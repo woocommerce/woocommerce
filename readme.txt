@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Change wording on link to change address to reflect if an address is already present or not. #23532
 * Tweak - If variations are missing prices, show notice in product data panel. #23133
 * Tweak - Tracks: track status page events. #23190
+* Tweak - Updated postcode label to "Postal code" when selected Canada. #23740
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
 * Performance - Reduce number of queries needed to populate variations data by priming post caches. #23272
 * Localization - Added validation for Italian postcodes. #23269
