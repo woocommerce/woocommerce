@@ -303,11 +303,13 @@ class WC_Emails {
 	 * Filter callback to replace {site_title} in email footer
 	 *
 	 * @since  3.3.0
+	 * @deprecated 3.7.0
 	 * @param  string $string Email footer text.
 	 * @return string         Email footer text with any replacements done.
 	 */
 	public function email_footer_replace_site_title( $string ) {
-		return str_replace( '{site_title}', $this->get_blogname(), $string );
+		wc_deprecated_function( 'WC_Emails::email_footer_replace_site_title', '3.7.0', 'WC_Emails::replace_placeholders' );
+		return $this->replace_placeholders( $string );
 	}
 
 	/**
