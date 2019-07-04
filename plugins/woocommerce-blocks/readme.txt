@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products
 Requires at least: 5.0
 Tested up to: 5.2
 Requires PHP: 5.2
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -82,6 +82,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 2.2.1 - 2019-07-04 =
+
+- Fix: Allow custom CSS classes on grid blocks.
+- Fix: Allow custom CSS classes on featured product block.
+- Fix: Allow custom CSS classes on product categories list.
 
 = 2.2.0 - 2019-06-26 =
 
