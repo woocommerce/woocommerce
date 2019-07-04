@@ -834,6 +834,9 @@ class WC_Countries {
 						),
 					),
 					'CA' => array(
+						'postcode' => array(
+							'label' => __( 'Postal code', 'woocommerce' ),
+						),
 						'state' => array(
 							'label' => __( 'Province', 'woocommerce' ),
 						),
