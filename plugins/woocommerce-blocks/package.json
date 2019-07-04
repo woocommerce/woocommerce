@@ -93,12 +93,10 @@
     }
   },
   "lint-staged": {
-    "linters": {
-      "*.php": [
-        "php -d display_errors=1 -l",
-        "composer run-script phpcs"
-      ]
-    }
+    "*.php": [
+      "php -d display_errors=1 -l",
+      "composer run-script phpcs"
+    ]
   },
   "browserslist": [
     "last 1 version",
