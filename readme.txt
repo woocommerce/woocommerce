@@ -163,15 +163,15 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Format empty cart message as information notice. #23152
 * Enhancement - Add taxonomy-specific classes to active filters widget. #23122
 * Fix - Use version_compare for determining max version number. #23092
-* Dev - Add quantity input action hooks (`woocommerce_before_add_to_cart_quantity`, `woocommerce_after_add_to_cart_quantity`). #23166
-* Dev - Add $this parameter to email class filters. #23250
-* Dev - Add new WC_Abstract_Order::get_coupons() method for returning all coupon line item objects on an order. #23663
 * Tweak - When cleaning up variations due to product type change, force delete them instead of trashing. #23478
 * Tweak - Change wording on link to change address to reflect if an address is already present or not. #23532
 * Tweak - If variations are missing prices, show notice in product data panel. #23133
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
 * Performance - Reduce number of queries needed to populate variations data by priming post caches. #23272
 * Localization - Added validation for Italian postcodes. #23269
+* Dev - Add quantity input action hooks (`woocommerce_before_add_to_cart_quantity`, `woocommerce_after_add_to_cart_quantity`). #23166
+* Dev - Add $this parameter to email class filters. #23250
+* Dev - Add new WC_Abstract_Order::get_coupons() method for returning all coupon line item objects on an order. #23663
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
