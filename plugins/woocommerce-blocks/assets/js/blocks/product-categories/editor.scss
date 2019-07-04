@@ -1,3 +1,9 @@
 .wc-block-product-categories.wc-block-product-categories ul {
 	margin-left: 20px;
 }
+.wc-block-product-categories {
+	svg {
+		margin-right: 1ch;
+		fill: currentColor;
+	}
+}
