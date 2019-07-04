@@ -280,7 +280,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'woocommerce_admin_meta_boxes_coupon',
 					array(
 						'generate_button_text' => esc_html__( 'Generate coupon', 'woocommerce' ),
-						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ2345678' ),
+						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ23456789' ),
 						'char_limit'           => apply_filters( 'woocommerce_coupon_code_generator_character_limit', 8 ),
 						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
 						'postfix'              => apply_filters( 'woocommerce_coupon_code_generator_postfix', '' ),
