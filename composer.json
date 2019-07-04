@@ -10,7 +10,7 @@
     "composer/installers": "1.6.0"
   },
   "require-dev": {
-    "myclabs/deep-copy": "1.7.0",
+    "myclabs/deep-copy": "1.9.1",
     "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
