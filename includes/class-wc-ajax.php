@@ -1814,7 +1814,6 @@ class WC_AJAX {
 
 		try {
 			$order       = wc_get_order( $order_id );
-			$order_items = $order->get_items();
 			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
