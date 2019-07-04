@@ -42,6 +42,7 @@ const getInteractionIcon = ( isSingle = false, isSelected = false ) => {
 };
 
 const SearchListItem = ( {
+	countLabel,
 	className,
 	depth = 0,
 	item,
@@ -87,7 +88,7 @@ const SearchListItem = ( {
 
 			{ !! showCount && (
 				<span className="woocommerce-search-list__item-count">
-					{ item.count }
+					{ countLabel || item.count }
 				</span>
 			) }
 		</MenuItem>
@@ -99,6 +100,10 @@ SearchListItem.propTypes = {
 	 * Additional CSS classes.
 	 */
 	className: PropTypes.string,
+	/**
+	 * Label to display if `showCount` is set to true. If undefined, it will use `item.count`.
+	 */
+	countLabel: PropTypes.node,
 	/**
 	 * Depth, non-zero if the list is hierarchical.
 	 */

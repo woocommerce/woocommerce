@@ -1,3 +1,6 @@
+# unreleased
+- SearchListItem component: new `countLabel` prop that will overwrite the `item.count` value.
+
 # 3.0.0
 - <DateInput> and <DatePicker> got a `disabled` prop.
 - TableCard component: new `onPageChange` prop.
