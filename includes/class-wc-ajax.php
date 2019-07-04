@@ -1322,8 +1322,14 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$rate_id  = absint( $_POST['rate_id'] );
 
+			$order = wc_get_order( $order_id );
+			if ( ! $order->is_editable() ) {
+				throw new Exception( __( 'Order not editable', 'woocommerce' ) );
+			}
+
 			wc_delete_order_item( $rate_id );
 
+			// Need to load order again after deleting to have latest items before calculating.
 			$order = wc_get_order( $order_id );
 			$order->calculate_totals( false );
 
@@ -1814,7 +1820,6 @@ class WC_AJAX {
 
 		try {
 			$order       = wc_get_order( $order_id );
-			$order_items = $order->get_items();
 			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {

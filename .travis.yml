@@ -60,9 +60,6 @@ before_script:
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
       composer global require "phpunit/phpunit=4.8.*|6.5.*"
     fi
-  - |
-    # Install wpcs globally:
-    composer require woocommerce/woocommerce-sniffs
 
 script:
   - bash tests/bin/phpunit.sh

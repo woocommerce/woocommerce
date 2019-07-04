@@ -399,7 +399,7 @@ class WC_Shortcode_Products {
 	/**
 	 * Set top rated products query args.
 	 *
-	 * @since 3.6.4
+	 * @since 3.6.5
 	 * @param array $query_args Query args.
 	 */
 	protected function set_top_rated_products_query_args( &$query_args ) {

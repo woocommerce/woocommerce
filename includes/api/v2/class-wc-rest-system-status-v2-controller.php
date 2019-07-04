@@ -706,7 +706,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				$wpdb->prepare(
 					"SELECT
 					    table_name AS 'name',
-						engine,
+						engine AS 'engine',
 					    round( ( data_length / 1024 / 1024 ), 2 ) 'data',
 					    round( ( index_length / 1024 / 1024 ), 2 ) 'index'
 					FROM information_schema.TABLES
