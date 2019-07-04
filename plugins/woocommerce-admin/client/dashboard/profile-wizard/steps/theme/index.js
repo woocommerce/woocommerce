@@ -103,13 +103,13 @@ class Theme extends Component {
 	}
 
 	getThemeStatus( theme ) {
-		const { installed, price, slug } = theme;
+		const { is_installed, price, slug } = theme;
 		const { activeTheme } = wcSettings.onboarding;
 
 		if ( activeTheme === slug ) {
 			return __( 'Currently active theme', 'woocommerce-admin' );
 		}
-		if ( installed ) {
+		if ( is_installed ) {
 			return __( 'Installed', 'woocommerce-admin' );
 		} else if ( this.getPriceValue( price ) <= 0 ) {
 			return __( 'Free', 'woocommerce-admin' );

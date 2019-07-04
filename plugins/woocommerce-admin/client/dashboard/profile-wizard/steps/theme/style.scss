@@ -29,9 +29,11 @@
 		border-bottom: 1px solid transparent;
 		color: $muriel-gray-500;
 		display: flex;
+		justify-content: center;
 		background: transparent;
 		height: 48px;
 		width: 100%;
+		cursor: pointer;
 		@include font-size(14);
 		font-weight: 500;
 		outline: none;
