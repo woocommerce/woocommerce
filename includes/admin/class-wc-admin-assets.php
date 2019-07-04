@@ -283,7 +283,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ23456789' ),
 						'char_limit'           => apply_filters( 'woocommerce_coupon_code_generator_character_limit', 8 ),
 						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
-						'postfix'              => apply_filters( 'woocommerce_coupon_code_generator_postfix', '' ),
+						'suffix'               => apply_filters( 'woocommerce_coupon_code_generator_suffix', '' ),
 					)
 				);
 			}
