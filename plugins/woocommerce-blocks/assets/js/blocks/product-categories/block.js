@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
-import { IconButton } from '@wordpress/components';
+import { IconButton, Placeholder } from '@wordpress/components';
 import { repeat } from 'lodash';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
@@ -13,6 +13,7 @@ import { withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { buildTermsTree } from './hierarchy';
+import { IconFolder } from '../../components/icons';
 
 function getCategories( { hasEmpty, isHierarchical } ) {
 	const categories = wc_product_block_data.productCategories.filter(
@@ -98,30 +99,42 @@ class ProductCategoriesBlock extends Component {
 		const selectId = `prod-categories-${ instanceId }`;
 
 		return (
-			<div className={ classes }>
-				{ isDropdown ? (
-					<Fragment>
-						<div className="wc-block-product-categories__dropdown">
-							<label className="screen-reader-text" htmlFor={ selectId }>
-								{ __( 'Select a category', 'woo-gutenberg-products-block' ) }
-							</label>
-							<select id={ selectId } ref={ this.select }>
-								<option value="false" hidden>
-									{ __( 'Select a category', 'woo-gutenberg-products-block' ) }
-								</option>
-								{ this.renderOptions( categories ) }
-							</select>
-						</div>
-						<IconButton
-							icon="arrow-right-alt2"
-							label={ __( 'Go to category', 'woo-gutenberg-products-block' ) }
-							onClick={ this.onNavigate }
-						/>
-					</Fragment>
+			<Fragment>
+				{ categories.length > 0 ? (
+					<div className={ classes }>
+						{ isDropdown ? (
+							<Fragment>
+								<div className="wc-block-product-categories__dropdown">
+									<label className="screen-reader-text" htmlFor={ selectId }>
+										{ __( 'Select a category', 'woo-gutenberg-products-block' ) }
+									</label>
+									<select id={ selectId } ref={ this.select }>
+										<option value="false" hidden>
+											{ __( 'Select a category', 'woo-gutenberg-products-block' ) }
+										</option>
+										{ this.renderOptions( categories ) }
+									</select>
+								</div>
+								<IconButton
+									icon="arrow-right-alt2"
+									label={ __( 'Go to category', 'woo-gutenberg-products-block' ) }
+									onClick={ this.onNavigate }
+								/>
+							</Fragment>
+						) : (
+							this.renderList( categories )
+						) }
+					</div>
 				) : (
-					this.renderList( categories )
+					<Placeholder
+						className="wc-block-product-categories"
+						icon={ <IconFolder /> }
+						label={ __( 'Product Categories List', 'woo-gutenberg-products-block' ) }
+					>
+						{ __( "This block shows product categories for your store. In order to preview this you'll first need to create a product and assign it to a category.", 'woo-gutenberg-products-block' ) }
+					</Placeholder>
 				) }
-			</div>
+			</Fragment>
 		);
 	}
 }
