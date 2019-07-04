@@ -1322,8 +1322,14 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$rate_id  = absint( $_POST['rate_id'] );
 
+			$order = wc_get_order( $order_id );
+			if ( ! $order->is_editable() ) {
+				throw new Exception( __( 'Order not editable', 'woocommerce' ) );
+			}
+
 			wc_delete_order_item( $rate_id );
 
+			// Need to load order again after deleting to have latest items before calculating.
 			$order = wc_get_order( $order_id );
 			$order->calculate_totals( false );
 
