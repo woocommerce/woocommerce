@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Format empty cart message as information notice. #23152
 * Enhancement - Add taxonomy-specific classes to active filters widget. #23122
 * Fix - Use version_compare for determining max version number. #23092
+* Fix - Missing space and closing <strong> tag in WooCommerce.com disconnect message. #24073
 * Tweak - When cleaning up variations due to product type change, force delete them instead of trashing. #23478
 * Tweak - Change wording on link to change address to reflect if an address is already present or not. #23532
 * Tweak - If variations are missing prices, show notice in product data panel. #23133
