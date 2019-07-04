@@ -229,7 +229,10 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
 
-		$expected_attributes = array( 'pa_size' => array( 'small', 'large' ) );
+		$expected_attributes = array(
+			'pa_size'   => array( 'small', 'large' ),
+			'pa_colour' => array( 'blue', 'red' ),
+		);
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 	}
 
@@ -804,5 +807,37 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $product2->get_id(), $results );
 		$this->assertNotContains( $product3->get_id(), $results );
 		$this->assertNotContains( $product4->get_id(), $results );
+	}
+
+	public function test_find_matching_product_variation()
+	{
+		$product    = WC_Helper_Product::create_variation_product();
+		$data_store = WC_Data_Store::load( 'product' );
+		$children   = $product->get_children();
+
+		$match = $data_store->find_matching_product_variation($product, array());
+		$this->assertEquals(0, $match);
+
+		$match = $data_store->find_matching_product_variation($product, array(
+			'attribute_pa_size' => 'small',
+		));
+		$this->assertEquals($children[0], $match);
+
+		$match = $data_store->find_matching_product_variation($product, array(
+			'attribute_pa_size' => 'large',
+		));
+		$this->assertEquals($children[1], $match);
+
+		$match = $data_store->find_matching_product_variation($product, array(
+			'attribute_pa_size'   => 'small',
+			'attribute_pa_colour' => '',
+		));
+		$this->assertEquals($children[0], $match);
+
+		$match = $data_store->find_matching_product_variation($product, array(
+			'attribute_pa_size'   => 'small',
+			'attribute_pa_colour' => 'red',
+		));
+		$this->assertEquals($children[0], $match);
 	}
 }
