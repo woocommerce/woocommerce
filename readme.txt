@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - When cleaning up variations due to product type change, force delete them instead of trashing. #23478
 * Tweak - Change wording on link to change address to reflect if an address is already present or not. #23532
 * Tweak - If variations are missing prices, show notice in product data panel. #23133
+* Tweak - Tracks: track status page events. #23190
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
 * Performance - Reduce number of queries needed to populate variations data by priming post caches. #23272
 * Localization - Added validation for Italian postcodes. #23269
