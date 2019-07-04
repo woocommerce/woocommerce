@@ -6,7 +6,7 @@
 	align-items: center;
 	position: fixed;
 	right: 0;
-	height: $medium-header-height;
+	height: $header-height;
 
 	@include breakpoint( '<782px' ) {
 		position: relative;
@@ -22,8 +22,7 @@
 		max-width: 280px;
 	}
 
-	@include breakpoint( '>960px' ) {
-		height: $large-header-height;
+	@include breakpoint( '>1280px' ) {
 		max-width: 400px;
 	}
 
@@ -35,12 +34,8 @@
 .woocommerce-layout__activity-panel-tabs {
 	width: 100%;
 	display: flex;
-	height: $medium-header-height;
+	height: $header-height;
 	justify-content: flex-end;
-
-	@include breakpoint( '>960px' ) {
-		height: $large-header-height;
-	}
 
 	.dashicon,
 	.gridicon {
@@ -76,11 +71,7 @@
 		min-width: 80px;
 		width: 100%;
 		font-size: 11px;
-		height: $medium-header-height;
-		@include breakpoint( '>960px' ) {
-			font-size: 13px;
-			height: $large-header-height;
-		}
+		height: $header-height;
 
 		&.is-active {
 			color: $core-grey-dark-700;
@@ -147,7 +138,7 @@
 .woocommerce-layout__activity-panel-mobile-toggle {
 	margin-right: 10px;
 	max-width: 48px;
-	height: $small-header-height;
+	height: $header-height;
 	position: fixed;
 	top: $adminbar-height-mobile;
 	right: 0;
@@ -192,26 +183,21 @@
 }
 
 .woocommerce-layout__activity-panel-wrapper {
-	height: calc(100vh - #{$medium-header-height + $small-header-height + $adminbar-height-mobile});
+	height: calc(100vh - #{$header-height + $header-height + $adminbar-height-mobile});
 	background: $core-grey-light-200;
 	box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
 	width: 0;
 	@include activity-panel-slide();
 	position: fixed;
 	right: 0;
-	top: #{$medium-header-height + $small-header-height + $adminbar-height-mobile};
+	top: #{$header-height + $header-height + $adminbar-height-mobile};
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
-	@include breakpoint( '782px-960px' ) {
-		height: calc(100vh - #{$medium-header-height + $adminbar-height});
-		top: #{$medium-header-height + $adminbar-height};
-	}
-
-	@include breakpoint( '>960px' ) {
-		height: calc(100vh - #{$large-header-height + $adminbar-height});
-		top: #{$large-header-height + $adminbar-height};
+	@include breakpoint( '>782px' ) {
+		height: calc(100vh - #{$header-height + $adminbar-height});
+		top: #{$header-height + $adminbar-height};
 	}
 
 	&.is-open {

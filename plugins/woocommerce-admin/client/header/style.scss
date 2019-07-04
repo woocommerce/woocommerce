@@ -8,7 +8,7 @@
 	box-sizing: border-box;
 	border-bottom: 1px solid $white;
 	padding: 0;
-	height: $large-header-height;
+	height: $header-height;
 	position: fixed;
 	width: 100%;
 	top: $adminbar-height;
@@ -19,13 +19,8 @@
 	}
 
 	@include breakpoint( '<782px' ) {
-		top: $adminbar-height-mobile;
-		height: $small-header-height;
 		flex-flow: row wrap;
-	}
-
-	@include breakpoint( '782px-960px' ) {
-		height: $medium-header-height;
+		top: $adminbar-height-mobile;
 	}
 
 	.woocommerce-layout__header-breadcrumbs {
@@ -34,19 +29,9 @@
 		padding: 0 0 0 $fallback-gutter-large;
 		padding: 0 0 0 $gutter-large;
 		flex: 1 auto;
-		height: $small-header-height;
-		line-height: $small-header-height;
+		height: $header-height;
+		line-height: $header-height;
 		background: $white;
-
-		@include breakpoint( '782px-960px' ) {
-			height: $medium-header-height;
-			line-height: $medium-header-height;
-		}
-
-		@include breakpoint( '>960px' ) {
-			height: $large-header-height;
-			line-height: $large-header-height;
-		}
 
 		span + span::before {
 			content: ' / ';
