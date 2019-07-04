@@ -1,3 +1,7 @@
+# 1.0.3
+
+- Update liscence to GPL-3.0-or-later
+
 # 1.0.2
 
 - Bump dependency versions.
