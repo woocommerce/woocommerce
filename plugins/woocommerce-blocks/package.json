@@ -84,7 +84,7 @@
     "npm": "6.9.2"
   },
   "dependencies": {
-    "@woocommerce/components": "2.0.0",
+    "@woocommerce/components": "3.0.0",
     "gridicons": "3.3.1"
   },
   "husky": {
