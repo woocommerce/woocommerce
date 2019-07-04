@@ -480,6 +480,16 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Returns in-app-purchase URL params.
+	 */
+	public static function get_in_app_purchase_url_params() {
+		return array(
+			'in-app-purchase-site'        => site_url(),
+			'in-app-purchase-woo-version' => WC_VERSION,
+		);
+	}
+
+	/**
 	 * Add in-app-purchase URL params to link.
 	 *
 	 * Adds various url parameters to a url to support a streamlined
@@ -489,10 +499,7 @@ class WC_Admin_Addons {
 	 */
 	public static function add_in_app_purchase_url_params( $url ) {
 		return add_query_arg(
-			array(
-				'in-app-purchase-site'        => site_url(),
-				'in-app-purchase-woo-version' => WC_VERSION,
-			),
+			self::get_in_app_purchase_url_params(),
 			$url
 		);
 	}
