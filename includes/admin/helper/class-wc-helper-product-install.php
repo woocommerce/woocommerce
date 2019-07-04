@@ -1,4 +1,11 @@
 <?php
+/**
+ * WooCommerce.com Product Installation.
+ *
+ * @class    WC_Helper_Product_Install
+ * @package  WooCommerce/Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -105,7 +112,6 @@ class WC_Helper_Product_Install {
 		self::update_state( 'steps', $steps );
 
 		// TODO: async install? i.e. queue the job via Action Scheduler.
-
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 		require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
 		require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
@@ -181,10 +187,13 @@ class WC_Helper_Product_Install {
 
 		$state_steps[ $product_id ]['last_step'] = $step;
 
-		self::update_state( 'current_step', array(
-			'product_id' => $product_id,
-			'step'       => $step,
-		) );
+		self::update_state(
+			'current_step',
+			array(
+				'product_id' => $product_id,
+				'step'       => $step,
+			)
+		);
 
 		$result = call_user_func( array( __CLASS__, $step ), $product_id, $upgrader );
 		if ( is_wp_error( $result ) ) {
@@ -303,16 +312,17 @@ class WC_Helper_Product_Install {
 		}
 
 		// TODO: handle theme.
-
-		return $upgrader->install_package( array(
-			'source'        => $steps[ $product_id ]['unpacked_path'],
-			'destination'   => WP_PLUGIN_DIR,
-			'clear_working' => true,
-			'hook_extra'    => array(
-				'type'   => 'plugin',
-				'action' => 'install',
+		return $upgrader->install_package(
+			array(
+				'source'        => $steps[ $product_id ]['unpacked_path'],
+				'destination'   => WP_PLUGIN_DIR,
+				'clear_working' => true,
+				'hook_extra'    => array(
+					'type'   => 'plugin',
+					'action' => 'install',
+				),
 			)
-		) );
+		);
 	}
 
 	/**
@@ -339,8 +349,7 @@ class WC_Helper_Product_Install {
 			return new WP_Error( 'unknown_filename', __( 'Unknown product filename.', 'woocommerce' ) );
 		}
 
-		// TODO: theme activation support
-
+		// TODO: theme activation support.
 		return activate_plugin( $filename );
 	}
 }
