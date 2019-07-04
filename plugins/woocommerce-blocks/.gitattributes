@@ -1,10 +1,8 @@
 /.* export-ignore
+/*.md export-ignore
 /node_modules* export-ignore
 /tests export-ignore
-/vendor export-ignore
 /bin export-ignore
-/CONTRIBUTING.md export-ignore
-/README.md export-ignore
 /phpcs.xml export-ignore
 /phpunit.* export-ignore
 /renovate.json export-ignore
