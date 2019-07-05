@@ -1,6 +1,9 @@
 # unreleased
 - SearchListItem component: new `countLabel` prop that will overwrite the `item.count` value.
 
+# 3.1.0
+- Added support for a countLabel prop on SearchListItem to allow custom counts.
+
 # 3.0.0
 - <DateInput> and <DatePicker> got a `disabled` prop.
 - TableCard component: new `onPageChange` prop.
@@ -16,7 +19,7 @@
 - Card component: new `description` prop.
 - Card component: new `isInactive` prop.
 - DateRangeFilterPicker (breaking change): Introduced `onRangeSelect` prop and remove `path` prop better control.
-- Update liscence to GPL-3.0-or-later.
+- Update license to GPL-3.0-or-later.
 
 # 2.0.0
 - Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.

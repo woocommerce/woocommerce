@@ -5,7 +5,7 @@
 
 # 2.1.1
 
-- Update liscence to GPL-3.0-or-later
+- Update license to GPL-3.0-or-later
 
 # 2.1.0
 
