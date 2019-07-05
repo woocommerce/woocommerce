@@ -759,7 +759,7 @@ class WC_Admin_Setup_Wizard {
 	public function plugin_install_info() {
 		?>
 		<span class="plugin-install-info">
-			<span class="plugin-install-info-label"><?php esc_html_e( 'The following free plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
+			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
 			<span class="plugin-install-info-list"></span>
 		</span>
 		<?php
@@ -1913,7 +1913,7 @@ class WC_Admin_Setup_Wizard {
 					$this->display_recommended_item( array(
 						'type'        => 'wc_admin',
 						'title'       => __( 'WooCommerce Dashboard & Analytics', 'woocommerce' ),
-						'description' => __( 'New and improved interface for managing your store\'s reports as well as a dashboard to monitor key metrics.', 'woocommerce' ),
+						'description' => __( 'Manage your store\'s reports and monitor key metrics with a new and improved interface and dashboard.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
 						'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
 						'plugins'     => array( array( 'name' => __( 'WooCommerce Admin', 'woocommerce' ), 'slug' => 'woocommerce-admin' ) ),
