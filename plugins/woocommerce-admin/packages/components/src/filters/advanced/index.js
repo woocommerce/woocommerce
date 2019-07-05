@@ -198,7 +198,7 @@ class AdvancedFilters extends Component {
 		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
-		const updateDisabled = window.location.hash && ( window.location.hash.substr( 1 ) === updateHref || 0 === activeFilters.length );
+		const updateDisabled = ( 'admin.php' + window.location.search === updateHref ) || 0 === activeFilters.length;
 		const isEnglish = this.isEnglish();
 		return (
 			<Card className="woocommerce-filters-advanced woocommerce-analytics__card" title={ this.getTitle() }>
