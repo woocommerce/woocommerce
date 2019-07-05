@@ -33,6 +33,7 @@ class WC_Admin_Onboarding {
 	public function __construct() {
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
+		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 	}
 
 	/**
@@ -142,14 +143,11 @@ class WC_Admin_Onboarding {
 					continue;
 				}
 
-				$themes[ $slug ] = array(
-					'slug'                    => sanitize_title( $slug ),
-					'title'                   => $theme->get( 'Name' ),
-					'price'                   => '0.00',
-					'is_installed'            => true,
-					'image'                   => $theme->get_screenshot(),
-					'has_woocommerce_support' => $has_woocommerce_support,
-				);
+				$installed_themes = wp_get_themes();
+
+				foreach ( $installed_themes as $slug => $theme ) {
+					$themes[ $slug ] = self::get_theme_data( $theme );
+				}
 			}
 
 			$themes = array( $active_theme => $themes[ $active_theme ] ) + $themes;
@@ -159,6 +157,40 @@ class WC_Admin_Onboarding {
 
 		$themes = apply_filters( 'woocommerce_admin_onboarding_themes', $themes );
 		return array_values( $themes );
+	}
+
+	/**
+	 * Get theme data used in onboarding theme browser.
+	 *
+	 * @param WP_Theme $theme Theme to gather data from.
+	 * @return array
+	 */
+	public static function get_theme_data( $theme ) {
+		return array(
+			'slug'                    => sanitize_title( $theme->stylesheet ),
+			'title'                   => $theme->get( 'Name' ),
+			'price'                   => '0.00',
+			'is_installed'            => true,
+			'image'                   => $theme->get_screenshot(),
+			'has_woocommerce_support' => self::has_woocommerce_support( $theme ),
+		);
+	}
+
+	/**
+	 * Add theme data to response from themes controller.
+	 *
+	 * @param WP_REST_Response $response Rest response.
+	 * @return WP_REST_Response
+	 */
+	public static function add_uploaded_theme_data( $response ) {
+		if ( ! isset( $response->data['theme'] ) ) {
+			return $response;
+		}
+
+		$theme                        = wp_get_theme( $response->data['theme'] );
+		$response->data['theme_data'] = self::get_theme_data( $theme );
+
+		return $response;
 	}
 
 	/**
