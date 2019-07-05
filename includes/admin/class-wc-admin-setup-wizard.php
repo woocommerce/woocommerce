@@ -1912,7 +1912,7 @@ class WC_Admin_Setup_Wizard {
 				if ( $this->should_show_wc_admin() ) :
 					$this->display_recommended_item( array(
 						'type'        => 'wc_admin',
-						'title'       => __( 'WooCommerce Dashboard & Analytics', 'woocommerce' ),
+						'title'       => __( 'WooCommerce Admin', 'woocommerce' ),
 						'description' => __( 'Manage your store\'s reports and monitor key metrics with a new and improved interface and dashboard.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
 						'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
