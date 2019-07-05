@@ -24,15 +24,16 @@ class WC_Coupons_Tracking {
 	public function tracks_coupons_bulk_actions() {
 		wc_enqueue_js(
 			"
-			var apply = $( '#posts-filter input[type=\"submit\"]' );
-			$( apply ).on( 'click', function() {
+			function onApplyBulkActions() {
 				var action = $('select[name=\"action\"]').val();
 				if ( '-1' !== action ) {
 					window.wcTracks.recordEvent( 'coupons_view_bulk_action', {
 						action: action
 					} );
 				}
-			} );
+			}
+			$( '#doaction' ).on( 'click', onApplyBulkActions );
+			$( '#doaction2' ).on( 'click', onApplyBulkActions );
 		"
 		);
 	}
@@ -41,7 +42,7 @@ class WC_Coupons_Tracking {
 	 * Track page view events.
 	 */
 	public function tracks_coupons_events() {
-		if ( isset( $_GET['post_type'] ) && 'shop_coupon' === wp_verify_nonce( sanitize_key( $_GET['post_type'] ) ) ) {
+		if ( isset( $_GET['post_type'] ) && 'shop_coupon' === $_GET['post_type'] ) {
 
 			$this->tracks_coupons_bulk_actions();
 
