@@ -152,11 +152,17 @@ class WC_Admin_Notes {
 	 * Schedule unsnooze notes event.
 	 */
 	public static function schedule_unsnooze_notes() {
-		$queue = WC()->queue();
-		$next  = $queue->get_next( self::UNSNOOZE_HOOK );
 
-		if ( ! $next ) {
-			$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK, array(), self::QUEUE_GROUP );
+		$snooze_checked_transient_key = sprintf( '%s_checked', self::UNSNOOZE_HOOK );
+
+		if ( 'yes' !== get_transient( $snooze_checked_transient_key ) ) {
+			$queue = WC()->queue();
+			$next  = $queue->get_next( self::UNSNOOZE_HOOK );
+
+			if ( ! $next ) {
+				$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK, array(), self::QUEUE_GROUP );
+			}
+			set_transient( $snooze_checked_transient_key, 'yes', HOUR_IN_SECONDS );
 		}
 	}
 
