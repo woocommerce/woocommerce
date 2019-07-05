@@ -123,6 +123,7 @@ class ReportTable extends Component {
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
 			endpoint,
 			headers: getHeadersContent(),
+			ids: itemIdField ? items.data.map( item => item[ itemIdField ] ) : [],
 			rows: getRowsContent( items.data ),
 			totals,
 			summary: getSummary ? getSummary( totals, totalResults ) : null,
