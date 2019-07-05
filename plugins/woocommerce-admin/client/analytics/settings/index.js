@@ -19,7 +19,6 @@ import { SectionHeader, useFilters } from '@woocommerce/components';
  */
 import './index.scss';
 import { analyticsSettings } from './config';
-import Header from 'header';
 import Setting from './setting';
 import HistoricalData from './historical-data';
 import withSelect from 'wc-api/with-select';
@@ -160,12 +159,6 @@ class Settings extends Component {
 
 		return (
 			<Fragment>
-				<Header
-					sections={ [
-						[ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ],
-						__( 'Settings', 'woocommerce-admin' ),
-					] }
-				/>
 				<SectionHeader title={ __( 'Analytics Settings', 'woocommerce-admin' ) } />
 				<div className="woocommerce-settings__wrapper">
 					{ analyticsSettings.map( setting => (

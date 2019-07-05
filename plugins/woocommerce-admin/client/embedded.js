@@ -3,7 +3,6 @@
  * External dependencies
  */
 import { render } from '@wordpress/element';
-import { Provider as SlotFillProvider } from 'react-slot-fill';
 
 /**
  * Internal dependencies
@@ -16,12 +15,7 @@ import 'wc-api/wp-data-store';
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
 
 // Render the header.
-render(
-	<SlotFillProvider>
-		<EmbedLayout />
-	</SlotFillProvider>,
-	embeddedRoot
-);
+render( <EmbedLayout />, embeddedRoot );
 
 embeddedRoot.classList.remove( 'is-embed-loading' );
 

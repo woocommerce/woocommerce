@@ -4,8 +4,9 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse, stringify } from 'qs';
-import { isEqual, last } from 'lodash';
+import { find, isEqual, last } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * WooCommerce dependencies
@@ -15,8 +16,7 @@ import { getNewPath, getPersistedQuery, getHistory } from '@woocommerce/navigati
 /**
  * Internal dependencies
  */
-import Analytics from 'analytics';
-import AnalyticsReport from 'analytics/report';
+import AnalyticsReport, { getReports } from 'analytics/report';
 import AnalyticsSettings from 'analytics/settings';
 import Dashboard from 'dashboard';
 import DevDocs from 'devdocs';
@@ -32,11 +32,13 @@ export const getPages = () => {
 		pages.push( {
 			container: DevDocs,
 			path: '/devdocs',
+			breadcrumbs: [ 'Documentation' ],
 			wpOpenMenu: 'toplevel_page_woocommerce',
 		} );
 		pages.push( {
 			container: DevDocs,
 			path: '/devdocs/:component',
+			breadcrumbs: ( { match } ) => [ [ '/devdocs', 'Documentation' ], match.params.component ],
 			wpOpenMenu: 'toplevel_page_woocommerce',
 		} );
 	}
@@ -45,24 +47,31 @@ export const getPages = () => {
 		pages.push( {
 			container: Dashboard,
 			path: '/',
+			breadcrumbs: [ __( 'Dashboard', 'woocommerce-admin' ) ],
 			wpOpenMenu: 'toplevel_page_woocommerce',
 		} );
 	}
 
 	if ( window.wcAdminFeatures.analytics ) {
 		pages.push( {
-			container: Analytics,
-			path: '/analytics',
-			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
-		} );
-		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
+			breadcrumbs: [
+				[ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ],
+				__( 'Settings', 'woocommerce-admin' ),
+			],
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 		pages.push( {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
+			breadcrumbs: ( { match } ) => {
+				const report = find( getReports(), { report: match.params.report } );
+				if ( ! report ) {
+					return [];
+				}
+				return [ [ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ], report.title ];
+			},
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 	}

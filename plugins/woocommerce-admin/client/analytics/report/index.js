@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
@@ -19,7 +19,6 @@ import { getQuery, getSearchWords } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './style.scss';
-import Header from 'header';
 import OrdersReport from './orders';
 import ProductsReport from './products';
 import RevenueReport from './revenue';
@@ -33,9 +32,9 @@ import ReportError from 'analytics/components/report-error';
 import { searchItemsByString } from 'wc-api/items/utils';
 import withSelect from 'wc-api/with-select';
 
-const REPORTS_FILTER = 'woocommerce_admin_reports_list';
+export const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
-const getReports = () => {
+export const getReports = () => {
 	const reports = [
 		{
 			report: 'revenue',
@@ -128,17 +127,7 @@ class Report extends Component {
 			return null;
 		}
 		const Container = report.component;
-		return (
-			<Fragment>
-				<Header
-					sections={ [
-						[ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ],
-						report.title,
-					] }
-				/>
-				<Container { ...this.props } />
-			</Fragment>
-		);
+		return <Container { ...this.props } />;
 	}
 }
 

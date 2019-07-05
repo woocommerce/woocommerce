@@ -2,12 +2,11 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { useFilters } from '@woocommerce/components';
 import { Router, Route, Switch } from 'react-router-dom';
-import { Slot } from 'react-slot-fill';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, isFunction } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -24,6 +23,7 @@ import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
 import TransientNotices from './transient-notices';
 import StoreAlerts from './store-alerts';
+import { REPORTS_FILTER } from 'analytics/report';
 
 export class PrimaryLayout extends Component {
 	render() {
@@ -76,9 +76,13 @@ class Layout extends Component {
 
 	render() {
 		const { isEmbedded, ...restProps } = this.props;
+		const { breadcrumbs } = this.props.page;
 		return (
 			<div className="woocommerce-layout">
-				<Slot name="header" />
+				<Header
+					sections={ isFunction( breadcrumbs ) ? breadcrumbs( this.props ) : breadcrumbs }
+					isEmbedded={ isEmbedded }
+				/>
 				<TransientNotices />
 				{ ! isEmbedded && (
 					<PrimaryLayout>
@@ -94,6 +98,17 @@ class Layout extends Component {
 
 Layout.propTypes = {
 	isEmbedded: PropTypes.bool,
+	page: PropTypes.shape( {
+		container: PropTypes.func.isRequired,
+		path: PropTypes.string.isRequired,
+		breadcrumbs: PropTypes.oneOfType( [
+			PropTypes.func,
+			PropTypes.arrayOf(
+				PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.string ), PropTypes.string ] )
+			),
+		] ).isRequired,
+		wpOpenMenu: PropTypes.string.isRequired,
+	} ).isRequired,
 };
 
 class _PageLayout extends Component {
@@ -116,16 +131,18 @@ class _PageLayout extends Component {
 		);
 	}
 }
-// Use the useFilters HoC so PageLayout is re-rendered when the filter is used to add new pages
-export const PageLayout = useFilters( PAGES_FILTER )( _PageLayout );
+// Use the useFilters HoC so PageLayout is re-rendered when filters are used to add new pages or reports
+export const PageLayout = useFilters( [ PAGES_FILTER, REPORTS_FILTER ] )( _PageLayout );
 
 export class EmbedLayout extends Component {
 	render() {
 		return (
-			<Fragment>
-				<Header sections={ wcSettings.embedBreadcrumbs } isEmbedded />
-				<Layout isEmbedded />
-			</Fragment>
+			<Layout
+				page={ {
+					breadcrumbs: wcSettings.embedBreadcrumbs,
+				} }
+				isEmbedded
+			/>
 		);
 	}
 }

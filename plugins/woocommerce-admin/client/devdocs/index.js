@@ -13,7 +13,6 @@ import ComponentExample from './example';
 import ComponentDocs from './docs';
 import { Card, Link } from '@woocommerce/components';
 import examples from './examples.json';
-import Header from 'header';
 import './style.scss';
 
 const camelCaseToSlug = name => {
@@ -41,16 +40,13 @@ export default class extends Component {
 		} );
 
 		let exampleList = examples;
-		let breadcrumbs = [ 'Documentation' ];
 		if ( component ) {
 			const example = find( examples, ex => component === camelCaseToSlug( ex.component ) );
-			breadcrumbs = [ [ '/devdocs', 'Documentation' ], example.component ];
 			exampleList = [ example ];
 		}
 
 		return (
 			<div className={ className }>
-				<Header sections={ breadcrumbs } />
 				{ exampleList.map( example => {
 					const { componentName, filePath, render, docPath } = getExampleData( example );
 					const cardClasses = classnames(

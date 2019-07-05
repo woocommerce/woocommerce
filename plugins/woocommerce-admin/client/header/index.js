@@ -6,7 +6,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Component, findDOMNode } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
-import { Fill } from 'react-slot-fill';
 import PropTypes from 'prop-types';
 
 /**
@@ -84,12 +83,14 @@ class Header extends Component {
 			<div className={ className }>
 				<h1 className="woocommerce-layout__header-breadcrumbs">
 					<span>
-						<Link href="/">WooCommerce</Link>
+						<Link href={ 'admin.php?page=wc-admin' } type={ isEmbedded ? 'wp-admin' : 'wc-admin' }>
+							WooCommerce
+						</Link>
 					</span>
 					{ _sections.map( ( section, i ) => {
 						const sectionPiece = Array.isArray( section ) ? (
 							<Link
-								href={ getNewPath( {}, section[ 0 ], {} ) }
+								href={ isEmbedded ? section[ 0 ] : getNewPath( {}, section[ 0 ], {} ) }
 								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
 							>
 								{ section[ 1 ] }
@@ -115,10 +116,4 @@ Header.defaultProps = {
 	isEmbedded: false,
 };
 
-export default function( props ) {
-	return (
-		<Fill name="header">
-			<Header { ...props } />
-		</Fill>
-	);
-}
+export default Header;

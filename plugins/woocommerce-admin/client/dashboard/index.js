@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 
@@ -12,7 +11,6 @@ import { compose } from '@wordpress/compose';
 import './style.scss';
 import CustomizableDashboard from './customizable';
 import DashboardCharts from './dashboard-charts';
-import Header from 'header';
 import Leaderboards from './leaderboards';
 import { ReportFilters } from '@woocommerce/components';
 import StorePerformance from './store-performance';
@@ -21,7 +19,7 @@ import ProfileWizard from './profile-wizard';
 import withSelect from 'wc-api/with-select';
 
 class Dashboard extends Component {
-	renderDashboardOutput() {
+	render() {
 		const { path, profileItems, query } = this.props;
 
 		if ( window.wcAdminFeatures.onboarding && ! profileItems.skipped && ! profileItems.completed ) {
@@ -46,15 +44,6 @@ class Dashboard extends Component {
 				<StorePerformance query={ query } hiddenBlocks={ [] } />
 				<DashboardCharts query={ query } path={ path } hiddenBlocks={ [] } />
 				<Leaderboards query={ query } hiddenBlocks={ [] } />
-			</Fragment>
-		);
-	}
-
-	render() {
-		return (
-			<Fragment>
-				<Header sections={ [ __( 'Dashboard', 'woocommerce-admin' ) ] } />
-				{ this.renderDashboardOutput() }
 			</Fragment>
 		);
 	}

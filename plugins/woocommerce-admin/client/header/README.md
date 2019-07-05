@@ -1,7 +1,7 @@
 Header
 ======
 
-A basic component for the app header. The header outputs breadcrumbs via the `sections` prop (required) and access to the activity panel. It also sets the document title. The Header component used in each section automatically fills into the "header" slot defined in `<Layout />`. We're using [react-slot-fill](https://github.com/camwest/react-slot-fill) to avoid a duplicated `div` wrapper from Gutenberg's implementation.
+A basic component for the app header. The header outputs breadcrumbs via the `sections` prop (required) and access to the activity panel. It also sets the document title.
 
 ## How to use:
 
