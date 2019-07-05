@@ -628,7 +628,7 @@ class WC_Admin_Loader {
 		$settings['wcAdminSettings']         = array();
 
 		foreach ( $wc_admin_group_settings as $setting ) {
-			if ( ! empty( $setting['id'] ) && ! empty( $setting['value'] ) ) {
+			if ( ! empty( $setting['id'] ) ) {
 				$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
 			}
 		}
