@@ -24,16 +24,18 @@ class WC_Coupons_Tracking {
 	public function tracks_coupons_bulk_actions() {
 		wc_enqueue_js(
 			"
-			function onApplyBulkActions() {
-				var action = $('select[name=\"action\"]').val();
-				if ( '-1' !== action ) {
+			function onApplyBulkActions( event ) {
+				var id = event.data.id;
+				var action = $( '#' + id ).val();
+				
+				if ( action && '-1' !== action ) {
 					window.wcTracks.recordEvent( 'coupons_view_bulk_action', {
 						action: action
 					} );
 				}
 			}
-			$( '#doaction' ).on( 'click', onApplyBulkActions );
-			$( '#doaction2' ).on( 'click', onApplyBulkActions );
+			$( '#doaction' ).on( 'click', { id: 'bulk-action-selector-top' }, onApplyBulkActions );
+			$( '#doaction2' ).on( 'click', { id: 'bulk-action-selector-bottom' }, onApplyBulkActions );
 		"
 		);
 	}
