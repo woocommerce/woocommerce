@@ -172,7 +172,7 @@
     "stylelint": "9.10.1",
     "stylelint-config-wordpress": "13.1.0",
     "url-loader": "1.1.2",
-    "webpack": "4.33.0",
+    "webpack": "4.35.3",
     "webpack-cli": "3.3.4",
     "webpack-rtl-plugin": "github:yoavf/webpack-rtl-plugin#develop"
   },
