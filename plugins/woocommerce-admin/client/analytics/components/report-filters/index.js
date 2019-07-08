@@ -4,7 +4,7 @@
  */
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { omitBy, isUndefined } from 'lodash';
+import { omitBy, isUndefined, snakeCase } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -45,7 +45,11 @@ export default class ReportFilters extends Component {
 				recordEvent( 'analytics_filters_remove', { report, filter: data.key } );
 				break;
 			case 'filter':
-				recordEvent( 'analytics_filters_filter', { report, ...data } );
+				const snakeCaseData = Object.keys( data ).reduce( ( result, property ) => {
+					result[ snakeCase( property ) ] = data[ property ];
+					return result;
+				}, {} );
+				recordEvent( 'analytics_filters_filter', { report, snakeCaseData } );
 				break;
 			case 'clear_all':
 				recordEvent( 'analytics_filters_clear_all', { report } );
