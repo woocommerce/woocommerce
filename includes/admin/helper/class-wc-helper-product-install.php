@@ -33,12 +33,13 @@ class WC_Helper_Product_Install {
 	 * @var array
 	 */
 	private static $default_step_state = array(
-		'download_link' => '',
-		'product_type'  => '',
-		'last_step'     => '',
-		'last_error'    => '',
-		'download_path' => '',
-		'unpacked_path' => '',
+		'download_link'  => '',
+		'product_type'   => '',
+		'last_step'      => '',
+		'last_error'     => '',
+		'download_path'  => '',
+		'unpacked_path'  => '',
+		'installed_path' => '',
 	);
 
 	/**
@@ -209,6 +210,9 @@ class WC_Helper_Product_Install {
 					break;
 				case 'unpack_product':
 					$state_steps[ $product_id ]['unpacked_path'] = $result;
+					break;
+				case 'move_product':
+					$state_steps[ $product_id ]['installed_path'] = $result['destination'];
 					break;
 			}
 		}
