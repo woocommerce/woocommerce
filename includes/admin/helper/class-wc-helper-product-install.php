@@ -86,7 +86,7 @@ class WC_Helper_Product_Install {
 	}
 
 	/**
-	 * Reset product isntall state.
+	 * Reset product install state.
 	 */
 	public static function reset_state() {
 		WC_Helper_Options::update( 'product_install', self::$default_state );
