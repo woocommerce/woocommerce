@@ -243,6 +243,7 @@ final class WooCommerce {
 			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
 			'order_itemmeta'         => 'woocommerce_order_itemmeta',
 			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
 		);
 
 		foreach ( $tables as $name => $table ) {

@@ -1976,13 +1976,34 @@ function wc_update_360_db_version() {
 }
 
 /**
+ * Put tax classes into a DB table.
+ *
+ * @return void
+ */
+function wc_update_370_tax_rate_classes() {
+	global $wpdb;
+
+	$classes = array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) );
+
+	if ( $classes ) {
+		foreach ( $classes as $class ) {
+			if ( empty( $class ) ) {
+				continue;
+			}
+			WC_Tax::create_tax_class( $class );
+		}
+	}
+}
+
+/**
  * Update currency settings for 3.7.0
  *
  * @return void
  */
 function wc_update_370_mro_std_currency() {
 	global $wpdb;
-	// Fix currency settings for MRU  and STNcurrency.
+
+	// Fix currency settings for MRU and STN currency.
 	$current_currency = get_option( 'woocommerce_currency' );
 
 	if ( 'MRO' === $current_currency ) {
@@ -1997,11 +2018,11 @@ function wc_update_370_mro_std_currency() {
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'MRU',
+			'meta_value' => 'MRU', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		),
 		array(
-			'meta_key'   => '_order_currency',
-			'meta_value' => 'MRO',
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'MRO', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		)
 	);
 
@@ -2009,12 +2030,18 @@ function wc_update_370_mro_std_currency() {
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'STN',
+			'meta_value' => 'STN', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		),
 		array(
-			'meta_key'   => '_order_currency',
-			'meta_value' => 'STD',
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'STD', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 		)
 	);
+}
 
+/**
+ * Update DB Version.
+ */
+function wc_update_370_db_version() {
+	WC_Install::update_db_version( '3.7.0' );
 }
