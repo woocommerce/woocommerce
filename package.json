@@ -75,23 +75,17 @@
     }
   },
   "lint-staged": {
-    "linters": {
-      "*.php": [
-        "php -d display_errors=1 -l",
-        "composer run-script phpcs-pre-commit"
-      ],
-      "*.scss": [
-        "stylelint --syntax=scss --fix",
-        "git add"
-      ],
-      "*.js": [
-        "eslint --fix",
-        "git add"
-      ]
-    },
-    "ignore": [
-      "*.min.js",
-      "*.css"
+    "*.php": [
+      "php -d display_errors=1 -l",
+      "composer run-script phpcs-pre-commit"
+    ],
+    "*.scss": [
+      "stylelint --syntax=scss --fix",
+      "git add"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "git add"
     ]
   }
 }
