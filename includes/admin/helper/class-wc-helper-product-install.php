@@ -342,17 +342,26 @@ class WC_Helper_Product_Install {
 	private static function activate_product( $product_id ) {
 		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
 		wp_clean_plugins_cache();
+		$filename = false;
 
-		$plugins = wp_list_filter(
-			WC_Helper::get_local_woo_plugins(),
-			array(
-				'_product_id' => $product_id,
-			)
-		);
+		// If product is WP.org one, find out its filename.
+		$folder_name = self::get_wporg_product_folder_name( $product_id );
+		if ( false !== $folder_name ) {
+			$filename = self::get_wporg_plugin_relative_path( $folder_name );
+		}
 
-		$filename = is_array( $plugins ) && ! empty( $plugins )
-			? key( $plugins )
-			: '';
+		if ( false === $filename ) {
+			$plugins = wp_list_filter(
+				WC_Helper::get_local_woo_plugins(),
+				array(
+					'_product_id' => $product_id,
+				)
+			);
+
+			$filename = is_array( $plugins ) && ! empty( $plugins )
+				? key( $plugins )
+				: '';
+		}
 
 		if ( empty( $filename ) ) {
 			return new WP_Error( 'unknown_filename', __( 'Unknown product filename.', 'woocommerce' ) );
@@ -360,5 +369,54 @@ class WC_Helper_Product_Install {
 
 		// TODO: theme activation support.
 		return activate_plugin( $filename );
+	}
+
+	/**
+	 * Get WP.org product filename.
+	 *
+	 * @param int $product_id Product ID.
+	 *
+	 * @return bool|string
+	 */
+	private static function get_wporg_product_folder_name( $product_id ) {
+		$steps = self::get_state( 'steps' );
+		$product = $steps[ $product_id ];
+
+		if ( empty( $product['download_url'] ) || empty( $product['installed_path'] ) ) {
+			return false;
+		}
+
+		// Check whether product was downloaded from WordPress.org.
+		$host = parse_url( $product['download_url'], PHP_URL_HOST );
+		if ( 'downloads.wordpress.org' !== $host ) {
+			return false;
+		}
+
+		return basename( $product['installed_path'] );
+	}
+
+	/**
+	 * Get plugin's relative path.
+	 *
+	 * @param string $folder Folder of the plugin.
+	 *
+	 * @return bool|string
+	 */
+	private static function get_wporg_plugin_relative_path( $folder ) {
+		// Ensure that exact folder name is used.
+		$folder .= '/';
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$plugins = get_plugins();
+		foreach ( $plugins as $path => $plugin ) {
+			if ( 0 === strpos( $path, $folder ) ) {
+				return $path;
+			}
+		}
+
+		return false;
 	}
 }
