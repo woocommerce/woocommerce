@@ -345,9 +345,9 @@ class WC_Helper_Product_Install {
 		$filename = false;
 
 		// If product is WP.org one, find out its filename.
-		$folder_name = self::get_wporg_product_folder_name( $product_id );
-		if ( false !== $folder_name ) {
-			$filename = self::get_wporg_plugin_relative_path( $folder_name );
+		$dir_name = self::get_wporg_product_dir_name( $product_id );
+		if ( false !== $dir_name ) {
+			$filename = self::get_wporg_plugin_main_file( $dir_name );
 		}
 
 		if ( false === $filename ) {
@@ -378,7 +378,7 @@ class WC_Helper_Product_Install {
 	 *
 	 * @return bool|string
 	 */
-	private static function get_wporg_product_folder_name( $product_id ) {
+	private static function get_wporg_product_dir_name( $product_id ) {
 		$steps = self::get_state( 'steps' );
 		$product = $steps[ $product_id ];
 
@@ -402,7 +402,7 @@ class WC_Helper_Product_Install {
 	 *
 	 * @return bool|string
 	 */
-	private static function get_wporg_plugin_relative_path( $folder ) {
+	private static function get_wporg_plugin_main_file( $folder ) {
 		// Ensure that exact folder name is used.
 		$folder .= '/';
 
