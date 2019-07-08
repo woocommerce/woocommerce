@@ -15,19 +15,6 @@ output() {
 	echo "$(tput setaf "$1")$2$(tput sgr0)"
 }
 
-updating=false
-
-# Script args.
-while [ ! $# -eq 0 ]
-do
-	case "$1" in
-		--updating | -u)
-			updating=true
-			;;
-	esac
-	shift
-done
-
 if [ ! -d "packages/" ]; then
 	output 1 "./packages doesn't exist!"
 	output 1 "run \"composer install\" before proceed."
@@ -47,11 +34,4 @@ find ./packages/woocommerce-rest-api -iname '*.php' -exec sed -i.bak -e "s/, 'wo
 
 # Cleanup backup files
 find ./packages -name "*.bak" -type f -delete
-output 2 "Done"
-
-if ( $updating ); then
-	# Update POT file
-	output 3 "Updating POT file..."
-	npm run makepot
-	output 2 "Done"
-fi
+output 2 "Done!"

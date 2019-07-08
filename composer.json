@@ -37,7 +37,7 @@
       "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
-      "sh ./bin/package-update.sh --updating"
+      "sh ./bin/package-update.sh"
     ],
     "test": [
       "phpunit"
