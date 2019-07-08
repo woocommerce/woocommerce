@@ -815,9 +815,15 @@ function wc_update_user_last_active( $user_id ) {
  * @return string
  */
 function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+	// translate_user_role() only accepts a second parameter starting in WP 5.2.
+	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+		return $translation;
+	}
+
 	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
 		return translate_user_role( $text, 'woocommerce' );
 	}
+
 	return $translation;
 }
 add_filter( 'gettext_with_context', 'wc_translate_user_roles', 10, 4 );
