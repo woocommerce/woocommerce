@@ -733,7 +733,7 @@ class WC_Product_CSV_Importer_Controller {
 			),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
-			'meta:' . $meta      => __( 'Custom', 'woocommerce' ),
+			'meta:' . $meta      => __( 'Import as meta data', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 
