@@ -99,15 +99,15 @@ class Layout extends Component {
 Layout.propTypes = {
 	isEmbedded: PropTypes.bool,
 	page: PropTypes.shape( {
-		container: PropTypes.func.isRequired,
-		path: PropTypes.string.isRequired,
+		container: PropTypes.func,
+		path: PropTypes.string,
 		breadcrumbs: PropTypes.oneOfType( [
 			PropTypes.func,
 			PropTypes.arrayOf(
 				PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.string ), PropTypes.string ] )
 			),
 		] ).isRequired,
-		wpOpenMenu: PropTypes.string.isRequired,
+		wpOpenMenu: PropTypes.string,
 	} ).isRequired,
 };
 
