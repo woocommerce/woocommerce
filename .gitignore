@@ -46,3 +46,6 @@ contributors.md
 
 # Screenshots for e2e tests failures
 /screenshots/
+
+# Language files
+i18n/languages/woocommerce.pot
