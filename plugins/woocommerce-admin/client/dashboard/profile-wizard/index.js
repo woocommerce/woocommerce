@@ -93,7 +93,7 @@ class ProfileWizard extends Component {
 	}
 
 	async goToNextStep() {
-		const { addNotice, isError, updateProfileItems } = this.props;
+		const { createNotice, isError, updateProfileItems } = this.props;
 		const currentStep = this.getCurrentStep();
 		const currentStepIndex = getSteps().findIndex( s => s.key === currentStep.key );
 		const nextStep = getSteps()[ currentStepIndex + 1 ];
@@ -102,10 +102,10 @@ class ProfileWizard extends Component {
 			await updateProfileItems( { completed: true } );
 
 			if ( isError ) {
-				addNotice( {
-					status: 'error',
-					message: __( 'There was a problem completing the profiler.', 'woocommerce-admin' ),
-				} );
+				createNotice(
+					'error',
+					__( 'There was a problem completing the profiler.', 'woocommerce-admin' )
+				);
 			}
 			return;
 		}
@@ -142,10 +142,11 @@ export default compose(
 		return { isError };
 	} ),
 	withDispatch( dispatch => {
-		const { addNotice, updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
-			addNotice,
+			createNotice,
 			updateProfileItems,
 		};
 	} )

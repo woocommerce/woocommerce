@@ -30,7 +30,7 @@ class ProductTypes extends Component {
 	}
 
 	async onContinue() {
-		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
+		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
 		recordEvent( 'storeprofiler_store_product_type_continue', {
 			product_type: this.state.selected,
@@ -40,10 +40,10 @@ class ProductTypes extends Component {
 		if ( ! isError ) {
 			goToNextStep();
 		} else {
-			addNotice( {
-				status: 'error',
-				message: __( 'There was a problem updating your product types.', 'woocommerce-admin' ),
-			} );
+			createNotice(
+				'error',
+				__( 'There was a problem updating your product types.', 'woocommerce-admin' )
+			);
 		}
 	}
 
@@ -137,10 +137,11 @@ export default compose(
 		return { isError };
 	} ),
 	withDispatch( dispatch => {
-		const { addNotice, updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
-			addNotice,
+			createNotice,
 			updateProfileItems,
 		};
 	} )

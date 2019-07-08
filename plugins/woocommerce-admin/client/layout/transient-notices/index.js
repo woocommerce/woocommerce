@@ -6,24 +6,25 @@ import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
+import { SnackbarList } from '@wordpress/components';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import TransientNotice from './transient-notice';
 import withSelect from 'wc-api/with-select';
 
 class TransientNotices extends Component {
 	render() {
-		const { className, notices } = this.props;
-		const classes = classnames( 'woocommerce-transient-notices', className );
-
-		return (
-			<section className={ classes }>
-				{ notices && notices.map( ( notice, i ) => <TransientNotice key={ i } { ...notice } /> ) }
-			</section>
+		const { className, notices, onRemove } = this.props;
+		const classes = classnames(
+			'woocommerce-transient-notices',
+			'components-notices__snackbar',
+			className
 		);
+
+		return <SnackbarList notices={ notices } className={ classes } onRemove={ onRemove } />;
 	}
 }
 
@@ -40,9 +41,11 @@ TransientNotices.propTypes = {
 
 export default compose(
 	withSelect( select => {
-		const { getNotices } = select( 'wc-admin' );
-		const notices = getNotices();
+		const notices = select( 'core/notices' ).getNotices();
 
 		return { notices };
-	} )
+	} ),
+	withDispatch( dispatch => ( {
+		onRemove: dispatch( 'core/notices' ).removeNotice,
+	} ) )
 )( TransientNotices );

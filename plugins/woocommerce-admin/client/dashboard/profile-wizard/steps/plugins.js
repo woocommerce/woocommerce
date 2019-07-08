@@ -119,10 +119,7 @@ class Plugins extends Component {
 			} );
 			return pluginResponse;
 		} catch ( err ) {
-			this.props.addNotice( {
-				status: 'error',
-				message: this.getErrorMessage( action, plugin ),
-			} );
+			this.props.createNotice( 'error', this.getErrorMessage( action, plugin ) );
 			this.setState( {
 				isPending: false,
 				isError: true,
@@ -141,10 +138,7 @@ class Plugins extends Component {
 			}
 			throw new Error();
 		} catch ( err ) {
-			this.props.addNotice( {
-				status: 'error',
-				message: this.getErrorMessage( 'activate', 'jetpack' ),
-			} );
+			this.props.createNotice( 'error', this.getErrorMessage( 'activate', 'jetpack' ) );
 			this.setState( {
 				isPending: false,
 				isError: true,
@@ -208,9 +202,9 @@ class Plugins extends Component {
 
 export default compose(
 	withDispatch( dispatch => {
-		const { addNotice } = dispatch( 'wc-admin' );
+		const { createNotice } = dispatch( 'core/notices' );
 		return {
-			addNotice,
+			createNotice,
 		};
 	} )
 )( Plugins );

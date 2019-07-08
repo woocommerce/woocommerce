@@ -74,7 +74,7 @@ class Setting extends Component {
 	};
 
 	handleInputCallback = () => {
-		const { addNotice, callback } = this.props;
+		const { createNotice, callback } = this.props;
 
 		if ( 'function' !== typeof callback ) {
 			return;
@@ -82,7 +82,7 @@ class Setting extends Component {
 
 		return new Promise( ( resolve, reject ) => {
 			this.setState( { disabled: true } );
-			callback( resolve, reject, addNotice );
+			callback( resolve, reject, createNotice );
 		} )
 			.then( () => {
 				this.setState( { disabled: false } );
@@ -197,7 +197,7 @@ Setting.propTypes = {
 
 export default compose(
 	withDispatch( dispatch => {
-		const { addNotice } = dispatch( 'wc-admin' );
-		return { addNotice };
+		const { createNotice } = dispatch( 'core/notices' );
+		return { createNotice };
 	} )
 )( Setting );
