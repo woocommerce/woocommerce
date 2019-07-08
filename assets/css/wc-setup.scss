@@ -1394,6 +1394,7 @@ p.jetpack-terms {
 .wc-setup-content .recommended-item {
 	list-style: none;
 	margin-bottom: 1.5em;
+	padding-bottom: 0;
 
 	&:last-child {
 		margin-bottom: 0; // Avoid extra space at the end of the list.
