@@ -71,7 +71,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			WC_Payment_Tokens::set_users_default( $token->get_user_id(), $token_id );
 		}
 
-		do_action( 'woocommerce_new_payment_token', $token_id );
+		do_action( 'woocommerce_new_payment_token', $token_id, $token );
 	}
 
 	/**
