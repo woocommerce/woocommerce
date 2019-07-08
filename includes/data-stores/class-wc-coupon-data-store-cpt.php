@@ -115,7 +115,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'description'                 => $post_object->post_excerpt,
 				'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
 				'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
-				'date_expires'                => get_post_meta( $coupon_id, 'date_expires', true ),
+				'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ), // @todo: Migrate expiry_date meta to date_expires in upgrade routine.
 				'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 				'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
 				'usage_count'                 => get_post_meta( $coupon_id, 'usage_count', true ),
@@ -366,6 +366,19 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	public function get_usage_by_user_id( &$coupon, $user_id ) {
 		global $wpdb;
 		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %d;", $coupon->get_id(), $user_id ) );
+	}
+
+	/**
+	 * Get the number of uses for a coupon by email address
+	 *
+	 * @since 3.6.4
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @param string    $email Email address.
+	 * @return int
+	 */
+	public function get_usage_by_email( &$coupon, $email ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %s;", $coupon->get_id(), $email ) );
 	}
 
 	/**

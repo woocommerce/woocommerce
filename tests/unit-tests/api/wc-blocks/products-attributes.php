@@ -51,7 +51,7 @@ class WC_Tests_API_Products_Attributes_Controller extends WC_REST_Unit_Test_Case
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes' );
 
-		$response       = $this->server->dispatch( $request );
+		$response            = $this->server->dispatch( $request );
 		$response_attributes = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $response_attributes ) );
@@ -96,7 +96,7 @@ class WC_Tests_API_Products_Attributes_Controller extends WC_REST_Unit_Test_Case
 		wp_set_current_user( $this->contributor );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] );
 
-		$response       = $this->server->dispatch( $request );
+		$response  = $this->server->dispatch( $request );
 		$attribute = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $this->attr_size['attribute_id'], $attribute['id'] );

@@ -120,10 +120,12 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_refund_id() {
 		wp_set_current_user( $this->user );
-		$order  = WC_Helper_Order::create_order();
-		$refund = wc_create_refund( array(
-			'order_id' => $order->get_id(),
-		) );
+		$order    = WC_Helper_Order::create_order();
+		$refund   = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+			)
+		);
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $refund->get_id() ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -273,7 +275,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'payment_method'       => 'bacs',
-				'payment_method_title' => '<h1>Sanitize this too <script>alert(1);</script></h1>'
+				'payment_method_title' => '<h1>Sanitize this too <script>alert(1);</script></h1>',
 			)
 		);
 		$response = $this->server->dispatch( $request );

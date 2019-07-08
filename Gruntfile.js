@@ -88,6 +88,8 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/photoswipe/photoswipe.min.js': ['<%= dirs.js %>/photoswipe/photoswipe.js'],
 					'<%= dirs.js %>/photoswipe/photoswipe-ui-default.min.js': ['<%= dirs.js %>/photoswipe/photoswipe-ui-default.js'],
 					'<%= dirs.js %>/round/round.min.js': ['<%= dirs.js %>/round/round.js'],
+					'<%= dirs.js %>/selectWoo/selectWoo.full.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.full.js'],
+					'<%= dirs.js %>/selectWoo/selectWoo.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.js'],
 					'<%= dirs.js %>/stupidtable/stupidtable.min.js': ['<%= dirs.js %>/stupidtable/stupidtable.js'],
 					'<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.min.js': ['<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.js']
 				}
@@ -195,7 +197,6 @@ module.exports = function( grunt ) {
 				options: {
 					potFilename: 'woocommerce.pot',
 					exclude: [
-						'apigen/.*',
 						'vendor/.*',
 						'tests/.*',
 						'tmp/.*'
@@ -228,7 +229,6 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php',               // Include all files
-					'!apigen/**',             // Exclude apigen/
 					'!includes/libraries/**', // Exclude libraries/
 					'!node_modules/**',       // Exclude node_modules/
 					'!tests/**',              // Exclude tests/
@@ -244,13 +244,6 @@ module.exports = function( grunt ) {
 			options: {
 				stdout: true,
 				stderr: true
-			},
-			apidocs: {
-				command: [
-					'vendor/bin/apigen generate -q',
-					'cd apigen',
-					'php hook-docs.php'
-				].join( '&&' )
 			},
 			e2e_test: {
 				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
@@ -293,9 +286,6 @@ module.exports = function( grunt ) {
 
 		// Clean the directory.
 		clean: {
-			apidocs: {
-				src: [ 'wc-apidocs' ]
-			},
 			blocks: {
 				src: [
 					'<%= dirs.js %>/blocks',
@@ -313,7 +303,6 @@ module.exports = function( grunt ) {
 			dist: {
 				src:  [
 					'**/*.php', // Include all php files.
-					'!apigen/**',
 					'!includes/api/legacy/**',
 					'!includes/libraries/**',
 					'!node_modules/**',
@@ -383,6 +372,7 @@ module.exports = function( grunt ) {
 						)
 						// Replace class & constant prefixes.
 						.replace( /WGPB_/g, 'WC_' )
+						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
 						// Replace file imports
 						.replace( /-wgpb-/g, '-wc-' )
 				}
@@ -434,11 +424,6 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'blocks', [
 		'clean:blocks',
 		'copy'
-	]);
-
-	grunt.registerTask( 'docs', [
-		'clean:apidocs',
-		'shell:apidocs'
 	]);
 
 	grunt.registerTask( 'contributors', [

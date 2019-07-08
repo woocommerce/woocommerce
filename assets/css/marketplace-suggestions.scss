@@ -30,15 +30,24 @@ a.suggestion-dismiss::before {
 
 #woocommerce-product-data ul.wc-tabs li.marketplace-suggestions_tab {
 
+
+	a::before {
+
+		@include iconbeforedashicons( "\f106" );
+
+		@media only screen and (max-width: 900px) {
+			line-height: 40px;
+		}
+	}
+
 	a span {
-		margin: 0;
+		margin: 0 0.618em;
 	}
 }
 
 .marketplace-suggestions-metabox-nosuggestions-placeholder {
 	max-width: 325px;
-	margin: auto;
-	margin-top: 4em;
+	margin: 2em auto;
 	text-align: center;
 
 	.marketplace-suggestion-placeholder-content {
@@ -157,6 +166,10 @@ a.suggestion-dismiss::before {
 
 			text-align: left;
 		}
+
+		.marketplace-suggestion-container-content.has-manage-link {
+			text-align: right;
+		}
 	}
 }
 
@@ -176,51 +189,6 @@ a.suggestion-dismiss::before {
 			}
 		}
 	}
-}
-
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-inline"] {
-
-	// hide by default (mobile first)
-	display: none;
-
-	td:first-child {
-		border-left: 4px solid $woocommerce;
-	}
-
-	.marketplace-suggestion-container {
-		padding: 0.5em 0 0.5em 1em;
-
-		img.marketplace-suggestion-icon {
-			margin-bottom: 0;
-		}
-
-		.marketplace-suggestion-container-content {
-
-			h4 {
-				margin: 0;
-				font-size: 14px;
-			}
-		}
-
-		.marketplace-suggestion-container-cta {
-
-			.suggestion-dismiss {
-				position: relative;
-				top: 4px;
-				right: auto;
-				margin-left: 1em;
-			}
-		}
-	}
-
-	@media screen and (min-width: 800px) {
-
-		// Display inline table suggestion on desktop only.
-		// The table columns are dynamic, so there's no good way to style the row
-		// content correctly when columns are hidden.
-		display: table-row;
-	}
-
 }
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],

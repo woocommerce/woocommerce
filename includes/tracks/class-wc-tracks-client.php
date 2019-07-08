@@ -28,6 +28,51 @@ class WC_Tracks_Client {
 	const USER_AGENT_SLUG = 'tracks-client';
 
 	/**
+	 * Initialize tracks client class
+	 *
+	 * @return void
+	 */
+	public static function init() {
+		// Use wp hook for setting the identity cookie to avoid headers already sent warnings.
+		add_action( 'admin_init', array( __CLASS__, 'maybe_set_identity_cookie' ) );
+	}
+
+	/**
+	 * Check if identiy cookie is set, if not set it.
+	 *
+	 * @return void
+	 */
+	public static function maybe_set_identity_cookie() {
+		// Bail if cookie already set.
+		if ( isset( $_COOKIE['tk_ai'] ) ) {
+			return;
+		}
+
+		$user = wp_get_current_user();
+
+		// We don't want to track user events during unit tests/CI runs.
+		if ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key ) {
+			return false;
+		}
+		$user_id = $user->ID;
+		$anon_id = get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true );
+
+		// If an id is still not found, create one and save it.
+		if ( ! $anon_id ) {
+			$anon_id = self::get_anon_id();
+			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
+		}
+
+		// Don't set cookie on API requests.
+		if (
+			! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) &&
+			! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+		) {
+			wc_setcookie( 'tk_ai', $anon_id );
+		}
+	}
+
+	/**
 	 * Record a Tracks event
 	 *
 	 * @param  array $event Array of event properties.
@@ -92,13 +137,18 @@ class WC_Tracks_Client {
 	 * @return array Identity properties.
 	 */
 	public static function get_identity( $user_id ) {
-		$jetpack_lib = trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
+		$jetpack_lib = '/tracks/client.php';
 
-		if ( class_exists( 'Jetpack' ) && file_exists( $jetpack_lib ) ) {
-			include_once $jetpack_lib;
-
-			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
-				return jetpack_tracks_get_identity( $user_id );
+		if ( class_exists( 'Jetpack' ) && defined( JETPACK__VERSION ) ) {
+			if ( version_compare( JETPACK__VERSION, '7.5', '<' ) ) {
+				if ( file_exists( jetpack_require_lib_dir() . $jetpack_lib ) ) {
+					include_once jetpack_require_lib_dir() . $jetpack_lib;
+					if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
+						return jetpack_tracks_get_identity( $user_id );
+					}
+				}
+			} else {
+				return Automattic\Jetpack\Tracking::tracks_get_identity( $user_id );
 			}
 		}
 
@@ -115,10 +165,6 @@ class WC_Tracks_Client {
 			$anon_id = self::get_anon_id();
 
 			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
-		}
-
-		if ( ! isset( $_COOKIE['tk_ai'] ) ) {
-			wc_setcookie( 'tk_ai', $anon_id );
 		}
 
 		return array(
@@ -151,17 +197,11 @@ class WC_Tracks_Client {
 				}
 
 				$anon_id = 'woo:' . base64_encode( $binary );
-
-				// Don't set cookie on API requests.
-				if (
-					! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) &&
-					! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-				) {
-					wc_setcookie( 'tk_ai', $anon_id );
-				}
 			}
 		}
 
 		return $anon_id;
 	}
 }
+
+WC_Tracks_Client::init();

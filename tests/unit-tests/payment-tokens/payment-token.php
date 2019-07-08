@@ -20,7 +20,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_payment_token_token() {
 		$raw_token = time() . ' ' . __FUNCTION__;
-		$token = new WC_Payment_Token_Stub();
+		$token     = new WC_Payment_Token_Stub();
 		$token->set_token( $raw_token );
 		$this->assertEquals( $raw_token, $token->get_token() );
 	}
@@ -73,7 +73,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_payment_token_get_data() {
 		$raw_token = time() . ' ' . __FUNCTION__;
-		$token = new WC_Payment_Token_Stub();
+		$token     = new WC_Payment_Token_Stub();
 		$token->set_token( $raw_token );
 		$token->set_gateway_id( 'paypal' );
 		$token->set_extra( 'woocommerce' );
@@ -105,7 +105,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_read() {
-		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
+		$token    = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$token_id = $token->get_id();
 
 		$token_read = new WC_Payment_Token_Stub( $token_id );
@@ -150,7 +150,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_delete() {
-		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
+		$token    = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$token_id = $token->get_id();
 		$token->delete();
 		$get_token = WC_Payment_Tokens::get( $token_id );
@@ -176,7 +176,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 * @expectedDeprecated WC_Payment_Token::update
 	 */
 	public function test_wc_payment_token_legacy() {
-		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
+		$token    = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$token_id = $token->get_id();
 
 		$token_read = new WC_Payment_Token_Stub();

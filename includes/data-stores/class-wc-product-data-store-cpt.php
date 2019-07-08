@@ -185,6 +185,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->read_product_data( $product );
 		$this->read_extra_data( $product );
 		$product->set_object_read( true );
+
+		do_action( 'woocommerce_product_read', $product->get_id() );
 	}
 
 	/**
@@ -361,6 +363,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
 
 		$product->set_props( $set_props );
+	}
+
+	/**
+	 * Re-reads stock from the DB ignoring changes.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param int|float  $new_stock New stock level if already read.
+	 */
+	public function read_stock_quantity( &$product, $new_stock = null ) {
+		$object_read = $product->get_object_read();
+		$product->set_object_read( false ); // This makes update of qty go directly to data- instead of changes-array of the product object (which is needed as the data should hold status of the object as it was read from the db).
+		$product->set_stock_quantity( is_null( $new_stock ) ? get_post_meta( $product->get_id(), '_stock', true ) : $new_stock );
+		$product->set_object_read( $object_read );
 	}
 
 	/**
@@ -864,19 +879,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
-		// Fetch a list of non-published parent products and exlude them, quicker than joining in the main query below.
-		$non_published_products = $wpdb->get_col(
-			"
-			SELECT posts.ID as id FROM `$wpdb->posts` AS posts
-			WHERE posts.post_type = 'product'
-			AND posts.post_parent = 0
-			AND posts.post_status != 'publish'
-			"
-		);
-		if ( 0 < count( $non_published_products ) ) {
-			$non_published_where = ' AND posts.post_parent NOT IN ( ' . implode( ',', $non_published_products ) . ')';
-		}
-
 		return $wpdb->get_results(
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			"
@@ -888,7 +890,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND posts.post_status = 'publish'
 			AND lookup.onsale = 1
 			$outofstock_where
-			$non_published_where
+			AND posts.post_parent NOT IN (
+				SELECT ID FROM `$wpdb->posts` as posts
+				WHERE posts.post_type = 'product'
+				AND posts.post_parent = 0
+				AND posts.post_status != 'publish'
+			)
 			GROUP BY posts.ID
 			"
 			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
@@ -1110,7 +1117,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			foreach ( $match_attributes as $attribute_key => $attribute_value ) {
 				if ( array_key_exists( $attribute_key, $variation ) ) {
-					if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
+					if ( $variation[ $attribute_key ] !== $attribute_value && ( '0' === $variation[ $attribute_key ] || $variation[ $attribute_key ] ) ) {
 						$match = false;
 					}
 				}
@@ -1128,6 +1135,60 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 */
 			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
 		}
+	}
+
+	/**
+	 * Creates all possible combinations of variations from the attributes, without creating duplicates.
+	 *
+	 * @since  3.6.0
+	 * @todo   Add to interface in 4.0.
+	 * @param  WC_Product $product Variable product.
+	 * @param  int        $limit Limit the number of created variations.
+	 * @return int        Number of created variations.
+	 */
+	public function create_all_product_variations( $product, $limit = -1 ) {
+		$count = 0;
+
+		if ( ! $product ) {
+			return $count;
+		}
+
+		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+
+		if ( empty( $attributes ) ) {
+			return $count;
+		}
+
+		// Get existing variations so we don't create duplicates.
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+		$existing_attributes = array();
+
+		foreach ( $existing_variations as $existing_variation ) {
+			$existing_attributes[] = $existing_variation->get_attributes();
+		}
+
+		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
+
+		foreach ( $possible_attributes as $possible_attribute ) {
+			// Allow any order if key/values -- do not use strict mode.
+			if ( in_array( $possible_attribute, $existing_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+				continue;
+			}
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_attributes( $possible_attribute );
+			$variation_id = $variation->save();
+
+			do_action( 'product_variation_linked', $variation_id );
+
+			$count ++;
+
+			if ( $limit > 0 && $count >= $limit ) {
+				break;
+			}
+		}
+
+		return $count;
 	}
 
 	/**
@@ -1240,49 +1301,91 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Update a product's stock amount directly in the database.
+	 *
+	 * Updates both post meta and lookup tables. Ignores manage stock setting on the product.
+	 *
+	 * @param int            $product_id_with_stock Product ID.
+	 * @param int|float|null $stock_quantity        Stock quantity.
+	 */
+	protected function set_product_stock( $product_id_with_stock, $stock_quantity ) {
+		global $wpdb;
+
+		// Generate SQL.
+		$sql = $wpdb->prepare(
+			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+			$stock_quantity,
+			$product_id_with_stock
+		);
+
+		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
+
+		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+
+		// Cache delete is required (not only) to set correct data for lookup table (which reads from cache).
+		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
+		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+
+		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+	}
+
+	/**
 	 * Update a product's stock amount directly.
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
+	 * Ignores manage stock setting on the product and sets quantities directly in the db: post meta and lookup tables.
+	 * Uses locking to update the quantity. If the lock is not acquired, change is lost.
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int      $product_id_with_stock Product ID.
-	 * @param  int|null $stock_quantity Stock quantity.
-	 * @param  string   $operation Set, increase and decrease.
+	 * @param  int            $product_id_with_stock Product ID.
+	 * @param  int|float|null $stock_quantity Stock quantity.
+	 * @param  string         $operation Set, increase and decrease.
+	 * @return int|float New stock level.
 	 */
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
 		global $wpdb;
+
+		// Ensures a row exists to update.
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
-		// Update stock in DB directly.
-		switch ( $operation ) {
-			case 'increase':
-				$sql = $wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'",
-					$stock_quantity,
-					$product_id_with_stock
-				);
-				break;
-			case 'decrease':
-				$sql = $wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'",
-					$stock_quantity,
-					$product_id_with_stock
-				);
-				break;
-			default:
-				$sql = $wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-					$stock_quantity,
-					$product_id_with_stock
-				);
-				break;
+		if ( 'set' === $operation ) {
+			$new_stock = wc_stock_amount( $stock_quantity );
+		} else {
+			// @todo: potential race condition.
+			// Read current stock level and lock the row. If the lock can't be acquired, don't wait.
+			$current_stock = wc_stock_amount(
+				$wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key='_stock';",
+						$product_id_with_stock
+					)
+				)
+			);
+
+			// Calculate new value.
+			switch ( $operation ) {
+				case 'increase':
+					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					break;
+				default:
+					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					break;
+			}
 		}
 
-		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, $operation );
+		// Generate SQL.
+		$sql = $wpdb->prepare(
+			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+			$new_stock,
+			$product_id_with_stock
+		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $sql );
+		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
 
+		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+
+		// Cache delete is required (not only) to set correct data for lookup table (which reads from cache).
+		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
 		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
@@ -1294,6 +1397,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * @param int $product_id_with_stock Product ID that was updated directly.
 		 */
 		do_action( 'woocommerce_updated_product_stock', $product_id_with_stock );
+
+		return $new_stock;
 	}
 
 	/**
@@ -1422,14 +1527,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Search product data for a term and return ids.
 	 *
-	 * @param  string   $term Search term.
-	 * @param  string   $type Type of product.
-	 * @param  bool     $include_variations Include variations in search or not.
-	 * @param  bool     $all_statuses Should we search all statuses or limit to published.
-	 * @param  null|int $limit Limit returned results. @since 3.5.0.
+	 * @param  string     $term Search term.
+	 * @param  string     $type Type of product.
+	 * @param  bool       $include_variations Include variations in search or not.
+	 * @param  bool       $all_statuses Should we search all statuses or limit to published.
+	 * @param  null|int   $limit Limit returned results. @since 3.5.0.
+	 * @param  null|array $include Keep specific results. @since 3.6.0.
+	 * @param  null|array $exclude Discard specific results. @since 3.6.0.
 	 * @return array of ids
 	 */
-	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null ) {
+	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null, $include = null, $exclude = null ) {
 		global $wpdb;
 
 		$custom_results = apply_filters( 'woocommerce_product_pre_search_products', false, $term, $type, $include_variations, $all_statuses, $limit );
@@ -1438,12 +1545,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $custom_results;
 		}
 
-		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
-		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
-		$type_where    = '';
-		$status_where  = '';
-		$limit_query   = '';
-		$term          = wc_strtolower( $term );
+		$post_types   = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$type_where   = '';
+		$status_where = '';
+		$limit_query  = '';
+		$term         = wc_strtolower( $term );
+
+		/**
+		 * Hook woocommerce_search_products_post_statuses.
+		 *
+		 * @since 3.7.0
+		 * @param array $post_statuses List of post statuses.
+		 */
+		$post_statuses = apply_filters(
+			'woocommerce_search_products_post_statuses',
+			current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
+		);
 
 		// See if search term contains OR keywords.
 		if ( strstr( $term, ' or ' ) ) {
@@ -1484,7 +1601,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( ! empty( $search_queries ) ) {
-			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
+			$search_where = ' AND (' . implode( ') OR (', $search_queries ) . ') ';
+		}
+
+		if ( ! empty( $include ) && is_array( $include ) ) {
+			$search_where .= ' AND posts.ID IN(' . implode( ',', array_map( 'absint', $include ) ) . ') ';
+		}
+
+		if ( ! empty( $exclude ) && is_array( $exclude ) ) {
+			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', array_map( 'absint', $exclude ) ) . ') ';
 		}
 
 		if ( 'virtual' === $type ) {

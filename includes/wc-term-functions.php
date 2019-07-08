@@ -23,7 +23,7 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 	if ( is_array( $taxonomies ) && 1 < count( $taxonomies ) ) {
 		return $defaults;
 	}
-	$taxonomy = is_array( $taxonomies ) ? $taxonomies[0] : $taxonomies;
+	$taxonomy = is_array( $taxonomies ) ? (string) current( $taxonomies ) : $taxonomies;
 	$orderby  = 'name';
 
 	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
@@ -32,18 +32,13 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 		$orderby = 'menu_order';
 	}
 
+	// Change defaults. Invalid values will be changed later @see wc_change_pre_get_terms.
+	// These are in place so we know if a specific order was requested.
 	switch ( $orderby ) {
 		case 'menu_order':
-			$defaults['orderby']               = 'meta_value_num';
-			$defaults['meta_key']              = 'order'; // phpcs:ignore
-			$defaults['force_menu_order_sort'] = true;
-			break;
 		case 'name_num':
-			$defaults['orderby']            = 'name';
-			$defaults['force_numeric_name'] = true;
-			break;
 		case 'parent':
-			$defaults['orderby'] = 'parent';
+			$defaults['orderby'] = $orderby;
 			break;
 	}
 
@@ -60,14 +55,33 @@ add_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
 function wc_change_pre_get_terms( $terms_query ) {
 	$args = &$terms_query->query_vars;
 
-	if ( ! empty( $args['menu_order'] ) ) {
-		$args['order']                 = 'DESC' === strtoupper( $args['menu_order'] ) ? 'DESC' : 'ASC';
-		$args['orderby']               = 'meta_value_num';
-		$args['meta_key']              = 'order'; // phpcs:ignore
+	// Put back valid orderby values.
+	if ( 'menu_order' === $args['orderby'] ) {
+		$args['orderby']               = 'name';
 		$args['force_menu_order_sort'] = true;
-		$terms_query->meta_query->parse_query_vars( $args );
 	}
 
+	if ( 'name_num' === $args['orderby'] ) {
+		$args['orderby']            = 'name';
+		$args['force_numeric_name'] = true;
+	}
+
+	// When COUNTING, disable custom sorting.
+	if ( 'count' === $args['fields'] ) {
+		return;
+	}
+
+	// Support menu_order arg used in previous versions.
+	if ( ! empty( $args['menu_order'] ) ) {
+		$args['order']                 = 'DESC' === strtoupper( $args['menu_order'] ) ? 'DESC' : 'ASC';
+		$args['force_menu_order_sort'] = true;
+	}
+
+	if ( ! empty( $args['force_menu_order_sort'] ) ) {
+		$args['orderby']  = 'meta_value_num';
+		$args['meta_key'] = 'order'; // phpcs:ignore
+		$terms_query->meta_query->parse_query_vars( $args );
+	}
 }
 add_action( 'pre_get_terms', 'wc_change_pre_get_terms', 10, 1 );
 
@@ -83,7 +97,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb;
 
 	// No need to filter when counting.
-	if ( strpos( 'COUNT(*)', $clauses['fields'] ) !== false ) {
+	if ( strpos( $clauses['fields'], 'COUNT(*)' ) !== false ) {
 		return $clauses;
 	}
 
@@ -95,7 +109,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	// For sorting, force left join in case order meta is missing.
 	if ( ! empty( $args['force_menu_order_sort'] ) ) {
 		$clauses['join']    = str_replace( "INNER JOIN {$wpdb->termmeta} ON ( t.term_id = {$wpdb->termmeta}.term_id )", "LEFT JOIN {$wpdb->termmeta} ON ( t.term_id = {$wpdb->termmeta}.term_id AND {$wpdb->termmeta}.meta_key='order')", $clauses['join'] );
-		$clauses['where']   = str_replace( "{$wpdb->termmeta}.meta_key = 'order'", "{$wpdb->termmeta}.meta_key = 'order' OR {$wpdb->termmeta}.meta_key IS NULL", $clauses['where'] );
+		$clauses['where']   = str_replace( "{$wpdb->termmeta}.meta_key = 'order'", "( {$wpdb->termmeta}.meta_key = 'order' OR {$wpdb->termmeta}.meta_key IS NULL )", $clauses['where'] );
 		$clauses['orderby'] = 'DESC' === $args['order'] ? str_replace( 'meta_value+0', 'meta_value+0 DESC, t.name', $clauses['orderby'] ) : str_replace( 'meta_value+0', 'meta_value+0 ASC, t.name', $clauses['orderby'] );
 	}
 

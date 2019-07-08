@@ -1004,6 +1004,7 @@ function wc_update_250_currency() {
 			'meta_value' => 'KIP',
 		)
 	);
+
 }
 
 /**
@@ -1992,6 +1993,50 @@ function wc_update_370_tax_rate_classes() {
 			WC_Tax::create_tax_class( $class );
 		}
 	}
+}
+
+/**
+ * Update currency settings for 3.7.0
+ *
+ * @return void
+ */
+function wc_update_370_mro_std_currency() {
+	global $wpdb;
+
+	// Fix currency settings for MRU and STN currency.
+	$current_currency = get_option( 'woocommerce_currency' );
+
+	if ( 'MRO' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'MRU' );
+	}
+
+	if ( 'STD' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'STN' );
+	}
+
+	// Update MRU currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'MRU', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		),
+		array(
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'MRO', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		)
+	);
+
+	// Update STN currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'STN', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		),
+		array(
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'STD', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		)
+	);
 }
 
 /**

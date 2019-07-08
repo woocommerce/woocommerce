@@ -132,6 +132,7 @@ class WC_Install {
 		),
 		'3.7.0' => array(
 			'wc_update_370_tax_rate_classes',
+			'wc_update_370_mro_std_currency',
 			'wc_update_370_db_version',
 		),
 	);
@@ -141,6 +142,7 @@ class WC_Install {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -159,6 +161,24 @@ class WC_Install {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
+	}
+
+	/**
+	 * Performan manual database update when triggered by WooCommerce System Tools.
+	 *
+	 * @since 3.6.5
+	 */
+	public static function manual_database_update() {
+		$blog_id = get_current_blog_id();
+
+		add_action( 'wp_' . $blog_id . '_wc_updater_cron', array( __CLASS__, 'run_manual_database_update' ) );
+	}
+
+	/**
+	 * Run manual database update.
+	 */
+	public static function run_manual_database_update() {
+		self::update();
 	}
 
 	/**
@@ -302,8 +322,10 @@ class WC_Install {
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
+		$update_versions    = array_keys( $updates );
+		usort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( $updates ) ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
 	}
 
 	/**
@@ -1149,7 +1171,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
@@ -1289,10 +1311,10 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 			if ( empty( $installed_plugins ) ) {
 				$installed_plugins = array();
 			}
-			$plugin_slug       = $plugin_to_install['repo-slug'];
-			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
-			$installed         = false;
-			$activate          = false;
+			$plugin_slug = $plugin_to_install['repo-slug'];
+			$plugin_file = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
+			$installed   = false;
+			$activate    = false;
 
 			// See if the plugin is installed already.
 			if ( isset( $installed_plugins[ $plugin_file ] ) ) {

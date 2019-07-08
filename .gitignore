@@ -24,9 +24,6 @@ none
 # Windows junk
 Thumbs.db
 
-# ApiGen
-/wc-apidocs/
-
 # Behat/CLI Tests
 tests/cli/installer
 tests/cli/composer.phar

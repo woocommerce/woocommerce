@@ -12,6 +12,16 @@
 class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * Set up test
+	 *
+	 * @return void
+	 */
+	public function setUp() {
+		parent::setUp();
+		$this->wc = WC();
+	}
+
+	/**
 	 * Test get_woocommerce_currency().
 	 *
 	 * @since 2.2
@@ -126,7 +136,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'MMK' => 'Burmese kyat',
 			'MNT' => 'Mongolian t&ouml;gr&ouml;g',
 			'MOP' => 'Macanese pataca',
-			'MRO' => 'Mauritanian ouguiya',
+			'MRU' => 'Mauritanian ouguiya',
 			'MUR' => 'Mauritian rupee',
 			'MVR' => 'Maldivian rufiyaa',
 			'MWK' => 'Malawian kwacha',
@@ -164,7 +174,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'SOS' => 'Somali shilling',
 			'SRD' => 'Surinamese dollar',
 			'SSP' => 'South Sudanese pound',
-			'STD' => 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra',
+			'STN' => 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra',
 			'SYP' => 'Syrian pound',
 			'SZL' => 'Swazi lilangeni',
 			'THB' => 'Thai baht',
@@ -311,6 +321,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return WC_Logger_Interface
 	 */
 	public function return_valid_logger_instance() {
+		if ( ! class_exists( 'Dummy_WC_Logger' ) ) {
+			include_once 'dummy-wc-logger.php';
+		}
 		return new Dummy_WC_Logger();
 	}
 
@@ -546,12 +559,49 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the wc_get_template function.
+	 * Test the wc_get_template_part function.
 	 *
 	 * @return void
 	 */
 	public function test_wc_get_template_part() {
 		$this->assertEmpty( wc_get_template_part( 'nothinghere' ) );
+	}
+
+	/**
+	 * Test wc_get_template.
+	 *
+	 * @expectedIncorrectUsage wc_get_template
+	 */
+	public function test_wc_get_template_invalid_action_args() {
+		ob_start();
+		wc_get_template(
+			'global/wrapper-start.php',
+			array(
+				'action_args' => 'this is bad',
+			)
+		);
+		$template = ob_get_clean();
+	}
+
+	/**
+	 * Test wc_get_template.
+	 */
+	public function test_wc_get_template() {
+		ob_start();
+		wc_get_template( 'global/wrapper-start.php' );
+		$template = ob_get_clean();
+		$this->assertNotEmpty( $template );
+
+		ob_start();
+		wc_get_template(
+			'global/wrapper-start.php',
+			array(
+				'template' => 'x',
+				'located'  => 'x',
+			)
+		);
+		$template = ob_get_clean();
+		$this->assertNotEmpty( $template );
 	}
 
 	/**
@@ -861,10 +911,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'billing_first_name' => array(
 				'priority' => 10,
 			),
-			'billing_last_name' => array(
+			'billing_last_name'  => array(
 				'priority' => 20,
 			),
-			'billing_email' => array(
+			'billing_email'      => array(
 				'priority' => 1,
 			),
 		);
@@ -892,5 +942,27 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		// Now test the new wc_ascii_uasort_comparison function which sorts the strings correctly.
 		uasort( $sorted_values, 'wc_ascii_uasort_comparison' );
 		$this->assertSame( array( 'Bélgica', 'Benin' ), array_values( $sorted_values ) );
+	}
+
+	/**
+	 * Test wc_load_cart function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_load_cart() {
+		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
+		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
+		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
+
+		$this->wc->cart = $this->wc->customer = $this->wc->session = null;
+		$this->assertNull( $this->wc->cart );
+		$this->assertNull( $this->wc->customer );
+		$this->assertNull( $this->wc->session );
+
+		wc_load_cart();
+		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
+		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
+		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
+
 	}
 }

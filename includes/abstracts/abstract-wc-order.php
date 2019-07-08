@@ -731,6 +731,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Return an array of coupons within this order.
+	 *
+	 * @since  3.7.0
+	 * @return WC_Order_Item_Coupon[]
+	 */
+	public function get_coupons() {
+		return $this->get_items( 'coupon' );
+	}
+
+	/**
 	 * Return an array of fees within this order.
 	 *
 	 * @return WC_Order_item_Fee[]
@@ -771,11 +781,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get coupon codes only.
+	 * Get used coupon codes only.
 	 *
+	 * @since 3.7.0
 	 * @return array
 	 */
-	public function get_used_coupons() {
+	public function get_coupon_codes() {
 		$coupon_codes = array();
 		$coupons      = $this->get_items( 'coupon' );
 
@@ -952,6 +963,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_wp_error( $applied ) ) {
 			return $applied;
+		}
+
+		$data_store = $coupon->get_data_store();
+
+		// Check specific for guest checkouts here as well since WC_Cart handles that seperately in check_customer_coupons.
+		if ( $data_store && 0 === $this->get_customer_id() ) {
+			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
+			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
+				return new WP_Error(
+					'invalid_coupon',
+					$coupon->get_coupon_error( 106 ),
+					array(
+						'status' => 400,
+					)
+				);
+			}
 		}
 
 		$this->set_coupon_discount_amounts( $discounts );
@@ -1316,11 +1343,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Default to base.
 		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
-			$default          = wc_get_base_location();
-			$args['country']  = $default['country'];
-			$args['state']    = $default['state'];
-			$args['postcode'] = '';
-			$args['city']     = '';
+			$args['country']  = WC()->countries->get_base_country();
+			$args['state']    = WC()->countries->get_base_state();
+			$args['postcode'] = WC()->countries->get_base_postcode();
+			$args['city']     = WC()->countries->get_base_city();
 		}
 
 		return $args;
@@ -1631,7 +1657,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets line subtotal - formatted for display.
 	 *
-	 * @param array  $item Item to get total from.
+	 * @param object $item Item to get total from.
 	 * @param string $tax_display Incl or excl tax display mode.
 	 * @return string
 	 */
@@ -1848,7 +1874,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function add_order_item_totals_tax_rows( &$total_rows, $tax_display ) {
 		// Tax for tax exclusive prices.
-		if ( 'excl' === $tax_display ) {
+		if ( 'excl' === $tax_display && wc_tax_enabled() ) {
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
 				foreach ( $this->get_tax_totals() as $code => $tax ) {
 					$total_rows[ sanitize_title( $code ) ] = array(

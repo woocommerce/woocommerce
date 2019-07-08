@@ -457,13 +457,21 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 	 * @return string
 	 */
 	protected function get_attribute_taxonomy_name( $slug, $product ) {
+		// Format slug so it matches attributes of the product.
+		$slug       = wc_attribute_taxonomy_slug( $slug );
 		$attributes = $product->get_attributes();
+		$attribute  = false;
 
-		if ( ! isset( $attributes[ $slug ] ) ) {
-			return wc_attribute_taxonomy_slug( $slug );
+		// pa_ attributes.
+		if ( isset( $attributes[ wc_attribute_taxonomy_name( $slug ) ] ) ) {
+			$attribute = $attributes[ wc_attribute_taxonomy_name( $slug ) ];
+		} elseif ( isset( $attributes[ $slug ] ) ) {
+			$attribute = $attributes[ $slug ];
 		}
 
-		$attribute = $attributes[ $slug ];
+		if ( ! $attribute ) {
+			return $slug;
+		}
 
 		// Taxonomy attribute name.
 		if ( $attribute->is_taxonomy() ) {
@@ -1538,7 +1546,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 					'description' => __( 'Product status (post status).', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'publish',
-					'enum'        => array_keys( get_post_statuses() ),
+					'enum'        => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'featured'              => array(
@@ -2105,7 +2113,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array( 'any' ), array_keys( get_post_statuses() ) ),
+			'enum'              => array_merge( array( 'any', 'future' ), array_keys( get_post_statuses() ) ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

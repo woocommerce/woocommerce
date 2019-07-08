@@ -1,8 +1,11 @@
 <?php
+/**
+ * File for class Conditional_Functions tests.
+ * @package WooCommerce\Tests\Util
+ */
 
 /**
  * Class Conditional_Functions.
- * @package WooCommerce\Tests\Util
  * @since 2.3.0
  */
 class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
@@ -44,18 +47,18 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_test_wc_is_valid_url() {
 		return array(
-			// Test some invalid URLs
+			// Test some invalid URLs.
 			array( false, wc_is_valid_url( 'google.com' ) ),
 			array( false, wc_is_valid_url( 'ftp://google.com' ) ),
 			array( false, wc_is_valid_url( 'sftp://google.com' ) ),
 			array( false, wc_is_valid_url( 'https://google.com/test invalid' ) ),
 
-			// Test some valid URLs
-			array( true,  wc_is_valid_url( 'http://google.com' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test%20valid' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) ),
+			// Test some valid URLs.
+			array( true, wc_is_valid_url( 'http://google.com' ) ),
+			array( true, wc_is_valid_url( 'https://google.com' ) ),
+			array( true, wc_is_valid_url( 'https://google.com/test%20valid' ) ),
+			array( true, wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) ),
+			array( true, wc_is_valid_url( 'https://google.com/test-valid/#hash' ) ),
 		);
 	}
 
@@ -83,9 +86,23 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 * Test wc_is_valid_url().
 	 *
 	 * @dataProvider data_provider_test_wc_is_valid_url
+	 * @param bool $assert Expected result.
+	 * @param bool $values Actual result returned by wc_is_valid_url().
 	 * @since 2.3.0
 	 */
 	public function test_wc_is_valid_url( $assert, $values ) {
-		$this->assertEquals( $assert,  $values );
+		$this->assertEquals( $assert, $values );
+	}
+
+	/**
+	 * Test wc_is_file_valid_csv.
+	 *
+	 * @since 3.6.5
+	 */
+	public function test_wc_is_file_valid_csv() {
+		$this->assertTrue( wc_is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( wc_is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( wc_is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( wc_is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 	}
 }

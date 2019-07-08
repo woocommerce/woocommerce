@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.6.0';
+	public $version = '3.7.0';
 
 	/**
 	 * The single instance of the class.
@@ -152,6 +152,7 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
+		$this->define_tables();
 		$this->includes();
 		$this->init_hooks();
 	}
@@ -184,7 +185,6 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
@@ -228,6 +228,28 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '5.6.20' );
+		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '4.9' );
+	}
+
+	/**
+	 * Register custom tables within $wpdb object.
+	 */
+	private function define_tables() {
+		global $wpdb;
+
+		// List of tables without prefixes.
+		$tables = array(
+			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
+			'order_itemmeta'         => 'woocommerce_order_itemmeta',
+			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+		);
+
+		foreach ( $tables as $name => $table ) {
+			$wpdb->$name    = $wpdb->prefix . $table;
+			$wpdb->tables[] = $table;
+		}
 	}
 
 	/**
@@ -256,13 +278,10 @@ final class WooCommerce {
 			return false;
 		}
 
-		// REST API prefix.
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		// Check if this is a WC endpoint.
-		$is_woocommerce_endpoint = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return apply_filters( 'woocommerce_is_rest_api_request', $is_woocommerce_endpoint );
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
 	}
 
 	/**
@@ -530,17 +549,7 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			// Session class, handles session data for users - can be overwritten if custom handler is needed.
-			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-			$this->session = new $session_class();
-			$this->session->init();
-
-			$this->customer = new WC_Customer( get_current_user_id(), true );
-			// Cart needs the customer info.
-			$this->cart = new WC_Cart();
-
-			// Customer should be saved during shutdown.
-			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
+			wc_load_cart();
 		}
 
 		$this->load_webhooks();
@@ -710,22 +719,43 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Initialize the customer and cart objects and setup customer saving on shutdown.
+	 *
+	 * @since 3.6.4
+	 * @return void
+	 */
+	public function initialize_cart() {
+		// Cart needs customer info.
+		if ( is_null( $this->customer ) || ! $this->customer instanceof WC_Customer ) {
+			$this->customer = new WC_Customer( get_current_user_id(), true );
+			// Customer should be saved during shutdown.
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
+		}
+		if ( is_null( $this->cart ) || ! $this->cart instanceof WC_Cart ) {
+			$this->cart = new WC_Cart();
+		}
+	}
+
+	/**
+	 * Initialize the session class.
+	 *
+	 * @since 3.6.4
+	 * @return void
+	 */
+	public function initialize_session() {
+		// Session class, handles session data for users - can be overwritten if custom handler is needed.
+		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+		if ( is_null( $this->session ) || ! $this->session instanceof $session_class ) {
+			$this->session = new $session_class();
+			$this->session->init();
+		}
+	}
+
+	/**
 	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
-		global $wpdb;
-
-		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
-
-		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
-
-		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
-		$wpdb->tables[]               = 'wc_product_meta_lookup';
-
-		$wpdb->wc_tax_rate_classes = $wpdb->prefix . 'wc_tax_rate_classes';
-		$wpdb->tables[]            = 'wc_tax_rate_classes';
+		$this->define_tables();
 	}
 
 	/**

@@ -35,7 +35,7 @@ class WC_Products_Tracking {
 			'product_id' => $product_id,
 		);
 
-		WC_Tracks::record_event( 'update_product', $properties );
+		WC_Tracks::record_event( 'product_edit', $properties );
 	}
 
 	/**
