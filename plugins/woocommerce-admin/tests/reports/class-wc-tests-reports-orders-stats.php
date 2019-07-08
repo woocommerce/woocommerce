@@ -589,13 +589,129 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the calculation of multiple coupons on orders.
+	 */
+	public function test_populate_and_query_multiple_coupons() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a product and customer.
+		$customer      = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
+		$product_price = 23.45;
+		$product       = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( $product_price );
+		$product->save();
+
+		// create 3 coupons valued 1,2,3.
+		$coupons = array();
+		foreach ( range( 1, 3 ) as $amount ) {
+			$coupon = WC_Helper_Coupon::create_coupon( 'coupon_' . $amount );
+			$coupon->set_amount( $amount );
+			$coupon->save();
+			$coupons[ $amount ] = $coupon;
+		}
+
+		// Create 3 orders with 1, 2, 3 coupons applied respectively.
+		$minute_ago        = time() - MINUTE_IN_SECONDS;
+		$report_start_time = $minute_ago - ( $minute_ago % HOUR_IN_SECONDS );
+		$order_time        = $report_start_time + 1;
+		$applied_coupons   = 0;
+		$applied_amount    = 0;
+		$orders_total      = 0;
+		$orders            = array();
+
+		foreach ( range( 1, 3 ) as $order_number ) {
+			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
+			$order->set_date_created( $order_time++ );
+			$order->set_status( 'completed' );
+
+			foreach ( $coupons as $amount => $coupon ) {
+				if ( $amount >= $order_number ) {
+					$order->apply_coupon( $coupon );
+					$applied_coupons++;
+					$applied_amount += $amount;
+				}
+			}
+
+			$order->calculate_totals();
+			$orders_total += $order->get_total();
+			$order->save();
+
+			$orders[] = $order;
+		}
+
+		WC_Helper_Queue::run_all_pending();
+
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+
+		// Test for the current hour.
+		$current_hour_start = new DateTime();
+		$current_hour_start->setTimestamp( $report_start_time );
+
+		$current_hour_end = new DateTime();
+		$current_hour_end->setTimestamp( $report_start_time + HOUR_IN_SECONDS - 1 );
+
+		$query_args = array(
+			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+		);
+
+		$order_shipping  = 10; // Hardcoded in WC_Helper_Order::create_order.
+		$qty_per_product = 4; // Hardcoded in WC_Helper_Order::create_order.
+		$new_customers   = 1;
+		$orders_count    = count( $orders );
+		$coupons_count   = count( $coupons );
+		$num_items_sold  = $orders_count * $qty_per_product;
+		$shipping        = $orders_count * $order_shipping;
+		$net_revenue     = $orders_total - $shipping;
+		$subtotals       = array(
+			'orders_count'            => $orders_count,
+			'num_items_sold'          => $num_items_sold,
+			'gross_revenue'           => $orders_total,
+			'coupons'                 => $applied_amount,
+			'coupons_count'           => $coupons_count,
+			'refunds'                 => 0,
+			'taxes'                   => 0,
+			'shipping'                => $shipping,
+			'net_revenue'             => $net_revenue,
+			'avg_items_per_order'     => $num_items_sold / $orders_count,
+			'avg_order_value'         => $net_revenue / $orders_count,
+			'num_returning_customers' => 0,
+			'num_new_customers'       => $new_customers,
+			'segments'                => array(),
+		);
+		$totals          = array_merge( $subtotals, array( 'products' => 1 ) );
+
+		$expected_stats = array(
+			'totals'    => $totals,
+			'intervals' => array(
+				array(
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'subtotals'      => $subtotals,
+				),
+			),
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
+	}
+
+	/**
 	 * Test the calculations and querying works correctly for the case of multiple orders.
 	 */
 	public function test_populate_and_query_multiple_intervals() {
 		global $wpdb;
 		WC_Helper_Reports::reset_stats_dbs();
 
-		// 2 different products.
+		// 4 different products.
 		$product_1_price = 25;
 		$product_1       = new WC_Product_Simple();
 		$product_1->set_name( 'Test Product' );
