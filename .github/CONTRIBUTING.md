@@ -44,7 +44,7 @@ https://woocommerce.com/contact-us/
 
 ## Build process
 
-Compiled CSS and JS files are not included in WooCommerce, also some projects like Blocks and REST API, so it's necessary to build ALL dependencies and assets when downloading or cloning WooCommerce source code from GitHub.
+The source code found in GitHub doesn't contains any compiled CSS or JS files, also doesn't include some features like Blocks and REST API, requiring a build process.
 
 In a terminal go to your WooCommerce installation, and run:
 
