@@ -1420,6 +1420,12 @@ p.jetpack-terms {
 		margin-right: 1em;
 		margin-left: 4px;
 
+		&.recommended-item-icon-wc_admin {
+			background-color: #96588a;
+			padding: 0.5em;
+			height: 2em;
+		}
+
 		&.recommended-item-icon-storefront_theme {
 			background-color: #f4a224;
 			max-height: 3em;
