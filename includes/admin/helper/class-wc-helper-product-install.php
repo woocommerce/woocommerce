@@ -221,7 +221,7 @@ class WC_Helper_Product_Install {
 	 *
 	 * @param int $product_id Product ID.
 	 *
-	 * @return \WP_Error|string
+	 * @return bool|\WP_Error
 	 */
 	private static function get_product_info( $product_id ) {
 		$product_info = array(
@@ -288,6 +288,8 @@ class WC_Helper_Product_Install {
 	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
+	 *
+	 * @return \WP_Error|string
 	 */
 	private static function unpack_product( $product_id, $upgrader ) {
 		$steps = self::get_state( 'steps' );
@@ -304,6 +306,8 @@ class WC_Helper_Product_Install {
 	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
+	 *
+	 * @return array|\WP_Error
 	 */
 	private static function move_product( $product_id, $upgrader ) {
 		$steps = self::get_state( 'steps' );
@@ -329,6 +333,8 @@ class WC_Helper_Product_Install {
 	 * Activate product given its product ID.
 	 *
 	 * @param int $product_id Product ID.
+	 *
+	 * @return \WP_Error|null
 	 */
 	private static function activate_product( $product_id ) {
 		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
