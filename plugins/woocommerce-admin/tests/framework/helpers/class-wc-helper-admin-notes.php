@@ -35,6 +35,7 @@ class WC_Helper_Admin_Notes {
 		$note_1->set_icon( 'info' );
 		$note_1->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note_1->set_source( 'PHPUNIT_TEST' );
+		$note_1->set_is_snoozable( false );
 		$note_1->add_action(
 			'PHPUNIT_TEST_NOTE_1_ACTION_1_SLUG',
 			'PHPUNIT_TEST_NOTE_1_ACTION_1_LABEL',
@@ -56,6 +57,7 @@ class WC_Helper_Admin_Notes {
 		$note_2->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note_2->set_source( 'PHPUNIT_TEST' );
 		$note_2->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+		$note_2->set_is_snoozable( true );
 		// This note has no actions.
 		$note_2->save();
 

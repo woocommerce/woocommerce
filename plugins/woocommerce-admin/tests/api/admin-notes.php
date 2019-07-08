@@ -176,6 +176,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, count( $notes ) );
 		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_2_TITLE' );
+		$this->assertEquals( $notes[0]['is_snoozable'], true );
 	}
 
 
@@ -247,6 +248,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 3, count( $notes ) );
 		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_1_TITLE' );
+		$this->assertEquals( $notes[0]['is_snoozable'], false );
 		$this->assertEquals( $notes[1]['title'], 'PHPUNIT_TEST_NOTE_2_TITLE' );
 		$this->assertEquals( $notes[2]['title'], 'PHPUNIT_TEST_NOTE_3_TITLE' );
 

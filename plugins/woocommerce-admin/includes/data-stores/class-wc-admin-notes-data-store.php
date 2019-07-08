@@ -31,7 +31,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			'icon'         => $note->get_icon(),
 			'status'       => $note->get_status(),
 			'source'       => $note->get_source(),
-			'is_snoozable' => $note->get_is_snoozable(),
+			'is_snoozable' => (int) $note->get_is_snoozable(),
 		);
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data() );
