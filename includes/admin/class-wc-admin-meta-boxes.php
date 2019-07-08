@@ -4,15 +4,10 @@
  *
  * Sets up the write panels used by products and orders (custom post types).
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Meta Boxes
- * @version     2.1.0
+ * @package WooCommerce/Admin/Meta Boxes
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Meta_Boxes.
@@ -75,7 +70,7 @@ class WC_Admin_Meta_Boxes {
 	/**
 	 * Add an error message.
 	 *
-	 * @param string $text
+	 * @param string $text Error to add.
 	 */
 	public static function add_error( $text ) {
 		self::$meta_box_errors[] = $text;
@@ -104,7 +99,7 @@ class WC_Admin_Meta_Boxes {
 
 			echo '</div>';
 
-			// Clear
+			// Clear.
 			delete_option( 'woocommerce_meta_box_errors' );
 		}
 	}
@@ -124,10 +119,13 @@ class WC_Admin_Meta_Boxes {
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			$order_type_object = get_post_type_object( $type );
+			/* Translators: %s order type name. */
 			add_meta_box( 'woocommerce-order-data', sprintf( __( '%s data', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Data::output', $type, 'normal', 'high' );
 			add_meta_box( 'woocommerce-order-items', __( 'Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $type, 'normal', 'high' );
+			/* Translators: %s order type name. */
 			add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s notes', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Notes::output', $type, 'side', 'default' );
 			add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $type, 'normal', 'default' );
+			/* Translators: %s order type name. */
 			add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $order_type_object->labels->singular_name ), 'WC_Meta_Box_Order_Actions::output', $type, 'side', 'high' );
 		}
 
@@ -135,7 +133,7 @@ class WC_Admin_Meta_Boxes {
 		add_meta_box( 'woocommerce-coupon-data', __( 'Coupon data', 'woocommerce' ), 'WC_Meta_Box_Coupon_Data::output', 'shop_coupon', 'normal', 'high' );
 
 		// Comment rating.
-		if ( 'comment' === $screen_id && isset( $_GET['c'] ) && metadata_exists( 'comment', $_GET['c'], 'rating' ) ) {
+		if ( 'comment' === $screen_id && isset( $_GET['c'] ) && metadata_exists( 'comment', wc_clean( wp_unslash( $_GET['c'] ) ), 'rating' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Product_Reviews::output', 'comment', 'normal', 'high' );
 		}
 	}
@@ -168,8 +166,8 @@ class WC_Admin_Meta_Boxes {
 	public function rename_meta_boxes() {
 		global $post;
 
-		// Comments/Reviews
-		if ( isset( $post ) && ( 'publish' == $post->post_status || 'private' == $post->post_status ) && post_type_supports( 'product', 'comments' ) ) {
+		// Comments/Reviews.
+		if ( isset( $post ) && ( 'publish' === $post->post_status || 'private' === $post->post_status ) && post_type_supports( 'product', 'comments' ) ) {
 			remove_meta_box( 'commentsdiv', 'product', 'normal' );
 			add_meta_box( 'commentsdiv', __( 'Reviews', 'woocommerce' ), 'post_comment_meta_box', 'product', 'normal' );
 		}
@@ -178,31 +176,33 @@ class WC_Admin_Meta_Boxes {
 	/**
 	 * Check if we're saving, the trigger an action based on the post type.
 	 *
-	 * @param  int    $post_id
-	 * @param  object $post
+	 * @param  int    $post_id Post ID.
+	 * @param  object $post Post object.
 	 */
 	public function save_meta_boxes( $post_id, $post ) {
+		$post_id = absint( $post_id );
+
 		// $post_id and $post are required
 		if ( empty( $post_id ) || empty( $post ) || self::$saved_meta_boxes ) {
 			return;
 		}
 
-		// Dont' save meta boxes for revisions or autosaves
+		// Dont' save meta boxes for revisions or autosaves.
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || is_int( wp_is_post_revision( $post ) ) || is_int( wp_is_post_autosave( $post ) ) ) {
 			return;
 		}
 
-		// Check the nonce
-		if ( empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) ) {
+		// Check the nonce.
+		if ( empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ), 'woocommerce_save_data' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			return;
 		}
 
-		// Check the post being saved == the $post_id to prevent triggering this call for other save_post events
-		if ( empty( $_POST['post_ID'] ) || $_POST['post_ID'] != $post_id ) {
+		// Check the post being saved == the $post_id to prevent triggering this call for other save_post events.
+		if ( empty( $_POST['post_ID'] ) || absint( $_POST['post_ID'] ) !== $post_id ) {
 			return;
 		}
 
-		// Check user has permission to edit
+		// Check user has permission to edit.
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
@@ -210,13 +210,13 @@ class WC_Admin_Meta_Boxes {
 		// We need this save event to run once to avoid potential endless loops. This would have been perfect:
 		// remove_action( current_filter(), __METHOD__ );
 		// But cannot be used due to https://github.com/woocommerce/woocommerce/issues/6485
-		// When that is patched in core we can use the above. For now:
+		// When that is patched in core we can use the above.
 		self::$saved_meta_boxes = true;
 
-		// Check the post type
-		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ) ) ) {
+		// Check the post type.
+		if ( in_array( $post->post_type, wc_get_order_types( 'order-meta-boxes' ), true ) ) {
 			do_action( 'woocommerce_process_shop_order_meta', $post_id, $post );
-		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon' ) ) ) {
+		} elseif ( in_array( $post->post_type, array( 'product', 'shop_coupon' ), true ) ) {
 			do_action( 'woocommerce_process_' . $post->post_type . '_meta', $post_id, $post );
 		}
 	}

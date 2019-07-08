@@ -1393,15 +1393,15 @@ p.jetpack-terms {
 
 .wc-setup-content .recommended-item {
 	list-style: none;
+	margin-bottom: 1.5em;
 
-	&:last-child label {
+	&:last-child {
 		margin-bottom: 0; // Avoid extra space at the end of the list.
 	}
 
 	label {
 		display: flex;
 		align-items: center;
-		margin-bottom: 1.5em;
 
 		&::before,
 		&::after {
