@@ -12,7 +12,7 @@
 # 6 - cian
 # 7 - white
 output() {
-  echo "$(tput setaf "$1")$2$(tput sgr0)"
+	echo "$(tput setaf "$1")$2$(tput sgr0)"
 }
 
 updating=false
@@ -27,6 +27,11 @@ do
 	esac
 	shift
 done
+
+if [ ! -d "packages/" ]; then
+	output 1 "./packages doesn't exist!"
+	output 1 "run \"composer install\" before proceed."
+fi
 
 # Autoloader
 output 3 "Updating autoloader classmaps..."
