@@ -318,18 +318,21 @@ class WC_Helper_Product_Install {
 			return new WP_Error( 'missing_unpacked_path', __( 'Could not found unpacked path.', 'woocommerce' ) );
 		}
 
-		// TODO: handle theme.
-		return $upgrader->install_package(
-			array(
-				'source'        => $steps[ $product_id ]['unpacked_path'],
-				'destination'   => WP_PLUGIN_DIR,
-				'clear_working' => true,
-				'hook_extra'    => array(
-					'type'   => 'plugin',
-					'action' => 'install',
-				),
-			)
+		$destination = 'plugin' === $steps[ $product_id ]['product_type']
+			? WP_PLUGIN_DIR
+			: get_theme_root();
+
+		$package = array(
+			'source'        => $steps[ $product_id ]['unpacked_path'],
+			'destination'   => $destination,
+			'clear_working' => true,
+			'hook_extra'    => array(
+				'type'   => $steps[ $product_id ]['product_type'],
+				'action' => 'install',
+			),
 		);
+
+		return $upgrader->install_package( $package );
 	}
 
 	/**
@@ -340,6 +343,21 @@ class WC_Helper_Product_Install {
 	 * @return \WP_Error|null
 	 */
 	private static function activate_product( $product_id ) {
+		$steps = self::get_state( 'steps' );
+		if ( 'plugin' === $steps[ $product_id ]['product_type'] ) {
+			return self::activate_plugin( $product_id );
+		}
+		return self::activate_theme( $product_id );
+	}
+
+	/**
+	 * Activate plugin given its product ID.
+	 *
+	 * @param int $product_id Product ID.
+	 *
+	 * @return \WP_Error|null
+	 */
+	private static function activate_plugin( $product_id ) {
 		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
 		wp_clean_plugins_cache();
 		$filename = false;
@@ -367,12 +385,49 @@ class WC_Helper_Product_Install {
 			return new WP_Error( 'unknown_filename', __( 'Unknown product filename.', 'woocommerce' ) );
 		}
 
-		// TODO: theme activation support.
 		return activate_plugin( $filename );
 	}
 
 	/**
-	 * Get WP.org product filename.
+	 * Activate theme given its product ID.
+	 *
+	 * @param int $product_id Product ID.
+	 *
+	 * @return \WP_Error|null
+	 */
+	private static function activate_theme( $product_id ) {
+		// Clear plugins cache used in `WC_Helper::get_local_woo_themes`.
+		wp_clean_themes_cache();
+		$theme_slug = false;
+
+		// If product is WP.org theme, find out its slug.
+		$dir_name = self::get_wporg_product_dir_name( $product_id );
+		if ( false !== $dir_name ) {
+			$theme_slug = basename( $dir_name );
+		}
+
+		if ( false === $theme_slug ) {
+			$themes = wp_list_filter(
+				WC_Helper::get_local_woo_themes(),
+				array(
+					'_product_id' => $product_id,
+				)
+			);
+
+			$theme_slug = is_array( $themes ) && ! empty( $themes )
+				? dirname( key( $themes ) )
+				: '';
+		}
+
+		if ( empty( $theme_slug ) ) {
+			return new WP_Error( 'unknown_filename', __( 'Unknown product filename.', 'woocommerce' ) );
+		}
+
+		return switch_theme( $theme_slug );
+	}
+
+	/**
+	 * Get installed directory of WP.org product.
 	 *
 	 * @param int $product_id Product ID.
 	 *
@@ -396,15 +451,15 @@ class WC_Helper_Product_Install {
 	}
 
 	/**
-	 * Get plugin's relative path.
+	 * Get WP.org plugin's main file.
 	 *
-	 * @param string $folder Folder of the plugin.
+	 * @param string $dir Directory name of the plugin.
 	 *
 	 * @return bool|string
 	 */
-	private static function get_wporg_plugin_main_file( $folder ) {
-		// Ensure that exact folder name is used.
-		$folder .= '/';
+	private static function get_wporg_plugin_main_file( $dir ) {
+		// Ensure that exact dir name is used.
+		$dir .= '/';
 
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -412,7 +467,7 @@ class WC_Helper_Product_Install {
 
 		$plugins = get_plugins();
 		foreach ( $plugins as $path => $plugin ) {
-			if ( 0 === strpos( $path, $folder ) ) {
+			if ( 0 === strpos( $path, $dir ) ) {
 				return $path;
 			}
 		}
