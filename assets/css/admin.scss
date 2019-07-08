@@ -4573,6 +4573,7 @@ img.help_tip {
 	}
 }
 
+.woocommerce_attribute,
 .woocommerce_variation {
 
 	h3 .sort {
@@ -4961,6 +4962,7 @@ img.help_tip {
 			}
 		}
 
+		&.woocommerce_attribute h3,
 		&.woocommerce_variation h3 {
 			cursor: pointer;
 			padding: 0.5em 0.75em 0.5em 1em !important;
