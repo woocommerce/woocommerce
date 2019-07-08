@@ -302,7 +302,6 @@ class WC_Helper_Product_Install {
 		}
 
 		return $upgrader->unpack_package( $steps[ $product_id ]['download_path'], true );
-
 	}
 
 	/**
