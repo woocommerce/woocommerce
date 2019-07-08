@@ -47,6 +47,6 @@ output 2 "Done"
 if ( $updating ); then
 	# Update POT file
 	output 3 "Updating POT file..."
-	grunt makepot
+	npm run makepot
 	output 2 "Done"
 fi
