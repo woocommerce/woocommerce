@@ -22,6 +22,7 @@ import { Card, H } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
+import ThemeUploader from './uploader';
 
 class Theme extends Component {
 	constructor() {
@@ -29,8 +30,10 @@ class Theme extends Component {
 
 		this.state = {
 			activeTab: 'all',
+			uploadedThemes: [],
 		};
 
+		this.handleUploadComplete = this.handleUploadComplete.bind( this );
 		this.onChoose = this.onChoose.bind( this );
 		this.onSelectTab = this.onSelectTab.bind( this );
 		this.openDemo = this.openDemo.bind( this );
@@ -128,17 +131,27 @@ class Theme extends Component {
 	}
 
 	getThemes() {
+		const { activeTab, uploadedThemes } = this.state;
 		const { themes } = wcSettings.onboarding;
-		const { activeTab } = this.state;
+		themes.concat( uploadedThemes );
+		const allThemes = [ ...themes, ...uploadedThemes ];
 
 		switch ( activeTab ) {
 			case 'paid':
-				return themes.filter( theme => this.getPriceValue( theme.price ) > 0 );
+				return allThemes.filter( theme => this.getPriceValue( theme.price ) > 0 );
 			case 'free':
-				return themes.filter( theme => this.getPriceValue( theme.price ) <= 0 );
+				return allThemes.filter( theme => this.getPriceValue( theme.price ) <= 0 );
 			case 'all':
 			default:
-				return themes;
+				return allThemes;
+		}
+	}
+
+	handleUploadComplete( upload ) {
+		if ( 'success' === upload.status && upload.theme_data ) {
+			this.setState( {
+				uploadedThemes: [ ...this.state.uploadedThemes, upload.theme_data ],
+			} );
 		}
 	}
 
@@ -175,6 +188,7 @@ class Theme extends Component {
 					{ () => (
 						<div className="woocommerce-profile-wizard__themes">
 							{ themes && themes.map( theme => this.renderTheme( theme ) ) }
+							<ThemeUploader onUploadComplete={ this.handleUploadComplete } />
 						</div>
 					) }
 				</TabPanel>

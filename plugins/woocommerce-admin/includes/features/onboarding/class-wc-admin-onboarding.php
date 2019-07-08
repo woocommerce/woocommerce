@@ -18,6 +18,20 @@ class WC_Admin_Onboarding {
 	protected static $instance = null;
 
 	/**
+	 * Name of themes transient.
+	 *
+	 * @var string
+	 */
+	const THEMES_TRANSIENT = 'wc_onboarding_themes';
+
+	/**
+	 * Name of product data transient.
+	 *
+	 * @var string
+	 */
+	const PRODUCT_DATA_TRANSIENT = 'wc_onboarding_product_data';
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -32,6 +46,8 @@ class WC_Admin_Onboarding {
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
+		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
+		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 	}
@@ -116,8 +132,7 @@ class WC_Admin_Onboarding {
 	 * @return array
 	 */
 	public static function get_themes() {
-		$themes_transient_name = 'wc_onboarding_themes';
-		$themes                = get_transient( $themes_transient_name );
+		$themes = get_transient( self::THEMES_TRANSIENT );
 		if ( false === $themes ) {
 			$theme_data = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes' );
 			$themes     = array();
@@ -152,7 +167,7 @@ class WC_Admin_Onboarding {
 
 			$themes = array( $active_theme => $themes[ $active_theme ] ) + $themes;
 
-			set_transient( $themes_transient_name, $themes, DAY_IN_SECONDS );
+			set_transient( self::THEMES_TRANSIENT, $themes, DAY_IN_SECONDS );
 		}
 
 		$themes = apply_filters( 'woocommerce_admin_onboarding_themes', $themes );
@@ -221,15 +236,14 @@ class WC_Admin_Onboarding {
 	 * @return array
 	 */
 	public static function append_product_data( $product_types ) {
-		$product_data_transient_name = 'wc_onboarding_product_data';
-		$woocommerce_products        = get_transient( $product_data_transient_name );
+		$woocommerce_products = get_transient( self::PRODUCT_DATA_TRANSIENT );
 		if ( false === $woocommerce_products ) {
 			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=product-type' );
 			if ( is_wp_error( $woocommerce_products ) ) {
 				return $product_types;
 			}
 
-			set_transient( $product_data_transient_name, $woocommerce_products, DAY_IN_SECONDS );
+			set_transient( self::PRODUCT_DATA_TRANSIENT, $woocommerce_products, DAY_IN_SECONDS );
 		}
 
 		$product_data = json_decode( $woocommerce_products['body'] );
@@ -251,6 +265,13 @@ class WC_Admin_Onboarding {
 		}
 
 		return $product_types;
+	}
+
+	/**
+	 * Delete the stored themes transient.
+	 */
+	public static function delete_themes_transient() {
+		delete_transient( self::THEMES_TRANSIENT );
 	}
 
 	/**

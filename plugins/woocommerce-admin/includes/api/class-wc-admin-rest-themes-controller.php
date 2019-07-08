@@ -89,11 +89,19 @@ class WC_Admin_REST_Themes_Controller extends WC_REST_Data_Controller {
 		}
 
 		if ( ! is_wp_error( $install ) && isset( $install['destination_name'] ) ) {
+			$theme  = $install['destination_name'];
 			$result = array(
 				'status'  => 'success',
 				'message' => $upgrader->strings['process_success'],
-				'theme'   => $install['destination_name'],
+				'theme'   => $theme,
 			);
+
+			/**
+			 * Fires when a theme is successfully installed.
+			 *
+			 * @param string $theme The theme name.
+			 */
+			do_action( 'woocommerce_theme_installed', $theme );
 		} else {
 			if ( is_wp_error( $install ) && $install->get_error_code() ) {
 				$error_message = isset( $upgrader->strings[ $install->get_error_code() ] ) ? $upgrader->strings[ $install->get_error_code() ] : $install->get_error_data();

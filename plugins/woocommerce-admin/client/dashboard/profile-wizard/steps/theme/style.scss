@@ -116,3 +116,64 @@
 		}
 	}
 }
+
+.woocommerce-profile-wizard__body .woocommerce-theme-uploader.woocommerce-card {
+	margin: 0;
+	position: relative;
+
+	.woocommerce-card__body {
+		height: 100%;
+	}
+
+	&.is-uploading .components-drop-zone__provider {
+		min-height: 382px;
+	}
+
+	.components-drop-zone__provider {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		border-radius: 2px;
+		background: #f6f6f6;
+		border: 1px dashed #b0b5b8;
+	}
+
+	.components-form-file-upload {
+		flex: 1;
+		width: 100%;
+	}
+
+	.components-form-file-upload > .components-button {
+		flex: 1;
+		flex-direction: column;
+		margin: 0;
+		width: 100%;
+		height: 100%;
+		min-height: 380px;
+
+		> .gridicon {
+			width: 48px;
+			height: 48px;
+
+			path {
+				fill: #50575d;
+			}
+		}
+
+		.dashicons-upload {
+			display: none;
+		}
+	}
+
+	.woocommerce-theme-uploader__title {
+		margin: $gap-smaller 0;
+		@include font-size(24);
+		font-weight: 400;
+	}
+
+	p {
+		@include font-size(14);
+		margin: 0;
+	}
+}
