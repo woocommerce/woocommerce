@@ -48,3 +48,4 @@ tests/cli/vendor
 # Built files
 /build/
 bin/languages
+woocommerce-gutenberg-products-block.zip
