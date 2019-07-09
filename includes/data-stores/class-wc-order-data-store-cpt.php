@@ -611,6 +611,87 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Return array of coupon_code => meta_key for coupon which have usage limit and have tentative keys.
+	 * Pass $coupon_id if key for only one of the coupon is needed.
+	 *
+	 * @param WC_Order $order     Order object.
+	 * @param int      $coupon_id If passed, will return held key for that coupon.
+	 *
+	 * @return array|string Key value pair for coupon code and meta key name. If $coupon_id is passed, returns meta_key for only that coupon.
+	 */
+	public function get_coupon_held_keys( $order, $coupon_id = null ) {
+		$held_keys = $order->get_meta( '_coupon_held_keys' );
+		if ( $coupon_id ) {
+			return $held_keys[ $coupon_id ];
+		}
+		return $held_keys;
+	}
+
+	/**
+	 * Return array of coupon_code => meta_key for coupon which have usage limit per customer and have tentative keys.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param int      $coupon_id If passed, will return held key for that coupon.
+	 *
+	 * @return mixed
+	 */
+	public function get_coupon_held_keys_for_users( $order, $coupon_id = null ) {
+		$held_keys_for_user = $order->get_meta( '_coupon_held_keys_for_users' );
+		if ( $coupon_id && is_array( $held_keys_for_user ) ) {
+			return $held_keys_for_user[ $coupon_id ];
+		}
+		return $held_keys_for_user;
+	}
+
+	/**
+	 * Add/Update list of meta keys that are currently being used by this order to hold a coupon.
+	 * This is used to figure out what all meta entries we should delete when order is cancelled/completed.
+	 *
+	 * @param WC_Order $order              Order object.
+	 * @param array    $held_keys          Array of coupon_code => meta_key.
+	 * @param array    $held_keys_for_user Array of coupon_code => meta_key for held coupon for user.
+	 *
+	 * @return mixed
+	 */
+	public function set_coupon_held_keys( $order, $held_keys, $held_keys_for_user ) {
+		if ( is_array( $held_keys ) && 0 < count( $held_keys ) ) {
+			$order->update_meta_data( '_coupon_held_keys', $held_keys );
+		}
+		if ( is_array( $held_keys_for_user ) && 0 < count( $held_keys_for_user ) ) {
+			$order->update_meta_data( '_coupon_held_keys_for_users', $held_keys_for_user );
+		}
+	}
+
+	/**
+	 * Release all coupons held by this order.
+	 *
+	 * @param WC_Order $order Current order object.
+	 * @param bool     $save  Whether to delete keys from DB right away. Could be useful to pass `false` if you are building a bulk request.
+	 */
+	public function release_held_coupons( $order, $save = true ) {
+		$coupon_held_keys = $this->get_coupon_held_keys( $order );
+		if ( is_array( $coupon_held_keys ) ) {
+			foreach ( $coupon_held_keys as $coupon_id => $meta_key ) {
+				delete_post_meta( $coupon_id, $meta_key );
+			}
+		}
+		$order->delete_meta_data( '_coupon_held_keys' );
+
+		$coupon_held_keys_for_users = $this->get_coupon_held_keys_for_users( $order );
+		if ( is_array( $coupon_held_keys_for_users ) ) {
+			foreach ( $coupon_held_keys_for_users as $coupon_id => $meta_key ) {
+				delete_post_meta( $coupon_id, $meta_key );
+			}
+		}
+		$order->delete_meta_data( '_coupon_held_keys_for_users' );
+
+		if ( $save ) {
+			$order->save_meta_data();
+		}
+
+	}
+
+	/**
 	 * Gets information about whether stock was reduced.
 	 *
 	 * @param WC_Order|int $order Order ID or order object.

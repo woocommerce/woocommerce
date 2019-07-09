@@ -30,6 +30,8 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
+		WC()->cart->empty_cart();
+
 		$this->ids = array();
 
 		$tax_rate    = array(
