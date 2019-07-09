@@ -86,7 +86,7 @@ class HistoricalDataLayout extends Component {
 										total={ customersTotal }
 									/>
 									<HistoricalDataProgress
-										label={ __( 'Orders', 'woocommerce-admin' ) }
+										label={ __( 'Orders and Refunds', 'woocommerce-admin' ) }
 										progress={ ordersProgress }
 										total={ ordersTotal }
 									/>
