@@ -70,6 +70,7 @@ GridContentControl.propTypes = {
 	settings: PropTypes.shape( {
 		button: PropTypes.bool.isRequired,
 		price: PropTypes.bool.isRequired,
+		rating: PropTypes.bool.isRequired,
 		title: PropTypes.bool.isRequired,
 	} ).isRequired,
 	/**
