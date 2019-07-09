@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Tracks: track status page events. #23190
 * Tweak - Updated postcode label to "Postal code" when selected Canada. #23740
 * Tweak - Use determine_locale() to properly load custom translation files. #23785
+* Tweak - OBW: Switch shipping labels and shipping zones placement. #23781
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
 * Performance - Reduce number of queries needed to populate variations data by priming post caches. #23272
 * Localization - Added validation for Italian postcodes. #23269
