@@ -1,10 +1,18 @@
 <?php
+/**
+ * Cart tests.
+ *
+ * @package WooCommerce\Tests\Cart
+ */
 
 /**
  * Class Cart.
- * @package WooCommerce\Tests\Cart
  */
 class WC_Tests_Cart extends WC_Unit_Test_Case {
+
+	/**
+	 * tearDown.
+	 */
 	public function tearDown() {
 		parent::tearDown();
 
@@ -85,7 +93,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Add product to cart x1, calc and test
+		// Add product to cart x1, calc and test.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '85.92', number_format( WC()->cart->total, 2, '.', '' ) );
@@ -101,8 +109,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
 	 * Test tax rounding.
-	 * Ticket:
-	 *  https://github.com/woocommerce/woocommerce/issues/21021
+	 * Ticket: https://github.com/woocommerce/woocommerce/issues/21021.
 	 */
 	public function test_cart_get_total_issue_21021() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
@@ -135,14 +142,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		$tax_rate_5 = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Create product with price 19
+		// Create product with price 19.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 19 );
 		$product->set_regular_price( 19 );
 		$product->set_tax_class( '5percent' );
 		$product->save();
 
-		// Create product with price 59
+		// Create product with price 59.
 		$product2 = WC_Helper_Product::create_simple_product();
 		$product2->set_price( 59 );
 		$product2->set_regular_price( 59 );
@@ -165,16 +172,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
-		// Set the flat_rate shipping method
+		// Set the flat_rate shipping method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 
-		// Add product to cart x1, calc and test
+		// Add product to cart x1, calc and test.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( 28.9, WC()->cart->total );
 
-		// Add product2 to cart
+		// Add product2 to cart.
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
@@ -236,34 +243,33 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
 	 * Test some discount logic which has caused issues in the past.
-	 * Ticket:
-	 *  https://github.com/woocommerce/woocommerce/issues/10963
+	 * Ticket: https://github.com/woocommerce/woocommerce/issues/10963.
 	 *
 	 * Due to discounts being split amongst products in cart.
 	 */
 	public function test_cart_get_discounted_price_issue_10963() {
-		// Create dummy coupon - fixed cart, 1 value
+		// Create dummy coupon - fixed cart, 1 value.
 		$coupon = WC_Helper_Coupon::create_coupon();
 
-		// Add coupon
+		// Add coupon.
 		WC()->cart->add_discount( $coupon->get_code() );
 
-		// Create dummy product - price will be 10
+		// Create dummy product - price will be 10.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Add product to cart x1, calc and test
+		// Add product to cart x1, calc and test.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '9.00', number_format( WC()->cart->total, 2, '.', '' ) );
 		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
 
-		// Add product to cart x2, calc and test
+		// Add product to cart x2, calc and test.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '19.00', number_format( WC()->cart->total, 2, '.', '' ) );
 		$this->assertEquals( '1.00', number_format( WC()->cart->discount_cart, 2, '.', '' ) );
 
-		// Add product to cart x3, calc and test
+		// Add product to cart x3, calc and test.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( '29.00', number_format( WC()->cart->total, 2, '.', '' ) );
@@ -336,10 +342,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * Ticket: https://github.com/woocommerce/woocommerce/issues/10573
 	 */
 	public function test_cart_get_discounted_price_issue_10573() {
-		// Create dummy coupon - fixed cart, 1 value
+		// Create dummy coupon - fixed cart, 1 value.
 		$coupon = WC_Helper_Coupon::create_coupon();
 
-		// Create dummy product - price will be 10
+		// Create dummy product - price will be 10.
 		$product = WC_Helper_Product::create_simple_product();
 
 		$product->set_regular_price( '29.95' );
@@ -373,7 +379,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Test that calculation rounding is done correctly with and without taxes.
 	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/16305
+	 * @see https://github.com/woocommerce/woocommerce/issues/16305.
 	 * @since 3.2
 	 */
 	public function test_discount_cart_rounding() {
@@ -826,12 +832,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( '0.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ) );
 	}
 
-
 	/**
 	 * Helper that can be hooked to a filter to force the customer's shipping country to be GB.
 	 *
 	 * @since 3.3
-	 * @param string $country
+	 * @param string $country Country code.
 	 * @return string
 	 */
 	public function force_customer_gb_shipping( $country ) {
@@ -842,7 +847,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * Helper that can be hooked to a filter to force the customer's shipping country to be US.
 	 *
 	 * @since 3.3
-	 * @param string $country
+	 * @param string $country Country code.
 	 * @return string
 	 */
 	public function force_customer_us_shipping( $country ) {
@@ -1135,13 +1140,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_remove_url() {
-		// Get the cart page id
+		// Get the cart page id.
 		$cart_page_url = wc_get_page_permalink( 'cart' );
 
-		// Test cart item key
+		// Test cart item key.
 		$cart_item_key = 'test';
 
-		// Do the check
+		// Do the check.
 		$this->assertEquals( apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' ), wc_get_cart_remove_url( $cart_item_key ) );
 	}
 
@@ -1151,13 +1156,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_to_cart_simple() {
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 1 ) );
 
-		// Check if the item is in the cart
+		// Check if the item is in the cart.
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 	}
 
@@ -1165,16 +1170,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * Check if we can add a trashed product to the cart.
 	 */
 	public function test_add_to_cart_trashed() {
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Trash product
+		// Trash product.
 		wp_trash_post( $product->get_id() );
 
-		// Refetch product, to be sure
+		// Refetch product, to be sure.
 		$product = wc_get_product( $product->get_id() );
 
-		// Add product to cart
+		// Add product to cart.
 		$this->assertFalse( WC()->cart->add_to_cart( $product->get_id(), 1 ) );
 	}
 
@@ -1191,7 +1196,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Add the product to the cart. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 1, $variation['variation_id'], array( 'Size' => ucfirst( $variation['attributes']['attribute_pa_size'] ) ) ) );
 
-		// Check if the item is in the cart
+		// Check if the item is in the cart.
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 	}
 
@@ -1201,7 +1206,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_add_to_cart_sold_individually() {
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
 		$product->set_sold_individually( true );
@@ -1210,7 +1215,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Add the product twice to cart, should be corrected to 1. Methods returns boolean on failure, string on success.
 		$this->assertNotFalse( WC()->cart->add_to_cart( $product->get_id(), 2 ) );
 
-		// Check if the item is in the cart
+		// Check if the item is in the cart.
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 	}
 
@@ -1220,16 +1225,16 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_find_product_in_cart() {
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Add product to cart
+		// Add product to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Generate cart id
+		// Generate cart id.
 		$cart_id = WC()->cart->generate_cart_id( $product->get_id() );
 
-		// Get the product from the cart
+		// Get the product from the cart.
 		$this->assertNotEquals( '', WC()->cart->find_product_in_cart( $cart_id ) );
 	}
 
@@ -1239,8 +1244,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_generate_cart_id() {
-
-		// Setup data
+		// Setup data.
 		$product_id     = 1;
 		$variation_id   = 2;
 		$variation      = array( 'Testing' => 'yup' );
@@ -1254,7 +1258,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			),
 		);
 
-		// Manually generate ID
+		// Manually generate ID.
 		$id_parts = array( $product_id );
 
 		if ( $variation_id && 0 != $variation_id ) {
@@ -1284,7 +1288,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$manual_cart_id = md5( implode( '_', $id_parts ) );
 
-		// Assert
 		$this->assertEquals( $manual_cart_id, WC()->cart->generate_cart_id( $product_id, $variation_id, array( 'Testing' => 'yup' ), $cart_item_data ) );
 
 	}
@@ -1295,25 +1298,25 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_set_quantity() {
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Add 1 product to cart
+		// Add 1 product to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Get cart id
+		// Get cart id.
 		$cart_id = WC()->cart->generate_cart_id( $product->get_id() );
 
-		// Set quantity of product in cart to 2
+		// Set quantity of product in cart to 2.
 		$this->assertTrue( WC()->cart->set_quantity( $cart_id, 2 ), $cart_id );
 
-		// Check if there are 2 items in cart now
+		// Check if there are 2 items in cart now.
 		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
 
-		// Set quantity of product in cart to 0
+		// Set quantity of product in cart to 0.
 		$this->assertTrue( WC()->cart->set_quantity( $cart_id, 0 ) );
 
-		// Check if there are 0 items in cart now
+		// Check if there are 0 items in cart now.
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 	}
 
@@ -1324,13 +1327,13 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 */
 	public function test_check_cart_item_validity() {
 
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Add product to cart
+		// Add product to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Check cart validity, should pass
+		// Check cart validity, should pass.
 		$this->assertTrue( WC()->cart->check_cart_item_validity() );
 	}
 
@@ -1340,13 +1343,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_get_total() {
-		// Create dummy product
 		$product = WC_Helper_Product::create_simple_product();
-
-		// Add product to cart
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Check
 		$this->assertEquals( apply_filters( 'woocommerce_cart_total', wc_price( WC()->cart->total ) ), WC()->cart->get_total() );
 	}
 
@@ -1421,25 +1420,25 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_shipping_total() {
-		// Create product
+		// Create product.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 10 );
 		$product->save();
 
-		// Create a flat rate method
+		// Create a flat rate method.
 		WC_Helper_Shipping::create_simple_flat_rate();
 
-		// Add product to cart
+		// Add product to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Set the flat_rate shipping method
+		// Set the flat_rate shipping method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
 
-		// Test if the shipping total amount is equal 20
+		// Test if the shipping total amount is equal 20.
 		$this->assertEquals( 10, WC()->cart->shipping_total );
 
-		// Test if the cart total amount is equal 20
+		// Test if the cart total amount is equal 20.
 		$this->assertEquals( 20, WC()->cart->total );
 	}
 
@@ -1583,10 +1582,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * Test cart coupons.
 	 */
 	public function test_get_coupons() {
-		// Create coupon
+		// Create coupon.
 		$coupon = WC_Helper_Coupon::create_coupon();
 
-		// Add coupon
+		// Add coupon.
 		WC()->cart->add_discount( $coupon->get_code() );
 
 		$this->assertEquals( count( WC()->cart->get_coupons() ), 1 );
@@ -1611,6 +1610,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertFalse( $success );
 	}
 
+	/**
+	 * test_add_invidual_use_coupon.
+	 */
 	public function test_add_invidual_use_coupon() {
 		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
 		$iu_coupon->set_individual_use( true );
@@ -1626,6 +1628,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 'code1', reset( $coupons )->get_code() );
 	}
 
+	/**
+	 * test_add_individual_use_coupon_removal.
+	 */
 	public function test_add_individual_use_coupon_removal() {
 		$coupon    = WC_Helper_Coupon::create_coupon();
 		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
@@ -1642,6 +1647,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, did_action( 'woocommerce_removed_coupon' ) );
 	}
 
+	/**
+	 * test_add_individual_use_coupon_double_individual.
+	 */
 	public function test_add_individual_use_coupon_double_individual() {
 		$iu_coupon1 = WC_Helper_Coupon::create_coupon( 'code1' );
 		$iu_coupon1->set_individual_use( true );
@@ -1660,6 +1668,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 'code2', reset( $coupons )->get_code() );
 	}
 
+	/**
+	 * test_clone_cart.
+	 */
 	public function test_clone_cart() {
 		$cart              = wc()->cart;
 		$new_cart          = clone $cart;
@@ -1669,6 +1680,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertFalse( $is_identical_cart, 'Cloned cart not identical to original cart' );
 	}
 
+	/**
+	 * test_cloned_cart_session.
+	 */
 	public function test_cloned_cart_session() {
 		// PHP 5.2 does not include support for ReflectionProperty::setAccessible().
 		if ( version_compare( '5.3', PHP_VERSION, '>' ) ) {
@@ -1691,6 +1705,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertFalse( $identical_sessions, 'Cloned cart sessions should not be identical to original cart' );
 	}
 
+	/**
+	 * test_cloned_cart_fees.
+	 */
 	public function test_cloned_cart_fees() {
 		$cart     = wc()->cart;
 		$new_cart = clone $cart;
@@ -1704,11 +1721,17 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertFalse( $identical_fees, 'Cloned cart fees should not be identical to original cart.' );
 	}
 
+	/**
+	 * test_cart_object_istantiation.
+	 */
 	public function test_cart_object_istantiation() {
 		$cart = new WC_Cart();
 		$this->assertInstanceOf( 'WC_Cart', $cart );
 	}
 
+	/**
+	 * test_get_cart_item_quantities.
+	 */
 	public function test_get_cart_item_quantities() {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1716,6 +1739,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, array_sum( WC()->cart->get_cart_item_quantities() ) );
 	}
 
+	/**
+	 * test_get_cart_contents_weight.
+	 */
 	public function test_get_cart_contents_weight() {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1723,6 +1749,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 1.1, WC()->cart->get_cart_contents_weight() );
 	}
 
+	/**
+	 * test_check_cart_items.
+	 */
 	public function test_check_cart_items() {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1730,6 +1759,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( true, WC()->cart->check_cart_items() );
 	}
 
+	/**
+	 * test_check_cart_item_stock.
+	 */
 	public function test_check_cart_item_stock() {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1737,6 +1769,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( true, WC()->cart->check_cart_item_stock() );
 	}
 
+	/**
+	 * test_get_cross_sells.
+	 */
 	public function test_get_cross_sells() {
 		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1744,6 +1779,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( array(), WC()->cart->get_cross_sells() );
 	}
 
+	/**
+	 * test_get_tax_totals.
+	 */
 	public function test_get_tax_totals() {
 		// Set calc taxes option.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -1798,5 +1836,72 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.test' ) ) );
 		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer@wc.local' ) ) );
 		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer2@wc.local' ) ) );
+	}
+
+	/**
+	 * Check subtotals align when using filters. Ref: 23340
+	 */
+	public function test_changing_tax_class_via_filter_issue_23340() {
+		// Store is set to enter product prices inclusive tax.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// 5% tax.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '5.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// 20% tax.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => 'reduced-rate',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create products and add them to cart.
+		$product1 = new WC_Product_Simple();
+		$product1->set_regular_price( '6' );
+		$product1->save();
+
+		WC()->cart->add_to_cart( $product1->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '5.71', WC()->cart->get_subtotal() );
+		$this->assertEquals( '6', WC()->cart->get_total( 'edit' ) );
+
+		add_filter( 'woocommerce_product_get_tax_class', array( $this, 'change_tax_class_filter' ) );
+		add_filter( 'woocommerce_product_variation_get_tax_class', array( $this, 'change_tax_class_filter' ) );
+
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '5.71', WC()->cart->get_subtotal() );
+		$this->assertEquals( '6.85', WC()->cart->get_total( 'edit' ) );
+
+		remove_filter( 'woocommerce_product_get_tax_class', array( $this, 'change_tax_class_filter' ) );
+		remove_filter( 'woocommerce_product_variation_get_tax_class', array( $this, 'change_tax_class_filter' ) );
+	}
+
+	/**
+	 * Change tax class.
+	 *
+	 * @return string
+	 */
+	public function change_tax_class_filter() {
+		return 'reduced-rate';
 	}
 }
