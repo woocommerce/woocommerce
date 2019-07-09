@@ -1,8 +1,8 @@
 <?php
 /**
- * Helper REST API Product Reviews Controller
+ * WCCOM Site Installer REST API Controller
  *
- * Handles requests to /product-installation.
+ * Handles requests to /installer.
  *
  * @package WooCommerce/API
  * @since   3.7.0
@@ -11,26 +11,26 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API Product Reviews Controller Class.
+ * REST API WCCOM Site Installer Controller Class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Controller
  */
-class WC_REST_Helper_Product_Installation_Controller extends WC_REST_Controller {
+class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-helper/v1';
+	protected $namespace = 'wccom-site/v1';
 
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'product-installation';
+	protected $rest_base = 'installer';
 
 	/**
 	 * Register the routes for product reviews.

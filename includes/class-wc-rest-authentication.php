@@ -38,7 +38,7 @@ class WC_REST_Authentication {
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
-		add_filter( 'determine_current_user', array( $this, 'authenticate_helper' ), 14 );
+		add_filter( 'determine_current_user', array( $this, 'authenticate_wccom' ), 14 );
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
@@ -68,11 +68,11 @@ class WC_REST_Authentication {
 	}
 
 	/**
-	 * Check if this is a request to Helper REST API.
+	 * Check if this is a request to WCCOM Site REST API.
 	 *
 	 * @return bool
 	 */
-	protected function is_request_to_helper_rest_api() {
+	protected function is_request_to_wccom_site_rest_api() {
 		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
@@ -80,11 +80,11 @@ class WC_REST_Authentication {
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 
-		return false !== strpos( $request_uri, $rest_prefix . 'wc-helper/' );
+		return false !== strpos( $request_uri, $rest_prefix . 'wccom-site/' );
 	}
 
 	/**
-	 * Verify helper request from a given body and signature request.
+	 * Verify WooCommerce.com request from a given body and signature request.
 	 *
 	 * @param string $body                Request body.
 	 * @param string $signature           Request signature found in
@@ -93,7 +93,7 @@ class WC_REST_Authentication {
 	 *
 	 * @return bool
 	 */
-	protected function verify_helper_request( $body, $signature, $access_token_secret ) {
+	protected function verify_wccom_request( $body, $signature, $access_token_secret ) {
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
 			'request_uri' => $_SERVER['REQUEST_URI'],
@@ -110,14 +110,14 @@ class WC_REST_Authentication {
 	}
 
 	/**
-	 * Authenticate helper request.
+	 * Authenticate WooCommerce.com request.
 	 *
 	 * @param int|false $user_id User ID.
 	 *
 	 * @return int|false
 	 */
-	public function authenticate_helper( $user_id ) {
-		if ( ! empty( $user_id ) || ! $this->is_request_to_helper_rest_api() ) {
+	public function authenticate_wccom( $user_id ) {
+		if ( ! empty( $user_id ) || ! $this->is_request_to_wccom_site_rest_api() ) {
 			return $user_id;
 		}
 
@@ -144,7 +144,7 @@ class WC_REST_Authentication {
 		$body      = WP_REST_Server::get_raw_data();
 		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] );
 
-		if ( ! $this->verify_helper_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
+		if ( ! $this->verify_wccom_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
 			return false;
 		}
 
