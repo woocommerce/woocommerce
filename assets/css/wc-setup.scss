@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 body {
 	margin: 65px auto 24px;
 	box-shadow: none;
@@ -27,6 +28,14 @@ body {
 	.hidden {
 		display: none;
 	}
+
+	#tiptip_content {
+		background: #5f6973;
+	}
+
+	#tiptip_holder.tip_top #tiptip_arrow_inner {
+		border-top-color: #5f6973;
+	}
 }
 
 .wc-setup-content {
@@ -53,13 +62,13 @@ body {
 	p {
 		margin: 20px 0;
 		font-size: 1em;
-		line-height: 1.75em;
+		line-height: 1.75;
 		color: #666;
 	}
 
 	table {
 		font-size: 1em;
-		line-height: 1.75em;
+		line-height: 1.75;
 		color: #666;
 	}
 
@@ -77,7 +86,7 @@ body {
 		th {
 			width: 35%;
 			vertical-align: top;
-			font-weight: normal;
+			font-weight: 400;
 		}
 
 		td {
@@ -94,7 +103,7 @@ body {
 			}
 
 			.description {
-				line-height: 1.5em;
+				line-height: 1.5;
 				display: block;
 				margin-top: 0.25em;
 				color: #999;
@@ -167,7 +176,7 @@ body {
 
 				&::before {
 					content: "\f333";
-					font-family: "dashicons";
+					font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
 				}
 			}
 
@@ -178,7 +187,7 @@ body {
 
 		.add {
 			padding: 1em 0 0 1em;
-			line-height: 1em;
+			line-height: 1;
 			font-size: 1em;
 			width: 0;
 			margin: 6px 0 0;
@@ -189,7 +198,7 @@ body {
 
 			&::before {
 				content: "\f502";
-				font-family: "dashicons";
+				font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
 				position: absolute;
 				left: 0;
 				top: 0;
@@ -198,7 +207,7 @@ body {
 
 		.remove {
 			padding: 1em 0 0 1em;
-			line-height: 1em;
+			line-height: 1;
 			font-size: 1em;
 			width: 0;
 			margin: 0;
@@ -209,7 +218,7 @@ body {
 
 			&::before {
 				content: "\f182";
-				font-family: "dashicons";
+				font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
 				position: absolute;
 				left: 0;
 				top: 0;
@@ -227,7 +236,7 @@ body {
 
 		.page-name {
 			width: 30%;
-			font-weight: bold;
+			font-weight: 700;
 		}
 
 		th,
@@ -249,14 +258,14 @@ body {
 			p {
 				color: #777;
 				margin: 6px 0 0 24px;
-				line-height: 1.75em;
+				line-height: 1.75;
 
 				input {
 					vertical-align: middle;
 					margin: 1px 0 0;
 					height: 1.75em;
 					width: 1.75em;
-					line-height: 1.75em;
+					line-height: 1.75;
 				}
 
 				label {
@@ -324,7 +333,7 @@ body {
 					text-shadow: 1px 0 1px #eee, 0 1px 1px #eee;
 					font-size: 1em;
 					height: auto;
-					line-height: 1.75em;
+					line-height: 1.75;
 					margin: 0 0 0.75em;
 					opacity: 1;
 					padding: 1em;
@@ -358,7 +367,7 @@ body {
 
 			li a::before {
 				color: #82878c;
-				font: normal 20px/1 "dashicons";
+				font: 400 20px/1 dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
 				speak: none;
 				display: inline-block;
 				padding: 0 10px 0 0;
@@ -409,7 +418,7 @@ body {
 
 		p {
 			font-size: 14px;
-			line-height: 1.5em;
+			line-height: 1.5;
 		}
 
 		.checkbox {
@@ -499,7 +508,7 @@ body {
 		text-align: center;
 		position: relative;
 		border-bottom: 4px solid #ccc;
-		line-height: 1.4em;
+		line-height: 1.4;
 
 		a {
 			color: #a16696;
@@ -534,7 +543,7 @@ body {
 	li.active {
 		border-color: #a16696;
 		color: #a16696;
-		font-weight: bold;
+		font-weight: 700;
 
 		&::before {
 			border-color: #a16696;
@@ -556,16 +565,6 @@ body {
 	overflow: hidden;
 	margin: 20px 0 0;
 	position: relative;
-
-	.button {
-		font-size: 1.25em;
-		padding: 0.5em 1em;
-		line-height: 1em;
-		margin-right: 0.5em;
-		margin-bottom: 2px;
-		height: auto;
-		border-radius: 4px;
-	}
 
 	.button-primary {
 		background-color: #bb77ae;
@@ -681,7 +680,7 @@ body {
 		margin: 0 0 1em 0;
 		padding: 0;
 		font-size: 1em;
-		line-height: 1.5em;
+		line-height: 1.5;
 	}
 }
 
@@ -707,7 +706,7 @@ body {
 		flex-basis: 0;
 		min-width: 160px;
 		text-align: center;
-		font-weight: bold;
+		font-weight: 700;
 		padding: 2em 0;
 		align-self: stretch;
 		display: flex;
@@ -790,7 +789,7 @@ body {
 		border-radius: 10em;
 		position: relative;
 
-		input[type=checkbox] {
+		input[type="checkbox"] {
 			display: none;
 		}
 
@@ -850,8 +849,7 @@ body {
 
 	.wc-wizard-service-enable::before {
 		content: "\f343"; // up chevron
-		font-family: "dashicons";
-		visibility: initial;
+		font-family: dashicons; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
 		color: #666;
 		font-size: 25px;
 		margin-top: -7px;
@@ -882,7 +880,7 @@ body {
 	margin: 0;
 
 	.wc-wizard-service-name {
-		font-weight: normal;
+		font-weight: 400;
 		text-align: left;
 		align-items: center;
 		max-height: 5em;
@@ -966,7 +964,7 @@ body {
 .wc-setup-shipping-units {
 
 	p {
-		line-height: 1.5em;
+		line-height: 1.5;
 		font-size: 13px;
 		margin-bottom: 0.25em;
 		text-align: center;
@@ -1021,7 +1019,7 @@ body {
 	p.wc-wizard-feature-name,
 	p.wc-wizard-feature-description {
 		margin: 0;
-		line-height: 1.5em;
+		line-height: 1.5;
 	}
 }
 
@@ -1061,8 +1059,12 @@ h3.jetpack-reasons {
 	padding: 1em 2em;
 	box-shadow: none;
 	min-width: 12em;
-	min-width: auto;
 	margin-top: 10px;
+	line-height: 1;
+	margin-right: 0.5em;
+	margin-bottom: 2px;
+	height: auto;
+	border-radius: 4px;
 
 	&:focus,
 	&:hover,
@@ -1076,7 +1078,7 @@ h3.jetpack-reasons {
 	font-style: italic;
 	color: #999;
 	font-size: 14px;
-	line-height: 1.5em;
+	line-height: 1.5;
 	margin: 5px 0;
 
 	& > * {
@@ -1292,10 +1294,6 @@ h3.jetpack-reasons {
 				font-size: 15px;
 				margin: 1em 0 1em 1.5em;
 			}
-
-			.button::last-child {
-				margin-right: 1.5em;
-			}
 		}
 	}
 }
@@ -1312,7 +1310,7 @@ p.jetpack-terms {
 	text-align: center;
 	max-width: 480px;
 	margin: 0 auto;
-	line-height: 1.5em;
+	line-height: 1.5;
 }
 
 .woocommerce-error {
@@ -1461,14 +1459,14 @@ p.jetpack-terms {
 
 		h3 {
 			font-size: 15px;
-			font-weight: bold;
+			font-weight: 700;
 			letter-spacing: 0.5px;
 			margin-bottom: 0;
 		}
 
 		p {
 			margin-top: 0;
-			line-height: 1.5em;
+			line-height: 1.5;
 		}
 	}
 }
@@ -1480,23 +1478,6 @@ p.jetpack-terms {
 
 .help_tip {
 	text-decoration: underline dotted;
-}
-
-.wc-setup {
-
-	#tiptip_content {
-		background: #5f6973;
-	}
-
-	#tiptip_holder.tip_top #tiptip_arrow_inner {
-		border-top-color: #5f6973;
-	}
-}
-
-.wc-setup-shipping-recommended {
-	border-bottom: 1px solid #eee;
-	margin-top: 0;
-	padding: 30px 0;
 }
 
 @media only screen and (max-width: 400px) {
@@ -1574,3 +1555,4 @@ p.jetpack-terms {
 		}
 	}
 }
+/* stylelint-enable */
