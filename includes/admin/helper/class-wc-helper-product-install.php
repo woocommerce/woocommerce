@@ -263,7 +263,7 @@ class WC_Helper_Product_Install {
 			WC_Helper_Updater::flush_updates_cache();
 			$updates = WC_Helper_Updater::get_update_data();
 			if ( empty( $updates[ $product_id ]['package'] ) ) {
-				return new WP_Error( 'missing_product_package', __( 'Could not found product package.', 'woocommerce' ) );
+				return new WP_Error( 'missing_product_package', __( 'Could not find product package.', 'woocommerce' ) );
 			}
 
 			$product_info['download_url'] = $updates[ $product_id ]['package'];
@@ -283,7 +283,7 @@ class WC_Helper_Product_Install {
 	private static function download_product( $product_id, $upgrader ) {
 		$steps = self::get_state( 'steps' );
 		if ( empty( $steps[ $product_id ]['download_url'] ) ) {
-			return new WP_Error( 'missing_download_url', __( 'Could not found download url for the product.', 'woocommerce' ) );
+			return new WP_Error( 'missing_download_url', __( 'Could not find download url for the product.', 'woocommerce' ) );
 		}
 		return $upgrader->download_package( $steps[ $product_id ]['download_url'] );
 	}
@@ -299,7 +299,7 @@ class WC_Helper_Product_Install {
 	private static function unpack_product( $product_id, $upgrader ) {
 		$steps = self::get_state( 'steps' );
 		if ( empty( $steps[ $product_id ]['download_path'] ) ) {
-			return new WP_Error( 'missing_download_path', __( 'Could not found download path.', 'woocommerce' ) );
+			return new WP_Error( 'missing_download_path', __( 'Could not find download path.', 'woocommerce' ) );
 		}
 
 		return $upgrader->unpack_package( $steps[ $product_id ]['download_path'], true );
@@ -316,7 +316,7 @@ class WC_Helper_Product_Install {
 	private static function move_product( $product_id, $upgrader ) {
 		$steps = self::get_state( 'steps' );
 		if ( empty( $steps[ $product_id ]['unpacked_path'] ) ) {
-			return new WP_Error( 'missing_unpacked_path', __( 'Could not found unpacked path.', 'woocommerce' ) );
+			return new WP_Error( 'missing_unpacked_path', __( 'Could not find unpacked path.', 'woocommerce' ) );
 		}
 
 		$destination = 'plugin' === $steps[ $product_id ]['product_type']
