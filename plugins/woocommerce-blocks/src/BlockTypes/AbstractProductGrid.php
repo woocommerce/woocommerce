@@ -156,14 +156,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Set args specific to this block
-	 *
-	 * @param array $query_args Query args.
-	 */
-	abstract protected function set_block_query_args( &$query_args );
-
-	/**
-	 * Set orderby/order query args.
+	 * Parse query args.
 	 *
 	 * @param array $query_args Query args.
 	 */
@@ -188,6 +181,13 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] )
 		);
 	}
+
+	/**
+	 * Set args specific to this block
+	 *
+	 * @param array $query_args Query args.
+	 */
+	abstract protected function set_block_query_args( &$query_args );
 
 	/**
 	 * Set categories query args.

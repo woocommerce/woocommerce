@@ -9,6 +9,8 @@ export default function getQuery( blockAttributes, name ) {
 		attrOperator,
 		categories,
 		catOperator,
+		tags,
+		tagOperator,
 		orderby,
 		products,
 	} = blockAttributes;
@@ -26,6 +28,13 @@ export default function getQuery( blockAttributes, name ) {
 		query.category = categories.join( ',' );
 		if ( catOperator && 'all' === catOperator ) {
 			query.category_operator = 'and';
+		}
+	}
+
+	if ( tags && tags.length > 0 ) {
+		query.tag = tags.join( ',' );
+		if ( tagOperator && 'all' === tagOperator ) {
+			query.tag_operator = 'and';
 		}
 	}
 
