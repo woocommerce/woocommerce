@@ -292,10 +292,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array
 	 */
 	public function get_available_variations() {
-		if ( ! empty( $this->variations_available ) ) {
-			return $this->variations_available;
-		}
 		$variation_ids        = $this->get_children();
+		$available_variations = array();
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -315,12 +313,17 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$this->variations_available[] = $this->get_available_variation( $variation );
+			// Prevent re-loading variations.
+			if ( ! isset( $this->variations_available[ $child_id ] ) ) {
+			  $this->variations_available[ $child_id ] = $this->get_available_variation( $variation );
+			}
+
+			$available_variations[] = $this->variations_available[ $child_id ];
 		}
 
-		$this->variations_available = array_values( array_filter( $this->variations_available) );
+		$available_variations = array_values( array_filter( $available_variations ) );
 
-		return $this->variations_available;
+		return $available_variations;
 	}
 
 	/**
