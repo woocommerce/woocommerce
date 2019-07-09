@@ -260,6 +260,7 @@ class WC_Helper_Product_Install {
 			return new WP_Error( 'missing_subscription', __( 'Missing product subscription', 'woocommerce' ) );
 		} else {
 			// Retrieve download URL for non-wporg product.
+			WC_Helper_Updater::flush_updates_cache();
 			$updates = WC_Helper_Updater::get_update_data();
 			if ( empty( $updates[ $product_id ]['package'] ) ) {
 				return new WP_Error( 'missing_product_package', __( 'Could not found product package.', 'woocommerce' ) );
