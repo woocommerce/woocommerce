@@ -44,6 +44,7 @@ class RestApi {
 			'product-attribute-terms' => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributeTerms',
 			'product-categories'      => __NAMESPACE__ . '\RestApi\Controllers\ProductCategories',
 			'products'                => __NAMESPACE__ . '\RestApi\Controllers\Products',
+			'variations'              => __NAMESPACE__ . '\RestApi\Controllers\Variations',
 		];
 	}
 }

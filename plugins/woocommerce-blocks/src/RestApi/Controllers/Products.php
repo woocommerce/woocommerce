@@ -167,27 +167,23 @@ class Products extends WC_REST_Products_Controller {
 	/**
 	 * Get product data.
 	 *
-	 * @param WC_Product $product Product instance.
-	 * @param string     $context Request context.
-	 *                            Options: 'view' and 'edit'.
+	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
+	 * @param string                            $context Request context. Options: 'view' and 'edit'.
 	 * @return array
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
-		$raw_data = parent::get_product_data( $product, $context );
-		$data     = array();
-
-		$data['id']                = $raw_data['id'];
-		$data['name']              = $raw_data['name'];
-		$data['permalink']         = $raw_data['permalink'];
-		$data['sku']               = $raw_data['sku'];
-		$data['description']       = $raw_data['description'];
-		$data['short_description'] = $raw_data['short_description'];
-		$data['price']             = $raw_data['price'];
-		$data['price_html']        = $raw_data['price_html'];
-		$data['images']            = $raw_data['images'];
-		$data['average_rating']    = $raw_data['average_rating'];
-
-		return $data;
+		return array(
+			'id'             => $product->get_id(),
+			'name'           => $product->get_title(),
+			'variation'      => $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '',
+			'permalink'      => $product->get_permalink(),
+			'sku'            => $product->get_sku(),
+			'description'    => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
+			'price'          => $product->get_price(),
+			'price_html'     => $product->get_price_html(),
+			'images'         => $this->get_images( $product ),
+			'average_rating' => $product->get_average_rating(),
+		);
 	}
 
 	/**
@@ -201,7 +197,7 @@ class Products extends WC_REST_Products_Controller {
 		$attachment_ids = array();
 
 		// Add featured image.
-		if ( has_post_thumbnail( $product->get_id() ) ) {
+		if ( $product->get_image_id() ) {
 			$attachment_ids[] = $product->get_image_id();
 		}
 
@@ -287,58 +283,58 @@ class Products extends WC_REST_Products_Controller {
 			'title'      => 'product_block_product',
 			'type'       => 'object',
 			'properties' => array(
-				'id'                => array(
+				'id'             => array(
 					'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'name'              => array(
+				'name'           => array(
 					'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 				),
-				'permalink'         => array(
+				'variation'      => array(
+					'description' => __( 'Product variation attributes, if applicable.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit', 'embed' ),
+				),
+				'permalink'      => array(
 					'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
-				'description'       => array(
-					'description' => __( 'Product description.', 'woo-gutenberg-products-block' ),
+				'description'    => array(
+					'description' => __( 'Short description or excerpt from description.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'embed' ),
 				),
-				'short_description' => array(
-					'description' => __( 'Product short description.', 'woo-gutenberg-products-block' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
-				),
-				'sku'               => array(
+				'sku'            => array(
 					'description' => __( 'Unique identifier.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'price'             => array(
+				'price'          => array(
 					'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'price_html'        => array(
+				'price_html'     => array(
 					'description' => __( 'Price formatted in HTML.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'average_rating'    => array(
+				'average_rating' => array(
 					'description' => __( 'Reviews average rating.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'images'            => array(
+				'images'         => array(
 					'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit', 'embed' ),

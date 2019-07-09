@@ -60,9 +60,16 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			wp_kses_post( $product->get_title() )
 		);
 
+		if ( $product->is_type( 'variation' ) ) {
+			$title .= sprintf(
+				'<h3 class="wc-block-featured-product__variation">%s</h3>',
+				wc_get_formatted_variation( $product, true, true, false )
+			);
+		}
+
 		$desc_str = sprintf(
 			'<div class="wc-block-featured-product__description">%s</div>',
-			apply_filters( 'woocommerce_short_description', $product->get_short_description() )
+			apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) )
 		);
 
 		$price_str = sprintf(
