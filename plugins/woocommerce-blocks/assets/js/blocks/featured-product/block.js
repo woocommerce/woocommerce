@@ -29,7 +29,7 @@ import {
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { debounce, isObject } from 'lodash';
+import { debounce, isObject, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -193,7 +193,7 @@ class FeaturedProduct extends Component {
 				className="wc-block-featured-product"
 			>
 				{ __(
-					'Visually highlight a product and encourage prompt action',
+					'Visually highlight a product or variation and encourage prompt action',
 					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-handpicked-products__selection">
@@ -305,11 +305,19 @@ class FeaturedProduct extends Component {
 											__html: product.name,
 										} }
 									/>
+									{ ! isEmpty( product.variation ) && (
+										<h3
+											className="wc-block-featured-product__variation"
+											dangerouslySetInnerHTML={ {
+												__html: product.variation,
+											} }
+										/>
+									) }
 									{ showDesc && (
 										<div
 											className="wc-block-featured-product__description"
 											dangerouslySetInnerHTML={ {
-												__html: product.short_description,
+												__html: product.description,
 											} }
 										/>
 									) }
