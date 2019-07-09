@@ -38,6 +38,7 @@ class ReportTable extends Component {
 
 		this.onColumnsChange = this.onColumnsChange.bind( this );
 		this.onPageChange = this.onPageChange.bind( this );
+		this.onSort = this.onSort.bind( this );
 		this.scrollPointRef = createRef();
 	}
 
@@ -74,6 +75,19 @@ class ReportTable extends Component {
 		if ( focusableElements.length ) {
 			focusableElements[ 0 ].focus();
 		}
+	}
+
+	onSort( key, direction ) {
+		onQueryChange( 'sort' )( key, direction );
+
+		const { endpoint } = this.props;
+		const eventProps = {
+			report: endpoint,
+			column: key,
+			direction,
+		};
+
+		recordEvent( 'analytics_table_sort', eventProps );
 	}
 
 	filterShownHeaders( headers, hiddenKeys ) {
@@ -160,6 +174,7 @@ class ReportTable extends Component {
 					isLoading={ isLoading }
 					onQueryChange={ onQueryChange }
 					onColumnsChange={ this.onColumnsChange }
+					onSort={ this.onSort }
 					onPageChange={ this.onPageChange }
 					rows={ rows }
 					rowsPerPage={ parseInt( query.per_page ) || QUERY_DEFAULTS.pageSize }

@@ -266,6 +266,7 @@ class TableCard extends Component {
 			isLoading,
 			onClickDownload,
 			onQueryChange,
+			onSort,
 			query,
 			rowHeader,
 			rowsPerPage,
@@ -376,7 +377,6 @@ class TableCard extends Component {
 							rowHeader={ rowHeader }
 							caption={ title }
 							query={ query }
-							onSort={ onQueryChange( 'sort' ) }
 						/>
 					</Fragment>
 				) : (
@@ -386,7 +386,7 @@ class TableCard extends Component {
 						rowHeader={ rowHeader }
 						caption={ title }
 						query={ query }
-						onSort={ onQueryChange( 'sort' ) }
+						onSort={ onSort || onQueryChange( 'sort' ) }
 					/>
 				) }
 
@@ -453,6 +453,10 @@ TableCard.propTypes = {
 	 * A function which returns a callback function which is called upon the user changing the visiblity of columns.
 	 */
 	onColumnsChange: PropTypes.func,
+	/**
+	 * A function which is called upon the user changing the sorting of the table.
+	 */
+	onSort: PropTypes.func,
 	/**
 	 * Whether the table must be downloadable. If true, the download button will appear.
 	 */
@@ -522,6 +526,7 @@ TableCard.defaultProps = {
 	isLoading: false,
 	onQueryChange: noop,
 	onColumnsChange: noop,
+	onSort: undefined,
 	query: {},
 	rowHeader: 0,
 	rows: [],
