@@ -81,6 +81,7 @@ ProductPreview.propTypes = {
 	 */
 	product: PropTypes.shape( {
 		id: PropTypes.number,
+		average_rating: PropTypes.oneOf( [ 'PropTypes.number', 'PropTypes.string' ] ),
 		images: PropTypes.array,
 		name: PropTypes.string,
 		price_html: PropTypes.string,
