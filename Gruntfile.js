@@ -421,6 +421,11 @@ module.exports = function( grunt ) {
 		'concat'
 	]);
 
+	grunt.registerTask( 'assets', [
+		'js',
+		'css'
+	]);
+
 	grunt.registerTask( 'blocks', [
 		'clean:blocks',
 		'copy'

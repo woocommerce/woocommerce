@@ -180,6 +180,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -825,5 +826,44 @@ final class WooCommerce {
 	 */
 	public function mailer() {
 		return WC_Emails::instance();
+	}
+
+	/**
+	 * Check if plugin assets are built and minified
+	 *
+	 * @return bool
+	 */
+	public function build_dependencies_satisfied() {
+		// Check if we have compiled CSS.
+		if ( ! file_exists( WC()->plugin_path() . '/assets/css/admin.css' ) ) {
+			return false;
+		}
+
+		// Check if we have minified JS.
+		if ( ! file_exists( WC()->plugin_path() . '/assets/js/admin/woocommerce_admin.min.js' ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Output a admin notice when build dependencies not met.
+	 *
+	 * @return void
+	 */
+	public function build_dependencies_notice() {
+		if ( $this->build_dependencies_satisfied() ) {
+			return;
+		}
+
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>grunt assets</code> to build and minify assets.', 'woocommerce' );
+		$message_two = sprintf(
+			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
+			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/woocommerce/',
+			'https://github.com/woocommerce/woocommerce/releases'
+		);
+		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
 	}
 }
