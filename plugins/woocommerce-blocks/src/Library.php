@@ -26,6 +26,7 @@ class Library {
 	 */
 	public static function register_blocks() {
 		$blocks = [
+			'FeaturedCategory',
 			'FeaturedProduct',
 			'HandpickedProducts',
 			'ProductBestSellers',
