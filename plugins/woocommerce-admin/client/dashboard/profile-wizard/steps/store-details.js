@@ -137,7 +137,7 @@ class StoreDetails extends Component {
 					/>
 
 					<TextControl
-						label={ __( 'Address line 2', 'woocommerce-admin' ) }
+						label={ __( 'Address line 2 (optional)', 'woocommerce-admin' ) }
 						onChange={ value => this.setState( { addressLine2: value } ) }
 						required
 						value={ addressLine2 }
