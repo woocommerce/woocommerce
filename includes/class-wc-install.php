@@ -258,8 +258,8 @@ class WC_Install {
 
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
-		self::create_options();
 		self::create_tables();
+		self::create_options();
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
