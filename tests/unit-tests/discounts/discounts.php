@@ -165,8 +165,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 */
 	public function test_calculations( $test_data ) {
 		$this->last_test_data = $test_data;
-		$discounts = new WC_Discounts();
-		$products = array();
+		$discounts            = new WC_Discounts();
+		$products             = array();
 
 		if ( isset( $test_data['tax_rate'] ) ) {
 			WC_Tax::_insert_tax_rate( $test_data['tax_rate'] );
@@ -215,7 +215,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		return array(
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -226,20 +226,20 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'wc_options' => array(
+					'wc_options'              => array(
 						'woocommerce_calc_taxes' => array(
 							'set'    => 'yes',
 							'revert' => 'no',
 						),
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'percent',
@@ -251,7 +251,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -262,14 +262,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'fixed_cart',
@@ -281,7 +281,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -292,8 +292,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 1,
@@ -303,7 +303,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'fixed_cart',
@@ -315,7 +315,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -326,8 +326,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 1,
@@ -341,7 +341,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'fixed_cart',
@@ -353,7 +353,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -364,8 +364,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
@@ -379,7 +379,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 2,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'fixed_cart',
@@ -391,7 +391,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -402,8 +402,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 1,
@@ -449,7 +449,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'fixed_cart',
@@ -461,7 +461,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -472,8 +472,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 1,
 							'qty'   => 1,
@@ -487,7 +487,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'          => 'test',
 							'discount_type' => 'fixed_cart',
@@ -499,7 +499,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -510,14 +510,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'percent',
@@ -530,7 +530,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'tax_rate' => array(
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -541,8 +541,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
@@ -552,7 +552,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 2,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'percent',
@@ -565,8 +565,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. No limits. Not discounting sequentially.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. No limits. Not discounting sequentially.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -577,8 +577,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
@@ -588,16 +588,16 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'percent',
-							'amount'                 => '10',
+							'code'          => 'test',
+							'discount_type' => 'percent',
+							'amount'        => '10',
 						),
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 7.5,
@@ -605,8 +605,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. One coupon has limit up to one item. Not discounting sequentially.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. One coupon has limit up to one item. Not discounting sequentially.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -617,8 +617,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
@@ -628,7 +628,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'percent',
@@ -636,9 +636,9 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'limit_usage_to_x_items' => 1,
 						),
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 6,
@@ -646,8 +646,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. No limits. Discounting sequentially.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. No limits. Discounting sequentially.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -658,14 +658,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'wc_options' => array(
+					'prices_include_tax'      => false,
+					'wc_options'              => array(
 						'woocommerce_calc_discounts_sequentially' => array(
 							'set'    => 'yes',
 							'revert' => 'no',
 						),
 					),
-					'cart' => array(
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 2,
@@ -675,16 +675,16 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'percent',
-							'amount'                 => '10',
+							'code'          => 'test',
+							'discount_type' => 'percent',
+							'amount'        => '10',
 						),
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 7,
@@ -692,8 +692,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. No limits. Discounting sequentially.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. No limits. Discounting sequentially.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -704,14 +704,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'wc_options' => array(
+					'prices_include_tax'      => false,
+					'wc_options'              => array(
 						'woocommerce_calc_discounts_sequentially' => array(
 							'set'    => 'yes',
 							'revert' => 'no',
 						),
 					),
-					'cart' => array(
+					'cart'                    => array(
 						array(
 							'price' => 1.80,
 							'qty'   => 10,
@@ -721,16 +721,16 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'percent',
-							'amount'                 => '10',
+							'code'          => 'test',
+							'discount_type' => 'percent',
+							'amount'        => '10',
 						),
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 16.75,
@@ -738,8 +738,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting non-sequentially.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting non-sequentially.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -750,8 +750,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 3,
@@ -761,7 +761,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'percent',
@@ -769,9 +769,9 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'limit_usage_to_x_items' => 5,
 						),
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 21,
@@ -779,8 +779,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -791,14 +791,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'wc_options' => array(
+					'prices_include_tax'      => false,
+					'wc_options'              => array(
 						'woocommerce_calc_discounts_sequentially' => array(
 							'set'    => 'yes',
 							'revert' => 'no',
 						),
 					),
-					'cart' => array(
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 3,
@@ -808,11 +808,11 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 						array(
 							'code'                   => 'test',
@@ -826,8 +826,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially. Multiple zero-dollar items.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons. One coupon has limit up to 5 item. Discounting sequentially. Multiple zero-dollar items.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -838,14 +838,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'wc_options' => array(
+					'prices_include_tax'      => false,
+					'wc_options'              => array(
 						'woocommerce_calc_discounts_sequentially' => array(
 							'set'    => 'yes',
 							'revert' => 'no',
 						),
 					),
-					'cart' => array(
+					'cart'                    => array(
 						array(
 							'price' => 1.80,
 							'qty'   => 3,
@@ -875,7 +875,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'percent',
@@ -883,9 +883,9 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'limit_usage_to_x_items' => 5,
 						),
 						array(
-							'code'                   => 'test1',
-							'discount_type'          => 'percent',
-							'amount'                 => '20',
+							'code'          => 'test1',
+							'discount_type' => 'percent',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 20.35,
@@ -893,8 +893,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on one item.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on one item.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -905,18 +905,18 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'fixed_product',
-							'amount'                 => '10',
+							'code'          => 'test',
+							'discount_type' => 'fixed_product',
+							'amount'        => '10',
 						),
 					),
 					'expected_total_discount' => 30,
@@ -924,8 +924,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on one item. Coupon greater than item cost.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on one item. Coupon greater than item cost.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -936,18 +936,18 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'fixed_product',
-							'amount'                 => '20',
+							'code'          => 'test',
+							'discount_type' => 'fixed_product',
+							'amount'        => '20',
 						),
 					),
 					'expected_total_discount' => 41.85,
@@ -955,8 +955,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on one item. Limit to one item.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on one item. Limit to one item.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -967,14 +967,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -987,8 +987,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on one item. Limit to one item. Price greater than product.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on one item. Limit to one item. Price greater than product.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -999,14 +999,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1019,8 +1019,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on one item. Limit to same number of items as product. Price same as product.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on one item. Limit to same number of items as product. Price same as product.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1031,14 +1031,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1051,8 +1051,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on two items. No limit.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on two items. No limit.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1063,8 +1063,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
@@ -1074,11 +1074,11 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 5,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'fixed_product',
-							'amount'                 => '10',
+							'code'          => 'test',
+							'discount_type' => 'fixed_product',
+							'amount'        => '10',
 						),
 					),
 					'expected_total_discount' => 39,
@@ -1086,8 +1086,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on two items. Limit to same number of items as first product.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on two items. Limit to same number of items as first product.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1098,8 +1098,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
@@ -1109,7 +1109,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 5,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1122,8 +1122,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on two items. Limit to number greater than first product but less than total quantities.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on two items. Limit to number greater than first product but less than total quantities.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1134,8 +1134,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
@@ -1145,7 +1145,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 5,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1158,8 +1158,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on two items. Limit to number greater than first product but less than total quantities. Amount less than price of either product.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on two items. Limit to number greater than first product but less than total quantities. Amount less than price of either product.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1170,8 +1170,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
@@ -1181,7 +1181,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 5,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1194,8 +1194,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on two items. Limit to number greater than both product quantities combined. Amount less than price of either product.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on two items. Limit to number greater than both product quantities combined. Amount less than price of either product.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1206,8 +1206,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 13.95,
 							'qty'   => 3,
@@ -1217,7 +1217,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 5,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1230,8 +1230,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on two items. Limit to two items. Testing the products are sorted according to legacy method where first one to apply is the one with greatest price * quantity.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on two items. Limit to two items. Testing the products are sorted according to legacy method where first one to apply is the one with greatest price * quantity.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1242,8 +1242,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 1.80,
 							'qty'   => 5,
@@ -1253,7 +1253,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 							'qty'   => 3,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'test',
 							'discount_type'          => 'fixed_product',
@@ -1266,8 +1266,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test single fixed product coupon on one item to illustrate type conversion precision bug.',
-					'tax_rate' => array(
+					'desc'                    => 'Test single fixed product coupon on one item to illustrate type conversion precision bug.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1278,18 +1278,18 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 8.95,
 							'qty'   => 1,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
-							'code'                   => 'test',
-							'discount_type'          => 'fixed_product',
-							'amount'                 => '10',
+							'code'          => 'test',
+							'discount_type' => 'fixed_product',
+							'amount'        => '10',
 						),
 					),
 					'expected_total_discount' => 8.95,
@@ -1297,8 +1297,8 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 			),
 			array(
 				array(
-					'desc' => 'Test multiple coupons with limits of 1.',
-					'tax_rate' => array(
+					'desc'                    => 'Test multiple coupons with limits of 1.',
+					'tax_rate'                => array(
 						'tax_rate_country'  => '',
 						'tax_rate_state'    => '',
 						'tax_rate'          => '20.0000',
@@ -1309,14 +1309,14 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 						'tax_rate_order'    => '1',
 						'tax_rate_class'    => '',
 					),
-					'prices_include_tax' => false,
-					'cart' => array(
+					'prices_include_tax'      => false,
+					'cart'                    => array(
 						array(
 							'price' => 10,
 							'qty'   => 4,
 						),
 					),
-					'coupons' => array(
+					'coupons'                 => array(
 						array(
 							'code'                   => 'one',
 							'discount_type'          => 'fixed_product',
@@ -1347,11 +1347,11 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 */
 	public function test_free_shipping_coupon_no_products() {
 		$discounts = new WC_Discounts();
-		$coupon = WC_Helper_Coupon::create_coupon( 'freeshipping' );
+		$coupon    = WC_Helper_Coupon::create_coupon( 'freeshipping' );
 		$coupon->set_props(
 			array(
 				'discount_type' => 'percent',
-				'amount' => '',
+				'amount'        => '',
 				'free_shipping' => 'yes',
 			)
 		);
@@ -1394,9 +1394,9 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
 		$coupon->set_props(
 			array(
-				'code'                   => 'test',
-				'discount_type'          => 'percent',
-				'amount'                 => '20',
+				'code'          => 'test',
+				'discount_type' => 'percent',
+				'amount'        => '20',
 			)
 		);
 

@@ -138,7 +138,7 @@ jQuery(function( $ ) {
 		var groupby       = $( this ) .data( 'groupby' );
 		var index_type    = $( this ).data( 'index_type' );
 		var export_format = $( this ).data( 'export' );
-		var csv_data      = 'data:text/csv;charset=utf-8,\uFEFF';
+		var csv_data      = '';
 		var s, series_data, d;
 
 		if ( 'table' === export_format ) {
@@ -243,8 +243,9 @@ jQuery(function( $ ) {
 			} );
 		}
 
+		csv_data = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent( csv_data );
 		// Set data as href and return
-		$( this ).attr( 'href', encodeURI( csv_data ) );
+		$( this ).attr( 'href', csv_data );
 		return true;
 	});
 });

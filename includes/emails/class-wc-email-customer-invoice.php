@@ -34,7 +34,6 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			$this->template_html  = 'emails/customer-invoice.php';
 			$this->template_plain = 'emails/plain/customer-invoice.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -84,11 +83,11 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
-				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object );
+				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
 			}
 
 			$subject = $this->get_option( 'subject', $this->get_default_subject() );
-			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object );
+			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object, $this );
 		}
 
 		/**
@@ -99,11 +98,21 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		public function get_heading() {
 			if ( $this->object->has_status( wc_get_is_paid_statuses() ) ) {
 				$heading = $this->get_option( 'heading_paid', $this->get_default_heading( true ) );
-				return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $heading ), $this->object );
+				return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $heading ), $this->object, $this );
 			}
 
 			$heading = $this->get_option( 'heading', $this->get_default_heading() );
-			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $heading ), $this->object );
+			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $heading ), $this->object, $this );
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Thanks for using {site_address}!', 'woocommerce' );
 		}
 
 		/**
@@ -140,12 +149,14 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+				$this->template_html,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -157,12 +168,14 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => true,
-					'email'         => $this,
+				$this->template_plain,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
 		}
@@ -171,13 +184,14 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
+			/* translators: %s: list of placeholders */
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 			$this->form_fields = array(
 				'subject'      => array(
 					'title'       => __( 'Subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject(),
 					'default'     => '',
 				),
@@ -185,8 +199,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'title'       => __( 'Email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading(),
 					'default'     => '',
 				),
@@ -194,8 +207,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'title'       => __( 'Subject (paid)', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject( true ),
 					'default'     => '',
 				),
@@ -203,10 +215,18 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'title'       => __( 'Email heading (paid)', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading( true ),
 					'default'     => '',
+				),
+				'additional_content' => array(
+					'title'       => __( 'Additional content', 'woocommerce' ),
+					'description' => __( 'Text to appear to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => $this->get_default_additional_content(),
+					'desc_tip'    => true,
 				),
 				'email_type'   => array(
 					'title'       => __( 'Email type', 'woocommerce' ),

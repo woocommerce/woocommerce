@@ -120,8 +120,10 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
 					'blogname'           => $this->get_blogname(),
@@ -140,8 +142,10 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
 					'blogname'           => $this->get_blogname(),
@@ -151,6 +155,16 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'We look forward to seeing you soon.', 'woocommerce' );
 		}
 	}
 

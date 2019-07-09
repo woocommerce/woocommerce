@@ -18,7 +18,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://developer.wordpress.org/reference/functions/add_metadata/.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 *
 	 * @var string
@@ -578,6 +578,8 @@ class WC_Data_Store_WP {
 	 * @since 3.6.0
 	 * @param int    $id ID of object to update.
 	 * @param string $table Lookup table name.
+	 *
+	 * @return NULL
 	 */
 	protected function update_lookup_table( $id, $table ) {
 		global $wpdb;

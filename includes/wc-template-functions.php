@@ -43,7 +43,7 @@ function wc_template_redirect() {
 	}
 
 	// Trigger 404 if trying to access an endpoint on wrong page.
-	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() ) {
+	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
 		$wp_query->set_404();
 		status_header( 404 );
 		include( get_query_template( '404' ) );
@@ -453,7 +453,9 @@ function wc_get_product_cat_class( $class = '', $category = null ) {
 }
 
 /**
- * Adds extra post classes for products.
+ * Adds extra post classes for products via the WordPress post_class hook, if used.
+ *
+ * Note: For performance reasons we instead recommend using wc_product_class/wc_get_product_class instead.
  *
  * @since 2.1.0
  * @param array        $classes Current classes.
@@ -468,41 +470,43 @@ function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 
 	$product = wc_get_product( $post_id );
 
-	if ( $product ) {
-		$classes[] = 'product';
-		$classes[] = wc_get_loop_class();
-		$classes[] = $product->get_stock_status();
+	if ( ! $product ) {
+		return $classes;
+	}
 
-		if ( $product->is_on_sale() ) {
-			$classes[] = 'sale';
-		}
-		if ( $product->is_featured() ) {
-			$classes[] = 'featured';
-		}
-		if ( $product->is_downloadable() ) {
-			$classes[] = 'downloadable';
-		}
-		if ( $product->is_virtual() ) {
-			$classes[] = 'virtual';
-		}
-		if ( $product->is_sold_individually() ) {
-			$classes[] = 'sold-individually';
-		}
-		if ( $product->is_taxable() ) {
-			$classes[] = 'taxable';
-		}
-		if ( $product->is_shipping_taxable() ) {
-			$classes[] = 'shipping-taxable';
-		}
-		if ( $product->is_purchasable() ) {
-			$classes[] = 'purchasable';
-		}
-		if ( $product->get_type() ) {
-			$classes[] = 'product-type-' . $product->get_type();
-		}
-		if ( $product->is_type( 'variable' ) && $product->get_default_attributes() ) {
-			$classes[] = 'has-default-attributes';
-		}
+	$classes[] = 'product';
+	$classes[] = wc_get_loop_class();
+	$classes[] = $product->get_stock_status();
+
+	if ( $product->is_on_sale() ) {
+		$classes[] = 'sale';
+	}
+	if ( $product->is_featured() ) {
+		$classes[] = 'featured';
+	}
+	if ( $product->is_downloadable() ) {
+		$classes[] = 'downloadable';
+	}
+	if ( $product->is_virtual() ) {
+		$classes[] = 'virtual';
+	}
+	if ( $product->is_sold_individually() ) {
+		$classes[] = 'sold-individually';
+	}
+	if ( $product->is_taxable() ) {
+		$classes[] = 'taxable';
+	}
+	if ( $product->is_shipping_taxable() ) {
+		$classes[] = 'shipping-taxable';
+	}
+	if ( $product->is_purchasable() ) {
+		$classes[] = 'purchasable';
+	}
+	if ( $product->get_type() ) {
+		$classes[] = 'product-type-' . $product->get_type();
+	}
+	if ( $product->is_type( 'variable' ) && $product->get_default_attributes() ) {
+		$classes[] = 'has-default-attributes';
 	}
 
 	$key = array_search( 'hentry', $classes, true );
@@ -551,36 +555,55 @@ function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
  * Retrieves the classes for the post div as an array.
  *
  * This method was modified from WordPress's get_post_class() to allow the removal of taxonomies
- * (for performance reasons).
- *
- * Previously wc_product_post_class was hooked into post_class. That still happens, but this function
- * negates the need for it and thus unhooks it when running the post_class hook. @since 3.6.0
+ * (for performance reasons). Previously wc_product_post_class was hooked into post_class. @since 3.6.0
  *
  * @since 3.4.0
  * @param string|array           $class      One or more classes to add to the class list.
- * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ * @param int|WP_Post|WC_Product $product Product ID or product object.
  * @return array
  */
-function wc_get_product_class( $class = '', $product_id = null ) {
-	if ( is_a( $product_id, 'WC_Product' ) ) {
-		$product    = $product_id;
-		$product_id = $product_id->get_id();
-	} else {
-		$product = wc_get_product( $product_id );
+function wc_get_product_class( $class = '', $product = null ) {
+	if ( is_null( $product ) && ! empty( $GLOBALS['product'] ) ) {
+		// Product was null so pull from global.
+		$product = $GLOBALS['product'];
 	}
 
-	if ( ! is_array( $class ) ) {
-		$classes = preg_split( '#\s+#', $class );
-	} else {
-		$classes = $class;
+	if ( $product && ! is_a( $product, 'WC_Product' ) ) {
+		// Make sure we have a valid product, or set to false.
+		$product = wc_get_product( $product );
 	}
+
+	if ( $class ) {
+		if ( ! is_array( $class ) ) {
+			$class = preg_split( '#\s+#', $class );
+		}
+	} else {
+		$class = array();
+	}
+
+	$post_classes = array_map( 'esc_attr', $class );
 
 	if ( ! $product ) {
-		return array_map( 'esc_attr', $classes );
+		return $post_classes;
+	}
+
+	// Run through the post_class hook so 3rd parties using this previously can still append classes.
+	// Note, to change classes you will need to use the newer woocommerce_post_class filter.
+	// @internal This removes the wc_product_post_class filter so classes are not duplicated.
+	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
+
+	if ( $filtered ) {
+		remove_filter( 'post_class', 'wc_product_post_class', 20 );
+	}
+
+	$post_classes = apply_filters( 'post_class', $post_classes, $class, $product->get_id() );
+
+	if ( $filtered ) {
+		add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 	}
 
 	$classes = array_merge(
-		$classes,
+		$post_classes,
 		array(
 			'product',
 			'type-product',
@@ -641,20 +664,16 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 		}
 	}
 
-	// If using `wc_get_product_class` instead of `get_post_class`, we don't need to hook `wc_product_post_class` function.
-	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
+	/**
+	 * WooCommerce Post Class filter.
+	 *
+	 * @since 3.6.2
+	 * @param array      $class Array of CSS classes.
+	 * @param WC_Product $product Product object.
+	 */
+	$classes = apply_filters( 'woocommerce_post_class', $classes, $product );
 
-	if ( $filtered ) {
-		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
-	}
-
-	$classes = apply_filters( 'post_class', $classes, $class, $product->get_id() );
-
-	if ( $filtered ) {
-		add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
-	}
-
-	return array_filter( array_map( 'esc_attr', array_unique( $classes ) ) );
+	return array_map( 'esc_attr', array_unique( array_filter( $classes ) ) );
 }
 
 /**
@@ -665,7 +684,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
  * @param int|WP_Post|WC_Product $product_id Product ID or product object.
  */
 function wc_product_class( $class = '', $product_id = null ) {
-	echo 'class="' . esc_attr( join( ' ', wc_get_product_class( $class, $product_id ) ) ) . '"';
+	echo 'class="' . esc_attr( implode( ' ', wc_get_product_class( $class, $product_id ) ) ) . '"';
 }
 
 /**
@@ -686,7 +705,24 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		$values    = array();
 
 		if ( ! empty( $url_parts['query'] ) ) {
-			parse_str( $url_parts['query'], $values );
+			// This is to preserve full-stops, pluses and spaces in the query string when ran through parse_str.
+			$replace_chars = array(
+				'.'   => '{dot}',
+				'+'   => '{plus}',
+				'%20' => '{space}',
+			);
+
+			$query_string = str_replace( array_keys( $replace_chars ), array_values( $replace_chars ), $url_parts['query'] );
+
+			// Parse the string.
+			parse_str( $query_string, $parsed_query_string );
+
+			// Convert the full-stops, pluses and spaces back and add to values array.
+			foreach ( $parsed_query_string as $key => $value ) {
+				$new_key            = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
+				$new_value          = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
+				$values[ $new_key ] = $new_value;
+			}
 		}
 	}
 	$html = '';

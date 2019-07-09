@@ -218,7 +218,7 @@ class WC_Frontend_Scripts {
 			'selectWoo'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.0.5',
+				'version' => '1.0.6',
 			),
 			'wc-address-i18n'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
@@ -583,6 +583,7 @@ class WC_Frontend_Scripts {
 			case 'wc-password-strength-meter':
 				$params = array(
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
+					'stop_checkout'         => apply_filters( 'woocommerce_enforce_password_strength_meter_on_checkout', false ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
 					'i18n_password_hint'    => esc_attr( wp_get_password_hint() ),
 				);

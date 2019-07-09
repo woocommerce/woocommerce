@@ -43,7 +43,9 @@ if ( wc_tax_enabled() ) {
 						<th class="line_tax tips" data-tip="<?php echo esc_attr( $column_tip ); ?>">
 							<?php echo esc_attr( $column_label ); ?>
 							<input type="hidden" class="order-tax-id" name="order_taxes[<?php echo esc_attr( $tax_id ); ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
-							<a class="delete-order-tax" href="#" data-rate_id="<?php echo esc_attr( $tax_id ); ?>"></a>
+							<?php if ( $order->is_editable() ) : ?>
+								<a class="delete-order-tax" href="#" data-rate_id="<?php echo esc_attr( $tax_id ); ?>"></a>
+							<?php endif; ?>
 						</th>
 						<?php
 					endforeach;

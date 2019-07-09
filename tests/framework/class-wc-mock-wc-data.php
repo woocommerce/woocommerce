@@ -1,9 +1,9 @@
 <?php
 class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface {
 
-	protected $meta_type = 'post';
+	protected $meta_type                = 'post';
 	protected $object_id_field_for_meta = '';
-	protected $internal_meta_keys = array();
+	protected $internal_meta_keys       = array();
 
 	/*
 	|--------------------------------------------------------------------------
@@ -75,9 +75,19 @@ class WC_Mock_WC_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_S
 		$content_id = $object->get_id();
 
 		if ( 'user' === $this->meta_type ) {
-			wp_update_user( array( 'ID' => $customer_id, 'user_email' => $object->get_content() ) );
+			wp_update_user(
+				array(
+					'ID'         => $customer_id,
+					'user_email' => $object->get_content(),
+				)
+			);
 		} else {
-			wp_update_post( array( 'ID' => $content_id, 'post_title' => $object->get_content() ) );
+			wp_update_post(
+				array(
+					'ID'         => $content_id,
+					'post_title' => $object->get_content(),
+				)
+			);
 		}
 	}
 
@@ -132,7 +142,7 @@ class WC_Mock_WC_Data extends WC_Data {
 			$this->set_object_read( true );
 		}
 
-		$this->data_store = new WC_Mock_WC_Data_Store;
+		$this->data_store = new WC_Mock_WC_Data_Store();
 
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );

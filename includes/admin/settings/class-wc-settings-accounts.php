@@ -78,7 +78,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
-				'desc'          => __( 'When creating an account, automatically generate a username from the customer\'s email address', 'woocommerce' ),
+				'desc'          => __( 'When creating an account, automatically generate an account username for the customer based on their name, surname or email', 'woocommerce' ),
 				'id'            => 'woocommerce_registration_generate_username',
 				'default'       => 'yes',
 				'type'          => 'checkbox',

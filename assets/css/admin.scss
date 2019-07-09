@@ -2263,7 +2263,8 @@ ul.wc_coupon_list_block {
 
 			&::before {
 				content: "";
-				background: url("../images/wpspin.gif") no-repeat center top;
+				background: url("../images/wpspin-2x.gif") no-repeat center top;
+				background-size: 71%;
 			}
 		}
 	}
@@ -3270,6 +3271,10 @@ table.wc_shipping {
 	margin-top: 0;
 }
 
+.wc-shipping-zone-settings tbody {
+	display: inherit;
+}
+
 table {
 
 	tr,
@@ -3931,6 +3936,11 @@ img.help_tip {
 			margin-bottom: 3px;
 		}
 
+		.select2-container + span.description {
+			display: block;
+			margin-top: 8px;
+		}
+
 		table.widefat th {
 			padding-right: inherit;
 		}
@@ -4563,6 +4573,7 @@ img.help_tip {
 	}
 }
 
+.woocommerce_attribute,
 .woocommerce_variation {
 
 	h3 .sort {
@@ -4951,6 +4962,7 @@ img.help_tip {
 			}
 		}
 
+		&.woocommerce_attribute h3,
 		&.woocommerce_variation h3 {
 			cursor: pointer;
 			padding: 0.5em 0.75em 0.5em 1em !important;

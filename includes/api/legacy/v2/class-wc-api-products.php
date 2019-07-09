@@ -607,11 +607,11 @@ class WC_API_Products extends WC_API_Resource {
 			$term_id = intval( $term->term_id );
 
 			// Get category display type
-			$display_type = get_term_meta( $term_id, 'display_type' );
+			$display_type = get_term_meta( $term_id, 'display_type', true );
 
 			// Get category image
 			$image = '';
-			if ( $image_id = get_term_meta( $term_id, 'thumbnail_id' ) ) {
+			if ( $image_id = get_term_meta( $term_id, 'thumbnail_id', true ) ) {
 				$image = wp_get_attachment_url( $image_id );
 			}
 

@@ -1,5 +1,4 @@
 /.* export-ignore
-apigen* export-ignore
 CODE_OF_CONDUCT.md export-ignore
 CHANGELOG.txt export-ignore
 composer.* export-ignore
