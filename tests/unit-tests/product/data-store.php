@@ -914,35 +914,51 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 7, $count );
 	}
 
-	public function test_find_matching_product_variation()
-	{
+	/**
+	 * Test find_matching_product_variation.
+	 *
+	 * @return void
+	 */
+	public function test_find_matching_product_variation() {
 		$product    = WC_Helper_Product::create_variation_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$children   = $product->get_children();
 
-		$match = $data_store->find_matching_product_variation($product, array());
-		$this->assertEquals(0, $match);
+		$match = $data_store->find_matching_product_variation( $product, array() );
+		$this->assertEquals( 0, $match );
 
-		$match = $data_store->find_matching_product_variation($product, array(
-			'attribute_pa_size' => 'small',
-		));
-		$this->assertEquals($children[0], $match);
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size' => 'small',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
 
-		$match = $data_store->find_matching_product_variation($product, array(
-			'attribute_pa_size' => 'large',
-		));
-		$this->assertEquals($children[1], $match);
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size' => 'large',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
 
-		$match = $data_store->find_matching_product_variation($product, array(
-			'attribute_pa_size'   => 'small',
-			'attribute_pa_colour' => '',
-		));
-		$this->assertEquals($children[0], $match);
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => '',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
 
-		$match = $data_store->find_matching_product_variation($product, array(
-			'attribute_pa_size'   => 'small',
-			'attribute_pa_colour' => 'red',
-		));
-		$this->assertEquals($children[0], $match);
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
 	}
 }
