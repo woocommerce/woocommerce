@@ -525,6 +525,10 @@ class WC_Install {
 		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+
+		// Define initial tax classes.
+		WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
+		WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
 	}
 
 	/**
