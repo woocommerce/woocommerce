@@ -21,7 +21,7 @@ class ProductCategory extends AbstractProductGrid {
 	protected $block_name = 'product-category';
 
 	/**
-	 * This function is not necessary in this block.
+	 * Set args specific to this block
 	 *
 	 * @param array $query_args Query args.
 	 */
