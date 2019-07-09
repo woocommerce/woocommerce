@@ -403,3 +403,53 @@ function wc_render_action_buttons( $actions ) {
 
 	return $actions_html;
 }
+
+/**
+ * Shows a notice if variations are missing prices.
+ *
+ * @since 3.6.0
+ * @param WC_Product $product_object Product object.
+ */
+function wc_render_invalid_variation_notice( $product_object ) {
+	global $wpdb;
+
+	$variation_ids = $product_object ? $product_object->get_children() : array();
+
+	if ( empty( $variation_ids ) ) {
+		return;
+	}
+
+	$variation_count = count( $variation_ids );
+
+	// Check if a variation exists without pricing data.
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$invalid_variation_count = $wpdb->get_var(
+		"
+		SELECT count(post_id) FROM {$wpdb->postmeta}
+		WHERE post_id in (" . implode( ',', array_map( 'absint', $variation_ids ) ) . ")
+		AND meta_key='_price'
+		AND meta_value >= 0
+		AND meta_value != ''
+		"
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	if ( 0 < ( $variation_count - $invalid_variation_count ) ) {
+		?>
+		<div id="message" class="inline notice woocommerce-message woocommerce-notice-invalid-variation">
+			<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* Translators: %d variation count. */
+					_n( '%d variation does not have a price.', '%d variations do not have prices.', ( $variation_count - $invalid_variation_count ), 'woocommerce' ),
+					( $variation_count - $invalid_variation_count )
+				) . '&nbsp;' .
+				__( 'Variations (and their attributes) that do not have prices will not be shown in your store.', 'woocommerce' )
+			);
+			?>
+			</p>
+		</div>
+		<?php
+	}
+}

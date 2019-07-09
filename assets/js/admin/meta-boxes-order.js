@@ -83,7 +83,7 @@ jQuery( function ( $ ) {
 					.prop( 'name', input_name )
 					.prop( 'placeholder', placeholder )
 					.addClass( 'js_field-state' )
-					.val( value );
+					.val( '' );
 				$state.replaceWith( $newstate );
 			}
 
@@ -400,15 +400,17 @@ jQuery( function ( $ ) {
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
 
-				var user_id = $( '#customer_user' ).val();
+				var user_id    = $( '#customer_user' ).val();
+				var user_email = $( '#_billing_email' ).val();
 
 				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
-					action   : 'woocommerce_add_coupon_discount',
-					dataType : 'json',
-					order_id : woocommerce_admin_meta_boxes.post_id,
-					security : woocommerce_admin_meta_boxes.order_item_nonce,
-					coupon   : value,
-					user_id  : user_id
+					action     : 'woocommerce_add_coupon_discount',
+					dataType   : 'json',
+					order_id   : woocommerce_admin_meta_boxes.post_id,
+					security   : woocommerce_admin_meta_boxes.order_item_nonce,
+					coupon     : value,
+					user_id    : user_id,
+					user_email : user_email
 				} );
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {

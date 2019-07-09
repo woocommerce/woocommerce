@@ -556,9 +556,9 @@ class WC_Meta_Box_Order_Data {
 				}
 
 				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
-					$props[ 'billing_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+					$props[ 'billing_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
 				}
 			}
 		}
@@ -575,21 +575,21 @@ class WC_Meta_Box_Order_Data {
 				}
 
 				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
-					$props[ 'shipping_' . $key ] = wc_clean( $_POST[ $field['id'] ] );
+					$props[ 'shipping_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( $_POST[ $field['id'] ] ) );
+					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
 				}
 			}
 		}
 
 		if ( isset( $_POST['_transaction_id'] ) ) {
-			$props['transaction_id'] = wc_clean( $_POST['_transaction_id'] );
+			$props['transaction_id'] = wc_clean( wp_unslash( $_POST['_transaction_id'] ) );
 		}
 
 		// Payment method handling.
 		if ( $order->get_payment_method() !== wp_unslash( $_POST['_payment_method'] ) ) {
 			$methods              = WC()->payment_gateways->payment_gateways();
-			$payment_method       = wc_clean( $_POST['_payment_method'] );
+			$payment_method       = wc_clean( wp_unslash( $_POST['_payment_method'] ) );
 			$payment_method_title = $payment_method;
 
 			if ( isset( $methods ) && isset( $methods[ $payment_method ] ) ) {
@@ -616,7 +616,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Save order data.
 		$order->set_props( $props );
-		$order->set_status( wc_clean( $_POST['order_status'] ), '', true );
+		$order->set_status( wc_clean( wp_unslash( $_POST['order_status'] ) ), '', true );
 		$order->save();
 	}
 }

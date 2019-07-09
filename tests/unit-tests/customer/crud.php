@@ -29,7 +29,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_update_customer() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertEquals( 'test@woo.local', $customer->get_email() );
 		$this->assertEquals( 'Apt 1', $customer->get_billing_address_2() );
@@ -58,7 +58,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $customer->get_id() );
 		$customer->save();
 		$customer_id = $customer->get_id();
-		$wp_user = new WP_User( $customer->get_id() );
+		$wp_user     = new WP_User( $customer->get_id() );
 
 		$this->assertNotEquals( 0, $customer->get_id() );
 
@@ -76,7 +76,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_delete_customer() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertNotEquals( 0, $customer->get_id() );
 		$customer->delete();
@@ -97,7 +97,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		$customer->set_last_name( 'Bob' );
 		$customer->set_display_name( 'Billy Bob' );
 		$customer->save();
-		$customer_id = $customer->get_id();
+		$customer_id   = $customer->get_id();
 		$customer_read = new WC_Customer( $customer_id );
 
 		$this->assertEquals( $customer_id, $customer_read->get_id() );
@@ -179,35 +179,35 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_setters_and_getters() {
-		$time = time();
+		$time    = time();
 		$setters = array(
-			'username' => 'test',
-			'email' => 'test@woo.local',
-			'first_name' => 'Bob',
-			'last_name' => 'tester',
-			'display_name' => 'Bob Tester',
-			'role' => 'customer',
-			'date_created' => $time,
-			'date_modified' => $time,
-			'billing_postcode' => 11010,
-			'billing_city' => 'New York',
-			'billing_address' => '123 Main St.',
-			'billing_address_1' => '123 Main St.',
-			'billing_address_2' => 'Apt 2',
-			'billing_state' => 'NY',
-			'billing_country' => 'US',
-			'shipping_state' => 'NY',
-			'shipping_postcode' => 11011,
-			'shipping_city' => 'New York',
-			'shipping_address' => '123 Main St.',
-			'shipping_address_1' => '123 Main St.',
-			'shipping_address_2' => 'Apt 2',
-			'is_vat_exempt' => true,
+			'username'            => 'test',
+			'email'               => 'test@woo.local',
+			'first_name'          => 'Bob',
+			'last_name'           => 'tester',
+			'display_name'        => 'Bob Tester',
+			'role'                => 'customer',
+			'date_created'        => $time,
+			'date_modified'       => $time,
+			'billing_postcode'    => 11010,
+			'billing_city'        => 'New York',
+			'billing_address'     => '123 Main St.',
+			'billing_address_1'   => '123 Main St.',
+			'billing_address_2'   => 'Apt 2',
+			'billing_state'       => 'NY',
+			'billing_country'     => 'US',
+			'shipping_state'      => 'NY',
+			'shipping_postcode'   => 11011,
+			'shipping_city'       => 'New York',
+			'shipping_address'    => '123 Main St.',
+			'shipping_address_1'  => '123 Main St.',
+			'shipping_address_2'  => 'Apt 2',
+			'is_vat_exempt'       => true,
 			'calculated_shipping' => true,
-			'is_paying_customer' => true,
+			'is_paying_customer'  => true,
 		);
 
-		$customer = new WC_Customer;
+		$customer = new WC_Customer();
 
 		foreach ( $setters as $method => $value ) {
 			$customer->{"set_{$method}"}( $value );
@@ -220,7 +220,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 		}
 
 		// Get timestamps from date_created and date_modified.
-		$getters['date_created'] = $getters['date_created']->getOffsetTimestamp();
+		$getters['date_created']  = $getters['date_created']->getOffsetTimestamp();
 		$getters['date_modified'] = $getters['date_modified']->getOffsetTimestamp();
 
 		$this->assertEquals( $setters, $getters );
@@ -231,11 +231,11 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_last_order_info() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$order = WC_Helper_Order::create_order( $customer_id );
-		$customer = new WC_Customer( $customer_id );
-		$last_order = $customer->get_last_order();
+		$order       = WC_Helper_Order::create_order( $customer_id );
+		$customer    = new WC_Customer( $customer_id );
+		$last_order  = $customer->get_last_order();
 		$this->assertEquals( $order->get_id(), $last_order ? $last_order->get_id() : 0 );
 		$this->assertEquals( $order->get_date_created(), $last_order ? $last_order->get_date_created() : 0 );
 		$order->delete();
@@ -246,7 +246,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_order_count_read() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		WC_Helper_Order::create_order( $customer_id );
 		WC_Helper_Order::create_order( $customer_id );
@@ -260,10 +260,10 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_total_spent_read() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$order = WC_Helper_Order::create_order( $customer_id );
-		$customer = new WC_Customer( $customer_id );
+		$order       = WC_Helper_Order::create_order( $customer_id );
+		$customer    = new WC_Customer( $customer_id );
 		$this->assertEquals( 0, $customer->get_total_spent() );
 		$order->update_status( 'wc-completed' );
 		$customer = new WC_Customer( $customer_id );
@@ -286,9 +286,9 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_date_created_read() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$user = new WP_User( $customer_id );
+		$user        = new WP_User( $customer_id );
 		$this->assertEquals( strtotime( $user->data->user_registered ), $customer->get_date_created()->getOffsetTimestamp() );
 	}
 
@@ -297,9 +297,9 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_date_modified_read() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
-		$last = get_user_meta( $customer_id, 'last_update', true );
+		$last        = get_user_meta( $customer_id, 'last_update', true );
 		sleep( 1 );
 		$this->assertEquals( $last, $customer->get_date_modified()->getOffsetTimestamp() );
 		$customer->set_billing_address( '1234 Some St.' );
@@ -314,7 +314,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_taxable_address() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$customer->set_shipping_postcode( '11111' );
 		$customer->set_shipping_city( 'Test' );
@@ -348,7 +348,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_get_downloadable_products() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 		$this->assertEquals( wc_get_customer_available_downloads( $customer_id ), $customer->get_downloadable_products() );
 	}
@@ -358,7 +358,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_customer_password() {
-		$customer = WC_Helper_Customer::create_customer();
+		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 
 		$user = get_user_by( 'id', $customer_id );
@@ -460,7 +460,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 
 		// should still be session ID, not a created row, since we are working with guests/sessions
 		$this->assertFalse( $session->get_id() > 0 );
-		$this->assertEquals( '32191' , $session->get_billing_postcode() );
+		$this->assertEquals( '32191', $session->get_billing_postcode() );
 	}
 
 	/**
@@ -468,12 +468,12 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_meta() {
-		$customer = WC_Helper_Customer::create_customer();
-		$customer_id  = $customer->get_id();
-		$meta_value = time() . '-custom-value';
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$meta_value  = time() . '-custom-value';
 		add_user_meta( $customer_id, 'test_field', $meta_value, true );
 		$customer = new WC_Customer( $customer_id );
-		$fields = $customer->get_meta_data();
+		$fields   = $customer->get_meta_data();
 		$this->assertEquals( $meta_value, $customer->get_meta( 'test_field' ) );
 	}
 
@@ -482,9 +482,9 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_set_meta() {
-		$customer = WC_Helper_Customer::create_customer();
-		$customer_id  = $customer->get_id();
-		$meta_value = time() . '-custom-value';
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$meta_value  = time() . '-custom-value';
 		$customer->add_meta_data( 'my-field', $meta_value, true );
 		$customer->save();
 		$customer = new WC_Customer( $customer_id );

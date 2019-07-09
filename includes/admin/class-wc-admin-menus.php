@@ -44,6 +44,9 @@ class WC_Admin_Menus {
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
 		}
+
+		// Handle saving settings earlier than load-{page} hook to avoid race conditions in conditional menus.
+		add_action( 'wp_loaded', array( $this, 'save_settings' ) );
 	}
 
 	/**
@@ -85,10 +88,36 @@ class WC_Admin_Menus {
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
-		global $current_tab, $current_section;
-
 		WC()->payment_gateways();
 		WC()->shipping();
+
+		// Include settings pages.
+		WC_Admin_Settings::get_settings_pages();
+
+		// Add any posted messages.
+		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
+		}
+
+		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
+		}
+
+		do_action( 'woocommerce_settings_page_init' );
+	}
+
+	/**
+	 * Handle saving of settings.
+	 *
+	 * @return void
+	 */
+	public function save_settings() {
+		global $current_tab, $current_section;
+
+		// We should only save on the settings page.
+		if ( ! is_admin() || ! isset( $_GET['page'] ) || 'wc-settings' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			return;
+		}
 
 		// Include settings pages.
 		WC_Admin_Settings::get_settings_pages();
@@ -103,17 +132,6 @@ class WC_Admin_Menus {
 		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
-
-		// Add any posted messages.
-		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
-		}
-
-		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
-		}
-
-		do_action( 'woocommerce_settings_page_init' );
 	}
 
 	/**

@@ -273,7 +273,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * Test: test_get_image_should_return_product_image.
 	 */
 	public function test_get_image_should_return_product_image() {
-		$product = new WC_Product();
+		$product   = new WC_Product();
 		$image_url = $this->set_product_image( $product );
 
 		$this->assertEquals(
@@ -297,9 +297,9 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 */
 	public function test_get_image_should_return_parent_product_image() {
 		$variable_product = WC_Helper_Product::create_variation_product();
-		$variations = $variable_product->get_children();
-		$variation_1 = wc_get_product( $variations[0] );
-		$image_url = $this->set_product_image( $variable_product );
+		$variations       = $variable_product->get_children();
+		$variation_1      = wc_get_product( $variations[0] );
+		$image_url        = $this->set_product_image( $variable_product );
 
 		$this->assertEquals(
 			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',

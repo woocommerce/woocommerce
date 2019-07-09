@@ -34,6 +34,8 @@ class WC_Admin_Notices {
 		'regenerating_thumbnails'   => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
 		'no_secure_connection'      => 'secure_connection_notice',
+		'wc_admin'                  => 'wc_admin_feature_plugin_notice',
+		'wp_php_min_requirements'   => 'wp_php_min_requirements_notice',
 	);
 
 	/**
@@ -82,7 +84,9 @@ class WC_Admin_Notices {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
+		self::add_wc_admin_feature_plugin_notice();
 		self::add_notice( 'template_files' );
+		self::add_min_version_notice();
 	}
 
 	/**
@@ -339,6 +343,89 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
+	}
+
+
+	/**
+	 * If on WordPress 5.0 or greater, inform users of WooCommerce Admin feature plugin.
+	 *
+	 * @since 3.6.4
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
+	 */
+	public static function add_wc_admin_feature_plugin_notice() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) {
+			self::add_notice( 'wc_admin' );
+		}
+	}
+
+	/**
+	 * Notice to try WooCommerce Admin
+	 *
+	 * @since 3.6.4
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
+	 */
+	public static function wc_admin_feature_plugin_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_wc_admin_notice', true ) || self::is_plugin_active( 'woocommerce-admin/woocommerce-admin.php' ) ) {
+			self::remove_notice( 'wc_admin' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-wc-admin.php';
+	}
+
+	/**
+	 * Add notice about minimum PHP and WordPress requirement.
+	 *
+	 * @since 3.6.5
+	 */
+	public static function add_min_version_notice() {
+		if ( version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' ) ) {
+			self::add_notice( 'wp_php_min_requirements' );
+		}
+	}
+
+	/**
+	 * Notice about WordPress and PHP minimum requirements.
+	 *
+	 * @since 3.6.5
+	 * @return void
+	 */
+	public static function wp_php_min_requirements_notice() {
+		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_wp_php_min_requirements_notice', true ) ) ) {
+			self::remove_notice( 'wp_php_min_requirements' );
+			return;
+		}
+
+		$old_php = version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' );
+		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' );
+
+		// Both PHP and WordPress up to date version => no notice.
+		if ( ! $old_php && ! $old_wp ) {
+			return;
+		}
+
+		if ( $old_php && $old_wp ) {
+			$msg = sprintf(
+				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
+				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
+				WC_NOTICE_MIN_PHP_VERSION,
+				WC_NOTICE_MIN_WP_VERSION
+			);
+		} elseif ( $old_php ) {
+			$msg = sprintf(
+				/* translators: %s: Minimum PHP version */
+				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
+				WC_NOTICE_MIN_PHP_VERSION
+			);
+		} elseif ( $old_wp ) {
+			$msg = sprintf(
+				/* translators: %s: Minimum WordPress version */
+				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
+				WC_NOTICE_MIN_WP_VERSION
+			);
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
 	}
 
 	/**

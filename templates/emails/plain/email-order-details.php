@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
- * @version 3.5.0
+ * @version 3.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -34,10 +34,10 @@ echo "\n" . wc_get_email_order_items( // phpcs:ignore WordPress.Security.EscapeO
 
 echo "==========\n\n";
 
-$totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+$item_totals = $order->get_order_item_totals();
 
-if ( $totals ) {
-	foreach ( $totals as $total ) {
+if ( $item_totals ) {
+	foreach ( $item_totals as $total ) {
 		echo wp_kses_post( $total['label'] . "\t " . $total['value'] ) . "\n";
 	}
 }

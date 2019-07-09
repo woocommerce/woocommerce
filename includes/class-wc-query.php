@@ -258,32 +258,41 @@ class WC_Query {
 			return;
 		}
 
-		// Fix for endpoints on the homepage.
-		if ( $this->is_showing_page_on_front( $q ) && ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
-			$_query = wp_parse_args( $q->query );
-			if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
-				$q->is_page     = true;
-				$q->is_home     = false;
-				$q->is_singular = true;
-				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
-				add_filter( 'redirect_canonical', '__return_false' );
-			}
-		}
+		// Fixes for queries on static homepages.
+		if ( $this->is_showing_page_on_front( $q ) ) {
 
-		// When orderby is set, WordPress shows posts on the front-page. Get around that here.
-		if ( $this->is_showing_page_on_front( $q ) && $this->page_on_front_is( wc_get_page_id( 'shop' ) ) ) {
-			$_query = wp_parse_args( $q->query );
-			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
+			// Fix for endpoints on the homepage.
+			if ( ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
+				$_query = wp_parse_args( $q->query );
+				if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
+					$q->is_page     = true;
+					$q->is_home     = false;
+					$q->is_singular = true;
+					$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
+					add_filter( 'redirect_canonical', '__return_false' );
+				}
+			}
+
+			// When orderby is set, WordPress shows posts on the front-page. Get around that here.
+			if ( $this->page_on_front_is( wc_get_page_id( 'shop' ) ) ) {
+				$_query = wp_parse_args( $q->query );
+				if ( empty( $_query ) || ! array_diff( array_keys( $_query ), array( 'preview', 'page', 'paged', 'cpage', 'orderby' ) ) ) {
+					$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
+					$q->is_page = true;
+					$q->is_home = false;
+
+					// WP supporting themes show post type archive.
+					if ( current_theme_supports( 'woocommerce' ) ) {
+						$q->set( 'post_type', 'product' );
+					} else {
+						$q->is_singular = true;
+					}
+				}
+			} elseif ( ! empty( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 				$q->set( 'page_id', (int) get_option( 'page_on_front' ) );
 				$q->is_page = true;
 				$q->is_home = false;
-
-				// WP supporting themes show post type archive.
-				if ( current_theme_supports( 'woocommerce' ) ) {
-					$q->set( 'post_type', 'product' );
-				} else {
-					$q->is_singular = true;
-				}
+				$q->is_singular = true;
 			}
 		}
 
@@ -454,8 +463,9 @@ class WC_Query {
 			$order         = ! empty( $orderby_value[1] ) ? $orderby_value[1] : $order;
 		}
 
-		$orderby = strtolower( $orderby );
-		$order   = strtoupper( $order );
+		// Convert to correct format.
+		$orderby = strtolower( is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby );
+		$order   = strtoupper( is_array( $order ) ? (string) current( $order ) : (string) $order );
 		$args    = array(
 			'orderby'  => $orderby,
 			'order'    => ( 'DESC' === $order ) ? 'DESC' : 'ASC',

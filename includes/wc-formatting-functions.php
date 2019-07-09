@@ -976,7 +976,7 @@ function wc_format_phone_number( $phone ) {
 	if ( ! WC_Validation::is_phone( $phone ) ) {
 		return '';
 	}
-	return preg_replace( '/[^0-9\+\-\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
 }
 
 /**
