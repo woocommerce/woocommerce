@@ -38,6 +38,16 @@
 		}
 	}
 
+	.woocommerce-card__body {
+		> div:first-of-type > .components-base-control {
+			margin-top: 0;
+		}
+
+		> div:last-of-type > .components-base-control {
+			margin-bottom: 0;
+		}
+	}
+
 	.woocommerce-stepper .woocommerce-stepper__step {
 		.woocommerce-stepper__step-label {
 			color: $muriel-gray-800;
@@ -135,6 +145,10 @@
 	}
 
 	/* Muriel style overrides */
+	.muriel-component {
+		margin-top: $gap;
+		margin-bottom: $gap;
+	}
 	.muriel-input-text {
 		&.empty {
 			.components-base-control__label {
