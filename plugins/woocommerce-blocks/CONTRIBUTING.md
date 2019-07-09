@@ -10,10 +10,10 @@ We have a set of scripts in npm to handle repeated developer tasks.
 
 ### `$ npm run build` & `$ npm start`
 
-These scripts compile the code using `webpack`. 
+These scripts compile the code using `webpack`.
 
 - Run `$ npm run build` to build all assets for production.
-- Run `$ npm start` to build assets and watch for changes (useful for development). 
+- Run `$ npm start` to build assets and watch for changes (useful for development).
 
 You can also run `$ npx webpack` to run the development build and not keep watching.
 
@@ -35,6 +35,10 @@ The test scripts use [wp-scripts](https://github.com/WordPress/gutenberg/tree/ma
 ### `$ npm run prepack`
 
 This script is run automatically when `$ npm pack` or `$ npm publish` is run. It installs packages, runs the linters, runs the tests, and then builds assets from source once more.
+
+### `$ npm run package-plugin`
+
+This script run `npm install` and `npm run build` and then creates a zip file automatically for you which you can use to install WooCommerce Blocks through the WordPress admin.
 
 ## Tagging new releases on GitHub
 
@@ -64,7 +68,7 @@ __Important:__ Before running the release script ensure you have already pushed 
 
 ## Publishing `@woocommerce/block-library`
 
-We publish the blocks to npm at [@woocommerce/block-library,](https://www.npmjs.com/package/@woocommerce/block-library) and then import them into WooCommerce core via [a grunt script.](https://github.com/woocommerce/woocommerce/blob/741bd5ba6d193e21893ef3af3d4f3f030a79c099/Gruntfile.js#L347) 
+We publish the blocks to npm at [@woocommerce/block-library,](https://www.npmjs.com/package/@woocommerce/block-library) and then import them into WooCommerce core via [a grunt script.](https://github.com/woocommerce/woocommerce/blob/741bd5ba6d193e21893ef3af3d4f3f030a79c099/Gruntfile.js#L347)
 
 To release a new version, there are 3 basic steps. Prepare and test the release, publish the version, then import into WooCommerce core.
 
