@@ -703,6 +703,13 @@ class WC_Install {
 			$collate = $wpdb->get_charset_collate();
 		}
 
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 */
+		$max_index_length = 191;
+
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -903,7 +910,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   name varchar(200) NOT NULL DEFAULT '',
   slug varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_class_id),
-  UNIQUE KEY slug (slug)
+  UNIQUE KEY slug (slug($max_index_length))
 ) $collate;
 		";
 
