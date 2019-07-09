@@ -34,7 +34,7 @@ class WC_Tracks_Client {
 	 */
 	public static function init() {
 		// Use wp hook for setting the identity cookie to avoid headers already sent warnings.
-		add_action( 'wp_loaded', array( __CLASS__, 'maybe_set_identity_cookie' ) );
+		add_action( 'admin_init', array( __CLASS__, 'maybe_set_identity_cookie' ) );
 	}
 
 	/**
@@ -139,11 +139,16 @@ class WC_Tracks_Client {
 	public static function get_identity( $user_id ) {
 		$jetpack_lib = '/tracks/client.php';
 
-		if ( class_exists( 'Jetpack' ) && file_exists( jetpack_require_lib_dir() . $jetpack_lib ) ) {
-			include_once jetpack_require_lib_dir() . $jetpack_lib;
-
-			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
-				return jetpack_tracks_get_identity( $user_id );
+		if ( class_exists( 'Jetpack' ) && defined( JETPACK__VERSION ) ) {
+			if ( version_compare( JETPACK__VERSION, '7.5', '<' ) ) {
+				if ( file_exists( jetpack_require_lib_dir() . $jetpack_lib ) ) {
+					include_once jetpack_require_lib_dir() . $jetpack_lib;
+					if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
+						return jetpack_tracks_get_identity( $user_id );
+					}
+				}
+			} else {
+				return Automattic\Jetpack\Tracking::tracks_get_identity( $user_id );
 			}
 		}
 

@@ -40,7 +40,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		add_filter( 'the_posts', array( $this, 'remove_ordering_args' ) );
 	}
 
 	/**
@@ -451,6 +450,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
+		$this->remove_ordering_args();
 		// Custom order by arguments.
 		if ( isset( $query_vars['orderby'] ) ) {
 			$orderby = strtolower( $query_vars['orderby'] );
@@ -520,10 +520,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Remove ordering queries.
 	 *
-	 * @param array $posts Posts from WP Query.
+	 * @param array $posts Posts array, keeping this for backwards compatibility defaulting to empty array.
 	 * @return array
 	 */
-	public function remove_ordering_args( $posts ) {
+	public function remove_ordering_args( $posts = array() ) {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_asc_post_clauses' ) );
@@ -531,7 +531,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
-		return $posts;
+		return $posts; // Keeping this here for backward compatibility.
 	}
 
 	/**

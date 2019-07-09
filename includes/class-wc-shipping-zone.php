@@ -259,17 +259,34 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		if ( ! $this->get_zone_name() ) {
 			$this->set_zone_name( $this->generate_zone_name() );
 		}
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-			if ( null === $this->get_id() ) {
-				$this->data_store->create( $this );
-			} else {
-				$this->data_store->update( $this );
-			}
+		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
+
+		/**
+		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		if ( null !== $this->get_id() ) {
+			$this->data_store->update( $this );
+		} else {
+			$this->data_store->create( $this );
+		}
+
+		/**
+		 * Trigger action after saving to the DB.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		return $this->get_id();
 	}
 
 	/**

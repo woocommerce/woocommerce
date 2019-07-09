@@ -216,7 +216,11 @@ function wc_product_post_type_link( $permalink, $post ) {
 			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
-				$product_cat     = $ancestor_object->slug . '/' . $product_cat;
+				if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
+					$product_cat = $ancestor_object->slug;
+				} else {
+					$product_cat = $ancestor_object->slug . '/' . $product_cat;
+				}
 			}
 		}
 	} else {
@@ -886,7 +890,9 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		)
 	);
 
-	shuffle( $related_posts );
+	if ( apply_filters( 'woocommerce_product_related_posts_shuffle', true ) ) {
+		shuffle( $related_posts );
+	}
 
 	return array_slice( $related_posts, 0, $limit );
 }
@@ -1157,6 +1163,8 @@ function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc
 		case 'menu_order':
 		case 'price':
 			usort( $products, 'wc_products_array_orderby_' . $orderby );
+			break;
+		case 'none':
 			break;
 		default:
 			shuffle( $products );

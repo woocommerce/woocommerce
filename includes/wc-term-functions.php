@@ -23,7 +23,7 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 	if ( is_array( $taxonomies ) && 1 < count( $taxonomies ) ) {
 		return $defaults;
 	}
-	$taxonomy = is_array( $taxonomies ) ? $taxonomies[0] : $taxonomies;
+	$taxonomy = is_array( $taxonomies ) ? (string) current( $taxonomies ) : $taxonomies;
 	$orderby  = 'name';
 
 	if ( taxonomy_is_product_attribute( $taxonomy ) ) {

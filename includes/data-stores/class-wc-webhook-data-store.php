@@ -61,7 +61,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		$this->delete_transients( $webhook->get_status( 'edit' ) );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
-		do_action( 'woocommerce_new_webhook', $webhook_id );
+		do_action( 'woocommerce_new_webhook', $webhook_id, $webhook );
 	}
 
 	/**
@@ -370,13 +370,13 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 */
 	protected function get_webhook_count( $status = 'active' ) {
 		global $wpdb;
-
-		$count = wp_cache_get( $status . '_count', 'webhooks' );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . $status . '_count';
+		$count = wp_cache_get( $cache_key, 'webhooks' );
 
 		if ( false === $count ) {
 			$count = absint( $wpdb->get_var( $wpdb->prepare( "SELECT count( webhook_id ) FROM {$wpdb->prefix}wc_webhooks WHERE `status` = %s;", $status ) ) );
 
-			wp_cache_add( $status . '_count', $count, 'webhooks' );
+			wp_cache_add( $cache_key, $count, 'webhooks' );
 		}
 
 		return $count;

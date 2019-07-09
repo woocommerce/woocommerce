@@ -125,7 +125,7 @@ class WC_Shortcode_Products {
 				'terms'          => '',        // Comma separated term slugs or ids.
 				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 				'tag'            => '',        // Comma separated tag slugs.
-				'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
+				'visibility'     => 'visible', // Product visibility setting. Possible values are 'visible', 'catalog', 'search', 'hidden'.
 				'class'          => '',        // HTML class.
 				'page'           => 1,         // Page for pagination.
 				'paginate'       => false,     // Should results be paginated.
@@ -178,7 +178,7 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ),
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		);
 
 		$orderby_value         = explode( '-', $query_args['orderby'] );
@@ -195,20 +195,18 @@ class WC_Shortcode_Products {
 			$this->attributes['limit'] = $this->attributes['columns'] * $this->attributes['rows'];
 		}
 
-		// @codingStandardsIgnoreStart
-		$ordering_args                = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-		$query_args['orderby']        = $ordering_args['orderby'];
-		$query_args['order']          = $ordering_args['order'];
+		$ordering_args         = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+		$query_args['orderby'] = $ordering_args['orderby'];
+		$query_args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
-			$query_args['meta_key']       = $ordering_args['meta_key'];
+			$query_args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		}
 		$query_args['posts_per_page'] = intval( $this->attributes['limit'] );
 		if ( 1 < $this->attributes['page'] ) {
-			$query_args['paged']          = absint( $this->attributes['page'] );
+			$query_args['paged'] = absint( $this->attributes['page'] );
 		}
-		$query_args['meta_query']     = WC()->query->get_meta_query();
-		$query_args['tax_query']      = array();
-		// @codingStandardsIgnoreEnd
+		$query_args['meta_query'] = WC()->query->get_meta_query(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		$query_args['tax_query']  = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 
 		// Visibility.
 		$this->set_visibility_query_args( $query_args );
@@ -333,7 +331,7 @@ class WC_Shortcode_Products {
 			$field      = 'slug';
 
 			if ( is_numeric( $categories[0] ) ) {
-				$field = 'term_id';
+				$field      = 'term_id';
 				$categories = array_map( 'absint', $categories );
 				// Check numeric slugs.
 				foreach ( $categories as $cat ) {
@@ -393,7 +391,19 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_best_selling_products_query_args( &$query_args ) {
-		$query_args['meta_key'] = 'total_sales'; // @codingStandardsIgnoreLine
+		$query_args['meta_key'] = 'total_sales'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$query_args['order']    = 'DESC';
+		$query_args['orderby']  = 'meta_value_num';
+	}
+
+	/**
+	 * Set top rated products query args.
+	 *
+	 * @since 3.6.5
+	 * @param array $query_args Query args.
+	 */
+	protected function set_top_rated_products_query_args( &$query_args ) {
+		$query_args['meta_key'] = '_wc_average_rating'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		$query_args['order']    = 'DESC';
 		$query_args['orderby']  = 'meta_value_num';
 	}
@@ -470,9 +480,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_visibility_featured_query_args( &$query_args ) {
-		// @codingStandardsIgnoreStart
-		$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
-		// @codingStandardsIgnoreEnd
+		$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 
 		$query_args['tax_query'][] = array(
 			'taxonomy'         => 'product_visibility',
@@ -493,9 +501,7 @@ class WC_Shortcode_Products {
 		if ( method_exists( $this, 'set_visibility_' . $this->attributes['visibility'] . '_query_args' ) ) {
 			$this->{'set_visibility_' . $this->attributes['visibility'] . '_query_args'}( $query_args );
 		} else {
-			// @codingStandardsIgnoreStart
-			$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
-			// @codingStandardsIgnoreEnd
+			$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 		}
 	}
 
@@ -540,7 +546,7 @@ class WC_Shortcode_Products {
 
 		if ( 'rand' === $this->query_args['orderby'] ) {
 			// When using rand, we'll cache a number of random queries and pull those to avoid querying rand on each page load.
-			$rand_index      = rand( 0, max( 1, absint( apply_filters( 'woocommerce_product_query_max_rand_cache_count', 5 ) ) ) );
+			$rand_index      = wp_rand( 0, max( 1, absint( apply_filters( 'woocommerce_product_query_max_rand_cache_count', 5 ) ) ) );
 			$transient_name .= $rand_index;
 		}
 
@@ -562,13 +568,7 @@ class WC_Shortcode_Products {
 		if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
 			$results = $transient_value['value'];
 		} else {
-			if ( 'top_rated_products' === $this->type ) {
-				add_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-				$query = new WP_Query( $this->query_args );
-				remove_filter( 'posts_clauses', array( __CLASS__, 'order_by_rating_post_clauses' ) );
-			} else {
-				$query = new WP_Query( $this->query_args );
-			}
+			$query = new WP_Query( $this->query_args );
 
 			$paginated = ! $query->get( 'no_found_rows' );
 

@@ -99,7 +99,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		$customer_id = wp_insert_user( $new_customer_data );
 
 		if ( is_wp_error( $customer_id ) ) {
-			return new WP_Error( 'registration-error', __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+			return $customer_id;
 		}
 
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
@@ -853,3 +853,27 @@ function wc_update_user_last_active( $user_id ) {
 	}
 	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
 }
+
+/**
+ * Translate WC roles using the woocommerce textdomain.
+ *
+ * @since 3.7.0
+ * @param string $translation  Translated text.
+ * @param string $text         Text to translate.
+ * @param string $context      Context information for the translators.
+ * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
+ * @return string
+ */
+function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+	// translate_user_role() only accepts a second parameter starting in WP 5.2.
+	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+		return $translation;
+	}
+
+	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
+		return translate_user_role( $text, 'woocommerce' );
+	}
+
+	return $translation;
+}
+add_filter( 'gettext_with_context', 'wc_translate_user_roles', 10, 4 );

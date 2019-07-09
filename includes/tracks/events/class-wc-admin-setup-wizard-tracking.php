@@ -50,6 +50,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	public function add_footer_scripts() {
 		wp_print_scripts();
 		WC_Site_Tracking::add_tracking_function();
+		wc_print_js();
 	}
 
 	/**
@@ -226,6 +227,8 @@ class WC_Admin_Setup_Wizard_Tracking {
 			'setup_storefront'    => isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'],
 			'setup_automated_tax' => isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'],
 			'setup_mailchimp'     => isset( $_POST['setup_mailchimp'] ) && 'yes' === $_POST['setup_mailchimp'],
+			'setup_facebook'     => isset( $_POST['setup_facebook'] ) && 'yes' === $_POST['setup_facebook'],
+			'setup_wc_admin'     => isset( $_POST['setup_wc_admin'] ) && 'yes' === $_POST['setup_wc_admin'],
 		);
 		// phpcs:enable
 

@@ -183,6 +183,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$buyer = ucwords( $user->display_name );
 		}
 
+		/**
+		 * Filter buyer name in list table orders.
+		 *
+		 * @since 3.7.0
+		 * @param string   $buyer Buyer name.
+		 * @param WC_Order $order Order data.
+		 */
+		$buyer = apply_filters( 'woocommerce_admin_order_buyer_name', $buyer, $this->object );
+
 		if ( $this->object->get_status() === 'trash' ) {
 			echo '<strong>#' . esc_attr( $this->object->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong>';
 		} else {

@@ -75,7 +75,8 @@ class WC_Emails {
 	 */
 	public static function init_transactional_emails() {
 		$email_actions = apply_filters(
-			'woocommerce_email_actions', array(
+			'woocommerce_email_actions',
+			array(
 				'woocommerce_low_stock',
 				'woocommerce_no_stock',
 				'woocommerce_product_on_backorder',
@@ -127,7 +128,7 @@ class WC_Emails {
 				)
 			);
 		} else {
-			call_user_func_array( array( __CLASS__, 'send_transactional_email' ), func_get_args() );
+			call_user_func_array( array( __CLASS__, 'send_transactional_email' ), func_get_args() ); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsUsage.InParameterList
 		}
 	}
 
@@ -200,7 +201,7 @@ class WC_Emails {
 		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
 		// Hook for replacing {site_title} in email-footer.
-		add_filter( 'woocommerce_email_footer_text', array( $this, 'email_footer_replace_site_title' ) );
+		add_filter( 'woocommerce_email_footer_text', array( $this, 'replace_placeholders' ) );
 
 		// Let 3rd parties unhook the above via this hook.
 		do_action( 'woocommerce_email', $this );
@@ -272,14 +273,43 @@ class WC_Emails {
 	}
 
 	/**
+	 * Replace placeholder text in strings.
+	 *
+	 * @since  3.7.0
+	 * @param  string $string Email footer text.
+	 * @return string         Email footer text with any replacements done.
+	 */
+	public function replace_placeholders( $string ) {
+		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
+
+		return str_replace(
+			array(
+				'{site_title}',
+				'{site_address}',
+				'{woocommerce}',
+				'{WooCommerce}',
+			),
+			array(
+				$this->get_blogname(),
+				$domain,
+				'<a href="https://woocommerce.com">WooCommerce</a>',
+				'<a href="https://woocommerce.com">WooCommerce</a>',
+			),
+			$string
+		);
+	}
+
+	/**
 	 * Filter callback to replace {site_title} in email footer
 	 *
 	 * @since  3.3.0
+	 * @deprecated 3.7.0
 	 * @param  string $string Email footer text.
 	 * @return string         Email footer text with any replacements done.
 	 */
 	public function email_footer_replace_site_title( $string ) {
-		return str_replace( '{site_title}', $this->get_blogname(), $string );
+		wc_deprecated_function( 'WC_Emails::email_footer_replace_site_title', '3.7.0', 'WC_Emails::replace_placeholders' );
+		return $this->replace_placeholders( $string );
 	}
 
 	/**
@@ -367,7 +397,8 @@ class WC_Emails {
 	public function order_details( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
 		if ( $plain_text ) {
 			wc_get_template(
-				'emails/plain/email-order-details.php', array(
+				'emails/plain/email-order-details.php',
+				array(
 					'order'         => $order,
 					'sent_to_admin' => $sent_to_admin,
 					'plain_text'    => $plain_text,
@@ -376,7 +407,8 @@ class WC_Emails {
 			);
 		} else {
 			wc_get_template(
-				'emails/email-order-details.php', array(
+				'emails/email-order-details.php',
+				array(
 					'order'         => $order,
 					'sent_to_admin' => $sent_to_admin,
 					'plain_text'    => $plain_text,
@@ -404,7 +436,8 @@ class WC_Emails {
 
 		$downloads = $order->get_downloadable_items();
 		$columns   = apply_filters(
-			'woocommerce_email_downloads_columns', array(
+			'woocommerce_email_downloads_columns',
+			array(
 				'download-product' => __( 'Product', 'woocommerce' ),
 				'download-expires' => __( 'Expires', 'woocommerce' ),
 				'download-file'    => __( 'Download', 'woocommerce' ),
@@ -413,7 +446,8 @@ class WC_Emails {
 
 		if ( $plain_text ) {
 			wc_get_template(
-				'emails/plain/email-downloads.php', array(
+				'emails/plain/email-downloads.php',
+				array(
 					'order'         => $order,
 					'sent_to_admin' => $sent_to_admin,
 					'plain_text'    => $plain_text,
@@ -424,7 +458,8 @@ class WC_Emails {
 			);
 		} else {
 			wc_get_template(
-				'emails/email-downloads.php', array(
+				'emails/email-downloads.php',
+				array(
 					'order'         => $order,
 					'sent_to_admin' => $sent_to_admin,
 					'plain_text'    => $plain_text,
@@ -534,14 +569,16 @@ class WC_Emails {
 		}
 		if ( $plain_text ) {
 			wc_get_template(
-				'emails/plain/email-addresses.php', array(
+				'emails/plain/email-addresses.php',
+				array(
 					'order'         => $order,
 					'sent_to_admin' => $sent_to_admin,
 				)
 			);
 		} else {
 			wc_get_template(
-				'emails/email-addresses.php', array(
+				'emails/email-addresses.php',
+				array(
 					'order'         => $order,
 					'sent_to_admin' => $sent_to_admin,
 				)
@@ -572,8 +609,8 @@ class WC_Emails {
 		$message = sprintf(
 			/* translators: 1: product name 2: items in stock */
 			__( '%1$s is low in stock. There are %2$d left.', 'woocommerce' ),
-			html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-			html_entity_decode( strip_tags( $product->get_stock_quantity() ) )
+			html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+			html_entity_decode( wp_strip_all_tags( $product->get_stock_quantity() ) )
 		);
 
 		wp_mail(
@@ -597,7 +634,7 @@ class WC_Emails {
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product out of stock', 'woocommerce' ) );
 		/* translators: %s: product name */
-		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+		$message = sprintf( __( '%s is out of stock.', 'woocommerce' ), html_entity_decode( wp_strip_all_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_no_stock', get_option( 'woocommerce_stock_email_recipient' ), $product ),
@@ -615,7 +652,8 @@ class WC_Emails {
 	 */
 	public function backorder( $args ) {
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'product'  => '',
 				'quantity' => '',
 				'order_id' => '',
@@ -634,7 +672,7 @@ class WC_Emails {
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
 		/* translators: 1: product quantity 2: product name 3: order number */
-		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( strip_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( wp_strip_all_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
 
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args ),
