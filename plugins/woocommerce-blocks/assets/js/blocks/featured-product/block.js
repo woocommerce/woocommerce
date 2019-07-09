@@ -196,7 +196,7 @@ class FeaturedProduct extends Component {
 					'Visually highlight a product or variation and encourage prompt action',
 					'woo-gutenberg-products-block'
 				) }
-				<div className="wc-block-handpicked-products__selection">
+				<div className="wc-block-featured-product__selection">
 					<ProductControl
 						selected={ attributes.productId || 0 }
 						onChange={ ( value = [] ) => {
