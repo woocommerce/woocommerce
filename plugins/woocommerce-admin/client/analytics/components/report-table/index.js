@@ -41,8 +41,8 @@ class ReportTable extends Component {
 		this.scrollPointRef = createRef();
 	}
 
-	onColumnsChange( shownColumns ) {
-		const { columnPrefsKey, getHeadersContent, updateCurrentUserData } = this.props;
+	onColumnsChange( shownColumns, toggledColumn ) {
+		const { columnPrefsKey, endpoint, getHeadersContent, updateCurrentUserData } = this.props;
 		const columns = getHeadersContent().map( header => header.key );
 		const hiddenColumns = columns.filter( column => ! shownColumns.includes( column ) );
 
@@ -51,6 +51,16 @@ class ReportTable extends Component {
 				[ columnPrefsKey ]: hiddenColumns,
 			};
 			updateCurrentUserData( userDataFields );
+		}
+
+		if ( toggledColumn ) {
+			const eventProps = {
+				report: endpoint,
+				column: toggledColumn,
+				status: shownColumns.includes( toggledColumn ) ? 'on' : 'off',
+			};
+
+			recordEvent( 'analytics_table_header_toggle', eventProps );
 		}
 	}
 

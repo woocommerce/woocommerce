@@ -128,12 +128,12 @@ class TableCard extends Component {
 					}
 
 					const showCols = without( prevState.showCols, key );
-					onColumnsChange( showCols );
+					onColumnsChange( showCols, key );
 					return { showCols };
 				}
 
 				const showCols = [ ...prevState.showCols, key ];
-				onColumnsChange( showCols );
+				onColumnsChange( showCols, key );
 				return { showCols };
 			} );
 		};
