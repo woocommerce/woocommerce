@@ -43,7 +43,8 @@ jQuery( function ( $ ) {
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
 				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
-				placeholder = $state.attr( 'placeholder' );
+				placeholder = $state.attr( 'placeholder' ),
+				$newstate;
 
 			if ( stickValue ){
 				$this.data( 'woocommerce.stickState-' + country, value );
@@ -53,22 +54,37 @@ jQuery( function ( $ ) {
 			$parent.show().find( '.select2-container' ).remove();
 
 			if ( ! $.isEmptyObject( wc_meta_boxes_order.states[ country ] ) ) {
-				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state select short" placeholder="' + placeholder + '"></select>' ),
-					state = wc_meta_boxes_order.states[ country ];
+				var state = wc_meta_boxes_order.states[ country ],
+					$defaultOption = $( '<option value=""></option>' )
+						.text( woocommerce_admin_meta_boxes_order.i18n_select_state_text );
 
-				$states_select.append( $( '<option value="">' + woocommerce_admin_meta_boxes_order.i18n_select_state_text + '</option>' ) );
+					$newstate = $( '<select></select>' )
+						.prop( 'id', input_id )
+						.prop( 'name', input_name )
+						.prop( 'placeholder', placeholder )
+						.addClass( 'js_field-state select short' )
+						.append( $defaultOption );
 
-				$.each( state, function( index ) {
-					$states_select.append( $( '<option value="' + index + '">' + state[ index ] + '</option>' ) );
-				} );
+					$.each( state, function( index ) {
+						var $option = $( '<option></option>' )
+							.prop( 'value', index )
+							.text( state[ index ] );
+						$newstate.append( $option );
+					} );
 
-				$states_select.val( value );
+				$newstate.val( value );
 
-				$state.replaceWith( $states_select );
+				$state.replaceWith( $newstate );
 
-				$states_select.show().selectWoo().hide().change();
+				$newstate.show().selectWoo().hide().change();
 			} else {
-				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
+				$newstate = $( '<input type="text" />' )
+					.prop( 'id', input_id )
+					.prop( 'name', input_name )
+					.prop( 'placeholder', placeholder )
+					.addClass( 'js_field-state' )
+					.val( '' );
+				$state.replaceWith( $newstate );
 			}
 
 			// This event has a typo - deprecated in 2.5.0
@@ -384,15 +400,17 @@ jQuery( function ( $ ) {
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
 
-				var user_id = $( '#customer_user' ).val();
+				var user_id    = $( '#customer_user' ).val();
+				var user_email = $( '#_billing_email' ).val();
 
 				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
-					action   : 'woocommerce_add_coupon_discount',
-					dataType : 'json',
-					order_id : woocommerce_admin_meta_boxes.post_id,
-					security : woocommerce_admin_meta_boxes.order_item_nonce,
-					coupon   : value,
-					user_id  : user_id
+					action     : 'woocommerce_add_coupon_discount',
+					dataType   : 'json',
+					order_id   : woocommerce_admin_meta_boxes.post_id,
+					security   : woocommerce_admin_meta_boxes.order_item_nonce,
+					coupon     : value,
+					user_id    : user_id,
+					user_email : user_email
 				} );
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {

@@ -172,7 +172,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 			$this->clear_caches( $product );
 
-			do_action( 'woocommerce_new_product_variation', $id );
+			do_action( 'woocommerce_new_product_variation', $id, $product );
 		}
 	}
 
@@ -265,7 +265,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$this->clear_caches( $product );
 
-		do_action( 'woocommerce_update_product_variation', $product->get_id() );
+		do_action( 'woocommerce_update_product_variation', $product->get_id(), $product );
 	}
 
 	/*

@@ -283,15 +283,18 @@ class WC_Download_Handler {
 
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules(), true ) ) {
 			self::download_headers( $parsed_file_path['file_path'], $filename );
-			header( 'X-Sendfile: ' . $parsed_file_path['file_path'] );
+			$filepath = apply_filters( 'woocommerce_download_file_xsendfile_file_path', $parsed_file_path['file_path'], $file_path, $filename, $parsed_file_path );
+			header( 'X-Sendfile: ' . $filepath );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
 			self::download_headers( $parsed_file_path['file_path'], $filename );
-			header( 'X-Lighttpd-Sendfile: ' . $parsed_file_path['file_path'] );
+			$filepath = apply_filters( 'woocommerce_download_file_xsendfile_lighttpd_file_path', $parsed_file_path['file_path'], $file_path, $filename, $parsed_file_path );
+			header( 'X-Lighttpd-Sendfile: ' . $filepath );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
 			self::download_headers( $parsed_file_path['file_path'], $filename );
 			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $parsed_file_path['file_path'] ), '/' );
+			$xsendfile_path = apply_filters( 'woocommerce_download_file_xsendfile_x_accel_redirect_file_path', $xsendfile_path, $file_path, $filename, $parsed_file_path );
 			header( "X-Accel-Redirect: /$xsendfile_path" );
 			exit;
 		}

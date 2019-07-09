@@ -90,8 +90,8 @@ class WC_Helper_Product {
 		$product          = new WC_Product_Grouped();
 		$product->set_props(
 			array(
-				'name'          => 'Dummy Grouped Product',
-				'sku'           => 'DUMMY GROUPED SKU',
+				'name' => 'Dummy Grouped Product',
+				'sku'  => 'DUMMY GROUPED SKU',
 			)
 		);
 		$product->set_children( array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
@@ -246,7 +246,7 @@ class WC_Helper_Product {
 			$result = term_exists( $term, $attribute->slug );
 
 			if ( ! $result ) {
-				$result = wp_insert_term( $term, $attribute->slug );
+				$result               = wp_insert_term( $term, $attribute->slug );
 				$return['term_ids'][] = $result['term_id'];
 			} else {
 				$return['term_ids'][] = $result['term_id'];

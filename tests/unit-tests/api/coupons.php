@@ -15,9 +15,11 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Coupons_Controller();
-		$this->user = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user     = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 	}
 
 	/**
@@ -43,51 +45,54 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$coupon_2 = WC_Helper_Coupon::create_coupon( 'dummycoupon-2' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/coupons' ) );
-		$coupons = $response->get_data();
+		$coupons  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $coupons ) );
-		$this->assertContains( array(
-			'id'             => $coupon_1->get_id(),
-			'code'           => 'dummycoupon-1',
-			'amount'         => '1.00',
-			'date_created'   => wc_rest_prepare_date_response( $post_1->post_date_gmt, false ),
-			'date_created_gmt'   => wc_rest_prepare_date_response( $post_1->post_date_gmt ),
-			'date_modified'  => wc_rest_prepare_date_response( $post_1->post_modified_gmt, false ),
-			'date_modified_gmt'  => wc_rest_prepare_date_response( $post_1->post_modified_gmt ),
-			'discount_type'  => 'fixed_cart',
-			'description'    => 'This is a dummy coupon',
-			'date_expires'   => '',
-			'date_expires_gmt'   => '',
-			'usage_count'    => 0,
-			'individual_use' => false,
-			'product_ids'    => array(),
-			'excluded_product_ids' => array(),
-			'usage_limit'    => '',
-			'usage_limit_per_user' => '',
-			'limit_usage_to_x_items' => null,
-			'free_shipping' => false,
-			'product_categories' => array(),
-			'excluded_product_categories' => array(),
-			'exclude_sale_items' => false,
-			'minimum_amount' => '0.00',
-			'maximum_amount' => '0.00',
-			'email_restrictions' => array(),
-			'used_by' => array(),
-			'meta_data' => array(),
-			'_links' => array(
-				'self'       => array(
-					array(
-						'href' => rest_url( '/wc/v3/coupons/' . $coupon_1->get_id() ),
+		$this->assertContains(
+			array(
+				'id'                          => $coupon_1->get_id(),
+				'code'                        => 'dummycoupon-1',
+				'amount'                      => '1.00',
+				'date_created'                => wc_rest_prepare_date_response( $post_1->post_date_gmt, false ),
+				'date_created_gmt'            => wc_rest_prepare_date_response( $post_1->post_date_gmt ),
+				'date_modified'               => wc_rest_prepare_date_response( $post_1->post_modified_gmt, false ),
+				'date_modified_gmt'           => wc_rest_prepare_date_response( $post_1->post_modified_gmt ),
+				'discount_type'               => 'fixed_cart',
+				'description'                 => 'This is a dummy coupon',
+				'date_expires'                => '',
+				'date_expires_gmt'            => '',
+				'usage_count'                 => 0,
+				'individual_use'              => false,
+				'product_ids'                 => array(),
+				'excluded_product_ids'        => array(),
+				'usage_limit'                 => '',
+				'usage_limit_per_user'        => '',
+				'limit_usage_to_x_items'      => null,
+				'free_shipping'               => false,
+				'product_categories'          => array(),
+				'excluded_product_categories' => array(),
+				'exclude_sale_items'          => false,
+				'minimum_amount'              => '0.00',
+				'maximum_amount'              => '0.00',
+				'email_restrictions'          => array(),
+				'used_by'                     => array(),
+				'meta_data'                   => array(),
+				'_links'                      => array(
+					'self'       => array(
+						array(
+							'href' => rest_url( '/wc/v3/coupons/' . $coupon_1->get_id() ),
+						),
 					),
-				),
-				'collection' => array(
-					array(
-						'href' => rest_url( '/wc/v3/coupons' ),
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v3/coupons' ),
+						),
 					),
 				),
 			),
-		), $coupons );
+			$coupons
+		);
 	}
 
 	/**
@@ -112,35 +117,38 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array(
-			'id'             => $coupon->get_id(),
-			'code'           => 'dummycoupon-1',
-			'amount'         => '1.00',
-			'date_created'   => wc_rest_prepare_date_response( $post->post_date_gmt, false ),
-			'date_created_gmt' => wc_rest_prepare_date_response( $post->post_date_gmt ),
-			'date_modified'  => wc_rest_prepare_date_response( $post->post_modified_gmt, false ),
-			'date_modified_gmt' => wc_rest_prepare_date_response( $post->post_modified_gmt ),
-			'discount_type'  => 'fixed_cart',
-			'description'    => 'This is a dummy coupon',
-			'date_expires'    => null,
-			'date_expires_gmt' => null,
-			'usage_count'    => 0,
-			'individual_use' => false,
-			'product_ids'    => array(),
-			'excluded_product_ids' => array(),
-			'usage_limit'    => null,
-			'usage_limit_per_user' => null,
-			'limit_usage_to_x_items' => null,
-			'free_shipping' => false,
-			'product_categories' => array(),
-			'excluded_product_categories' => array(),
-			'exclude_sale_items' => false,
-			'minimum_amount' => '0.00',
-			'maximum_amount' => '0.00',
-			'email_restrictions' => array(),
-			'used_by' => array(),
-			'meta_data' => array(),
-		), $data );
+		$this->assertEquals(
+			array(
+				'id'                          => $coupon->get_id(),
+				'code'                        => 'dummycoupon-1',
+				'amount'                      => '1.00',
+				'date_created'                => wc_rest_prepare_date_response( $post->post_date_gmt, false ),
+				'date_created_gmt'            => wc_rest_prepare_date_response( $post->post_date_gmt ),
+				'date_modified'               => wc_rest_prepare_date_response( $post->post_modified_gmt, false ),
+				'date_modified_gmt'           => wc_rest_prepare_date_response( $post->post_modified_gmt ),
+				'discount_type'               => 'fixed_cart',
+				'description'                 => 'This is a dummy coupon',
+				'date_expires'                => null,
+				'date_expires_gmt'            => null,
+				'usage_count'                 => 0,
+				'individual_use'              => false,
+				'product_ids'                 => array(),
+				'excluded_product_ids'        => array(),
+				'usage_limit'                 => null,
+				'usage_limit_per_user'        => null,
+				'limit_usage_to_x_items'      => null,
+				'free_shipping'               => false,
+				'product_categories'          => array(),
+				'excluded_product_categories' => array(),
+				'exclude_sale_items'          => false,
+				'minimum_amount'              => '0.00',
+				'maximum_amount'              => '0.00',
+				'email_restrictions'          => array(),
+				'used_by'                     => array(),
+				'meta_data'                   => array(),
+			),
+			$data
+		);
 	}
 
 	/**
@@ -171,46 +179,51 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	public function test_create_coupon() {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
-		$request->set_body_params( array(
-			'code'          => 'test',
-			'amount'        => '5.00',
-			'discount_type' => 'fixed_product',
-			'description'   => 'Test',
-			'usage_limit'   => 10,
-		) );
+		$request->set_body_params(
+			array(
+				'code'          => 'test',
+				'amount'        => '5.00',
+				'discount_type' => 'fixed_product',
+				'description'   => 'Test',
+				'usage_limit'   => 10,
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEquals( array(
-			'id'             => $data['id'],
-			'code'           => 'test',
-			'amount'         => '5.00',
-			'date_created'   => $data['date_created'],
-			'date_created_gmt'   => $data['date_created_gmt'],
-			'date_modified'  => $data['date_modified'],
-			'date_modified_gmt'  => $data['date_modified_gmt'],
-			'discount_type'  => 'fixed_product',
-			'description'    => 'Test',
-			'date_expires'    => null,
-			'date_expires_gmt'    => null,
-			'usage_count'    => 0,
-			'individual_use' => false,
-			'product_ids'    => array(),
-			'excluded_product_ids' => array(),
-			'usage_limit'    => 10,
-			'usage_limit_per_user' => null,
-			'limit_usage_to_x_items' => null,
-			'free_shipping' => false,
-			'product_categories' => array(),
-			'excluded_product_categories' => array(),
-			'exclude_sale_items' => false,
-			'minimum_amount' => '0.00',
-			'maximum_amount' => '0.00',
-			'email_restrictions' => array(),
-			'used_by' => array(),
-			'meta_data' => array(),
-		), $data );
+		$this->assertEquals(
+			array(
+				'id'                          => $data['id'],
+				'code'                        => 'test',
+				'amount'                      => '5.00',
+				'date_created'                => $data['date_created'],
+				'date_created_gmt'            => $data['date_created_gmt'],
+				'date_modified'               => $data['date_modified'],
+				'date_modified_gmt'           => $data['date_modified_gmt'],
+				'discount_type'               => 'fixed_product',
+				'description'                 => 'Test',
+				'date_expires'                => null,
+				'date_expires_gmt'            => null,
+				'usage_count'                 => 0,
+				'individual_use'              => false,
+				'product_ids'                 => array(),
+				'excluded_product_ids'        => array(),
+				'usage_limit'                 => 10,
+				'usage_limit_per_user'        => null,
+				'limit_usage_to_x_items'      => null,
+				'free_shipping'               => false,
+				'product_categories'          => array(),
+				'excluded_product_categories' => array(),
+				'exclude_sale_items'          => false,
+				'minimum_amount'              => '0.00',
+				'maximum_amount'              => '0.00',
+				'email_restrictions'          => array(),
+				'used_by'                     => array(),
+				'meta_data'                   => array(),
+			),
+			$data
+		);
 	}
 
 	/**
@@ -222,12 +235,14 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 		// test no code...
 		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
-		$request->set_body_params( array(
-			'amount'        => '5.00',
-			'discount_type' => 'fixed_product',
-		) );
+		$request->set_body_params(
+			array(
+				'amount'        => '5.00',
+				'discount_type' => 'fixed_product',
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -241,13 +256,15 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 
 		// test no code...
 		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
-		$request->set_body_params( array(
-			'code'          => 'fail',
-			'amount'        => '5.00',
-			'discount_type' => 'fixed_product',
-		) );
+		$request->set_body_params(
+			array(
+				'code'          => 'fail',
+				'amount'        => '5.00',
+				'discount_type' => 'fixed_product',
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -258,8 +275,8 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_coupon() {
 		wp_set_current_user( $this->user );
-		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
-		$post     = get_post( $coupon->get_id() );
+		$coupon = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$post   = get_post( $coupon->get_id() );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/coupons/' . $coupon->get_id() ) );
 		$data     = $response->get_data();
@@ -268,12 +285,14 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '1.00', $data['amount'] );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
-		$request->set_body_params( array(
-			'amount' => '10.00',
-			'description' => 'New description',
-		) );
+		$request->set_body_params(
+			array(
+				'amount'      => '10.00',
+				'description' => 'New description',
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( '10.00', $data['amount'] );
 		$this->assertEquals( 'New description', $data['description'] );
@@ -288,13 +307,15 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/0' );
-		$request->set_body_params( array(
-			'code'   => 'tester',
-			'amount' => '10.00',
-			'description' => 'New description',
-		) );
+		$request->set_body_params(
+			array(
+				'code'        => 'tester',
+				'amount'      => '10.00',
+				'description' => 'New description',
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -305,14 +326,16 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_coupon_without_permission() {
 		wp_set_current_user( 0 );
-		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
-		$post     = get_post( $coupon->get_id() );
+		$coupon = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$post   = get_post( $coupon->get_id() );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
-		$request->set_body_params( array(
-			'amount' => '10.00',
-			'description' => 'New description',
-		) );
+		$request->set_body_params(
+			array(
+				'amount'      => '10.00',
+				'description' => 'New description',
+			)
+		);
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
@@ -324,7 +347,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_coupon() {
 		wp_set_current_user( $this->user );
-		$coupon   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$coupon  = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/coupons/' . $coupon->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -364,32 +387,34 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	public function test_batch_coupon() {
 		wp_set_current_user( $this->user );
 
-		$coupon_1   = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
-		$coupon_2   = WC_Helper_Coupon::create_coupon( 'dummycoupon-2' );
-		$coupon_3   = WC_Helper_Coupon::create_coupon( 'dummycoupon-3' );
-		$coupon_4   = WC_Helper_Coupon::create_coupon( 'dummycoupon-4' );
+		$coupon_1 = WC_Helper_Coupon::create_coupon( 'dummycoupon-1' );
+		$coupon_2 = WC_Helper_Coupon::create_coupon( 'dummycoupon-2' );
+		$coupon_3 = WC_Helper_Coupon::create_coupon( 'dummycoupon-3' );
+		$coupon_4 = WC_Helper_Coupon::create_coupon( 'dummycoupon-4' );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons/batch' );
-		$request->set_body_params( array(
-			'update' => array(
-				array(
-					'id'     => $coupon_1->get_id(),
-					'amount' => '5.15',
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'     => $coupon_1->get_id(),
+						'amount' => '5.15',
+					),
 				),
-			),
-			'delete' => array(
-				$coupon_2->get_id(),
-				$coupon_3->get_id(),
-			),
-			'create' => array(
-				array(
-					'code'   => 'new-coupon',
-					'amount' => '11.00',
+				'delete' => array(
+					$coupon_2->get_id(),
+					$coupon_3->get_id(),
 				),
-			),
-		) );
+				'create' => array(
+					array(
+						'code'   => 'new-coupon',
+						'amount' => '11.00',
+					),
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( '5.15', $data['update'][0]['amount'] );
 		$this->assertEquals( '11.00', $data['create'][0]['amount'] );
@@ -397,9 +422,9 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $coupon_2->get_id(), $data['delete'][0]['id'] );
 		$this->assertEquals( $coupon_3->get_id(), $data['delete'][1]['id'] );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 3, count( $data ) );
 	}
@@ -410,9 +435,9 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_coupon_schema() {
 		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/coupons' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/coupons' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
 		$this->assertEquals( 27, count( $properties ) );

@@ -112,11 +112,7 @@ class ActionScheduler_WPCLI_QueueRunner extends ActionScheduler_Abstract_QueueRu
 
 			$this->process_action( $action_id );
 			$this->progress_bar->tick();
-
-			// Free up memory after every 50 items
-			if ( 0 === $this->progress_bar->current() % 50 ) {
-				$this->stop_the_insanity();
-			}
+			$this->maybe_stop_the_insanity();
 		}
 
 		$completed = $this->progress_bar->current();
@@ -205,6 +201,17 @@ class ActionScheduler_WPCLI_QueueRunner extends ActionScheduler_Abstract_QueueRu
 
 		if ( is_callable( array( $wp_object_cache, '__remoteset' ) ) ) {
 			call_user_func( array( $wp_object_cache, '__remoteset' ) ); // important
+		}
+	}
+
+	/**
+	 * Maybe trigger the stop_the_insanity() method to free up memory.
+	 */
+	protected function maybe_stop_the_insanity() {
+		// The value returned by progress_bar->current() might be padded. Remove padding, and convert to int.
+		$current_iteration = intval( trim( $this->progress_bar->current() ) );
+		if ( 0 === $current_iteration % 50 ) {
+			$this->stop_the_insanity();
 		}
 	}
 }

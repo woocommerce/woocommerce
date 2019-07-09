@@ -378,7 +378,7 @@ class WC_AJAX {
 			array(
 				'result'    => empty( $messages ) ? 'success' : 'failure',
 				'messages'  => $messages,
-				'reload'    => $reload_checkout ? 'true' : 'false',
+				'reload'    => $reload_checkout,
 				'fragments' => apply_filters(
 					'woocommerce_update_order_review_fragments',
 					array(
@@ -707,7 +707,7 @@ class WC_AJAX {
 		$product_id       = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id ); // phpcs:ignore
 		$loop             = intval( $_POST['loop'] );
-		$product_object   = wc_get_product( $product_id );
+		$product_object   = new WC_Product_Variable( $product_id ); // Forces type to variable in case product is unsaved.
 		$variation_object = new WC_Product_Variation();
 		$variation_object->set_parent_id( $product_id );
 		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
@@ -728,7 +728,7 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 49 );
+		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 50 );
 		wc_set_time_limit( 0 );
 
 		$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
@@ -738,39 +738,14 @@ class WC_AJAX {
 		}
 
 		$product    = wc_get_product( $post_id );
-		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+		$data_store = $product->get_data_store();
 
-		if ( ! empty( $attributes ) ) {
-			// Get existing variations so we don't create duplicates.
-			$existing_variations = array_map( 'wc_get_product', $product->get_children() );
-			$existing_attributes = array();
-
-			foreach ( $existing_variations as $existing_variation ) {
-				$existing_attributes[] = $existing_variation->get_attributes();
-			}
-
-			$added               = 0;
-			$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
-
-			foreach ( $possible_attributes as $possible_attribute ) {
-				if ( in_array( $possible_attribute, $existing_attributes, true ) ) {
-					continue;
-				}
-				$variation = new WC_Product_Variation();
-				$variation->set_parent_id( $post_id );
-				$variation->set_attributes( $possible_attribute );
-
-				do_action( 'product_variation_linked', $variation->save() );
-
-				if ( ( $added ++ ) > WC_MAX_LINKED_VARIATIONS ) {
-					break;
-				}
-			}
-
-			echo esc_html( $added );
+		if ( ! is_callable( array( $data_store, 'create_all_product_variations' ) ) ) {
+			wp_die();
 		}
 
-		$data_store = $product->get_data_store();
+		echo esc_html( $data_store->create_all_product_variations( $product, WC_MAX_LINKED_VARIATIONS ) );
+
 		$data_store->sort_all_product_variations( $product->get_id() );
 		wp_die();
 	}
@@ -925,7 +900,7 @@ class WC_AJAX {
 				}
 
 				$item_id                 = $order->add_product( $product, $qty );
-				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
 
@@ -1153,11 +1128,15 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 
-			// Add user ID so validation for coupon limits works.
-			$user_id_arg = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+			// Add user ID and/or email so validation for coupon limits works.
+			$user_id_arg    = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+			$user_email_arg = isset( $_POST['user_email'] ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : '';
 
 			if ( $user_id_arg ) {
 				$order->set_customer_id( $user_id_arg );
+			}
+			if ( $user_email_arg ) {
+				$order->set_billing_email( $user_email_arg );
 			}
 
 			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1343,8 +1322,14 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$rate_id  = absint( $_POST['rate_id'] );
 
+			$order = wc_get_order( $order_id );
+			if ( ! $order->is_editable() ) {
+				throw new Exception( __( 'Order not editable', 'woocommerce' ) );
+			}
+
 			wc_delete_order_item( $rate_id );
 
+			// Need to load order again after deleting to have latest items before calculating.
 			$order = wc_get_order( $order_id );
 			$order->calculate_totals( false );
 
@@ -1543,16 +1528,11 @@ class WC_AJAX {
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
+		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
+		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit );
-
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
-		}
-
-		if ( ! empty( $_GET['include'] ) ) {
-			$ids = array_intersect( $ids, array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) );
-		}
+		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
@@ -1590,21 +1570,18 @@ class WC_AJAX {
 	public static function json_search_downloadable_products_and_variations() {
 		check_ajax_referer( 'search-products', 'security' );
 
+		if ( ! empty( $_GET['limit'] ) ) {
+			$limit = absint( $_GET['limit'] );
+		} else {
+			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		}
+
+		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
+		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+
 		$term       = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, 'downloadable', true );
-
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
-		}
-
-		if ( ! empty( $_GET['include'] ) ) {
-			$ids = array_intersect( $ids, array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) );
-		}
-
-		if ( ! empty( $_GET['limit'] ) ) {
-			$ids = array_slice( $ids, 0, absint( $_GET['limit'] ) );
-		}
+		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
 
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
@@ -1843,7 +1820,6 @@ class WC_AJAX {
 
 		try {
 			$order       = wc_get_order( $order_id );
-			$order_items = $order->get_items();
 			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
@@ -2077,6 +2053,8 @@ class WC_AJAX {
 		);
 
 		if ( $variations ) {
+			wc_render_invalid_variation_notice( $product_object );
+
 			foreach ( $variations as $variation_object ) {
 				$variation_id   = $variation_object->get_id();
 				$variation      = get_post( $variation_id );

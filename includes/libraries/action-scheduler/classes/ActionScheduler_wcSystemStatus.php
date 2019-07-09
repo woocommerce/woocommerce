@@ -21,7 +21,7 @@ class ActionScheduler_wcSystemStatus {
 	 *
 	 * Helpful to identify issues, like a clogged queue.
 	 */
-	public function print() {
+	public function render() {
 		$action_counts     = $this->store->action_counts();
 		$status_labels     = $this->store->get_status_labels();
 		$oldest_and_newest = $this->get_oldest_and_newest( array_keys( $status_labels ) );
@@ -126,4 +126,22 @@ class ActionScheduler_wcSystemStatus {
 		<?php
 	}
 
+	/**
+	 * is triggered when invoking inaccessible methods in an object context.
+	 *
+	 * @param $name      string
+	 * @param $arguments array
+	 *
+	 * @return mixed
+	 * @link https://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.methods
+	 */
+	public function __call( $name, $arguments ) {
+		switch ( $name ) {
+			case 'print':
+				_deprecated_function( __CLASS__ . '::print()', '2.2.4', __CLASS__ . '::render()' );
+				return call_user_func_array( array( $this, 'render' ), $arguments );
+		}
+
+		return null;
+	}
 }

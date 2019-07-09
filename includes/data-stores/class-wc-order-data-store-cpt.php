@@ -83,7 +83,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function create( &$order ) {
 		$order->set_order_key( wc_generate_order_key() );
 		parent::create( $order );
-		do_action( 'woocommerce_new_order', $order->get_id() );
+		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
 	/**
@@ -166,9 +166,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$new_status = $order->get_status( 'edit' );
 
 		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft' ), true ) ) {
-			do_action( 'woocommerce_new_order', $order->get_id() );
+			do_action( 'woocommerce_new_order', $order->get_id(), $order );
 		} else {
-			do_action( 'woocommerce_update_order', $order->get_id() );
+			do_action( 'woocommerce_update_order', $order->get_id(), $order );
 		}
 	}
 

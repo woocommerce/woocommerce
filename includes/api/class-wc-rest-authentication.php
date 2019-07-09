@@ -55,11 +55,15 @@ class WC_REST_Authentication {
 		}
 
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+
+		// Check if the request is to the WC API endpoints.
+		$woocommerce = ( false !== strpos( $request_uri, $rest_prefix . 'wc/' ) );
 
 		// Allow third party plugins use our authentication methods.
-		$third_party = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc-' ) ); // @codingStandardsIgnoreLine
+		$third_party = ( false !== strpos( $request_uri, $rest_prefix . 'wc-' ) );
 
-		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', WC()->is_rest_api_request() || $third_party );
+		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
 	}
 
 	/**

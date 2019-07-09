@@ -90,7 +90,7 @@ class WC_Meta_Box_Coupon_Data {
 						'label'       => __( 'Coupon amount', 'woocommerce' ),
 						'placeholder' => wc_format_localized_price( 0 ),
 						'description' => __( 'Value of the coupon.', 'woocommerce' ),
-						'data_type'   => 'price',
+						'data_type'   => 'percent' === $coupon->get_discount_type( 'edit' ) ? 'decimal' : 'price',
 						'desc_tip'    => true,
 						'value'       => $coupon->get_amount( 'edit' ),
 					)

@@ -235,7 +235,7 @@ defined( 'ABSPATH' ) || exit;
 						'options'       => wc_get_product_stock_status_options(),
 						'desc_tip'      => true,
 						'description'   => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
-						'wrapper_class' => 'form-row form-row-full hide_if_variation_manage_stock',
+						'wrapper_class' => 'form-row form-row-full variable_stock_status',
 					)
 				);
 

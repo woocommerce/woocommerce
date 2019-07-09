@@ -18,14 +18,18 @@ none
 # Sass
 .sass-cache/
 
+# Compiled CSS
+/assets/css/*.css
+
+# Minified JS
+/assets/js/admin/*.min.js
+/assets/js/frontend/*.min.js
+
 # OS X metadata
 .DS_Store
 
 # Windows junk
 Thumbs.db
-
-# ApiGen
-/wc-apidocs/
 
 # Behat/CLI Tests
 tests/cli/installer

@@ -199,7 +199,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return float
 	 */
 	public function get_amount( $context = 'view' ) {
-		return (float) $this->get_prop( 'amount', $context );
+		return wc_format_decimal( $this->get_prop( 'amount', $context ) );
 	}
 
 	/**
@@ -942,7 +942,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Map one of the WC_Coupon error codes to a message string.
 	 *
 	 * @param int $err_code Message/error code.
-	 * @return string| Message/error string
+	 * @return string Message/error string
 	 */
 	public function get_coupon_error( $err_code ) {
 		switch ( $err_code ) {

@@ -183,6 +183,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$buyer = ucwords( $user->display_name );
 		}
 
+		/**
+		 * Filter buyer name in list table orders.
+		 *
+		 * @since 3.7.0
+		 * @param string   $buyer Buyer name.
+		 * @param WC_Order $order Order data.
+		 */
+		$buyer = apply_filters( 'woocommerce_admin_order_buyer_name', $buyer, $this->object );
+
 		if ( $this->object->get_status() === 'trash' ) {
 			echo '<strong>#' . esc_attr( $this->object->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong>';
 		} else {
@@ -756,7 +765,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 		?>
 		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Filter by registered customer', 'woocommerce' ); ?>" data-allow_clear="true">
-			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( $user_string ); ?><option>
+			<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( wp_kses_post( $user_string ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?><option>
 		</select>
 		<?php
 	}

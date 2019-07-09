@@ -1,12 +1,12 @@
 language: php
-
-addons:
-  chrome: stable
-  apt:
-    packages:
-      - nginx
+dist: trusty
 
 sudo: false
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
 
 # Test main supported versions of PHP against latest WP.
 php:
@@ -19,32 +19,34 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
-# Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP
+# Additional tests against stable PHP (min version is 5.6)
 # and code coverage report.
 matrix:
   fast_finish: true
   include:
-  - php: 5.3
-    dist: precise
-  - php: 5.2
-    dist: precise
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "e2e tests"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    addons:
+      chrome: stable
+      apt:
+        packages:
+          - nginx
   - name: "Unit tests code coverage"
-    php: 7.1
+    php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   - name: "WooCommerce unit tests using WordPress nightly"
     php: 7.3
     env: WP_VERSION=nightly WP_MULTISITE=0
   allow_failures:
-  - php: 7.1
+  - php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     # Remove Xdebug for a huge performance increase:
     if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
@@ -52,9 +54,12 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
-  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash tests/bin/travis.sh before
+  - |
+    # Install WP Test suite, install PHPUnit globally:
+    if [[ ! -z "$WP_VERSION" ]]; then
+      bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+      composer global require "phpunit/phpunit=4.8.*|6.5.*"
+    fi
 
 script:
   - bash tests/bin/phpunit.sh

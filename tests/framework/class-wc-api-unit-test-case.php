@@ -40,10 +40,10 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 	 * Assert the given response is an API error with a specific code and status.
 	 *
 	 * @since 2.2
-	 * @param string $code error code, e.g. `woocommerce_api_user_cannot_read_orders_count`
+	 * @param string   $code error code, e.g. `woocommerce_api_user_cannot_read_orders_count`
 	 * @param int|null $status HTTP status code associated with error, e.g. 400
 	 * @param WP_Error $response
-	 * @param string $message optional message to render when assertion fails
+	 * @param string   $message optional message to render when assertion fails
 	 */
 	public function assertHasAPIError( $code, $status = null, $response, $message = '' ) {
 

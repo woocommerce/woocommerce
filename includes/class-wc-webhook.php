@@ -38,7 +38,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		'event'            => '',
 		'failure_count'    => 0,
 		'user_id'          => 0,
-		'api_version'      => 2,
+		'api_version'      => 3,
 		'pending_delivery' => false,
 	);
 
@@ -269,6 +269,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 			// Ignore standard drafts for orders.
 			if ( 'order' === $resource && 'draft' === $status ) {
+				return false;
+			}
+
+			// Check registered order types for order types args.
+			if ( 'order' === $resource && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ), true ) ) {
 				return false;
 			}
 		}

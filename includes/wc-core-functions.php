@@ -157,7 +157,7 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name ) ) );
+	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, WC_VERSION ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -205,7 +205,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) );
+	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, WC_VERSION ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -233,12 +233,20 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	);
 
 	if ( ! empty( $args ) && is_array( $args ) ) {
+		if ( isset( $args['action_args'] ) ) {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				__( 'action_args should not be overwritten when calling wc_get_template.', 'woocommerce' ),
+				'3.6.0'
+			);
+			unset( $args['action_args'] );
+		}
 		extract( $args ); // @codingStandardsIgnoreLine
 	}
 
 	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
-	include $template;
+	include $action_args['located'];
 
 	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
@@ -418,7 +426,7 @@ function get_woocommerce_currencies() {
 					'MMK' => __( 'Burmese kyat', 'woocommerce' ),
 					'MNT' => __( 'Mongolian t&ouml;gr&ouml;g', 'woocommerce' ),
 					'MOP' => __( 'Macanese pataca', 'woocommerce' ),
-					'MRO' => __( 'Mauritanian ouguiya', 'woocommerce' ),
+					'MRU' => __( 'Mauritanian ouguiya', 'woocommerce' ),
 					'MUR' => __( 'Mauritian rupee', 'woocommerce' ),
 					'MVR' => __( 'Maldivian rufiyaa', 'woocommerce' ),
 					'MWK' => __( 'Malawian kwacha', 'woocommerce' ),
@@ -456,7 +464,7 @@ function get_woocommerce_currencies() {
 					'SOS' => __( 'Somali shilling', 'woocommerce' ),
 					'SRD' => __( 'Surinamese dollar', 'woocommerce' ),
 					'SSP' => __( 'South Sudanese pound', 'woocommerce' ),
-					'STD' => __( 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra', 'woocommerce' ),
+					'STN' => __( 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra', 'woocommerce' ),
 					'SYP' => __( 'Syrian pound', 'woocommerce' ),
 					'SZL' => __( 'Swazi lilangeni', 'woocommerce' ),
 					'THB' => __( 'Thai baht', 'woocommerce' ),
@@ -604,7 +612,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'MMK' => 'Ks',
 			'MNT' => '&#x20ae;',
 			'MOP' => 'P',
-			'MRO' => 'UM',
+			'MRU' => 'UM',
 			'MUR' => '&#x20a8;',
 			'MVR' => '.&#x783;',
 			'MWK' => 'MK',
@@ -643,7 +651,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'SOS' => 'Sh',
 			'SRD' => '&#36;',
 			'SSP' => '&pound;',
-			'STD' => 'Db',
+			'STN' => 'Db',
 			'SYP' => '&#x644;.&#x633;',
 			'SZL' => 'L',
 			'THB' => '&#3647;',
@@ -869,7 +877,7 @@ function wc_print_js() {
  * @param  string  $value  Value of the cookie.
  * @param  integer $expire Expiry of the cookie.
  * @param  bool    $secure Whether the cookie should be served only over https.
- * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0
+ * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
 	if ( ! headers_sent() ) {
@@ -1615,9 +1623,9 @@ function wc_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
-	if ( function_exists( 'iconv' ) ) {
-		$a = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
-		$b = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
+	if ( function_exists( 'iconv' ) && defined( 'ICONV_IMPL' ) && @strcasecmp( ICONV_IMPL, 'unknown' ) !== 0 ) {
+		$a = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $a );
+		$b = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $b );
 	}
 	return strcmp( $a, $b );
 }
@@ -2246,4 +2254,15 @@ function wc_get_server_database_version() {
 		'string' => $server_info,
 		'number' => preg_replace( '/([^\d.]+).*/', '', $server_info ),
 	);
+}
+
+/**
+ * Initialize and load the cart functionality.
+ *
+ * @since 3.6.4
+ * @return void
+ */
+function wc_load_cart() {
+	WC()->initialize_session();
+	WC()->initialize_cart();
 }
