@@ -1,3 +1,4 @@
+/* global woocommerce_admin_meta_boxes_coupon */
 jQuery(function( $ ) {
 
 	/**
@@ -13,12 +14,7 @@ jQuery(function( $ ) {
 				.on( 'change', this.type_options )
 				.change();
 
-			// Add buttons to coupon screen
-			var $coupon_screen = $( '.post-new-php.post-type-shop_coupon' ),
-			$code_action       = $coupon_screen.find( '#title' );
-			$code_action.after(
-				'<a href="#" class="button generate-coupon-code">' + woocommerce_admin_meta_boxes_coupon.generate_button_text + '</a>'
-			);
+            this.insert_generate_coupon_code_button();
 			$( '.button.generate-coupon-code' ).on( 'click', this.generate_coupon_code );
 		},
 
@@ -40,7 +36,16 @@ jQuery(function( $ ) {
 			} else {
 				$( '.limit_usage_to_x_items_field' ).hide();
 			}
-		},
+        },
+
+        /**
+         * Insert generate coupon code buttom HTML.
+         */
+        insert_generate_coupon_code_button: function() {
+			$( '.post-type-shop_coupon' ).find( '#title' ).after(
+				'<a href="#" class="button generate-coupon-code">' + woocommerce_admin_meta_boxes_coupon.generate_button_text + '</a>'
+			);
+        },
 
 		/**
 		 * Generate a random coupon code
@@ -50,7 +55,7 @@ jQuery(function( $ ) {
 			var $coupon_code_field = $( '#title' ),
 				$coupon_code_label = $( '#title-prompt-text' ),
 			    $result = '';
-			for ( var i = 0; i < woocommerce_admin_meta_boxes_coupon.char_limit; i++ ) {
+			for ( var i = 0; i < woocommerce_admin_meta_boxes_coupon.char_length; i++ ) {
 				$result += woocommerce_admin_meta_boxes_coupon.characters.charAt(
 					Math.floor( Math.random() * woocommerce_admin_meta_boxes_coupon.characters.length )
 				);
