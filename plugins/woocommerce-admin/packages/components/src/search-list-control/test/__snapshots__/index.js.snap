@@ -43,7 +43,6 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-8"
     >
@@ -51,7 +50,9 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     </div>
     <div
       aria-labelledby="components-menu-group-label-8"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -344,7 +345,6 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-0"
     >
@@ -352,7 +352,9 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     </div>
     <div
       aria-labelledby="components-menu-group-label-0"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -630,7 +632,6 @@ exports[`SearchListControl should render a search box and list of options with a
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-1"
     >
@@ -638,7 +639,9 @@ exports[`SearchListControl should render a search box and list of options with a
     </div>
     <div
       aria-labelledby="components-menu-group-label-1"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -916,7 +919,6 @@ exports[`SearchListControl should render a search box and list of options, with 
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-7"
     >
@@ -924,7 +926,9 @@ exports[`SearchListControl should render a search box and list of options, with 
     </div>
     <div
       aria-labelledby="components-menu-group-label-7"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <div>
         Apricots
@@ -998,7 +1002,6 @@ exports[`SearchListControl should render a search box and list of options, with 
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-6"
     >
@@ -1006,7 +1009,9 @@ exports[`SearchListControl should render a search box and list of options, with 
     </div>
     <div
       aria-labelledby="components-menu-group-label-6"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -1428,7 +1433,6 @@ exports[`SearchListControl should render a search box with a search term, and on
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-4"
     >
@@ -1436,7 +1440,9 @@ exports[`SearchListControl should render a search box with a search term, and on
     </div>
     <div
       aria-labelledby="components-menu-group-label-4"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -1563,7 +1569,6 @@ exports[`SearchListControl should render a search box with a search term, and on
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-5"
     >
@@ -1571,7 +1576,9 @@ exports[`SearchListControl should render a search box with a search term, and on
     </div>
     <div
       aria-labelledby="components-menu-group-label-5"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -1750,7 +1757,6 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-2"
     >
@@ -1758,7 +1764,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     </div>
     <div
       aria-labelledby="components-menu-group-label-2"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}
@@ -2134,7 +2142,6 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     className="woocommerce-search-list__list components-menu-group"
   >
     <div
-      aria-hidden="true"
       className="components-menu-group__label"
       id="components-menu-group-label-3"
     >
@@ -2142,7 +2149,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     </div>
     <div
       aria-labelledby="components-menu-group-label-3"
-      role="group"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
     >
       <button
         aria-checked={false}

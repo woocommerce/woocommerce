@@ -51,13 +51,13 @@ class HistoricalData extends Component {
 	}
 
 	makeQuery( path, errorMessage ) {
-		const { createNotice } = this.props;
+		const { addNotice } = this.props;
 		apiFetch( { path, method: 'POST' } )
 			.then( response => {
 				if ( 'success' === response.status ) {
-					createNotice( 'success', response.message );
+					addNotice( { status: 'success', message: response.message } );
 				} else {
-					createNotice( 'error', errorMessage );
+					addNotice( { status: 'error', message: errorMessage } );
 					this.setState( {
 						activeImport: false,
 						lastImportStopTimestamp: Date.now(),
@@ -66,7 +66,7 @@ class HistoricalData extends Component {
 			} )
 			.catch( error => {
 				if ( error && error.message ) {
-					createNotice( 'error', error.message );
+					addNotice( { status: 'error', message: error.message } );
 					this.setState( {
 						activeImport: false,
 						lastImportStopTimestamp: Date.now(),
