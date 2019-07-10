@@ -531,7 +531,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		$images    = array();
-		$separator = apply_filters( 'woocommerce_product_import_image_separator', ',' ); 
+		$separator = apply_filters( 'woocommerce_product_import_image_separator', ',' );
 
 		foreach ( $this->explode_values( $value, $separator ) as $image ) {
 			if ( stristr( $image, '://' ) ) {
