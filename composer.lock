@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd0dd7c781a1eb991b4013a04fd4a576",
+    "content-hash": "418a94fc1ba1250449181ef141996527",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -164,20 +164,20 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "dev-build/2.2.0-dev",
+            "version": "v2.3.0-beta",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "d17885ea1fff530ab6bd79d57e8ab4224600ec43"
+                "reference": "2087a7639277fe7c1c45a72532d4524c28739186"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d17885ea1fff530ab6bd79d57e8ab4224600ec43",
-                "reference": "d17885ea1fff530ab6bd79d57e8ab4224600ec43",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/2087a7639277fe7c1c45a72532d4524c28739186",
+                "reference": "2087a7639277fe7c1c45a72532d4524c28739186",
                 "shasum": ""
             },
             "require": {
-                "automattic/jetpack-autoloader": "^1",
+                "automattic/jetpack-autoloader": "1.2.0",
                 "composer/installers": "1.6.0"
             },
             "require-dev": {
@@ -200,22 +200,27 @@
             "license": [
                 "GPL-3.0-or-later"
             ],
-            "description": "Feature plugin for the WooCommerce Gutenberg Products block",
+            "description": "WooCommerce blocks for the Gutenberg editor.",
             "homepage": "https://woocommerce.com/",
-            "time": "2019-06-24T11:20:32+00:00"
+            "keywords": [
+                "blocks",
+                "gutenberg",
+                "woocommerce"
+            ],
+            "time": "2019-07-10T11:39:03+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "72c5a6687d52cc1d9672c279de1a1eeb66f3ab4e"
+                "reference": "1b3ea5eef13afb15aef68dd5aff4b44052ff1fdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/72c5a6687d52cc1d9672c279de1a1eeb66f3ab4e",
-                "reference": "72c5a6687d52cc1d9672c279de1a1eeb66f3ab4e",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/1b3ea5eef13afb15aef68dd5aff4b44052ff1fdf",
+                "reference": "1b3ea5eef13afb15aef68dd5aff4b44052ff1fdf",
                 "shasum": ""
             },
             "require": {
@@ -242,7 +247,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2019-07-08T18:02:29+00:00"
+            "time": "2019-07-10T10:11:48+00:00"
         }
     ],
     "packages-dev": [
@@ -2126,9 +2131,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "woocommerce/woocommerce-blocks": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": [],
