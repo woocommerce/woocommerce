@@ -8,8 +8,8 @@
   "minimum-stability": "dev",
   "require": {
     "composer/installers": "1.6.0",
-    "woocommerce/woocommerce-rest-api": "1.0.1",
-    "woocommerce/woocommerce-blocks": "dev-build/2.2.0-dev",
+    "woocommerce/woocommerce-rest-api": "1.0.2",
+    "woocommerce/woocommerce-blocks": "2.3.0-beta",
     "automattic/jetpack-autoloader": "1.2.0"
   },
   "require-dev": {
