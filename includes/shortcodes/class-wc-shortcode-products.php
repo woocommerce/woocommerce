@@ -125,6 +125,7 @@ class WC_Shortcode_Products {
 				'terms'          => '',        // Comma separated term slugs or ids.
 				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 				'tag'            => '',        // Comma separated tag slugs.
+				'tag_operator'   => 'IN',      // Operator to compare tags. Possible values are 'IN', 'NOT IN', 'AND'.
 				'visibility'     => 'visible', // Product visibility setting. Possible values are 'visible', 'catalog', 'search', 'hidden'.
 				'class'          => '',        // HTML class.
 				'page'           => 1,         // Page for pagination.
@@ -369,7 +370,7 @@ class WC_Shortcode_Products {
 				'taxonomy' => 'product_tag',
 				'terms'    => array_map( 'sanitize_title', explode( ',', $this->attributes['tag'] ) ),
 				'field'    => 'slug',
-				'operator' => 'IN',
+				'operator' => $this->attributes['tag_operator'],
 			);
 		}
 	}

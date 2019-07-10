@@ -111,6 +111,8 @@ class WC_Site_Tracking {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-orders-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-settings-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-status-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupons-tracking.php';
 
 		$tracking_classes = array(
 			'WC_Admin_Setup_Wizard_Tracking',
@@ -119,6 +121,8 @@ class WC_Site_Tracking {
 			'WC_Products_Tracking',
 			'WC_Orders_Tracking',
 			'WC_Settings_Tracking',
+			'WC_Status_Tracking',
+			'WC_Coupons_Tracking',
 		);
 
 		foreach ( $tracking_classes as $tracking_class ) {

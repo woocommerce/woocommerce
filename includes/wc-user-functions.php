@@ -117,7 +117,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
  * @param string $suffix Append string to username to make it unique.
  * @return string Generated username.
  */
-function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' ) {
+function wc_create_new_customer_username( $email, $new_user_args = array(), $suffix = '' ) {
 	$username_parts = array();
 
 	if ( isset( $new_user_args['first_name'] ) ) {
@@ -155,10 +155,42 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 		$username_parts[] = sanitize_user( $email_username, true );
 	}
 
-	$username = wc_strtolower( implode( '', $username_parts ) );
+	$username = wc_strtolower( implode( '.', $username_parts ) );
 
 	if ( $suffix ) {
 		$username .= $suffix;
+	}
+
+	/**
+	 * WordPress 4.4 - filters the list of blacklisted usernames.
+	 *
+	 * @since 3.7.0
+	 * @param array $usernames Array of blacklisted usernames.
+	 */
+	$illegal_logins = (array) apply_filters( 'illegal_user_logins', array() );
+
+	// Stop illegal logins and generate a new random username.
+	if ( in_array( strtolower( $username ), array_map( 'strtolower', $illegal_logins ), true ) ) {
+		$new_args = array();
+
+		/**
+		 * Filter generated customer username.
+		 *
+		 * @since 3.7.0
+		 * @param string $username      Generated username.
+		 * @param string $email         New customer email address.
+		 * @param array  $new_user_args Array of new user args, maybe including first and last names.
+		 * @param string $suffix        Append string to username to make it unique.
+		 */
+		$new_args['first_name'] = apply_filters(
+			'woocommerce_generated_customer_username',
+			'woo_user_' . zeroise( wp_rand( 0, 9999 ), 4 ),
+			$email,
+			$new_user_args,
+			$suffix
+		);
+
+		return wc_create_new_customer_username( $email, $new_args, $suffix );
 	}
 
 	if ( username_exists( $username ) ) {
@@ -167,7 +199,16 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 		return wc_create_new_customer_username( $email, $new_user_args, $suffix );
 	}
 
-	return $username;
+	/**
+	 * Filter new customer username.
+	 *
+	 * @since 3.7.0
+	 * @param string $username      Customer username.
+	 * @param string $email         New customer email address.
+	 * @param array  $new_user_args Array of new user args, maybe including first and last names.
+	 * @param string $suffix        Append string to username to make it unique.
+	 */
+	return apply_filters( 'woocommerce_new_customer_username', $username, $email, $new_user_args, $suffix );
 }
 
 /**
@@ -853,3 +894,27 @@ function wc_update_user_last_active( $user_id ) {
 	}
 	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
 }
+
+/**
+ * Translate WC roles using the woocommerce textdomain.
+ *
+ * @since 3.7.0
+ * @param string $translation  Translated text.
+ * @param string $text         Text to translate.
+ * @param string $context      Context information for the translators.
+ * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
+ * @return string
+ */
+function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+	// translate_user_role() only accepts a second parameter starting in WP 5.2.
+	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+		return $translation;
+	}
+
+	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
+		return translate_user_role( $text, 'woocommerce' );
+	}
+
+	return $translation;
+}
+add_filter( 'gettext_with_context', 'wc_translate_user_roles', 10, 4 );

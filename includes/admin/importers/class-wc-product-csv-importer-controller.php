@@ -157,6 +157,9 @@ class WC_Product_CSV_Importer_Controller {
 		$this->map_preferences = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
 		// phpcs:enable
 
+		// Import mappings for CSV data.
+		include_once dirname( __FILE__ ) . '/mappings/mappings.php';
+
 		if ( $this->map_preferences ) {
 			add_filter( 'woocommerce_csv_product_import_mapped_columns', array( $this, 'auto_map_user_preferences' ), 9999 );
 		}
@@ -488,8 +491,6 @@ class WC_Product_CSV_Importer_Controller {
 		$weight_unit    = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
 
-		include dirname( __FILE__ ) . '/mappings/mappings.php';
-
 		/*
 		 * @hooked wc_importer_generic_mappings - 10
 		 * @hooked wc_importer_wordpress_mappings - 10
@@ -542,7 +543,8 @@ class WC_Product_CSV_Importer_Controller {
 					__( 'External URL', 'woocommerce' )   => 'product_url',
 					__( 'Button text', 'woocommerce' )    => 'button_text',
 					__( 'Position', 'woocommerce' )       => 'menu_order',
-				)
+				),
+				$raw_headers
 			)
 		);
 
@@ -567,7 +569,8 @@ class WC_Product_CSV_Importer_Controller {
 						__( 'Download %d URL', 'woocommerce' ) => 'downloads:url',
 						/* translators: %d: Meta number */
 						__( 'Meta: %s', 'woocommerce' ) => 'meta:',
-					)
+					),
+					$raw_headers
 				)
 			)
 		);
@@ -697,7 +700,8 @@ class WC_Product_CSV_Importer_Controller {
 				),
 			),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
-			'tag_ids'            => __( 'Tags', 'woocommerce' ),
+			'tag_ids'            => __( 'Tags (comma separated)', 'woocommerce' ),
+			'tag_ids_spaces'     => __( 'Tags (space separated)', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
 			'images'             => __( 'Images', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
@@ -732,7 +736,7 @@ class WC_Product_CSV_Importer_Controller {
 			),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
-			'meta:' . $meta      => __( 'Import as meta', 'woocommerce' ),
+			'meta:' . $meta      => __( 'Import as meta data', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 

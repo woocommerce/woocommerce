@@ -283,18 +283,6 @@ module.exports = function( grunt ) {
 				}
 			}
 		},
-
-		// Clean the directory.
-		clean: {
-			blocks: {
-				src: [
-					'<%= dirs.js %>/blocks',
-					'<%= dirs.css %>/blocks',
-					'<%= dirs.php %>/blocks'
-				]
-			}
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -331,52 +319,6 @@ module.exports = function( grunt ) {
 					'<%= dirs.css %>/*.css'
 				]
 			}
-		},
-
-		// Copy block files from npm package.
-		copy: {
-			js: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/build',
-				src: '*.js',
-				dest: '<%= dirs.js %>/blocks/',
-				options: {
-					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
-				}
-			},
-			css: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/build',
-				src: '*.css',
-				dest: '<%= dirs.css %>/blocks/'
-			},
-			php: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/assets/php',
-				src: '*.php',
-				dest: '<%= dirs.php %>/blocks/',
-				rename: ( dest, src ) => dest + '/' + src.replace( '-wgpb-', '-wc-' ),
-				options: {
-					process: ( content ) => content
-						// Replace textdomain.
-						.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
-						// Replace source for JS files.
-						.replace(
-							/plugins_url\( 'build\/([\w-]*)\.js', WGPB_PLUGIN_FILE \)/g,
-							"WC()->plugin_url() . '/assets/js/blocks/$1.js'"
-						)
-						// Replace source for CSS files.
-						.replace(
-							/plugins_url\( 'build\/([\w-]*)\.css', WGPB_PLUGIN_FILE \)/g,
-							"WC()->plugin_url() . '/assets/css/blocks/$1.css'"
-						)
-						// Replace class & constant prefixes.
-						.replace( /WGPB_/g, 'WC_' )
-						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
-						// Replace file imports
-						.replace( /-wgpb-/g, '-wc-' )
-				}
-			}
 		}
 	});
 
@@ -402,7 +344,6 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
-		'blocks',
 		'i18n'
 	]);
 
@@ -421,9 +362,9 @@ module.exports = function( grunt ) {
 		'concat'
 	]);
 
-	grunt.registerTask( 'blocks', [
-		'clean:blocks',
-		'copy'
+	grunt.registerTask( 'assets', [
+		'js',
+		'css'
 	]);
 
 	grunt.registerTask( 'contributors', [

@@ -130,6 +130,11 @@ class WC_Install {
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
 		),
+		'3.7.0' => array(
+			'wc_update_370_tax_rate_classes',
+			'wc_update_370_mro_std_currency',
+			'wc_update_370_db_version',
+		),
 	);
 
 	/**
@@ -251,9 +256,10 @@ class WC_Install {
 		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
+		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
-		self::create_options();
 		self::create_tables();
+		self::create_options();
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
@@ -519,6 +525,10 @@ class WC_Install {
 		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+
+		// Define initial tax classes.
+		WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
+		WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
 	}
 
 	/**
@@ -692,6 +702,13 @@ class WC_Install {
 		if ( $wpdb->has_cap( 'collation' ) ) {
 			$collate = $wpdb->get_charset_collate();
 		}
+
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 */
+		$max_index_length = 191;
 
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
@@ -887,7 +904,14 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`)
-  ) $collate;
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
+  tax_rate_class_id BIGINT UNSIGNED NOT NULL auto_increment,
+  name varchar(200) NOT NULL DEFAULT '',
+  slug varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY  (tax_rate_class_id),
+  UNIQUE KEY slug (slug($max_index_length))
+) $collate;
 		";
 
 		return $tables;
@@ -905,6 +929,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
 			"{$wpdb->prefix}wc_product_meta_lookup",
+			"{$wpdb->prefix}wc_tax_rate_classes",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
@@ -1158,7 +1183,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
@@ -1298,10 +1323,10 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
 			if ( empty( $installed_plugins ) ) {
 				$installed_plugins = array();
 			}
-			$plugin_slug       = $plugin_to_install['repo-slug'];
-			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
-			$installed         = false;
-			$activate          = false;
+			$plugin_slug = $plugin_to_install['repo-slug'];
+			$plugin_file = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
+			$installed   = false;
+			$activate    = false;
 
 			// See if the plugin is installed already.
 			if ( isset( $installed_plugins[ $plugin_file ] ) ) {
