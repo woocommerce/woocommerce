@@ -114,7 +114,14 @@
 
 			var utmUrl = addURLParameters( context, url );
 			linkoutButton.setAttribute( 'href', utmUrl );
-			linkoutButton.setAttribute( 'target', 'blank' );
+
+			// By default, CTA links should open in same tab (and feel integrated with Woo).
+			// Exception: when editing products, use new tab. User may have product edits
+			// that need to be saved.
+			if ( 'editproduct' === context ) {
+				linkoutButton.setAttribute( 'target', 'blank' );
+			}
+
 			linkoutButton.textContent = text;
 
 			linkoutButton.onclick = function() {
