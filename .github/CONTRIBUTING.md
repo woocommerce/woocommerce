@@ -42,23 +42,34 @@ https://woocommerce.com/contact-us/
 - [WooExperts](https://woocommerce.com/experts/)
 - [Codeable](https://codeable.io/)
 
+## Build process 🛠
+
+The source code found on GitHub does not contain compiled CSS or Javascript, and is missing some functionality such as Gutenberg Blocks and the REST API, until the build process is ran.
+
+To run the build process, in a terminal go to your WooCommerce installation and run:
+
+```bash
+npm install
+composer install
+npm run build
+```
+
+To get your development environment running we recommend [reading here](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment).
+
 ## Coding Guidelines and Development 🛠
 
-WooCommerce core uses NPM and Grunt for build tasks, and Composer for installing packages and dependencies. To get your development environment running we recommend [reading here](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment).
-
-If you are contributing code to the REST API or editor blocks, these are developed in external packages.
-- [WooCommerce REST API package](https://github.com/woocommerce/woocommerce-rest-api)
-- [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
-
-When writing code for WooCommerce:
-- **Ensure you follow to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
-- Install our pre-commit hook using composer. It'll help with the Coding Standards. To install run `composer install` from the command line within the woocommerce plugin directory.
+- **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
+- Run our build process described in the section above, it will install our pre-commit hook, code sniffs, dependencies, and more.
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
 - Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.
 - Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository.
 
 Please avoid modifying the change-log directly or updating the .pot files. These will be updated by the WooCommerce team.
+
+If you are contributing code to the REST API or editor blocks, these are developed in external packages.
+- [WooCommerce REST API package](https://github.com/woocommerce/woocommerce-rest-api)
+- [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
 
 ## Translating WooCommerce 💬
 

@@ -34,30 +34,6 @@ class WC_Tax {
 	public static function init() {
 		self::$precision         = wc_get_rounding_precision();
 		self::$round_at_subtotal = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
-		add_action( 'update_option_woocommerce_tax_classes', array( __CLASS__, 'maybe_remove_tax_class_rates' ), 10, 2 );
-	}
-
-	/**
-	 * When the woocommerce_tax_classes option is changed, remove any orphan rates.
-	 *
-	 * @param  string $old_value Old rates value.
-	 * @param  string $value New rates value.
-	 */
-	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
-		$old     = array_filter( array_map( 'trim', explode( "\n", $old_value ) ) );
-		$new     = array_filter( array_map( 'trim', explode( "\n", $value ) ) );
-		$removed = array_filter( array_map( 'sanitize_title', array_diff( $old, $new ) ) );
-
-		if ( $removed ) {
-			global $wpdb;
-
-			foreach ( $removed as $removed_tax_class ) {
-				$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", $removed_tax_class ) );
-				$wpdb->query( "DELETE locations FROM {$wpdb->prefix}woocommerce_tax_rate_locations locations LEFT JOIN {$wpdb->prefix}woocommerce_tax_rates rates ON rates.tax_rate_id = locations.tax_rate_id WHERE rates.tax_rate_id IS NULL;" );
-			}
-
-			WC_Cache_Helper::incr_cache_prefix( 'taxes' );
-		}
 	}
 
 	/**
@@ -734,22 +710,36 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get store tax classes.
+	 * Gets all tax rate classes from the database.
+	 *
+	 * @since 3.7.0
+	 * @return array Array of tax class objects consisting of tax_rate_class_id, name, and slug.
+	 */
+	protected static function get_tax_rate_classes() {
+		global $wpdb;
+
+		$cache_key        = 'tax-rate-classes';
+		$tax_rate_classes = wp_cache_get( $cache_key, 'taxes' );
+
+		if ( ! is_array( $tax_rate_classes ) ) {
+			$tax_rate_classes = $wpdb->get_results(
+				"
+				SELECT * FROM {$wpdb->wc_tax_rate_classes} ORDER BY name;
+				"
+			);
+			wp_cache_set( $cache_key, $tax_rate_classes, 'taxes' );
+		}
+
+		return $tax_rate_classes;
+	}
+
+	/**
+	 * Get store tax class names.
 	 *
 	 * @return array Array of class names ("Reduced rate", "Zero rate", etc).
 	 */
 	public static function get_tax_classes() {
-		return array_filter( array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) ), array( __CLASS__, 'is_valid_tax_class' ) );
-	}
-
-	/**
-	 * Filter out invalid tax classes.
-	 *
-	 * @param string $tax_class Tax class name.
-	 * @return boolean
-	 */
-	private static function is_valid_tax_class( $tax_class ) {
-		return ! empty( $tax_class ) && sanitize_title( $tax_class );
+		return wp_list_pluck( self::get_tax_rate_classes(), 'name' );
 	}
 
 	/**
@@ -759,16 +749,137 @@ class WC_Tax {
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . '-slugs';
-		$slugs     = wp_cache_get( $cache_key, 'taxes' );
+		return wp_list_pluck( self::get_tax_rate_classes(), 'slug' );
+	}
 
-		if ( ! $slugs ) {
-			$slugs = array_filter( array_map( 'sanitize_title', self::get_tax_classes() ) );
+	/**
+	 * Create a new tax class.
+	 *
+	 * @since 3.7.0
+	 * @param string $name Name of the tax class to add.
+	 * @param string $slug (optional) Slug of the tax class to add. Defaults to sanitized name.
+	 * @return WP_Error|array Returns name and slug (array) if the tax class is created, or WP_Error if something went wrong.
+	 */
+	public static function create_tax_class( $name, $slug = '' ) {
+		global $wpdb;
 
-			wp_cache_set( $cache_key, $slugs, 'taxes' );
+		if ( empty( $name ) ) {
+			return new WP_Error( 'tax_class_invalid_name', __( 'Tax class requires a valid name', 'woocommerce' ) );
 		}
 
-		return $slugs;
+		$existing       = self::get_tax_classes();
+		$existing_slugs = self::get_tax_class_slugs();
+
+		if ( in_array( $name, $existing, true ) ) {
+			return new WP_Error( 'tax_class_exists', __( 'Tax class already exists', 'woocommerce' ) );
+		}
+
+		if ( ! $slug ) {
+			$slug = sanitize_title( $name );
+		}
+
+		if ( in_array( $slug, $existing_slugs, true ) ) {
+			return new WP_Error( 'tax_class_slug_exists', __( 'Tax class slug already exists', 'woocommerce' ) );
+		}
+
+		$insert = $wpdb->insert(
+			$wpdb->wc_tax_rate_classes,
+			array(
+				'name' => $name,
+				'slug' => $slug,
+			)
+		);
+
+		if ( is_wp_error( $insert ) ) {
+			return new WP_Error( 'tax_class_insert_error', $insert->get_error_message() );
+		}
+
+		wp_cache_delete( 'tax-rate-classes', 'taxes' );
+
+		return array(
+			'name' => $name,
+			'slug' => $slug,
+		);
+	}
+
+	/**
+	 * Get an existing tax class.
+	 *
+	 * @since 3.7.0
+	 * @param string     $field Field to get by. Valid values are id, name, or slug.
+	 * @param string|int $item Item to get.
+	 * @return array|bool Returns the tax class as an array. False if not found.
+	 */
+	public static function get_tax_class_by( $field, $item ) {
+		if ( ! in_array( $field, array( 'id', 'name', 'slug' ), true ) ) {
+			return new WP_Error( 'invalid_field', __( 'Invalid field', 'woocommerce' ) );
+		}
+
+		if ( 'id' === $field ) {
+			$field = 'tax_rate_class_id';
+		}
+
+		$matches = wp_list_filter(
+			self::get_tax_rate_classes(),
+			array(
+				$field => $item,
+			)
+		);
+
+		if ( ! $matches ) {
+			return false;
+		}
+
+		$tax_class = current( $matches );
+
+		return array(
+			'name' => $tax_class->name,
+			'slug' => $tax_class->slug,
+		);
+	}
+
+	/**
+	 * Delete an existing tax class.
+	 *
+	 * @since 3.7.0
+	 * @param string     $field Field to delete by. Valid values are id, name, or slug.
+	 * @param string|int $item Item to delete.
+	 * @return WP_Error|bool Returns true if deleted successfully, false if nothing was deleted, or WP_Error if there is an invalid request.
+	 */
+	public static function delete_tax_class_by( $field, $item ) {
+		global $wpdb;
+
+		if ( ! in_array( $field, array( 'id', 'name', 'slug' ), true ) ) {
+			return new WP_Error( 'invalid_field', __( 'Invalid field', 'woocommerce' ) );
+		}
+
+		$tax_class = self::get_tax_class_by( $field, $item );
+
+		if ( ! $tax_class ) {
+			return new WP_Error( 'invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
+		}
+
+		if ( 'id' === $field ) {
+			$field = 'tax_rate_class_id';
+		}
+
+		$delete = $wpdb->delete(
+			$wpdb->wc_tax_rate_classes,
+			array(
+				$field => $item,
+			)
+		);
+
+		if ( $delete ) {
+			// Delete associated tax rates.
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_class = %s;", $tax_class['slug'] ) );
+			$wpdb->query( "DELETE locations FROM {$wpdb->prefix}woocommerce_tax_rate_locations locations LEFT JOIN {$wpdb->prefix}woocommerce_tax_rates rates ON rates.tax_rate_id = locations.tax_rate_id WHERE rates.tax_rate_id IS NULL;" );
+		}
+
+		wp_cache_delete( 'tax-rate-classes', 'taxes' );
+		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
+		return (bool) $delete;
 	}
 
 	/**

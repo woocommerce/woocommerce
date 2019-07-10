@@ -464,7 +464,7 @@ final class WC_Cart_Totals {
 				$new_taxes = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false );
 
 				// Now we have a new item price.
-				$item->price = round( $item->price - array_sum( $taxes ) + array_sum( $new_taxes ) );
+				$item->price = $item->price - array_sum( $taxes ) + array_sum( $new_taxes );
 			}
 		}
 		return $item;
@@ -591,7 +591,6 @@ final class WC_Cart_Totals {
 				$taxes[ $rate_id ] += $this->round_line_tax( $rate );
 			}
 		}
-		$taxes = $this->round_merged_taxes( $taxes );
 
 		return $in_cents ? $taxes : wc_remove_number_precision_deep( $taxes );
 	}
@@ -682,7 +681,13 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
 		}
 
-		$this->set_total( 'items_total', array_sum( array_map( 'round', array_values( wp_list_pluck( $this->items, 'total' ) ) ) ) );
+		$items_total = array_sum(
+			array_map(
+				array( $this, 'round_item_subtotal' ),
+				array_values( wp_list_pluck( $this->items, 'total' ) )
+			)
+		);
+		$this->set_total( 'items_total', round( $items_total ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
 		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
@@ -740,8 +745,14 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
 
-		$this->set_total( 'items_subtotal', array_sum( array_map( 'round', array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) ) );
-		$this->set_total( 'items_subtotal_tax', array_sum( $this->round_merged_taxes( $merged_subtotal_taxes ) ) );
+		$items_subtotal = array_sum(
+			array_map(
+				array( $this, 'round_item_subtotal' ),
+				array_values( wp_list_pluck( $this->items, 'subtotal' ) )
+			)
+		);
+		$this->set_total( 'items_subtotal', round( $items_subtotal ) );
+		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
@@ -873,6 +884,20 @@ final class WC_Cart_Totals {
 	protected function round_line_tax( $value ) {
 		if ( ! $this->round_at_subtotal() ) {
 			$value = wc_round_tax_total( $value, 0 );
+		}
+		return $value;
+	}
+
+	/**
+	 * Apply rounding to item subtotal before summing.
+	 *
+	 * @since 3.7.0
+	 * @param float $value Item subtotal value.
+	 * @return float
+	 */
+	protected function round_item_subtotal( $value ) {
+		if ( ! $this->round_at_subtotal() ) {
+			$value = round( $value );
 		}
 		return $value;
 	}

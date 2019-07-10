@@ -165,8 +165,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
+		if ( ! $this->data_store ) {
+			return $this->get_id();
+		}
+
+		try {
+			/**
+			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+			 *
+			 * @param WC_Data          $this The object being saved.
+			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 */
 			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 			if ( $this->get_id() ) {
@@ -174,9 +183,39 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			} else {
 				$this->data_store->create( $this );
 			}
+
+			$this->save_items();
+
+			/**
+			 * Trigger action after saving to the DB.
+			 *
+			 * @param WC_Data          $this The object being saved.
+			 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+			 */
+			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		} catch ( Exception $e ) {
+			$this->handle_exception( $e, __( 'Error saving order.', 'woocommerce' ) );
 		}
-		$this->save_items();
+
 		return $this->get_id();
+	}
+
+	/**
+	 * Log an error about this order is exception is encountered.
+	 *
+	 * @param Exception $e Exception object.
+	 * @param string    $message Message regarding exception thrown.
+	 * @since 3.7.0
+	 */
+	protected function handle_exception( $e, $message = 'Error' ) {
+		wc_get_logger()->error(
+			$message,
+			array(
+				'order' => $this,
+				'error' => $e,
+			)
+		);
 	}
 
 	/**

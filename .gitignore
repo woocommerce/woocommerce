@@ -18,6 +18,13 @@ none
 # Sass
 .sass-cache/
 
+# Compiled CSS
+/assets/css/*.css
+
+# Minified JS
+/assets/js/admin/*.min.js
+/assets/js/frontend/*.min.js
+
 # OS X metadata
 .DS_Store
 
@@ -50,3 +57,6 @@ contributors.md
 
 # Screenshots for e2e tests failures
 /screenshots/
+
+# Language files
+i18n/languages/woocommerce.pot

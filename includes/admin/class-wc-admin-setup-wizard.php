@@ -145,6 +145,17 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Should we show the WooCommerce Admin install option?
+	 * True only if the user can install plugins,
+	 * and up until the end date of the recommendation.
+	 *
+	 * @return boolean
+	 */
+	protected function should_show_wc_admin() {
+		return current_user_can( 'install_plugins' );
+	}
+
+	/**
 	 * Should we display the 'Recommended' step?
 	 * True if at least one of the recommendations will be displayed.
 	 *
@@ -154,7 +165,8 @@ class WC_Admin_Setup_Wizard {
 		return $this->should_show_theme()
 			|| $this->should_show_automated_tax()
 			|| $this->should_show_mailchimp()
-			|| $this->should_show_facebook();
+			|| $this->should_show_facebook()
+			|| $this->should_show_wc_admin();
 	}
 
 	/**
@@ -917,6 +929,41 @@ class WC_Admin_Setup_Wizard {
 			<p><?php echo wp_kses_post( $intro_text ); ?></p>
 		<?php endif; ?>
 		<form method="post">
+			<?php if ( $is_wcs_labels_supported || $is_shipstation_supported ) : ?>
+				<ul class="wc-setup-shipping-recommended">
+				<?php
+				if ( $is_wcs_labels_supported ) :
+					$this->display_recommended_item(
+						array(
+							'type'        => 'woocommerce_services',
+							'title'       => __( 'Did you know you can print shipping labels at home?', 'woocommerce' ),
+							'description' => __( 'Use WooCommerce Shipping (powered by WooCommerce Services & Jetpack) to save time at the post office by printing your shipping labels at home.', 'woocommerce' ),
+							'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
+							'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
+							'plugins'     => $this->get_wcs_requisite_plugins(),
+						)
+					);
+				elseif ( $is_shipstation_supported ) :
+					$this->display_recommended_item(
+						array(
+							'type'        => 'shipstation',
+							'title'       => __( 'Did you know you can print shipping labels at home?', 'woocommerce' ),
+							'description' => __( 'We recommend using ShipStation to save time at the post office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
+							'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
+							'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
+							'plugins'     => array(
+								array(
+									'name' => __( 'ShipStation', 'woocommerce' ),
+									'slug' => 'woocommerce-shipstation-integration',
+								),
+							),
+						)
+					);
+				endif;
+				?>
+				</ul>
+			<?php endif; ?>
+
 			<?php if ( empty( $existing_zones ) ) : ?>
 				<ul class="wc-wizard-services shipping">
 					<li class="wc-wizard-service-item">
@@ -981,41 +1028,6 @@ class WC_Admin_Setup_Wizard {
 					</li>
 				</ul>
 			<?php endif; ?>
-
-		<?php if ( $is_wcs_labels_supported || $is_shipstation_supported ) : ?>
-			<ul class="wc-setup-shipping-recommended">
-			<?php
-			if ( $is_wcs_labels_supported ) :
-				$this->display_recommended_item(
-					array(
-						'type'        => 'woocommerce_services',
-						'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-						'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
-						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
-						'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
-						'plugins'     => $this->get_wcs_requisite_plugins(),
-					)
-				);
-			elseif ( $is_shipstation_supported ) :
-				$this->display_recommended_item(
-					array(
-						'type'        => 'shipstation',
-						'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-						'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
-						'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
-						'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
-						'plugins'     => array(
-							array(
-								'name' => __( 'ShipStation', 'woocommerce' ),
-								'slug' => 'woocommerce-shipstation-integration',
-							),
-						),
-					)
-				);
-			endif;
-		endif;
-		?>
-			</ul>
 
 			<div class="wc-setup-shipping-units">
 				<p>
@@ -1860,7 +1872,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
 		<p>
-			<?php esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Enhance your store with these recommended free features.', 'woocommerce' ); ?>
 		</p>
 		<form method="post">
 			<ul class="recommended-step">
@@ -1888,6 +1900,17 @@ class WC_Admin_Setup_Wizard {
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
 						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
 						'plugins'     => $this->get_wcs_requisite_plugins(),
+					) );
+				endif;
+
+				if ( $this->should_show_wc_admin() ) :
+					$this->display_recommended_item( array(
+						'type'        => 'wc_admin',
+						'title'       => __( 'WooCommerce Admin', 'woocommerce' ),
+						'description' => __( 'Manage your store\'s reports and monitor key metrics with a new and improved interface and dashboard.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
+						'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'WooCommerce Admin', 'woocommerce' ), 'slug' => 'woocommerce-admin' ) ),
 					) );
 				endif;
 
@@ -1933,6 +1956,7 @@ class WC_Admin_Setup_Wizard {
 		$setup_automated_tax    = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
 		$setup_mailchimp        = isset( $_POST['setup_mailchimp'] ) && 'yes' === $_POST['setup_mailchimp'];
 		$setup_facebook         = isset( $_POST['setup_facebook'] ) && 'yes' === $_POST['setup_facebook'];
+		$setup_wc_admin         = isset( $_POST['setup_wc_admin'] ) && 'yes' === $_POST['setup_wc_admin'];
 
 		update_option( 'woocommerce_calc_taxes', $setup_automated_tax ? 'yes' : 'no' );
 		update_option( 'woocommerce_setup_automated_taxes', $setup_automated_tax );
@@ -1965,6 +1989,16 @@ class WC_Admin_Setup_Wizard {
 				array(
 					'name'      => __( 'Facebook for WooCommerce', 'woocommerce' ),
 					'repo-slug' => 'facebook-for-woocommerce',
+				)
+			);
+		}
+
+		if ( $setup_wc_admin ) {
+			$this->install_plugin(
+				'woocommerce-admin',
+				array(
+					'name'      => __( 'WooCommerce Admin', 'woocommerce' ),
+					'repo-slug' => 'woocommerce-admin',
 				)
 			);
 		}
