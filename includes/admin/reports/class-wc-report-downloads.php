@@ -164,11 +164,15 @@ class WC_Report_Downloads extends WP_List_Table {
 					// File information.
 					$file = $product->get_file( $permission->get_download_id() );
 
-					echo esc_html( $file->get_name() . ' - ' . basename( $file->get_file() ) );
+					if ( false === $file ) {
+						echo esc_html__( 'File does not exist', 'woocommerce' );
+					} else {
+						echo esc_html( $file->get_name() . ' - ' . basename( $file->get_file() ) );
 
-					echo '<div class="row-actions">';
-					echo '<a href="' . esc_url( add_query_arg( 'download_id', $permission->get_download_id() ) ) . '">' . esc_html__( 'Filter by file', 'woocommerce' ) . '</a>';
-					echo '</div>';
+						echo '<div class="row-actions">';
+						echo '<a href="' . esc_url( add_query_arg( 'download_id', $permission->get_download_id() ) ) . '">' . esc_html__( 'Filter by file', 'woocommerce' ) . '</a>';
+						echo '</div>';
+					}
 				}
 				break;
 			case 'order':

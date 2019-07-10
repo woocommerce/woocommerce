@@ -16,10 +16,8 @@
     "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --recursive",
     "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --grep ",
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register",
+    "makepot": "grunt makepot",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
-  },
-  "dependencies": {
-    "@woocommerce/block-library": "2.0.1"
   },
   "devDependencies": {
     "autoprefixer": "9.6.1",
@@ -56,7 +54,7 @@
     "grunt-wp-i18n": "1.0.3",
     "husky": "3.0.0",
     "istanbul": "1.0.0-alpha.2",
-    "lint-staged": "9.1.0",
+    "lint-staged": "9.2.0",
     "mocha": "6.1.4",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",

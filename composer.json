@@ -7,15 +7,43 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
+    "automattic/jetpack-autoloader": "1.2.0",
     "php": "^5.6|^7.0",
-    "composer/installers": "1.6.0"
+    "composer/installers": "1.6.0",
+    "woocommerce/woocommerce-blocks": "2.3.0-beta",
+    "woocommerce/woocommerce-rest-api": "1.0.2"
   },
   "require-dev": {
     "myclabs/deep-copy": "1.7.0",
     "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
+  "config": {
+    "platform": {
+      "php": "7.0"
+    },
+    "preferred-install": {
+        "woocommerce/woocommerce-rest-api": "dist",
+        "woocommerce/woocommerce-blocks": "dist"
+    },
+    "sort-packages": true
+  },
+  "autoload": {
+    "exclude-from-classmap": [
+      "includes/legacy",
+      "includes/libraries"
+    ],
+    "psr-4": {
+      "Automattic\\WooCommerce\\": "src/"
+    }
+  },
   "scripts": {
+    "post-install-cmd": [
+      "sh ./bin/package-update.sh"
+    ],
+    "post-update-cmd": [
+      "sh ./bin/package-update.sh"
+    ],
     "test": [
       "phpunit"
     ],
@@ -29,13 +57,11 @@
       "phpcbf -p"
     ]
   },
-  "config": {
-    "platform": {
-      "php": "7.0"
-    },
-    "sort-packages": true
-  },
   "extra": {
+    "installer-paths": {
+      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
+      "packages/woocommerce-blocks": ["woocommerce/woocommerce-blocks"]
+    },
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",

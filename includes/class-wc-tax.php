@@ -763,6 +763,10 @@ class WC_Tax {
 	public static function create_tax_class( $name, $slug = '' ) {
 		global $wpdb;
 
+		if ( empty( $name ) ) {
+			return new WP_Error( 'tax_class_invalid_name', __( 'Tax class requires a valid name', 'woocommerce' ) );
+		}
+
 		$existing       = self::get_tax_classes();
 		$existing_slugs = self::get_tax_class_slugs();
 

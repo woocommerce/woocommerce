@@ -17,7 +17,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$shortcode = new WC_Shortcode_Products();
 		$expected  = array(
 			'limit'          => '-1',
-			'columns'        => '4',
+			'columns'        => 4,
 			'orderby'        => 'title',
 			'order'          => 'ASC',
 			'ids'            => '',
@@ -27,6 +27,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'attribute'      => '',
 			'terms'          => '',
 			'terms_operator' => 'IN',
+			'tag'            => '',
+			'tag_operator'   => 'IN',
 			'visibility'     => 'visible',
 			'class'          => '',
 			'rows'           => '',
@@ -55,6 +57,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'attribute'      => '',
 			'terms'          => '',
 			'terms_operator' => 'IN',
+			'tag'            => '',
+			'tag_operator'   => 'IN',
 			'visibility'     => 'visible',
 			'class'          => '',
 			'rows'           => '',

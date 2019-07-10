@@ -33,6 +33,7 @@
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
 	</rule>
 
 	<rule ref="Generic.Commenting">
@@ -45,5 +46,6 @@
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>i18n/</exclude-pattern>
+		<exclude-pattern>src/</exclude-pattern>
 	</rule>
 </ruleset>
