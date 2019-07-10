@@ -15,9 +15,7 @@
  * @version 3.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 global $product;
 
@@ -74,13 +72,13 @@ if ( ! comments_open() ) {
 				$commenter    = wp_get_current_commenter();
 				$comment_form = array(
 					/* translators: %s is product title */
-					'title_reply'         => have_comments() ? __( 'Add a review', 'woocommerce' ) : sprintf( __( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
+					'title_reply'         => have_comments() ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
 					/* translators: %s is product title */
-					'title_reply_to'      => __( 'Leave a Reply to %s', 'woocommerce' ),
+					'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
 					'title_reply_before'  => '<span id="reply-title" class="comment-reply-title">',
 					'title_reply_after'   => '</span>',
 					'comment_notes_after' => '',
-					'label_submit'        => __( 'Submit', 'woocommerce' ),
+					'label_submit'        => esc_html__( 'Submit', 'woocommerce' ),
 					'logged_in_as'        => '',
 					'comment_field'       => '',
 				);

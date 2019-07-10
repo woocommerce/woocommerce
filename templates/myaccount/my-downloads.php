@@ -18,29 +18,30 @@
  * @deprecated  2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
-if ( $downloads = WC()->customer->get_downloadable_products() ) : ?>
+$downloads = WC()->customer->get_downloadable_products();
+
+if ( $downloads ) : ?>
 
 	<?php do_action( 'woocommerce_before_available_downloads' ); ?>
 
-	<h2><?php echo apply_filters( 'woocommerce_my_account_my_downloads_title', __( 'Available downloads', 'woocommerce' ) ); ?></h2>
+	<h2><?php echo apply_filters( 'woocommerce_my_account_my_downloads_title', esc_html__( 'Available downloads', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
 
 	<ul class="woocommerce-Downloads digital-downloads">
 		<?php foreach ( $downloads as $download ) : ?>
 			<li>
 				<?php
-					do_action( 'woocommerce_available_download_start', $download );
+				do_action( 'woocommerce_available_download_start', $download );
 
-					if ( is_numeric( $download['downloads_remaining'] ) ) {
-						echo apply_filters( 'woocommerce_available_download_count', '<span class="woocommerce-Count count">' . sprintf( _n( '%s download remaining', '%s downloads remaining', $download['downloads_remaining'], 'woocommerce' ), $download['downloads_remaining'] ) . '</span> ', $download );
-					}
+				if ( is_numeric( $download['downloads_remaining'] ) ) {
+					/* translators: %s product name */
+					echo apply_filters( 'woocommerce_available_download_count', '<span class="woocommerce-Count count">' . sprintf( _n( '%s download remaining', '%s downloads remaining', $download['downloads_remaining'], 'woocommerce' ), $download['downloads_remaining'] ) . '</span> ', $download ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
 
-					echo apply_filters( 'woocommerce_available_download_link', '<a href="' . esc_url( $download['download_url'] ) . '">' . $download['download_name'] . '</a>', $download );
+				echo apply_filters( 'woocommerce_available_download_link', '<a href="' . esc_url( $download['download_url'] ) . '">' . $download['download_name'] . '</a>', $download ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-					do_action( 'woocommerce_available_download_end', $download );
+				do_action( 'woocommerce_available_download_end', $download );
 				?>
 			</li>
 		<?php endforeach; ?>
