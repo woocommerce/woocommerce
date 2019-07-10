@@ -39,4 +39,4 @@ If you have enabled WooCommerce usage tracking ( option `woocommerce_allow_track
 
 ## Contributing
 
-There are many ways to contribute – reporting bugs, feature suggestions and fixing bugs. For full details, please see [CONTRIBUTING.md](./CONTRIBUTING.md)
+There are many ways to contribute – reporting bugs, adding translations, feature suggestions and fixing bugs. For full details, please see [CONTRIBUTING.md](./CONTRIBUTING.md)
