@@ -140,7 +140,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return null
 	 */
 	public function save_tax_classes( $raw_tax_classes ) {
-		$tax_classes          = array_map( 'trim', explode( "\n", $raw_tax_classes ) );
+		$tax_classes          = array_filter( array_map( 'trim', explode( "\n", $raw_tax_classes ) ) );
 		$existing_tax_classes = WC_Tax::get_tax_classes();
 		$removed              = array_diff( $existing_tax_classes, $tax_classes );
 		$added                = array_diff( $tax_classes, $existing_tax_classes );
