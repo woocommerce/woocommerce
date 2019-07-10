@@ -1,8 +1,12 @@
 <?php
+/**
+ * Class WC_Product_CSV_Importer unit tests.
+ *
+ * @package WooCommerce\Tests\Importer
+ */
 
 /**
- * Meta
- * @package WooCommerce\Tests\Importer
+ * Test class for WC_Product_CSV_Importer.
  */
 class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
@@ -105,6 +109,36 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
+	}
+
+	/**
+	 * Test import should update product price and skip products with empty SKU
+	 * (see https://github.com/woocommerce/woocommerce/issues/23257).
+	 */
+	public function test_import_should_update_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 15 );
+		$product->set_sku( 'wp-pennant' );
+		$product->save();
+
+		$args = array(
+			'mapping'         => $this->get_csv_mapped_items(),
+			'parse'           => true,
+			'update_existing' => true,
+		);
+
+		$csv_file = dirname( __FILE__ ) . '/sample_update_product.csv';
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$results  = $importer->import();
+
+		$this->assertEquals( 0, count( $results['imported'] ) );
+		$this->assertEquals( 0, count( $results['failed'] ) );
+		$this->assertEquals( 1, count( $results['updated'] ) );
+		$this->assertEquals( 2, count( $results['skipped'] ) );
+
+		$updated_product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 20, $updated_product->get_price() );
 	}
 
 	/**

@@ -258,8 +258,8 @@ class WC_Install {
 
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
-		self::create_options();
 		self::create_tables();
+		self::create_options();
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
@@ -525,6 +525,10 @@ class WC_Install {
 		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+
+		// Define initial tax classes.
+		WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
+		WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
 	}
 
 	/**
@@ -698,6 +702,13 @@ class WC_Install {
 		if ( $wpdb->has_cap( 'collation' ) ) {
 			$collate = $wpdb->get_charset_collate();
 		}
+
+		/*
+		 * Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
+		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
+		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
+		 */
+		$max_index_length = 191;
 
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
@@ -899,7 +910,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   name varchar(200) NOT NULL DEFAULT '',
   slug varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY  (tax_rate_class_id),
-  UNIQUE KEY slug (slug)
+  UNIQUE KEY slug (slug($max_index_length))
 ) $collate;
 		";
 
@@ -918,6 +929,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
 			"{$wpdb->prefix}wc_product_meta_lookup",
+			"{$wpdb->prefix}wc_tax_rate_classes",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
