@@ -68,7 +68,9 @@ class Industry extends Component {
 				<H className="woocommerce-profile-wizard__header-title">
 					{ __( 'In which industry does the store operate?', 'woocommerce-admin' ) }
 				</H>
-				<p>{ __( 'Choose any that apply' ) }</p>
+				<p className="woocommerce-profile-wizard__intro-paragraph">
+					{ __( 'Choose any that apply' ) }
+				</p>
 				<Card className="woocommerce-profile-wizard__industry-card">
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( industries ).map( slug => {
