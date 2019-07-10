@@ -103,7 +103,9 @@ class CustomizableDashboard extends Component {
 			toggledSection.isVisible = ! toggledSection.isVisible;
 			sections.push( toggledSection );
 
-			if ( ! toggledSection.isVisible ) {
+			if ( toggledSection.isVisible ) {
+				recordEvent( 'dash_section_add', { key: toggledSection.key } );
+			} else {
 				recordEvent( 'dash_section_remove', { key: toggledSection.key } );
 			}
 
