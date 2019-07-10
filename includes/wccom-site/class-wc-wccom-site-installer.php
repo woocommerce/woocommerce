@@ -24,7 +24,7 @@ class WC_WCCOM_Site_Installer {
 	private static $default_state = array(
 		'status'       => 'idle',
 		'steps'        => array(),
-		'current_step' => array(),
+		'current_step' => null,
 	);
 
 	/**
@@ -115,6 +115,8 @@ class WC_WCCOM_Site_Installer {
 
 		$steps = array_fill_keys( array_keys( $products ), self::$default_step_state );
 		self::update_state( 'steps', $steps );
+
+		self::update_state( 'current_step', null );
 
 		$args = array(
 			'products' => $products,
