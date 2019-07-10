@@ -97,8 +97,13 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 		}
 
 		$data = json_decode( $body, true );
-		if ( empty( $data['products'] ) || ! is_array( $data['products'] ) ) {
+		if ( empty( $data['products'] ) ) {
 			return new WP_Error( 'missing_products', __( 'Missing products in request body.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$validation_result = $this->validate_products( $data['products'] );
+		if ( is_wp_error( $validation_result ) ) {
+			return $validation_result;
 		}
 
 		return rest_ensure_response( WC_WCCOM_Site_Installer::schedule_install( $data['products'] ) );
@@ -116,5 +121,33 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 		$resp->set_status( 204 );
 
 		return $resp;
+	}
+
+	/**
+	 * Validate products from request body.
+	 *
+	 * @param array $products Array of products where key is product ID and
+	 *                        element is install args.
+	 *
+	 * @return bool|WP_Error
+	 */
+	protected function validate_products( $products ) {
+		$err = new WP_Error( 'invalid_products', __( 'Invalid products in request body.', 'woocommerce' ), array( 'status' => 400 ) );
+
+		if ( ! is_array( $products ) ) {
+			return $err;
+		}
+
+		foreach ( $products as $product_id => $install_args ) {
+			if ( ! absint( $product_id ) ) {
+				return $err;
+			}
+
+			if ( empty( $install_args ) || ! is_array( $install_args ) ) {
+				return $err;
+			}
+		}
+
+		return true;
 	}
 }

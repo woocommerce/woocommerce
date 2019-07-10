@@ -40,6 +40,7 @@ class WC_WCCOM_Site_Installer {
 		'download_path'  => '',
 		'unpacked_path'  => '',
 		'installed_path' => '',
+		'activate'       => false,
 	);
 
 	/**
@@ -99,7 +100,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Schedule installing given list of products.
 	 *
-	 * @param array $products List of product IDs.
+	 * @param array $products Array of products where key is product ID and
+	 *                        element is install args.
 	 *
 	 * @return array State.
 	 */
@@ -111,7 +113,7 @@ class WC_WCCOM_Site_Installer {
 		}
 		self::update_state( 'status', 'in-progress' );
 
-		$steps = array_fill_keys( $products, self::$default_step_state );
+		$steps = array_fill_keys( array_keys( $products ), self::$default_step_state );
 		self::update_state( 'steps', $steps );
 
 		$args = array(
@@ -129,7 +131,8 @@ class WC_WCCOM_Site_Installer {
 	 *
 	 * Run via `woocommerce_wccom_install_products` hook.
 	 *
-	 * @param array $products List of product IDs.
+	 * @param array $products Array of products where key is product ID and
+	 *                        element is install args.
 	 *
 	 * @return array State.
 	 */
@@ -144,8 +147,8 @@ class WC_WCCOM_Site_Installer {
 		$upgrader->init();
 		wp_clean_plugins_cache();
 
-		foreach ( $products as $product_id ) {
-			self::install_product( $product_id, $upgrader );
+		foreach ( $products as $product_id => $install_args ) {
+			self::install_product( $product_id, $install_args, $upgrader );
 		}
 
 		self::finish_installation();
@@ -177,23 +180,25 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Install a single product given its ID.
 	 *
-	 * @param int          $product_id Product ID.
-	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
+	 * @param int          $product_id   Product ID.
+	 * @param array        $install_args Install args.
+	 * @param \WP_Upgrader $upgrader     Core class to handle installation.
 	 */
-	private static function install_product( $product_id, $upgrader ) {
+	private static function install_product( $product_id, $install_args, $upgrader ) {
 		foreach ( self::$install_steps as $step ) {
-			self::do_install_step( $product_id, $step, $upgrader );
+			self::do_install_step( $product_id, $install_args, $step, $upgrader );
 		}
 	}
 
 	/**
 	 * Perform product installation step.
 	 *
-	 * @param int          $product_id Product ID.
-	 * @param string       $step       Installation step.
-	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
+	 * @param int          $product_id   Product ID.
+	 * @param array        $install_args Install args.
+	 * @param string       $step         Installation step.
+	 * @param \WP_Upgrader $upgrader     Core class to handle installation.
 	 */
-	private static function do_install_step( $product_id, $step, $upgrader ) {
+	private static function do_install_step( $product_id, $install_args, $step, $upgrader ) {
 		$state_steps = self::get_state( 'steps' );
 		if ( empty( $state_steps[ $product_id ] ) ) {
 			$state_steps[ $product_id ] = self::$default_step_state;
@@ -204,6 +209,10 @@ class WC_WCCOM_Site_Installer {
 		}
 
 		$state_steps[ $product_id ]['last_step'] = $step;
+
+		if ( ! empty( $install_args['activate'] ) ) {
+			$state_steps[ $product_id ]['activate'] = true;
+		}
 
 		self::update_state(
 			'current_step',
@@ -362,6 +371,10 @@ class WC_WCCOM_Site_Installer {
 	 */
 	private static function activate_product( $product_id ) {
 		$steps = self::get_state( 'steps' );
+		if ( ! $steps[ $product_id ]['activate'] ) {
+			return null;
+		}
+
 		if ( 'plugin' === $steps[ $product_id ]['product_type'] ) {
 			return self::activate_plugin( $product_id );
 		}
