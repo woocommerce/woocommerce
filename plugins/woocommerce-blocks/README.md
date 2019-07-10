@@ -1,6 +1,6 @@
 # WooCommerce Product Blocks
 
-Feature plugin for WooCoomerce + Gutenberg. Now that the product blocks have been merged into WooCommerce 3.6, this plugin serves as a space to iterate and explore how else WooCommerce might work with the block editor. 
+Feature plugin for WooCommerce + Gutenberg. Now that the product blocks have been merged into WooCommerce 3.6, this plugin serves as a space to iterate and explore how else WooCommerce might work with the block editor. 
 
 If you're just looking to use these blocks, update to WooCommerce 3.6! The blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
