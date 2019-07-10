@@ -211,6 +211,7 @@ class WC_Admin_Setup_Wizard {
 			array(
 				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
 				'states'                  => WC()->countries->get_states(),
+				'postcodes'               => $this->get_postcodes(),
 				'current_step'            => isset( $this->steps[ $this->step ] ) ? $this->step : false,
 				'i18n'                    => array(
 					'extra_plugins' => array(
@@ -223,6 +224,23 @@ class WC_Admin_Setup_Wizard {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Helper method to get postcode configurations from `WC()->countries->get_country_locale()`.
+	 * We don't use `wp_list_pluck` because it will throw notices when postcode configuration is not defined for a country.
+	 *
+	 * @return array
+	 */
+	private function get_postcodes() {
+		$locales   = WC()->countries->get_country_locale();
+		$postcodes = array();
+		foreach ( $locales as $country_code => $locale ) {
+			if ( isset( $locale['postcode'] ) ) {
+				$postcodes[ $country_code ] = $locale['postcode'];
+			}
+		}
+		return $postcodes;
 	}
 
 	/**
