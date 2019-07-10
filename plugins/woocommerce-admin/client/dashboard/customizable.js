@@ -127,6 +127,12 @@ class CustomizableDashboard extends Component {
 			// Yes, lets insert.
 			sections.splice( newIndex, 0, movedSection );
 			this.updateSections( sections );
+
+			const eventProps = {
+				key: movedSection.key,
+				direction: 0 < change ? 'down' : 'up',
+			};
+			recordEvent( 'dash_section_order_change', eventProps );
 		} else {
 			// No, lets try the next one.
 			this.onMove( index, change + change );
