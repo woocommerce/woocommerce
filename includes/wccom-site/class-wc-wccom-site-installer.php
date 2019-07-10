@@ -2,8 +2,8 @@
 /**
  * WooCommerce.com Product Installation.
  *
- * @class    WC_Helper_Product_Install
- * @package  WooCommerce/Admin
+ * @class    WC_WCCOM_Site_Installer
+ * @package  WooCommerce/WCCOM_Site
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -11,11 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Helper_Product_Install Class
+ * WC_WCCOM_Site_Installer Class
  *
- * Contains functionalities to install product via helper connection.
+ * Contains functionalities to install products via WooCommerce.com helper connection.
  */
-class WC_Helper_Product_Install {
+class WC_WCCOM_Site_Installer {
 	/**
 	 * Default state.
 	 *
@@ -88,31 +88,52 @@ class WC_Helper_Product_Install {
 
 	/**
 	 * Reset product install state.
+	 *
+	 * @param array $products List of product IDs.
 	 */
-	public static function reset_state() {
+	public static function reset_state( $products = array() ) {
+		WC()->queue()->cancel_all( 'woocommerce_wccom_install_products' );
 		WC_Helper_Options::update( 'product_install', self::$default_state );
 	}
 
 	/**
+	 * Schedule installing given list of products.
+	 *
+	 * @param array $products List of product IDs.
+	 *
+	 * @return array State.
+	 */
+	public static function schedule_install( $products ) {
+		$state  = self::get_state();
+		$status = ! empty( $state['status'] ) ? $state['status'] : '';
+		if ( 'in-progress' === $status ) {
+			return $state;
+		}
+		self::update_state( 'status', 'in-progress' );
+
+		$steps = array_fill_keys( $products, self::$default_step_state );
+		self::update_state( 'steps', $steps );
+
+		$args = array(
+			'products' => $products,
+		);
+
+		WC()->queue()->cancel_all( 'woocommerce_wccom_install_products', $args );
+		WC()->queue()->add( 'woocommerce_wccom_install_products', $args );
+
+		return self::get_state();
+	}
+
+	/**
 	 * Install a given product IDs.
+	 *
+	 * Run via `woocommerce_wccom_install_products` hook.
 	 *
 	 * @param array $products List of product IDs.
 	 *
 	 * @return array State.
 	 */
 	public static function install( $products ) {
-		$state  = self::get_state();
-		$status = ! empty( $state['status'] ) ? $state['status'] : '';
-		if ( 'in-progress' === $status ) {
-			return $state;
-		}
-
-		self::update_state( 'status', 'in-progress' );
-
-		$steps = array_fill_keys( $products, self::$default_step_state );
-		self::update_state( 'steps', $steps );
-
-		// TODO: async install? i.e. queue the job via Action Scheduler.
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 		require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
 		require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
@@ -127,18 +148,16 @@ class WC_Helper_Product_Install {
 			self::install_product( $product_id, $upgrader );
 		}
 
-		return self::finish_installation();
+		self::finish_installation();
 	}
 
 	/**
 	 * Finish installation by updating the state.
-	 *
-	 * @return array State.
 	 */
 	private static function finish_installation() {
 		$state = self::get_state();
 		if ( empty( $state['steps'] ) ) {
-			return $state;
+			return;
 		}
 
 		foreach ( $state['steps'] as $step ) {
@@ -153,8 +172,6 @@ class WC_Helper_Product_Install {
 		}
 
 		WC_Helper_Options::update( 'product_install', $state );
-
-		return $state;
 	}
 
 	/**

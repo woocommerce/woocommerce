@@ -80,8 +80,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_install_state( $request ) {
-		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
-		return rest_ensure_response( WC_Helper_Product_Install::get_state() );
+		return rest_ensure_response( WC_WCCOM_Site_Installer::get_state() );
 	}
 
 	/**
@@ -92,8 +91,6 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function install( $request ) {
-		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
-
 		$body = WP_REST_Server::get_raw_data();
 		if ( empty( $body ) ) {
 			return new WP_Error( 'empty_body', __( 'Request body is empty.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -104,7 +101,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 			return new WP_Error( 'missing_products', __( 'Missing products in request body.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		return rest_ensure_response( WC_Helper_Product_Install::install( $data['products'] ) );
+		return rest_ensure_response( WC_WCCOM_Site_Installer::schedule_install( $data['products'] ) );
 	}
 
 	/**
@@ -115,8 +112,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function reset_install( $request ) {
-		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
-		$resp = rest_ensure_response( WC_Helper_Product_Install::reset_state() );
+		$resp = rest_ensure_response( WC_WCCOM_Site_Installer::reset_state() );
 		$resp->set_status( 204 );
 
 		return $resp;
