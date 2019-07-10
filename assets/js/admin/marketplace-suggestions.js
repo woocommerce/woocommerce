@@ -118,7 +118,12 @@
 			// By default, CTA links should open in same tab (and feel integrated with Woo).
 			// Exception: when editing products, use new tab. User may have product edits
 			// that need to be saved.
-			if ( 'editproduct' === context ) {
+			var newTabContexts = [
+				'product-edit-meta-tab-header',
+				'product-edit-meta-tab-footer',
+				'product-edit-meta-tab-body'
+			];
+			if ( _.includes( newTabContexts, context ) ) {
 				linkoutButton.setAttribute( 'target', 'blank' );
 			}
 
