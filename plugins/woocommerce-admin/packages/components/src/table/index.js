@@ -54,7 +54,7 @@ class TableCard extends Component {
 		this.onClickDownload = this.onClickDownload.bind( this );
 		this.onCompare = this.onCompare.bind( this );
 		this.onPageChange = this.onPageChange.bind( this );
-		this.onSearch = this.onSearch.bind( this );
+		this.onSearchChange = this.onSearchChange.bind( this );
 		this.selectRow = this.selectRow.bind( this );
 		this.selectAllRows = this.selectAllRows.bind( this );
 	}
@@ -179,8 +179,13 @@ class TableCard extends Component {
 		}
 	}
 
-	onSearch( values ) {
-		const { compareParam, searchBy, baseSearchQuery } = this.props;
+	onSearchChange( values ) {
+		const {
+			baseSearchQuery,
+			compareParam,
+			onSearch,
+			searchBy,
+		} = this.props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
 		const labels = values.map( v => v.label.replace( ',', '%2C' ) );
@@ -197,6 +202,8 @@ class TableCard extends Component {
 				search: undefined,
 			} );
 		}
+
+		onSearch( values );
 	}
 
 	selectAllRows( event ) {
@@ -318,7 +325,7 @@ class TableCard extends Component {
 							allowFreeTextSearch={ true }
 							inlineTags
 							key="search"
-							onChange={ this.onSearch }
+							onChange={ this.onSearchChange }
 							placeholder={ labels.placeholder || __( 'Search by item name', 'woocommerce-admin' ) }
 							selected={ searchedLabels }
 							showClearButton={ true }
@@ -454,6 +461,10 @@ TableCard.propTypes = {
 	 */
 	onColumnsChange: PropTypes.func,
 	/**
+	 * A function which is called upon the user searching in the table header.
+	 */
+	onSearch: PropTypes.func,
+	/**
 	 * A function which is called upon the user changing the sorting of the table.
 	 */
 	onSort: PropTypes.func,
@@ -526,6 +537,7 @@ TableCard.defaultProps = {
 	isLoading: false,
 	onQueryChange: noop,
 	onColumnsChange: noop,
+	onSearch: noop,
 	onSort: undefined,
 	query: {},
 	rowHeader: 0,

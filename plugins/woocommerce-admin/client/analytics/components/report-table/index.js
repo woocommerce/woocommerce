@@ -40,6 +40,7 @@ class ReportTable extends Component {
 		this.onPageChange = this.onPageChange.bind( this );
 		this.onSort = this.onSort.bind( this );
 		this.scrollPointRef = createRef();
+		this.trackTableSearch = this.trackTableSearch.bind( this );
 	}
 
 	onColumnsChange( shownColumns, toggledColumn ) {
@@ -75,6 +76,13 @@ class ReportTable extends Component {
 		if ( focusableElements.length ) {
 			focusableElements[ 0 ].focus();
 		}
+	}
+
+	trackTableSearch() {
+		const { endpoint } = this.props;
+
+		// @todo: decide if this should only fire for new tokens (not any/all changes).
+		recordEvent( 'analytics_table_filter', { report: endpoint } );
 	}
 
 	onSort( key, direction ) {
@@ -174,6 +182,7 @@ class ReportTable extends Component {
 					isLoading={ isLoading }
 					onQueryChange={ onQueryChange }
 					onColumnsChange={ this.onColumnsChange }
+					onSearch={ this.trackTableSearch }
 					onSort={ this.onSort }
 					onPageChange={ this.onPageChange }
 					rows={ rows }
