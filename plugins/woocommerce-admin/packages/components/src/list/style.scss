@@ -1,0 +1,32 @@
+.woocommerce-list__item {
+	padding: $gap;
+	display: flex;
+	margin-bottom: 0;
+
+	.woocommerce-list__item-title {
+		display: block;
+		font-size: 16px;
+		line-height: 22px;
+		color: #1a1a1a;
+	}
+
+	.woocommerce-list__item-description {
+		display: block;
+		font-size: 14px;
+		line-height: 20px;
+		color: #50575d;
+	}
+
+	.woocommerce-list__item-before {
+		margin-right: $gap;
+		display: flex;
+		align-items: center;
+	}
+
+	.woocommerce-list__item-after {
+		margin-left: $gap;
+		display: flex;
+		align-items: center;
+		margin-left: auto;
+	}
+}
