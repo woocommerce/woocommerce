@@ -530,9 +530,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
-		$images = array();
+		$images    = array();
+		$separator = apply_filters( 'woocommerce_product_import_image_separator', ',' );
 
-		foreach ( $this->explode_values( $value ) as $image ) {
+		foreach ( $this->explode_values( $value, $separator ) as $image ) {
 			if ( stristr( $image, '://' ) ) {
 				$images[] = esc_url_raw( $image );
 			} else {
