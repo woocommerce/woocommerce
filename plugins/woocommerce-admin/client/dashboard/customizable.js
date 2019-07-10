@@ -86,6 +86,7 @@ class CustomizableDashboard extends Component {
 
 	onSectionTitleUpdate( updatedKey ) {
 		return updatedTitle => {
+			recordEvent( 'dash_section_rename', { key: updatedKey } );
 			this.updateSection( updatedKey, { title: updatedTitle } );
 		};
 	}
