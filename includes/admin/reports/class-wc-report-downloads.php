@@ -164,8 +164,8 @@ class WC_Report_Downloads extends WP_List_Table {
 					// File information.
 					$file = $product->get_file( $permission->get_download_id() );
 
-					if( false === $file ){
-						echo esc_html__( 'File not exists', 'woocommerce' );
+					if ( false === $file ) {
+						echo esc_html__( 'File does not exist', 'woocommerce' );
 					} else {
 						echo esc_html( $file->get_name() . ' - ' . basename( $file->get_file() ) );
 
