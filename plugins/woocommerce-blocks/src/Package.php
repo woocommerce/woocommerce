@@ -19,7 +19,7 @@ class Package {
 	 *
 	 * @var string
 	 */
-	const VERSION = '2.3.0-dev';
+	const VERSION = '2.3.0-beta';
 
 	/**
 	 * Stores if init has ran yet.
