@@ -2195,6 +2195,11 @@ p.demo_store,
 					background-image: url("../images/icons/credit-cards/discover.svg");
 				}
 			}
+			
+			.wc-credit-card-form-card-number:valid {
+				font-weight: bold;
+				color: #57bf6d;
+			}
 
 			span.help {
 				font-size: 0.857em;
