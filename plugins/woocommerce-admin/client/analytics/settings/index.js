@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { remove, transform } from 'lodash';
+import { partial, remove, transform } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -80,7 +80,7 @@ class Settings extends Component {
 		) {
 			const settings = {};
 			analyticsSettings.forEach( setting => ( settings[ setting.name ] = setting.defaultValue ) );
-			this.setState( { settings }, this.saveChanges );
+			this.setState( { settings }, partial( this.saveChanges, 'reset' ) );
 		}
 	};
 
@@ -126,19 +126,23 @@ class Settings extends Component {
 		} );
 	}
 
-	saveChanges = () => {
+	saveChanges = source => {
 		const { settings } = this.state;
 		this.persistChanges( this.state );
 		this.props.updateSettings( { wc_admin: settings } );
 
-		const eventProps = transform(
-			analyticsSettings,
-			( props, setting ) => {
-				props[ setting.name ] = settings[ setting.name ];
-			},
-			{}
-		);
-		recordEvent( 'analytics_settings_save', eventProps );
+		if ( 'reset' === source ) {
+			recordEvent( 'analytics_settings_reset_defaults' );
+		} else {
+			const eventProps = transform(
+				analyticsSettings,
+				( props, setting ) => {
+					props[ setting.name ] = settings[ setting.name ];
+				},
+				{}
+			);
+			recordEvent( 'analytics_settings_save', eventProps );
+		}
 
 		// TODO: remove this optimistic set of isDirty to false once #2541 is resolved.
 		this.setState( { saving: true, isDirty: false } );
