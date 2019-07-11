@@ -53,7 +53,7 @@ echo "Before proceeding:"
 echo " • Ensure you have checked out the branch you wish to release"
 echo " • Ensure you have committed/pushed all local changes"
 echo " • Did you remember to update versions, changelogs, and stable tags in the readme and plugin files?"
-echo " • If you are running this script directory instead of via '$ npm run deploy', ensure you have built assets."
+echo " • If you are running this script directory instead of via '$ npm run deploy', ensure you have built assets and installed composer in --no-dev mode."
 echo
 output 3 "Do you want to continue? [y/N]: "
 read -r PROCEED
@@ -101,6 +101,11 @@ git checkout -b $BRANCH
 git add build/. --force
 git add .
 git commit -m "Adding /build directory to release"
+
+# Force add vendor directory and commit.
+git add vendor/. --force
+git add .
+git commit -m "Adding /vendor directory to release"
 
 # Push branch upstream
 git push origin $BRANCH

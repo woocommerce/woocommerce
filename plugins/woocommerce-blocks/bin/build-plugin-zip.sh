@@ -77,6 +77,7 @@ fi
 
 # Run the build.
 status "Installing dependencies... 📦"
+composer install --no-dev
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
 status "==========================="
 npm list webpack
