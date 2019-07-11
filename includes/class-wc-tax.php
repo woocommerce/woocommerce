@@ -670,7 +670,6 @@ class WC_Tax {
 		global $wpdb;
 
 		if ( is_object( $key_or_rate ) ) {
-			$key      = $key_or_rate->tax_rate_id;
 			$tax_rate = $key_or_rate->tax_rate;
 		} else {
 			$key      = $key_or_rate;
