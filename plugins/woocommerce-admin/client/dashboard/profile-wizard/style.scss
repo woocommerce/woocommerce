@@ -377,6 +377,10 @@
 				left: 3px;
 			}
 
+			label.components-checkbox-control__label {
+				color: $muriel-gray-800;
+			}
+
 			label.components-checkbox-control__label,
 			.components-base-control__help {
 				margin-left: $gap-large * 2;
