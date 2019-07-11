@@ -94,17 +94,19 @@ class WC_REST_Authentication {
 	 * @return bool
 	 */
 	protected function verify_wccom_request( $body, $signature, $access_token_secret ) {
+		// phpcs:disable
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
 			'request_uri' => $_SERVER['REQUEST_URI'],
 			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
 		);
+		// phpcs:enable
 
 		if ( ! empty( $body ) ) {
 			$data['body'] = $body;
 		}
 
-		$expected_signature = hash_hmac( 'sha256', json_encode( $data ), $access_token_secret );
+		$expected_signature = hash_hmac( 'sha256', wp_json_encode( $data ), $access_token_secret );
 
 		return hash_equals( $expected_signature, $signature );
 	}
@@ -125,6 +127,7 @@ class WC_REST_Authentication {
 			return false;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_auth = trim( $_SERVER['HTTP_AUTHORIZATION'] );
 		if ( stripos( $request_auth, 'Bearer ' ) !== 0 ) {
 			return false;
@@ -134,7 +137,7 @@ class WC_REST_Authentication {
 			return false;
 		}
 
-		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php' );
+		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		$access_token = trim( substr( $request_auth, 7 ) );
 		$site_auth    = WC_Helper_Options::get( 'auth' );
 		if ( empty( $site_auth['access_token'] ) || $access_token !== $site_auth['access_token'] ) {
@@ -142,7 +145,7 @@ class WC_REST_Authentication {
 		}
 
 		$body      = WP_REST_Server::get_raw_data();
-		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] );
+		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( ! $this->verify_wccom_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
 			return false;

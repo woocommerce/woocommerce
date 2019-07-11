@@ -135,14 +135,12 @@ class WC_WCCOM_Site_Installer {
 	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.
-	 *
-	 * @return array State.
 	 */
 	public static function install( $products ) {
-		require_once( ABSPATH . 'wp-admin/includes/file.php' );
-		require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
-		require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		WP_Filesystem();
 		$upgrader = new WP_Upgrader( new Automatic_Upgrader_Skin() );
@@ -467,7 +465,7 @@ class WC_WCCOM_Site_Installer {
 	 * @return bool|string
 	 */
 	private static function get_wporg_product_dir_name( $product_id ) {
-		$steps = self::get_state( 'steps' );
+		$steps   = self::get_state( 'steps' );
 		$product = $steps[ $product_id ];
 
 		if ( empty( $product['download_url'] ) || empty( $product['installed_path'] ) ) {
@@ -475,8 +473,8 @@ class WC_WCCOM_Site_Installer {
 		}
 
 		// Check whether product was downloaded from WordPress.org.
-		$host = parse_url( $product['download_url'], PHP_URL_HOST );
-		if ( 'downloads.wordpress.org' !== $host ) {
+		$parsed_url = wp_parse_url( $product['download_url'] );
+		if ( ! empty( $parsed_url['host'] ) && 'downloads.wordpress.org' !== $parsed_url['host'] ) {
 			return false;
 		}
 
