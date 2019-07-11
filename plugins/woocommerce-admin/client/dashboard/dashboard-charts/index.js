@@ -43,6 +43,7 @@ class DashboardCharts extends Component {
 				[ 'dashboard_chart_type' ]: chartType,
 			};
 			this.props.updateCurrentUserData( userDataFields );
+			recordEvent( 'dash_charts_type_toggle', { chart_type: chartType } );
 		};
 	}
 
