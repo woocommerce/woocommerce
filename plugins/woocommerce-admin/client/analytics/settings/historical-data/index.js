@@ -18,6 +18,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
  */
 import { formatParams } from './utils';
 import HistoricalDataLayout from './layout';
+import { recordEvent } from 'lib/tracks';
 
 class HistoricalData extends Component {
 	constructor() {
@@ -100,6 +101,7 @@ class HistoricalData extends Component {
 		this.setState( {
 			activeImport: false,
 		} );
+		recordEvent( 'analytics_import_delete_previous' );
 	}
 
 	onReimportData() {
