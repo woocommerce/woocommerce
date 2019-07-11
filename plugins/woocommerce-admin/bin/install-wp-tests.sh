@@ -182,6 +182,7 @@ install_deps() {
 	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
 	cd "$WP_CORE_DIR"
 	# Bring in WooCommerce Core dependencies
+	ls composer.json
 	composer install
 	php wp-cli.phar plugin activate woocommerce
 
