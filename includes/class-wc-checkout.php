@@ -557,6 +557,7 @@ class WC_Checkout {
 						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
 						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
 						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
+						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_id ),
 					)
 				);
 
