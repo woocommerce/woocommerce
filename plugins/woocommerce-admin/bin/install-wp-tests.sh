@@ -180,10 +180,12 @@ install_deps() {
 	cd "wp-content/plugins/"
 	# As zip file does not include tests, we have to get it from git repo.
 	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
-	cd "$WP_CORE_DIR"
+
 	# Bring in WooCommerce Core dependencies
-	ls composer.json
+	cd "woocommerce"
 	composer install
+
+	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
 
 	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
