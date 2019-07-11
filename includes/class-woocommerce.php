@@ -444,7 +444,6 @@ final class WooCommerce {
 		 */
 		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
 
-
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
 		}
