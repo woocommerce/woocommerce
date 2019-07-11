@@ -151,6 +151,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		$this->set_block_query_args( $query_args );
 		$this->set_ordering_query_args( $query_args );
 		$this->set_categories_query_args( $query_args );
+		$this->set_visibility_query_args( $query_args );
 
 		return $query_args;
 	}
@@ -213,6 +214,29 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		}
 	}
 
+	/**
+	 * Set visibility query args.
+	 *
+	 * @param array $query_args Query args.
+	 */
+	protected function set_visibility_query_args( &$query_args ) {
+		$product_visibility_terms  = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( $product_visibility_terms['exclude-from-catalog'] );
+
+		// Hide out of stock products.
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+		}
+
+		if ( ! empty( $product_visibility_not_in ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => $product_visibility_not_in,
+				'operator' => 'NOT IN',
+			);
+		}
+	}
 	/**
 	 * Works out the item limit based on rows and columns, or returns default.
 	 *
