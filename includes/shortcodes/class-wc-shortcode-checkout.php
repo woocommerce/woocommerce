@@ -272,6 +272,7 @@ class WC_Shortcode_Checkout {
 		if ( empty( $_POST ) && wc_notice_count( 'error' ) > 0 ) { // WPCS: input var ok, CSRF ok.
 
 			wc_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
+			wc_clear_notices();
 
 		} else {
 

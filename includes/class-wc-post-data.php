@@ -129,7 +129,7 @@ class WC_Post_Data {
 		if ( 'variable' === $from && 'variable' !== $to ) {
 			// If the product is no longer variable, we should ensure all variations are removed.
 			$data_store = WC_Data_Store::load( 'product-variable' );
-			$data_store->delete_variations( $product->get_id() );
+			$data_store->delete_variations( $product->get_id(), true );
 		}
 	}
 

@@ -66,34 +66,3 @@ p.woocommerce-actions,
 .woocommerce-about-text {
 	margin-bottom: 1em !important;
 }
-
-div.woocommerce-legacy-shipping-notice,
-div.woocommerce-no-shipping-methods-notice {
-	overflow: hidden;
-	padding: 1px 12px;
-
-	p {
-		position: relative;
-		z-index: 1;
-		line-height: 1.5em;
-		margin: 12px 0;
-
-		&.main {
-			font-size: 1.1em;
-		}
-	}
-
-	&::before {
-		content: "\e01b";
-		font-family: "WooCommerce";
-		text-align: center;
-		line-height: 1;
-		color: #f7f1f6;
-		display: block;
-		width: 1em;
-		font-size: 20em;
-		top: 36px;
-		right: 12px;
-		position: absolute;
-	}
-}

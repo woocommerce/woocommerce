@@ -11,6 +11,16 @@
 class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * Set illegal login
+	 *
+	 * @param array $logins Array of blacklisted logins.
+	 * @return array
+	 */
+	public function setup_illegal_user_logins( $logins ) {
+		return array( 'test' );
+	}
+
+	/**
 	 * Test wc_create_new_customer.
 	 *
 	 * @since 3.1
@@ -93,12 +103,12 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		// Test first/last name generation.
 		$this->assertEquals(
-			'bobbobson',
+			'bob.bobson',
 			wc_create_new_customer_username(
 				'bob@bobbobson.com',
 				array(
 					'first_name' => 'Bob',
-					'last_name' => 'Bobson',
+					'last_name'  => 'Bobson',
 				)
 			)
 		);
@@ -110,10 +120,20 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 				'unicode@unicode.com',
 				array(
 					'first_name' => 'こんにちは',
-					'last_name' => 'こんにちは',
+					'last_name'  => 'こんにちは',
 				)
 			)
 		);
+
+		// Test username generation triggered by illegal_user_logins filter.
+		add_filter( 'illegal_user_logins', array( $this, 'setup_illegal_user_logins' ) );
+
+		$this->assertStringStartsWith(
+			'woo_user_',
+			wc_create_new_customer_username( 'test@test.com' )
+		);
+
+		remove_filter( 'illegal_user_logins', array( $this, 'setup_illegal_user_logins' ) );
 	}
 
 	/**

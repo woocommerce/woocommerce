@@ -249,24 +249,23 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_shipping_args( $order ) {
 		$shipping_args = array();
-
-		if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {
+		if ( $order->needs_shipping_address() ) {
 			$shipping_args['address_override'] = $this->gateway->get_option( 'address_override' ) === 'yes' ? 1 : 0;
 			$shipping_args['no_shipping']      = 0;
-
-			// If we are sending shipping, send shipping address instead of billing.
-			$shipping_args['first_name'] = $this->limit_length( $order->get_shipping_first_name(), 32 );
-			$shipping_args['last_name']  = $this->limit_length( $order->get_shipping_last_name(), 64 );
-			$shipping_args['address1']   = $this->limit_length( $order->get_shipping_address_1(), 100 );
-			$shipping_args['address2']   = $this->limit_length( $order->get_shipping_address_2(), 100 );
-			$shipping_args['city']       = $this->limit_length( $order->get_shipping_city(), 40 );
-			$shipping_args['state']      = $this->get_paypal_state( $order->get_shipping_country(), $order->get_shipping_state() );
-			$shipping_args['country']    = $this->limit_length( $order->get_shipping_country(), 2 );
-			$shipping_args['zip']        = $this->limit_length( wc_format_postcode( $order->get_shipping_postcode(), $order->get_shipping_country() ), 32 );
+			if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {
+				// If we are sending shipping, send shipping address instead of billing.
+				$shipping_args['first_name'] = $this->limit_length( $order->get_shipping_first_name(), 32 );
+				$shipping_args['last_name']  = $this->limit_length( $order->get_shipping_last_name(), 64 );
+				$shipping_args['address1']   = $this->limit_length( $order->get_shipping_address_1(), 100 );
+				$shipping_args['address2']   = $this->limit_length( $order->get_shipping_address_2(), 100 );
+				$shipping_args['city']       = $this->limit_length( $order->get_shipping_city(), 40 );
+				$shipping_args['state']      = $this->get_paypal_state( $order->get_shipping_country(), $order->get_shipping_state() );
+				$shipping_args['country']    = $this->limit_length( $order->get_shipping_country(), 2 );
+				$shipping_args['zip']        = $this->limit_length( wc_format_postcode( $order->get_shipping_postcode(), $order->get_shipping_country() ), 32 );
+			}
 		} else {
 			$shipping_args['no_shipping'] = 1;
 		}
-
 		return $shipping_args;
 	}
 
@@ -492,7 +491,7 @@ class WC_Gateway_Paypal_Request {
 		$item = apply_filters(
 			'woocommerce_paypal_line_item',
 			array(
-				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
+				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? wp_strip_all_tags( $item_name ) : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
 				'quantity'    => (int) $quantity,
 				'amount'      => wc_float_to_string( (float) $amount ),
 				'item_number' => $item_number,

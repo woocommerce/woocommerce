@@ -33,7 +33,7 @@ class WC_Tests_Integrations extends WC_Unit_Test_Case {
 		$this->assertEquals( array(), $integrations->integrations );
 		$this->assertEquals( array(), $integrations->get_integrations() );
 
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-dummy-integration.php' );
+		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-dummy-integration.php';
 
 		add_filter( 'woocommerce_integrations', array( $this, 'add_dummy_integration' ) );
 		$integrations = new WC_Integrations();

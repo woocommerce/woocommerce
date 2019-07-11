@@ -51,7 +51,8 @@ class WC_Settings_General extends WC_Settings_Page {
 		}
 
 		$settings = apply_filters(
-			'woocommerce_general_settings', array(
+			'woocommerce_general_settings',
+			array(
 
 				array(
 					'title' => __( 'Store Address', 'woocommerce' ),
@@ -317,54 +318,10 @@ class WC_Settings_General extends WC_Settings_Page {
 	}
 
 	/**
-	 * Show a notice showing where the store notice setting has moved.
-	 *
-	 * @since 3.3.1
-	 * @todo remove in next major release.
-	 */
-	private function store_notice_setting_moved_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_store_notice_setting_moved_notice', true ) ) {
-			return;
-		}
-		?>
-		<div id="message" class="updated woocommerce-message inline">
-			<a class="woocommerce-message-close notice-dismiss" style="top:0;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'store_notice_setting_moved' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
-
-			<p>
-				<?php
-				echo wp_kses(
-					sprintf(
-						/* translators: %s: URL to customizer. */
-						__( 'Looking for the store notice setting? It can now be found <a href="%s">in the Customizer</a>.', 'woocommerce' ), esc_url(
-							add_query_arg(
-								array(
-									'autofocus' => array(
-										'panel' => 'woocommerce',
-									),
-									'url'       => wc_get_page_permalink( 'shop' ),
-								), admin_url( 'customize.php' )
-							)
-						)
-					), array(
-						'a' => array(
-							'href'  => array(),
-							'title' => array(),
-						),
-					)
-				);
-				?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Output the settings.
 	 */
 	public function output() {
 		$settings = $this->get_settings();
-
-		$this->store_notice_setting_moved_notice();
 
 		WC_Admin_Settings::output_fields( $settings );
 	}

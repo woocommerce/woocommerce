@@ -753,12 +753,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * separators.
 	 *
 	 * @since  3.2.0
-	 * @param  string $value Value to explode.
+	 * @param  string $value     Value to explode.
+	 * @param  string $separator Separator separating each value. Defaults to comma.
 	 * @return array
 	 */
-	protected function explode_values( $value ) {
+	protected function explode_values( $value, $separator = ',' ) {
 		$value  = str_replace( '\\,', '::separator::', $value );
-		$values = explode( ',', $value );
+		$values = explode( $separator, $value );
 		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
 
 		return $values;
