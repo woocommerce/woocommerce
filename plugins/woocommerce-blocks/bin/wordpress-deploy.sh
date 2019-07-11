@@ -137,6 +137,11 @@ if [ ! -d "$GIT_PATH/build" ]; then
 	exit 1
 fi
 
+if [ ! -d "$GIT_PATH/vendor" ]; then
+	output 3 "Vendor directory not found in tag. Aborting."
+	exit 1
+fi
+
 # Checkout SVN repository if not exists
 if [ ! -d "$SVN_PATH" ]; then
 	output 2 "No SVN directory found, fetching files..."
