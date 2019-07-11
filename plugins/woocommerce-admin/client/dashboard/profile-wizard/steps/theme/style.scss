@@ -66,7 +66,7 @@
 	}
 
 	.woocommerce-profile-wizard__theme-name {
-		margin-top: 0;
+		margin-top: auto;
 		margin-bottom: $gap-smaller;
 		@include font-size(24);
 		font-weight: 400;
@@ -99,9 +99,8 @@
 	}
 
 	.woocommerce-profile-wizard__theme-actions {
-		margin-top: auto;
-
 		button.components-button {
+			margin-top: 13px;
 			display: block;
 			float: left;
 			min-width: 106px;
