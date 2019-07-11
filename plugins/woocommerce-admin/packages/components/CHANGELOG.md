@@ -1,5 +1,7 @@
 # unreleased
 - SearchListItem component: new `countLabel` prop that will overwrite the `item.count` value.
+- AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
+- TableCard component: add `onSearch` an `onSort` function props.
 
 # 3.1.0
 - Added support for a countLabel prop on SearchListItem to allow custom counts.
