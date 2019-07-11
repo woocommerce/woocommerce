@@ -35,3 +35,17 @@
 		}
 	}
 }
+
+.wc-block-api-error {
+	.components-placeholder__fieldset {
+		display: block;
+		margin: 0;
+		padding: 0;
+	}
+	.wc-block-error__message {
+		margin-bottom: 16px;
+	}
+	.components-spinner {
+		float: none;
+	}
+}
