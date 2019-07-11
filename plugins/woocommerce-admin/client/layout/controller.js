@@ -86,8 +86,8 @@ export class Controller extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const prevQuery = this.getQuery( prevProps.location.search );
-		const prevBaseQuery = this.getBaseQuery( prevProps.location.search );
-		const baseQuery = this.getBaseQuery( this.props.location.search );
+		const prevBaseQuery = omit( this.getQuery( prevProps.location.search ), 'paged' );
+		const baseQuery = omit( this.getQuery( this.props.location.search ), 'paged' );
 
 		if ( prevQuery.paged > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
 			getHistory().replace( getNewPath( { paged: 1 } ) );
@@ -107,16 +107,10 @@ export class Controller extends Component {
 		return parse( search );
 	}
 
-	getBaseQuery( searchString ) {
-		const query = this.getQuery( searchString );
-		delete query.paged;
-		return query;
-	}
-
 	render() {
 		const { page, match, location } = this.props;
 		const { url, params } = match;
-		const query = omit( this.getQuery( location.search ), 'page' );
+		const query = this.getQuery( location.search );
 
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page, url );
