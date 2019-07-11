@@ -2160,7 +2160,7 @@ class WC_Admin_Setup_Wizard {
 			<p class="jetpack-terms">
 				<?php
 					printf(
-						wp_kses_post( __( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms of Service</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ) ),
+						wp_kses_post( __( 'By connecting your site you agree to our fascinating <a href="%1$s" target="_blank">Terms and Conditions</a> and to <a href="%2$s" target="_blank">share details</a> with WordPress.com', 'woocommerce' ) ),
 						'https://wordpress.com/tos',
 						'https://jetpack.com/support/what-data-does-jetpack-sync'
 					);
