@@ -4,7 +4,7 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse, stringify } from 'qs';
-import { find, isEqual, last } from 'lodash';
+import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
@@ -89,8 +89,8 @@ export class Controller extends Component {
 		const prevBaseQuery = this.getBaseQuery( prevProps.location.search );
 		const baseQuery = this.getBaseQuery( this.props.location.search );
 
-		if ( prevQuery.page > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
-			getHistory().replace( getNewPath( { page: 1 } ) );
+		if ( prevQuery.paged > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
+			getHistory().replace( getNewPath( { paged: 1 } ) );
 		}
 
 		if ( prevProps.match.url !== this.props.match.url ) {
@@ -109,14 +109,14 @@ export class Controller extends Component {
 
 	getBaseQuery( searchString ) {
 		const query = this.getQuery( searchString );
-		delete query.page;
+		delete query.paged;
 		return query;
 	}
 
 	render() {
 		const { page, match, location } = this.props;
 		const { url, params } = match;
-		const query = this.getBaseQuery( location.search );
+		const query = omit( this.getQuery( location.search ), 'page' );
 
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page, url );
