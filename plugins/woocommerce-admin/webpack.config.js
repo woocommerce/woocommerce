@@ -26,6 +26,8 @@ const WC_ADMIN_CONFIG = require( path.join( __dirname, 'config', WC_ADMIN_PHASE 
 const externals = {
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
 	'@wordpress/blocks': { this: [ 'wp', 'blocks' ] },
+	'@wordpress/components': { this: [ 'wp', 'components' ] },
+	'@wordpress/compose': { this: [ 'wp', 'compose' ] },
 	'@wordpress/data': { this: [ 'wp', 'data' ] },
 	'@wordpress/editor': { this: [ 'wp', 'editor' ] },
 	'@wordpress/element': { this: [ 'wp', 'element' ] },

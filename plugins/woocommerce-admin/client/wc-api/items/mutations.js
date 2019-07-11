@@ -11,7 +11,7 @@ import { dispatch } from '@wordpress/data';
 import { getResourceName } from '../utils';
 
 const updateProductStock = operations => async ( product, newStock ) => {
-	const { createNotice } = dispatch( 'core/notices' );
+	const { addNotice } = dispatch( 'wc-admin' );
 	const oldStockQuantity = product.stock_quantity;
 	const resourceName = getResourceName( 'items-query-products-item', product.id );
 
@@ -30,16 +30,16 @@ const updateProductStock = operations => async ( product, newStock ) => {
 	} );
 	const response = result[ 0 ][ resourceName ];
 	if ( response && response.data ) {
-		createNotice(
-			'success',
-			sprintf( __( '%s stock updated.', 'woocommerce-admin' ), product.name )
-		);
+		addNotice( {
+			status: 'success',
+			message: sprintf( __( '%s stock updated.', 'woocommerce-admin' ), product.name ),
+		} );
 	}
 	if ( response && response.error ) {
-		createNotice(
-			'error',
-			sprintf( __( '%s stock could not be updated.', 'woocommerce-admin' ), product.name )
-		);
+		addNotice( {
+			status: 'error',
+			message: sprintf( __( '%s stock could not be updated.', 'woocommerce-admin' ), product.name ),
+		} );
 		// Revert local changes if the operation failed in the server
 		operations.updateLocally( [ resourceName ], {
 			[ resourceName ]: { ...product, stock_quantity: oldStockQuantity },
