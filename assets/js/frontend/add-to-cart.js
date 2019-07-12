@@ -26,9 +26,9 @@ jQuery( function( $ ) {
 	AddToCartHandler.prototype.addRequest = function( request ) {
 		this.requests.push( request );
 
-        if ( 1 === this.requests.length ) {
+		if ( 1 === this.requests.length ) {
 			this.run();
-        }
+		}
 	}
 
 	/**
@@ -38,7 +38,7 @@ jQuery( function( $ ) {
 		var requestManager = this,
 			originalCallback = requestManager.requests[0].complete;
 
-        requestManager.requests[0].complete = function() {
+		requestManager.requests[0].complete = function() {
 			if ( typeof originalCallback === 'function' ) {
 				originalCallback();
 			}
@@ -48,9 +48,9 @@ jQuery( function( $ ) {
 			if ( requestManager.requests.length > 0 ) {
 				requestManager.run();
 			}
-        };
+		};
 
-        $.ajax( this.requests[0] );
+		$.ajax( this.requests[0] );
 	}
 
 	/**
