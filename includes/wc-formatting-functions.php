@@ -281,7 +281,7 @@ function wc_format_refund_total( $amount ) {
  * This function does not remove thousands - this should be done before passing a value to the function.
  *
  * @param  float|string $number     Expects either a float or a string with a decimal separator only (no thousands).
- * @param  bool|integer $dp number  Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
+ * @param  bool|integer $dp         Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
  * @param  bool         $trim_zeros From end of string.
  * @param  bool         $abs        Converts to absolute value of a number. See PHP abs().
  * @return string
