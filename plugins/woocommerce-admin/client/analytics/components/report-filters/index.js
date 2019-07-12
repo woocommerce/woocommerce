@@ -54,6 +54,9 @@ export default class ReportFilters extends Component {
 			case 'clear_all':
 				recordEvent( 'analytics_filters_clear_all', { report } );
 				break;
+			case 'match':
+				recordEvent( 'analytics_filters_all_any', { report, value: data.match } );
+				break;
 		}
 	}
 

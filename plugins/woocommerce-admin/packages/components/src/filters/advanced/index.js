@@ -75,7 +75,11 @@ class AdvancedFilters extends Component {
 	}
 
 	onMatchChange( match ) {
+		const { onAdvancedFilterAction } = this.props;
+
 		this.setState( { match } );
+
+		onAdvancedFilterAction( 'match', { match } );
 	}
 
 	onFilterChange( key, property, value ) {

@@ -38,11 +38,13 @@ class ReportTable extends Component {
 
 		this.onColumnsChange = this.onColumnsChange.bind( this );
 		this.onPageChange = this.onPageChange.bind( this );
+		this.onSort = this.onSort.bind( this );
 		this.scrollPointRef = createRef();
+		this.trackTableSearch = this.trackTableSearch.bind( this );
 	}
 
-	onColumnsChange( shownColumns ) {
-		const { columnPrefsKey, getHeadersContent, updateCurrentUserData } = this.props;
+	onColumnsChange( shownColumns, toggledColumn ) {
+		const { columnPrefsKey, endpoint, getHeadersContent, updateCurrentUserData } = this.props;
 		const columns = getHeadersContent().map( header => header.key );
 		const hiddenColumns = columns.filter( column => ! shownColumns.includes( column ) );
 
@@ -51,6 +53,16 @@ class ReportTable extends Component {
 				[ columnPrefsKey ]: hiddenColumns,
 			};
 			updateCurrentUserData( userDataFields );
+		}
+
+		if ( toggledColumn ) {
+			const eventProps = {
+				report: endpoint,
+				column: toggledColumn,
+				status: shownColumns.includes( toggledColumn ) ? 'on' : 'off',
+			};
+
+			recordEvent( 'analytics_table_header_toggle', eventProps );
 		}
 	}
 
@@ -64,6 +76,26 @@ class ReportTable extends Component {
 		if ( focusableElements.length ) {
 			focusableElements[ 0 ].focus();
 		}
+	}
+
+	trackTableSearch() {
+		const { endpoint } = this.props;
+
+		// @todo: decide if this should only fire for new tokens (not any/all changes).
+		recordEvent( 'analytics_table_filter', { report: endpoint } );
+	}
+
+	onSort( key, direction ) {
+		onQueryChange( 'sort' )( key, direction );
+
+		const { endpoint } = this.props;
+		const eventProps = {
+			report: endpoint,
+			column: key,
+			direction,
+		};
+
+		recordEvent( 'analytics_table_sort', eventProps );
 	}
 
 	filterShownHeaders( headers, hiddenKeys ) {
@@ -150,6 +182,8 @@ class ReportTable extends Component {
 					isLoading={ isLoading }
 					onQueryChange={ onQueryChange }
 					onColumnsChange={ this.onColumnsChange }
+					onSearch={ this.trackTableSearch }
+					onSort={ this.onSort }
 					onPageChange={ this.onPageChange }
 					rows={ rows }
 					rowsPerPage={ parseInt( query.per_page ) || QUERY_DEFAULTS.pageSize }

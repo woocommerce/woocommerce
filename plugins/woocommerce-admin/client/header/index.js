@@ -19,6 +19,7 @@ import { Link } from '@woocommerce/components';
  */
 import './style.scss';
 import ActivityPanel from './activity-panel';
+import { recordEvent } from 'lib/tracks';
 
 class Header extends Component {
 	constructor() {
@@ -29,6 +30,7 @@ class Header extends Component {
 
 		this.onWindowScroll = this.onWindowScroll.bind( this );
 		this.updateIsScrolled = this.updateIsScrolled.bind( this );
+		this.trackLinkClick = this.trackLinkClick.bind( this );
 	}
 
 	componentDidMount() {
@@ -53,6 +55,12 @@ class Header extends Component {
 				isScrolled: isScrolled,
 			} );
 		}
+	}
+
+	trackLinkClick( event ) {
+		const href = event.target.closest( 'a' ).getAttribute( 'href' );
+
+		recordEvent( 'navbar_breadcrumb_click', { href, text: event.target.innerText } );
 	}
 
 	render() {
@@ -83,7 +91,11 @@ class Header extends Component {
 			<div className={ className }>
 				<h1 className="woocommerce-layout__header-breadcrumbs">
 					<span>
-						<Link href={ 'admin.php?page=wc-admin' } type={ isEmbedded ? 'wp-admin' : 'wc-admin' }>
+						<Link
+							href={ 'admin.php?page=wc-admin' }
+							type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
+							onClick={ this.trackLinkClick }
+						>
 							WooCommerce
 						</Link>
 					</span>
@@ -92,6 +104,7 @@ class Header extends Component {
 							<Link
 								href={ isEmbedded ? section[ 0 ] : getNewPath( {}, section[ 0 ], {} ) }
 								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
+								onClick={ this.trackLinkClick }
 							>
 								{ section[ 1 ] }
 							</Link>
