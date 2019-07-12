@@ -51,6 +51,10 @@ class ProductAttributeControl extends Component {
 			} );
 	}
 
+	componentWillUnmount() {
+		this.debouncedGetTerms.cancel();
+	}
+
 	componentDidUpdate( prevProps, prevState ) {
 		if ( prevState.attribute !== this.state.attribute ) {
 			this.debouncedGetTerms();

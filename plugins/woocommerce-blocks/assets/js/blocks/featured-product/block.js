@@ -96,6 +96,10 @@ class FeaturedProduct extends Component {
 		this.getProduct();
 	}
 
+	componentWillUnmount() {
+		this.debouncedGetProduct.cancel();
+	}
+
 	componentDidUpdate( prevProps ) {
 		if ( prevProps.attributes.productId !== this.props.attributes.productId ) {
 			this.debouncedGetProduct();
