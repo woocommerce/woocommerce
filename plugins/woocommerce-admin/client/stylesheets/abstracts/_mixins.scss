@@ -26,6 +26,10 @@
 	&::after {
 		content: '\00a0';
 	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
 }
 
 // Adds animation to transforms
