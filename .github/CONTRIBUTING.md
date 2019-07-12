@@ -12,7 +12,7 @@ If you think something can be improved and you wish to contribute code,
 [fork](https://help.github.com/articles/fork-a-repo/) WooCommerce, commit your changes,
 and [send a pull request](https://help.github.com/articles/using-pull-requests/). We'll be happy to review your changes!
 
-## Feature Requests
+## Feature Requests 🚀
 
 Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?template=Feature_request.md). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
 
@@ -20,7 +20,7 @@ Feature request issues will remain closed until we see sufficient interest via c
 
 You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc+is%3Aclosed).
 
-## Technical Support / Questions
+## Technical Support / Questions ❓
 
 We don't offer technical support on GitHub so we recommend using the following:
 
@@ -42,18 +42,36 @@ https://woocommerce.com/contact-us/
 - [WooExperts](https://woocommerce.com/experts/)
 - [Codeable](https://codeable.io/)
 
-## Coding Guidelines
+## Build process 🛠
+
+The source code found on GitHub does not contain compiled CSS or Javascript, and is missing some functionality such as Gutenberg Blocks and the REST API, until the build process is ran.
+
+To run the build process, in a terminal go to your WooCommerce installation and run:
+
+```bash
+npm install
+composer install
+npm run build
+```
+
+To get your development environment running we recommend [reading here](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment).
+
+## Coding Guidelines and Development 🛠
 
 - **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
-- Install our pre-commit hook using composer. It'll help with the Coding Standards. To install run `composer install` from the command line within the woocommerce plugin directory.
+- Run our build process described in the section above, it will install our pre-commit hook, code sniffs, dependencies, and more.
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
-- Ensure that your code is compatible with PHP 5.2+.
-- Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository. Existing maintenance branches will be maintained by WooCommerce developers.
+- Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.
+- Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository.
 
-Please **don't** modify the changelog or update the .pot files. These will be maintained by the WooCommerce team.
+Please avoid modifying the change-log directly or updating the .pot files. These will be updated by the WooCommerce team.
 
-## Translating WooCommerce
+If you are contributing code to the REST API or editor blocks, these are developed in external packages.
+- [WooCommerce REST API package](https://github.com/woocommerce/woocommerce-rest-api)
+- [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
+
+## Translating WooCommerce 💬
 
 We have a [project on translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce). You can join the localization team of your language and help by translating WooCommerce. [Find more about using joining a language team and using GlotPress](https://make.wordpress.org/polyglots/handbook/tools/glotpress-translate-wordpress-org/).
 

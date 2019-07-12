@@ -51,6 +51,25 @@ jQuery( function( $ ) {
 		$( '#currency_code' ).val( wc_setup_currencies[ country ] ).change();
 	} );
 
+	/* Setup postcode field and validations */
+	$( '#store_country' ).on( 'change', function() {
+		if ( ! wc_setup_params.postcodes ) {
+			return;
+		}
+
+		var $this                 = $( this ),
+			country               = $this.val(),
+			$store_postcode_input = $( '#store_postcode' ),
+			country_postcode_obj  = wc_setup_params.postcodes[ country ];
+
+		// Default to required, if its unknown whether postcode is required or not.
+		if ( $.isEmptyObject( country_postcode_obj ) || country_postcode_obj.required  ) {
+			$store_postcode_input.attr( 'required', 'true' );
+		} else {
+			$store_postcode_input.removeAttr( 'required' );
+		}
+	} );
+
 	$( '#store_country' ).change();
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-service-enable input', function() {

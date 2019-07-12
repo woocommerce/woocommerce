@@ -88,6 +88,8 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/photoswipe/photoswipe.min.js': ['<%= dirs.js %>/photoswipe/photoswipe.js'],
 					'<%= dirs.js %>/photoswipe/photoswipe-ui-default.min.js': ['<%= dirs.js %>/photoswipe/photoswipe-ui-default.js'],
 					'<%= dirs.js %>/round/round.min.js': ['<%= dirs.js %>/round/round.js'],
+					'<%= dirs.js %>/selectWoo/selectWoo.full.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.full.js'],
+					'<%= dirs.js %>/selectWoo/selectWoo.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.js'],
 					'<%= dirs.js %>/stupidtable/stupidtable.min.js': ['<%= dirs.js %>/stupidtable/stupidtable.js'],
 					'<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.min.js': ['<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.js']
 				}
@@ -195,7 +197,6 @@ module.exports = function( grunt ) {
 				options: {
 					potFilename: 'woocommerce.pot',
 					exclude: [
-						'apigen/.*',
 						'vendor/.*',
 						'tests/.*',
 						'tmp/.*'
@@ -228,7 +229,6 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php',               // Include all files
-					'!apigen/**',             // Exclude apigen/
 					'!includes/libraries/**', // Exclude libraries/
 					'!node_modules/**',       // Exclude node_modules/
 					'!tests/**',              // Exclude tests/
@@ -244,13 +244,6 @@ module.exports = function( grunt ) {
 			options: {
 				stdout: true,
 				stderr: true
-			},
-			apidocs: {
-				command: [
-					'vendor/bin/apigen generate -q',
-					'cd apigen',
-					'php hook-docs.php'
-				].join( '&&' )
 			},
 			e2e_test: {
 				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
@@ -290,21 +283,6 @@ module.exports = function( grunt ) {
 				}
 			}
 		},
-
-		// Clean the directory.
-		clean: {
-			apidocs: {
-				src: [ 'wc-apidocs' ]
-			},
-			blocks: {
-				src: [
-					'<%= dirs.js %>/blocks',
-					'<%= dirs.css %>/blocks',
-					'<%= dirs.php %>/blocks'
-				]
-			}
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -313,7 +291,6 @@ module.exports = function( grunt ) {
 			dist: {
 				src:  [
 					'**/*.php', // Include all php files.
-					'!apigen/**',
 					'!includes/api/legacy/**',
 					'!includes/libraries/**',
 					'!node_modules/**',
@@ -342,52 +319,6 @@ module.exports = function( grunt ) {
 					'<%= dirs.css %>/*.css'
 				]
 			}
-		},
-
-		// Copy block files from npm package.
-		copy: {
-			js: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/build',
-				src: '*.js',
-				dest: '<%= dirs.js %>/blocks/',
-				options: {
-					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
-				}
-			},
-			css: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/build',
-				src: '*.css',
-				dest: '<%= dirs.css %>/blocks/'
-			},
-			php: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/assets/php',
-				src: '*.php',
-				dest: '<%= dirs.php %>/blocks/',
-				rename: ( dest, src ) => dest + '/' + src.replace( '-wgpb-', '-wc-' ),
-				options: {
-					process: ( content ) => content
-						// Replace textdomain.
-						.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
-						// Replace source for JS files.
-						.replace(
-							/plugins_url\( 'build\/([\w-]*)\.js', WGPB_PLUGIN_FILE \)/g,
-							"WC()->plugin_url() . '/assets/js/blocks/$1.js'"
-						)
-						// Replace source for CSS files.
-						.replace(
-							/plugins_url\( 'build\/([\w-]*)\.css', WGPB_PLUGIN_FILE \)/g,
-							"WC()->plugin_url() . '/assets/css/blocks/$1.css'"
-						)
-						// Replace class & constant prefixes.
-						.replace( /WGPB_/g, 'WC_' )
-						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
-						// Replace file imports
-						.replace( /-wgpb-/g, '-wc-' )
-				}
-			}
 		}
 	});
 
@@ -413,7 +344,6 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
-		'blocks',
 		'i18n'
 	]);
 
@@ -432,14 +362,9 @@ module.exports = function( grunt ) {
 		'concat'
 	]);
 
-	grunt.registerTask( 'blocks', [
-		'clean:blocks',
-		'copy'
-	]);
-
-	grunt.registerTask( 'docs', [
-		'clean:apidocs',
-		'shell:apidocs'
+	grunt.registerTask( 'assets', [
+		'js',
+		'css'
 	]);
 
 	grunt.registerTask( 'contributors', [

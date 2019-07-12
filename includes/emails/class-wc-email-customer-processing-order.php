@@ -35,7 +35,6 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			$this->template_html  = 'emails/customer-processing-order.php';
 			$this->template_plain = 'emails/plain/customer-processing-order.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -106,11 +105,12 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			return wc_get_template_html(
 				$this->template_html,
 				array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -124,13 +124,24 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			return wc_get_template_html(
 				$this->template_plain,
 				array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => true,
-					'email'         => $this,
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Thanks for using {site_address}!', 'woocommerce' );
 		}
 	}
 
