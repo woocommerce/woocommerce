@@ -75,3 +75,10 @@ Properties of the selected chart.
 
 Data to display in the SummaryNumbers.
 
+### `report`
+
+- Type: String
+- Default: null
+
+Report name, if different than the endpoint.
+

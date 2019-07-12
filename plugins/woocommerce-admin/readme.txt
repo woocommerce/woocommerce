@@ -71,6 +71,43 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.15.0 2019-07-11 =
+
+- Fix: Compare checkboxes in report tables #2571
+- Dev: Introduce a new Products by Tag(s) block #554
+- Dev: Tracks: Fix Link onclick #2594 (Components, Packages)
+- Fix: Use correct links in DevDocs. #2602 (Documentation)
+- Fix: Prevent error when no actionable order statuses are set #2577
+- Fix: exclude old WC auto-draft orders from import #2612 (Analytics)
+- Dev: Fix: propType validation warnings on embedded pages #2607
+- Fix: Only calculate one order row when the order has multiple coupons. #2484 (Analytics)
+- Fix: Cast is_snoozable as int prior to database save #2573
+- Performance: check for scheduled snooze action once per hour instead of every admin request. #2593
+- Fix: Update layout of Settings Page and notify users when settings are not saved. #2544
+- Dev: Update color-studio to 1.0.5 #2575 (Build, Packages)
+- Task: Add tracks event to Store Alert and Inbox Notification action clicks #2559
+- Fix: Change size of Header to 56px - fixes bug in product edit page toolbar being hidden.
+- Dev: Add countLabel prop to SearchListItem #2569 (Components, Packages)
+- Task: Send tracks event for snoozing store alerts. #2560
+- Fix: Stock notifs: fix low_stock_amount for variations #2546
+- Enhancement: Add Report CSV Export Endpoint #2526 (Analytics, REST API)
+- Tweak: remove placeholder link. #2561
+- Fix: WordPress Notifications Activity Panel falsely saying there are notices to be seen. #2552
+- Dev: Route handling: Remove hash in favor of path parameter #2444 (Components, Packages)
+- Dev: Customizable dashboard: handle turned off feature flag #2548
+- Dev: Dashboard: Add Tracks events #2550 (Dashboard)
+- Task: Tracks: Add chart and table events #2557
+- Fix: Fixes issue with alerts on mobile #2537
+- Bug: Fix batch queue range bug. #2521
+- Dev: Advanced Filters: Add Tracks events #2525 (Components, Packages)
+- Tweak: Open external note action links in a new tab #2462 (Activity Panel, Inbox)
+- Tweak: fix some report endpoint default params. #2496 (REST API)
+- Enhancement: Remove updated stock products from Activity Panel #2442 (Activity Panel)
+- Fix: Track name for activity panel open event #2532
+- Enhancement: Add Reports CSV Exporter Class #2502 (Analytics)
+- Fix: margins on non-update notices. #2487  👏 @benignant
+- Enhancement: add state/region to Customers Report. #2463 (Analytics) 👏 @KZeni
+
 = 0.14.0 2019-06-24 =
 
 - Dev: Action Scheduler: fix potential endless sync #2425

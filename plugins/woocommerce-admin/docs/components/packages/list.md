@@ -1,10 +1,17 @@
 `List` (component)
 ==================
 
-Use `List` to create a list of items to display.
+List component to display a list of items.
 
 Props
 -----
+
+### `className`
+
+- Type: String
+- Default: null
+
+Additional class name to style the component.
 
 ### `items`
 
@@ -12,9 +19,10 @@ Props
 - Type: Array
   - title: String - Title displayed for the list item.
   - description: String - Description displayed beneath the list item title.
-  - before: Node - Content displayed before the list item text.
-  - after: Node - Content displayed after the list item text.
-  - onClick: Function - Click handler for this list item.
-- Default: []
+  - before: ReactNode - Content displayed before the list item text.
+  - after: ReactNode - Content displayed after the list item text.
+  - onClick: Function - Content displayed after the list item text.
+- Default: null
 
-The list items to display.
+An array of list items.
+

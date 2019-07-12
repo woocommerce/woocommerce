@@ -132,6 +132,13 @@ Props
 
 Additional CSS classes.
 
+### `countLabel`
+
+- Type: ReactNode
+- Default: null
+
+Label to display if `showCount` is set to true. If undefined, it will use `item.count`.
+
 ### `depth`
 
 - Type: Number

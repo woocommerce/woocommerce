@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: woocommerce-admin
  * Domain Path: /languages
- * Version: 0.14.0
+ * Version: 0.15.0
  *
  * WC requires at least: 3.6.0
  * WC tested up to: 3.6.4
@@ -124,7 +124,7 @@ class WC_Admin_Feature_Plugin {
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', __FILE__ );
 		// WARNING: Do not directly edit this version number constant.
 		// It is updated as part of the prebuild process from the package.json value.
-		$this->define( 'WC_ADMIN_VERSION_NUMBER', '0.14.0' );
+		$this->define( 'WC_ADMIN_VERSION_NUMBER', '0.15.0' );
 	}
 
 	/**
