@@ -955,10 +955,85 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$match = $data_store->find_matching_product_variation(
 			$product,
 			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => '',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
 				'attribute_pa_size'   => 'small',
 				'attribute_pa_colour' => 'red',
 			)
 		);
 		$this->assertEquals( $children[0], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'blue',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		// Test against non matching colour, should still return first attribute.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => 'pink',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
+
+		// Test against non matching colour, should still return first attribute.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'pink',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		// Test non expected matches.
+		// If second attribute in variation is any and you omit the first attribute it should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_colour' => 'blue',
+			)
+		);
+		$this->assertEquals( 0, $match );
+
+		// If second attribute in variation is any and you pass a blank in the first attribute it should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => '',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$this->assertEquals( 0, $match );
+
+		// Passing blanks as both attributes should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => '',
+				'attribute_pa_colour' => '',
+			)
+		);
+		$this->assertEquals( 0, $match );
+
+		// Passing an empty array should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array()
+		);
+		$this->assertEquals( 0, $match );
 	}
 }
