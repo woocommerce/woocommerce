@@ -239,7 +239,7 @@ class WC_Session_Handler extends WC_Session {
 	 *
 	 * @param int $old_session_key session ID before user logs in.
 	 */
-	public function save_data( $old_session_key ) {
+	public function save_data( $old_session_key = 0 ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
@@ -256,7 +256,7 @@ class WC_Session_Handler extends WC_Session {
 
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
 			$this->_dirty = false;
-			if ( get_current_user_id() != $old_session_key ) {
+			if ( get_current_user_id() != $old_session_key && !is_object( get_user_by( 'id', $old_session_key ) ) ) {
 				$this->delete_session( $old_session_key );
 			}
 		}
