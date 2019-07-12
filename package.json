@@ -85,5 +85,10 @@
       "eslint --fix",
       "git add"
     ]
-  }
+  },
+  "browserslist": [
+    "> 0.1%",
+    "ie 8",
+    "ie 9"
+  ]
 }
