@@ -2,7 +2,7 @@
 if [[ ${RUN_E2E} == 1 ]]; then
 
 	# Lets build using grunt
-	grunt
+	grunt e2e-build
 
 	WP_SITE_URL="http://localhost:8080"
 
