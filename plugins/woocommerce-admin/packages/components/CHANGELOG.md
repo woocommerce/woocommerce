@@ -3,6 +3,7 @@
 - AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
 - TableCard component: add `onSearch` an `onSort` function props.
 - Add new component `<List />` for displaying interactive list items.
+- Fix z-index issue in `<Chart />` empty message.
 
 # 3.1.0
 - Added support for a countLabel prop on SearchListItem to allow custom counts.

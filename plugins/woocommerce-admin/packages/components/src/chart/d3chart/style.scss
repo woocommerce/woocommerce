@@ -34,7 +34,6 @@
 		right: 0;
 		top: 0;
 		text-align: center;
-		z-index: 1;
 
 		@include breakpoint( '<782px' ) {
 			@include font-size( 13 );
