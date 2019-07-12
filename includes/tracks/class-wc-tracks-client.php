@@ -139,7 +139,7 @@ class WC_Tracks_Client {
 	public static function get_identity( $user_id ) {
 		$jetpack_lib = '/tracks/client.php';
 
-		if ( class_exists( 'Jetpack' ) && defined( JETPACK__VERSION ) ) {
+		if ( class_exists( 'Jetpack' ) && defined( 'JETPACK__VERSION' ) ) {
 			if ( version_compare( JETPACK__VERSION, '7.5', '<' ) ) {
 				if ( file_exists( jetpack_require_lib_dir() . $jetpack_lib ) ) {
 					include_once jetpack_require_lib_dir() . $jetpack_lib;
@@ -148,7 +148,8 @@ class WC_Tracks_Client {
 					}
 				}
 			} else {
-				return Automattic\Jetpack\Tracking::tracks_get_identity( $user_id );
+				$tracking = new Automattic\Jetpack\Tracking();
+				return $tracking->tracks_get_identity( $user_id );
 			}
 		}
 
