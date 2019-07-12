@@ -208,6 +208,11 @@ PHP
 		php wp-cli.phar theme install twentytwelve --activate
 		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
 		php wp-cli.phar wc update
+
+		# Compile assets
+		cd "$WP_CORE_DIR/wp-content/plugins/$BRANCH"
+		grunt e2e-build
+
 		cd "$WORKING_DIR"
 
 	fi
