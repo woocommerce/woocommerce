@@ -61,7 +61,6 @@ before_script:
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
       composer global require "phpunit/phpunit=4.8.*|6.5.*"
     fi
-  - grunt
 
 script:
   - bash tests/bin/phpunit.sh
