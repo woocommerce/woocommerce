@@ -278,7 +278,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 }
 
 /**
- * Order Status completed - This is a paying customer.
+ * Order payment completed - This is a paying customer.
  *
  * @param int $order_id Order ID.
  */
@@ -288,10 +288,14 @@ function wc_paying_customer( $order_id ) {
 
 	if ( $customer_id > 0 && 'shop_order_refund' !== $order->get_type() ) {
 		$customer = new WC_Customer( $customer_id );
-		$customer->set_is_paying_customer( true );
-		$customer->save();
+
+		if ( ! $customer->get_is_paying_customer() ) {
+			$customer->set_is_paying_customer( true );
+			$customer->save();
+		}
 	}
 }
+add_action( 'woocommerce_payment_complete', 'wc_paying_customer' );
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
