@@ -35,6 +35,10 @@ class ProductsControl extends Component {
 			} );
 	}
 
+	componentWillUnmount() {
+		this.debouncedOnSearch.cancel();
+	}
+
 	onSearch( search ) {
 		const { selected } = this.props;
 		getProducts( { selected, search } )

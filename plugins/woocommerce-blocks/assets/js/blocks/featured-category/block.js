@@ -112,6 +112,10 @@ class FeaturedCategory extends Component {
 		this.getCategory();
 	}
 
+	componentWillUnmount() {
+		this.debouncedGetCategory.cancel();
+	}
+
 	componentDidUpdate( prevProps ) {
 		if ( prevProps.attributes.categoryId !== this.props.attributes.categoryId ) {
 			this.debouncedGetCategory();
