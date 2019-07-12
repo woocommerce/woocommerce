@@ -483,8 +483,10 @@ class WC_Admin_Addons {
 	 * Returns in-app-purchase URL params.
 	 */
 	public static function get_in_app_purchase_url_params() {
+		$back_admin_path = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 		return array(
 			'in-app-purchase-site'        => site_url(),
+			'in-app-purchase-back'        => $back_admin_path,
 			'in-app-purchase-woo-version' => WC_VERSION,
 		);
 	}
