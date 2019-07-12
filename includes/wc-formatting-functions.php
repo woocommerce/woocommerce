@@ -281,11 +281,12 @@ function wc_format_refund_total( $amount ) {
  * This function does not remove thousands - this should be done before passing a value to the function.
  *
  * @param  float|string $number     Expects either a float or a string with a decimal separator only (no thousands).
- * @param  mixed        $dp number  Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
+ * @param  bool|integer $dp         Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
  * @param  bool         $trim_zeros From end of string.
+ * @param  bool         $abs        Converts to absolute value of a number. See PHP abs().
  * @return string
  */
-function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
+function wc_format_decimal( $number, $dp = false, $trim_zeros = false, $abs = false ) {
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
@@ -293,6 +294,11 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	if ( ! is_float( $number ) ) {
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
+	}
+
+	// Convert to absolute number. Avoid empty values to not convert to 0.
+	if ( '' !== $number && $abs ) {
+		$number = abs( $number );
 	}
 
 	if ( false !== $dp ) {
