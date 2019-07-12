@@ -13,6 +13,7 @@
   { "component": "Gravatar" },
   { "component": "ImageAsset" },
   { "component": "Link" },
+  { "component": "List" },
   { "component": "OrderStatus" },
   { "component": "Pagination" },
   { "component": "ProductImage" },

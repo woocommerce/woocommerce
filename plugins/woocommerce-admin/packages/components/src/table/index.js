@@ -175,7 +175,7 @@ class TableCard extends Component {
 			onPageChange( ...params );
 		}
 		if ( onQueryChange ) {
-			onQueryChange( 'page' )( ...params );
+			onQueryChange( 'paged' )( ...params );
 		}
 	}
 
@@ -398,8 +398,8 @@ class TableCard extends Component {
 				) }
 
 				<Pagination
-					key={ parseInt( query.page ) || 1 }
-					page={ parseInt( query.page ) || 1 }
+					key={ parseInt( query.paged ) || 1 }
+					page={ parseInt( query.paged ) || 1 }
 					perPage={ rowsPerPage }
 					total={ totalRows }
 					onPageChange={ this.onPageChange }

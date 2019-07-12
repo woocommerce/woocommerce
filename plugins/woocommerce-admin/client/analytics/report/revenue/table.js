@@ -228,7 +228,7 @@ export default compose(
 			interval: 'day',
 			orderby: query.orderby || 'date',
 			order: query.order || 'desc',
-			page: query.page || 1,
+			page: query.paged || 1,
 			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),

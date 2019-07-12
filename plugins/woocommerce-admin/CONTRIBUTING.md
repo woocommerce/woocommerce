@@ -2,13 +2,28 @@
 
 Hi! Thank you for your interest in contributing to WooCommerce Admin. We appreciate it.
 
-There are many ways to contribute – reporting bugs, feature suggestions, and fixing bugs.
+There are many ways to contribute – reporting bugs, adding translations, feature suggestions, and fixing bugs.
 
 ## Reporting Bugs, Asking Questions, Sending Suggestions
 
 Open [a GitHub issue](https://github.com/woocommerce/woocommerce-admin/issues/new/choose), that's all. If you have write access, add any appropriate labels.
 
 If you're filing a bug, specific steps to reproduce are always helpful. Please include what you expected to see and what happened instead.
+
+## Localizing WooCommerce Admin
+
+To translate WooCommerce Admin in your locale or language, [select your locale here](https://translate.wordpress.org/projects/wp-plugins/woocommerce-admin) and translate *Development* (which contains the plugin's string) and/or *Development Readme* (please translate what you see in the Details tab of the [plugin page](https://wordpress.org/plugins/woocommerce-admin/)).
+
+A Global Translation Editor (GTE) or Project Translation Editor (PTE) with suitable rights will process your translations in due time.
+
+Language packs are automatically generated once 95% of the plugin's strings are translated and approved for a locale.
+
+### Testing translations in development without language packs
+
+1. Export the translations strings as a `.po` file from the [translate.wordpress.org project](https://translate.wordpress.org/projects/wp-plugins/woocommerce-admin).
+1. Rename `.po` file to the following format: `woocommerce-admin-xx_YY.po` (Where xx_YY is your locale, like it_IT)
+1. Use WP-CLI to generate needed JSON files for JavaScript-based strings: `wp i18n make-json [.po file here] --no-purge`
+1. Move `.po` and `.json` files to `/wp-content/languages/plugins`.
 
 ## We're Here To Help
 

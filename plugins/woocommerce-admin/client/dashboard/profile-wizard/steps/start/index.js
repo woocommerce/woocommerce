@@ -76,7 +76,7 @@ class Start extends Component {
 	}
 
 	async skipWizard() {
-		const { createNotice, isProfileItemsError, updateProfileItems, isSettingsError } = this.props;
+		const { addNotice, isProfileItemsError, updateProfileItems, isSettingsError } = this.props;
 
 		recordEvent( 'storeprofiler_welcome_clicked', { proceed_without_install: true } );
 
@@ -84,15 +84,15 @@ class Start extends Component {
 		await this.updateTracking();
 
 		if ( isProfileItemsError || isSettingsError ) {
-			createNotice(
-				'error',
-				__( 'There was a problem updating your preferences.', 'woocommerce-admin' )
-			);
+			addNotice( {
+				status: 'error',
+				message: __( 'There was a problem updating your preferences.', 'woocommerce-admin' ),
+			} );
 		}
 	}
 
 	async startWizard() {
-		const { createNotice, isSettingsError } = this.props;
+		const { addNotice, isSettingsError } = this.props;
 
 		recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
 
@@ -101,10 +101,10 @@ class Start extends Component {
 		if ( ! isSettingsError ) {
 			this.props.goToNextStep();
 		} else {
-			createNotice(
-				'error',
-				__( 'There was a problem updating your preferences.', 'woocommerce-admin' )
-			);
+			addNotice( {
+				status: 'error',
+				message: __( 'There was a problem updating your preferences.', 'woocommerce-admin' ),
+			} );
 		}
 	}
 
@@ -217,11 +217,10 @@ export default compose(
 		return { getSettings, isSettingsError, isProfileItemsError, isSettingsRequesting };
 	} ),
 	withDispatch( dispatch => {
-		const { updateProfileItems, updateSettings } = dispatch( 'wc-api' );
-		const { createNotice } = dispatch( 'core/notices' );
+		const { addNotice, updateProfileItems, updateSettings } = dispatch( 'wc-api' );
 
 		return {
-			createNotice,
+			addNotice,
 			updateProfileItems,
 			updateSettings,
 		};

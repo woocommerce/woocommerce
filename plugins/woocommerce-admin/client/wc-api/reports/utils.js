@@ -349,7 +349,7 @@ export function getReportTableQuery( options ) {
 		order: query.order || 'desc',
 		after: noIntervals ? undefined : appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: noIntervals ? undefined : appendTimestamp( datesFromQuery.primary.before, 'end' ),
-		page: query.page || 1,
+		page: query.paged || 1,
 		per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 		...filterQuery,
 		...tableQuery,

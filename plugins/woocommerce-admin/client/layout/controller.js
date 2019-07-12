@@ -4,7 +4,7 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse, stringify } from 'qs';
-import { find, isEqual, last } from 'lodash';
+import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
@@ -86,11 +86,11 @@ export class Controller extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const prevQuery = this.getQuery( prevProps.location.search );
-		const prevBaseQuery = this.getBaseQuery( prevProps.location.search );
-		const baseQuery = this.getBaseQuery( this.props.location.search );
+		const prevBaseQuery = omit( this.getQuery( prevProps.location.search ), 'paged' );
+		const baseQuery = omit( this.getQuery( this.props.location.search ), 'paged' );
 
-		if ( prevQuery.page > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
-			getHistory().replace( getNewPath( { page: 1 } ) );
+		if ( prevQuery.paged > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
+			getHistory().replace( getNewPath( { paged: 1 } ) );
 		}
 
 		if ( prevProps.match.url !== this.props.match.url ) {
@@ -107,16 +107,10 @@ export class Controller extends Component {
 		return parse( search );
 	}
 
-	getBaseQuery( searchString ) {
-		const query = this.getQuery( searchString );
-		delete query.page;
-		return query;
-	}
-
 	render() {
 		const { page, match, location } = this.props;
 		const { url, params } = match;
-		const query = this.getBaseQuery( location.search );
+		const query = this.getQuery( location.search );
 
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page, url );

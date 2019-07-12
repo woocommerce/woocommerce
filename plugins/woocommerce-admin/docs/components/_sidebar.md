@@ -22,6 +22,7 @@
     * [Gravatar](components/packages/gravatar.md)
     * [ImageAsset](components/packages/image-asset.md)
     * [Link](components/packages/link.md)
+    * [List](components/packages/list.md)
     * [OrderStatus](components/packages/order-status.md)
     * [Pagination](components/packages/pagination.md)
     * [ProductImage](components/packages/product-image.md)

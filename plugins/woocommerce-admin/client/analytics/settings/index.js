@@ -84,22 +84,25 @@ class Settings extends Component {
 	};
 
 	componentDidUpdate() {
-		const { createNotice, isError, isRequesting } = this.props;
+		const { addNotice, isError, isRequesting } = this.props;
 		const { saving, isDirty } = this.state;
 		let newIsDirtyState = isDirty;
 
 		if ( saving && ! isRequesting ) {
 			if ( ! isError ) {
-				createNotice(
-					'success',
-					__( 'Your settings have been successfully saved.', 'woocommerce-admin' )
-				);
+				addNotice( {
+					status: 'success',
+					message: __( 'Your settings have been successfully saved.', 'woocommerce-admin' ),
+				} );
 				newIsDirtyState = false;
 			} else {
-				createNotice(
-					'error',
-					__( 'There was an error saving your settings.  Please try again.', 'woocommerce-admin' )
-				);
+				addNotice( {
+					status: 'error',
+					message: __(
+						'There was an error saving your settings.  Please try again.',
+						'woocommerce-admin'
+					),
+				} );
 			}
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( { saving: false, isDirty: newIsDirtyState } );
@@ -148,7 +151,7 @@ class Settings extends Component {
 	}
 
 	render() {
-		const { createNotice } = this.props;
+		const { addNotice } = this.props;
 		const { hasError } = this.state;
 		if ( hasError ) {
 			return null;
@@ -175,7 +178,7 @@ class Settings extends Component {
 						</Button>
 					</div>
 				</div>
-				<HistoricalData createNotice={ createNotice } />
+				<HistoricalData addNotice={ addNotice } />
 			</Fragment>
 		);
 	}
@@ -192,11 +195,11 @@ export default compose(
 		return { getSettings, isError, isRequesting, settings };
 	} ),
 	withDispatch( dispatch => {
-		const { createNotice } = dispatch( 'core/notices' );
+		const { addNotice } = dispatch( 'wc-admin' );
 		const { updateSettings } = dispatch( 'wc-api' );
 
 		return {
-			createNotice,
+			addNotice,
 			updateSettings,
 		};
 	} )
