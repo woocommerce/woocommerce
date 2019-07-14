@@ -586,7 +586,7 @@ class WC_Form_Handler {
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
 				}
 
-				wc_add_notice( $removed_notice );
+				wc_add_notice( $removed_notice, apply_filters( 'woocommerce_cart_item_removed_notice_type', 'success' ) );
 			}
 
 			$referer = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
@@ -657,7 +657,7 @@ class WC_Form_Handler {
 				wp_safe_redirect( wc_get_checkout_url() );
 				exit;
 			} elseif ( $cart_updated ) {
-				wc_add_notice( __( 'Cart updated.', 'woocommerce' ) );
+				wc_add_notice( __( 'Cart updated.', 'woocommerce' ), apply_filters( 'woocommerce_cart_updated_notice_type', 'success' ) );
 				$referer = remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), ( wp_get_referer() ? wp_get_referer() : wc_get_cart_url() ) );
 				wp_safe_redirect( $referer );
 				exit;
@@ -1052,7 +1052,7 @@ class WC_Form_Handler {
 
 			if ( in_array( $field, array( 'password_1', 'password_2' ) ) ) {
 				// Don't unslash password fields
-				// @see https://github.com/woocommerce/woocommerce/issues/23922
+				// @see https://github.com/woocommerce/woocommerce/issues/23922.
 				$posted_fields[ $field ] = $_POST[ $field ]; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			} else {
 				$posted_fields[ $field ] = wp_unslash( $_POST[ $field ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

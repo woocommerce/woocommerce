@@ -133,7 +133,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	if ( $return ) {
 		return $message;
 	} else {
-		wc_add_notice( $message );
+		wc_add_notice( $message, apply_filters( 'woocommerce_add_to_cart_notice_type', 'success' ) );
 	}
 }
 
