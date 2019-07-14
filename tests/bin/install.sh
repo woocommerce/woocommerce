@@ -210,7 +210,7 @@ PHP
 		php wp-cli.phar wc update
 
 		# Compile assets
-		cd "$WP_CORE_DIR/wp-content/plugins/$BRANCH"
+		cd "$WP_CORE_DIR/wp-content/plugins/woocommerce"
 		grunt e2e-build
 
 		cd "$WORKING_DIR"
