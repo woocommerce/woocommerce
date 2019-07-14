@@ -511,17 +511,17 @@ class WC_Admin_Addons {
 	 *
 	 * @param string $url    Destination URL.
 	 * @param string $text   Button label text.
-	 * @param string $theme  Button style class (not to be confused with WP theme!).
+	 * @param string $style  Button style class.
 	 * @param string $plugin The plugin the button is promoting.
 	 */
-	public static function output_button( $url, $text, $theme, $plugin = '' ) {
-		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
-		$theme = is_plugin_active( $plugin ) ? 'addons-button-installed' : $theme;
+	public static function output_button( $url, $text, $style, $plugin = '' ) {
+		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $style;
+		$style = is_plugin_active( $plugin ) ? 'addons-button-installed' : $style;
 		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
 		$url   = self::add_in_app_purchase_url_params( $url );
 		?>
 		<a
-			class="addons-button <?php echo esc_attr( $theme ); ?>"
+			class="addons-button <?php echo esc_attr( $style ); ?>"
 			href="<?php echo esc_url( $url ); ?>">
 			<?php echo esc_html( $text ); ?>
 		</a>
