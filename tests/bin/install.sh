@@ -213,7 +213,7 @@ PHP
 		echo "CREATING WooCommerce PLUGIN DIR AT $WC_PLUGIN_DIR"
 		mkdir $WC_PLUGIN_DIR
 		echo "COPYING CHECKED OUT BRANCH TO $WC_PLUGIN_DIR"
-		cp "$HOME/woocommerce/woocommerce/" "$WP_CORE_DIR/wp-content/plugins/woocommerce/" -R
+		cp "$TRAVIS_BUILD_DIR" "$WP_CORE_DIR/wp-content/plugins/woocommerce/" -R
 		echo "ACTIVATING WooCommerce PLUGIN"
 		php wp-cli.phar plugin activate woocommerce
 		echo "RUNNING WooCommerce UPDATE ROUTINE"
