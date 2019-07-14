@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 if [[ ${RUN_E2E} == 1 ]]; then
 
-	# Lets build using grunt
-	grunt e2e-build
-
 	WP_SITE_URL="http://localhost:8080"
 
 	# Start xvfb to run the tests

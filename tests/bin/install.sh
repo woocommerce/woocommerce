@@ -215,19 +215,21 @@ PHP
 		echo "COPYING CHECKED OUT BRANCH TO $WC_PLUGIN_DIR"
 		cp -R "$TRAVIS_BUILD_DIR" "$WP_CORE_DIR/wp-content/plugins/"
 		ls "$WP_CORE_DIR/wp-content/plugins/woocommerce/"
+
+		# Compile assets and installing dependencies
+		echo "COMPILING ASSETS IN $WC_PLUGIN_DIR"
+		cd $WC_PLUGIN_DIR
+		npm install
+		composer install
+		grunt e2e-build
+
 		echo "ACTIVATING WooCommerce PLUGIN"
 		php wp-cli.phar plugin activate woocommerce
 		echo "RUNNING WooCommerce UPDATE ROUTINE"
 		php wp-cli.phar wc update
 
-		# Compile assets
-		echo "COMPILING ASSETS IN $WC_PLUGIN_DIR"
-		cd $WC_PLUGIN_DIR
-		npm install
-		grunt e2e-build
-
-		cd "$WORKING_DIR"
 		echo "DONE INSTALLING E2E SUITE."
+		cd "$WORKING_DIR"
 		echo "WORKING DIR: $WORKING_DIR"
 	fi
 }
