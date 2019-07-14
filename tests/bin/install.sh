@@ -214,6 +214,7 @@ PHP
 		mkdir $WC_PLUGIN_DIR
 		echo "COPYING CHECKED OUT BRANCH TO $WC_PLUGIN_DIR"
 		cp -R "$TRAVIS_BUILD_DIR" "$WP_CORE_DIR/wp-content/plugins/woocommerce/"
+		ls "$WP_CORE_DIR/wp-content/plugins/woocommerce/"
 		echo "ACTIVATING WooCommerce PLUGIN"
 		php wp-cli.phar plugin activate woocommerce
 		echo "RUNNING WooCommerce UPDATE ROUTINE"
@@ -222,6 +223,7 @@ PHP
 		# Compile assets
 		echo "COMPILING ASSETS IN $WC_PLUGIN_DIR"
 		cd $WC_PLUGIN_DIR
+		npm install
 		grunt e2e-build
 
 		cd "$WORKING_DIR"
