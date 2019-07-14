@@ -2083,6 +2083,17 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_proceed_to_checkout' )
 	}
 }
 
+if ( ! function_exists( 'woocommerce_widget_shopping_cart_subtotal' ) ) {
+	/**
+	 * Output to view cart subtotal.
+	 *
+	 * @since 3.7.0
+	 */
+	function woocommerce_widget_shopping_cart_subtotal() {
+		echo '<strong>' . esc_html( 'Subtotal', 'woocommerce' ) . ':</strong> ' . WC()->cart->get_cart_subtotal(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+}
+
 /** Mini-Cart */
 
 if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
