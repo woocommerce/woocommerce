@@ -54,12 +54,13 @@ class WC_WCCOM_Site {
 			return $user_id;
 		}
 
-		if ( empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
+		$auth_header = self::get_authorization_header();
+		if ( empty( $auth_header ) ) {
 			return false;
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$request_auth = trim( $_SERVER['HTTP_AUTHORIZATION'] );
+		$request_auth = trim( $auth_header );
 		if ( stripos( $request_auth, 'Bearer ' ) !== 0 ) {
 			return false;
 		}
@@ -88,6 +89,36 @@ class WC_WCCOM_Site {
 		}
 
 		return $user;
+	}
+
+	/**
+	 * Get the authorization header.
+	 *
+	 * On certain systems and configurations, the Authorization header will be
+	 * stripped out by the server or PHP. Typically this is then used to
+	 * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
+	 * `getallheaders` here to try and grab it out instead.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @return string Authorization header if set.
+	 */
+	protected static function get_authorization_header() {
+		if ( ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
+			return wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ); // WPCS: sanitization ok.
+		}
+
+		if ( function_exists( 'getallheaders' ) ) {
+			$headers = getallheaders();
+			// Check for the authoization header case-insensitively.
+			foreach ( $headers as $key => $value ) {
+				if ( 'authorization' === strtolower( $key ) ) {
+					return $value;
+				}
+			}
+		}
+
+		return '';
 	}
 
 	/**
