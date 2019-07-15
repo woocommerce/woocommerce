@@ -75,12 +75,9 @@ class WC_REST_Authentication {
 	 * @return bool
 	 */
 	protected function is_request_to_wccom_site_rest_api() {
-		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
-			return false;
-		}
-
+		$request_uri = add_query_arg( array() );
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
-		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$request_uri = esc_url_raw( wp_unslash( $request_uri ) );
 
 		return false !== strpos( $request_uri, $rest_prefix . 'wccom-site/' );
 	}
