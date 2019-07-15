@@ -40,7 +40,6 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 *
 	 * Register wccom-site REST namespace.
 	 *
 	 * @since 3.7.0
