@@ -24,7 +24,7 @@
     "@babel/runtime-corejs2": "7.4.5",
     "@wordpress/date": "3.3.0",
     "@wordpress/i18n": "3.4.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.13",
     "moment": "2.22.2"
   },
   "publishConfig": {
