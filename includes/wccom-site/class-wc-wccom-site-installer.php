@@ -4,6 +4,7 @@
  *
  * @class    WC_WCCOM_Site_Installer
  * @package  WooCommerce/WCCOM_Site
+ * @since    3.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,6 +61,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Get the product install state.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param string $key Key in state data. If empty key is passed array of
 	 *                    state will be returned.
 	 *
@@ -77,6 +80,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Update the product install state.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param string $key   Key in state data.
 	 * @param mixed  $value Value.
 	 */
@@ -90,6 +95,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Reset product install state.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param array $products List of product IDs.
 	 */
 	public static function reset_state( $products = array() ) {
@@ -99,6 +106,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Schedule installing given list of products.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.
@@ -133,6 +142,8 @@ class WC_WCCOM_Site_Installer {
 	 *
 	 * Run via `woocommerce_wccom_install_products` hook.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.
 	 */
@@ -156,6 +167,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Finish installation by updating the state.
+	 *
+	 * @since 3.7.0
 	 */
 	private static function finish_installation() {
 		$state = self::get_state();
@@ -180,6 +193,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Install a single product given its ID.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int          $product_id   Product ID.
 	 * @param array        $install_args Install args.
 	 * @param \WP_Upgrader $upgrader     Core class to handle installation.
@@ -192,6 +207,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Perform product installation step.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param int          $product_id   Product ID.
 	 * @param array        $install_args Install args.
@@ -249,6 +266,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Get product info from its ID.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int $product_id Product ID.
 	 *
 	 * @return bool|\WP_Error
@@ -301,6 +320,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Download product by its ID and returns the path of the zip package.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
 	 *
@@ -316,6 +337,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Unpack downloaded product.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
@@ -333,6 +356,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Move product to plugins directory.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
@@ -365,6 +390,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Activate product given its product ID.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int $product_id Product ID.
 	 *
 	 * @return \WP_Error|null
@@ -383,6 +410,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Activate plugin given its product ID.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param int $product_id Product ID.
 	 *
@@ -422,6 +451,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Activate theme given its product ID.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int $product_id Product ID.
 	 *
 	 * @return \WP_Error|null
@@ -460,6 +491,8 @@ class WC_WCCOM_Site_Installer {
 	/**
 	 * Get installed directory of WP.org product.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int $product_id Product ID.
 	 *
 	 * @return bool|string
@@ -483,6 +516,8 @@ class WC_WCCOM_Site_Installer {
 
 	/**
 	 * Get WP.org plugin's main file.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param string $dir Directory name of the plugin.
 	 *

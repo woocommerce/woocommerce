@@ -34,6 +34,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 
 	/**
 	 * Register the routes for product reviews.
+	 *
+	 * @since 3.7.0
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -62,6 +64,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Check permissions.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
@@ -77,6 +81,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Get installation state.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
@@ -87,6 +93,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 
 	/**
 	 * Install WooCommerce.com products.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -114,6 +122,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Reset installation state.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|WP_Error
@@ -127,6 +137,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 
 	/**
 	 * Validate products from request body.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.

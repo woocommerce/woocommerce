@@ -4,6 +4,7 @@
  *
  * @class    WC_WCCOM_Site_Installer
  * @package  WooCommerce/WCCOM_Site
+ * @since    3.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_WCCOM_Site {
 	/**
 	 * Load the WCCOM site class.
+	 *
+	 * @since 3.7.0
 	 */
 	public static function load() {
 		self::includes();
@@ -28,6 +31,8 @@ class WC_WCCOM_Site {
 
 	/**
 	 * Include support files.
+	 *
+	 * @since 3.7.0
 	 */
 	protected static function includes() {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
@@ -35,7 +40,10 @@ class WC_WCCOM_Site {
 	}
 
 	/**
+	 *
 	 * Register wccom-site REST namespace.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param array $namespaces List of registered namespaces.
 	 *

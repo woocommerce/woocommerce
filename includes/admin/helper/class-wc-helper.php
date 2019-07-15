@@ -1101,6 +1101,8 @@ class WC_Helper {
 	/**
 	 * Checks whether current site has product subscription of a given ID.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int $product_id The product id.
 	 *
 	 * @return bool Returns true if product subscription exists, false otherwise.

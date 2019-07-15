@@ -70,6 +70,8 @@ class WC_REST_Authentication {
 	/**
 	 * Check if this is a request to WCCOM Site REST API.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @return bool
 	 */
 	protected function is_request_to_wccom_site_rest_api() {
@@ -85,6 +87,8 @@ class WC_REST_Authentication {
 
 	/**
 	 * Verify WooCommerce.com request from a given body and signature request.
+	 *
+	 * @since 3.7.0
 	 *
 	 * @param string $body                Request body.
 	 * @param string $signature           Request signature found in
