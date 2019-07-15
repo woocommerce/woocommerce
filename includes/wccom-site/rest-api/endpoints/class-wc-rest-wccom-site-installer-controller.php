@@ -11,12 +11,12 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API WCCOM Site Installer v1 Controller Class.
+ * REST API WCCOM Site Installer Controller Class.
  *
  * @package WooCommerce/WCCOM_Site/REST_API
  * @extends WC_REST_Controller
  */
-class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
+class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.

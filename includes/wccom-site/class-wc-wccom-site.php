@@ -165,10 +165,10 @@ class WC_WCCOM_Site {
 	 * @return array Registered namespaces.
 	 */
 	public static function register_rest_namespace( $namespaces ) {
-		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/v1/class-wc-rest-wccom-site-installer-v1-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
 
 		$namespaces['wccom-site/v1'] = array(
-			'installer' => 'WC_REST_WCCOM_Site_Installer_V1_Controller',
+			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
 		);
 
 		return $namespaces;
