@@ -7,6 +7,7 @@ import { Button, SelectControl, TextControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
+import { pickBy } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 import { recordEvent } from 'lib/tracks';
 
@@ -21,15 +22,19 @@ class StoreDetails extends Component {
 		super( ...arguments );
 
 		this.state = {
-			addressLine1: '',
-			addressLine2: '',
-			city: '',
-			countryState: '',
 			countryStateOptions: [],
-			postCode: '',
+			errors: {},
+			fields: {
+				addressLine1: '',
+				addressLine2: '',
+				city: '',
+				countryState: '',
+				postCode: '',
+			},
 		};
 
 		this.onContinue = this.onContinue.bind( this );
+		this.updateValue = this.updateValue.bind( this );
 	}
 
 	componentWillMount() {
@@ -37,23 +42,51 @@ class StoreDetails extends Component {
 		this.setState( { countryStateOptions } );
 	}
 
-	isValidForm() {
-		const { addressLine1, city, countryState, postCode } = this.state;
+	validateField( name ) {
+		const { errors, fields } = this.state;
 
-		if ( addressLine1.length && city.length && countryState.length && postCode.length ) {
-			return true;
+		switch ( name ) {
+			case 'addressLine1':
+				errors.addressLine1 = fields.addressLine1.length
+					? null
+					: __( 'Please add an address', 'woocommerce-admin' );
+				break;
+			case 'countryState':
+				errors.countryState = fields.countryState.length
+					? null
+					: __( 'Please select a country and state', 'woocommerce-admin' );
+				break;
+			case 'city':
+				errors.city = fields.city.length ? null : __( 'Please add a city', 'woocommerce-admin' );
+				break;
+			case 'postCode':
+				errors.postCode = fields.postCode.length
+					? null
+					: __( 'Please add a post code', 'woocommerce-admin' );
+				break;
 		}
 
-		return false;
+		this.setState( { errors: pickBy( errors ) } );
+	}
+
+	updateValue( name, value ) {
+		const fields = { ...this.state.fields, [ name ]: value };
+		this.setState( { fields }, () => this.validateField( name ) );
+	}
+
+	async validateForm() {
+		const { fields } = this.state;
+		Object.keys( fields ).forEach( fieldName => this.validateField( fieldName ) );
 	}
 
 	async onContinue() {
-		if ( ! this.isValidForm() ) {
+		await this.validateForm();
+		if ( Object.keys( this.state.errors ).length ) {
 			return;
 		}
 
 		const { addNotice, goToNextStep, isError, updateSettings } = this.props;
-		const { addressLine1, addressLine2, city, countryState, postCode } = this.state;
+		const { addressLine1, addressLine2, city, countryState, postCode } = this.state.fields;
 
 		recordEvent( 'storeprofiler_store_details_continue', {
 			store_country: countryState.split( ':' )[ 0 ],
@@ -110,14 +143,8 @@ class StoreDetails extends Component {
 	}
 
 	render() {
-		const {
-			addressLine1,
-			addressLine2,
-			city,
-			countryState,
-			countryStateOptions,
-			postCode,
-		} = this.state;
+		const { countryStateOptions, errors, fields } = this.state;
+		const { addressLine1, addressLine2, city, countryState, postCode } = fields;
 
 		return (
 			<Fragment>
@@ -131,41 +158,51 @@ class StoreDetails extends Component {
 				<Card>
 					<TextControl
 						label={ __( 'Address line 1', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { addressLine1: value } ) }
+						onChange={ value => this.updateValue( 'addressLine1', value ) }
 						required
 						value={ addressLine1 }
+						help={ errors.addressLine1 }
+						className={ errors.addressLine1 ? 'has-error' : null }
 					/>
 
 					<TextControl
 						label={ __( 'Address line 2 (optional)', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { addressLine2: value } ) }
+						onChange={ value => this.updateValue( 'addressLine2', value ) }
 						required
 						value={ addressLine2 }
+						help={ errors.addressLine2 }
+						className={ errors.addressLine2 ? 'has-error' : null }
 					/>
 
 					<SelectControl
 						label={ __( 'Country / State', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { countryState: value } ) }
+						onChange={ value => this.updateValue( 'countryState', value ) }
 						options={ countryStateOptions }
 						value={ countryState }
 						required
+						help={ errors.countryState }
+						className={ errors.countryState ? 'has-error' : null }
 					/>
 
 					<TextControl
 						label={ __( 'City', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { city: value } ) }
+						onChange={ value => this.updateValue( 'city', value ) }
 						required
 						value={ city }
+						help={ errors.city }
+						className={ errors.city ? 'has-error' : null }
 					/>
 
 					<TextControl
 						label={ __( 'Post code', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { postCode: value } ) }
+						onChange={ value => this.updateValue( 'postCode', value ) }
 						required
 						value={ postCode }
+						help={ errors.postCode }
+						className={ errors.postCode ? 'has-error' : null }
 					/>
 
-					<Button isPrimary onClick={ this.onContinue } disabled={ ! this.isValidForm() }>
+					<Button isPrimary onClick={ this.onContinue }>
 						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>
 				</Card>

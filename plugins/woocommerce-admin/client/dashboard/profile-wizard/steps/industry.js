@@ -20,6 +20,7 @@ class Industry extends Component {
 	constructor() {
 		super();
 		this.state = {
+			error: null,
 			selected: [],
 		};
 		this.onContinue = this.onContinue.bind( this );
@@ -27,6 +28,11 @@ class Industry extends Component {
 	}
 
 	async onContinue() {
+		await this.validateField();
+		if ( this.state.error ) {
+			return;
+		}
+
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
 		recordEvent( 'storeprofiler_store_industry_continue', { store_industry: this.state.selected } );
@@ -42,27 +48,37 @@ class Industry extends Component {
 		}
 	}
 
+	async validateField() {
+		const error = this.state.selected.length
+			? null
+			: __( 'Please select at least one industry', 'woocommerce-admin' );
+		this.setState( { error } );
+	}
+
 	onChange( slug ) {
-		this.setState( state => {
-			if ( includes( state.selected, slug ) ) {
+		this.setState(
+			state => {
+				if ( includes( state.selected, slug ) ) {
+					return {
+						selected:
+							filter( state.selected, value => {
+								return value !== slug;
+							} ) || [],
+					};
+				}
+				const newSelected = state.selected;
+				newSelected.push( slug );
 				return {
-					selected:
-						filter( state.selected, value => {
-							return value !== slug;
-						} ) || [],
+					selected: newSelected,
 				};
-			}
-			const newSelected = state.selected;
-			newSelected.push( slug );
-			return {
-				selected: newSelected,
-			};
-		} );
+			},
+			() => this.validateField()
+		);
 	}
 
 	render() {
 		const { industries } = wcSettings.onboarding;
-		const { selected } = this.state;
+		const { error } = this.state;
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -82,13 +98,12 @@ class Industry extends Component {
 								/>
 							);
 						} ) }
+						{ error && <span className="woocommerce-profile-wizard__error">{ error }</span> }
 					</div>
 
-					{ selected.length > 0 && (
-						<Button isPrimary onClick={ this.onContinue }>
-							{ __( 'Continue', 'woocommerce-admin' ) }
-						</Button>
-					) }
+					<Button isPrimary onClick={ this.onContinue }>
+						{ __( 'Continue', 'woocommerce-admin' ) }
+					</Button>
 				</Card>
 			</Fragment>
 		);

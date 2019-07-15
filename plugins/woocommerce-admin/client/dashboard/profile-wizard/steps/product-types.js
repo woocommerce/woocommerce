@@ -22,6 +22,7 @@ class ProductTypes extends Component {
 		super();
 
 		this.state = {
+			error: null,
 			selected: [],
 		};
 
@@ -29,7 +30,19 @@ class ProductTypes extends Component {
 		this.onChange = this.onChange.bind( this );
 	}
 
+	async validateField() {
+		const error = this.state.selected.length
+			? null
+			: __( 'Please select at least one product type', 'woocommerce-admin' );
+		this.setState( { error } );
+	}
+
 	async onContinue() {
+		await this.validateField();
+		if ( this.state.error ) {
+			return;
+		}
+
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
 		recordEvent( 'storeprofiler_store_product_type_continue', {
@@ -48,21 +61,24 @@ class ProductTypes extends Component {
 	}
 
 	onChange( slug ) {
-		this.setState( state => {
-			if ( includes( state.selected, slug ) ) {
+		this.setState(
+			state => {
+				if ( includes( state.selected, slug ) ) {
+					return {
+						selected:
+							filter( state.selected, value => {
+								return value !== slug;
+							} ) || [],
+					};
+				}
+				const newSelected = state.selected;
+				newSelected.push( slug );
 				return {
-					selected:
-						filter( state.selected, value => {
-							return value !== slug;
-						} ) || [],
+					selected: newSelected,
 				};
-			}
-			const newSelected = state.selected;
-			newSelected.push( slug );
-			return {
-				selected: newSelected,
-			};
-		} );
+			},
+			() => this.validateField()
+		);
 	}
 
 	onLearnMore( slug ) {
@@ -71,7 +87,7 @@ class ProductTypes extends Component {
 
 	render() {
 		const { productTypes } = wcSettings.onboarding;
-		const { selected } = this.state;
+		const { error } = this.state;
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -111,17 +127,16 @@ class ProductTypes extends Component {
 								/>
 							);
 						} ) }
+						{ error && <span className="woocommerce-profile-wizard__error">{ error }</span> }
 					</div>
 
-					{ selected.length > 0 && (
-						<Button
-							isPrimary
-							className="woocommerce-profile-wizard__continue"
-							onClick={ this.onContinue }
-						>
-							{ __( 'Continue', 'woocommerce-admin' ) }
-						</Button>
-					) }
+					<Button
+						isPrimary
+						className="woocommerce-profile-wizard__continue"
+						onClick={ this.onContinue }
+					>
+						{ __( 'Continue', 'woocommerce-admin' ) }
+					</Button>
 				</Card>
 			</Fragment>
 		);

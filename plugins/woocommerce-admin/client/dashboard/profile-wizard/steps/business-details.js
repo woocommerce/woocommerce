@@ -27,12 +27,15 @@ class BusinessDetails extends Component {
 		super();
 
 		this.state = {
-			other_platform: '',
-			product_count: '',
-			selling_venues: '',
-			extensions: {
-				facebook: true,
-				mailchimp: true,
+			errors: {},
+			fields: {
+				other_platform: '',
+				product_count: '',
+				selling_venues: '',
+				extensions: {
+					facebook: true,
+					mailchimp: true,
+				},
 			},
 		};
 
@@ -40,23 +43,28 @@ class BusinessDetails extends Component {
 	}
 
 	async onContinue() {
+		await this.validateForm();
+		if ( Object.keys( this.state.errors ).length ) {
+			return;
+		}
+
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
-		const { other_platform, product_count, selling_venues } = this.state;
-		const extensions = keys( pickBy( this.state.extensions ) );
+		const { extensions, other_platform, product_count, selling_venues } = this.state.fields;
+		const businessExtensions = keys( pickBy( extensions ) );
 
 		recordEvent( 'storeprofiler_store_business_details_continue', {
 			product_number: product_count,
 			already_selling: 'no' !== selling_venues,
 			used_platform: other_platform,
-			install_facebook: this.state.extensions.facebook,
-			install_mailchimp: this.state.extensions.mailchimp,
+			install_facebook: extensions.facebook,
+			install_mailchimp: extensions.mailchimp,
 		} );
 
 		await updateProfileItems( {
 			other_platform,
 			product_count,
 			selling_venues,
-			business_extensions: extensions,
+			business_extensions: businessExtensions,
 		} );
 
 		if ( ! isError ) {
@@ -69,17 +77,37 @@ class BusinessDetails extends Component {
 		}
 	}
 
-	isValidForm() {
-		const { other_platform, product_count, selling_venues } = this.state;
-		const other_platform_valid = [ 'other', 'brick-mortar-other' ].includes( selling_venues )
-			? other_platform.length
-			: true;
+	validateField( name ) {
+		const { errors, fields } = this.state;
 
-		if ( other_platform_valid && product_count.length && selling_venues.length ) {
-			return true;
+		switch ( name ) {
+			case 'extensions':
+				break;
+			case 'other_platform':
+				errors.other_platform =
+					[ 'other', 'brick-mortar-other' ].includes( fields.selling_venues ) &&
+					! fields.other_platform.length
+						? __( 'This field is required', 'woocommerce-admin' )
+						: null;
+				break;
+			default:
+				errors[ name ] = ! fields[ name ].length
+					? __( 'This field is required', 'woocommerce-admin' )
+					: null;
+				break;
 		}
 
-		return false;
+		this.setState( { errors: pickBy( errors ) } );
+	}
+
+	updateValue( name, value ) {
+		const fields = { ...this.state.fields, [ name ]: value };
+		this.setState( { fields }, () => this.validateField( name ) );
+	}
+
+	async validateForm() {
+		const { fields } = this.state;
+		Object.keys( fields ).forEach( fieldName => this.validateField( fieldName ) );
 	}
 
 	getNumberRangeString( min, max = false ) {
@@ -98,18 +126,23 @@ class BusinessDetails extends Component {
 	}
 
 	setDefaultValue( key, options ) {
-		if ( ! this.state[ key ].length ) {
-			this.setState( { [ key ]: options[ 0 ].value } );
+		const { fields } = this.state;
+
+		if ( ! fields[ key ].length ) {
+			this.setState( { fields: { ...fields, [ key ]: options[ 0 ].value } }, () =>
+				this.validateField( key )
+			);
 		}
 	}
 
 	onExtensionChange( extension ) {
-		this.setState( {
-			extensions: {
-				...this.state.extensions,
-				[ extension ]: ! this.state.extensions[ extension ],
-			},
-		} );
+		const { fields } = this.state;
+		const extensions = {
+			...fields.extensions,
+			[ extension ]: ! fields.extensions[ extension ],
+		};
+
+		this.setState( { fields: { ...fields, extensions } } );
 	}
 
 	renderBusinessExtensionHelpText() {
@@ -118,7 +151,7 @@ class BusinessDetails extends Component {
 			mailchimp: __( 'Mailchimp for WooCommerce', 'woocommerce-admin' ),
 		};
 
-		const extensions = keys( pickBy( this.state.extensions ) );
+		const extensions = keys( pickBy( this.state.fields.extensions ) );
 		if ( 0 === extensions.length ) {
 			return null;
 		}
@@ -171,7 +204,7 @@ class BusinessDetails extends Component {
 						</div>
 						<div className="woocommerce-profile-wizard__benefit-toggle">
 							<FormToggle
-								checked={ this.state.extensions[ benefit.slug ] }
+								checked={ this.state.fields.extensions[ benefit.slug ] }
 								onChange={ () => this.onExtensionChange( benefit.slug ) }
 								className="woocommerce-profile-wizard__toggle"
 							/>
@@ -183,7 +216,8 @@ class BusinessDetails extends Component {
 	}
 
 	render() {
-		const { other_platform, product_count, selling_venues } = this.state;
+		const { errors, fields } = this.state;
+		const { other_platform, product_count, selling_venues } = fields;
 
 		const productCountOptions = [
 			{
@@ -250,7 +284,7 @@ class BusinessDetails extends Component {
 		];
 
 		// Show extensions when the currently selling elsewhere checkbox has been answered.
-		const showExtensions = '' !== this.state.selling_venues;
+		const showExtensions = '' !== selling_venues;
 
 		return (
 			<Fragment>
@@ -262,29 +296,35 @@ class BusinessDetails extends Component {
 				<Card className="woocommerce-profile-wizard__product-types-card">
 					<SelectControl
 						label={ __( 'How many products will you add?', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { product_count: value } ) }
+						onChange={ value => this.updateValue( 'product_count', value ) }
 						onFocus={ this.setDefaultValue.bind( this, 'product_count', productCountOptions ) }
 						options={ productCountOptions }
 						value={ product_count }
+						help={ errors.product_count }
+						className={ errors.product_count ? 'has-error' : null }
 						required
 					/>
 
 					<SelectControl
 						label={ __( 'Currently selling elsewhere?', 'woocommerce-admin' ) }
-						onChange={ value => this.setState( { selling_venues: value } ) }
+						onChange={ value => this.updateValue( 'selling_venues', value ) }
 						onFocus={ this.setDefaultValue.bind( this, 'selling_venues', sellingVenueOptions ) }
 						options={ sellingVenueOptions }
 						value={ selling_venues }
+						help={ errors.selling_venues }
+						className={ errors.selling_venues ? 'has-error' : null }
 						required
 					/>
 
 					{ [ 'other', 'brick-mortar-other' ].includes( selling_venues ) && (
 						<SelectControl
 							label={ __( 'Which platform is the store using?', 'woocommerce-admin' ) }
-							onChange={ value => this.setState( { other_platform: value } ) }
+							onChange={ value => this.updateValue( 'other_platform', value ) }
 							onFocus={ this.setDefaultValue.bind( this, 'other_platform', otherPlatformOptions ) }
 							options={ otherPlatformOptions }
 							value={ other_platform }
+							help={ errors.other_platform }
+							className={ errors.other_platform ? 'has-error' : null }
 							required
 						/>
 					) }
@@ -295,7 +335,6 @@ class BusinessDetails extends Component {
 						isPrimary
 						className="woocommerce-profile-wizard__continue"
 						onClick={ this.onContinue }
-						disabled={ ! this.isValidForm() }
 					>
 						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>
