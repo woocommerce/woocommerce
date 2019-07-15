@@ -1508,6 +1508,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get a user friendly message about why an item is not purchasable.
+	 *
+	 * @return string
+	 */
+	public function get_unable_to_purchase_message() {
+		if ( ! $this->exists() ) {
+			$message = __( 'Sorry, this product cannot be purchased because it does not exist.', 'woocommerce' );
+		} elseif( 'publish' !== $this->get_status() && ! current_user_can( 'edit_post', $this->get_id() ) ) {
+			$message = __( 'Sorry, this product cannot be purchased because it has been removed.', 'woocommerce');
+		} elseif( '' === $this->get_price() ) {
+			$message = __( 'Sorry, this product cannot be purchased because it has no price set.', 'woocommerce' );
+		} else {
+			// Some other reason probably related to a plugin.
+			$message = __( 'Sorry, this product cannot be purchased.', 'woocommerce' );
+		}
+
+		return apply_filters( 'woocommerce_is_purchasable_message', $message, $this );
+	}
+
+	/**
 	 * Returns whether or not the product is on sale.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
