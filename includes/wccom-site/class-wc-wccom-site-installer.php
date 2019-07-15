@@ -525,7 +525,7 @@ class WC_WCCOM_Site_Installer {
 	 */
 	private static function get_wporg_plugin_main_file( $dir ) {
 		// Ensure that exact dir name is used.
-		$dir .= '/';
+		$dir = trailingslashit( $dir );
 
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
