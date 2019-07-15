@@ -4,7 +4,7 @@
  *
  * Handles requests to /installer.
  *
- * @package WooCommerce/WCCOM_Site/REST_API
+ * @package WooCommerce\WooCommerce_Site\Rest_Api
  * @since   3.7.0
  */
 
@@ -65,9 +65,7 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	 * Check permissions.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
 	 * @return bool|WP_Error
 	 */
 	public function check_permission( $request ) {
@@ -82,9 +80,7 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	 * Get installation state.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
 	 * @return bool|WP_Error
 	 */
 	public function get_install_state( $request ) {
@@ -95,9 +91,7 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	 * Install WooCommerce.com products.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
 	 * @return bool|WP_Error
 	 */
 	public function install( $request ) {
@@ -123,9 +117,7 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	 * Reset installation state.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
 	 * @return bool|WP_Error
 	 */
 	public function reset_install( $request ) {
@@ -139,10 +131,8 @@ class WC_REST_WCCOM_Site_Installer_V1_Controller extends WC_REST_Controller {
 	 * Validate products from request body.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.
-	 *
 	 * @return bool|WP_Error
 	 */
 	protected function validate_products( $products ) {

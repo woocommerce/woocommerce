@@ -2,9 +2,8 @@
 /**
  * WooCommerce.com Product Installation.
  *
- * @class    WC_WCCOM_Site_Installer
- * @package  WooCommerce/WCCOM_Site
- * @since    3.7.0
+ * @package WooCommerce\WooCommerce_Site
+ * @since   3.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -15,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * Contains functionalities to install products via WooCommerce.com helper connection.
  */
 class WC_WCCOM_Site_Installer {
+
 	/**
 	 * Default state.
 	 *
@@ -60,10 +60,8 @@ class WC_WCCOM_Site_Installer {
 	 * Get the product install state.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param string $key Key in state data. If empty key is passed array of
 	 *                    state will be returned.
-	 *
 	 * @return array Product install state.
 	 */
 	public static function get_state( $key = '' ) {
@@ -79,7 +77,6 @@ class WC_WCCOM_Site_Installer {
 	 * Update the product install state.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param string $key   Key in state data.
 	 * @param mixed  $value Value.
 	 */
@@ -94,7 +91,6 @@ class WC_WCCOM_Site_Installer {
 	 * Reset product install state.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param array $products List of product IDs.
 	 */
 	public static function reset_state( $products = array() ) {
@@ -106,10 +102,8 @@ class WC_WCCOM_Site_Installer {
 	 * Schedule installing given list of products.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.
-	 *
 	 * @return array State.
 	 */
 	public static function schedule_install( $products ) {
@@ -141,7 +135,6 @@ class WC_WCCOM_Site_Installer {
 	 * Run via `woocommerce_wccom_install_products` hook.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param array $products Array of products where key is product ID and
 	 *                        element is install args.
 	 */
@@ -192,7 +185,6 @@ class WC_WCCOM_Site_Installer {
 	 * Install a single product given its ID.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int          $product_id   Product ID.
 	 * @param array        $install_args Install args.
 	 * @param \WP_Upgrader $upgrader     Core class to handle installation.
@@ -207,7 +199,6 @@ class WC_WCCOM_Site_Installer {
 	 * Perform product installation step.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int          $product_id   Product ID.
 	 * @param array        $install_args Install args.
 	 * @param string       $step         Installation step.
@@ -265,9 +256,7 @@ class WC_WCCOM_Site_Installer {
 	 * Get product info from its ID.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int $product_id Product ID.
-	 *
 	 * @return bool|\WP_Error
 	 */
 	private static function get_product_info( $product_id ) {
@@ -319,10 +308,8 @@ class WC_WCCOM_Site_Installer {
 	 * Download product by its ID and returns the path of the zip package.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
-	 *
 	 * @return \WP_Error|string
 	 */
 	private static function download_product( $product_id, $upgrader ) {
@@ -337,10 +324,8 @@ class WC_WCCOM_Site_Installer {
 	 * Unpack downloaded product.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
-	 *
 	 * @return \WP_Error|string
 	 */
 	private static function unpack_product( $product_id, $upgrader ) {
@@ -356,10 +341,8 @@ class WC_WCCOM_Site_Installer {
 	 * Move product to plugins directory.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
-	 *
 	 * @return array|\WP_Error
 	 */
 	private static function move_product( $product_id, $upgrader ) {
@@ -389,9 +372,7 @@ class WC_WCCOM_Site_Installer {
 	 * Activate product given its product ID.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int $product_id Product ID.
-	 *
 	 * @return \WP_Error|null
 	 */
 	private static function activate_product( $product_id ) {
@@ -410,9 +391,7 @@ class WC_WCCOM_Site_Installer {
 	 * Activate plugin given its product ID.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int $product_id Product ID.
-	 *
 	 * @return \WP_Error|null
 	 */
 	private static function activate_plugin( $product_id ) {
@@ -434,9 +413,7 @@ class WC_WCCOM_Site_Installer {
 				)
 			);
 
-			$filename = is_array( $plugins ) && ! empty( $plugins )
-				? key( $plugins )
-				: '';
+			$filename = is_array( $plugins ) && ! empty( $plugins ) ? key( $plugins ) : '';
 		}
 
 		if ( empty( $filename ) ) {
@@ -450,9 +427,7 @@ class WC_WCCOM_Site_Installer {
 	 * Activate theme given its product ID.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int $product_id Product ID.
-	 *
 	 * @return \WP_Error|null
 	 */
 	private static function activate_theme( $product_id ) {
@@ -474,9 +449,7 @@ class WC_WCCOM_Site_Installer {
 				)
 			);
 
-			$theme_slug = is_array( $themes ) && ! empty( $themes )
-				? dirname( key( $themes ) )
-				: '';
+			$theme_slug = is_array( $themes ) && ! empty( $themes ) ? dirname( key( $themes ) ) : '';
 		}
 
 		if ( empty( $theme_slug ) ) {
@@ -490,9 +463,7 @@ class WC_WCCOM_Site_Installer {
 	 * Get installed directory of WP.org product.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param int $product_id Product ID.
-	 *
 	 * @return bool|string
 	 */
 	private static function get_wporg_product_dir_name( $product_id ) {
@@ -516,9 +487,7 @@ class WC_WCCOM_Site_Installer {
 	 * Get WP.org plugin's main file.
 	 *
 	 * @since 3.7.0
-	 *
 	 * @param string $dir Directory name of the plugin.
-	 *
 	 * @return bool|string
 	 */
 	private static function get_wporg_plugin_main_file( $dir ) {
