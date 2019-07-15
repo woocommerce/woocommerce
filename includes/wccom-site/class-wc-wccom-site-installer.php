@@ -34,7 +34,7 @@ class WC_WCCOM_Site_Installer {
 	 * @var array
 	 */
 	private static $default_step_state = array(
-		'download_link'  => '',
+		'download_url'   => '',
 		'product_type'   => '',
 		'last_step'      => '',
 		'last_error'     => '',
