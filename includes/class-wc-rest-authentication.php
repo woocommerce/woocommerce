@@ -38,7 +38,6 @@ class WC_REST_Authentication {
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
-		add_filter( 'determine_current_user', array( $this, 'authenticate_wccom' ), 14 );
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
@@ -66,102 +65,6 @@ class WC_REST_Authentication {
 
 		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
 	}
-
-	/**
-	 * Check if this is a request to WCCOM Site REST API.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @return bool
-	 */
-	protected function is_request_to_wccom_site_rest_api() {
-		$request_uri = add_query_arg( array() );
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );
-		$request_uri = esc_url_raw( wp_unslash( $request_uri ) );
-
-		return false !== strpos( $request_uri, $rest_prefix . 'wccom-site/' );
-	}
-
-	/**
-	 * Verify WooCommerce.com request from a given body and signature request.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @param string $body                Request body.
-	 * @param string $signature           Request signature found in
-	 *                                    X-Woo-Signature header.
-	 * @param string $access_token_secret Access token secret for this site.
-	 *
-	 * @return bool
-	 */
-	protected function verify_wccom_request( $body, $signature, $access_token_secret ) {
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$data = array(
-			'host'        => $_SERVER['HTTP_HOST'],
-			'request_uri' => $_SERVER['REQUEST_URI'],
-			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
-		);
-		// phpcs:enable
-
-		if ( ! empty( $body ) ) {
-			$data['body'] = $body;
-		}
-
-		$expected_signature = hash_hmac( 'sha256', wp_json_encode( $data ), $access_token_secret );
-
-		return hash_equals( $expected_signature, $signature );
-	}
-
-	/**
-	 * Authenticate WooCommerce.com request.
-	 *
-	 * @since 3.7.0
-	 *
-	 * @param int|false $user_id User ID.
-	 *
-	 * @return int|false
-	 */
-	public function authenticate_wccom( $user_id ) {
-		if ( ! empty( $user_id ) || ! $this->is_request_to_wccom_site_rest_api() ) {
-			return $user_id;
-		}
-
-		if ( empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
-			return false;
-		}
-
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$request_auth = trim( $_SERVER['HTTP_AUTHORIZATION'] );
-		if ( stripos( $request_auth, 'Bearer ' ) !== 0 ) {
-			return false;
-		}
-
-		if ( empty( $_SERVER['HTTP_X_WOO_SIGNATURE'] ) ) {
-			return false;
-		}
-
-		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
-		$access_token = trim( substr( $request_auth, 7 ) );
-		$site_auth    = WC_Helper_Options::get( 'auth' );
-		if ( empty( $site_auth['access_token'] ) || $access_token !== $site_auth['access_token'] ) {
-			return false;
-		}
-
-		$body      = WP_REST_Server::get_raw_data();
-		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( ! $this->verify_wccom_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
-			return false;
-		}
-
-		$user = get_user_by( 'id', $site_auth['user_id'] );
-		if ( ! $user ) {
-			return false;
-		}
-
-		return $user;
-	}
-
 
 	/**
 	 * Authenticate user.
