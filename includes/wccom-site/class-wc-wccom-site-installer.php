@@ -7,9 +7,7 @@
  * @since    3.7.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_WCCOM_Site_Installer Class
