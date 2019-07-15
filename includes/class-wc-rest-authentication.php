@@ -94,7 +94,7 @@ class WC_REST_Authentication {
 	 * @return bool
 	 */
 	protected function verify_wccom_request( $body, $signature, $access_token_secret ) {
-		// phpcs:disable
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
 			'request_uri' => $_SERVER['REQUEST_URI'],
