@@ -1099,6 +1099,20 @@ class WC_Helper {
 	}
 
 	/**
+	 * Checks whether current site has product subscription of a given ID.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $product_id The product id.
+	 *
+	 * @return bool Returns true if product subscription exists, false otherwise.
+	 */
+	public static function has_product_subscription( $product_id ) {
+		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+		return ! empty( $subscription );
+	}
+
+	/**
 	 * Get a subscription entry from product_id. If multiple subscriptions are
 	 * found with the same product id and $single is set to true, will return the
 	 * first one in the list, so you can use this method to get things like extension

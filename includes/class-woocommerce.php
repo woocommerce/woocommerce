@@ -435,6 +435,11 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
+		 * WCCOM Site.
+		 */
+		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
+
+		/**
 		 * Libraries
 		 */
 		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
