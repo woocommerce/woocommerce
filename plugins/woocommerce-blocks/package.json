@@ -80,7 +80,7 @@
     "stylelint": "10.1.0",
     "stylelint-config-wordpress": "14.0.0",
     "webpack": "4.35.3",
-    "webpack-cli": "3.3.5",
+    "webpack-cli": "3.3.6",
     "yargs": "13.2.4"
   },
   "engines": {
