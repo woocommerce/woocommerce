@@ -115,6 +115,8 @@ class WC_REST_Authentication {
 	/**
 	 * Authenticate WooCommerce.com request.
 	 *
+	 * @since 3.7.0
+	 *
 	 * @param int|false $user_id User ID.
 	 *
 	 * @return int|false
