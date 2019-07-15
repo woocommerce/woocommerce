@@ -95,22 +95,16 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function install( $request ) {
-		$body = WP_REST_Server::get_raw_data();
-		if ( empty( $body ) ) {
-			return new WP_Error( 'empty_body', __( 'Request body is empty.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		$data = json_decode( $body, true );
-		if ( empty( $data['products'] ) ) {
+		if ( empty( $request['products'] ) ) {
 			return new WP_Error( 'missing_products', __( 'Missing products in request body.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$validation_result = $this->validate_products( $data['products'] );
+		$validation_result = $this->validate_products( $request['products'] );
 		if ( is_wp_error( $validation_result ) ) {
 			return $validation_result;
 		}
 
-		return rest_ensure_response( WC_WCCOM_Site_Installer::schedule_install( $data['products'] ) );
+		return rest_ensure_response( WC_WCCOM_Site_Installer::schedule_install( $request['products'] ) );
 	}
 
 	/**
