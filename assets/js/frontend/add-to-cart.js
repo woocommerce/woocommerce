@@ -29,12 +29,12 @@ jQuery( function( $ ) {
 		if ( 1 === this.requests.length ) {
 			this.run();
 		}
-	}
+	};
 
 	/**
 	 * Run add to cart events.
 	 */
-	AddToCartHandler.prototype.run = function( e ) {
+	AddToCartHandler.prototype.run = function() {
 		var requestManager = this,
 			originalCallback = requestManager.requests[0].complete;
 
@@ -51,7 +51,7 @@ jQuery( function( $ ) {
 		};
 
 		$.ajax( this.requests[0] );
-	}
+	};
 
 	/**
 	 * Handle the add to cart event.
