@@ -9,10 +9,6 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	sh -e /etc/init.d/xvfb start
 	sleep 3
 
-	# Compile and minify CSS and JS before running test
-	grunt css
-	grunt js
-
 	# Run the tests
 	npm test
 fi

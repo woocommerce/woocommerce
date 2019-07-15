@@ -88,19 +88,20 @@ test.describe( 'Add New Product Page', function() {
 		panelVaritions.selectAction( 'Create variations from all attributes' );
 		panelVaritions.go();
 
-		const var1 = panelVaritions.getRow( 1 );
+		// We start at two because of a new message introduced at the top of the panel.
+		const var1 = panelVaritions.getRow( 2 );
 		var1.toggle();
 		var1.checkEnabled();
 		var1.checkVirtual();
 		var1.setRegularPrice( '9.99' );
 
-		const var2 = panelVaritions.getRow( 2 );
+		const var2 = panelVaritions.getRow( 3 );
 		var2.toggle();
 		var2.checkEnabled();
 		var2.checkVirtual();
 		var2.setRegularPrice( '11.99' );
 
-		const var3 = panelVaritions.getRow( 3 );
+		const var3 = panelVaritions.getRow( 4 );
 		var3.toggle();
 		var3.checkEnabled();
 		var3.checkManageStock();

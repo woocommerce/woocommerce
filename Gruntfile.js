@@ -361,6 +361,13 @@ module.exports = function( grunt ) {
 		'css'
 	]);
 
+	grunt.registerTask( 'e2e-build', [
+		'uglify:admin',
+		'uglify:frontend',
+		'uglify:flexslider',
+		'css'
+	]);
+
 	grunt.registerTask( 'contributors', [
 		'prompt:contributors',
 		'shell:contributors'

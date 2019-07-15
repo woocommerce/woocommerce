@@ -155,6 +155,7 @@ install_e2e_site() {
 		# Script Variables
 		CONFIG_DIR="./tests/e2e-tests/config/travis"
 		WP_CORE_DIR="$HOME/wordpress"
+		WC_PLUGIN_DIR="$WP_CORE_DIR/wp-content/plugins/woocommerce"
 		NGINX_DIR="$HOME/nginx"
 		PHP_FPM_BIN="$HOME/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm"
 		PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
@@ -206,10 +207,30 @@ PHP
 		php wp-cli.phar db import $WP_DB_DATA
 		php wp-cli.phar search-replace "http://local.wordpress.test" "$WP_SITE_URL"
 		php wp-cli.phar theme install twentytwelve --activate
-		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
-		php wp-cli.phar wc update
-		cd "$WORKING_DIR"
 
+		# Instead of installing WC from a GH zip, rather used the checked out branch?
+		# php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
+		echo "CREATING WooCommerce PLUGIN DIR AT $WC_PLUGIN_DIR"
+		mkdir $WC_PLUGIN_DIR
+		echo "COPYING CHECKED OUT BRANCH TO $WC_PLUGIN_DIR"
+		cp -R "$TRAVIS_BUILD_DIR" "$WP_CORE_DIR/wp-content/plugins/"
+		ls "$WP_CORE_DIR/wp-content/plugins/woocommerce/"
+
+		# Compile assets and installing dependencies
+		echo "COMPILING ASSETS IN $WC_PLUGIN_DIR"
+		cd $WC_PLUGIN_DIR
+		npm install
+		composer install
+		grunt e2e-build
+
+		echo "ACTIVATING WooCommerce PLUGIN"
+		php wp-cli.phar plugin activate woocommerce
+		echo "RUNNING WooCommerce UPDATE ROUTINE"
+		php wp-cli.phar wc update
+
+		echo "DONE INSTALLING E2E SUITE."
+		cd "$WORKING_DIR"
+		echo "WORKING DIR: $WORKING_DIR"
 	fi
 }
 
