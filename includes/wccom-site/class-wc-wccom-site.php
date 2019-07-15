@@ -71,7 +71,7 @@ class WC_WCCOM_Site {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		$access_token = trim( substr( $request_auth, 7 ) );
 		$site_auth    = WC_Helper_Options::get( 'auth' );
-		if ( empty( $site_auth['access_token'] ) || $access_token !== $site_auth['access_token'] ) {
+		if ( empty( $site_auth['access_token'] ) || ! hash_equals( $access_token, $site_auth['access_token'] ) ) {
 			return false;
 		}
 
