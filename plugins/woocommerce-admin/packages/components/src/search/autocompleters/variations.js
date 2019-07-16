@@ -2,12 +2,13 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * WooCommerce dependencies
  */
-import { stringifyQuery, getQuery } from '@woocommerce/navigation';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -40,19 +41,15 @@ export default {
 	name: 'products',
 	className: 'woocommerce-search__product-result',
 	options( search ) {
-		let payload = '';
-		if ( search ) {
-			const query = {
-				search,
-				per_page: 10,
-			};
-			payload = stringifyQuery( query );
-		}
+		const query = search ? {
+			search,
+			per_page: 10,
+		} : {};
 		const product = getQuery().products;
 		if ( ! product || product.includes( ',' ) ) {
 			console.warn( 'Invalid product id supplied to Variations autocompleter' );
 		}
-		return apiFetch( { path: `/wc/v4/products/${ product }/variations${ payload }` } );
+		return apiFetch( { path: addQueryArgs( `/wc/v4/products/${ product }/variations`, query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( variation ) {

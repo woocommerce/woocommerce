@@ -3,13 +3,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import interpolateComponents from 'interpolate-components';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -26,15 +22,11 @@ export default {
 	name: 'taxes',
 	className: 'woocommerce-search__tax-result',
 	options( search ) {
-		let payload = '';
-		if ( search ) {
-			const query = {
-				code: search,
-				per_page: 10,
-			};
-			payload = stringifyQuery( query );
-		}
-		return apiFetch( { path: `/wc/v4/taxes${ payload }` } );
+		const query = search ? {
+			code: search,
+			per_page: 10,
+		} : {};
+		return apiFetch( { path: addQueryArgs( '/wc/v4/taxes', query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( tax ) {

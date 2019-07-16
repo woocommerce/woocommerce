@@ -2,13 +2,14 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { identity } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { getIdsFromQuery, stringifyQuery } from '@woocommerce/navigation';
+import { getIdsFromQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -30,11 +31,13 @@ export function getRequestByIdString( path, handleData = identity ) {
 		if ( idList.length < 1 ) {
 			return Promise.resolve( [] );
 		}
-		const payload = stringifyQuery( {
+		const payload = {
 			include: idList.join( ',' ),
 			per_page: idList.length,
-		} );
-		return apiFetch( { path: pathString + payload } ).then( data => data.map( handleData ) );
+		};
+		return apiFetch( { path: addQueryArgs( pathString, payload ) } ).then( data =>
+			data.map( handleData )
+		);
 	};
 }
 

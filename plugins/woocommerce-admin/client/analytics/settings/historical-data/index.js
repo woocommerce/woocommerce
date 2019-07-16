@@ -3,15 +3,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
 import moment from 'moment';
 import { withSpokenMessages } from '@wordpress/components';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -110,9 +106,10 @@ class HistoricalData extends Component {
 
 	onStartImport() {
 		const { period, skipChecked } = this.state;
-		const path =
-			'/wc/v4/reports/import' +
-			stringifyQuery( formatParams( this.dateFormat, period, skipChecked ) );
+		const path = addQueryArgs(
+			'/wc/v4/reports/import',
+			formatParams( this.dateFormat, period, skipChecked )
+		);
 		const errorMessage = __(
 			'There was a problem rebuilding your report data.',
 			'woocommerce-admin'

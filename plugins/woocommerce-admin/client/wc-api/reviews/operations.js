@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,7 +20,7 @@ function readReviewQueries( resourceNames, fetch ) {
 
 	return filteredNames.map( async resourceName => {
 		const query = getResourceIdentifier( resourceName );
-		const url = `${ NAMESPACE }/products/reviews${ stringifyQuery( query ) }`;
+		const url = addQueryArgs( `${ NAMESPACE }/products/reviews`, query );
 
 		try {
 			const response = await fetch( {

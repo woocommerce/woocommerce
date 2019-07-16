@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,16 +20,12 @@ export default {
 	name: 'emails',
 	className: 'woocommerce-search__emails-result',
 	options( search ) {
-		let payload = '';
-		if ( search ) {
-			const query = {
-				search,
-				searchby: 'email',
-				per_page: 10,
-			};
-			payload = stringifyQuery( query );
-		}
-		return apiFetch( { path: `/wc/v4/customers${ payload }` } );
+		const query = search ? {
+			search,
+			searchby: 'email',
+			per_page: 10,
+		} : {};
+		return apiFetch( { path: addQueryArgs( '/wc/v4/customers', query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {

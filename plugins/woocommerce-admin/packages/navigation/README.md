@@ -42,15 +42,6 @@ Get the current path from history.
 
 **Returns**: <code>String</code> - Current path.
 
-### stringifyQuery(query) ⇒ <code>String</code>
-Converts a query object to a query string.
-
-**Returns**: <code>String</code> - Query string.
-
-| Param | Type | Description |
-| --- | --- | --- |
-| query | <code>Object</code> | parameters to be converted. |
-
 ### getTimeRelatedQuery(query) ⇒ <code>Object</code>
 Gets time related parameters from a query.
 

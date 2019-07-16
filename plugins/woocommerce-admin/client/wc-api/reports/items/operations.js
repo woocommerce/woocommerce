@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -41,7 +37,7 @@ function read( resourceNames, fetch = apiFetch ) {
 		const query = getResourceIdentifier( resourceName );
 		const fetchArgs = {
 			parse: false,
-			path: NAMESPACE + '/reports/' + endpoint + stringifyQuery( query ),
+			path: addQueryArgs( `${ NAMESPACE }/reports/${ endpoint }`, query ),
 		};
 
 		try {

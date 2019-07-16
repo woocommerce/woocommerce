@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,14 +20,10 @@ export default {
 	name: 'download-ips',
 	className: 'woocommerce-search__download-ip-result',
 	options( match ) {
-		let payload = '';
-		if ( match ) {
-			const query = {
-				match,
-			};
-			payload = stringifyQuery( query );
-			return apiFetch( { path: `/wc/v4/data/download-ips${ payload }` } );
-		}
+		const query = match ? {
+			match,
+		} : {};
+		return apiFetch( { path: addQueryArgs( '/wc/v4/data/download-ips', query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( download ) {

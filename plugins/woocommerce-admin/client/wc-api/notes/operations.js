@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -31,7 +27,7 @@ function readNoteQueries( resourceNames, fetch ) {
 
 	return filteredNames.map( async resourceName => {
 		const query = getResourceIdentifier( resourceName );
-		const url = `${ NAMESPACE }/admin/notes${ stringifyQuery( query ) }`;
+		const url = addQueryArgs( `${ NAMESPACE }/admin/notes`, query );
 
 		try {
 			const response = await fetch( {

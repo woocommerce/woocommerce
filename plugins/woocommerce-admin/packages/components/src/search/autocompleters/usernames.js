@@ -2,15 +2,14 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
+
 /**
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
+
 /**
  * A customer username completer.
  * See https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface
@@ -21,16 +20,12 @@ export default {
 	name: 'usernames',
 	className: 'woocommerce-search__usernames-result',
 	options( search ) {
-		let payload = '';
-		if ( search ) {
-			const query = {
-				search,
-				searchby: 'username',
-				per_page: 10,
-			};
-			payload = stringifyQuery( query );
-		}
-		return apiFetch( { path: `/wc/v4/customers${ payload }` } );
+		const query = search ? {
+			search,
+			searchby: 'username',
+			per_page: 10,
+		} : {};
+		return apiFetch( { path: addQueryArgs( '/wc/v4/customers', query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {

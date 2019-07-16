@@ -2,13 +2,9 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { omit } from 'lodash';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -33,7 +29,7 @@ function read( resourceNames, fetch = apiFetch ) {
 		const query = getResourceIdentifier( resourceName );
 		const fetchArgs = {
 			parse: false,
-			path: NAMESPACE + `/${ endpoint }${ stringifyQuery( omit( query, [ 'timestamp' ] ) ) }`,
+			path: addQueryArgs( `${ NAMESPACE }/${ endpoint }`, omit( query, [ 'timestamp' ] ) ),
 		};
 
 		try {

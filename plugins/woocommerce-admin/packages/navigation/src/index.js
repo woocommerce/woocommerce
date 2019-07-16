@@ -2,8 +2,9 @@
 /**
  * External dependencies
  */
-import { isEmpty, pick, uniq } from 'lodash';
-import { parse, stringify } from 'qs';
+import { addQueryArgs } from '@wordpress/url';
+import { parse } from 'qs';
+import { pick, uniq } from 'lodash';
 
 /**
  * Internal dependencies
@@ -36,14 +37,6 @@ export const getAdminLink = path => wcSettings.adminUrl + path;
  * @return {String}  Current path.
  */
 export const getPath = () => getHistory().location.pathname;
-
-/**
- * Converts a query object to a query string.
- *
- * @param {Object} query parameters to be converted.
- * @return {String} Query string.
- */
-export const stringifyQuery = query => ( isEmpty( query ) ? '' : '?' + stringify( query ) );
 
 /**
  * Gets query parameters that should persist between screens or updates
@@ -99,8 +92,7 @@ export function getSearchWords( query = navUtils.getQuery() ) {
  * @return {String}  Updated URL merging query params into existing params.
  */
 export function getNewPath( query, path = getPath(), currentQuery = getQuery() ) {
-	const queryString = stringifyQuery( { page: 'wc-admin', path, ...currentQuery, ...query } );
-	return `admin.php${ queryString }`;
+	return addQueryArgs( 'admin.php', { page: 'wc-admin', path, ...currentQuery, ...query } );
 }
 
 /**

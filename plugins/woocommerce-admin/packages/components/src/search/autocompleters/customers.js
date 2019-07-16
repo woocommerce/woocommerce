@@ -3,13 +3,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import interpolateComponents from 'interpolate-components';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -26,16 +22,12 @@ export default {
 	name: 'customers',
 	className: 'woocommerce-search__customers-result',
 	options( name ) {
-		let payload = '';
-		if ( name ) {
-			const query = {
-				search: name,
-				searchby: 'name',
-				per_page: 10,
-			};
-			payload = stringifyQuery( query );
-		}
-		return apiFetch( { path: `/wc/v4/customers${ payload }` } );
+		const query = name ? {
+			search: name,
+			searchby: 'name',
+			per_page: 10,
+		} : {};
+		return apiFetch( { path: addQueryArgs( '/wc/v4/customers', query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {

@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,15 +20,11 @@ export default {
 	name: 'orders',
 	className: 'woocommerce-search__order-result',
 	options( search ) {
-		let payload = '';
-		if ( search ) {
-			const query = {
-				number: search,
-				per_page: 10,
-			};
-			payload = stringifyQuery( query );
-			return apiFetch( { path: `/wc/v4/orders${ payload }` } );
-		}
+		const query = search ? {
+			number: search,
+			per_page: 10,
+		} : {};
+		return apiFetch( { path: addQueryArgs( '/wc/v4/orders', query ) } );
 	},
 	isDebounced: true,
 	getOptionKeywords( order ) {

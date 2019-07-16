@@ -2,12 +2,8 @@
 /**
  * External dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -54,9 +50,9 @@ function read( resourceNames, fetch = apiFetch ) {
 		};
 
 		if ( statEndpoints.indexOf( endpoint ) >= 0 ) {
-			fetchArgs.path = NAMESPACE + '/reports/' + endpoint + '/stats' + stringifyQuery( query );
+			fetchArgs.path = addQueryArgs( `${ NAMESPACE }/reports/${ endpoint }/stats`, query );
 		} else {
-			fetchArgs.path = endpoint + stringifyQuery( query );
+			fetchArgs.path = addQueryArgs( endpoint, query );
 		}
 
 		try {

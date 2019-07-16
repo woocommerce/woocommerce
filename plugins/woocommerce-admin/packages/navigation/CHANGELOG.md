@@ -2,6 +2,7 @@
 
 - `getHistory` updated to reflect path parameters in url query.
 - `getNewPath` also updated to reflect path parameters in url query.
+- `stringifyQuery` method is no longer available, instead use `addQueryArgs` from `@wordpress/url` package.
 
 # 2.1.1
 
