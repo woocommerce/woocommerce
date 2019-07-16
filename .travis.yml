@@ -19,15 +19,11 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
-# Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP
+# Additional tests against stable PHP (min version is 5.6)
 # and code coverage report.
 matrix:
   fast_finish: true
   include:
-  - php: 5.3
-    dist: precise
-  - php: 5.2
-    dist: precise
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
@@ -58,19 +54,12 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - composer install --no-dev
   - |
-    # Install WP Test suite, install PHPUnit globally if needed:
+    # Install WP Test suite, install PHPUnit globally:
     if [[ ! -z "$WP_VERSION" ]]; then
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-      # PHP 5.2 does not have composer, do not try to run it.
-      if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
-        composer global require "phpunit/phpunit=4.8.*|6.5.*"
-      fi
-    fi
-  - |
-    # Install wpcs globally if needed:
-    if [[ ${RUN_PHPCS} == 1 ]] && [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
-      composer require woocommerce/woocommerce-sniffs
+      composer global require "phpunit/phpunit=4.8.*|6.5.*"
     fi
 
 script:

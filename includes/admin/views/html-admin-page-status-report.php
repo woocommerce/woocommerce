@@ -9,26 +9,16 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-// This screen requires classes from the REST API.
-if ( ! did_action( 'rest_api_init' ) ) {
-	WC()->api->rest_api_includes();
-}
-
-if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
-	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
-}
-
-$system_status      = new WC_REST_System_Status_Controller();
-$environment        = $system_status->get_environment_info();
-$database           = $system_status->get_database_info();
-$post_type_counts   = $system_status->get_post_type_counts();
-$active_plugins     = $system_status->get_active_plugins();
-$inactive_plugins   = $system_status->get_inactive_plugins();
-$dropins_mu_plugins = $system_status->get_dropins_mu_plugins();
-$theme              = $system_status->get_theme_info();
-$security           = $system_status->get_security_info();
-$settings           = $system_status->get_settings();
-$wp_pages           = $system_status->get_pages();
+$report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
+$environment        = $report['environment'];
+$database           = $report['database'];
+$active_plugins     = $report['active_plugins'];
+$inactive_plugins   = $report['inactive_plugins'];
+$dropins_mu_plugins = $report['dropins_mu_plugins'];
+$theme              = $report['theme'];
+$security           = $report['security'];
+$settings           = $report['settings'];
+$wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
@@ -75,6 +65,21 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['version'] ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="REST API Version"><?php esc_html_e( 'WooCommerce REST API package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce REST API package running on your site.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php
+				$version = wc()->api->get_rest_api_package_version();
+
+				if ( ! is_null( $version ) ) {
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
+				} else {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
+				}
+				?>
+			</td>
 		</tr>
 		<tr>
 			<td data-export-label="Log Directory Writable"><?php esc_html_e( 'Log directory writable', 'woocommerce' ); ?>:</td>
@@ -130,7 +135,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 				<?php
 				if ( $environment['wp_memory_limit'] < 67108864 ) {
 					/* Translators: %1$s: Memory limit, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://codex.wordpress.org/Editing_wp-config.php#Increasing_memory_allocated_to_PHP" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://wordpress.org/support/article/editing-wp-config-php/#increasing-memory-allocated-to-php" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( size_format( $environment['wp_memory_limit'] ) ) . '</mark>';
 				}
@@ -448,73 +453,68 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			</tr>
 		<?php } ?>
 
-		<tr>
-			<td><?php esc_html_e( 'Total Database Size', 'woocommerce' ); ?></td>
-			<td class="help">&nbsp;</td>
-			<td><?php printf( '%.2fMB', esc_html( $database['database_size']['data'] + $database['database_size']['index'] ) ); ?></td>
-		</tr>
-
-		<tr>
-			<td><?php esc_html_e( 'Database Data Size', 'woocommerce' ); ?></td>
-			<td class="help">&nbsp;</td>
-			<td><?php printf( '%.2fMB', esc_html( $database['database_size']['data'] ) ); ?></td>
-		</tr>
-
-		<tr>
-			<td><?php esc_html_e( 'Database Index Size', 'woocommerce' ); ?></td>
-			<td class="help">&nbsp;</td>
-			<td><?php printf( '%.2fMB', esc_html( $database['database_size']['index'] ) ); ?></td>
-		</tr>
-
-		<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
+		<?php if ( ! empty( $database['database_size'] ) && ! empty( $database['database_tables'] ) ) : ?>
 			<tr>
-				<td><?php echo esc_html( $table ); ?></td>
+				<td><?php esc_html_e( 'Total Database Size', 'woocommerce' ); ?></td>
+				<td class="help">&nbsp;</td>
+				<td><?php printf( '%.2fMB', esc_html( $database['database_size']['data'] + $database['database_size']['index'] ) ); ?></td>
+			</tr>
+
+			<tr>
+				<td><?php esc_html_e( 'Database Data Size', 'woocommerce' ); ?></td>
+				<td class="help">&nbsp;</td>
+				<td><?php printf( '%.2fMB', esc_html( $database['database_size']['data'] ) ); ?></td>
+			</tr>
+
+			<tr>
+				<td><?php esc_html_e( 'Database Index Size', 'woocommerce' ); ?></td>
+				<td class="help">&nbsp;</td>
+				<td><?php printf( '%.2fMB', esc_html( $database['database_size']['index'] ) ); ?></td>
+			</tr>
+
+			<?php foreach ( $database['database_tables']['woocommerce'] as $table => $table_data ) { ?>
+				<tr>
+					<td><?php echo esc_html( $table ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td>
+						<?php
+						if ( ! $table_data ) {
+							echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Table does not exist', 'woocommerce' ) . '</mark>';
+						} else {
+							/* Translators: %1$f: Table size, %2$f: Index size, %3$s Engine. */
+							printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB + Engine %3$s', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ), esc_html( $table_data['engine'] ) );
+						}
+						?>
+					</td>
+				</tr>
+			<?php } ?>
+
+			<?php foreach ( $database['database_tables']['other'] as $table => $table_data ) { ?>
+				<tr>
+					<td><?php echo esc_html( $table ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td>
+						<?php
+							/* Translators: %1$f: Table size, %2$f: Index size, %3$s Engine. */
+							printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB + Engine %3$s', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ), esc_html( $table_data['engine'] ) );
+						?>
+					</td>
+				</tr>
+			<?php } ?>
+		<?php else : ?>
+			<tr>
+				<td><?php esc_html_e( 'Database information:', 'woocommerce' ); ?></td>
 				<td class="help">&nbsp;</td>
 				<td>
 					<?php
-					if ( ! $table_data ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Table does not exist', 'woocommerce' ) . '</mark>';
-					} else {
-						/* Translators: %1$f: Table size, %2$f: Index size. */
-						printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ) );
-					}
+					esc_html_e(
+						'Unable to retrieve database information. Usually, this is not a problem, and it only means that your install is using a class that replaces the WordPress database class (e.g., HyperDB) and WooCommerce is unable to get database information.',
+						'woocommerce'
+					);
 					?>
 				</td>
 			</tr>
-		<?php } ?>
-
-		<?php foreach ( $database['database_tables']['other'] as $table => $table_data ) { ?>
-			<tr>
-				<td><?php echo esc_html( $table ); ?></td>
-				<td class="help">&nbsp;</td>
-				<td>
-					<?php
-					/* Translators: %1$f: Table size, %2$f: Index size. */
-					printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ) );
-					?>
-				</td>
-			</tr>
-		<?php } ?>
-	</tbody>
-</table>
-<table class="wc_status_table widefat" cellspacing="0">
-	<thead>
-	<tr>
-		<th colspan="3" data-export-label="Post Type Counts"><h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
-	</tr>
-	</thead>
-	<tbody>
-		<?php
-		foreach ( $post_type_counts as $ptype ) {
-			?>
-			<tr>
-				<td><?php echo esc_html( $ptype->type ); ?></td>
-				<td class="help">&nbsp;</td>
-				<td><?php echo absint( $ptype->count ); ?></td>
-			</tr>
-			<?php
-		}
-		?>
+		<?php endif; ?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -785,7 +785,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<tr>
 			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 	</tbody>
 </table>
@@ -821,7 +821,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				$found_error = true;
 			} elseif ( ! $_page['page_visible'] ) {
 				/* Translators: %s: docs link. */
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) ) . '</mark>';
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
 			} else {
 				// Shortcode check.
@@ -881,7 +881,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
 				} else {
 					/* Translators: %s docs link. */
-					echo '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' ) );
+					echo '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ) );
 				}
 				?>
 				</td>

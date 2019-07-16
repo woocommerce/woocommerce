@@ -94,24 +94,27 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	public function test_read_manual_coupon() {
 		$code   = 'manual_coupon_' . time();
 		$coupon = new WC_Coupon( $code );
-		$coupon->read_manual_coupon( $code, array(
-			'id'                         => true,
-			'type'                       => 'fixed_cart',
-			'amount'                     => 0,
-			'individual_use'             => true,
-			'product_ids'                => array(),
-			'exclude_product_ids'        => array(),
-			'usage_limit'                => '',
-			'usage_count'                => '',
-			'expiry_date'                => '',
-			'free_shipping'              => false,
-			'product_categories'         => array(),
-			'exclude_product_categories' => array(),
-			'exclude_sale_items'         => false,
-			'minimum_amount'             => '',
-			'maximum_amount'             => 100,
-			'customer_email'             => '',
-		) );
+		$coupon->read_manual_coupon(
+			$code,
+			array(
+				'id'                         => true,
+				'type'                       => 'fixed_cart',
+				'amount'                     => 0,
+				'individual_use'             => true,
+				'product_ids'                => array(),
+				'exclude_product_ids'        => array(),
+				'usage_limit'                => '',
+				'usage_count'                => '',
+				'expiry_date'                => '',
+				'free_shipping'              => false,
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'exclude_sale_items'         => false,
+				'minimum_amount'             => '',
+				'maximum_amount'             => 100,
+				'customer_email'             => '',
+			)
+		);
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertTrue( $coupon->get_individual_use() );
 		$this->assertEquals( 100, $coupon->get_maximum_amount() );
@@ -132,24 +135,27 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
 		$code                          = 'bc_manual_coupon_' . time();
 		$coupon                        = new WC_Coupon( $code );
-		$coupon->read_manual_coupon( $code, array(
-			'id'                         => true,
-			'type'                       => 'fixed_cart',
-			'amount'                     => 0,
-			'individual_use'             => 'yes',
-			'product_ids'                => '',
-			'exclude_product_ids'        => '5,6',
-			'usage_limit'                => '',
-			'usage_count'                => '',
-			'expiry_date'                => '',
-			'free_shipping'              => 'no',
-			'product_categories'         => array(),
-			'exclude_product_categories' => array(),
-			'exclude_sale_items'         => 'no',
-			'minimum_amount'             => '',
-			'maximum_amount'             => 100,
-			'customer_email'             => '',
-		) );
+		$coupon->read_manual_coupon(
+			$code,
+			array(
+				'id'                         => true,
+				'type'                       => 'fixed_cart',
+				'amount'                     => 0,
+				'individual_use'             => 'yes',
+				'product_ids'                => '',
+				'exclude_product_ids'        => '5,6',
+				'usage_limit'                => '',
+				'usage_count'                => '',
+				'expiry_date'                => '',
+				'free_shipping'              => 'no',
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'exclude_sale_items'         => 'no',
+				'minimum_amount'             => '',
+				'maximum_amount'             => 100,
+				'customer_email'             => '',
+			)
+		);
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertTrue( $coupon->get_individual_use() );
 		$this->assertFalse( $coupon->get_free_shipping() );

@@ -49,6 +49,8 @@ class WC_CLI_Update_Command {
 		}
 
 		if ( empty( $callbacks_to_run ) ) {
+			// Ensure DB version is set to the current WC version to match WP-Admin update routine.
+			WC_Install::update_db_version();
 			/* translators: %s Database version number */
 			WP_CLI::success( sprintf( __( 'No updates required. Database version is %s', 'woocommerce' ), get_option( 'woocommerce_db_version' ) ) );
 			return;

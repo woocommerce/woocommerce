@@ -2,8 +2,8 @@
 /**
  * Load assets
  *
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @package WooCommerce/Admin
+ * @version 3.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -112,7 +112,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
 			wp_register_script( 'wc-clipboard', WC()->plugin_url() . '/assets/js/admin/wc-clipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
-			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.4' );
+			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
 			wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
 			wp_register_script( 'js-cookie', WC()->plugin_url() . '/assets/js/js-cookie/js.cookie' . $suffix . '.js', array(), '2.1.4', true );
 
@@ -275,6 +275,17 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 			if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
 				wp_enqueue_script( 'wc-admin-coupon-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-coupon' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
+				wp_localize_script(
+					'wc-admin-coupon-meta-boxes',
+					'woocommerce_admin_meta_boxes_coupon',
+					array(
+						'generate_button_text' => esc_html__( 'Generate coupon code', 'woocommerce' ),
+						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ23456789' ),
+						'char_length'          => apply_filters( 'woocommerce_coupon_code_generator_character_length', 8 ),
+						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
+						'suffix'               => apply_filters( 'woocommerce_coupon_code_generator_suffix', '' ),
+					)
+				);
 			}
 			if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
 				$post_id            = isset( $post->ID ) ? $post->ID : '';
@@ -443,6 +454,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'dismissed_suggestions'    => WC_Marketplace_Suggestions::get_dismissed_suggestions(),
 						'suggestions_data'         => WC_Marketplace_Suggestions::get_suggestions_api_data(),
 						'manage_suggestions_url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ),
+						'in_app_purchase_params'   => WC_Admin_Addons::get_in_app_purchase_url_params(),
 						'i18n_marketplace_suggestions_default_cta'
 							=> esc_html__( 'Learn More', 'woocommerce' ),
 						'i18n_marketplace_suggestions_dismiss_tooltip'

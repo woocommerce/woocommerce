@@ -19,26 +19,32 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	public function test_wc_modify_editable_roles() {
 		$password = wp_generate_password();
 
-		$admin_id = wp_insert_user( array(
-			'user_login' => 'test_admin',
-			'user_pass'  => $password,
-			'user_email' => 'admin@example.com',
-			'role'       => 'administrator',
-		) );
+		$admin_id = wp_insert_user(
+			array(
+				'user_login' => 'test_admin',
+				'user_pass'  => $password,
+				'user_email' => 'admin@example.com',
+				'role'       => 'administrator',
+			)
+		);
 
-		$editor_id = wp_insert_user( array(
-			'user_login' => 'test_editor',
-			'user_pass'  => $password,
-			'user_email' => 'editor@example.com',
-			'role'       => 'editor',
-		) );
+		$editor_id = wp_insert_user(
+			array(
+				'user_login' => 'test_editor',
+				'user_pass'  => $password,
+				'user_email' => 'editor@example.com',
+				'role'       => 'editor',
+			)
+		);
 
-		$manager_id = wp_insert_user( array(
-			'user_login' => 'test_manager',
-			'user_pass'  => $password,
-			'user_email' => 'manager@example.com',
-			'role'       => 'shop_manager',
-		) );
+		$manager_id = wp_insert_user(
+			array(
+				'user_login' => 'test_manager',
+				'user_pass'  => $password,
+				'user_email' => 'manager@example.com',
+				'role'       => 'shop_manager',
+			)
+		);
 
 		// Admins should be able to edit anyone.
 		wp_set_current_user( $admin_id );
@@ -70,33 +76,41 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	public function test_wc_modify_map_meta_cap() {
 		$password = wp_generate_password();
 
-		$admin_id = wp_insert_user( array(
-			'user_login' => 'test_admin',
-			'user_pass'  => $password,
-			'user_email' => 'admin@example.com',
-			'role'       => 'administrator',
-		) );
+		$admin_id = wp_insert_user(
+			array(
+				'user_login' => 'test_admin',
+				'user_pass'  => $password,
+				'user_email' => 'admin@example.com',
+				'role'       => 'administrator',
+			)
+		);
 
-		$editor_id = wp_insert_user( array(
-			'user_login' => 'test_editor',
-			'user_pass'  => $password,
-			'user_email' => 'editor@example.com',
-			'role'       => 'editor',
-		) );
+		$editor_id = wp_insert_user(
+			array(
+				'user_login' => 'test_editor',
+				'user_pass'  => $password,
+				'user_email' => 'editor@example.com',
+				'role'       => 'editor',
+			)
+		);
 
-		$manager_id = wp_insert_user( array(
-			'user_login' => 'test_manager',
-			'user_pass'  => $password,
-			'user_email' => 'manager@example.com',
-			'role'       => 'shop_manager',
-		) );
+		$manager_id = wp_insert_user(
+			array(
+				'user_login' => 'test_manager',
+				'user_pass'  => $password,
+				'user_email' => 'manager@example.com',
+				'role'       => 'shop_manager',
+			)
+		);
 
-		$customer_id = wp_insert_user( array(
-			'user_login' => 'test_customer',
-			'user_pass'  => $password,
-			'user_email' => 'customer@example.com',
-			'role'       => 'customer',
-		) );
+		$customer_id = wp_insert_user(
+			array(
+				'user_login' => 'test_customer',
+				'user_pass'  => $password,
+				'user_email' => 'customer@example.com',
+				'role'       => 'customer',
+			)
+		);
 
 		// Admins should be able to edit or promote anyone.
 		wp_set_current_user( $admin_id );
@@ -123,21 +137,25 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	public function test_wc_shop_manager_has_capability() {
 		$password = wp_generate_password();
 
-		$manager_id = wp_insert_user( array(
-			'user_login' => 'test_manager',
-			'user_pass'  => $password,
-			'user_email' => 'manager@example.com',
-			'role'       => 'shop_manager',
-		) );
-		$manager = new WP_User( $manager_id );
+		$manager_id = wp_insert_user(
+			array(
+				'user_login' => 'test_manager',
+				'user_pass'  => $password,
+				'user_email' => 'manager@example.com',
+				'role'       => 'shop_manager',
+			)
+		);
+		$manager    = new WP_User( $manager_id );
 
-		$editor_id = wp_insert_user( array(
-			'user_login' => 'test_editor',
-			'user_pass'  => $password,
-			'user_email' => 'editor@example.com',
-			'role'       => 'editor',
-		) );
-		$editor = new WP_User( $editor_id );
+		$editor_id = wp_insert_user(
+			array(
+				'user_login' => 'test_editor',
+				'user_pass'  => $password,
+				'user_email' => 'editor@example.com',
+				'role'       => 'editor',
+			)
+		);
+		$editor    = new WP_User( $editor_id );
 
 		// Test capabilities translation is working correctly and only gives shop managers capabilities.
 		$this->assertTrue( $manager->has_cap( 'edit_users' ) );

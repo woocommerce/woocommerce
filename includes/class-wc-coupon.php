@@ -199,7 +199,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return float
 	 */
 	public function get_amount( $context = 'view' ) {
-		return (float) $this->get_prop( 'amount', $context );
+		return wc_format_decimal( $this->get_prop( 'amount', $context ) );
 	}
 
 	/**

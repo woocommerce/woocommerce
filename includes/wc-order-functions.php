@@ -772,11 +772,13 @@ function wc_order_fully_refunded( $order_id ) {
 	wc_create_refund(
 		array(
 			'amount'     => $max_refund,
-			'reason'     => __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ),
+			'reason'     => __( 'Order fully refunded.', 'woocommerce' ),
 			'order_id'   => $order_id,
 			'line_items' => array(),
 		)
 	);
+
+	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ) );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
@@ -854,8 +856,8 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	if ( count( $order->get_used_coupons() ) > 0 ) {
-		foreach ( $order->get_used_coupons() as $code ) {
+	if ( count( $order->get_coupon_codes() ) > 0 ) {
+		foreach ( $order->get_coupon_codes() as $code ) {
 			if ( ! $code ) {
 				continue;
 			}

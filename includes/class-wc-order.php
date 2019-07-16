@@ -128,7 +128,11 @@ class WC_Order extends WC_Abstract_Order {
 			 */
 			$logger = wc_get_logger();
 			$logger->error(
-				sprintf( 'Error completing payment for order #%d', $this->get_id() ), array(
+				sprintf(
+					'Error completing payment for order #%d',
+					$this->get_id()
+				),
+				array(
 					'order' => $this,
 					'error' => $e,
 				)
@@ -175,7 +179,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		if ( $total_refunded && $display_refunded ) {
-			$formatted_total = '<del>' . strip_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
+			$formatted_total = '<del>' . wp_strip_all_tags( $formatted_total ) . '</del> <ins>' . wc_price( $order_total - $total_refunded, array( 'currency' => $this->get_currency() ) ) . $tax_string . '</ins>';
 		} else {
 			$formatted_total .= $tax_string;
 		}
@@ -212,34 +216,29 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		try {
-			$this->maybe_set_user_billing_email();
-
-			if ( $this->data_store ) {
-				// Trigger action before saving to the DB. Allows you to adjust object props before save.
-				do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
-
-				if ( $this->get_id() ) {
-					$this->data_store->update( $this );
-				} else {
-					$this->data_store->create( $this );
-				}
-			}
-
-			$this->save_items();
-			$this->status_transition();
-		} catch ( Exception $e ) {
-			$logger = wc_get_logger();
-			$logger->error(
-				sprintf( 'Error saving order #%d', $this->get_id() ), array(
-					'order' => $this,
-					'error' => $e,
-				)
-			);
-			$this->add_order_note( __( 'Error saving order.', 'woocommerce' ) . ' ' . $e->getMessage() );
-		}
+		$this->maybe_set_user_billing_email();
+		parent::save();
+		$this->status_transition();
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Log an error about this order is exception is encountered.
+	 *
+	 * @param Exception $e Exception object.
+	 * @param string    $message Message regarding exception thrown.
+	 * @since 3.7.0
+	 */
+	protected function handle_exception( $e, $message = 'Error' ) {
+		wc_get_logger()->error(
+			$message,
+			array(
+				'order' => $this,
+				'error' => $e,
+			)
+		);
+		$this->add_order_note( $message . ' ' . $e->getMessage() );
 	}
 
 	/**
@@ -335,7 +334,11 @@ class WC_Order extends WC_Abstract_Order {
 		} catch ( Exception $e ) {
 			$logger = wc_get_logger();
 			$logger->error(
-				sprintf( 'Error updating status for order #%d', $this->get_id() ), array(
+				sprintf(
+					'Error updating status for order #%d',
+					$this->get_id()
+				),
+				array(
 					'order' => $this,
 					'error' => $e,
 				)
@@ -375,7 +378,11 @@ class WC_Order extends WC_Abstract_Order {
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
 				$logger->error(
-					sprintf( 'Status transition of order #%d errored!', $this->get_id() ), array(
+					sprintf(
+						'Status transition of order #%d errored!',
+						$this->get_id()
+					),
+					array(
 						'order' => $this,
 						'error' => $e,
 					)
@@ -883,9 +890,12 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_formatted_shipping_address( $empty_content = '' ) {
 		$address = '';
+		if ( $this->has_shipping_address() ) {
+			$address = $this->get_address( 'shipping' );
+		}
+		$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $address, $this );
 
 		if ( $this->has_shipping_address() ) {
-			$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this );
 			$address = WC()->countries->get_formatted_address( $address );
 		}
 
@@ -1513,7 +1523,8 @@ class WC_Order extends WC_Abstract_Order {
 				array(
 					'pay_for_order' => 'true',
 					'key'           => $this->get_order_key(),
-				), $pay_url
+				),
+				$pay_url
 			);
 		}
 
@@ -1545,15 +1556,18 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_cancel_order_url( $redirect = '' ) {
 		return apply_filters(
-			'woocommerce_get_cancel_order_url', wp_nonce_url(
+			'woocommerce_get_cancel_order_url',
+			wp_nonce_url(
 				add_query_arg(
 					array(
 						'cancel_order' => 'true',
 						'order'        => $this->get_order_key(),
 						'order_id'     => $this->get_id(),
 						'redirect'     => $redirect,
-					), $this->get_cancel_endpoint()
-				), 'woocommerce-cancel_order'
+					),
+					$this->get_cancel_endpoint()
+				),
+				'woocommerce-cancel_order'
 			)
 		);
 	}
@@ -1566,14 +1580,16 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_cancel_order_url_raw( $redirect = '' ) {
 		return apply_filters(
-			'woocommerce_get_cancel_order_url_raw', add_query_arg(
+			'woocommerce_get_cancel_order_url_raw',
+			add_query_arg(
 				array(
 					'cancel_order' => 'true',
 					'order'        => $this->get_order_key(),
 					'order_id'     => $this->get_id(),
 					'redirect'     => $redirect,
 					'_wpnonce'     => wp_create_nonce( 'woocommerce-cancel_order' ),
-				), $this->get_cancel_endpoint()
+				),
+				$this->get_cancel_endpoint()
 			)
 		);
 	}
@@ -1669,7 +1685,8 @@ class WC_Order extends WC_Abstract_Order {
 			add_comment_meta( $comment_id, 'is_customer_note', 1 );
 
 			do_action(
-				'woocommerce_new_customer_note', array(
+				'woocommerce_new_customer_note',
+				array(
 					'order_id'      => $this->get_id(),
 					'customer_note' => $commentdata['comment_content'],
 				)

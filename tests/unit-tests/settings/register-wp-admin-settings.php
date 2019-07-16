@@ -67,7 +67,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 				'label' => $this->page->get_label(),
 			),
 		);
-		$actual = $settings->register_page_group( $initial );
+		$actual   = $settings->register_page_group( $initial );
 
 		$this->assertEquals( $expected, $actual );
 	}
@@ -109,11 +109,11 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 			// Boolean 'desc_tip' defaulting to 'desc' value
 			array(
 				array(
-					'id'        => 'setting-id',
-					'type'      => 'select',
-					'title'     => 'Setting Name',
-					'desc'      => 'Setting Description',
-					'desc_tip'  => true,
+					'id'         => 'setting-id',
+					'type'       => 'select',
+					'title'      => 'Setting Name',
+					'desc'       => 'Setting Description',
+					'desc_tip'   => true,
 					'option_key' => '',
 				),
 				array(
@@ -211,18 +211,18 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 
 		$settings = array(
 			array(
-				'id'          => 'setting-1',
-				'type'        => 'text',
-				'option_key'  => '',
+				'id'         => 'setting-1',
+				'type'       => 'text',
+				'option_key' => '',
 			),
 			array(
-				'type'        => 'no-id',
-				'option_key'  => '',
+				'type'       => 'no-id',
+				'option_key' => '',
 			),
 			array(
-				'id'          => 'setting-2',
-				'type'        => 'textarea',
-				'option_key'  => '',
+				'id'         => 'setting-2',
+				'type'       => 'textarea',
+				'option_key' => '',
 			),
 		);
 
@@ -249,7 +249,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 				'option_key'  => 'setting-2',
 			),
 		);
-		$actual = $settings->register_page_settings( array() );
+		$actual   = $settings->register_page_settings( array() );
 
 		$this->assertEquals( $expected, $actual );
 	}

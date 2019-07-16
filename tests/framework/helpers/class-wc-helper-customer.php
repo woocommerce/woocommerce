@@ -14,25 +14,25 @@ class WC_Helper_Customer {
 	 */
 	public static function create_mock_customer() {
 		$customer_data = array(
-			'id'                     => 0,
-			'date_modified'          => null,
-			'country' 				 => 'US',
-			'state' 				 => 'PA',
-			'postcode' 				 => '19123',
-			'city'					 => 'Philadelphia',
-			'address' 				 => '123 South Street',
-			'address_2' 			 => 'Apt 1',
-			'shipping_country' 		 => 'US',
-			'shipping_state' 		 => 'PA',
-			'shipping_postcode' 	 => '19123',
-			'shipping_city'			 => 'Philadelphia',
-			'shipping_address'		 => '123 South Street',
-			'shipping_address_2'	 => 'Apt 1',
-			'is_vat_exempt' 		 => false,
-			'calculated_shipping'	 => false,
+			'id'                  => 0,
+			'date_modified'       => null,
+			'country'             => 'US',
+			'state'               => 'PA',
+			'postcode'            => '19123',
+			'city'                => 'Philadelphia',
+			'address'             => '123 South Street',
+			'address_2'           => 'Apt 1',
+			'shipping_country'    => 'US',
+			'shipping_state'      => 'PA',
+			'shipping_postcode'   => '19123',
+			'shipping_city'       => 'Philadelphia',
+			'shipping_address'    => '123 South Street',
+			'shipping_address_2'  => 'Apt 1',
+			'is_vat_exempt'       => false,
+			'calculated_shipping' => false,
 		);
 
-		WC_Helper_Customer::set_customer_details( $customer_data );
+		self::set_customer_details( $customer_data );
 
 		$customer = new WC_Customer( 0, true );
 
@@ -70,7 +70,7 @@ class WC_Helper_Customer {
 	 * @return array
 	 */
 	public static function get_expected_store_location() {
-		return array( "GB", "", "", "" );
+		return array( 'GB', '', '', '' );
 	}
 
 	/**

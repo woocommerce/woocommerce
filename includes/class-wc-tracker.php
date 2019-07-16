@@ -349,7 +349,13 @@ class WC_Tracker {
 	 */
 	private static function get_review_counts() {
 		global $wpdb;
-		$review_count = array();
+		$review_count = array( 'total' => 0 );
+		$status_map   = array(
+			'0'     => 'pending',
+			'1'     => 'approved',
+			'trash' => 'trash',
+			'spam'  => 'spam',
+		);
 		$counts       = $wpdb->get_results(
 			"
 			SELECT comment_approved, COUNT(*) AS num_reviews
@@ -359,15 +365,19 @@ class WC_Tracker {
 			",
 			ARRAY_A
 		);
-		if ( $counts ) {
-			foreach ( $counts as $count ) {
-				if ( 1 === $count['comment_approved'] ) {
-					$review_count['approved'] = $count['num_reviews'];
-				} else {
-					$review_count['pending'] = $count['num_reviews'];
-				}
-			}
+
+		if ( ! $counts ) {
+			return $review_count;
 		}
+
+		foreach ( $counts as $count ) {
+			$status = $count['comment_approved'];
+			if ( array_key_exists( $status, $status_map ) ) {
+				$review_count[ $status_map[ $status ] ] = $count['num_reviews'];
+			}
+			$review_count['total'] += $count['num_reviews'];
+		}
+
 		return $review_count;
 	}
 
@@ -509,7 +519,7 @@ class WC_Tracker {
 			FROM {$wpdb->prefix}posts AS orders
 			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
 			WHERE order_meta.meta_key =  '_order_total'
-				AND orders.post_status =  'wc-completed'
+				AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
 			GROUP BY order_meta.meta_key
 		"
 		);

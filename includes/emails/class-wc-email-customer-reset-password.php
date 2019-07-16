@@ -124,15 +124,17 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
-					'email_heading' => $this->get_heading(),
-					'user_id'       => $this->user_id,
-					'user_login'    => $this->user_login,
-					'reset_key'     => $this->reset_key,
-					'blogname'      => $this->get_blogname(),
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+				$this->template_html,
+				array(
+					'email_heading'      => $this->get_heading(),
+					'user_id'            => $this->user_id,
+					'user_login'         => $this->user_login,
+					'reset_key'          => $this->reset_key,
+					'blogname'           => $this->get_blogname(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -144,17 +146,29 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
-					'email_heading' => $this->get_heading(),
-					'user_id'       => $this->user_id,
-					'user_login'    => $this->user_login,
-					'reset_key'     => $this->reset_key,
-					'blogname'      => $this->get_blogname(),
-					'sent_to_admin' => false,
-					'plain_text'    => true,
-					'email'         => $this,
+				$this->template_plain,
+				array(
+					'email_heading'      => $this->get_heading(),
+					'user_id'            => $this->user_id,
+					'user_login'         => $this->user_login,
+					'reset_key'          => $this->reset_key,
+					'blogname'           => $this->get_blogname(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Thanks for reading.', 'woocommerce' );
 		}
 	}
 

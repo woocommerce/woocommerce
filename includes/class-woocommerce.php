@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.6.0';
+	public $version = '3.7.0';
 
 	/**
 	 * The single instance of the class.
@@ -152,6 +152,7 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
+		$this->define_tables();
 		$this->includes();
 		$this->init_hooks();
 	}
@@ -179,12 +180,12 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
@@ -228,6 +229,28 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '5.6.20' );
+		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '4.9' );
+	}
+
+	/**
+	 * Register custom tables within $wpdb object.
+	 */
+	private function define_tables() {
+		global $wpdb;
+
+		// List of tables without prefixes.
+		$tables = array(
+			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
+			'order_itemmeta'         => 'woocommerce_order_itemmeta',
+			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+		);
+
+		foreach ( $tables as $name => $table ) {
+			$wpdb->$name    = $wpdb->prefix . $table;
+			$wpdb->tables[] = $table;
+		}
 	}
 
 	/**
@@ -406,15 +429,15 @@ final class WooCommerce {
 		 */
 		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-api.php';
+		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
+		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
-		 * Blocks.
+		 * WCCOM Site.
 		 */
-		if ( file_exists( WC_ABSPATH . 'includes/blocks/class-wc-block-library.php' ) ) {
-			include_once WC_ABSPATH . 'includes/blocks/class-wc-block-library.php';
-		}
+		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
 		/**
 		 * Libraries
@@ -440,6 +463,7 @@ final class WooCommerce {
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
+		$this->api->init();
 	}
 
 	/**
@@ -527,17 +551,7 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			// Session class, handles session data for users - can be overwritten if custom handler is needed.
-			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-			$this->session = new $session_class();
-			$this->session->init();
-
-			$this->customer = new WC_Customer( get_current_user_id(), true );
-			// Cart needs the customer info.
-			$this->cart = new WC_Cart();
-
-			// Customer should be saved during shutdown.
-			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
+			wc_load_cart();
 		}
 
 		$this->load_webhooks();
@@ -556,7 +570,13 @@ final class WooCommerce {
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
-		$locale = is_admin() && function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale();
+		if ( function_exists( 'determine_locale' ) ) {
+			$locale = determine_locale();
+		} else {
+			// @todo Remove when start supporting WP 5.0 or later.
+			$locale = is_admin() ? get_user_locale() : get_locale();
+		}
+
 		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' );
 
 		unload_textdomain( 'woocommerce' );
@@ -707,19 +727,43 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Initialize the customer and cart objects and setup customer saving on shutdown.
+	 *
+	 * @since 3.6.4
+	 * @return void
+	 */
+	public function initialize_cart() {
+		// Cart needs customer info.
+		if ( is_null( $this->customer ) || ! $this->customer instanceof WC_Customer ) {
+			$this->customer = new WC_Customer( get_current_user_id(), true );
+			// Customer should be saved during shutdown.
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
+		}
+		if ( is_null( $this->cart ) || ! $this->cart instanceof WC_Cart ) {
+			$this->cart = new WC_Cart();
+		}
+	}
+
+	/**
+	 * Initialize the session class.
+	 *
+	 * @since 3.6.4
+	 * @return void
+	 */
+	public function initialize_session() {
+		// Session class, handles session data for users - can be overwritten if custom handler is needed.
+		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+		if ( is_null( $this->session ) || ! $this->session instanceof $session_class ) {
+			$this->session = new $session_class();
+			$this->session->init();
+		}
+	}
+
+	/**
 	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
-		global $wpdb;
-
-		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
-
-		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
-
-		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
-		$wpdb->tables[]               = 'wc_product_meta_lookup';
+		$this->define_tables();
 	}
 
 	/**
@@ -789,5 +833,44 @@ final class WooCommerce {
 	 */
 	public function mailer() {
 		return WC_Emails::instance();
+	}
+
+	/**
+	 * Check if plugin assets are built and minified
+	 *
+	 * @return bool
+	 */
+	public function build_dependencies_satisfied() {
+		// Check if we have compiled CSS.
+		if ( ! file_exists( WC()->plugin_path() . '/assets/css/admin.css' ) ) {
+			return false;
+		}
+
+		// Check if we have minified JS.
+		if ( ! file_exists( WC()->plugin_path() . '/assets/js/admin/woocommerce_admin.min.js' ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Output a admin notice when build dependencies not met.
+	 *
+	 * @return void
+	 */
+	public function build_dependencies_notice() {
+		if ( $this->build_dependencies_satisfied() ) {
+			return;
+		}
+
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>grunt assets</code> to build and minify assets.', 'woocommerce' );
+		$message_two = sprintf(
+			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
+			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/woocommerce/',
+			'https://github.com/woocommerce/woocommerce/releases'
+		);
+		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
 	}
 }

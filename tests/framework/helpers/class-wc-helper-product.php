@@ -90,8 +90,8 @@ class WC_Helper_Product {
 		$product          = new WC_Product_Grouped();
 		$product->set_props(
 			array(
-				'name'          => 'Dummy Grouped Product',
-				'sku'           => 'DUMMY GROUPED SKU',
+				'name' => 'Dummy Grouped Product',
+				'sku'  => 'DUMMY GROUPED SKU',
 			)
 		);
 		$product->set_children( array( $simple_product_1->get_id(), $simple_product_2->get_id() ) );
@@ -116,9 +116,20 @@ class WC_Helper_Product {
 			)
 		);
 
-		$attribute_data = self::create_attribute( 'size', array( 'small', 'large' ) ); // Create all attribute related things.
 		$attributes     = array();
+
 		$attribute      = new WC_Product_Attribute();
+		$attribute_data = self::create_attribute( 'size', array( 'small', 'large' ) );
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_position( 1 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$attributes[] = $attribute;
+
+		$attribute      = new WC_Product_Attribute();
+		$attribute_data = self::create_attribute( 'colour', array( 'red', 'blue' ) );
 		$attribute->set_id( $attribute_data['attribute_id'] );
 		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
 		$attribute->set_options( $attribute_data['term_ids'] );
@@ -235,7 +246,7 @@ class WC_Helper_Product {
 			$result = term_exists( $term, $attribute->slug );
 
 			if ( ! $result ) {
-				$result = wp_insert_term( $term, $attribute->slug );
+				$result               = wp_insert_term( $term, $attribute->slug );
 				$return['term_ids'][] = $result['term_id'];
 			} else {
 				$return['term_ids'][] = $result['term_id'];

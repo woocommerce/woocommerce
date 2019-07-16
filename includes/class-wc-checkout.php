@@ -267,6 +267,14 @@ class WC_Checkout {
 		foreach ( $this->fields as $field_type => $fields ) {
 			// Sort each of the checkout field sections based on priority.
 			uasort( $this->fields[ $field_type ], 'wc_checkout_fields_uasort_comparison' );
+
+			// Add accessibility labels to fields that have placeholders.
+			foreach ( $fields as $single_field_type => $field ) {
+				if ( empty( $field['label'] ) && ! empty( $field['placeholder'] ) ) {
+					$this->fields[ $field_type ][ $single_field_type ]['label']       = $field['placeholder'];
+					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = 'screen-reader-text';
+				}
+			}
 		}
 
 		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
@@ -549,6 +557,7 @@ class WC_Checkout {
 						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
 						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
 						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
+						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_id ),
 					)
 				);
 
@@ -1168,7 +1177,7 @@ class WC_Checkout {
 		if ( is_user_logged_in() ) {
 			// Load customer object, but keep it cached to avoid reloading it multiple times.
 			if ( is_null( $this->logged_in_customer ) ) {
-				$this->logged_in_customer = new WC_Customer( get_current_user_id() );
+				$this->logged_in_customer = new WC_Customer( get_current_user_id(), true );
 			}
 			$customer_object = $this->logged_in_customer;
 		}
