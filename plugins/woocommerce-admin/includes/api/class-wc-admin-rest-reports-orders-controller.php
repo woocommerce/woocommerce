@@ -55,6 +55,8 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 		$args['extended_info']    = $request['extended_info'];
 		$args['refunds']          = $request['refunds'];
 		$args['match']            = $request['match'];
+		$args['order_includes']   = $request['order_includes'];
+		$args['order_excludes']   = $request['order_excludes'];
 
 		return $args;
 	}
@@ -384,6 +386,24 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['order_includes']   = array(
+			'description'       => __( 'Limit result set to items that have the specified order ids.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['order_excludes']   = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order ids.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;
