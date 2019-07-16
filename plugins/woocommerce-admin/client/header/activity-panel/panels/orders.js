@@ -9,6 +9,7 @@ import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
+import { keyBy, map, merge } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -256,7 +257,15 @@ OrdersPanel.defaultProps = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { hasActionableOrders } = props;
-		const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
+		const {
+			getItems,
+			getItemsTotalCount,
+			getItemsError,
+			isGetItemsRequesting,
+			getReportItems,
+			getReportItemsError,
+			isReportItemsRequesting,
+		} = select( 'wc-api' );
 		const orderStatuses =
 			wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses ||
 			DEFAULT_ACTIONABLE_STATUSES;
@@ -265,29 +274,37 @@ export default compose(
 			return { orders: [], isError: true, isRequesting: false, orderStatuses };
 		}
 
-		if ( hasActionableOrders ) {
+		// Query the core Orders endpoint for the most up-to-date statuses.
+		const allOrdersQuery = {
+			page: 1,
+			per_page: QUERY_DEFAULTS.pageSize,
+			status: orderStatuses,
+		};
+		const actionableOrders = Array.from( getItems( 'orders', allOrdersQuery ).values() );
+
+		if ( hasActionableOrders && actionableOrders.length ) {
+			// Retrieve the Order stats data from our reporting table.
 			const ordersQuery = {
 				page: 1,
 				per_page: QUERY_DEFAULTS.pageSize,
-				status_is: orderStatuses,
 				extended_info: true,
+				order_includes: map( actionableOrders, 'id' ),
 			};
 
-			const orders = getReportItems( 'orders', ordersQuery ).data;
+			// Merge the core endpoint data with our reporting table.
+			const reportOrdersById = keyBy( getReportItems( 'orders', ordersQuery ).data, 'order_id' );
+			const actionableOrdersById = keyBy( actionableOrders, 'id' );
+			const orders = Object.values( merge( reportOrdersById, actionableOrdersById ) );
+
 			const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
 			const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
 
 			return { orders, isError, isRequesting, orderStatuses };
 		}
 
-		const allOrdersQuery = {
-			page: 1,
-			per_page: 0,
-		};
-
-		const totalNonActionableOrders = getReportItems( 'orders', allOrdersQuery ).totalResults;
-		const isError = Boolean( getReportItemsError( 'orders', allOrdersQuery ) );
-		const isRequesting = isReportItemsRequesting( 'orders', allOrdersQuery );
+		const totalNonActionableOrders = getItemsTotalCount( 'orders', allOrdersQuery );
+		const isError = Boolean( getItemsError( 'orders', allOrdersQuery ) );
+		const isRequesting = isGetItemsRequesting( 'orders', allOrdersQuery );
 
 		return {
 			hasNonActionableOrders: totalNonActionableOrders > 0,
