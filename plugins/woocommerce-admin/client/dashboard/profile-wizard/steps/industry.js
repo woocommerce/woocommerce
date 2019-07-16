@@ -87,7 +87,7 @@ class Industry extends Component {
 				<p className="woocommerce-profile-wizard__intro-paragraph">
 					{ __( 'Choose any that apply' ) }
 				</p>
-				<Card className="woocommerce-profile-wizard__industry-card">
+				<Card className="has-checkbox-group">
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( industries ).map( slug => {
 							return (

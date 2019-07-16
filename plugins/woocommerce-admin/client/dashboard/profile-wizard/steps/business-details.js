@@ -293,7 +293,7 @@ class BusinessDetails extends Component {
 				</H>
 				<p>{ __( 'Tell us about the business' ) }</p>
 
-				<Card className="woocommerce-profile-wizard__product-types-card">
+				<Card>
 					<SelectControl
 						label={ __( 'How many products will you add?', 'woocommerce-admin' ) }
 						onChange={ value => this.updateValue( 'product_count', value ) }

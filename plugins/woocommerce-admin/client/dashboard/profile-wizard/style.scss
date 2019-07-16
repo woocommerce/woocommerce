@@ -27,20 +27,14 @@
 
 		button {
 			display: flex;
-			margin: $gap auto 0;
+			margin: $gap-smaller auto 0;
 			min-width: 310px;
 			max-width: 100%;
 			justify-content: center;
 		}
-	}
 
-	.woocommerce-card__body {
-		> div:first-of-type > .components-base-control {
-			margin-top: 0;
-		}
-
-		> div:last-of-type > .components-base-control {
-			margin-bottom: 0;
+		&.has-checkbox-group .woocommerce-card__body {
+			padding: 0 0 $gap;
 		}
 	}
 
@@ -298,12 +292,6 @@
 		}
 	}
 
-	.woocommerce-profile-wizard__product-types-card {
-		.woocommerce-profile-wizard__benefit-content {
-			margin-left: 12px;
-		}
-	}
-
 	.woocommerce-profile-wizard__toggle {
 		label {
 			font-size: 14px;
@@ -369,14 +357,14 @@
 			margin-top: 0;
 			margin-bottom: 0;
 			position: relative;
-			padding-top: $gap;
-			padding-bottom: $gap;
+			padding: $gap-small $gap;
+			min-height: 56px;
 
 			&::after {
 				content: '';
 				position: absolute;
-				left: $gap-large * 2;
-				width: calc(100% - #{$gap * 2});
+				left: $gap-large * 2 + $gap;
+				width: calc(100% - #{$gap-large * 2 + $gap});
 				height: 1px;
 				background-color: $muriel-gray-50;
 				bottom: 0;
@@ -409,16 +397,11 @@
 				color: $muriel-gray-600;
 				font-size: 14px;
 				line-height: 20px;
-				margin-top: 2px;
-			}
-
-			&:first-of-type {
-				padding-top: 0;
+				margin-top: 3px;
+				margin-bottom: 0;
 			}
 
 			&:last-of-type {
-				padding-bottom: 0;
-
 				&::after {
 					display: none;
 				}
