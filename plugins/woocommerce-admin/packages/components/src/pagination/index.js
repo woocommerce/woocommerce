@@ -38,7 +38,7 @@ class Pagination extends Component {
 		if ( page - 1 < 1 ) {
 			return;
 		}
-		onPageChange( page - 1 );
+		onPageChange( page - 1, 'previous' );
 	}
 
 	nextPage( event ) {
@@ -47,7 +47,7 @@ class Pagination extends Component {
 		if ( page + 1 > this.pageCount ) {
 			return;
 		}
-		onPageChange( page + 1 );
+		onPageChange( page + 1, 'next' );
 	}
 
 	perPageChange( perPage ) {
@@ -71,7 +71,7 @@ class Pagination extends Component {
 		const newPage = parseInt( event.target.value, 10 );
 
 		if ( newPage !== page && isFinite( newPage ) && newPage > 0 && this.pageCount && this.pageCount >= newPage ) {
-			onPageChange( newPage );
+			onPageChange( newPage, 'goto' );
 		}
 	}
 

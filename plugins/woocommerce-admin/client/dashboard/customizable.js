@@ -86,6 +86,7 @@ class CustomizableDashboard extends Component {
 
 	onSectionTitleUpdate( updatedKey ) {
 		return updatedTitle => {
+			recordEvent( 'dash_section_rename', { key: updatedKey } );
 			this.updateSection( updatedKey, { title: updatedTitle } );
 		};
 	}
@@ -103,7 +104,9 @@ class CustomizableDashboard extends Component {
 			toggledSection.isVisible = ! toggledSection.isVisible;
 			sections.push( toggledSection );
 
-			if ( ! toggledSection.isVisible ) {
+			if ( toggledSection.isVisible ) {
+				recordEvent( 'dash_section_add', { key: toggledSection.key } );
+			} else {
 				recordEvent( 'dash_section_remove', { key: toggledSection.key } );
 			}
 
@@ -127,6 +130,12 @@ class CustomizableDashboard extends Component {
 			// Yes, lets insert.
 			sections.splice( newIndex, 0, movedSection );
 			this.updateSections( sections );
+
+			const eventProps = {
+				key: movedSection.key,
+				direction: 0 < change ? 'down' : 'up',
+			};
+			recordEvent( 'dash_section_order_change', eventProps );
 		} else {
 			// No, lets try the next one.
 			this.onMove( index, change + change );

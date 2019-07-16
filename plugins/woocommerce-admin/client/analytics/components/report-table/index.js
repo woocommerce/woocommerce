@@ -66,7 +66,8 @@ class ReportTable extends Component {
 		}
 	}
 
-	onPageChange() {
+	onPageChange( newPage, source ) {
+		const { endpoint } = this.props;
 		this.scrollPointRef.current.scrollIntoView();
 		const tableElement = this.scrollPointRef.current.nextSibling.querySelector(
 			'.woocommerce-table__table'
@@ -75,6 +76,14 @@ class ReportTable extends Component {
 
 		if ( focusableElements.length ) {
 			focusableElements[ 0 ].focus();
+		}
+
+		if ( source ) {
+			if ( 'goto' === source ) {
+				recordEvent( 'analytics_table_go_to_page', { report: endpoint, page: newPage } );
+			} else {
+				recordEvent( 'analytics_table_page_click', { report: endpoint, direction: source } );
+			}
 		}
 	}
 
