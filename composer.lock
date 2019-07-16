@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf0137b021dc5e4f6576dbfe07a54462",
+    "content-hash": "2ae85d17d88de2a1ff50e32bbd85b1db",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -168,12 +168,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "2087a7639277fe7c1c45a72532d4524c28739186"
+                "reference": "00b6d8fefd62e6fe8b14fdb277dc784ff108291e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/2087a7639277fe7c1c45a72532d4524c28739186",
-                "reference": "2087a7639277fe7c1c45a72532d4524c28739186",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/00b6d8fefd62e6fe8b14fdb277dc784ff108291e",
+                "reference": "00b6d8fefd62e6fe8b14fdb277dc784ff108291e",
                 "shasum": ""
             },
             "require": {
@@ -211,16 +211,16 @@
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "1b3ea5eef13afb15aef68dd5aff4b44052ff1fdf"
+                "reference": "7d9babf1c25890c32df3edb28b8351732640f5ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/1b3ea5eef13afb15aef68dd5aff4b44052ff1fdf",
-                "reference": "1b3ea5eef13afb15aef68dd5aff4b44052ff1fdf",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/7d9babf1c25890c32df3edb28b8351732640f5ce",
+                "reference": "7d9babf1c25890c32df3edb28b8351732640f5ce",
                 "shasum": ""
             },
             "require": {
@@ -247,7 +247,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2019-07-10T10:11:48+00:00"
+            "time": "2019-07-16T14:27:40+00:00"
         }
     ],
     "packages-dev": [
