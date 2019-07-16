@@ -81,7 +81,7 @@
     "stylelint-config-wordpress": "14.0.0",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.6",
-    "yargs": "13.2.4"
+    "yargs": "13.3.0"
   },
   "engines": {
     "node": "10.16.0",
