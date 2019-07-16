@@ -73,6 +73,10 @@ class WC_Orders_Tracking {
 			return;
 		}
 
+		if ( 'auto-draft' === get_post_status( $id ) ) {
+			return;
+		}
+
 		$order        = wc_get_order( $id );
 		$date_created = $order->get_date_created()->date( 'Y-m-d H:i:s' );
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
