@@ -1847,13 +1847,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				list( , $total_sales_left_val, $total_sales_compare, $total_sales_right_val ) = $total_sales_query_parts;
 
 			} else { // simple "=" comparison.
-				$total_sales_right_val = absint( $query_vars['total_sales'] );
+				$total_sales_right_val = $query_vars['total_sales'];
 			}
 
 			$wp_query_args['meta_query'][] = array(
 				'key'     => 'total_sales',
-				'value'   => $total_sales_is_range ? array( absint( $total_sales_left_val ), absint( $total_sales_right_val ) ) : absint( $total_sales_right_val ),
+				'value'   => $total_sales_is_range ? array( $total_sales_left_val, $total_sales_right_val ) : $total_sales_right_val,
 				'compare' => $total_sales_is_range ? 'BETWEEN' : $total_sales_compare,
+				'type'	  => 'numeric'
 			);
 
 		}
