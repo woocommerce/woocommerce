@@ -246,6 +246,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - On the system status database info section display a message informing users that WooCommerce was unable to get database information instead of an error, when a database sharding plugin is active. #24034
 * Fix - Usage and event tracking (if opted in) was not working correctly in the OBW. #24056
 * Fix - Fatal error on downloads report when some download files were missing. #24118
+* Fix - Prevents the taxes columns from being removed when the order is no longer editable in admin. #23884
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
 * Performance - Reduce number of queries needed to populate variations data by priming post caches. #23272
 * Performance - Persistant cart improvements, only update the persistent cart if the cart items actually change. #23112
