@@ -487,9 +487,9 @@ class WC_Admin_Addons {
 		// so WCCOM "back" link returns user to where they were.
 		$back_admin_path = add_query_arg( array() );
 		return array(
-			'in-app-purchase-site'        => site_url(),
-			'in-app-purchase-back'        => esc_url( $back_admin_path ),
-			'in-app-purchase-woo-version' => WC_VERSION,
+			'wccom-site'        => site_url(),
+			'wccom-back'        => esc_url( $back_admin_path ),
+			'wccom-woo-version' => WC_VERSION,
 		);
 	}
 
