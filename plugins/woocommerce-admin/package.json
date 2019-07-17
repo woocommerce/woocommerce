@@ -123,7 +123,7 @@
     "@wordpress/jest-preset-default": "4.1.0",
     "@wordpress/postcss-themes": "1.0.5",
     "ast-types": "0.13.2",
-    "autoprefixer": "9.6.0",
+    "autoprefixer": "9.6.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.2",
     "babel-loader": "8.0.6",
