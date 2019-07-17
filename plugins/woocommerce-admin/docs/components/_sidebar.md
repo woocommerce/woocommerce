@@ -32,6 +32,7 @@
     * [SectionHeader](components/packages/section-header.md)
     * [Section](components/packages/section.md)
     * [SegmentedSelection](components/packages/segmented-selection.md)
+    * [SimpleSelectControl](components/packages/simple-select-control.md)
     * [Spinner](components/packages/spinner.md)
     * [SplitButton](components/packages/split-button.md)
     * [Stepper](components/packages/stepper.md)

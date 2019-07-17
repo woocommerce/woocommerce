@@ -1,5 +1,5 @@
 ```jsx
-import { MySpinner } from '@woocommerce/components';
+import { Spinner } from '@woocommerce/components';
 
 const MySpinner = () => (
 	<div>

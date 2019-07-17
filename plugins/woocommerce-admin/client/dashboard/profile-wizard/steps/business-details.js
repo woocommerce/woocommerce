@@ -6,7 +6,7 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { FormToggle } from '@wordpress/components';
-import { Button, SelectControl } from 'newspack-components';
+import { Button } from 'newspack-components';
 import { withDispatch } from '@wordpress/data';
 import { keys, pickBy } from 'lodash';
 
@@ -18,7 +18,7 @@ import { numberFormat } from '@woocommerce/number';
 /**
  * Internal dependencies
  */
-import { H, Card } from '@woocommerce/components';
+import { H, Card, SimpleSelectControl } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
@@ -294,7 +294,7 @@ class BusinessDetails extends Component {
 				<p>{ __( 'Tell us about the business' ) }</p>
 
 				<Card>
-					<SelectControl
+					<SimpleSelectControl
 						label={ __( 'How many products will you add?', 'woocommerce-admin' ) }
 						onChange={ value => this.updateValue( 'product_count', value ) }
 						onFocus={ this.setDefaultValue.bind( this, 'product_count', productCountOptions ) }
@@ -305,7 +305,7 @@ class BusinessDetails extends Component {
 						required
 					/>
 
-					<SelectControl
+					<SimpleSelectControl
 						label={ __( 'Currently selling elsewhere?', 'woocommerce-admin' ) }
 						onChange={ value => this.updateValue( 'selling_venues', value ) }
 						onFocus={ this.setDefaultValue.bind( this, 'selling_venues', sellingVenueOptions ) }
@@ -317,7 +317,7 @@ class BusinessDetails extends Component {
 					/>
 
 					{ [ 'other', 'brick-mortar-other' ].includes( selling_venues ) && (
-						<SelectControl
+						<SimpleSelectControl
 							label={ __( 'Which platform is the store using?', 'woocommerce-admin' ) }
 							onChange={ value => this.updateValue( 'other_platform', value ) }
 							onFocus={ this.setDefaultValue.bind( this, 'other_platform', otherPlatformOptions ) }
