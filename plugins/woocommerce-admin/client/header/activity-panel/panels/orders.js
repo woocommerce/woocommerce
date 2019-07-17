@@ -292,13 +292,18 @@ export default compose(
 				order_includes: map( actionableOrders, 'id' ),
 			};
 
-			// Merge the core endpoint data with our reporting table.
-			const reportOrdersById = keyBy( getReportItems( 'orders', ordersQuery ).data, 'order_id' );
-			const actionableOrdersById = keyBy( actionableOrders, 'id' );
-			const orders = Object.values( merge( reportOrdersById, actionableOrdersById ) );
-
+			const reportOrders = getReportItems( 'orders', ordersQuery ).data;
 			const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
 			const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
+			let orders = [];
+
+			if ( reportOrders && reportOrders.length ) {
+				// Merge the core endpoint data with our reporting table.
+				const actionableOrdersById = keyBy( actionableOrders, 'id' );
+				orders = reportOrders.map( order =>
+					merge( {}, order, actionableOrdersById[ order.order_id ] || {} )
+				);
+			}
 
 			return { orders, isError, isRequesting, orderStatuses };
 		}
