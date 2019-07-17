@@ -32,6 +32,7 @@ const externals = {
 	'@wordpress/editor': { this: [ 'wp', 'editor' ] },
 	'@wordpress/element': { this: [ 'wp', 'element' ] },
 	'@wordpress/hooks': { this: [ 'wp', 'hooks' ] },
+	'@wordpress/url': { this: [ 'wp', 'url' ] },
 	'@wordpress/html-entities': { this: [ 'wp', 'htmlEntities' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
 	'@wordpress/keycodes': { this: [ 'wp', 'keycodes' ] },
