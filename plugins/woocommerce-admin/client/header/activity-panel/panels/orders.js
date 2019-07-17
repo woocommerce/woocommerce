@@ -274,16 +274,25 @@ export default compose(
 			return { orders: [], isError: true, isRequesting: false, orderStatuses };
 		}
 
-		// Query the core Orders endpoint for the most up-to-date statuses.
-		const allOrdersQuery = {
-			page: 1,
-			per_page: QUERY_DEFAULTS.pageSize,
-			status: orderStatuses,
-			_fields: [ 'id', 'date_created_gmt', 'status' ],
-		};
-		const actionableOrders = Array.from( getItems( 'orders', allOrdersQuery ).values() );
+		if ( hasActionableOrders ) {
+			// Query the core Orders endpoint for the most up-to-date statuses.
+			const actionableOrdersQuery = {
+				page: 1,
+				per_page: QUERY_DEFAULTS.pageSize,
+				status: orderStatuses,
+				_fields: [ 'id', 'date_created_gmt', 'status' ],
+			};
+			const actionableOrders = Array.from( getItems( 'orders', actionableOrdersQuery ).values() );
+			const isRequestingActionable = isGetItemsRequesting( 'orders', actionableOrdersQuery );
 
-		if ( hasActionableOrders && actionableOrders.length ) {
+			if ( isRequestingActionable ) {
+				return {
+					isError: Boolean( getItemsError( 'orders', actionableOrdersQuery ) ),
+					isRequesting: isRequestingActionable,
+					orderStatuses,
+				};
+			}
+
 			// Retrieve the Order stats data from our reporting table.
 			const ordersQuery = {
 				page: 1,
@@ -308,6 +317,15 @@ export default compose(
 			return { orders, isError, isRequesting, orderStatuses };
 		}
 
+		// Get a count of all orders for messaging purposes.
+		// @todo Add a property to wcSettings for this?
+		const allOrdersQuery = {
+			page: 1,
+			per_page: 1,
+			_fields: [ 'id' ],
+		};
+
+		getItems( 'orders', allOrdersQuery );
 		const totalNonActionableOrders = getItemsTotalCount( 'orders', allOrdersQuery );
 		const isError = Boolean( getItemsError( 'orders', allOrdersQuery ) );
 		const isRequesting = isGetItemsRequesting( 'orders', allOrdersQuery );
