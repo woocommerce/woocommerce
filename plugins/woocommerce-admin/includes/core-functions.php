@@ -34,13 +34,13 @@ function wc_admin_number_format( $number ) {
  *
  * @return string       Fully qualified URL pointing to the desired path.
  */
-function wc_admin_url( $path, $query = array() ) {
+function wc_admin_url( $path = null, $query = array() ) {
 	if ( ! empty( $query ) ) {
 		$query_string = http_build_query( $query );
-		$path         = $path . '&' . $query_string;
+		$path         = $path ? '&path=' . $path . '&' . $query_string : '';
 	}
 
-	return admin_url( 'admin.php?page=wc-admin&path=' . $path, dirname( __FILE__ ) );
+	return admin_url( 'admin.php?page=wc-admin' . $path, dirname( __FILE__ ) );
 }
 
 /**
