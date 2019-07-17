@@ -32,7 +32,7 @@ export function getUnreadNotes( select ) {
 }
 
 export function getUnreadOrders( select ) {
-	const { getItemsTotalCount, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
+	const { getItems, getItemsTotalCount, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 	const orderStatuses =
 		wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || DEFAULT_ACTIONABLE_STATUSES;
 
@@ -44,8 +44,10 @@ export function getUnreadOrders( select ) {
 		page: 1,
 		per_page: 1, // Core endpoint requires per_page > 0.
 		status: orderStatuses,
+		_fields: [ 'id' ],
 	};
 
+	getItems( 'orders', ordersQuery );
 	const totalOrders = getItemsTotalCount( 'orders', ordersQuery );
 	const isError = Boolean( getItemsError( 'orders', ordersQuery ) );
 	const isRequesting = isGetItemsRequesting( 'orders', ordersQuery );

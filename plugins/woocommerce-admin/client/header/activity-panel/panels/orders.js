@@ -279,6 +279,7 @@ export default compose(
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
 			status: orderStatuses,
+			_fields: [ 'id', 'date_created_gmt', 'status' ],
 		};
 		const actionableOrders = Array.from( getItems( 'orders', allOrdersQuery ).values() );
 
