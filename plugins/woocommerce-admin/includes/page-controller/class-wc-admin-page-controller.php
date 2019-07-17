@@ -336,6 +336,12 @@ class WC_Admin_Page_Controller {
 			$is_connected_page = isset( $current_page['js_page'] ) ? ! $current_page['js_page'] : true;
 		}
 
+		// Disable embed on the block editor.
+		$current_screen = get_current_screen();
+		if ( method_exists( $current_screen, 'is_block_editor' ) && $current_screen->is_block_editor() ) {
+			$is_connected_page = false;
+		}
+
 		/**
 		 * Whether or not the current page is an existing page connected to this controller.
 		 *
