@@ -99,18 +99,16 @@
 			height: 4px;
 			display: inline-block;
 			border-radius: 50%;
-			top: 10px;
+			top: 8px;
 			left: 50%;
 
 			@include breakpoint( '782px-960px' ) {
-				top: 8px;
 				right: 18px;
 				left: initial;
 				margin-left: 0;
 			}
 
 			@include breakpoint( '>960px' ) {
-				top: 16px;
 				right: 28px;
 				left: initial;
 				margin-left: 0;
