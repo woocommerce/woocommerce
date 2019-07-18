@@ -302,6 +302,13 @@ class WC_Admin_Loader {
 			self::get_file_version( "{$entry}/style.css" )
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
+
+		wp_register_style(
+			'wc-material-icons',
+			'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined',
+			array(),
+			self::get_file_version( 'https://fonts.googleapis.com/icon?family=Material+Icons' )
+		);
 	}
 
 	/**
@@ -314,6 +321,7 @@ class WC_Admin_Loader {
 
 		wp_enqueue_script( WC_ADMIN_APP );
 		wp_enqueue_style( WC_ADMIN_APP );
+		wp_enqueue_style( 'wc-material-icons' );
 
 		// Use server-side detection to prevent unneccessary stylesheet loading in other browsers.
 		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : ''; // WPCS: sanitization ok.

@@ -11,6 +11,7 @@
 	}
 
 	.woocommerce-list__item-description {
+		margin-top: $gap-smallest;
 		display: block;
 		font-size: 14px;
 		line-height: 20px;
@@ -18,7 +19,7 @@
 	}
 
 	.woocommerce-list__item-before {
-		margin-right: $gap;
+		margin-right: 20px;
 		display: flex;
 		align-items: center;
 	}
