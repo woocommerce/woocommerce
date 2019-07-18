@@ -9,6 +9,7 @@ import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
+import { keyBy, map, merge } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -256,7 +257,15 @@ OrdersPanel.defaultProps = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { hasActionableOrders } = props;
-		const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
+		const {
+			getItems,
+			getItemsTotalCount,
+			getItemsError,
+			isGetItemsRequesting,
+			getReportItems,
+			getReportItemsError,
+			isReportItemsRequesting,
+		} = select( 'wc-api' );
 		const orderStatuses =
 			wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses ||
 			DEFAULT_ACTIONABLE_STATUSES;
@@ -266,28 +275,60 @@ export default compose(
 		}
 
 		if ( hasActionableOrders ) {
+			// Query the core Orders endpoint for the most up-to-date statuses.
+			const actionableOrdersQuery = {
+				page: 1,
+				per_page: QUERY_DEFAULTS.pageSize,
+				status: orderStatuses,
+				_fields: [ 'id', 'date_created_gmt', 'status' ],
+			};
+			const actionableOrders = Array.from( getItems( 'orders', actionableOrdersQuery ).values() );
+			const isRequestingActionable = isGetItemsRequesting( 'orders', actionableOrdersQuery );
+
+			if ( isRequestingActionable ) {
+				return {
+					isError: Boolean( getItemsError( 'orders', actionableOrdersQuery ) ),
+					isRequesting: isRequestingActionable,
+					orderStatuses,
+				};
+			}
+
+			// Retrieve the Order stats data from our reporting table.
 			const ordersQuery = {
 				page: 1,
 				per_page: QUERY_DEFAULTS.pageSize,
-				status_is: orderStatuses,
 				extended_info: true,
+				order_includes: map( actionableOrders, 'id' ),
 			};
 
-			const orders = getReportItems( 'orders', ordersQuery ).data;
+			const reportOrders = getReportItems( 'orders', ordersQuery ).data;
 			const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
 			const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
+			let orders = [];
+
+			if ( reportOrders && reportOrders.length ) {
+				// Merge the core endpoint data with our reporting table.
+				const actionableOrdersById = keyBy( actionableOrders, 'id' );
+				orders = reportOrders.map( order =>
+					merge( {}, order, actionableOrdersById[ order.order_id ] || {} )
+				);
+			}
 
 			return { orders, isError, isRequesting, orderStatuses };
 		}
 
+		// Get a count of all orders for messaging purposes.
+		// @todo Add a property to wcSettings for this?
 		const allOrdersQuery = {
 			page: 1,
-			per_page: 0,
+			per_page: 1,
+			_fields: [ 'id' ],
 		};
 
-		const totalNonActionableOrders = getReportItems( 'orders', allOrdersQuery ).totalResults;
-		const isError = Boolean( getReportItemsError( 'orders', allOrdersQuery ) );
-		const isRequesting = isReportItemsRequesting( 'orders', allOrdersQuery );
+		getItems( 'orders', allOrdersQuery );
+		const totalNonActionableOrders = getItemsTotalCount( 'orders', allOrdersQuery );
+		const isError = Boolean( getItemsError( 'orders', allOrdersQuery ) );
+		const isRequesting = isGetItemsRequesting( 'orders', allOrdersQuery );
 
 		return {
 			hasNonActionableOrders: totalNonActionableOrders > 0,

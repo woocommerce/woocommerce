@@ -90,6 +90,16 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			}
 		}
 
+		$included_orders = $this->get_included_orders( $query_args );
+		if ( $included_orders ) {
+			$where_subquery[] = "{$order_stats_lookup_table}.order_id IN ({$included_orders})";
+		}
+
+		$excluded_orders = $this->get_excluded_orders( $query_args );
+		if ( $excluded_orders ) {
+			$where_subquery[] = "{$order_stats_lookup_table}.order_id NOT IN ({$excluded_orders})";
+		}
+
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = ${returning_customer}";
@@ -151,8 +161,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'page'             => 1,
 			'order'            => 'DESC',
 			'orderby'          => 'date_created',
-			'before'           => WC_Admin_Reports_Interval::default_before(),
-			'after'            => WC_Admin_Reports_Interval::default_after(),
+			'before'           => '',
+			'after'            => '',
 			'fields'           => '*',
 			'product_includes' => array(),
 			'product_excludes' => array(),
@@ -162,6 +172,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'status_is'        => array(),
 			'extended_info'    => false,
 			'refunds'          => null,
+			'order_includes'   => array(),
+			'order_excludes'   => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
