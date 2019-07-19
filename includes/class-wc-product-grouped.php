@@ -83,16 +83,6 @@ class WC_Product_Grouped extends WC_Product {
 	}
 
 	/**
-	 * Get a user friendly message about why an item is not purchasable.
-	 *
-	 * @return string
-	 */
-	public function get_unable_to_purchase_message() {
-
-		return __( 'Sorry, this grouped product cannot be purchased individually.');
-	}
-
-	/**
 	 * Returns the price in html format.
 	 *
 	 * @param string $price (default: '').

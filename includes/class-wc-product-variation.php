@@ -548,23 +548,6 @@ class WC_Product_Variation extends WC_Product_Simple {
 	}
 
 	/**
-	 * Get a user friendly message about why an item is not purchasable.
-	 * Override abstract so the error can be more precise.
-	 *
-	 * @return string
-	 */
-	public function get_unable_to_purchase_message() {
-		if ( ! $this->variation_is_visible() ) {
-			$message = __( 'Sorry, this product variation cannot be purchased because it is disabled.', 'woocommerce' );
-		} elseif( 'publish' === $this->parent_data['status'] || current_user_can( 'edit_post', $this->get_parent_id() ) ) {
-			$message = __( 'Sorry, this product variation cannot be purchased because its parent has been removed.', 'woocommerce');
-		} else {
-			$message = parent::get_unable_to_purchase_message();
-		}
-		return $message;
-	}
-
-	/**
 	 * Controls whether this particular variation will appear greyed-out (inactive) or not (active).
 	 * Used by extensions to make incompatible variations appear greyed-out, etc.
 	 * Other possible uses: prevent out-of-stock variations from being selected.

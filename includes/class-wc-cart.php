@@ -1044,7 +1044,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			if ( ! $product_data->is_purchasable() ) {
-				throw new Exception( $product_data->get_unable_to_purchase_message() );
+				$message = __( 'Sorry, this product cannot be purchased.', 'woocommerce' );
+
+				$message = apply_filters( 'woocommerce_is_not_purchasable_message', $message, $product_data, 'add_to_cart' );
+				throw new Exception( $message );
 			}
 
 			// Stock check - only check if we're managing stock and backorders are not allowed.

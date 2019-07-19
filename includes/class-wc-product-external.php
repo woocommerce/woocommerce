@@ -152,15 +152,6 @@ class WC_Product_External extends WC_Product {
 	}
 
 	/**
-	 * Get a user friendly message about why an item is not purchasable.
-	 *
-	 * @return string
-	 */
-	public function get_unable_to_purchase_message() {
-		return __( 'Sorry, this external product cannot be purchased here.', 'woocommerce' );
-	}
-
-	/**
 	 * Get the add to url used mainly in loops.
 	 *
 	 * @access public
