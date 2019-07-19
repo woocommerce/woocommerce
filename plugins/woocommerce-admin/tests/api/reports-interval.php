@@ -884,12 +884,12 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 * Test function that validates *_between query parameters for numeric values.
 	 */
 	public function test_rest_validate_between_numeric_arg() {
-		$this->assertIsWPError(
+		$this->assertWPError(
 			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( 'not array', null, 'param' ),
 			'param is not a numerically indexed array.'
 		);
 
-		$this->assertIsWPError(
+		$this->assertWPError(
 			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1 ), null, 'param' ),
 			'param must contain 2 numbers.'
 		);
@@ -903,17 +903,17 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 * Test function that validates *_between query parameters for date values.
 	 */
 	public function rest_validate_between_date_arg() {
-		$this->assertIsWPError(
+		$this->assertWPError(
 			WC_Admin_Reports_Interval::rest_validate_between_date_arg( 'not array', null, 'param' ),
 			'param is not a numerically indexed array.'
 		);
 
-		$this->assertIsWPError(
+		$this->assertWPError(
 			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00' ), null, 'param' ),
 			'param must contain 2 valid dates.'
 		);
 
-		$this->assertIsWPError(
+		$this->assertWPError(
 			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( 'not a valid date' ), null, 'param' ),
 			'param must contain 2 valid dates.'
 		);
