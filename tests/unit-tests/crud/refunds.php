@@ -20,7 +20,7 @@ class WC_Tests_CRUD_Refunds extends WC_Unit_Test_Case {
 	function test_get_refund_amount() {
 		$object = new WC_Order_Refund();
 		$object->set_amount( 20 );
-		$this->assertEquals( '20.00', $object->get_amount() );
+		$this->assertEquals( '20', $object->get_amount() );
 	}
 
 	/**
