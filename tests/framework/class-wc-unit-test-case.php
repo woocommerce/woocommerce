@@ -123,23 +123,4 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$message = $message ? $message : "We're all doomed!";
 		throw new Exception( $message, $code );
 	}
-
-	/**
-	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2.
-	 *
-	 * @since  2.2
-	 * @param  mixed  $condition The statement to evaluate as not false.
-	 * @param  string $message   A message to display if the assertion fails.
-	 */
-	public static function assertNotFalse( $condition, $message = '' ) {
-
-		if ( version_compare( phpversion(), '5.3', '<' ) ) {
-
-			self::assertThat( $condition, self::logicalNot( self::isFalse() ), $message );
-
-		} else {
-
-			parent::assertNotFalse( $condition, $message );
-		}
-	}
 }

@@ -1684,11 +1684,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * test_cloned_cart_session.
 	 */
 	public function test_cloned_cart_session() {
-		// PHP 5.2 does not include support for ReflectionProperty::setAccessible().
-		if ( version_compare( '5.3', PHP_VERSION, '>' ) ) {
-			$this->markTestSkipped( 'Test requires PHP 5.3 and above to use ReflectionProperty::setAccessible()' );
-		}
-
 		$cart     = wc()->cart;
 		$new_cart = clone $cart;
 
@@ -1883,7 +1878,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$this->assertEquals( '5.71', WC()->cart->get_subtotal() );
-		$this->assertEquals( '6', WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( '6.00', WC()->cart->get_total( 'edit' ) );
 
 		add_filter( 'woocommerce_product_get_tax_class', array( $this, 'change_tax_class_filter' ) );
 		add_filter( 'woocommerce_product_variation_get_tax_class', array( $this, 'change_tax_class_filter' ) );

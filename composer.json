@@ -8,19 +8,19 @@
   "minimum-stability": "dev",
   "require": {
     "automattic/jetpack-autoloader": "1.2.0",
-    "php": "^5.6|^7.0",
+    "php": ">=5.6|>=7.0",
     "composer/installers": "1.6.0",
     "woocommerce/woocommerce-blocks": "2.3.0-beta",
     "woocommerce/woocommerce-rest-api": "1.0.3"
   },
   "require-dev": {
     "myclabs/deep-copy": "1.7.0",
-    "phpunit/phpunit": "6.5.14",
+    "phpunit/phpunit": "7.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "config": {
     "platform": {
-      "php": "7.0"
+      "php": "7.1"
     },
     "preferred-install": {
         "woocommerce/woocommerce-rest-api": "dist",
