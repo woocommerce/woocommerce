@@ -1,8 +1,12 @@
 <?php
+/**
+ * Order coupon tests.
+ *
+ * @package WooCommerce\Tests\Orders
+ */
 
 /**
  * Order coupon tests.
- * @package WooCommerce\Tests\Orders
  */
 class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 
@@ -48,7 +52,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Add order products
+		// Add order products.
 		$product_item  = new WC_Order_Item_Product();
 		$coupon_item_1 = new WC_Order_Item_Coupon();
 		$coupon_item_2 = new WC_Order_Item_Coupon();
