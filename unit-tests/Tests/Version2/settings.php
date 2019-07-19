@@ -163,7 +163,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 
 		// test route callback receiving an empty group id
 		$result = $this->endpoint->get_group_settings( '' );
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 
 		// test getting a group that does not exist
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/settings/not-real' ) );
@@ -344,7 +344,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_setting_empty_setting_id() {
 		$result = $this->endpoint->get_setting( 'test', '' );
 
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 	}
 
 	/**
@@ -355,7 +355,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_setting_invalid_setting_id() {
 		$result = $this->endpoint->get_setting( 'test', 'invalid' );
 
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 	}
 
 	/**
@@ -379,7 +379,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 
 		$result = $controller->get_setting( 'test', 'woocommerce_shop_page_display' );
 
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 	}
 
 	/**
