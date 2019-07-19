@@ -71,7 +71,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 		$expected_error_message = 'Error getting remote image http://somedomain.com/nonexistent-image.png. Error: Not found.';
 		$result                 = wc_rest_upload_image_from_url( 'http://somedomain.com/nonexistent-image.png' );
 
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 		$this->assertEquals( $expected_error_message, $result->get_error_message() );
 	}
 
@@ -85,14 +85,14 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 		$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
 		$result                 = wc_rest_upload_image_from_url( 'http://somedomain.com/invalid-image-1.png' );
 
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 		$this->assertEquals( $expected_error_message, $result->get_error_message() );
 
 		// unsupported mime type.
 		$expected_error_message = 'Invalid image: Sorry, this file type is not permitted for security reasons.';
 		$result                 = wc_rest_upload_image_from_url( 'http://somedomain.com/invalid-image-2.png' );
 
-		$this->assertIsWPError( $result );
+		$this->assertWPError( $result );
 		$this->assertEquals( $expected_error_message, $result->get_error_message() );
 	}
 
