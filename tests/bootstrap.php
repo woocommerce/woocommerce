@@ -53,9 +53,6 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
-		// Load Speed trap.
-		require_once $this->wp_tests_dir . '/includes/phpunit7/speed-trap-listener.php';
-
 		// load WC testing framework
 		$this->includes();
 	}

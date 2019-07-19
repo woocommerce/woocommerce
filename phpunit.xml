@@ -43,6 +43,6 @@
 		</whitelist>
 	</filter>
 	<listeners>
-		<listener class="WC_SpeedTrapListener" file="tests/includes/speed-trap-listener.php" />
+		<listener class="SpeedTrapListener" file="tests/includes/listener-loader.php" />
 	</listeners>
 </phpunit>
