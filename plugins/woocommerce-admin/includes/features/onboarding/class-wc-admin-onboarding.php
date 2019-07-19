@@ -50,7 +50,7 @@ class WC_Admin_Onboarding {
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
-		add_action( 'admin_init', array( $this, 'reset_onboarding' ) );
+		add_action( 'current_screen', array( $this, 'reset_onboarding' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 	}
