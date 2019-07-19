@@ -2264,7 +2264,7 @@ function wc_get_server_database_version() {
  */
 function wc_load_cart() {
 	if ( ! did_action( 'before_woocommerce_init' ) || doing_action( 'before_woocommerce_init' ) ) {
-		/* translators: 1: wc_get_product 2: woocommerce_init */
+		/* translators: 1: wc_load_cart 2: woocommerce_init */
 		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_load_cart', 'woocommerce_init' ), '3.7' );
 		return;
 	}
