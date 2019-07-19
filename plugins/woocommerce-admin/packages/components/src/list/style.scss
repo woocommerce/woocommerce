@@ -1,7 +1,12 @@
 .woocommerce-list__item {
 	padding: $gap;
 	display: flex;
+	align-items: center;
 	margin-bottom: 0;
+
+	&.has-action {
+		cursor: pointer;
+	}
 
 	.woocommerce-list__item-title {
 		display: block;

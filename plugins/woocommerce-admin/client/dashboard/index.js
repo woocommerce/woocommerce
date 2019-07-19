@@ -29,7 +29,7 @@ class Dashboard extends Component {
 		// @todo This should be replaced by a check of tasks from the REST API response from #1897.
 		const requiredTasksComplete = true;
 		if ( window.wcAdminFeatures.onboarding && ! requiredTasksComplete ) {
-			return <TaskList />;
+			return <TaskList query={ query } />;
 		}
 
 		// @todo When the customizable dashboard is ready to be launched, we can pull `CustomizableDashboard`'s render

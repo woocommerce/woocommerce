@@ -45,6 +45,7 @@ class WC_Admin_Onboarding {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
+		$this->includes();
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
@@ -52,6 +53,13 @@ class WC_Admin_Onboarding {
 		add_action( 'admin_init', array( $this, 'reset_onboarding' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
+	}
+
+	/**
+	 * Include WC Admin Onboarding classes.
+	 */
+	public function includes() {
+		require_once WC_ADMIN_FEATURES_PATH . 'onboarding/class-wc-admin-onboarding-tasks.php';
 	}
 
 	/**
@@ -366,8 +374,6 @@ class WC_Admin_Onboarding {
 			)
 		);
 		$response = rest_do_request( $request );
-
-		wp_safe_redirect( wc_admin_url() );
 	}
 }
 
