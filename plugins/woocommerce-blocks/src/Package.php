@@ -35,14 +35,14 @@ class Package {
 		if ( true === self::$did_init || ! self::has_dependencies() ) {
 			return;
 		}
+
 		self::$did_init = true;
+		self::remove_core_blocks();
 
 		if ( ! self::is_built() ) {
 			return self::add_build_notice();
 		}
 
-		self::define_constants();
-		self::remove_core_blocks();
 		Library::init();
 		Assets::init();
 		RestApi::init();
@@ -105,14 +105,6 @@ class Package {
 	}
 
 	/**
-	 * Define plugin constants.
-	 */
-	protected static function define_constants() {
-		define( 'WGPB_VERSION', self::VERSION );
-		define( 'WGPB_ABSPATH', self::get_path() . '/' );
-	}
-
-	/**
 	 * Remove core blocks (for 3.6 and below).
 	 */
 	protected static function remove_core_blocks() {
@@ -121,6 +113,7 @@ class Package {
 		remove_action( 'init', array( 'WC_Block_Library', 'register_assets' ) );
 		remove_filter( 'block_categories', array( 'WC_Block_Library', 'add_block_category' ) );
 		remove_action( 'admin_print_footer_scripts', array( 'WC_Block_Library', 'print_script_settings' ), 1 );
+		remove_action( 'init', array( 'WGPB_Block_Library', 'init' ) );
 	}
 
 }
