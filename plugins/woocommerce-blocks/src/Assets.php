@@ -36,7 +36,6 @@ class Assets {
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', __DIR__ ), array(), false );
 		self::register_script( 'wc-vendors', plugins_url( 'build/vendors.js', __DIR__ ), array(), false );
 		self::register_script( 'wc-packages', plugins_url( 'build/packages.js', __DIR__ ), array(), false );
-		self::register_script( 'wc-frontend', plugins_url( 'build/frontend.js', __DIR__ ), array( 'wc-vendors' ) );
 
 		// Individual blocks.
 		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
@@ -174,18 +173,35 @@ class Assets {
 	 * @param string $src       Full URL of the script, or path of the script relative to the WordPress root directory.
 	 * @param array  $deps      Optional. An array of registered script handles this script depends on. Default empty array.
 	 * @param bool   $has_i18n  Optional. Whether to add a script translation call to this file. Default 'true'.
+	 * @param bool   $enqueue   Optional. Whether the script should be enqueued instead of registered.
 	 */
-	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true ) {
+	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true, $enqueue = false ) {
 		$filename     = str_replace( plugins_url( '/', __DIR__ ), '', $src );
 		$ver          = self::get_file_version( $filename );
 		$deps_path    = dirname( __DIR__ ) . '/' . str_replace( '.js', '.deps.json', $filename );
 		$dependencies = file_exists( $deps_path ) ? json_decode( file_get_contents( $deps_path ) ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		$dependencies = array_merge( $dependencies, $deps );
 
-		wp_register_script( $handle, $src, $dependencies, $ver, true );
+		if ( $enqueue ) {
+			wp_enqueue_script( $handle, $src, $dependencies, $ver, true );
+		} else {
+			wp_register_script( $handle, $src, $dependencies, $ver, true );
+		}
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', dirname( __DIR__ ) . '/languages' );
 		}
+	}
+
+	/**
+	 * Queues a script when required.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $name Name of the script used to identify the file inside build folder.
+	 */
+	public static function load_script_as_required( $name ) {
+		$filename = 'build/' . $name . '.js';
+		self::register_script( 'wc-' . $name, plugins_url( $filename, __DIR__ ), array( 'wc-vendors' ), true, true );
 	}
 
 	/**
