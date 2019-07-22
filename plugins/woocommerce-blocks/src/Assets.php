@@ -35,20 +35,19 @@ class Assets {
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', __DIR__ ), array(), false );
 		self::register_script( 'wc-vendors', plugins_url( 'build/vendors.js', __DIR__ ), array(), false );
-		self::register_script( 'wc-packages', plugins_url( 'build/packages.js', __DIR__ ), array(), false );
 
 		// Individual blocks.
-		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-best-sellers', plugins_url( 'build/product-best-sellers.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-category', plugins_url( 'build/product-category.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-new', plugins_url( 'build/product-new.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-on-sale', plugins_url( 'build/product-on-sale.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-top-rated', plugins_url( 'build/product-top-rated.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-products-by-attribute', plugins_url( 'build/products-by-attribute.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-featured-product', plugins_url( 'build/featured-product.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-featured-category', plugins_url( 'build/featured-category.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-categories', plugins_url( 'build/product-categories.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
-		self::register_script( 'wc-product-tag', plugins_url( 'build/product-tag.js', __DIR__ ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-best-sellers', plugins_url( 'build/product-best-sellers.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-category', plugins_url( 'build/product-category.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-new', plugins_url( 'build/product-new.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-on-sale', plugins_url( 'build/product-on-sale.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-top-rated', plugins_url( 'build/product-top-rated.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-products-by-attribute', plugins_url( 'build/products-by-attribute.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-featured-product', plugins_url( 'build/featured-product.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-featured-category', plugins_url( 'build/featured-category.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-categories', plugins_url( 'build/product-categories.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-tag', plugins_url( 'build/product-tag.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 	}
 
 	/**
@@ -201,7 +200,7 @@ class Assets {
 	 */
 	public static function load_script_as_required( $name ) {
 		$filename = 'build/' . $name . '.js';
-		self::register_script( 'wc-' . $name, plugins_url( $filename, __DIR__ ), array( 'wc-vendors' ), true, true );
+		self::register_script( 'wc-' . $name, plugins_url( $filename, __DIR__ ), array(), true, true );
 	}
 
 	/**
