@@ -320,7 +320,9 @@ class WC_Admin_Onboarding {
 	 */
 	public function is_loading( $is_loading ) {
 		$show_profiler = $this->should_show_profiler();
-		if ( ! $show_profiler ) {
+		$is_dashboard  = ! isset( $_GET['path'] ); // WPCS: csrf ok.
+
+		if ( ! $show_profiler || ! $is_dashboard ) {
 			return $is_loading;
 		}
 		return true;
