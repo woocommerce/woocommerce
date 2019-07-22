@@ -187,6 +187,12 @@ class WC_Admin_Page_Controller {
 	 * @return array|boolean Current page or false if not registered with this controller.
 	 */
 	public function get_current_page() {
+		// If 'current_screen' hasn't fired yet, the current page calculation
+		// will fail which causes `false` to be returned for all subsquent calls.
+		if ( ! did_action( 'current_screen' ) ) {
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retreival should be called on or after the `current_screen` hook.', 'woocommerce-admin' ) );
+		}
+
 		if ( is_null( $this->current_page ) ) {
 			$this->determine_current_page();
 		}
