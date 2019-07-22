@@ -51,8 +51,8 @@ class WC_Admin_Notes_Giving_Feedback_Notes {
 
 		// Otherwise, create our new note.
 		$note = new WC_Admin_Note();
-		$note->set_title( __( 'Giving feedback', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Are you enjoying the new WooCommerce experience? We\'d love to get your feedback.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Review your experience', 'woocommerce-admin' ) );
+		$note->set_content( __( 'If you like WooCommerce Admin please leave us a 5 star rating. A huge thanks in advance!', 'woocommerce-admin' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'info' );
@@ -60,8 +60,8 @@ class WC_Admin_Notes_Giving_Feedback_Notes {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'share-feedback',
-			__( 'Share feedback', 'woocommerce-admin' ),
-			'https://github.com/woocommerce/woocommerce-admin/issues/new/choose'
+			__( 'Review', 'woocommerce-admin' ),
+			'https://wordpress.org/support/plugin/woocommerce-admin/reviews/?rate=5#new-post'
 		);
 		$note->save();
 	}
