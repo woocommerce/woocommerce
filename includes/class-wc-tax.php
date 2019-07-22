@@ -37,6 +37,17 @@ class WC_Tax {
 	}
 
 	/**
+	 * When the woocommerce_tax_classes option is changed, remove any orphan rates.
+	 *
+	 * @deprecated 3.7.0
+	 * @param  string $old_value Old rates value.
+	 * @param  string $value New rates value.
+	 */
+	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
+		wc_deprecated_function( 'WC_Tax::maybe_remove_tax_class_rates', '3.7' );
+	}
+
+	/**
 	 * Calculate tax for a line.
 	 *
 	 * @param  float   $price              Price to calc tax on.
