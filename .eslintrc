@@ -2,13 +2,19 @@
 	"root": true,
 	"env": {
 		"browser": true,
-		"node": true
+		"es6": true,
+		"node": true,
+		"jest/globals": true
 	},
 	"globals": {
 		"wp": true,
 		"wpApiSettings": true,
 		"wcSettings": true,
-		"es6": true
+		"es6": true,
+		"page": true,
+		"browser": true,
+		"context": true,
+		"jestPuppeteer": true
 	},
 	"rules": {
 		"camelcase": 0,
@@ -17,6 +23,17 @@
 		"no-console": 1
 	},
 	"parserOptions": {
-		"ecmaVersion": 6
-	}
+		"ecmaVersion": 8,
+		"ecmaFeatures": {
+			"modules": true,
+			"experimentalObjectRestSpread": true,
+			"jsx": true
+		}
+	},
+	"plugins": [
+		"jest"
+	],
+	"extends": [
+		"plugin:jest/recommended"
+	]
 }

@@ -44,6 +44,9 @@ tests/cli/vendor
 /tests/e2e-tests/config/local-*.json
 /tests/e2e-tests/config/local.json
 
+# Screenshot tests
+/__image_snapshots__/
+
 # Logs
 /logs
 

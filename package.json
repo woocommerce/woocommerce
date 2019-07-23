@@ -16,6 +16,7 @@
     "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --recursive",
     "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --grep ",
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register",
+    "test:screenshots": "cross-env JEST_PUPPETEER_CONFIG='./tests/screenshot-tests/config/jest-puppeteer.config.js' jest --config='./tests/screenshot-tests/config/jest.config.js' --maxWorkers=1 --rootDir=./",
     "makepot": "grunt makepot",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
@@ -34,7 +35,9 @@
     "cross-env": "5.2.0",
     "eslint": "6.1.0",
     "eslint-config-wpcalypso": "4.0.1",
+    "eslint-plugin-jest": "22.13.6",
     "eslint-plugin-wpcalypso": "4.1.0",
+    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master",
     "grunt": "1.0.4",
     "grunt-checktextdomain": "1.0.1",
     "grunt-contrib-clean": "2.0.0",
@@ -54,14 +57,17 @@
     "grunt-wp-i18n": "1.0.3",
     "husky": "3.0.1",
     "istanbul": "1.0.0-alpha.2",
+    "jest": "24.8.0",
+    "jest-image-snapshot": "2.9.0",
+    "jest-puppeteer": "4.3.0",
     "lint-staged": "9.2.0",
     "mocha": "6.2.0",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
+    "puppeteer": "1.19.0",
     "stylelint": "10.1.0",
     "stylelint-config-wordpress": "14.0.0",
-    "wc-e2e-page-objects": "0.10.0",
-    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
+    "wc-e2e-page-objects": "0.10.0"
   },
   "engines": {
     "node": ">=10.15.0",
