@@ -92,7 +92,11 @@ export function getSearchWords( query = navUtils.getQuery() ) {
  * @return {String}  Updated URL merging query params into existing params.
  */
 export function getNewPath( query, path = getPath(), currentQuery = getQuery() ) {
-	return addQueryArgs( 'admin.php', { page: 'wc-admin', path, ...currentQuery, ...query } );
+	const args = { page: 'wc-admin', ...currentQuery, ...query };
+	if ( '/' !== path ) {
+		args.path = path;
+	}
+	return addQueryArgs( 'admin.php', args );
 }
 
 /**
