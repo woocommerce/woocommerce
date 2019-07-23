@@ -40,7 +40,7 @@ class Theme extends Component {
 	}
 
 	async onChoose( theme ) {
-		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
+		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
 		recordEvent( 'storeprofiler_store_theme_choose', { theme } );
 		await updateProfileItems( { theme } );
@@ -49,10 +49,10 @@ class Theme extends Component {
 			// @todo This should send profile information to woocommerce.com.
 			goToNextStep();
 		} else {
-			addNotice( {
-				status: 'error',
-				message: __( 'There was a problem selecting your store theme.', 'woocommerce-admin' ),
-			} );
+			createNotice(
+				'error',
+				__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
+			);
 		}
 	}
 
@@ -206,10 +206,11 @@ export default compose(
 		return { isError };
 	} ),
 	withDispatch( dispatch => {
-		const { addNotice, updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
-			addNotice,
+			createNotice,
 			updateProfileItems,
 		};
 	} )

@@ -41,7 +41,7 @@
 	}
 }
 
-// Gutenberg Button variables. These are temporary until Gutenberg's variables are exposed.
+// Gutenberg mixins. These are temporary until Gutenberg's mixins are exposed.
 @mixin button-style__focus-active() {
 	background-color: $white;
 	color: $dark-gray-900;
@@ -50,6 +50,31 @@
 	// Windows High Contrast mode will show this outline, but not the box-shadow
 	outline: 2px solid transparent;
 	outline-offset: -2px;
+}
+
+@mixin reduce-motion($property: '') {
+	@if $property == 'transition' {
+		@media (prefers-reduced-motion: reduce) {
+			transition-duration: 0s;
+		}
+	}
+	@else if $property == 'animation' {
+		@media (prefers-reduced-motion: reduce) {
+			animation-duration: 1ms;
+		}
+	}
+	@else {
+		@media (prefers-reduced-motion: reduce) {
+			transition-duration: 0s;
+			animation-duration: 1ms;
+		}
+	}
+}
+
+@mixin break-small() {
+	@media (min-width: #{ ($break-small) }) {
+		@content;
+	}
 }
 
 // Sets positions for children of grid elements

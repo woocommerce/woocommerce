@@ -41,7 +41,7 @@ class ThemeUploader extends Component {
 	}
 
 	uploadTheme( file ) {
-		const { addNotice, onUploadComplete } = this.props;
+		const { createNotice, onUploadComplete } = this.props;
 		this.setState( { isUploading: true } );
 
 		const body = new FormData();
@@ -51,12 +51,12 @@ class ThemeUploader extends Component {
 			.then( response => {
 				onUploadComplete( response );
 				this.setState( { isUploading: false } );
-				addNotice( { status: response.status, message: response.message } );
+				createNotice( response.status, response.message );
 			} )
 			.catch( error => {
 				this.setState( { isUploading: false } );
 				if ( error && error.message ) {
-					addNotice( { status: 'error', message: error.message } );
+					createNotice( 'error', error.message );
 				}
 			} );
 	}
@@ -118,7 +118,7 @@ ThemeUploader.defaultProps = {
 
 export default compose(
 	withDispatch( dispatch => {
-		const { addNotice } = dispatch( 'wc-admin' );
-		return { addNotice };
+		const { createNotice } = dispatch( 'core/notices' );
+		return { createNotice };
 	} )
 )( ThemeUploader );

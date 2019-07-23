@@ -19,8 +19,8 @@ WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
 # Error if WP < 5
 if [[ $WP_VERSION =~ ^([0-9]+)[0-9\.]+\-? ]]; then
-	if [ "5" -gt "${BASH_REMATCH[1]}" ]; then
-		echo "You must use WordPress 5.0 or greater."
+	if [ "5.2" -gt "${BASH_REMATCH[1]}" ]; then
+		echo "You must use WordPress 5.2 or greater."
 		exit 1
 	fi
 fi

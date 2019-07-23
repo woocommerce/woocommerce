@@ -85,7 +85,7 @@ class StoreDetails extends Component {
 			return;
 		}
 
-		const { addNotice, goToNextStep, isError, updateSettings } = this.props;
+		const { createNotice, goToNextStep, isError, updateSettings } = this.props;
 		const { addressLine1, addressLine2, city, countryState, postCode } = this.state.fields;
 
 		recordEvent( 'storeprofiler_store_details_continue', {
@@ -105,10 +105,10 @@ class StoreDetails extends Component {
 		if ( ! isError ) {
 			goToNextStep();
 		} else {
-			addNotice( {
-				status: 'error',
-				message: __( 'There was a problem saving your store details.', 'woocommerce-admin' ),
-			} );
+			createNotice(
+				'error',
+				__( 'There was a problem saving your store details.', 'woocommerce-admin' )
+			);
 		}
 	}
 
@@ -222,11 +222,11 @@ export default compose(
 		return { getSettings, isError, isRequesting, settings };
 	} ),
 	withDispatch( dispatch => {
-		const { addNotice } = dispatch( 'wc-api' );
+		const { createNotice } = dispatch( 'core/notices' );
 		const { updateSettings } = dispatch( 'wc-api' );
 
 		return {
-			addNotice,
+			createNotice,
 			updateSettings,
 		};
 	} )

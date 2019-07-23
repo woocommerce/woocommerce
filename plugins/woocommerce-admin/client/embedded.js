@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import '@wordpress/notices';
 import { render } from '@wordpress/element';
 
 /**
@@ -9,7 +10,6 @@ import { render } from '@wordpress/element';
  */
 import './stylesheets/_embedded.scss';
 import { EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
-import 'store';
 import 'wc-api/wp-data-store';
 
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );

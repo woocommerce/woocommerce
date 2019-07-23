@@ -33,7 +33,7 @@ class Industry extends Component {
 			return;
 		}
 
-		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
+		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
 		recordEvent( 'storeprofiler_store_industry_continue', { store_industry: this.state.selected } );
 		await updateProfileItems( { industry: this.state.selected } );
@@ -41,10 +41,10 @@ class Industry extends Component {
 		if ( ! isError ) {
 			goToNextStep();
 		} else {
-			addNotice( {
-				status: 'error',
-				message: __( 'There was a problem updating your industries.', 'woocommerce-admin' ),
-			} );
+			createNotice(
+				'error',
+				__( 'There was a problem updating your industries.', 'woocommerce-admin' )
+			);
 		}
 	}
 
@@ -119,10 +119,11 @@ export default compose(
 		return { isError };
 	} ),
 	withDispatch( dispatch => {
-		const { addNotice, updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
-			addNotice,
+			createNotice,
 			updateProfileItems,
 		};
 	} )
