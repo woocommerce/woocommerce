@@ -184,7 +184,7 @@ class WC_Shortcode_Products {
 
 		$orderby_value         = explode( '-', $query_args['orderby'] );
 		$orderby               = esc_attr( $orderby_value[0] );
-		$order                 = ! empty( $orderby_value[1] ) ? $orderby_value[1] : strtoupper( $this->attributes['order'] );
+		$order                 = ! empty( $orderby_value[1] ) ? $orderby_value[1] : ( empty( $_GET['orderby'] ) ? strtoupper( $this->attributes['order'] ) : 'ASC' ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		$query_args['orderby'] = $orderby;
 		$query_args['order']   = $order;
 
