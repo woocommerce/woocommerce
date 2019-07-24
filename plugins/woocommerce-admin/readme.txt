@@ -71,7 +71,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
-= 0.16.0 2019-07-11 =
+= 0.16.0 2019-07-24 =
 
 - Tweak: Change verbiage of feedback notification. #2677
 - Dev: Update unit tests to work with PHPUnit 7+. #2678
@@ -88,6 +88,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Disable placeholder animation when prefers-reduced-motion is set #2645 (Accessibility)
 - Task: Add instructions for translating to contributing docs. #2618 (Documentation)
 - Dev: show example extension list as list in readme #2619 (Documentation)
+- Fix: react-spring breaking IE11 #2698 (Build)
 
 = 0.15.0 2019-07-11 =
 
