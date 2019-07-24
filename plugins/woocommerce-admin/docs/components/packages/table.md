@@ -79,6 +79,20 @@ A function which returns a callback function to update the query string for a gi
 
 A function which returns a callback function which is called upon the user changing the visiblity of columns.
 
+### `onSearch`
+
+- Type: Function
+- Default: `noop`
+
+A function which is called upon the user searching in the table header.
+
+### `onSort`
+
+- Type: Function
+- Default: `undefined`
+
+A function which is called upon the user changing the sorting of the table.
+
 ### `downloadable`
 
 - Type: Boolean

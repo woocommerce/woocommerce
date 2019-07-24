@@ -22,6 +22,7 @@ Additional class name to style the component.
   - before: ReactNode - Content displayed before the list item text.
   - after: ReactNode - Content displayed after the list item text.
   - onClick: Function - Content displayed after the list item text.
+  - className: String - Additional class name to style the list item.
 - Default: null
 
 An array of list items.
