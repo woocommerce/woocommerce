@@ -148,6 +148,8 @@ const webpackConfig = {
 		],
 		alias: {
 			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
+			// @todo - remove once https://github.com/WordPress/gutenberg/pull/16196 is released.
+			'react-spring': 'react-spring/web.cjs',
 		},
 	},
 	plugins: [
