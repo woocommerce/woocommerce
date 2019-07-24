@@ -132,7 +132,14 @@ final class WC_Cart_Session {
 				$update_cart_session = true;
 				/* translators: %1$s: product name. %2$s reason why */
 				$message = sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() );
-				$message = apply_filters( 'woocommerce_is_not_purchasable_message', $message, $product, 'get_cart_from_session' );
+				/**
+				 * Filter message about item removed from the cart.
+				 *
+				 * @since 3.8.0
+				 * @param string     $message Message.
+				 * @param WC_Product $product Product data.
+				 */
+				$message = apply_filters( 'woocommerce_cart_item_removed_message', $message, $product );
 				wc_add_notice( $message, 'error' );
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 

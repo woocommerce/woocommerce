@@ -1045,8 +1045,14 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			if ( ! $product_data->is_purchasable() ) {
 				$message = __( 'Sorry, this product cannot be purchased.', 'woocommerce' );
-
-				$message = apply_filters( 'woocommerce_is_not_purchasable_message', $message, $product_data, 'add_to_cart' );
+				/**
+				 * Filters message about product unable to be purchased.
+				 *
+				 * @since 3.8.0
+				 * @param string     $message Message.
+				 * @param WC_Product $product_data Product data.
+				 */
+				$message = apply_filters( 'woocommerce_cart_product_cannot_be_purchased_message', $message, $product_data );
 				throw new Exception( $message );
 			}
 
