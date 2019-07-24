@@ -35,6 +35,14 @@ matrix:
       apt:
         packages:
           - nginx
+  - name: "Visual regression tests"
+    php: 7.3
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_VIS_REGRESSION=1
+    addons:
+      chrome: stable
+      apt:
+        packages:
+          - nginx
   - name: "Unit tests code coverage"
     php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1

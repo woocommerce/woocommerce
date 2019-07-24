@@ -10,7 +10,12 @@ if [ $1 == 'after' ]; then
 		php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 	fi
 
-	if [[ ${RUN_E2E} == 1 && $(ls -A $TRAVIS_BUILD_DIR/screenshots) ]]; then
+	if [[ ${RUN_VIS_REGRESSION} == 1 ]]; then
+		# copy diff output for failed tests to the screenshots directory to uploading.
+		cp /tests/visual-regression/__image_snapshots__/__diff_output__/ $TRAVIS_BUILD_DIR/screenshots/
+	fi
+
+	if [[ ( ${RUN_E2E} == 1 || ${RUN_VIS_REGRESSION} == 1 ) && $(ls -A $TRAVIS_BUILD_DIR/screenshots) ]]; then
 		if [[ -z "${ARTIFACTS_KEY}" ]]; then
 			echo "Screenshots were not uploaded. Please run the e2e tests locally to see failures."
 		else

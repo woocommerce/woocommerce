@@ -2,7 +2,7 @@
 
 module.exports = {
 	launch: {
-		slowMo: 200,
+		slowMo: false,
 		headless: true,
 		ignoreHTTPSErrors: true,
 		args: [
