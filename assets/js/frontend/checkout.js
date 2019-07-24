@@ -360,9 +360,12 @@ jQuery( function( $ ) {
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
-							$( key ).replaceWith( value );
+							if ( ! wc_checkout_form.fragments || wc_checkout_form.fragments[ key ] !== value ) {
+								$( key ).replaceWith( value );
+							}
 							$( key ).unblock();
 						} );
+						wc_checkout_form.fragments = data.fragments;
 					}
 
 					// Recheck the terms and conditions box, if needed
