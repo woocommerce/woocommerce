@@ -45,6 +45,10 @@ class WC_Admin_Onboarding {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		$this->includes();
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
