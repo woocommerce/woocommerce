@@ -74,7 +74,7 @@ script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - travis_retry bash tests/bin/run-e2e-CI.sh
-  - bash test/bin/run-vis-regression.sh
+  - bash tests/bin/run-vis-regression.sh
 
 after_script:
   - bash tests/bin/travis.sh after
