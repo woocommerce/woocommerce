@@ -208,7 +208,7 @@
 		box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
 	}
 
-	.woocommerce-layout__activity-panel-content {
+	&.is-switching {
 		animation: tabSwitch;
 		animation-duration: 300ms;
 

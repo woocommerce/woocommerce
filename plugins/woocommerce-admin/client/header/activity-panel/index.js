@@ -42,6 +42,7 @@ class ActivityPanel extends Component {
 			isPanelOpen: false,
 			mobileOpen: false,
 			currentTab: '',
+			isPanelSwitching: false,
 			hasWordPressNotices: false,
 		};
 	}
@@ -77,13 +78,13 @@ class ActivityPanel extends Component {
 					mobileOpen: ! state.isPanelOpen,
 				};
 			}
-			return { currentTab: tabName };
+			return { currentTab: tabName, isPanelSwitching: true };
 		} );
 	}
 
 	clearPanel() {
 		this.setState(
-			( { isPanelOpen } ) => ( isPanelOpen ? null : { currentTab: '' } )
+			( { isPanelOpen } ) => ( isPanelOpen ? { isPanelSwitching: false } : { currentTab: '' } )
 		);
 	}
 
@@ -164,7 +165,7 @@ class ActivityPanel extends Component {
 	}
 
 	renderPanel() {
-		const { isPanelOpen, currentTab } = this.state;
+		const { isPanelOpen, currentTab, isPanelSwitching } = this.state;
 
 		const tab = find( this.getTabs(), { name: currentTab } );
 		if ( ! tab ) {
@@ -173,6 +174,7 @@ class ActivityPanel extends Component {
 
 		const classNames = classnames( 'woocommerce-layout__activity-panel-wrapper', {
 			'is-open': isPanelOpen,
+			'is-switching': isPanelSwitching,
 		} );
 
 		return (
@@ -182,6 +184,7 @@ class ActivityPanel extends Component {
 				role="tabpanel"
 				aria-label={ tab.title }
 				onTransitionEnd={ this.clearPanel }
+				onAnimationEnd={ this.clearPanel }
 			>
 				<div
 					className="woocommerce-layout__activity-panel-content"
