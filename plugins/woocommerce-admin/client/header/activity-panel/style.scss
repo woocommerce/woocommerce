@@ -174,7 +174,9 @@
 }
 
 @mixin activity-panel-slide {
-	transition: width 300ms cubic-bezier(0.42, 0, 0.58, 1);
+	transition-property: transform box-shadow;
+	transition-duration: 300ms;
+	transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
 	@media screen and (prefers-reduced-motion: reduce) {
 		transition: none;
 	}
@@ -183,8 +185,11 @@
 .woocommerce-layout__activity-panel-wrapper {
 	height: calc(100vh - #{$header-height + $header-height + $adminbar-height-mobile});
 	background: $core-grey-light-200;
-	box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
-	width: 0;
+	width: 510px;
+	@include breakpoint( '<782px' ) {
+		width: 100%;
+	}
+	transform: translateX(100%);
 	@include activity-panel-slide();
 	position: fixed;
 	right: 0;
@@ -199,11 +204,8 @@
 	}
 
 	&.is-open {
-		@include activity-panel-slide();
-		width: 510px;
-		@include breakpoint( '<782px' ) {
-			width: 100%;
-		}
+		transform: initial;
+		box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
 	}
 
 	.woocommerce-layout__activity-panel-content {
