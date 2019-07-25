@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b2833a3907261e9b1fb056fe56c9dfb",
+    "content-hash": "8b88f3c424707ce9ffe80b4fe6e600a5",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -164,16 +164,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v2.3.0-beta",
+            "version": "v2.3.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "00b6d8fefd62e6fe8b14fdb277dc784ff108291e"
+                "reference": "6894c51726556d3c9b30fe7da1681904cef057a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/00b6d8fefd62e6fe8b14fdb277dc784ff108291e",
-                "reference": "00b6d8fefd62e6fe8b14fdb277dc784ff108291e",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/6894c51726556d3c9b30fe7da1681904cef057a2",
+                "reference": "6894c51726556d3c9b30fe7da1681904cef057a2",
                 "shasum": ""
             },
             "require": {
@@ -207,7 +207,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2019-07-10T11:39:03+00:00"
+            "time": "2019-07-25T14:58:54+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -560,13 +560,13 @@
                 },
                 {
                     "name": "Wim Godden",
-                    "homepage": "https://github.com/wimg",
-                    "role": "lead"
+                    "role": "lead",
+                    "homepage": "https://github.com/wimg"
                 },
                 {
                     "name": "Juliette Reinders Folmer",
-                    "homepage": "https://github.com/jrfnl",
-                    "role": "lead"
+                    "role": "lead",
+                    "homepage": "https://github.com/jrfnl"
                 }
             ],
             "description": "A set of sniffs for PHP_CodeSniffer that checks for PHP cross-version compatibility.",
@@ -943,8 +943,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "Library that provides collection, processing, and rendering functionality for PHP code coverage information.",
@@ -1216,8 +1216,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "The PHP Unit Testing framework.",
