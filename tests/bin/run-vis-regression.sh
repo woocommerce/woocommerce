@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [[ ${RUN_E2E} == 1 ]]; then
+if [[ ${RUN_VIS_REGRESSION} == 1 ]]; then
 
 	WP_SITE_URL="http://localhost:8080"
 
