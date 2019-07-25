@@ -7,5 +7,5 @@ if [[ ${RUN_VIS_REGRESSION} == 1 ]]; then
 	export BASE_URL="$WP_SITE_URL"
 
 	# Run the tests
-	npm test:vis-regression
+	npm run test:vis-regression
 fi
