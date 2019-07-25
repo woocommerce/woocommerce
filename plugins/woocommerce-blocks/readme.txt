@@ -83,7 +83,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 2.3.0 - 2019-07-10 =
+= 2.3.0 - 2019-07-25 =
 
 - Feature: Added a new Featured Category Block; feature a category and show a link to it's archive.
 - Feature: Added a new Products by Tag(s) block.
@@ -92,6 +92,10 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Feature: Added a cancel button to the product category block editor to discard unsaved changes.
 - Enhancement: Change the toggle for list type in Product Category List block to a button toggle component for clarity.
 - Build: Updated build process and plugin structure to follow modern best practices. Minimum PHP version bumped to 5.6.
+- Fix - Correctly hide products from grids when visibility is hidden.
+- Fix - Fix Featured Category block using radio buttons instead of checkboxes.
+- Fix - Use externals for frontend dependencies so they are shared between extensions and blocks. That saves 2.57MB on page weight.
+- Fix - Load frontend scripts dynamically only when the page contains a block that requires them.
 
 = 2.2.1 - 2019-07-04 =
 
