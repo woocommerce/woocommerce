@@ -200,7 +200,7 @@ class ActivityPanel extends Component {
 	renderTab( tab, i ) {
 		const { currentTab, isPanelOpen } = this.state;
 		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
-			'is-active': tab.name === currentTab,
+			'is-active': isPanelOpen && tab.name === currentTab,
 			'has-unread': tab.unread,
 		} );
 

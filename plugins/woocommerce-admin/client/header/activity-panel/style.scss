@@ -73,18 +73,27 @@
 		font-size: 11px;
 		height: $header-height;
 
+		&::before {
+			background-color: $woocommerce;
+			bottom: 0;
+			content: '';
+			height: 0;
+			opacity: 0;
+			transition-property: height, opacity;
+			transition-duration: 300ms;
+			transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+			left: 0;
+			position: absolute;
+			right: 0;
+		}
+
 		&.is-active {
 			color: $core-grey-dark-700;
 			box-shadow: none;
 
 			&::before {
-				background-color: $woocommerce;
-				bottom: 0;
-				content: '';
 				height: 3px;
-				left: 0;
-				position: absolute;
-				right: 0;
+				opacity: 1;
 			}
 		}
 
