@@ -34,6 +34,7 @@ class ActivityPanel extends Component {
 	constructor() {
 		super( ...arguments );
 		this.togglePanel = this.togglePanel.bind( this );
+		this.clearPanel = this.clearPanel.bind( this );
 		this.toggleMobile = this.toggleMobile.bind( this );
 		this.renderTab = this.renderTab.bind( this );
 		this.updateNoticeFlag = this.updateNoticeFlag.bind( this );
@@ -72,12 +73,18 @@ class ActivityPanel extends Component {
 			) {
 				return {
 					isPanelOpen: ! state.isPanelOpen,
-					currentTab: state.isPanelOpen ? '' : tabName,
+					currentTab: tabName,
 					mobileOpen: ! state.isPanelOpen,
 				};
 			}
 			return { currentTab: tabName };
 		} );
+	}
+
+	clearPanel() {
+		this.setState(
+			( { isPanelOpen } ) => ( isPanelOpen ? null : { currentTab: '' } )
+		);
 	}
 
 	// On smaller screen, the panel buttons are hidden behind a toggle.
@@ -169,17 +176,20 @@ class ActivityPanel extends Component {
 		} );
 
 		return (
-			<div className={ classNames } tabIndex={ 0 } role="tabpanel" aria-label={ tab.title }>
-				{ ( isPanelOpen && (
-					<div
-						className="woocommerce-layout__activity-panel-content"
-						key={ 'activity-panel-' + currentTab }
-						id={ 'activity-panel-' + currentTab }
-					>
-						{ this.getPanelContent( currentTab ) }
-					</div>
-				) ) ||
-					null }
+			<div
+				className={ classNames }
+				tabIndex={ 0 }
+				role="tabpanel"
+				aria-label={ tab.title }
+				onTransitionEnd={ this.clearPanel }
+			>
+				<div
+					className="woocommerce-layout__activity-panel-content"
+					key={ 'activity-panel-' + currentTab }
+					id={ 'activity-panel-' + currentTab }
+				>
+					{ this.getPanelContent( currentTab ) }
+				</div>
 			</div>
 		);
 	}

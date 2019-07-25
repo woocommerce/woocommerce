@@ -178,7 +178,7 @@
 	transition-duration: 300ms;
 	transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
 	@media screen and (prefers-reduced-motion: reduce) {
-		transition: none;
+		transition-duration: 1ms;
 	}
 }
 
