@@ -1,16 +1,46 @@
 # Contributing to WooCommerce ✨
 
-There are many ways to contribute to the WooCommerce project!
-
-- Translating strings into your language.
-- Answering questions on GitHub and within the various WooCommerce communities.
-- Submitting fixes, improvements, and enhancements.
-
 WooCommerce currently powers 30% of all online stores across the internet, and your help making it even more awesome will be greatly appreciated :)
 
-If you think something can be improved and you wish to contribute code,
-[fork](https://help.github.com/articles/fork-a-repo/) WooCommerce, commit your changes,
-and [send a pull request](https://help.github.com/articles/using-pull-requests/). We'll be happy to review your changes!
+There are many ways to contribute to the project!
+
+- [Translating strings into your language](https://github.com/woocommerce/woocommerce/wiki/Translating-WooCommerce).
+- Answering questions on the various WooCommerce communities like the [WP.org support forums](https://wordpress.org/support/plugin/woocommerce/).
+- Testing open [issues](https://github.com/woocommerce/woocommerce/issues) or [pull requests](https://github.com/woocommerce/woocommerce/pulls) and sharing your findings in a comment.
+- Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://woocommerce.wordpress.com/).
+- Submitting fixes, improvements, and enhancements.
+- To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
+
+If you wish to contribute code, before [forking](https://help.github.com/articles/fork-a-repo/) WooCommerce, commiting your changes,
+and [sendind a pull request](https://help.github.com/articles/using-pull-requests/), please see the information in the sections below.
+
+WooCommerce is licensed under the GPLv2+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv2+ license.
+
+If you have questions about the process to contribute code or want to discuss details of your contribution, you can contact WooCommerce core developers on the #core channel in the [WooCommerce community Slack](https://woocommerce.com/community-slack/).
+
+## Getting started
+
+- [How to set up WooCommerce development environment](How-to-set-up-WooCommerce-development-environment)
+- [Minification of SCSS and JS](Minification-of-SCSS-and-JS)
+- [String localisation guidelines](String-localisation-guidelines)
+- [Running unit tests](https://github.com/woocommerce/woocommerce/blob/master/tests/README.md)
+- [Running e2e tests](End-to-end-Testing)
+
+## Coding Guidelines and Development 🛠
+
+- Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)
+- Run our build process described in the document on [how to set up WooCommerce development environment](How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
+- Whenever possible please fix pre-existing code standards errors in the files that you change. It is ok to skip that for larger files or complex fixes.
+- Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
+- When committing, reference your issue number (#1234) and include a note about the fix.
+- Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.
+- Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository.
+- Make sure to write good and detailed commit messages (see [this post](https://chris.beams.io/posts/git-commit/) for more on this) and follow all the applicable sections of the pull request template.
+- Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team.
+
+If you are contributing code to the REST API or editor blocks, these are developed in external packages.
+- [WooCommerce REST API package](https://github.com/woocommerce/woocommerce-rest-api)
+- [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
 
 ## Feature Requests 🚀
 
@@ -19,18 +49,3 @@ Feature requests can be [submitted to our issue tracker](https://github.com/wooc
 Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
 
 You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc+is%3Aclosed).
-
-## Coding Guidelines and Development 🛠
-
-- **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
-- Run our build process described in the section above, it will install our pre-commit hook, code sniffs, dependencies, and more.
-- Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
-- When committing, reference your issue number (#1234) and include a note about the fix.
-- Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.
-- Push the changes to your fork and submit a pull request on the master branch of the WooCommerce repository.
-
-Please avoid modifying the change-log directly or updating the .pot files. These will be updated by the WooCommerce team.
-
-If you are contributing code to the REST API or editor blocks, these are developed in external packages.
-- [WooCommerce REST API package](https://github.com/woocommerce/woocommerce-rest-api)
-- [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
