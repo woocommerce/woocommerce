@@ -35,11 +35,11 @@ fi
 
 status "Lets release WooCommerce Admin 🎉"
 
-#git checkout master || { error "ERROR: Unable to checkout master branch." ; exit 1; }
+git checkout master || { error "ERROR: Unable to checkout master branch." ; exit 1; }
 
 success "Checked out master branch"
 
-#git pull origin master
+git pull origin master
 
 success "Pulled latest commits"
 
@@ -60,7 +60,7 @@ fi
 
 status "creating a release branch"
 
-#git checkout -b $branch || { error "ERROR: Unable to create release branch." ; exit 1; }
+git checkout -b $branch || { error "ERROR: Unable to create release branch." ; exit 1; }
 
 success "Release branch created: ${branch}"
 
