@@ -16,6 +16,7 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 
 ## Documentation
 * [WooCommerce Documentation](https://docs.woocommerce.com/documentation/plugins/woocommerce/)
+* [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
