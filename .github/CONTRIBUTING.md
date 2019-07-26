@@ -20,28 +20,6 @@ Feature request issues will remain closed until we see sufficient interest via c
 
 You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc+is%3Aclosed).
 
-## Technical Support / Questions ❓
-
-We don't offer technical support on GitHub so we recommend using the following:
-
-**Reading our documentation**
-Usage docs can be found here: https://docs.woocommerce.com/
-
-If you have a problem, you may want to start with the self help guide here: https://docs.woocommerce.com/document/woocommerce-self-service-guide/
-
-**Technical support for premium extensions or if you're a WooCommerce.com customer**
- from a human being - submit a ticket via the helpdesk
-https://woocommerce.com/contact-us/ 
-
-**General usage and development questions**
-- WooCommerce Slack Community: https://woocommerce.com/community-slack/
-- WordPress.org Forums: https://wordpress.org/support/plugin/woocommerce
-- The WooCommerce Help and Share Facebook group
-
-**Customizations**
-- [WooExperts](https://woocommerce.com/experts/)
-- [Codeable](https://codeable.io/)
-
 ## Build process 🛠
 
 The source code found on GitHub does not contain compiled CSS or Javascript, and is missing some functionality such as Gutenberg Blocks and the REST API, until the build process is ran.
