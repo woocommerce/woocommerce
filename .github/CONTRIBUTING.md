@@ -20,20 +20,6 @@ Feature request issues will remain closed until we see sufficient interest via c
 
 You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc+is%3Aclosed).
 
-## Build process 🛠
-
-The source code found on GitHub does not contain compiled CSS or Javascript, and is missing some functionality such as Gutenberg Blocks and the REST API, until the build process is ran.
-
-To run the build process, in a terminal go to your WooCommerce installation and run:
-
-```bash
-npm install
-composer install
-npm run build
-```
-
-To get your development environment running we recommend [reading here](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment).
-
 ## Coding Guidelines and Development 🛠
 
 - **Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)**
