@@ -122,6 +122,8 @@ const printProjectColumns = async () => {
 		json: true,
 	}
 
+	console.log( chalk.yellow( 'Gathering columns from the project board, https://github.com/orgs/woocommerce/projects/2' ) );
+
 	return requestPromise( options )
 		.then( data => {
 			console.log( ' ' );
