@@ -34,6 +34,7 @@ class ActivityPanel extends Component {
 	constructor() {
 		super( ...arguments );
 		this.togglePanel = this.togglePanel.bind( this );
+		this.clearPanel = this.clearPanel.bind( this );
 		this.toggleMobile = this.toggleMobile.bind( this );
 		this.renderTab = this.renderTab.bind( this );
 		this.updateNoticeFlag = this.updateNoticeFlag.bind( this );
@@ -41,6 +42,7 @@ class ActivityPanel extends Component {
 			isPanelOpen: false,
 			mobileOpen: false,
 			currentTab: '',
+			isPanelSwitching: false,
 			hasWordPressNotices: false,
 		};
 	}
@@ -72,12 +74,18 @@ class ActivityPanel extends Component {
 			) {
 				return {
 					isPanelOpen: ! state.isPanelOpen,
-					currentTab: state.isPanelOpen ? '' : tabName,
+					currentTab: tabName,
 					mobileOpen: ! state.isPanelOpen,
 				};
 			}
-			return { currentTab: tabName };
+			return { currentTab: tabName, isPanelSwitching: true };
 		} );
+	}
+
+	clearPanel() {
+		this.setState(
+			( { isPanelOpen } ) => ( isPanelOpen ? { isPanelSwitching: false } : { currentTab: '' } )
+		);
 	}
 
 	// On smaller screen, the panel buttons are hidden behind a toggle.
@@ -157,7 +165,7 @@ class ActivityPanel extends Component {
 	}
 
 	renderPanel() {
-		const { isPanelOpen, currentTab } = this.state;
+		const { isPanelOpen, currentTab, isPanelSwitching } = this.state;
 
 		const tab = find( this.getTabs(), { name: currentTab } );
 		if ( ! tab ) {
@@ -166,20 +174,25 @@ class ActivityPanel extends Component {
 
 		const classNames = classnames( 'woocommerce-layout__activity-panel-wrapper', {
 			'is-open': isPanelOpen,
+			'is-switching': isPanelSwitching,
 		} );
 
 		return (
-			<div className={ classNames } tabIndex={ 0 } role="tabpanel" aria-label={ tab.title }>
-				{ ( isPanelOpen && (
-					<div
-						className="woocommerce-layout__activity-panel-content"
-						key={ 'activity-panel-' + currentTab }
-						id={ 'activity-panel-' + currentTab }
-					>
-						{ this.getPanelContent( currentTab ) }
-					</div>
-				) ) ||
-					null }
+			<div
+				className={ classNames }
+				tabIndex={ 0 }
+				role="tabpanel"
+				aria-label={ tab.title }
+				onTransitionEnd={ this.clearPanel }
+				onAnimationEnd={ this.clearPanel }
+			>
+				<div
+					className="woocommerce-layout__activity-panel-content"
+					key={ 'activity-panel-' + currentTab }
+					id={ 'activity-panel-' + currentTab }
+				>
+					{ this.getPanelContent( currentTab ) }
+				</div>
 			</div>
 		);
 	}
@@ -187,7 +200,7 @@ class ActivityPanel extends Component {
 	renderTab( tab, i ) {
 		const { currentTab, isPanelOpen } = this.state;
 		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
-			'is-active': tab.name === currentTab,
+			'is-active': isPanelOpen && tab.name === currentTab,
 			'has-unread': tab.unread,
 		} );
 
