@@ -56,5 +56,3 @@ class WC_Admin_Notes_Historical_Data {
 		$note->save();
 	}
 }
-
-new WC_Admin_Notes_Historical_Data();

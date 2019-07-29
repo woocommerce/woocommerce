@@ -117,5 +117,3 @@ class WC_Admin_Analytics_Dashboard {
 		array_unshift( $submenu['woocommerce'], $menu );
 	}
 }
-
-new WC_Admin_Analytics_Dashboard();

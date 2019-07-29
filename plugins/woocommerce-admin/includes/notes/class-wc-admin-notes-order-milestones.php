@@ -319,5 +319,3 @@ class WC_Admin_Notes_Order_Milestones {
 		$note->save();
 	}
 }
-
-new WC_Admin_Notes_Order_Milestones();

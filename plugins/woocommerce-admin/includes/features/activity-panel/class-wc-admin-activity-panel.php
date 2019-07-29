@@ -9,11 +9,11 @@
 /**
  * Contains backend logic for the activity panel feature.
  */
-class WC_Admin_Activity_Panel {
+class WC_Admin_Activity_Panels {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Activity_Panel instance
+	 * @var WC_Admin_Activity_Panels instance
 	 */
 	protected static $instance = null;
 
@@ -69,5 +69,3 @@ class WC_Admin_Activity_Panel {
 		WC_Admin_Notes_Settings_Notes::add_notes_for_settings_that_have_moved();
 	}
 }
-
-new WC_Admin_Activity_Panel();

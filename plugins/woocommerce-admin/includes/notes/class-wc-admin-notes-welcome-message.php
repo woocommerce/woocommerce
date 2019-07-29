@@ -48,5 +48,3 @@ class WC_Admin_Notes_Welcome_Message {
 		$note->save();
 	}
 }
-
-new WC_Admin_Notes_Welcome_Message();

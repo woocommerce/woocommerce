@@ -455,5 +455,3 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		}
 	}
 }
-
-new WC_Admin_Notes_Woo_Subscriptions_Notes();

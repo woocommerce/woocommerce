@@ -56,5 +56,3 @@ class WC_Admin_Events {
 		WC_Admin_Notes_Mobile_App::possibly_add_mobile_app_note();
 	}
 }
-
-WC_Admin_Events::instance()->init();

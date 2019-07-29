@@ -181,5 +181,3 @@ class WC_Admin_Notes {
 		}
 	}
 }
-
-WC_Admin_Notes::init();

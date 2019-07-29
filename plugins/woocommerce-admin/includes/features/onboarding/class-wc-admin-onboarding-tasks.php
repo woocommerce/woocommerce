@@ -127,5 +127,3 @@ class WC_Admin_Onboarding_Tasks {
 		return false;
 	}
 }
-
-WC_Admin_Onboarding_Tasks::get_instance();

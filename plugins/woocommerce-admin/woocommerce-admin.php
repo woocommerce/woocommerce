@@ -20,6 +20,51 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Autoload packages.
+ *
+ * We want to fail gracefully if `composer install` has not been executed yet, so we are checking for the autoloader.
+ * If the autoloader is not present, let's log the failure and display a nice admin notice.
+ */
+$autoloader = __DIR__ . '/vendor/autoload.php';
+if ( is_readable( $autoloader ) ) {
+	require $autoloader;
+} else {
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log(  // phpcs:ignore
+			sprintf(
+				/* translators: 1: composer command. 2: plugin directory */
+				esc_html__( 'Your installation of the WooCommerce Admin feature plugin is incomplete. Please run %1$s within the %2$s directory.', 'woocommerce-admin' ),
+				'`composer install`',
+				'`' . esc_html( str_replace( ABSPATH, '', __DIR__ ) ) . '`'
+			)
+		);
+	}
+	/**
+	 * Outputs an admin notice if composer install has not been ran.
+	 */
+	add_action(
+		'admin_notices',
+		function() {
+			?>
+			<div class="notice notice-error">
+				<p>
+					<?php
+					printf(
+						/* translators: 1: composer command. 2: plugin directory */
+						esc_html__( 'Your installation of the WooCommerce Admin feature plugin is incomplete. Please run %1$s within the %2$s directory.', 'woocommerce-admin' ),
+						'<code>composer install</code>',
+						'<code>' . esc_html( str_replace( ABSPATH, '', __DIR__ ) ) . '</code>'
+					);
+					?>
+				</p>
+			</div>
+			<?php
+		}
+	);
+	return;
+}
+
+/**
  * Feature plugin main class.
  *
  * @internal This file will not be bundled with woo core, only the feature plugin.
@@ -69,7 +114,6 @@ class WC_Admin_Feature_Plugin {
 	 * @return void
 	 */
 	public function on_activation() {
-		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 		WC_Admin_Install::create_tables();
 		WC_Admin_Install::create_events();
 	}
@@ -140,33 +184,22 @@ class WC_Admin_Feature_Plugin {
 	 * Include WC Admin classes.
 	 */
 	public function includes() {
-		require_once WC_ADMIN_ABSPATH . 'includes/core-functions.php';
-
 		// Initialize the WC API extensions.
-		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-sync.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-events.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-api-init.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/export/class-wc-admin-report-csv-exporter.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/export/class-wc-admin-report-exporter.php';
-
-		// Data triggers.
-		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
+		WC_Admin_Reports_Sync::init();
+		WC_Admin_Install::init();
+		WC_Admin_Events::instance()->init();
+		new WC_Admin_Api_Init();
+		WC_Admin_Report_Exporter::init();
 
 		// CRUD classes.
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-note.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes.php';
+		WC_Admin_Notes::init();
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-new-sales-record.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-settings-notes.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-giving-feedback-notes.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-woo-subscriptions-notes.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-historical-data.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-order-milestones.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-mobile-app.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-welcome-message.php';
+		new WC_Admin_Notes_Woo_Subscriptions_Notes();
+		new WC_Admin_Notes_Historical_Data();
+		new WC_Admin_Notes_Order_Milestones();
+		new WC_Admin_Notes_Welcome_Message();
 	}
 
 	/**
@@ -180,11 +213,6 @@ class WC_Admin_Feature_Plugin {
 		if ( 'ActionScheduler_wpPostStore' !== $store_class ) {
 			return $store_class;
 		}
-
-		// Include our store class here instead of wc_admin_plugins_loaded()
-		// because ActionScheduler is hooked into `plugins_loaded` at a
-		// much higher priority.
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-actionscheduler-wppoststore.php';
 
 		return 'WC_Admin_ActionScheduler_WPPostStore';
 	}
@@ -210,7 +238,7 @@ class WC_Admin_Feature_Plugin {
 
 		remove_action( 'admin_head', array( 'WC_Admin_Library', 'update_link_structure' ), 20 );
 
-		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-loader.php';
+		new WC_Admin_Loader();
 
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ) );
 		add_action( 'admin_menu', array( $this, 'register_devdocs_page' ) );
@@ -293,9 +321,6 @@ class WC_Admin_Feature_Plugin {
 	 * @param array $features Array of feature slugs.
 	 */
 	public function replace_supported_features( $features ) {
-		if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
-			require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';
-		}
 		$feature_config = apply_filters( 'wc_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;

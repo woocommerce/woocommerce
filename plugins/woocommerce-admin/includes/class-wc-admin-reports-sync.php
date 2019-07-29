@@ -797,5 +797,3 @@ class WC_Admin_Reports_Sync {
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );
 	}
 }
-
-WC_Admin_Reports_Sync::init();

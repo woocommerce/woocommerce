@@ -181,5 +181,3 @@ class WC_Admin_Report_Exporter {
 		}
 	}
 }
-
-WC_Admin_Report_Exporter::init();

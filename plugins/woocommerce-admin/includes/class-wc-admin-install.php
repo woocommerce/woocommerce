@@ -288,5 +288,3 @@ class WC_Admin_Install {
 		}
 	}
 }
-
-WC_Admin_Install::init();

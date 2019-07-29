@@ -127,17 +127,13 @@ class WC_Admin_Loader {
 	 * Class loader for enabled WooCommerce Admin features/sections.
 	 */
 	public static function load_features() {
-		require_once WC_ADMIN_ABSPATH . 'includes/page-controller/class-wc-admin-page-controller.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/page-controller/page-controller-functions.php';
-
 		$features = self::get_features();
 		foreach ( $features as $feature ) {
-			$feature = strtolower( $feature );
-			$file    = WC_ADMIN_FEATURES_PATH . $feature . '/class-wc-admin-' . $feature . '.php';
-			if ( file_exists( $file ) ) {
-				require_once $file;
-				$feature         = ucfirst( $feature );
-				self::$classes[] = 'WC_Admin_' . $feature;
+			$feature = strtolower( str_replace( '-', '_', $feature ) );
+			$feature = 'WC_Admin_' . ucwords( $feature, '_' );
+
+			if ( class_exists( $feature ) ) {
+				new $feature;
 			}
 		}
 	}
@@ -740,5 +736,3 @@ class WC_Admin_Loader {
 		return apply_filters( 'wc_admin_get_user_data_fields', array() );
 	}
 }
-
-new WC_Admin_Loader();
