@@ -44,7 +44,18 @@ class WC_Tax {
 	 * @param  string $value New rates value.
 	 */
 	public static function maybe_remove_tax_class_rates( $old_value, $value ) {
-		wc_deprecated_function( 'WC_Tax::maybe_remove_tax_class_rates', '3.7' );
+		wc_deprecated_function( 'WC_Tax::maybe_remove_tax_class_rates', '3.7', 'WC_Tax::delete_tax_class_by' );
+
+		$tax_classes          = array_filter( array_map( 'trim', explode( "\n", $value ) ) );
+		$existing_tax_classes = self::get_tax_classes();
+		$removed              = array_diff( $existing_tax_classes, $tax_classes );
+		$added                = array_diff( $tax_classes, $existing_tax_classes );
+		foreach ( $removed as $name ) {
+			self::delete_tax_class_by( 'name', $name );
+		}
+		foreach ( $added as $name ) {
+			self::create_tax_class( $name );
+		}
 	}
 
 	/**
