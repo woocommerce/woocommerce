@@ -1,20 +1,20 @@
 /**
  * External dependencies
  */
-import { forEach } from 'lodash';
-import { render } from '@wordpress/element';
+import { render } from 'react-dom';
 
 /**
  * Internal dependencies
  */
 import Block from './block.js';
+import getCategories from './get-categories';
 
 const containers = document.querySelectorAll(
 	'.wp-block-woocommerce-product-categories'
 );
 
 if ( containers.length ) {
-	forEach( containers, ( el ) => {
+	Array.prototype.forEach.call( containers, ( el ) => {
 		const data = JSON.parse( JSON.stringify( el.dataset ) );
 		const attributes = {
 			hasCount: data.hasCount === 'true',
@@ -22,8 +22,10 @@ if ( containers.length ) {
 			isDropdown: data.isDropdown === 'true',
 			isHierarchical: data.isHierarchical === 'true',
 		};
+		const categories = getCategories( attributes );
+
 		el.classList.remove( 'is-loading' );
 
-		render( <Block attributes={ attributes } />, el );
+		render( <Block attributes={ attributes } categories={ categories } />, el );
 	} );
 }

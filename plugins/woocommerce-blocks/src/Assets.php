@@ -30,7 +30,7 @@ class Assets {
 	 */
 	public static function register_assets() {
 		self::register_style( 'wc-block-editor', plugins_url( 'build/editor.css', __DIR__ ), array( 'wp-edit-blocks' ) );
-		self::register_style( 'wc-block-style', plugins_url( 'build/style.css', __DIR__ ), array( 'wp-components' ) );
+		self::register_style( 'wc-block-style', plugins_url( 'build/style.css', __DIR__ ), array() );
 
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', __DIR__ ), array(), false );

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -12,9 +12,12 @@ import { PanelBody, ToggleControl } from '@wordpress/components';
 import './editor.scss';
 import Block from './block.js';
 import ToggleButtonControl from '../../components/toggle-button-control';
+import getCategories from './get-categories';
+import { IconFolder } from '../../components/icons';
 
 export default function( { attributes, setAttributes } ) {
 	const { hasCount, hasEmpty, isDropdown, isHierarchical } = attributes;
+	const categories = getCategories( attributes );
 
 	return (
 		<Fragment>
@@ -69,7 +72,17 @@ export default function( { attributes, setAttributes } ) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<Block attributes={ attributes } isPreview />
+			{ categories.length > 0 ? (
+				<Block attributes={ attributes } categories={ categories } isPreview />
+			) : (
+				<Placeholder
+					className="wc-block-product-categories"
+					icon={ <IconFolder /> }
+					label={ __( 'Product Categories List', 'woo-gutenberg-products-block' ) }
+				>
+					{ __( "This block shows product categories for your store. In order to preview this you'll first need to create a product and assign it to a category.", 'woo-gutenberg-products-block' ) }
+				</Placeholder>
+			) }
 		</Fragment>
 	);
 }

@@ -2,27 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Component, createRef, Fragment } from 'react';
 import classnames from 'classnames';
-import { Component, createRef, Fragment } from '@wordpress/element';
-import { IconButton, Placeholder } from '@wordpress/components';
-import { repeat } from 'lodash';
-import PropTypes from 'prop-types';
-import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import { buildTermsTree } from './hierarchy';
-import { IconFolder } from '../../components/icons';
-
-function getCategories( { hasEmpty, isHierarchical } ) {
-	const categories = wc_product_block_data.productCategories.filter(
-		( cat ) => hasEmpty || !! cat.count
-	);
-	return isHierarchical ?
-		buildTermsTree( categories ) :
-		categories;
-}
+import withComponentId from '../../utils/with-component-id';
 
 /**
  * Component displaying the categories as dropdown or list.
@@ -76,7 +62,7 @@ class ProductCategoriesBlock extends Component {
 			const count = hasCount ? `(${ cat.count })` : null;
 			return [
 				<option key={ cat.term_id } value={ cat.link }>
-					{ repeat( '–', depth ) } { cat.name } { count }
+					{ '–'.repeat( depth ) } { cat.name } { count }
 				</option>,
 				!! cat.children && !! cat.children.length && this.renderOptions( cat.children, depth + 1 ),
 			];
@@ -84,9 +70,8 @@ class ProductCategoriesBlock extends Component {
 	}
 
 	render() {
-		const { attributes, instanceId } = this.props;
+		const { attributes, categories, ComponentId } = this.props;
 		const { className, isDropdown } = attributes;
-		const categories = getCategories( attributes );
 		const classes = classnames(
 			'wc-block-product-categories',
 			className,
@@ -96,11 +81,11 @@ class ProductCategoriesBlock extends Component {
 			}
 		);
 
-		const selectId = `prod-categories-${ instanceId }`;
+		const selectId = `prod-categories-${ ComponentId }`;
 
 		return (
 			<Fragment>
-				{ categories.length > 0 ? (
+				{ categories.length > 0 && (
 					<div className={ classes }>
 						{ isDropdown ? (
 							<Fragment>
@@ -115,43 +100,26 @@ class ProductCategoriesBlock extends Component {
 										{ this.renderOptions( categories ) }
 									</select>
 								</div>
-								<IconButton
+								<button
+									type="button"
+									className="wc-block-product-categories__button"
+									aria-label={ __( 'Go to category', 'woo-gutenberg-products-block' ) }
 									icon="arrow-right-alt2"
-									label={ __( 'Go to category', 'woo-gutenberg-products-block' ) }
 									onClick={ this.onNavigate }
-								/>
+								>
+									<svg aria-hidden="true" role="img" focusable="false" className="dashicon dashicons-arrow-right-alt2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+										<path d="M6 15l5-5-5-5 1-2 7 7-7 7z"></path>
+									</svg>
+								</button>
 							</Fragment>
 						) : (
 							this.renderList( categories )
 						) }
 					</div>
-				) : (
-					<Placeholder
-						className="wc-block-product-categories"
-						icon={ <IconFolder /> }
-						label={ __( 'Product Categories List', 'woo-gutenberg-products-block' ) }
-					>
-						{ __( "This block shows product categories for your store. In order to preview this you'll first need to create a product and assign it to a category.", 'woo-gutenberg-products-block' ) }
-					</Placeholder>
 				) }
 			</Fragment>
 		);
 	}
 }
 
-ProductCategoriesBlock.propTypes = {
-	/**
-	 * The attributes for this block.
-	 */
-	attributes: PropTypes.object.isRequired,
-	/**
-	 * A unique ID for identifying the label for the select dropdown.
-	 */
-	instanceId: PropTypes.number,
-	/**
-	 * Whether this is the block preview or frontend display.
-	 */
-	isPreview: PropTypes.bool,
-};
-
-export default withInstanceId( ProductCategoriesBlock );
+export default withComponentId( ProductCategoriesBlock );
