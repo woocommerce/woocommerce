@@ -45,7 +45,7 @@ class ProductCategories extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
-		\Automattic\WooCommerce\Blocks\Assets::load_script_as_required( 'frontend' );
+		\Automattic\WooCommerce\Blocks\Assets::register_block_script( 'frontend' );
 
 		return $content;
 	}
