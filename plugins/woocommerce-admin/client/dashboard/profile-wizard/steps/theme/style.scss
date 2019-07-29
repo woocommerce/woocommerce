@@ -29,6 +29,7 @@
 		border-bottom: 1px solid transparent;
 		color: $muriel-gray-500;
 		display: flex;
+		align-items: center;
 		justify-content: center;
 		background: transparent;
 		height: 48px;
@@ -146,6 +147,7 @@
 	.components-form-file-upload > .components-button {
 		flex: 1;
 		flex-direction: column;
+		justify-content: center;
 		margin: 0;
 		width: 100%;
 		height: 100%;
