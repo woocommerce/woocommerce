@@ -101,7 +101,12 @@ const GutenbergBlocksConfig = {
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
-				loader: 'babel-loader?cacheDirectory',
+				use: {
+					loader: 'babel-loader?cacheDirectory',
+					options: {
+						presets: [ '@wordpress/default' ],
+					},
+				},
 			},
 			{
 				test: /\.s[c|a]ss$/,
@@ -152,7 +157,18 @@ const BlocksFrontendConfig = {
 			{
 				test: /\.jsx?$/,
 				exclude: /node_modules/,
-				loader: 'babel-loader?cacheDirectory',
+				use: {
+					loader: 'babel-loader?cacheDirectory',
+					options: {
+						...require( '@wordpress/babel-preset-default' ),
+						plugins: [
+							'@babel/plugin-transform-react-jsx',
+							'@babel/plugin-transform-runtime',
+							'transform-object-rest-spread',
+							'transform-async-generator-functions',
+						],
+					},
+				},
 			},
 		],
 	},
