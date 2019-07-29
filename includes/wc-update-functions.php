@@ -1993,6 +1993,7 @@ function wc_update_370_tax_rate_classes() {
 			WC_Tax::create_tax_class( $class );
 		}
 	}
+	delete_option( 'woocommerce_tax_classes' );
 }
 
 /**
