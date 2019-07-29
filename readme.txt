@@ -247,7 +247,8 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Added `$order` and `$product` as parameters to the `woocommerce_ajax_order_item` filter in `WC_Ajax::add_order_item()`. #24108
 * Dev - Add new `woocommerce_product_import_image_separator` filter in `WC_Product_CSV_Importer::parse_images_field()` for adjusting the product images seperator. #24120
 * Dev - Add new `woocommerce_widget_shopping_cart_subtotal()` template function that hooks into the `woocommerce_widget_shopping_cart_total` action to output the mini cart subtotal. #24145
-* Dev - Removed the `woocommerce_before_cart_item_quantity_zero` action from `WC_Cart::restore_cart_item()` in favor of existing `woocommerce_cart_item_removed` action. #23112
+* Dev - Deprecate the `woocommerce_before_cart_item_quantity_zero` action from `WC_Cart::restore_cart_item()` in favor of existing `woocommerce_cart_item_removed` action. #23112
+* Dev - Deprecate WC_Tax::maybe_remove_tax_class_rates which hooked into the WP Options update hook for taxes in favor of new function WC_Tax::delete_tax_class_by which works on the new tax classes table. #24213
 * Fix - Use version_compare for determining the maximum WooCommerce database version number. #23092
 * Fix - Missing space and closing `<strong>` tag in WooCommerce.com disconnect message. #24073
 * Fix - CSV Importer - Skip rows during update if a SKU column exists, but the value is empty. #23262
