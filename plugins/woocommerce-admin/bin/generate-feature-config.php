@@ -23,12 +23,14 @@ if ( 'core' !== $phase ) {
 	$write  = "<?php\n";
 	$write .= "// WARNING: Do not directly edit this file.\n";
 	$write .= "// This file is auto-generated as part of the build process and things may break.\n";
-	$write .= "function wc_admin_get_feature_config() {\n";
-	$write .= "\treturn array(\n";
+	$write .= "if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {\n";
+	$write .= "\tfunction wc_admin_get_feature_config() {\n";
+	$write .= "\t\treturn array(\n";
 	foreach ( $config->features as $feature => $bool ) {
-		$write .= "\t\t'{$feature}' => " . ( $bool ? 'true' : 'false' ) . ",\n";
+		$write .= "\t\t\t'{$feature}' => " . ( $bool ? 'true' : 'false' ) . ",\n";
 	}
-	$write .= "\t);\n";
+	$write .= "\t\t);\n";
+	$write .= "\t}\n";
 	$write .= "}\n";
 
 	$config_file = fopen( 'includes/feature-config.php', 'w' );
