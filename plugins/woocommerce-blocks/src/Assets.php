@@ -172,35 +172,31 @@ class Assets {
 	 * @param string $src       Full URL of the script, or path of the script relative to the WordPress root directory.
 	 * @param array  $deps      Optional. An array of registered script handles this script depends on. Default empty array.
 	 * @param bool   $has_i18n  Optional. Whether to add a script translation call to this file. Default 'true'.
-	 * @param bool   $enqueue   Optional. Whether the script should be enqueued instead of registered.
 	 */
-	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true, $enqueue = false ) {
+	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true ) {
 		$filename     = str_replace( plugins_url( '/', __DIR__ ), '', $src );
 		$ver          = self::get_file_version( $filename );
 		$deps_path    = dirname( __DIR__ ) . '/' . str_replace( '.js', '.deps.json', $filename );
 		$dependencies = file_exists( $deps_path ) ? json_decode( file_get_contents( $deps_path ) ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		$dependencies = array_merge( $dependencies, $deps );
 
-		if ( $enqueue ) {
-			wp_enqueue_script( $handle, $src, $dependencies, $ver, true );
-		} else {
-			wp_register_script( $handle, $src, $dependencies, $ver, true );
-		}
+		wp_register_script( $handle, $src, $dependencies, $ver, true );
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', dirname( __DIR__ ) . '/languages' );
 		}
 	}
 
 	/**
-	 * Queues a script when required.
+	 * Queues a block script.
 	 *
 	 * @since 2.3.0
 	 *
 	 * @param string $name Name of the script used to identify the file inside build folder.
 	 */
-	public static function load_script_as_required( $name ) {
+	public static function register_block_script( $name ) {
 		$filename = 'build/' . $name . '.js';
-		self::register_script( 'wc-' . $name, plugins_url( $filename, __DIR__ ), array(), true, true );
+		self::register_script( 'wc-' . $name, plugins_url( $filename, __DIR__ ) );
+		wp_enqueue_script( 'wc-' . $name );
 	}
 
 	/**
