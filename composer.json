@@ -10,7 +10,7 @@
     "automattic/jetpack-autoloader": "1.2.0",
     "php": ">=5.6|>=7.0",
     "composer/installers": "1.6.0",
-    "woocommerce/woocommerce-blocks": "2.3.0-beta.2",
+    "woocommerce/woocommerce-blocks": "2.3.0-beta.3",
     "woocommerce/woocommerce-rest-api": "1.0.3"
   },
   "require-dev": {
