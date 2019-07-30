@@ -50,7 +50,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.ship_to_different_address();
+			this.init_ship_to_different_address();
 			this.init_payment_methods();
 
 			// Update on page load
@@ -183,11 +183,30 @@ jQuery( function( $ ) {
 				wc_checkout_form.trigger_update_checkout();
 			}
 		},
-		ship_to_different_address: function( e ) {
-			if ( $( '#ship-to-different-address input' ).is( ':checked' ) ) {
-				$( 'div.shipping_address' ).slideDown( e ? null : 0 );
+		init_ship_to_different_address: function() {
+			var $checkbox = $( '#ship-to-different-address input' );
+
+			if ( ! $checkbox.prop( 'checked' ) ) {
+				var $billing = $( 'div.woocommerce-billing-fields' );
+
+				var $differentFields = jQuery( 'div.shipping_address' ).find( 'input, select' ).filter( function() {
+					jQuery( this ).attr( 'id' ).replace( 'shipping', 'billing' );
+					var id = jQuery( this ).attr( 'id' ).replace( 'shipping', 'billing' );
+					return jQuery( this ).val() !== $billing.find( '#' + id ).val();
+				} );
+
+				if ( $differentFields.length > 0 ) {
+					$checkbox.prop( 'checked', true );
+				}
+			}
+
+			$( 'div.shipping_address' ).toggle( $checkbox.prop( 'checked' ) );
+		},
+		ship_to_different_address: function() {
+			if ( $( this ).is( ':checked' ) ) {
+				$( 'div.shipping_address' ).slideDown();
 			} else {
-				$( 'div.shipping_address' ).slideUp( e ? null : 0 );
+				$( 'div.shipping_address' ).slideUp();
 			}
 		},
 		reset_update_checkout_timer: function() {
