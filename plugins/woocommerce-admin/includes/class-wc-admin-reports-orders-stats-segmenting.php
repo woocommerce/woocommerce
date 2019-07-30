@@ -390,7 +390,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			RIGHT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
 			";
 			$segmenting_where          = " AND taxonomy = 'product_cat'";
-			$segmenting_groupby        = 'wp_term_taxonomy.term_taxonomy_id';
+			$segmenting_groupby        = 'wp_term_taxonomy.term_id';
 			$segmenting_dimension_name = 'category_id';
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
