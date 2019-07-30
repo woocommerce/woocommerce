@@ -22,11 +22,11 @@ const withComponentId = ( OriginalComponent ) => {
 		}
 
 		render() {
-			const ComponentId = this.generateUniqueID();
+			const componentId = this.generateUniqueID();
 
 			return <OriginalComponent
 				{ ...this.props }
-				ComponentId={ ComponentId }
+				componentId={ componentId }
 			/>;
 		}
 	};
