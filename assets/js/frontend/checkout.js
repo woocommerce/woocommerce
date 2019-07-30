@@ -135,7 +135,10 @@ jQuery( function( $ ) {
 			}
 		},
 		init_checkout: function() {
-			$( document.body ).trigger( 'update_checkout' );
+			// Fire updated_checkout event after existing ready event handlers.
+			$( function() {
+				$( document.body ).trigger( 'updated_checkout' );
+			} );
 		},
 		maybe_input_changed: function( e ) {
 			if ( wc_checkout_form.dirtyInput ) {
