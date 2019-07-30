@@ -50,7 +50,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.$checkout_form.find( '#ship-to-different-address input' ).change();
+			this.ship_to_different_address();
 			this.init_payment_methods();
 
 			// Update on page load
@@ -183,10 +183,11 @@ jQuery( function( $ ) {
 				wc_checkout_form.trigger_update_checkout();
 			}
 		},
-		ship_to_different_address: function() {
-			$( 'div.shipping_address' ).hide();
-			if ( $( this ).is( ':checked' ) ) {
-				$( 'div.shipping_address' ).slideDown();
+		ship_to_different_address: function( e ) {
+			if ( $( '#ship-to-different-address input' ).is( ':checked' ) ) {
+				$( 'div.shipping_address' ).slideDown( e ? null : 0 );
+			} else {
+				$( 'div.shipping_address' ).slideUp( e ? null : 0 );
 			}
 		},
 		reset_update_checkout_timer: function() {
