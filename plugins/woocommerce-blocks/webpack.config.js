@@ -160,13 +160,20 @@ const BlocksFrontendConfig = {
 				use: {
 					loader: 'babel-loader?cacheDirectory',
 					options: {
-						...require( '@wordpress/babel-preset-default' ),
-						plugins: [
-							'@babel/plugin-transform-react-jsx',
-							'@babel/plugin-transform-runtime',
-							'transform-object-rest-spread',
-							'transform-async-generator-functions',
+						presets: [
+							[ '@babel/preset-env', {
+								modules: false,
+								targets: {
+									browsers: [ 'extends @wordpress/browserslist-config' ],
+								},
+							} ],
 						],
+						plugins: [
+							require.resolve( '@babel/plugin-proposal-object-rest-spread' ),
+							require.resolve( '@babel/plugin-transform-react-jsx' ),
+							require.resolve( '@babel/plugin-proposal-async-generator-functions' ),
+							require.resolve( '@babel/plugin-transform-runtime' ),
+						].filter( Boolean ),
 					},
 				},
 			},
