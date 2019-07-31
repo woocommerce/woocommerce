@@ -18,7 +18,7 @@ class WC_Admin_Order_Refund extends \WC_Order_Refund {
 	/**
 	 * Order traits.
 	 */
-	use \WC_Admin_Order_Trait;
+	use \Automattic\WooCommerce\Admin\WC_Admin_Order_Trait;
 
 	/**
 	 * Add filter(s) required to hook WC_Admin_Order_Refund class to substitute WC_Order_Refund.

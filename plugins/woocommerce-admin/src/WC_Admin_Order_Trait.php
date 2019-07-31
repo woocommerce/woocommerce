@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 defined( 'ABSPATH' ) || exit;
 
 /**

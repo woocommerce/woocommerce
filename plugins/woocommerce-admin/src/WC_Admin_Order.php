@@ -18,7 +18,7 @@ class WC_Admin_Order extends \WC_Order {
 	/**
 	 * Order traits.
 	 */
-	use \WC_Admin_Order_Trait;
+	use \Automattic\WooCommerce\Admin\WC_Admin_Order_Trait;
 
 	/**
 	 * Holds refund amounts and quantities for the order.
