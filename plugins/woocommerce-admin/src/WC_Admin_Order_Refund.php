@@ -7,16 +7,18 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Order_Refund class.
  */
-class WC_Admin_Order_Refund extends WC_Order_Refund {
+class WC_Admin_Order_Refund extends \WC_Order_Refund {
 	/**
 	 * Order traits.
 	 */
-	use WC_Admin_Order_Trait;
+	use \WC_Admin_Order_Trait;
 
 	/**
 	 * Add filter(s) required to hook WC_Admin_Order_Refund class to substitute WC_Order_Refund.
@@ -35,8 +37,9 @@ class WC_Admin_Order_Refund extends WC_Order_Refund {
 	 * @return string
 	 */
 	public static function order_class_name( $classname, $order_type, $order_id ) {
+		// @todo - Only substitute class when necessary (during sync).
 		if ( 'WC_Order_Refund' === $classname ) {
-			return 'WC_Admin_Order_Refund';
+			return '\Automattic\WooCommerce\Admin\WC_Admin_Order_Refund';
 		} else {
 			return $classname;
 		}
@@ -54,7 +57,7 @@ class WC_Admin_Order_Refund extends WC_Order_Refund {
 			return false;
 		}
 
-		return WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $parent_order );
+		return \WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $parent_order );
 	}
 
 	/**

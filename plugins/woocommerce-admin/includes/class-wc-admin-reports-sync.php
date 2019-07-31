@@ -8,6 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\WC_Admin_Order;
+use \Automattic\WooCommerce\Admin\WC_Admin_Order_Refund;
 
 /**
  * WC_Admin_Reports_Sync Class.
