@@ -7,6 +7,8 @@
  * @package WooCommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\Notes;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -104,7 +106,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	 */
 	public function check_connection() {
 		if ( ! $this->is_connected() ) {
-			$data_store = WC_Data_Store::load( 'admin-note' );
+			$data_store = \WC_Data_Store::load( 'admin-note' );
 			$note_ids   = $data_store->get_notes_with_name( self::CONNECTION_NOTE_NAME );
 			if ( ! empty( $note_ids ) ) {
 				// We already have a connection note. Exit early.
@@ -122,7 +124,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	 * @return bool
 	 */
 	public function is_connected() {
-		$auth = WC_Helper_Options::get( 'auth' );
+		$auth = \WC_Helper_Options::get( 'auth' );
 		return ( ! empty( $auth['access_token'] ) );
 	}
 
@@ -136,7 +138,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 			return false;
 		}
 
-		$auth = WC_Helper_Options::get( 'auth' );
+		$auth = \WC_Helper_Options::get( 'auth' );
 		return absint( $auth['site_id'] );
 	}
 
@@ -154,7 +156,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$product_ids = array();
 
 		if ( $this->is_connected() ) {
-			$subscriptions = WC_Helper::get_subscriptions();
+			$subscriptions = \WC_Helper::get_subscriptions();
 
 			foreach ( (array) $subscriptions as $subscription ) {
 				if ( in_array( $site_id, $subscription['connections'], true ) ) {
@@ -216,7 +218,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	public function prune_inactive_subscription_notes() {
 		$active_product_ids = $this->get_subscription_active_product_ids();
 
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$note_ids   = $data_store->get_notes_with_name( self::SUBSCRIPTION_NOTE_NAME );
 
 		foreach ( (array) $note_ids as $note_id ) {
@@ -239,7 +241,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	public function find_note_for_product_id( $product_id ) {
 		$product_id = intval( $product_id );
 
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$note_ids   = $data_store->get_notes_with_name( self::SUBSCRIPTION_NOTE_NAME );
 		foreach ( (array) $note_ids as $note_id ) {
 			$note             = WC_Admin_Notes::get_note( $note_id );
@@ -418,7 +420,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 
 		$this->prune_inactive_subscription_notes();
 
-		$subscriptions      = WC_Helper::get_subscriptions();
+		$subscriptions      = \WC_Helper::get_subscriptions();
 		$active_product_ids = $this->get_subscription_active_product_ids();
 
 		foreach ( (array) $subscriptions as $subscription ) {

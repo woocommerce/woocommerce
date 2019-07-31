@@ -5,6 +5,8 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\Notes;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -58,7 +60,7 @@ class WC_Admin_Notes {
 	 * @return array Array of arrays.
 	 */
 	public static function get_notes( $context = 'edit', $args = array() ) {
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$raw_notes  = $data_store->get_notes( $args );
 		$notes      = array();
 		foreach ( (array) $raw_notes as $raw_note ) {
@@ -91,7 +93,7 @@ class WC_Admin_Notes {
 		if ( false !== $note_id ) {
 			try {
 				return new WC_Admin_Note( $note_id );
-			} catch ( Exception $e ) {
+			} catch ( \Exception $e ) {
 				return false;
 			}
 		}
@@ -106,7 +108,7 @@ class WC_Admin_Notes {
 	 * @return int
 	 */
 	public static function get_notes_count( $type = array(), $status = array() ) {
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 		return $data_store->get_notes_count( $type, $status );
 	}
 
@@ -116,7 +118,7 @@ class WC_Admin_Notes {
 	 * @param string $name Name to search for.
 	 */
 	public static function delete_notes_with_name( $name ) {
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$note_ids   = $data_store->get_notes_with_name( $name );
 		foreach ( (array) $note_ids as $note_id ) {
 			$note = new WC_Admin_Note( $note_id );
@@ -128,13 +130,13 @@ class WC_Admin_Notes {
 	 * Clear note snooze status if the reminder date has been reached.
 	 */
 	public static function unsnooze_notes() {
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$raw_notes  = $data_store->get_notes(
 			array(
 				'status' => array( WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED ),
 			)
 		);
-		$now        = new DateTime();
+		$now        = new \DateTime();
 
 		foreach ( $raw_notes as $raw_note ) {
 			$note          = new WC_Admin_Note( $raw_note );
@@ -170,7 +172,7 @@ class WC_Admin_Notes {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		$store = ActionScheduler::store();
+		$store = \ActionScheduler::store();
 
 		if ( is_a( $store, 'WC_Admin_ActionScheduler_WPPostStore' ) ) {
 			// If we're using our data store, call our bespoke deletion method.

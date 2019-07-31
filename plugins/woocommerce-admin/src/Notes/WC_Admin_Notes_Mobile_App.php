@@ -7,6 +7,8 @@
  * @package WooCommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\Notes;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -38,7 +40,7 @@ class WC_Admin_Notes_Mobile_App {
 			return;
 		}
 
-		$data_store = WC_Data_Store::load( 'admin-note' );
+		$data_store = \WC_Data_Store::load( 'admin-note' );
 
 		// We already have this note? Then exit, we're done.
 		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );

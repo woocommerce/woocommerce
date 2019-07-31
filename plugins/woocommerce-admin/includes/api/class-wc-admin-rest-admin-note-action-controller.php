@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+
 /**
  * REST API Admin Note Action controller class.
  *

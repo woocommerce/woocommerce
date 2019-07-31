@@ -6,6 +6,9 @@
  * @package Woocommerce Admin
  */
 
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Settings_Notes;
+
 /**
  * Contains backend logic for the activity panel feature.
  */

@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+
 /**
  * WC Admin Note Data Store (Custom Tables)
  */

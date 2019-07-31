@@ -7,6 +7,8 @@
  * @package WooCommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\Notes;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,7 +26,7 @@ class WC_Admin_Notes_New_Sales_Record {
 	 * @return floatval
 	 */
 	public static function sum_sales_for_date( $date ) {
-		$order_query = new WC_Order_Query( array( 'date_created' => $date ) );
+		$order_query = new \WC_Order_Query( array( 'date_created' => $date ) );
 		$orders      = $order_query->get_orders();
 		$total       = 0;
 

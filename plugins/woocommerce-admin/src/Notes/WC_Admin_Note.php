@@ -7,12 +7,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\Notes;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Note class.
  */
-class WC_Admin_Note extends WC_Data {
+class WC_Admin_Note extends \WC_Data {
 
 	// Note types.
 	const E_WC_ADMIN_NOTE_ERROR         = 'error';   // used for presenting error conditions.
@@ -53,7 +55,7 @@ class WC_Admin_Note extends WC_Data {
 			'title'         => '-',
 			'content'       => '-',
 			'icon'          => 'info',
-			'content_data'  => new stdClass(),
+			'content_data'  => new \stdClass(),
 			'status'        => self::E_WC_ADMIN_NOTE_UNACTIONED,
 			'source'        => 'woocommerce',
 			'date_created'  => '0000-00-00 00:00:00',
@@ -76,7 +78,7 @@ class WC_Admin_Note extends WC_Data {
 			$this->set_object_read( true );
 		}
 
-		$this->data_store = WC_Data_Store::load( 'admin-note' );
+		$this->data_store = \WC_Data_Store::load( 'admin-note' );
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
@@ -391,7 +393,7 @@ class WC_Admin_Note extends WC_Data {
 		$allowed_type = false;
 
 		// Make sure $content_data is stdClass Object or an array.
-		if ( ! ( $content_data instanceof stdClass ) ) {
+		if ( ! ( $content_data instanceof \stdClass ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note content_data prop must be an instance of stdClass.', 'woocommerce-admin' ) );
 		}
 
