@@ -14,7 +14,7 @@ There are many ways to contribute to the project!
 If you wish to contribute code, before [forking](https://help.github.com/articles/fork-a-repo/) WooCommerce, commiting your changes,
 and [sendind a pull request](https://help.github.com/articles/using-pull-requests/), please see the information in the sections below.
 
-WooCommerce is licensed under the GPLv2+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv2+ license.
+WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
 If you have questions about the process to contribute code or want to discuss details of your contribution, you can contact WooCommerce core developers on the #core channel in the [WooCommerce community Slack](https://woocommerce.com/community-slack/).
 
