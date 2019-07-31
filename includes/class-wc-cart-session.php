@@ -130,7 +130,7 @@ final class WC_Cart_Session {
 
 			} elseif ( ! $product->is_purchasable() ) {
 				$update_cart_session = true;
-				/* translators: %1$s: product name. %2$s reason why */
+				/* translators: %s: product name */
 				$message = sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() );
 				/**
 				 * Filter message about item removed from the cart.
