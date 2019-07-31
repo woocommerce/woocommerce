@@ -293,6 +293,8 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	if ( ! is_float( $number ) ) {
 		$number = str_replace( $decimals, '.', $number );
 		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
+
+		// Convert multiple dots to just one.
 		$number = preg_replace( '/\.+/', '.', $number );
 	}
 
