@@ -19,17 +19,17 @@ If you have questions about the process to contribute code or want to discuss de
 
 ## Getting started
 
-- [How to set up WooCommerce development environment](How-to-set-up-WooCommerce-development-environment)
-- [Git Flow](WooCommerce-Git-Flow)
-- [Minification of SCSS and JS](Minification-of-SCSS-and-JS)
-- [String localisation guidelines](String-localisation-guidelines)
+- [How to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment)
+- [Git Flow](https://github.com/woocommerce/woocommerce/wiki/WooCommerce-Git-Flow)
+- [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)
+- [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/master/tests/README.md)
-- [Running e2e tests](End-to-end-Testing)
+- [Running e2e tests](https://github.com/woocommerce/woocommerce/wiki/End-to-end-Testing)
 
 ## Coding Guidelines and Development 🛠
 
 - Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/)
-- Run our build process described in the document on [how to set up WooCommerce development environment](How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
+- Run our build process described in the document on [how to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
 - Whenever possible please fix pre-existing code standards errors in the files that you change. It is ok to skip that for larger files or complex fixes.
 - Ensure you use LF line endings in your code editor. Use [EditorConfig](http://editorconfig.org/) if your editor supports it so that indentation, line endings and other settings are auto configured.
 - When committing, reference your issue number (#1234) and include a note about the fix.
