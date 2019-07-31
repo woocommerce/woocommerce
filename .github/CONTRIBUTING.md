@@ -20,6 +20,7 @@ If you have questions about the process to contribute code or want to discuss de
 ## Getting started
 
 - [How to set up WooCommerce development environment](How-to-set-up-WooCommerce-development-environment)
+- [Git Flow](WooCommerce-Git-Flow)
 - [Minification of SCSS and JS](Minification-of-SCSS-and-JS)
 - [String localisation guidelines](String-localisation-guidelines)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/master/tests/README.md)
