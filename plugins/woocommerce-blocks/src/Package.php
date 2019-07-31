@@ -72,7 +72,7 @@ class Package {
 	 * @return boolean
 	 */
 	protected static function has_dependencies() {
-		return class_exists( 'WooCommerce' );
+		return class_exists( 'WooCommerce' ) && function_exists( 'register_block_type' );
 	}
 
 	/**
