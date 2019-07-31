@@ -29,7 +29,7 @@
     "babel-preset-stage-2": "6.24.1",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "chromedriver": "75.1.0",
+    "chromedriver": "76.0.0",
     "config": "3.2.2",
     "cross-env": "5.2.0",
     "eslint": "6.1.0",
