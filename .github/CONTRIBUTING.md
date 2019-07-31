@@ -11,8 +11,7 @@ There are many ways to contribute to the project!
 - Submitting fixes, improvements, and enhancements.
 - To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
 
-If you wish to contribute code, before [forking](https://help.github.com/articles/fork-a-repo/) WooCommerce, commiting your changes,
-and [sendind a pull request](https://help.github.com/articles/using-pull-requests/), please see the information in the sections below.
+If you wish to contribute code, please read the information in the sections below. Then [fork](https://help.github.com/articles/fork-a-repo/) WooCommerce, commit your changes, and [submit a pull request](https://help.github.com/articles/using-pull-requests/) 🎉
 
 WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
