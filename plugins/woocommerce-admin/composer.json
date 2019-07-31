@@ -39,6 +39,9 @@
       "includes/core-functions.php",
       "includes/feature-config.php",
       "includes/page-controller/page-controller-functions.php"
-    ]
+    ],
+    "psr-4": {
+      "Automattic\\WooCommerce\\Admin\\": "src/"
+    }
   }
 }
