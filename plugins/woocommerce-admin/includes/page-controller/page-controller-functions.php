@@ -5,6 +5,8 @@
  * @package Woocommerce Admin
  */
 
+use Automattic\WooCommerce\Admin\WC_Admin_Page_Controller;
+
 /**
  * Connect an existing page to WooCommerce Admin.
  * Passthrough to WC_Admin_Page_Controller::connect_page().

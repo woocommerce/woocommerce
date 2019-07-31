@@ -5,6 +5,10 @@
  * @package Woocommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin;
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * WC_Admin_Page_Controller
  */
@@ -257,7 +261,7 @@ class WC_Admin_Page_Controller {
 		);
 
 		// Tabs that have sections as well.
-		$wc_emails    = WC_Emails::instance();
+		$wc_emails    = \WC_Emails::instance();
 		$wc_email_ids = array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) );
 
 		$tabs_with_sections = apply_filters(
