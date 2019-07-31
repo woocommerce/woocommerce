@@ -23,7 +23,7 @@
   "dependencies": {
     "@babel/runtime-corejs2": "7.5.5",
     "history": "4.9.0",
-    "lodash": "4.17.13",
+    "lodash": "4.17.15",
     "qs": "6.7.0"
   },
   "publishConfig": {
