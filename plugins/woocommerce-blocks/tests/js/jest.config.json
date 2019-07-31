@@ -15,5 +15,8 @@
     "node_modules/(?!(simple-html-tokenizer)/)"
   ],
   "preset": "@wordpress/jest-preset-default",
+  "transform": {
+    "^.+\\.js$": "<rootDir>/tests/js/jestPreprocess.js"
+  },
   "verbose": true
 }
