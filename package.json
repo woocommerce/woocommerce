@@ -50,7 +50,7 @@
     "grunt-rtlcss": "2.0.1",
     "grunt-sass": "3.0.2",
     "grunt-shell": "3.0.1",
-    "grunt-stylelint": "0.11.0",
+    "grunt-stylelint": "0.11.1",
     "grunt-wp-i18n": "1.0.3",
     "husky": "3.0.2",
     "istanbul": "1.0.0-alpha.2",
