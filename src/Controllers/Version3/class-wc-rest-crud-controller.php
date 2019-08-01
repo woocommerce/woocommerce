@@ -337,7 +337,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		}
 
 		return array(
-			'objects' => array_map( array( $this, 'get_object' ), $result ),
+			'objects' => array_filter( array_map( array( $this, 'get_object' ), $result ) ),
 			'total'   => (int) $total_posts,
 			'pages'   => (int) ceil( $total_posts / (int) $query->query_vars['posts_per_page'] ),
 		);
