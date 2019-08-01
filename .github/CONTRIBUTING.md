@@ -1,6 +1,6 @@
 # Contributing to WooCommerce ✨
 
-WooCommerce powers several online stores across the internet, and your help making it even more awesome will be greatly appreciated :)
+WooCommerce powers many online stores across the internet, and your help making it even more awesome will be greatly appreciated :)
 
 There are many ways to contribute to the project!
 
