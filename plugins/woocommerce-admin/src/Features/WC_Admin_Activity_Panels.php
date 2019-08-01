@@ -6,6 +6,8 @@
  * @package Woocommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\Features;
+
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Settings_Notes;
 

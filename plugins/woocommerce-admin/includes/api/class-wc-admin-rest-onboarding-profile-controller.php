@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Features\WC_Admin_Onboarding;
+
 /**
  * Onboarding Profile controller.
  *

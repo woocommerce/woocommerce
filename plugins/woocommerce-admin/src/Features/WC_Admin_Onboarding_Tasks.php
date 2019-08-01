@@ -6,6 +6,8 @@
  * @package Woocommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\Features;
+
 /**
  * Contains the logic for completing onboarding tasks.
  */

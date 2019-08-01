@@ -6,6 +6,8 @@
  * @package Woocommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\Features;
+
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
  */
@@ -228,9 +230,9 @@ class WC_Admin_Onboarding {
 		}
 
 		foreach ( $themes as $theme ) {
-			$directory = new RecursiveDirectoryIterator( $theme->theme_root . '/' . $theme->stylesheet );
-			$iterator  = new RecursiveIteratorIterator( $directory );
-			$files     = new RegexIterator( $iterator, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH );
+			$directory = new \RecursiveDirectoryIterator( $theme->theme_root . '/' . $theme->stylesheet );
+			$iterator  = new \RecursiveIteratorIterator( $directory );
+			$files     = new \RegexIterator( $iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH );
 
 			foreach ( $files as $file ) {
 				$content = file_get_contents( $file[0] );
@@ -361,14 +363,14 @@ class WC_Admin_Onboarding {
 	 */
 	public static function reset_onboarding() {
 		if (
-			! WC_Admin_Loader::is_admin_page() ||
+			! \WC_Admin_Loader::is_admin_page() ||
 			! isset( $_GET['reset_onboarding'] ) || // WPCS: CSRF ok.
 			1 !== absint( $_GET['reset_onboarding'] ) // WPCS: CSRF ok.
 		) {
 			return;
 		}
 
-		$request = new WP_REST_Request( 'POST', '/wc-admin/v1/onboarding/profile' );
+		$request = new \WP_REST_Request( 'POST', '/wc-admin/v1/onboarding/profile' );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
 		$request->set_body(
 			wp_json_encode(

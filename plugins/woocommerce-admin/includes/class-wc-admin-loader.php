@@ -130,7 +130,7 @@ class WC_Admin_Loader {
 		$features = self::get_features();
 		foreach ( $features as $feature ) {
 			$feature = strtolower( str_replace( '-', '_', $feature ) );
-			$feature = 'WC_Admin_' . ucwords( $feature, '_' );
+			$feature = 'Automattic\WooCommerce\Admin\Features\WC_Admin_' . ucwords( $feature, '_' );
 
 			if ( class_exists( $feature ) ) {
 				new $feature;
