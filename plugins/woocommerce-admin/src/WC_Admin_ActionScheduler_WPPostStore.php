@@ -5,10 +5,12 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 /**
  * Class WC Admin Action Scheduler Store.
  */
-class WC_Admin_ActionScheduler_WPPostStore extends ActionScheduler_wpPostStore {
+class WC_Admin_ActionScheduler_WPPostStore extends \ActionScheduler_wpPostStore {
 	/**
 	 * Action scheduler job priority (lower numbers are claimed first).
 	 */
@@ -24,7 +26,7 @@ class WC_Admin_ActionScheduler_WPPostStore extends ActionScheduler_wpPostStore {
 	 * @param DateTime               $scheduled_date Action schedule.
 	 * @return array Post data array for usage in wp_insert_post().
 	 */
-	protected function create_post_array( ActionScheduler_Action $action, DateTime $scheduled_date = null ) {
+	protected function create_post_array( \ActionScheduler_Action $action, \DateTime $scheduled_date = null ) {
 		$postdata = parent::create_post_array( $action, $scheduled_date );
 
 		if ( 0 === strpos( $postdata['post_title'], 'wc-admin_' ) ) {

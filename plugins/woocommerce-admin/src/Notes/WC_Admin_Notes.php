@@ -174,7 +174,7 @@ class WC_Admin_Notes {
 	public static function clear_queued_actions() {
 		$store = \ActionScheduler::store();
 
-		if ( is_a( $store, 'WC_Admin_ActionScheduler_WPPostStore' ) ) {
+		if ( is_a( $store, 'Automattic\WooCommerce\Admin\WC_Admin_ActionScheduler_WPPostStore' ) ) {
 			// If we're using our data store, call our bespoke deletion method.
 			$action_types = array( self::UNSNOOZE_HOOK );
 			$store->clear_pending_wcadmin_actions( $action_types );

@@ -222,7 +222,7 @@ class WC_Admin_Feature_Plugin {
 			return $store_class;
 		}
 
-		return 'WC_Admin_ActionScheduler_WPPostStore';
+		return 'Automattic\WooCommerce\Admin\WC_Admin_ActionScheduler_WPPostStore';
 	}
 
 	/**
