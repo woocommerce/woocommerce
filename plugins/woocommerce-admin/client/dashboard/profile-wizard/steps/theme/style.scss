@@ -87,7 +87,7 @@
 		padding: $gap;
 		display: flex;
 		flex-direction: column;
-		height: 100%;
+		margin-top: auto;
 	}
 
 	.woocommerce-profile-wizard__theme-status {
@@ -176,5 +176,116 @@
 	p {
 		@include font-size(14);
 		margin: 0;
+	}
+}
+
+.woocommerce-theme-preview {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	max-width: 100% !important;
+	display: flex;
+	flex-direction: column;
+
+	.woocommerce-theme-preview__toolbar {
+		background: $white;
+		flex-direction: row;
+		display: flex;
+		height: 56px;
+		border-bottom: 1px solid $muriel-gray-50;
+		padding-left: $gap;
+		padding-right: $gap;
+		align-items: center;
+
+		.muriel-button.is-button.is-primary {
+			height: 40px;
+			margin: 0;
+
+			@include breakpoint( '<782px' ) {
+				margin-left: auto;
+			}
+		}
+	}
+
+	.woocommerce-theme-preview__theme-name {
+		padding-left: $gap;
+		color: #1a1a1a;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 50%;
+	}
+
+	.woocommerce-theme-preview__close {
+		padding: 0 $gap 0 0;
+		color: $muriel-gray-500;
+	}
+
+	.woocommerce-theme-preview__devices {
+		margin-left: auto;
+		margin-right: $gap;
+
+		.muriel-button {
+			padding: $gap-small;
+			color: $muriel-gray-500;
+			margin: 0;
+			border-radius: 50%;
+
+			&.is-selected,
+			&:focus {
+				background: $muriel-gray-500;
+				color: $white;
+			}
+		}
+
+		@include breakpoint( '<782px' ) {
+			display: none;
+		}
+	}
+
+	.woocommerce-web-preview {
+		flex: 1;
+		padding: $gap-largest $gap;
+		overflow: scroll;
+
+		.woocommerce-web-preview__iframe-wrapper {
+			height: 100%;
+			border-radius: 3px;
+			box-shadow: $muriel-box-shadow-1dp;
+			overflow: hidden;
+			margin: 0 auto;
+
+			iframe {
+				display: block;
+			}
+		}
+
+		&.is-mobile .woocommerce-web-preview__iframe-wrapper {
+			max-width: 360px;
+		}
+
+		&.is-tablet .woocommerce-web-preview__iframe-wrapper {
+			max-width: 768px;
+		}
+
+		&.is-desktop {
+			width: 100%;
+			padding: 0;
+
+			.woocommerce-web-preview__iframe-wrapper {
+				border-radius: 0;
+				box-shadow: none;
+			}
+		}
+	}
+}
+
+.woocommerce-theme-preview-active {
+	overflow: hidden;
+
+	.woocommerce-profile-wizard__header {
+		display: none;
 	}
 }

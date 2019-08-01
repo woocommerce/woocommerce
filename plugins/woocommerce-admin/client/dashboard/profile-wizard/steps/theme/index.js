@@ -23,6 +23,7 @@ import withSelect from 'wc-api/with-select';
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
 import ThemeUploader from './uploader';
+import ThemePreview from './preview';
 
 class Theme extends Component {
 	constructor() {
@@ -30,19 +31,21 @@ class Theme extends Component {
 
 		this.state = {
 			activeTab: 'all',
+			demo: null,
 			uploadedThemes: [],
 		};
 
 		this.handleUploadComplete = this.handleUploadComplete.bind( this );
 		this.onChoose = this.onChoose.bind( this );
+		this.onClosePreview = this.onClosePreview.bind( this );
 		this.onSelectTab = this.onSelectTab.bind( this );
 		this.openDemo = this.openDemo.bind( this );
 	}
 
-	async onChoose( theme ) {
+	async onChoose( theme, location = '' ) {
 		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
-		recordEvent( 'storeprofiler_store_theme_choose', { theme } );
+		recordEvent( 'storeprofiler_store_theme_choose', { theme, location } );
 		await updateProfileItems( { theme } );
 
 		if ( ! isError ) {
@@ -56,10 +59,17 @@ class Theme extends Component {
 		}
 	}
 
-	openDemo( theme ) {
-		// @todo This should open a theme demo preview.
+	onClosePreview() {
+		const { demo } = this.state;
+		recordEvent( 'storeprofiler_store_theme_demo_close', { theme: demo.slug } );
+		document.body.classList.remove( 'woocommerce-theme-preview-active' );
+		this.setState( { demo: null } );
+	}
 
-		recordEvent( 'storeprofiler_store_theme_live_demo', { theme } );
+	openDemo( theme ) {
+		recordEvent( 'storeprofiler_store_theme_live_demo', { theme: theme.slug } );
+		document.body.classList.add( 'woocommerce-theme-preview-active' );
+		this.setState( { demo: theme } );
 	}
 
 	renderTheme( theme ) {
@@ -90,12 +100,12 @@ class Theme extends Component {
 						<Button
 							isPrimary={ Boolean( demo_url ) }
 							isDefault={ ! Boolean( demo_url ) }
-							onClick={ () => this.onChoose( slug ) }
+							onClick={ () => this.onChoose( slug, 'card' ) }
 						>
 							{ __( 'Choose', 'woocommerce-admin' ) }
 						</Button>
 						{ demo_url && (
-							<Button isDefault onClick={ () => this.openDemo( slug ) }>
+							<Button isDefault onClick={ () => this.openDemo( theme ) }>
 								{ __( 'Live Demo', 'woocommerce-admin' ) }
 							</Button>
 						) }
@@ -152,11 +162,14 @@ class Theme extends Component {
 			this.setState( {
 				uploadedThemes: [ ...this.state.uploadedThemes, upload.theme_data ],
 			} );
+
+			recordEvent( 'storeprofiler_store_theme_upload', { theme: upload.theme_data.slug } );
 		}
 	}
 
 	render() {
 		const themes = this.getThemes();
+		const { demo } = this.state;
 
 		return (
 			<Fragment>
@@ -192,6 +205,9 @@ class Theme extends Component {
 						</div>
 					) }
 				</TabPanel>
+				{ demo && (
+					<ThemePreview theme={ demo } onChoose={ this.onChoose } onClose={ this.onClosePreview } />
+				) }
 			</Fragment>
 		);
 	}

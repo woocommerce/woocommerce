@@ -30,5 +30,6 @@
   { "component": "Table" },
   { "component": "Tag" },
   { "component": "TextControlWithAffixes" },
-  { "component": "ViewMoreList" }
+  { "component": "ViewMoreList" },
+  { "component": "WebPreview" }
 ]
