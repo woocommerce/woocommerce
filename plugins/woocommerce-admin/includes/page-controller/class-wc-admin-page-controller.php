@@ -190,7 +190,7 @@ class WC_Admin_Page_Controller {
 		// If 'current_screen' hasn't fired yet, the current page calculation
 		// will fail which causes `false` to be returned for all subsquent calls.
 		if ( ! did_action( 'current_screen' ) ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retreival should be called on or after the `current_screen` hook.', 'woocommerce-admin' ) );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retreival should be called on or after the `current_screen` hook.', 'woocommerce-admin' ), '0.12.0' );
 		}
 
 		if ( is_null( $this->current_page ) ) {
