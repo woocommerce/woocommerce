@@ -68,6 +68,7 @@ abstract class WC_Gateway_Paypal_Response {
 			$order->payment_complete( $txn_id );
 			WC()->cart->empty_cart();
 			$order->update_meta_data( '_paypal_payment_completed', 'yes' );
+			$order->save();
 		}
 	}
 
