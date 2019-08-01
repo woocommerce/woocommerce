@@ -111,7 +111,7 @@ Another valuable way to help is by translating our growing library of WooCommerc
 
 By translating video tutorials you'll be helping non-English speaking users and people affected by disabilities to get to grips with using WooCommerce for the first time, and to go on and create their businesses and make a living! That's something to be proud of and if you choose to dive into this area, we salute you.
 
-### Testing
+## Testing 🔬
 
 There can never be enough testing done which is why it is a great way to contribute to WooCommerce as well. 
 
