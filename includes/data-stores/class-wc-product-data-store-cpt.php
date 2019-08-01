@@ -1958,6 +1958,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			add_filter( 'posts_where', array( $this, 'reviews_allowed_query_where' ), 10, 2 );
 		}
 
+		// Handle orderby.
+		if ( isset( $query_vars['orderby'] ) && 'include' === $query_vars['orderby'] ) {
+			$wp_query_args['orderby'] = 'post__in';
+		}
+
 		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
 	}
 
