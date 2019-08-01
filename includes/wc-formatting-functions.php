@@ -927,10 +927,10 @@ function wc_format_postcode( $postcode, $country ) {
 	switch ( $country ) {
 		case 'CA':
 		case 'GB':
-			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', -3, 0 );
 			break;
 		case 'IE':
-			$postcode = trim( substr_replace( $postcode, ' ', 3, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', 3, 0 );
 			break;
 		case 'BR':
 		case 'PL':
@@ -946,11 +946,11 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
 		case 'NL':
-			$postcode = trim( substr_replace( $postcode, ' ', 4, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', 4, 0 );
 			break;
 	}
 
-	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
+	return apply_filters( 'woocommerce_format_postcode', trim( $postcode ), $country );
 }
 
 /**
