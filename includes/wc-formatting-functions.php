@@ -946,7 +946,7 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
 		case 'NL':
-			$postcode = substr_replace( $postcode, ' ', 4, 0 );
+			$postcode = trim( substr_replace( $postcode, ' ', 4, 0 ) );
 			break;
 	}
 
