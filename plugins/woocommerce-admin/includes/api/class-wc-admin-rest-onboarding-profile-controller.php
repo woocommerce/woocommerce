@@ -96,6 +96,8 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
+		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
+
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
 		$item_schema     = $this->get_item_schema();
 
@@ -103,6 +105,9 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 		foreach ( $item_schema['properties'] as $key => $property_schema ) {
 			$items[ $key ] = isset( $onboarding_data[ $key ] ) ? $onboarding_data[ $key ] : null;
 		}
+
+		$wccom_auth               = WC_Helper_Options::get( 'auth' );
+		$items['wccom_connected'] = empty( $wccom_auth['access_token'] ) ? false : true;
 
 		$item = $this->prepare_item_for_response( $items, $request );
 		$data = $this->prepare_response_for_collection( $item );
@@ -313,6 +318,13 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			'setup_client'        => array(
 				'type'              => 'boolean',
 				'description'       => __( 'Whether or not this store was setup for a client.', 'woocommerce-admin' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'wccom_connected'     => array(
+				'type'              => 'boolean',
+				'description'       => __( 'Whether or not the store was connected to WooCommerce.com during the extension flow.', 'woocommerce-admin' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',

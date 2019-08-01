@@ -72,6 +72,32 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 				'schema' => array( $this, 'get_connect_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/request-wccom-connect',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'request_wccom_connect' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_connect_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/finish-wccom-connect',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'finish_wccom_connect' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_connect_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -234,6 +260,129 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 			'name'          => __( 'Jetpack', 'woocommerce-admin' ),
 			'connectAction' => $connect_url,
 		) );
+	}
+
+	/**
+	 *  Kicks off the WCCOM Connect process.
+	 *
+	 * @return array Connection URL for WooCommerce.com
+	 */
+	public function request_wccom_connect() {
+		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
+		if ( ! class_exists( 'WC_Helper_API' ) ) {
+			return new WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
+		}
+
+		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
+
+		$request = WC_Helper_API::post(
+			'oauth/request_token',
+			array(
+				'body' => array(
+					'home_url'     => home_url(),
+					'redirect_uri' => $redirect_uri,
+				),
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $code ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+		}
+
+		$secret = json_decode( wp_remote_retrieve_body( $request ) );
+		if ( empty( $secret ) ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+		}
+
+		do_action( 'woocommerce_helper_connect_start' );
+
+		$connect_url = add_query_arg(
+			array(
+				'home_url'     => rawurlencode( home_url() ),
+				'redirect_uri' => rawurlencode( $redirect_uri ),
+				'secret'       => rawurlencode( $secret ),
+				'from'         => 'woocommerce-onboarding',
+			),
+			WC_Helper_API::url( 'oauth/authorize' )
+		);
+
+		// Redirect to local calypso instead of production.
+		// @todo WordPress.com Connect / the OAuth flow does not currently respect this, but a patch is in the works to make this easier.
+		if ( defined( 'WOOCOMMERCE_CALYPSO_LOCAL' ) && WOOCOMMERCE_CALYPSO_LOCAL ) {
+			$connect_url = add_query_arg(
+				array(
+					'calypso_env' => 'development',
+				),
+				$connect_url
+			);
+		}
+
+		return( array(
+			'connectAction' => $connect_url,
+		) );
+	}
+
+	/**
+	 * Finishes connecting to WooCommerce.com.
+	 *
+	 * @param  object $rest_request Request details.
+	 * @return array Contains success status.
+	 */
+	public function finish_wccom_connect( $rest_request ) {
+		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
+		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
+		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php';
+		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
+		if ( ! class_exists( 'WC_Helper_API' ) ) {
+			return new WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
+		}
+
+		// Obtain an access token.
+		$request = WC_Helper_API::post(
+			'oauth/access_token',
+			array(
+				'body' => array(
+					'request_token' => wp_unslash( $rest_request['request_token'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					'home_url'      => home_url(),
+				),
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $code ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+		}
+
+		$access_token = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( ! $access_token ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+		}
+
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => $access_token['access_token'],
+				'access_token_secret' => $access_token['access_token_secret'],
+				'site_id'             => $access_token['site_id'],
+				'user_id'             => get_current_user_id(),
+				'updated'             => time(),
+			)
+		);
+
+		if ( ! WC_Helper::_flush_authentication_cache() ) {
+			WC_Helper_Options::update( 'auth', array() );
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+		}
+
+		delete_transient( '_woocommerce_helper_subscriptions' );
+		WC_Helper_Updater::flush_updates_cache();
+
+		do_action( 'woocommerce_helper_connected' );
+
+		return array(
+			'success' => true,
+		);
 	}
 
 	/**
