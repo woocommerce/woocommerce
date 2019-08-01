@@ -165,7 +165,7 @@ class Plugins extends Component {
 
 				<Card className="woocommerce-profile-wizard__plugins-card">
 					<Stepper
-						direction="vertical"
+						isVertical={ true }
 						currentStep={ step }
 						isPending={ isPending }
 						steps={ [

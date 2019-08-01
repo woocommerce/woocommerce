@@ -8,20 +8,28 @@ const MyStepper = withState( {
 } )( ( { currentStep, isComplete, isPending, setState } ) => {
 	const steps = [
 		{
-			label: 'First',
 			key: 'first',
+			label: 'First',
+			description: 'Step item description',
+			content: <div>First step content.</div>,
 		},
 		{
-			label: 'Second',
 			key: 'second',
+			label: 'Second',
+			description: 'Step item description',
+			content: <div>Second step content.</div>,
 		},
 		{
 			label: 'Third',
 			key: 'third',
+			description: 'Step item description',
+			content: <div>Third step content.</div>,
 		},
 		{
 			label: 'Fourth',
 			key: 'fourth',
+			description: 'Step item description',
+			content: <div>Fourth step content.</div>,
 		},
 	];
 
@@ -71,12 +79,14 @@ const MyStepper = withState( {
 			isPending={ isPending }
 		/>
 
+		<br />
+
 		<Stepper
 			isPending={ isPending }
-			direction="vertical"
+			isVertical={ true }
 			steps={ steps }
 			currentStep={ currentStep }
-			/>
+		/>
 	</div>
 	);
 } );

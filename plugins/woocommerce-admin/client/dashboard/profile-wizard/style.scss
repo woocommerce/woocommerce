@@ -46,8 +46,8 @@
 			}
 		}
 
-		.woocommerce-spinner__circle {
-			stroke: $muriel-hot-purple-600;
+		.woocommerce-spinner {
+			background: $muriel-hot-purple-600;
 		}
 	}
 
@@ -414,10 +414,6 @@
 }
 
 .woocommerce-profile-wizard__plugins-card {
-	.woocommerce-stepper {
-		box-shadow: none;
-	}
-
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
 		margin-left: 64px;
@@ -448,9 +444,10 @@
 
 	.woocommerce-stepper {
 		margin: 0 $gap 0 $gap;
-		background: transparent;
-		box-shadow: none;
-		margin-bottom: 0;
 		width: 100%;
+	}
+
+	.woocommerce-stepper__steps {
+		margin: 0;
 	}
 }
