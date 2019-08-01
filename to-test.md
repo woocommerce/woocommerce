@@ -46,7 +46,7 @@ When testing the new Coupon code generator functionality, focus on the following
 
 ### Testing helpers
 
-- At any point during your testing, remember to [check your browser's JavaScript console](https://codex.wordpress.org/Using_Your_Browser_to_Diagnose_JavaScript_Errors#Step_3:_Diagnosis) and see if there are any errors reported by WooCommerce there.
+- At any point during your testing, remember to [check your browser's JavaScript console](https://codex.wordpress.org/Using_Your_Browser_to_Diagnose_JavaScript_Errors#Step_3:_Diagnosis) and see if there are any errors reported by WooCommerce.
 - Use [Debug Bar](https://wordpress.org/plugins/enable-wp-debug-from-admin-dashboard/) or [Query Monitor](https://en-gb.wordpress.org/plugins/query-monitor/) to help make PHP notices and warnings more noticeable and report anything you see.
 
 ### Reporting bugs

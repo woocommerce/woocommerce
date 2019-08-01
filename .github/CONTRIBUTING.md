@@ -110,3 +110,12 @@ If you created a style guide for your language, please let us know so we can add
 Another valuable way to help is by translating our growing library of WooCommerce video tutorials. Check out the [Translating  Our Videos](https://docs.woocommerce.com/document/translating-our-videos/) doc and join in!
 
 By translating video tutorials you'll be helping non-English speaking users and people affected by disabilities to get to grips with using WooCommerce for the first time, and to go on and create their businesses and make a living! That's something to be proud of and if you choose to dive into this area, we salute you.
+
+### Testing
+
+There can never be enough testing done which is why it is a great way to contribute to WooCommerce as well. 
+
+If you'd like to test WooCommerce, take a look at the guides below:
+
+- [General WooCommerce Core Testing Checklist](https://github.com/woocommerce/woocommerce/wiki/Core-Testing-Checklist)
+- [Testing instructions for the current WooCommerce release](https://github.com/woocommerce/woocommerce/blob/master/to-test.md)
