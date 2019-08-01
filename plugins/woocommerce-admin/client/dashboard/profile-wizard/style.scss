@@ -216,6 +216,10 @@
 		border-color: transparent;
 	}
 
+	.muriel-checkbox label.components-checkbox-control__label {
+		margin-left: $gap-smaller;
+	}
+
 	.muriel-checkbox input[type='checkbox'] {
 		width: 18px;
 		height: 18px;

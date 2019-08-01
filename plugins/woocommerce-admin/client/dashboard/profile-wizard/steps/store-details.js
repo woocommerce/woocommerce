@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, SelectControl, TextControl } from 'newspack-components';
+import { Button, SelectControl, TextControl, CheckboxControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -30,6 +30,7 @@ class StoreDetails extends Component {
 				city: '',
 				countryState: '',
 				postCode: '',
+				isClient: false,
 			},
 		};
 
@@ -85,11 +86,26 @@ class StoreDetails extends Component {
 			return;
 		}
 
-		const { createNotice, goToNextStep, isError, updateSettings } = this.props;
-		const { addressLine1, addressLine2, city, countryState, postCode } = this.state.fields;
+		const {
+			createNotice,
+			goToNextStep,
+			isSettingsError,
+			updateSettings,
+			updateProfileItems,
+			isProfileItemsError,
+		} = this.props;
+		const {
+			addressLine1,
+			addressLine2,
+			city,
+			countryState,
+			postCode,
+			isClient,
+		} = this.state.fields;
 
 		recordEvent( 'storeprofiler_store_details_continue', {
 			store_country: countryState.split( ':' )[ 0 ],
+			setup_client: isClient,
 		} );
 
 		await updateSettings( {
@@ -102,7 +118,9 @@ class StoreDetails extends Component {
 			},
 		} );
 
-		if ( ! isError ) {
+		await updateProfileItems( { setup_client: isClient } );
+
+		if ( ! isSettingsError && ! isProfileItemsError ) {
 			goToNextStep();
 		} else {
 			createNotice(
@@ -202,6 +220,11 @@ class StoreDetails extends Component {
 						className={ errors.postCode ? 'has-error' : null }
 					/>
 
+					<CheckboxControl
+						label={ __( 'This store is being set up for a client', 'woocommerce-admin' ) }
+						onChange={ value => this.updateValue( 'isClient', value ) }
+					/>
+
 					<Button isPrimary onClick={ this.onContinue }>
 						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>
@@ -213,21 +236,25 @@ class StoreDetails extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting } = select( 'wc-api' );
+		const { getSettings, getSettingsError, isGetSettingsRequesting, getProfileItemsError } = select(
+			'wc-api'
+		);
 
 		const settings = getSettings( 'general' );
-		const isError = Boolean( getSettingsError( 'general' ) );
-		const isRequesting = isGetSettingsRequesting( 'general' );
+		const isSettingsError = Boolean( getSettingsError( 'general' ) );
+		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
+		const isProfileItemsError = Boolean( getProfileItemsError() );
 
-		return { getSettings, isError, isRequesting, settings };
+		return { getSettings, isProfileItemsError, isSettingsError, isSettingsRequesting, settings };
 	} ),
 	withDispatch( dispatch => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateSettings } = dispatch( 'wc-api' );
+		const { updateSettings, updateProfileItems } = dispatch( 'wc-api' );
 
 		return {
 			createNotice,
 			updateSettings,
+			updateProfileItems,
 		};
 	} )
 )( StoreDetails );

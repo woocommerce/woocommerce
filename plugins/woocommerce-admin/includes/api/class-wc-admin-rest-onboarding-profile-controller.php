@@ -310,6 +310,13 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'setup_client'        => array(
+				'type'              => 'boolean',
+				'description'       => __( 'Whether or not this store was setup for a client.', 'woocommerce-admin' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+			),
 		);
 
 		return apply_filters( 'woocommerce_onboarding_profile_properties', $properties );
