@@ -709,7 +709,6 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			$replace_chars = array(
 				'.'   => '{dot}',
 				'+'   => '{plus}',
-				'%20' => '{space}',
 			);
 
 			$query_string = str_replace( array_keys( $replace_chars ), array_values( $replace_chars ), $url_parts['query'] );
