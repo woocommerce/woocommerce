@@ -5,10 +5,9 @@
  * @package WooCommerce Admin/Classes
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Automattic\WooCommerce\Admin;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Order;
-use \Automattic\WooCommerce\Admin\WC_Admin_Order_Refund;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Sync Class.
@@ -127,7 +126,7 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
 		if ( self::is_importing() ) {
-			return new WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress.  Please allow the previous import to complete before beginning a new one.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress.  Please allow the previous import to complete before beginning a new one.', 'woocommerce-admin' ) );
 		}
 
 		self::reset_import_stats( $days, $skip_existing );
@@ -154,7 +153,7 @@ class WC_Admin_Reports_Sync {
 		$previous_import_date = get_option( 'wc_admin_imported_from_date' );
 		$current_import_date  = $days ? date( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) ) : -1;
 
-		if ( ! $previous_import_date || -1 === $current_import_date || new DateTime( $previous_import_date ) > new DateTime( $current_import_date ) ) {
+		if ( ! $previous_import_date || -1 === $current_import_date || new \DateTime( $previous_import_date ) > new \DateTime( $current_import_date ) ) {
 			update_option( 'wc_admin_imported_from_date', $current_import_date );
 		}
 	}
@@ -208,7 +207,7 @@ class WC_Admin_Reports_Sync {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		$store = ActionScheduler::store();
+		$store = \ActionScheduler::store();
 
 		if ( is_a( $store, 'WC_Admin_ActionScheduler_WPPostStore' ) ) {
 			// If we're using our data store, call our bespoke deletion method.
@@ -314,11 +313,11 @@ class WC_Admin_Reports_Sync {
 		add_action( 'save_post', array( __CLASS__, 'schedule_single_order_import' ) );
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'schedule_single_order_import' ) );
 
-		WC_Admin_Reports_Orders_Stats_Data_Store::init();
-		WC_Admin_Reports_Customers_Data_Store::init();
-		WC_Admin_Reports_Coupons_Data_Store::init();
-		WC_Admin_Reports_Products_Data_Store::init();
-		WC_Admin_Reports_Taxes_Data_Store::init();
+		\WC_Admin_Reports_Orders_Stats_Data_Store::init();
+		\WC_Admin_Reports_Customers_Data_Store::init();
+		\WC_Admin_Reports_Coupons_Data_Store::init();
+		\WC_Admin_Reports_Products_Data_Store::init();
+		\WC_Admin_Reports_Taxes_Data_Store::init();
 	}
 
 	/**
@@ -457,10 +456,10 @@ class WC_Admin_Reports_Sync {
 
 		$result = array_sum(
 			array(
-				WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id ),
-				WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id ),
-				WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id ),
-				WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id ),
+				\WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id ),
+				\WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id ),
+				\WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id ),
+				\WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id ),
 			)
 		);
 
@@ -630,7 +629,7 @@ class WC_Admin_Reports_Sync {
 			add_action( 'pre_user_query', array( __CLASS__, 'exclude_existing_customers_from_query' ) );
 		}
 
-		$customer_query = new WP_User_Query( $query_args );
+		$customer_query = new \WP_User_Query( $query_args );
 
 		remove_action( 'pre_user_query', array( __CLASS__, 'exclude_existing_customers_from_query' ) );
 
@@ -707,7 +706,7 @@ class WC_Admin_Reports_Sync {
 
 		foreach ( $customer_ids as $customer_id ) {
 			// @todo Schedule single customer update if this fails?
-			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
+			\WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
 
 		$imported_count = get_option( 'wc_admin_import_customers_count', 0 );
@@ -752,7 +751,7 @@ class WC_Admin_Reports_Sync {
 		);
 
 		foreach ( $customer_ids as $customer_id ) {
-			WC_Admin_Reports_Customers_Data_Store::delete_customer( $customer_id );
+			\WC_Admin_Reports_Customers_Data_Store::delete_customer( $customer_id );
 		}
 
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'customer' ) );
@@ -794,7 +793,7 @@ class WC_Admin_Reports_Sync {
 		);
 
 		foreach ( $order_ids as $order_id ) {
-			WC_Admin_Reports_Orders_Stats_Data_Store::delete_order( $order_id );
+			\WC_Admin_Reports_Orders_Stats_Data_Store::delete_order( $order_id );
 		}
 
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );

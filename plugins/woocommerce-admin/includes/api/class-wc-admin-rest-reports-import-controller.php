@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\WC_Admin_Reports_Sync;
+
 /**
  * Reports Imports controller.
  *

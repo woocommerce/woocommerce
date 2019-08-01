@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\API
  */
 
+use Automattic\WooCommerce\Admin\WC_Admin_Reports_Sync;
+
 /**
  * Reports Import REST API Test Class
  *

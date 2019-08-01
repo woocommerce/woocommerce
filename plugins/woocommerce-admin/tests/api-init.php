@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Admin\WC_Admin_Reports_Sync;
+
 /**
  * Class WC_Tests_API_Init
  */

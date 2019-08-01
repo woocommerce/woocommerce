@@ -95,7 +95,7 @@ class WC_Admin_Report_Exporter {
 		$report_batch_args = array( $export_id, $report_type, $report_args );
 
 		if ( 0 < $num_batches ) {
-			\WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
+			WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
 		}
 
 		return $total_rows;
