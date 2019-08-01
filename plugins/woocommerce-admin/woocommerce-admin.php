@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Order_Milestones;
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Welcome_Message;
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Woo_Subscriptions_Notes;
+use Automattic\WooCommerce\Admin\WC_Admin_Report_Exporter;
 
 /**
  * Autoload packages.

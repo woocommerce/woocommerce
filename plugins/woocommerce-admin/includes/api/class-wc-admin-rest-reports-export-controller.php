@@ -11,6 +11,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\WC_Admin_Report_Exporter;
+
 /**
  * Reports Export controller.
  *

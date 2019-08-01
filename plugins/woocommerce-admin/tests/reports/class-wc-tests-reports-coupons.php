@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Coupons
  */
 
+use \Automattic\WooCommerce\Admin\WC_Admin_Report_CSV_Exporter;
+
 /**
  * Class WC_Tests_Reports_Coupons
  */

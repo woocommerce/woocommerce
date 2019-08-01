@@ -5,6 +5,8 @@
  * @package WooCommerce/Export
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,7 +21,7 @@ if ( ! class_exists( 'WC_CSV_Batch_Exporter', false ) ) {
 /**
  * WC_Admin_Report_CSV_Exporter Class.
  */
-class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
+class WC_Admin_Report_CSV_Exporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Type of report being exported.
 	 *
@@ -102,15 +104,15 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	protected function map_report_controller() {
 		$controller_map = array(
-			'products'   => 'WC_Admin_REST_Reports_Products_Controller',
-			'variations' => 'WC_Admin_REST_Reports_Variations_Controller',
-			'orders'     => 'WC_Admin_REST_Reports_Orders_Controller',
-			'categories' => 'WC_Admin_REST_Reports_Categories_Controller',
-			'taxes'      => 'WC_Admin_REST_Reports_Taxes_Controller',
-			'coupons'    => 'WC_Admin_REST_Reports_Coupons_Controller',
-			'stock'      => 'WC_Admin_REST_Reports_Stock_Controller',
-			'downloads'  => 'WC_Admin_REST_Reports_Downloads_Controller',
-			'customers'  => 'WC_Admin_REST_Reports_Customers_Controller',
+			'products'   => '\WC_Admin_REST_Reports_Products_Controller',
+			'variations' => '\WC_Admin_REST_Reports_Variations_Controller',
+			'orders'     => '\WC_Admin_REST_Reports_Orders_Controller',
+			'categories' => '\WC_Admin_REST_Reports_Categories_Controller',
+			'taxes'      => '\WC_Admin_REST_Reports_Taxes_Controller',
+			'coupons'    => '\WC_Admin_REST_Reports_Coupons_Controller',
+			'stock'      => '\WC_Admin_REST_Reports_Stock_Controller',
+			'downloads'  => '\WC_Admin_REST_Reports_Downloads_Controller',
+			'customers'  => '\WC_Admin_REST_Reports_Customers_Controller',
 		);
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
@@ -175,7 +177,7 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Prepare data for export.
 	 */
 	public function prepare_data_to_export() {
-		$request  = new WP_REST_Request( 'GET', "/wc/v4/reports/{$this->report_type}" );
+		$request  = new \WP_REST_Request( 'GET', "/wc/v4/reports/{$this->report_type}" );
 		$params   = $this->controller->get_collection_params();
 		$defaults = array();
 
