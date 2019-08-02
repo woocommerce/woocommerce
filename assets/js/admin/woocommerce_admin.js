@@ -61,16 +61,20 @@
 			})
 
 			.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc-order-totals #refund_amount[type=text]', function() {
-				var regex;
+				var regex, decimalRegex, decimailPoint;
 
 				if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+					decimailPoint = woocommerce_admin.mon_decimal_point;
+					regex = new RegExp( '[^\-0-9\%\\' + decimailPoint + ']+', 'gi' );
+					decimalRegex = new RegExp( '\\' + decimailPoint + '+', 'gi' );
 				} else {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+					decimailPoint = woocommerce_admin.decimal_point;
+					regex = new RegExp( '[^\-0-9\%\\' + decimailPoint + ']+', 'gi' );
+					decimalRegex = new RegExp( '\\' + decimailPoint + '+', 'gi' );
 				}
 
 				var value    = $( this ).val();
-				var newvalue = value.replace( regex, '' );
+				var newvalue = value.replace( regex, '' ).replace( decimalRegex, decimailPoint );
 
 				if ( value !== newvalue ) {
 					$( this ).val( newvalue );
