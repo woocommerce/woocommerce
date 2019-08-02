@@ -120,14 +120,17 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		wc_get_template( 'content-widget-price-filter.php', array(
-			'form_action'       => $form_action,
-			'step' 	            => $step,
-			'min_price'         => $min_price,
-			'max_price'         => $max_price,
-			'current_min_price' => $current_min_price,
-			'current_max_price' => $current_max_price
-		) );
+		wc_get_template(
+			'content-widget-price-filter.php',
+			array(
+				'form_action'       => $form_action,
+				'step'              => $step,
+				'min_price'         => $min_price,
+				'max_price'         => $max_price,
+				'current_min_price' => $current_min_price,
+				'current_max_price' => $current_max_price,
+			)
+		);
 
 		$this->widget_end( $args );
 	}
