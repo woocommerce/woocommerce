@@ -189,10 +189,11 @@ jQuery( function( $ ) {
 			if ( ! $checkbox.prop( 'checked' ) ) {
 				var $billing = $( 'div.woocommerce-billing-fields' );
 
-				var $differentFields = jQuery( 'div.shipping_address' ).find( 'input, select' ).filter( function() {
-					jQuery( this ).attr( 'id' ).replace( 'shipping', 'billing' );
-					var id = jQuery( this ).attr( 'id' ).replace( 'shipping', 'billing' );
-					return jQuery( this ).val() !== $billing.find( '#' + id ).val();
+				// Find shipping field values that diverge from billing.
+				var $differentFields = $( 'div.shipping_address' ).find( 'input, select' ).filter( function() {
+					$( this ).attr( 'id' ).replace( 'shipping', 'billing' );
+					var id = $( this ).attr( 'id' ).replace( 'shipping', 'billing' );
+					return $( this ).val() !== $billing.find( '#' + id ).val();
 				} );
 
 				if ( $differentFields.length > 0 ) {
