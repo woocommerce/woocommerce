@@ -9,9 +9,11 @@ export const isLargeCatalog = wc_product_block_data.isLargeCatalog || false;
 export const limitTags = wc_product_block_data.limitTags || false;
 export const hasTags = wc_product_block_data.hasTags || false;
 
+const NAMESPACE = '/wc/blocks/products';
+
 const getProductsRequests = ( { selected = [], search } ) => {
 	const requests = [
-		addQueryArgs( '/wc/blocks/products', {
+		addQueryArgs( NAMESPACE, {
 			per_page: isLargeCatalog ? 100 : -1,
 			catalog_visibility: 'visible',
 			status: 'publish',
@@ -22,7 +24,7 @@ const getProductsRequests = ( { selected = [], search } ) => {
 	// If we have a large catalog, we might not get all selected products in the first page.
 	if ( isLargeCatalog && selected.length ) {
 		requests.push(
-			addQueryArgs( '/wc/blocks/products', {
+			addQueryArgs( NAMESPACE, {
 				catalog_visibility: 'visible',
 				status: 'publish',
 				include: selected,
@@ -46,9 +48,20 @@ export const getProducts = ( { selected = [], search } ) => {
 	} );
 };
 
+/**
+ * Get a promise that resolves to a product object from the API.
+ *
+ * @param {object} - Id of the product to retrieve.
+ */
+export const getProduct = ( productId ) => {
+	return apiFetch( {
+		path: `${ NAMESPACE }/${ productId }`,
+	} );
+};
+
 const getProductTagsRequests = ( { selected = [], search } ) => {
 	const requests = [
-		addQueryArgs( '/wc/blocks/products/tags', {
+		addQueryArgs( `${ NAMESPACE }/tags`, {
 			per_page: limitTags ? 100 : -1,
 			orderby: limitTags ? 'count' : 'name',
 			order: limitTags ? 'desc' : 'asc',
@@ -59,7 +72,7 @@ const getProductTagsRequests = ( { selected = [], search } ) => {
 	// If we have a large catalog, we might not get all selected products in the first page.
 	if ( limitTags && selected.length ) {
 		requests.push(
-			addQueryArgs( '/wc/blocks/products/tags', {
+			addQueryArgs( `${ NAMESPACE }/tags`, {
 				include: selected,
 			} )
 		);
