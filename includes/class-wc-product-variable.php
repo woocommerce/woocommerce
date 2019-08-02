@@ -292,8 +292,12 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array
 	 */
 	public function get_available_variations() {
+		global $wp_filter;
 		$variation_ids        = $this->get_children();
 		$available_variations = array();
+
+		// @var bool Whether available variations are cacheable or not.
+		$available_variations_cacheable = empty( $wp_filter['woocommerce_show_variation_price'] ) && empty( $wp_filter['woocommerce_available_variation'] );
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -313,12 +317,15 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			// Prevent re-loading variations.
-			if ( ! isset( $this->variations_available[ $child_id ] ) ) {
-			  $this->variations_available[ $child_id ] = $this->get_available_variation( $variation );
+			if ( ! $available_variations_cacheable ) {
+				$available_variations[] = $this->get_available_variation( $variation );
+			} else {
+				// Prevent re-loading variations.
+				if ( ! isset( $this->variations_available[ $child_id ] ) ) {
+					$this->variations_available[ $child_id ] = $this->get_available_variation( $variation );
+				}
+				$available_variations[] = $this->variations_available[ $child_id ];
 			}
-
-			$available_variations[] = $this->variations_available[ $child_id ];
 		}
 
 		$available_variations = array_values( array_filter( $available_variations ) );
