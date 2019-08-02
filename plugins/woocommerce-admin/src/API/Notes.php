@@ -7,7 +7,7 @@
  * @package WooCommerce Admin/API
  */
 
-namespace Automattic\WooCommerce\Admin\API\Notes;
+namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,7 +20,7 @@ use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
  * @package WooCommerce/API
  * @extends WC_REST_CRUD_Controller
  */
-class Controller extends \WC_REST_CRUD_Controller {
+class Notes extends \WC_REST_CRUD_Controller {
 
 	/**
 	 * Endpoint namespace.

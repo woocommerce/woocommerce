@@ -33,8 +33,8 @@ class WC_Admin_Api_Init {
 	 */
 	public function rest_api_init() {
 		$controllers = array(
-			'Automattic\WooCommerce\Admin\API\Notes\Controller',
-			'Automattic\WooCommerce\Admin\API\Notes\Actions\Controller',
+			'Automattic\WooCommerce\Admin\API\Notes',
+			'Automattic\WooCommerce\Admin\API\NoteActions',
 			'WC_Admin_REST_Coupons_Controller',
 			'WC_Admin_REST_Customers_Controller',
 			'WC_Admin_REST_Data_Controller',
