@@ -9,6 +9,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\WC_Admin_Theme_Upgrader;
+use Automattic\WooCommerce\Admin\WC_Admin_Theme_Upgrader_Skin;
+
 /**
  * Themes controller.
  *

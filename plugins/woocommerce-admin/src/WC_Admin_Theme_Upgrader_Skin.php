@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Theme_Upgrader_Skin Class.
  */
-class WC_Admin_Theme_Upgrader_Skin extends Theme_Upgrader_Skin {
+class WC_Admin_Theme_Upgrader_Skin extends \Theme_Upgrader_Skin {
 	/**
 	 * Hide the skin header display.
 	 */

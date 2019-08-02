@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Theme_Upgrader Class.
  */
-class WC_Admin_Theme_Upgrader extends Theme_Upgrader {
+class WC_Admin_Theme_Upgrader extends \Theme_Upgrader {
 	/**
 	 * Install a theme package.
 	 *
