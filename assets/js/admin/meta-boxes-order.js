@@ -44,9 +44,10 @@ jQuery( function ( $ ) {
 				country = $this.val(),
 				$state = $this.parents( 'div.edit_address' ).find( ':input.js_field-state' ),
 				$parent = $state.parent(),
+				stateValue = $state.val(),
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
-				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
+				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : stateValue,
 				placeholder = $state.attr( 'placeholder' ),
 				$newstate;
 
@@ -73,6 +74,9 @@ jQuery( function ( $ ) {
 						var $option = $( '<option></option>' )
 							.prop( 'value', index )
 							.text( state[ index ] );
+						if ( index === stateValue ) {
+							$option.prop( 'selected' );
+						}
 						$newstate.append( $option );
 					} );
 
@@ -87,7 +91,7 @@ jQuery( function ( $ ) {
 					.prop( 'name', input_name )
 					.prop( 'placeholder', placeholder )
 					.addClass( 'js_field-state' )
-					.val( '' );
+					.val( stateValue );
 				$state.replaceWith( $newstate );
 			}
 
