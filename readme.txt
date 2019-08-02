@@ -179,7 +179,9 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.7.0 - 2019-xx-xx =
+= 3.8.0 - 2019-11-08 =
+
+= 3.7.0 - 2019-08-12 =
 * Enhancement - Added table ENGINE to system status report for debugging purposes. #23101
 * Enhancement - Format empty cart message as information notice. #23152
 * Enhancement - Add taxonomy-specific classes to active filters widget. #23122
@@ -280,6 +282,7 @@ INTERESTED IN DEVELOPMENT?
 * Localization - OBW: Make postal code optional based on locale data. #23915
 * Localization - Add new currency for São Tomé, Príncipe dobra and Mauritanian ouguiya. #23950
 * Localization - Change Canada poscode label to `Postal code`. #23740
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
