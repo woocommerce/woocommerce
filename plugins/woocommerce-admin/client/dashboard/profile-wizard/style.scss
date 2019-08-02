@@ -5,6 +5,13 @@
 		color: $muriel-gray-600;
 	}
 
+	.woocommerce-profile-wizard__skip.components-button.is-link {
+		color: $muriel-gray-600;
+		margin-top: 0;
+		margin-bottom: 0;
+		font-weight: normal;
+	}
+
 	.woocommerce-card {
 		margin-top: $gap;
 

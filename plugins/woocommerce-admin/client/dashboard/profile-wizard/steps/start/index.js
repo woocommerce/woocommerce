@@ -195,9 +195,9 @@ class Start extends Component {
 				</Card>
 
 				<p>
-					<Link href="#" onClick={ this.skipWizard }>
+					<Button isLink className="woocommerce-profile-wizard__skip" onClick={ this.skipWizard }>
 						{ __( 'Proceed without Jetpack or WooCommerce Services', 'woocommerce-admin' ) }
-					</Link>
+					</Button>
 				</p>
 			</Fragment>
 		);
