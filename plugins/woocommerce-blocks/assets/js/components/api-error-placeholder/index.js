@@ -2,61 +2,57 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import classNames from 'classnames';
+import { escapeHTML } from '@wordpress/escape-html';
 import {
 	Button,
 	Placeholder,
 	Spinner,
 } from '@wordpress/components';
 
-/**
- * Internal dependencies
- */
-
-class ApiErrorPlaceholder extends Component {
-	constructor() {
-		super( ...arguments );
-		this.state = {
-			retrying: false,
-		};
-		this.onRetry = this.onRetry.bind( this );
+const getErrorMessage = ( { apiMessage, message } ) => {
+	if ( message ) {
+		return message;
 	}
 
-	onRetry() {
-		const { onRetry } = this.props;
-
-		this.setState( { retrying: true } );
-		onRetry();
-	}
-
-	render() {
-		const { onRetry, errorMessage, className } = this.props;
-		const { retrying } = this.state;
+	if ( apiMessage ) {
 		return (
-			<Placeholder
-				icon={ <Gridicon icon="notice" /> }
-				label={ __( 'Sorry, an error occurred', 'woo-gutenberg-products-block' ) }
-				className={ classNames( 'wc-block-api-error', className ) }
-			>
-				<div className="wc-block-error__message">{ errorMessage }</div>
-				{ onRetry && (
-					<Fragment>
-						{ !! retrying ? (
-							<Spinner />
-						) : (
-							<Button isDefault onClick={ this.onRetry }>
-								{ __( 'Retry', 'woo-gutenberg-products-block' ) }
-							</Button>
-						) }
-					</Fragment>
-				) }
-			</Placeholder>
+			<span>
+				{ __( 'The following error was returned from the API', 'woo-gutenberg-products-block' ) }
+				<br />
+				<code>{ escapeHTML( apiMessage ) }</code>
+			</span>
 		);
 	}
-}
+
+	return __( 'An unknown error occurred which prevented the block from being updated.', 'woo-gutenberg-products-block' );
+};
+
+const ApiErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
+	<Placeholder
+		icon={ <Gridicon icon="notice" /> }
+		label={ __( 'Sorry, an error occurred', 'woo-gutenberg-products-block' ) }
+		className={ classNames( 'wc-block-api-error', className ) }
+	>
+		<div className="wc-block-error__message">
+			{ getErrorMessage( error ) }
+		</div>
+		{ onRetry && (
+			<Fragment>
+				{ isLoading ? (
+					<Spinner />
+				) : (
+					<Button isDefault onClick={ onRetry }>
+						{ __( 'Retry', 'woo-gutenberg-products-block' ) }
+					</Button>
+				) }
+			</Fragment>
+		) }
+	</Placeholder>
+);
 
 ApiErrorPlaceholder.propTypes = {
 	/**
@@ -64,13 +60,27 @@ ApiErrorPlaceholder.propTypes = {
 	 */
 	onRetry: PropTypes.func.isRequired,
 	/**
-	 * The error message to display from the API.
-	 */
-	errorMessage: PropTypes.node,
-	/**
 	 * Classname to add to placeholder in addition to the defaults.
 	 */
 	className: PropTypes.string,
+	/**
+	 * The error object.
+	 */
+	error: PropTypes.shape( {
+		/**
+		 * API error message to display in case of a missing `message`.
+		 */
+		apiMessage: PropTypes.node,
+		/**
+		 * Human-readable error message to display.
+		 */
+		message: PropTypes.string,
+	} ),
+	/**
+	 * Whether there is a request running, so the 'Retry' button is hidden and
+	 * a spinner is shown instead.
+	 */
+	isLoading: PropTypes.bool,
 };
 
 export default ApiErrorPlaceholder;
