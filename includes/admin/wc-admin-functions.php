@@ -194,6 +194,18 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
+	/**
+	 * Prevent adjust line item product stock.
+	 *
+	 * @since 3.7.1
+	 * @param bool $prevent If should prevent.
+	 * @param WC_Order_Item $item Item object.
+	 * @param int           $item_quantity Optional quantity to check against.
+	 */
+	if ( apply_filters( 'woocommerce_prevent_adjust_line_item_product_stock', false, $item, $item_quantity ) ) {
+		return false;
+	}
+
 	$product               = $item->get_product();
 	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
