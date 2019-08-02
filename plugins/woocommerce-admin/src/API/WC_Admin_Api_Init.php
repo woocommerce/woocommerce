@@ -5,6 +5,8 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -17,10 +19,10 @@ class WC_Admin_Api_Init {
 	 */
 	public function __construct() {
 		// Hook in data stores.
-		add_filter( 'woocommerce_data_stores', array( 'WC_Admin_Api_Init', 'add_data_stores' ) );
+		add_filter( 'woocommerce_data_stores', array( __CLASS__, 'add_data_stores' ) );
 		// REST API extensions init.
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
-		add_filter( 'rest_endpoints', array( 'WC_Admin_Api_Init', 'filter_rest_endpoints' ), 10, 1 );
+		add_filter( 'rest_endpoints', array( __CLASS__, 'filter_rest_endpoints' ), 10, 1 );
 
 		// Add currency symbol to orders endpoint response.
 		add_filter( 'woocommerce_rest_prepare_shop_order_object', array( __CLASS__, 'add_currency_symbol_to_order_response' ) );
@@ -31,8 +33,8 @@ class WC_Admin_Api_Init {
 	 */
 	public function rest_api_init() {
 		$controllers = array(
-			'WC_Admin_REST_Admin_Notes_Controller',
-			'WC_Admin_REST_Admin_Note_Action_Controller',
+			'Automattic\WooCommerce\Admin\API\Notes\Controller',
+			'Automattic\WooCommerce\Admin\API\Notes\Actions\Controller',
 			'WC_Admin_REST_Coupons_Controller',
 			'WC_Admin_REST_Customers_Controller',
 			'WC_Admin_REST_Data_Controller',
@@ -70,7 +72,7 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Themes_Controller',
 		);
 
-		if ( WC_Admin_Loader::is_feature_enabled( 'onboarding' ) ) {
+		if ( \WC_Admin_Loader::is_feature_enabled( 'onboarding' ) ) {
 			$controllers = array_merge(
 				$controllers,
 				array(

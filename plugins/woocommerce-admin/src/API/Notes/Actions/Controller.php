@@ -7,9 +7,11 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API\Notes\Actions;
+
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
 
 /**
  * REST API Admin Note Action controller class.
@@ -17,7 +19,7 @@ use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
  * @package WooCommerce/API
  * @extends WC_REST_CRUD_Controller
  */
-class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Notes_Controller {
+class Controller extends \Automattic\WooCommerce\Admin\API\Notes\Controller {
 
 	/**
 	 * Register the routes for admin notes.
@@ -38,7 +40,7 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'trigger_note_action' ),
 					// @todo - double check these permissions for taking note actions.
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
@@ -58,7 +60,7 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 		$note = WC_Admin_Notes::get_note( $request->get_param( 'note_id' ) );
 
 		if ( ! $note ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'woocommerce_admin_notes_invalid_id',
 				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
@@ -77,7 +79,7 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 		}
 
 		if ( ! $triggered_action ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'woocommerce_admin_note_action_invalid_id',
 				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
