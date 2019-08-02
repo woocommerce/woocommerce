@@ -74,7 +74,7 @@ jQuery( function ( $ ) {
 						var $option = $( '<option></option>' )
 							.prop( 'value', index )
 							.text( state[ index ] );
-						if ( index == stateValue ) {
+						if ( index === stateValue ) {
 							$option.prop( 'selected' );
 						}
 						$newstate.append( $option );
