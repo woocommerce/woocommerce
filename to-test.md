@@ -1,4 +1,4 @@
-### 3.7
+### WooCommerce 3.7
 
 ### Product Blocks
 
@@ -27,6 +27,9 @@ In addition to the above, we have also included the following user-facing enhanc
 
 - The ability to change the “Thanks” wording in emails from the email settings.
 - Added new Coupon code generator functionality to the coupons page.
+- If variations are missing prices, show a notice in the product data panel.
+- Show the quantity refunded on customer facing order screens.
+- CSV product import now allows true/false values for the published field, as well as the original 0 (private), -1 (draft), 1 (publish) values.
 
 To test, you'd want to make sure you can edit the text that appears below the main email content. To do that, navigate to `WooCommerce > Settings > Emails` and edit the `Additional content` field of the emails. The `Thanks` wording appears in the following emails by default:
 
@@ -43,6 +46,21 @@ When testing the new Coupon code generator functionality, focus on the following
 
 - Add, edit, publish, and delete coupon
 - Apply coupon during checkout
+
+To test the change around variations, create a variable product without setting the price for variations. Can you see a notice letting you know that some variations are missing the price?
+
+When testing to make sure the refunded amount of the order is visible on the customer facing pages as well, follow the steps below:
+
+- Place an order on the site
+- Refund the order partially
+- Make sure you can see the amount refunded when navigating to `My Account > Orders > Order refunded` page at the front end of the site
+
+Finally, to test the CSV Import, you'd want to follow the steps below:
+
+- Export products from one of your test sites
+- Edit the `Published` field of the CSV file to either `true` = `published` or `false` = `draft`
+- Import the file to your current testing site
+- Verify that the products that were marked as `true` are indeed published and those marked as `false` are saved as draft 
 
 ### Testing helpers
 
