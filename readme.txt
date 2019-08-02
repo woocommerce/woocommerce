@@ -269,6 +269,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Usage and event tracking (if opted in) was not working correctly in the OBW. #24056
 * Fix - Fatal error on downloads report when some download files were missing. #24118
 * Fix - Prevents the taxes columns from being removed when the order is no longer editable in admin. #23884
+* Fix - State field overwritten with blank value when saving orders via wp-admin. #24301
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
 * Performance - Reduce number of queries needed to populate variations data by priming post caches. #23272
 * Performance - Persistant cart improvements, only update the persistent cart if the cart items actually change. #23112
