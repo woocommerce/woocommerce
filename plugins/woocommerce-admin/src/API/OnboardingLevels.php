@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
-class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller {
+class OnboardingLevels extends \WC_REST_Data_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -39,7 +41,7 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),

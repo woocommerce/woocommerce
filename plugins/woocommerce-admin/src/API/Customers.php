@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_Admin_REST_Reports_Customers_Controller
  */
-class WC_Admin_REST_Customers_Controller extends WC_Admin_REST_Reports_Customers_Controller {
+class Customers extends \WC_Admin_REST_Reports_Customers_Controller {
 
 	/**
 	 * Route base.

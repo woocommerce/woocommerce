@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\WC_Admin_Theme_Upgrader;
@@ -18,7 +20,7 @@ use Automattic\WooCommerce\Admin\WC_Admin_Theme_Upgrader_Skin;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
-class WC_Admin_REST_Themes_Controller extends WC_REST_Data_Controller {
+class Themes extends \WC_REST_Data_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -42,7 +44,7 @@ class WC_Admin_REST_Themes_Controller extends WC_REST_Data_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'upload_theme' ),
 					'permission_callback' => array( $this, 'upload_theme_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -60,7 +62,7 @@ class WC_Admin_REST_Themes_Controller extends WC_REST_Data_Controller {
 	 */
 	public function upload_theme_permissions_check( $request ) {
 		if ( ! current_user_can( 'upload_themes' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you are not allowed to install themes on this site.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you are not allowed to install themes on this site.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -74,7 +76,7 @@ class WC_Admin_REST_Themes_Controller extends WC_REST_Data_Controller {
 	 */
 	public function upload_theme( $request ) {
 		if ( ! isset( $_FILES['pluginzip'] ) || ! is_uploaded_file( $_FILES['pluginzip']['tmp_name'] ) || ! is_file( $_FILES['pluginzip']['tmp_name'] ) ) { // WPCS: sanitization ok.
-			return new WP_Error( 'woocommerce_rest_invalid_file', __( 'Specified file failed upload test.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_file', __( 'Specified file failed upload test.', 'woocommerce-admin' ) );
 		}
 
 		include_once ABSPATH . 'wp-admin/includes/file.php';
@@ -83,8 +85,8 @@ class WC_Admin_REST_Themes_Controller extends WC_REST_Data_Controller {
 		include_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-theme-upgrader-skin.php';
 
 		$_GET['package'] = true;
-		$file_upload     = new File_Upload_Upgrader( 'pluginzip', 'package' );
-		$upgrader        = new WC_Admin_Theme_Upgrader( new WC_Admin_Theme_Upgrader_Skin() );
+		$file_upload     = new \File_Upload_Upgrader( 'pluginzip', 'package' );
+		$upgrader        = new \WC_Admin_Theme_Upgrader( new \WC_Admin_Theme_Upgrader_Skin() );
 		$install         = $upgrader->install( $file_upload->package );
 
 		if ( $install || is_wp_error( $install ) ) {

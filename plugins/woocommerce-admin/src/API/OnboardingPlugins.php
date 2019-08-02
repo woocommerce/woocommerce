@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
-class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controller {
+class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -39,7 +41,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 			'/' . $this->rest_base . '/install',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'install_plugin' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
@@ -52,7 +54,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 			'/' . $this->rest_base . '/activate',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'activate_plugin' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
@@ -65,7 +67,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 			'/' . $this->rest_base . '/connect-jetpack',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'connect_jetpack' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
@@ -108,7 +110,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -136,7 +138,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 		$allowed_plugins = $this->get_allowed_plugins();
 		$plugin          = sanitize_title_with_dashes( $request['plugin'] );
 		if ( ! in_array( $plugin, array_keys( $allowed_plugins ), true ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -170,14 +172,14 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 		);
 
 		if ( is_wp_error( $api ) ) {
-			return new WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
 		}
 
-		$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
+		$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
 		$result   = $upgrader->install( $api->download_link );
 
 		if ( is_wp_error( $result ) || is_null( $result ) ) {
-			return new WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
 		}
 
 		return array(
@@ -197,7 +199,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 		$allowed_plugins = $this->get_allowed_plugins();
 		$plugin          = sanitize_title_with_dashes( $request['plugin'] );
 		if ( ! in_array( $plugin, array_keys( $allowed_plugins ), true ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -207,12 +209,12 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 		$installed_plugins = get_plugins();
 
 		if ( ! in_array( $path, array_keys( $installed_plugins ), true ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
 		}
 
 		$result = activate_plugin( $path );
 		if ( ! is_null( $result ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_plugin', __( 'The requested plugin could not be activated.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'The requested plugin could not be activated.', 'woocommerce-admin' ), 500 );
 		}
 
 		return( array(
@@ -229,7 +231,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 	 */
 	public function connect_jetpack() {
 		if ( ! class_exists( 'Jetpack' ) ) {
-			return new WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
 		}
 
 		$next_step_slug = apply_filters( 'woocommerce_onboarding_after_jetpack_step', 'store-details' );
@@ -243,7 +245,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 			)
 		);
 
-		$connect_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
+		$connect_url = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
 		// Redirect to local calypso instead of production.
 		if ( defined( 'WOOCOMMERCE_CALYPSO_LOCAL' ) && WOOCOMMERCE_CALYPSO_LOCAL ) {

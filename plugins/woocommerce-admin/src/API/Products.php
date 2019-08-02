@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Products_Controller
  */
-class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
+class Products extends \WC_REST_Products_Controller {
 
 	/**
 	 * Endpoint namespace.

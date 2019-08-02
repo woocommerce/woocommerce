@@ -7,6 +7,8 @@
  * @package WooCommerce Admin/API
  */
 
+namespace Automattic\WooCommerce\Admin\API;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
-class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
+class Leaderboards extends \WC_REST_Data_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -39,7 +41,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -53,7 +55,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 			'/' . $this->rest_base . '/allowed',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_allowed_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -71,7 +73,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_coupons_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$coupons_data_store = new WC_Admin_Reports_Coupons_Data_Store();
+		$coupons_data_store = new \WC_Admin_Reports_Coupons_Data_Store();
 		$coupons_data       = $per_page > 0 ? $coupons_data_store->get_data(
 			array(
 				'orderby'       => 'orders_count',
@@ -137,7 +139,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_categories_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$categories_data_store = new WC_Admin_Reports_Categories_Data_Store();
+		$categories_data_store = new \WC_Admin_Reports_Categories_Data_Store();
 		$categories_data       = $per_page > 0 ? $categories_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',
@@ -203,7 +205,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_customers_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
+		$customers_data_store = new \WC_Admin_Reports_Customers_Data_Store();
 		$customers_data       = $per_page > 0 ? $customers_data_store->get_data(
 			array(
 				'orderby'      => 'total_spend',
@@ -267,7 +269,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_products_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$products_data_store = new WC_Admin_Reports_Products_Data_Store();
+		$products_data_store = new \WC_Admin_Reports_Products_Data_Store();
 		$products_data       = $per_page > 0 ? $products_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',

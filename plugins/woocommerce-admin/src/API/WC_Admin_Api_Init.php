@@ -35,20 +35,20 @@ class WC_Admin_Api_Init {
 		$controllers = array(
 			'Automattic\WooCommerce\Admin\API\Notes',
 			'Automattic\WooCommerce\Admin\API\NoteActions',
-			'WC_Admin_REST_Coupons_Controller',
-			'WC_Admin_REST_Customers_Controller',
-			'WC_Admin_REST_Data_Controller',
-			'WC_Admin_REST_Data_Countries_Controller',
-			'WC_Admin_REST_Data_Download_Ips_Controller',
-			'WC_Admin_REST_Leaderboards_Controller',
-			'WC_Admin_REST_Orders_Controller',
-			'WC_Admin_REST_Products_Controller',
-			'WC_Admin_REST_Product_Categories_Controller',
-			'WC_Admin_REST_Product_Variations_Controller',
-			'WC_Admin_REST_Product_Reviews_Controller',
-			'WC_Admin_REST_Product_Variations_Controller',
+			'Automattic\WooCommerce\Admin\API\Coupons',
+			'Automattic\WooCommerce\Admin\API\Customers',
+			'Automattic\WooCommerce\Admin\API\Data',
+			'Automattic\WooCommerce\Admin\API\DataCountries',
+			'Automattic\WooCommerce\Admin\API\DataDownloadIPs',
+			'Automattic\WooCommerce\Admin\API\Leaderboards',
+			'Automattic\WooCommerce\Admin\API\Orders',
+			'Automattic\WooCommerce\Admin\API\Products',
+			'Automattic\WooCommerce\Admin\API\ProductCategories',
+			'Automattic\WooCommerce\Admin\API\ProductVariations',
+			'Automattic\WooCommerce\Admin\API\ProductReviews',
+			'Automattic\WooCommerce\Admin\API\ProductVariations',
 			'WC_Admin_REST_Reports_Controller',
-			'WC_Admin_REST_Setting_Options_Controller',
+			'Automattic\WooCommerce\Admin\API\SettingOptions',
 			'WC_Admin_REST_Reports_Import_Controller',
 			'WC_Admin_REST_Reports_Export_Controller',
 			'WC_Admin_REST_Reports_Products_Controller',
@@ -68,17 +68,17 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Reports_Downloads_Stats_Controller',
 			'WC_Admin_REST_Reports_Customers_Controller',
 			'WC_Admin_REST_Reports_Customers_Stats_Controller',
-			'WC_Admin_REST_Taxes_Controller',
-			'WC_Admin_REST_Themes_Controller',
+			'Automattic\WooCommerce\Admin\API\Taxes',
+			'Automattic\WooCommerce\Admin\API\Themes',
 		);
 
 		if ( \WC_Admin_Loader::is_feature_enabled( 'onboarding' ) ) {
 			$controllers = array_merge(
 				$controllers,
 				array(
-					'WC_Admin_REST_Onboarding_Levels_Controller',
-					'WC_Admin_REST_Onboarding_Profile_Controller',
-					'WC_Admin_REST_Onboarding_Plugins_Controller',
+					'Automattic\WooCommerce\Admin\API\OnboardingLevels',
+					'Automattic\WooCommerce\Admin\API\OnboardingProfile',
+					'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 				)
 			);
 		}
@@ -133,8 +133,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/coupons'] )
 			&& isset( $endpoints['/wc/v4/coupons'][3] )
 			&& isset( $endpoints['/wc/v4/coupons'][2] )
-			&& $endpoints['/wc/v4/coupons'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v4/coupons'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/coupons'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
+			&& $endpoints['/wc/v4/coupons'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
 		) {
 			$endpoints['/wc/v4/coupons'][0] = $endpoints['/wc/v4/coupons'][2];
 			$endpoints['/wc/v4/coupons'][1] = $endpoints['/wc/v4/coupons'][3];
@@ -144,8 +144,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/customers'] )
 			&& isset( $endpoints['/wc/v4/customers'][3] )
 			&& isset( $endpoints['/wc/v4/customers'][2] )
-			&& $endpoints['/wc/v4/customers'][2]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
-			&& $endpoints['/wc/v4/customers'][3]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+			&& $endpoints['/wc/v4/customers'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Customers
+			&& $endpoints['/wc/v4/customers'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Customers
 		) {
 			$endpoints['/wc/v4/customers'][0] = $endpoints['/wc/v4/customers'][2];
 			$endpoints['/wc/v4/customers'][1] = $endpoints['/wc/v4/customers'][3];
@@ -156,9 +156,9 @@ class WC_Admin_Api_Init {
 			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5] )
 			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4] )
 			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
 		) {
 			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3];
 			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4];
@@ -169,8 +169,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/orders'] )
 			&& isset( $endpoints['/wc/v4/orders'][3] )
 			&& isset( $endpoints['/wc/v4/orders'][2] )
-			&& $endpoints['/wc/v4/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v4/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
+			&& $endpoints['/wc/v4/orders'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
 		) {
 			$endpoints['/wc/v4/orders'][0] = $endpoints['/wc/v4/orders'][2];
 			$endpoints['/wc/v4/orders'][1] = $endpoints['/wc/v4/orders'][3];
@@ -179,7 +179,7 @@ class WC_Admin_Api_Init {
 		// Override /wc/v4/data.
 		if ( isset( $endpoints['/wc/v4/data'] )
 			&& isset( $endpoints['/wc/v4/data'][1] )
-			&& $endpoints['/wc/v4/data'][1]['callback'][0] instanceof WC_Admin_REST_Data_Controller
+			&& $endpoints['/wc/v4/data'][1]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Data
 		) {
 			$endpoints['/wc/v4/data'][0] = $endpoints['/wc/v4/data'][1];
 		}
@@ -188,8 +188,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/products'] )
 			&& isset( $endpoints['/wc/v4/products'][3] )
 			&& isset( $endpoints['/wc/v4/products'][2] )
-			&& $endpoints['/wc/v4/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v4/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Products
+			&& $endpoints['/wc/v4/products'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Products
 		) {
 			$endpoints['/wc/v4/products'][0] = $endpoints['/wc/v4/products'][2];
 			$endpoints['/wc/v4/products'][1] = $endpoints['/wc/v4/products'][3];
@@ -200,9 +200,9 @@ class WC_Admin_Api_Init {
 			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5] )
 			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4] )
 			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Products
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Products
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Products
 		) {
 			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3];
 			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4];
@@ -213,8 +213,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/products/categories'] )
 			&& isset( $endpoints['/wc/v4/products/categories'][3] )
 			&& isset( $endpoints['/wc/v4/products/categories'][2] )
-			&& $endpoints['/wc/v4/products/categories'][2]['callback'][0] instanceof WC_Admin_REST_Product_categories_Controller
-			&& $endpoints['/wc/v4/products/categories'][3]['callback'][0] instanceof WC_Admin_REST_Product_categories_Controller
+			&& $endpoints['/wc/v4/products/categories'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\ProductCategories
+			&& $endpoints['/wc/v4/products/categories'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\ProductCategories
 		) {
 			$endpoints['/wc/v4/products/categories'][0] = $endpoints['/wc/v4/products/categories'][2];
 			$endpoints['/wc/v4/products/categories'][1] = $endpoints['/wc/v4/products/categories'][3];
@@ -224,8 +224,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/products/reviews'] )
 			&& isset( $endpoints['/wc/v4/products/reviews'][3] )
 			&& isset( $endpoints['/wc/v4/products/reviews'][2] )
-			&& $endpoints['/wc/v4/products/reviews'][2]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
-			&& $endpoints['/wc/v4/products/reviews'][3]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+			&& $endpoints['/wc/v4/products/reviews'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\ProductReviews
+			&& $endpoints['/wc/v4/products/reviews'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\ProductReviews
 		) {
 			$endpoints['/wc/v4/products/reviews'][0] = $endpoints['/wc/v4/products/reviews'][2];
 			$endpoints['/wc/v4/products/reviews'][1] = $endpoints['/wc/v4/products/reviews'][3];
@@ -235,8 +235,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['products/(?P<product_id>[\d]+)/variations'] )
 			&& isset( $endpoints['products/(?P<product_id>[\d]+)/variations'][3] )
 			&& isset( $endpoints['products/(?P<product_id>[\d]+)/variations'][2] )
-			&& $endpoints['products/(?P<product_id>[\d]+)/variations'][2]['callback'][0] instanceof WC_Admin_REST_Product_Variations_Controller
-			&& $endpoints['products/(?P<product_id>[\d]+)/variations'][3]['callback'][0] instanceof WC_Admin_REST_Product_Variations_Controller
+			&& $endpoints['products/(?P<product_id>[\d]+)/variations'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\ProductVariations
+			&& $endpoints['products/(?P<product_id>[\d]+)/variations'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\ProductVariations
 		) {
 			$endpoints['products/(?P<product_id>[\d]+)/variations'][0] = $endpoints['products/(?P<product_id>[\d]+)/variations'][2];
 			$endpoints['products/(?P<product_id>[\d]+)/variations'][1] = $endpoints['products/(?P<product_id>[\d]+)/variations'][3];
@@ -246,8 +246,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v4/taxes'] )
 			&& isset( $endpoints['/wc/v4/taxes'][3] )
 			&& isset( $endpoints['/wc/v4/taxes'][2] )
-			&& $endpoints['/wc/v4/taxes'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v4/taxes'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/taxes'][2]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
+			&& $endpoints['/wc/v4/taxes'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\Orders
 		) {
 			$endpoints['/wc/v4/taxes'][0] = $endpoints['/wc/v4/taxes'][2];
 			$endpoints['/wc/v4/taxes'][1] = $endpoints['/wc/v4/taxes'][3];
@@ -258,9 +258,9 @@ class WC_Admin_Api_Init {
 			&& isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][5] )
 			&& isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4] )
 			&& isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3] )
-			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_Setting_Options_Controller
-			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4]['callback'][0] instanceof WC_Admin_REST_Setting_Options_Controller
-			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][5]['callback'][0] instanceof WC_Admin_REST_Setting_Options_Controller
+			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\SettingOptions
+			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\SettingOptions
+			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][5]['callback'][0] instanceof \Automattic\WooCommerce\Admin\API\SettingOptions
 		) {
 			$endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][0] = $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3];
 			$endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][1] = $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4];
