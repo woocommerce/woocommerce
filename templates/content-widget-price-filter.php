@@ -12,13 +12,13 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.6.1
+ * @version 3.7.1
  */
 
 defined( 'ABSPATH' ) || exit;
 
 ?>
-<?php do_action( 'woocommerce_widget_price_filter_item_start', $args ); ?>
+<?php do_action( 'woocommerce_widget_price_filter_start', $args ); ?>
 
 <form method="get" action="<?php echo esc_url( $form_action ); ?>">
 	<div class="price_slider_wrapper">
@@ -36,4 +36,4 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 </form>
 
-<?php do_action( 'woocommerce_widget_price_filter_item_end', $args ); ?>
+<?php do_action( 'woocommerce_widget_price_filter_end', $args ); ?>
