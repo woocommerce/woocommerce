@@ -47,27 +47,27 @@ class WC_Admin_Api_Init {
 			'Automattic\WooCommerce\Admin\API\ProductVariations',
 			'Automattic\WooCommerce\Admin\API\ProductReviews',
 			'Automattic\WooCommerce\Admin\API\ProductVariations',
-			'WC_Admin_REST_Reports_Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Controller',
 			'Automattic\WooCommerce\Admin\API\SettingOptions',
-			'WC_Admin_REST_Reports_Import_Controller',
-			'WC_Admin_REST_Reports_Export_Controller',
-			'WC_Admin_REST_Reports_Products_Controller',
-			'WC_Admin_REST_Reports_Variations_Controller',
-			'WC_Admin_REST_Reports_Products_Stats_Controller',
-			'WC_Admin_REST_Reports_Revenue_Stats_Controller',
-			'WC_Admin_REST_Reports_Orders_Controller',
-			'WC_Admin_REST_Reports_Orders_Stats_Controller',
-			'WC_Admin_REST_Reports_Categories_Controller',
-			'WC_Admin_REST_Reports_Taxes_Controller',
-			'WC_Admin_REST_Reports_Taxes_Stats_Controller',
-			'WC_Admin_REST_Reports_Coupons_Controller',
-			'WC_Admin_REST_Reports_Coupons_Stats_Controller',
-			'WC_Admin_REST_Reports_Stock_Controller',
-			'WC_Admin_REST_Reports_Stock_Stats_Controller',
-			'WC_Admin_REST_Reports_Downloads_Controller',
-			'WC_Admin_REST_Reports_Downloads_Stats_Controller',
-			'WC_Admin_REST_Reports_Customers_Controller',
-			'WC_Admin_REST_Reports_Customers_Stats_Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Import\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Export\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Products\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
+			'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			'Automattic\WooCommerce\Admin\API\Taxes',
 			'Automattic\WooCommerce\Admin\API\Themes',
 		);
@@ -84,7 +84,7 @@ class WC_Admin_Api_Init {
 		}
 
 		// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
-		$controllers[] = 'WC_Admin_REST_Reports_Performance_Indicators_Controller';
+		$controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 
 		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 

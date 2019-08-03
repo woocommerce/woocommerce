@@ -104,15 +104,15 @@ class WC_Admin_Report_CSV_Exporter extends \WC_CSV_Batch_Exporter {
 	 */
 	protected function map_report_controller() {
 		$controller_map = array(
-			'products'   => '\WC_Admin_REST_Reports_Products_Controller',
-			'variations' => '\WC_Admin_REST_Reports_Variations_Controller',
-			'orders'     => '\WC_Admin_REST_Reports_Orders_Controller',
-			'categories' => '\WC_Admin_REST_Reports_Categories_Controller',
-			'taxes'      => '\WC_Admin_REST_Reports_Taxes_Controller',
-			'coupons'    => '\WC_Admin_REST_Reports_Coupons_Controller',
-			'stock'      => '\WC_Admin_REST_Reports_Stock_Controller',
-			'downloads'  => '\WC_Admin_REST_Reports_Downloads_Controller',
-			'customers'  => '\WC_Admin_REST_Reports_Customers_Controller',
+			'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
+			'variations' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
+			'orders'     => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
+			'categories' => 'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
+			'taxes'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
+			'coupons'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
+			'stock'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
+			'downloads'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
+			'customers'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
 		);
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
