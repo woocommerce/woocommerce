@@ -48,6 +48,7 @@ class Assets {
 		self::register_script( 'wc-featured-category', plugins_url( 'build/featured-category.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-product-categories', plugins_url( 'build/product-categories.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-product-tag', plugins_url( 'build/product-tag.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-search', plugins_url( 'build/product-search.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 	}
 
 	/**
