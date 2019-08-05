@@ -10,6 +10,7 @@
   { "component": "EmptyContent" },
   { "component": "Filters", "render": "MyReportFilters" },
   { "component": "Flag" },
+  { "component": "Form" },
   { "component": "Gravatar" },
   { "component": "ImageAsset" },
   { "component": "Link" },
