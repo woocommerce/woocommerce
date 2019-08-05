@@ -16,6 +16,10 @@ php:
   - 7.2
   - 7.3
 
+# Since Xenial services are not started by default, we need to instruct it below to start.
+services:
+  - mysql
+
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
