@@ -8,7 +8,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import withComponentId from '../../utils/with-component-id';
+import { withComponentId } from '../../hocs';
 
 /**
  * Component displaying the categories as dropdown or list.
