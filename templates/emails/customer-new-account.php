@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
- * @version 3.5.2
+ * @version 3.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,7 +28,12 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	<p><?php printf( esc_html__( 'Your password has been automatically generated: %s', 'woocommerce' ), '<strong>' . esc_html( $user_pass ) . '</strong>' ); ?></p>
 <?php endif; ?>
 
-<p><?php esc_html_e( 'We look forward to seeing you soon.', 'woocommerce' ); ?></p>
-
 <?php
+/**
+ * Show user-defined additonal content - this is set in each email's settings.
+ */
+if ( $additional_content ) {
+	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+}
+
 do_action( 'woocommerce_email_footer', $email );
