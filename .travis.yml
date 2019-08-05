@@ -36,7 +36,7 @@ matrix:
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     addons:
-      chrome: stable
+      chrome: beta
       apt:
         packages:
           - nginx
