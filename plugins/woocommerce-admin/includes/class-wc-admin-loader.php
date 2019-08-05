@@ -478,7 +478,13 @@ class WC_Admin_Loader {
 	 * @todo Can we do some URL rewriting so we can figure out which page they are on server side?
 	 */
 	public static function update_admin_title( $admin_title ) {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if (
+			! did_action( 'current_screen' ) ||
+			(
+				! self::is_admin_page() &&
+				! self::is_embed_page()
+			)
+		) {
 			return $admin_title;
 		}
 
