@@ -66,6 +66,9 @@ before_script:
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
       composer global require "phpunit/phpunit=5.7.*|7.5.*"
     fi
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
 
 script:
   - bash tests/bin/phpunit.sh
