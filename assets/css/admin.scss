@@ -3272,8 +3272,9 @@ table.wc_shipping {
 }
 
 .wc-shipping-zone-settings tbody {
-	display: inherit;
+	display: table-row-group;
 }
+
 
 table {
 
