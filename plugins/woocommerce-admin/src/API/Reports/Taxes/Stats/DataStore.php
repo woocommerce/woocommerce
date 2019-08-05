@@ -5,13 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
 
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Reports_Taxes_Stats_Data_Store.
  */
-class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -152,8 +153,8 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'tax_rate_id',
-			'before'   => WC_Admin_Reports_Interval::default_before(),
-			'after'    => WC_Admin_Reports_Interval::default_after(),
+			'before'   => \WC_Admin_Reports_Interval::default_before(),
+			'after'    => \WC_Admin_Reports_Interval::default_after(),
 			'fields'   => '*',
 			'taxes'    => array(),
 		);
@@ -194,7 +195,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$expected_interval_count = \WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
 
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
@@ -217,9 +218,9 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
-			$segmenter             = new WC_Admin_Reports_Taxes_Stats_Segmenting( $query_args, $this->report_columns );
+			$segmenter             = new \WC_Admin_Reports_Taxes_Stats_Segmenting( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
 			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count, $table_name );
@@ -251,7 +252,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'woocommerce-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
@@ -264,7 +265,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			if ( WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+			if ( \WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
 				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );

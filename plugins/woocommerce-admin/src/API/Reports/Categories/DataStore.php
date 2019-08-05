@@ -5,13 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Automattic\WooCommerce\Admin\API\Reports\Categories;
 
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Categories_Data_Store.
  */
-class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -207,7 +208,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	protected function include_extended_info( &$categories_data, $query_args ) {
 		foreach ( $categories_data as $key => $category_data ) {
-			$extended_info = new ArrayObject();
+			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
 				$extended_info['name'] = get_the_category_by_ID( $category_data['category_id'] );
 			}
@@ -232,8 +233,8 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			'page'          => 1,
 			'order'         => 'DESC',
 			'orderby'       => 'date',
-			'before'        => WC_Admin_Reports_Interval::default_before(),
-			'after'         => WC_Admin_Reports_Interval::default_after(),
+			'before'        => \WC_Admin_Reports_Interval::default_before(),
+			'after'         => \WC_Admin_Reports_Interval::default_after(),
 			'fields'        => '*',
 			'categories'    => array(),
 			'extended_info' => false,
@@ -295,7 +296,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $categories_data ) {
-				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ), array( 'status' => 500 ) );
+				return new \WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ), array( 'status' => 500 ) );
 			}
 
 			$record_count = count( $categories_data );

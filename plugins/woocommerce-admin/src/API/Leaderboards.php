@@ -11,6 +11,11 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore as CategoriesDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+
 /**
  * Leaderboards controller.
  *
@@ -73,7 +78,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_coupons_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$coupons_data_store = new \WC_Admin_Reports_Coupons_Data_Store();
+		$coupons_data_store = new CouponsDataStore();
 		$coupons_data       = $per_page > 0 ? $coupons_data_store->get_data(
 			array(
 				'orderby'       => 'orders_count',
@@ -139,7 +144,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_categories_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$categories_data_store = new \WC_Admin_Reports_Categories_Data_Store();
+		$categories_data_store = new CategoriesDataStore();
 		$categories_data       = $per_page > 0 ? $categories_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',
@@ -205,7 +210,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_customers_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$customers_data_store = new \WC_Admin_Reports_Customers_Data_Store();
+		$customers_data_store = new CustomersDataStore();
 		$customers_data       = $per_page > 0 ? $customers_data_store->get_data(
 			array(
 				'orderby'      => 'total_spend',
@@ -269,7 +274,7 @@ class Leaderboards extends \WC_REST_Data_Controller {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_products_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$products_data_store = new \WC_Admin_Reports_Products_Data_Store();
+		$products_data_store = new ProductsDataStore();
 		$products_data       = $per_page > 0 ? $products_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',

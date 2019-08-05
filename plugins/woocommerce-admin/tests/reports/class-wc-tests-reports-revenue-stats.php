@@ -6,6 +6,8 @@
  * @todo Finish up unit testing to verify bug-free order reports.
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+
 /**
  * Class WC_Admin_Tests_Reports_Revenue_Stats
  */
@@ -43,7 +45,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// /reports/revenue/stats is mapped to Orders_Data_Store.
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );

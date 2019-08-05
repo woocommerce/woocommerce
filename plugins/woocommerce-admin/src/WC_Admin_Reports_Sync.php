@@ -9,6 +9,12 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+
 /**
  * WC_Admin_Reports_Sync Class.
  */
@@ -313,11 +319,11 @@ class WC_Admin_Reports_Sync {
 		add_action( 'save_post', array( __CLASS__, 'schedule_single_order_import' ) );
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'schedule_single_order_import' ) );
 
-		\WC_Admin_Reports_Orders_Stats_Data_Store::init();
-		\WC_Admin_Reports_Customers_Data_Store::init();
-		\WC_Admin_Reports_Coupons_Data_Store::init();
-		\WC_Admin_Reports_Products_Data_Store::init();
-		\WC_Admin_Reports_Taxes_Data_Store::init();
+		OrdersStatsDataStore::init();
+		CustomersDataStore::init();
+		CouponsDataStore::init();
+		ProductsDataStore::init();
+		TaxesDataStore::init();
 	}
 
 	/**
@@ -456,10 +462,10 @@ class WC_Admin_Reports_Sync {
 
 		$result = array_sum(
 			array(
-				\WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id ),
-				\WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id ),
-				\WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id ),
-				\WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id ),
+				OrdersStatsDataStore::sync_order( $order_id ),
+				ProductsDataStore::sync_order_products( $order_id ),
+				CouponsDataStore::sync_order_coupons( $order_id ),
+				TaxesDataStore::sync_order_taxes( $order_id ),
 			)
 		);
 
@@ -706,7 +712,7 @@ class WC_Admin_Reports_Sync {
 
 		foreach ( $customer_ids as $customer_id ) {
 			// @todo Schedule single customer update if this fails?
-			\WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
+			CustomersDataStore::update_registered_customer( $customer_id );
 		}
 
 		$imported_count = get_option( 'wc_admin_import_customers_count', 0 );
@@ -751,7 +757,7 @@ class WC_Admin_Reports_Sync {
 		);
 
 		foreach ( $customer_ids as $customer_id ) {
-			\WC_Admin_Reports_Customers_Data_Store::delete_customer( $customer_id );
+			CustomersDataStore::delete_customer( $customer_id );
 		}
 
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'customer' ) );
@@ -793,7 +799,7 @@ class WC_Admin_Reports_Sync {
 		);
 
 		foreach ( $order_ids as $order_id ) {
-			\WC_Admin_Reports_Orders_Stats_Data_Store::delete_order( $order_id );
+			OrdersStatsDataStore::delete_order( $order_id );
 		}
 
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );

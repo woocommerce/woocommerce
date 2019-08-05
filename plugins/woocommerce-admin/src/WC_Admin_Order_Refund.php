@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+
 /**
  * WC_Admin_Order_Refund class.
  */
@@ -57,7 +59,7 @@ class WC_Admin_Order_Refund extends \WC_Order_Refund {
 			return false;
 		}
 
-		return \WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $parent_order );
+		return CustomersDataStore::get_or_create_customer_from_order( $parent_order );
 	}
 
 	/**

@@ -11,6 +11,9 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+
 /**
  * WC_Admin_Order class.
  */
@@ -58,7 +61,7 @@ class WC_Admin_Order extends \WC_Order {
 	 * @return int
 	 */
 	public function get_report_customer_id() {
-		return \WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $this );
+		return CustomersDataStore::get_or_create_customer_from_order( $this );
 	}
 
 	/**
@@ -67,7 +70,7 @@ class WC_Admin_Order extends \WC_Order {
 	 * @return bool
 	 */
 	public function is_returning_customer() {
-		return \WC_Admin_Reports_Orders_Stats_Data_Store::is_returning_customer( $this );
+		return OrdersStatsDataStore::is_returning_customer( $this );
 	}
 
 	/**

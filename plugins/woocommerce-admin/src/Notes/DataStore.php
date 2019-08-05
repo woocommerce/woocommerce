@@ -5,14 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Automattic\WooCommerce\Admin\Notes;
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC Admin Note Data Store (Custom Tables)
  */
-class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Data_Store_Interface {
+class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Interface {
 	/**
 	 * Method to create a new note in the database.
 	 *
@@ -112,7 +112,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			 */
 			do_action( 'woocommerce_admin_note_loaded', $note );
 		} else {
-			throw new Exception( __( 'Invalid data store for admin note.', 'woocommerce-admin' ) );
+			throw new \Exception( __( 'Invalid data store for admin note.', 'woocommerce-admin' ) );
 		}
 	}
 

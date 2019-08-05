@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Coupons;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Coupons_Data_Store.
  */
-class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -170,22 +172,22 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	 */
 	protected function include_extended_info( &$coupon_data, $query_args ) {
 		foreach ( $coupon_data as $idx => $coupon_datum ) {
-			$extended_info = new ArrayObject();
+			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
 				$coupon_id = $coupon_datum['coupon_id'];
-				$coupon    = new WC_Coupon( $coupon_id );
+				$coupon    = new \WC_Coupon( $coupon_id );
 
-				$gmt_timzone = new DateTimeZone( 'UTC' );
+				$gmt_timzone = new \DateTimeZone( 'UTC' );
 
 				$date_expires = $coupon->get_date_expires();
 				if ( null === $date_expires ) {
 					$date_expires     = '';
 					$date_expires_gmt = '';
 				} else {
-					$date_expires     = $date_expires->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-					$date_expires_gmt = new DateTime( $date_expires );
+					$date_expires     = $date_expires->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_expires_gmt = new \DateTime( $date_expires );
 					$date_expires_gmt->setTimezone( $gmt_timzone );
-					$date_expires_gmt = $date_expires_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_expires_gmt = $date_expires_gmt->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
 				}
 
 				$date_created = $coupon->get_date_created();
@@ -193,10 +195,10 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					$date_created     = '';
 					$date_created_gmt = '';
 				} else {
-					$date_created     = $date_created->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-					$date_created_gmt = new DateTime( $date_created );
+					$date_created     = $date_created->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_created_gmt = new \DateTime( $date_created );
 					$date_created_gmt->setTimezone( $gmt_timzone );
-					$date_created_gmt = $date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_created_gmt = $date_created_gmt->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
 				}
 
 				$extended_info = array(
@@ -229,8 +231,8 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'page'          => 1,
 			'order'         => 'DESC',
 			'orderby'       => 'coupon_id',
-			'before'        => WC_Admin_Reports_Interval::default_before(),
-			'after'         => WC_Admin_Reports_Interval::default_after(),
+			'before'        => \WC_Admin_Reports_Interval::default_before(),
+			'after'         => \WC_Admin_Reports_Interval::default_after(),
 			'fields'        => '*',
 			'coupons'       => array(),
 			'extended_info' => false,
@@ -385,7 +387,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'order_id'        => $order_id,
 					'coupon_id'       => $coupon_id,
 					'discount_amount' => $coupon_item->get_discount(),
-					'date_created'    => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_created'    => $order->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
 				),
 				array(
 					'%d',

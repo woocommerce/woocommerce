@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Customers_Data_Store.
  */
-class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -169,14 +171,14 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$column_name = $param_info['column'];
 
 			if ( ! empty( $query_args[ $before_arg ] ) ) {
-				$datetime     = new DateTime( $query_args[ $before_arg ] );
-				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime     = new \DateTime( $query_args[ $before_arg ] );
+				$datetime_str = $datetime->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
 				$subclauses[] = "{$column_name} <= '$datetime_str'";
 			}
 
 			if ( ! empty( $query_args[ $after_arg ] ) ) {
-				$datetime     = new DateTime( $query_args[ $after_arg ] );
-				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime     = new \DateTime( $query_args[ $after_arg ] );
+				$datetime_str = $datetime->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
 				$subclauses[] = "{$column_name} >= '$datetime_str'";
 			}
 
@@ -347,8 +349,8 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			'page'         => 1,
 			'order'        => 'DESC',
 			'orderby'      => 'date_registered',
-			'order_before' => WC_Admin_Reports_Interval::default_before(),
-			'order_after'  => WC_Admin_Reports_Interval::default_after(),
+			'order_before' => \WC_Admin_Reports_Interval::default_before(),
+			'order_after'  => \WC_Admin_Reports_Interval::default_after(),
 			'fields'       => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
@@ -516,10 +518,10 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		// Add registered customer data.
 		if ( 0 !== $order->get_user_id() ) {
 			$user_id                 = $order->get_user_id();
-			$customer                = new WC_Customer( $user_id );
+			$customer                = new \WC_Customer( $user_id );
 			$data['user_id']         = $user_id;
 			$data['username']        = $customer->get_username( 'edit' );
-			$data['date_registered'] = $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ) : null;
+			$data['date_registered'] = $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ) : null;
 			$format[]                = '%d';
 			$format[]                = '%s';
 			$format[]                = '%s';
@@ -611,7 +613,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	public static function update_registered_customer( $user_id ) {
 		global $wpdb;
 
-		$customer = new WC_Customer( $user_id );
+		$customer = new \WC_Customer( $user_id );
 
 		if ( ! self::is_valid_customer( $user_id ) ) {
 			return false;
@@ -638,7 +640,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
-			'date_registered'  => $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'date_registered'  => $customer->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(
@@ -680,7 +682,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @return bool
 	 */
 	protected static function is_valid_customer( $user_id ) {
-		$customer = new WC_Customer( $user_id );
+		$customer = new \WC_Customer( $user_id );
 
 		if ( absint( $customer->get_id() ) !== absint( $user_id ) ) {
 			return false;

@@ -236,7 +236,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( \WC_Admin_Onboarding::get_allowed_industries() ),
+					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_industries() ),
 					'type' => 'string',
 				),
 			),
@@ -248,7 +248,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( \WC_Admin_Onboarding::get_allowed_product_types() ),
+					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_product_types() ),
 					'type' => 'string',
 				),
 			),

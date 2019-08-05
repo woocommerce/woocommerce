@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Downloads_Data_Store.
  */
-class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -255,13 +257,13 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 		);
 
 		if ( $query_args['before'] ) {
-			$datetime_str                    = $query_args['before']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['before']->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp <= '$datetime_str'";
 
 		}
 
 		if ( $query_args['after'] ) {
-			$datetime_str                    = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['after']->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp >= '$datetime_str'";
 		}
 
@@ -312,8 +314,8 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'timestamp',
-			'before'   => WC_Admin_Reports_Interval::default_before(),
-			'after'    => WC_Admin_Reports_Interval::default_after(),
+			'before'   => \WC_Admin_Reports_Interval::default_before(),
+			'after'    => \WC_Admin_Reports_Interval::default_after(),
 			'fields'   => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );

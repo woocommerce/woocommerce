@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Taxes_Data_Store.
  */
-class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -167,8 +169,8 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'tax_rate_id',
-			'before'   => WC_Admin_Reports_Interval::default_before(),
-			'after'    => WC_Admin_Reports_Interval::default_after(),
+			'before'   => \WC_Admin_Reports_Interval::default_before(),
+			'after'    => \WC_Admin_Reports_Interval::default_after(),
 			'fields'   => '*',
 			'taxes'    => array(),
 		);
@@ -325,7 +327,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
-					'date_created' => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_created' => $order->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
 					'tax_rate_id'  => $tax_item->get_rate_id(),
 					'shipping_tax' => $tax_item->get_shipping_tax_total(),
 					'order_tax'    => $tax_item->get_tax_total(),

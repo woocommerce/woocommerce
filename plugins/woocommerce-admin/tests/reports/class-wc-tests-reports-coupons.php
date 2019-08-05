@@ -6,6 +6,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\WC_Admin_Report_CSV_Exporter;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 
 /**
  * Class WC_Tests_Reports_Coupons
@@ -58,7 +59,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Coupons_Data_Store();
+		$data_store = new CouponsDataStore();
 		$start_time = date( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
 		$args       = array(

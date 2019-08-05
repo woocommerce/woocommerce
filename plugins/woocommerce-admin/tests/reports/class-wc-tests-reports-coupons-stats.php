@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Coupons-stats
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;
+ 
 /**
  * Class WC_Tests_Reports_Coupons_Stats
  */
@@ -56,7 +58,7 @@ class WC_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Coupons_Stats_Data_Store();
+		$data_store = new CouponsStatsDataStore();
 		$start_time = date( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
 		$args       = array(

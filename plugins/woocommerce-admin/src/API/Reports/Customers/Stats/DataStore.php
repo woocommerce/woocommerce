@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Customers_Stats_Data_Store.
  */
-class WC_Admin_Reports_Customers_Stats_Data_Store extends WC_Admin_Reports_Customers_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *

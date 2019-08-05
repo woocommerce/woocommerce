@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Orders_Stats_Data_Store.
  */
-class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -202,8 +204,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'page'             => 1,
 			'order'            => 'DESC',
 			'orderby'          => 'date',
-			'before'           => WC_Admin_Reports_Interval::default_before(),
-			'after'            => WC_Admin_Reports_Interval::default_after(),
+			'before'           => \WC_Admin_Reports_Interval::default_before(),
+			'after'            => \WC_Admin_Reports_Interval::default_after(),
 			'interval'         => 'week',
 			'fields'           => '*',
 			'segmentby'        => '',
@@ -270,7 +272,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 			$unique_products            = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products']      = $unique_products;
-			$segmenting                 = new WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
+			$segmenting                 = new \WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
 			$unique_coupons             = $this->get_unique_coupon_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['coupons_count'] = $unique_coupons;
 			$totals[0]['segments']      = $segmenting->get_totals_segments( $totals_query, $table_name );
@@ -292,7 +294,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			); // WPCS: cache ok, DB call ok, , unprepared SQL ok.
 
 			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$expected_interval_count = \WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
 
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
@@ -327,7 +329,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			if ( isset( $intervals[0] ) ) {
@@ -343,7 +345,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			if ( WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+			if ( \WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
 				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );
@@ -565,13 +567,13 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @return bool
 	 */
 	public static function is_returning_customer( $order ) {
-		$customer_id = WC_Admin_Reports_Customers_Data_Store::get_existing_customer_id_from_order( $order );
+		$customer_id = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_existing_customer_id_from_order( $order );
 
 		if ( ! $customer_id ) {
 			return false;
 		}
 
-		$oldest_orders = WC_Admin_Reports_Customers_Data_Store::get_oldest_orders( $customer_id );
+		$oldest_orders = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_oldest_orders( $customer_id );
 
 		if ( empty( $oldest_orders ) ) {
 			return false;

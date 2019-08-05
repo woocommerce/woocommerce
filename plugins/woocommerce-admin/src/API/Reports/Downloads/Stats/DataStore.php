@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Downloads_Data_Store.
  */
-class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downloads_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -57,8 +59,8 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 			'orderby'  => 'date',
 			'fields'   => '*',
 			'interval' => 'week',
-			'before'   => WC_Admin_Reports_Interval::default_before(),
-			'after'    => WC_Admin_Reports_Interval::default_after(),
+			'before'   => \WC_Admin_Reports_Interval::default_before(),
+			'after'    => \WC_Admin_Reports_Interval::default_after(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
@@ -95,7 +97,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 
 			$db_records_count = count( $db_intervals );
 
-			$expected_interval_count = WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$expected_interval_count = \WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return array();
@@ -118,7 +120,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
 			}
 
 			if ( '' !== $selections ) {
@@ -146,7 +148,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Variations;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Products_Data_Store.
  */
-class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -167,7 +169,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	protected function include_extended_info( &$products_data, $query_args ) {
 		foreach ( $products_data as $key => $product_data ) {
-			$extended_info = new ArrayObject();
+			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_variations_extended_attributes', $this->extended_attributes, $product_data );
 				$product             = wc_get_product( $product_data['product_id'] );
@@ -226,8 +228,8 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 			'page'          => 1,
 			'order'         => 'DESC',
 			'orderby'       => 'date',
-			'before'        => WC_Admin_Reports_Interval::default_before(),
-			'after'         => WC_Admin_Reports_Interval::default_after(),
+			'before'        => \WC_Admin_Reports_Interval::default_before(),
+			'after'         => \WC_Admin_Reports_Interval::default_after(),
 			'fields'        => '*',
 			'products'      => array(),
 			'variations'    => array(),

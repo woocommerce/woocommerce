@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Products;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Products_Data_Store.
  */
-class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Table used to get the data.
@@ -187,7 +189,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		$product_names = array();
 
 		foreach ( $products_data as $key => $product_data ) {
-			$extended_info = new ArrayObject();
+			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
 				$product_id = $product_data['product_id'];
 				$product    = wc_get_product( $product_id );
@@ -255,8 +257,8 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			'page'             => 1,
 			'order'            => 'DESC',
 			'orderby'          => 'date',
-			'before'           => WC_Admin_Reports_Interval::default_before(),
-			'after'            => WC_Admin_Reports_Interval::default_after(),
+			'before'           => \WC_Admin_Reports_Interval::default_before(),
+			'after'            => \WC_Admin_Reports_Interval::default_after(),
 			'fields'           => '*',
 			'categories'       => array(),
 			'product_includes' => array(),
@@ -429,7 +431,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					'customer_id'           => $order->get_report_customer_id(),
 					'product_qty'           => $product_qty,
 					'product_net_revenue'   => $net_revenue,
-					'date_created'          => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_created'          => $order->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
 					'coupon_amount'         => $coupon_amount,
 					'tax_amount'            => $tax_amount,
 					'shipping_amount'       => $shipping_amount,

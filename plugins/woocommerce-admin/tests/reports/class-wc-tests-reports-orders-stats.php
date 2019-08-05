@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Orders
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+
 /**
  * Class WC_Tests_Reports_Orders_Stats
  */
@@ -46,7 +48,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -189,7 +191,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -354,7 +356,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -643,7 +645,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Test for the current hour.
 		$current_hour_start = new DateTime();
@@ -894,7 +896,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		$current_hour_start = new DateTime();
@@ -3938,7 +3940,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		$now = new DateTime();
@@ -4502,7 +4504,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		$current_hour_start = new DateTime();
@@ -5275,7 +5277,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		global $wpdb;
 		$res = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}wc_order_stats" );
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		// (this sets minutes for current hour to 0, seconds are left as they arem e.g. 15:23:43 becomes 15:00:43).
@@ -6002,7 +6004,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// All empty in the beginning.
 		$query_args  = array(
@@ -6113,7 +6115,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// All empty in the beginning.
 		$query_args  = array(

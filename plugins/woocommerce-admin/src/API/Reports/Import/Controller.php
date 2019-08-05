@@ -123,7 +123,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function import_items( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
-		$import     = \WC_Admin_Reports_Sync::regenerate_report_data( $query_args['days'], $query_args['skip_existing'] );
+		$import     = WC_Admin_Reports_Sync::regenerate_report_data( $query_args['days'], $query_args['skip_existing'] );
 
 		if ( is_wp_error( $import ) ) {
 			$result = array(
@@ -239,7 +239,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function cancel_import( $request ) {
-		\WC_Admin_Reports_Sync::clear_queued_actions();
+		WC_Admin_Reports_Sync::clear_queued_actions();
 
 		$result = array(
 			'status'  => 'success',
@@ -259,7 +259,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function delete_imported_items( $request ) {
-		$delete = \WC_Admin_Reports_Sync::delete_report_data();
+		$delete = WC_Admin_Reports_Sync::delete_report_data();
 
 		if ( is_wp_error( $delete ) ) {
 			$result = array(
@@ -287,7 +287,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function get_import_status( $request ) {
 		$result = array(
-			'is_importing'    => \WC_Admin_Reports_Sync::is_importing(),
+			'is_importing'    => WC_Admin_Reports_Sync::is_importing(),
 			'customers_total' => (int) get_option( 'wc_admin_import_customers_total', 0 ),
 			'customers_count' => (int) get_option( 'wc_admin_import_customers_count', 0 ),
 			'orders_total'    => (int) get_option( 'wc_admin_import_orders_total', 0 ),
@@ -309,7 +309,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function get_import_totals( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
-		$totals     = \WC_Admin_Reports_Sync::get_import_totals( $query_args['days'], $query_args['skip_existing'] );
+		$totals     = WC_Admin_Reports_Sync::get_import_totals( $query_args['days'], $query_args['skip_existing'] );
 
 		$response = $this->prepare_item_for_response( $totals, $request );
 		$data     = $this->prepare_response_for_collection( $response );

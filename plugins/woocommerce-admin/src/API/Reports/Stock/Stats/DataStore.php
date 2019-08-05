@@ -5,12 +5,14 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Stock\Stats;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Reports_Stock_Stats_Data_Store.
  */
-class WC_Admin_Reports_Stock_Stats_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
 
 	/**
 	 * Get stock counts for the whole store.
@@ -122,7 +124,7 @@ class WC_Admin_Reports_Stock_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 	private function get_product_count() {
 		$query_args              = array();
 		$query_args['post_type'] = array( 'product', 'product_variation' );
-		$query                   = new WP_Query();
+		$query                   = new \WP_Query();
 		$query->query( $query_args );
 		return intval( $query->found_posts );
 	}
