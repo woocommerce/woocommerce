@@ -19,6 +19,7 @@ php:
 # Since Xenial services are not started by default, we need to instruct it below to start.
 services:
   - mysql
+  - xvfb
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
