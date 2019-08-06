@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string );
+	return is_bool( $string ) ? $string : ( 'yes' === strtolower( $string ) || 1 === $string || 'true' === strtolower( $string ) || '1' === $string );
 }
 
 /**
