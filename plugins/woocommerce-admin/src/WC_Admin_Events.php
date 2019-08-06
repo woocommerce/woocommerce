@@ -6,7 +6,13 @@
  * @package Woocommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Giving_Feedback_Notes;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Mobile_App;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_New_Sales_Record;
 
 /**
  * WC_Admin_Events Class.
