@@ -5,6 +5,8 @@
  * @package  WooCommerce Admin/Interface
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -14,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 3.5.0
  */
-interface WC_Admin_Reports_Data_Store_Interface {
+interface DataStoreInterface {
 
 	/**
 	 * Get the data based on args.

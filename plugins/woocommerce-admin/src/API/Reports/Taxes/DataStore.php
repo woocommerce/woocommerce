@@ -9,10 +9,13 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+
 /**
  * WC_Admin_Reports_Taxes_Data_Store.
  */
-class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Table used to get the data.

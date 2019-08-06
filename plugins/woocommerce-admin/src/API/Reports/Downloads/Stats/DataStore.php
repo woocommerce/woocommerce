@@ -9,10 +9,13 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore as DownloadsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+
 /**
  * WC_Admin_Reports_Downloads_Data_Store.
  */
-class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
+class DataStore extends DownloadsDataStore implements DataStoreInterface {
 
 	/**
 	 * Mapping columns to data type to return correct response types.

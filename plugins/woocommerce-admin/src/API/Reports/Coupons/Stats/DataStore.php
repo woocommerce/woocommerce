@@ -8,12 +8,13 @@
 namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 
 defined( 'ABSPATH' ) || exit;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 
 /**
  * WC_Reports_Coupons_Stats_Data_Store.
  */
-class DataStore extends \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore implements \WC_Admin_Reports_Data_Store_Interface {
-
+class DataStore extends CouponsDataStore implements DataStoreInterface {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
