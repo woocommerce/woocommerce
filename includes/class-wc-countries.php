@@ -996,7 +996,7 @@ class WC_Countries {
 							'class'    => array( 'form-row-first' ),
 							'priority' => 10,
 						),
-						'first_name'=> array(
+						'first_name' => array(
 							'class'    => array( 'form-row-last' ),
 							'priority' => 20,
 						),
