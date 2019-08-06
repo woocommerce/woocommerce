@@ -7,9 +7,11 @@
  * @package  WooCommerce Admin
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Parameter_Exception class.
  */
-class WC_Admin_Reports_Parameter_Exception extends WC_Data_Exception {}
+class ParameterException extends \WC_Data_Exception {}

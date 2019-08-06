@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
+
 /**
  * REST API Reports orders stats controller class.
  *
@@ -75,7 +77,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$orders_query = new Query( $query_args );
 		try {
 			$report_data = $orders_query->get_data();
-		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {
+		} catch ( ParameterException $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 

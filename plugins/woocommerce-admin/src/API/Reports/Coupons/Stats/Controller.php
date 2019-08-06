@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
+
 /**
  * REST API Reports coupons stats controller class.
  *
@@ -66,7 +68,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$coupons_query = new Query( $query_args );
 		try {
 			$report_data = $coupons_query->get_data();
-		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {
+		} catch ( ParameterException $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
