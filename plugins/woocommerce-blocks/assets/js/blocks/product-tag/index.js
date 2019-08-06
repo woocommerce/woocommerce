@@ -27,6 +27,7 @@ registerBlockType( 'woocommerce/product-tag', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		/**

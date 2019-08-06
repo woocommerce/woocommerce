@@ -29,6 +29,7 @@ registerBlockType( blockTypeName, {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		...sharedAttributes,
