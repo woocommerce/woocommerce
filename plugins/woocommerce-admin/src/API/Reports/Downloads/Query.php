@@ -15,12 +15,16 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * WC_Admin_Reports_Downloads_Query
  */
-class WC_Admin_Reports_Downloads_Query extends WC_Admin_Reports_Query {
+class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for downloads report.
@@ -39,7 +43,7 @@ class WC_Admin_Reports_Downloads_Query extends WC_Admin_Reports_Query {
 	public function get_data() {
 		$args = apply_filters( 'woocommerce_reports_downloads_query_args', $this->get_query_vars() );
 
-		$data_store = WC_Data_Store::load( 'report-downloads' );
+		$data_store = \WC_Data_Store::load( 'report-downloads' );
 		$results    = $data_store->get_data( $args );
 		return apply_filters( 'woocommerce_reports_downloads_select_query', $results, $args );
 	}

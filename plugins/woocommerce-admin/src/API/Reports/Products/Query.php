@@ -16,12 +16,16 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Products;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * WC_Admin_Reports_Products_Query
  */
-class WC_Admin_Reports_Products_Query extends WC_Admin_Reports_Query {
+class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for Products report.
@@ -40,7 +44,7 @@ class WC_Admin_Reports_Products_Query extends WC_Admin_Reports_Query {
 	public function get_data() {
 		$args = apply_filters( 'woocommerce_reports_products_query_args', $this->get_query_vars() );
 
-		$data_store = WC_Data_Store::load( 'report-products' );
+		$data_store = \WC_Data_Store::load( 'report-products' );
 		$results    = $data_store->get_data( $args );
 		return apply_filters( 'woocommerce_reports_products_select_query', $results, $args );
 	}

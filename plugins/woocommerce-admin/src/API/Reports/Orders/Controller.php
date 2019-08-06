@@ -71,7 +71,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new \WC_Admin_Reports_Orders_Query( $query_args );
+		$orders_query = new Query( $query_args );
 		$report_data  = $orders_query->get_data();
 
 		$data = array();

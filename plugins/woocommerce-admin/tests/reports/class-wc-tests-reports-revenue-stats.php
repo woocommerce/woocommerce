@@ -7,6 +7,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 
 /**
  * Class WC_Admin_Tests_Reports_Revenue_Stats
@@ -146,7 +147,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$query          = new WC_Admin_Reports_Revenue_Query( $args );
+		$query          = new RevenueQuery( $args );
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $query->get_data() ), true ) );
 	}
 }

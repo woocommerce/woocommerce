@@ -7,6 +7,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Products\Query as ProductsQuery;
 
 /**
  * Reports product stats tests class
@@ -69,7 +70,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Products_Query( $args );
+		$query = new ProductsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -185,7 +186,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Products_Query( $args );
+		$query = new ProductsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -410,7 +411,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Products_Query( $args );
+		$query = new ProductsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 }

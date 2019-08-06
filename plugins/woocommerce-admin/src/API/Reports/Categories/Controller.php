@@ -64,7 +64,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new \WC_Admin_Reports_Categories_Query( $query_args );
+		$categories_query = new Query( $query_args );
 		$report_data      = $categories_query->get_data();
 
 		if ( is_wp_error( $report_data ) ) {

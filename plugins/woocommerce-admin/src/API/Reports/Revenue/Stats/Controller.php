@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
+
 /**
  * REST API Reports revenue stats controller class.
  *
@@ -61,7 +63,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$reports_revenue = new \WC_Admin_Reports_Revenue_Query( $query_args );
+		$reports_revenue = new RevenueQuery( $query_args );
 		try {
 			$report_data = $reports_revenue->get_data();
 		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {

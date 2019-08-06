@@ -7,6 +7,7 @@
 
 use \Automattic\WooCommerce\Admin\WC_Admin_Report_CSV_Exporter;
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
 
 /**
  * Class WC_Tests_Reports_Coupons
@@ -95,7 +96,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Coupons_Query( $args );
+		$query = new CouponsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 
 		// Test order by orders_count DESC.

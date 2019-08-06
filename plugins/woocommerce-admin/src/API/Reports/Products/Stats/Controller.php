@@ -77,7 +77,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			}
 		}
 
-		$query = new \WC_Admin_Reports_Products_Stats_Query( $query_args );
+		$query = new Query( $query_args );
 		try {
 			$report_data = $query->get_data();
 		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {

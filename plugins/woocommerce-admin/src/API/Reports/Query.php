@@ -5,12 +5,14 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Query
  */
-abstract class WC_Admin_Reports_Query extends WC_Object_Query {
+abstract class Query extends \WC_Object_Query {
 
 	/**
 	 * Get report data matching the current query vars.
@@ -19,7 +21,7 @@ abstract class WC_Admin_Reports_Query extends WC_Object_Query {
 	 */
 	public function get_data() {
 		/* translators: %s: Method name */
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce-admin' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce-admin' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 }

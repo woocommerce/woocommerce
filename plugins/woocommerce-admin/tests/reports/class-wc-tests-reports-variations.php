@@ -7,6 +7,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore as VariationsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Variations\Query as VariationsQuery;
  
 /**
  * Reports order stats tests class.
@@ -71,7 +72,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Variations_Query( $args );
+		$query = new VariationsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 

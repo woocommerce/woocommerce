@@ -1,27 +1,30 @@
 <?php
 /**
- * Class for parameter-based Taxes Stats Report querying
+ * Class for parameter-based Taxes Report querying
  *
  * Example usage:
  * $args = array(
  *          'before'       => '2018-07-19 00:00:00',
  *          'after'        => '2018-07-05 00:00:00',
  *          'page'         => 2,
- *          'categories'   => array(15, 18),
- *          'product_ids'  => array(1,2,3)
+ *          'taxes'        => array(1,2,3)
  *         );
- * $report = new WC_Admin_Reports_Taxes_Stats_Query( $args );
+ * $report = new WC_Admin_Reports_Taxes_Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * WC_Admin_Reports_Taxes_Query
  */
-class WC_Admin_Reports_Taxes_Stats_Query extends WC_Admin_Reports_Query {
+class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for Taxes report.
@@ -33,16 +36,16 @@ class WC_Admin_Reports_Taxes_Stats_Query extends WC_Admin_Reports_Query {
 	}
 
 	/**
-	 * Get tax stats data based on the current query vars.
+	 * Get product data based on the current query vars.
 	 *
 	 * @return array
 	 */
 	public function get_data() {
-		$args = apply_filters( 'woocommerce_reports_taxes_stats_query_args', $this->get_query_vars() );
+		$args = apply_filters( 'woocommerce_reports_taxes_query_args', $this->get_query_vars() );
 
-		$data_store = WC_Data_Store::load( 'report-taxes-stats' );
+		$data_store = \WC_Data_Store::load( 'report-taxes' );
 		$results    = $data_store->get_data( $args );
-		return apply_filters( 'woocommerce_reports_taxes_stats_select_query', $results, $args );
+		return apply_filters( 'woocommerce_reports_taxes_select_query', $results, $args );
 	}
 
 }

@@ -62,7 +62,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			}
 		}
 
-		$reports       = new \WC_Admin_Reports_Products_Query( $args );
+		$reports       = new Query( $args );
 		$products_data = $reports->get_data();
 
 		$data = array();

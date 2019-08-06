@@ -17,12 +17,16 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * WC_Admin_Reports_Orders_Stats_Query
  */
-class WC_Admin_Reports_Orders_Stats_Query extends WC_Admin_Reports_Query {
+class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for Orders report.
@@ -53,7 +57,7 @@ class WC_Admin_Reports_Orders_Stats_Query extends WC_Admin_Reports_Query {
 	public function get_data() {
 		$args = apply_filters( 'woocommerce_reports_orders_stats_query_args', $this->get_query_vars() );
 
-		$data_store = WC_Data_Store::load( 'report-orders-stats' );
+		$data_store = \WC_Data_Store::load( 'report-orders-stats' );
 		$results    = $data_store->get_data( $args );
 		return apply_filters( 'woocommerce_reports_orders_stats_select_query', $results, $args );
 	}

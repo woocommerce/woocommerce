@@ -89,7 +89,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new \WC_Admin_Reports_Customers_Query( $query_args );
+		$customers_query = new Query( $query_args );
 		$report_data     = $customers_query->get_data();
 
 		$data = array();

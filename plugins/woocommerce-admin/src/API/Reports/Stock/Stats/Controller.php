@@ -40,7 +40,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$stock_query = new \WC_Admin_Reports_Stock_Stats_Query();
+		$stock_query = new Query();
 		$report_data = $stock_query->get_data();
 		$out_data    = array(
 			'totals' => $report_data,

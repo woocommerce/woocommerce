@@ -47,7 +47,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			}
 		}
 
-		$reports        = new \WC_Admin_Reports_Downloads_Query( $args );
+		$reports        = new Query( $args );
 		$downloads_data = $reports->get_data();
 
 		$data = array();

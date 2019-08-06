@@ -6,6 +6,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Query as CouponsStatsQuery;
  
 /**
  * Class WC_Tests_Reports_Coupons_Stats
@@ -100,7 +101,7 @@ class WC_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Coupons_Stats_Query( $args );
+		$query = new CouponsStatsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 }

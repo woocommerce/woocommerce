@@ -63,7 +63,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_reports_query( $request );
-		$coupons_query = new \WC_Admin_Reports_Coupons_Stats_Query( $query_args );
+		$coupons_query = new Query( $query_args );
 		try {
 			$report_data = $coupons_query->get_data();
 		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {

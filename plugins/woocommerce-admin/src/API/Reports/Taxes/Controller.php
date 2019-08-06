@@ -60,7 +60,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new \WC_Admin_Reports_Taxes_Query( $query_args );
+		$taxes_query = new Query( $query_args );
 		$report_data = $taxes_query->get_data();
 
 		$data = array();

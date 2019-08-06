@@ -6,6 +6,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
 
 /**
  * Class WC_Tests_Reports_Orders_Stats
@@ -110,7 +111,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
 
 		// Test retrieving the stats through the query class.
-		$query          = new WC_Admin_Reports_Orders_Stats_Query( $args );
+		$query          = new OrdersStatsQuery( $args );
 		$expected_stats = array(
 			'totals'    => array(
 				'net_revenue'             => 68,
