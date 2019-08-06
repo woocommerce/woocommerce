@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Admin_Reports_Coupons_Data_Store.
@@ -187,10 +188,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$date_expires     = '';
 					$date_expires_gmt = '';
 				} else {
-					$date_expires     = $date_expires->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_expires     = $date_expires->format( TimeInterval::$iso_datetime_format );
 					$date_expires_gmt = new \DateTime( $date_expires );
 					$date_expires_gmt->setTimezone( $gmt_timzone );
-					$date_expires_gmt = $date_expires_gmt->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_expires_gmt = $date_expires_gmt->format( TimeInterval::$iso_datetime_format );
 				}
 
 				$date_created = $coupon->get_date_created();
@@ -198,10 +199,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$date_created     = '';
 					$date_created_gmt = '';
 				} else {
-					$date_created     = $date_created->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_created     = $date_created->format( TimeInterval::$iso_datetime_format );
 					$date_created_gmt = new \DateTime( $date_created );
 					$date_created_gmt->setTimezone( $gmt_timzone );
-					$date_created_gmt = $date_created_gmt->format( \WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_created_gmt = $date_created_gmt->format( TimeInterval::$iso_datetime_format );
 				}
 
 				$extended_info = array(
@@ -234,8 +235,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'          => 1,
 			'order'         => 'DESC',
 			'orderby'       => 'coupon_id',
-			'before'        => \WC_Admin_Reports_Interval::default_before(),
-			'after'         => \WC_Admin_Reports_Interval::default_after(),
+			'before'        => TimeInterval::default_before(),
+			'after'         => TimeInterval::default_after(),
 			'fields'        => '*',
 			'coupons'       => array(),
 			'extended_info' => false,
@@ -390,7 +391,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'order_id'        => $order_id,
 					'coupon_id'       => $coupon_id,
 					'discount_amount' => $coupon_item->get_discount(),
-					'date_created'    => $order->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_created'    => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
 				),
 				array(
 					'%d',

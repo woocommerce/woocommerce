@@ -5,12 +5,14 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.
  */
-class WC_Admin_Reports_Interval {
+class TimeInterval {
 
 	/**
 	 * Format string for ISO DateTime formatter.
@@ -33,8 +35,8 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function convert_local_datetime_to_gmt( $datetime_string ) {
-		$datetime = new DateTime( $datetime_string, new DateTimeZone( wc_timezone_string() ) );
-		$datetime->setTimezone( new DateTimeZone( 'GMT' ) );
+		$datetime = new \DateTime( $datetime_string, new \DateTimeZone( wc_timezone_string() ) );
+		$datetime->setTimezone( new \DateTimeZone( 'GMT' ) );
 		return $datetime;
 	}
 
@@ -44,10 +46,10 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function default_before() {
-		$datetime = new WC_DateTime();
+		$datetime = new \WC_DateTime();
 		// Set local timezone or offset.
 		if ( get_option( 'timezone_string' ) ) {
-			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			$datetime->setTimezone( new \DateTimeZone( wc_timezone_string() ) );
 		} else {
 			$datetime->set_utc_offset( wc_timezone_offset() );
 		}
@@ -63,11 +65,11 @@ class WC_Admin_Reports_Interval {
 		$now       = time();
 		$week_back = $now - WEEK_IN_SECONDS;
 
-		$datetime = new WC_DateTime();
+		$datetime = new \WC_DateTime();
 		$datetime->setTimestamp( $week_back );
 		// Set local timezone or offset.
 		if ( get_option( 'timezone_string' ) ) {
-			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+			$datetime->setTimezone( new \DateTimeZone( wc_timezone_string() ) );
 		} else {
 			$datetime->set_utc_offset( wc_timezone_offset() );
 		}
@@ -147,7 +149,7 @@ class WC_Admin_Reports_Interval {
 	 * @return int
 	 */
 	public static function simple_week_number( $datetime, $first_day_of_week ) {
-		$beg_of_year_day          = new DateTime( "{$datetime->format('Y')}-01-01" );
+		$beg_of_year_day          = new \DateTime( "{$datetime->format('Y')}-01-01" );
 		$adj_day_beg_of_year      = ( (int) $beg_of_year_day->format( 'w' ) - $first_day_of_week + 7 ) % 7;
 		$days_since_start_of_year = (int) $datetime->format( 'z' ) + 1;
 
@@ -158,7 +160,7 @@ class WC_Admin_Reports_Interval {
 	 * Returns ISO 8601 week number for the DateTime, if week starts on Monday,
 	 * otherwise returns simple week number.
 	 *
-	 * @see WC_Admin_Reports_Interval::simple_week_number()
+	 * @see TimeInterval::simple_week_number()
 	 *
 	 * @param DateTime $datetime          Local date for which the week number is to be calculated.
 	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
@@ -288,9 +290,9 @@ class WC_Admin_Reports_Interval {
 			$hours_offset_timestamp --;
 		}
 
-		$hours_offset_time = new DateTime();
+		$hours_offset_time = new \DateTime();
 		$hours_offset_time->setTimestamp( $hours_offset_timestamp );
-		$hours_offset_time->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		$hours_offset_time->setTimezone( new \DateTimeZone( wc_timezone_string() ) );
 		return $hours_offset_time;
 	}
 
@@ -312,9 +314,9 @@ class WC_Admin_Reports_Interval {
 			$next_day_timestamp --;
 		}
 
-		$next_day = new DateTime();
+		$next_day = new \DateTime();
 		$next_day->setTimestamp( $next_day_timestamp );
-		$next_day->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		$next_day->setTimezone( new \DateTimeZone( wc_timezone_string() ) );
 		return $next_day;
 	}
 
@@ -357,7 +359,7 @@ class WC_Admin_Reports_Interval {
 		$month           = (int) $datetime->format( 'm' );
 
 		if ( $reversed ) {
-			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00", new DateTimeZone( wc_timezone_string() ) );
+			$beg_of_month_datetime       = new \DateTime( "$year-$month-01 00:00:00", new \DateTimeZone( wc_timezone_string() ) );
 			$timestamp                   = (int) $beg_of_month_datetime->format( 'U' );
 			$end_of_prev_month_timestamp = $timestamp - 1;
 			$datetime->setTimestamp( $end_of_prev_month_timestamp );
@@ -368,7 +370,7 @@ class WC_Admin_Reports_Interval {
 				$year ++;
 			}
 			$day      = '01';
-			$datetime = new DateTime( "$year-$month-$day 00:00:00", new DateTimeZone( wc_timezone_string() ) );
+			$datetime = new \DateTime( "$year-$month-$day 00:00:00", new \DateTimeZone( wc_timezone_string() ) );
 		}
 
 		return $datetime;
@@ -424,7 +426,7 @@ class WC_Admin_Reports_Interval {
 				}
 				break;
 		}
-		$datetime = new DateTime( "$year-$month-01 00:00:00", new DateTimeZone( wc_timezone_string() ) );
+		$datetime = new \DateTime( "$year-$month-01 00:00:00", new \DateTimeZone( wc_timezone_string() ) );
 		if ( $reversed ) {
 			$timestamp                   = (int) $datetime->format( 'U' );
 			$end_of_prev_month_timestamp = $timestamp - 1;
@@ -448,13 +450,13 @@ class WC_Admin_Reports_Interval {
 		$day            = '01';
 
 		if ( $reversed ) {
-			$datetime                   = new DateTime( "$year-$month-$day 00:00:00", new DateTimeZone( wc_timezone_string() ) );
+			$datetime                   = new \DateTime( "$year-$month-$day 00:00:00", new \DateTimeZone( wc_timezone_string() ) );
 			$timestamp                  = (int) $datetime->format( 'U' );
 			$end_of_prev_year_timestamp = $timestamp - 1;
 			$datetime->setTimestamp( $end_of_prev_year_timestamp );
 		} else {
 			$year    += $year_increment;
-			$datetime = new DateTime( "$year-$month-$day 00:00:00", new DateTimeZone( wc_timezone_string() ) );
+			$datetime = new \DateTime( "$year-$month-$day 00:00:00", new \DateTimeZone( wc_timezone_string() ) );
 		}
 
 		return $datetime;
@@ -591,7 +593,7 @@ class WC_Admin_Reports_Interval {
 	 */
 	public static function rest_validate_between_numeric_arg( $value, $request, $param ) {
 		if ( ! wp_is_numeric_array( $value ) ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: 1: parameter name */
 				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce-admin' ), $param )
@@ -603,7 +605,7 @@ class WC_Admin_Reports_Interval {
 			! is_numeric( $value[0] ) ||
 			! is_numeric( $value[1] )
 		) {
-			return new WP_Error(
+			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
 				sprintf( __( '%s must contain 2 numbers.', 'woocommerce-admin' ), $param )
@@ -623,7 +625,7 @@ class WC_Admin_Reports_Interval {
 	 */
 	public static function rest_validate_between_date_arg( $value, $request, $param ) {
 		if ( ! wp_is_numeric_array( $value ) ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: 1: parameter name */
 				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce-admin' ), $param )
@@ -635,7 +637,7 @@ class WC_Admin_Reports_Interval {
 			! rest_parse_date( $value[0] ) ||
 			! rest_parse_date( $value[1] )
 		) {
-			return new WP_Error(
+			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
 				sprintf( __( '%s must contain 2 valid dates.', 'woocommerce-admin' ), $param )

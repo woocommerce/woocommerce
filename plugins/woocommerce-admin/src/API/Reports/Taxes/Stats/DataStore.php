@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Reports_Taxes_Stats_Data_Store.
@@ -156,8 +157,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'tax_rate_id',
-			'before'   => \WC_Admin_Reports_Interval::default_before(),
-			'after'    => \WC_Admin_Reports_Interval::default_after(),
+			'before'   => TimeInterval::default_before(),
+			'after'    => TimeInterval::default_after(),
 			'fields'   => '*',
 			'taxes'    => array(),
 		);
@@ -198,7 +199,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = \WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
 
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
@@ -268,7 +269,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			if ( \WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+			if ( TimeInterval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
 				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );

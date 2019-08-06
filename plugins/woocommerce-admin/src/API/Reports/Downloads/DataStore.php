@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Admin_Reports_Downloads_Data_Store.
@@ -260,13 +261,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		if ( $query_args['before'] ) {
-			$datetime_str                    = $query_args['before']->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['before']->format( TimeInterval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp <= '$datetime_str'";
 
 		}
 
 		if ( $query_args['after'] ) {
-			$datetime_str                    = $query_args['after']->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['after']->format( TimeInterval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp >= '$datetime_str'";
 		}
 
@@ -317,8 +318,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'timestamp',
-			'before'   => \WC_Admin_Reports_Interval::default_before(),
-			'after'    => \WC_Admin_Reports_Interval::default_after(),
+			'before'   => TimeInterval::default_before(),
+			'after'    => TimeInterval::default_after(),
 			'fields'   => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );

@@ -8,6 +8,7 @@
 use \Automattic\WooCommerce\Admin\WC_Admin_Report_CSV_Exporter;
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Class WC_Tests_Reports_Coupons
@@ -186,8 +187,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c1_date_created_gmt = new DateTime( $c1_date_created );
 			$c1_date_created_gmt->setTimezone( $gmt_timezone );
 
-			$c1_date_created     = $c1_date_created->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c1_date_created_gmt = $c1_date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c1_date_created     = $c1_date_created->format( TimeInterval::$iso_datetime_format );
+			$c1_date_created_gmt = $c1_date_created_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$c1_date_expires = $coupon_1->get_date_expires();
@@ -198,8 +199,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c1_date_expires_gmt = new DateTime( $c1_date_expires );
 			$c1_date_expires_gmt->setTimezone( $gmt_timezone );
 
-			$c1_date_expires     = $c1_date_expires->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c1_date_expires_gmt = $c1_date_expires_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c1_date_expires     = $c1_date_expires->format( TimeInterval::$iso_datetime_format );
+			$c1_date_expires_gmt = $c1_date_expires_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$coupon_1_response = array(
@@ -224,8 +225,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c2_date_created_gmt = new DateTime( $c2_date_created );
 			$c2_date_created_gmt->setTimezone( $gmt_timezone );
 
-			$c2_date_created     = $c2_date_created->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c2_date_created_gmt = $c2_date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c2_date_created     = $c2_date_created->format( TimeInterval::$iso_datetime_format );
+			$c2_date_created_gmt = $c2_date_created_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$c2_date_expires = $coupon_2->get_date_expires();
@@ -236,8 +237,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c2_date_expires_gmt = new DateTime( $c2_date_expires );
 			$c2_date_expires_gmt->setTimezone( $gmt_timezone );
 
-			$c2_date_expires     = $c2_date_expires->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c2_date_expires_gmt = $c2_date_expires_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c2_date_expires     = $c2_date_expires->format( TimeInterval::$iso_datetime_format );
+			$c2_date_expires_gmt = $c2_date_expires_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$coupon_2_response = array(

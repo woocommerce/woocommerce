@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Admin_Reports_Products_Data_Store.
@@ -260,8 +261,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'             => 1,
 			'order'            => 'DESC',
 			'orderby'          => 'date',
-			'before'           => \WC_Admin_Reports_Interval::default_before(),
-			'after'            => \WC_Admin_Reports_Interval::default_after(),
+			'before'           => TimeInterval::default_before(),
+			'after'            => TimeInterval::default_after(),
 			'fields'           => '*',
 			'categories'       => array(),
 			'product_includes' => array(),
@@ -434,7 +435,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'customer_id'           => $order->get_report_customer_id(),
 					'product_qty'           => $product_qty,
 					'product_net_revenue'   => $net_revenue,
-					'date_created'          => $order->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_created'          => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
 					'coupon_amount'         => $coupon_amount,
 					'tax_amount'            => $tax_amount,
 					'shipping_amount'       => $shipping_amount,

@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Admin_Reports_Taxes_Data_Store.
@@ -172,8 +173,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'tax_rate_id',
-			'before'   => \WC_Admin_Reports_Interval::default_before(),
-			'after'    => \WC_Admin_Reports_Interval::default_after(),
+			'before'   => TimeInterval::default_before(),
+			'after'    => TimeInterval::default_after(),
 			'fields'   => '*',
 			'taxes'    => array(),
 		);
@@ -330,7 +331,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
-					'date_created' => $order->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_created' => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
 					'tax_rate_id'  => $tax_item->get_rate_id(),
 					'shipping_tax' => $tax_item->get_shipping_tax_total(),
 					'order_tax'    => $tax_item->get_tax_total(),

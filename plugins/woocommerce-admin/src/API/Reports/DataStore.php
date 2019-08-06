@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 /**
  * WC_Admin_Reports_Data_Store: Common parent for custom report data stores.
  */
@@ -144,8 +146,8 @@ class DataStore {
 		// @todo Should 'products' be in intervals?
 		unset( $totals_arr['products'] );
 		while ( $start_datetime <= $end_datetime ) {
-			$next_start = \WC_Admin_Reports_Interval::iterate( $start_datetime, $time_interval );
-			$time_id    = \WC_Admin_Reports_Interval::time_interval_id( $time_interval, $start_datetime );
+			$next_start = TimeInterval::iterate( $start_datetime, $time_interval );
+			$time_id    = TimeInterval::time_interval_id( $time_interval, $start_datetime );
 			// Either create fill-zero interval or use data from db.
 			if ( $next_start > $end_datetime ) {
 				$interval_end = $end_datetime->format( 'Y-m-d H:i:s' );
@@ -329,7 +331,7 @@ class DataStore {
 						$start_iteration = 0;
 						break;
 					}
-					$new_start_date = \WC_Admin_Reports_Interval::iterate( $new_start_date, $query_args['interval'] );
+					$new_start_date = TimeInterval::iterate( $new_start_date, $query_args['interval'] );
 					$start_iteration ++;
 				}
 
@@ -338,7 +340,7 @@ class DataStore {
 					if ( $new_end_date > $latest_end_date ) {
 						break;
 					}
-					$new_end_date = \WC_Admin_Reports_Interval::iterate( $new_end_date, $query_args['interval'] );
+					$new_end_date = TimeInterval::iterate( $new_end_date, $query_args['interval'] );
 					$end_iteration ++;
 				}
 				if ( $new_end_date > $latest_end_date ) {
@@ -360,7 +362,7 @@ class DataStore {
 						$end_iteration = 0;
 						break;
 					}
-					$new_end_date = \WC_Admin_Reports_Interval::iterate( $new_end_date, $query_args['interval'], true );
+					$new_end_date = TimeInterval::iterate( $new_end_date, $query_args['interval'], true );
 					$end_iteration ++;
 				}
 
@@ -369,7 +371,7 @@ class DataStore {
 					if ( $new_start_date < $earliest_start_date ) {
 						break;
 					}
-					$new_start_date = \WC_Admin_Reports_Interval::iterate( $new_start_date, $query_args['interval'], true );
+					$new_start_date = TimeInterval::iterate( $new_start_date, $query_args['interval'], true );
 					$start_iteration ++;
 				}
 				if ( $new_start_date < $earliest_start_date ) {
@@ -384,8 +386,8 @@ class DataStore {
 			}
 			$query_args['adj_after']               = $new_start_date;
 			$query_args['adj_before']              = $new_end_date;
-			$adj_after                             = $new_start_date->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
-			$adj_before                            = $new_end_date->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+			$adj_after                             = $new_start_date->format( TimeInterval::$sql_datetime_format );
+			$adj_before                            = $new_end_date->format( TimeInterval::$sql_datetime_format );
 			$intervals_query['where_time_clause']  = '';
 			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$adj_before'";
 			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$adj_after'";
@@ -505,7 +507,7 @@ class DataStore {
 		foreach ( $intervals as $key => $interval ) {
 			$datetime = new \DateTime( $interval['datetime_anchor'], $local_tz );
 
-			$prev_start = \WC_Admin_Reports_Interval::iterate( $datetime, $time_interval, true );
+			$prev_start = TimeInterval::iterate( $datetime, $time_interval, true );
 			// @todo Not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
 			$prev_start_timestamp = (int) $prev_start->format( 'U' ) + 1;
 			$prev_start->setTimestamp( $prev_start_timestamp );
@@ -516,7 +518,7 @@ class DataStore {
 				$intervals[ $key ]['date_start'] = $prev_start->format( 'Y-m-d H:i:s' );
 			}
 
-			$next_end           = \WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
+			$next_end           = TimeInterval::iterate( $datetime, $time_interval );
 			$next_end_timestamp = (int) $next_end->format( 'U' ) - 1;
 			$next_end->setTimestamp( $next_end_timestamp );
 			if ( $end_datetime ) {
@@ -539,15 +541,15 @@ class DataStore {
 	 */
 	protected function create_interval_subtotals( &$intervals ) {
 		foreach ( $intervals as $key => $interval ) {
-			$start_gmt = \WC_Admin_Reports_Interval::convert_local_datetime_to_gmt( $interval['date_start'] );
-			$end_gmt   = \WC_Admin_Reports_Interval::convert_local_datetime_to_gmt( $interval['date_end'] );
+			$start_gmt = TimeInterval::convert_local_datetime_to_gmt( $interval['date_start'] );
+			$end_gmt   = TimeInterval::convert_local_datetime_to_gmt( $interval['date_end'] );
 			// Move intervals result to subtotals object.
 			$intervals[ $key ] = array(
 				'interval'       => $interval['time_interval'],
 				'date_start'     => $interval['date_start'],
-				'date_start_gmt' => $start_gmt->format( \WC_Admin_Reports_Interval::$sql_datetime_format ),
+				'date_start_gmt' => $start_gmt->format( TimeInterval::$sql_datetime_format ),
 				'date_end'       => $interval['date_end'],
-				'date_end_gmt'   => $end_gmt->format( \WC_Admin_Reports_Interval::$sql_datetime_format ),
+				'date_end_gmt'   => $end_gmt->format( TimeInterval::$sql_datetime_format ),
 			);
 
 			unset( $interval['interval'] );
@@ -575,9 +577,9 @@ class DataStore {
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			if ( is_a( $query_args['before'], 'WC_DateTime' ) ) {
-				$datetime_str = $query_args['before']->date( \WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime_str = $query_args['before']->date( TimeInterval::$sql_datetime_format );
 			} else {
-				$datetime_str = $query_args['before']->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime_str = $query_args['before']->format( TimeInterval::$sql_datetime_format );
 			}
 			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$datetime_str'";
 
@@ -585,9 +587,9 @@ class DataStore {
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			if ( is_a( $query_args['after'], 'WC_DateTime' ) ) {
-				$datetime_str = $query_args['after']->date( \WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime_str = $query_args['after']->date( TimeInterval::$sql_datetime_format );
 			} else {
-				$datetime_str = $query_args['after']->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime_str = $query_args['after']->format( TimeInterval::$sql_datetime_format );
 			}
 			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$datetime_str'";
 		}
@@ -710,7 +712,7 @@ class DataStore {
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
-			$intervals_query['select_clause'] = \WC_Admin_Reports_Interval::db_datetime_format( $interval, $table_name );
+			$intervals_query['select_clause'] = TimeInterval::db_datetime_format( $interval, $table_name );
 		}
 
 		$intervals_query = array_merge( $intervals_query, $this->get_limit_sql_params( $query_args ) );

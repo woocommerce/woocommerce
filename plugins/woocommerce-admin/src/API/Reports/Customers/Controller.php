@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 /**
  * REST API Reports customers controller class.
  *
@@ -73,9 +75,9 @@ class Controller extends \WC_REST_Reports_Controller {
 		$args['customers']           = $request['customers'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$normalized_params_numeric = \WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
+		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
 		$between_params_date       = array( 'last_active', 'registered' );
-		$normalized_params_date    = \WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_date, true );
+		$normalized_params_date    = TimeInterval::normalize_between_params( $request, $between_params_date, true );
 		$args                      = array_merge( $args, $normalized_params_numeric, $normalized_params_date );
 
 		return $args;
@@ -433,7 +435,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params['last_active_between']     = array(
 			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_date_arg' ),
+			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_date_arg' ),
 		);
 		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
@@ -450,7 +452,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params['registered_between']      = array(
 			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_date_arg' ),
+			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_date_arg' ),
 		);
 		$params['orders_count_min']        = array(
 			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'woocommerce-admin' ),
@@ -467,7 +469,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params['orders_count_between']    = array(
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'woocommerce-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_numeric_arg' ),
+			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
 		);
 		$params['total_spend_min']         = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'woocommerce-admin' ),
@@ -482,7 +484,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params['total_spend_between']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'woocommerce-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_numeric_arg' ),
+			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
 		);
 		$params['avg_order_value_min']     = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'woocommerce-admin' ),
@@ -497,7 +499,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params['avg_order_value_between'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'woocommerce-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_numeric_arg' ),
+			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
 		);
 		$params['last_order_before']       = array(
 			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),

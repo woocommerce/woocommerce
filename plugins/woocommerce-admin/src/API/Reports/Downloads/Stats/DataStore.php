@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore as DownloadsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Admin_Reports_Downloads_Data_Store.
@@ -62,8 +63,8 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 			'orderby'  => 'date',
 			'fields'   => '*',
 			'interval' => 'week',
-			'before'   => \WC_Admin_Reports_Interval::default_before(),
-			'after'    => \WC_Admin_Reports_Interval::default_after(),
+			'before'   => TimeInterval::default_before(),
+			'after'    => TimeInterval::default_after(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
@@ -100,7 +101,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 
 			$db_records_count = count( $db_intervals );
 
-			$expected_interval_count = \WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return array();

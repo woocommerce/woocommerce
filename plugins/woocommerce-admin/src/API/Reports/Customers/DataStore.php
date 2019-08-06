@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * WC_Admin_Reports_Customers_Data_Store.
@@ -175,13 +176,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( ! empty( $query_args[ $before_arg ] ) ) {
 				$datetime     = new \DateTime( $query_args[ $before_arg ] );
-				$datetime_str = $datetime->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime_str = $datetime->format( TimeInterval::$sql_datetime_format );
 				$subclauses[] = "{$column_name} <= '$datetime_str'";
 			}
 
 			if ( ! empty( $query_args[ $after_arg ] ) ) {
 				$datetime     = new \DateTime( $query_args[ $after_arg ] );
-				$datetime_str = $datetime->format( \WC_Admin_Reports_Interval::$sql_datetime_format );
+				$datetime_str = $datetime->format( TimeInterval::$sql_datetime_format );
 				$subclauses[] = "{$column_name} >= '$datetime_str'";
 			}
 
@@ -352,8 +353,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'         => 1,
 			'order'        => 'DESC',
 			'orderby'      => 'date_registered',
-			'order_before' => \WC_Admin_Reports_Interval::default_before(),
-			'order_after'  => \WC_Admin_Reports_Interval::default_after(),
+			'order_before' => TimeInterval::default_before(),
+			'order_after'  => TimeInterval::default_after(),
 			'fields'       => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
@@ -524,7 +525,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$customer                = new \WC_Customer( $user_id );
 			$data['user_id']         = $user_id;
 			$data['username']        = $customer->get_username( 'edit' );
-			$data['date_registered'] = $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ) : null;
+			$data['date_registered'] = $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null;
 			$format[]                = '%d';
 			$format[]                = '%s';
 			$format[]                = '%s';
@@ -643,7 +644,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
-			'date_registered'  => $customer->get_date_created( 'edit' )->date( \WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'date_registered'  => $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
 			'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(

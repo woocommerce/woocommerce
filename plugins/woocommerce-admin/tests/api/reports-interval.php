@@ -6,6 +6,8 @@
  * @since x.x.0
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 /**
  * Class WC_Tests_Reports_Interval_Stats
  */
@@ -30,31 +32,31 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_quarter() {
 		$datetime = new DateTime( '2017-12-31T00:00:00', self::$local_tz );
-		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 4, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-01-01T00:00:00', self::$local_tz );
-		$this->assertEquals( 1, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 1, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-03-31T23:59:59', self::$local_tz );
-		$this->assertEquals( 1, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 1, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-04-01T00:00:00', self::$local_tz );
-		$this->assertEquals( 2, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 2, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-06-30T23:59:59', self::$local_tz );
-		$this->assertEquals( 2, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 2, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-07-01T00:00:00', self::$local_tz );
-		$this->assertEquals( 3, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 3, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-09-30T23:59:59', self::$local_tz );
-		$this->assertEquals( 3, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 3, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-10-01T00:00:00', self::$local_tz );
-		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 4, TimeInterval::quarter( $datetime ) );
 
 		$datetime = new DateTime( '2018-12-31T23:59:59', self::$local_tz );
-		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
+		$this->assertEquals( 4, TimeInterval::quarter( $datetime ) );
 	}
 
 	/**
@@ -337,7 +339,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $expected_week_no as $date => $week_numbers ) {
 			for ( $first_day_of_week = 1; $first_day_of_week <= 7; $first_day_of_week++ ) {
 				$datetime = new DateTime( $date, self::$local_tz );
-				$this->assertEquals( $expected_week_no[ $date ][ $first_day_of_week ], WC_Admin_Reports_Interval::simple_week_number( $datetime, $first_day_of_week ), "First day of week: $first_day_of_week; Date: $date" );
+				$this->assertEquals( $expected_week_no[ $date ][ $first_day_of_week ], TimeInterval::simple_week_number( $datetime, $first_day_of_week ), "First day of week: $first_day_of_week; Date: $date" );
 			}
 		}
 
@@ -381,7 +383,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		);
 		foreach ( $expected_week_no as $date => $week_numbers ) {
 			$datetime = new DateTime( $date, self::$local_tz );
-			$this->assertEquals( $expected_week_no[ $date ], WC_Admin_Reports_Interval::week_number( $datetime, 1 ), "ISO week number for date: $date" );
+			$this->assertEquals( $expected_week_no[ $date ], TimeInterval::week_number( $datetime, 1 ), "ISO week number for date: $date" );
 		}
 	}
 
@@ -617,7 +619,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			foreach ( $setting['intervals'] as $interval => $exp_value ) {
 				$start_datetime = new DateTime( $setting['start'], self::$local_tz );
 				$end_datetime   = new DateTime( $setting['end'], self::$local_tz );
-				$this->assertEquals( $exp_value, WC_Admin_Reports_Interval::intervals_between( $start_datetime, $end_datetime, $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
+				$this->assertEquals( $exp_value, TimeInterval::intervals_between( $start_datetime, $end_datetime, $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
 			}
 		}
 	}
@@ -639,8 +641,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_hour_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_hour_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -662,8 +664,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_day_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_day_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -710,8 +712,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_week_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_week_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -742,8 +744,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_week_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_week_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -766,8 +768,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_month_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_month_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -801,8 +803,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_quarter_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_quarter_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -828,8 +830,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $settings as $datetime_s => $setting ) {
 			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
-				$result_dt = WC_Admin_Reports_Interval::next_year_start( $datetime, $reversed );
-				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+				$result_dt = TimeInterval::next_year_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
 			}
 		}
 	}
@@ -846,7 +848,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			'f_between' => array( 10, 12 ), // not in params, skipped.
 		);
 		$params   = array( 'a', 'b', 'c', 'd' );
-		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, false );
+		$result   = TimeInterval::normalize_between_params( $request, $params, false );
 		$expected = array(
 			'b_min' => 1,
 			'b_max' => 5,
@@ -869,7 +871,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			'f_between' => array( 10, 12 ), // not in params, skipped.
 		);
 		$params   = array( 'a', 'b', 'c', 'd' );
-		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, true );
+		$result   = TimeInterval::normalize_between_params( $request, $params, true );
 		$expected = array(
 			'b_after'  => 1,
 			'b_before' => 5,
@@ -885,17 +887,17 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_rest_validate_between_numeric_arg() {
 		$this->assertWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( 'not array', null, 'param' ),
+			TimeInterval::rest_validate_between_numeric_arg( 'not array', null, 'param' ),
 			'param is not a numerically indexed array.'
 		);
 
 		$this->assertWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1 ), null, 'param' ),
+			TimeInterval::rest_validate_between_numeric_arg( array( 1 ), null, 'param' ),
 			'param must contain 2 numbers.'
 		);
 
 		$this->assertTrue(
-			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1, 2 ), null, 'param' )
+			TimeInterval::rest_validate_between_numeric_arg( array( 1, 2 ), null, 'param' )
 		);
 	}
 
@@ -904,22 +906,22 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function rest_validate_between_date_arg() {
 		$this->assertWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_date_arg( 'not array', null, 'param' ),
+			TimeInterval::rest_validate_between_date_arg( 'not array', null, 'param' ),
 			'param is not a numerically indexed array.'
 		);
 
 		$this->assertWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00' ), null, 'param' ),
+			TimeInterval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00' ), null, 'param' ),
 			'param must contain 2 valid dates.'
 		);
 
 		$this->assertWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( 'not a valid date' ), null, 'param' ),
+			TimeInterval::rest_validate_between_date_arg( array( 'not a valid date' ), null, 'param' ),
 			'param must contain 2 valid dates.'
 		);
 
 		$this->assertTrue(
-			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00', '2019-01-15T00:00:00' ), null, 'param' )
+			TimeInterval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00', '2019-01-15T00:00:00' ), null, 'param' )
 		);
 	}
 }
