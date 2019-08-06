@@ -1534,7 +1534,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( 0 > $fee_total ) {
 				$max_discount = round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
 
-				if ( $fee_total < $max_discount ) {
+				if ( $fee_total < $max_discount && 0 > $max_discount ) {
 					$item->set_total( $max_discount );
 				}
 			}
