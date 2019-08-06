@@ -5,12 +5,16 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Segmenter as ReportsSegmenter;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.
  */
-class WC_Admin_Reports_Taxes_Stats_Segmenting extends WC_Admin_Reports_Segmenting {
+class Segmenter extends ReportsSegmenter {
 
 	/**
 	 * Returns SELECT clause statements to be used for order-related order-level segmenting query (e.g. tax_rate_id).

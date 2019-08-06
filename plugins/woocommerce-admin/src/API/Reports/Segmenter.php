@@ -5,12 +5,17 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxesStatsDataStore;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.
  */
-class WC_Admin_Reports_Segmenting {
+class Segmenter {
 
 	/**
 	 * Array of all segment ids.
@@ -375,7 +380,7 @@ class WC_Admin_Reports_Segmenting {
 			if ( isset( $this->query_args['coupons'] ) ) {
 				$args['include'] = $this->query_args['coupons'];
 			}
-			$coupons        = WC_Admin_Reports_Coupons_Data_Store::get_coupons( $args );
+			$coupons        = CouponsDataStore::get_coupons( $args );
 			$segments       = wp_list_pluck( $coupons, 'ID' );
 			$segment_labels = wp_list_pluck( $coupons, 'post_title', 'ID' );
 			$segment_labels = array_map( 'wc_format_coupon_code', $segment_labels );
@@ -388,12 +393,12 @@ class WC_Admin_Reports_Segmenting {
 			if ( isset( $this->query_args['taxes'] ) ) {
 				$args['include'] = $this->query_args['taxes'];
 			}
-			$taxes = WC_Admin_Reports_Taxes_Stats_Data_Store::get_taxes( $args );
+			$taxes = TaxesStatsDataStore::get_taxes( $args );
 
 			foreach ( $taxes as $tax ) {
 				$id                    = $tax['tax_rate_id'];
 				$segments[]            = $id;
-				$segment_labels[ $id ] = WC_Tax::get_rate_code( (object) $tax );
+				$segment_labels[ $id ] = \WC_Tax::get_rate_code( (object) $tax );
 			}
 		} else {
 			// Catch all default.

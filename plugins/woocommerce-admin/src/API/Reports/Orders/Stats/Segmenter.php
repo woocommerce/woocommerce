@@ -5,12 +5,16 @@
  * @package  WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
+
 defined( 'ABSPATH' ) || exit;
+
+use \Automattic\WooCommerce\Admin\API\Reports\Segmenter as ReportsSegmenter;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.
  */
-class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenting {
+class Segmenter extends ReportsSegmenter {
 
 	/**
 	 * Returns SELECT clause statements to be used for product-related product-level segmenting query (e.g. products sold, revenue from product X when segmenting by category).
@@ -366,7 +370,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
-				throw new WC_Admin_Reports_Parameter_Exception( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'woocommerce-admin' ) );
+				throw new \WC_Admin_Reports_Parameter_Exception( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'woocommerce-admin' ) );
 			}
 
 			$segmenting_selections     = array(

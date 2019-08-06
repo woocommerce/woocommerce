@@ -275,10 +275,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$unique_products            = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products']      = $unique_products;
-			$segmenting                 = new \WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
+			$segmenter                   = new Segmenter( $query_args, $this->report_columns );
 			$unique_coupons             = $this->get_unique_coupon_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['coupons_count'] = $unique_coupons;
-			$totals[0]['segments']      = $segmenting->get_totals_segments( $totals_query, $table_name );
+			$totals[0]['segments']      = $segmenter->get_totals_segments( $totals_query, $table_name );
 			$totals                     = (object) $this->cast_numbers( $totals[0] );
 
 			$db_intervals = $wpdb->get_col(
@@ -355,7 +355,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			} else {
 				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 			}
-			$segmenting->add_intervals_segments( $data, $intervals_query, $table_name );
+			$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
 			$this->create_interval_subtotals( $data->intervals );
 
 			wp_cache_set( $cache_key, $data, $this->cache_group );

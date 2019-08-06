@@ -223,7 +223,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( null === $totals ) {
 				return new \WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
-			$segmenter             = new \WC_Admin_Reports_Taxes_Stats_Segmenting( $query_args, $this->report_columns );
+			$segmenter             = new Segmenter( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
 			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count, $table_name );

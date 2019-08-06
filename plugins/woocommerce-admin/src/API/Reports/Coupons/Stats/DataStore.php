@@ -166,7 +166,7 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 			if ( null === $totals ) {
 				return $data;
 			}
-			$segmenter             = new \WC_Admin_Reports_Coupons_Stats_Segmenting( $query_args, $this->report_columns );
+			$segmenter             = new Segmenter( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 			$totals                = (object) $this->cast_numbers( $totals[0] );
 
