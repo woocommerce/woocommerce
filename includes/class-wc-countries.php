@@ -992,11 +992,21 @@ class WC_Countries {
 						),
 					),
 					'JP' => array(
+						'last_name' => array(
+							'class'    => array( 'form-row-first' ),
+							'priority' => 10,
+						),
+						'first_name'=> array(
+							'class'    => array( 'form-row-last' ),
+							'priority' => 20,
+						),
 						'postcode'  => array(
+							'class'    => array( 'form-row-first' ),
 							'priority' => 65,
 						),
 						'state'     => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
+							'class'    => array( 'form-row-last' ),
 							'priority' => 66,
 						),
 						'city'      => array(
