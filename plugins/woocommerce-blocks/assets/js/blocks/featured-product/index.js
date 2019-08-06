@@ -29,6 +29,7 @@ registerBlockType( 'woocommerce/featured-product', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		/**

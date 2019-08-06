@@ -93,7 +93,7 @@ class ProductSearchBlock extends Component {
 						className="wc-block-product-search__button"
 						label={ __( 'Search', 'woo-gutenberg-products-block' ) }
 						onClick={ ( e ) => e.preventDefault() }
-						tabindex="-1"
+						tabIndex="-1"
 					>
 						<svg aria-hidden="true" role="img" focusable="false" className="dashicon dashicons-arrow-right-alt2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
 							<path d="M6 15l5-5-5-5 1-2 7 7-7 7z"></path>

@@ -27,6 +27,7 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		...sharedAttributes,

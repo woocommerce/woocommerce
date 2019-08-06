@@ -30,6 +30,7 @@ registerBlockType( 'woocommerce/product-category', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		...sharedAttributes,

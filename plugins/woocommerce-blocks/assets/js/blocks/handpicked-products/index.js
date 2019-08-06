@@ -26,6 +26,7 @@ registerBlockType( 'woocommerce/handpicked-products', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		/**
