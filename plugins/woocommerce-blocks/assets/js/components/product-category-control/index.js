@@ -13,6 +13,7 @@ import { SelectControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import { ENDPOINTS } from '../../constants';
 import './style.scss';
 
 class ProductCategoryControl extends Component {
@@ -27,7 +28,7 @@ class ProductCategoryControl extends Component {
 
 	componentDidMount() {
 		apiFetch( {
-			path: addQueryArgs( '/wc/blocks/products/categories', { per_page: -1 } ),
+			path: addQueryArgs( `${ ENDPOINTS.products }/categories`, { per_page: -1 } ),
 		} )
 			.then( ( list ) => {
 				this.setState( { list, loading: false } );

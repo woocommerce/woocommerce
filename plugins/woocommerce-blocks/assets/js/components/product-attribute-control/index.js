@@ -13,6 +13,7 @@ import { SelectControl, Spinner } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import { ENDPOINTS } from '../../constants';
 import './style.scss';
 
 class ProductAttributeControl extends Component {
@@ -34,7 +35,7 @@ class ProductAttributeControl extends Component {
 	componentDidMount() {
 		const { selected } = this.props;
 		apiFetch( {
-			path: addQueryArgs( '/wc/blocks/products/attributes', { per_page: -1 } ),
+			path: addQueryArgs( `${ ENDPOINTS.products }/attributes`, { per_page: -1 } ),
 		} )
 			.then( ( list ) => {
 				list = list.map( ( item ) => ( { ...item, parent: 0 } ) );
@@ -71,7 +72,7 @@ class ProductAttributeControl extends Component {
 		}
 
 		apiFetch( {
-			path: addQueryArgs( `/wc/blocks/products/attributes/${ attribute }/terms`, {
+			path: addQueryArgs( `${ ENDPOINTS.products }/attributes/${ attribute }/terms`, {
 				per_page: -1,
 			} ),
 		} )
