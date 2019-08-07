@@ -277,7 +277,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 				),
 				'additional_content' => array(
 					'title'       => __( 'Additional content', 'woocommerce' ),
-					'description' => __( 'Text to appear to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
 					'css'         => 'width:400px; height: 75px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
 					'type'        => 'textarea',
