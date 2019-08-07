@@ -302,7 +302,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 				'home_url'     => rawurlencode( home_url() ),
 				'redirect_uri' => rawurlencode( $redirect_uri ),
 				'secret'       => rawurlencode( $secret ),
-				'from'         => 'woocommerce-onboarding',
+				'wccom-from'   => 'onboarding',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);
