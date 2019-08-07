@@ -254,8 +254,6 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s )", $continent );
 		$criteria[] = 'OR ( location_type IS NULL ) )';
 
-		$criteria = apply_filters( 'woocommerce_get_zone_criteria', $criteria, $package );
-
 		// Postcode range and wildcard matching.
 		$postcode_locations = $wpdb->get_results( "SELECT zone_id, location_code FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'postcode';" );
 
@@ -268,6 +266,16 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 				$criteria[] = 'AND zones.zone_id NOT IN (' . implode( ',', $do_not_match ) . ')';
 			}
 		}
+		
+		/**
+		 * Get shipping zone criteria
+		 *
+		 * @since 3.6.6
+		 * @param array $criteria Get zone criteria.
+		 * @param array $package Package information
+		 * @param array $postcode_locations Postcode range and wildcard matching
+		 */
+		$criteria = apply_filters( 'woocommerce_get_zone_criteria', $criteria, $package, $postcode_locations );
 
 		// Get matching zones.
 		return $wpdb->get_var(
