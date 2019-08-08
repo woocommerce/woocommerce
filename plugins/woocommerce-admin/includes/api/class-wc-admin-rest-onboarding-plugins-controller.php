@@ -256,7 +256,7 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 		}
 
 		return( array(
-			'slug'          => $slug,
+			'slug'          => 'jetpack',
 			'name'          => __( 'Jetpack', 'woocommerce-admin' ),
 			'connectAction' => $connect_url,
 		) );
