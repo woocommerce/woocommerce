@@ -222,7 +222,7 @@ class WC_Admin_Feature_Plugin {
 	 *
 	 * @return bool
 	 */
-	public function check_dependencies() {
+	protected function check_dependencies() {
 		$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.6', '>=' );
 		if ( ! $woocommerce_minimum_met ) {
 			return false;
