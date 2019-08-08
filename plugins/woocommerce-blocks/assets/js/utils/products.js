@@ -7,7 +7,7 @@
  */
 export function getImageSrcFromProduct( product ) {
 	if ( ! product || ! product.images || ! product.images.length ) {
-		return 0;
+		return '';
 	}
 
 	return product.images[ 0 ].src || '';
