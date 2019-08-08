@@ -30,6 +30,7 @@ registerBlockType( 'woocommerce/featured-category', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		/**
