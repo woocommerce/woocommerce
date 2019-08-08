@@ -3,7 +3,7 @@
  * States
  *
  * Returns an array of country states. This deprecates and replaces the /states/ directory found in older versions.
- * States /should/ be defined in English and translated native though localisation files.
+ * States should be defined in English and translated native through localisation files.
  * Countries defined with empty arrays have no states.
  *
  * @package WooCommerce/i18n
