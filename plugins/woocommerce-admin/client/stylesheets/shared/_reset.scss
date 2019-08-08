@@ -14,7 +14,7 @@
 
 	@include breakpoint( '>782px' ) {
 		#wpbody-content {
-			padding: 0;
+			padding-left: 0;
 		}
 	}
 
