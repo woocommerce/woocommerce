@@ -44,6 +44,21 @@ class Form extends Component {
 		} ), this.validate );
 	}
 
+	handleChange( name, value ) {
+		const { values } = this.state;
+
+		// Handle native events.
+		if ( value.target ) {
+			if ( 'checkbox' === value.target.type ) {
+				this.setValue( name, ! values[ name ] );
+			} else {
+				this.setValue( name, value.target.value );
+			}
+		} else {
+			this.setValue( name, value );
+		}
+	}
+
 	handleBlur( name ) {
 		this.setState( prevState => ( {
 			touched: { ...prevState.touched, [ name ]: true },
@@ -66,7 +81,9 @@ class Form extends Component {
 
 		return {
 			value: values[ name ],
-			onChange: ( value ) => this.setValue( name, value ),
+			checked: Boolean( values[ name ] ),
+			selected: values[ name ],
+			onChange: ( value ) => this.handleChange( name, value ),
 			onBlur: () => this.handleBlur( name ),
 			className: touched[ name ] && errors[ name ] ? 'has-error' : null,
 			help: touched[ name ] ? errors[ name ] : null,

@@ -1,5 +1,5 @@
 ```jsx
-import { Button TextControl } from '@wordpress/components';
+import { Button, CheckboxControl, RadioControl, SelectControl, TextControl } from '@wordpress/components';
 import { Form } from '@woocommerce/components';
 
 const validate = ( values ) => {
@@ -14,7 +14,7 @@ const validate = ( values ) => {
 };
 
 const onSubmitCallback = ( values ) => console.log( values );
-const initialValues = { firstName: '', lastName: '' };
+const initialValues = { firstName: '', lastName: '', select: '3', checkbox: true, radio: '2' };
 
 const MyForm = () => (
 	<Form validate={ validate } onSubmitCallback={ onSubmitCallback } initialValues={ initialValues }>
@@ -33,6 +33,28 @@ const MyForm = () => (
 				<TextControl
 					label={ 'Last Name' }
 					{ ...getInputProps( 'lastName' ) }
+				/>
+				<SelectControl
+					label='Select'
+					options={ [
+						{ label: 'Option 1', value: '1' },
+						{ label: 'Option 2', value: '2' },
+						{ label: 'Option 3', value: '3' },
+					] }
+					{ ...getInputProps( 'select' ) }
+				/>
+				<CheckboxControl
+					label='Checkbox'
+					{ ...getInputProps( 'checkbox' ) }
+				/>
+				<RadioControl
+					label='Radio'
+					options={ [
+						{ label: 'Option 1', value: '1' },
+						{ label: 'Option 2', value: '2' },
+						{ label: 'Option 3', value: '3' },
+					] }
+					{ ...getInputProps( 'radio' ) }
 				/>
 				<Button
 					isPrimary
