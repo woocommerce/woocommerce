@@ -61,7 +61,7 @@
     "clean-webpack-plugin": "3.0.0",
     "core-js": "3.1.4",
     "cross-env": "5.2.0",
-    "css-loader": "3.1.0",
+    "css-loader": "3.2.0",
     "cssnano": "4.1.10",
     "eslint": "6.1.0",
     "eslint-config-wordpress": "2.0.0",
