@@ -4,6 +4,7 @@
  *
  * Returns an array of country states. This deprecates and replaces the /states/ directory found in older versions.
  * States should be defined in English and translated native through localisation files.
+ * Country codes and states (or province) names should follow the ISO_3166-2 standard (https://en.wikipedia.org/wiki/ISO_3166-2).
  * Countries defined with empty arrays have no states.
  *
  * @package WooCommerce/i18n
