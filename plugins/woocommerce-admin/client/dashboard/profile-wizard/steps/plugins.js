@@ -160,7 +160,7 @@ class Plugins extends Component {
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
-					{ __( 'Install plugins', 'woocommerce-admin' ) }
+					{ __( 'Enhance your store setup', 'woocommerce-admin' ) }
 				</H>
 
 				<Card className="woocommerce-profile-wizard__plugins-card">

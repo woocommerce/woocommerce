@@ -177,7 +177,10 @@ class Theme extends Component {
 					{ __( 'Choose a theme', 'woocommerce-admin' ) }
 				</H>
 				<H className="woocommerce-profile-wizard__header-subtitle">
-					{ __( 'Your theme determines how your store appears to customers', 'woocommerce-admin' ) }
+					{ __(
+						"Choose how your store appears to customers. And don't worry, you can always switch themes and edit them later.",
+						'woocommerce-admin'
+					) }
 				</H>
 				<TabPanel
 					className="woocommerce-profile-wizard__themes-tab-panel"

@@ -133,10 +133,13 @@ class StoreDetails extends Component {
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
-					{ __( 'Store Details', 'woocommerce-admin' ) }
+					{ __( 'Where is your store based?', 'woocommerce-admin' ) }
 				</H>
 				<H className="woocommerce-profile-wizard__header-subtitle">
-					{ __( 'Tell us about your store', 'woocommerce-admin' ) }
+					{ __(
+						'This will help us configure your store and get you started quickly',
+						'woocommerce-admin'
+					) }
 				</H>
 
 				<Card>
@@ -179,7 +182,7 @@ class StoreDetails extends Component {
 								/>
 
 								<CheckboxControl
-									label={ __( 'This store is being set up for a client', 'woocommerce-admin' ) }
+									label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
 									{ ...getInputProps( 'isClient' ) }
 								/>
 

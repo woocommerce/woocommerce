@@ -152,7 +152,7 @@ class Start extends Component {
 				<p>
 					{ interpolateComponents( {
 						mixedString: __(
-							'Simplify and enhance the setup of your store with features and benefits offered by ' +
+							'Simplify and enhance the setup of your store with the free features and benefits offered by ' +
 								'{{strong}}Jetpack & WooCommerce Services{{/strong}}.',
 							'woocommerce-admin'
 						),

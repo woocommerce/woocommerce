@@ -265,12 +265,12 @@ class BusinessDetails extends Component {
 			},
 			{
 				value: 'brick-mortar',
-				label: __( 'Yes, at a brick and mortar store', 'woocommerce-admin' ),
+				label: __( 'Yes, in person at physical stores and/or events', 'woocommerce-admin' ),
 			},
 			{
 				value: 'brick-mortar-other',
 				label: __(
-					'Yes, on another platform and at a brick and mortar store',
+					'Yes, on another platform and in person at physical stores and/or events',
 					'woocommerce-admin'
 				),
 			},
@@ -311,13 +311,18 @@ class BusinessDetails extends Component {
 					return (
 						<Fragment>
 							<H className="woocommerce-profile-wizard__header-title">
-								{ __( 'Business details', 'woocommerce-admin' ) }
+								{ __( 'Tell us about your business', 'woocommerce-admin' ) }
 							</H>
-							<p>{ __( 'Tell us about the business', 'woocommerce-admin' ) }</p>
+							<p>
+								{ __(
+									"We'd love to know if you are just getting started or you already have a business in place.",
+									'woocommerce-admin'
+								) }
+							</p>
 							<Card>
 								<Fragment>
 									<SimpleSelectControl
-										label={ __( 'How many products will you add?', 'woocommerce-admin' ) }
+										label={ __( 'How many products do you plan to add?', 'woocommerce-admin' ) }
 										options={ productCountOptions }
 										required
 										{ ...getInputProps( 'product_count' ) }
