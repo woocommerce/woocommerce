@@ -152,6 +152,9 @@ class FeaturedCategory extends Component {
 		const url =
 			attributes.mediaSrc || getCategoryImageSrc( this.state.category );
 		const { focalPoint = { x: 0.5, y: 0.5 } } = attributes;
+		// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
+		// so we need to check if it exists before using it.
+		const focalPointPickerExists = typeof FocalPointPicker === 'function';
 
 		return (
 			<InspectorControls key="inspector">
@@ -172,22 +175,26 @@ class FeaturedCategory extends Component {
 						},
 					] }
 				>
-					<RangeControl
-						label={ __( 'Background Opacity', 'woo-gutenberg-products-block' ) }
-						value={ attributes.dimRatio }
-						onChange={ ( ratio ) => setAttributes( { dimRatio: ratio } ) }
-						min={ 0 }
-						max={ 100 }
-						step={ 10 }
-					/>
-					{ !! FocalPointPicker && !! url &&
-						<FocalPointPicker
-							label={ __( 'Focal Point Picker' ) }
-							url={ url }
-							value={ focalPoint }
-							onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
-						/>
-					}
+					{ !! url && (
+						<Fragment>
+							<RangeControl
+								label={ __( 'Background Opacity', 'woo-gutenberg-products-block' ) }
+								value={ attributes.dimRatio }
+								onChange={ ( ratio ) => setAttributes( { dimRatio: ratio } ) }
+								min={ 0 }
+								max={ 100 }
+								step={ 10 }
+							/>
+							{ focalPointPickerExists &&
+								<FocalPointPicker
+									label={ __( 'Focal Point Picker' ) }
+									url={ url }
+									value={ focalPoint }
+									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
+								/>
+							}
+						</Fragment>
+					) }
 				</PanelColorSettings>
 			</InspectorControls>
 		);
