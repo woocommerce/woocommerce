@@ -1346,4 +1346,16 @@ return array(
 		'NW'  => __( 'North West', 'woocommerce' ),
 		'WC'  => __( 'Western Cape', 'woocommerce' ),
 	),
+	'ZM' => array( // Zambia's Provinces. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:ZM
+		'ZM-01' => __( 'Western', 'woocommerce' ),
+		'ZM-02' => __( 'Central', 'woocommerce' ),
+		'ZM-03' => __( 'Eastern', 'woocommerce' ),
+		'ZM-04' => __( 'Luapula', 'woocommerce' ),
+		'ZM-05' => __( 'Northern', 'woocommerce' ),
+		'ZM-06' => __( 'North-Western', 'woocommerce' ),
+		'ZM-07' => __( 'Southern', 'woocommerce' ),
+		'ZM-08' => __( 'Copperbelt', 'woocommerce' ),
+		'ZM-09' => __( 'Lusaka', 'woocommerce' ),
+		'ZM-10' => __( 'Muchinga', 'woocommerce' ),
+	),
 );
