@@ -21,6 +21,7 @@ import { numberFormat } from '@woocommerce/number';
 import { H, Card, SimpleSelectControl, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
+import { formatCurrency } from '@woocommerce/currency';
 
 class BusinessDetails extends Component {
 	constructor() {
@@ -30,6 +31,7 @@ class BusinessDetails extends Component {
 			other_platform: '',
 			product_count: '',
 			selling_venues: '',
+			revenue: '',
 			facebook: true,
 			mailchimp: true,
 		};
@@ -42,23 +44,36 @@ class BusinessDetails extends Component {
 
 	async onContinue( values ) {
 		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
-		const { facebook, mailchimp, other_platform, product_count, selling_venues } = values;
+		const { facebook, mailchimp, other_platform, product_count, revenue, selling_venues } = values;
 		const businessExtensions = this.getBusinessExtensions( values );
 
 		recordEvent( 'storeprofiler_store_business_details_continue', {
 			product_number: product_count,
 			already_selling: 'no' !== selling_venues,
+			currency: wcSettings.currency.code,
+			revenue,
 			used_platform: other_platform,
 			install_facebook: facebook,
 			install_mailchimp: mailchimp,
 		} );
 
-		await updateProfileItems( {
+		const _updates = {
 			other_platform,
 			product_count,
+			revenue,
 			selling_venues,
 			business_extensions: businessExtensions,
+		};
+
+		// Remove possible empty values like `revenue` and `other_platform`.
+		const updates = {};
+		Object.keys( _updates ).forEach( key => {
+			if ( _updates[ key ] !== '' ) {
+				updates[ key ] = _updates[ key ];
+			}
 		} );
+
+		await updateProfileItems( updates );
 
 		if ( ! isError ) {
 			goToNextStep();
@@ -81,6 +96,13 @@ class BusinessDetails extends Component {
 				) {
 					errors.other_platform = __( 'This field is required', 'woocommerce-admin' );
 				}
+			} else if ( 'revenue' === name ) {
+				if (
+					! values.revenue.length &&
+					[ 'other', 'brick-mortar', 'brick-mortar-other' ].includes( values.selling_venues )
+				) {
+					errors.revenue = __( 'This field is required', 'woocommerce-admin' );
+				}
 			} else if ( ! this.extensions.includes( name ) && ! values[ name ].length ) {
 				errors[ name ] = __( 'This field is required', 'woocommerce-admin' );
 			}
@@ -93,18 +115,15 @@ class BusinessDetails extends Component {
 		return keys( pickBy( values ) ).filter( name => this.extensions.includes( name ) );
 	}
 
-	getNumberRangeString( min, max = false ) {
+	getNumberRangeString( min, max = false, format = numberFormat ) {
 		if ( ! max ) {
-			return sprintf(
-				_x( '%s+', 'store product count', 'woocommerce-admin' ),
-				numberFormat( min )
-			);
+			return sprintf( _x( '%s+', 'store product count', 'woocommerce-admin' ), format( min ) );
 		}
 
 		return sprintf(
 			_x( '%s - %s', 'store product count', 'woocommerce-admin' ),
-			numberFormat( min ),
-			numberFormat( max )
+			format( min ),
+			format( max )
 		);
 	}
 
@@ -199,6 +218,42 @@ class BusinessDetails extends Component {
 			},
 		];
 
+		const revenueOptions = [
+			{
+				value: 'none',
+				label: sprintf(
+					_x( "%s (I'm just getting started)", '$0 revenue amount', 'woocommerce-admin' ),
+					formatCurrency( 0 )
+				),
+			},
+			{
+				value: 'up-to-2500',
+				label: sprintf(
+					_x( 'Up to %s', 'Up to a certain revenue amount', 'woocommerce-admin' ),
+					formatCurrency( 2500 )
+				),
+			},
+			{
+				value: '2500-10000',
+				label: this.getNumberRangeString( 2500, 10000, formatCurrency ),
+			},
+			{
+				value: '10000-50000',
+				label: this.getNumberRangeString( 10000, 50000, formatCurrency ),
+			},
+			{
+				value: '50000-250000',
+				label: this.getNumberRangeString( 50000, 250000, formatCurrency ),
+			},
+			{
+				value: 'more-than-250000',
+				label: sprintf(
+					_x( 'More than %s', 'More than a certain revenue amount', 'woocommerce-admin' ),
+					formatCurrency( 250000 )
+				),
+			},
+		];
+
 		const sellingVenueOptions = [
 			{
 				value: 'no',
@@ -274,6 +329,17 @@ class BusinessDetails extends Component {
 										required
 										{ ...getInputProps( 'selling_venues' ) }
 									/>
+
+									{ [ 'other', 'brick-mortar', 'brick-mortar-other' ].includes(
+										values.selling_venues
+									) && (
+										<SimpleSelectControl
+											label={ __( "What's your current annual revenue?", 'woocommerce-admin' ) }
+											options={ revenueOptions }
+											required
+											{ ...getInputProps( 'revenue' ) }
+										/>
+									) }
 
 									{ [ 'other', 'brick-mortar-other' ].includes( values.selling_venues ) && (
 										<SimpleSelectControl

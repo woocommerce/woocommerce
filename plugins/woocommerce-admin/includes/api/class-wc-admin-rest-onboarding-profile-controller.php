@@ -274,6 +274,21 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 					'brick-mortar-other',
 				),
 			),
+			'revenue'      => array(
+				'type'              => 'string',
+				'description'       => __( 'Current annual revenue of the store.', 'woocommerce-admin' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+				'enum'              => array(
+					'none',
+					'up-to-2500',
+					'2500-10000',
+					'10000-50000',
+					'50000-250000',
+					'more-than-250000',
+				),
+			),
 			'other_platform'      => array(
 				'type'              => 'string',
 				'description'       => __( 'Name of other platform used to sell.', 'woocommerce-admin' ),
