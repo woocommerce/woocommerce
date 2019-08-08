@@ -44,3 +44,10 @@ A function that receives the value of the new option that is being selected as i
 
 The currently value of the select element.
 
+### `help`
+
+- Type: One of type: string, node
+- Default: null
+
+If this property is added, a help text will be generated using help property as the content.
+

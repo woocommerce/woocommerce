@@ -3,10 +3,11 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Dropdown, Button, NavigableMenu, withFocusOutside } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { Fragment, Component } from '@wordpress/element';
 import { map, find } from 'lodash';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * A component for displaying a material styled 'simple' select control.
@@ -62,7 +63,7 @@ class SimpleSelectControl extends Component {
 	}
 
 	render() {
-		const { options, label, className } = this.props;
+		const { options, label, className, instanceId, help } = this.props;
 		const { currentValue, isFocused } = this.state;
 		const onChange = ( value ) => {
 			this.onChange( value );
@@ -72,8 +73,11 @@ class SimpleSelectControl extends Component {
 		const isEmpty = currentValue === '' || currentValue === null;
 		const currentOption = find( options, ( { value } ) => value === currentValue );
 
+		const id = `simple-select-control-${ instanceId }`;
+
 		return (
 			<Dropdown
+				id={ id }
 				className={ classNames(
 					'woocommerce-simple-select-control__dropdown',
 					'components-base-control',
@@ -87,19 +91,22 @@ class SimpleSelectControl extends Component {
 				contentClassName="woocommerce-simple-select-control__dropdown-content"
 				position="center"
 				renderToggle={ ( { isOpen, onToggle } ) => (
-					<Button
-						className="woocommerce-simple-select-control__selector"
-						onClick={ () => this.handleOnClick( onToggle ) }
-						onFocus={ () => this.handleOnFocus() }
-						aria-expanded={ isOpen }
-						aria-label={ ! isEmpty ? sprintf(
-							/* translators: Label: Current Value for a Select Dropddown */
-							__( '%s: %s' ), label, currentOption && currentOption.label
-						) : label }
-					>
-						<span className="woocommerce-simple-select-control__label">{ label }</span>
-						<span className="woocommerce-simple-select-control__value">{ currentOption && currentOption.label }</span>
-					</Button>
+					<Fragment>
+						<Button
+							className="woocommerce-simple-select-control__selector"
+							onClick={ () => this.handleOnClick( onToggle ) }
+							onFocus={ () => this.handleOnFocus() }
+							aria-expanded={ isOpen }
+							aria-label={ ! isEmpty ? sprintf(
+								/* translators: Label: Current Value for a Select Dropddown */
+								__( '%s: %s' ), label, currentOption && currentOption.label
+							) : label }
+						>
+							<span className="woocommerce-simple-select-control__label">{ label }</span>
+							<span className="woocommerce-simple-select-control__value">{ currentOption && currentOption.label }</span>
+						</Button>
+						{ !! help && <p id={ id + '__help' } className="components-base-control__help">{ help }</p> }
+					</Fragment>
 				) }
 				renderContent={ ( { onClose } ) => (
 					<NavigableMenu>
@@ -171,6 +178,13 @@ SimpleSelectControl.propTypes = {
 	 * The currently value of the select element.
 	 */
 	value: PropTypes.string,
+	/**
+	 * If this property is added, a help text will be generated using help property as the content.
+	 */
+	help: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.node,
+	] ),
 };
 
-export default withFocusOutside( SimpleSelectControl );
+export default withFocusOutside( withInstanceId( SimpleSelectControl ) );
