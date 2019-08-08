@@ -48,7 +48,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		'state'            => 'state',
 		'postcode'         => 'postcode',
 		'date_registered'  => 'date_registered',
-		'date_last_active' => 'IF( date_last_active < 1, NULL, date_last_active ) AS date_last_active',
+		'date_last_active' => 'IF( date_last_active <= "0000-00-00 00:00:00", NULL, date_last_active ) AS date_last_active',
 		'orders_count'     => 'SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) as orders_count',
 		'total_spend'      => 'SUM( gross_total ) as total_spend',
 		'avg_order_value'  => '( SUM( gross_total ) / COUNT( order_id ) ) as avg_order_value',
