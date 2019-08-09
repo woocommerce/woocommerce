@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "./build/*.js",
+      "maxSize": "300 kB"
+    },
+    {
+      "path": "./build/frontend*.js",
+      "maxSize": "130 kB"
+    }
+  ]
+}
