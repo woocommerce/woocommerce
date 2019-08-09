@@ -1456,7 +1456,7 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 
 	foreach ( $objects as $object ) {
 		$object_id       = $object->$object_id_key;
-		$compare_against = $object->$object_compare_key;
+		$compare_against = wc_format_postcode( $object->$object_compare_key, $country );
 
 		// Handle postcodes containing ranges.
 		if ( strstr( $compare_against, '...' ) ) {
