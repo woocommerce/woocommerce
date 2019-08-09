@@ -41,7 +41,7 @@ const getProductsRequests = ( { selected = [], search } ) => {
 /**
  * Get a promise that resolves to a list of products from the API.
  *
- * @param {object} - A query object with the list of selected products and search term.
+ * @param {Object} - A query object with the list of selected products and search term.
  */
 export const getProducts = ( { selected = [], search } ) => {
 	const requests = getProductsRequests( { selected, search } );
@@ -54,7 +54,7 @@ export const getProducts = ( { selected = [], search } ) => {
 /**
  * Get a promise that resolves to a product object from the API.
  *
- * @param {object} - Id of the product to retrieve.
+ * @param {Object} productId Id of the product to retrieve.
  */
 export const getProduct = ( productId ) => {
 	return apiFetch( {
@@ -87,7 +87,7 @@ const getProductTagsRequests = ( { selected = [], search } ) => {
 /**
  * Get a promise that resolves to a list of tags from the API.
  *
- * @param {object} - A query object with the list of selected products and search term.
+ * @param {Object} - A query object with the list of selected products and search term.
  */
 export const getProductTags = ( { selected = [], search } ) => {
 	const requests = getProductTagsRequests( { selected, search } );

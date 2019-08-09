@@ -48,7 +48,7 @@ const MIN_HEIGHT = wc_product_block_data.min_height;
  * Get the src from a category object, unless null (no image).
  *
  * @param {object|null} category A product category object from the API.
- * @return {string}
+ * @return {string} The src of the category image.
  */
 function getCategoryImageSrc( category ) {
 	if ( isObject( category.image ) ) {
@@ -61,7 +61,7 @@ function getCategoryImageSrc( category ) {
  * Get the attachment ID from a category object, unless null (no image).
  *
  * @param {object|null} category A product category object from the API.
- * @return {int}
+ * @return {number} The id of the category image.
  */
 function getCategoryImageID( category ) {
 	if ( isObject( category.image ) ) {
@@ -74,7 +74,7 @@ function getCategoryImageID( category ) {
  * Generate a style object given either a product category image from the API or URL to an image.
  *
  * @param {string} url An image URL.
- * @return {object} A style object with a backgroundImage set (if a valid image is provided).
+ * @return {Object} A style object with a backgroundImage set (if a valid image is provided).
  */
 function backgroundImageStyles( url ) {
 	if ( url ) {

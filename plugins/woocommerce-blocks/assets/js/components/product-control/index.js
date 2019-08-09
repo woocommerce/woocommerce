@@ -64,7 +64,7 @@ class ProductControl extends Component {
 					return {
 						...product,
 						parent: 0,
-						count: count,
+						count,
 					};
 				} );
 				this.setState( { products, loading: false } );
