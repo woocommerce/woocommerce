@@ -14,15 +14,14 @@ import { withSearchedProducts } from '../../hocs';
  * The products control exposes a custom selector for searching and selecting
  * products.
  *
- * @param {function} props.onChange  Callback fired when the selected item
- *                                   changes
- * @param {function} props.onSearch  Callback fired when a search is triggered
- * @param {array}    props.selected  An array of selected products.
- * @param {array}    props.products  An array of products to select from.
- * @param {boolean}  props.isLoading Whether or not the products are being
- *                                   loaded.
+ * @param {Object} props Component props.
+ * @param {Function} props.onChange  Callback fired when the selected item changes
+ * @param {Function} props.onSearch  Callback fired when a search is triggered
+ * @param {Array}    props.selected  An array of selected products.
+ * @param {Array}    props.products  An array of products to select from.
+ * @param {boolean}  props.isLoading Whether or not the products are being loaded.
  *
- * @return {function} A functional component.
+ * @return {Function} A functional component.
  */
 const ProductsControl = ( {
 	onChange,

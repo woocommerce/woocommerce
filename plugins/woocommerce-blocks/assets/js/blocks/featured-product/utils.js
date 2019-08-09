@@ -14,7 +14,7 @@ import {
  * Generate a style object given either a product object or URL to an image.
  *
  * @param {object|string} url A product object as returned from the API, or an image URL.
- * @return {object} A style object with a backgroundImage set (if a valid image is provided).
+ * @return {Object} A style object with a backgroundImage set (if a valid image is provided).
  */
 function getBackgroundImageStyles( url ) {
 	// If `url` is an object, it's actually a product.
