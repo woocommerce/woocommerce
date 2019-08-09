@@ -40,7 +40,7 @@ class Package {
 		self::remove_core_blocks();
 
 		if ( ! self::is_built() ) {
-			return self::add_build_notice();
+			self::add_build_notice();
 		}
 
 		Library::init();

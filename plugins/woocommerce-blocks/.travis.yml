@@ -11,19 +11,9 @@ cache:
     - $HOME/.npm
     - $HOME/.composer/cache
 
-matrix:
-  include:
-    - php: 7.1
-      env: WP_VERSION=latest
-    - php: 5.6
-      env: WP_VERSION=latest
-    - php: 7.1
-      env: WP_TRAVISCI=phpcs
-
 before_install:
   - timedatectl
-  - npm install
-  - npm run build
+  - nvm install --latest-npm
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
@@ -36,6 +26,7 @@ before_script:
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
       composer install --no-dev
+      # also installs woocommerce plugin
       bash tests/bin/install-wp-tests.sh wgpb_admin root '' localhost $WP_VERSION
       composer global require "phpunit/phpunit=4.8.*|5.7.*"
     fi
@@ -43,13 +34,33 @@ before_script:
     if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
       composer install
     fi
-script:
-  - |
-    if [[ ! -z "$WP_VERSION" ]] ; then
-      phpunit
-      npm test
-    fi
-  - |
-    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
-      npm run lint
-    fi
+jobs:
+    fast_finish: true
+    include:
+        - stage: build tests
+          name: PHP 7.1/unit-tests/Latest WP
+          php: 7.1
+          env:
+            - WP_VERSION=latest
+          script:
+            - phpunit
+        - name: PHP 5.6/unit-tests/Latest WP
+          php: 5.6
+          env:
+            - WP_VERSION=latest
+          script:
+            - phpunit
+        - name: PHP Linting Check
+          php: 7.1
+          env:
+            - WP_TRAVISCI=phpcs
+          script:
+            - npm run lint:php
+        - name: Javascript Tests
+          script:
+            - npm install
+            - npm run test
+        - name: Javascript/CSS Lint and Bundle Size Check
+          script:
+            - npm install
+            - npm run build:ci

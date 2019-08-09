@@ -162,6 +162,10 @@ install_deps() {
 	# checkout dev version of woocommerce
 	cd "$WP_CORE_DIR/wp-content/plugins"
 	git clone --depth 1 "https://github.com/woocommerce/woocommerce.git"
+	# install dependencies
+	cd woocommerce
+	npm install
+	composer install --no-dev
 
 	# Back to original dir
 	cd "$WORKING_DIR"
