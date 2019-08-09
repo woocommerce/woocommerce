@@ -134,6 +134,12 @@ export default class CustomersReportTable extends Component {
 				name
 			);
 
+			const dateLastActive = date_last_active ? (
+				<Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />
+			) : (
+				'—'
+			);
+
 			const dateRegistered = date_registered ? (
 				<Date date={ date_registered } visibleFormat={ defaultTableDateFormat } />
 			) : (
@@ -159,9 +165,7 @@ export default class CustomersReportTable extends Component {
 					value: username,
 				},
 				{
-					display: date_last_active && (
-						<Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />
-					),
+					display: dateLastActive,
 					value: date_last_active,
 				},
 				{
