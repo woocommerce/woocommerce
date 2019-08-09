@@ -345,8 +345,8 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 					{$data->image}
 					{$data->title}
 				</a>
-				{$data->price}
 				{$data->badge}
+				{$data->price}
 				{$data->rating}
 				{$data->button}
 			</li>",
