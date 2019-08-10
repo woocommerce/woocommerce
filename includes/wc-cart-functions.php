@@ -223,7 +223,7 @@ function wc_cart_totals_shipping_html() {
 				'package'                  => $package,
 				'available_methods'        => $package['rates'],
 				'show_package_details'     => count( $packages ) > 1,
-				'show_shipping_calculator' => is_cart() && $first,
+				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
 				/* translators: %d: shipping package number */
 				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
