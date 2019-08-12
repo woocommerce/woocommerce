@@ -13,8 +13,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Order_Milestones;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Welcome_Message;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Woo_Subscriptions_Notes;
-use \Automattic\WooCommerce\Admin\API\WC_Admin_Api_Init;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Woo_Subscriptions_Notes;;
 
 /**
  * Feature plugin main class.
@@ -140,7 +139,7 @@ class WC_Admin_Feature_Plugin {
 		WC_Admin_Reports_Sync::init();
 		WC_Admin_Install::init();
 		WC_Admin_Events::instance()->init();
-		new WC_Admin_Api_Init();
+		new \Automattic\WooCommerce\Admin\API\Init();
 		WC_Admin_Report_Exporter::init();
 
 		// CRUD classes.

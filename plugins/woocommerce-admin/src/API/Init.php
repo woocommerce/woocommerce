@@ -14,7 +14,7 @@ use \Automattic\WooCommerce\Admin\WC_Admin_Loader;
 /**
  * WC_Admin_Api_Init class.
  */
-class WC_Admin_Api_Init {
+class Init {
 
 	/**
 	 * Boostrap REST API.
