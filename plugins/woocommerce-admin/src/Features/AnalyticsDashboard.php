@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 /**
  * Contains backend logic for the dashboard feature.
  */
-class WC_Admin_Analytics_Dashboard {
+class AnalyticsDashboard {
 	/**
 	 * Menu slug.
 	 */

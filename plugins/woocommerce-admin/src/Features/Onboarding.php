@@ -13,7 +13,7 @@ use \Automattic\WooCommerce\Admin\WC_Admin_Loader;
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
  */
-class WC_Admin_Onboarding {
+class Onboarding {
 	/**
 	 * Class instance.
 	 *
@@ -54,7 +54,7 @@ class WC_Admin_Onboarding {
 		}
 
 		// Include WC Admin Onboarding classes.
-		WC_Admin_Onboarding_Tasks::get_instance();
+		OnboardingTasks::get_instance();
 
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );

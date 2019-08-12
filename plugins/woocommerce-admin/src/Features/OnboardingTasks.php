@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 /**
  * Contains the logic for completing onboarding tasks.
  */
-class WC_Admin_Onboarding_Tasks {
+class OnboardingTasks {
 	/**
 	 * Class instance.
 	 *

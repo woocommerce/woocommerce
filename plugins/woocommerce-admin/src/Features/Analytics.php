@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 /**
  * Contains backend logic for the Analytics feature.
  */
-class WC_Admin_Analytics {
+class Analytics {
 	/**
 	 * Class instance.
 	 *

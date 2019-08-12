@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\WC_Admin_Onboarding;
+use Automattic\WooCommerce\Admin\Features\Onboarding;
 
 /**
  * Onboarding Profile controller.
@@ -236,7 +236,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_industries() ),
+					'enum' => array_keys( Onboarding::get_allowed_industries() ),
 					'type' => 'string',
 				),
 			),
@@ -248,7 +248,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_product_types() ),
+					'enum' => array_keys( Onboarding::get_allowed_product_types() ),
 					'type' => 'string',
 				),
 			),

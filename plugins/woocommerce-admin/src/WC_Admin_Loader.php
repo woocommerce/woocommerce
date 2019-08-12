@@ -131,8 +131,8 @@ class WC_Admin_Loader {
 	public static function load_features() {
 		$features = self::get_features();
 		foreach ( $features as $feature ) {
-			$feature = strtolower( str_replace( '-', '_', $feature ) );
-			$feature = 'Automattic\WooCommerce\Admin\Features\WC_Admin_' . ucwords( $feature, '_' );
+			$feature = str_replace( '-', '', ucwords( strtolower( $feature ), '-' ) );
+			$feature = 'Automattic\\WooCommerce\\Admin\\Features\\' . $feature;
 
 			if ( class_exists( $feature ) ) {
 				new $feature;

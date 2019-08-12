@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Settings_Notes;
 /**
  * Contains backend logic for the activity panel feature.
  */
-class WC_Admin_Activity_Panels {
+class ActivityPanels {
 	/**
 	 * Class instance.
 	 *
