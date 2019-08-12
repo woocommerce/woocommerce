@@ -857,7 +857,7 @@ if ( ! function_exists( 'wc_hex_lighter' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wc_is_light' ) ) {
+if ( ! function_exists( 'wc_hex_is_light' ) ) {
 
 	/**
 	 * Determine whether a hex color is light.
