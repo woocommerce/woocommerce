@@ -165,6 +165,11 @@ class FeaturePlugin {
 			return $store_class;
 		}
 
+		// Don't override if action scheduler is 3.0.0 or greater.
+		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
+			return $store_class;
+		}
+
 		return 'Automattic\WooCommerce\Admin\Overrides\WPPostStore';
 	}
 
