@@ -158,7 +158,7 @@ class WC_Admin_Loader {
 		);
 
 		// Connect existing WooCommerce pages.
-		require_once WC_ADMIN_ABSPATH . 'includes/page-controller/connect-existing-pages.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/connect-existing-pages.php';
 	}
 
 	/**
