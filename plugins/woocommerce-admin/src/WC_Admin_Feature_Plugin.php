@@ -190,7 +190,7 @@ class WC_Admin_Feature_Plugin {
 
 		remove_action( 'admin_head', array( 'WC_Admin_Library', 'update_link_structure' ), 20 );
 
-		new \WC_Admin_Loader();
+		new WC_Admin_Loader();
 
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ) );
 		add_action( 'admin_menu', array( $this, 'register_devdocs_page' ) );
@@ -282,7 +282,7 @@ class WC_Admin_Feature_Plugin {
 	 * Adds a menu item for the wc-admin devdocs.
 	 */
 	public function register_devdocs_page() {
-		if ( \WC_Admin_Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+		if ( WC_Admin_Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 			wc_admin_register_page(
 				array(
 					'title'  => 'DevDocs',

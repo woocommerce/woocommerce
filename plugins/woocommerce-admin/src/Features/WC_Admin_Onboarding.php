@@ -8,6 +8,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use \Automattic\WooCommerce\Admin\WC_Admin_Loader;
+
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
  */
@@ -363,7 +365,7 @@ class WC_Admin_Onboarding {
 	 */
 	public static function reset_onboarding() {
 		if (
-			! \WC_Admin_Loader::is_admin_page() ||
+			! WC_Admin_Loader::is_admin_page() ||
 			! isset( $_GET['reset_onboarding'] ) || // WPCS: CSRF ok.
 			1 !== absint( $_GET['reset_onboarding'] ) // WPCS: CSRF ok.
 		) {
