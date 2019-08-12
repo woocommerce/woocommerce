@@ -19,9 +19,9 @@ if ( ! class_exists( 'WC_CSV_Batch_Exporter', false ) ) {
 }
 
 /**
- * WC_Admin_Report_CSV_Exporter Class.
+ * ReportCSVExporter Class.
  */
-class WC_Admin_Report_CSV_Exporter extends \WC_CSV_Batch_Exporter {
+class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Type of report being exported.
 	 *

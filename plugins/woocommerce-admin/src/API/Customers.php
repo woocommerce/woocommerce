@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Customers controller.
  *
  * @package WooCommerce Admin/API
- * @extends WC_Admin_REST_Reports_Customers_Controller
+ * @extends \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller
  */
 class Customers extends \Automattic\WooCommerce\Admin\API\Reports\Customers\Controller {
 

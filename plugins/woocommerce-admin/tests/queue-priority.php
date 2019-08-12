@@ -6,8 +6,8 @@
  * @since 3.5.0
  */
 
-use Automattic\WooCommerce\Admin\WC_Admin_Reports_Sync;
-use Automattic\WooCommerce\Admin\WC_Admin_ActionScheduler_wpPostStore;
+use Automattic\WooCommerce\Admin\ReportsSync;
+use Automattic\WooCommerce\Admin\Overrides\WPPostStore;
 
 /**
  * Reports Generation Batch Queue Prioritizaion Test Class
@@ -40,13 +40,13 @@ class WC_Tests_Reports_Queue_Prioritization extends WC_REST_Unit_Test_Case {
 	 * Test that we're setting a priority on our actions.
 	 */
 	public function test_queue_action_sets_priority() {
-		WC_Admin_Reports_Sync::queue()->schedule_single( time(), WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION );
+		ReportsSync::queue()->schedule_single( time(), ReportsSync::SINGLE_ORDER_IMPORT_ACTION );
 
-		$actions = WC_Admin_Reports_Sync::queue()->search(
+		$actions = ReportsSync::queue()->search(
 			array(
 				'status'  => 'pending',
 				'claimed' => false,
-				'hook'    => WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION,
+				'hook'    => ReportsSync::SINGLE_ORDER_IMPORT_ACTION,
 			)
 		);
 
@@ -56,9 +56,9 @@ class WC_Tests_Reports_Queue_Prioritization extends WC_REST_Unit_Test_Case {
 		$action_id  = $action_ids[0];
 		$action     = get_post( $action_id );
 
-		$this->assertEquals( WC_Admin_ActionScheduler_wpPostStore::JOB_PRIORITY, $action->menu_order );
+		$this->assertEquals( WPPostStore::JOB_PRIORITY, $action->menu_order );
 
-		WC_Admin_Reports_Sync::queue()->cancel_all( WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION );
+		ReportsSync::queue()->cancel_all( ReportsSync::SINGLE_ORDER_IMPORT_ACTION );
 	}
 }
 

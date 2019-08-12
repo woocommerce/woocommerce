@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Install;
+use \Automattic\WooCommerce\Admin\Install;
 
 /**
  * WC_Admin_Notes_Welcome_Message.
@@ -24,7 +24,7 @@ class WC_Admin_Notes_Welcome_Message {
 	 */
 	public static function add_welcome_note() {
 		// Check if plugin is upgrading if yes then don't create this note.
-		$is_upgrading = get_option( WC_Admin_Install::VERSION_OPTION );
+		$is_upgrading = get_option( Install::VERSION_OPTION );
 		if ( $is_upgrading ) {
 			return;
 		}

@@ -37,8 +37,8 @@ function wc_admin_install() {
 	define( 'WC_REMOVE_ALL_DATA', true );
 
 	// Initialize the WC API extensions.
-	\Automattic\WooCommerce\Admin\WC_Admin_Install::create_tables();
-	\Automattic\WooCommerce\Admin\WC_Admin_Install::create_events();
+	\Automattic\WooCommerce\Admin\Install::create_tables();
+	\Automattic\WooCommerce\Admin\Install::create_events();
 
 	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 	$GLOBALS['wp_roles'] = null; // WPCS: override ok.

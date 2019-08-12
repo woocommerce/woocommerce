@@ -7,14 +7,14 @@
  * @package WooCommerce Admin/Classes
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Admin\Overrides;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Admin_Order_Trait class.
+ * OrderTraits class.
  */
-trait WC_Admin_Order_Trait {
+trait OrderTraits {
 	/**
 	 * Calculate shipping amount for line item/product as a total shipping amount ratio based on quantity.
 	 *

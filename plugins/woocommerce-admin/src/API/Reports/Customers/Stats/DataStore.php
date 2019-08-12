@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Admin_Reports_Customers_Stats_Data_Store class file.
+ * API\Reports\Customers\Stats\DataStore class file.
  *
  * @package WooCommerce Admin/Classes
  */
@@ -13,7 +13,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDa
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 
 /**
- * WC_Admin_Reports_Customers_Stats_Data_Store.
+ * API\Reports\Customers\Stats\DataStore.
  */
 class DataStore extends CustomersDataStore implements DataStoreInterface {
 	/**

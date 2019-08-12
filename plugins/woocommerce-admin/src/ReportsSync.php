@@ -16,9 +16,9 @@ use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsData
 use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 
 /**
- * WC_Admin_Reports_Sync Class.
+ * ReportsSync Class.
  */
-class WC_Admin_Reports_Sync {
+class ReportsSync {
 	/**
 	 * Action hook for reducing a range of batches down to single actions.
 	 */
@@ -215,7 +215,7 @@ class WC_Admin_Reports_Sync {
 	public static function clear_queued_actions() {
 		$store = \ActionScheduler::store();
 
-		if ( is_a( $store, 'Automattic\WooCommerce\Admin\WC_Admin_ActionScheduler_WPPostStore' ) ) {
+		if ( is_a( $store, 'Automattic\WooCommerce\Admin\Overrides\WPPostStore' ) ) {
 			// If we're using our data store, call our bespoke deletion method.
 			$action_types = array(
 				self::QUEUE_BATCH_ACTION,
@@ -312,8 +312,8 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function orders_lookup_update_init() {
 		// Activate WC_Order extension.
-		WC_Admin_Order::add_filters();
-		WC_Admin_Order_Refund::add_filters();
+		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
+		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
 		// Order and refund data must be run on these hooks to ensure meta data is set.
 		add_action( 'save_post', array( __CLASS__, 'schedule_single_order_import' ) );

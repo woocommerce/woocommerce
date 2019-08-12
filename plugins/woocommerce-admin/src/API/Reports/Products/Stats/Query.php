@@ -10,7 +10,7 @@
  *          'categories'   => array(15, 18),
  *          'product_ids'  => array(1,2,3)
  *         );
- * $report = new WC_Admin_Reports_Products_Stats_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Products\Stats\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Products_Query
+ * API\Reports\Products\Stats\Query
  */
 class Query extends ReportsQuery {
 

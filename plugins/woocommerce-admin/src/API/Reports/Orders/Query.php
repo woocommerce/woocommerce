@@ -13,7 +13,7 @@
  *          'status_is_not' => array('failed'),
  *          'new_customers' => false,
  *         );
- * $report = new WC_Admin_Reports_Orders_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Orders\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Orders_Query
+ * API\Reports\Orders\Query
  */
 class Query extends ReportsQuery {
 

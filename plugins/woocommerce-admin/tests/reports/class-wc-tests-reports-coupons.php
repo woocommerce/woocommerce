@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Coupons
  */
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Report_CSV_Exporter;
+use \Automattic\WooCommerce\Admin\ReportCSVExporter;
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
@@ -321,7 +321,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		do_action( 'rest_api_init' );
 
 		// Run the export and compare values.
-		$export = new WC_Admin_Report_CSV_Exporter( 'coupons', $args );
+		$export = new ReportCSVExporter( 'coupons', $args );
 		$export->generate_file();
 		$actual_csv = $export->get_file();
 

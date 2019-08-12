@@ -17,7 +17,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_New_Sales_Record;
 /**
  * WC_Admin_Events Class.
  */
-class WC_Admin_Events {
+class Events {
 	/**
 	 * The single instance of the class.
 	 *

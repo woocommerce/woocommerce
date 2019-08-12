@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Downloads_Stats_Query
+ * API\Reports\Downloads\Stats\Query
  */
 class Query extends ReportsQuery {
 

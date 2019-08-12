@@ -9,9 +9,9 @@
 namespace Automattic\WooCommerce\Admin;
 
 /**
- * WC_Admin_Loader Class.
+ * Loader Class.
  */
-class WC_Admin_Loader {
+class Loader {
 	/**
 	 * App entry point.
 	 */
@@ -20,7 +20,7 @@ class WC_Admin_Loader {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Loader instance
+	 * @var Loader instance
 	 */
 	protected static $instance = null;
 
@@ -691,7 +691,7 @@ class WC_Admin_Loader {
 	}
 
 	/**
-	 * For all the registered user data fields (  WC_Admin_Loader::get_user_data_fields ), fetch the data
+	 * For all the registered user data fields (  Loader::get_user_data_fields ), fetch the data
 	 * for returning via the REST API.
 	 *
 	 * @param WP_User $user Current user.
@@ -705,7 +705,7 @@ class WC_Admin_Loader {
 	}
 
 	/**
-	 * For all the registered user data fields ( WC_Admin_Loader::get_user_data_fields ), update the data
+	 * For all the registered user data fields ( Loader::get_user_data_fields ), update the data
 	 * for the REST API.
 	 *
 	 * @param array   $values   The new values for the meta.

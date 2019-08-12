@@ -21,7 +21,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Woo_Subscriptions_Notes;;
  * @internal This file will not be bundled with woo core, only the feature plugin.
  * @internal Note this is not called WC_Admin due to a class already existing in core with that name.
  */
-class WC_Admin_Feature_Plugin {
+class FeaturePlugin {
 	/**
 	 * The single instance of the class.
 	 *
@@ -65,8 +65,8 @@ class WC_Admin_Feature_Plugin {
 	 * @return void
 	 */
 	public function on_activation() {
-		WC_Admin_Install::create_tables();
-		WC_Admin_Install::create_events();
+		Install::create_tables();
+		Install::create_events();
 	}
 
 	/**
@@ -82,7 +82,7 @@ class WC_Admin_Feature_Plugin {
 		}
 
 		$this->includes();
-		WC_Admin_Reports_Sync::clear_queued_actions();
+		ReportsSync::clear_queued_actions();
 		WC_Admin_Notes::clear_queued_actions();
 		wp_clear_scheduled_hook( 'wc_admin_daily' );
 	}
@@ -136,11 +136,11 @@ class WC_Admin_Feature_Plugin {
 	 */
 	public function includes() {
 		// Initialize the WC API extensions.
-		WC_Admin_Reports_Sync::init();
-		WC_Admin_Install::init();
-		WC_Admin_Events::instance()->init();
-		new \Automattic\WooCommerce\Admin\API\Init();
-		WC_Admin_Report_Exporter::init();
+		ReportsSync::init();
+		Install::init();
+		Events::instance()->init();
+		new API\Init();
+		ReportExporter::init();
 
 		// CRUD classes.
 		WC_Admin_Notes::init();
@@ -165,7 +165,7 @@ class WC_Admin_Feature_Plugin {
 			return $store_class;
 		}
 
-		return 'Automattic\WooCommerce\Admin\WC_Admin_ActionScheduler_WPPostStore';
+		return 'Automattic\WooCommerce\Admin\Overrides\WPPostStore';
 	}
 
 	/**
@@ -189,7 +189,7 @@ class WC_Admin_Feature_Plugin {
 
 		remove_action( 'admin_head', array( 'WC_Admin_Library', 'update_link_structure' ), 20 );
 
-		new WC_Admin_Loader();
+		new Loader();
 
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ) );
 		add_action( 'admin_menu', array( $this, 'register_devdocs_page' ) );
@@ -281,7 +281,7 @@ class WC_Admin_Feature_Plugin {
 	 * Adds a menu item for the wc-admin devdocs.
 	 */
 	public function register_devdocs_page() {
-		if ( WC_Admin_Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+		if ( Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 			wc_admin_register_page(
 				array(
 					'title'  => 'DevDocs',

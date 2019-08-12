@@ -13,9 +13,9 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Welcome_Message;
 
 /**
- * WC_Admin_Install Class.
+ * Install Class.
  */
-class WC_Admin_Install {
+class Install {
 	/**
 	 * Plugin version option name.
 	 */

@@ -13,7 +13,7 @@ Connecting pages uses five parameters to `wc_admin_connect_page()`:
 
 * `id` - Identifies the page with the controller. Required.
 * `parent` - Denotes the page as a child of `parent`. Used for breadcrumbs. Optional.
-* `screen_id` - Corresponds to [`WC_Admin_Page_Controller::get_current_screen_id()`](../includes/page-controller/class-wc-admin-page-controller.php#L219) to determine the current page. Required.
+* `screen_id` - Corresponds to [`PageController::get_current_screen_id()`](../includes/page-controller/class-wc-admin-page-controller.php#L219) to determine the current page. Required.
 * `title` - Page title. Used to build breadcrumbs. String or array of breadcrumb pieces. Required.
 * `path` - Page path (relative). Used for linking breadcrumb pieces when this page is a `parent`. Optional.
 
@@ -132,6 +132,6 @@ add_filter( 'woocommerce_admin_report_menu_items', 'add_report_menu_item' );
 
 ### Further Reading
 
-* Check out the [`WC_Admin_Page_Controller`](../includes/page-controller/class-wc-admin-page-controller.php) class.
+* Check out the [`PageController`](../includes/page-controller/class-wc-admin-page-controller.php) class.
 * See how we're [connecting existing WooCommerce pages](../includes/page-controller/connect-existing-pages.php).
 * See how we're [registering Analytics Reports](../includes/features/analytics/class-wc-admin-analytics.php#L75).

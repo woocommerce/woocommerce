@@ -7,30 +7,30 @@
  * @package WooCommerce Admin/Classes
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Admin\Overrides;
 
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
 /**
- * WC_Admin_Order_Refund class.
+ * WC_Order_Refund subclass.
  */
-class WC_Admin_Order_Refund extends \WC_Order_Refund {
+class OrderRefund extends \WC_Order_Refund {
 	/**
 	 * Order traits.
 	 */
-	use \Automattic\WooCommerce\Admin\WC_Admin_Order_Trait;
+	use OrderTraits;
 
 	/**
-	 * Add filter(s) required to hook WC_Admin_Order_Refund class to substitute WC_Order_Refund.
+	 * Add filter(s) required to hook this class to substitute WC_Order_Refund.
 	 */
 	public static function add_filters() {
 		add_filter( 'woocommerce_order_class', array( __CLASS__, 'order_class_name' ), 10, 3 );
 	}
 
 	/**
-	 * Filter function to swap class WC_Order_Refund for WC_Admin_Order_Refund in cases when it's suitable.
+	 * Filter function to swap class WC_Order_Refund for this one in cases when it's suitable.
 	 *
 	 * @param string $classname Name of the class to be created.
 	 * @param string $order_type Type of order object to be created.
@@ -41,7 +41,7 @@ class WC_Admin_Order_Refund extends \WC_Order_Refund {
 	public static function order_class_name( $classname, $order_type, $order_id ) {
 		// @todo - Only substitute class when necessary (during sync).
 		if ( 'WC_Order_Refund' === $classname ) {
-			return '\Automattic\WooCommerce\Admin\WC_Admin_Order_Refund';
+			return '\Automattic\WooCommerce\Admin\Overrides\OrderRefund';
 		} else {
 			return $classname;
 		}

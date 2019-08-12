@@ -373,7 +373,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Admin_Reports_Query $object Object data.
+	 * @param \Automattic\WooCommerce\Admin\API\Reports\Query $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {

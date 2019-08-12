@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Install;
+use \Automattic\WooCommerce\Admin\Install;
 
 /**
  * WC_Admin_Notes_Historical_Data.
@@ -23,7 +23,7 @@ class WC_Admin_Notes_Historical_Data {
 	 * Creates a note for regenerating historical data.
 	 */
 	public static function add_note() {
-		$is_upgrading = get_option( WC_Admin_Install::VERSION_OPTION );
+		$is_upgrading = get_option( Install::VERSION_OPTION );
 		if ( $is_upgrading ) {
 			return;
 		}

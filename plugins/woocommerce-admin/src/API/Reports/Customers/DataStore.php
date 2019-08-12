@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Admin_Reports_Customers_Data_Store class file.
+ * Admin\API\Reports\Customers\DataStore class file.
  *
  * @package WooCommerce Admin/Classes
  */
@@ -14,7 +14,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
- * WC_Admin_Reports_Customers_Data_Store.
+ * Admin\API\Reports\Customers\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
 

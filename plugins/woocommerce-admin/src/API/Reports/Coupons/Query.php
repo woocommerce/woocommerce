@@ -9,7 +9,7 @@
  *          'page'    => 2,
  *          'coupons' => array(5, 120),
  *         );
- * $report = new WC_Admin_Reports_Coupons_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Coupons\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Coupons_Query
+ * API\Reports\Coupons\Query
  */
 class Query extends ReportsQuery {
 

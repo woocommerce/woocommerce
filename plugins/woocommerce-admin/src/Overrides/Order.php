@@ -7,7 +7,7 @@
  * @package WooCommerce Admin/Classes
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Admin\Overrides;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,13 +15,13 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDa
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 
 /**
- * WC_Admin_Order class.
+ * WC_Order subclass.
  */
-class WC_Admin_Order extends \WC_Order {
+class Order extends \WC_Order {
 	/**
 	 * Order traits.
 	 */
-	use \Automattic\WooCommerce\Admin\WC_Admin_Order_Trait;
+	use OrderTraits;
 
 	/**
 	 * Holds refund amounts and quantities for the order.
@@ -31,14 +31,14 @@ class WC_Admin_Order extends \WC_Order {
 	protected $refunded_line_items;
 
 	/**
-	 * Add filter(s) required to hook WC_Admin_Order class to substitute WC_Order.
+	 * Add filter(s) required to hook this class to substitute WC_Order.
 	 */
 	public static function add_filters() {
 		add_filter( 'woocommerce_order_class', array( __CLASS__, 'order_class_name' ), 10, 3 );
 	}
 
 	/**
-	 * Filter function to swap class WC_Order for WC_Admin_Order in cases when it's suitable.
+	 * Filter function to swap class WC_Order for this one in cases when it's suitable.
 	 *
 	 * @param string $classname Name of the class to be created.
 	 * @param string $order_type Type of order object to be created.
@@ -49,7 +49,7 @@ class WC_Admin_Order extends \WC_Order {
 	public static function order_class_name( $classname, $order_type, $order_id ) {
 		// @todo - Only substitute class when necessary (during sync).
 		if ( 'WC_Order' === $classname ) {
-			return '\Automattic\WooCommerce\Admin\WC_Admin_Order';
+			return '\Automattic\WooCommerce\Admin\Overrides\Order';
 		} else {
 			return $classname;
 		}

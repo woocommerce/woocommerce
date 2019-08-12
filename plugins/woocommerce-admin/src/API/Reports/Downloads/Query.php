@@ -9,7 +9,7 @@
  *      'page'         => 2,
  *      'products'     => array(1,2,3)
  * );
- * $report = new WC_Admin_Reports_Downloads_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Downloads\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Downloads_Query
+ * API\Reports\Downloads\Query
  */
 class Query extends ReportsQuery {
 

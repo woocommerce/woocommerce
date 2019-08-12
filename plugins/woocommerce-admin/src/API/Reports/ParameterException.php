@@ -12,6 +12,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Admin_Reports_Parameter_Exception class.
+ * API\Reports\ParameterException class.
  */
 class ParameterException extends \WC_Data_Exception {}

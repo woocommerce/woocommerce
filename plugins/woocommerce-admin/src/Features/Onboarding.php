@@ -8,7 +8,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Loader;
+use \Automattic\WooCommerce\Admin\Loader;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -17,7 +17,7 @@ class Onboarding {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Onboarding instance
+	 * @var Onboarding instance
 	 */
 	protected static $instance = null;
 
@@ -56,7 +56,7 @@ class Onboarding {
 		// Include WC Admin Onboarding classes.
 		OnboardingTasks::get_instance();
 
-		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
+		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after Automattic\WooCommerce\Admin\Loader.
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
@@ -365,7 +365,7 @@ class Onboarding {
 	 */
 	public static function reset_onboarding() {
 		if (
-			! WC_Admin_Loader::is_admin_page() ||
+			! Loader::is_admin_page() ||
 			! isset( $_GET['reset_onboarding'] ) || // WPCS: CSRF ok.
 			1 !== absint( $_GET['reset_onboarding'] ) // WPCS: CSRF ok.
 		) {

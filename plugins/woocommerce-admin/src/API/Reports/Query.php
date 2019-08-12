@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Admin_Reports_Query
+ * Admin\API\Reports\Query
  */
 abstract class Query extends \WC_Object_Query {
 

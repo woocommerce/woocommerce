@@ -18,7 +18,7 @@ class ActivityPanels {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Activity_Panels instance
+	 * @var ActivityPanels instance
 	 */
 	protected static $instance = null;
 
@@ -37,7 +37,7 @@ class ActivityPanels {
 	 */
 	public function __construct() {
 		add_filter( 'wc_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
-		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after WC_Admin_Loader.
+		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after Automattic\WooCommerce\Admin\Loader.
 		add_action( 'woocommerce_updated', array( $this, 'woocommerce_updated_note' ) );
 	}
 

@@ -8,7 +8,7 @@
  *          'after'  => '2018-07-05 00:00:00',
  *          'interval' => 'week',
  *         );
- * $report = new WC_Admin_Reports_Revenue_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Revenue\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Revenue_Query
+ * API\Reports\Revenue\Query
  */
 class Query extends ReportsQuery {
 

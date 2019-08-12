@@ -15,7 +15,7 @@ class OnboardingTasks {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Onboarding_Tasks instance
+	 * @var OnboardingTasks instance
 	 */
 	protected static $instance = null;
 
@@ -47,7 +47,7 @@ class OnboardingTasks {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 ); // Run after WC_Admin_Onboarding.
+		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 ); // Run after Onboarding.
 		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
 		add_action( 'admin_init', array( $this, 'check_active_task_completion' ), 1 );
 	}

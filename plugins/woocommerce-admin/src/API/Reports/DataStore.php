@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Admin_Reports_Data_Store class file.
+ * Admin\API\Reports\DataStore class file.
  *
  * @package WooCommerce Admin/Classes
  */
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
- * WC_Admin_Reports_Data_Store: Common parent for custom report data stores.
+ * Admin\API\Reports\DataStore: Common parent for custom report data stores.
  */
 class DataStore {
 

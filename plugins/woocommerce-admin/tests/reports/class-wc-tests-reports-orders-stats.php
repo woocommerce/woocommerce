@@ -3748,10 +3748,10 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Test if lookup tables are cleaned after delete an order.
 	 *
-	 * @covers WC_Admin_Reports_Orders_Stats_Data_Store::delete_order
-	 * @covers WC_Admin_Reports_Products_Data_Store::sync_on_order_delete
-	 * @covers WC_Admin_Reports_Coupons_Data_Store::sync_on_order_delete
-	 * @covers WC_Admin_Reports_Taxes_Data_Store::sync_on_order_delete
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::delete_order
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_on_order_delete
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_on_order_delete
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore::sync_on_order_delete
 	 */
 	public function test_order_deletion() {
 		global $wpdb;

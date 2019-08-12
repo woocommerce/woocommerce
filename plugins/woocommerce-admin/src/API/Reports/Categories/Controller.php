@@ -139,7 +139,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Admin_Reports_Query $object Object data.
+	 * @param \Automattic\WooCommerce\Admin\API\Reports\Query $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {

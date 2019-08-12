@@ -46,7 +46,7 @@ class Segmenter {
 	protected $report_columns = array();
 
 	/**
-	 * WC_Admin_Reports_Segmenting constructor.
+	 * Constructor.
 	 *
 	 * @param array $query_args Query arguments supplied by the user for data store.
 	 * @param array $report_columns Report columns lookup from data store.

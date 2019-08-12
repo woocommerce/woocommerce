@@ -20,7 +20,7 @@ class AnalyticsDashboard {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Analytics_Dashboard instance
+	 * @var AnalyticsDashboard instance
 	 */
 	protected static $instance = null;
 

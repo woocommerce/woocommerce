@@ -5,12 +5,12 @@
  * @package WooCommerce Admin/Classes
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Admin\Overrides;
 
 /**
  * Class WC Admin Action Scheduler Store.
  */
-class WC_Admin_ActionScheduler_WPPostStore extends \ActionScheduler_wpPostStore {
+class WPPostStore extends \ActionScheduler_wpPostStore {
 	/**
 	 * Action scheduler job priority (lower numbers are claimed first).
 	 */

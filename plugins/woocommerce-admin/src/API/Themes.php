@@ -11,8 +11,8 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\WC_Admin_Theme_Upgrader;
-use Automattic\WooCommerce\Admin\WC_Admin_Theme_Upgrader_Skin;
+use Automattic\WooCommerce\Admin\Overrides\ThemeUpgrader;
+use Automattic\WooCommerce\Admin\Overrides\ThemeUpgraderSkin;
 
 /**
  * Themes controller.
@@ -84,7 +84,7 @@ class Themes extends \WC_REST_Data_Controller {
 
 		$_GET['package'] = true;
 		$file_upload     = new \File_Upload_Upgrader( 'pluginzip', 'package' );
-		$upgrader        = new \WC_Admin_Theme_Upgrader( new \WC_Admin_Theme_Upgrader_Skin() );
+		$upgrader        = new ThemeUpgrader( new ThemeUpgraderSkin() );
 		$install         = $upgrader->install( $file_upload->package );
 
 		if ( $install || is_wp_error( $install ) ) {

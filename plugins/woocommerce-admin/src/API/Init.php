@@ -9,10 +9,10 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Loader;
+use \Automattic\WooCommerce\Admin\Loader;
 
 /**
- * WC_Admin_Api_Init class.
+ * Init class.
  */
 class Init {
 
@@ -74,7 +74,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Themes',
 		);
 
-		if ( WC_Admin_Loader::is_feature_enabled( 'onboarding' ) ) {
+		if ( Loader::is_feature_enabled( 'onboarding' ) ) {
 			$controllers = array_merge(
 				$controllers,
 				array(

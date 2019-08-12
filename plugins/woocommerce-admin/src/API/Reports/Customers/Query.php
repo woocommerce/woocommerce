@@ -10,7 +10,7 @@
  *          'avg_order_value_min' => 100,
  *          'country'             => 'GB',
  *         );
- * $report = new WC_Admin_Reports_Customers_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Customers\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Customers_Query
+ * API\Reports\Customers\Query
  */
 class Query extends ReportsQuery {
 

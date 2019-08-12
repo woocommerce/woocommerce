@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Admin_Report_Exporter Class.
+ * ReportExporter Class.
  */
-class WC_Admin_Report_Exporter {
+class ReportExporter {
 	/**
 	 * Action hook for generating a report export.
 	 */
@@ -83,7 +83,7 @@ class WC_Admin_Report_Exporter {
 	 * @return int Number of items to export.
 	 */
 	public static function queue_report_export( $export_id, $report_type, $report_args = array() ) {
-		$exporter = new WC_Admin_Report_CSV_Exporter( $report_type, $report_args );
+		$exporter = new ReportCSVExporter( $report_type, $report_args );
 		$exporter->prepare_data_to_export();
 
 		$total_rows  = $exporter->get_total_rows();
@@ -95,7 +95,7 @@ class WC_Admin_Report_Exporter {
 		$report_batch_args = array( $export_id, $report_type, $report_args );
 
 		if ( 0 < $num_batches ) {
-			WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
+			ReportsSync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
 		}
 
 		return $total_rows;
@@ -113,7 +113,7 @@ class WC_Admin_Report_Exporter {
 	public static function report_export_action( $page_number, $export_id, $report_type, $report_args ) {
 		$report_args['page'] = $page_number;
 
-		$exporter = new WC_Admin_Report_CSV_Exporter( $report_type, $report_args );
+		$exporter = new ReportCSVExporter( $report_type, $report_args );
 		$exporter->set_filename( "wc-{$report_type}-report-export-{$export_id}" );
 		$exporter->generate_file();
 
@@ -177,7 +177,7 @@ class WC_Admin_Report_Exporter {
 			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // WPCS: input var ok, sanitization ok.
 			current_user_can( 'view_woocommerce_reports' )
 		) {
-			$exporter = new WC_Admin_Report_CSV_Exporter();
+			$exporter = new ReportCSVExporter();
 			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
 			$exporter->export();
 		}

@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Feature_Plugin;
+use \Automattic\WooCommerce\Admin\FeaturePlugin;
 
 /**
  * Autoload packages.
@@ -66,4 +66,4 @@ if ( is_readable( $autoloader ) ) {
 	return;
 }
 
-WC_Admin_Feature_Plugin::instance()->init();
+FeaturePlugin::instance()->init();

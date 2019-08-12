@@ -11,7 +11,7 @@
  *          'coupons'      => array(138),
  *          'status_in'    => array('completed'),
  *         );
- * $report = new WC_Admin_Reports_Orders_Stats_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Orders_Stats_Query
+ * API\Reports\Orders\Stats\Query
  */
 class Query extends ReportsQuery {
 

@@ -2,7 +2,7 @@
 /**
  * Class for stock stats report querying
  *
- * $report = new WC_Admin_Reports_Stock__Stats_Query();
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\Query();
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Stock_Stats_Query
+ * API\Reports\Stock\Stats\Query
  */
 class Query extends ReportsQuery {
 

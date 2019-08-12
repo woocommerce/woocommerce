@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Export;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\WC_Admin_Report_Exporter;
+use \Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
  * Reports Export controller.
@@ -152,7 +152,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		$report_args = empty( $request['report_args'] ) ? array() : $request['report_args'];
 		$export_id   = str_replace( '.', '', microtime( true ) );
 
-		$total_rows = WC_Admin_Report_Exporter::queue_report_export( $export_id, $report_type, $report_args );
+		$total_rows = ReportExporter::queue_report_export( $export_id, $report_type, $report_args );
 
 		if ( 0 === $total_rows ) {
 			$response = rest_ensure_response(
@@ -179,7 +179,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 				)
 			);
 
-			WC_Admin_Report_Exporter::update_export_percentage_complete( $report_type, $export_id, 0 );
+			ReportExporter::update_export_percentage_complete( $report_type, $export_id, 0 );
 		}
 
 		$data = $this->prepare_response_for_collection( $response );
@@ -196,7 +196,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	public function export_status( $request ) {
 		$report_type = $request['type'];
 		$export_id   = $request['export_id'];
-		$percentage  = WC_Admin_Report_Exporter::get_export_percentage_complete( $report_type, $export_id );
+		$percentage  = ReportExporter::get_export_percentage_complete( $report_type, $export_id );
 
 		if ( false === $percentage ) {
 			return new \WP_Error(
@@ -213,7 +213,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		// @todo - add thing in the links below instead?
 		if ( 100 === $percentage ) {
 			$query_args = array(
-				'action'   => WC_Admin_Report_Exporter::DOWNLOAD_EXPORT_ACTION,
+				'action'   => ReportExporter::DOWNLOAD_EXPORT_ACTION,
 				'filename' => "wc-{$report_type}-report-export-{$export_id}",
 			);
 

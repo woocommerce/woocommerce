@@ -137,7 +137,7 @@ class Segmenter extends ReportsSegmenter {
 	 * @param string $table_name Name of main SQL table for the data store (used as basis for JOINS).
 	 *
 	 * @return array
-	 * @throws WC_Admin_Reports_Parameter_Exception In case of segmenting by variations, when no parent product is specified.
+	 * @throws \Automattic\WooCommerce\Admin\API\Reports\ParameterException In case of segmenting by variations, when no parent product is specified.
 	 */
 	protected function get_segments( $type, $query_params, $table_name ) {
 		global $wpdb;

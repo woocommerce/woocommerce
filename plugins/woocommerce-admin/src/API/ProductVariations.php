@@ -64,13 +64,13 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		add_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10, 2 );
-		add_filter( 'posts_join', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_join' ), 10, 2 );
-		add_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10, 2 );
+		add_filter( 'posts_where', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_filter' ), 10, 2 );
+		add_filter( 'posts_join', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_join' ), 10, 2 );
+		add_filter( 'posts_groupby', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_group_by' ), 10, 2 );
 		$response = parent::get_items( $request );
-		remove_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10 );
-		remove_filter( 'posts_join', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_join' ), 10 );
-		remove_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10 );
+		remove_filter( 'posts_where', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_join', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_join' ), 10 );
+		remove_filter( 'posts_groupby', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_group_by' ), 10 );
 		return $response;
 	}
 

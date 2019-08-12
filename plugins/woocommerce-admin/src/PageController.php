@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Admin_Page_Controller
+ * PageController
  *
  * @package Woocommerce Admin
  */
@@ -10,16 +10,16 @@ namespace Automattic\WooCommerce\Admin;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Admin_Page_Controller
+ * PageController
  */
-class WC_Admin_Page_Controller {
+class PageController {
 	// JS-powered page root.
 	const PAGE_ROOT = 'wc-admin';
 
 	/**
 	 * Singleton instance of self.
 	 *
-	 * @var WC_Admin_Page_Controller
+	 * @var PageController
 	 */
 	private static $instance = false;
 

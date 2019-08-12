@@ -10,7 +10,7 @@
  *          'order'        => 'desc',
  *          'orderby'      => 'items_sold',
  *         );
- * $report = new WC_Admin_Reports_Categories_Query( $args );
+ * $report = new \Automattic\WooCommerce\Admin\API\Reports\Query( $args );
  * $mydata = $report->get_data();
  *
  * @package  WooCommerce Admin/Classes
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * WC_Admin_Reports_Categories_Query
+ * API\Reports\Query
  */
 class Query extends ReportsQuery {
 

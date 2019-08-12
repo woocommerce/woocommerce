@@ -15,7 +15,7 @@ class Analytics {
 	/**
 	 * Class instance.
 	 *
-	 * @var WC_Admin_Analytics instance
+	 * @var Analytics instance
 	 */
 	protected static $instance = null;
 
