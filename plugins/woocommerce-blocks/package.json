@@ -80,7 +80,7 @@
     "progress-bar-webpack-plugin": "1.12.1",
     "react-test-renderer": "16.8.6",
     "rimraf": "2.6.3",
-    "sass-loader": "7.1.0",
+    "sass-loader": "7.2.0",
     "style-loader": "1.0.0",
     "stylelint": "10.1.0",
     "stylelint-config-wordpress": "14.0.0",
