@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "05557159b0c72dea312dfaf01083ec18",
+    "content-hash": "0594e841788ef9e44e6c688c152c1c30",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -164,16 +164,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v2.3.0-rc.1",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "59d64079b98e5d8f18c1d436cd4f8fbc9471a649"
+                "reference": "79911c596a29ad675c7998bfc7939e92b7530bdc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/59d64079b98e5d8f18c1d436cd4f8fbc9471a649",
-                "reference": "59d64079b98e5d8f18c1d436cd4f8fbc9471a649",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/79911c596a29ad675c7998bfc7939e92b7530bdc",
+                "reference": "79911c596a29ad675c7998bfc7939e92b7530bdc",
                 "shasum": ""
             },
             "require": {
@@ -207,7 +207,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2019-08-01T14:56:08+00:00"
+            "time": "2019-08-12T11:08:10+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -291,9 +291,9 @@
             "authors": [
                 {
                     "name": "Franck Nijhof",
+                    "role": "Developer / IT Manager",
                     "email": "franck.nijhof@dealerdirect.com",
-                    "homepage": "http://www.frenck.nl",
-                    "role": "Developer / IT Manager"
+                    "homepage": "http://www.frenck.nl"
                 }
             ],
             "description": "PHP_CodeSniffer Standards Composer Installer Plugin",
@@ -456,18 +456,18 @@
             "authors": [
                 {
                     "name": "Arne Blankerts",
-                    "email": "arne@blankerts.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "arne@blankerts.de"
                 },
                 {
                     "name": "Sebastian Heuer",
-                    "email": "sebastian@phpeople.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "sebastian@phpeople.de"
                 },
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "Component for reading phar.io manifest information from a PHP Archive (PHAR)",
@@ -994,8 +994,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "FilterIterator implementation that filters files based on a list of suffixes.",
@@ -1036,8 +1036,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "Simple template engine.",
@@ -1085,8 +1085,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "Utility class for timing",
@@ -1787,8 +1787,8 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
+                    "role": "lead",
+                    "email": "sebastian@phpunit.de"
                 }
             ],
             "description": "Library that helps with managing the version number of Git-hosted PHP projects",
