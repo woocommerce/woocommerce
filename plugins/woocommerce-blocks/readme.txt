@@ -1,10 +1,10 @@
 === WooCommerce Blocks ===
-Contributors: automattic, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia
-Tags: gutenberg, woocommerce, woo commerce, products
+Contributors: automattic, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia, aljullu, mikejolley, nerrad, joshuawold
+Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.0
 Tested up to: 5.2
 Requires PHP: 5.6
-Stable tag: 2.2.1
+Stable tag: 2.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,7 +16,7 @@ WooCommerce Blocks are the easiest, most flexible way to display your products o
 Display a grid of products from your selected attributes.
 
 **Featured Product Block**
-Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo. 
+Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo.
 
 **Hand-Picked products Block**
 Display a grid of hand picked products. Products can be ordered in various ways.
@@ -36,7 +36,7 @@ Display a grid of on sale products, filterable by category.
 **Products by Category Block**
 Display a grid of products from your selected category, or categories. Products can be ordered in various ways.
 
-We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories. 
+We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories.
 
 == Getting Started ==
 
@@ -83,7 +83,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 2.3.0 - 2019-07-25 =
+= 2.3.0 - 2019-08-12 =
 
 - Feature: Added a new Featured Category Block; feature a category and show a link to it's archive.
 - Feature: Added a new Products by Tag(s) block.
@@ -96,6 +96,11 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fix - Fix Featured Category block using radio buttons instead of checkboxes.
 - Fix - Use externals for frontend dependencies so they are shared between extensions and blocks. That saves 2.57MB on page weight.
 - Fix - Load frontend scripts dynamically only when the page contains a block that requires them.
+- Fix - Reduce dependencies of JavaScript powered frontend blocks.
+- Fix - Disable HTML editing on dynamic blocks which have no content.
+- Fix - Hide background opacity control in Featured Product settings if there is no background image.
+- Fix - Reduce CSS specificity to make styling easier.
+- Fix - Fix author access to API for handpicked products block.
 
 = 2.2.1 - 2019-07-04 =
 
@@ -195,7 +200,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 = 1.1.2 - 2018-09-07 =
 
-* Fix - Refactor to remove withAPIData usage, as the class was removed in Gutenberg 3.7. 
+* Fix - Refactor to remove withAPIData usage, as the class was removed in Gutenberg 3.7.
 
 = 1.1.1 - 2018-08-22 =
 

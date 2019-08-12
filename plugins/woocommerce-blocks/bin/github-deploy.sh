@@ -100,12 +100,12 @@ git checkout -b $BRANCH
 # Force add build directory and commit.
 git add build/. --force
 git add .
-git commit -m "Adding /build directory to release"
+git commit -m "Adding /build directory to release" --no-verify
 
 # Force add vendor directory and commit.
 git add vendor/. --force
 git add .
-git commit -m "Adding /vendor directory to release"
+git commit -m "Adding /vendor directory to release" --no-verify
 
 # Push branch upstream
 git push origin $BRANCH
