@@ -288,7 +288,7 @@ class Products extends WC_REST_Products_Controller {
 		$params['catalog_visibility'] = array(
 			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
-			'enum'              => array( 'visible', 'catalog', 'search', 'hidden' ),
+			'enum'              => array( 'any', 'visible', 'catalog', 'search', 'hidden' ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

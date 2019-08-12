@@ -18,7 +18,7 @@ const getProductsRequests = ( { selected = [], search } ) => {
 	const requests = [
 		addQueryArgs( ENDPOINTS.products, {
 			per_page: isLargeCatalog ? 100 : -1,
-			catalog_visibility: 'visible',
+			catalog_visibility: 'any',
 			status: 'publish',
 			search,
 		} ),
@@ -28,7 +28,7 @@ const getProductsRequests = ( { selected = [], search } ) => {
 	if ( isLargeCatalog && selected.length ) {
 		requests.push(
 			addQueryArgs( ENDPOINTS.products, {
-				catalog_visibility: 'visible',
+				catalog_visibility: 'any',
 				status: 'publish',
 				include: selected,
 			} )
