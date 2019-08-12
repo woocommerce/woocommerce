@@ -260,7 +260,7 @@ module.exports = function( grunt ) {
 					'echo "Generating contributor list since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
-					' --showlogin true > contributors.md'
+					' --showlogin true --sha <%= sha %> > contributors.md'
 				].join( '&&' )
 			}
 		},
@@ -273,6 +273,11 @@ module.exports = function( grunt ) {
 							config: 'fromDate',
 							type: 'input',
 							message: 'What date (YYYY-MM-DD) should we get contributions since?'
+						},
+						{
+							config: 'sha',
+							type: 'input',
+							message: 'What branch should we get contributors from?'
 						},
 						{
 							config: 'authToken',
