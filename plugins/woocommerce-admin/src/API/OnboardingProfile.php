@@ -110,7 +110,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			$items[ $key ] = isset( $onboarding_data[ $key ] ) ? $onboarding_data[ $key ] : null;
 		}
 
-		$wccom_auth               = WC_Helper_Options::get( 'auth' );
+		$wccom_auth               = \WC_Helper_Options::get( 'auth' );
 		$items['wccom_connected'] = empty( $wccom_auth['access_token'] ) ? false : true;
 
 		$item = $this->prepare_item_for_response( $items, $request );

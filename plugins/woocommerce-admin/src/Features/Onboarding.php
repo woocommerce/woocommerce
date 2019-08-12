@@ -301,7 +301,7 @@ class Onboarding {
 		$profile = get_option( 'wc_onboarding_profile', array() );
 
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
-		$wccom_auth                 = WC_Helper_Options::get( 'auth' );
+		$wccom_auth                 = \WC_Helper_Options::get( 'auth' );
 		$profile['wccom_connected'] = empty( $wccom_auth['access_token'] ) ? false : true;
 
 		$settings['onboarding'] = array(

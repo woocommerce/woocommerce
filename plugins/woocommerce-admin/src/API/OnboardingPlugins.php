@@ -277,7 +277,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
 
-		$request = WC_Helper_API::post(
+		$request = \WC_Helper_API::post(
 			'oauth/request_token',
 			array(
 				'body' => array(
@@ -306,7 +306,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 				'secret'       => rawurlencode( $secret ),
 				'wccom-from'   => 'onboarding',
 			),
-			WC_Helper_API::url( 'oauth/authorize' )
+			\WC_Helper_API::url( 'oauth/authorize' )
 		);
 
 		// Redirect to local calypso instead of production.
@@ -341,7 +341,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		}
 
 		// Obtain an access token.
-		$request = WC_Helper_API::post(
+		$request = \WC_Helper_API::post(
 			'oauth/access_token',
 			array(
 				'body' => array(
@@ -361,7 +361,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
-		WC_Helper_Options::update(
+		\WC_Helper_Options::update(
 			'auth',
 			array(
 				'access_token'        => $access_token['access_token'],
@@ -372,13 +372,13 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			)
 		);
 
-		if ( ! WC_Helper::_flush_authentication_cache() ) {
-			WC_Helper_Options::update( 'auth', array() );
+		if ( ! \WC_Helper::_flush_authentication_cache() ) {
+			\WC_Helper_Options::update( 'auth', array() );
 			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
 		delete_transient( '_woocommerce_helper_subscriptions' );
-		WC_Helper_Updater::flush_updates_cache();
+		\WC_Helper_Updater::flush_updates_cache();
 
 		do_action( 'woocommerce_helper_connected' );
 
