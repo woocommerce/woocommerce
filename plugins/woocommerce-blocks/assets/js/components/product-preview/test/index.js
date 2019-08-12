@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import renderer from 'react-test-renderer';
+import TestRenderer from 'react-test-renderer';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ describe( 'ProductPreview', () => {
 				},
 			],
 		};
-		const component = renderer.create( <ProductPreview product={ product } /> );
+		const component = TestRenderer.create( <ProductPreview product={ product } /> );
 		expect( component.toJSON() ).toMatchSnapshot();
 	} );
 
@@ -33,7 +33,7 @@ describe( 'ProductPreview', () => {
 				'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>65.00</span>',
 			images: [],
 		};
-		const component = renderer.create( <ProductPreview product={ product } /> );
+		const component = TestRenderer.create( <ProductPreview product={ product } /> );
 		expect( component.toJSON() ).toMatchSnapshot();
 	} );
 } );
