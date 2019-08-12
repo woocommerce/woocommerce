@@ -155,20 +155,20 @@ class WC_Shipping {
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
-			$debug_mode             = 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' );
-			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
-			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
-			
-			// translators: %s: shipping zone name
-			$matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
+            $debug_mode             = 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' );
+            $shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
+            $this->shipping_methods = $shipping_zone->get_shipping_methods( true );
+            
+            // translators: %s: shipping zone name.
+            $matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
 
-			// Debug output.
-			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
-				wc_add_notice( $matched_zone_notice );
-			}
-		} else {
-			$this->shipping_methods = array();
-		}
+            // Debug output.
+            if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
+                wc_add_notice( $matched_zone_notice );
+            }
+        } else {
+            $this->shipping_methods = array();
+        }
 
 		// For the settings in the backend, and for non-shipping zone methods, we still need to load any registered classes here.
 		foreach ( $this->get_shipping_method_class_names() as $method_id => $method_class ) {
