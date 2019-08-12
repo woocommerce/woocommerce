@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 4.9
 Tested up to: 5.2
 Requires PHP: 5.6
-Stable tag: 3.6.5
+Stable tag: 3.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.7.0 - 2019-xx-xx =
+= 3.7.0 - 2019-08-12 =
 * Enhancement - Added table ENGINE to system status report for debugging purposes. #23101
 * Enhancement - Format empty cart message as information notice. #23152
 * Enhancement - Add taxonomy-specific classes to active filters widget. #23122
