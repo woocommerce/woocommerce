@@ -33,6 +33,23 @@ class HandpickedProducts extends AbstractProductGrid {
 	}
 
 	/**
+	 * Set visibility query args. Handpicked products will show hidden products if chosen.
+	 *
+	 * @param array $query_args Query args.
+	 */
+	protected function set_visibility_query_args( &$query_args ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$product_visibility_terms  = wc_get_product_visibility_term_ids();
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => array( $product_visibility_terms['outofstock'] ),
+				'operator' => 'NOT IN',
+			);
+		}
+	}
+
+	/**
 	 * Get block attributes.
 	 *
 	 * @return array
