@@ -37,10 +37,8 @@ function wc_admin_install() {
 	define( 'WC_REMOVE_ALL_DATA', true );
 
 	// Initialize the WC API extensions.
-	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-install.php';
-
-	WC_Admin_Install::create_tables();
-	WC_Admin_Install::create_events();
+	\Automattic\WooCommerce\Admin\WC_Admin_Install::create_tables();
+	\Automattic\WooCommerce\Admin\WC_Admin_Install::create_events();
 
 	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
@@ -93,6 +91,7 @@ function _manually_load_plugin() {
 	update_option( 'woocommerce_calc_taxes', 'yes' );
 
 	require_once wc_dir() . '/woocommerce.php';
+	require dirname( __DIR__ ) . '/vendor/autoload.php';
 
 	wc_admin_install();
 

@@ -5,6 +5,8 @@
  * @package WooCommerce Admin/Classes
  */
 
+namespace Automattic\WooCommerce\Admin;
+
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
