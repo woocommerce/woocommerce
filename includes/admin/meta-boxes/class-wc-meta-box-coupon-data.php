@@ -63,7 +63,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				foreach ( $coupon_data_tabs as $key => $tab ) :
 					?>
-					<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( implode( ' ', (array) $tab['class'] )); ?>">
+					<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( implode( ' ', (array) $tab['class'] ) ); ?>">
 						<a href="#<?php echo esc_html( $tab['target'] ); ?>">
 							<span><?php echo esc_html( $tab['label'] ); ?></span>
 						</a>
@@ -354,9 +354,7 @@ class WC_Meta_Box_Coupon_Data {
 	 */
 	public static function save( $post_id, $post ) {
 		// Not allowed, return regular value without updating meta.
-		if ( ! isset( $_POST['woocommerce_meta_nonce'], $_POST['rating'] )
-		     || ! wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ),
-				'woocommerce_save_data' ) ) { // WPCS: input var ok, sanitization ok.
+		if ( ! wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ), 'woocommerce_save_data' ) ) { // WPCS: input var ok, sanitization ok.
 
 			// Check for dupe coupons.
 			$coupon_code  = wc_format_coupon_code( $post->post_title );
@@ -374,25 +372,25 @@ class WC_Meta_Box_Coupon_Data {
 			$coupon->set_props(
 				array(
 					'code'                        => $post->post_title,
-					'discount_type'               => wc_clean( $_POST['discount_type'] ),
-					'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),
-					'date_expires'                => wc_clean( $_POST['expiry_date'] ),
+					'discount_type'               => wc_clean( wp_unslash( $_POST['discount_type'] ) ),
+					'amount'                      => wc_format_decimal( wp_unslash( $_POST['coupon_amount'] ) ),
+					'date_expires'                => wc_clean( wp_unslash( $_POST['expiry_date'] ) ),
 					'individual_use'              => isset( $_POST['individual_use'] ),
 					'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval',
 						(array) $_POST['product_ids'] ) )
 						: array(),
 					'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval',
 						(array) $_POST['exclude_product_ids'] ) ) : array(),
-					'usage_limit'                 => absint( $_POST['usage_limit'] ),
-					'usage_limit_per_user'        => absint( $_POST['usage_limit_per_user'] ),
-					'limit_usage_to_x_items'      => absint( $_POST['limit_usage_to_x_items'] ),
+					'usage_limit'                 => absint( wp_unslash( $_POST['usage_limit'] ) ),
+					'usage_limit_per_user'        => absint( wp_unslash( $_POST['usage_limit_per_user'] ) ),
+					'limit_usage_to_x_items'      => absint( wp_unslash( $_POST['limit_usage_to_x_items'] ) ),
 					'free_shipping'               => isset( $_POST['free_shipping'] ),
 					'product_categories'          => array_filter( array_map( 'intval', $product_categories ) ),
 					'excluded_product_categories' => array_filter( array_map( 'intval', $exclude_product_categories ) ),
 					'exclude_sale_items'          => isset( $_POST['exclude_sale_items'] ),
-					'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
-					'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
-					'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) )
+					'minimum_amount'              => wc_format_decimal( wp_unslash( $_POST['minimum_amount'] ) ),
+					'maximum_amount'              => wc_format_decimal( wp_unslash( $_POST['maximum_amount'] ) ),
+					'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( wp_unslash( $_POST['customer_email'] ) ) ) )
 					),
 				)
 			);
