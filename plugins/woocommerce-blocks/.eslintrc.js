@@ -7,6 +7,7 @@ module.exports = {
 	},
 	globals: {
 		wc_product_block_data: true,
+		wcSettings: true,
 	},
 	plugins: [
 		'jest',
