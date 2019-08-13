@@ -274,6 +274,7 @@ export function getReportChartData( options ) {
 		let isError = false;
 		const pagedData = [];
 		const totalPages = Math.ceil( stats.totalResults / MAX_PER_PAGE );
+		let pagesFetched = 1;
 
 		for ( let i = 2; i <= totalPages; i++ ) {
 			const nextQuery = { ...requestQuery, page: i };
@@ -288,7 +289,9 @@ export function getReportChartData( options ) {
 			}
 
 			pagedData.push( _data );
-			if ( i === totalPages ) {
+			pagesFetched++;
+
+			if ( pagesFetched === totalPages ) {
 				isFetching = false;
 				break;
 			}
