@@ -119,7 +119,7 @@ class ProductsBlock extends Component {
 				className="wc-block-products-grid wc-block-handpicked-products"
 			>
 				{ __(
-					'Display a selection of hand-picked products in a grid',
+					'Display a selection of hand-picked products in a grid.',
 					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-handpicked-products__selection">

@@ -174,7 +174,7 @@ class ProductsByTagBlock extends Component {
 				className="wc-block-products-grid wc-block-product-tag"
 			>
 				{ __(
-					'Display a grid of products from your selected tags',
+					'Display a grid of products from your selected tags.',
 					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-product-tag__selection">
