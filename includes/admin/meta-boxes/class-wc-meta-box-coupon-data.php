@@ -372,22 +372,21 @@ class WC_Meta_Box_Coupon_Data {
 				array(
 					'code'                        => $post->post_title,
 					'discount_type'               => isset( $_POST['discount_type'] ) ? wc_clean( wp_unslash( $_POST['discount_type'] ) ) : null,
-					'amount'                      => isset( $_POST['coupon_amount'] ) ? wc_format_decimal( wp_unslash( $_POST['coupon_amount'] ) ) : null, 
-					'date_expires'                => isset( $_POST['expiry_date'] ) ? wc_clean( wp_unslash( $_POST['expiry_date'] ) ) : null, 
+					'amount'                      => isset( $_POST['coupon_amount'] ) ? wc_format_decimal( wp_unslash( $_POST['coupon_amount'] ) ) : null,
+					'date_expires'                => isset( $_POST['expiry_date'] ) ? wc_clean( wp_unslash( $_POST['expiry_date'] ) ) : null,
 					'individual_use'              => isset( $_POST['individual_use'] ),
 					'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval', wp_unslash( (array) $_POST['product_ids'] ) ) ) : array(), // WPCS: input var ok.
 					'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval', wp_unslash( (array) $_POST['exclude_product_ids'] ) ) ) : array(), // WPCS: input var ok.
-					'usage_limit'                 => isset( $_POST['usage_limit'] ) ? absint( wp_unslash( $_POST['usage_limit'] ) ) : null, 
-					'usage_limit_per_user'        => isset( $_POST['usage_limit_per_user'] ) ? absint( wp_unslash( $_POST['usage_limit_per_user'] ) ) : null, 
-					'limit_usage_to_x_items'      => isset( $_POST['limit_usage_to_x_items'] ) ? absint( wp_unslash( $_POST['limit_usage_to_x_items'] ) ) : null, 
+					'usage_limit'                 => isset( $_POST['usage_limit'] ) ? absint( wp_unslash( $_POST['usage_limit'] ) ) : null,
+					'usage_limit_per_user'        => isset( $_POST['usage_limit_per_user'] ) ? absint( wp_unslash( $_POST['usage_limit_per_user'] ) ) : null,
+					'limit_usage_to_x_items'      => isset( $_POST['limit_usage_to_x_items'] ) ? absint( wp_unslash( $_POST['limit_usage_to_x_items'] ) ) : null,
 					'free_shipping'               => isset( $_POST['free_shipping'] ),
 					'product_categories'          => array_filter( array_map( 'intval', $product_categories ) ),
 					'excluded_product_categories' => array_filter( array_map( 'intval', $exclude_product_categories ) ),
 					'exclude_sale_items'          => isset( $_POST['exclude_sale_items'] ),
-					'minimum_amount'              => isset( $_POST['minimum_amount'] ) ? wc_format_decimal( wp_unslash( $_POST['minimum_amount'] ) ) : null, 
-					'maximum_amount'              => isset( $_POST['maximum_amount'] ) ? wc_format_decimal( wp_unslash( $_POST['maximum_amount'] ) ) : null, 
-					'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( wp_unslash( $_POST['customer_email'] ) ) ) )
-					),
+					'minimum_amount'              => isset( $_POST['minimum_amount'] ) ? wc_format_decimal( wp_unslash( $_POST['minimum_amount'] ) ) : null,
+					'maximum_amount'              => isset( $_POST['maximum_amount'] ) ? wc_format_decimal( wp_unslash( $_POST['maximum_amount'] ) ) : null,
+					'email_restrictions' => isset( $_POST['customer_email'] ) ? array_filter( array_map( 'trim', explode( ',', wc_clean( wp_unslash( $_POST['customer_email'] ) ) ) ) ) : array(),
 				)
 			);
 			$coupon->save();
