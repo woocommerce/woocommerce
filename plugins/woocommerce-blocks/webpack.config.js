@@ -33,6 +33,11 @@ const baseConfig = {
 		hash: true,
 		timings: true,
 	},
+	resolve: {
+		alias: {
+			'@woocommerce/settings': path.resolve( __dirname, 'assets/js/settings/index.js' ),
+		},
+	},
 };
 
 /**
