@@ -4,14 +4,13 @@
  *
  * Display the coupon data meta box.
  *
- * @author      WooThemes
- * @category    Admin
+ * @class    	WC_Meta_Box_Coupon_Data
  * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -64,7 +63,7 @@ class WC_Meta_Box_Coupon_Data {
 				foreach ( $coupon_data_tabs as $key => $tab ) :
 					?>
 					<li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ', (array) $tab['class'] ); ?>">
-						<a href="#<?php echo $tab['target']; ?>">
+						<a href="#<?php echo esc_html( $tab['target'] ); ?>">
 							<span><?php echo esc_html( $tab['label'] ); ?></span>
 						</a>
 					</li>
@@ -117,7 +116,7 @@ class WC_Meta_Box_Coupon_Data {
 						'label'             => __( 'Coupon expiry date', 'woocommerce' ),
 						'placeholder'       => 'YYYY-MM-DD',
 						'description'       => __( 'The coupon will expire at 00:00:00 of this date.', 'woocommerce' ),
-						'desc_tip'    		=> true,
+						'desc_tip'          => true,
 						'class'             => 'date-picker',
 						'custom_attributes' => array(
 							'pattern' => apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ),
@@ -279,7 +278,7 @@ class WC_Meta_Box_Coupon_Data {
 				?>
 			</div>
 			<?php do_action( 'woocommerce_coupon_options_usage_restriction', $coupon->get_id(), $coupon ); ?>
-			</div>
+		</div>
 			<div id="usage_limit_coupon_data" class="panel woocommerce_options_panel">
 				<div class="options_group">
 					<?php
@@ -342,7 +341,6 @@ class WC_Meta_Box_Coupon_Data {
 			</div>
 			<?php do_action( 'woocommerce_coupon_data_panels', $coupon->get_id(), $coupon ); ?>
 			<div class="clear"></div>
-		</div>
 		<?php
 	}
 
