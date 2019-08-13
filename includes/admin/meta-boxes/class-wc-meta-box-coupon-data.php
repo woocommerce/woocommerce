@@ -354,19 +354,18 @@ class WC_Meta_Box_Coupon_Data {
 	 */
 	public static function save( $post_id, $post ) {
 		// Not allowed, return regular value without updating meta.
-		if ( ! wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ), 'woocommerce_save_data' ) ) { // WPCS: input var ok, sanitization ok.
+		if ( wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ), 'woocommerce_save_data' ) ) { // WPCS: input var ok, sanitization ok.
 
 			// Check for dupe coupons.
 			$coupon_code  = wc_format_coupon_code( $post->post_title );
 			$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );
 
 			if ( $id_from_code ) {
-				WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.',
-					'woocommerce' ) );
+				WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' ) );
 			}
 
-			$product_categories         = isset( $_POST['product_categories'] ) ? (array) $_POST['product_categories'] : array();
-			$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? (array) $_POST['exclude_product_categories'] : array();
+			$product_categories         = isset( $_POST['product_categories'] ) ? wp_unslash( (array) $_POST['product_categories'] ) : array();
+			$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? wp_unslash( (array) $_POST['exclude_product_categories'] ) : array();
 
 			$coupon = new WC_Coupon( $post_id );
 			$coupon->set_props(
@@ -376,11 +375,8 @@ class WC_Meta_Box_Coupon_Data {
 					'amount'                      => wc_format_decimal( wp_unslash( $_POST['coupon_amount'] ) ),
 					'date_expires'                => wc_clean( wp_unslash( $_POST['expiry_date'] ) ),
 					'individual_use'              => isset( $_POST['individual_use'] ),
-					'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval',
-						(array) $_POST['product_ids'] ) )
-						: array(),
-					'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval',
-						(array) $_POST['exclude_product_ids'] ) ) : array(),
+					'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval', wp_unslash( (array) $_POST['product_ids'] ) ) ) : array(),
+					'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval', wp_unslash( (array) $_POST['exclude_product_ids'] ) ) ) : array(),
 					'usage_limit'                 => absint( wp_unslash( $_POST['usage_limit'] ) ),
 					'usage_limit_per_user'        => absint( wp_unslash( $_POST['usage_limit_per_user'] ) ),
 					'limit_usage_to_x_items'      => absint( wp_unslash( $_POST['limit_usage_to_x_items'] ) ),
