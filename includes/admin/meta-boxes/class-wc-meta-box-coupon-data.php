@@ -4,7 +4,7 @@
  *
  * Display the coupon data meta box.
  *
- * @class    	WC_Meta_Box_Coupon_Data
+ * @class       WC_Meta_Box_Coupon_Data
  * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
@@ -21,7 +21,7 @@ class WC_Meta_Box_Coupon_Data {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post The post object.
 	 */
 	public static function output( $post ) {
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -41,7 +41,8 @@ class WC_Meta_Box_Coupon_Data {
 			<ul class="coupon_data_tabs wc-tabs" style="display:none;">
 				<?php
 				$coupon_data_tabs = apply_filters(
-					'woocommerce_coupon_data_tabs', array(
+					'woocommerce_coupon_data_tabs',
+					array(
 						'general'           => array(
 							'label'  => __( 'General', 'woocommerce' ),
 							'target' => 'general_coupon_data',
@@ -62,7 +63,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				foreach ( $coupon_data_tabs as $key => $tab ) :
 					?>
-					<li class="<?php echo $key; ?>_options <?php echo $key; ?>_tab <?php echo implode( ' ', (array) $tab['class'] ); ?>">
+					<li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( implode( ' ', (array) $tab['class'] )); ?>">
 						<a href="#<?php echo esc_html( $tab['target'] ); ?>">
 							<span><?php echo esc_html( $tab['label'] ); ?></span>
 						</a>
@@ -101,6 +102,7 @@ class WC_Meta_Box_Coupon_Data {
 						array(
 							'id'          => 'free_shipping',
 							'label'       => __( 'Allow free shipping', 'woocommerce' ),
+							/* translators: %s: Link to Free Shipping doc */
 							'description' => sprintf( __( 'Check this box if the coupon grants free shipping. A <a href="%s" target="_blank">free shipping method</a> must be enabled in your shipping zone and be set to require "a valid free shipping coupon" (see the "Free Shipping Requires" setting).', 'woocommerce' ), 'https://docs.woocommerce.com/document/free-shipping/' ),
 							'value'       => wc_bool_to_string( $coupon->get_free_shipping( 'edit' ) ),
 						)
@@ -184,7 +186,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Product ids.
 				?>
 				<p class="form-field">
-					<label><?php _e( 'Products', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Products', 'woocommerce' ); ?></label>
 					<select class="wc-product-search" multiple="multiple" style="width: 50%;" name="product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations">
 						<?php
 						$product_ids = $coupon->get_product_ids( 'edit' );
@@ -202,7 +204,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				<?php // Exclude Product ids. ?>
 				<p class="form-field">
-					<label><?php _e( 'Exclude products', 'woocommerce' ); ?></label>
+					<label><?php esc_html_e( 'Exclude products', 'woocommerce' ); ?></label>
 					<select class="wc-product-search" multiple="multiple" style="width: 50%;" name="exclude_product_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations">
 						<?php
 						$product_ids = $coupon->get_excluded_product_ids( 'edit' );
@@ -224,7 +226,7 @@ class WC_Meta_Box_Coupon_Data {
 				// Categories.
 				?>
 				<p class="form-field">
-					<label for="product_categories"><?php _e( 'Product categories', 'woocommerce' ); ?></label>
+					<label for="product_categories"><?php esc_html_e( 'Product categories', 'woocommerce' ); ?></label>
 					<select id="product_categories" name="product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'Any category', 'woocommerce' ); ?>">
 						<?php
 						$category_ids = $coupon->get_product_categories( 'edit' );
@@ -241,7 +243,7 @@ class WC_Meta_Box_Coupon_Data {
 
 				<?php // Exclude Categories. ?>
 				<p class="form-field">
-					<label for="exclude_product_categories"><?php _e( 'Exclude categories', 'woocommerce' ); ?></label>
+					<label for="exclude_product_categories"><?php esc_html_e( 'Exclude categories', 'woocommerce' ); ?></label>
 					<select id="exclude_product_categories" name="exclude_product_categories[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'No categories', 'woocommerce' ); ?>">
 						<?php
 						$category_ids = $coupon->get_excluded_product_categories( 'edit' );
@@ -347,44 +349,55 @@ class WC_Meta_Box_Coupon_Data {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int     $post_id
-	 * @param WP_Post $post
+	 * @param int     $post_id The post ID.
+	 * @param WP_Post $post The post object.
 	 */
 	public static function save( $post_id, $post ) {
-		// Check for dupe coupons.
-		$coupon_code  = wc_format_coupon_code( $post->post_title );
-		$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );
+		// Not allowed, return regular value without updating meta.
+		if ( ! isset( $_POST['woocommerce_meta_nonce'], $_POST['rating'] )
+		     || ! wp_verify_nonce( wp_unslash( $_POST['woocommerce_meta_nonce'] ),
+				'woocommerce_save_data' ) ) { // WPCS: input var ok, sanitization ok.
 
-		if ( $id_from_code ) {
-			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.', 'woocommerce' ) );
+			// Check for dupe coupons.
+			$coupon_code  = wc_format_coupon_code( $post->post_title );
+			$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );
+
+			if ( $id_from_code ) {
+				WC_Admin_Meta_Boxes::add_error( __( 'Coupon code already exists - customers will use the latest coupon with this code.',
+					'woocommerce' ) );
+			}
+
+			$product_categories         = isset( $_POST['product_categories'] ) ? (array) $_POST['product_categories'] : array();
+			$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? (array) $_POST['exclude_product_categories'] : array();
+
+			$coupon = new WC_Coupon( $post_id );
+			$coupon->set_props(
+				array(
+					'code'                        => $post->post_title,
+					'discount_type'               => wc_clean( $_POST['discount_type'] ),
+					'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),
+					'date_expires'                => wc_clean( $_POST['expiry_date'] ),
+					'individual_use'              => isset( $_POST['individual_use'] ),
+					'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval',
+						(array) $_POST['product_ids'] ) )
+						: array(),
+					'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval',
+						(array) $_POST['exclude_product_ids'] ) ) : array(),
+					'usage_limit'                 => absint( $_POST['usage_limit'] ),
+					'usage_limit_per_user'        => absint( $_POST['usage_limit_per_user'] ),
+					'limit_usage_to_x_items'      => absint( $_POST['limit_usage_to_x_items'] ),
+					'free_shipping'               => isset( $_POST['free_shipping'] ),
+					'product_categories'          => array_filter( array_map( 'intval', $product_categories ) ),
+					'excluded_product_categories' => array_filter( array_map( 'intval', $exclude_product_categories ) ),
+					'exclude_sale_items'          => isset( $_POST['exclude_sale_items'] ),
+					'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
+					'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
+					'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) )
+					),
+				)
+			);
+			$coupon->save();
+			do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 		}
-
-		$product_categories         = isset( $_POST['product_categories'] ) ? (array) $_POST['product_categories'] : array();
-		$exclude_product_categories = isset( $_POST['exclude_product_categories'] ) ? (array) $_POST['exclude_product_categories'] : array();
-
-		$coupon = new WC_Coupon( $post_id );
-		$coupon->set_props(
-			array(
-				'code'                        => $post->post_title,
-				'discount_type'               => wc_clean( $_POST['discount_type'] ),
-				'amount'                      => wc_format_decimal( $_POST['coupon_amount'] ),
-				'date_expires'                => wc_clean( $_POST['expiry_date'] ),
-				'individual_use'              => isset( $_POST['individual_use'] ),
-				'product_ids'                 => isset( $_POST['product_ids'] ) ? array_filter( array_map( 'intval', (array) $_POST['product_ids'] ) ) : array(),
-				'excluded_product_ids'        => isset( $_POST['exclude_product_ids'] ) ? array_filter( array_map( 'intval', (array) $_POST['exclude_product_ids'] ) ) : array(),
-				'usage_limit'                 => absint( $_POST['usage_limit'] ),
-				'usage_limit_per_user'        => absint( $_POST['usage_limit_per_user'] ),
-				'limit_usage_to_x_items'      => absint( $_POST['limit_usage_to_x_items'] ),
-				'free_shipping'               => isset( $_POST['free_shipping'] ),
-				'product_categories'          => array_filter( array_map( 'intval', $product_categories ) ),
-				'excluded_product_categories' => array_filter( array_map( 'intval', $exclude_product_categories ) ),
-				'exclude_sale_items'          => isset( $_POST['exclude_sale_items'] ),
-				'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
-				'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
-				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
-			)
-		);
-		$coupon->save();
-		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}
 }
