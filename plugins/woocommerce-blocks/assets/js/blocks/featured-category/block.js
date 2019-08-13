@@ -219,7 +219,7 @@ class FeaturedCategory extends Component {
 				className="wc-block-featured-category"
 			>
 				{ __(
-					'Visually highlight a product category and encourage prompt action',
+					'Visually highlight a product category and encourage prompt action.',
 					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-featured-category__selection">
