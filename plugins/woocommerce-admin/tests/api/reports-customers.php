@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+
 /**
  * Reports Customers REST API Test Class
  *
@@ -103,7 +105,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_registered_customer_with_bad_user_id() {
-		$result = WC_Admin_Reports_Customers_Data_Store::update_registered_customer( 2 );
+		$result = CustomersDataStore::update_registered_customer( 2 );
 		$this->assertFalse( $result );
 	}
 
@@ -424,7 +426,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	 * Test that bad order params don't cause PHP errors when retrieving customers.
 	 */
 	public function test_customer_retrieval_from_order_bad_order() {
-		$this->assertFalse( WC_Admin_Reports_Customers_Data_Store::get_existing_customer_id_from_order( false ) );
-		$this->assertFalse( WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( false ) );
+		$this->assertFalse( CustomersDataStore::get_existing_customer_id_from_order( false ) );
+		$this->assertFalse( CustomersDataStore::get_or_create_customer_from_order( false ) );
 	}
 }

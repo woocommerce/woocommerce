@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\API
  */
 
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+
 /**
  * Class WC_Tests_API_Admin_Notes
  */

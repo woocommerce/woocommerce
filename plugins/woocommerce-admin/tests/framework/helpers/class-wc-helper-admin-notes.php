@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Framework\Helpers
  */
 
+use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+
 /**
  * Class WC_Helper_Admin_Notes.
  *

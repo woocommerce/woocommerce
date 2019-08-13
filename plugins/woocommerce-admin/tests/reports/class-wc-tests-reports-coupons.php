@@ -5,6 +5,11 @@
  * @package WooCommerce\Tests\Coupons
  */
 
+use \Automattic\WooCommerce\Admin\ReportCSVExporter;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 /**
  * Class WC_Tests_Reports_Coupons
  */
@@ -56,7 +61,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Coupons_Data_Store();
+		$data_store = new CouponsDataStore();
 		$start_time = date( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d 23:59:59', $order->get_date_created()->getOffsetTimestamp() );
 		$args       = array(
@@ -92,7 +97,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Coupons_Query( $args );
+		$query = new CouponsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 
 		// Test order by orders_count DESC.
@@ -182,8 +187,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c1_date_created_gmt = new DateTime( $c1_date_created );
 			$c1_date_created_gmt->setTimezone( $gmt_timezone );
 
-			$c1_date_created     = $c1_date_created->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c1_date_created_gmt = $c1_date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c1_date_created     = $c1_date_created->format( TimeInterval::$iso_datetime_format );
+			$c1_date_created_gmt = $c1_date_created_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$c1_date_expires = $coupon_1->get_date_expires();
@@ -194,8 +199,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c1_date_expires_gmt = new DateTime( $c1_date_expires );
 			$c1_date_expires_gmt->setTimezone( $gmt_timezone );
 
-			$c1_date_expires     = $c1_date_expires->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c1_date_expires_gmt = $c1_date_expires_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c1_date_expires     = $c1_date_expires->format( TimeInterval::$iso_datetime_format );
+			$c1_date_expires_gmt = $c1_date_expires_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$coupon_1_response = array(
@@ -220,8 +225,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c2_date_created_gmt = new DateTime( $c2_date_created );
 			$c2_date_created_gmt->setTimezone( $gmt_timezone );
 
-			$c2_date_created     = $c2_date_created->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c2_date_created_gmt = $c2_date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c2_date_created     = $c2_date_created->format( TimeInterval::$iso_datetime_format );
+			$c2_date_created_gmt = $c2_date_created_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$c2_date_expires = $coupon_2->get_date_expires();
@@ -232,8 +237,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			$c2_date_expires_gmt = new DateTime( $c2_date_expires );
 			$c2_date_expires_gmt->setTimezone( $gmt_timezone );
 
-			$c2_date_expires     = $c2_date_expires->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$c2_date_expires_gmt = $c2_date_expires_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$c2_date_expires     = $c2_date_expires->format( TimeInterval::$iso_datetime_format );
+			$c2_date_expires_gmt = $c2_date_expires_gmt->format( TimeInterval::$iso_datetime_format );
 		}
 
 		$coupon_2_response = array(
@@ -316,7 +321,7 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		do_action( 'rest_api_init' );
 
 		// Run the export and compare values.
-		$export = new WC_Admin_Report_CSV_Exporter( 'coupons', $args );
+		$export = new ReportCSVExporter( 'coupons', $args );
 		$export->generate_file();
 		$actual_csv = $export->get_file();
 

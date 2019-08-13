@@ -6,6 +6,9 @@
  * @since 3.5.0
  */
 
+use Automattic\WooCommerce\Admin\ReportsSync;
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+
 /**
  * Class WC_Tests_API_Init
  */
@@ -16,7 +19,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->queue = new WC_Admin_Test_Action_Queue();
-		WC_Admin_Reports_Sync::set_queue( $this->queue );
+		ReportsSync::set_queue( $this->queue );
 	}
 
 	/**
@@ -24,7 +27,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		WC_Admin_Reports_Sync::set_queue( null );
+		ReportsSync::set_queue( null );
 		$this->queue->actions = array();
 	}
 
@@ -39,7 +42,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 
 		if (
 			0 === strpos( $query, 'REPLACE INTO' ) &&
-			false !== strpos( $query, WC_Admin_Reports_Orders_Stats_Data_Store::TABLE_NAME )
+			false !== strpos( $query, OrdersStatsDataStore::TABLE_NAME )
 		) {
 			remove_filter( 'query', array( $this, 'filter_order_query' ) );
 			return "DESCRIBE $wpdb->posts"; // Execute any random query.
@@ -72,13 +75,13 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 		add_filter( 'query', array( $this, 'filter_order_query' ) );
 
 		// Initiate sync.
-		WC_Admin_Reports_Sync::orders_lookup_import_order( $order->get_id() );
+		ReportsSync::orders_lookup_import_order( $order->get_id() );
 
 		// Verify that a retry job was scheduled.
 		$this->assertCount( 1, $this->queue->actions );
 		$this->assertArraySubset(
 			array(
-				'hook' => WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION,
+				'hook' => ReportsSync::SINGLE_ORDER_IMPORT_ACTION,
 				'args' => array( $order->get_id() ),
 			),
 			$this->queue->actions[0]

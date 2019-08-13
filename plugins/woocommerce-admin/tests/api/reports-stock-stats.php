@@ -94,6 +94,14 @@ class WC_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$backorder_stock->set_stock_status( 'onbackorder' );
 		$backorder_stock->save();
 
+		// Clear caches
+		delete_transient( 'wc_admin_stock_count_lowstock' );
+		delete_transient( 'wc_admin_stock_count_outofstock' );
+		delete_transient( 'wc_admin_stock_count_onbackorder' );
+		delete_transient( 'wc_admin_stock_count_lowstock' );
+		delete_transient( 'wc_admin_stock_count_instock' );
+		delete_transient( 'wc_admin_product_count' );
+
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();

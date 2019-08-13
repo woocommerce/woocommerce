@@ -17,9 +17,9 @@ class WC_Helper_Reports {
 	 */
 	public static function reset_stats_dbs() {
 		global $wpdb;
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Orders_Stats_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Products_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Coupons_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Customers_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
 	}
 }

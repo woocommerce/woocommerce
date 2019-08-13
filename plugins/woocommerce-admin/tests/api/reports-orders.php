@@ -6,6 +6,8 @@
  * @since 3.5.0
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+
 /**
  * Reports Orders REST API Test Class
  *
@@ -69,7 +71,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$expected_customer_id = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( 1 );
+		$expected_customer_id = CustomersDataStore::get_customer_id_by_user_id( 1 );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();

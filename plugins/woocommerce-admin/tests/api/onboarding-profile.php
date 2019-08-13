@@ -5,6 +5,8 @@
  * @package WooCommerce Admin\Tests\API
  */
 
+use \Automattic\WooCommerce\Admin\API\OnboardingProfile;
+
 /**
  * WC Tests API Onboarding Profile
  */
@@ -42,7 +44,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$properties = WC_Admin_REST_Onboarding_Profile_Controller::get_profile_properties();
+		$properties = OnboardingProfile::get_profile_properties();
 		foreach ( $properties as $key => $property ) {
 			$this->assertArrayHasKey( $key, $properties );
 		}

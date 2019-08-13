@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\Loader;
+
 /**
  * Format a number using the decimal and thousands separator settings in WooCommerce.
  *
@@ -16,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @return string
  */
 function wc_admin_number_format( $number ) {
-	$currency_settings = WC_Admin_Loader::get_currency_settings();
+	$currency_settings = Loader::get_currency_settings();
 	return number_format(
 		$number,
 		0,

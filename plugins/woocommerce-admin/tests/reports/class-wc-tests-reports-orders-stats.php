@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\Orders
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 /**
  * Class WC_Tests_Reports_Orders_Stats
  */
@@ -46,7 +50,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -108,7 +112,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
 
 		// Test retrieving the stats through the query class.
-		$query          = new WC_Admin_Reports_Orders_Stats_Query( $args );
+		$query          = new OrdersStatsQuery( $args );
 		$expected_stats = array(
 			'totals'    => array(
 				'net_revenue'             => 68,
@@ -189,7 +193,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -354,7 +358,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -643,7 +647,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Test for the current hour.
 		$current_hour_start = new DateTime();
@@ -653,8 +657,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$current_hour_end->setTimestamp( $report_start_time + HOUR_IN_SECONDS - 1 );
 
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 		);
 
@@ -894,7 +898,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		$current_hour_start = new DateTime();
@@ -912,8 +916,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// 24 orders without coupons, 48 with coupons: 24 with $1 coupon and 24 with $2 coupon.
 		// shipping is $10 per order.
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 		);
 
@@ -988,8 +992,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// * Order status filter
 		// ** Status is, positive filter for 2 statuses, i.e. all orders.
 		$query_args = array(
-			'after'     => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'    => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'     => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'    => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'  => 'hour',
 			'status_is' => array(
 				$order_status_1,
@@ -1001,8 +1005,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Status is, positive filter for 1 status -> half orders.
 		$query_args = array(
-			'after'     => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'    => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'     => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'    => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'  => 'hour',
 			'status_is' => array(
 				$order_status_1,
@@ -1079,8 +1083,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Status is not, negative filter for 1 status -> half orders.
 		$query_args = array(
-			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'status_is_not' => array(
 				$order_status_2,
@@ -1157,8 +1161,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Status is not, negative filter for 2 statuses -> no orders.
 		$query_args = array(
-			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'status_is_not' => array(
 				$order_status_1,
@@ -1217,8 +1221,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Status is + Status is not, positive filter for 2 statuses, negative for 1 -> half of orders.
 		$query_args = array(
-			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'status_is'     => array(
 				$order_status_1,
@@ -1300,8 +1304,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// * Product filter
 		// ** Product includes, positive filter for 2 products, i.e. 2 orders out of 3.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_1->get_id(),
@@ -1377,8 +1381,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Product includes, positive filter for 1 product, 1/3 of orders
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_3->get_id(),
@@ -1452,8 +1456,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Product excludes, negative filter for 1 product, 2/3 of orders.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_excludes' => array(
 				$product_1->get_id(),
@@ -1528,8 +1532,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Product excludes, negative filter for 2 products, 1/3 of orders
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_excludes' => array(
 				$product_1->get_id(),
@@ -1603,8 +1607,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Product includes + product excludes, positive filter for 2 products, negative for 1 -> 1/3 of orders, only orders with product 2 and product 2 + product 4
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_1->get_id(),
@@ -1682,8 +1686,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// * Coupon filters
 		// ** Coupon includes, positive filter for 2 coupons, i.e. 2/3 of orders.
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_includes' => array(
 				$coupon_1->get_id(),
@@ -1761,8 +1765,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Coupon includes, positive filter for 1 coupon, 1/3 of orders
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_includes' => array(
 				$coupon_1->get_id(),
@@ -1839,8 +1843,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Coupon excludes, negative filter for 1 coupon, 2/3 of orders
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_excludes' => array(
 				$coupon_1->get_id(),
@@ -1917,8 +1921,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Coupon excludes, negative filter for 2 coupons, 1/3 of orders
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_excludes' => array(
 				$coupon_1->get_id(),
@@ -1996,8 +2000,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Coupon includes + coupon excludes, positive filter for 2 coupon, negative for 1, 1/3 orders
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_includes' => array(
 				$coupon_1->get_id(),
@@ -2079,8 +2083,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// * Customer filters
 		// ** Customer new
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'customer' => 'new',
 		);
@@ -2143,8 +2147,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ** Customer returning
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ), // I don't think this makes sense.... date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ), // I don't think this makes sense.... date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'customer' => 'returning',
 		);
@@ -2190,8 +2194,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'intervals' => array(
 				array(
 					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-					'date_start_gmt' => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_start'     => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+					'date_start_gmt' => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
 					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
@@ -2222,8 +2226,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Combinations: match all
 		// status_is + product_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2299,8 +2303,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is + coupon_includes.
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'status_is'       => array(
 				$order_status_1,
@@ -2380,8 +2384,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// product_includes + coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_1->get_id(),
@@ -2457,8 +2461,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is + product_includes + coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2537,8 +2541,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is + status_is_not + product_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2621,8 +2625,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is + status_is_not + product_includes + product_excludes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2706,8 +2710,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is + status_is_not + product_includes + product_excludes + coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2793,8 +2797,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is + status_is_not + product_includes + product_excludes + coupon_includes + coupon_excludes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2885,8 +2889,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Combinations: match any
 		// status_is + status_is_not, all orders.
 		$query_args = array(
-			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'match'         => 'any',
 			'status_is'     => array(
@@ -2967,8 +2971,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR product_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3049,8 +3053,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR coupon_includes.
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'match'           => 'any',
 			'status_is'       => array(
@@ -3131,8 +3135,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR coupon_excludes.
 		$query_args = array(
-			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'match'           => 'any',
 			'status_is'       => array(
@@ -3213,8 +3217,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// product_includes OR coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'product_includes' => array(
@@ -3295,8 +3299,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR product_includes OR coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3380,8 +3384,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR status_is_not OR product_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3468,8 +3472,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR status_is_not OR product_includes OR product_excludes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3556,8 +3560,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR status_is_not OR product_includes OR product_excludes OR coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3647,8 +3651,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// status_is OR status_is_not OR product_includes OR product_excludes OR coupon_includes OR coupon_excludes.
 		$query_args = array(
-			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3744,10 +3748,10 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Test if lookup tables are cleaned after delete an order.
 	 *
-	 * @covers WC_Admin_Reports_Orders_Stats_Data_Store::delete_order
-	 * @covers WC_Admin_Reports_Products_Data_Store::sync_on_order_delete
-	 * @covers WC_Admin_Reports_Coupons_Data_Store::sync_on_order_delete
-	 * @covers WC_Admin_Reports_Taxes_Data_Store::sync_on_order_delete
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::delete_order
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_on_order_delete
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_on_order_delete
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore::sync_on_order_delete
 	 */
 	public function test_order_deletion() {
 		global $wpdb;
@@ -3938,7 +3942,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		$now = new DateTime();
@@ -3967,8 +3971,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$i3_end->setTimestamp( $i3_end_timestamp );
 
 		$query_args = array(
-			'after'     => $two_hours_back->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'    => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'     => $two_hours_back->format( TimeInterval::$sql_datetime_format ),
+			'before'    => $now->format( TimeInterval::$sql_datetime_format ),
 			'interval'  => 'hour',
 			'segmentby' => 'product',
 		);
@@ -4502,7 +4506,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		$current_hour_start = new DateTime();
@@ -4518,8 +4522,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Test for current hour--only 1 hour visible.
 		// DESC.
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -4584,8 +4588,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ASC -- only 1 interval, so should be the same.
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'asc',
@@ -4608,8 +4612,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$minus_5_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
 
 		$query_args = array(
-			'after'    => $minus_5_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_5_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -4724,8 +4728,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ASC -- reverse the intervals array, but numbers stay the same.
 		$query_args                  = array(
-			'after'    => $minus_5_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_5_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'asc',
@@ -4751,8 +4755,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$minus_9_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
 
 		$query_args = array(
-			'after'    => $minus_9_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_9_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -4864,8 +4868,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ASC -- same values, just reverse order of intervals.
 		$query_args = array(
-			'after'    => $minus_9_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_9_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'asc',
@@ -4900,8 +4904,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 1.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -5015,8 +5019,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 2.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'desc',
@@ -5069,8 +5073,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 1.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'asc',
@@ -5106,8 +5110,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 2.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'date',
 			'order'    => 'asc',
@@ -5275,7 +5279,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		global $wpdb;
 		$res = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}wc_order_stats" );
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// Tests for before & after set to current hour.
 		// (this sets minutes for current hour to 0, seconds are left as they arem e.g. 15:23:43 becomes 15:00:43).
@@ -5293,8 +5297,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Test 1: only one hour visible, so only 1 interval in the response, no real ordering.
 		// DESC.
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'desc',
@@ -5360,8 +5364,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// ASC -- only 1 interval, so should be the same.
 		$query_args = array(
-			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'asc',
@@ -5383,8 +5387,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$minus_5_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
 
 		$query_args = array(
-			'after'    => $minus_5_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_5_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'desc',
@@ -5531,8 +5535,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		array_push( $expected_stats['intervals'], $to_be_last );
 
 		$query_args = array(
-			'after'    => $minus_5_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_5_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'asc',
@@ -5552,8 +5556,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$minus_9_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
 
 		$query_args = array(
-			'after'    => $minus_9_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_9_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'desc',
@@ -5697,8 +5701,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		array_push( $expected_stats['intervals'], $to_be_last );
 
 		$query_args = array(
-			'after'    => $minus_9_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_9_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'asc',
@@ -5719,8 +5723,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 1.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'desc',
@@ -5849,8 +5853,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 2.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'desc',
@@ -5903,8 +5907,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 1.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'asc',
@@ -5941,8 +5945,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		// Page 2.
 		$query_args = array(
-			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $minus_10_hours->format( TimeInterval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'orderby'  => 'orders_count',
 			'order'    => 'asc',
@@ -6002,7 +6006,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// All empty in the beginning.
 		$query_args  = array(
@@ -6113,7 +6117,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+		$data_store = new OrdersStatsDataStore();
 
 		// All empty in the beginning.
 		$query_args  = array(

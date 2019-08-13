@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\API
  */
 
+use Automattic\WooCommerce\Admin\ReportsSync;
+
 /**
  * Reports Import REST API Test Class
  *
@@ -291,7 +293,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_import_status() {
 		// Delete any pending actions that weren't fully run.
-		WC_Admin_Reports_Sync::clear_queued_actions();
+		ReportsSync::clear_queued_actions();
 
 		wp_set_current_user( $this->user );
 

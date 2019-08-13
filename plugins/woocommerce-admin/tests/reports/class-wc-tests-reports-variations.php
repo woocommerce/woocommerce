@@ -6,6 +6,9 @@
  * @todo Finish up unit testing to verify bug-free order reports.
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore as VariationsDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Variations\Query as VariationsQuery;
+ 
 /**
  * Reports order stats tests class.
  *
@@ -41,7 +44,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Variations_Data_Store();
+		$data_store = new VariationsDataStore();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
 		$args       = array(
@@ -69,7 +72,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $data );
 
 		// Test retrieving the stats through the query class.
-		$query = new WC_Admin_Reports_Variations_Query( $args );
+		$query = new VariationsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -110,7 +113,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$data_store = new WC_Admin_Reports_Variations_Data_Store();
+		$data_store = new VariationsDataStore();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
 		$args       = array(

@@ -5,6 +5,8 @@
  * @package WooCommerce Admin\Tests\API
  */
 
+use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+
 /**
  * WC Tests API Orders
  */
@@ -80,6 +82,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		clean_post_cache( $order->get_id() );
 
 		// Trigger an order sync on the refund which should handle the missing parent order.
-		$this->assertTrue( WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $refund->get_id() ) );
+		$this->assertTrue( OrdersStatsDataStore::sync_order( $refund->get_id() ) );
 	}
 }
