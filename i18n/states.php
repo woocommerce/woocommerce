@@ -1278,7 +1278,7 @@ return array(
 	),
 	'LK' => array(),
 	'SE' => array(),
-	'UG' => array(
+	'UG' => array( // Uganda districts. Ref: https://en.wikipedia.org/wiki/ISO_3166-2:UG.
 		'UG314' => __( 'Abim', 'woocommerce' ),
 		'UG301' => __( 'Adjumani', 'woocommerce' ),
 		'UG322' => __( 'Agago', 'woocommerce' ),
