@@ -151,6 +151,10 @@ class Segmenter {
 
 		foreach ( $result1 as $segment_data ) {
 			$segment_id = $segment_data[ $segment_dimension ];
+			if ( ! isset( $segment_labels[ $segment_id ] ) ) {
+				continue;
+			}
+
 			unset( $segment_data[ $segment_dimension ] );
 			$result_segments[ $segment_id ] = array(
 				'segment_label' => $segment_labels[ $segment_id ],
@@ -161,6 +165,10 @@ class Segmenter {
 
 		foreach ( $result2 as $segment_data ) {
 			$segment_id = $segment_data[ $segment_dimension ];
+			if ( ! isset( $segment_labels[ $segment_id ] ) ) {
+				continue;
+			}
+
 			unset( $segment_data[ $segment_dimension ] );
 			if ( ! isset( $result_segments[ $segment_id ] ) ) {
 				$result_segments[ $segment_id ] = array(
@@ -216,14 +224,19 @@ class Segmenter {
 		$segment_labels  = $this->get_segment_labels();
 
 		foreach ( $result1 as $segment_data ) {
+			$segment_id = $segment_data[ $segment_dimension ];
+			if ( ! isset( $segment_labels[ $segment_id ] ) ) {
+				continue;
+			}
+
 			$time_interval = $segment_data['time_interval'];
 			if ( ! isset( $result_segments[ $time_interval ] ) ) {
 				$result_segments[ $time_interval ]             = array();
 				$result_segments[ $time_interval ]['segments'] = array();
 			}
+
 			unset( $segment_data['time_interval'] );
 			unset( $segment_data['datetime_anchor'] );
-			$segment_id = $segment_data[ $segment_dimension ];
 			unset( $segment_data[ $segment_dimension ] );
 			$segment_datum = array(
 				'segment_label' => $segment_labels[ $segment_id ],
@@ -234,14 +247,19 @@ class Segmenter {
 		}
 
 		foreach ( $result2 as $segment_data ) {
+			$segment_id = $segment_data[ $segment_dimension ];
+			if ( ! isset( $segment_labels[ $segment_id ] ) ) {
+				continue;
+			}
+
 			$time_interval = $segment_data['time_interval'];
 			if ( ! isset( $result_segments[ $time_interval ] ) ) {
 				$result_segments[ $time_interval ]             = array();
 				$result_segments[ $time_interval ]['segments'] = array();
 			}
+
 			unset( $segment_data['time_interval'] );
 			unset( $segment_data['datetime_anchor'] );
-			$segment_id = $segment_data[ $segment_dimension ];
 			unset( $segment_data[ $segment_dimension ] );
 
 			if ( ! isset( $result_segments[ $time_interval ]['segments'][ $segment_id ] ) ) {
