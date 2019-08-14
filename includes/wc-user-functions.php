@@ -721,7 +721,8 @@ function wc_disable_author_archives_for_customers() {
 		$user = get_user_by( 'id', $author );
 
 		if ( user_can( $user, 'customer' ) && ! user_can( $user, 'edit_posts' ) ) {
-			wp_redirect( wc_get_page_permalink( 'shop' ) );
+			wp_safe_redirect( wc_get_page_permalink( 'shop' ) );
+			exit;
 		}
 	}
 }
