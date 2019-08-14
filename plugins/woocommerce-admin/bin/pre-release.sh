@@ -82,10 +82,6 @@ status "Run docs script to make sure docs are updated."
 
 npm run docs
 
-status "Remove changes to package-lock.json to prevent merge conflicts."
-
-git checkout package-lock.json
-
 status "Here are the changes so far. Make sure the following changes are reflected."
 
 echo "- docs/: folder will have changes to documentation, if any."
