@@ -566,12 +566,10 @@ class Segmenter {
 		}
 
 		foreach ( $intervals_segments as $time_interval => $segment ) {
-			if ( ! isset( $intervals[ $time_interval ] ) ) {
-				$intervals[ $time_interval ]['segments'] = array();
+			if ( isset( $intervals[ $time_interval ] ) ) {
+				$intervals[ $time_interval ]['segments'] = $segment['segments'];
 			}
-			$intervals[ $time_interval ]['segments'] = $segment['segments'];
 		}
-
 		// To remove time interval keys (so that REST response is formatted correctly).
 		$intervals = array_values( $intervals );
 	}
