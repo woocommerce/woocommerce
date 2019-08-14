@@ -27,17 +27,19 @@ The current step's key.
 - Type: Array
   - key: String - Key used to identify step.
   - label: String - Label displayed in stepper.
+  - description: String - Description displayed beneath the label.
   - isComplete: Boolean - Optionally mark a step complete regardless of step index.
+  - content: ReactNode - Content displayed when the step is active.
 - Default: null
 
 An array of steps used.
 
-### `direction`
+### `isVertical`
 
-- Type: One of: 'horizontal', 'vertical'
-- Default: `'horizontal'`
+- Type: Boolean
+- Default: `false`
 
-Direction of the stepper.
+If the stepper is vertical instead of horizontal.
 
 ### `isPending`
 
