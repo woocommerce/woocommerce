@@ -12,11 +12,11 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages!
 
-**Products by Attribute Block**
-Display a grid of products from your selected attributes.
-
 **Featured Product Block**
 Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo.
+
+**Featured Category Block**
+Visually highlight a product category to increase traffic to that specific section on your shop.
 
 **Hand-Picked products Block**
 Display a grid of hand picked products. Products can be ordered in various ways.
@@ -35,6 +35,15 @@ Display a grid of on sale products, filterable by category.
 
 **Products by Category Block**
 Display a grid of products from your selected category, or categories. Products can be ordered in various ways.
+
+**Products by Tag Block**
+Show a grid of products based on a specific tag that allows you to highlight products based on finer classification options.
+
+**Products by Attribute Block**
+Display a grid of products from your selected attributes.
+
+**Product Categories List Block**
+Display all your product categories as a list or dropdown and help shoppers to find a specific category.
 
 We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories.
 
