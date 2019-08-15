@@ -92,6 +92,10 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.3.1 =
+
+- Fix: Fix deprecation notices with PHP 7.4.
+
 = 2.3.0 - 2019-08-12 =
 
 - Feature: Added a new Featured Category Block; feature a category and show a link to it's archive.
@@ -101,15 +105,15 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Feature: Added a cancel button to the product category block editor to discard unsaved changes.
 - Enhancement: Change the toggle for list type in Product Category List block to a button toggle component for clarity.
 - Build: Updated build process and plugin structure to follow modern best practices. Minimum PHP version bumped to 5.6.
-- Fix - Correctly hide products from grids when visibility is hidden.
-- Fix - Fix Featured Category block using radio buttons instead of checkboxes.
-- Fix - Use externals for frontend dependencies so they are shared between extensions and blocks. That saves 2.57MB on page weight.
-- Fix - Load frontend scripts dynamically only when the page contains a block that requires them.
-- Fix - Reduce dependencies of JavaScript powered frontend blocks.
-- Fix - Disable HTML editing on dynamic blocks which have no content.
-- Fix - Hide background opacity control in Featured Product settings if there is no background image.
-- Fix - Reduce CSS specificity to make styling easier.
-- Fix - Fix author access to API for handpicked products block.
+- Fix: Correctly hide products from grids when visibility is hidden.
+- Fix: Fix Featured Category block using radio buttons instead of checkboxes.
+- Fix: Use externals for frontend dependencies so they are shared between extensions and blocks. That saves 2.57MB on page weight.
+- Fix: Load frontend scripts dynamically only when the page contains a block that requires them.
+- Fix: Reduce dependencies of JavaScript powered frontend blocks.
+- Fix: Disable HTML editing on dynamic blocks which have no content.
+- Fix: Hide background opacity control in Featured Product settings if there is no background image.
+- Fix: Reduce CSS specificity to make styling easier.
+- Fix: Fix author access to API for handpicked products block.
 
 = 2.2.1 - 2019-07-04 =
 
