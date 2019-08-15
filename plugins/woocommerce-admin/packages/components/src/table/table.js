@@ -117,6 +117,7 @@ class Table extends Component {
 		} );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
 		const sortDir = query.order || get( find( headers, { key: sortedBy } ), 'defaultOrder', DESC );
+		const hasData = !! rows.length;
 
 		return (
 			<div
@@ -199,25 +200,36 @@ class Table extends Component {
 								);
 							} ) }
 						</tr>
-						{ rows.map( ( row, i ) => (
-							<tr key={ i }>
-								{ row.map( ( cell, j ) => {
-									const { cellClassName, isLeftAligned, isNumeric } = headers[ j ];
-									const isHeader = rowHeader === j;
-									const Cell = isHeader ? 'th' : 'td';
-									const cellClasses = classnames( 'woocommerce-table__item', cellClassName, {
-										'is-left-aligned': isLeftAligned,
-										'is-numeric': isNumeric,
-										'is-sorted': sortedBy === headers[ j ].key,
-									} );
-									return (
-										<Cell scope={ isHeader ? 'row' : null } key={ j } className={ cellClasses }>
-											{ getDisplay( cell ) }
-										</Cell>
-									);
-								} ) }
-							</tr>
-						) ) }
+						{ hasData
+							? (
+								rows.map( ( row, i ) => (
+									<tr key={ i }>
+										{ row.map( ( cell, j ) => {
+											const { cellClassName, isLeftAligned, isNumeric } = headers[ j ];
+											const isHeader = rowHeader === j;
+											const Cell = isHeader ? 'th' : 'td';
+											const cellClasses = classnames( 'woocommerce-table__item', cellClassName, {
+												'is-left-aligned': isLeftAligned,
+												'is-numeric': isNumeric,
+												'is-sorted': sortedBy === headers[ j ].key,
+											} );
+											return (
+												<Cell scope={ isHeader ? 'row' : null } key={ j } className={ cellClasses }>
+													{ getDisplay( cell ) }
+												</Cell>
+											);
+										} ) }
+									</tr>
+								) )
+							)
+							: (
+								<tr>
+									<td className="woocommerce-table__empty-item" colSpan={ headers.length }>
+										{ __( 'No data for the selected date range', 'woocommerce-admin' ) }
+									</td>
+								</tr>
+							)
+						}
 					</tbody>
 				</table>
 			</div>
