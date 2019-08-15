@@ -9,8 +9,9 @@ $package_json = file_get_contents( 'package.json' );
 $package      = json_decode( $package_json );
 
 function replace_version( $filename, $package_json ) {
-	$lines        = array();
-	$file = file( $filename );
+	$lines = array();
+	$file  = file( $filename );
+	
 	foreach ( $file as $line ) {
 		if ( stripos( $line, ' * Version: ' ) !== false ) {
 			$line = " * Version: {$package_json->version}\n";
