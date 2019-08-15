@@ -122,8 +122,9 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		return apply_filters(
 			'woocommerce_onboarding_plugins_whitelist',
 			array(
-				'jetpack'              => 'jetpack/jetpack.php',
-				'woocommerce-services' => 'woocommerce-services/woocommerce-services.php',
+				'facebook-for-woocommerce' => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
+				'jetpack'                  => 'jetpack/jetpack.php',
+				'woocommerce-services'     => 'woocommerce-services/woocommerce-services.php',
 			)
 		);
 	}
