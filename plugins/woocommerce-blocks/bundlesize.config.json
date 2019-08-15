@@ -5,7 +5,7 @@
       "maxSize": "300 kB"
     },
     {
-      "path": "./build/frontend*.js",
+      "path": "./build/*frontend*.js",
       "maxSize": "130 kB"
     },
     {

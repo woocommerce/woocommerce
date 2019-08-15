@@ -49,6 +49,7 @@ class Assets {
 		self::register_script( 'wc-featured-category', plugins_url( 'build/featured-category.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-product-categories', plugins_url( 'build/product-categories.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-product-tag', plugins_url( 'build/product-tag.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-reviews-by-product', plugins_url( 'build/reviews-by-product.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-product-search', plugins_url( 'build/product-search.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 	}
 
@@ -124,21 +125,23 @@ class Assets {
 
 		// Global settings used in each block.
 		$block_settings = array(
-			'min_columns'       => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
-			'max_columns'       => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
-			'default_columns'   => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
-			'min_rows'          => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
-			'max_rows'          => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
-			'default_rows'      => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
-			'thumbnail_size'    => wc_get_theme_support( 'thumbnail_image_width', 300 ),
-			'placeholderImgSrc' => wc_placeholder_img_src(),
-			'min_height'        => wc_get_theme_support( 'featured_block::min_height', 500 ),
-			'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),
-			'isLargeCatalog'    => $product_counts->publish > 200,
-			'limitTags'         => $tag_count > 100,
-			'hasTags'           => $tag_count > 0,
-			'productCategories' => $product_categories,
-			'homeUrl'           => esc_js( home_url( '/' ) ),
+			'min_columns'        => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
+			'max_columns'        => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
+			'default_columns'    => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
+			'min_rows'           => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
+			'max_rows'           => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
+			'default_rows'       => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+			'thumbnail_size'     => wc_get_theme_support( 'thumbnail_image_width', 300 ),
+			'placeholderImgSrc'  => wc_placeholder_img_src(),
+			'min_height'         => wc_get_theme_support( 'featured_block::min_height', 500 ),
+			'default_height'     => wc_get_theme_support( 'featured_block::default_height', 500 ),
+			'isLargeCatalog'     => $product_counts->publish > 200,
+			'limitTags'          => $tag_count > 100,
+			'hasTags'            => $tag_count > 0,
+			'productCategories'  => $product_categories,
+			'homeUrl'            => esc_js( home_url( '/' ) ),
+			'showAvatars'        => '1' === get_option( 'show_avatars' ),
+			'enableReviewRating' => 'yes' === get_option( 'woocommerce_enable_review_rating' ),
 		);
 		?>
 		<script type="text/javascript">

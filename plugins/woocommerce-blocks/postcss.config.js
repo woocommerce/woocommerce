@@ -1,6 +1,6 @@
 module.exports = ( { env } ) => ( {
 	plugins: {
-		autoprefixer: {},
+		autoprefixer: { grid: true },
 		cssnano: env === 'production',
 	},
 } );

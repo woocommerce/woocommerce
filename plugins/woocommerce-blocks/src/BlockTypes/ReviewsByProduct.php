@@ -1,8 +1,8 @@
 <?php
 /**
- * Product categories block.
+ * Reviews by Product block.
  *
- * @package WooCommerce/Blocks
+ * @package WooCommerce\Blocks
  */
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
@@ -10,16 +10,15 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * ProductCategories class.
+ * ReviewsByProduct class.
  */
-class ProductCategories extends AbstractBlock {
-
+class ReviewsByProduct extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-categories';
+	protected $block_name = 'reviews-by-product';
 
 	/**
 	 * Registers the block type with WordPress.

@@ -58,6 +58,7 @@ const GutenbergBlocksConfig = {
 		'product-top-rated': './assets/js/blocks/product-top-rated/index.js',
 		'products-by-attribute': './assets/js/blocks/products-by-attribute/index.js',
 		'featured-product': './assets/js/blocks/featured-product/index.js',
+		'reviews-by-product': './assets/js/blocks/reviews-by-product/index.js',
 		'product-search': './assets/js/blocks/product-search/index.js',
 		'product-tag': './assets/js/blocks/product-tag/index.js',
 		'featured-category': './assets/js/blocks/featured-category/index.js',
@@ -86,17 +87,15 @@ const GutenbergBlocksConfig = {
 					test: ( module = {} ) =>
 						module.constructor.name === 'CssModule' &&
 						( findModuleMatch( module, /editor\.scss$/ ) ||
-							findModuleMatch( module, /[\\/]components[\\/]/ ) ),
+							findModuleMatch( module, /[\\/]assets[\\/]components[\\/]/ ) ),
 					name: 'editor',
 					chunks: 'all',
-					enforce: true,
 					priority: 10,
 				},
 				style: {
 					test: /style\.scss$/,
 					name: 'style',
 					chunks: 'all',
-					enforce: true,
 					priority: 5,
 				},
 			},
@@ -156,10 +155,17 @@ const GutenbergBlocksConfig = {
 
 const BlocksFrontendConfig = {
 	...baseConfig,
-	entry: './assets/js/blocks/product-categories/frontend.js',
+	entry: {
+		'product-categories': './assets/js/blocks/product-categories/frontend.js',
+		'reviews-by-product': './assets/js/blocks/reviews-by-product/frontend.js',
+	},
 	output: {
 		path: path.resolve( __dirname, './build/' ),
-		filename: 'frontend.js',
+		filename: '[name]-frontend.js',
+		// This fixes an issue with multiple webpack projects using chunking
+		// overwriting each other's chunk loader function.
+		// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+		jsonpFunction: 'webpackWcBlocksJsonp',
 	},
 	module: {
 		rules: [
@@ -185,6 +191,12 @@ const BlocksFrontendConfig = {
 							NODE_ENV === 'production' ? require.resolve( 'babel-plugin-transform-react-remove-prop-types' ) : false,
 						].filter( Boolean ),
 					},
+				},
+			},
+			{
+				test: /\.s[c|a]ss$/,
+				use: {
+					loader: 'ignore-loader',
 				},
 			},
 		],
