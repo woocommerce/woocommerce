@@ -152,7 +152,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			$classes[] = $attributes['className'];
 		}
 
-		return implode( $classes, ' ' );
+		return implode( ' ', $classes );
 	}
 
 	/**
