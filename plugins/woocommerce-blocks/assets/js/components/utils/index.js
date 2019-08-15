@@ -54,7 +54,7 @@ export const getProducts = ( { selected = [], search } ) => {
 /**
  * Get a promise that resolves to a product object from the API.
  *
- * @param {Object} productId Id of the product to retrieve.
+ * @param {number} productId Id of the product to retrieve.
  */
 export const getProduct = ( productId ) => {
 	return apiFetch( {
@@ -94,5 +94,16 @@ export const getProductTags = ( { selected = [], search } ) => {
 
 	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) ).then( ( data ) => {
 		return uniqBy( flatten( data ), 'id' );
+	} );
+};
+
+/**
+ * Get a promise that resolves to a category object from the API.
+ *
+ * @param {number} categoryId Id of the product to retrieve.
+ */
+export const getCategory = ( categoryId ) => {
+	return apiFetch( {
+		path: `${ ENDPOINTS.categories }/${ categoryId }`,
 	} );
 };
