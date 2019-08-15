@@ -71,6 +71,26 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.17.0 2019-08-15 =
+
+- Fix: chart data fetch/render over long time periods #2785 (Analytics)
+- Task: update the class filename exclusion to /src/ for PSR-4 #2794
+- Tweak: Increase zIndex on popover elements. #2777
+- Fix: chart display when comparing categories. #2710 (Analytics)
+- Fix: Allow WooCommerce Admin to be deleted through the plugin screen when WooCommerce is not active. #2762
+- Fix: Charts being partially rendered on long time periods. #2776 (Analytics)
+- Task: update WC tested to version to 3.7.0 #2782
+- Fix: Customer last active date showing `Invalid date`. #2764 (Analytics)
+- Task: Update report endpoints to be PSR-4 autoloaded  #2755 (Build)
+- Bug: Fix daily cron event (PSR-4) #2754 (Build)
+- Fix: issue where product category update button was not always clickable #2753
+- Fix: Add version parameter to `_doing_it_wrong` on `current_screen`. #2733
+- Task: Update feature classes to be PSR-4 autoloaded. #2736 (Build)
+- Fix: Short circuit admin title filter when applied by third parties too early. #2744
+- Fix: chart display when comparing categories. #2708 (Analytics)
+- Bug: Only apply current submenu CSS reset on non-embed pages. #2687
+- Dev: Add `wc_admin_get_feature_config` filter to feature config array. #2689
+
 = 0.16.0 2019-07-24 =
 
 - Tweak: Change verbiage of feedback notification. #2677
