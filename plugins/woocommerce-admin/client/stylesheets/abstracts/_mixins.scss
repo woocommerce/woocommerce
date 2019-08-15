@@ -42,12 +42,84 @@
 }
 
 // Gutenberg mixins. These are temporary until Gutenberg's mixins are exposed.
+/**
+ * Breakpoint mixins
+ */
+
+@mixin break-huge() {
+	@media (min-width: #{ ($break-huge) }) {
+		@content;
+	}
+}
+
+@mixin break-wide() {
+	@media (min-width: #{ ($break-wide) }) {
+		@content;
+	}
+}
+
+@mixin break-xlarge() {
+	@media (min-width: #{ ($break-xlarge) }) {
+		@content;
+	}
+}
+
+@mixin break-large() {
+	@media (min-width: #{ ($break-large) }) {
+		@content;
+	}
+}
+
+@mixin break-medium() {
+	@media (min-width: #{ ($break-medium) }) {
+		@content;
+	}
+}
+
+@mixin break-small() {
+	@media (min-width: #{ ($break-small) }) {
+		@content;
+	}
+}
+
+@mixin break-mobile() {
+	@media (min-width: #{ ($break-mobile) }) {
+		@content;
+	}
+}
+
+@mixin break-zoomed-in() {
+	@media (min-width: #{ ($break-zoomed-in) }) {
+		@content;
+	}
+}
+
+// Buttons with rounded corners.
+@mixin button-style__disabled {
+	opacity: 0.6;
+	cursor: default;
+}
+
+@mixin button-style__hover {
+	background-color: $white;
+	color: $dark-gray-900;
+	box-shadow: inset 0 0 0 1px $light-gray-500, inset 0 0 0 2px $white,
+		0 1px 1px rgba($dark-gray-900, 0.2);
+}
+
+@mixin button-style__active() {
+	outline: none;
+	background-color: $white;
+	color: $dark-gray-900;
+	box-shadow: inset 0 0 0 1px $light-gray-700, inset 0 0 0 2px $white;
+}
+
 @mixin button-style__focus-active() {
 	background-color: $white;
 	color: $dark-gray-900;
 	box-shadow: inset 0 0 0 1px $dark-gray-300, inset 0 0 0 2px $white;
 
-	// Windows High Contrast mode will show this outline, but not the box-shadow
+	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;
 	outline-offset: -2px;
 }
@@ -75,6 +147,15 @@
 	@media (min-width: #{ ($break-small) }) {
 		@content;
 	}
+}
+
+// Gutenberg Switch.
+@mixin switch-style__focus-active() {
+	box-shadow: 0 0 0 2px $white, 0 0 0 3px $dark-gray-300;
+
+	// Windows High Contrast mode will show this outline, but not the box-shadow.
+	outline: 2px solid transparent;
+	outline-offset: 2px;
 }
 
 // Sets positions for children of grid elements

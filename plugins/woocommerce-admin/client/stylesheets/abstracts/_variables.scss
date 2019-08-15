@@ -23,19 +23,55 @@ $sidebar-width: 272px;
 $spacing: 16px;
 
 // Gutenberg variables. These are temporary until Gutenberg's variables are exposed.
+$break-huge: 1440px;
+$break-wide: 1280px;
+$break-xlarge: 1080px;
+$break-large: 960px; // admin sidebar auto folds
+$break-medium: 782px; // adminbar goes big
+$break-small: 600px;
+$break-mobile: 480px;
+$break-zoomed-in: 280px;
+$border-width: 1px;
 $default-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 	'Helvetica Neue', sans-serif;
 $default-font-size: 13px;
 $default-line-height: 1.4;
-$break-small: 600px;
-$border-width: 1px;
+$blue-medium-900: #006589;
+$blue-medium-800: #00739c;
+$blue-medium-700: #007fac;
+$blue-medium-600: #008dbe;
+$blue-medium-500: #00a0d2;
+$blue-medium-400: #33b3db;
+$blue-medium-300: #66c6e4;
+$blue-medium-200: #bfe7f3;
+$blue-medium-100: #e5f5fa;
+$blue-medium-highlight: #b3e7fe;
 $blue-medium-focus: #007cba;
+$light-gray-100: $core-grey-light-100;
+$light-gray-200: $core-grey-light-200;
+$light-gray-300: $core-grey-light-300;
+$light-gray-400: $core-grey-light-400;
 $light-gray-500: $core-grey-light-500;
-$dark-gray-300: $core-grey-dark-300;
+$light-gray-600: $core-grey-light-600;
+$light-gray-700: $core-grey-light-700;
+$light-gray-800: $core-grey-light-800;
+$light-gray-900: $core-grey-light-900;
+$dark-gray-100: $core-grey-dark-100;
+$dark-gray-200: $core-grey-dark-200;
+$dark-gray-300: $core-grey-dark-300; // This & below have 4.5+ contrast against white
+$dark-gray-400: $core-grey-dark-400;
+$dark-gray-500: $core-grey-dark-500;
+$dark-gray-600: $core-grey-dark-600;
 $dark-gray-700: $core-grey-dark-700;
+$dark-gray-800: $core-grey-dark-800;
 $dark-gray-900: $core-grey-dark-900;
 $alert-red: $error-red;
+$alert-yellow: $notice-yellow;
+$alert-green: $valid-green;
+$toggle-border-width: 2px;
 $radius-round-rectangle: 4px;
+$icon-button-size: 36px;
+$icon-button-size-small: 24px;
 
 // WordPress defaults
 $adminbar-height: 32px;

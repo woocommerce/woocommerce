@@ -74,3 +74,29 @@
 		padding-bottom: 10px;
 	}
 }
+
+.woocommerce-dashboard__body {
+	background: $muriel-gray-0;
+	color: $muriel-gray-600;
+	font-family: $default-font;
+
+	#wpbody-content {
+		min-height: 100vh;
+	}
+
+	/* Hide wp-admin and WooCommerce elements when the dashboard body class is present */
+	#adminmenumain,
+	.woocommerce-layout__header,
+	.update-nag,
+	.woocommerce-store-alerts,
+	.woocommerce-message,
+	.notice,
+	.error,
+	.updated {
+		display: none;
+	}
+
+	#wpcontent {
+		margin-left: 0;
+	}
+}
