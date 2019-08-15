@@ -163,7 +163,7 @@
     "prop-types": "15.7.2",
     "raw-loader": "1.0.0",
     "react-docgen": "2.21.0",
-    "readline-sync": "1.4.9",
+    "readline-sync": "1.4.10",
     "recast": "0.18.1",
     "replace": "1.1.0",
     "request-promise": "4.2.4",
