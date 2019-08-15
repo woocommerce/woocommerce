@@ -175,7 +175,7 @@
 		}
 
 		.woocommerce-search-list__item-count {
-			flex: 0;
+			flex: 0 1 auto;
 			padding: $gap-smallest/2 $gap-smaller;
 			border: 1px solid $core-grey-light-500;
 			border-radius: 12px;

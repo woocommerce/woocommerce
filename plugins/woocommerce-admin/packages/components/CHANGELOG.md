@@ -1,14 +1,14 @@
 # unreleased
-- SearchListItem component: new `countLabel` prop that will overwrite the `item.count` value.
 - AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
 - TableCard component: add `onSearch` an `onSort` function props.
 - Add new component `<List />` for displaying interactive list items.
 - Fix z-index issue in `<Chart />` empty message.
 - Added a new `<SimpleSelectControl />` component.
 - Added a new `<WebPreview />` component.
+- SearchListItem component: fix long count values being cut-off in IE11.
 
 # 3.1.0
-- Added support for a countLabel prop on SearchListItem to allow custom counts.
+- Added support for a `countLabel` prop on `SearchListItem` to allow custom counts.
 
 # 3.0.0
 - <DateInput> and <DatePicker> got a `disabled` prop.
