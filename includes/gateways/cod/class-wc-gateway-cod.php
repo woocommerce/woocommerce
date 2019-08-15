@@ -237,7 +237,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	private function get_canonical_package_rate_ids( $chosen_package_rate_ids ) {
 
-		$shipping_packages  = WC()->shipping->get_packages();
+		$shipping_packages  = WC()->shipping()->get_packages();
 		$canonical_rate_ids = array();
 
 		if ( ! empty( $chosen_package_rate_ids ) && is_array( $chosen_package_rate_ids ) ) {

@@ -28,7 +28,7 @@ class WC_Payment_Tokens {
 	 *     @type string $gateway_id Gateway ID.
 	 *     @type string $type       Token type.
 	 * }
-	 * @return array
+	 * @return WC_Payment_Token[]
 	 */
 	public static function get_tokens( $args ) {
 		$args = wp_parse_args(
@@ -62,7 +62,7 @@ class WC_Payment_Tokens {
 	 * @since 2.6.0
 	 * @param  int    $customer_id Customer ID.
 	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
-	 * @return array               Array of token objects.
+	 * @return WC_Payment_Token[]  Array of token objects.
 	 */
 	public static function get_customer_tokens( $customer_id, $gateway_id = '' ) {
 		if ( $customer_id < 1 ) {
@@ -105,8 +105,8 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed order ID.
 	 *
 	 * @since 2.6.0
-	 * @param int $order_id Order ID.
-	 * @return array Array of token objects.
+	 * @param int $order_id       Order ID.
+	 * @return WC_Payment_Token[] Array of token objects.
 	 */
 	public static function get_order_tokens( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -170,7 +170,7 @@ class WC_Payment_Tokens {
 	 * Remove a payment token from the database by ID.
 	 *
 	 * @since 2.6.0
-	 * @param WC_Payment_Token $token_id Token ID.
+	 * @param int $token_id Token ID.
 	 */
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );

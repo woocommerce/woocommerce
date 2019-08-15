@@ -50,7 +50,7 @@ if ( woocommerce_product_loop() ) {
 	/**
 	 * Hook: woocommerce_before_shop_loop.
 	 *
-	 * @hooked wc_print_notices - 10
+	 * @hooked woocommerce_output_all_notices - 10
 	 * @hooked woocommerce_result_count - 20
 	 * @hooked woocommerce_catalog_ordering - 30
 	 */
@@ -64,8 +64,6 @@ if ( woocommerce_product_loop() ) {
 
 			/**
 			 * Hook: woocommerce_shop_loop.
-			 *
-			 * @hooked WC_Structured_Data::generate_product_data() - 10
 			 */
 			do_action( 'woocommerce_shop_loop' );
 

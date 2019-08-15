@@ -44,6 +44,9 @@ class WC_Admin_Menus {
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 31 );
 		}
+
+		// Handle saving settings earlier than load-{page} hook to avoid race conditions in conditional menus.
+		add_action( 'wp_loaded', array( $this, 'save_settings' ) );
 	}
 
 	/**
@@ -85,24 +88,11 @@ class WC_Admin_Menus {
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
-		global $current_tab, $current_section;
-
 		WC()->payment_gateways();
 		WC()->shipping();
 
 		// Include settings pages.
 		WC_Admin_Settings::get_settings_pages();
-
-		// Get current tab/section.
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
-
-		// Save settings if data has been posted.
-		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::save();
-		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::save();
-		}
 
 		// Add any posted messages.
 		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
@@ -114,6 +104,34 @@ class WC_Admin_Menus {
 		}
 
 		do_action( 'woocommerce_settings_page_init' );
+	}
+
+	/**
+	 * Handle saving of settings.
+	 *
+	 * @return void
+	 */
+	public function save_settings() {
+		global $current_tab, $current_section;
+
+		// We should only save on the settings page.
+		if ( ! is_admin() || ! isset( $_GET['page'] ) || 'wc-settings' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			return;
+		}
+
+		// Include settings pages.
+		WC_Admin_Settings::get_settings_pages();
+
+		// Get current tab/section.
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
+
+		// Save settings if data has been posted.
+		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::save();
+		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
+			WC_Admin_Settings::save();
+		}
 	}
 
 	/**
@@ -164,14 +182,16 @@ class WC_Admin_Menus {
 			// Remove 'WooCommerce' sub menu item.
 			unset( $submenu['woocommerce'][0] );
 
-			$order_count = wc_processing_order_count();
-
 			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) && $order_count ) {
-				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // WPCS: override ok.
-						break;
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) ) {
+				$order_count = wc_processing_order_count();
+
+				if ( $order_count ) {
+					foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+						if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+							$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // WPCS: override ok.
+							break;
+						}
 					}
 				}
 			}

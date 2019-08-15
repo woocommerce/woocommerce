@@ -317,7 +317,8 @@ function wc_update_200_line_items() {
 				}
 
 				$item_id = wc_add_order_item(
-					$order_tax_row->post_id, array(
+					$order_tax_row->post_id,
+					array(
 						'order_item_name' => $order_tax['label'],
 						'order_item_type' => 'tax',
 					)
@@ -671,6 +672,9 @@ function wc_update_220_attributes() {
 			}
 		}
 	}
+
+	delete_transient( 'wc_attribute_taxonomies' );
+	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 }
 
 /**
@@ -737,22 +741,23 @@ function wc_update_240_shipping_methods() {
 	foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 		// Stop this running more than once if routine is repeated.
 		if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
-			$has_classes                      = count( WC()->shipping->get_shipping_classes() ) > 0;
-			$cost_key                         = $has_classes ? 'no_class_cost' : 'cost';
-			$min_fee                          = $shipping_method->get_option( 'minimum_fee' );
-			$math_cost_strings                = array(
+			$shipping_classes  = WC()->shipping()->get_shipping_classes();
+			$has_classes       = count( $shipping_classes ) > 0;
+			$cost_key          = $has_classes ? 'no_class_cost' : 'cost';
+			$min_fee           = $shipping_method->get_option( 'minimum_fee' );
+			$math_cost_strings = array(
 				'cost'          => array(),
 				'no_class_cost' => array(),
 			);
 
 			$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
-			$fee = $shipping_method->get_option( 'fee' );
+			$fee                              = $shipping_method->get_option( 'fee' );
 
 			if ( $fee ) {
 				$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
 			}
 
-			foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+			foreach ( $shipping_classes as $shipping_class ) {
 				$rate_key                       = 'class_cost_' . $shipping_class->slug;
 				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
@@ -999,6 +1004,7 @@ function wc_update_250_currency() {
 			'meta_value' => 'KIP',
 		)
 	);
+
 }
 
 /**
@@ -1087,7 +1093,8 @@ function wc_update_260_zone_methods() {
 			// Move data.
 			foreach ( $old_methods as $old_method ) {
 				$wpdb->insert(
-					$wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
+					$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+					array(
 						'zone_id'      => $old_method->zone_id,
 						'method_id'    => $old_method->shipping_method_type,
 						'method_order' => $old_method->shipping_method_order,
@@ -1422,7 +1429,8 @@ function wc_update_320_mexican_states() {
 				SET meta_value = %s
 				WHERE meta_key IN ( '_billing_state', '_shipping_state' )
 				AND meta_value = %s",
-				$new, $old
+				$new,
+				$old
 			)
 		);
 		$wpdb->update(
@@ -1511,11 +1519,13 @@ function wc_update_330_webhooks() {
 		'pending' => 'disabled',
 	);
 
-	$posts = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_webhook',
-		'post_status'    => 'any',
-	) );
+	$posts = get_posts(
+		array(
+			'posts_per_page' => -1,
+			'post_type'      => 'shop_webhook',
+			'post_status'    => 'any',
+		)
+	);
 
 	foreach ( $posts as $post ) {
 		$webhook = new WC_Webhook();
@@ -1544,19 +1554,22 @@ function wc_update_330_set_default_product_cat() {
 	$default_category = get_option( 'default_product_cat', 0 );
 
 	if ( $default_category ) {
-		$result = $wpdb->query( $wpdb->prepare( "
-			INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
-			SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
-			LEFT JOIN
-				(
-					SELECT object_id FROM {$wpdb->term_relationships} term_relationships
-					LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
-					WHERE term_taxonomy.taxonomy = 'product_cat'
-				) AS tax_query
-			ON posts.ID = tax_query.object_id
-			WHERE posts.post_type = 'product'
-			AND tax_query.object_id IS NULL
-		", $default_category ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
+				SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
+				LEFT JOIN
+					(
+						SELECT object_id FROM {$wpdb->term_relationships} term_relationships
+						LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
+						WHERE term_taxonomy.taxonomy = 'product_cat'
+					) AS tax_query
+				ON posts.ID = tax_query.object_id
+				WHERE posts.post_type = 'product'
+				AND tax_query.object_id IS NULL",
+				$default_category
+			)
+		);
 		wp_cache_flush();
 		delete_transient( 'wc_term_counts' );
 		wp_update_term_count_now( array( $default_category ), 'product_cat' );
@@ -1576,16 +1589,19 @@ function wc_update_330_product_stock_status() {
 	$min_stock_amount = (int) get_option( 'woocommerce_notify_no_stock_amount', 0 );
 
 	// Get all products that have stock management enabled, stock less than or equal to min stock amount, and backorders enabled.
-	$post_ids = $wpdb->get_col( $wpdb->prepare( "
-		SELECT t1.post_id FROM $wpdb->postmeta t1
-		INNER JOIN $wpdb->postmeta t2
-			ON t1.post_id = t2.post_id
-			AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
-			AND t2.meta_key = '_stock' AND t2.meta_value <= %d
-		INNER JOIN $wpdb->postmeta t3
-			ON t2.post_id = t3.post_id
-			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
-		", $min_stock_amount ) ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+	$post_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT t1.post_id FROM $wpdb->postmeta t1
+			INNER JOIN $wpdb->postmeta t2
+				ON t1.post_id = t2.post_id
+				AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
+				AND t2.meta_key = '_stock' AND t2.meta_value <= %d
+			INNER JOIN $wpdb->postmeta t3
+				ON t2.post_id = t3.post_id
+				AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )",
+			$min_stock_amount
+		)
+	); // WPCS: db call ok, unprepared SQL ok, cache ok.
 
 	if ( empty( $post_ids ) ) {
 		return;
@@ -1594,11 +1610,11 @@ function wc_update_330_product_stock_status() {
 	$post_ids = array_map( 'absint', $post_ids );
 
 	// Set the status to onbackorder for those products.
-	$wpdb->query( "
-		UPDATE $wpdb->postmeta
+	$wpdb->query(
+		"UPDATE $wpdb->postmeta
 		SET meta_value = 'onbackorder'
-		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )
-		' ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )'
+	); // WPCS: db call ok, unprepared SQL ok, cache ok.
 }
 
 /**
@@ -1737,7 +1753,8 @@ function wc_update_340_state() {
 					SET meta_value = %s
 					WHERE meta_key IN ( '_billing_state', '_shipping_state' )
 					AND meta_value = %s",
-					$new, $old
+					$new,
+					$old
 				)
 			);
 			$wpdb->update(
@@ -1811,18 +1828,18 @@ function wc_update_340_db_version() {
 function wc_update_343_cleanup_foreign_keys() {
 	global $wpdb;
 
-	$results = $wpdb->get_results( "
-		SELECT CONSTRAINT_NAME
+	$results = $wpdb->get_results(
+		"SELECT CONSTRAINT_NAME
 		FROM information_schema.TABLE_CONSTRAINTS
 		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
 		AND CONSTRAINT_NAME LIKE '%wc_download_log_ib%'
 		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
-	" );
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+	);
 
 	if ( $results ) {
 		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 }
@@ -1856,123 +1873,14 @@ function wc_update_344_db_version() {
 }
 
 /**
- * Copy order customer_id from post meta to post_author and set post_author to 0 for refunds.
- *
- * Two different strategies are used to copy data depending if the update is being executed from
- * the command line or not. If `wp wc update` is used to update the database, this function
- * copies data in a single go that is faster but uses more resources. If the databse update was
- * triggered from the wp-admin, this function copies data in batches which is slower but uses
- * few resources and thus is less likely to fail on smaller servers.
- *
- * @param WC_Background_Updater|false $updater Background updater instance or false if function is called from `wp wc update` WP-CLI command.
- * @return true|void Return true if near memory limit and needs to restart. Return void if update completed.
+ * Set the comment type to 'review' for product reviews that don't have a comment type.
  */
-function wc_update_350_order_customer_id( $updater = false ) {
+function wc_update_350_reviews_comment_type() {
 	global $wpdb;
 
-	$post_types              = (array) apply_filters( 'woocommerce_update_350_order_customer_id_post_types', array( 'shop_order' ) );
-	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
-
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		// If running the update from the command-line, copy data in a single go which is faster but uses more resources.
-		$wpdb->query(
-			'CREATE TEMPORARY TABLE customers_map (post_id BIGINT(20), customer_id BIGINT(20), PRIMARY KEY(post_id))'
-		);
-
-		$wpdb->query(
-			"INSERT IGNORE INTO customers_map (SELECT post_id, meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_customer_user')"
-		);
-
-		$wpdb->query( 'SET sql_safe_updates=1' );
-
-		$wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->prefix}posts JOIN customers_map ON {$wpdb->prefix}posts.ID = customers_map.post_id SET {$wpdb->prefix}posts.post_author = customers_map.customer_id WHERE post_type IN ({$post_types_placeholders})",  // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-				$post_types
-			)
-		);
-
-		$wpdb->update( $wpdb->posts, array( 'post_author' => 0 ), array( 'post_type' => 'shop_order_refund' ) );
-	} else {
-		// If running the update from the wp-admin, copy data in batches being careful not to use more memory than allowed.
-		$admin_orders_sql = '';
-		$admin_orders     = get_transient( 'wc_update_350_admin_orders' );
-
-		if ( false === $admin_orders ) {
-			// Get the list of orders that we don't want to change as they belong to user ID 1.
-			$admin_orders = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT ID FROM {$wpdb->prefix}posts p
-					INNER JOIN {$wpdb->prefix}postmeta pm ON p.ID = pm.post_id
-					WHERE post_type IN ({$post_types_placeholders}) AND meta_key = '_customer_user' AND meta_value = 1", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-					$post_types
-				)
-			);
-
-			// Cache the list of orders placed by the user ID 1 as to large stores this query can be slow.
-			set_transient( 'wc_update_350_admin_orders', $admin_orders, DAY_IN_SECONDS );
-		}
-
-		if ( ! empty( $admin_orders ) ) {
-			$admin_orders_sql .= ' AND ID NOT IN (' . implode( ', ', $admin_orders ) . ') ';
-		}
-
-		// Query to get a batch of orders IDs to change.
-		$query = $wpdb->prepare(
-			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
-			"SELECT ID FROM {$wpdb->posts}
-			WHERE post_author = 1 AND post_type IN ({$post_types_placeholders}) $admin_orders_sql
-			LIMIT 1000",
-			$post_types
-			// phpcs:enable
-		);
-
-		while ( true ) {
-			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-			$orders_to_update = $wpdb->get_col( $query );
-
-			// Exit loop if no more orders to update.
-			if ( ! $orders_to_update ) {
-				break;
-			}
-
-			$orders_meta_data = $wpdb->get_results(
-				// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-				"SELECT post_id, meta_value as customer_id FROM {$wpdb->postmeta} WHERE meta_key = '_customer_user' AND post_id IN (" . implode( ', ', $orders_to_update ) . ')'
-			);
-
-			// Exit loop if no _customer_user metas exist for the list of orders to update.
-			if ( ! $orders_meta_data ) {
-				break;
-			}
-
-			// Update post_author for a batch of orders.
-			foreach ( $orders_meta_data as $order_meta ) {
-				// Stop update execution and re-enqueue it if near memory limit.
-				if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-					return true;
-				}
-
-				$wpdb->update( $wpdb->posts, array( 'post_author' => $order_meta->customer_id ), array( 'ID' => $order_meta->post_id ) );
-			}
-		}
-
-		// Set post_author to 0 instead of 1 on all shop_order_refunds.
-		while ( true ) {
-			// Stop update execution and re-enqueue it if near memory limit.
-			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				return true;
-			}
-
-			$updated_rows = $wpdb->query( "UPDATE {$wpdb->posts} SET post_author = 0 WHERE post_type = 'shop_order_refund' LIMIT 1000" );
-
-			if ( ! $updated_rows ) {
-				break;
-			}
-		}
-	}
-
-	wp_cache_flush();
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}comments JOIN {$wpdb->prefix}posts ON {$wpdb->prefix}posts.ID = {$wpdb->prefix}comments.comment_post_ID AND ( {$wpdb->prefix}posts.post_type = 'product' OR {$wpdb->prefix}posts.post_type = 'product_variation' ) SET {$wpdb->prefix}comments.comment_type = 'review' WHERE {$wpdb->prefix}comments.comment_type = ''"
+	);
 }
 
 /**
@@ -1980,4 +1888,161 @@ function wc_update_350_order_customer_id( $updater = false ) {
  */
 function wc_update_350_db_version() {
 	WC_Install::update_db_version( '3.5.0' );
+}
+
+/**
+ * Drop the fk_wc_download_log_permission_id FK as we use a new one with the table and blog prefix for MS compatability.
+ *
+ * @return void
+ */
+function wc_update_352_drop_download_log_fk() {
+	global $wpdb;
+	$results = $wpdb->get_results(
+		"SELECT CONSTRAINT_NAME
+		FROM information_schema.TABLE_CONSTRAINTS
+		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+		AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+	);
+
+	// We only need to drop the old key as WC_Install::create_tables() takes care of creating the new FK.
+	if ( $results ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+	}
+}
+
+/**
+ * Remove edit_user capabilities from shop managers and use "translated" capabilities instead.
+ * See wc_shop_manager_has_capability function.
+ */
+function wc_update_354_modify_shop_manager_caps() {
+	global $wp_roles;
+
+	if ( ! class_exists( 'WP_Roles' ) ) {
+		return;
+	}
+
+	if ( ! isset( $wp_roles ) ) {
+		$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+	}
+
+	$wp_roles->remove_cap( 'shop_manager', 'edit_users' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_354_db_version() {
+	WC_Install::update_db_version( '3.5.4' );
+}
+
+/**
+ * Update product lookup tables in bulk.
+ */
+function wc_update_360_product_lookup_tables() {
+	wc_update_product_lookup_tables();
+}
+
+/**
+ * Renames ordering meta to be consistent across taxonomies.
+ */
+function wc_update_360_term_meta() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE {$wpdb->termmeta} SET meta_key = 'order' WHERE meta_key LIKE 'order_pa_%';" );
+}
+
+/**
+ * Add new user_order_remaining_expires to speed up user download permission fetching.
+ *
+ * @return void
+ */
+function wc_update_360_downloadable_product_permissions_index() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'user_order_remaining_expires'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)" );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_360_db_version() {
+	WC_Install::update_db_version( '3.6.0' );
+}
+
+/**
+ * Put tax classes into a DB table.
+ *
+ * @return void
+ */
+function wc_update_370_tax_rate_classes() {
+	global $wpdb;
+
+	$classes = array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) );
+
+	if ( $classes ) {
+		foreach ( $classes as $class ) {
+			if ( empty( $class ) ) {
+				continue;
+			}
+			WC_Tax::create_tax_class( $class );
+		}
+	}
+	delete_option( 'woocommerce_tax_classes' );
+}
+
+/**
+ * Update currency settings for 3.7.0
+ *
+ * @return void
+ */
+function wc_update_370_mro_std_currency() {
+	global $wpdb;
+
+	// Fix currency settings for MRU and STN currency.
+	$current_currency = get_option( 'woocommerce_currency' );
+
+	if ( 'MRO' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'MRU' );
+	}
+
+	if ( 'STD' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'STN' );
+	}
+
+	// Update MRU currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'MRU', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		),
+		array(
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'MRO', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		)
+	);
+
+	// Update STN currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'STN', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		),
+		array(
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'STD', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		)
+	);
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_370_db_version() {
+	WC_Install::update_db_version( '3.7.0' );
 }

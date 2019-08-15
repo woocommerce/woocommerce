@@ -205,7 +205,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		$accounts = array();
 
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce verification already handled in WC_Admin_Settings::save()
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification -- Nonce verification already handled in WC_Admin_Settings::save()
 		if ( isset( $_POST['bacs_account_name'] ) && isset( $_POST['bacs_account_number'] ) && isset( $_POST['bacs_bank_name'] )
 			 && isset( $_POST['bacs_sort_code'] ) && isset( $_POST['bacs_iban'] ) && isset( $_POST['bacs_bic'] ) ) {
 
@@ -306,7 +306,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 				// BACS account fields shown on the thanks page and in emails.
 				$account_fields = apply_filters(
-					'woocommerce_bacs_account_fields', array(
+					'woocommerce_bacs_account_fields',
+					array(
 						'bank_name'      => array(
 							'label' => __( 'Bank', 'woocommerce' ),
 							'value' => $bacs_account->bank_name,
@@ -327,7 +328,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 							'label' => __( 'BIC', 'woocommerce' ),
 							'value' => $bacs_account->bic,
 						),
-					), $order_id
+					),
+					$order_id
 				);
 
 				foreach ( $account_fields as $field_key => $field ) {
@@ -386,7 +388,8 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 			// Locale information to be used - only those that are not 'Sort Code'.
 			$this->locale = apply_filters(
-				'woocommerce_get_bacs_locale', array(
+				'woocommerce_get_bacs_locale',
+				array(
 					'AU' => array(
 						'sortcode' => array(
 							'label' => __( 'BSB', 'woocommerce' ),

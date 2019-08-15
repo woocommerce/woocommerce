@@ -44,7 +44,6 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'icanhazip'         => 'http://icanhazip.com',
 		'ipify'             => 'http://api.ipify.org/',
 		'ipecho'            => 'http://ipecho.net/plain',
 		'ident'             => 'http://ident.me',
@@ -149,7 +148,7 @@ class WC_Geolocation {
 
 	/**
 	 * Get user IP Address using an external service.
-	 * This is used mainly as a fallback for users on localhost where
+	 * This can be used as a fallback for users on localhost where
 	 * get_ip_address() will be a local IP and non-geolocatable.
 	 *
 	 * @return string
@@ -192,7 +191,7 @@ class WC_Geolocation {
 	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
-	public static function geolocate_ip( $ip_address = '', $fallback = true, $api_fallback = true ) {
+	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
 		// Filter to allow custom geolocation of the IP address.
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
@@ -238,13 +237,13 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		$upload_dir = wp_upload_dir();
-
-		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoLite2-Country.mmdb', $deprecated );
+		return apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', $deprecated );
 	}
 
 	/**
 	 * Update geoip database.
+	 *
+	 * Extract files with PharData. Tool built into PHP since 5.3.
 	 */
 	public static function update_database() {
 		$logger = wc_get_logger();
@@ -256,31 +255,27 @@ class WC_Geolocation {
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
-		$upload_dir        = wp_upload_dir();
-		$tmp_database_path = download_url( self::GEOLITE2_DB );
+		$database             = 'GeoLite2-Country.mmdb';
+		$target_database_path = self::get_local_database_path();
+		$tmp_database_path    = download_url( self::GEOLITE2_DB );
 
 		if ( ! is_wp_error( $tmp_database_path ) ) {
+			WP_Filesystem();
+
+			global $wp_filesystem;
+
 			try {
-				// GeoLite2 database name.
-				$database  = 'GeoLite2-Country.mmdb';
-				$dest_path = trailingslashit( $upload_dir['basedir'] ) . $database;
+				// Make sure target dir exists.
+				$wp_filesystem->mkdir( dirname( $target_database_path ) );
 
 				// Extract files with PharData. Tool built into PHP since 5.3.
-				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.PHP.NewClasses.phardataFound
+				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.Classes.NewClasses.phardataFound
 				$file_path = trailingslashit( $file->current()->getFileName() ) . $database;
+				$file->extractTo( dirname( $tmp_database_path ), $file_path, true );
 
-				// Extract under uploads directory.
-				$file->extractTo( $upload_dir['basedir'], $file_path, true );
-
-				// Remove old database.
-				@unlink( $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
-
-				// Copy database and delete tmp directories.
-				@rename( trailingslashit( $upload_dir['basedir'] ) . $file_path, $dest_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_rename
-				@rmdir( trailingslashit( $upload_dir['basedir'] ) . $file->current()->getFileName() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.directory_rmdir
-
-				// Set correct file permission.
-				@chmod( $dest_path, 0644 ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.chmod_chmod
+				// Move file and delete temp.
+				$wp_filesystem->move( trailingslashit( dirname( $tmp_database_path ) ) . $file_path, $target_database_path, true );
+				$wp_filesystem->delete( trailingslashit( dirname( $tmp_database_path ) ) . $file->current()->getFileName() );
 			} catch ( Exception $e ) {
 				$logger->notice( $e->getMessage(), array( 'source' => 'geolocation' ) );
 
@@ -288,8 +283,8 @@ class WC_Geolocation {
 				wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 				wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 			}
-
-			@unlink( $tmp_database_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
+			// Delete temp file regardless of success.
+			$wp_filesystem->delete( $tmp_database_path );
 		} else {
 			$logger->notice(
 				'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),

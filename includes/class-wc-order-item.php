@@ -38,7 +38,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://developer.wordpress.org/reference/functions/add_metadata/.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 *
 	 * @var string
@@ -85,7 +85,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function apply_changes() {
 		if ( function_exists( 'array_replace' ) ) {
-			$this->data = array_replace( $this->data, $this->changes ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replaceFound
+			$this->data = array_replace( $this->data, $this->changes ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_replaceFound
 		} else { // PHP 5.2 compatibility.
 			foreach ( $this->changes as $key => $change ) {
 				$this->data[ $key ] = $change;
@@ -186,7 +186,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $value Item name.
 	 */
 	public function set_name( $value ) {
-		$this->set_prop( 'name', wc_clean( $value ) );
+		$this->set_prop( 'name', wp_check_invalid_utf8( $value ) );
 	}
 
 	/*

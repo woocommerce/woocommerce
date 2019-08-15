@@ -81,9 +81,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
-		$order->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+		$order->set_order_key( wc_generate_order_key() );
 		parent::create( $order );
-		do_action( 'woocommerce_new_order', $order->get_id() );
+		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
 	/**
@@ -107,17 +107,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$date_paid = get_post_meta( $id, '_paid_date', true );
 		}
 
-		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-			$customer_id = $post_object->post_author;
-		} else {
-			$customer_id = get_post_meta( $id, '_customer_user', true );
-		}
-
 		$order->set_props(
 			array(
 				'order_key'            => get_post_meta( $id, '_order_key', true ),
-				'customer_id'          => $customer_id,
+				'customer_id'          => get_post_meta( $id, '_customer_user', true ),
 				'billing_first_name'   => get_post_meta( $id, '_billing_first_name', true ),
 				'billing_last_name'    => get_post_meta( $id, '_billing_last_name', true ),
 				'billing_company'      => get_post_meta( $id, '_billing_company', true ),
@@ -163,10 +156,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
 
+		// Also grab the current status so we can compare.
+		$previous_status = get_post_status( $order->get_id() );
+
 		// Update the order.
 		parent::update( $order );
 
-		do_action( 'woocommerce_update_order', $order->get_id() );
+		// Fire a hook depending on the status - this should be considered a creation if it was previously draft status.
+		$new_status = $order->get_status( 'edit' );
+
+		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft' ), true ) ) {
+			do_action( 'woocommerce_new_order', $order->get_id(), $order );
+		} else {
+			do_action( 'woocommerce_update_order', $order->get_id(), $order );
+		}
 	}
 
 	/**
@@ -196,26 +199,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
-
-			if ( 'date_paid' === $prop ) {
-				// In 3.0.x we store this as a UTC timestamp.
-				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
-
-				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
-				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
-
-			} elseif ( 'date_completed' === $prop ) {
-				// In 3.0.x we store this as a UTC timestamp.
-				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
-
-				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
-				update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
-
-			} else {
-				update_post_meta( $id, $meta_key, $value );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+			switch ( $prop ) {
+				case 'date_paid':
+				case 'date_completed':
+					$value = ! is_null( $value ) ? $value->getTimestamp() : '';
+					break;
 			}
 
-			$updated_props[] = $prop;
+			$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
+
+			if ( $updated ) {
+				$updated_props[] = $prop;
+			}
 		}
 
 		$address_props = array(
@@ -248,10 +244,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		foreach ( $address_props as $props_key => $props ) {
 			$props_to_update = $this->get_props_to_update( $order, $props );
 			foreach ( $props_to_update as $meta_key => $prop ) {
-				$value = $order->{"get_$prop"}( 'edit' );
-				update_post_meta( $id, $meta_key, $value );
-				$updated_props[] = $prop;
-				$updated_props[] = $props_key;
+				$value   = $order->{"get_$prop"}( 'edit' );
+				$value   = is_string( $value ) ? wp_slash( $value ) : $value;
+				$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
+
+				if ( $updated ) {
+					$updated_props[] = $prop;
+					$updated_props[] = $props_key;
+				}
 			}
 		}
 
@@ -265,9 +265,23 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
 		}
 
-		// If customer email changed, update any downloadable permissions.
-		if ( in_array( 'billing_email', $updated_props ) ) {
-			$this->update_downloadable_permissions( $order );
+		// Legacy date handling. @todo remove in 4.0.
+		if ( in_array( 'date_paid', $updated_props, true ) ) {
+			$value = $order->get_date_paid( 'edit' );
+			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+			update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
+		}
+
+		if ( in_array( 'date_completed', $updated_props, true ) ) {
+			$value = $order->get_date_completed( 'edit' );
+			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+			update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
+		}
+
+		// If customer changed, update any downloadable permissions.
+		if ( in_array( 'customer_id', $updated_props ) || in_array( 'billing_email', $updated_props ) ) {
+			$data_store = WC_Data_Store::load( 'customer-download' );
+			$data_store->update_user_by_order_id( $id, $order->get_customer_id(), $order->get_billing_email() );
 		}
 
 		// Mark user account as active.
@@ -488,8 +502,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @var array
 		 */
 		$search_fields = array_map(
-			'wc_clean', apply_filters(
-				'woocommerce_shop_order_search_fields', array(
+			'wc_clean',
+			apply_filters(
+				'woocommerce_shop_order_search_fields',
+				array(
 					'_billing_address_index',
 					'_shipping_address_index',
 					'_billing_last_name',
@@ -650,11 +666,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'total'          => 'order_total',
 			'page'           => 'paged',
 		);
-
-		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-			$key_mapping['customer_id'] = 'author';
-		}
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {

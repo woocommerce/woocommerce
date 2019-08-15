@@ -65,7 +65,7 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 							continue;
 						}
 
-						$filter_name    = 'filter_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) );
+						$filter_name    = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
 						$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // WPCS: input var ok, CSRF ok.
 						$current_filter = array_map( 'sanitize_title', $current_filter );
 						$new_filter     = array_diff( $current_filter, array( $term_slug ) );
@@ -76,7 +76,9 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 							$link = add_query_arg( $filter_name, implode( ',', $new_filter ), $link );
 						}
 
-						echo '<li class="chosen"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a></li>';
+						$filter_classes = array( 'chosen', 'chosen-' . sanitize_html_class( str_replace( 'pa_', '', $taxonomy ) ), 'chosen-' . sanitize_html_class( str_replace( 'pa_', '', $taxonomy ) . '-' . $term_slug ) );
+
+						echo '<li class="' . esc_attr( implode( ' ', $filter_classes ) ) . '"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a></li>';
 					}
 				}
 			}

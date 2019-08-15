@@ -1,6 +1,7 @@
 /* jshint node:true */
 module.exports = function( grunt ) {
 	'use strict';
+	var sass = require( 'node-sass' );
 
 	grunt.initConfig({
 
@@ -9,7 +10,8 @@ module.exports = function( grunt ) {
 			css: 'assets/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
-			js: 'assets/js'
+			js: 'assets/js',
+			php: 'includes'
 		},
 
 		// JavaScript linting with JSHint.
@@ -18,13 +20,10 @@ module.exports = function( grunt ) {
 				jshintrc: '.jshintrc'
 			},
 			all: [
-				'Gruntfile.js',
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js',
-				'includes/gateways/simplify-commerce/assets/js/*.js',
-				'!includes/gateways/simplify-commerce/assets/js/*.min.js'
+				'!<%= dirs.js %>/frontend/*.min.js'
 			]
 		},
 
@@ -75,9 +74,13 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/jquery-flot/jquery.flot.time.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.time.js'],
 					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
 					'<%= dirs.js %>/jquery-qrcode/jquery.qrcode.min.js': ['<%= dirs.js %>/jquery-qrcode/jquery.qrcode.js'],
-					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': ['<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'],
+					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': [
+						'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'
+					],
 					'<%= dirs.js %>/jquery-tiptip/jquery.tipTip.min.js': ['<%= dirs.js %>/jquery-tiptip/jquery.tipTip.js'],
-					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': ['<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'],
+					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': [
+						'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'
+					],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.js'],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.js'],
 					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js'],
@@ -85,6 +88,8 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/photoswipe/photoswipe.min.js': ['<%= dirs.js %>/photoswipe/photoswipe.js'],
 					'<%= dirs.js %>/photoswipe/photoswipe-ui-default.min.js': ['<%= dirs.js %>/photoswipe/photoswipe-ui-default.js'],
 					'<%= dirs.js %>/round/round.min.js': ['<%= dirs.js %>/round/round.js'],
+					'<%= dirs.js %>/selectWoo/selectWoo.full.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.full.js'],
+					'<%= dirs.js %>/selectWoo/selectWoo.min.js': ['<%= dirs.js %>/selectWoo/selectWoo.js'],
 					'<%= dirs.js %>/stupidtable/stupidtable.min.js': ['<%= dirs.js %>/stupidtable/stupidtable.js'],
 					'<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.min.js': ['<%= dirs.js %>/zeroclipboard/jquery.zeroclipboard.js']
 				}
@@ -112,6 +117,7 @@ module.exports = function( grunt ) {
 		sass: {
 			compile: {
 				options: {
+					implementation: sass,
 					sourceMap: 'none'
 				},
 				files: [{
@@ -191,7 +197,6 @@ module.exports = function( grunt ) {
 				options: {
 					potFilename: 'woocommerce.pot',
 					exclude: [
-						'apigen/.*',
 						'vendor/.*',
 						'tests/.*',
 						'tmp/.*'
@@ -224,12 +229,12 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php',               // Include all files
-					'!apigen/**',             // Exclude apigen/
 					'!includes/libraries/**', // Exclude libraries/
 					'!node_modules/**',       // Exclude node_modules/
 					'!tests/**',              // Exclude tests/
 					'!vendor/**',             // Exclude vendor/
-					'!tmp/**'                 // Exclude tmp/
+					'!tmp/**',                // Exclude tmp/
+					'!packages/*/vendor/**'   // Exclude packages/*/vendor
 				],
 				expand: true
 			}
@@ -240,13 +245,6 @@ module.exports = function( grunt ) {
 			options: {
 				stdout: true,
 				stderr: true
-			},
-			apidocs: {
-				command: [
-					'vendor/bin/apigen generate -q',
-					'cd apigen',
-					'php hook-docs.php'
-				].join( '&&' )
 			},
 			e2e_test: {
 				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
@@ -260,7 +258,9 @@ module.exports = function( grunt ) {
 			contributors: {
 				command: [
 					'echo "Generating contributor list since <%= fromDate %>"',
-					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc --showlogin true > contributors.md'
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
+					' --showlogin true > contributors.md'
 				].join( '&&' )
 			}
 		},
@@ -277,20 +277,13 @@ module.exports = function( grunt ) {
 						{
 							config: 'authToken',
 							type: 'input',
-							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
+							message: '(optional) Provide a personal access token.' +
+							' This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
 						}
 					]
 				}
 			}
 		},
-
-		// Clean the directory.
-		clean: {
-			apidocs: {
-				src: [ 'wc-apidocs' ]
-			}
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -298,15 +291,13 @@ module.exports = function( grunt ) {
 			},
 			dist: {
 				src:  [
-					'**/*.php',                                                  // Include all files
-					'!apigen/**',                                                // Exclude apigen/
-					'!includes/api/legacy/**',                                   // Exclude legacy REST API
-					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
-					'!includes/libraries/**',                                    // Exclude libraries/
-					'!node_modules/**',                                          // Exclude node_modules/
-					'!tests/cli/**',                                             // Exclude tests/cli/
-					'!tmp/**',                                                   // Exclude tmp/
-					'!vendor/**'                                                 // Exclude vendor/
+					'**/*.php', // Include all php files.
+					'!includes/api/legacy/**',
+					'!includes/libraries/**',
+					'!node_modules/**',
+					'!tests/cli/**',
+					'!tmp/**',
+					'!vendor/**'
 				]
 			}
 		},
@@ -315,13 +306,7 @@ module.exports = function( grunt ) {
 		postcss: {
 			options: {
 				processors: [
-					require( 'autoprefixer' )({
-						browsers: [
-							'> 0.1%',
-							'ie 8',
-							'ie 9'
-						]
-					})
+					require( 'autoprefixer' )
 				]
 			},
 			dist: {
@@ -345,6 +330,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
+	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-prompt' );
@@ -359,8 +345,7 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'js', [
 		'jshint',
 		'uglify:admin',
-		'uglify:frontend',
-		'uglify:flexslider'
+		'uglify:frontend'
 	]);
 
 	grunt.registerTask( 'css', [
@@ -371,9 +356,16 @@ module.exports = function( grunt ) {
 		'concat'
 	]);
 
-	grunt.registerTask( 'docs', [
-		'clean:apidocs',
-		'shell:apidocs'
+	grunt.registerTask( 'assets', [
+		'js',
+		'css'
+	]);
+
+	grunt.registerTask( 'e2e-build', [
+		'uglify:admin',
+		'uglify:frontend',
+		'uglify:flexslider',
+		'css'
 	]);
 
 	grunt.registerTask( 'contributors', [

@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_string_to_bool( $string ) {
-	return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string );
+	return is_bool( $string ) ? $string : ( 'yes' === strtolower( $string ) || 1 === $string || 'true' === strtolower( $string ) || '1' === $string );
 }
 
 /**
@@ -228,7 +228,7 @@ function wc_round_tax_total( $value, $precision = null ) {
 	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 
 	if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {
-		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.round_modeFound
+		$rounded_tax = round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 	} elseif ( 2 === wc_get_tax_rounding_mode() ) {
 		$rounded_tax = wc_legacy_round_half_down( $value, $precision );
 	} else {
@@ -363,6 +363,20 @@ function wc_format_coupon_code( $value ) {
 }
 
 /**
+ * Sanitize a coupon code.
+ *
+ * Uses sanitize_post_field since coupon codes are stored as
+ * post_titles - the sanitization and escaping must match.
+ *
+ * @since  3.6.0
+ * @param  string $value Coupon code to format.
+ * @return string
+ */
+function wc_sanitize_coupon_code( $value ) {
+	return sanitize_post_field( 'post_title', $value, 0, 'db' );
+}
+
+/**
  * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
  * Non-scalar values are ignored.
  *
@@ -374,6 +388,20 @@ function wc_clean( $var ) {
 		return array_map( 'wc_clean', $var );
 	} else {
 		return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
+	}
+}
+
+/**
+ * Function wp_check_invalid_utf8 with recursive array support.
+ *
+ * @param string|array $var Data to sanitize.
+ * @return string|array
+ */
+function wc_check_invalid_utf8( $var ) {
+	if ( is_array( $var ) ) {
+		return array_map( 'wc_check_invalid_utf8', $var );
+	} else {
+		return wp_check_invalid_utf8( $var );
 	}
 }
 
@@ -398,7 +426,8 @@ function wc_sanitize_textarea( $var ) {
 function wc_sanitize_tooltip( $var ) {
 	return htmlspecialchars(
 		wp_kses(
-			html_entity_decode( $var ), array(
+			html_entity_decode( $var ),
+			array(
 				'br'     => array(),
 				'em'     => array(),
 				'strong' => array(),
@@ -527,8 +556,10 @@ function wc_get_price_decimals() {
  */
 function wc_price( $price, $args = array() ) {
 	$args = apply_filters(
-		'wc_price_args', wp_parse_args(
-			$args, array(
+		'wc_price_args',
+		wp_parse_args(
+			$args,
+			array(
 				'ex_tax_label'       => false,
 				'currency'           => '',
 				'decimal_separator'  => wc_get_price_decimal_separator(),
@@ -575,10 +606,8 @@ function wc_price( $price, $args = array() ) {
  * @return int
  */
 function wc_let_to_num( $size ) {
-	$l    = substr( $size, -1 );
-	$ret  = substr( $size, 0, -1 );
-	$byte = 1024;
-
+	$l   = substr( $size, -1 );
+	$ret = (int) substr( $size, 0, -1 );
 	switch ( strtoupper( $l ) ) {
 		case 'P':
 			$ret *= 1024;
@@ -898,10 +927,10 @@ function wc_format_postcode( $postcode, $country ) {
 	switch ( $country ) {
 		case 'CA':
 		case 'GB':
-			$postcode = trim( substr_replace( $postcode, ' ', -3, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', -3, 0 );
 			break;
 		case 'IE':
-			$postcode = trim( substr_replace( $postcode, ' ', 3, 0 ) );
+			$postcode = substr_replace( $postcode, ' ', 3, 0 );
 			break;
 		case 'BR':
 		case 'PL':
@@ -916,9 +945,12 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'US':
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
+		case 'NL':
+			$postcode = substr_replace( $postcode, ' ', 4, 0 );
+			break;
 	}
 
-	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
+	return apply_filters( 'woocommerce_format_postcode', trim( $postcode ), $country );
 }
 
 /**
@@ -941,7 +973,22 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	return preg_replace( '/[^0-9\+\-\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	if ( ! WC_Validation::is_phone( $phone ) ) {
+		return '';
+	}
+	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+}
+
+/**
+ * Sanitize phone number.
+ * Allows only numbers and "+" (plus sign).
+ *
+ * @since 3.6.0
+ * @param string $phone Phone number.
+ * @return string
+ */
+function wc_sanitize_phone_number( $phone ) {
+	return preg_replace( '/[^\d+]/', '', $phone );
 }
 
 /**
@@ -1015,7 +1062,8 @@ function wc_format_product_short_description( $content ) {
 
 		return wpautop(
 			$markdown->transform(
-				$content, array(
+				$content,
+				array(
 					'unslash' => false,
 				)
 			)
@@ -1084,7 +1132,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
-	return trim( wp_unslash( strip_tags( $term ) ) );
+	return trim( wp_strip_all_tags( wp_unslash( $term ) ) );
 }
 
 if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
@@ -1215,7 +1263,7 @@ function wc_format_weight( $weight ) {
  * @return string
  */
 function wc_format_dimensions( $dimensions ) {
-	$dimension_string = implode( ' x ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
+	$dimension_string = implode( ' &times; ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
 
 	if ( ! empty( $dimension_string ) ) {
 		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
@@ -1349,6 +1397,23 @@ function wc_implode_html_attributes( $raw_attributes ) {
 }
 
 /**
+ * Escape JSON for use on HTML or attribute text nodes.
+ *
+ * @since 3.5.5
+ * @param string $json JSON to escape.
+ * @param bool   $html True if escaping for HTML text node, false for attributes. Determines how quotes are handled.
+ * @return string Escaped JSON.
+ */
+function wc_esc_json( $json, $html = false ) {
+	return _wp_specialchars(
+		$json,
+		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only.
+		'UTF-8',                           // json_encode() outputs UTF-8 (really just ASCII), not the blog's charset.
+		true                               // Double escape entities: `&amp;` -> `&amp;amp;`.
+	);
+}
+
+/**
  * Parse a relative date option from the settings API into a standard format.
  *
  * @since 3.4.0
@@ -1363,10 +1428,13 @@ function wc_parse_relative_date_option( $raw_value ) {
 		'years'  => __( 'Year(s)', 'woocommerce' ),
 	);
 
-	$value = wp_parse_args( (array) $raw_value, array(
-		'number' => '',
-		'unit'   => 'days',
-	) );
+	$value = wp_parse_args(
+		(array) $raw_value,
+		array(
+			'number' => '',
+			'unit'   => 'days',
+		)
+	);
 
 	$value['number'] = ! empty( $value['number'] ) ? absint( $value['number'] ) : '';
 
@@ -1376,3 +1444,27 @@ function wc_parse_relative_date_option( $raw_value ) {
 
 	return $value;
 }
+
+/**
+ * Format the endpoint slug, strip out anything not allowed in a url.
+ *
+ * @since 3.5.0
+ * @param string $raw_value The raw value.
+ * @return string
+ */
+function wc_sanitize_endpoint_slug( $raw_value ) {
+	return sanitize_title( $raw_value );
+}
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_order_received_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_add_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_delete_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_set_default_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_orders_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_view_order_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_downloads_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_account_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_address_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_payment_methods_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_lost_password_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_logout_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

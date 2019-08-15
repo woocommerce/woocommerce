@@ -92,7 +92,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_get_prices_include_tax() {
 		$object = new WC_Order();
-		$set_to = 'USD';
 		$object->set_prices_include_tax( 1 );
 		$this->assertTrue( $object->get_prices_include_tax() );
 	}
@@ -314,6 +313,24 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_coupons
+	 */
+	public function test_get_coupons() {
+		$object = new WC_Order();
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_props(
+			array(
+				'code'         => '12345',
+				'discount'     => 10,
+				'discount_tax' => 5,
+			)
+		);
+		$object->add_item( $item );
+		$object->save();
+		$this->assertCount( 1, $object->get_coupons() );
+	}
+
+	/**
 	 * Test: get_fees
 	 */
 	public function test_get_fees() {
@@ -453,9 +470,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: get_used_coupons
+	 * Test: get_coupon_codes
 	 */
-	public function test_get_used_coupons() {
+	public function test_get_coupon_codes() {
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Coupon();
 		$item->set_props(
@@ -467,7 +484,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		);
 		$object->add_item( $item );
 		$object->save();
-		$this->assertCount( 1, $object->get_used_coupons() );
+		$this->assertCount( 1, $object->get_coupon_codes() );
 	}
 
 	/**
@@ -942,6 +959,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertContains( 'Update status event failed', $note->content );
 
 		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
+	}
+
+	/**
+	 * Test: status_transition
+	 */
+	public function test_status_transition_handles_transition_errors() {
+		$object = new WC_Order();
+		$object->save();
+
+		add_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
+		$object->update_status( 'on-hold' );
+		remove_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
+
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
+
+		$this->assertContains( __( 'Error during status transition.', 'woocommerce' ), $note->content );
 	}
 
 	/**
@@ -1797,6 +1836,37 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$order->remove_coupon( 'test' );
 		$this->assertEquals( 50, $order->get_total() );
+	}
+
+	/**
+	 * Test the coupon usage limit based on guest orders with emails only.
+	 *
+	 * @return void
+	 */
+	public function test_coupon_email_usage_limit() {
+		// Orders.
+		$order1 = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
+
+		// Setup coupon.
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'usage-limit-coupon' );
+		$coupon->set_amount( 100 );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_usage_limit_per_user( 1 );
+		$coupon->save();
+
+		// Set as guest users with the same email.
+		$order1->set_customer_id( 0 );
+		$order1->set_billing_email( 'coupontest@example.com' );
+		$order2->set_customer_id( 0 );
+		$order2->set_billing_email( 'coupontest@example.com' );
+
+		$order1->apply_coupon( 'usage-limit-coupon' );
+		$this->assertEquals( 1, count( $order1->get_coupons() ) );
+
+		$order2->apply_coupon( 'usage-limit-coupon' );
+		$this->assertEquals( 0, count( $order2->get_coupons() ) );
 	}
 
 	/**

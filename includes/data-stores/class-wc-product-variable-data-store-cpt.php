@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Variable Product Data Store: Stored in CPT.
  *
- * @version  3.0.0
+ * @version 3.0.0
  */
 class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface, WC_Product_Variable_Data_Store_Interface {
 
@@ -43,7 +43,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						'is_visible'   => 0,
 						'is_variation' => 0,
 						'is_taxonomy'  => 0,
-					), (array) $meta_attribute_value
+					),
+					(array) $meta_attribute_value
 				);
 
 				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
@@ -95,9 +96,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Read product data.
 	 *
-	 * @since 3.0.0
-	 *
 	 * @param WC_Product $product Product object.
+	 *
+	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
 		parent::read_product_data( $product );
@@ -110,8 +111,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Loads variation child IDs.
 	 *
-	 * @param  WC_Product $product Product object.
-	 * @param  bool       $force_read True to bypass the transient.
+	 * @param WC_Product $product Product object.
+	 * @param bool       $force_read True to bypass the transient.
+	 *
 	 * @return array
 	 */
 	public function read_children( &$product, $force_read = false ) {
@@ -158,6 +160,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Loads an array of attributes used for variations, as well as their possible values.
 	 *
 	 * @param WC_Product $product Product object.
+	 *
 	 * @return array
 	 */
 	public function read_variation_attributes( &$product ) {
@@ -166,7 +169,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$variation_attributes = array();
 		$attributes           = $product->get_attributes();
 		$child_ids            = $product->get_children();
-		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id();
+		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'product_' . $product->get_id() ) . 'product_variation_attributes_' . $product->get_id();
 		$cache_group          = 'products';
 		$cached_data          = wp_cache_get( $cache_key, $cache_group );
 
@@ -174,21 +177,28 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return $cached_data;
 		}
 
-		if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
+		if ( ! empty( $attributes ) ) {
 			foreach ( $attributes as $attribute ) {
 				if ( empty( $attribute['is_variation'] ) ) {
 					continue;
 				}
 
 				// Get possible values for this attribute, for only visible variations.
-				$values = array_unique(
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-							wc_variation_attribute_name( $attribute['name'] )
+				if ( ! empty( $child_ids ) ) {
+					$format     = array_fill( 0, count( $child_ids ), '%d' );
+					$query_in   = '(' . implode( ',', $format ) . ')';
+					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
+					$values     = array_unique(
+						$wpdb->get_col(
+							$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
+								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
+								$query_args
+							)
 						)
-					)
-				);
+					);
+				} else {
+					$values = array();
+				}
 
 				// Empty value indicates that all options for given attribute are available.
 				if ( in_array( null, $values, true ) || in_array( '', $values, true ) || empty( $values ) ) {
@@ -230,10 +240,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Can be filtered by plugins which modify costs, but otherwise will include the raw meta costs unlike get_price() which runs costs through the woocommerce_get_price filter.
 	 * This is to ensure modified prices are not cached, unless intended.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Product $product Product object.
-	 * @param  bool       $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 * @param WC_Product $product Product object.
+	 * @param bool       $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
+	 *
 	 * @return array of prices
+	 * @since  3.0.0
 	 */
 	public function read_price_data( &$product, $for_display = false ) {
 
@@ -242,9 +253,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 *
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name = 'wc_var_prices_' . $product->get_id();
+		$transient_name    = 'wc_var_prices_' . $product->get_id();
+		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash        = $this->get_price_hash( $product, $for_display );
 
-		$price_hash = $this->get_price_hash( $product, $for_display );
+		// Check if prices array is stale.
+		if ( ! isset( $this->prices_array['version'] ) || $this->prices_array['version'] !== $transient_version ) {
+			$this->prices_array = array(
+				'version' => $transient_version,
+			);
+		}
 
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
@@ -254,16 +272,26 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
 			// If the product version has changed since the transient was last saved, reset the transient cache.
-			if ( empty( $transient_cached_prices_array['version'] ) || WC_Cache_Helper::get_transient_version( 'product' ) !== $transient_cached_prices_array['version'] ) {
-				$transient_cached_prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+			if ( ! isset( $transient_cached_prices_array['version'] ) || $transient_version !== $transient_cached_prices_array['version'] ) {
+				$transient_cached_prices_array = array(
+					'version' => $transient_version,
+				);
 			}
 
 			// If the prices are not stored for this hash, generate them and add to the transient.
 			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
-				$prices         = array();
-				$regular_prices = array();
-				$sale_prices    = array();
-				$variation_ids  = $product->get_visible_children();
+				$prices_array = array(
+					'price'         => array(),
+					'regular_price' => array(),
+					'sale_price'    => array(),
+				);
+
+				$variation_ids = $product->get_visible_children();
+
+				if ( is_callable( '_prime_post_caches' ) ) {
+					_prime_post_caches( $variation_ids );
+				}
+
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
 
@@ -286,38 +314,44 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						if ( $for_display ) {
 							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
 								$price         = '' === $price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $price,
 									)
 								);
 								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $regular_price,
 									)
 								);
 								$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $sale_price,
 									)
 								);
 							} else {
 								$price         = '' === $price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $price,
 									)
 								);
 								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $regular_price,
 									)
 								);
 								$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $sale_price,
 									)
@@ -325,17 +359,18 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							}
 						}
 
-						$prices[ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
-						$regular_prices[ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
-						$sale_prices[ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
+						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
+						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+
+						$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
 					}
 				}
 
-				$transient_cached_prices_array[ $price_hash ] = array(
-					'price'         => $prices,
-					'regular_price' => $regular_prices,
-					'sale_price'    => $sale_prices,
-				);
+				// Add all pricing data to the transient array.
+				foreach ( $prices_array as $key => $values ) {
+					$transient_cached_prices_array[ $price_hash ][ $key ] = $values;
+				}
 
 				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
@@ -353,9 +388,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Create unique cache key based on the tax location (affects displayed/cached prices), product version and active price filters.
 	 * DEVELOPERS should filter this hash if offering conditional pricing to keep it unique.
 	 *
+	 * @param WC_Product $product Product object.
+	 * @param bool       $for_display If taxes should be calculated or not.
+	 *
 	 * @since  3.0.0
-	 * @param  WC_Product $product Product object.
-	 * @param  bool       $for_display If taxes should be calculated or not.
 	 * @return string
 	 */
 	protected function get_price_hash( &$product, $for_display = false ) {
@@ -374,47 +410,57 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash   = md5(
-			wp_json_encode(
-				apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display )
-			)
-		);
-
-		return $price_hash;
+		return md5( wp_json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display ) ) );
 	}
 
 	/**
 	 * Does a child have a weight set?
 	 *
-	 * @since 3.0.0
 	 * @param WC_Product $product Product object.
+	 *
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function child_has_weight( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		if ( ! $children ) {
+			return false;
+		}
+
+		$format   = array_fill( 0, count( $children ), '%d' );
+		$query_in = '(' . implode( ',', $format ) . ')';
+
+		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
 	 * Does a child have dimensions set?
 	 *
-	 * @since 3.0.0
 	 * @param WC_Product $product Product object.
+	 *
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		if ( ! $children ) {
+			return false;
+		}
+
+		$format   = array_fill( 0, count( $children ), '%d' );
+		$query_in = '(' . implode( ',', $format ) . ')';
+
+		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
 	 * Is a child in stock?
 	 *
-	 * @since 3.0.0
 	 * @param WC_Product $product Product object.
+	 *
+	 * @since  3.0.0
 	 * @return boolean
 	 */
 	public function child_is_in_stock( $product ) {
@@ -424,9 +470,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Does a child have a stock status?
 	 *
-	 * @since 3.3.0
 	 * @param WC_Product $product Product object.
 	 * @param string     $status 'instock', 'outofstock', or 'onbackorder'.
+	 *
+	 * @since  3.3.0
 	 * @return boolean
 	 */
 	public function child_has_stock_status( $product, $status ) {
@@ -435,12 +482,22 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children = $product->get_children();
 
 		if ( $children ) {
+			$format     = array_fill( 0, count( $children ), '%d' );
+			$query_in   = '(' . implode( ',', $format ) . ')';
+			$query_args = array( 'stock_status' => $status ) + $children;
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+				$query = "SELECT COUNT( post_id ) FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}";
+			} else {
+				$query = "SELECT COUNT( product_id ) FROM {$wpdb->wc_product_meta_lookup} WHERE stock_status = %s AND product_id IN {$query_in}";
+			}
 			$children_with_status = $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-					$status
+					$query,
+					$query_args
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		} else {
 			$children_with_status = 0;
 		}
@@ -454,6 +511,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 * @param string     $previous_name Variation previous name.
 	 * @param string     $new_name Variation new name.
+	 *
 	 * @since 3.0.0
 	 */
 	public function sync_variation_names( &$product, $previous_name = '', $new_name = '' ) {
@@ -479,21 +537,29 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * This sync function syncs downwards (from parent to child) when the variable product is saved.
 	 *
 	 * @param WC_Product $product Product object.
+	 *
 	 * @since 3.0.0
 	 */
 	public function sync_managed_variation_stock_status( &$product ) {
 		global $wpdb;
 
 		if ( $product->get_manage_stock() ) {
-			$status           = $product->get_stock_status();
-			$children         = $product->get_children();
-			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-			$changed          = false;
-			foreach ( $managed_children as $managed_child ) {
-				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
-					$changed = true;
+			$children = $product->get_children();
+			$changed  = false;
+
+			if ( $children ) {
+				$status           = $product->get_stock_status();
+				$format           = array_fill( 0, count( $children ), '%d' );
+				$query_in         = '(' . implode( ',', $format ) . ')';
+				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
+				foreach ( $managed_children as $managed_child ) {
+					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
+						$this->update_lookup_table( $managed_child, 'wc_product_meta_lookup' );
+						$changed = true;
+					}
 				}
 			}
+
 			if ( $changed ) {
 				$children = $this->read_children( $product, true );
 				$product->set_children( $children['all'] );
@@ -505,21 +571,28 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Sync variable product prices with children.
 	 *
-	 * @since 3.0.0
 	 * @param WC_Product $product Product object.
+	 *
+	 * @since 3.0.0
 	 */
 	public function sync_price( &$product ) {
 		global $wpdb;
 
 		$children = $product->get_visible_children();
-		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		if ( $children ) {
+			$format   = array_fill( 0, count( $children ), '%d' );
+			$query_in = '(' . implode( ',', $format ) . ')';
+			$prices   = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
+		} else {
+			$prices = array();
+		}
 
 		delete_post_meta( $product->get_id(), '_price' );
 		delete_post_meta( $product->get_id(), '_sale_price' );
 		delete_post_meta( $product->get_id(), '_regular_price' );
 
 		if ( $prices ) {
-			sort( $prices );
+			sort( $prices, SORT_NUMERIC );
 			// To allow sorting and filtering by multiple values, we have no choice but to store child prices in this manner.
 			foreach ( $prices as $price ) {
 				if ( is_null( $price ) || '' === $price ) {
@@ -528,14 +601,25 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				add_post_meta( $product->get_id(), '_price', $price, false );
 			}
 		}
+
+		$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_price', $product->get_id() );
 	}
 
 	/**
 	 * Sync variable product stock status with children.
 	 * Change does not persist unless saved by caller.
 	 *
-	 * @since 3.0.0
 	 * @param WC_Product $product Product object.
+	 *
+	 * @since 3.0.0
 	 */
 	public function sync_stock_status( &$product ) {
 		if ( $product->child_is_in_stock() ) {
@@ -550,9 +634,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Delete variations of a product.
 	 *
-	 * @since 3.0.0
 	 * @param int  $product_id Product ID.
 	 * @param bool $force_delete False to trash.
+	 *
+	 * @since 3.0.0
 	 */
 	public function delete_variations( $product_id, $force_delete = false ) {
 		if ( ! is_numeric( $product_id ) || 0 >= $product_id ) {
@@ -574,9 +659,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( ! empty( $variation_ids ) ) {
 			foreach ( $variation_ids as $variation_id ) {
 				if ( $force_delete ) {
+					do_action( 'woocommerce_before_delete_product_variation', $variation_id );
 					wp_delete_post( $variation_id, true );
+					do_action( 'woocommerce_delete_product_variation', $variation_id );
 				} else {
 					wp_trash_post( $variation_id );
+					do_action( 'woocommerce_trash_product_variation', $variation_id );
 				}
 			}
 		}

@@ -50,6 +50,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 3.5.0
 	 */
 	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+
 		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
 		WC_Install::create_terms();
 	}
@@ -84,30 +86,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Asserts thing is not WP_Error.
-	 *
-	 * @since 2.2
-	 * @param mixed  $actual  The object to assert is not an instance of WP_Error.
-	 * @param string $message A message to display if the assertion fails.
-	 */
-	public function assertNotWPError( $actual, $message = '' ) {
-		if ( ! $message && is_wp_error( $actual ) ) {
-			$message = $actual->get_error_message();
-		}
-		$this->assertNotInstanceOf( 'WP_Error', $actual, $message );
-	}
-
-	/**
-	 * Asserts thing is WP_Error.
-	 *
-	 * @param mixed  $actual  The object to assert is an instance of WP_Error.
-	 * @param string $message A message to display if the assertion fails.
-	 */
-	public function assertIsWPError( $actual, $message = '' ) {
-		$this->assertInstanceOf( 'WP_Error', $actual, $message );
-	}
-
-	/**
 	 * Throws an exception with an optional message and code.
 	 *
 	 * Note: can't use `throwException` as that's reserved.
@@ -120,24 +98,5 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function throwAnException( $message = null, $code = null ) {
 		$message = $message ? $message : "We're all doomed!";
 		throw new Exception( $message, $code );
-	}
-
-	/**
-	 * Backport assertNotFalse to PHPUnit 3.6.12 which only runs in PHP 5.2.
-	 *
-	 * @since  2.2
-	 * @param  mixed  $condition The statement to evaluate as not false.
-	 * @param  string $message   A message to display if the assertion fails.
-	 */
-	public static function assertNotFalse( $condition, $message = '' ) {
-
-		if ( version_compare( phpversion(), '5.3', '<' ) ) {
-
-			self::assertThat( $condition, self::logicalNot( self::isFalse() ), $message );
-
-		} else {
-
-			parent::assertNotFalse( $condition, $message );
-		}
 	}
 }

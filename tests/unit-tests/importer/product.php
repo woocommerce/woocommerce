@@ -1,8 +1,12 @@
 <?php
+/**
+ * Class WC_Product_CSV_Importer unit tests.
+ *
+ * @package WooCommerce\Tests\Importer
+ */
 
 /**
- * Meta
- * @package WooCommerce\Tests\Importer
+ * Test class for WC_Product_CSV_Importer.
  */
 class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
@@ -87,7 +91,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 	/**
 	 * Test import.
+	 *
 	 * @since 3.1.0
+	 * @requires PHP 5.4
 	 */
 	public function test_import() {
 		$args = array(
@@ -103,6 +109,36 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
+	}
+
+	/**
+	 * Test import should update product price and skip products with empty SKU
+	 * (see https://github.com/woocommerce/woocommerce/issues/23257).
+	 */
+	public function test_import_should_update_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 15 );
+		$product->set_sku( 'wp-pennant' );
+		$product->save();
+
+		$args = array(
+			'mapping'         => $this->get_csv_mapped_items(),
+			'parse'           => true,
+			'update_existing' => true,
+		);
+
+		$csv_file = dirname( __FILE__ ) . '/sample_update_product.csv';
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$results  = $importer->import();
+
+		$this->assertEquals( 0, count( $results['imported'] ) );
+		$this->assertEquals( 0, count( $results['failed'] ) );
+		$this->assertEquals( 1, count( $results['updated'] ) );
+		$this->assertEquals( 2, count( $results['skipped'] ) );
+
+		$updated_product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 20, $updated_product->get_price() );
 	}
 
 	/**
@@ -597,7 +633,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 *
 	 * This function is called by WP_HTTP_TestCase::http_request_listner().
 	 *
-	 * @param array $request Request arguments.
+	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.
 	 *
 	 * @return array|false mocked response or false to let WP perform a regular request.
@@ -606,6 +642,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$mocked_response = false;
 
 		if ( false !== strpos( $url, 'http://demo.woothemes.com' ) ) {
+
+			if ( ! empty( $request['filename'] ) ) {
+				copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png', $request['filename'] );
+			}
+
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
@@ -613,5 +654,15 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		}
 
 		return $mocked_response;
+	}
+
+	/**
+	 * Test WC_Product_CSV_Importer_Controller::is_file_valid_csv.
+	 */
+	public function test_is_file_valid_csv() {
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 	}
 }

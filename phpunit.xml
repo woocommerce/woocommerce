@@ -7,7 +7,6 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	verbose="true"
-	syntaxCheck="true"
 	>
 	<testsuites>
 		<testsuite name="WooCommerce Test Suite">
@@ -27,7 +26,6 @@
 				<directory suffix=".php">./includes/admin/views</directory>
 				<directory suffix=".php">./includes/api/legacy</directory>
 				<directory suffix=".php">./includes/api/v1</directory>
-				<directory suffix=".php">./includes/gateways/simplify-commerce/includes</directory>
 				<directory suffix=".php">./includes/legacy</directory>
 				<directory suffix=".php">./includes/libraries</directory>
 				<directory suffix=".php">./includes/shipping/legacy-flat-rate</directory>
@@ -38,6 +36,9 @@
 				<directory suffix=".php">./includes/updates</directory>
 				<directory suffix=".php">./includes/vendor</directory>
 				<directory suffix=".php">./includes/widgets</directory>
+				<directory suffix=".php">./packages</directory>
+				<directory suffix=".php">./src</directory>
+				<directory suffix=".php">./vendor</directory>
 				<file>./includes/wc-deprecated-functions.php</file>
 				<file>./includes/wc-template-hooks.php</file>
 				<file>./includes/wc-widget-functions.php</file>
@@ -45,6 +46,6 @@
 		</whitelist>
 	</filter>
 	<listeners>
-		<listener class="SpeedTrapListener" file="tests/includes/speed-trap-listener.php" />
+		<listener class="SpeedTrapListener" file="tests/includes/listener-loader.php" />
 	</listeners>
 </phpunit>

@@ -21,7 +21,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_order_statuses() {
 
 		$order_statuses = apply_filters(
-			'wc_order_statuses', array(
+			'wc_order_statuses',
+			array(
 				'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 				'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
 				'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
@@ -1269,6 +1270,16 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$orders   = wc_get_orders( $args );
 		$expected = array( $us_now->get_id() );
 		$this->assertEquals( $expected, $orders );
+	}
+
+	/**
+	 * Test wc_sanitize_order_id().
+	 */
+	public function test_wc_sanitize_order_id() {
+		$this->assertSame( 123, wc_sanitize_order_id( '123' ) );
+		$this->assertSame( 123, wc_sanitize_order_id( '#123' ) );
+		$this->assertSame( 123, wc_sanitize_order_id( '# 123' ) );
+		$this->assertSame( 123, wc_sanitize_order_id( 'Order #123' ) );
 	}
 
 	/**

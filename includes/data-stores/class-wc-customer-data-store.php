@@ -64,6 +64,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'syntax_highlighting',
 		'_order_count',
 		'_money_spent',
+		'_woocommerce_tracks_anon_id',
 	);
 
 	/**
@@ -117,11 +118,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		wp_update_user(
 			apply_filters(
-				'woocommerce_update_customer_args', array(
+				'woocommerce_update_customer_args',
+				array(
 					'ID'           => $customer->get_id(),
 					'role'         => $customer->get_role(),
 					'display_name' => $customer->get_display_name(),
-				), $customer
+				),
+				$customer
 			)
 		);
 		$wp_user = new WP_User( $customer->get_id() );
@@ -129,7 +132,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
-		do_action( 'woocommerce_new_customer', $customer->get_id() );
+		do_action( 'woocommerce_new_customer', $customer->get_id(), $customer );
 	}
 
 	/**
@@ -147,16 +150,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
 		}
 
-		// Only users on this site should be read.
-		if ( is_multisite() && ! is_user_member_of_blog( $customer->get_id() ) ) {
-			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
-		}
-
 		$customer_id = $customer->get_id();
 
 		// Load meta but exclude deprecated props.
 		$user_meta = array_diff_key(
-			array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ),
+			array_change_key_case( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ) ),
 			array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) )
 		);
 
@@ -186,11 +184,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function update( &$customer ) {
 		wp_update_user(
 			apply_filters(
-				'woocommerce_update_customer_args', array(
+				'woocommerce_update_customer_args',
+				array(
 					'ID'           => $customer->get_id(),
 					'user_email'   => $customer->get_email(),
 					'display_name' => $customer->get_display_name(),
-				), $customer
+				),
+				$customer
 			)
 		);
 
@@ -209,7 +209,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
-		do_action( 'woocommerce_update_customer', $customer->get_id() );
+		do_action( 'woocommerce_update_customer', $customer->get_id(), $customer );
 	}
 
 	/**
@@ -225,7 +225,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'reassign' => 0,
 			)
 		);
@@ -325,27 +326,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function get_last_order( &$customer ) {
 		global $wpdb;
 
-		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-			$query = "SELECT ID
-			FROM $wpdb->posts
-			WHERE post_author = '" . esc_sql( $customer->get_id() ) . "'
-			AND   post_type = 'shop_order'
-			AND   post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-			ORDER BY ID DESC";
-		} else {
-			$query = "SELECT posts.ID
+		$last_order = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			"SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 			WHERE meta.meta_key = '_customer_user'
 			AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
 			AND   posts.post_type = 'shop_order'
 			AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-			ORDER BY posts.ID DESC";
-		}
-
-		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-		$last_order = $wpdb->get_var( $query );
+			ORDER BY posts.ID DESC"
+			// phpcs:enable
+		);
 
 		if ( ! $last_order ) {
 			return false;
@@ -367,25 +359,17 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		if ( '' === $count ) {
 			global $wpdb;
 
-			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-				$query = "SELECT COUNT(*)
-				FROM $wpdb->posts
-				WHERE   post_type = 'shop_order'
-				AND     post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-				AND     post_author = " . esc_sql( $customer->get_id() );
-			} else {
-				$query = "SELECT COUNT(*)
+			$count = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				"SELECT COUNT(*)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 				WHERE   meta.meta_key = '_customer_user'
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'";
-			}
-
-			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-			$count = $wpdb->get_var( $query );
+				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
+				// phpcs:enable
+			);
 			update_user_meta( $customer->get_id(), '_order_count', $count );
 		}
 
@@ -410,18 +394,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			global $wpdb;
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
-
-			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-				$query = "SELECT SUM(meta.meta_value)
-					FROM $wpdb->posts as posts
-					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-					WHERE   posts.post_author   = '" . esc_sql( $customer->get_id() ) . "'
-					AND     posts.post_type     = 'shop_order'
-					AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-					AND     meta.meta_key      = '_order_total'";
-			} else {
-				$query = "SELECT SUM(meta2.meta_value)
+			$spent    = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				apply_filters(
+					'woocommerce_customer_get_total_spent_query',
+					"SELECT SUM(meta2.meta_value)
 					FROM $wpdb->posts as posts
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
@@ -429,11 +406,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
 					AND     posts.post_type     = 'shop_order'
 					AND     posts.post_status   IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-					AND     meta2.meta_key      = '_order_total'";
-			}
-
-			// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
-			$spent = $wpdb->get_var( apply_filters( 'woocommerce_customer_get_total_spent_query', $query, $customer ) );
+					AND     meta2.meta_key      = '_order_total'",
+					$customer
+				)
+				// phpcs:enable
+			);
 
 			if ( ! $spent ) {
 				$spent = 0;
@@ -461,18 +438,23 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$query = new WP_User_Query(
 			apply_filters(
-				'woocommerce_customer_search_customers', array(
+				'woocommerce_customer_search_customers',
+				array(
 					'search'         => '*' . esc_attr( $term ) . '*',
 					'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 					'fields'         => 'ID',
 					'number'         => $limit,
-				), $term, $limit, 'main_query'
+				),
+				$term,
+				$limit,
+				'main_query'
 			)
 		);
 
 		$query2 = new WP_User_Query(
 			apply_filters(
-				'woocommerce_customer_search_customers', array(
+				'woocommerce_customer_search_customers',
+				array(
 					'fields'     => 'ID',
 					'number'     => $limit,
 					'meta_query' => array(
@@ -488,7 +470,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 							'compare' => 'LIKE',
 						),
 					),
-				), $term, $limit, 'meta_query'
+				),
+				$term,
+				$limit,
+				'meta_query'
 			)
 		);
 

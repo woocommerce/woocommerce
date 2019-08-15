@@ -142,7 +142,7 @@
 							$( '#key_permissions', self.el ).val( data.permissions );
 						}
 					} else {
-						$( 'h3', self.el ).first().append( '<div class="wc-api-message error"><p>' + response.data.message + '</p></div>' );
+						$( 'h2, h3', self.el ).first().append( '<div class="wc-api-message error"><p>' + response.data.message + '</p></div>' );
 					}
 
 					self.unblock();

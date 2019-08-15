@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-echo esc_html( wc_strtoupper( __( 'Downloads', 'woocommerce' ) ) ) . "\n\n";
+echo esc_html( wc_strtoupper( esc_html__( 'Downloads', 'woocommerce' ) ) ) . "\n\n";
 
 foreach ( $downloads as $download ) {
 	foreach ( $columns as $column_id => $column_name ) {

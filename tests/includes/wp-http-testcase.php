@@ -203,7 +203,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	public function http_request_listner( $preempt, $request, $url ) {
 
 		$this->http_requests[] = array(
-			'url' => $url,
+			'url'     => $url,
 			'request' => $request,
 		);
 
@@ -256,7 +256,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param array $request The request.
+	 * @param array  $request The request.
 	 * @param string $url The URL the request is for.
 	 *
 	 * @return string|false The cache key for the request. False if not caching.
@@ -315,7 +315,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 		}
 
 		self::$cache[ $cache_key ] = $response;
-		self::$cache_changed = true;
+		self::$cache_changed       = true;
 	}
 
 	//
@@ -428,7 +428,8 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		// phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents
 		file_put_contents(
-			self::$cache_dir . '/' . self::$cache_group, serialize( self::$cache )
+			self::$cache_dir . '/' . self::$cache_group,
+			serialize( self::$cache )
 		);
 	}
 }

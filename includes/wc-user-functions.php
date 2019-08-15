@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
-	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', 'yes' ) === 'yes' ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
+	if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
 
@@ -32,14 +32,13 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	/**
 	 * Create a new customer.
 	 *
-	 * @param  string $email Customer email.
+	 * @param  string $email    Customer email.
 	 * @param  string $username Customer username.
 	 * @param  string $password Customer password.
+	 * @param  array  $args     List of arguments to pass to `wp_insert_user()`.
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
-	function wc_create_new_customer( $email, $username = '', $password = '' ) {
-
-		// Check the email address.
+	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
 		if ( empty( $email ) || ! is_email( $email ) ) {
 			return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
 		}
@@ -48,28 +47,18 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 			return new WP_Error( 'registration-error-email-exists', apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. Please log in.', 'woocommerce' ), $email ) );
 		}
 
-		// Handle username creation.
-		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
-			$username = sanitize_user( $username );
+		if ( 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' ) && empty( $username ) ) {
+			$username = wc_create_new_customer_username( $email, $args );
+		}
 
-			if ( empty( $username ) || ! validate_username( $username ) ) {
-				return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
-			}
+		$username = sanitize_user( $username );
 
-			if ( username_exists( $username ) ) {
-				return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
-			}
-		} else {
-			$username = sanitize_user( current( explode( '@', $email ) ), true );
+		if ( empty( $username ) || ! validate_username( $username ) ) {
+			return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
+		}
 
-			// Ensure username is unique.
-			$append     = 1;
-			$o_username = $username;
-
-			while ( username_exists( $username ) ) {
-				$username = $o_username . $append;
-				$append++;
-			}
+		if ( username_exists( $username ) ) {
+			return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 		}
 
 		// Handle password creation.
@@ -95,18 +84,22 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		$new_customer_data = apply_filters(
-			'woocommerce_new_customer_data', array(
-				'user_login' => $username,
-				'user_pass'  => $password,
-				'user_email' => $email,
-				'role'       => 'customer',
+			'woocommerce_new_customer_data',
+			array_merge(
+				$args,
+				array(
+					'user_login' => $username,
+					'user_pass'  => $password,
+					'user_email' => $email,
+					'role'       => 'customer',
+				)
 			)
 		);
 
 		$customer_id = wp_insert_user( $new_customer_data );
 
 		if ( is_wp_error( $customer_id ) ) {
-			return new WP_Error( 'registration-error', __( 'Couldn&#8217;t register you&hellip; please contact us if you continue to have problems.', 'woocommerce' ) );
+			return $customer_id;
 		}
 
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
@@ -116,16 +109,119 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 }
 
 /**
+ * Create a unique username for a new customer.
+ *
+ * @since 3.6.0
+ * @param string $email New customer email address.
+ * @param array  $new_user_args Array of new user args, maybe including first and last names.
+ * @param string $suffix Append string to username to make it unique.
+ * @return string Generated username.
+ */
+function wc_create_new_customer_username( $email, $new_user_args = array(), $suffix = '' ) {
+	$username_parts = array();
+
+	if ( isset( $new_user_args['first_name'] ) ) {
+		$username_parts[] = sanitize_user( $new_user_args['first_name'], true );
+	}
+
+	if ( isset( $new_user_args['last_name'] ) ) {
+		$username_parts[] = sanitize_user( $new_user_args['last_name'], true );
+	}
+
+	// Remove empty parts.
+	$username_parts = array_filter( $username_parts );
+
+	// If there are no parts, e.g. name had unicode chars, or was not provided, fallback to email.
+	if ( empty( $username_parts ) ) {
+		$email_parts    = explode( '@', $email );
+		$email_username = $email_parts[0];
+
+		// Exclude common prefixes.
+		if ( in_array(
+			$email_username,
+			array(
+				'sales',
+				'hello',
+				'mail',
+				'contact',
+				'info',
+			),
+			true
+		) ) {
+			// Get the domain part.
+			$email_username = $email_parts[1];
+		}
+
+		$username_parts[] = sanitize_user( $email_username, true );
+	}
+
+	$username = wc_strtolower( implode( '.', $username_parts ) );
+
+	if ( $suffix ) {
+		$username .= $suffix;
+	}
+
+	/**
+	 * WordPress 4.4 - filters the list of blacklisted usernames.
+	 *
+	 * @since 3.7.0
+	 * @param array $usernames Array of blacklisted usernames.
+	 */
+	$illegal_logins = (array) apply_filters( 'illegal_user_logins', array() );
+
+	// Stop illegal logins and generate a new random username.
+	if ( in_array( strtolower( $username ), array_map( 'strtolower', $illegal_logins ), true ) ) {
+		$new_args = array();
+
+		/**
+		 * Filter generated customer username.
+		 *
+		 * @since 3.7.0
+		 * @param string $username      Generated username.
+		 * @param string $email         New customer email address.
+		 * @param array  $new_user_args Array of new user args, maybe including first and last names.
+		 * @param string $suffix        Append string to username to make it unique.
+		 */
+		$new_args['first_name'] = apply_filters(
+			'woocommerce_generated_customer_username',
+			'woo_user_' . zeroise( wp_rand( 0, 9999 ), 4 ),
+			$email,
+			$new_user_args,
+			$suffix
+		);
+
+		return wc_create_new_customer_username( $email, $new_args, $suffix );
+	}
+
+	if ( username_exists( $username ) ) {
+		// Generate something unique to append to the username in case of a conflict with another user.
+		$suffix = '-' . zeroise( wp_rand( 0, 9999 ), 4 );
+		return wc_create_new_customer_username( $email, $new_user_args, $suffix );
+	}
+
+	/**
+	 * Filter new customer username.
+	 *
+	 * @since 3.7.0
+	 * @param string $username      Customer username.
+	 * @param string $email         New customer email address.
+	 * @param array  $new_user_args Array of new user args, maybe including first and last names.
+	 * @param string $suffix        Append string to username to make it unique.
+	 */
+	return apply_filters( 'woocommerce_new_customer_username', $username, $email, $new_user_args, $suffix );
+}
+
+/**
  * Login a customer (set auth cookie and set global user object).
  *
  * @param int $customer_id Customer ID.
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
-	global $current_user;
-
-	$current_user = get_user_by( 'id', $customer_id ); // WPCS: override ok.
-
+	wp_set_current_user( $customer_id );
 	wp_set_auth_cookie( $customer_id, true );
+
+	// Update session.
+	WC()->session->init_session_cookie();
 }
 
 /**
@@ -182,7 +278,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 }
 
 /**
- * Order Status completed - This is a paying customer.
+ * Order payment completed - This is a paying customer.
  *
  * @param int $order_id Order ID.
  */
@@ -192,10 +288,14 @@ function wc_paying_customer( $order_id ) {
 
 	if ( $customer_id > 0 && 'shop_order_refund' !== $order->get_type() ) {
 		$customer = new WC_Customer( $customer_id );
-		$customer->set_is_paying_customer( true );
-		$customer->save();
+
+		if ( ! $customer->get_is_paying_customer() ) {
+			$customer->set_is_paying_customer( true );
+			$customer->save();
+		}
 	}
 }
+add_action( 'woocommerce_payment_complete', 'wc_paying_customer' );
 add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
@@ -215,18 +315,17 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return $result;
 	}
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
-	$result         = get_transient( $transient_name );
+	$transient_name    = 'wc_customer_bought_product_' . md5( $customer_email . $user_id );
+	$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
+	$transient_value   = get_transient( $transient_name );
 
-	if ( false === $result ) {
-		$customer_data = array();
+	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+		$result = $transient_value['value'];
+	} else {
+		$customer_data = array( $user_id );
 
 		if ( $user_id ) {
 			$user = get_user_by( 'id', $user_id );
-
-			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '<' ) ) {
-				$customer_data[] = $user_id;
-			}
 
 			if ( isset( $user->user_email ) ) {
 				$customer_data[] = $user->user_email;
@@ -244,36 +343,58 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) && $user_id ) {
-			// Since WC 3.5 wp_posts.post_author is used to store the ID of the customer who placed an order.
-			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-				AND p.post_author = {$user_id}
-				AND pm.meta_key = '_billing_email'
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value != 0
-				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
-		} else {
-			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value != 0
-				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
-		}
-
-		$result = $wpdb->get_col( $query ); // WPCS: unprepared SQL ok.
+		$result = $wpdb->get_col(
+			"
+			SELECT im.meta_value FROM {$wpdb->posts} AS p
+			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+			WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+			AND im.meta_key IN ( '_product_id', '_variation_id' )
+			AND im.meta_value != 0
+			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+		"
+		); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
-		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		$transient_value = array(
+			'version' => $transient_version,
+			'value'   => $result,
+		);
+
+		set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
 	}
 	return in_array( absint( $product_id ), $result, true );
+}
+
+/**
+ * Checks if the current user has a role.
+ *
+ * @param string $role The role.
+ * @return bool
+ */
+function wc_current_user_has_role( $role ) {
+	return wc_user_has_role( wp_get_current_user(), $role );
+}
+
+/**
+ * Checks if a user has a role.
+ *
+ * @param int|\WP_User $user The user.
+ * @param string       $role The role.
+ * @return bool
+ */
+function wc_user_has_role( $user, $role ) {
+	if ( ! is_object( $user ) ) {
+		$user = get_userdata( $user );
+	}
+
+	if ( ! $user || ! $user->exists() ) {
+		return false;
+	}
+
+	return in_array( $role, $user->roles, true );
 }
 
 /**
@@ -282,7 +403,8 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
  * @param array $allcaps All capabilities.
  * @param array $caps    Capabilities.
  * @param array $args    Arguments.
- * @return bool
+ *
+ * @return array The filtered array of all capabilities.
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
 	if ( isset( $caps[0] ) ) {
@@ -343,15 +465,47 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 
 /**
+ * Safe way of allowing shop managers restricted capabilities that will remove
+ * access to the capabilities if WooCommerce is deactivated.
+ *
+ * @since 3.5.4
+ * @param bool[]   $allcaps Array of key/value pairs where keys represent a capability name and boolean values
+ *                          represent whether the user has that capability.
+ * @param string[] $caps    Required primitive capabilities for the requested capability.
+ * @param array    $args Arguments that accompany the requested capability check.
+ * @param WP_User  $user    The user object.
+ * @return bool[]
+ */
+function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
+
+	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
+		// @see wc_modify_map_meta_cap, which limits editing to customers.
+		$allcaps['edit_users'] = true;
+	}
+
+	return $allcaps;
+}
+add_filter( 'user_has_cap', 'wc_shop_manager_has_capability', 10, 4 );
+
+/**
  * Modify the list of editable roles to prevent non-admin adding admin users.
  *
  * @param  array $roles Roles.
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
-	if ( ! current_user_can( 'administrator' ) ) {
-		unset( $roles['administrator'] );
+	if ( is_multisite() && is_super_admin() ) {
+		return $roles;
 	}
+	if ( ! wc_current_user_has_role( 'administrator' ) ) {
+		unset( $roles['administrator'] );
+
+		if ( wc_current_user_has_role( 'shop_manager' ) ) {
+			$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+			return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
+		}
+	}
+
 	return $roles;
 }
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
@@ -368,6 +522,9 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
+	if ( is_multisite() && is_super_admin() ) {
+		return $caps;
+	}
 	switch ( $cap ) {
 		case 'edit_user':
 		case 'remove_user':
@@ -376,8 +533,17 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
-				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
-					$caps[] = 'do_not_allow';
+				if ( ! wc_current_user_has_role( 'administrator' ) ) {
+					if ( wc_user_has_role( $args[0], 'administrator' ) ) {
+						$caps[] = 'do_not_allow';
+					} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
+						// Shop managers can only edit customer info.
+						$userdata = get_userdata( $args[0] );
+						$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+						if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+							$caps[] = 'do_not_allow';
+						}
+					}
 				}
 			}
 			break;
@@ -511,7 +677,7 @@ function wc_get_customer_order_count( $user_id ) {
 }
 
 /**
- * Reset customer ID on orders when a user is deleted.
+ * Reset _customer_user on orders when a user is deleted.
  *
  * @param int $user_id User ID.
  */
@@ -519,27 +685,15 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
 	$wpdb->update(
-		$wpdb->postmeta, array( 'meta_value' => 0 ), array(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 0,
+		),
+		array(
 			'meta_key'   => '_customer_user',
 			'meta_value' => $user_id,
 		)
 	); // WPCS: slow query ok.
-
-	$post_types              = (array) apply_filters( 'woocommerce_reset_order_customer_id_post_types', array( 'shop_order' ) );
-	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
-	$query_args              = array_merge( $post_types, array( $user_id ) );
-
-	// Since WC 3.5, the customer ID is stored both in the _customer_user postmeta and in the post_author field.
-	// In future versions of WC, the plan is to use only post_author and stop using _customer_user, but for now
-	// we have to update both places.
-	$wpdb->query(
-		// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$wpdb->prepare(
-			"UPDATE {$wpdb->posts} SET `post_author` = 0 WHERE post_type IN ({$post_types_placeholders}) AND post_author = %d",
-			$query_args
-		)
-		// phpcs:enable
-	);
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
@@ -744,3 +898,27 @@ function wc_update_user_last_active( $user_id ) {
 	}
 	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
 }
+
+/**
+ * Translate WC roles using the woocommerce textdomain.
+ *
+ * @since 3.7.0
+ * @param string $translation  Translated text.
+ * @param string $text         Text to translate.
+ * @param string $context      Context information for the translators.
+ * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
+ * @return string
+ */
+function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+	// translate_user_role() only accepts a second parameter starting in WP 5.2.
+	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+		return $translation;
+	}
+
+	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
+		return translate_user_role( $text, 'woocommerce' );
+	}
+
+	return $translation;
+}
+add_filter( 'gettext_with_context', 'wc_translate_user_roles', 10, 4 );

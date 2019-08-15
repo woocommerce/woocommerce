@@ -65,9 +65,6 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		WC()->query->init_query_vars();
 		$updated_vars = WC()->query->get_query_vars();
 		$this->assertEquals( 'order-pay-new', $updated_vars['order-pay'] );
-
-		// Clean up.
-		update_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' );
 	}
 
 	/**
@@ -111,7 +108,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	public function test_add_query_vars() {
 		WC()->query->init_query_vars();
 
-		$vars = array(
+		$vars  = array(
 			'test1',
 			'test2',
 		);
@@ -255,19 +252,16 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 				'expected' => array(
 					'orderby'  => 'popularity',
 					'order'    => 'DESC',
-					'meta_key' => 'total_sales',
+					'meta_key' => '',
 				),
 			),
 			array(
 				'orderby'  => 'rating',
 				'order'    => 'ASC',
 				'expected' => array(
-					'orderby'  => array(
-						'meta_value_num' => 'DESC',
-						'ID'             => 'ASC',
-					),
+					'orderby'  => 'rating',
 					'order'    => 'ASC',
-					'meta_key' => '_wc_average_rating',
+					'meta_key' => '',
 				),
 			),
 			array(
@@ -284,6 +278,20 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 				'order'    => 'INVALIDORDER',
 				'expected' => array(
 					'orderby'  => 'date ID',
+					'order'    => 'DESC',
+					'meta_key' => '',
+				),
+			),
+			array(
+				'orderby'  => array(
+					'price',
+					'date',
+				),
+				'order'    => array(
+					'DESC',
+				),
+				'expected' => array(
+					'orderby'  => 'price',
 					'order'    => 'DESC',
 					'meta_key' => '',
 				),

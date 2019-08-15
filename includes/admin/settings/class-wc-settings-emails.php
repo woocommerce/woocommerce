@@ -47,8 +47,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	public function get_settings() {
 		$settings = apply_filters(
-			'woocommerce_email_settings', array(
-
+			'woocommerce_email_settings',
+			array(
 				array(
 					'title' => __( 'Email notifications', 'woocommerce' ),
 					'desc'  => __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.', 'woocommerce' ),
@@ -80,7 +80,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'desc'     => __( 'How the sender name appears in outgoing WooCommerce emails.', 'woocommerce' ),
 					'id'       => 'woocommerce_email_from_name',
 					'type'     => 'text',
-					'css'      => 'min-width:300px;',
+					'css'      => 'min-width:400px;',
 					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
 					'autoload' => false,
 					'desc_tip' => true,
@@ -94,7 +94,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'custom_attributes' => array(
 						'multiple' => 'multiple',
 					),
-					'css'               => 'min-width:300px;',
+					'css'               => 'min-width:400px;',
 					'default'           => get_option( 'admin_email' ),
 					'autoload'          => false,
 					'desc_tip'          => true,
@@ -108,6 +108,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					'title' => __( 'Email template', 'woocommerce' ),
 					'type'  => 'title',
+					/* translators: %s: Nonced email preview link */
 					'desc'  => sprintf( __( 'This section lets you customize the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>.', 'woocommerce' ), wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ),
 					'id'    => 'email_template_options',
 				),
@@ -117,7 +118,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'desc'        => __( 'URL to an image you want to show in the email header. Upload images using the media uploader (Admin > Media).', 'woocommerce' ),
 					'id'          => 'woocommerce_email_header_image',
 					'type'        => 'text',
-					'css'         => 'min-width:300px;',
+					'css'         => 'min-width:400px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
 					'default'     => '',
 					'autoload'    => false,
@@ -126,12 +127,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 				array(
 					'title'       => __( 'Footer text', 'woocommerce' ),
-					'desc'        => __( 'The text to appear in the footer of WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title}' ),
+					/* translators: %s: Available placeholders for use */
+					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_address}' ),
 					'id'          => 'woocommerce_email_footer_text',
-					'css'         => 'width:300px; height: 75px;',
+					'css'         => 'width:400px; height: 75px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
 					'type'        => 'textarea',
-					'default'     => '{site_title}',
+					'default'     => '{site_title} &mdash; Built with {WooCommerce}',
 					'autoload'    => false,
 					'desc_tip'    => true,
 				),
@@ -258,7 +260,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					<tr>
 						<?php
 						$columns = apply_filters(
-							'woocommerce_email_setting_columns', array(
+							'woocommerce_email_setting_columns',
+							array(
 								'status'     => '',
 								'name'       => __( 'Email', 'woocommerce' ),
 								'email_type' => __( 'Content type', 'woocommerce' ),
@@ -282,7 +285,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 								switch ( $key ) {
 									case 'name':
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-										<a href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . $email->get_title() . '</a>
+										<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) ) . '">' . esc_html( $email->get_title() ) . '</a>
 										' . wc_help_tip( $email->get_description() ) . '
 									</td>';
 										break;
@@ -311,7 +314,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 										break;
 									case 'actions':
 										echo '<td class="wc-email-settings-table-' . esc_attr( $key ) . '">
-										<a class="button alignright" href="' . admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>
+										<a class="button alignright" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=email&section=' . strtolower( $email_key ) ) ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>
 									</td>';
 										break;
 									default:

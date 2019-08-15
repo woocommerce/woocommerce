@@ -653,6 +653,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public static function sync_average_rating( $post_id ) {
 		wc_deprecated_function( 'WC_Product::sync_average_rating', '3.0', 'WC_Comments::get_average_rating_for_product or leave to CRUD.' );
+		// See notes in https://github.com/woocommerce/woocommerce/pull/22909#discussion_r262393401.
+		// Sync count first like in the original method https://github.com/woocommerce/woocommerce/blob/2.6.0/includes/abstracts/abstract-wc-product.php#L1101-L1128.
+		self::sync_rating_count( $post_id );
 		$average = WC_Comments::get_average_rating_for_product( wc_get_product( $post_id ) );
 		update_post_meta( $post_id, '_wc_average_rating', $average );
 	}

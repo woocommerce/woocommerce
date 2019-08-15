@@ -135,10 +135,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
 
 			wp_localize_script(
-				'woocommerce_settings', 'woocommerce_settings_params', array(
-					'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
-					'i18n_moved_up'    => __( 'Item moved up', 'woocommerce' ),
-					'i18n_moved_down'  => __( 'Item moved down', 'woocommerce' ),
+				'woocommerce_settings',
+				'woocommerce_settings_params',
+				array(
+					'i18n_nav_warning'                    => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
+					'i18n_moved_up'                       => __( 'Item moved up', 'woocommerce' ),
+					'i18n_moved_down'                     => __( 'Item moved down', 'woocommerce' ),
+					'i18n_no_specific_countries_selected' => __( 'Selecting no country to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
 				)
 			);
 
@@ -156,6 +159,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * @return mixed
 		 */
 		public static function get_option( $option_name, $default = '' ) {
+			if ( ! $option_name ) {
+				return $default;
+			}
+
 			// Array value.
 			if ( strstr( $option_name, '[' ) ) {
 
@@ -227,6 +234,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['suffix'] ) ) {
 					$value['suffix'] = '';
 				}
+				if ( ! isset( $value['value'] ) ) {
+					$value['value'] = self::get_option( $value['id'], $value['default'] );
+				}
 
 				// Custom attribute handling.
 				$custom_attributes = array();
@@ -285,7 +295,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'email':
 					case 'url':
 					case 'tel':
-						$option_value = self::get_option( $value['id'], $value['default'] );
+						$option_value = $value['value'];
 
 						?><tr valign="top">
 							<th scope="row" class="titledesc">
@@ -309,7 +319,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Color picker.
 					case 'color':
-						$option_value = self::get_option( $value['id'], $value['default'] );
+						$option_value = $value['value'];
 
 						?>
 						<tr valign="top">
@@ -337,7 +347,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Textarea.
 					case 'textarea':
-						$option_value = self::get_option( $value['id'], $value['default'] );
+						$option_value = $value['value'];
 
 						?>
 						<tr valign="top">
@@ -363,7 +373,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					// Select boxes.
 					case 'select':
 					case 'multiselect':
-						$option_value = self::get_option( $value['id'], $value['default'] );
+						$option_value = $value['value'];
 
 						?>
 						<tr valign="top">
@@ -391,9 +401,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												selected( $option_value, (string) $key );
 											}
 
-										?>
-										>
-										<?php echo esc_html( $val ); ?></option>
+											?>
+										><?php echo esc_html( $val ); ?></option>
 										<?php
 									}
 									?>
@@ -405,7 +414,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Radio inputs.
 					case 'radio':
-						$option_value = self::get_option( $value['id'], $value['default'] );
+						$option_value = $value['value'];
 
 						?>
 						<tr valign="top">
@@ -442,7 +451,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Checkbox input.
 					case 'checkbox':
-						$option_value     = self::get_option( $value['id'], $value['default'] );
+						$option_value     = $value['value'];
 						$visibility_class = array();
 
 						if ( ! isset( $value['hide_if_checked'] ) ) {
@@ -495,7 +504,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'end' === $value['checkboxgroup'] ) {
-										?>
+							?>
 										</fieldset>
 									</td>
 								</tr>
@@ -548,7 +557,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							'show_option_none' => ' ',
 							'class'            => $value['class'],
 							'echo'             => false,
-							'selected'         => absint( self::get_option( $value['id'], $value['default'] ) ),
+							'selected'         => absint( $value['value'] ),
 							'post_status'      => 'publish,private,draft',
 						);
 
@@ -570,7 +579,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Single country selects.
 					case 'single_select_country':
-						$country_setting = (string) self::get_option( $value['id'], $value['default'] );
+						$country_setting = (string) $value['value'];
 
 						if ( strstr( $country_setting, ':' ) ) {
 							$country_setting = explode( ':', $country_setting );
@@ -595,7 +604,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Country multiselects.
 					case 'multi_select_countries':
-						$selections = (array) self::get_option( $value['id'], $value['default'] );
+						$selections = (array) $value['value'];
 
 						if ( ! empty( $value['options'] ) ) {
 							$countries = $value['options'];
@@ -632,7 +641,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							'months' => __( 'Month(s)', 'woocommerce' ),
 							'years'  => __( 'Year(s)', 'woocommerce' ),
 						);
-						$option_value = wc_parse_relative_date_option( self::get_option( $value['id'], $value['default'] ) );
+						$option_value = wc_parse_relative_date_option( $value['value'] );
 						?>
 						<tr valign="top">
 							<th scope="row" class="titledesc">
@@ -735,7 +744,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			// Loop options and get values to save.
 			foreach ( $options as $option ) {
-				if ( ! isset( $option['id'] ) || ! isset( $option['type'] ) ) {
+				if ( ! isset( $option['id'] ) || ! isset( $option['type'] ) || ( isset( $option['is_option'] ) && false === $option['is_option'] ) ) {
 					continue;
 				}
 

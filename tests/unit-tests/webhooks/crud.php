@@ -1,15 +1,18 @@
 <?php
-
 /**
  * Webhook CRUD
  * @package WooCommerce\Tests\CRUD
+ */
+
+/**
+ * WC_Tests_CRUD_Webhooks class
  */
 class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 
 	/**
 	 * Test: get_id
 	 */
-	function test_get_id() {
+	public function test_get_id() {
 		$object = new WC_Webhook();
 		$id     = $object->save();
 		$this->assertEquals( $id, $object->get_id() );
@@ -19,7 +22,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_data
 	 */
-	function test_get_data() {
+	public function test_get_data() {
 		$object = new WC_Webhook();
 		$this->assertInternalType( 'array', $object->get_data() );
 	}
@@ -27,7 +30,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_name
 	 */
-	function test_get_name() {
+	public function test_get_name() {
 		$object   = new WC_Webhook();
 		$expected = 'test';
 		$object->set_name( $expected );
@@ -37,7 +40,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_date_created
 	 */
-	function test_get_date_created() {
+	public function test_get_date_created() {
 		$object = new WC_Webhook();
 		$object->set_date_created( '2016-12-12' );
 		$this->assertEquals( '1481500800', $object->get_date_created()->getOffsetTimestamp() );
@@ -49,7 +52,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_date_modified
 	 */
-	function test_get_date_modified() {
+	public function test_get_date_modified() {
 		$object = new WC_Webhook();
 		$object->set_date_modified( '2016-12-12' );
 		$this->assertEquals( '1481500800', $object->get_date_modified()->getOffsetTimestamp() );
@@ -61,8 +64,8 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_status
 	 */
-	function test_get_status() {
-		$object   = new WC_Webhook();
+	public function test_get_status() {
+		$object = new WC_Webhook();
 		$this->assertEquals( 'disabled', $object->get_status() );
 
 		$expected = 'active';
@@ -73,7 +76,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_secret
 	 */
-	function test_get_secret() {
+	public function test_get_secret() {
 		$object   = new WC_Webhook();
 		$expected = 'secret';
 		$object->set_secret( $expected );
@@ -83,7 +86,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_topic
 	 */
-	function test_get_topic() {
+	public function test_get_topic() {
 		$object   = new WC_Webhook();
 		$expected = 'order.created';
 		$object->set_topic( $expected );
@@ -93,7 +96,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_delivery_url
 	 */
-	function test_get_delivery_url() {
+	public function test_get_delivery_url() {
 		$object   = new WC_Webhook();
 		$expected = 'https://woocommerce.com';
 		$object->set_delivery_url( $expected );
@@ -103,7 +106,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_user_id
 	 */
-	function test_get_user_id() {
+	public function test_get_user_id() {
 		$object   = new WC_Webhook();
 		$expected = 1;
 		$object->set_user_id( $expected );
@@ -113,7 +116,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_api_version
 	 */
-	function test_get_api_version() {
+	public function test_get_api_version() {
 		$object   = new WC_Webhook();
 		$expected = 'wp_api_v2';
 		$object->set_api_version( $expected );
@@ -123,7 +126,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_failure_count
 	 */
-	function test_get_failure_count() {
+	public function test_get_failure_count() {
 		$object   = new WC_Webhook();
 		$expected = 1;
 		$object->set_failure_count( $expected );
@@ -133,7 +136,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_pending_delivery
 	 */
-	function test_get_pending_delivery() {
+	public function test_get_pending_delivery() {
 		$object   = new WC_Webhook();
 		$expected = true;
 		$object->set_pending_delivery( $expected );
@@ -143,11 +146,10 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_hooks
 	 */
-	function test_get_hooks() {
+	public function test_get_hooks() {
 		$object = new WC_Webhook();
 		$object->set_topic( 'order.created' );
 		$expected = array(
-			'woocommerce_process_shop_order_meta',
 			'woocommerce_new_order',
 		);
 		$this->assertEquals( $expected, $object->get_hooks() );
@@ -156,7 +158,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_resource
 	 */
-	function test_get_resource() {
+	public function test_get_resource() {
 		$object = new WC_Webhook();
 		$object->set_topic( 'order.created' );
 		$this->assertEquals( 'order', $object->get_resource() );
@@ -165,7 +167,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_event
 	 */
-	function test_get_event() {
+	public function test_get_event() {
 		$object = new WC_Webhook();
 		$object->set_topic( 'order.created' );
 		$this->assertEquals( 'created', $object->get_event() );
@@ -174,7 +176,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: get_i18n_status
 	 */
-	function test_get_i18n_status() {
+	public function test_get_i18n_status() {
 		$object = new WC_Webhook();
 		$object->set_status( 'active' );
 		$this->assertEquals( 'Active', $object->get_i18n_status() );
@@ -183,7 +185,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	/**
 	 * Test: generate_signature
 	 */
-	function test_generate_signature() {
+	public function test_generate_signature() {
 		$object = new WC_Webhook();
 		$this->assertEquals( 'GBDo00G55h6IiV+6CxqivQPLbI//KzaOZm747971tPs=', $object->generate_signature( 'secret' ) );
 	}

@@ -119,7 +119,8 @@ class WC_Admin_Webhooks {
 		}
 
 		// API version.
-		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : 'wp_api_v2' ); // WPCS: input var okay, CSRF ok.
+		$rest_api_versions = wc_get_webhook_rest_api_versions();
+		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : end( $rest_api_versions ) ); // WPCS: input var okay, CSRF ok.
 
 		$webhook->save();
 
@@ -269,8 +270,9 @@ class WC_Admin_Webhooks {
 		echo '<h2>' . esc_html__( 'Webhooks', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=0' ) ) . '" class="add-new-h2">' . esc_html__( 'Add webhook', 'woocommerce' ) . '</a></h2>';
 
 		// Get the webhooks count.
-		$data_store = WC_Data_Store::load( 'webhook' );
-		$count      = count( $data_store->get_webhooks_ids() );
+		$data_store   = WC_Data_Store::load( 'webhook' );
+		$num_webhooks = $data_store->get_count_webhooks_by_status();
+		$count        = array_sum( $num_webhooks );
 
 		if ( 0 < $count ) {
 			$webhooks_table_list->process_bulk_action();

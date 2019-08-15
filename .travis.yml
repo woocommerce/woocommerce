@@ -1,48 +1,77 @@
 language: php
+dist: xenial
 
-addons:
-  chrome: stable
-  apt:
-    packages:
-      - nginx
+# Since Xenial services are not started by default, we need to instruct it below to start.
+services:
+  - xvfb
+  - mysql
 
 sudo: false
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
 
 # Test main supported versions of PHP against latest WP.
 php:
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
+  - 7.3
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
-# Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP
+# Additional tests against stable PHP (min version is 5.6)
 # and code coverage report.
 matrix:
   fast_finish: true
   include:
-  - php: 5.3
-    dist: precise
-  - php: 5.2
-    dist: precise
-  - php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 RUN_E2E=1
-  - php: 7.1
+  - name: "Coding standard check"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - name: "e2e tests"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    addons:
+      chrome: beta
+      apt:
+        packages:
+          - nginx
+  - name: "Unit tests code coverage"
+    php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - name: "WooCommerce unit tests using WordPress nightly"
+    php: 7.3
+    env: WP_VERSION=nightly WP_MULTISITE=0
   allow_failures:
-  - env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - php: 7.3
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
-  - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash tests/bin/travis.sh before
+  - |
+    # Remove Xdebug for a huge performance increase:
+    if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
+      phpenv config-rm xdebug.ini
+    else
+      echo "xdebug.ini does not exist"
+    fi
+  - composer install --no-dev
+  - |
+    # Install WP Test suite, install PHPUnit globally:
+    if [[ ! -z "$WP_VERSION" ]]; then
+      bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+      composer global require "phpunit/phpunit=5.7.*|7.5.*"
+    fi
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 
 script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - bash tests/bin/run-e2e-CI.sh
+  - travis_retry bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after

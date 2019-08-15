@@ -7,31 +7,42 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "automattic/jetpack-autoloader": "1.2.0",
+    "php": ">=5.6|>=7.0",
+    "composer/installers": "1.6.0",
+    "woocommerce/woocommerce-blocks": "2.3.0",
+    "woocommerce/woocommerce-rest-api": "1.0.3"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "^0.14",
-    "phpunit/phpunit": "6.*",
-    "woocommerce/woocommerce-git-hooks": "*",
-    "woocommerce/woocommerce-sniffs": "*",
-    "wimg/php-compatibility": "^8.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
-    "apigen/apigen": "^4",
-    "nette/utils": "~2.3.0"
+    "myclabs/deep-copy": "1.7.0",
+    "phpunit/phpunit": "7.5.14",
+    "woocommerce/woocommerce-sniffs": "0.0.6"
+  },
+  "config": {
+    "platform": {
+      "php": "7.1"
+    },
+    "preferred-install": {
+        "woocommerce/woocommerce-rest-api": "dist",
+        "woocommerce/woocommerce-blocks": "dist"
+    },
+    "sort-packages": true
+  },
+  "autoload": {
+    "exclude-from-classmap": [
+      "includes/legacy",
+      "includes/libraries"
+    ],
+    "psr-4": {
+      "Automattic\\WooCommerce\\": "src/"
+    }
   },
   "scripts": {
-    "pre-update-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::preHooks"
-    ],
-    "pre-install-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::preHooks"
-    ],
     "post-install-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::postHooks"
+      "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::postHooks"
+      "sh ./bin/package-update.sh"
     ],
     "test": [
       "phpunit"
@@ -39,11 +50,18 @@
     "phpcs": [
       "phpcs -s -p"
     ],
+    "phpcs-pre-commit": [
+      "phpcs -s -p -n"
+    ],
     "phpcbf": [
       "phpcbf -p"
     ]
   },
   "extra": {
+    "installer-paths": {
+      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
+      "packages/woocommerce-blocks": ["woocommerce/woocommerce-blocks"]
+    },
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",

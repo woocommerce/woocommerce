@@ -20,6 +20,11 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		$wp_rest_server = new WP_Test_Spy_REST_Server();
 		$this->server   = $wp_rest_server;
 		do_action( 'rest_api_init' );
+
+		// Reset payment gateways.
+		$gateways                   = WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
 	}
 
 	/**

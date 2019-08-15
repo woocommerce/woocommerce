@@ -108,11 +108,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		global $current_section;
 
 		if ( ! $current_section ) {
 			$settings = $this->get_settings();
 			WC_Admin_Settings::save_fields( $settings );
+
+			if ( isset( $_POST['woocommerce_tax_classes'] ) ) {
+				$this->save_tax_classes( wp_unslash( $_POST['woocommerce_tax_classes'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			}
 
 		} elseif ( ! empty( $_POST['tax_rate_country'] ) ) {
 			$this->save_tax_rates();
@@ -125,6 +130,30 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// Invalidate caches.
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
+	}
+
+	/**
+	 * Saves tax classes defined in the textarea to the tax class table instead of an option.
+	 *
+	 * @param string $raw_tax_classes Posted value.
+	 * @return null
+	 */
+	public function save_tax_classes( $raw_tax_classes ) {
+		$tax_classes          = array_filter( array_map( 'trim', explode( "\n", $raw_tax_classes ) ) );
+		$existing_tax_classes = WC_Tax::get_tax_classes();
+		$removed              = array_diff( $existing_tax_classes, $tax_classes );
+		$added                = array_diff( $tax_classes, $existing_tax_classes );
+
+		foreach ( $removed as $name ) {
+			WC_Tax::delete_tax_class_by( 'name', $name );
+		}
+
+		foreach ( $added as $name ) {
+			WC_Tax::create_tax_class( $name );
+		}
+
+		return null;
 	}
 
 	/**

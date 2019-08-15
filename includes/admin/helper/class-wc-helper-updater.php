@@ -161,7 +161,7 @@ class WC_Helper_Updater {
 	 */
 	private static function _update_check( $payload ) {
 		ksort( $payload );
-		$hash = md5( json_encode( $payload ) );
+		$hash = md5( wp_json_encode( $payload ) );
 
 		$cache_key = '_woocommerce_helper_updates';
 		if ( false !== ( $data = get_transient( $cache_key ) ) ) {
@@ -179,7 +179,7 @@ class WC_Helper_Updater {
 
 		$request = WC_Helper_API::post(
 			'update-check', array(
-				'body'          => json_encode( array( 'products' => $payload ) ),
+				'body'          => wp_json_encode( array( 'products' => $payload ) ),
 				'authenticated' => true,
 			)
 		);

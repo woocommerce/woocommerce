@@ -69,56 +69,46 @@ class WC_Report_Customers extends WC_Admin_Report {
 	 * Output customers vs guests chart.
 	 */
 	public function customers_vs_guests() {
-		$customer_args = array(
-			'data'         => array(
-				'ID' => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
+
+		$customer_order_totals = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
 				),
-			),
-			'filter_range' => true,
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '>',
+					),
+				),
+				'filter_range' => true,
+			)
 		);
-		$guest_args    = $customer_args;
 
-		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-			$customer_args['where'] = array(
-				array(
-					'key'      => 'post_author',
-					'value'    => '0',
-					'operator' => '>',
+		$guest_order_totals = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
 				),
-			);
-
-			$guest_args['where'] = array(
-				array(
-					'key'      => 'post_author',
-					'value'    => '0',
-					'operator' => '=',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '=',
+					),
 				),
-			);
-		} else {
-			$customer_args['where_meta'] = array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '>',
-				),
-			);
-
-			$guest_args['where_meta'] = array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '=',
-				),
-			);
-		}
-
-		$customer_order_totals = $this->get_order_report_data( $customer_args );
-		$guest_order_totals = $this->get_order_report_data( $guest_args );
-
+				'filter_range' => true,
+			)
+		);
 		?>
 		<div class="chart-container">
 			<div class="chart-placeholder customers_vs_guests pie-chart" style="height:200px"></div>
@@ -213,9 +203,12 @@ class WC_Report_Customers extends WC_Admin_Report {
 		);
 
 		$users_query = new WP_User_Query(
-			array(
-				'fields'  => array( 'user_registered' ),
-				'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+			apply_filters(
+				'woocommerce_admin_report_customers_user_query_args',
+				array(
+					'fields'  => array( 'user_registered' ),
+					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+				)
 			)
 		);
 
@@ -256,72 +249,72 @@ class WC_Report_Customers extends WC_Admin_Report {
 	public function get_main_chart() {
 		global $wp_locale;
 
-		$customer_args = array(
-			'data'         => array(
-				'ID'        => array(
-					'type'     => 'post_data',
-					'function' => 'COUNT',
-					'name'     => 'total_orders',
+		$customer_orders = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID'        => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
+					'post_date' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date',
+					),
 				),
-				'post_date' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '>',
+					),
 				),
-			),
-			'group_by'     => $this->group_by_query,
-			'order_by'     => 'post_date ASC',
-			'query_type'   => 'get_results',
-			'filter_range' => true,
+				'group_by'     => $this->group_by_query,
+				'order_by'     => 'post_date ASC',
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+			)
 		);
-		$guest_args    = $customer_args;
 
-		// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-			$customer_args['where'] = array(
-				array(
-					'key'      => 'post_author',
-					'value'    => '0',
-					'operator' => '>',
+		$guest_orders = $this->get_order_report_data(
+			array(
+				'data'         => array(
+					'ID'        => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
+					'post_date' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date',
+					),
 				),
-			);
-
-			$guest_args['where'] = array(
-				array(
-					'key'      => 'post_author',
-					'value'    => '0',
-					'operator' => '=',
+				'where_meta'   => array(
+					array(
+						'meta_key'   => '_customer_user',
+						'meta_value' => '0',
+						'operator'   => '=',
+					),
 				),
-			);
-		} else {
-			$customer_args['where_meta'] = array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '>',
-				),
-			);
-
-			$guest_args['where_meta'] = array(
-				array(
-					'meta_key'   => '_customer_user',
-					'meta_value' => '0',
-					'operator'   => '=',
-				),
-			);
-		}
-
-		$customer_orders = $this->get_order_report_data( $customer_args );
-		$guest_orders = $this->get_order_report_data( $guest_args );
+				'group_by'     => $this->group_by_query,
+				'order_by'     => 'post_date ASC',
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+			)
+		);
 
 		$signups         = $this->prepare_chart_data( $this->customers, 'user_registered', '', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$customer_orders = $this->prepare_chart_data( $customer_orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$guest_orders    = $this->prepare_chart_data( $guest_orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
-		$chart_data = array(
-			'signups'         => array_values( $signups ),
-			'customer_orders' => array_values( $customer_orders ),
-			'guest_orders'    => array_values( $guest_orders ),
+		$chart_data = wp_json_encode(
+			array(
+				'signups'         => array_values( $signups ),
+				'customer_orders' => array_values( $customer_orders ),
+				'guest_orders'    => array_values( $guest_orders ),
+			)
 		);
 		?>
 		<div class="chart-container">
@@ -331,7 +324,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 			var main_chart;
 
 			jQuery(function(){
-				var chart_data = jQuery.parseJSON( '<?php echo wp_json_encode( $chart_data ); ?>' );
+				var chart_data = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( $chart_data ); ?>' ) );
 
 				var drawGraph = function( highlight ) {
 					var series = [
@@ -400,7 +393,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 								tickColor: 'transparent',
 								mode: "time",
 								timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
-								monthNames: <?php echo wp_json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
+								monthNames: JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( array_values( $wp_locale->month_abbrev ) ) ); ?>' ) ),
 								tickLength: 1,
 								minTickSize: [1, "<?php echo esc_html( $this->chart_groupby ); ?>"],
 								tickSize: [1, "<?php echo esc_html( $this->chart_groupby ); ?>"],

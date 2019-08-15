@@ -229,11 +229,13 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function __construct() {
 		// Find/replace.
-		if ( empty( $this->placeholders ) ) {
-			$this->placeholders = array(
-				'{site_title}' => $this->get_blogname(),
-			);
-		}
+		$this->placeholders = array_merge(
+			array(
+				'{site_title}'   => $this->get_blogname(),
+				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
+			),
+			$this->placeholders
+		);
 
 		// Init settings.
 		$this->init_form_fields();
@@ -260,7 +262,7 @@ class WC_Email extends WC_Settings_API {
 	public function handle_multipart( $mailer ) {
 		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
 			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
-				preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) )
+				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
 			);
 			$this->sending   = false;
 		}
@@ -346,12 +348,36 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Default content to show below main email content.
+	 *
+	 * @since 3.7.0
+	 * @return string
+	 */
+	public function get_default_additional_content() {
+		return '';
+	}
+
+	/**
+	 * Return content from the additional_content field.
+	 *
+	 * Displayed above the footer.
+	 *
+	 * @since 3.7.0
+	 * @return string
+	 */
+	public function get_additional_content() {
+		$content = $this->get_option( 'additional_content', '' );
+
+		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $content ), $this->object );
+	}
+
+	/**
 	 * Get email subject.
 	 *
 	 * @return string
 	 */
 	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 	}
 
 	/**
@@ -360,7 +386,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object, $this );
 	}
 
 	/**
@@ -369,7 +395,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_recipient() {
-		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object );
+		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object, $this );
 		$recipients = array_map( 'trim', explode( ',', $recipient ) );
 		$recipients = array_filter( $recipients, 'is_email' );
 		return implode( ', ', $recipients );
@@ -383,11 +409,15 @@ class WC_Email extends WC_Settings_API {
 	public function get_headers() {
 		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
 
-		if ( 'new_order' === $this->id && $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-			$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
+			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
+				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			}
+		} elseif ( $this->get_from_address() && $this->get_from_name() ) {
+			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
 		}
 
-		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object );
+		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object, $this );
 	}
 
 	/**
@@ -396,7 +426,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_attachments() {
-		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object );
+		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object, $this );
 	}
 
 	/**
@@ -460,7 +490,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object );
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object, $this );
 	}
 
 	/**
@@ -499,7 +529,7 @@ class WC_Email extends WC_Settings_API {
 		$this->sending = true;
 
 		if ( 'plain' === $this->get_email_type() ) {
-			$email_content = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ), 70 );
+			$email_content = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) ), 70 );
 		} else {
 			$email_content = $this->get_content_html();
 		}
@@ -519,14 +549,15 @@ class WC_Email extends WC_Settings_API {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
-			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
+			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
 			if ( $this->supports_emogrifier() ) {
-				if ( ! class_exists( 'Emogrifier' ) ) {
+				$emogrifier_class = '\\Pelago\\Emogrifier';
+				if ( ! class_exists( $emogrifier_class ) ) {
 					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
 				}
 				try {
-					$emogrifier = new Emogrifier( $content, $css );
+					$emogrifier = new $emogrifier_class( $content, $css );
 					$content    = $emogrifier->emogrify();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();
@@ -600,8 +631,10 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
-		$message = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
-		$return  = wp_mail( $to, $subject, $message, $headers, $attachments );
+		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
+		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
+		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, $subject, $message, $headers, $attachments ), $this );
+		$return               = call_user_func_array( $mail_callback, $mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
@@ -614,32 +647,41 @@ class WC_Email extends WC_Settings_API {
 	 * Initialise Settings Form Fields - these are generic email options most will use.
 	 */
 	public function init_form_fields() {
+		/* translators: %s: list of placeholders */
+		$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 		$this->form_fields = array(
-			'enabled'    => array(
+			'enabled'            => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => __( 'Enable this email notification', 'woocommerce' ),
 				'default' => 'yes',
 			),
-			'subject'    => array(
+			'subject'            => array(
 				'title'       => __( 'Subject', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => true,
-				/* translators: %s: list of placeholders */
-				'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
+				'description' => $placeholder_text,
 				'placeholder' => $this->get_default_subject(),
 				'default'     => '',
 			),
-			'heading'    => array(
+			'heading'            => array(
 				'title'       => __( 'Email heading', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => true,
-				/* translators: %s: list of placeholders */
-				'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' ),
+				'description' => $placeholder_text,
 				'placeholder' => $this->get_default_heading(),
 				'default'     => '',
 			),
-			'email_type' => array(
+			'additional_content' => array(
+				'title'       => __( 'Additional content', 'woocommerce' ),
+				'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+				'css'         => 'width:400px; height: 75px;',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'type'        => 'textarea',
+				'default'     => $this->get_default_additional_content(),
+				'desc_tip'    => true,
+			),
+			'email_type'         => array(
 				'title'       => __( 'Email type', 'woocommerce' ),
 				'type'        => 'select',
 				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
@@ -716,17 +758,17 @@ class WC_Email extends WC_Settings_API {
 			$code  = wp_unslash( $template_code );
 
 			if ( is_writeable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writeable
-				$f = fopen( $file, 'w+' );
+				$f = fopen( $file, 'w+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
 				if ( false !== $f ) {
-					fwrite( $f, $code );
-					fclose( $f );
+					fwrite( $f, $code ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose( $f ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
 					$saved = true;
 				}
 			}
 
 			if ( ! $saved ) {
-				$redirect = add_query_arg( 'wc_error', urlencode( __( 'Could not write to template file.', 'woocommerce' ) ) );
+				$redirect = add_query_arg( 'wc_error', rawurlencode( __( 'Could not write to template file.', 'woocommerce' ) ) );
 				wp_safe_redirect( $redirect );
 				exit;
 			}
@@ -820,7 +862,7 @@ class WC_Email extends WC_Settings_API {
 		if (
 			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
 			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
-			&& 'GET' === $_SERVER['REQUEST_METHOD'] // phpcs:ignore WordPress.VIP.ValidatedSanitizedInput.InputNotValidated
+			&& 'GET' === $_SERVER['REQUEST_METHOD'] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		) {
 			if ( empty( $_GET['_wc_email_nonce'] ) || ! wp_verify_nonce( wc_clean( wp_unslash( $_GET['_wc_email_nonce'] ) ), 'woocommerce_email_template_nonce' ) ) {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
@@ -927,7 +969,7 @@ class WC_Email extends WC_Settings_API {
 									?>
 									readonly="readonly" disabled="disabled"
 								<?php else : ?>
-									data-name="<?php echo esc_attr( $template_type ) . '_code'; ?>"<?php endif; ?>><?php echo esc_html( file_get_contents( $local_file ) ); ?></textarea>
+									data-name="<?php echo esc_attr( $template_type ) . '_code'; ?>"<?php endif; ?>><?php echo esc_html( file_get_contents( $local_file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents ?></textarea>
 							</div>
 						<?php elseif ( file_exists( $template_file ) ) : ?>
 							<p>
@@ -960,7 +1002,7 @@ class WC_Email extends WC_Settings_API {
 							</p>
 
 							<div class="editor" style="display:none">
-								<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo esc_html( file_get_contents( $template_file ) ); ?></textarea>
+								<textarea class="code" readonly="readonly" disabled="disabled" cols="25" rows="20"><?php echo esc_html( file_get_contents( $template_file ) );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents ?></textarea>
 							</div>
 						<?php else : ?>
 							<p><?php esc_html_e( 'File was not found.', 'woocommerce' ); ?></p>

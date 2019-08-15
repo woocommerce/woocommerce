@@ -17,7 +17,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 	 * An email sent to the customer when they create an account.
 	 *
 	 * @class       WC_Email_Customer_New_Account
-	 * @version     2.3.0
+	 * @version     3.5.0
 	 * @package     WooCommerce/Classes/Emails
 	 * @extends     WC_Email
 	 */
@@ -73,7 +73,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Your account on {site_title}', 'woocommerce' );
+			return __( 'Your {site_title} account has been created!', 'woocommerce' );
 		}
 
 		/**
@@ -116,13 +116,14 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
 					'blogname'           => $this->get_blogname(),
@@ -137,13 +138,14 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		/**
 		 * Get content plain.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
 					'blogname'           => $this->get_blogname(),
@@ -153,6 +155,16 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 					'email'              => $this,
 				)
 			);
+		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'We look forward to seeing you soon.', 'woocommerce' );
 		}
 	}
 

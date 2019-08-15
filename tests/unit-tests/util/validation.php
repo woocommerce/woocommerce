@@ -1,8 +1,12 @@
 <?php
+/**
+ * Unit tests for validation.
+ *
+ * @package WooCommerce\Tests\Util
+ */
 
 /**
- * Class Validation.
- * @package WooCommerce\Tests\Util
+ * Class WC_Tests_Validation.
  * @since 2.3
  */
 class WC_Tests_Validation extends WC_Unit_Test_Case {
@@ -27,13 +31,16 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( true, WC_Validation::is_phone( '+00 000 00 00 000' ) ),
 			array( true, WC_Validation::is_phone( '+00-000-00-00-000' ) ),
 			array( true, WC_Validation::is_phone( '(000) 00 00 000' ) ),
-			array( false, WC_Validation::is_phone( '+00.000.00.00.000' ) ),
+			array( true, WC_Validation::is_phone( '+00.000.00.00.000' ) ),
 			array( false, WC_Validation::is_phone( '+00 aaa dd ee fff' ) ),
 		);
 	}
 
 	/**
 	 * Test is_phone().
+	 *
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_is_phone
 	 * @since 2.3
@@ -48,12 +55,11 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function data_provider_test_is_postcode() {
-		$generic = array(
+		$it = array(
 			array( true, WC_Validation::is_postcode( '99999', 'IT' ) ),
-			array( true, WC_Validation::is_postcode( '99999', 'IT' ) ),
-			array( true, WC_Validation::is_postcode( '9999', 'IT' ) ),
-			array( true, WC_Validation::is_postcode( 'ABC 999', 'IT' ) ),
-			array( true, WC_Validation::is_postcode( 'ABC-999', 'IT' ) ),
+			array( false, WC_Validation::is_postcode( '9999', 'IT' ) ),
+			array( false, WC_Validation::is_postcode( 'ABC 999', 'IT' ) ),
+			array( false, WC_Validation::is_postcode( 'ABC-999', 'IT' ) ),
 			array( false, WC_Validation::is_postcode( 'ABC_123', 'IT' ) ),
 		);
 
@@ -92,11 +98,23 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( false, WC_Validation::is_postcode( '0A0A0A', 'CA' ) ),
 		);
 
-		return array_merge( $generic, $gb, $us, $ch, $br, $ca );
+		$nl = array(
+			array( true, WC_Validation::is_postcode( '3852GC', 'NL' ) ),
+			array( true, WC_Validation::is_postcode( '3852 GC', 'NL' ) ),
+			array( true, WC_Validation::is_postcode( '3852 gc', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '3852SA', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '3852 SA', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '3852 sa', 'NL' ) ),
+		);
+
+		return array_merge( $it, $gb, $us, $ch, $br, $ca, $nl );
 	}
 
 	/**
 	 * Test is_postcode().
+	 *
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_is_postcode
 	 * @since 2.4
@@ -129,6 +147,9 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	/**
 	 * Test is_gb_postcode().
 	 *
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
+	 *
 	 * @dataProvider data_provider_test_is_gb_postcode
 	 * @since 2.4
 	 */
@@ -154,6 +175,9 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 
 	/**
 	 * Test format_postcode().
+	 *
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_format_postcode
 	 * @since 2.4

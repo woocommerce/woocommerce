@@ -22,7 +22,7 @@ class WC_Order_Item_Tax_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount' );
+	protected $internal_meta_keys = array( 'rate_id', 'label', 'compound', 'tax_amount', 'shipping_tax_amount', 'rate_percent' );
 
 	/**
 	 * Read/populate data properties specific to this order item.
@@ -41,6 +41,7 @@ class WC_Order_Item_Tax_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 				'compound'           => get_metadata( 'order_item', $id, 'compound', true ),
 				'tax_total'          => get_metadata( 'order_item', $id, 'tax_amount', true ),
 				'shipping_tax_total' => get_metadata( 'order_item', $id, 'shipping_tax_amount', true ),
+				'rate_percent'       => get_metadata( 'order_item', $id, 'rate_percent', true ),
 			)
 		);
 		$item->set_object_read( true );
@@ -62,6 +63,7 @@ class WC_Order_Item_Tax_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 			'compound'            => 'compound',
 			'tax_amount'          => 'tax_total',
 			'shipping_tax_amount' => 'shipping_tax_total',
+			'rate_percent'        => 'rate_percent',
 		);
 		$props_to_update   = $this->get_props_to_update( $item, $meta_key_to_props, 'order_item' );
 

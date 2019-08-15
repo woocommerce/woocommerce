@@ -37,10 +37,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 */
 	public function get_sections() {
 		$sections = array(
-			''           => __( 'Page setup', 'woocommerce' ),
-			'keys'       => __( 'REST API', 'woocommerce' ),
-			'webhooks'   => __( 'Webhooks', 'woocommerce' ),
-			'legacy_api' => __( 'Legacy API', 'woocommerce' ),
+			''                => __( 'Page setup', 'woocommerce' ),
+			'keys'            => __( 'REST API', 'woocommerce' ),
+			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
+			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
+			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
 
 		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
@@ -50,6 +51,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Get settings array.
 	 *
 	 * @param string $current_section Current section slug.
+	 *
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
@@ -57,7 +59,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_settings_pages', array(
+				'woocommerce_settings_pages',
+				array(
 
 					array(
 						'title' => __( 'Page setup', 'woocommerce' ),
@@ -75,7 +78,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
+						'args'     => array(
+							'exclude' =>
+								array(
+									wc_get_page_id( 'checkout' ),
+									wc_get_page_id( 'myaccount' ),
+								),
+						),
 						'desc_tip' => true,
+						'autoload' => false,
 					),
 
 					array(
@@ -87,7 +98,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
+						'args'     => array(
+							'exclude' =>
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'myaccount' ),
+								),
+						),
 						'desc_tip' => true,
+						'autoload' => false,
 					),
 
 					array(
@@ -99,7 +118,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
+						'args'     => array(
+							'exclude' =>
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'checkout' ),
+								),
+						),
 						'desc_tip' => true,
+						'autoload' => false,
 					),
 
 					array(
@@ -126,7 +153,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'id'    => 'checkout_process_options',
 					),
 
-					'force_ssl_checkout'   => array(
+					'force_ssl_checkout' => array(
 						'title'           => __( 'Secure checkout', 'woocommerce' ),
 						'desc'            => __( 'Force secure checkout', 'woocommerce' ),
 						'id'              => 'woocommerce_force_ssl_checkout',
@@ -298,9 +325,59 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			if ( wc_site_is_https() ) {
 				unset( $settings['unforce_ssl_checkout'], $settings['force_ssl_checkout'] );
 			}
+		} elseif ( 'woocommerce_com' === $current_section ) {
+			$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
+
+			$settings = apply_filters(
+				'woocommerce_com_integration_settings',
+				array(
+					array(
+						'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
+						'type'  => 'title',
+						'id'    => 'tracking_options',
+						'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
+					),
+					array(
+						'title'         => __( 'Enable tracking', 'woocommerce' ),
+						'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
+						/* Translators: %s URL to tracking info screen. */
+						'desc_tip'      => sprintf( esc_html__( 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: %s.', 'woocommerce' ), $tracking_info_text ),
+						'id'            => 'woocommerce_allow_tracking',
+						'type'          => 'checkbox',
+						'checkboxgroup' => 'start',
+						'default'       => 'no',
+						'autoload'      => false,
+					),
+					array(
+						'type' => 'sectionend',
+						'id'   => 'tracking_options',
+					),
+					array(
+						'title' => esc_html__( 'Marketplace suggestions', 'woocommerce' ),
+						'type'  => 'title',
+						'id'    => 'marketplace_suggestions',
+						'desc'  => __( 'We show contextual suggestions for official extensions that may be helpful to your store.', 'woocommerce' ),
+					),
+					array(
+						'title'         => __( 'Show Suggestions', 'woocommerce' ),
+						'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
+						'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to see suggested extensions.', 'woocommerce' ),
+						'id'            => 'woocommerce_show_marketplace_suggestions',
+						'type'          => 'checkbox',
+						'checkboxgroup' => 'start',
+						'default'       => 'yes',
+						'autoload'      => false,
+					),
+					array(
+						'type' => 'sectionend',
+						'id'   => 'marketplace_suggestions',
+					),
+				)
+			);
 		} elseif ( 'legacy_api' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_settings_rest_api', array(
+				'woocommerce_settings_rest_api',
+				array(
 					array(
 						'title' => '',
 						'type'  => 'title',
@@ -329,7 +406,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Form method.
 	 *
 	 * @deprecated 3.4.4
+	 *
 	 * @param  string $method Method name.
+	 *
 	 * @return string
 	 */
 	public function form_method( $method ) {
@@ -378,6 +457,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				$_POST['woocommerce_terms_page_id'] = '';
 			}
 
+			// Prevent the Cart, checkout and my account page from being set to the same page.
+			if ( isset( $_POST['woocommerce_cart_page_id'], $_POST['woocommerce_checkout_page_id'], $_POST['woocommerce_myaccount_page_id'] ) ) { // WPCS: input var ok, CSRF ok.
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_checkout_page_id'] ) { // WPCS: input var ok, CSRF ok.
+					$_POST['woocommerce_checkout_page_id'] = '';
+				}
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) { // WPCS: input var ok, CSRF ok.
+					$_POST['woocommerce_myaccount_page_id'] = '';
+				}
+				if ( $_POST['woocommerce_checkout_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) { // WPCS: input var ok, CSRF ok.
+					$_POST['woocommerce_myaccount_page_id'] = '';
+				}
+			}
+
 			WC_Admin_Settings::save_fields( $settings );
 
 			if ( $current_section ) {
@@ -393,6 +485,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
  * @deprecated 3.4 in favour of WC_Settings_Advanced.
  * @todo remove in 4.0.
  */
-class WC_Settings_Rest_API extends WC_Settings_Advanced {} // @codingStandardsIgnoreLine.
+class WC_Settings_Rest_API extends WC_Settings_Advanced {
+} // @codingStandardsIgnoreLine.
 
 return new WC_Settings_Advanced();
