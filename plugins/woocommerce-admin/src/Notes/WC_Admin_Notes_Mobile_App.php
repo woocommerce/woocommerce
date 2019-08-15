@@ -15,6 +15,10 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notes_Mobile_App
  */
 class WC_Admin_Notes_Mobile_App {
+	/**
+	 * Note traits.
+	 */
+	use NoteTraits;
 
 	/**
 	 * Name of the note for use in the database.
@@ -25,18 +29,9 @@ class WC_Admin_Notes_Mobile_App {
 	 * Possibly add mobile app note.
 	 */
 	public static function possibly_add_mobile_app_note() {
-
-		$wc_admin_installed = get_option( 'wc_admin_install_timestamp', false );
-		if ( false === $wc_admin_installed ) {
-			$wc_admin_installed = time();
-			update_option( 'wc_admin_install_timestamp', $wc_admin_installed );
-		}
-
-		$current_time        = time();
-		$two_days_in_seconds = 172800;
-
 		// We want to show the mobile app note after day 2.
-		if ( $current_time - $wc_admin_installed < $two_days_in_seconds ) {
+		$two_days_in_seconds = 2 * DAY_IN_SECONDS;
+		if ( ! self::wc_admin_active_for( $two_days_in_seconds ) ) {
 			return;
 		}
 

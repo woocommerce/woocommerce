@@ -16,6 +16,11 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Admin_Notes_Giving_Feedback_Notes {
 	/**
+	 * Note traits.
+	 */
+	use NoteTraits;
+
+	/**
 	 * Add notes for admin giving feedback.
 	 */
 	public static function add_notes_for_admin_giving_feedback() {
@@ -36,18 +41,9 @@ class WC_Admin_Notes_Giving_Feedback_Notes {
 			return;
 		}
 
-		// Getting install timestamp reference class-wc-admin-install.php.
-		$wc_admin_installed = get_option( 'wc_admin_install_timestamp', false );
-		if ( false === $wc_admin_installed ) {
-			$wc_admin_installed = time();
-			update_option( 'wc_admin_install_timestamp', $wc_admin_installed );
-		}
-
-		$current_time          = time();
-		$three_days_in_seconds = 259200;
-
 		// We need to show Admin Giving feeback notification after 3 days of install.
-		if ( $current_time - $wc_admin_installed < $three_days_in_seconds ) {
+		$three_days_in_seconds = 3 * DAY_IN_SECONDS;
+		if ( ! self::wc_admin_active_for( $three_days_in_seconds ) ) {
 			return;
 		}
 

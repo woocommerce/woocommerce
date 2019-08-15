@@ -15,6 +15,10 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notes_Facebook_Extension
  */
 class WC_Admin_Notes_Facebook_Extension {
+	/**
+	 * Note traits.
+	 */
+	use NoteTraits;
 
 	/**
 	 * Name of the note for use in the database.
@@ -32,23 +36,15 @@ class WC_Admin_Notes_Facebook_Extension {
 	 * Possibly add Facebook extension note.
 	 */
 	public static function possibly_add_facebook_note() {
-		$wc_admin_installed = get_option( 'wc_admin_install_timestamp', false );
-		if ( false === $wc_admin_installed ) {
-			$wc_admin_installed = time();
-			update_option( 'wc_admin_install_timestamp', $wc_admin_installed );
-		}
-
 		// Only show the Facebook note to stores with products.
 		$products = wp_count_posts( 'product' );
 		if ( (int) $products->publish < 1 ) {
 			return;
 		}
 
-		$current_time          = time();
-		$three_days_in_seconds = 3 * DAY_IN_SECONDS;
-
 		// We want to show the Facebook note after day 3.
-		if ( $current_time - $wc_admin_installed < $three_days_in_seconds ) {
+		$three_days_in_seconds = 3 * DAY_IN_SECONDS;
+		if ( ! self::wc_admin_active_for( $three_days_in_seconds ) ) {
 			return;
 		}
 
