@@ -168,7 +168,7 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			$classes[] = $attributes['className'];
 		}
 
-		return implode( $classes, ' ' );
+		return implode( ' ', $classes );
 	}
 
 	/**
