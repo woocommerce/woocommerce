@@ -80,7 +80,7 @@
     "postcss-loader": "3.0.0",
     "progress-bar-webpack-plugin": "1.12.1",
     "react-test-renderer": "16.8.6",
-    "rimraf": "2.7.0",
+    "rimraf": "2.7.1",
     "sass-loader": "7.2.0",
     "style-loader": "1.0.0",
     "stylelint": "10.1.0",
