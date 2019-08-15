@@ -184,7 +184,7 @@ class Table extends Component {
 														)
 													}
 													aria-describedby={ labelId }
-													onClick={ this.sortBy( key ) }
+													onClick={ hasData ? this.sortBy( key ) : noop }
 													isDefault
 												>
 													{ textLabel }
