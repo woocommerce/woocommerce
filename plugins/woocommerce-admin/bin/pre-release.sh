@@ -43,10 +43,6 @@ git pull origin master
 
 success "Pulled latest commits"
 
-composer install
-
-success "Installed PHP dependencies"
-
 status "What version would you like to release?"
 
 echo -n "Version: "
