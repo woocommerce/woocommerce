@@ -1,4 +1,4 @@
-# 3.0.0 (unreleased)
+# 3.0.0
 
 - `getHistory` updated to reflect path parameters in url query.
 - `getNewPath` also updated to reflect path parameters in url query.

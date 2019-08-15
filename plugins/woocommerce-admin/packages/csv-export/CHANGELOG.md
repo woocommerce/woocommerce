@@ -1,6 +1,10 @@
+# 1.1.2
+
+- Update dependencies.
+
 # 1.1.1
 
-- Update license to GPL-3.0-or-later
+- Update license to GPL-3.0-or-later.
 
 # 1.1.0
 
