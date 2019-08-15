@@ -46,6 +46,7 @@ class RestApi {
 			'product-tags'            => __NAMESPACE__ . '\RestApi\Controllers\ProductTags',
 			'products'                => __NAMESPACE__ . '\RestApi\Controllers\Products',
 			'variations'              => __NAMESPACE__ . '\RestApi\Controllers\Variations',
+			'product-reviews'         => __NAMESPACE__ . '\RestApi\Controllers\ProductReviews',
 		];
 	}
 }

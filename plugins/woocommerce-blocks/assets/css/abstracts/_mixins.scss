@@ -15,6 +15,18 @@
 	}
 }
 
+@keyframes loading-fade {
+	0% {
+		opacity: 0.7;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.7;
+	}
+}
+
 // Adds animation to placeholder section
 @mixin placeholder( $lighten-percentage: 30% ) {
 	animation: loading-fade 1.6s ease-in-out infinite;
@@ -23,6 +35,10 @@
 
 	&::after {
 		content: "\00a0";
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		animation: none;
 	}
 }
 
