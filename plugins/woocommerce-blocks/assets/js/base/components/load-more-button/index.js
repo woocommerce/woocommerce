@@ -23,12 +23,14 @@ export const LoadMoreButton = ( { onClick, label, screenReaderLabel } ) => {
 	) : label;
 
 	return (
-		<button
-			className="wc-block-load-more"
-			onClick={ onClick }
-		>
-			{ labelNode }
-		</button>
+		<div className="wp-block-button wc-block-load-more">
+			<button
+				className="wp-block-button__link"
+				onClick={ onClick }
+			>
+				{ labelNode }
+			</button>
+		</div>
 	);
 };
 
