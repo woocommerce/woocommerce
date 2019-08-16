@@ -178,6 +178,7 @@ class Search extends Component {
 			selected,
 			showClearButton,
 			staticResults,
+			disabled,
 		} = this.props;
 		const { value = '', isActive } = this.state;
 		const aria = {
@@ -239,6 +240,7 @@ class Search extends Component {
 											shouldRenderTags ? `search-inline-input-${ instanceId }` : null
 										}
 										{ ...aria }
+										disabled={ disabled }
 									/>
 									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
 										{ __( 'Move backward for selected items', 'woocommerce-admin' ) }
@@ -257,6 +259,7 @@ class Search extends Component {
 									aria-owns={ listBoxId }
 									aria-activedescendant={ activeId }
 									{ ...aria }
+									disabled={ disabled }
 								/>
 							</Fragment>
 						)
@@ -338,6 +341,10 @@ Search.propTypes = {
 	 * Render results list positioned statically instead of absolutely.
 	 */
 	staticResults: PropTypes.bool,
+	/**
+	 * Whether the control is disabled or not.
+	 */
+	disabled: PropTypes.bool,
 };
 
 Search.defaultProps = {
@@ -347,6 +354,7 @@ Search.defaultProps = {
 	inlineTags: false,
 	showClearButton: false,
 	staticResults: false,
+	disabled: false,
 };
 
 export default withInstanceId( Search );

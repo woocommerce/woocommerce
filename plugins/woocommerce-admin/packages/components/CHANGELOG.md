@@ -6,6 +6,8 @@
 - Added a new `<SimpleSelectControl />` component.
 - Added a new `<WebPreview />` component.
 - SearchListItem component: fix long count values being cut-off in IE11.
+- Add `disabled` prop to CompareButton, Search, and TableCard components.
+- Table component: add empty table display.
 
 # 3.1.0
 - Added support for a `countLabel` prop on `SearchListItem` to allow custom counts.
