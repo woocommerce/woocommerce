@@ -25,7 +25,7 @@ import GridContentControl from '../../components/grid-content-control';
 import GridLayoutControl from '../../components/grid-layout-control';
 import ProductTagControl from '../../components/product-tag-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
-import { hasTags } from '../../components/utils';
+import { HAS_TAGS } from '../../constants';
 
 /**
  * Component to handle edit mode of "Products by Tag".
@@ -231,7 +231,7 @@ class ProductsByTagBlock extends Component {
 
 		return (
 			<Fragment>
-				{ hasTags ? (
+				{ HAS_TAGS ? (
 					<Fragment>
 						<BlockControls>
 							<Toolbar

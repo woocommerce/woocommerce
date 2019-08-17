@@ -11,6 +11,7 @@ import { PlainText } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
+import { HOME_URL } from '../../constants';
 import './editor.scss';
 import './style.scss';
 
@@ -20,7 +21,6 @@ import './style.scss';
 class ProductSearchBlock extends Component {
 	renderView() {
 		const { attributes: { label, placeholder, formId, className, hasLabel, align } } = this.props;
-		const home = wc_product_block_data.homeUrl;
 		const classes = classnames(
 			'wc-block-product-search',
 			align ? 'align' + align : '',
@@ -29,7 +29,7 @@ class ProductSearchBlock extends Component {
 
 		return (
 			<div className={ classes }>
-				<form role="search" method="get" action={ home }>
+				<form role="search" method="get" action={ HOME_URL }>
 					<label
 						htmlFor={ formId }
 						className={ hasLabel ? 'wc-block-product-search__label' : 'wc-block-product-search__label screen-reader-text' }

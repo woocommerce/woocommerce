@@ -34,6 +34,7 @@ import { IconFolderStar } from '../../components/icons';
 /**
  * Internal dependencies
  */
+import { MIN_HEIGHT } from '../../constants';
 import ProductCategoryControl from '../../components/product-category-control';
 import ApiErrorPlaceholder from '../../components/api-error-placeholder';
 import {
@@ -43,11 +44,6 @@ import {
 	getCategoryImageSrc,
 } from './utils';
 import { withCategory } from '../../hocs';
-
-/**
- * The min-height for the block content.
- */
-const MIN_HEIGHT = wc_product_block_data.min_height;
 
 /**
  * Component to handle edit mode of "Featured Category".

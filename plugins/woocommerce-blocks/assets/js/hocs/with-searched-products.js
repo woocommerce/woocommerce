@@ -9,7 +9,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { isLargeCatalog, getProducts } from '../components/utils';
+import { IS_LARGE_CATALOG } from '../constants';
+import { getProducts } from '../components/utils';
 
 /**
  * A higher order component that enhances the provided component with products
@@ -69,7 +70,7 @@ const withSearchedProducts = createHigherOrderComponent( ( OriginalComponent ) =
 					selected={ list.filter(
 						( { id } ) => selected.includes( id )
 					) }
-					onSearch={ isLargeCatalog ? this.debouncedOnSearch : null }
+					onSearch={ IS_LARGE_CATALOG ? this.debouncedOnSearch : null }
 				/>
 			);
 		}

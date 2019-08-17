@@ -11,6 +11,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import './style.scss';
 import './editor.scss';
 import Block from './block';
+import { DEFAULT_HEIGHT } from '../../constants';
 
 /**
  * Register and run the "Featured Product" block.
@@ -68,7 +69,7 @@ registerBlockType( 'woocommerce/featured-product', {
 		 */
 		height: {
 			type: 'number',
-			default: wc_product_block_data.default_height,
+			default: DEFAULT_HEIGHT,
 		},
 
 		/**

@@ -8,6 +8,11 @@ import TestRenderer from 'react-test-renderer';
  */
 import ProductPreview from '../';
 
+jest.mock( '../../../constants.js', () => ( {
+	PLACEHOLDER_IMG_SRC: 'placeholder.png',
+	THUMBNAIL_SIZE: 300,
+} ) );
+
 describe( 'ProductPreview', () => {
 	test( 'should render a single product preview with an image', () => {
 		const product = {

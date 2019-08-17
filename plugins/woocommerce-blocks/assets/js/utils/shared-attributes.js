@@ -1,3 +1,7 @@
+/**
+ * Internal dependencies
+ */
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../constants';
 
 export const sharedAttributeBlockTypes = [
 	'woocommerce/product-best-sellers',
@@ -13,7 +17,7 @@ export default {
 	 */
 	columns: {
 		type: 'number',
-		default: wc_product_block_data.default_columns,
+		default: DEFAULT_COLUMNS,
 	},
 
 	/**
@@ -21,7 +25,7 @@ export default {
 	 */
 	rows: {
 		type: 'number',
-		default: wc_product_block_data.default_rows,
+		default: DEFAULT_ROWS,
 	},
 
 	/**

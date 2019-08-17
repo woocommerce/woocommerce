@@ -14,8 +14,7 @@ import LoadMoreButton from '../../base/components/load-more-button';
 import ReviewOrderSelect from '../../base/components/review-order-select';
 import ReviewList from '../../base/components/review-list';
 import withComponentId from '../../base/hocs/with-component-id';
-
-const enableReviewRating = !! ( typeof wc_product_block_data !== 'undefined' && wc_product_block_data.enableReviewRating );
+import { ENABLE_REVIEW_RATING } from '../../constants';
 
 /**
  * Block rendered in the frontend.
@@ -134,7 +133,7 @@ class FrontendBlock extends Component {
 
 		return (
 			<Fragment>
-				{ ( attributes.showOrderby && enableReviewRating ) && (
+				{ ( attributes.showOrderby && ENABLE_REVIEW_RATING ) && (
 					<ReviewOrderSelect
 						componentId={ componentId }
 						onChange={ this.onChangeOrderby }

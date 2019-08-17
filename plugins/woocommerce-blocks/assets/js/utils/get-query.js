@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { min } from 'lodash';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../constants';
 
 export default function getQuery( blockAttributes, name ) {
 	const {
@@ -14,8 +15,8 @@ export default function getQuery( blockAttributes, name ) {
 		orderby,
 		products,
 	} = blockAttributes;
-	const columns = blockAttributes.columns || wc_product_block_data.default_columns;
-	const rows = blockAttributes.rows || wc_product_block_data.default_rows;
+	const columns = blockAttributes.columns || DEFAULT_COLUMNS;
+	const rows = blockAttributes.rows || DEFAULT_ROWS;
 	const apiMax = Math.floor( 100 / columns ) * columns; // Prevent uneven final row.
 
 	const query = {

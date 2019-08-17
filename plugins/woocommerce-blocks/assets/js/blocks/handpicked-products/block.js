@@ -27,6 +27,7 @@ import GridContentControl from '../../components/grid-content-control';
 import { IconWidgets } from '../../components/icons';
 import ProductsControl from '../../components/products-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
+import { MAX_COLUMNS, MIN_COLUMNS } from '../../constants';
 
 /**
  * Component to handle edit mode of "Hand-picked Products".
@@ -46,8 +47,8 @@ class ProductsBlock extends Component {
 						label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
 						value={ columns }
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ wc_product_block_data.min_columns }
-						max={ wc_product_block_data.max_columns }
+						min={ MIN_COLUMNS }
+						max={ MAX_COLUMNS }
 					/>
 					<ToggleControl
 						label={ __( 'Align Add to Cart buttons', 'woo-gutenberg-products-block' ) }
