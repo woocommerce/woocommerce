@@ -138,7 +138,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $order_status_filter ) {
 			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
-			$sql_query_params['where_clause'] .= ' AND variation_id > 0';
 		}
 
 		return $sql_query_params;
@@ -289,7 +288,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 									{$sql_query_params['where_time_clause']}
 									{$sql_query_params['where_clause']}
 								GROUP BY
-									variation_id
+									product_id, variation_id
 								) AS tt"
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -317,7 +316,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
-						variation_id
+						product_id, variation_id
 				{$suffix}
 					{$right_join}
 					{$sql_query_params['outer_from_clause']}
