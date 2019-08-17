@@ -9,6 +9,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import withComponentId from '../../base/hocs/with-component-id';
+import { HOME_URL } from '../../constants';
 
 /**
  * Component displaying the categories as dropdown or list.
@@ -28,7 +29,7 @@ class ProductCategoriesBlock extends Component {
 		if ( 'false' === url ) {
 			return;
 		}
-		const home = wc_product_block_data.homeUrl;
+		const home = HOME_URL;
 
 		if ( ! isPreview && 0 === url.indexOf( home ) ) {
 			document.location.href = url;

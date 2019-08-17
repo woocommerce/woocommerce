@@ -11,6 +11,7 @@ import './editor.scss';
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
 import { IconWidgets } from '../../components/icons';
+import { DEFAULT_COLUMNS } from '../../constants';
 
 registerBlockType( 'woocommerce/handpicked-products', {
 	title: __( 'Hand-picked Products', 'woo-gutenberg-products-block' ),
@@ -41,7 +42,7 @@ registerBlockType( 'woocommerce/handpicked-products', {
 		 */
 		columns: {
 			type: 'number',
-			default: wc_product_block_data.default_columns,
+			default: DEFAULT_COLUMNS,
 		},
 
 		/**
@@ -99,7 +100,7 @@ registerBlockType( 'woocommerce/handpicked-products', {
 				},
 				columns: {
 					type: 'number',
-					default: wc_product_block_data.default_columns,
+					default: DEFAULT_COLUMNS,
 				},
 				editMode: {
 					type: 'boolean',

@@ -10,13 +10,16 @@ import _ from 'lodash';
 import withSearchedProducts from '../with-searched-products';
 import * as mockedUtils from '../../components/utils';
 
+jest.mock( '../../constants.js', () => ( {
+	IS_LARGE_CATALOG: true,
+} ) );
+
 // Mock the getProducts and isLargeCatalog values for tests.
 mockedUtils.getProducts = jest.fn().mockImplementation(
 	() => Promise.resolve(
 		[ { id: 10, name: 'foo' }, { id: 20, name: 'bar' } ]
 	)
 );
-mockedUtils.isLargeCatalog = true;
 
 // Add a mock implementation of debounce for testing so we can spy on
 // the onSearch call.
@@ -38,7 +41,6 @@ describe( 'withSearchedProducts Component', () => {
 		debouncedCancel.mockClear();
 		debouncedAction.mockClear();
 		mockedUtils.getProducts.mockClear();
-		mockedUtils.isLargeCatalog = false;
 	} );
 	const TestComponent = withSearchedProducts( ( {
 		selected,

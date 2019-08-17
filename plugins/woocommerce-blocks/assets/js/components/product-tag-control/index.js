@@ -11,8 +11,9 @@ import { SelectControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import { getProductTags } from '../utils';
+import { LIMIT_TAGS } from '../../constants';
 import './style.scss';
-import { limitTags, getProductTags } from '../utils';
 
 /**
  * Component to handle searching and selecting product tags.
@@ -127,7 +128,7 @@ class ProductTagControl extends Component {
 					isLoading={ loading }
 					selected={ selected.map( ( id ) => find( list, { id } ) ).filter( Boolean ) }
 					onChange={ onChange }
-					onSearch={ limitTags ? this.debouncedOnSearch : null }
+					onSearch={ LIMIT_TAGS ? this.debouncedOnSearch : null }
 					renderItem={ this.renderItem }
 					messages={ messages }
 					isHierarchical

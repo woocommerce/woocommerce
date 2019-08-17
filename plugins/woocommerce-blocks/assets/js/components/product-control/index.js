@@ -17,8 +17,8 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { ENDPOINTS } from '../../constants';
-import { isLargeCatalog, getProducts } from '../utils';
+import { ENDPOINTS, IS_LARGE_CATALOG } from '../../constants';
+import { getProducts } from '../utils';
 import {
 	IconRadioSelected,
 	IconRadioUnselected,
@@ -273,7 +273,7 @@ class ProductControl extends Component {
 					selected={ selectedListItems }
 					onChange={ onChange }
 					renderItem={ renderItem }
-					onSearch={ isLargeCatalog ? this.debouncedOnSearch : null }
+					onSearch={ IS_LARGE_CATALOG ? this.debouncedOnSearch : null }
 					messages={ messages }
 					isHierarchical
 				/>

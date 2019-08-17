@@ -45,11 +45,7 @@ import {
 	getImageIdFromProduct,
 } from '../../utils/products';
 import { withProduct } from '../../hocs';
-
-/**
- * The min-height for the block content.
- */
-const MIN_HEIGHT = wc_product_block_data.min_height;
+import { MIN_HEIGHT } from '../../constants';
 
 /**
  * Component to handle edit mode of "Featured Product".

@@ -12,6 +12,7 @@ import './style.scss';
 import './editor.scss';
 import Block from './block';
 import { IconFolderStar } from '../../components/icons';
+import { DEFAULT_HEIGHT } from '../../constants';
 
 /**
  * Register and run the "Featured Category" block.
@@ -69,7 +70,7 @@ registerBlockType( 'woocommerce/featured-category', {
 		 */
 		height: {
 			type: 'number',
-			default: wc_product_block_data.default_height,
+			default: DEFAULT_HEIGHT,
 		},
 
 		/**

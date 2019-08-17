@@ -1,12 +1,6 @@
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will likely run into this.
 global.wp = {};
 
-// Set up our settings global.
-global.wc_product_block_data = {
-	placeholderImgSrc: 'placeholder.png',
-	thumbnail_size: '300',
-};
-
 // wcSettings is required by @woocommerce/* packages
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',

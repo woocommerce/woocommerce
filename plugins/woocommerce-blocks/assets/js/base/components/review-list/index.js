@@ -7,11 +7,12 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import ReviewListItem from '../review-list-item';
+import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '../../../constants';
 import './style.scss';
 
 const ReviewList = ( { attributes, componentId, reviews } ) => {
-	const showReviewImage = ( wc_product_block_data.showAvatars || attributes.imageType === 'product' ) && attributes.showReviewImage;
-	const showReviewRating = wc_product_block_data.enableReviewRating && attributes.showReviewRating;
+	const showReviewImage = ( SHOW_AVATARS || attributes.imageType === 'product' ) && attributes.showReviewImage;
+	const showReviewRating = ENABLE_REVIEW_RATING && attributes.showReviewRating;
 	const attrs = {
 		...attributes,
 		showReviewImage,

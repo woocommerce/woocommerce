@@ -9,6 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import './editor.scss';
 import Block from './block';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../../constants';
 
 /**
  * Register and run the "Products by Tag" block.
@@ -35,7 +36,7 @@ registerBlockType( 'woocommerce/product-tag', {
 		 */
 		columns: {
 			type: 'number',
-			default: wc_product_block_data.default_columns,
+			default: DEFAULT_COLUMNS,
 		},
 
 		/**
@@ -43,7 +44,7 @@ registerBlockType( 'woocommerce/product-tag', {
 		 */
 		rows: {
 			type: 'number',
-			default: wc_product_block_data.default_rows,
+			default: DEFAULT_ROWS,
 		},
 
 		/**
