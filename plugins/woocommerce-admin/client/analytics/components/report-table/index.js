@@ -108,14 +108,19 @@ class ReportTable extends Component {
 	}
 
 	filterShownHeaders( headers, hiddenKeys ) {
-		if ( ! hiddenKeys || ! hiddenKeys.length ) {
-			return headers;
+		// If no user preferences, set visibilty based on column default.
+		if ( ! hiddenKeys ) {
+			return headers.map( header => ( {
+				...header,
+				visible: header.required || ! header.hiddenByDefault,
+			} ) );
 		}
 
-		return headers.map( header => {
-			const hidden = hiddenKeys.includes( header.key ) && ! header.required;
-			return { ...header, hiddenByDefault: hidden };
-		} );
+		// Set visibilty based on user preferences.
+		return headers.map( header => ( {
+			...header,
+			visible: header.required || ! hiddenKeys.includes( header.key ),
+		} ) );
 	}
 
 	render() {

@@ -93,7 +93,15 @@ class TableCard extends Component {
 	}
 
 	getShowCols( headers ) {
-		return headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean );
+		return headers.map( ( { key, visible } ) => {
+			if (
+				'undefined' === typeof visible ||
+				visible
+			) {
+				return key;
+			}
+			return false;
+		} ).filter( Boolean );
 	}
 
 	getVisibleHeaders() {
