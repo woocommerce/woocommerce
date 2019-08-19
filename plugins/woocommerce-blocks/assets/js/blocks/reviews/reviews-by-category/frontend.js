@@ -9,7 +9,7 @@ import { render } from 'react-dom';
 import FrontendBlock from './frontend-block.js';
 
 const containers = document.querySelectorAll(
-	'.wp-block-woocommerce-reviews-by-product'
+	'.wp-block-woocommerce-reviews-by-category'
 );
 
 if ( containers.length ) {
@@ -21,6 +21,8 @@ if ( containers.length ) {
 			showReviewerName: el.classList.contains( 'has-name' ),
 			showReviewImage: el.classList.contains( 'has-image' ),
 			showReviewRating: el.classList.contains( 'has-rating' ),
+			showReviewContent: el.classList.contains( 'has-content' ),
+			showProductName: el.classList.contains( 'has-product-name' ),
 		};
 
 		render( <FrontendBlock attributes={ attributes } />, el );

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -40,4 +41,21 @@ export const getReviews = ( args ) => {
 			return { reviews, totalReviews };
 		} );
 	} );
+};
+
+export const getBlockClassName = ( blockClassName, attributes ) => {
+	const { className, showReviewDate, showReviewerName, showReviewContent, showProductName, showReviewImage, showReviewRating } = attributes;
+
+	return classNames(
+		blockClassName,
+		className,
+		{
+			'has-image': showReviewImage,
+			'has-name': showReviewerName,
+			'has-date': showReviewDate,
+			'has-rating': showReviewRating,
+			'has-content': showReviewContent,
+			'has-product-name': showProductName,
+		}
+	);
 };

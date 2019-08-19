@@ -7,5 +7,6 @@ export { default as IconNewReleases } from './new-releases';
 export { default as IconRadioSelected } from './radio-selected';
 export { default as IconRadioUnselected } from './radio-unselected';
 export { default as IconReviewsByProduct } from './reviews-by-product';
+export { default as IconReviewsByCategory } from './reviews-by-category';
 export { default as IconWidgets } from './widgets';
 export { default as IconWoo } from './woo';

@@ -17,6 +17,10 @@
 				width: 80px;
 			}
 
+			.wc-block-review-list-item__product {
+				display: none;
+			}
+
 			.wc-block-review-list-item__rating {
 				.wc-block-review-list-item__rating__stars > span {
 					display: none;
@@ -32,6 +36,7 @@
 	}
 }
 
+.editor-styles-wrapper .wc-block-review-list-item__item,
 .wc-block-review-list-item__item {
 	margin: 0 0 $gap-large * 2;
 	list-style: none;
@@ -91,19 +96,68 @@
 	}
 }
 
+.wc-block-review-list-item__meta {
+	display: flex;
+	align-items: center;
+	flex-flow: row wrap;
+
+	&::after {
+		// Force wrap after star rating.
+		order: 3;
+		content: "";
+		flex-basis: 100%;
+	}
+}
+
+.wc-block-review-list-item__product {
+	display: block;
+	font-weight: bold;
+	order: 1;
+	margin-right: $gap/2;
+}
+
 .wc-block-review-list-item__author {
 	display: block;
+	font-weight: bold;
+	order: 1;
+	margin-right: $gap/2;
+}
+
+.wc-block-review-list-item__product + .wc-block-review-list-item__author {
+	font-weight: normal;
+	color: #808080;
+	order: 4;
+}
+
+.wc-block-review-list-item__published-date {
+	color: #808080;
+	order: 5;
+}
+
+.wc-block-review-list-item__author + .wc-block-review-list-item__published-date {
+	&::before {
+		content: "";
+		display: inline-block;
+		margin-right: $gap/2;
+		border-right: 1px solid #ddd;
+		height: 1em;
+		vertical-align: middle;
+	}
+}
+
+.wc-block-review-list-item__author:first-child + .wc-block-review-list-item__published-date,
+.wc-block-review-list-item__rating + .wc-block-review-list-item__author + .wc-block-review-list-item__published-date {
+	&::before {
+		display: none;
+	}
 }
 
 .wc-block-review-list-item__rating {
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: $gap;
-	height: 1em;
+	order: 2;
 
 	> .wc-block-review-list-item__rating__stars {
 		display: inline-block;
-		top: -5px;
+		top: 0;
 		overflow: hidden;
 		position: relative;
 		height: 1.618em;
@@ -112,6 +166,7 @@
 		width: 5.3em;
 		font-family: star; /* stylelint-disable-line */
 		font-weight: 400;
+		vertical-align: top;
 	}
 
 	> .wc-block-review-list-item__rating__stars::before {
@@ -139,11 +194,4 @@
 		left: 0;
 		color: #e6a237;
 	}
-}
-
-.wc-block-review-list-item__published-date {
-	display: inline-block;
-	vertical-align: middle;
-	color: #808080;
-	font-size: 0.875em;
 }

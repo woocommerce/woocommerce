@@ -9,12 +9,12 @@ import { speak } from '@wordpress/a11y';
 /**
  * Internal dependencies
  */
-import { getOrderArgs, getReviews } from './utils';
-import LoadMoreButton from '../../base/components/load-more-button';
-import ReviewOrderSelect from '../../base/components/review-order-select';
-import ReviewList from '../../base/components/review-list';
-import withComponentId from '../../base/hocs/with-component-id';
-import { ENABLE_REVIEW_RATING } from '../../constants';
+import { getOrderArgs, getReviews } from '../utils';
+import LoadMoreButton from '../../../base/components/load-more-button';
+import ReviewOrderSelect from '../../../base/components/review-order-select';
+import ReviewList from '../../../base/components/review-list';
+import withComponentId from '../../../base/hocs/with-component-id';
+import { ENABLE_REVIEW_RATING } from '../../../constants';
 
 /**
  * Block rendered in the frontend.
@@ -41,13 +41,13 @@ class FrontendBlock extends Component {
 	getDefaultArgs() {
 		const { attributes } = this.props;
 		const { order, orderby } = getOrderArgs( this.state.orderby );
-		const { productId, reviewsOnPageLoad } = attributes;
+		const { categoryIds, reviewsOnPageLoad } = attributes;
 
 		return {
 			order,
 			orderby,
 			per_page: reviewsOnPageLoad,
-			product_id: productId,
+			category_id: categoryIds,
 		};
 	}
 
@@ -130,6 +130,10 @@ class FrontendBlock extends Component {
 	render() {
 		const { attributes, componentId } = this.props;
 		const { orderby, reviews, totalReviews } = this.state;
+
+		if ( 0 === reviews.length ) {
+			return null;
+		}
 
 		return (
 			<Fragment>

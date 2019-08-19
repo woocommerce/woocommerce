@@ -61,41 +61,71 @@ function getReviewContent( review ) {
 	);
 }
 
+function getReviewProductName( review ) {
+	return (
+		<div className="wc-block-review-list-item__product">
+			<a href={ review.product_permalink }>
+				{ review.product_name }
+			</a>
+		</div>
+	);
+}
+
+function getReviewerName( review ) {
+	const { reviewer = '' } = review;
+	return (
+		<div className="wc-block-review-list-item__author">
+			{ reviewer }
+		</div>
+	);
+}
+
+function getReviewDate( review ) {
+	const { date_created: dateCreated, formatted_date_created: formattedDateCreated } = review;
+	return (
+		<time className="wc-block-review-list-item__published-date" dateTime={ dateCreated }>
+			{ formattedDateCreated }
+		</time>
+	);
+}
+
+function getReviewRating( review ) {
+	const { rating } = review;
+	const starStyle = {
+		width: ( rating / 5 * 100 ) + '%', /* stylelint-disable-line */
+	};
+	return (
+		<div className="wc-block-review-list-item__rating">
+			<div className="wc-block-review-list-item__rating__stars" role="img">
+				<span style={ starStyle }>{ sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), rating ) }</span>
+			</div>
+		</div>
+	);
+}
+
 const ReviewListItem = ( { attributes, review = {} } ) => {
-	const { imageType, showReviewDate, showReviewerName, showReviewImage, showReviewRating: showReviewRatingAttr } = attributes;
-	const { date_created: dateCreated, formatted_date_created: formattedDateCreated, rating, reviewer = '' } = review;
+	const { imageType, showReviewDate, showReviewerName, showReviewImage, showReviewRating: showReviewRatingAttr, showReviewContent, showProductName } = attributes;
+	const { rating } = review;
 	const isLoading = ! Object.keys( review ).length > 0;
 	const showReviewRating = Number.isFinite( rating ) && showReviewRatingAttr;
 	const classes = getReviewClasses( isLoading );
-	const starStyle = {
-		width: ( rating / 5 * 100 ) + '%',
-	};
 
 	return (
 		<li className={ classes } aria-hidden={ isLoading }>
-			{ ( showReviewDate || showReviewerName || showReviewImage || showReviewRating ) && (
+			{ ( showProductName || showReviewDate || showReviewerName || showReviewImage || showReviewRating ) && (
 				<div className="wc-block-review-list-item__info">
 					{ showReviewImage && getReviewImage( review, imageType, isLoading ) }
-					{ ( showReviewerName || showReviewRating || showReviewDate ) && (
+					{ ( showProductName || showReviewerName || showReviewRating || showReviewDate ) && (
 						<div className="wc-block-review-list-item__meta">
-							{ showReviewerName && (
-								<strong className="wc-block-review-list-item__author">{ reviewer }</strong>
-							) }
-							{ showReviewRating && (
-								<div className="wc-block-review-list-item__rating">
-									<div className="wc-block-review-list-item__rating__stars" role="img">
-										<span style={ starStyle }>{ sprintf( __( 'Rated %d out of 5', 'woo-gutenberg-products-block' ), rating ) }</span>
-									</div>
-								</div>
-							) }
-							{ showReviewDate && (
-								<time className="wc-block-review-list-item__published-date" dateTime={ dateCreated }>{ formattedDateCreated }</time>
-							) }
+							{ showReviewRating && getReviewRating( review ) }
+							{ showProductName && getReviewProductName( review ) }
+							{ showReviewerName && getReviewerName( review ) }
+							{ showReviewDate && getReviewDate( review ) }
 						</div>
 					) }
 				</div>
 			) }
-			{ getReviewContent( review ) }
+			{ showReviewContent && getReviewContent( review ) }
 		</li>
 	);
 };
