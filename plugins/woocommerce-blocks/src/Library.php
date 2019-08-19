@@ -37,6 +37,7 @@ class Library {
 			'ProductsByAttribute',
 			'ProductTopRated',
 			'ReviewsByProduct',
+			'ReviewsByCategory',
 			'ProductSearch',
 			'ProductTag',
 		];
