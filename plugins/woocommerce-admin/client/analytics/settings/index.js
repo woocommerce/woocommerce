@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Component, Fragment, createRef } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial, remove, transform } from 'lodash';
 import { withDispatch } from '@wordpress/data';
@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { SectionHeader, useFilters } from '@woocommerce/components';
+import { SectionHeader, useFilters, ScrollTo } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -39,15 +39,12 @@ class Settings extends Component {
 			isDirty: false,
 		};
 
-		this.importRef = createRef();
 		this.handleInputChange = this.handleInputChange.bind( this );
 		this.warnIfUnsavedChanges = this.warnIfUnsavedChanges.bind( this );
-		this.scrollToImport = this.scrollToImport.bind( this );
 	}
 
 	componentDidMount() {
 		window.addEventListener( 'beforeunload', this.warnIfUnsavedChanges );
-		setTimeout( this.scrollToImport, 250 );
 	}
 
 	componentWillUnmount() {
@@ -165,15 +162,8 @@ class Settings extends Component {
 		this.setState( { settings, isDirty: true } );
 	}
 
-	scrollToImport() {
-		const { query } = this.props;
-		if ( query.import === 'true' ) {
-			window.scrollTo( 0, this.importRef.current.offsetTop );
-		}
-	}
-
 	render() {
-		const { createNotice } = this.props;
+		const { createNotice, query } = this.props;
 		const { hasError } = this.state;
 		if ( hasError ) {
 			return null;
@@ -200,7 +190,7 @@ class Settings extends Component {
 						</Button>
 					</div>
 				</div>
-				<span ref={ this.importRef } />
+				{ query.import === 'true' ? <ScrollTo /> : '' }
 				<HistoricalData createNotice={ createNotice } />
 			</Fragment>
 		);
