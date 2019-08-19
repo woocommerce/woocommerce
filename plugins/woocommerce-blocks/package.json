@@ -33,11 +33,13 @@
     "test:help": "wp-scripts test-unit-js --help",
     "test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
     "test:watch": "npm run test -- --watch",
-    "size-check": "bundlesize"
+    "size-check": "bundlesize",
+    "changelog": "node ./bin/changelog.js "
   },
   "devDependencies": {
     "@babel/core": "7.5.5",
     "@woocommerce/navigation": "2.1.1",
+    "@octokit/rest": "^16.28.7",
     "@wordpress/babel-preset-default": "4.4.0",
     "@wordpress/blocks": "6.5.0",
     "@wordpress/browserslist-config": "2.6.0",
@@ -81,7 +83,9 @@
     "po2json": "1.0.0-alpha",
     "postcss-loader": "3.0.0",
     "progress-bar-webpack-plugin": "1.12.1",
+    "promptly": "^3.0.3",
     "react-test-renderer": "16.8.6",
+    "request-promise": "^4.2.4",
     "rimraf": "2.7.1",
     "sass-loader": "7.2.0",
     "style-loader": "1.0.0",
