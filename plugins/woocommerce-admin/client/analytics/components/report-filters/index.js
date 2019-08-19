@@ -61,13 +61,14 @@ export default class ReportFilters extends Component {
 	}
 
 	render() {
-		const { query, path, filters, advancedFilters } = this.props;
+		const { advancedFilters, filters, path, query, showDatePicker } = this.props;
 		return (
 			<Filters
 				query={ query }
 				path={ path }
 				filters={ filters }
 				advancedFilters={ advancedFilters }
+				showDatePicker={ showDatePicker }
 				onDateSelect={ this.trackDateSelect }
 				onFilterSelect={ this.trackFilterSelect }
 				onAdvancedFilterAction={ this.trackAdvancedFilterAction }
