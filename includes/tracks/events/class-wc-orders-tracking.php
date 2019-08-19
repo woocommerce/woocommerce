@@ -48,13 +48,12 @@ class WC_Orders_Tracking {
 	 */
 	public function track_order_status_change( $id, $previous_status, $next_status ) {
 		$order = wc_get_order( $id );
-		$date  = $order->get_date_created();
 
 		$properties = array(
 			'order_id'        => $id,
 			'next_status'     => $next_status,
 			'previous_status' => $previous_status,
-			'date_created'    => $date->date( 'Y-m-d' ),
+			'date_created'    => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '',
 			'payment_method'  => $order->get_payment_method(),
 		);
 
