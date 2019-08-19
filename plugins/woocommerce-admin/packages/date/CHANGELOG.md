@@ -1,7 +1,11 @@
+# 1.2.1
+
+- Update dependencies.
+
 # 1.2.0
 
 - Enhancement: gather default date settings from `wcSettings.wcAdminSettings.woocommerce_default_date_range` if they exist.
-- Update license to GPL-3.0-or-later
+- Update license to GPL-3.0-or-later.
 
 # 1.0.7
 

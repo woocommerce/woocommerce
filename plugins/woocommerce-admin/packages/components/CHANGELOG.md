@@ -1,6 +1,6 @@
-# unreleased
+# 3.2.0
 - AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
-- TableCard component: add `onSearch` an `onSort` function props.
+- TableCard component: add `onSearch` and `onSort` function props.
 - Add new component `<List />` for displaying interactive list items.
 - Fix z-index issue in `<Chart />` empty message.
 - Added a new `<SimpleSelectControl />` component.
