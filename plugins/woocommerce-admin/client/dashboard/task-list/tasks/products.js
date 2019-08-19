@@ -20,10 +20,7 @@ const subTasks = [
 		),
 		before: <i className="material-icons-outlined">add_box</i>,
 		after: <i className="material-icons-outlined">chevron_right</i>,
-		onClick: () =>
-			( window.location.href = getAdminLink(
-				'post-new.php?post_type=product&wc_onboarding_active_task=products'
-			) ),
+		href: getAdminLink( 'post-new.php?post_type=product&wc_onboarding_active_task=products' ),
 	},
 	{
 		title: __( 'Import', 'woocommerce-admin' ),
@@ -33,10 +30,9 @@ const subTasks = [
 		),
 		before: <i className="material-icons-outlined">import_export</i>,
 		after: <i className="material-icons-outlined">chevron_right</i>,
-		onClick: () =>
-			( window.location.href = getAdminLink(
-				'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
-			) ),
+		href: getAdminLink(
+			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
+		),
 	},
 	{
 		title: __( 'Migrate', 'woocommerce-admin' ),
@@ -47,7 +43,8 @@ const subTasks = [
 		before: <i className="material-icons-outlined">cloud_download</i>,
 		after: <i className="material-icons-outlined">chevron_right</i>,
 		// @todo This should be replaced with the in-app purchase iframe when ready.
-		onClick: () => window.open( 'https://woocommerce.com/products/cart2cart/', '_blank' ),
+		href: 'https://woocommerce.com/products/cart2cart/',
+		target: '_blank',
 	},
 ];
 

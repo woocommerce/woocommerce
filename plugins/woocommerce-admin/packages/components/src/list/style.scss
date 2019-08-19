@@ -1,11 +1,22 @@
 .woocommerce-list__item {
-	padding: $gap;
 	display: flex;
 	align-items: center;
 	margin-bottom: 0;
 
 	&.has-action {
 		cursor: pointer;
+	}
+
+	> .woocommerce-list__item-inner {
+		text-decoration: none;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		padding: $gap;
+
+		&:focus {
+			box-shadow: inset 0 0 0 1px $muriel-primary-500, inset 0 0 0 2px #fff;
+		}
 	}
 
 	.woocommerce-list__item-title {
