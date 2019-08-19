@@ -28,7 +28,7 @@
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
-		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
 		<exclude-pattern>woocommerce-admin.php</exclude-pattern>
 	</rule>

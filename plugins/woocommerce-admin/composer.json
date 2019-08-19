@@ -7,7 +7,7 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "1.6.0"
+    "composer/installers": "1.7.0"
   },
   "require-dev": {
     "phpunit/phpunit": "6.5.13",

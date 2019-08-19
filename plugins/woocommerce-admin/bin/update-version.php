@@ -7,16 +7,22 @@
 
 $package_json = file_get_contents( 'package.json' );
 $package      = json_decode( $package_json );
-$plugin_file  = file( 'woocommerce-admin.php' );
-$lines        = array();
 
-foreach ( $plugin_file as $line ) {
-	if ( stripos( $line, ' * Version: ' ) !== false ) {
-		$line = " * Version: {$package->version}\n";
+function replace_version( $filename, $package_json ) {
+	$lines = array();
+	$file  = file( $filename );
+	
+	foreach ( $file as $line ) {
+		if ( stripos( $line, ' * Version: ' ) !== false ) {
+			$line = " * Version: {$package_json->version}\n";
+		}
+		if ( stripos( $line, ">define( 'WC_ADMIN_VERSION_NUMBER'," ) !== false ) {
+			$line = "\t\t\$this->define( 'WC_ADMIN_VERSION_NUMBER', '{$package_json->version}' );\n";
+		}
+		$lines[] = $line;
 	}
-	if ( stripos( $line, ">define( 'WC_ADMIN_VERSION_NUMBER'," ) !== false ) {
-		$line = "\t\t\$this->define( 'WC_ADMIN_VERSION_NUMBER', '{$package->version}' );\n";
-	}
-	$lines[] = $line;
+	file_put_contents( $filename, $lines );
 }
-file_put_contents( 'woocommerce-admin.php', $lines );
+
+replace_version( 'woocommerce-admin.php', $package );
+replace_version( 'src/FeaturePlugin.php', $package );

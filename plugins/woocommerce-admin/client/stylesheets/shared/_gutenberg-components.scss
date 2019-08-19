@@ -5,4 +5,13 @@ Import Gutenberg component SCSS so webpack's postcss process can handle theme-in
 allows Woo themed components based on the config found in postcss.config.js
  */
 @import 'gutenberg-components/button/style.scss';
+@import 'gutenberg-components/checkbox-control/style.scss';
+@import 'gutenberg-components/dashicon/style.scss';
+@import 'gutenberg-components/form-toggle/style.scss';
+@import 'gutenberg-components/icon-button/style.scss';
+@import 'gutenberg-components/notice/style.scss';
+@import 'gutenberg-components/select-control/style.scss';
 @import 'gutenberg-components/snackbar/style.scss';
+@import 'gutenberg-components/spinner/style.scss';
+@import 'gutenberg-components/text-control/style.scss';
+@import 'gutenberg-components/tooltip/style.scss';

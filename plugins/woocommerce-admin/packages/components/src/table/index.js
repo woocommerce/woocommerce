@@ -250,7 +250,8 @@ class TableCard extends Component {
 	getAllCheckbox() {
 		const { ids = [] } = this.props;
 		const { selectedRows } = this.state;
-		const isAllChecked = ids.length > 0 && ids.length === selectedRows.length;
+		const hasData = ids.length > 0;
+		const isAllChecked = hasData && ids.length === selectedRows.length;
 		return {
 			cellClassName: 'is-checkbox-column',
 			label: (
@@ -259,6 +260,7 @@ class TableCard extends Component {
 					onChange={ this.selectAllRows }
 					aria-label={ __( 'Select All' ) }
 					checked={ isAllChecked }
+					disabled={ ! hasData }
 				/>
 			),
 			required: true,
@@ -295,6 +297,7 @@ class TableCard extends Component {
 			} );
 			headers = [ this.getAllCheckbox(), ...headers ];
 		}
+		const hasData = 0 < totalRows;
 
 		const className = classnames( 'woocommerce-analytics__card', {
 			'woocommerce-table': true,
@@ -316,6 +319,7 @@ class TableCard extends Component {
 								labels.helpText || __( 'Check at least two items below to compare', 'woocommerce-admin' )
 							}
 							onClick={ this.onCompare }
+							disabled={ ! hasData }
 						>
 							{ labels.compareButton || __( 'Compare', 'woocommerce-admin' ) }
 						</CompareButton>
@@ -330,13 +334,14 @@ class TableCard extends Component {
 							selected={ searchedLabels }
 							showClearButton={ true }
 							type={ searchBy }
+							disabled={ ! hasData }
 						/>
 					),
 					( downloadable || onClickDownload ) && (
 						<IconButton
 							key="download"
 							className="woocommerce-table__download-button"
-							disabled={ isLoading }
+							disabled={ isLoading || ! hasData }
 							onClick={ this.onClickDownload }
 							isLink
 						>

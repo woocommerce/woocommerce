@@ -61,6 +61,10 @@ else
 	exit 1
 fi
 
+# Install PHP dependencies
+status "Gathering PHP dependencies... 🐿️"
+composer install --no-dev
+
 # Run the build.
 status "Generating build... 👷‍♀️"
 npm run build
@@ -78,6 +82,8 @@ zip -r woocommerce-admin.zip \
 	$build_files \
 	languages/woocommerce-admin.pot \
 	languages/woocommerce-admin.php \
-	readme.txt
+	readme.txt \
+	src/ \
+	vendor/
 
 success "Done. You've built WooCommerce Admin! 🎉 "
