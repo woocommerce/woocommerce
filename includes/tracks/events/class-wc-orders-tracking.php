@@ -79,7 +79,7 @@ class WC_Orders_Tracking {
 		$order        = wc_get_order( $id );
 		$date_created = $order->get_date_created()->date( 'Y-m-d H:i:s' );
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
-		$new_date     = sprintf(
+		$new_date = sprintf(
 			'%s %2d:%2d:%2d',
 			isset( $_POST['order_date'] ) ? wc_clean( wp_unslash( $_POST['order_date'] ) ) : '',
 			isset( $_POST['order_date_hour'] ) ? wc_clean( wp_unslash( $_POST['order_date_hour'] ) ) : '',
@@ -90,8 +90,8 @@ class WC_Orders_Tracking {
 
 		if ( $new_date !== $date_created ) {
 			$properties = array(
-				'order_id'   => $id,
-				'status'     => $order->get_status(),
+				'order_id' => $id,
+				'status'   => $order->get_status(),
 			);
 
 			WC_Tracks::record_event( 'order_edit_date_created', $properties );
@@ -128,9 +128,9 @@ class WC_Orders_Tracking {
 			$referer = wp_get_referer();
 
 			if ( $referer ) {
-				$referring_page = parse_url( $referer );
+				$referring_page = wp_parse_url( $referer );
 				$referring_args = array();
-				$post_edit_page = parse_url( admin_url( 'post.php' ) );
+				$post_edit_page = wp_parse_url( admin_url( 'post.php' ) );
 
 				if ( ! empty( $referring_page['query'] ) ) {
 					parse_str( $referring_page['query'], $referring_args );
