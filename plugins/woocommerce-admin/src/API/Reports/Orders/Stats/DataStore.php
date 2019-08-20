@@ -70,7 +70,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->report_columns = array(
 			'orders_count'            => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) as orders_count",
 			'num_items_sold'          => "SUM({$table_name}.num_items_sold) as num_items_sold",
-			'gross_revenue'           => "SUM({$table_name}.gross_total) AS gross_revenue",
+			'gross_revenue'           => "SUM( CASE WHEN {$table_name}.gross_total > 0 THEN {$table_name}.gross_total END ) AS gross_revenue",
 			'coupons'                 => 'SUM(discount_amount) AS coupons',
 			'coupons_count'           => 'coupons_count',
 			'refunds'                 => "ABS( SUM( CASE WHEN {$table_name}.gross_total < 0 THEN {$table_name}.gross_total END ) ) AS refunds",
