@@ -1,3 +1,6 @@
+# unreleased
+- Added a new `<ScrollTo />` component.
+
 # 3.2.0
 - AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
 - TableCard component: add `onSearch` and `onSort` function props.
