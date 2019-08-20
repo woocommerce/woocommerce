@@ -192,7 +192,7 @@ export default class OrdersReportTable extends Component {
 						formattedCoupons.length ? [ formattedCoupons[ 0 ] ] : [],
 						formattedCoupons
 					),
-					value: formattedCoupons.map( item => item.code ).join( ' ' ),
+					value: formattedCoupons.map( coupon => coupon.label ).join( ', ' ),
 				},
 				{
 					display: renderCurrency( net_total, currency ),
