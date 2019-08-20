@@ -315,12 +315,13 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	public function get_notes_count( $type = array(), $status = array() ) {
 		global $wpdb;
 
-		$where_clauses = $this->get_notes_where_clauses(
-			array(
-				'type'   => $type,
-				'status' => $status,
-			)
+		$args = array(
+			'type'   => $type,
+			'status' => $status,
 		);
+
+		$where_clauses = $this->get_notes_where_clauses( $args );
+		$where_clauses = apply_filters( 'wc_admin_notes_count_where_clauses', $where_clauses, $args );
 
 		if ( ! empty( $where_clauses ) ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -371,7 +372,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$where_clauses .= " AND status IN ($escaped_status_types)";
 		}
 
-		return $where_clauses;
+		return apply_filters( 'wc_admin_notes_where_clauses', $where_clauses, $args );
 	}
 
 	/**
