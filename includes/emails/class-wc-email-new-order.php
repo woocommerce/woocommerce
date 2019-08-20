@@ -146,7 +146,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * @return string
 		 */
 		public function get_default_additional_content() {
-			return __( 'Congratulations on the sale 🙌', 'woocommerce' );
+			return __( 'Congratulations on the sale.', 'woocommerce' );
 		}
 
 		/**
