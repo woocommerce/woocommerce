@@ -378,6 +378,15 @@ class Segmenter {
 				$segments[]            = $id;
 				$segment_labels[ $id ] = $segment->get_name();
 			}
+
+			// If no variations were specified, add a segment for the parent product (variation = 0).
+			// This is to catch simple products with prior sales converted into variable products.
+			// See: https://github.com/woocommerce/woocommerce-admin/issues/2719.
+			if ( empty( $this->query_args['variations'] ) ) {
+				$parent_object = wc_get_product( $this->query_args['product_includes'][0] );
+				$segments[]        = 0;
+				$segment_labels[0] = $parent_object->get_name();
+			}
 		} elseif ( 'category' === $this->query_args['segmentby'] ) {
 			$args = array(
 				'taxonomy' => 'product_cat',

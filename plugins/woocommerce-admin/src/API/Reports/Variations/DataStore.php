@@ -138,7 +138,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $order_status_filter ) {
 			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
-			$sql_query_params['where_clause'] .= ' AND variation_id > 0';
 		}
 
 		return $sql_query_params;
@@ -178,32 +177,39 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_variations_extended_attributes', $this->extended_attributes, $product_data );
 				$product             = wc_get_product( $product_data['product_id'] );
 				$variations          = array();
-				if ( method_exists( $product, 'get_available_variations' ) ) {
-					$variations = $product->get_available_variations();
-				}
-				foreach ( $variations as $variation ) {
-					if ( (int) $variation['variation_id'] === (int) $product_data['variation_id'] ) {
-						$attributes        = array();
-						$variation_product = wc_get_product( $variation['variation_id'] );
-						foreach ( $extended_attributes as $extended_attribute ) {
-							$function = 'get_' . $extended_attribute;
-							if ( is_callable( array( $variation_product, $function ) ) ) {
-								$value                                = $variation_product->{$function}();
-								$extended_info[ $extended_attribute ] = $value;
-							}
-						}
-						foreach ( $variation['attributes'] as $attribute_name => $attribute ) {
-							$name         = str_replace( 'attribute_', '', $attribute_name );
-							$option_term  = get_term_by( 'slug', $attribute, $name );
-							$attributes[] = array(
-								'id'     => wc_attribute_taxonomy_id_by_name( $name ),
-								'name'   => str_replace( 'pa_', '', $name ),
-								'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
-							);
-						}
-						$extended_info['attributes'] = $attributes;
+
+				// Base extended info off the parent variable product if the variation ID is 0.
+				// This is caused by simple products with prior sales being converted into variable products.
+				// See: https://github.com/woocommerce/woocommerce-admin/issues/2719.
+				$variation_id      = (int) $product_data['variation_id'];
+				$variation_product = ( 0 === $variation_id ) ? $product : wc_get_product( $variation_id );
+				$attributes        = array();
+
+				foreach ( $extended_attributes as $extended_attribute ) {
+					$function = 'get_' . $extended_attribute;
+					if ( is_callable( array( $variation_product, $function ) ) ) {
+						$value                                = $variation_product->{$function}();
+						$extended_info[ $extended_attribute ] = $value;
 					}
 				}
+
+				// If this is a variation, add its attributes.
+				if ( 0 < $variation_id ) {
+					$variation_attributes = $variation_product->get_variation_attributes();
+
+					foreach ( $variation_attributes as $attribute_name => $attribute ) {
+						$name         = str_replace( 'attribute_', '', $attribute_name );
+						$option_term  = get_term_by( 'slug', $attribute, $name );
+						$attributes[] = array(
+							'id'     => wc_attribute_taxonomy_id_by_name( $name ),
+							'name'   => str_replace( 'pa_', '', $name ),
+							'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
+						);
+					}
+				}
+
+				$extended_info['attributes'] = $attributes;
+
 				// If there is no set low_stock_amount, use the one in user settings.
 				if ( '' === $extended_info['low_stock_amount'] ) {
 					$extended_info['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
@@ -289,7 +295,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 									{$sql_query_params['where_time_clause']}
 									{$sql_query_params['where_clause']}
 								GROUP BY
-									variation_id
+									product_id, variation_id
 								) AS tt"
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -317,7 +323,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
-						variation_id
+						product_id, variation_id
 				{$suffix}
 					{$right_join}
 					{$sql_query_params['outer_from_clause']}
