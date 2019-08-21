@@ -113,6 +113,7 @@ class ReportsSync {
 	 */
 	public static function init() {
 		// Initialize syncing hooks.
+		add_action( 'wp_loaded', array( __CLASS__, 'customers_lookup_update_init' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'orders_lookup_update_init' ) );
 
 		// Initialize scheduled action handlers.
@@ -316,6 +317,16 @@ class ReportsSync {
 	}
 
 	/**
+	 * Attach customer lookup update hooks.
+	 */
+	public static function customers_lookup_update_init() {
+		add_action( 'woocommerce_new_customer', array( __CLASS__, 'schedule_single_customer_import' ) );
+		add_action( 'woocommerce_update_customer', array( __CLASS__, 'schedule_single_customer_import' ) );
+
+		CustomersDataStore::init();
+	}
+
+	/**
 	 * Attach order lookup update hooks.
 	 */
 	public static function orders_lookup_update_init() {
@@ -328,7 +339,6 @@ class ReportsSync {
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'schedule_single_order_import' ) );
 
 		OrdersStatsDataStore::init();
-		CustomersDataStore::init();
 		CouponsDataStore::init();
 		ProductsDataStore::init();
 		TaxesDataStore::init();
