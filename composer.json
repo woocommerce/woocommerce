@@ -15,7 +15,7 @@
   },
   "require-dev": {
     "myclabs/deep-copy": "1.7.0",
-    "phpunit/phpunit": "7.5.14",
+    "phpunit/phpunit": "7.5.15",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "config": {
