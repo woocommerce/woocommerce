@@ -147,8 +147,8 @@ class WC_Shortcode_My_Account {
 			'myaccount/view-order.php',
 			array(
 				'status'   => $status, // @deprecated 2.2.
-				'order'    => wc_get_order( $order_id ),
-				'order_id' => $order_id,
+				'order'    => $order,
+				'order_id' => $order->get_id(),
 			)
 		);
 	}
