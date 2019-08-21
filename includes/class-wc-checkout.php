@@ -924,10 +924,12 @@ class WC_Checkout {
 		$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
 
 		// Redirect to success/confirmation/payment page.
-		if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
-			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
+		if ( isset( $result['result'] ) && 'failure' !== $result['result'] ) {
+			if ( 'success' === $result['result'] ) {
+				$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
+			}
 
-			if ( ! is_ajax() ) {
+			if ( ! is_ajax() && isset( $result['redirect'] ) ) {
 				wp_redirect( $result['redirect'] );
 				exit;
 			}
