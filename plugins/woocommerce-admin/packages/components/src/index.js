@@ -7,6 +7,7 @@ import 'react-dates/initialize';
 
 export { default as AdvancedFilters } from './filters/advanced';
 export { default as AnimationSlider } from './animation-slider';
+export { default as Autocomplete } from './autocomplete';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { default as Card } from './card';

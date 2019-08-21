@@ -1,0 +1,119 @@
+.woocommerce-autocomplete {
+	position: relative;
+
+	.components-base-control {
+		height: 56px;
+		display: flex;
+		align-items: center;
+		border: 1px solid $new-muriel-gray-20;
+		border-radius: 3px;
+		background: $white;
+		padding: $gap-small $gap;
+		position: relative;
+
+		.woocommerce-autocomplete__tags {
+			margin: $gap-small $gap-smallest 0 0;
+		}
+
+		.woocommerce-tag {
+			max-height: 20px;
+		}
+
+		.components-base-control__field {
+			display: flex;
+			align-items: center;
+			flex: 1;
+			margin-bottom: 0;
+		}
+
+		.components-base-control__label {
+			left: 52px;
+			position: absolute;
+			color: $new-muriel-gray-50;
+			font-size: 16px;
+		}
+
+		.woocommerce-autocomplete__control-input {
+			font-size: 16px;
+			border: 0;
+			box-shadow: none;
+			color: $new-muriel-gray-80;
+			margin: $gap-small 0 0 0;
+			padding-left: 0;
+			padding-right: 0;
+			width: 100%;
+			line-height: 24px;
+
+			&::-webkit-search-cancel-button {
+				display: none;
+			}
+		}
+
+		i {
+			color: #636d75;
+			margin-right: $gap-small;
+			width: 24px;
+		}
+
+		&.with-value .components-base-control__label,
+		&.is-active .components-base-control__label,
+		&.has-tags .components-base-control__label {
+			font-size: 12px;
+			margin-top: -$gap-small;
+		}
+	}
+
+	.woocommerce-autocomplete__tags {
+		position: relative;
+		margin: $gap-small 0;
+
+		&.has-clear {
+			padding-right: $gap-large;
+		}
+	}
+
+	.woocommerce-tag {
+		max-height: 24px;
+	}
+
+	.woocommerce-autocomplete__clear {
+		position: absolute;
+		right: 0;
+		top: calc(50% - 10px);
+
+		& > .dashicon {
+			color: #c9c9c9;
+		}
+	}
+
+	.woocommerce-autocomplete__listbox {
+		background: $white;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		box-shadow: $muriel-box-shadow-6dp;
+		border-radius: 3px;
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 56px;
+		z-index: 10;
+		overflow: scroll;
+		max-height: 350px;
+
+		&.is-static {
+			position: static;
+		}
+	}
+
+	.woocommerce-autocomplete__option {
+		padding: $gap;
+		min-height: 56px;
+		font-size: 16px;
+
+		&.is-selected,
+		&:hover {
+			background: $muriel-gray-0;
+		}
+	}
+}

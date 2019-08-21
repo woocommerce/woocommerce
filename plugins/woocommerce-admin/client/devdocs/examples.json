@@ -1,5 +1,6 @@
 [
   { "component": "AnimationSlider" },
+  { "component": "Autocomplete" },
   { "component": "Calendar", "render": "MyDateRange" },
   { "component": "Card" },
   { "component": "Chart" },

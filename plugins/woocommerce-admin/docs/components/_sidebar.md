@@ -9,6 +9,7 @@
     * [ReportTable](components/analytics/report-table.md)
   * [Package components](components/packages/)
     * [AnimationSlider](components/packages/animation-slider.md)
+    * [Autocomplete](components/packages/autocomplete.md)
     * [Calendar](components/packages/calendar.md)
     * [Card](components/packages/card.md)
     * [Chart](components/packages/chart.md)
