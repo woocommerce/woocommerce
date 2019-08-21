@@ -206,7 +206,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		// Verify there are actions to cancel.
 		$pending_actions = WC_Helper_Queue::get_all_pending();
-		$this->assertCount( 1, $pending_actions );
+		$this->assertCount( 2, $pending_actions ); // 1 for the user, 1 for order.
 
 		// Cancel outstanding actions.
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/cancel' );

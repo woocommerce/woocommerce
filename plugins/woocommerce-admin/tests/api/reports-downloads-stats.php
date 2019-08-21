@@ -152,6 +152,8 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$order->save();
 		$order_1 = $order->get_id();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$download = new WC_Customer_Download();
 		$download->set_user_id( 1 );
 		$download->set_order_id( $order->get_id() );
