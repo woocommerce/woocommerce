@@ -113,6 +113,7 @@ const GutenbergBlocksConfig = {
 						presets: [ '@wordpress/babel-preset-default' ],
 						plugins: [
 							NODE_ENV === 'production' ? require.resolve( 'babel-plugin-transform-react-remove-prop-types' ) : false,
+							require.resolve( '@babel/plugin-proposal-class-properties' ),
 						].filter( Boolean ),
 					},
 				},
@@ -190,6 +191,7 @@ const BlocksFrontendConfig = {
 							require.resolve( '@babel/plugin-transform-react-jsx' ),
 							require.resolve( '@babel/plugin-proposal-async-generator-functions' ),
 							require.resolve( '@babel/plugin-transform-runtime' ),
+							require.resolve( '@babel/plugin-proposal-class-properties' ),
 							NODE_ENV === 'production' ? require.resolve( 'babel-plugin-transform-react-remove-prop-types' ) : false,
 						].filter( Boolean ),
 					},

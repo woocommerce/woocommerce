@@ -38,8 +38,9 @@
   },
   "devDependencies": {
     "@babel/core": "7.5.5",
-    "@woocommerce/navigation": "2.1.1",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@octokit/rest": "16.28.7",
+	"@woocommerce/navigation": "2.1.1",
     "@wordpress/babel-preset-default": "4.4.0",
     "@wordpress/blocks": "6.5.0",
     "@wordpress/browserslist-config": "2.6.0",

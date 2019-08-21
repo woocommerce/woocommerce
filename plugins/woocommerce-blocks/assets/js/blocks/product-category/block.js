@@ -30,16 +30,27 @@ import ProductOrderbyControl from '../../components/product-orderby-control';
  * Component to handle edit mode of "Products by Category".
  */
 class ProductByCategoryBlock extends Component {
-	constructor() {
-		super( ...arguments );
-		this.state = {
-			changedAttributes: {},
-			isEditing: false,
-		};
-		this.startEditing = this.startEditing.bind( this );
-		this.stopEditing = this.stopEditing.bind( this );
-		this.setChangedAttributes = this.setChangedAttributes.bind( this );
-		this.save = this.save.bind( this );
+	static propTypes = {
+		/**
+		 * The attributes for this block
+		 */
+		attributes: PropTypes.object.isRequired,
+		/**
+		 * The register block name.
+		 */
+		name: PropTypes.string.isRequired,
+		/**
+		 * A callback to update attributes
+		 */
+		setAttributes: PropTypes.func.isRequired,
+
+		// from withSpokenMessages
+		debouncedSpeak: PropTypes.func.isRequired,
+	}
+
+	state = {
+		changedAttributes: {},
+		isEditing: false,
 	}
 
 	componentDidMount() {
@@ -51,27 +62,27 @@ class ProductByCategoryBlock extends Component {
 		}
 	}
 
-	startEditing() {
+	startEditing = () => {
 		this.setState( {
 			isEditing: true,
 			changedAttributes: {},
 		} );
 	}
 
-	stopEditing() {
+	stopEditing = () => {
 		this.setState( {
 			isEditing: false,
 			changedAttributes: {},
 		} );
 	}
 
-	setChangedAttributes( attributes ) {
+	setChangedAttributes = ( attributes ) => {
 		this.setState( ( prevState ) => {
 			return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
 		} );
 	}
 
-	save() {
+	save = () => {
 		const { changedAttributes } = this.state;
 		const { setAttributes } = this.props;
 
@@ -253,23 +264,5 @@ class ProductByCategoryBlock extends Component {
 		);
 	}
 }
-
-ProductByCategoryBlock.propTypes = {
-	/**
-	 * The attributes for this block
-	 */
-	attributes: PropTypes.object.isRequired,
-	/**
-	 * The register block name.
-	 */
-	name: PropTypes.string.isRequired,
-	/**
-	 * A callback to update attributes
-	 */
-	setAttributes: PropTypes.func.isRequired,
-
-	// from withSpokenMessages
-	debouncedSpeak: PropTypes.func.isRequired,
-};
 
 export default withSpokenMessages( ProductByCategoryBlock );
