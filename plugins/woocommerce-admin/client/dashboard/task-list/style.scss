@@ -16,9 +16,15 @@
 		margin-right: auto;
 	}
 
-	.muriel-button.is-button {
+	.muriel-button.components-button {
 		height: 40px;
-		margin: 0;
+		min-width: 106px;
+		margin: $gap $gap-smaller 0 0;
+		justify-content: center;
+
+		&:not(.is-primary) {
+			color: $muriel-hot-pink-500;
+		}
 	}
 
 	.woocommerce-list {
@@ -63,10 +69,6 @@
 	#wpbody-content {
 		position: relative;
 	}
-}
-
-.woocommerce-shipping-rates {
-	margin-bottom: $gap;
 }
 
 .woocommerce-shipping-rate {

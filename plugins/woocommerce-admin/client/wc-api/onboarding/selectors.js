@@ -43,8 +43,113 @@ const isGetProfileItemsRequesting = getResource => () => {
 	return lastRequested > lastReceived;
 };
 
+const getJetpackConnectUrl = ( getResource, requireResource ) => (
+	requirement = DEFAULT_REQUIREMENT
+) => {
+	return requireResource( requirement, 'jetpack-connect-url' ).data;
+};
+
+const getJetpackConnectUrlError = getResource => () => {
+	return getResource( 'jetpack-connect-url' ).error;
+};
+
+const isGetJetpackConnectUrlRequesting = getResource => () => {
+	const { lastReceived, lastRequested } = getResource( 'jetpack-connect-url' );
+
+	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
+		return true;
+	}
+
+	return lastRequested > lastReceived;
+};
+
+const getPluginInstallations = getResource => plugins => {
+	const resourceName = 'plugin-install';
+
+	const installations = {};
+	plugins.forEach( plugin => {
+		const data = getResource( getResourceName( resourceName, plugin ) ).data;
+		if ( data ) {
+			installations[ plugin ] = data;
+		}
+	} );
+
+	return installations;
+};
+
+const getPluginActivations = getResource => plugins => {
+	const resourceName = 'plugin-activate';
+
+	const activations = {};
+	plugins.forEach( plugin => {
+		const data = getResource( getResourceName( resourceName, plugin ) ).data;
+		if ( data ) {
+			activations[ plugin ] = data;
+		}
+	} );
+
+	return activations;
+};
+
+const getPluginActivationErrors = getResource => plugins => {
+	const resourceName = 'plugin-activate';
+
+	const errors = {};
+	plugins.forEach( plugin => {
+		const error = getResource( getResourceName( resourceName, plugin ) ).error;
+		if ( error ) {
+			errors[ plugin ] = error;
+		}
+	} );
+
+	return errors;
+};
+
+const getPluginInstallationErrors = getResource => plugins => {
+	const resourceName = 'plugin-install';
+
+	const errors = {};
+	plugins.forEach( plugin => {
+		const error = getResource( getResourceName( resourceName, plugin ) ).error;
+		if ( error ) {
+			errors[ plugin ] = error;
+		}
+	} );
+
+	return errors;
+};
+
+const isPluginActivateRequesting = getResource => () => {
+	const { lastReceived, lastRequested } = getResource( 'plugin-activate' );
+
+	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {
+		return true;
+	}
+
+	return lastRequested > lastReceived;
+};
+
+const isPluginInstallRequesting = getResource => () => {
+	const { lastReceived, lastRequested } = getResource( 'plugin-install' );
+
+	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {
+		return true;
+	}
+
+	return lastRequested > lastReceived;
+};
+
 export default {
 	getProfileItems,
 	getProfileItemsError,
 	isGetProfileItemsRequesting,
+	getJetpackConnectUrl,
+	getJetpackConnectUrlError,
+	isGetJetpackConnectUrlRequesting,
+	getPluginActivations,
+	getPluginInstallations,
+	getPluginInstallationErrors,
+	getPluginActivationErrors,
+	isPluginActivateRequesting,
+	isPluginInstallRequesting,
 };

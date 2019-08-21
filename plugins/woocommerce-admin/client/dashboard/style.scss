@@ -194,6 +194,10 @@
 
 	.muriel-button.is-button {
 		height: 48px;
+
+		&.is-busy {
+			cursor: progress;
+		}
 	}
 
 	.muriel-checkbox input[type='checkbox']:checked {

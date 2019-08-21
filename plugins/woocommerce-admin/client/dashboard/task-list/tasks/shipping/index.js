@@ -18,7 +18,9 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
+import Connect from './connect';
 import StoreLocation from './location';
+import ShippingLabels from './labels';
 import ShippingRates from './rates';
 import withSelect from 'wc-api/with-select';
 
@@ -137,6 +139,8 @@ class Shipping extends Component {
 	}
 
 	getSteps() {
+		const { countryCode } = this.props;
+
 		const steps = [
 			{
 				key: 'store_location',
@@ -160,6 +164,27 @@ class Shipping extends Component {
 					/>
 				),
 				visible: true,
+			},
+			{
+				key: 'label_printing',
+				label: __( 'Enable shipping label printing', 'woocommerce-admin' ),
+				description: __(
+					'With WooCommerce Services and Jetpack you can save time at the' +
+						'Post Office by printing your shipping labels at home',
+					'woocommerce-admin'
+				),
+				content: <ShippingLabels completeStep={ this.completeStep } { ...this.props } />,
+				visible: [ 'US', 'GB', 'CA', 'AU' ].includes( countryCode ),
+			},
+			{
+				key: 'connect',
+				label: __( 'Connect your store', 'woocommerce-admin' ),
+				description: __(
+					'Connect your store to WordPress.com to enable label printing',
+					'woocommerce-admin'
+				),
+				content: <Connect completeStep={ this.completeStep } { ...this.props } />,
+				visible: 'US' === countryCode,
 			},
 		];
 
