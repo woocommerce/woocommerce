@@ -12,7 +12,6 @@ import { find, get } from 'lodash';
 import ComponentExample from './example';
 import ComponentDocs from './docs';
 import { Card, Link } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/navigation';
 import examples from './examples.json';
 import './style.scss';
 
@@ -63,15 +62,13 @@ export default class extends Component {
 								component ? (
 									componentName
 								) : (
-									<Link href={ getAdminLink( `?page=wc-admin&path=/devdocs/${ filePath }` ) }>
+									<Link href={ `admin.php?page=wc-admin&path=/devdocs/${ filePath }` }>
 										{ componentName }
 									</Link>
 								)
 							}
 							action={
-								component ? (
-									<Link href={ getAdminLink( '?page=wc-admin&path=/devdocs' ) }>Full list</Link>
-								) : null
+								component ? <Link href={ '?page=wc-admin&path=/devdocs' }>Full list</Link> : null
 							}
 						>
 							<ComponentExample
