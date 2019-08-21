@@ -234,6 +234,7 @@ class ReportsSync {
 				self::ORDERS_IMPORT_BATCH_INIT,
 				self::ORDERS_DELETE_BATCH_INIT,
 				self::ORDERS_DELETE_BATCH_ACTION,
+				self::SINGLE_CUSTOMER_IMPORT_ACTION,
 				self::SINGLE_ORDER_IMPORT_ACTION,
 			);
 			$store->clear_pending_wcadmin_actions( $action_types );
