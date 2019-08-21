@@ -14,7 +14,6 @@
     "woocommerce/woocommerce-rest-api": "1.0.3"
   },
   "require-dev": {
-    "myclabs/deep-copy": "1.7.0",
     "phpunit/phpunit": "7.5.15",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
