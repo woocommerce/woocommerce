@@ -71,7 +71,8 @@ class OnboardingTasks {
 			set_transient( self::TASKS_TRANSIENT, $tasks, DAY_IN_SECONDS );
 		}
 
-		$settings['onboarding']['tasks'] = $tasks;
+		$settings['onboarding']['tasks']              = $tasks;
+		$settings['onboarding']['shippingZonesCount'] = count( \WC_Shipping_Zones::get_zones() );
 
 		return $settings;
 	}

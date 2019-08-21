@@ -13,6 +13,10 @@
 		font-weight: 400;
 		position: relative;
 
+		.woocommerce-stepper__step-text {
+			width: 100%;
+		}
+
 		.woocommerce-stepper__step-label {
 			color: $muriel-gray-900;
 			line-height: $step-icon-size;
@@ -112,10 +116,11 @@
 		.woocommerce-stepper__steps {
 			align-items: initial;
 			flex-direction: column;
+			margin-bottom: 0;
 		}
 
 		.woocommerce-stepper__step {
-			min-height: 90px;
+			padding-bottom: $gap-larger;
 		}
 
 		.woocommerce-stepper__step::after {
@@ -128,7 +133,7 @@
 		}
 
 		.woocommerce-stepper__step:last-child {
-			min-height: auto;
+			padding-bottom: $gap-smaller;
 			&::after {
 				display: none;
 			}

@@ -181,7 +181,6 @@ class Start extends Component {
 							onChange={ this.onTrackingChange }
 							onClick={ e => e.stopPropagation() }
 							tabIndex="-1"
-							className="woocommerce-profile-wizard__toggle"
 						/>
 					</div>
 

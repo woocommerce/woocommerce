@@ -15,7 +15,7 @@
 		padding: $gap;
 
 		&:focus {
-			box-shadow: inset 0 0 0 1px $muriel-primary-500, inset 0 0 0 2px #fff;
+			box-shadow: inset 0 0 0 1px $new-muriel-primary-500, inset 0 0 0 2px #fff;
 		}
 	}
 
@@ -23,7 +23,7 @@
 		display: block;
 		font-size: 16px;
 		line-height: 22px;
-		color: #1a1a1a;
+		color: $muriel-gray-900;
 	}
 
 	.woocommerce-list__item-description {

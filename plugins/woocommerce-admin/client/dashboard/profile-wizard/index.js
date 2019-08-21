@@ -73,12 +73,14 @@ class ProfileWizard extends Component {
 
 	componentDidMount() {
 		document.documentElement.classList.remove( 'wp-toolbar' );
+		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );
 		document.body.classList.add( 'woocommerce-admin-full-screen' );
 	}
 
 	componentWillUnmount() {
 		document.documentElement.classList.add( 'wp-toolbar' );
+		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-profile-wizard__body' );
 		document.body.classList.remove( 'woocommerce-admin-full-screen' );
 	}

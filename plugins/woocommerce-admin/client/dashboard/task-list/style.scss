@@ -5,9 +5,20 @@
 		color: $muriel-gray-500;
 	}
 
-	.woocommerce-card__body {
+	.woocommerce-task-card .woocommerce-card__body {
 		border-top: 1px solid $muriel-gray-50;
 		padding: 0;
+	}
+
+	.woocommerce-card.is-narrow {
+		max-width: 680px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.muriel-button.is-button {
+		height: 40px;
+		margin: 0;
 	}
 
 	.woocommerce-list {
@@ -51,5 +62,76 @@
 
 	#wpbody-content {
 		position: relative;
+	}
+}
+
+.woocommerce-shipping-rates {
+	margin-bottom: $gap;
+}
+
+.woocommerce-shipping-rate {
+	display: flex;
+	padding-top: $gap-small;
+	padding-bottom: $gap-small;
+
+	.woocommerce-shipping-rate__main {
+		width: 100%;
+	}
+
+	.woocommerce-shipping-rate__icon {
+		padding-top: $gap;
+		margin-right: $gap-large;
+	}
+
+	.woocommerce-shipping-rate__name {
+		align-items: center;
+		display: flex;
+		padding-top: $gap;
+		font-size: 16px;
+		line-height: 22px;
+		color: $muriel-gray-900;
+		margin-bottom: $gap-small;
+		border-top: 1px solid $new-muriel-gray-5;
+
+		.components-form-toggle {
+			margin-left: auto;
+			height: 18px;
+		}
+	}
+
+	.woocommerce-shipping-rate__control-wrapper {
+		position: relative;
+
+		.muriel-input-text input {
+			left: $gap * 2;
+		}
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+
+		.woocommerce-shipping-rate__control-prefix,
+		.woocommerce-shipping-rate__control-suffix {
+			display: none;
+			position: absolute;
+			left: $gap;
+			top: 26px;
+			z-index: 1;
+			font-size: 16px;
+			line-height: 24px;
+			color: $new-muriel-gray-50;
+		}
+
+		&.has-value {
+			.woocommerce-shipping-rate__control-prefix,
+			.woocommerce-shipping-rate__control-suffix {
+				display: block;
+			}
+		}
+
+		.woocommerce-shipping-rate__control-suffix {
+			left: auto;
+			right: $gap;
+		}
 	}
 }

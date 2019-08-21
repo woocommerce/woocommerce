@@ -52,7 +52,7 @@ export default class Products extends Component {
 	render() {
 		return (
 			<Fragment>
-				<Card>
+				<Card className="woocommerce-task-card">
 					<List items={ subTasks } />
 				</Card>
 			</Fragment>

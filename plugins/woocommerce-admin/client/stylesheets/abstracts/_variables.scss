@@ -82,4 +82,7 @@ $muriel-box-shadow-1dp: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0
 	0 1px 3px 0 rgba(0, 0, 0, 0.12);
 $muriel-box-shadow-8dp: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
 	0 3px 14px 2px rgba(0, 0, 0, 0.12);
-$muriel-primary-500: #005fb7;
+// @todo These can be removed once color-studio is updated to >= 2.0.0.
+$new-muriel-gray-50: #676a74;
+$new-muriel-gray-5: #e3dfe2;
+$new-muriel-primary-500: #005fb7;

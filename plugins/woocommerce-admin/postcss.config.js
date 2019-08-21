@@ -10,7 +10,7 @@ module.exports = {
 				outlines: '#007cba',
 			},
 			themes: {
-				'woocommerce-profile-wizard__body': {
+				'woocommerce-onboarding': {
 					primary: '#d52c82',
 					secondary: '#d52c82',
 					toggle: '#d52c82',

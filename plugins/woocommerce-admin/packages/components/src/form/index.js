@@ -20,6 +20,7 @@ class Form extends Component {
 
 		this.getInputProps = this.getInputProps.bind( this );
 		this.handleSubmit = this.handleSubmit.bind( this );
+		this.setTouched = this.setTouched.bind( this );
 		this.setValue = this.setValue.bind( this );
 	}
 
@@ -44,6 +45,12 @@ class Form extends Component {
 		} ), this.validate );
 	}
 
+	setTouched( name, touched = true ) {
+		this.setState( prevState => ( {
+			touched: { ...prevState.touched, [ name ]: touched },
+		} ) );
+	}
+
 	handleChange( name, value ) {
 		const { values } = this.state;
 
@@ -60,9 +67,7 @@ class Form extends Component {
 	}
 
 	handleBlur( name ) {
-		this.setState( prevState => ( {
-			touched: { ...prevState.touched, [ name ]: true },
-		} ) );
+		this.setTouched( name );
 	}
 
 	async handleSubmit() {
@@ -97,6 +102,7 @@ class Form extends Component {
 			values,
 			errors,
 			touched,
+			setTouched: this.setTouched,
 			setValue: this.setValue,
 			handleSubmit: this.handleSubmit,
 			getInputProps: this.getInputProps,
@@ -137,8 +143,9 @@ Form.propTypes = {
 Form.defaultProps = {
 	errors: {},
 	initialValues: {},
-	touched: {},
 	onSubmitCallback: noop,
+	touched: {},
+	validate: noop,
 };
 
 export default Form;

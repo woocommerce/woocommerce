@@ -80,7 +80,8 @@ function settingToSettingsResource( resourceName, data ) {
 		return '';
 	}
 
-	const resources = {};
+	// Override lastReceived time for group when batch updating.
+	const resources = { [ resourceName ]: { lastReceived: Date.now() } };
 	data.update.forEach(
 		setting =>
 			( resources[ getResourceName( resourceName, setting.id ) ] = { data: setting.value } )

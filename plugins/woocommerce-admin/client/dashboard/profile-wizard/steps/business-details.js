@@ -188,7 +188,6 @@ class BusinessDetails extends Component {
 						<div className="woocommerce-profile-wizard__benefit-toggle">
 							<FormToggle
 								checked={ values[ benefit.slug ] }
-								className="woocommerce-profile-wizard__toggle"
 								{ ...getInputProps( benefit.slug ) }
 							/>
 						</div>
