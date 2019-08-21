@@ -23,7 +23,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				onChange={ () => setAttributes( { showReviewRating: ! attributes.showReviewRating } ) }
 			/>
 			{ ( attributes.showReviewRating && ! ENABLE_REVIEW_RATING ) && (
-				<Notice className="wc-block-reviews-by-category__notice" isDismissible={ false }>
+				<Notice className="wc-block-reviews__notice" isDismissible={ false }>
 					<RawHTML>
 						{ sprintf( __( 'Product rating is disabled in your %sstore settings%s.', 'woo-gutenberg-products-block' ), `<a href="${ getAdminLink( 'admin.php?page=wc-settings&tab=products' ) }" target="_blank">`, '</a>' ) }
 					</RawHTML>
@@ -61,7 +61,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 						onChange={ ( value ) => setAttributes( { imageType: value } ) }
 					/>
 					{ ( attributes.imageType === 'reviewer' && ! SHOW_AVATARS ) && (
-						<Notice className="wc-block-reviews-by-category__notice" isDismissible={ false }>
+						<Notice className="wc-block-reviews__notice" isDismissible={ false }>
 							<RawHTML>
 								{ sprintf( __( 'Reviewer photo is disabled in your %ssite settings%s.', 'woo-gutenberg-products-block' ), `<a href="${ getAdminLink( 'options-discussion.php' ) }" target="_blank">`, '</a>' ) }
 							</RawHTML>

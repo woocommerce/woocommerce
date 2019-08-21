@@ -7,7 +7,7 @@ import { registerBlockType } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import './editor.scss';
+import '../editor.scss';
 import Editor from './edit';
 import { IconReviewsByProduct } from '../../../components/icons';
 import sharedAttributes from '../attributes';

@@ -25,7 +25,6 @@ import PropTypes from 'prop-types';
 import EditorBlock from './editor-block.js';
 import ProductCategoryControl from '../../../components/product-category-control';
 import { IconReviewsByCategory } from '../../../components/icons';
-import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '../../../constants';
 import { getSharedReviewContentControls, getSharedReviewListControls } from '../edit.js';
 import { getBlockClassName } from '../utils.js';
 
@@ -33,9 +32,6 @@ import { getBlockClassName } from '../utils.js';
  * Component to handle edit mode of "Reviews by Category".
  */
 const ReviewsByCategoryEditor = ( { attributes, debouncedSpeak, setAttributes } ) => {
-	attributes.showReviewImage = ( SHOW_AVATARS || attributes.imageType === 'product' ) && attributes.showReviewImage;
-	attributes.showReviewRating = ENABLE_REVIEW_RATING && attributes.showReviewRating;
-
 	const { editMode, categoryIds, showReviewDate, showReviewerName, showReviewContent, showProductName, showReviewImage, showReviewRating } = attributes;
 
 	const getBlockControls = () => (
@@ -134,13 +130,12 @@ const ReviewsByCategoryEditor = ( { attributes, debouncedSpeak, setAttributes } 
 			<Placeholder
 				icon={ <IconReviewsByCategory className="block-editor-block-icon" /> }
 				label={ __( 'Reviews by Category', 'woo-gutenberg-products-block' ) }
-				className="wc-block-reviews-by-category"
 			>
 				{ __(
 					'Show product reviews from specific categories.',
 					'woo-gutenberg-products-block'
 				) }
-				<div className="wc-block-reviews-by-category__selection">
+				<div className="wc-block-reviews__selection">
 					<ProductCategoryControl
 						selected={ attributes.categoryIds }
 						onChange={ ( value = [] ) => {
@@ -159,7 +154,6 @@ const ReviewsByCategoryEditor = ( { attributes, debouncedSpeak, setAttributes } 
 	const renderHiddenContentPlaceholder = () => {
 		return (
 			<Placeholder
-				className="wc-block-reviews-by-category"
 				icon={ <IconReviewsByCategory className="block-editor-block-icon" /> }
 				label={ __( 'Reviews by Category', 'woo-gutenberg-products-block' ) }
 			>
