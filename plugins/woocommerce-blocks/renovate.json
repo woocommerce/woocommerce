@@ -4,5 +4,6 @@
   ],
   "ignoreDeps": [
     "husky"
-  ]
+  ],
+  "schedule": ["before 3am on wednesday"]
 }
