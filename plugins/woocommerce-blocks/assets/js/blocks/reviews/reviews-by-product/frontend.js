@@ -6,7 +6,7 @@ import { render } from 'react-dom';
 /**
  * Internal dependencies
  */
-import FrontendBlock from './frontend-block.js';
+import FrontendContainerBlock from '../frontend-container-block.js';
 
 const containers = document.querySelectorAll(
 	'.wp-block-woocommerce-reviews-by-product'
@@ -24,6 +24,6 @@ if ( containers.length ) {
 			showReviewContent: el.classList.contains( 'has-content' ),
 		};
 
-		render( <FrontendBlock attributes={ attributes } />, el );
+		render( <FrontendContainerBlock attributes={ attributes } />, el );
 	} );
 }
