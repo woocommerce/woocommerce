@@ -62,13 +62,20 @@ export default class extends Component {
 								component ? (
 									componentName
 								) : (
-									<Link href={ `admin.php?page=wc-admin&path=/devdocs/${ filePath }` }>
+									<Link
+										href={ `admin.php?page=wc-admin&path=/devdocs/${ filePath }` }
+										type="wc-admin"
+									>
 										{ componentName }
 									</Link>
 								)
 							}
 							action={
-								component ? <Link href={ '?page=wc-admin&path=/devdocs' }>Full list</Link> : null
+								component ? (
+									<Link href={ '?page=wc-admin&path=/devdocs' } type="wc-admin">
+										Full list
+									</Link>
+								) : null
 							}
 						>
 							<ComponentExample
