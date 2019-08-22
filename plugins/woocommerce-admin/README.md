@@ -16,7 +16,12 @@ For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', tru
 
 ## Development
 
-After cloning the repo, install dependencies with `npm install`. Now you can build the files using one of these commands:
+After cloning the repo, install dependencies:
+ 
+ - `npm install` to install JavaScript dependencies.
+ - `composer install` to gather PHP dependencies.
+
+Now you can build the files using one of these commands:
 
  - `npm run build` : Build a production version
  - `npm run dev` : Build a development version
