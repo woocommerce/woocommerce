@@ -2132,7 +2132,7 @@ class WC_Admin_Setup_Wizard {
 				<img
 					class="jetpack-logo"
 					src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_horizontal_logo.png' ); ?>"
-					alt="Jetpack logo"
+					alt="<?php esc_attr_e( 'Jetpack logo', 'woocommerce' ); ?>"
 				/>
 				<img
 					class="wcs-notice"
@@ -2143,7 +2143,7 @@ class WC_Admin_Setup_Wizard {
 			<img
 				class="jetpack-logo"
 				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_vertical_logo.png' ); ?>"
-				alt="Jetpack logo"
+				alt="<?php esc_attr_e( 'Jetpack logo', 'woocommerce' ); ?>"
 			/>
 		<?php endif; ?>
 
