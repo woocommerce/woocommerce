@@ -46,9 +46,13 @@ matrix:
   - name: "WooCommerce unit tests using WordPress nightly"
     php: 7.3
     env: WP_VERSION=nightly WP_MULTISITE=0
+  - php: 7.4snapshot
+    env: WP_VERSION=nightly WP_MULTISITE=0
   allow_failures:
   - php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - php: 7.4snapshot
+    env: WP_VERSION=nightly WP_MULTISITE=0
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
