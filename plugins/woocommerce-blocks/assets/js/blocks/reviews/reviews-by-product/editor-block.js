@@ -5,6 +5,8 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Disabled, Placeholder } from '@wordpress/components';
+import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
+import { escapeHTML } from '@wordpress/escape-html';
 
 /**
  * Internal dependencies
@@ -16,8 +18,6 @@ import withComponentId from '../../../base/hocs/with-component-id';
 import withReviews from '../../../base/hocs/with-reviews';
 import { IconReviewsByProduct } from '../../../components/icons';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
-import { ENABLE_REVIEW_RATING } from '../../../constants';
-import { escapeHTML } from '@wordpress/escape-html';
 
 /**
  * Block rendered in the editor.

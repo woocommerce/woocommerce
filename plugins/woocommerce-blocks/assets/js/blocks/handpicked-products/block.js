@@ -19,6 +19,7 @@ import {
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -27,7 +28,6 @@ import GridContentControl from '../../components/grid-content-control';
 import { IconWidgets } from '../../components/icons';
 import ProductsControl from '../../components/products-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
-import { MAX_COLUMNS, MIN_COLUMNS } from '../../constants';
 
 /**
  * Component to handle edit mode of "Hand-picked Products".

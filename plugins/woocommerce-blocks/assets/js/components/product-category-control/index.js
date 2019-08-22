@@ -9,11 +9,11 @@ import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl } from '@wordpress/components';
+import { ENDPOINTS } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { ENDPOINTS } from '../../constants';
 import './style.scss';
 
 class ProductCategoryControl extends Component {

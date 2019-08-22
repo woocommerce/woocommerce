@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { min } from 'lodash';
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../constants';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/settings';
 
 export default function getQuery( blockAttributes, name ) {
 	const {

@@ -8,7 +8,7 @@ import TestRenderer from 'react-test-renderer';
  */
 import ProductPreview from '../';
 
-jest.mock( '../../../constants.js', () => ( {
+jest.mock( '@woocommerce/settings', () => ( {
 	PLACEHOLDER_IMG_SRC: 'placeholder.png',
 	THUMBNAIL_SIZE: 300,
 } ) );

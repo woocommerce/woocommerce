@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import Gridicon from 'gridicons';
 import { registerBlockType } from '@wordpress/blocks';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -11,7 +12,6 @@ import { registerBlockType } from '@wordpress/blocks';
 import './editor.scss';
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../../constants';
 
 const blockTypeName = 'woocommerce/products-by-attribute';
 

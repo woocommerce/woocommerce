@@ -33,11 +33,48 @@ const baseConfig = {
 		hash: true,
 		timings: true,
 	},
-	resolve: {
-		alias: {
-			'@woocommerce/settings': path.resolve( __dirname, 'assets/js/settings/index.js' ),
-		},
+};
+
+const requestToExternal = ( request ) => {
+	const wcDepMap = {
+		'@woocommerce/settings': [ 'wc', 'blockSettings' ],
+	};
+	if ( wcDepMap[ request ] ) {
+		return wcDepMap[ request ];
+	}
+};
+
+const requestToHandle = ( request ) => {
+	const wcHandleMap = {
+		'@woocommerce/settings': 'wc-block-settings',
+	};
+	if ( wcHandleMap[ request ] ) {
+		return wcHandleMap[ request ];
+	}
+};
+
+const CoreConfig = {
+	...baseConfig,
+	entry: {
+		'wc-blocks-settings': './assets/js/settings/index.js',
 	},
+	output: {
+		filename: '[name].js',
+		path: path.resolve( __dirname, './build/' ),
+		library: [ 'wc', 'blockSettings' ],
+		libraryTarget: 'this',
+		// This fixes an issue with multiple webpack projects using chunking
+		// overwriting each other's chunk loader function.
+		// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+		jsonpFunction: 'webpackWcBlocksJsonp',
+	},
+	plugins: [
+		new CleanWebpackPlugin(),
+		new ProgressBarPlugin( {
+			format: chalk.blue( 'Build core script' ) + ' [:bar] ' + chalk.green( ':percent' ) + ' :msg (:elapsed seconds)',
+		} ),
+		new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
+	],
 };
 
 /**
@@ -151,7 +188,11 @@ const GutenbergBlocksConfig = {
 		new ProgressBarPlugin( {
 			format: chalk.blue( 'Build' ) + ' [:bar] ' + chalk.green( ':percent' ) + ' :msg (:elapsed seconds)',
 		} ),
-		new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
+		new DependencyExtractionWebpackPlugin( {
+			injectPolyfill: true,
+			requestToExternal,
+			requestToHandle,
+		} ),
 	],
 };
 
@@ -206,12 +247,15 @@ const BlocksFrontendConfig = {
 		],
 	},
 	plugins: [
-		new CleanWebpackPlugin(),
 		new ProgressBarPlugin( {
 			format: chalk.blue( 'Build frontend scripts' ) + ' [:bar] ' + chalk.green( ':percent' ) + ' :msg (:elapsed seconds)',
 		} ),
-		new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
+		new DependencyExtractionWebpackPlugin( {
+			injectPolyfill: true,
+			requestToExternal,
+			requestToHandle,
+		} ),
 	],
 };
 
-module.exports = [ GutenbergBlocksConfig, BlocksFrontendConfig ];
+module.exports = [ CoreConfig, GutenbergBlocksConfig, BlocksFrontendConfig ];

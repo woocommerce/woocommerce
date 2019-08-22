@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -13,7 +14,6 @@ import ReviewOrderSelect from '../../base/components/review-order-select';
 import ReviewList from '../../base/components/review-list';
 import withComponentId from '../../base/hocs/with-component-id';
 import withReviews from '../../base/hocs/with-reviews';
-import { ENABLE_REVIEW_RATING } from '../../constants';
 
 /**
  * Block rendered in the frontend.

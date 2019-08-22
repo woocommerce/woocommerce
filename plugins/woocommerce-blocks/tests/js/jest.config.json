@@ -7,6 +7,9 @@
     "!**/test/**"
   ],
   "moduleDirectories": ["node_modules"],
+  "moduleNameMapper": {
+    "@woocommerce/settings": "assets/js/settings"
+  },
   "setupFiles": [
     "<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
     "<rootDir>/tests/js/setup-globals"

@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from 'react';
 import classnames from 'classnames';
+import { HOME_URL } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import withComponentId from '../../base/hocs/with-component-id';
-import { HOME_URL } from '../../constants';
 
 /**
  * Component displaying the categories as dropdown or list.

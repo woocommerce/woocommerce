@@ -7,11 +7,11 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { withInstanceId, compose } from '@wordpress/compose';
 import { PlainText } from '@wordpress/editor';
+import { HOME_URL } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { HOME_URL } from '../../constants';
 import './editor.scss';
 import './style.scss';
 
