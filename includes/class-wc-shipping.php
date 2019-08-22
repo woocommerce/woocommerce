@@ -262,7 +262,7 @@ class WC_Shipping {
 		 * Allow packages to be reorganized after calculating the shipping.
 		 *
 		 * This filter can be used to apply some extra manipulation after the shipping costs are calculated for the packages
-		 * but before Woocommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
+		 * but before WooCommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
 		 * packages for marketplaces.
 		 *
 		 * @since 2.6.0
