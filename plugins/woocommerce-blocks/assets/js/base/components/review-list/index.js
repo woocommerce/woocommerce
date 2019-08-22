@@ -2,12 +2,12 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import ReviewListItem from '../review-list-item';
-import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '../../../constants';
 import './style.scss';
 
 const ReviewList = ( { attributes, componentId, reviews } ) => {

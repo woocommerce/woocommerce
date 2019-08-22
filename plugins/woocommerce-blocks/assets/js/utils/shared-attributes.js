@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../constants';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/settings';
 
 export const sharedAttributeBlockTypes = [
 	'woocommerce/product-best-sellers',

@@ -10,7 +10,7 @@ import _ from 'lodash';
 import withSearchedProducts from '../with-searched-products';
 import * as mockedUtils from '../../components/utils';
 
-jest.mock( '../../constants.js', () => ( {
+jest.mock( '@woocommerce/settings', () => ( {
 	IS_LARGE_CATALOG: true,
 } ) );
 

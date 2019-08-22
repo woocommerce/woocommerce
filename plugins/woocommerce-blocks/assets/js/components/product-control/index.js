@@ -13,11 +13,11 @@ import {
 } from '@woocommerce/components';
 import { Spinner, MenuItem } from '@wordpress/components';
 import classnames from 'classnames';
+import { ENDPOINTS, IS_LARGE_CATALOG } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { ENDPOINTS, IS_LARGE_CATALOG } from '../../constants';
 import { getProducts } from '../utils';
 import {
 	IconRadioSelected,

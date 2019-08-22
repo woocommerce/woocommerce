@@ -30,6 +30,7 @@ import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
+import { MIN_HEIGHT } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -45,7 +46,6 @@ import {
 	getImageIdFromProduct,
 } from '../../utils/products';
 import { withProduct } from '../../hocs';
-import { MIN_HEIGHT } from '../../constants';
 
 /**
  * Component to handle edit mode of "Featured Product".

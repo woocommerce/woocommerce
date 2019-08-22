@@ -3,13 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
 import Block from './block';
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '../../constants';
 
 /**
  * Register and run the "Products by Tag" block.

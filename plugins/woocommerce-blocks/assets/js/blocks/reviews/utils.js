@@ -3,11 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import classNames from 'classnames';
-
-/**
- * Internal dependencies
- */
-import { ENABLE_REVIEW_RATING } from '../../constants';
+import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
 
 export const getOrderArgs = ( orderValue ) => {
 	if ( ENABLE_REVIEW_RATING ) {

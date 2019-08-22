@@ -20,10 +20,6 @@ class Assets {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_assets' ) );
 		add_action( 'body_class', array( __CLASS__, 'add_theme_body_class' ), 1 );
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'print_script_wc_settings' ), 1 );
-		add_action( 'admin_print_footer_scripts', array( __CLASS__, 'print_script_wc_settings' ), 1 );
-		add_action( 'admin_print_footer_scripts', array( __CLASS__, 'print_script_block_data' ), 1 );
-		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'print_script_block_data' ), 1 );
 	}
 
 	/**
@@ -34,6 +30,7 @@ class Assets {
 		self::register_style( 'wc-block-style', plugins_url( 'build/style.css', __DIR__ ), array() );
 
 		// Shared libraries and components across all blocks.
+		self::register_script( 'wc-block-settings', plugins_url( 'build/wc-blocks-settings.js', __DIR__ ), [], false );
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', __DIR__ ), array(), false );
 		self::register_script( 'wc-vendors', plugins_url( 'build/vendors.js', __DIR__ ), array(), false );
 
@@ -52,6 +49,13 @@ class Assets {
 		self::register_script( 'wc-reviews-by-product', plugins_url( 'build/reviews-by-product.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-reviews-by-category', plugins_url( 'build/reviews-by-category.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
 		self::register_script( 'wc-product-search', plugins_url( 'build/product-search.js', __DIR__ ), array( 'wc-vendors', 'wc-blocks' ) );
+
+		// attach data to wc-blocks-settings.
+		wp_add_inline_script(
+			'wc-block-settings',
+			self::get_wc_settings_data() . "\n" . self::get_wc_block_data(),
+			'before'
+		);
 	}
 
 	/**
@@ -66,10 +70,12 @@ class Assets {
 	}
 
 	/**
-	 * These are used by @woocommerce/components and the block library to set up defaults
-	 * based on user-controlled settings from WordPress. Only use this in wp-admin.
+	 * Returns javascript to inject as data for enqueued wc-blocks-settings script.
+	 *
+	 * @return string;
+	 * @since 2.4.0
 	 */
-	public static function print_script_wc_settings() {
+	protected static function get_wc_settings_data() {
 		global $wp_locale;
 		$code     = get_woocommerce_currency();
 		$settings = apply_filters(
@@ -96,21 +102,18 @@ class Assets {
 				),
 			)
 		);
-		?>
-		<script type="text/javascript">
-			var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $settings ) ); ?>' ) );
-		</script>
-		<?php
+		$settings = rawurlencode( wp_json_encode( $settings ) );
+		return "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . $settings . "' ) );";
 	}
 
 	/**
-	 * Output block-related data on a global object.
+	 * Returns block-related data for enqueued wc-blocks-settings script.
 	 *
 	 * This is used to map site settings & data into JS-accessible variables.
 	 *
-	 * @since 2.0.0
+	 * @since 2.4.0
 	 */
-	public static function print_script_block_data() {
+	protected static function get_wc_block_data() {
 		$tag_count          = wp_count_terms( 'product_tag' );
 		$product_counts     = wp_count_posts( 'product' );
 		$product_categories = get_terms(
@@ -144,11 +147,8 @@ class Assets {
 			'showAvatars'        => '1' === get_option( 'show_avatars' ),
 			'enableReviewRating' => 'yes' === get_option( 'woocommerce_enable_review_rating' ),
 		);
-		?>
-		<script type="text/javascript">
-			var wc_product_block_data = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $block_settings ) ); ?>' ) );
-		</script>
-		<?php
+		$block_settings = rawurlencode( wp_json_encode( $block_settings ) );
+		return "var wc_product_block_data = JSON.parse( decodeURIComponent( '" . $block_settings . "' ) );";
 	}
 
 	/**

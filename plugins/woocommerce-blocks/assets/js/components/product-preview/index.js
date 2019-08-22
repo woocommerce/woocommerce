@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import { PLACEHOLDER_IMG_SRC, THUMBNAIL_SIZE } from '../../constants';
+import { PLACEHOLDER_IMG_SRC, THUMBNAIL_SIZE } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

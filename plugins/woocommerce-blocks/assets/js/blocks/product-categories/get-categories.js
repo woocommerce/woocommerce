@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { PRODUCT_CATEGORIES } from '@woocommerce/settings';
+
+/**
  * Internal dependencies
  */
 import { buildTermsTree } from './hierarchy';
-import { PRODUCT_CATEGORIES } from '../../constants';
 
 /**
  * Returns categories in tree form.

@@ -4,11 +4,7 @@
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { flatten, uniqBy } from 'lodash';
-
-/**
- * Internal dependencies
- */
-import { ENDPOINTS, IS_LARGE_CATALOG, LIMIT_TAGS } from '../../constants';
+import { ENDPOINTS, IS_LARGE_CATALOG, LIMIT_TAGS } from '@woocommerce/settings';
 
 const getProductsRequests = ( { selected = [], search = '', queryArgs = [] } ) => {
 	const defaultArgs = {

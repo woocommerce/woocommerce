@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/editor';
 import { registerBlockType } from '@wordpress/blocks';
+import { DEFAULT_HEIGHT } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -11,7 +12,6 @@ import { registerBlockType } from '@wordpress/blocks';
 import './style.scss';
 import './editor.scss';
 import Block from './block';
-import { DEFAULT_HEIGHT } from '../../constants';
 
 /**
  * Register and run the "Featured Product" block.

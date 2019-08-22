@@ -29,12 +29,12 @@ import classnames from 'classnames';
 import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { IconFolderStar } from '../../components/icons';
+import { MIN_HEIGHT } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { MIN_HEIGHT } from '../../constants';
+import { IconFolderStar } from '../../components/icons';
 import ProductCategoryControl from '../../components/product-category-control';
 import ApiErrorPlaceholder from '../../components/api-error-placeholder';
 import {
