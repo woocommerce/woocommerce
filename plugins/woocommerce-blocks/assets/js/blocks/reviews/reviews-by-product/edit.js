@@ -16,6 +16,7 @@ import {
 import { SearchListItem } from '@woocommerce/components';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { debounce } from 'lodash';
 
 /**
  * Internal dependencies
@@ -24,7 +25,7 @@ import EditorBlock from './editor-block.js';
 import ProductControl from '../../../components/product-control';
 import { IconReviewsByProduct } from '../../../components/icons';
 import { getSharedReviewContentControls, getSharedReviewListControls } from '../edit.js';
-import { getBlockClassName } from '../utils.js';
+import { getBlockClassName, getOrderArgs } from '../utils.js';
 
 /**
  * Component to handle edit mode of "Reviews by Product".
@@ -160,9 +161,19 @@ const ReviewsByProductEditor = ( { attributes, debouncedSpeak, setAttributes } )
 			return renderHiddenContentPlaceholder();
 		}
 
+		const { reviewsOnPageLoad } = attributes;
+		const { order, orderby } = getOrderArgs( attributes.orderby );
+
 		return (
 			<div className={ getBlockClassName( 'wc-block-reviews-by-product', attributes ) }>
-				<EditorBlock attributes={ attributes } />
+				<EditorBlock
+					attributes={ attributes }
+					delayFunction={ ( callback ) => debounce( callback, 400 ) }
+					orderby={ orderby }
+					order={ order }
+					productId={ productId }
+					reviewsToDisplay={ reviewsOnPageLoad }
+				/>
 			</div>
 		);
 	};

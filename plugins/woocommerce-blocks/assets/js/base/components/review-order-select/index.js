@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
-const ReviewOrderSelect = ( { componentId, onChange, readOnly, value } ) => {
+const ReviewOrderSelect = ( { componentId, defaultValue, onChange, readOnly, value } ) => {
 	const selectId = `wc-block-review-order-select__select-${ componentId }`;
 
 	return (
@@ -25,6 +25,7 @@ const ReviewOrderSelect = ( { componentId, onChange, readOnly, value } ) => {
 			<select // eslint-disable-line jsx-a11y/no-onchange
 				id={ selectId }
 				className="wc-block-review-order-select__select"
+				defaultValue={ defaultValue }
 				onChange={ onChange }
 				readOnly={ readOnly }
 				value={ value }
