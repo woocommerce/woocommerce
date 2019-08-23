@@ -183,7 +183,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'title' => __( 'Checkout endpoints', 'woocommerce' ),
 						'type'  => 'title',
 						'desc'  => __( 'Endpoints are appended to your page URLs to handle specific actions during the checkout process. They should be unique.', 'woocommerce' ),
-						'id'    => 'account_endpoint_options',
+						'id'    => 'checkout_endpoint_options',
 					),
 
 					array(
