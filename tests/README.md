@@ -26,7 +26,7 @@ Example:
 
 ## Running Tests
 
-Simply change to the plugin root directory and type:
+Change to the plugin root directory and type:
 
     $ vendor/bin/phpunit
 
