@@ -49,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							</small>
 							<?php
 						}
-					?>
+						?>
 					</td>
 				</tr>
 				<tr>
