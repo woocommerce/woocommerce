@@ -190,8 +190,13 @@ class Settings extends Component {
 						</Button>
 					</div>
 				</div>
-				{ query.import === 'true' ? <ScrollTo /> : '' }
-				<HistoricalData createNotice={ createNotice } />
+				{ query.import === 'true' ? (
+					<ScrollTo offset="-56">
+						<HistoricalData createNotice={ createNotice } />
+					</ScrollTo>
+				) : (
+					<HistoricalData createNotice={ createNotice } />
+				) }
 			</Fragment>
 		);
 	}
