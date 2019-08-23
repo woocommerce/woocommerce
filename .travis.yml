@@ -27,7 +27,7 @@ matrix:
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "e2e tests (Selenium)"
+  - name: "e2e tests"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     addons:

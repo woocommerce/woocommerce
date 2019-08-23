@@ -32,7 +32,7 @@ npm install
 
 #### Test Configuration
 
-The tests use environment variables to specify values for the tests. 
+The tests use environment variables to specify login test data needed to run tests. 
 
 To login to the site, `loginUser()` utility function of [`e2e-test-utils`](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils) package is being used. The function relies on the following [`config.js`](https://github.com/WordPress/gutenberg/blob/master/packages/e2e-test-utils/src/shared/config.js) file to specify base URL, Admin user details and Test user details (could be different from Admin. For example, customer):
 
@@ -87,18 +87,20 @@ To run e2e tests use the following command:
 npm run test:e2e
 ```
 
-Puppeteer runs headless by default. However, sometimes it's useful to observe the browser while running tests. To do so you can use these environment variables:
+Tests are being run headless by default. However, sometimes it's useful to observe the browser while running tests. To do so, `Development mode` can be enabled by passing `--dev` flag to the `test:e2e` script in `./package.json` file as follows:
                                     
 ```bash
-PUPPETEER_HEADLESS=false PUPPETEER_SLOWMO=50 npm run test:e2e
+"test:e2e": "./tests/bin/e2e-test-integration.js --dev",
 ```
 
-SlowMo slows down Puppeteer’s operations so we can see what’s going on in the browser. `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
+Once done, start tests as usual by running `npm run test:e2e`. 
+
+The `Development mode` also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by editing `PUPPETEER_SLOWMO` variable in `./tests/e2e-tests/config/jest-puppeteer.dev.config.js` file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
 
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npm run test-e2e ./tests/e2e-tests/specs/activate-woocommerce.test.js
+npm run test:e2e ./tests/e2e-tests/specs/activate-woocommerce.test.js
 ``` 
 
 You can also provide the base URL, Test username and Test password like this:

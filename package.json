@@ -16,7 +16,7 @@
     "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --recursive",
     "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --grep ",
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register",
-    "test:e2e": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' NODE_ENV=development JEST_PUPPETEER_CONFIG='./tests/e2e-tests/config/jest-puppeteer.config.js' jest --config='./tests/e2e-tests/config/jest.config.js' --maxWorkers=1 --rootDir=./",
+    "test:e2e": "./tests/bin/e2e-test-integration.js",
     "makepot": "grunt makepot",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
@@ -33,6 +33,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chromedriver": "75.1.0",
+    "commander": "^3.0.0",
     "config": "3.2.2",
     "cross-env": "5.2.0",
     "eslint": "6.1.0",
