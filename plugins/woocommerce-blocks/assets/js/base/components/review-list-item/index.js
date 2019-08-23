@@ -30,9 +30,9 @@ function getReviewImage( review, imageType, isLoading ) {
 	return (
 		<div className="wc-block-review-list-item__image">
 			{ imageType === 'product' ? (
-				<img aria-hidden="true" alt="" src={ review.product_picture } className="wc-block-review-list-item__image" width="48" height="48" />
+				<img aria-hidden="true" alt="" src={ review.product_picture || '' } className="wc-block-review-list-item__image" width="48" height="48" />
 			) : (
-				<img aria-hidden="true" alt="" src={ review.reviewer_avatar_urls[ '48' ] } srcSet={ review.reviewer_avatar_urls[ '96' ] + ' 2x' } className="wc-block-review-list-item__image" width="48" height="48" />
+				<img aria-hidden="true" alt="" src={ review.reviewer_avatar_urls[ '48' ] || '' } srcSet={ review.reviewer_avatar_urls[ '96' ] + ' 2x' } className="wc-block-review-list-item__image" width="48" height="48" />
 			) }
 			{ review.verified && (
 				<div className="wc-block-review-list-item__verified" title={ __( 'Verified buyer', 'woo-gutenberg-products-block' ) }>{ __( 'Verified buyer', 'woo-gutenberg-products-block' ) }</div>

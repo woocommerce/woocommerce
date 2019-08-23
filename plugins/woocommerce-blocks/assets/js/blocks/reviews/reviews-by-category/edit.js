@@ -3,7 +3,6 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
-	BlockControls,
 	InspectorControls,
 } from '@wordpress/editor';
 import {
@@ -11,44 +10,26 @@ import {
 	PanelBody,
 	Placeholder,
 	ToggleControl,
-	Toolbar,
 	withSpokenMessages,
 } from '@wordpress/components';
 import { SearchListItem } from '@woocommerce/components';
 import { Fragment } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { debounce } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import EditorBlock from './editor-block.js';
 import ProductCategoryControl from '../../../components/product-category-control';
 import { IconReviewsByCategory } from '../../../components/icons';
-import { getSharedReviewContentControls, getSharedReviewListControls } from '../edit.js';
-import { getBlockClassName, getOrderArgs } from '../utils.js';
+import EditorContainerBlock from '../editor-container-block.js';
+import NoReviewsPlaceholder from './no-reviews-placeholder.js';
+import { getBlockControls, getSharedReviewContentControls, getSharedReviewListControls } from '../edit-utils.js';
 
 /**
  * Component to handle edit mode of "Reviews by Category".
  */
 const ReviewsByCategoryEditor = ( { attributes, debouncedSpeak, setAttributes } ) => {
-	const { editMode, categoryIds, showReviewDate, showReviewerName, showReviewContent, showProductName, showReviewImage, showReviewRating } = attributes;
-
-	const getBlockControls = () => (
-		<BlockControls>
-			<Toolbar
-				controls={ [
-					{
-						icon: 'edit',
-						title: __( 'Edit' ),
-						onClick: () => setAttributes( { editMode: ! editMode } ),
-						isActive: editMode,
-					},
-				] }
-			/>
-		</BlockControls>
-	);
+	const { editMode, categoryIds } = attributes;
 
 	const renderCategoryControlItem = ( args ) => {
 		const { item, search, depth = 0 } = args;
@@ -152,48 +133,21 @@ const ReviewsByCategoryEditor = ( { attributes, debouncedSpeak, setAttributes } 
 		);
 	};
 
-	const renderHiddenContentPlaceholder = () => {
-		return (
-			<Placeholder
-				icon={ <IconReviewsByCategory className="block-editor-block-icon" /> }
-				label={ __( 'Reviews by Category', 'woo-gutenberg-products-block' ) }
-			>
-				{ __( 'The content for this block is hidden due to block settings.', 'woo-gutenberg-products-block' ) }
-			</Placeholder>
-		);
-	};
-
-	const renderViewMode = () => {
-		if ( ! showReviewContent && ! showReviewRating && ! showReviewDate && ! showReviewerName && ! showReviewImage && ! showProductName ) {
-			return renderHiddenContentPlaceholder();
-		}
-
-		const { reviewsOnPageLoad } = attributes;
-		const { order, orderby } = getOrderArgs( attributes.orderby );
-
-		return (
-			<div className={ getBlockClassName( 'wc-block-reviews-by-category', attributes ) }>
-				<EditorBlock
-					attributes={ attributes }
-					categoryIds={ categoryIds }
-					delayFunction={ ( callback ) => debounce( callback, 400 ) }
-					orderby={ orderby }
-					order={ order }
-					reviewsToDisplay={ reviewsOnPageLoad }
-				/>
-			</div>
-		);
-	};
-
 	if ( ! categoryIds || editMode ) {
 		return renderEditMode();
 	}
 
 	return (
 		<Fragment>
-			{ getBlockControls() }
+			{ getBlockControls( editMode, setAttributes ) }
 			{ getInspectorControls() }
-			{ renderViewMode() }
+			<EditorContainerBlock
+				attributes={ attributes }
+				className="wc-block-reviews-by-category"
+				icon={ <IconReviewsByCategory className="block-editor-block-icon" /> }
+				name={ __( 'Reviews by Category', 'woo-gutenberg-products-block' ) }
+				noReviewsPlaceholder={ NoReviewsPlaceholder }
+			/>
 		</Fragment>
 	);
 };
@@ -215,6 +169,4 @@ ReviewsByCategoryEditor.propTypes = {
 	debouncedSpeak: PropTypes.func.isRequired,
 };
 
-export default compose( [
-	withSpokenMessages,
-] )( ReviewsByCategoryEditor );
+export default withSpokenMessages( ReviewsByCategoryEditor );

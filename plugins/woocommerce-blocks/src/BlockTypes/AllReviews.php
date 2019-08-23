@@ -10,15 +10,15 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * ReviewsByProduct class.
+ * AllReviews class.
  */
-class ReviewsByProduct extends AbstractBlock {
+class AllReviews extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'reviews-by-product';
+	protected $block_name = 'all-reviews';
 
 	/**
 	 * Registers the block type with WordPress.
