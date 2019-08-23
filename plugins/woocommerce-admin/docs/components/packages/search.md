@@ -75,3 +75,10 @@ Render a 'Clear' button next to the input box to remove its contents.
 
 Render results list positioned statically instead of absolutely.
 
+### `disabled`
+
+- Type: Boolean
+- Default: `false`
+
+Whether the control is disabled or not.
+
