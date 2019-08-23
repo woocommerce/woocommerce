@@ -68,6 +68,20 @@ const CoreConfig = {
 		// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 		jsonpFunction: 'webpackWcBlocksJsonp',
 	},
+	module: {
+		rules: [
+			{
+				test: /\.jsx?$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader?cacheDirectory',
+					options: {
+						presets: [ '@wordpress/babel-preset-default' ],
+					},
+				},
+			},
+		],
+	},
 	plugins: [
 		new CleanWebpackPlugin(),
 		new ProgressBarPlugin( {
