@@ -583,7 +583,7 @@ jQuery( function( $ ) {
 						$form.before( code );
 						$form.slideUp();
 
-						$( document.body ).trigger( 'applied_coupon', [ data.coupon_code ] );
+						$( document.body ).trigger( 'applied_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 					}
 				},
