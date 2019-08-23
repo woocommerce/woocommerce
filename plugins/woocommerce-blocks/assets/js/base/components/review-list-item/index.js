@@ -3,22 +3,13 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import ReadMore from '../read-more';
 import './style.scss';
-
-function getReviewClasses( isLoading ) {
-	const classArray = [ 'wc-block-review-list-item__item' ];
-
-	if ( isLoading ) {
-		classArray.push( 'is-loading' );
-	}
-
-	return classArray.join( ' ' );
-}
 
 function getReviewImage( review, imageType, isLoading ) {
 	if ( isLoading || ! review ) {
@@ -108,10 +99,12 @@ const ReviewListItem = ( { attributes, review = {} } ) => {
 	const { rating } = review;
 	const isLoading = ! Object.keys( review ).length > 0;
 	const showReviewRating = Number.isFinite( rating ) && showReviewRatingAttr;
-	const classes = getReviewClasses( isLoading );
 
 	return (
-		<li className={ classes } aria-hidden={ isLoading }>
+		<li
+			className={ classNames( 'wc-block-review-list-item__item', { 'is-loading': isLoading } ) }
+			aria-hidden={ isLoading }
+		>
 			{ ( showProductName || showReviewDate || showReviewerName || showReviewImage || showReviewRating ) && (
 				<div className="wc-block-review-list-item__info">
 					{ showReviewImage && getReviewImage( review, imageType, isLoading ) }

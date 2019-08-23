@@ -2,33 +2,25 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
+import Label from '../label';
 import './style.scss';
 
 export const LoadMoreButton = ( { onClick, label, screenReaderLabel } ) => {
-	const labelNode = ( screenReaderLabel && label !== screenReaderLabel ) ? (
-		<Fragment>
-			<span aria-hidden>
-				{ label }
-			</span>
-			<span className="screen-reader-text">
-				{ screenReaderLabel }
-			</span>
-		</Fragment>
-	) : label;
-
 	return (
 		<div className="wp-block-button wc-block-load-more">
 			<button
 				className="wp-block-button__link"
 				onClick={ onClick }
 			>
-				{ labelNode }
+				<Label
+					label={ label }
+					screenReaderLabel={ screenReaderLabel }
+				/>
 			</button>
 		</div>
 	);
