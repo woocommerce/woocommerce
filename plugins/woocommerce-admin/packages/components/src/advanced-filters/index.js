@@ -25,8 +25,8 @@ import {
 /**
  * Internal dependencies
  */
-import Card from '../../card';
-import Link from '../../link';
+import Card from '../card';
+import Link from '../link';
 import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
 import NumberFilter from './number-filter';

@@ -5,16 +5,16 @@
 // Turn on react-dates classes/styles, see https://github.com/airbnb/react-dates#initialize
 import 'react-dates/initialize';
 
-export { default as AdvancedFilters } from './filters/advanced';
+export { default as AdvancedFilters } from './advanced-filters';
 export { default as AnimationSlider } from './animation-slider';
 export { default as Autocomplete } from './autocomplete';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { default as Card } from './card';
 export { default as Count } from './count';
-export { default as CompareFilter } from './filters/compare';
+export { default as CompareFilter } from './compare-filter';
 export { default as Date } from './date';
-export { default as DateRangeFilterPicker } from './filters/date';
+export { default as DateRangeFilterPicker } from './date-range-filter-picker';
 export { default as DateRange } from './calendar/date-range';
 export { default as DatePicker } from './calendar/date-picker';
 export { default as DropdownButton } from './dropdown-button';
@@ -22,7 +22,7 @@ export { default as EllipsisMenu } from './ellipsis-menu';
 export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { default as Form } from './form';
-export { default as FilterPicker } from './filters/filter';
+export { default as FilterPicker } from './filter-picker';
 export { default as Gravatar } from './gravatar';
 export { H, Section } from './section';
 export { default as ImageAsset } from './image-asset';

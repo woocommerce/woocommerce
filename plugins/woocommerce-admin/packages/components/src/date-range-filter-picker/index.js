@@ -16,7 +16,7 @@ import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from '@woocomm
  * Internal dependencies
  */
 import DatePickerContent from './content';
-import DropdownButton from '../../dropdown-button';
+import DropdownButton from '../dropdown-button';
 
 const shortDateFormat = __( 'MM/DD/YYYY', 'woocommerce-admin' );
 

@@ -16,9 +16,9 @@ import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import Card from '../../card';
+import Card from '../card';
 import CompareButton from './button';
-import Search from '../../search';
+import Search from '../search';
 
 /**
  * Displays a card + search used to filter results as a comparison between objects.
