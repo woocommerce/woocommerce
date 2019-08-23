@@ -11,6 +11,9 @@ import { applyFilters } from '@wordpress/hooks';
 import { getCustomerLabels, getProductLabels } from 'lib/async-requests';
 
 const DOWLOADS_REPORT_CHART_FILTER = 'woocommerce_admin_downloads_report_chart_filter';
+const DOWLOADS_REPORT_FILTERS_FILTER = 'woocommerce_admin_downloads_report_filters';
+const DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER =
+	'woocommerce_admin_downloads_report_advanced_filters';
 
 export const charts = applyFilters( DOWLOADS_REPORT_CHART_FILTER, [
 	{
@@ -20,7 +23,7 @@ export const charts = applyFilters( DOWLOADS_REPORT_CHART_FILTER, [
 	},
 ] );
 
-export const filters = [
+export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [],
@@ -31,10 +34,10 @@ export const filters = [
 			{ label: __( 'Advanced Filters', 'woocommerce-admin' ), value: 'advanced' },
 		],
 	},
-];
+] );
 
 /*eslint-disable max-len*/
-export const advancedFilters = {
+export const advancedFilters = applyFilters( DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER, {
 	title: _x(
 		'Downloads Match {{select /}} Filters',
 		'A sentence describing filters for Downloads. See screen shot for context: https://cloudup.com/ccxhyH2mEDg',
@@ -168,5 +171,5 @@ export const advancedFilters = {
 			},
 		},
 	},
-};
+} );
 /*eslint-enable max-len*/

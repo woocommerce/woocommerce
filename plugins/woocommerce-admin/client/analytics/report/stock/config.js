@@ -3,10 +3,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
+
+const STOCK_REPORT_FILTERS_FILTER = 'woocommerce_admin_stock_report_filters';
 
 export const showDatePicker = false;
 
-export const filters = [
+export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [],
@@ -20,4 +23,4 @@ export const filters = [
 			{ label: __( 'On Backorder', 'woocommerce-admin' ), value: 'onbackorder' },
 		],
 	},
-];
+] );

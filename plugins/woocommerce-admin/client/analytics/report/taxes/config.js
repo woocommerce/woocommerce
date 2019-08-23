@@ -13,6 +13,7 @@ import { getTaxCode } from './utils';
 import { NAMESPACE } from 'wc-api/constants';
 
 const TAXES_REPORT_CHART_FILTER = 'woocommerce_admin_taxes_report_chart_filter';
+const TAXES_REPORT_FILTERS_FILTER = 'woocommerce_admin_taxes_report_filters';
 
 export const charts = applyFilters( TAXES_REPORT_CHART_FILTER, [
 	{
@@ -45,7 +46,7 @@ export const charts = applyFilters( TAXES_REPORT_CHART_FILTER, [
 	},
 ] );
 
-export const filters = [
+export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [ 'chart' ],
@@ -74,4 +75,4 @@ export const filters = [
 			},
 		],
 	},
-];
+] );

@@ -11,6 +11,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { getCouponLabels } from 'lib/async-requests';
 
 const COUPON_REPORT_CHART_FILTER = 'woocommerce_admin_coupon_report_chart_filter';
+const COUPON_REPORT_FILTERS_FILTER = 'woocommerce_admin_coupon_report_filters';
 
 export const charts = applyFilters( COUPON_REPORT_CHART_FILTER, [
 	{
@@ -29,7 +30,7 @@ export const charts = applyFilters( COUPON_REPORT_CHART_FILTER, [
 	},
 ] );
 
-export const filters = [
+export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [],
@@ -75,4 +76,4 @@ export const filters = [
 			},
 		],
 	},
-];
+] );

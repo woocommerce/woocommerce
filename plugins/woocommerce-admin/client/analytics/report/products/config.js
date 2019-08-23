@@ -11,6 +11,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { getProductLabels, getVariationLabels } from 'lib/async-requests';
 
 const PRODUCTS_REPORT_CHART_FILTER = 'woocommerce_admin_products_report_chart_filter';
+const PRODUCTS_REPORT_FILTERS_FILTER = 'woocommerce_admin_products_report_filters';
 
 export const charts = applyFilters( PRODUCTS_REPORT_CHART_FILTER, [
 	{
@@ -114,4 +115,7 @@ const variationsConfig = {
 	],
 };
 
-export const filters = [ filterConfig, variationsConfig ];
+export const filters = applyFilters( PRODUCTS_REPORT_FILTERS_FILTER, [
+	filterConfig,
+	variationsConfig,
+] );
