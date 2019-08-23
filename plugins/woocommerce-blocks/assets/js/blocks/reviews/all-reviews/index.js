@@ -3,39 +3,33 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
+import Gridicon from 'gridicons';
 
 /**
  * Internal dependencies
  */
 import '../editor.scss';
 import Editor from './edit';
-import { IconReviewsByCategory } from '../../../components/icons';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
 
 /**
- * Register and run the "Reviews by category" block.
+ * Register and run the "All Reviews" block.
  */
-registerBlockType( 'woocommerce/reviews-by-category', {
-	title: __( 'Reviews by Category', 'woo-gutenberg-products-block' ),
-	icon: (
-		<IconReviewsByCategory fillColor="#96588a" />
-	),
+registerBlockType( 'woocommerce/all-reviews', {
+	title: __( 'All Reviews', 'woo-gutenberg-products-block' ),
+	icon: {
+		src: <Gridicon icon="list" />,
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Show product reviews from specific categories.',
+		'Shows a list of all product reviews.',
 		'woo-gutenberg-products-block'
 	),
 	attributes: {
 		...sharedAttributes,
-		/**
-		 * The ids of the categories to load reviews for.
-		 */
-		categoryIds: {
-			type: 'array',
-			default: [],
-		},
 		/**
 		* Show the product name.
 		*/
