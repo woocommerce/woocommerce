@@ -15,14 +15,14 @@ module.exports = {
 	preset: 'jest-puppeteer',
 
 	// Where to look for test files
-	roots: [ '<rootDir>/tests/screenshot-tests' ],
+	roots: [ '<rootDir>/tests/e2e-tests/specs' ],
 
 	//setupFiles: [ '<rootDir>/.node_modules/regenerator-runtime/runtime' ],
 
 	// A list of paths to modules that run some code to configure or set up the testing framework
 	// before each test
 	setupFilesAfterEnv: [
-		'<rootDir>/tests/screenshot-tests/config/jest.setup.js',
+		'<rootDir>/tests/e2e-tests/config/jest.setup.js',
 		'expect-puppeteer',
 	],
 

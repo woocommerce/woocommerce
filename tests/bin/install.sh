@@ -150,7 +150,7 @@ install_db() {
 
 install_e2e_site() {
 
-	if [[ ${RUN_E2E} == 1 || ${RUN_VIS_REGRESSION} == 1 ]]; then
+	if [[ ${RUN_E2E} == 1 ]]; then
 
 		# Script Variables
 		CONFIG_DIR="./tests/e2e-tests/config/travis"

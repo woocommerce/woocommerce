@@ -27,17 +27,9 @@ matrix:
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "e2e tests"
+  - name: "e2e tests (Selenium)"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
-    addons:
-      chrome: stable
-      apt:
-        packages:
-          - nginx
-  - name: "Visual regression tests"
-    php: 7.3
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_VIS_REGRESSION=1
     addons:
       chrome: stable
       apt:
@@ -74,7 +66,6 @@ script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
   - travis_retry bash tests/bin/run-e2e-CI.sh
-  - bash tests/bin/run-vis-regression.sh
 
 after_script:
   - bash tests/bin/travis.sh after

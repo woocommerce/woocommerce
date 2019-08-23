@@ -35,5 +35,6 @@
 	],
 	"extends": [
 		"plugin:jest/recommended"
-	]
+	],
+	"parser": "babel-eslint"
 }
