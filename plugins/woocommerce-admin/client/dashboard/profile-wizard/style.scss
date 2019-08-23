@@ -263,7 +263,7 @@
 .woocommerce-profile-wizard__plugins-card {
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
-		margin-left: 64px;
+		margin-left: 44px;
 		min-height: 28px;
 
 		button.muriel-button {
@@ -271,6 +271,7 @@
 			height: 40px;
 			min-width: auto;
 			display: initial;
+			margin-right: $gap-small;
 		}
 	}
 }

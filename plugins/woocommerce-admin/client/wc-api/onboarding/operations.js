@@ -14,6 +14,7 @@ import { NAMESPACE, pluginNames } from './constants';
 
 function read( resourceNames, fetch = apiFetch ) {
 	return [
+		...readActivePlugins( resourceNames, fetch ),
 		...readProfileItems( resourceNames, fetch ),
 		...readJetpackConnectUrl( resourceNames, fetch ),
 	];
@@ -98,6 +99,77 @@ function profileItemToResource( items ) {
 	return resources;
 }
 
+function readActivePlugins( resourceNames, fetch ) {
+	const resourceName = 'active-plugins';
+	if ( resourceNames.includes( resourceName ) ) {
+		const url = NAMESPACE + '/onboarding/plugins/active';
+
+		return [
+			fetch( { path: url } )
+				.then( activePluginsToResources )
+				.catch( error => {
+					return { [ resourceName ]: { error: String( error.message ) } };
+				} ),
+		];
+	}
+
+	return [];
+}
+
+function activePluginsToResources( items ) {
+	const { plugins } = items;
+	const resourceName = 'active-plugins';
+	return {
+		[ resourceName ]: {
+			data: plugins,
+		},
+	};
+}
+
+function activatePlugins( resourceNames, data, fetch ) {
+	const resourceName = 'plugin-activate';
+	if ( resourceNames.includes( resourceName ) ) {
+		const plugins = data[ resourceName ];
+		const url = NAMESPACE + '/onboarding/plugins/activate';
+		return [
+			fetch( {
+				path: url,
+				method: 'POST',
+				data: {
+					plugins: plugins.join( ',' ),
+				},
+			} )
+				.then( response => activatePluginToResource( response, plugins ) )
+				.catch( error => {
+					const resources = { [ resourceName ]: { error } };
+					Object.keys( plugins ).forEach( key => {
+						const pluginError = { ...error };
+						const item = plugins[ key ];
+						pluginError.message = getPluginErrorMessage( 'activate', item );
+						resources[ getResourceName( resourceName, item ) ] = { error: pluginError };
+					} );
+					return resources;
+				} ),
+		];
+	}
+
+	return [];
+}
+
+function activatePluginToResource( response, items ) {
+	const resourceName = 'plugin-activate';
+
+	const resources = {
+		[ resourceName ]: { data: items },
+		[ 'active-plugins' ]: { data: response.active },
+	};
+	Object.keys( items ).forEach( key => {
+		const item = items[ key ];
+		resources[ getResourceName( resourceName, item ) ] = { data: item };
+	} );
+	return resources;
+}
+
 function readJetpackConnectUrl( resourceNames, fetch ) {
 	const resourceName = 'jetpack-connect-url';
 
@@ -112,7 +184,7 @@ function readJetpackConnectUrl( resourceNames, fetch ) {
 					return { [ resourceName ]: { data: response.connectAction } };
 				} )
 				.catch( error => {
-					error.message = getPluginErrorMessage( 'activate', 'jetpack' );
+					error.message = getPluginErrorMessage( 'connect', 'jetpack' );
 					return { [ resourceName ]: { error } };
 				} ),
 		];
@@ -121,64 +193,55 @@ function readJetpackConnectUrl( resourceNames, fetch ) {
 	return [];
 }
 
-function doPluginActions( fetch, action, plugins ) {
-	const resourceName = [ `plugin-${ action }` ];
-
-	return plugins.map( async plugin => {
-		return fetch( {
-			path: `${ NAMESPACE }/onboarding/plugins/${ action }`,
-			method: 'POST',
-			data: {
-				plugin,
-			},
-		} )
-			.then( response => {
-				return {
-					[ resourceName ]: { data: plugins },
-					[ getResourceName( resourceName, plugin ) ]: { data: response },
-				};
-			} )
-			.catch( error => {
-				error.message = getPluginErrorMessage( action, plugin );
-				return {
-					[ resourceName ]: { data: plugins },
-					[ getResourceName( resourceName, plugin ) ]: { error },
-				};
-			} );
-	} );
-}
-
 function getPluginErrorMessage( action, plugin ) {
 	const pluginName = pluginNames[ plugin ] || plugin;
-
-	return 'install' === action
-		? sprintf(
+	switch ( action ) {
+		case 'install':
+			return sprintf(
 				__( 'There was an error installing %s. Please try again.', 'woocommerce-admin' ),
 				pluginName
-			)
-		: sprintf(
+			);
+		case 'connect':
+			return sprintf(
+				__( 'There was an error connecting to %s. Please try again.', 'woocommerce-admin' ),
+				pluginName
+			);
+		case 'activate':
+		default:
+			return sprintf(
 				__( 'There was an error activating %s. Please try again.', 'woocommerce-admin' ),
 				pluginName
 			);
+	}
 }
 
 function installPlugins( resourceNames, data, fetch ) {
 	const resourceName = 'plugin-install';
-
 	if ( resourceNames.includes( resourceName ) ) {
 		const plugins = data[ resourceName ];
-		return doPluginActions( fetch, 'install', plugins );
-	}
 
-	return [];
-}
-
-function activatePlugins( resourceNames, data, fetch ) {
-	const resourceName = 'plugin-activate';
-
-	if ( resourceNames.includes( resourceName ) ) {
-		const plugins = data[ resourceName ];
-		return doPluginActions( fetch, 'activate', plugins );
+		return plugins.map( async plugin => {
+			return fetch( {
+				path: `${ NAMESPACE }/onboarding/plugins/install`,
+				method: 'POST',
+				data: {
+					plugin,
+				},
+			} )
+				.then( response => {
+					return {
+						[ resourceName ]: { data: plugins },
+						[ getResourceName( resourceName, plugin ) ]: { data: response },
+					};
+				} )
+				.catch( error => {
+					error.message = getPluginErrorMessage( 'install', pluginNames[ plugin ] || plugin );
+					return {
+						[ resourceName ]: { data: plugins },
+						[ getResourceName( resourceName, plugin ) ]: { error },
+					};
+				} );
+		} );
 	}
 
 	return [];

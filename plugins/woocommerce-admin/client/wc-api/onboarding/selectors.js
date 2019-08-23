@@ -77,6 +77,32 @@ const getPluginInstallations = getResource => plugins => {
 	return installations;
 };
 
+const getActivePlugins = ( getResource, requireResource ) => (
+	requirement = DEFAULT_REQUIREMENT
+) => {
+	const resourceName = 'active-plugins';
+	const data = requireResource( requirement, resourceName ).data || [];
+	if ( ! data.length ) {
+		return wcSettings.onboarding.activePlugins;
+	}
+
+	return data;
+};
+
+const getActivePluginsError = getResource => () => {
+	return getResource( 'active-plugins' ).error;
+};
+
+const isGetActivePluginsRequesting = getResource => () => {
+	const { lastReceived, lastRequested } = getResource( 'active-plugins' );
+
+	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
+		return true;
+	}
+
+	return lastRequested > lastReceived;
+};
+
 const getPluginActivations = getResource => plugins => {
 	const resourceName = 'plugin-activate';
 
@@ -146,6 +172,9 @@ export default {
 	getJetpackConnectUrl,
 	getJetpackConnectUrlError,
 	isGetJetpackConnectUrlRequesting,
+	getActivePlugins,
+	getActivePluginsError,
+	isGetActivePluginsRequesting,
 	getPluginActivations,
 	getPluginInstallations,
 	getPluginInstallationErrors,

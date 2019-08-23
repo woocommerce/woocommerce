@@ -2,21 +2,32 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { difference } from 'lodash';
+import { difference, get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
+
+/**
+ * WooCommerce depdencies
+ */
+import { H, Stepper, Card } from '@woocommerce/components';
+import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal depdencies
  */
-import { H, Stepper, Card } from '@woocommerce/components';
 import { recordEvent } from 'lib/tracks';
 import withSelect from 'wc-api/with-select';
+import { pluginNames } from 'wc-api/onboarding/constants';
 
-const plugins = [ 'jetpack', 'woocommerce-services' ];
+const pluginsToInstall = [ 'jetpack', 'woocommerce-services' ];
+// We want to use the cached version of activePlugins here, otherwise the list we are dealing with could update as plugins are activated.
+const plugins = difference(
+	pluginsToInstall,
+	get( wcSettings, [ 'onboarding', 'activePlugins' ], [] )
+);
 
 class Plugins extends Component {
 	constructor() {
@@ -30,11 +41,20 @@ class Plugins extends Component {
 	}
 
 	componentDidMount() {
+		if ( 0 === plugins.length ) {
+			return updateQueryString( { step: 'store-details' } );
+		}
 		this.props.installPlugins( plugins );
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { createNotice, errors, installedPlugins, jetpackConnectUrl } = this.props;
+		const {
+			createNotice,
+			errors,
+			installedPlugins,
+			activatedPlugins,
+			jetpackConnectUrl,
+		} = this.props;
 
 		if ( jetpackConnectUrl ) {
 			window.location = jetpackConnectUrl;
@@ -49,6 +69,17 @@ class Plugins extends Component {
 		) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( { step: 'activate' } );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+
+		// If Jetpack was already connected, we can go to store details after WCS is activated.
+		if (
+			! plugins.includes( 'jetpack' ) &&
+			prevProps.activatedPlugins.length !== plugins.length &&
+			activatedPlugins.length === plugins.length
+		) {
+			/* eslint-disable react/no-did-update-set-state */
+			return updateQueryString( { step: 'store-details' } );
 			/* eslint-enable react/no-did-update-set-state */
 		}
 	}
@@ -71,6 +102,10 @@ class Plugins extends Component {
 		const { hasErrors, isRequesting } = this.props;
 		const { step } = this.state;
 
+		const pluginLabel = plugins.includes( 'jetpack' )
+			? Object.values( pluginNames ).join( ' & ' )
+			: pluginNames[ 'woocommerce-services' ];
+
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -84,11 +119,11 @@ class Plugins extends Component {
 						isPending={ isRequesting && ! hasErrors }
 						steps={ [
 							{
-								label: __( 'Install Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								label: sprintf( __( 'Install %s', 'woocommerce-admin' ), pluginLabel ),
 								key: 'install',
 							},
 							{
-								label: __( 'Activate Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								label: sprintf( __( 'Activate %s', 'woocommerce-admin' ), pluginLabel ),
 								key: 'activate',
 							},
 						] }
@@ -150,7 +185,7 @@ export default compose(
 			errors.push( installationErrors[ plugin ].message )
 		);
 		if ( jetpackConnectUrlError ) {
-			errors.push( jetpackConnectUrlError );
+			errors.push( jetpackConnectUrlError.message );
 		}
 		const hasErrors = Boolean( errors.length );
 
