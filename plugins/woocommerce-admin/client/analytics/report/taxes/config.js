@@ -40,7 +40,7 @@ export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders Count', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',

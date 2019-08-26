@@ -19,7 +19,7 @@ const ORDERS_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_orders_report_a
 export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
-		label: __( 'Orders Count', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce-admin' ),
 		type: 'number',
 	},
 	{
