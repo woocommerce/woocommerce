@@ -77,7 +77,7 @@ class ShippingRates extends Component {
 
 		createNotice( 'success', __( 'Your shipping rates have been updated.', 'woocommerce-admin' ) );
 
-		this.props.completeStep();
+		this.props.onComplete();
 	}
 
 	renderInputPrefix() {
@@ -225,7 +225,7 @@ ShippingRates.propTypes = {
 	/**
 	 * Function used to mark the step complete.
 	 */
-	completeStep: PropTypes.func.isRequired,
+	onComplete: PropTypes.func.isRequired,
 	/**
 	 * Function to create a transient notice in the store.
 	 */

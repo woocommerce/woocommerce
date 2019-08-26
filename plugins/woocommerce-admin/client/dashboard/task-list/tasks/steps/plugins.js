@@ -7,12 +7,8 @@ import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { difference } from 'lodash';
+import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
-
-/**
- * WooCommerce dependencies
- */
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -21,18 +17,19 @@ import withSelect from 'wc-api/with-select';
 
 const plugins = [ 'jetpack', 'woocommerce-services' ];
 
-class ShippingLabels extends Component {
+class Plugins extends Component {
 	constructor() {
 		super( ...arguments );
 
 		this.installAndActivatePlugins = this.installAndActivatePlugins.bind( this );
+		this.skipInstaller = this.skipInstaller.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
 		const {
 			activatedPlugins,
 			activatePlugins,
-			completeStep,
+			onComplete,
 			createNotice,
 			errors,
 			installedPlugins,
@@ -56,7 +53,7 @@ class ShippingLabels extends Component {
 				'success',
 				__( 'Plugins were successfully installed and activated.', 'woocommerce-admin' )
 			);
-			completeStep();
+			onComplete();
 		}
 	}
 
@@ -73,11 +70,11 @@ class ShippingLabels extends Component {
 	}
 
 	skipInstaller() {
-		getHistory().push( getNewPath( {}, '/', {} ) );
+		this.props.onSkip();
 	}
 
 	render() {
-		const { hasErrors, isRequesting } = this.props;
+		const { hasErrors, isRequesting, skipText } = this.props;
 
 		return hasErrors ? (
 			<Button isPrimary onClick={ () => location.reload() }>
@@ -88,11 +85,26 @@ class ShippingLabels extends Component {
 				<Button isBusy={ isRequesting } isPrimary onClick={ this.installAndActivatePlugins }>
 					{ __( 'Install & enable', 'woocommerce-admin' ) }
 				</Button>
-				<Button onClick={ this.skipInstaller }>{ __( 'No thanks', 'woocommerce-admin' ) }</Button>
+				<Button onClick={ this.skipInstaller }>{ skipText || __( 'No thanks', 'woocommerce-admin' ) }</Button>
 			</Fragment>
 		);
 	}
 }
+
+Plugins.propTypes = {
+	/**
+	 * Called when the plugin installer is completed.
+	 */
+	onComplete: PropTypes.func.isRequired,
+	/**
+	 * Called when the plugin installer is skipped.
+	 */
+	onSkip: PropTypes.func.isRequired,
+	/**
+	 * Text used for the skip installer button.
+	 */
+	skipText: PropTypes.string,
+};
 
 export default compose(
 	withSelect( select => {
@@ -139,4 +151,4 @@ export default compose(
 			installPlugins,
 		};
 	} )
-)( ShippingLabels );
+)( Plugins );

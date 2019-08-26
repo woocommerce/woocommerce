@@ -12,6 +12,7 @@ import { recordEvent } from 'lib/tracks';
 /**
  * Internal depdencies
  */
+import { getCountryCode } from 'dashboard/utils';
 import { H, Card, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import {
@@ -46,7 +47,7 @@ class StoreDetails extends Component {
 		} = this.props;
 
 		recordEvent( 'storeprofiler_store_details_continue', {
-			store_country: values.countryState.split( ':' )[ 0 ],
+			store_country: getCountryCode( values.countryState ),
 			setup_client: values.isClient,
 		} );
 

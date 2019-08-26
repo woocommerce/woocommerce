@@ -26,7 +26,7 @@ export default class StoreLocation extends Component {
 	}
 
 	async onSubmit( values ) {
-		const { completeStep, createNotice, isSettingsError, updateSettings } = this.props;
+		const { onComplete, createNotice, isSettingsError, updateSettings } = this.props;
 
 		await updateSettings( {
 			general: {
@@ -39,7 +39,7 @@ export default class StoreLocation extends Component {
 		} );
 
 		if ( ! isSettingsError ) {
-			completeStep();
+			onComplete();
 		} else {
 			createNotice(
 				'error',

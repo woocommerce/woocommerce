@@ -18,9 +18,10 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import Connect from './connect';
-import StoreLocation from './location';
-import ShippingLabels from './labels';
+import Connect from '../steps/connect';
+import { getCountryCode } from 'dashboard/utils';
+import Plugins from '../steps/plugins';
+import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import withSelect from 'wc-api/with-select';
 
@@ -146,7 +147,7 @@ class Shipping extends Component {
 				key: 'store_location',
 				label: __( 'Set store location', 'woocommerce-admin' ),
 				description: __( 'The address from which your business operates', 'woocommerce-admin' ),
-				content: <StoreLocation completeStep={ this.completeStep } { ...this.props } />,
+				content: <StoreLocation onComplete={ this.completeStep } { ...this.props } />,
 				visible: true,
 			},
 			{
@@ -159,7 +160,7 @@ class Shipping extends Component {
 				content: (
 					<ShippingRates
 						shippingZones={ this.state.shippingZones }
-						completeStep={ this.completeStep }
+						onComplete={ this.completeStep }
 						{ ...this.props }
 					/>
 				),
@@ -173,7 +174,13 @@ class Shipping extends Component {
 						'Post Office by printing your shipping labels at home',
 					'woocommerce-admin'
 				),
-				content: <ShippingLabels completeStep={ this.completeStep } { ...this.props } />,
+				content: (
+					<Plugins
+						onComplete={ this.completeStep }
+						onSkip={ () => getHistory().push( getNewPath( {}, '/', {} ) ) }
+						{ ...this.props }
+					/>
+				),
 				visible: [ 'US', 'GB', 'CA', 'AU' ].includes( countryCode ),
 			},
 			{
@@ -218,9 +225,8 @@ export default compose(
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
 
-		const countryCode = settings.woocommerce_default_country
-			? settings.woocommerce_default_country.split( ':' )[ 0 ]
-			: null;
+		const countryCode = getCountryCode( settings.woocommerce_default_country );
+
 		const countries = ( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
 		const country = countryCode ? countries.find( c => c.code === countryCode ) : null;
 		const countryName = country ? country.name : null;

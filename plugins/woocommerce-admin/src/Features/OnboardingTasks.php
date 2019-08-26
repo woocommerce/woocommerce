@@ -71,8 +71,9 @@ class OnboardingTasks {
 			set_transient( self::TASKS_TRANSIENT, $tasks, DAY_IN_SECONDS );
 		}
 
-		$settings['onboarding']['tasks']              = $tasks;
-		$settings['onboarding']['shippingZonesCount'] = count( \WC_Shipping_Zones::get_zones() );
+		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
+		$settings['onboarding']['tasks']                          = $tasks;
+		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 
 		return $settings;
 	}
@@ -128,5 +129,20 @@ class OnboardingTasks {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get an array of countries that support automated tax.
+	 *
+	 * @return array
+	 */
+	public static function get_automated_tax_supported_countries() {
+		// https://developers.taxjar.com/api/reference/#countries .
+		$tax_supported_countries = array_merge(
+			array( 'US', 'CA', 'AU' ),
+			WC()->countries->get_european_union_countries()
+		);
+
+		return $tax_supported_countries;
 	}
 }
