@@ -13,9 +13,6 @@
     "build": "grunt",
     "build-watch": "grunt watch",
     "lint:js": "eslint assets/js --ext=js",
-    "test": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --recursive",
-    "test:grep": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha \"tests/e2e-tests\" --require babel-register --grep ",
-    "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register",
     "test:e2e": "./tests/bin/e2e-test-integration.js",
     "makepot": "grunt makepot",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
@@ -29,7 +26,6 @@
     "@babel/preset-env": "^7.5.5",
     "@babel/register": "^7.5.5",
     "babel-eslint": "10.0.2",
-    "babel-jest": "^24.9.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chromedriver": "75.1.0",
