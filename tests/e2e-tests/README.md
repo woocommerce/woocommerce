@@ -13,6 +13,7 @@ Automated end-to-end tests for WooCommerce.
 - [Running tests](#running-tests)
   - [How to run tests](#how-to-run-tests) 
 - [Writing tests](#writing-tests) 
+- [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
 
@@ -100,7 +101,7 @@ The `Development mode` also enables SlowMo mode. SlowMo slows down Puppeteer’s
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npm run test:e2e ./tests/e2e-tests/specs/activate-woocommerce.test.js
+npm run test:e2e ./tests/e2e-tests/specs/wp-admin/wp-admin-product-new.test.js
 ``` 
 
 You can also provide the base URL, Test username and Test password like this:
@@ -121,4 +122,22 @@ Tests are kept in `tests/e2e-tests/specs` folder.
 
 The following packages are being used to write tests:
 
-- `e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils). 
+- `e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils).
+
+## Debugging tests 
+
+Debugging tools are pre-built in the existing Puppeteer's architecture. To enable debugging:
+
+- Run tests in the `Development mode`;
+- Use `await jestPuppeteer.debug();` in test code to pause execution. 
+
+Doing the above will allow for the following: 
+
+- Tests to be run non-headless; 
+- SlowMo mode enabled; 
+- Chrome Dev Tools open by default; 
+- Test timeout time increased to 2 minutes. 
+
+If more than 2 minutes needed for inspection, adjust the `jestTimeoutInMilliSeconds` value in `./tests/e2e-tests/config/jest.setup.js`. 
+
+For more Puppeteer debugging tips, check [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).   
