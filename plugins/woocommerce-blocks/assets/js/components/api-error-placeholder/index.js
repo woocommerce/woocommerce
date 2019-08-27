@@ -56,10 +56,6 @@ const ApiErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
 
 ApiErrorPlaceholder.propTypes = {
 	/**
-	 * Callback to retry an action.
-	 */
-	onRetry: PropTypes.func.isRequired,
-	/**
 	 * Classname to add to placeholder in addition to the defaults.
 	 */
 	className: PropTypes.string,
@@ -81,6 +77,10 @@ ApiErrorPlaceholder.propTypes = {
 	 * a spinner is shown instead.
 	 */
 	isLoading: PropTypes.bool,
+	/**
+	 * Callback to retry an action.
+	 */
+	onRetry: PropTypes.func,
 };
 
 export default ApiErrorPlaceholder;

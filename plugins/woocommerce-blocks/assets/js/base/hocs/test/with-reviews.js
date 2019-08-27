@@ -111,7 +111,9 @@ describe( 'withReviews Component', () => {
 	describe( 'when the API returns an error', () => {
 		beforeEach( () => {
 			mockUtils.getReviews.mockImplementation(
-				() => Promise.reject( { message: 'There was an error.' } )
+				() => Promise.reject( {
+					json: () => Promise.resolve( { message: 'There was an error.' } ),
+				} )
 			);
 			renderer = render();
 		} );

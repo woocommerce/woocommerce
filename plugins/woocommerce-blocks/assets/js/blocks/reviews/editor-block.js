@@ -10,6 +10,7 @@ import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
+import ApiErrorPlaceholder from '../../components/api-error-placeholder';
 import LoadMoreButton from '../../base/components/load-more-button';
 import ReviewList from '../../base/components/review-list';
 import ReviewOrderSelect from '../../base/components/review-order-select';
@@ -33,7 +34,17 @@ class EditorBlock extends Component {
 	}
 
 	render() {
-		const { attributes, componentId, isLoading, noReviewsPlaceholder: NoReviewsPlaceholder, reviews, totalReviews } = this.props;
+		const { attributes, componentId, error, isLoading, noReviewsPlaceholder: NoReviewsPlaceholder, reviews, totalReviews } = this.props;
+
+		if ( error ) {
+			return (
+				<ApiErrorPlaceholder
+					className="wc-block-featured-product-error"
+					error={ error }
+					isLoading={ isLoading }
+				/>
+			);
+		}
 
 		if ( 0 === reviews.length && ! isLoading ) {
 			return <NoReviewsPlaceholder attributes={ attributes } />;

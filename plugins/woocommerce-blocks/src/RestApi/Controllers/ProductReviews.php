@@ -61,7 +61,7 @@ class ProductReviews extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( 'edit' === $request['context'] ) {
-			return new WP_Error( 'rest_forbidden_context', __( 'Sorry, you are not allowed to edit resources.', 'woo-gutenberg-products-block' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'rest_forbidden_context', __( 'Sorry, you cannot list resources.', 'woo-gutenberg-products-block' ), array( 'status' => \rest_authorization_required_code() ) );
 		}
 		return true;
 	}
