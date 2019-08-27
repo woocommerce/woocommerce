@@ -10,7 +10,7 @@ import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '@woocommerce/settings';
 import ReviewListItem from '../review-list-item';
 import './style.scss';
 
-const ReviewList = ( { attributes, componentId, reviews } ) => {
+const ReviewList = ( { attributes, reviews } ) => {
 	const showReviewImage = ( SHOW_AVATARS || attributes.imageType === 'product' ) && attributes.showReviewImage;
 	const showReviewRating = ENABLE_REVIEW_RATING && attributes.showReviewRating;
 	const attrs = {
@@ -20,10 +20,7 @@ const ReviewList = ( { attributes, componentId, reviews } ) => {
 	};
 
 	return (
-		<ul
-			key={ `wc-block-review-list-${ componentId }` }
-			className="wc-block-review-list"
-		>
+		<ul className="wc-block-review-list">
 			{ reviews.length === 0 ?
 				(
 					<ReviewListItem attributes={ attrs } />
@@ -39,7 +36,6 @@ const ReviewList = ( { attributes, componentId, reviews } ) => {
 
 ReviewList.propTypes = {
 	attributes: PropTypes.object.isRequired,
-	componentId: PropTypes.number.isRequired,
 	reviews: PropTypes.array.isRequired,
 };
 

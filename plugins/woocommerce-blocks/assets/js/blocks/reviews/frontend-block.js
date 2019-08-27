@@ -12,13 +12,12 @@ import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
 import LoadMoreButton from '../../base/components/load-more-button';
 import ReviewOrderSelect from '../../base/components/review-order-select';
 import ReviewList from '../../base/components/review-list';
-import withComponentId from '../../base/hocs/with-component-id';
 import withReviews from '../../base/hocs/with-reviews';
 
 /**
  * Block rendered in the frontend.
  */
-const FrontendBlock = ( { attributes, componentId, onAppendReviews, onChangeOrderby, reviews, totalReviews } ) => {
+const FrontendBlock = ( { attributes, onAppendReviews, onChangeOrderby, reviews, totalReviews } ) => {
 	const { orderby } = attributes;
 
 	if ( 0 === reviews.length ) {
@@ -29,14 +28,12 @@ const FrontendBlock = ( { attributes, componentId, onAppendReviews, onChangeOrde
 		<Fragment>
 			{ ( attributes.showOrderby && ENABLE_REVIEW_RATING ) && (
 				<ReviewOrderSelect
-					componentId={ componentId }
 					defaultValue={ orderby }
 					onChange={ onChangeOrderby }
 				/>
 			) }
 			<ReviewList
 				attributes={ attributes }
-				componentId={ componentId }
 				reviews={ reviews }
 			/>
 			{ ( attributes.showLoadMore && totalReviews > reviews.length ) && (
@@ -56,11 +53,9 @@ FrontendBlock.propTypes = {
 	attributes: PropTypes.object.isRequired,
 	onAppendReviews: PropTypes.func,
 	onChangeArgs: PropTypes.func,
-	// from withComponentId
-	componentId: PropTypes.number,
 	// from withReviewsattributes
 	reviews: PropTypes.array,
 	totalReviews: PropTypes.number,
 };
 
-export default withComponentId( withReviews( FrontendBlock ) );
+export default withReviews( FrontendBlock );
