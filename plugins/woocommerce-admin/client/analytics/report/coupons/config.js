@@ -12,6 +12,7 @@ import { getCouponLabels } from 'lib/async-requests';
 
 const COUPON_REPORT_CHART_FILTER = 'woocommerce_admin_coupon_report_chart_filter';
 const COUPON_REPORT_FILTERS_FILTER = 'woocommerce_admin_coupon_report_filters';
+const COUPON_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_coupon_report_advanced_filters';
 
 export const charts = applyFilters( COUPON_REPORT_CHART_FILTER, [
 	{
@@ -77,3 +78,5 @@ export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 		],
 	},
 ] );
+
+export const advancedFilters = applyFilters( COUPON_REPORT_ADVANCED_FILTERS_FILTER, {} );

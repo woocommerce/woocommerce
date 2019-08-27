@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { charts } from './config';
+import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
@@ -21,20 +21,34 @@ export default class RevenueReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } report="revenue" />
+				<ReportFilters
+					query={ query }
+					path={ path }
+					report="revenue"
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 				<ReportSummary
 					charts={ charts }
 					endpoint="revenue"
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
 					endpoint="revenue"
 					path={ path }
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
-				<RevenueReportTable query={ query } />
+				<RevenueReportTable
+					query={ query }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}

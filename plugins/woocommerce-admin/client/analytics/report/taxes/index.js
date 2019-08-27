@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { charts, filters } from './config';
+import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
@@ -42,7 +42,13 @@ export default class TaxesReport extends Component {
 		}
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } filters={ filters } report="taxes" />
+				<ReportFilters
+					query={ query }
+					path={ path }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+					report="taxes"
+				/>
 				<ReportSummary
 					charts={ charts }
 					endpoint="taxes"
@@ -50,9 +56,11 @@ export default class TaxesReport extends Component {
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 					mode={ mode }
 					endpoint="taxes"
 					query={ chartQuery }
@@ -61,7 +69,12 @@ export default class TaxesReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<TaxesReportTable isRequesting={ isRequesting } query={ query } filters={ filters } />
+				<TaxesReportTable
+					isRequesting={ isRequesting }
+					query={ query }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}
