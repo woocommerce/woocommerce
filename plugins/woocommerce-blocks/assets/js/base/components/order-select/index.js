@@ -8,6 +8,7 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import Label from '../label';
+import withComponentId from '../../hocs/with-component-id';
 import './style.scss';
 
 /**
@@ -47,7 +48,6 @@ const OrderSelect = ( { className, componentId, defaultValue, label, onChange, o
 };
 
 OrderSelect.propTypes = {
-	componentId: PropTypes.number.isRequired,
 	defaultValue: PropTypes.string,
 	label: PropTypes.string,
 	onChange: PropTypes.func,
@@ -58,6 +58,8 @@ OrderSelect.propTypes = {
 	readOnly: PropTypes.bool,
 	screenReaderLabel: PropTypes.string,
 	value: PropTypes.string,
+	// from withComponentId
+	componentId: PropTypes.number.isRequired,
 };
 
-export default OrderSelect;
+export default withComponentId( OrderSelect );

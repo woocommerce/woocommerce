@@ -10,11 +10,10 @@ import PropTypes from 'prop-types';
 import OrderSelect from '../order-select';
 import './style.scss';
 
-const ReviewOrderSelect = ( { componentId, defaultValue, onChange, readOnly, value } ) => {
+const ReviewOrderSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 	return (
 		<OrderSelect
 			className="wc-block-review-order-select"
-			componentId={ componentId }
 			defaultValue={ defaultValue }
 			label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
 			onChange={ onChange }
@@ -31,7 +30,6 @@ const ReviewOrderSelect = ( { componentId, defaultValue, onChange, readOnly, val
 };
 
 ReviewOrderSelect.propTypes = {
-	componentId: PropTypes.number.isRequired,
 	defaultValue: PropTypes.oneOf( [ 'most-recent', 'highest-rating', 'lowest-rating' ] ),
 	onChange: PropTypes.func,
 	readOnly: PropTypes.bool,
