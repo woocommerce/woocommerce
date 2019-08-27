@@ -119,19 +119,19 @@ class Onboarding {
 				),
 				'subscriptions' => array(
 					'label'   => __( 'Subscriptions', 'woocommerce-admin' ),
-					'product' => 'woocommerce-subscriptions',
+					'product' => 27147,
 				),
 				'memberships'   => array(
 					'label'   => __( 'Memberships', 'woocommerce-admin' ),
-					'product' => 'woocommerce-memberships',
+					'product' => 958589,
 				),
 				'composite'     => array(
 					'label'   => __( 'Composite Products', 'woocommerce-admin' ),
-					'product' => 'woocommerce-composite-products',
+					'product' => 216836,
 				),
 				'bookings'      => array(
 					'label'   => __( 'Bookings', 'woocommerce-admin' ),
-					'product' => 'WooCommerce Bookings',
+					'product' => 390890,
 				),
 			)
 		);
@@ -267,9 +267,9 @@ class Onboarding {
 		$product_data = json_decode( $woocommerce_products['body'] );
 		$products     = array();
 
-		// Map product data by slug.
+		// Map product data by ID.
 		foreach ( $product_data->products as $product_datum ) {
-			$products[ $product_datum->slug ] = $product_datum;
+			$products[ $product_datum->id ] = $product_datum;
 		}
 
 		// Loop over product types and append data.
