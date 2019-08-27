@@ -15,6 +15,7 @@
 
 		// Events.
 		$form.on( 'submit', { productExportForm: this }, this.onSubmit );
+		$form.find( '.woocommerce-exporter-types' ).on( 'change', { productExportForm: this }, this.exportTypeFields );
 	};
 
 	/**
@@ -82,6 +83,20 @@
 		} ).fail( function( response ) {
 			window.console.log( response );
 		} );
+	};
+
+	/**
+	 * Handle fields per export type.
+	 */
+	productExportForm.prototype.exportTypeFields = function() {
+		var exportCategory = $( '.woocommerce-exporter-category' );
+
+		if ( -1 !== $.inArray( 'variation', $( this ).val() ) ) {
+			exportCategory.closest( 'tr' ).hide();
+			exportCategory.val( '' ).change(); // Reset WooSelect selected value.
+		} else {
+			exportCategory.closest( 'tr' ).show();
+		}
 	};
 
 	/**
