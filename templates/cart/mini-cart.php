@@ -73,7 +73,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	<p class="woocommerce-mini-cart__total total">
 		<?php
 		/**
-		 * Woocommerce_widget_shopping_cart_total hook.
+		 * Hook: woocommerce_widget_shopping_cart_total.
 		 *
 		 * @hooked woocommerce_widget_shopping_cart_subtotal - 10
 		 */
