@@ -121,17 +121,19 @@ const withReviews = ( OriginalComponent ) => {
 				.catch( this.setError );
 		}
 
-		setError( apiError ) {
-			const { onReviewsLoadError } = this.props;
-			const error = typeof apiError === 'object' && apiError.hasOwnProperty( 'message' ) ? {
-				apiMessage: apiError.message,
-			} : {
-				apiMessage: null,
-			};
+		setError( errorResponse ) {
+			errorResponse.json().then( ( apiError ) => {
+				const { onReviewsLoadError } = this.props;
+				const error = typeof apiError === 'object' && apiError.hasOwnProperty( 'message' ) ? {
+					apiMessage: apiError.message,
+				} : {
+					apiMessage: null,
+				};
 
-			this.setState( { reviews: [], loading: false, error } );
+				this.setState( { reviews: [], loading: false, error } );
 
-			onReviewsLoadError();
+				onReviewsLoadError();
+			} );
 		}
 
 		render() {
