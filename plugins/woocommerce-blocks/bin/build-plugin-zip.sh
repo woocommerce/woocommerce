@@ -46,6 +46,7 @@ copy_dest_files() {
 		--exclude=renovate.json \
 		--exclude="*.config.js" \
 		--exclude="*-config.js" \
+		--exclude="*.config.json" \
 		--exclude=package.json \
 		--exclude=package-lock.json \
 		--exclude=none \
