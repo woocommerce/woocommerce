@@ -1,4 +1,5 @@
 // Export each icon as a named component.
+export { default as IconAllReviews } from './all-reviews';
 export { default as IconCheckChecked } from './checkbox-checked';
 export { default as IconCheckUnchecked } from './checkbox-unchecked';
 export { default as IconFolder } from './folder';
