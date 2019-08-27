@@ -6,7 +6,7 @@ import { clamp, isNaN } from 'lodash';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { RangeControl, ToggleControl } from '@wordpress/components';
-import { MAX_COLUMNS, MIN_COLUMNS, MAX_ROWS, MIN_ROWS } from '@woocommerce/settings';
+import { MAX_COLUMNS, MIN_COLUMNS, MAX_ROWS, MIN_ROWS } from '@woocommerce/block-settings';
 
 /**
  * A combination of range controls for product grid layout settings.

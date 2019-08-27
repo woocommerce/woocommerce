@@ -37,7 +37,8 @@ const baseConfig = {
 
 const requestToExternal = ( request ) => {
 	const wcDepMap = {
-		'@woocommerce/settings': [ 'wc', 'blockSettings' ],
+		'@woocommerce/settings': [ 'wc', 'wc-shared-settings' ],
+		'@woocommerce/block-settings': [ 'wc', 'wc-block-settings' ],
 	};
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
@@ -46,7 +47,8 @@ const requestToExternal = ( request ) => {
 
 const requestToHandle = ( request ) => {
 	const wcHandleMap = {
-		'@woocommerce/settings': 'wc-block-settings',
+		'@woocommerce/settings': 'wc-shared-settings',
+		'@woocommerce/block-settings': 'wc-block-settings',
 	};
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
@@ -56,12 +58,13 @@ const requestToHandle = ( request ) => {
 const CoreConfig = {
 	...baseConfig,
 	entry: {
-		'wc-blocks-settings': './assets/js/settings/index.js',
+		'wc-shared-settings': './assets/js/settings/shared/index.js',
+		'wc-block-settings': './assets/js/settings/blocks/index.js',
 	},
 	output: {
 		filename: '[name].js',
 		path: path.resolve( __dirname, './build/' ),
-		library: [ 'wc', 'blockSettings' ],
+		library: [ 'wc', '[name]' ],
 		libraryTarget: 'this',
 		// This fixes an issue with multiple webpack projects using chunking
 		// overwriting each other's chunk loader function.

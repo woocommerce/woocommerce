@@ -29,7 +29,7 @@ import classnames from 'classnames';
 import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { MIN_HEIGHT } from '@woocommerce/settings';
+import { MIN_HEIGHT } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

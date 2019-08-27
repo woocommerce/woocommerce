@@ -7,7 +7,7 @@ import { debounce, find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl } from '@wordpress/components';
-import { LIMIT_TAGS } from '@woocommerce/settings';
+import { LIMIT_TAGS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

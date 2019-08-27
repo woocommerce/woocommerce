@@ -8,7 +8,8 @@
   ],
   "moduleDirectories": ["node_modules"],
   "moduleNameMapper": {
-    "@woocommerce/settings": "assets/js/settings"
+    "@woocommerce/settings": "assets/js/settings/shared",
+    "@woocommerce/block-settings": "assets/js/settings/blocks"
   },
   "setupFiles": [
     "<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",

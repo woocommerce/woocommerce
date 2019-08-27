@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from 'react';
 import classnames from 'classnames';
-import { HOME_URL } from '@woocommerce/settings';
+import { HOME_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

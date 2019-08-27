@@ -5,7 +5,7 @@ import { Component } from '@wordpress/element';
 import { debounce } from 'lodash';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { IS_LARGE_CATALOG } from '@woocommerce/settings';
+import { IS_LARGE_CATALOG } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

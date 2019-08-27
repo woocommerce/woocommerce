@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
+import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

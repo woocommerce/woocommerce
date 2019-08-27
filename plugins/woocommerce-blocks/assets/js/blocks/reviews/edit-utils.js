@@ -10,7 +10,7 @@ import {
 } from '@wordpress/components';
 import { BlockControls } from '@wordpress/editor';
 import { getAdminLink } from '@woocommerce/navigation';
-import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '@woocommerce/settings';
+import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

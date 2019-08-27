@@ -19,7 +19,7 @@ import {
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/settings';
+import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

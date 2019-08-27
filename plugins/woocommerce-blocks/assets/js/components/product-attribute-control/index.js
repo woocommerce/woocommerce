@@ -9,7 +9,7 @@ import { debounce, find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl, Spinner } from '@wordpress/components';
-import { ENDPOINTS } from '@woocommerce/settings';
+import { ENDPOINTS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

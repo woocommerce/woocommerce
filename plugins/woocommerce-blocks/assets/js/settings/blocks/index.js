@@ -22,3 +22,4 @@ export const LIMIT_TAGS = getConstantFromData( 'limitTags' );
 export const HAS_TAGS = getConstantFromData( 'hasTags', true );
 export const HOME_URL = getConstantFromData( 'homeUrl ', '' );
 export const PRODUCT_CATEGORIES = getConstantFromData( 'productCategories', [] );
+export { ENDPOINTS } from './endpoints';

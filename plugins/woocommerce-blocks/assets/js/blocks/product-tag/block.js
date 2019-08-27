@@ -17,7 +17,7 @@ import {
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { HAS_TAGS } from '@woocommerce/settings';
+import { HAS_TAGS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
