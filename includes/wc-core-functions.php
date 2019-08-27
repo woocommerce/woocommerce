@@ -695,6 +695,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
  * @param mixed  $message     Message.
  * @param string $headers     Headers. (default: "Content-Type: text/html\r\n").
  * @param string $attachments Attachments. (default: "").
+ * @return bool
  */
 function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = '' ) {
 	$mailer = WC()->mailer();
