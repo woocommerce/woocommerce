@@ -425,7 +425,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 						break;
 					default:
 						/* translators: 1: Authorization ID, 2: Payment status */
-						$order->add_order_note( sprintf( __( 'Payment could not captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
+						$order->add_order_note( sprintf( __( 'Payment could not be captured - Auth ID: %1$s, Status: %2$s', 'woocommerce' ), $result->AUTHORIZATIONID, $result->PAYMENTSTATUS ) );
 						break;
 				}
 			}
