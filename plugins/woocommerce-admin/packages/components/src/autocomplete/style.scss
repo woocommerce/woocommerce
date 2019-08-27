@@ -55,6 +55,11 @@
 			width: 24px;
 		}
 
+		&.is-active {
+			box-shadow: 0 0 0 1px $new-muriel-primary-500;
+			border-color: $new-muriel-primary-500;
+		}
+
 		&.with-value .components-base-control__label,
 		&.is-active .components-base-control__label,
 		&.has-tags .components-base-control__label {
@@ -96,7 +101,7 @@
 		position: absolute;
 		left: 0;
 		right: 0;
-		top: 56px;
+		top: 57px;
 		z-index: 10;
 		overflow: scroll;
 		max-height: 350px;

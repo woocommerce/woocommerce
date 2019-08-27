@@ -123,7 +123,7 @@ export class Autocomplete extends Component {
 		const filtered = [];
 
 		// Create a regular expression to filter the options.
-		const expression = getSearchExpression( escapeRegExp( query.trim() ) );
+		const expression = getSearchExpression( escapeRegExp( query ? query.trim() : '' ) );
 		const search = expression ? new RegExp( expression, 'i' ) : /^$/;
 
 		for ( let i = 0; i < options.length; i++ ) {

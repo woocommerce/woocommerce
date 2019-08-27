@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
 import { isEqual } from 'lodash';
-import { ENTER, ESCAPE, UP, DOWN, LEFT, TAB, RIGHT } from '@wordpress/keycodes';
+import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT } from '@wordpress/keycodes';
 import PropTypes from 'prop-types';
 
 /**
@@ -82,7 +82,6 @@ class List extends Component {
 				event.stopPropagation();
 				break;
 
-			case TAB:
 			case DOWN:
 				nextSelectedIndex = null !== selectedIndex
 					? ( selectedIndex + 1 ) % filteredOptions.length
@@ -153,6 +152,7 @@ class List extends Component {
 								'is-selected': index === selectedIndex,
 							} ) }
 							onClick={ () => this.select( option ) }
+							tabIndex="-1"
 						>
 							{ option.label }
 						</Button>
