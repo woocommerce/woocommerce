@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ ${RUN_PHPCS} == 1 ]] || [[ ${RUN_E2E} == 1 ]] || [[ ${RUN_VIS_REGRESSION} == 1 ]]; then
+if [[ ${RUN_PHPCS} == 1 ]] || [[ ${RUN_E2E} == 1 ]]; then
 	exit
 fi
 
