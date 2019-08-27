@@ -26,7 +26,7 @@ const FrontendBlock = ( { attributes, onAppendReviews, onChangeOrderby, reviews,
 
 	return (
 		<Fragment>
-			{ ( attributes.showOrderby && ENABLE_REVIEW_RATING ) && (
+			{ ( attributes.showOrderby !== 'false' && ENABLE_REVIEW_RATING ) && (
 				<ReviewOrderSelect
 					defaultValue={ orderby }
 					onChange={ onChangeOrderby }
@@ -36,7 +36,7 @@ const FrontendBlock = ( { attributes, onAppendReviews, onChangeOrderby, reviews,
 				attributes={ attributes }
 				reviews={ reviews }
 			/>
-			{ ( attributes.showLoadMore && totalReviews > reviews.length ) && (
+			{ ( attributes.showLoadMore !== 'false' && totalReviews > reviews.length ) && (
 				<LoadMoreButton
 					onClick={ onAppendReviews }
 					screenReaderLabel={ __( 'Load more reviews', 'woo-gutenberg-products-block' ) }
