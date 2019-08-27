@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/components';
 import { Spinner, MenuItem } from '@wordpress/components';
 import classnames from 'classnames';
-import { ENDPOINTS, IS_LARGE_CATALOG } from '@woocommerce/settings';
+import { ENDPOINTS, IS_LARGE_CATALOG } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

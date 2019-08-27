@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '@woocommerce/settings';
+import { ENABLE_REVIEW_RATING, SHOW_AVATARS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

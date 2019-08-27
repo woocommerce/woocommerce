@@ -7,7 +7,7 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { withInstanceId, compose } from '@wordpress/compose';
 import { PlainText } from '@wordpress/editor';
-import { HOME_URL } from '@woocommerce/settings';
+import { HOME_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

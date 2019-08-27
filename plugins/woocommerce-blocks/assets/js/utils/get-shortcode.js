@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/settings';
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/block-settings';
 
 export default function getShortcode( props, name ) {
 	const blockAttributes = props.attributes;

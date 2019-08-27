@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Disabled } from '@wordpress/components';
-import { ENABLE_REVIEW_RATING } from '@woocommerce/settings';
+import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

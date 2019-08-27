@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { DEFAULT_COLUMNS } from '@woocommerce/settings';
+import { DEFAULT_COLUMNS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies

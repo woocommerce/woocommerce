@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { PRODUCT_CATEGORIES } from '@woocommerce/settings';
+import { PRODUCT_CATEGORIES } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
