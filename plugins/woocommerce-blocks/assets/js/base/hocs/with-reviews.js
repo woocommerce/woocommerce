@@ -17,7 +17,7 @@ const withReviews = ( OriginalComponent ) => {
 
 			this.state = {
 				error: null,
-				loading: false,
+				loading: true,
 				reviews: [],
 				totalReviews: 0,
 			};
@@ -50,6 +50,12 @@ const withReviews = ( OriginalComponent ) => {
 				prevProps.productId !== nextProps.productId ||
 				! isShallowEqual( prevProps.categoryIds, nextProps.categoryIds )
 			);
+		}
+
+		componentWillUnMount() {
+			if ( this.delayedAppendReviews.cancel ) {
+				this.delayedAppendReviews.cancel();
+			}
 		}
 
 		getArgs( reviewsToSkip ) {
