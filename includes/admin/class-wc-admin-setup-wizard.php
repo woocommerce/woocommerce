@@ -2320,7 +2320,7 @@ class WC_Admin_Setup_Wizard {
 					<p class="wc-setup-actions step newsletter-form-button-container">
 						<button
 							type="submit"
-							value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>"
+							value="<?php esc_attr_e( 'Yes please!', 'woocommerce' ); ?>"
 							name="subscribe"
 							id="mc-embedded-subscribe"
 							class="button-primary button newsletter-form-button"
