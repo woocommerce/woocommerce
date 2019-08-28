@@ -12,7 +12,7 @@ import { sprintf, __, _x } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import TextControlWithAffixes from '../../text-control-with-affixes';
+import TextControlWithAffixes from '../text-control-with-affixes';
 import { textContent } from './utils';
 
 /**

@@ -38,7 +38,7 @@ Function to call when a form is submitted with valid fields.
 ### `validate`
 
 - Type: Function
-- Default: null
+- Default: `noop`
 
 A function that is passed a list of all values and
 should return an `errors` object with error response.

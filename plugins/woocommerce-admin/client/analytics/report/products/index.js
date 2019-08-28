@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { charts, filters } from './config';
+import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from 'lib/get-selected-chart';
 import ProductsReportTable from './table';
 import ReportChart from 'analytics/components/report-chart';
@@ -64,7 +64,13 @@ class ProductsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } filters={ filters } report="products" />
+				<ReportFilters
+					query={ query }
+					path={ path }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+					report="products"
+				/>
 				<ReportSummary
 					mode={ mode }
 					charts={ charts }
@@ -73,10 +79,12 @@ class ProductsReport extends Component {
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
 					mode={ mode }
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 					endpoint="products"
 					isRequesting={ isRequesting }
 					itemsLabel={ itemsLabel }
@@ -90,9 +98,15 @@ class ProductsReport extends Component {
 						isRequesting={ isRequesting }
 						query={ query }
 						filters={ filters }
+						advancedFilters={ advancedFilters }
 					/>
 				) : (
-					<ProductsReportTable isRequesting={ isRequesting } query={ query } filters={ filters } />
+					<ProductsReportTable
+						isRequesting={ isRequesting }
+						query={ query }
+						filters={ filters }
+						advancedFilters={ advancedFilters }
+					/>
 				) }
 			</Fragment>
 		);

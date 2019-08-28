@@ -200,7 +200,7 @@ class RevenueReportTable extends Component {
 	}
 
 	render() {
-		const { query, tableData } = this.props;
+		const { advancedFilters, filters, tableData, query } = this.props;
 
 		return (
 			<ReportTable
@@ -212,6 +212,8 @@ class RevenueReportTable extends Component {
 				tableData={ tableData }
 				title={ __( 'Revenue', 'woocommerce-admin' ) }
 				columnPrefsKey="revenue_report_columns"
+				filters={ filters }
+				advancedFilters={ advancedFilters }
 			/>
 		);
 	}

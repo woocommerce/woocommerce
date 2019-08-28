@@ -18,9 +18,9 @@ import { flattenFilters, getPersistedQuery, updateQueryString } from '@woocommer
 /**
  * Internal dependencies
  */
-import AnimationSlider from '../../animation-slider';
-import DropdownButton from '../../dropdown-button';
-import Search from '../../search';
+import AnimationSlider from '../animation-slider';
+import DropdownButton from '../dropdown-button';
+import Search from '../search';
 
 export const DEFAULT_FILTER = 'all';
 

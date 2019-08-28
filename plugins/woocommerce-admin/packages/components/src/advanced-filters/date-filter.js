@@ -17,7 +17,7 @@ import { isoDateFormat, toMoment } from '@woocommerce/date';
 /**
  * Internal dependencies
  */
-import DatePicker from '../../calendar/date-picker';
+import DatePicker from '../calendar/date-picker';
 import { textContent } from './utils';
 import moment from 'moment';
 

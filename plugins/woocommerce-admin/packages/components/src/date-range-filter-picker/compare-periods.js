@@ -14,7 +14,7 @@ import { periods } from '@woocommerce/date';
 /**
  * Internal dependencies
  */
-import SegmentedSelection from '../../segmented-selection';
+import SegmentedSelection from '../segmented-selection';
 
 class ComparePeriods extends Component {
 	render() {

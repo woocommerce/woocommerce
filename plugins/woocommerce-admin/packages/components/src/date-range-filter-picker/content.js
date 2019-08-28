@@ -13,8 +13,8 @@ import moment from 'moment';
  * Internal dependencies
  */
 import ComparePeriods from './compare-periods';
-import DateRange from '../../calendar/date-range';
-import { H, Section } from '../../section';
+import DateRange from '../calendar/date-range';
+import { H, Section } from '../section';
 import PresetPeriods from './preset-periods';
 
 class DatePickerContent extends Component {

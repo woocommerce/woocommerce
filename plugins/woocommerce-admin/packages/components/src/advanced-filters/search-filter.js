@@ -13,7 +13,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import Search from '../../search';
+import Search from '../search';
 import { textContent } from './utils';
 
 class SearchFilter extends Component {

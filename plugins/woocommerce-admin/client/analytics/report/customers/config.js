@@ -4,6 +4,7 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -11,7 +12,11 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { getCustomerLabels, getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'wc-api/constants';
 
-export const filters = [
+const CUSTOMERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_customers_report_filters';
+const CUSTOMERS_REPORT_ADVANCED_FILTERS_FILTER =
+	'woocommerce_admin_customers_report_advanced_filters';
+
+export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [],
@@ -44,10 +49,10 @@ export const filters = [
 			{ label: __( 'Advanced Filters', 'woocommerce-admin' ), value: 'advanced' },
 		],
 	},
-];
+] );
 
 /*eslint-disable max-len*/
-export const advancedFilters = {
+export const advancedFilters = applyFilters( CUSTOMERS_REPORT_ADVANCED_FILTERS_FILTER, {
 	title: _x(
 		'Customers Match {{select /}} Filters',
 		'A sentence describing filters for Customers. See screen shot for context: https://cloudup.com/cCsm3GeXJbE',
@@ -334,5 +339,5 @@ export const advancedFilters = {
 			},
 		},
 	},
-};
+} );
 /*eslint-enable max-len*/
