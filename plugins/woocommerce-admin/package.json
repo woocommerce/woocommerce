@@ -99,7 +99,7 @@
     "html-to-react": "1.4.1",
     "interpolate-components": "1.1.1",
     "marked": "0.7.0",
-    "memoize-one": "5.0.5",
+    "memoize-one": "5.1.1",
     "newspack-components": "0.1.5",
     "prismjs": "1.17.1",
     "qs": "6.8.0",
