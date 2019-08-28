@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				type="text"
 				name="search"
 				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); ?>"
-				placeholder="<?php esc_html_e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
+				placeholder="<?php esc_attr_e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
 			<input type="hidden" name="page" value="wc-addons">
 			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_all'; ?>
 			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
