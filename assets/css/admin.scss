@@ -6738,6 +6738,7 @@ table.bar_chart {
 				outline: 0;
 				line-height: 1;
 				display: block;
+				padding: 7px;
 
 				code {
 					background: none;
@@ -6745,7 +6746,7 @@ table.bar_chart {
 					padding: 0;
 					margin: 0;
 					color: #999;
-					padding: 7px 0 0 7px;
+					max-width: 100%;
 					display: inline-block;
 				}
 
@@ -6756,6 +6757,8 @@ table.bar_chart {
 					outline: 0;
 					box-shadow: none;
 					display: inline-block;
+					max-width: 100%;
+					padding: 7px 0 0 0;
 				}
 			}
 		}
