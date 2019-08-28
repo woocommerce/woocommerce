@@ -898,7 +898,11 @@ class WC_AJAX {
 				if ( ! $product ) {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
+				$check = apply_filters( 'woocommerce_add_item_check', $product, $order, $qty );
 
+				if ( is_wp_error( $check ) ) {
+					throw new Exception( $check->get_error_message() );
+				}
 				$item_id                 = $order->add_product( $product, $qty );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
