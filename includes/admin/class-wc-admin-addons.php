@@ -427,7 +427,7 @@ class WC_Admin_Addons {
 					<?php foreach ( $block_data['logos'] as $logo ) : ?>
 						<li>
 							<img
-								alt="<?php echo esc_url( $logo['alt'] ); ?>"
+								alt="<?php echo esc_attr( $logo['alt'] ); ?>"
 								class="wcs-service-logo"
 								src="<?php echo esc_url( $logo['link'] ); ?>"
 							>
