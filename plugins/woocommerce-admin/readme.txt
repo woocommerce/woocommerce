@@ -71,6 +71,24 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.18.0 2019-08-28 =
+
+- Fix: Product in dropdown clickable in FF/Safari #2839 (Components, Packages) 👏 @cojennin
+- Fix: gross order total calculation. #2817 (Analytics)
+- Fix: Date calculation on notes being double adjusted to UTC. #2818 (Inbox)
+- Bug: Orders report now shows coupons in Coupon(s) column #2812 (Analytics) 👏 @cojennin
+- Fix: Bug navigating from DevDoc component pages to WP dashboard pages. #2827 (Documentation)
+- Enhancement: add Facebook extension inbox note. #2798 (Activity Panel, Inbox)
+- Enhancement: handle simple to variable product changes in reports. #2814 (Analytics)
+- Dev: Release Scripts: Update to reflect refactor #2796 (Build)
+- Fix: Import all used Gutenberg component styles. #2679
+- Fix: report column visibility preference bug. #2806 (Analytics, Components, Packages, Settings)
+- Dev: Components: prepare changelogs for release #2802 (Build, Components, Packages)
+- Fix: remove date picker from Customers Report. #2805 (Analytics)
+- Tweak: add empty dataset treatment for report tables. #2801 (Analytics, Components, Packages)
+- Dev: Search List Control: fix long count values cut-off in IE11 #2783 (Components, Packages)
+- Dev: Update List actionable items to be wrapped with Link #2779 (Components, Packages)
+
 = 0.17.0 2019-08-15 =
 
 - Fix: chart data fetch/render over long time periods #2785 (Analytics)
