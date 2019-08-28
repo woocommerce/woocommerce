@@ -225,7 +225,7 @@ class Table extends Component {
 							: (
 								<tr>
 									<td className="woocommerce-table__empty-item" colSpan={ headers.length }>
-										{ __( 'No data for the selected date range', 'woocommerce-admin' ) }
+										{ __( 'No data to display', 'woocommerce-admin' ) }
 									</td>
 								</tr>
 							)
