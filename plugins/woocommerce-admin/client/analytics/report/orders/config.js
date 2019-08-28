@@ -12,11 +12,11 @@ import { getCouponLabels, getProductLabels } from 'lib/async-requests';
 
 const { orderStatuses } = wcSettings;
 
-const ORDERS_REPORT_CHART_FILTER = 'woocommerce_admin_orders_report_chart_filter';
+const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
 const ORDERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_orders_report_filters';
 const ORDERS_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_orders_report_advanced_filters';
 
-export const charts = applyFilters( ORDERS_REPORT_CHART_FILTER, [
+export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
 		label: __( 'Orders Count', 'woocommerce-admin' ),

@@ -12,11 +12,11 @@ import { getRequestByIdString } from 'lib/async-requests';
 import { getTaxCode } from './utils';
 import { NAMESPACE } from 'wc-api/constants';
 
-const TAXES_REPORT_CHART_FILTER = 'woocommerce_admin_taxes_report_chart_filter';
+const TAXES_REPORT_CHARTS_FILTER = 'woocommerce_admin_taxes_report_charts';
 const TAXES_REPORT_FILTERS_FILTER = 'woocommerce_admin_taxes_report_filters';
 const TAXES_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_taxes_report_advanced_filters';
 
-export const charts = applyFilters( TAXES_REPORT_CHART_FILTER, [
+export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	{
 		key: 'total_tax',
 		label: __( 'Total Tax', 'woocommerce-admin' ),

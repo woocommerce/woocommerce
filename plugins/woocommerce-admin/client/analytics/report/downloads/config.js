@@ -10,12 +10,12 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { getCustomerLabels, getProductLabels } from 'lib/async-requests';
 
-const DOWLOADS_REPORT_CHART_FILTER = 'woocommerce_admin_downloads_report_chart_filter';
+const DOWLOADS_REPORT_CHARTS_FILTER = 'woocommerce_admin_downloads_report_charts';
 const DOWLOADS_REPORT_FILTERS_FILTER = 'woocommerce_admin_downloads_report_filters';
 const DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_downloads_report_advanced_filters';
 
-export const charts = applyFilters( DOWLOADS_REPORT_CHART_FILTER, [
+export const charts = applyFilters( DOWLOADS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'download_count',
 		label: __( 'Downloads', 'woocommerce-admin' ),

@@ -10,12 +10,12 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { getCategoryLabels } from 'lib/async-requests';
 
-const CATEGORY_REPORT_CHART_FILTER = 'woocommerce_admin_category_report_chart_filter';
+const CATEGORY_REPORT_CHARTS_FILTER = 'woocommerce_admin_category_report_charts';
 const CATEGORY_REPORT_FILTERS_FILTER = 'woocommerce_admin_category_report_filters';
 const CATEGORY_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_category_report_advanced_filters';
 
-export const charts = applyFilters( CATEGORY_REPORT_CHART_FILTER, [
+export const charts = applyFilters( CATEGORY_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
 		label: __( 'Items Sold', 'woocommerce-admin' ),
