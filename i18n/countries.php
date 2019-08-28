@@ -226,7 +226,7 @@ return array(
 	'SE' => __( 'Sweden', 'woocommerce' ),
 	'CH' => __( 'Switzerland', 'woocommerce' ),
 	'SY' => __( 'Syria', 'woocommerce' ),
-	'TW' => __( 'Taiwan', 'woocommerce' ),
+	'TW' => __( 'Taiwan (Province of China)', 'woocommerce' ),
 	'TJ' => __( 'Tajikistan', 'woocommerce' ),
 	'TZ' => __( 'Tanzania', 'woocommerce' ),
 	'TH' => __( 'Thailand', 'woocommerce' ),
