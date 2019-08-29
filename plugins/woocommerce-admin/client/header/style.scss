@@ -1,12 +1,12 @@
 /** @format */
 
 .woocommerce-layout__header {
-	background: $white;
+	background: $studio-white;
 	display: flex;
 	justify-content: space-between;
 	flex-direction: row;
 	box-sizing: border-box;
-	border-bottom: 1px solid $white;
+	border-bottom: 1px solid $studio-white;
 	padding: 0;
 	height: $header-height;
 	position: fixed;
@@ -31,7 +31,7 @@
 		flex: 1 auto;
 		height: $header-height;
 		line-height: $header-height;
-		background: $white;
+		background: $studio-white;
 
 		span + span::before {
 			content: ' / ';
@@ -40,7 +40,7 @@
 		}
 
 		a {
-			color: $woocommerce;
+			color: $studio-pink;
 		}
 	}
 }

@@ -32,17 +32,17 @@
 
 	&.is-selected {
 		.woocommerce-filters-filter__button {
-			background-color: $white;
+			background-color: $studio-white;
 
 			&.components-button:not(:disabled):not([aria-disabled='true']):focus {
-				background-color: $white;
+				background-color: $studio-white;
 			}
 
 			&::before {
 				content: '';
 				width: 8px;
 				height: 8px;
-				background-color: $woocommerce;
+				background-color: $studio-woocommerce-purple;
 				position: absolute;
 				top: 50%;
 				left: 1em;

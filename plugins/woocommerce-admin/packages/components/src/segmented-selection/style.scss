@@ -55,14 +55,14 @@
 	}
 
 	&:checked + label .woocommerce-segmented-selection__label {
-		background-color: $white;
+		background-color: $studio-white;
 		font-weight: 600;
 
 		&::before {
 			content: '';
 			width: 8px;
 			height: 8px;
-			background-color: $woocommerce;
+			background-color: $studio-woocommerce-purple;
 			position: absolute;
 			top: 50%;
 			transform: translate(-20px, -50%);
@@ -70,6 +70,6 @@
 	}
 
 	&:focus + label .woocommerce-segmented-selection__label {
-		box-shadow: inset 0 0 0 1px $black;
+		box-shadow: inset 0 0 0 1px $wp-admin-sidebar;
 	}
 }

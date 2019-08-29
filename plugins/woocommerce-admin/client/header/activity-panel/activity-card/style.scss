@@ -4,7 +4,7 @@
 	position: relative;
 	padding: $fallback-gutter;
 	padding: $gutter;
-	background: $white;
+	background: $studio-white;
 	border-bottom: 1px solid $core-grey-light-400;
 	color: $gray-text;
 	@include font-size( 13 );
@@ -43,7 +43,7 @@
 	flex-direction: column;
 
 	a {
-		color: $woocommerce;
+		color: $studio-woocommerce-purple;
 		text-decoration: none;
 	}
 
@@ -266,7 +266,7 @@
 		position: relative;
 
 		img.woocommerce-gravatar {
-			border: 2px solid $white;
+			border: 2px solid $studio-white;
 			left: 0;
 			position: absolute;
 			top: -6px;

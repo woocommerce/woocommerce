@@ -18,7 +18,7 @@
 .woocommerce-profile-wizard__themes-tab-panel .components-tab-panel__tabs {
 	display: flex;
 	justify-content: space-between;
-	background: $white;
+	background: $studio-white;
 	box-shadow: $muriel-box-shadow-1dp;
 	border-radius: 3px;
 	margin-top: $gap-large;
@@ -27,7 +27,7 @@
 	button {
 		border: 0;
 		border-bottom: 1px solid transparent;
-		color: $muriel-gray-500;
+		color: $studio-gray-50;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -41,8 +41,8 @@
 		padding: 0 $gap-large;
 
 		&.is-active {
-			border-bottom: 1px solid $muriel-hot-pink-500;
-			color: $muriel-hot-pink-500;
+			border-bottom: 1px solid $studio-woocommerce-purple-60;
+			color: $studio-woocommerce-purple-60;
 		}
 	}
 }
@@ -78,7 +78,7 @@
 			margin-left: $gap-smaller;
 
 			path {
-				fill: $muriel-red-500;
+				fill: $studio-red-50;
 			}
 		}
 	}
@@ -110,8 +110,8 @@
 			box-shadow: none;
 
 			&.is-default {
-				border-color: $muriel-hot-pink-500;
-				color: $muriel-hot-pink-500;
+				border-color: $studio-pink-50;
+				color: $studio-pink-50;
 			}
 		}
 	}
@@ -190,11 +190,11 @@
 	flex-direction: column;
 
 	.woocommerce-theme-preview__toolbar {
-		background: $white;
+		background: $studio-white;
 		flex-direction: row;
 		display: flex;
 		height: 56px;
-		border-bottom: 1px solid $muriel-gray-50;
+		border-bottom: 1px solid $studio-gray-5;
 		padding-left: $gap;
 		padding-right: $gap;
 		align-items: center;
@@ -211,7 +211,7 @@
 
 	.woocommerce-theme-preview__theme-name {
 		padding-left: $gap;
-		color: $muriel-gray-900;
+		color: $studio-gray-90;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -220,7 +220,7 @@
 
 	.woocommerce-theme-preview__close {
 		padding: 0 $gap 0 0;
-		color: $muriel-gray-500;
+		color: $studio-gray-50;
 	}
 
 	.woocommerce-theme-preview__devices {
@@ -229,14 +229,14 @@
 
 		.muriel-button {
 			padding: $gap-small;
-			color: $muriel-gray-500;
+			color: $studio-gray-50;
 			margin: 0;
 			border-radius: 50%;
 
 			&.is-selected,
 			&:focus {
-				background: $muriel-gray-500;
-				color: $white;
+				background: $studio-gray-50;
+				color: $studio-white;
 			}
 		}
 

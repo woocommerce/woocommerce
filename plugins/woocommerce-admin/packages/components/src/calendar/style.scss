@@ -24,19 +24,19 @@
 	}
 
 	.CalendarDay__selected_span {
-		background: $woocommerce;
+		background: $studio-woocommerce-purple;
 		border: 1px solid $core-grey-light-700;
 	}
 
 	.CalendarDay__selected {
-		background: $woocommerce-700;
+		background: $studio-woocommerce-purple-70;
 		border: 1px solid $core-grey-light-700;
 	}
 
 	.CalendarDay__hovered_span {
-		background: $woocommerce;
+		background: $studio-woocommerce-purple;
 		border: 1px solid $core-grey-light-500;
-		color: $white;
+		color: $studio-white;
 	}
 
 	.CalendarDay__blocked_out_of_range {
@@ -71,7 +71,7 @@
 		}
 
 		.CalendarDay__selected {
-			background: $woocommerce-700;
+			background: $studio-woocommerce-purple-70;
 			border: none;
 		}
 	}
@@ -173,7 +173,7 @@
 
 	.components-popover__content {
 		background-color: $core-grey-dark-400;
-		color: $white;
+		color: $studio-white;
 		padding: 0.5em;
 		border: none;
 	}
@@ -208,5 +208,5 @@
 	width: 100%;
 	margin: 0;
 	padding: 1em;
-	background-color: $white;
+	background-color: $studio-white;
 }

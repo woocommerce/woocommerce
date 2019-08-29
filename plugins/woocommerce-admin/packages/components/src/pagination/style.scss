@@ -30,7 +30,7 @@
 	background: $button;
 
 	.components-button:not(:disabled):not([aria-disabled='true']) {
-		color: $black;
+		color: $wp-admin-sidebar;
 		height: 30px;
 		width: 32px;
 		justify-content: center;

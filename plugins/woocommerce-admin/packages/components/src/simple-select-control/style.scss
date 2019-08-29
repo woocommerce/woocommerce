@@ -6,7 +6,7 @@
 	box-shadow: none;
 	box-sizing: border-box;
 	border-radius: 3px;
-	background: #fff;
+	background: $studio-white;
 	font-size: 16px;
 	line-height: 54px;
 	font-weight: 400;
@@ -51,7 +51,7 @@
 				top: 0;
 				right: $gap;
 				bottom: 16px;
-				color: #000;
+				color: $studio-black;
 			}
 		}
 	}
@@ -75,7 +75,7 @@
 			text-align: left;
 
 			&.is-selected {
-				background: $muriel-gray-100;
+				background: $studio-gray-100;
 			}
 		}
 	}

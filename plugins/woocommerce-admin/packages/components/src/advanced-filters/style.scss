@@ -87,7 +87,7 @@
 .woocommerce-filters-advanced__add-filter {
 	padding: $gap-small;
 	margin: 0;
-	color: $woocommerce;
+	color: $studio-woocommerce-purple;
 	display: block;
 	background-color: $core-grey-light-100;
 	border-bottom: 1px solid $core-grey-light-700;
@@ -168,11 +168,11 @@
 	}
 
 	&.components-icon-button:not(:disabled):not([aria-disabled='true']):not(.is-default):hover {
-		color: $woocommerce-300;
+		color: $studio-woocommerce-purple-30;
 	}
 
 	&:not(:disabled):not([aria-disabled='true']):focus {
-		color: $woocommerce;
+		color: $studio-woocommerce-purple;
 		background-color: transparent;
 	}
 }

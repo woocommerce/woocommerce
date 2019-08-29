@@ -41,16 +41,16 @@
 
 button.woocommerce-filters-date__tab {
 	outline: none;
-	border: 1px solid $woocommerce;
+	border: 1px solid $studio-pink;
 	padding: $gap-smaller;
 	margin: 0;
 	border-radius: 4px 0 0 4px;
-	color: $woocommerce;
+	color: $studio-pink;
 	background-color: transparent;
 	justify-content: center;
 
 	&:hover {
-		background-color: lighten($woocommerce, 50%);
+		background-color: lighten($studio-pink, 50%);
 		cursor: pointer;
 	}
 
@@ -60,8 +60,8 @@ button.woocommerce-filters-date__tab {
 
 	&.is-active,
 	&.is-active:focus {
-		background-color: $woocommerce;
-		color: $white;
+		background-color: $studio-pink;
+		color: $studio-white;
 	}
 
 	&:focus {
@@ -78,7 +78,7 @@ button.woocommerce-filters-date__tab {
 	width: 100%;
 	margin: 0;
 	padding: 1em;
-	background-color: $white;
+	background-color: $studio-white;
 }
 
 .woocommerce-filters-date__content-controls {
@@ -87,7 +87,7 @@ button.woocommerce-filters-date__tab {
 	width: 100%;
 	align-items: center;
 	padding-bottom: 1em;
-	background-color: $white;
+	background-color: $studio-white;
 
 	&.is-custom {
 		border-top: 1px solid $core-grey-light-700;

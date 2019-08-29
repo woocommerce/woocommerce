@@ -5,9 +5,9 @@
 		height: 56px;
 		display: flex;
 		align-items: center;
-		border: 1px solid $new-muriel-gray-20;
+		border: 1px solid $studio-gray-20;
 		border-radius: 3px;
-		background: $white;
+		background: $studio-white;
 		padding: $gap-small $gap;
 		position: relative;
 
@@ -29,7 +29,7 @@
 		.components-base-control__label {
 			left: 52px;
 			position: absolute;
-			color: $new-muriel-gray-50;
+			color: $studio-gray-50;
 			font-size: 16px;
 		}
 
@@ -37,7 +37,7 @@
 			font-size: 16px;
 			border: 0;
 			box-shadow: none;
-			color: $new-muriel-gray-80;
+			color: $studio-gray-80;
 			margin: $gap-small 0 0 0;
 			padding-left: 0;
 			padding-right: 0;
@@ -56,8 +56,8 @@
 		}
 
 		&.is-active {
-			box-shadow: 0 0 0 1px $new-muriel-primary-500;
-			border-color: $new-muriel-primary-500;
+			box-shadow: 0 0 0 1px $studio-wordpress-blue-50;
+			border-color: $studio-wordpress-blue-50;
 		}
 
 		&.with-value .components-base-control__label,
@@ -92,7 +92,7 @@
 	}
 
 	.woocommerce-autocomplete__listbox {
-		background: $white;
+		background: $studio-white;
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
@@ -118,7 +118,7 @@
 
 		&.is-selected,
 		&:hover {
-			background: $muriel-gray-0;
+			background: $studio-gray-0;
 		}
 	}
 }
