@@ -36,10 +36,14 @@
 			linear-gradient(90deg, rgba($core-grey-dark-800, 0.025) 1px, transparent 1px);
 		background-size: 32px 32px, 32px 32px, 8px 8px, 8px 8px;
 		background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+
+		.woocommerce-chart {
+			margin: 0;
+		}
 	}
 
 	.woocommerce-devdocs__docs {
-		max-width: 600px;
+		max-width: 720px;
 		margin: 0 auto;
 		padding: $gap;
 
@@ -53,6 +57,45 @@
 		h3 code,
 		h4 code {
 			font-size: 0.9em;
+		}
+
+		table {
+			border-collapse: collapse;
+			border-spacing: 0;
+
+			th,
+			td {
+				border-bottom: 1px solid $core-grey-light-700;
+				text-align: left;
+			}
+
+			th {
+				padding: 0.25em 3em 0.25em 0;
+			}
+
+			td {
+				padding: 1.17em 3em 1.17em 0;
+			}
+		}
+
+		// From wp-calypso: client/devdocs/style.scss
+		pre {
+			padding: 8px;
+			background: $white;
+			background-color: $white;
+		}
+
+		code {
+			background-color: $white;
+			border-radius: 3px;
+			font-size: 15px;
+			padding: 2px 6px;
+			max-width: 100px;
+		}
+
+		pre > code {
+			background-color: $transparent;
+			padding: 2px 0;
 		}
 	}
 }

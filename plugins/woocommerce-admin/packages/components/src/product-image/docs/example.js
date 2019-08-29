@@ -10,7 +10,7 @@ export default () => (
 		<ProductImage product={ { images: [] } } />
 		<ProductImage product={ { images: [
 			{
-				src: 'https://i.cloudup.com/pt4DjwRB84-3000x3000.png',
+				src: 'https://cldup.com/6L9h56D9Bw.jpg',
 			},
 		] } } />
 	</div>

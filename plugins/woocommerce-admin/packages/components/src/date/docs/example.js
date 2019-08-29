@@ -5,5 +5,5 @@
 import { Date } from '@woocommerce/components';
 
 export default () => (
-  <Date date="2019-01-01" />
+	<Date date="2019-01-01" />
 );

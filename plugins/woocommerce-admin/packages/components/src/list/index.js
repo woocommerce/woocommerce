@@ -117,7 +117,7 @@ List.propTypes = {
 			 */
 			href: PropTypes.string,
 			/**
-			 * Content displayed after the list item text.
+			 * Called when the list item is clicked.
 			 */
 			onClick: PropTypes.func,
 			/**

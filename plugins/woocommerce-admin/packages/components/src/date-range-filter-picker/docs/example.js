@@ -7,9 +7,9 @@ import { DateRangeFilterPicker } from '@woocommerce/components';
 const query = {};
 
 export default () => (
-    <DateRangeFilterPicker
-        key="daterange"
-        query={ query }
-        onRangeSelect={ () => {} }
-    />
+	<DateRangeFilterPicker
+		key="daterange"
+		query={ query }
+		onRangeSelect={ () => {} }
+	/>
 );

@@ -22,12 +22,10 @@ const camelCaseToSlug = name => {
 const getExampleData = example => {
 	const componentName = get( example, 'component' );
 	const filePath = get( example, 'filePath', camelCaseToSlug( componentName ) );
-	const render = get( example, 'render', `My${ componentName }` );
 
 	return {
 		componentName,
 		filePath,
-		render,
 	};
 };
 
@@ -48,7 +46,7 @@ export default class extends Component {
 		return (
 			<div className={ className }>
 				{ exampleList.map( example => {
-					const { componentName, filePath, render, docPath } = getExampleData( example );
+					const { componentName, filePath } = getExampleData( example );
 					const cardClasses = classnames(
 						'woocommerce-devdocs__card',
 						`woocommerce-devdocs__card--${ filePath }`,
@@ -83,7 +81,6 @@ export default class extends Component {
 									asyncName={ componentName }
 									component={ componentName }
 									filePath={ filePath }
-									render={ render }
 								/>
 							</Card>
 							{ component && (
@@ -91,7 +88,6 @@ export default class extends Component {
 									key={ `${ componentName }-readme` }
 									componentName={ componentName }
 									filePath={ filePath }
-									docPath={ docPath }
 								/>
 							) }
 						</Fragment>

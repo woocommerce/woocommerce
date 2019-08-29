@@ -4,9 +4,19 @@
  */
 import { Component } from '@wordpress/element';
 import marked from 'marked';
-import { Parser } from 'html-to-react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-jsx';
 
-const htmlToReactParser = new Parser();
+// Alias `javascript` language to `es6`
+Prism.languages.es6 = Prism.languages.javascript;
+
+// Configure marked to use Prism for code-block highlighting.
+marked.setOptions( {
+	highlight: function( code, language ) {
+		const syntax = Prism.languages[ language ];
+		return syntax ? Prism.highlight( code, syntax ) : code;
+	},
+} );
 
 class Docs extends Component {
 	state = {
@@ -18,15 +28,14 @@ class Docs extends Component {
 	}
 
 	getReadme() {
-		const { filePath, docPath } = this.props;
-		const readme = require( `../../docs/components/${ docPath }/${ filePath }.md` );
+		const { filePath } = this.props;
+		const readme = require( `../../packages/components/src/${ filePath }/README.md` );
+
 		if ( ! readme ) {
 			return;
 		}
-		const html = marked( readme );
-		this.setState( {
-			readme: htmlToReactParser.parse( html ),
-		} );
+
+		this.setState( { readme } );
 	}
 
 	render() {
@@ -34,12 +43,14 @@ class Docs extends Component {
 		if ( ! readme ) {
 			return null;
 		}
-		return <div className="woocommerce-devdocs__docs">{ readme }</div>;
+		return (
+			<div
+				className="woocommerce-devdocs__docs"
+				//eslint-disable-next-line react/no-danger
+				dangerouslySetInnerHTML={ { __html: marked( readme ) } }
+			/>
+		);
 	}
 }
-
-Docs.defaultProps = {
-	docPath: 'packages',
-};
 
 export default Docs;
