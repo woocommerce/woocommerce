@@ -11,26 +11,7 @@ import { activatePlugin } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { clickTab, uiUnblocked } from '../../utils';
-
-const verifyPublishAndTrash = async () => {
-	// Wait for auto save
-	await page.waitFor( 2000 );
-
-	// Publish product
-	await expect( page ).toClick( '#publish' );
-	await page.waitForSelector( '.updated.notice' );
-
-	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
-
-	// Trash product
-	await expect( page ).toClick( 'a', { text: 'Move to Trash' } );
-	await page.waitForSelector( '#message' );
-
-	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: '1 product moved to the Trash.' } );
-};
+import { clickTab, uiUnblocked, verifyPublishAndTrash } from '../../utils';
 
 describe( 'Add New Product Page', () => {
 	beforeAll( async () => {
@@ -50,7 +31,14 @@ describe( 'Add New Product Page', () => {
 		await clickTab( 'General' );
 		await expect( page ).toFill( '#_regular_price',  '9.99' );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 
 	it( 'can create product with variations', async () => {
@@ -135,6 +123,13 @@ describe( 'Add New Product Page', () => {
 		await page.focus( 'button.save-variation-changes' );
 		await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 } );
