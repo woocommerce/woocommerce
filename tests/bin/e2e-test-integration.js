@@ -26,6 +26,7 @@ spawn(
 		'--maxWorkers=1',
 		'--config=tests/e2e-tests/config/jest.config.js',
 		'--rootDir=./',
+		'--verbose',
 		program.args,
 	],
 	{
