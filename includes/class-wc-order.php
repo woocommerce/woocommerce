@@ -1427,8 +1427,8 @@ class WC_Order extends WC_Abstract_Order {
 			}
 
 			// check item refunds
-			$refunded_qty = $this->get_qty_refunded_for_item( $item->get_id() );
-			if ( $refunded_qty && $item->get_quantity() == $refunded_qty * -1 ) {
+			$refunded_qty = abs( $this->get_qty_refunded_for_item( $item->get_id() ) );
+			if ( $refunded_qty && $item->get_quantity() === $refunded_qty ) {
 				continue;
 			}
 
