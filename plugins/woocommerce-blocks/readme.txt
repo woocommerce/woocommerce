@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.0
 Tested up to: 5.2
 Requires PHP: 5.6
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -92,9 +92,26 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 2.3.1 =
+= 2.4.0 =
+- Feature: A new block named 'All Reviews' was added in order to display a list of reviews from all products and categories of your store. #902
+- Feature: Added Reviews by Product block.
+- Feature: Added Reviews by Category block.
+- Feature: Added a new product search block to insert a product search field on a page.
+- Enhancement: Add error handling for API requests to the featured product block.
+- Enhancement: Allow hidden products in handpicked products block.
+- Fix: Prevented block settings being output on every route.  Now they are only needed when the route has blocks requiring them.
+- Dev: Introduced higher order components, global data handlers, and refactored some blocks.
+- Dev: Created new HOCs for retrieving data: `withProduct`, `withComponentId`, `withCategory`.
+- Dev: Export block settings to an external global `wc.blockSettings` that can be reliably used by extensions by enqueuing their script with the `wc-block-settings` as the handle. #903
+- Dev: Added new generic base components: `<OrderSelect />` and `<Label />` so they can be shared between different blocks. #905
+
+= 2.3.1 - 2019-08-27 =
 
 - Fix: Fix deprecation notices with PHP 7.4.
+- Fix: Removed unused screen-reader-text css styles for buttons which caused some theme conflicts.
+- Fix: Left align stars to fix alignment in Storefront.
+- Fix: Best-sellers block query results #917
+- Fix: Fix duplicated translatable string #843
 
 = 2.3.0 - 2019-08-12 =
 
