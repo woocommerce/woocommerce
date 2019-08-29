@@ -50,7 +50,7 @@ These instructions cover new releases of the blocks plugin for those with commit
 
 **Before any release** ensure you update:
 
-- The `readme.txt` file supported versions, version number, and changelog
+- The `readme.txt` file supported versions, version number, changelog and list of blocks if the release includes new blocks.
 - The version number in `woocommerce-gutenberg-products-block.php`
 - The version number in `package.json`
 - The version number in `src/Package.php`
