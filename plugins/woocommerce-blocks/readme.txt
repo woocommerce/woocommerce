@@ -45,6 +45,18 @@ Display a grid of products from your selected attributes.
 **Product Categories List Block**
 Display all your product categories as a list or dropdown and help shoppers to find a specific category.
 
+**Reviews by Product**
+Display reviews of a specific product to build trust in your product and brand.
+
+**Reviews by Category**
+Highlight reviews from specific categories and help merchants making an informed purchasing decision.
+
+**All Reviews**
+Show a list of all product reviews on a landing page, blog post or any other page in your site.
+
+**Product Search**
+Help shoppers find your products by placing a search box in specific locations.
+
 We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories.
 
 == Getting Started ==
