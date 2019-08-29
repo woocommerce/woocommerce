@@ -3,7 +3,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { find, get } from 'lodash';
 
 /**
@@ -55,44 +55,46 @@ export default class extends Component {
 						'woocommerce-analytics__card'
 					);
 					return (
-						<Card
-							key={ componentName }
-							className={ cardClasses }
-							title={
-								component ? (
-									componentName
-								) : (
-									<Link
-										href={ `admin.php?page=wc-admin&path=/devdocs/${ filePath }` }
-										type="wc-admin"
-									>
-										{ componentName }
-									</Link>
-								)
-							}
-							action={
-								component ? (
-									<Link href={ '?page=wc-admin&path=/devdocs' } type="wc-admin">
-										Full list
-									</Link>
-								) : null
-							}
-						>
-							<ComponentExample
-								asyncName={ componentName }
-								component={ componentName }
-								filePath={ filePath }
-								render={ render }
-							/>
-
+						<Fragment key={ componentName }>
+							<Card
+								key={ `${ componentName }-example` }
+								className={ cardClasses }
+								title={
+									component ? (
+										componentName
+									) : (
+										<Link
+											href={ `admin.php?page=wc-admin&path=/devdocs/${ filePath }` }
+											type="wc-admin"
+										>
+											{ componentName }
+										</Link>
+									)
+								}
+								action={
+									component ? (
+										<Link href={ '?page=wc-admin&path=/devdocs' } type="wc-admin">
+											Full list
+										</Link>
+									) : null
+								}
+							>
+								<ComponentExample
+									asyncName={ componentName }
+									component={ componentName }
+									filePath={ filePath }
+									render={ render }
+								/>
+							</Card>
 							{ component && (
 								<ComponentDocs
+									key={ `${ componentName }-readme` }
 									componentName={ componentName }
 									filePath={ filePath }
 									docPath={ docPath }
 								/>
 							) }
-						</Card>
+						</Fragment>
 					);
 				} ) }
 			</div>
