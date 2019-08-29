@@ -1600,7 +1600,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string the cancel endpoint; either the cart page or the home page.
 	 */
 	public function get_cancel_endpoint() {
-		$cancel_endpoint = wc_get_page_permalink( 'cart' );
+		$cancel_endpoint = wc_get_cart_url();
 		if ( ! $cancel_endpoint ) {
 			$cancel_endpoint = home_url();
 		}
