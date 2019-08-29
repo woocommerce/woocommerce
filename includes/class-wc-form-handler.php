@@ -344,7 +344,7 @@ class WC_Form_Handler {
 			wc_nocache_headers();
 
 			if ( WC()->cart->is_empty() ) {
-				wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
+				wp_safe_redirect( wc_get_cart_url() );
 				exit;
 			}
 
