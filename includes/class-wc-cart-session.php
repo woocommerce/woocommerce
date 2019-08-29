@@ -179,7 +179,7 @@ final class WC_Cart_Session {
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
 		if ( $order_again ) {
-			wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
+			wp_safe_redirect( wc_get_cart_url() );
 			exit;
 		}
 	}
