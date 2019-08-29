@@ -57,6 +57,7 @@ class Onboarding {
 		OnboardingTasks::get_instance();
 
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after Automattic\WooCommerce\Admin\Loader.
+		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
@@ -79,6 +80,16 @@ class Onboarding {
 		// @todo When merging to WooCommerce Core, we should set the `completed` flag to true during the upgrade progress.
 		// https://github.com/woocommerce/woocommerce-admin/pull/2300#discussion_r287237498.
 		return $is_completed || $is_skipped ? false : true;
+	}
+
+	/**
+	 * Returns true if the task list should be displayed (not completed or hidden off the dashboard.
+	 *
+	 * @return bool
+	 */
+	public function should_show_tasks() {
+		// @todo Implement logic for this.
+		return true;
 	}
 
 	/**
@@ -314,10 +325,28 @@ class Onboarding {
 			$settings['onboarding']['productTypes']  = self::get_allowed_product_types();
 			$settings['onboarding']['themes']        = self::get_themes();
 			$settings['onboarding']['activeTheme']   = get_option( 'stylesheet' );
+		}
+
+		// Only fetch if the onboarding wizard OR the task list is incomplete.
+		if ( $this->should_show_profiler() || $this->should_show_tasks() ) {
 			$settings['onboarding']['activePlugins'] = self::get_active_plugins();
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Preload data from API endpoints.
+	 *
+	 * @param array $endpoints Array of preloaded endpoints.
+	 * @return array
+	 */
+	public function add_preload_endpoints( $endpoints ) {
+		if ( ! class_exists( 'Jetpack' ) ) {
+			return $endpoints;
+		}
+		$endpoints['jetpackStatus'] = '/jetpack/v4/connection';
+		return $endpoints;
 	}
 
 	/**

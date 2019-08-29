@@ -77,6 +77,24 @@ const getPluginInstallations = getResource => plugins => {
 	return installations;
 };
 
+const isJetpackConnected = ( getResource, requireResource ) => (
+	requirement = DEFAULT_REQUIREMENT
+) => {
+	const activePluginsData = requireResource( requirement, 'active-plugins' ).data || undefined;
+	const activePlugins = ! activePluginsData
+		? wcSettings.onboarding.activePlugins
+		: activePluginsData;
+
+	// Avoid issuing API calls, since Jetpack is obviously not connected.
+	if ( ! activePlugins.includes( 'jetpack' ) ) {
+		return false;
+	}
+
+	const data =
+		requireResource( requirement, 'jetpack-status' ).data || wcSettings.dataEndpoints.jetpackStatus;
+	return ( data && data.isActive ) || false;
+};
+
 const getActivePlugins = ( getResource, requireResource ) => (
 	requirement = DEFAULT_REQUIREMENT
 ) => {
@@ -181,4 +199,5 @@ export default {
 	getPluginActivationErrors,
 	isPluginActivateRequesting,
 	isPluginInstallRequesting,
+	isJetpackConnected,
 };

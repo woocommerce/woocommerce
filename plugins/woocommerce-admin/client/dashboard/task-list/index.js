@@ -21,6 +21,7 @@ import Connect from './tasks/connect';
 import Products from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
+import Payments from './tasks/payments';
 import withSelect from 'wc-api/with-select';
 
 class TaskDashboard extends Component {
@@ -42,7 +43,7 @@ class TaskDashboard extends Component {
 			{
 				key: 'connect',
 				title: __( 'Connect your store to WooCommerce.com', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Install and manage your extensions directly from your Dashboard',
 					'wooocommerce-admin'
 				),
@@ -55,7 +56,7 @@ class TaskDashboard extends Component {
 			{
 				key: 'products',
 				title: __( 'Add your first product', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Add products manually, import from a sheet or migrate from another platform',
 					'wooocommerce-admin'
 				),
@@ -73,7 +74,7 @@ class TaskDashboard extends Component {
 			{
 				key: 'personalize-store',
 				title: __( 'Personalize your store', 'woocommerce-admin' ),
-				description: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
+				content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
 				before: <i className="material-icons-outlined">palette</i>,
 				after: <i className="material-icons-outlined">chevron_right</i>,
 				onClick: noop,
@@ -82,10 +83,7 @@ class TaskDashboard extends Component {
 			{
 				key: 'shipping',
 				title: __( 'Set up shipping', 'woocommerce-admin' ),
-				description: __(
-					'Configure some basic shipping rates to get started',
-					'wooocommerce-admin'
-				),
+				content: __( 'Configure some basic shipping rates to get started', 'wooocommerce-admin' ),
 				before:
 					shippingZonesCount > 0 ? (
 						<i className="material-icons-outlined">check_circle</i>
@@ -101,7 +99,7 @@ class TaskDashboard extends Component {
 			{
 				key: 'tax',
 				title: __( 'Set up tax', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Choose how to configure tax rates - manually or automatically',
 					'wooocommerce-admin'
 				),
@@ -114,13 +112,14 @@ class TaskDashboard extends Component {
 			{
 				key: 'payments',
 				title: __( 'Set up payments', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Select which payment providers you’d like to use and configure them',
 					'wooocommerce-admin'
 				),
 				before: <i className="material-icons-outlined">payment</i>,
 				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: noop,
+				onClick: () => updateQueryString( { task: 'payments' } ),
+				container: <Payments />,
 				visible: true,
 			},
 		];
