@@ -260,7 +260,7 @@ module.exports = function( grunt ) {
 					'echo "Generating contributor list since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
-					' --showlogin true --sha <%= sha %> > contributors.md'
+					' --showlogin true --sha <%= sha %> --filter renovate-bot > contributors.md'
 				].join( '&&' )
 			}
 		},
