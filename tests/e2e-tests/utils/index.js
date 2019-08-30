@@ -13,6 +13,17 @@ const clickTab = async ( tabName ) => {
 };
 
 /**
+ * Save changes on a WooCommerce settings page.
+ */
+const settingsPageSaveChanges = async () => {
+	await page.focus( 'button.woocommerce-save-button' );
+	await Promise.all( [
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		page.click( 'button.woocommerce-save-button' ),
+	] );
+};
+
+/**
  * Wait for UI blocking to end.
  */
 const uiUnblocked = async () => {
@@ -22,5 +33,6 @@ const uiUnblocked = async () => {
 module.exports = {
 	...flows,
 	clickTab,
+	settingsPageSaveChanges,
 	uiUnblocked,
 };
