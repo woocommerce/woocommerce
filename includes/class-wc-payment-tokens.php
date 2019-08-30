@@ -215,18 +215,18 @@ class WC_Payment_Tokens {
 	}
 
 	/**
-	 * Get class based on token type.
+	 * Get classname based on token type.
 	 *
 	 * @since 3.8.0
 	 * @param string $type Token type.
-	 * @return WC_Payment_Token
+	 * @return string
 	 */
-	protected static function get_token_class( $type ) {
+	protected static function get_token_classname( $type ) {
 		/**
-		 * Filter paymenter token class per type.
+		 * Filter payment token class per type.
 		 *
 		 * @since 3.8.0
-		 * @param WC_Payment_Token $class Payment token class.
+		 * @param string $class Payment token class.
 		 * @param string $type Token type.
 		 */
 		return apply_filters( 'woocommerce_payment_token_class', 'WC_Payment_Token_' . $type, $type );
