@@ -1,7 +1,24 @@
 /**
+ * External dependencies
+ */
+import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
+
+/**
  * Internal dependencies
  */
 const flows = require( './flows' );
+
+/**
+ * Perform a "select all" and then fill a input.
+ *
+ * @param {string} selector
+ * @param {string} value
+ */
+const clearAndFillInput = async ( selector, value ) => {
+	await page.focus( selector );
+	await pressKeyWithModifier( 'primary', 'a' );
+	await page.type( selector, value );
+};
 
 /**
  * Click a tab (on post type edit screen).
@@ -13,6 +30,17 @@ const clickTab = async ( tabName ) => {
 };
 
 /**
+ * Save changes on a WooCommerce settings page.
+ */
+const settingsPageSaveChanges = async () => {
+	await page.focus( 'button.woocommerce-save-button' );
+	await Promise.all( [
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		page.click( 'button.woocommerce-save-button' ),
+	] );
+};
+
+/**
  * Wait for UI blocking to end.
  */
 const uiUnblocked = async () => {
@@ -21,6 +49,8 @@ const uiUnblocked = async () => {
 
 module.exports = {
 	...flows,
+	clearAndFillInput,
 	clickTab,
+	settingsPageSaveChanges,
 	uiUnblocked,
 };
