@@ -32,7 +32,8 @@ class WC_Payment_Tokens {
 	 */
 	public static function get_tokens( $args ) {
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'token_id'   => '',
 				'user_id'    => '',
 				'gateway_id' => '',
