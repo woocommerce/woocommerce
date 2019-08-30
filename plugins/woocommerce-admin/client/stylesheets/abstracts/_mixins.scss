@@ -101,47 +101,47 @@
 }
 
 @mixin button-style__hover {
-	background-color: $white;
+	background-color: $studio-white;
 	color: $dark-gray-900;
-	box-shadow: inset 0 0 0 1px $light-gray-500, inset 0 0 0 2px $white,
+	box-shadow: inset 0 0 0 1px $light-gray-500, inset 0 0 0 2px $studio-white,
 		0 1px 1px rgba($dark-gray-900, 0.2);
 }
 
 @mixin button-style__active() {
 	outline: none;
-	background-color: $white;
+	background-color: $studio-white;
 	color: $dark-gray-900;
-	box-shadow: inset 0 0 0 1px $light-gray-700, inset 0 0 0 2px $white;
+	box-shadow: inset 0 0 0 1px $light-gray-700, inset 0 0 0 2px $studio-white;
 }
 
 @mixin button-style__focus-active() {
-	background-color: $white;
+	background-color: $studio-white;
 	color: $dark-gray-900;
-	box-shadow: inset 0 0 0 1px $dark-gray-300, inset 0 0 0 2px $white;
+	box-shadow: inset 0 0 0 1px $dark-gray-300, inset 0 0 0 2px $studio-white;
 
 	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;
 	outline-offset: -2px;
 }
 
+/* stylelint-disable block-closing-brace-newline-after */
 @mixin reduce-motion($property: '') {
 	@if $property == 'transition' {
 		@media (prefers-reduced-motion: reduce) {
 			transition-duration: 0s;
 		}
-	}
-	@else if $property == 'animation' {
+	} @else if $property == 'animation' {
 		@media (prefers-reduced-motion: reduce) {
 			animation-duration: 1ms;
 		}
-	}
-	@else {
+	} @else {
 		@media (prefers-reduced-motion: reduce) {
 			transition-duration: 0s;
 			animation-duration: 1ms;
 		}
 	}
 }
+/* stylelint-enable */
 
 @mixin break-small() {
 	@media (min-width: #{ ($break-small) }) {
@@ -151,7 +151,7 @@
 
 // Gutenberg Switch.
 @mixin switch-style__focus-active() {
-	box-shadow: 0 0 0 2px $white, 0 0 0 3px $dark-gray-300;
+	box-shadow: 0 0 0 2px $studio-white, 0 0 0 3px $dark-gray-300;
 
 	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;

@@ -10,12 +10,13 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { NAMESPACE, pluginNames } from './constants';
+import { JETPACK_NAMESPACE, NAMESPACE, pluginNames } from './constants';
 
 function read( resourceNames, fetch = apiFetch ) {
 	return [
 		...readActivePlugins( resourceNames, fetch ),
 		...readProfileItems( resourceNames, fetch ),
+		...readJetpackStatus( resourceNames, fetch ),
 		...readJetpackConnectUrl( resourceNames, fetch ),
 	];
 }
@@ -168,6 +169,28 @@ function activatePluginToResource( response, items ) {
 		resources[ getResourceName( resourceName, item ) ] = { data: item };
 	} );
 	return resources;
+}
+
+function readJetpackStatus( resourceNames, fetch ) {
+	const resourceName = 'jetpack-status';
+
+	if ( resourceNames.includes( resourceName ) ) {
+		const url = JETPACK_NAMESPACE + '/connection';
+
+		return [
+			fetch( {
+				path: url,
+			} )
+				.then( response => {
+					return { [ resourceName ]: { data: response } };
+				} )
+				.catch( error => {
+					return { [ resourceName ]: { error: String( error.message ) } };
+				} ),
+		];
+	}
+
+	return [];
 }
 
 function readJetpackConnectUrl( resourceNames, fetch ) {

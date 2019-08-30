@@ -17,7 +17,7 @@
 }
 
 .woocommerce-legend__list {
-	color: $black;
+	color: $wp-admin-sidebar;
 	display: flex;
 	height: 100%;
 	margin: 0;
@@ -55,7 +55,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background-color: $white;
+		background-color: $studio-white;
 		color: $core-grey-dark-500;
 		cursor: pointer;
 		display: inline-flex;
@@ -91,7 +91,7 @@
 				left: 0;
 				height: 16px;
 				width: 16px;
-				background-color: $white;
+				background-color: $studio-white;
 
 				&::after {
 					content: '';
@@ -109,7 +109,7 @@
 						top: 2px;
 						width: 3px;
 						height: 6px;
-						border: solid $white;
+						border: solid $studio-white;
 						border-width: 0 2px 2px 0;
 						transform: rotate(45deg);
 					}
@@ -184,7 +184,7 @@
 
 .woocommerce-legend__total {
 	align-items: center;
-	background: $white;
+	background: $studio-white;
 	border-top: 1px solid $core-grey-light-700;
 	bottom: 0;
 	color: $core-grey-dark-500;

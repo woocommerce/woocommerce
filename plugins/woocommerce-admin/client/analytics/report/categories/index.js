@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { charts, filters } from './config';
+import { advancedFilters, charts, filters } from './config';
 import CategoriesReportTable from './table';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
@@ -52,7 +52,13 @@ export default class CategoriesReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } filters={ filters } report="categories" />
+				<ReportFilters
+					query={ query }
+					path={ path }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+					report="categories"
+				/>
 				<ReportSummary
 					charts={ charts }
 					endpoint="products"
@@ -61,10 +67,12 @@ export default class CategoriesReport extends Component {
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 					report="categories"
 				/>
 				<ReportChart
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 					mode={ mode }
 					endpoint="products"
 					limitProperties={ isSingleCategoryView ? [ 'products', 'categories' ] : [ 'categories' ] }
@@ -81,12 +89,14 @@ export default class CategoriesReport extends Component {
 						baseSearchQuery={ { filter: 'single_category' } }
 						hideCompare={ isSingleCategoryView }
 						filters={ filters }
+						advancedFilters={ advancedFilters }
 					/>
 				) : (
 					<CategoriesReportTable
 						isRequesting={ isRequesting }
 						query={ query }
 						filters={ filters }
+						advancedFilters={ advancedFilters }
 					/>
 				) }
 			</Fragment>

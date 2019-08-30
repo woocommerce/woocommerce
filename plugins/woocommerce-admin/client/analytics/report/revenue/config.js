@@ -5,9 +5,11 @@
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
-const REVENUE_REPORT_CHART_FILTER = 'woocommerce_admin_revenue_report_chart_filter';
+const REVENUE_REPORT_CHARTS_FILTER = 'woocommerce_admin_revenue_report_charts';
+const REVENUE_REPORT_FILTERS_FILTER = 'woocommerce_admin_revenue_report_filters';
+const REVENUE_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_revenue_report_advanced_filters';
 
-export const charts = applyFilters( REVENUE_REPORT_CHART_FILTER, [
+export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	{
 		key: 'gross_revenue',
 		label: __( 'Gross Revenue', 'woocommerce-admin' ),
@@ -49,3 +51,6 @@ export const charts = applyFilters( REVENUE_REPORT_CHART_FILTER, [
 		type: 'currency',
 	},
 ] );
+
+export const filters = applyFilters( REVENUE_REPORT_FILTERS_FILTER, [] );
+export const advancedFilters = applyFilters( REVENUE_REPORT_ADVANCED_FILTERS_FILTER, {} );

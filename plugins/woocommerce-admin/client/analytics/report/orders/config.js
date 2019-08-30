@@ -12,9 +12,11 @@ import { getCouponLabels, getProductLabels } from 'lib/async-requests';
 
 const { orderStatuses } = wcSettings;
 
-const ORDERS_REPORT_CHART_FILTER = 'woocommerce_admin_orders_report_chart_filter';
+const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
+const ORDERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_orders_report_filters';
+const ORDERS_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_orders_report_advanced_filters';
 
-export const charts = applyFilters( ORDERS_REPORT_CHART_FILTER, [
+export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
 		label: __( 'Orders Count', 'woocommerce-admin' ),
@@ -41,7 +43,7 @@ export const charts = applyFilters( ORDERS_REPORT_CHART_FILTER, [
 	},
 ] );
 
-export const filters = [
+export const filters = applyFilters( ORDERS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [ 'chart' ],
@@ -52,10 +54,10 @@ export const filters = [
 			{ label: __( 'Advanced Filters', 'woocommerce-admin' ), value: 'advanced' },
 		],
 	},
-];
+] );
 
 /*eslint-disable max-len*/
-export const advancedFilters = {
+export const advancedFilters = applyFilters( ORDERS_REPORT_ADVANCED_FILTERS_FILTER, {
 	title: _x(
 		'Orders Match {{select /}} Filters',
 		'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
@@ -185,5 +187,5 @@ export const advancedFilters = {
 			},
 		},
 	},
-};
+} );
 /*eslint-enable max-len*/

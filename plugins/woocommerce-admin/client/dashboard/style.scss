@@ -78,23 +78,23 @@
 .woocommerce-onboarding {
 	.woocommerce-stepper .woocommerce-stepper__step {
 		.woocommerce-stepper__step-label {
-			color: $muriel-gray-800;
+			color: $studio-gray-80;
 		}
 
 		&.is-active,
 		&.is-complete {
 			.woocommerce-stepper__step-icon {
-				background: $muriel-hot-purple-600;
-				color: $muriel-white;
+				background: $studio-woocommerce-purple-60;
+				color: $studio-white;
 			}
 
 			.woocommerce-stepper__step-label {
-				color: $muriel-gray-900;
+				color: $studio-gray-90;
 			}
 		}
 
 		.woocommerce-spinner {
-			background: $muriel-hot-purple-600;
+			background: $studio-woocommerce-purple-60;
 		}
 	}
 
@@ -106,7 +106,7 @@
 
 	.components-base-control.has-error {
 		margin-bottom: $gap * 2 !important;
-		border-color: $muriel-red-500;
+		border-color: $studio-red-50;
 
 		.components-base-control__help {
 			top: 100%;
@@ -114,7 +114,7 @@
 			margin-top: $gap-smallest;
 			font-size: 12px;
 			font-style: normal;
-			color: $muriel-red-500;
+			color: $studio-red-50;
 		}
 	}
 
@@ -173,7 +173,7 @@
 
 	.muriel-input-text.active,
 	.muriel-select.active {
-		box-shadow: 0 0 0 2px $muriel-hot-purple-600;
+		box-shadow: 0 0 0 2px $studio-woocommerce-purple-60;
 		border-color: transparent;
 	}
 
@@ -197,12 +197,21 @@
 
 		&.is-busy {
 			cursor: progress;
+			/* stylelint-disable function-parentheses-space-inside, function-comma-space-after */
+			background-image: linear-gradient(
+				-45deg,
+				$studio-pink-50 28%,
+				color($studio-pink-50 shade(30%)) 28%,
+				color($studio-pink-50 shade(30%)) 72%,
+				$studio-pink-50 72%
+			) !important; // Gutenberg & PostCSS Add the gradient late in output, based on the 'primary' color, which in our case is purple. Our busy state should be pink.
+			/* stylelint-enable */
 		}
 	}
 
 	.muriel-checkbox input[type='checkbox']:checked {
-		background-color: $muriel-hot-purple-600;
-		border-color: $muriel-hot-purple-600;
+		background-color: $studio-woocommerce-purple-60;
+		border-color: $studio-woocommerce-purple-60;
 	}
 
 	.components-form-toggle {
@@ -233,8 +242,8 @@
 
 		&.is-checked {
 			.components-form-toggle__track {
-				background-color: $muriel-hot-purple-600;
-				border-color: $muriel-hot-purple-600;
+				background-color: $studio-woocommerce-purple-60;
+				border-color: $studio-woocommerce-purple-60;
 			}
 		}
 	}

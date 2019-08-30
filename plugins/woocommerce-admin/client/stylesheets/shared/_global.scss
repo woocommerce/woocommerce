@@ -34,11 +34,11 @@
 	a:link,
 	a:visited,
 	.components-button.is-link {
-		color: $woocommerce-500;
+		color: $studio-pink;
 	}
 
 	a.components-button.is-button {
-		color: $white;
+		color: $studio-white;
 	}
 
 	a:hover,
@@ -47,22 +47,67 @@
 	.components-button.is-link:hover,
 	.components-button.is-link:active,
 	.components-button.is-link:focus {
-		color: $woocommerce-400;
+		color: $studio-pink;
 	}
 
 	a:focus {
-		box-shadow: 0 0 0 1px $woocommerce-300, 0 0 2px 1px rgba($woocommerce-300, 0.8);
+		box-shadow: 0 0 0 1px $studio-pink, 0 0 2px 1px rgba($studio-pink, 0.8);
 	}
 
 	.components-button.is-button.is-primary {
-		color: $white;
+		color: $studio-white;
 
 		&:not(:disabled) {
 			&:hover,
 			&:active,
 			&:focus {
-				color: $white;
+				color: $studio-white;
 			}
 		}
+	}
+
+	input:focus,
+	select:focus,
+	button:focus {
+		border-color: $studio-woocommerce-purple-60;
+		box-shadow: 0 0 2px rgba($studio-woocommerce-purple-60, 0.8);
+	}
+
+	input[type='checkbox'] {
+		border-radius: 3px;
+	}
+
+	input[type='checkbox'],
+	input[type='radio'] {
+		width: 18px;
+		height: 18px;
+		min-width: 18px;
+		border: 2px solid $studio-gray-50;
+
+		&:focus {
+			border-color: $studio-woocommerce-purple-60;
+			box-shadow: 0 0 0 1px $studio-woocommerce-purple-60,
+				0 0 2px 1px rgba($studio-woocommerce-purple-60, 0.8);
+		}
+	}
+
+	input[type='checkbox']:checked,
+	input[type='radio']:checked {
+		background-color: $studio-woocommerce-purple-60;
+		border-color: $studio-woocommerce-purple-60;
+	}
+
+	input[type='checkbox']:checked::before {
+		color: $studio-white;
+		font-size: 18px;
+		margin-left: -2.5px;
+		margin-top: -1px;
+	}
+
+	input[type='radio']:checked::before {
+		font-size: 18px;
+		margin-left: 4px;
+		margin-top: 4px;
+		background-color: $studio-white;
 	}
 }

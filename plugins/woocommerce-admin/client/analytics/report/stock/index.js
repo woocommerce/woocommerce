@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { showDatePicker, filters } from './config';
+import { advancedFilters, showDatePicker, filters } from './config';
 import StockReportTable from './table';
 import ReportFilters from 'analytics/components/report-filters';
 
@@ -23,9 +23,10 @@ export default class StockReport extends Component {
 					path={ path }
 					showDatePicker={ showDatePicker }
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 					report="stock"
 				/>
-				<StockReportTable query={ query } filters={ filters } />
+				<StockReportTable query={ query } filters={ filters } advancedFilters={ advancedFilters } />
 			</Fragment>
 		);
 	}

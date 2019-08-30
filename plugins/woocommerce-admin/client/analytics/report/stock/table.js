@@ -141,7 +141,7 @@ export default class StockReportTable extends Component {
 	}
 
 	render() {
-		const { query, filters } = this.props;
+		const { advancedFilters, filters, query } = this.props;
 
 		return (
 			<ReportTable
@@ -157,6 +157,7 @@ export default class StockReportTable extends Component {
 				} }
 				title={ __( 'Stock', 'woocommerce-admin' ) }
 				filters={ filters }
+				advancedFilters={ advancedFilters }
 			/>
 		);
 	}

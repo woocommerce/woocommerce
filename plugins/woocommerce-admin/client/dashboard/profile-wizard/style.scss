@@ -2,11 +2,11 @@
 
 .woocommerce-profile-wizard__body {
 	.woocommerce-profile-wizard__container a {
-		color: $muriel-gray-600;
+		color: $studio-pink-50;
 	}
 
 	.woocommerce-profile-wizard__skip.components-button.is-link {
-		color: $muriel-gray-600;
+		color: $studio-gray-60;
 		margin-top: 0;
 		margin-bottom: 0;
 		font-weight: normal;
@@ -18,9 +18,9 @@
 		h1,
 		h2,
 		h3 {
-			color: $muriel-gray-800;
+			color: $studio-gray-80;
 		}
-		color: $muriel-gray-600;
+		color: $studio-gray-60;
 		text-align: left;
 
 		.muriel-button {
@@ -38,23 +38,23 @@
 
 	.woocommerce-profile-wizard__header {
 		height: 56px;
-		border-bottom: 1px solid $muriel-gray-50;
+		border-bottom: 1px solid $studio-gray-5;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: $muriel-white;
+		background: $studio-white;
 
 		svg > g {
 			transform: translateX(25%);
 		}
 
 		.woocommerce-profile-wizard__plus {
-			stroke: $muriel-gray-800;
+			stroke: $studio-gray-80;
 		}
 	}
 
 	.woocommerce-profile-wizard__header-title {
-		color: $muriel-gray-800;
+		color: $studio-gray-80;
 		font-size: 24px;
 		line-height: 32px;
 		font-weight: 400;
@@ -62,7 +62,7 @@
 	}
 
 	.woocommerce-profile-wizard__header-subtitle {
-		color: $muriel-gray-600;
+		color: $studio-gray-60;
 		font-size: 16px;
 		line-height: 24px;
 		font-weight: 400;
@@ -120,7 +120,7 @@
 		margin-top: $gap;
 		margin-bottom: $gap;
 		font-size: 12px;
-		color: $muriel-red-500;
+		color: $studio-red-50;
 	}
 
 	.woocommerce-profile-wizard__benefit {
@@ -142,7 +142,7 @@
 		.woocommerce-profile-wizard__benefit-content p {
 			padding-bottom: $gap;
 			margin-top: 0;
-			border-bottom: 1px solid $muriel-gray-50;
+			border-bottom: 1px solid $studio-gray-5;
 			font-size: 14px;
 		}
 
@@ -208,7 +208,7 @@
 				left: $gap-large * 2 + $gap;
 				width: calc(100% - #{$gap-large * 2 + $gap});
 				height: 1px;
-				background-color: $muriel-gray-50;
+				background-color: $studio-gray-5;
 				bottom: 0;
 			}
 
@@ -227,7 +227,7 @@
 			}
 
 			label.components-checkbox-control__label {
-				color: $muriel-gray-800;
+				color: $studio-gray-80;
 			}
 
 			label.components-checkbox-control__label,
@@ -236,7 +236,7 @@
 			}
 
 			.components-base-control__help {
-				color: $muriel-gray-600;
+				color: $studio-gray-60;
 				font-size: 14px;
 				line-height: 20px;
 				margin-top: 3px;
@@ -286,7 +286,7 @@
 		z-index: 999;
 		width: 100%;
 		bottom: 0;
-		border-top: 1px solid $muriel-gray-50;
+		border-top: 1px solid $studio-gray-5;
 		border-bottom: none;
 	}
 

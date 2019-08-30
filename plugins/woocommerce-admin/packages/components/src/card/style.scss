@@ -2,7 +2,7 @@
 
 .woocommerce-card {
 	margin-bottom: $gap-large;
-	background: $white;
+	background: $studio-white;
 	border-radius: 3px;
 	box-shadow: $muriel-box-shadow-1dp;
 	transition: box-shadow 0.2s cubic-bezier(0.4, 1, 0.4, 1);
@@ -13,7 +13,7 @@
 	}
 
 	&.is-inactive {
-		background-color: $muriel-gray-0;
+		background-color: $studio-gray-0;
 		box-shadow: none;
 	}
 }
@@ -67,7 +67,7 @@
 .woocommerce-card__description {
 	@include font-size( 16 );
 	line-height: 1.5;
-	color: $muriel-gray-500;
+	color: $studio-gray-50;
 	margin-top: $gap-small;
 	margin-bottom: 0;
 	font-weight: 400;

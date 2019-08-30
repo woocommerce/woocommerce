@@ -23,7 +23,7 @@ import { getIdsFromQuery, getSearchWords, updateQueryString } from '@woocommerce
  * Internal dependencies
  */
 import Card from '../card';
-import CompareButton from '../filters/compare/button';
+import CompareButton from '../compare-filter/button';
 import DownloadIcon from './download-icon';
 import EllipsisMenu from '../ellipsis-menu';
 import MenuItem from '../ellipsis-menu/menu-item';

@@ -21,6 +21,7 @@ Additional class name to style the component.
   - before: ReactNode - Content displayed before the list item text.
   - className: String - Additional class name to style the list item.
   - description: String - Description displayed beneath the list item title.
+  - content: One of type: string, node
   - href: String - Href attribute used in a Link wrapped around the item.
   - onClick: Function - Content displayed after the list item text.
   - target: String - Target attribute used for Link wrapper.

@@ -15,7 +15,7 @@ import { presetValues } from '@woocommerce/date';
 /**
  * Internal dependencies
  */
-import SegmentedSelection from '../../segmented-selection';
+import SegmentedSelection from '../segmented-selection';
 
 class PresetPeriods extends Component {
 	render() {

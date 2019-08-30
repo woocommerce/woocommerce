@@ -14,17 +14,14 @@ import { getAdminLink } from '@woocommerce/navigation';
 const subTasks = [
 	{
 		title: __( 'Add manually (recommended)', 'woocommerce-admin' ),
-		description: __(
-			'For small stores we recommend adding products manually',
-			'woocommerce-admin'
-		),
+		content: __( 'For small stores we recommend adding products manually', 'woocommerce-admin' ),
 		before: <i className="material-icons-outlined">add_box</i>,
 		after: <i className="material-icons-outlined">chevron_right</i>,
 		href: getAdminLink( 'post-new.php?post_type=product&wc_onboarding_active_task=products' ),
 	},
 	{
 		title: __( 'Import', 'woocommerce-admin' ),
-		description: __(
+		content: __(
 			'For larger stores we recommend importing all products at once via CSV file',
 			'woocommerce-admin'
 		),
@@ -36,7 +33,7 @@ const subTasks = [
 	},
 	{
 		title: __( 'Migrate', 'woocommerce-admin' ),
-		description: __(
+		content: __(
 			'For stores currently selling elsewhere we suggest using a product migration service',
 			'woocommerce-admin'
 		),

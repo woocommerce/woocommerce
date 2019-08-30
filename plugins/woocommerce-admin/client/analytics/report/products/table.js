@@ -235,7 +235,14 @@ class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { query, isRequesting, baseSearchQuery, hideCompare, filters } = this.props;
+		const {
+			advancedFilters,
+			baseSearchQuery,
+			filters,
+			hideCompare,
+			isRequesting,
+			query,
+		} = this.props;
 
 		const labels = {
 			helpText: __( 'Check at least two products below to compare', 'woocommerce-admin' ),
@@ -264,6 +271,7 @@ class ProductsReportTable extends Component {
 				title={ __( 'Products', 'woocommerce-admin' ) }
 				columnPrefsKey="products_report_columns"
 				filters={ filters }
+				advancedFilters={ advancedFilters }
 			/>
 		);
 	}
