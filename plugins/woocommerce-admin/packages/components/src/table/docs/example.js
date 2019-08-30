@@ -12,7 +12,11 @@ import {
 	TableSummary,
 } from '@woocommerce/components';
 
-const noop = () => {};
+/**
+ * External dependencies
+ */
+import { withState } from '@wordpress/compose';
+
 const headers = [
 	{ key: 'month', label: 'Month' },
 	{ key: 'orders', label: 'Orders' },
@@ -41,7 +45,11 @@ const summary = [
 	{ label: 'Shipping', value: '$50.00' },
 ];
 
-export default () => (
+export default withState( {
+	query: {
+		paged: 1,
+	},
+} )( ( { query, setState } ) => (
 	<div>
 		<H>TableCard</H>
 		<Section component={ false }>
@@ -49,8 +57,16 @@ export default () => (
 				title="Revenue Last Week"
 				rows={ rows }
 				headers={ headers }
-				onQueryChange={ noop }
-				query={ { page: 2 } }
+				onQueryChange={
+					( param ) => (
+						( value ) => setState( {
+							query: {
+								[ param ]: value,
+							},
+						} )
+					)
+				}
+				query={ query }
 				rowsPerPage={ 7 }
 				totalRows={ 10 }
 				summary={ summary }
@@ -86,4 +102,4 @@ export default () => (
 			</EmptyTable>
 		</Section>
 	</div>
-);
+) );
