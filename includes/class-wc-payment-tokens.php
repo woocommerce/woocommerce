@@ -151,7 +151,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		$token_class = 'WC_Payment_Token_' . $token_result->type;
+		$token_class = self::get_token_class( $token_result->type );
 
 		if ( class_exists( $token_class ) ) {
 			$meta        = $data_store->get_metadata( $token_id );
@@ -176,7 +176,7 @@ class WC_Payment_Tokens {
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
 		if ( ! empty( $type ) ) {
-			$class = 'WC_Payment_Token_' . $type;
+			$class = self::get_token_class( $type );
 			$token = new $class( $token_id );
 			$token->delete();
 		}
@@ -229,6 +229,6 @@ class WC_Payment_Tokens {
 		 * @param WC_Payment_Token $class Payment token class.
 		 * @param string $type Token type.
 		 */
-		return apply_filters( 'woocommerce_payment_token_get_class', 'WC_Payment_Token_' . $type, $type );
+		return apply_filters( 'woocommerce_payment_token_class', 'WC_Payment_Token_' . $type, $type );
 	}
 }
