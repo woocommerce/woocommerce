@@ -44,9 +44,11 @@ const getProductsRequests = ( { selected = [], search = '', queryArgs = [] } ) =
 export const getProducts = ( { selected = [], search = '', queryArgs = [] } ) => {
 	const requests = getProductsRequests( { selected, search, queryArgs } );
 
-	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) ).then( ( data ) => {
-		return uniqBy( flatten( data ), 'id' );
-	} );
+	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) )
+		.then( ( data ) => uniqBy( flatten( data ), 'id' ) )
+		.catch( ( e ) => {
+			throw e;
+		} );
 };
 
 /**

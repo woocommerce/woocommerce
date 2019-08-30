@@ -9,6 +9,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  * Internal dependencies
  */
 import { getReviews } from '../../blocks/reviews/utils';
+import { formatError } from '../utils/errors.js';
 
 const withReviews = ( OriginalComponent ) => {
 	class WrappedComponent extends Component {
@@ -124,11 +125,7 @@ const withReviews = ( OriginalComponent ) => {
 		setError( errorResponse ) {
 			errorResponse.json().then( ( apiError ) => {
 				const { onReviewsLoadError } = this.props;
-				const error = typeof apiError === 'object' && apiError.hasOwnProperty( 'message' ) ? {
-					apiMessage: apiError.message,
-				} : {
-					apiMessage: null,
-				};
+				const error = formatError( apiError );
 
 				this.setState( { reviews: [], loading: false, error } );
 

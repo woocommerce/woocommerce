@@ -6,30 +6,17 @@ import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import classNames from 'classnames';
-import { escapeHTML } from '@wordpress/escape-html';
 import {
 	Button,
 	Placeholder,
 	Spinner,
 } from '@wordpress/components';
 
-const getErrorMessage = ( { apiMessage, message } ) => {
-	if ( message ) {
-		return message;
-	}
-
-	if ( apiMessage ) {
-		return (
-			<span>
-				{ __( 'The following error was returned from the API', 'woo-gutenberg-products-block' ) }
-				<br />
-				<code>{ escapeHTML( apiMessage ) }</code>
-			</span>
-		);
-	}
-
-	return __( 'An unknown error occurred which prevented the block from being updated.', 'woo-gutenberg-products-block' );
-};
+/**
+ * Internal dependencies
+ */
+import ErrorMessage from './error-message.js';
+import './style.scss';
 
 const ApiErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
 	<Placeholder
@@ -37,9 +24,7 @@ const ApiErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
 		label={ __( 'Sorry, an error occurred', 'woo-gutenberg-products-block' ) }
 		className={ classNames( 'wc-block-api-error', className ) }
 	>
-		<div className="wc-block-error__message">
-			{ getErrorMessage( error ) }
-		</div>
+		<ErrorMessage error={ error } />
 		{ onRetry && (
 			<Fragment>
 				{ isLoading ? (
