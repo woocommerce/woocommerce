@@ -212,4 +212,22 @@ class WC_Payment_Tokens {
 		$data_store = WC_Data_Store::load( 'payment-token' );
 		return $data_store->get_token_type_by_id( $token_id );
 	}
+
+	/**
+	 * Get class based on token type.
+	 *
+	 * @since 3.8.0
+	 * @param string $type Token type.
+	 * @return WC_Payment_Token
+	 */
+	protected static function get_token_class( $type ) {
+		/**
+		 * Filter paymenter token class per type.
+		 *
+		 * @since 3.8.0
+		 * @param WC_Payment_Token $class Payment token class.
+		 * @param string $type Token type.
+		 */
+		return apply_filters( 'woocommerce_payment_token_get_class', 'WC_Payment_Token_' . $type, $type );
+	}
 }
