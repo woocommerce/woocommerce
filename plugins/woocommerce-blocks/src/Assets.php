@@ -19,6 +19,7 @@ class Assets {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_assets' ) );
+		add_action( 'admin_print_scripts', array( __CLASS__, 'print_shared_settings' ), 1 );
 		add_action( 'admin_print_scripts', array( __CLASS__, 'maybe_add_asset_data' ), 1 );
 		add_action( 'admin_print_footer_scripts', array( __CLASS__, 'maybe_add_asset_data' ), 1 );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'maybe_add_asset_data' ), 1 );
@@ -58,16 +59,20 @@ class Assets {
 	}
 
 	/**
+	 * Print wcSettings in all pages. This is a temporary fix until we find a better
+	 * solution to share settings between WooCommerce Admin and WooCommerce Blocks.
+	 * See https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/932
+	 */
+	public static function print_shared_settings() {
+		echo '<script>';
+		echo "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . esc_js( self::get_wc_settings_data() ) . "' ) );";
+		echo '</script>';
+	}
+
+	/**
 	 * Attach data to registered assets using inline scripts.
 	 */
 	public static function maybe_add_asset_data() {
-		if ( wp_script_is( 'wc-shared-settings', 'enqueued' ) ) {
-			wp_add_inline_script(
-				'wc-shared-settings',
-				self::get_wc_settings_data(),
-				'before'
-			);
-		}
 		if ( wp_script_is( 'wc-block-settings', 'enqueued' ) ) {
 			wp_add_inline_script(
 				'wc-block-settings',
@@ -121,8 +126,7 @@ class Assets {
 				),
 			)
 		);
-		$settings = rawurlencode( wp_json_encode( $settings ) );
-		return "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . $settings . "' ) );";
+		return rawurlencode( wp_json_encode( $settings ) );
 	}
 
 	/**
