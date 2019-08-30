@@ -42,15 +42,20 @@ function getDescription( description = '' ) {
  * @return { string } Formatted string.
  */
 function getProp( propName, prop ) {
-	const lines = [ '### `' + propName + '`\n' ];
-	prop.required && lines.push( '- **Required**' );
-	lines.push( '- Type: ' + getPropType( prop.type, propName ) );
-	lines.push( '- Default: ' + getPropDefaultValue( prop.defaultValue ) );
-	lines.push( '' );
-	prop.description && lines.push( prop.description );
-	lines.push( '' );
+	const cols = [ '`' + propName + '`' ];
 
-	return lines.join( '\n' );
+	cols.push( getPropType( prop.type, propName ) );
+	cols.push( '`' + getPropDefaultValue( prop.defaultValue ) + '`' );
+
+	let description = ( prop.description || '' ).replace( /(\r\n|\n|\r)+/gm, ' ' ).replace( /\.$/, '' );
+
+	if ( prop.required ) {
+		description = '(required) ' + description;
+	}
+
+	cols.push( description );
+
+	return cols.join( ' | ' );
 }
 
 /**
@@ -63,7 +68,7 @@ function getPropDefaultValue( value ) {
 	if ( value && value.value ) {
 		return '`' + value.value + '`';
 	}
-	return 'null';
+	return '`null`';
 }
 
 /**
@@ -76,8 +81,13 @@ function getProps( props = {} ) {
 	if ( Object.keys( props ).length < 1 ) {
 		return '';
 	}
-	const title = 'Props';
-	const lines = [ title, stringOfLength( '-', title.length ), '' ];
+	const title = '### Props';
+	const lines = [
+		title,
+		'',
+		'Name | Type | Default | Description',
+		'--- | --- | --- | ---',
+	];
 	Object.keys( props ).map( key => {
 		lines.push( getProp( key, props[ key ] ) );
 	} );
@@ -145,8 +155,7 @@ function getPropType( type ) {
  * @return { string } Formatted string.
  */
 function getTitle( name ) {
-	const title = '`' + name + '` (component)';
-	return title + '\n' + stringOfLength( '=', title.length ) + '\n';
+	return name + '\n===\n';
 }
 
 /**

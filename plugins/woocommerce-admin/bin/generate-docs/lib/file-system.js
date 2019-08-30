@@ -19,27 +19,6 @@ const PACKAGES_FOLDER = path.resolve( __dirname, '../../../packages/components/s
 const DOCS_FOLDER = path.resolve( __dirname, '../../../docs/components/' );
 
 /**
- * Remove all files in existing docs folder.
- * @param { String } route Route of the folder to clean.
- */
-function deleteExistingDocs( route ) {
-	const folderRoute = path.resolve( DOCS_FOLDER, route );
-
-	if ( ! isDirectory( folderRoute ) ) {
-		fs.mkdirSync( folderRoute );
-		return;
-	}
-
-	const files = fs.readdirSync( folderRoute );
-	files.map( file => {
-		if ( 'README.md' === file ) {
-			return;
-		}
-		fs.unlinkSync( path.resolve( folderRoute, file ) );
-	} );
-}
-
-/**
  * Get an array of files exported from in the given file
  *
  * @param { string } filePath The file to parse for exports.
@@ -83,7 +62,13 @@ function getMdFileName( filepath, route, absolute = true ) {
 	if ( ! fileParts || ! fileParts[ 1 ] ) {
 		return;
 	}
-	const name = fileParts[ 1 ].replace( 'src/', '' ).split( '/' )[ 0 ];
+	let name = fileParts[ 1 ].replace( 'src/', '' ).split( '/' )[ 0 ];
+
+	// Package components have a different structure.
+	if ( 'packages' === route ) {
+		name += '/README';
+	}
+
 	if ( ! absolute ) {
 		return name + '.md';
 	}
@@ -120,20 +105,6 @@ function getRealFilePaths( files, basePath = PACKAGES_FOLDER ) {
 }
 
 /**
- * Check if a directory exists and is not a file.
- *
- * @param { string } dir A directory path to test.
- * @return { boolean } True if this path exists and is a directory.
- */
-function isDirectory( dir ) {
-	if ( ! fs.existsSync( dir ) ) {
-		return false;
-	}
-	const stats = fs.statSync( dir );
-	return stats && stats.isDirectory();
-}
-
-/**
  * Check if a file exists and is not a directory.
  *
  * @param { string } file A file path to test.
@@ -159,7 +130,7 @@ function getTocSection( files, route, title ) {
 	const mdFiles = files.map( f => getMdFileName( f, route, false ) ).sort();
 
 	const toc = uniq( mdFiles ).map( doc => {
-		const name = camelCaseDash( doc.replace( '.md', '' ) );
+		const name = camelCaseDash( doc.replace( '.md', '' ).split( '/' )[ 0 ] );
 		return `    * [${ name }](components/${ route }/${ doc })`;
 	} );
 
@@ -173,7 +144,6 @@ module.exports = {
 	DOCS_FOLDER,
 	ANALYTICS_FOLDER,
 	PACKAGES_FOLDER,
-	deleteExistingDocs,
 	getExportedFileList,
 	getMdFileName,
 	getRealFilePaths,
