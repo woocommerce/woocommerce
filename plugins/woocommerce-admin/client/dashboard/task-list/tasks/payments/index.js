@@ -6,9 +6,9 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { filter, noop } from 'lodash';
+import { filter, noop, keys, pickBy } from 'lodash';
 import { FormToggle, CheckboxControl } from '@wordpress/components';
-import { TextControl } from 'newspack-components';
+import { Button, TextControl } from 'newspack-components';
 
 /**
  * WooCommerce dependencies
@@ -21,6 +21,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import withSelect from 'wc-api/with-select';
+import Plugins from '../steps/plugins';
 
 class Payments extends Component {
 	constructor() {
@@ -37,6 +38,7 @@ class Payments extends Component {
 			paypal: false,
 			klarna_checkout: false,
 			klarna_payments: false,
+			square: false,
 			create_stripe: false,
 			create_paypal: false,
 			stripe_email: '',
@@ -64,7 +66,8 @@ class Payments extends Component {
 	}
 
 	// If Jetpack is connected and WCS is enabled, we will offer a streamlined option.
-	renderWooCommerceServicesStripeConnect( { getInputProps, values } ) {
+	renderWooCommerceServicesStripeConnect() {
+		const { getInputProps, values } = this.formData;
 		if ( ! values.stripe ) {
 			return null;
 		}
@@ -91,7 +94,8 @@ class Payments extends Component {
 		);
 	}
 
-	renderWooCommerceServicesPayPalConnect( { getInputProps, values } ) {
+	renderWooCommerceServicesPayPalConnect() {
+		const { getInputProps, values } = this.formData;
 		if ( ! values.paypal ) {
 			return null;
 		}
@@ -118,8 +122,8 @@ class Payments extends Component {
 		);
 	}
 
-	getMethodOptions( formData ) {
-		const { getInputProps } = formData;
+	getMethodOptions() {
+		const { getInputProps } = this.formData;
 		const { countryCode, profileItems } = this.props;
 		const methods = [
 			{
@@ -131,7 +135,7 @@ class Payments extends Component {
 								'and one-touch checkout with Apple Pay.',
 							'woocommerce-admin'
 						) }
-						{ this.renderWooCommerceServicesStripeConnect( formData ) }
+						{ this.renderWooCommerceServicesStripeConnect() }
 					</Fragment>
 				),
 				before: <div />, // @todo Logo
@@ -146,7 +150,7 @@ class Payments extends Component {
 							"Safe and secure payments using credit cards or your customer's PayPal account.",
 							'woocommerce-admin'
 						) }
-						{ this.renderWooCommerceServicesPayPalConnect( formData ) }
+						{ this.renderWooCommerceServicesPayPalConnect() }
 					</Fragment>
 				),
 				before: <div />, // @todo Logo
@@ -191,13 +195,63 @@ class Payments extends Component {
 		return filter( methods, method => method.visible );
 	}
 
-	getSteps( formData ) {
+	getPluginsToInstall() {
+		const { values } = this.formData;
+		const pluginSlugs = {
+			'woocommerce-gateway-stripe': values.stripe,
+			'woocommerce-gateway-paypal-express-checkout': values.paypal,
+			'klarna-checkout-for-woocommerce': values.klarna_checkout,
+			'klarna-payments-for-woocommerce': values.klarna_payments,
+			'woocommerce-square': values.square,
+		};
+		return keys( pickBy( pluginSlugs ) );
+	}
+
+	getSteps() {
+		const { values } = this.formData;
+		const isMethodSelected =
+			values.stripe ||
+			values.paypal ||
+			values.klarna_checkout ||
+			values.klarna_payments ||
+			values.square;
+
 		const steps = [
 			{
 				key: 'choose',
 				label: __( 'Choose payment methods', 'woocommerce-admin' ),
 				description: __( "Select which payment methods you'd like to use", 'woocommerce-admin' ),
-				content: <List items={ this.getMethodOptions( formData ) } />,
+				content: (
+					<Fragment>
+						<List items={ this.getMethodOptions() } />
+						<Button onClick={ this.completeStep } isPrimary disabled={ ! isMethodSelected }>
+							{ __( 'Proceed', 'woocommerce-admin' ) }
+						</Button>
+					</Fragment>
+				),
+				visible: true,
+			},
+			{
+				key: 'install',
+				label: __( 'Install selected methods', 'woocommerce-admin' ),
+				description: __(
+					'Install plugins required to offer the selected payment methods',
+					'woocommerce-admin'
+				),
+				content: (
+					<Plugins
+						onComplete={ this.completeStep }
+						autoInstall
+						pluginSlugs={ this.getPluginsToInstall() }
+					/>
+				),
+				visible: true,
+			},
+			{
+				key: 'configure',
+				label: __( 'Configure payment methods', 'woocommerce-admin' ),
+				description: __( 'Set up your chosen payment methods', 'woocommerce-admin' ),
+				content: <Fragment />,
 				visible: true,
 			},
 		];
@@ -214,15 +268,16 @@ class Payments extends Component {
 				onSubmitCallback={ noop }
 				validate={ this.validate }
 			>
-				{ ( { getInputProps, values } ) => {
+				{ formData => {
+					this.formData = formData;
 					return (
 						<div className="woocommerce-task-payments">
 							<Card className="is-narrow">
 								<Stepper
 									isVertical
-									isPending={ isSettingsRequesting }
+									isPending={ isSettingsRequesting || 'install' === step }
 									currentStep={ step }
-									steps={ this.getSteps( { getInputProps, values } ) }
+									steps={ this.getSteps() }
 								/>
 							</Card>
 						</div>

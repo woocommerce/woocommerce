@@ -170,7 +170,7 @@ class Shipping extends Component {
 				key: 'label_printing',
 				label: __( 'Enable shipping label printing', 'woocommerce-admin' ),
 				description: __(
-					'With WooCommerce Services and Jetpack you can save time at the' +
+					'With WooCommerce Services and Jetpack you can save time at the ' +
 						'Post Office by printing your shipping labels at home',
 					'woocommerce-admin'
 				),
