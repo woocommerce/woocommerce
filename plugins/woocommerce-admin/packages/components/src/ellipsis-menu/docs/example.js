@@ -3,51 +3,50 @@
  * Internal dependencies
  */
 import {
-	Button,
 	EllipsisMenu,
 	MenuItem,
 	MenuTitle,
-	ToggleControl,
 } from '@woocommerce/components';
 
 /**
  * External dependencies
  */
 import { withState } from '@wordpress/compose';
+import { Fragment } from '@wordpress/element';
+import { Icon } from '@wordpress/components';
 
 export default withState( {
 	showCustomers: true,
 	showOrders: true,
 } )( ( { setState, showCustomers, showOrders } ) => (
 	<EllipsisMenu label="Choose which analytics to display"
-		renderContent={ ( { onToggle } )=> {
-			return (
-				<div>
-					<MenuTitle>Display Stats</MenuTitle>
-					<MenuItem onInvoke={ () => setState( { showCustomers: ! showCustomers } ) }>
-						<ToggleControl
-							label="Show Customers"
-							checked={ showCustomers }
-							onChange={ () => setState( { showCustomers: ! showCustomers } ) }
-						/>
-					</MenuItem>
-					<MenuItem onInvoke={ () => setState( { showOrders: ! showOrders } ) }>
-						<ToggleControl
-							label="Show Orders"
-							checked={ showOrders }
-							onChange={ () => setState( { showOrders: ! showOrders } ) }
-						/>
-					</MenuItem>
-					<MenuItem onInvoke={ onToggle }>
-						<Button
-							label="Close menu"
-							onClick={ onToggle }
-						>
-						Close Menu
-						</Button>
-					</MenuItem>
-				</div>
-			);
-		} }
+		renderContent={ ( { onToggle } ) => (
+			<Fragment>
+				<MenuTitle>Display Stats</MenuTitle>
+				<MenuItem
+					isCheckbox
+					isClickable
+					checked={ showCustomers }
+					onInvoke={ () => setState( { showCustomers: ! showCustomers } ) }
+				>
+					Show Customers
+				</MenuItem>
+				<MenuItem
+					isCheckbox
+					isClickable
+					checked={ showOrders }
+					onInvoke={ () => setState( { showOrders: ! showOrders } ) }
+				>
+					Show Orders
+				</MenuItem>
+				<MenuItem
+					isClickable
+					onInvoke={ onToggle }
+				>
+					<Icon icon="no-alt" />
+					Close Menu
+				</MenuItem>
+			</Fragment>
+		) }
 	/>
 ) );
