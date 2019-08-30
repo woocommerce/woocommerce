@@ -39,9 +39,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 		</ul>
 
-		<?php if ( isset( $_GET['search'] ) ) : ?>
+		<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<h1 class="search-form-title" >
-				<?php printf( esc_html( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '</strong>' ); ?>
+				<?php printf( esc_html( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '</strong>' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			</h1>
 		<?php endif; ?>
 
@@ -52,10 +52,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input
 				type="text"
 				name="search"
-				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); ?>"
+				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"
 				placeholder="<?php esc_attr_e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
 			<input type="hidden" name="page" value="wc-addons">
-			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_all'; ?>
+			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
 		</form>
 		<?php if ( '_featured' === $current_section ) : ?>
