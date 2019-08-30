@@ -31,7 +31,7 @@ const getExampleData = example => {
 
 export default class extends Component {
 	render() {
-		const { params: { component } } = this.props;
+		const { query: { component } } = this.props;
 		const className = classnames( 'woocommerce_devdocs', {
 			'is-single': component,
 			'is-list': ! component,
@@ -62,7 +62,7 @@ export default class extends Component {
 										componentName
 									) : (
 										<Link
-											href={ `admin.php?page=wc-admin&path=/devdocs/${ filePath }` }
+											href={ `admin.php?page=wc-admin&path=/devdocs&component=${ filePath }` }
 											type="wc-admin"
 										>
 											{ componentName }
