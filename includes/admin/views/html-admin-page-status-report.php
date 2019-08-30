@@ -12,6 +12,7 @@ global $wpdb;
 $report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
+$post_type_counts   = $report['post_type_counts'];
 $active_plugins     = $report['active_plugins'];
 $inactive_plugins   = $report['inactive_plugins'];
 $dropins_mu_plugins = $report['dropins_mu_plugins'];
@@ -515,6 +516,26 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 				</td>
 			</tr>
 		<?php endif; ?>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+	<tr>
+		<th colspan="3" data-export-label="Post Type Counts"><h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
+	</tr>
+	</thead>
+	<tbody>
+		<?php
+		foreach ( $post_type_counts as $ptype ) {
+			?>
+			<tr>
+				<td><?php echo esc_html( $ptype['type'] ); ?></td>
+				<td class="help">&nbsp;</td>
+				<td><?php echo absint( $ptype['count'] ); ?></td>
+			</tr>
+			<?php
+		}
+		?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
