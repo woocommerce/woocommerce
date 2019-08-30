@@ -553,6 +553,15 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
+				'post_type_counts' => array(
+                    'description' => __('Total post count.', 'woocommerce'),
+                    'type'        => 'array',
+                    'context'     => array( 'view' ),
+                    'readonly'    => true,
+                    'items'       => array(
+                        'type' => 'string',
+                    ),
+                ),
 			),
 		);
 
@@ -575,6 +584,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'settings'           => $this->get_settings(),
 			'security'           => $this->get_security_info(),
 			'pages'              => $this->get_pages(),
+			'post_type_counts'   => $this->get_post_type_counts(),
 		);
 	}
 
