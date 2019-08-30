@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { withSearchedProducts } from '../../hocs';
+import ErrorMessage from '../api-error-placeholder/error-message.js';
 
 /**
  * The products control exposes a custom selector for searching and selecting
@@ -24,6 +25,7 @@ import { withSearchedProducts } from '../../hocs';
  * @return {Function} A functional component.
  */
 const ProductsControl = ( {
+	error,
 	onChange,
 	onSearch,
 	selected,
@@ -56,6 +58,13 @@ const ProductsControl = ( {
 			'woo-gutenberg-products-block'
 		),
 	};
+
+	if ( error ) {
+		return (
+			<ErrorMessage error={ error } />
+		);
+	}
+
 	return (
 		<SearchListControl
 			className="woocommerce-products"

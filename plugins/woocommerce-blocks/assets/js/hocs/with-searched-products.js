@@ -11,6 +11,7 @@ import { IS_LARGE_CATALOG } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import { getProducts } from '../components/utils';
+import { formatError } from '../base/utils/errors.js';
 
 /**
  * A higher order component that enhances the provided component with products
@@ -30,6 +31,7 @@ const withSearchedProducts = createHigherOrderComponent( ( OriginalComponent ) =
 				list: [],
 				loading: true,
 			};
+			this.setError = this.setError.bind( this );
 			this.debouncedOnSearch = debounce( this.onSearch.bind( this ), 400 );
 		}
 
@@ -39,9 +41,7 @@ const withSearchedProducts = createHigherOrderComponent( ( OriginalComponent ) =
 				.then( ( list ) => {
 					this.setState( { list, loading: false } );
 				} )
-				.catch( () => {
-					this.setState( { list: [], loading: false } );
-				} );
+				.catch( this.setError );
 		}
 
 		componentWillUnmount() {
@@ -54,17 +54,24 @@ const withSearchedProducts = createHigherOrderComponent( ( OriginalComponent ) =
 				.then( ( list ) => {
 					this.setState( { list, loading: false } );
 				} )
-				.catch( () => {
-					this.setState( { list: [], loading: false } );
-				} );
+				.catch( this.setError );
+		}
+
+		setError( errorResponse ) {
+			errorResponse.json().then( ( apiError ) => {
+				const error = formatError( apiError );
+
+				this.setState( { list: [], loading: false, error } );
+			} );
 		}
 
 		render() {
-			const { list, loading } = this.state;
+			const { error, list, loading } = this.state;
 			const { selected } = this.props;
 			return (
 				<OriginalComponent
 					{ ...this.props }
+					error={ error }
 					products={ list }
 					isLoading={ loading }
 					selected={ list.filter(

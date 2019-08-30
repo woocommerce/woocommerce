@@ -8,6 +8,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
  * Internal dependencies
  */
 import { getProduct } from '../components/utils';
+import { formatError } from '../base/utils/errors.js';
 
 const withProduct = createHigherOrderComponent(
 	( OriginalComponent ) => {
@@ -45,13 +46,7 @@ const withProduct = createHigherOrderComponent(
 				getProduct( productId ).then( ( product ) => {
 					this.setState( { product, loading: false, error: null } );
 				} ).catch( ( apiError ) => {
-					const error = typeof apiError === 'object' && apiError.hasOwnProperty( 'message' ) ? {
-						apiMessage: apiError.message,
-					} : {
-						// If we can't get any message from the API, set it to null and
-						// let <ApiErrorPlaceholder /> handle the message to display.
-						apiMessage: null,
-					};
+					const error = formatError( apiError );
 
 					this.setState( { product: null, loading: false, error } );
 				} );
