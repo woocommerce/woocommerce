@@ -650,7 +650,7 @@ class WC_Countries {
 			),
 			'country'    => array(
 				'type'         => 'country',
-				'label'        => __( 'Country', 'woocommerce' ),
+				'label'        => __( 'Country / Region', 'woocommerce' ),
 				'required'     => true,
 				'class'        => array( 'form-row-wide', 'address-field', 'update_totals_on_change' ),
 				'autocomplete' => 'country',
