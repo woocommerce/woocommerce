@@ -126,7 +126,7 @@ class Assets {
 	}
 
 	/**
-	 * Returns block-related data for enqueued wc-shared-settings script.
+	 * Returns block-related data for enqueued wc-block-settings script.
 	 *
 	 * This is used to map site settings & data into JS-accessible variables.
 	 *
