@@ -54,15 +54,17 @@ class Onboarding {
 		}
 
 		// Include WC Admin Onboarding classes.
-		// @todo We should return early if should_show_profiler and a new method should_show_tasks are both false.
-		OnboardingTasks::get_instance();
+		if ( $this->should_show_tasks() ) {
+			OnboardingTasks::get_instance();
+		}
 
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after Automattic\WooCommerce\Admin\Loader.
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
-		add_action( 'current_screen', array( $this, 'reset_onboarding' ) );
+		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
+		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 	}
@@ -89,8 +91,7 @@ class Onboarding {
 	 * @return bool
 	 */
 	public function should_show_tasks() {
-		// @todo Implement logic for this.
-		return true;
+		return 'no' === get_option( 'woocommerce_task_list_hidden', 'no' );
 	}
 
 	/**
@@ -317,8 +318,9 @@ class Onboarding {
 		$profile['wccom_connected'] = empty( $wccom_auth['access_token'] ) ? false : true;
 
 		$settings['onboarding'] = array(
-			'industries' => self::get_allowed_industries(),
-			'profile'    => $profile,
+			'industries'     => self::get_allowed_industries(),
+			'profile'        => $profile,
+			'taskListHidden' => ! $this->should_show_tasks(),
 		);
 
 		// Only fetch if the onboarding wizard is incomplete.
@@ -414,7 +416,7 @@ class Onboarding {
 		}
 
 		$help_tabs = $screen->get_help_tabs();
-
+		
 		foreach ( $help_tabs as $help_tab ) {
 			if ( 'woocommerce_onboard_tab' !== $help_tab['id'] ) {
 				continue;
@@ -423,19 +425,32 @@ class Onboarding {
 			$screen->remove_help_tab( 'woocommerce_onboard_tab' );
 			$help_tab['content'] = '<h2>' . __( 'Setup wizard', 'woocommerce-admin' ) . '</h2>' .
 				'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-				'<p><a href="' . wc_admin_url( '&reset_onboarding=1' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
+				'<p><a href="' . wc_admin_url( '&reset_profiler=1' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
 			$screen->add_help_tab( $help_tab );
 		}
+
+		$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
+		$task_list_tab    = array(
+			'id'      => 'woocommerce_task_list_tab',
+			'title'   => __( 'Task list', 'woocommerce-admin' ),
+			'content' => '<h2>' . __( 'Task list', 'woocommerce-admin' ) . '</h2>' .
+				'<p>' . __( 'If you need to enable or disable the task list, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+				( 'yes' === $task_list_hidden
+					? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+					: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+				),
+		);
+		$screen->add_help_tab( $task_list_tab );
 	}
 
 	/**
 	 * Reset the onboarding profiler and redirect to the profiler.
 	 */
-	public static function reset_onboarding() {
+	public static function reset_profiler() {
 		if (
 			! Loader::is_admin_page() ||
-			! isset( $_GET['reset_onboarding'] ) || // WPCS: CSRF ok.
-			1 !== absint( $_GET['reset_onboarding'] ) // WPCS: CSRF ok.
+			! isset( $_GET['reset_profiler'] ) || // WPCS: CSRF ok.
+			1 !== absint( $_GET['reset_profiler'] ) // WPCS: CSRF ok.
 		) {
 			return;
 		}
@@ -451,5 +466,24 @@ class Onboarding {
 			)
 		);
 		$response = rest_do_request( $request );
+		wp_safe_redirect( wc_admin_url() );
+		exit;
+	}
+
+	/**
+	 * Reset the onboarding task list and redirect to the dashboard.
+	 */
+	public static function reset_task_list() {
+		if (
+			! Loader::is_admin_page() ||
+			! isset( $_GET['reset_task_list'] ) // WPCS: CSRF ok.
+		) {
+			return;
+		}
+
+		$new_value = 1 === absint( $_GET['reset_task_list'] ) ? 'no' : 'yes'; // WPCS: CSRF ok.
+		update_option( 'woocommerce_task_list_hidden', $new_value );
+		wp_safe_redirect( wc_admin_url() );
+		exit;
 	}
 }

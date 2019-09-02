@@ -27,8 +27,11 @@ class Dashboard extends Component {
 		}
 
 		// @todo This should be replaced by a check of tasks from the REST API response from #1897.
-		const requiredTasksComplete = true;
-		if ( window.wcAdminFeatures.onboarding && ! requiredTasksComplete ) {
+		if (
+			window.wcAdminFeatures.onboarding &&
+			wcSettings.onboarding &&
+			! wcSettings.onboarding.taskListHidden
+		) {
 			return <TaskList query={ query } />;
 		}
 
