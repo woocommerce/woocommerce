@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { filter, noop } from 'lodash';
+import { filter } from 'lodash';
 import { compose } from '@wordpress/compose';
 
 /**
@@ -17,6 +17,7 @@ import { updateQueryString } from '@woocommerce/navigation';
  * Internal depdencies
  */
 import './style.scss';
+import Appearance from './tasks/appearance';
 import Connect from './tasks/connect';
 import Products from './tasks/products';
 import Shipping from './tasks/shipping';
@@ -72,12 +73,13 @@ class TaskDashboard extends Component {
 				visible: true,
 			},
 			{
-				key: 'personalize-store',
+				key: 'appearance',
 				title: __( 'Personalize your store', 'woocommerce-admin' ),
 				content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
 				before: <i className="material-icons-outlined">palette</i>,
 				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: noop,
+				onClick: () => updateQueryString( { task: 'appearance' } ),
+				container: <Appearance />,
 				visible: true,
 			},
 			{

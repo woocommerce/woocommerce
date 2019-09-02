@@ -10,7 +10,8 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { JETPACK_NAMESPACE, NAMESPACE, pluginNames } from './constants';
+import { JETPACK_NAMESPACE, WC_ADMIN_NAMESPACE } from '../constants';
+import { pluginNames } from './constants';
 
 function read( resourceNames, fetch = apiFetch ) {
 	return [
@@ -33,7 +34,7 @@ function readProfileItems( resourceNames, fetch ) {
 	const resourceName = 'onboarding-profile';
 
 	if ( resourceNames.includes( resourceName ) ) {
-		const url = NAMESPACE + '/onboarding/profile';
+		const url = WC_ADMIN_NAMESPACE + '/onboarding/profile';
 
 		return [
 			fetch( { path: url } )
@@ -51,7 +52,7 @@ function updateProfileItems( resourceNames, data, fetch ) {
 	const resourceName = 'onboarding-profile';
 
 	if ( resourceNames.includes( resourceName ) ) {
-		const url = NAMESPACE + '/onboarding/profile';
+		const url = WC_ADMIN_NAMESPACE + '/onboarding/profile';
 
 		return [
 			fetch( {
@@ -103,7 +104,7 @@ function profileItemToResource( items ) {
 function readActivePlugins( resourceNames, fetch ) {
 	const resourceName = 'active-plugins';
 	if ( resourceNames.includes( resourceName ) ) {
-		const url = NAMESPACE + '/onboarding/plugins/active';
+		const url = WC_ADMIN_NAMESPACE + '/onboarding/plugins/active';
 
 		return [
 			fetch( { path: url } )
@@ -131,7 +132,7 @@ function activatePlugins( resourceNames, data, fetch ) {
 	const resourceName = 'plugin-activate';
 	if ( resourceNames.includes( resourceName ) ) {
 		const plugins = data[ resourceName ];
-		const url = NAMESPACE + '/onboarding/plugins/activate';
+		const url = WC_ADMIN_NAMESPACE + '/onboarding/plugins/activate';
 		return [
 			fetch( {
 				path: url,
@@ -197,7 +198,7 @@ function readJetpackConnectUrl( resourceNames, fetch ) {
 	const resourceName = 'jetpack-connect-url';
 
 	if ( resourceNames.includes( resourceName ) ) {
-		const url = NAMESPACE + '/onboarding/plugins/connect-jetpack';
+		const url = WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-jetpack';
 
 		return [
 			fetch( {
@@ -245,7 +246,7 @@ function installPlugins( resourceNames, data, fetch ) {
 
 		return plugins.map( async plugin => {
 			return fetch( {
-				path: `${ NAMESPACE }/onboarding/plugins/install`,
+				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/install`,
 				method: 'POST',
 				data: {
 					plugin,

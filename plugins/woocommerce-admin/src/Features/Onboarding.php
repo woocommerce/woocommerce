@@ -54,6 +54,7 @@ class Onboarding {
 		}
 
 		// Include WC Admin Onboarding classes.
+		// @todo We should return early if should_show_profiler and a new method should_show_tasks are both false.
 		OnboardingTasks::get_instance();
 
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 ); // Run after Automattic\WooCommerce\Admin\Loader.
