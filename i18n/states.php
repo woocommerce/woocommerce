@@ -285,7 +285,7 @@ return array(
 		'CN27' => __( 'Gansu / &#29976;&#32899;', 'woocommerce' ),
 		'CN28' => __( 'Qinghai / &#38738;&#28023;', 'woocommerce' ),
 		'CN29' => __( 'Ningxia Hui / &#23425;&#22799;', 'woocommerce' ),
-		'CN30' => __( 'Macau / &#28595;&#38376;', 'woocommerce' ),
+		'CN30' => __( 'Macao / &#28595;&#38376;', 'woocommerce' ),
 		'CN31' => __( 'Tibet / &#35199;&#34255;', 'woocommerce' ),
 		'CN32' => __( 'Xinjiang / &#26032;&#30086;', 'woocommerce' ),
 	),
