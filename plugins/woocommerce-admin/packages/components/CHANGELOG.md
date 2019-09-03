@@ -1,6 +1,6 @@
 # 4.0.0
 - Added a new `<ScrollTo />` component.
-- Changed the <List /> `description` prop to `content` and allowed content nodes to be passed in addition to strings.
+- Changed the `<List />` `description` prop to `content` and allowed content nodes to be passed in addition to strings.
 
 # 3.2.0
 - AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.
