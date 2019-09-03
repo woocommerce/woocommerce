@@ -6,7 +6,9 @@ import { AdvancedFilters } from '@woocommerce/components';
 const { orderStatuses } = wcSettings;
 
 const path = ( new URL( document.location ) ).searchParams.get( 'path' ) || '/devdocs';
-const query = {};
+const query = {
+	component: 'advanced-filters',
+};
 
 const advancedFilters = {
 	title: 'Orders Match {{select /}} Filters',
