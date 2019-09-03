@@ -324,6 +324,12 @@ export class Autocomplete extends Component {
 									className={ classnames( 'woocommerce-search__autocomplete-result', className, {
 										'is-selected': index === selectedIndex,
 									} ) }
+									/*
+									 * On FF and Safari, if <Button> contains interior DOM nodes (i.e., <span>)
+									 * `handleFocusOutside` will be triggered before `onClick` and close the autocomplete.
+									 * Prevent focus from shifting to these nodes with onMouseDown.
+									 */
+									onMouseDown={ ( e ) => e.preventDefault() }
 									onClick={ () => this.select( option ) }
 								>
 									{ option.label }

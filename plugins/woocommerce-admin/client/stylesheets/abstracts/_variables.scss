@@ -36,6 +36,8 @@ $default-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-San
 	'Helvetica Neue', sans-serif;
 $default-font-size: 13px;
 $default-line-height: 1.4;
+$white: $studio-white;
+$black: $studio-black;
 $blue-medium-900: #006589;
 $blue-medium-800: #00739c;
 $blue-medium-700: #007fac;
@@ -73,13 +75,36 @@ $radius-round-rectangle: 4px;
 $icon-button-size: 36px;
 $icon-button-size-small: 24px;
 
+// Newspack variables. These are temporary until we move away from Newspack components.
+$muriel-white: $studio-white;
+$muriel-hot-pink-400: $studio-pink-40;
+$muriel-hot-pink-500: $studio-pink-50;
+$muriel-hot-pink-700: $studio-pink-70;
+$muriel-hot-purple-600: $studio-woocommerce-purple-60;
+$muriel-gray-0: $studio-gray-0;
+$muriel-gray-50: $studio-gray-5;
+$muriel-gray-100: $studio-gray-10;
+$muriel-gray-200: $studio-gray-20;
+$muriel-gray-300: $studio-gray-30;
+$muriel-gray-500: $studio-gray-50;
+$muriel-gray-600: $studio-gray-60;
+$muriel-gray-700: $studio-gray-70;
+$muriel-gray-800: $studio-gray-80;
+$muriel-green-400: $studio-green-40;
+$muriel-red-500: $studio-red-50;
+
 // WordPress defaults
 $adminbar-height: 32px;
 $adminbar-height-mobile: 46px;
 
+// wp-admin colors
+$wp-admin-background: #f1f1f1;
+$wp-admin-sidebar: #24292d;
+
 // Muriel
 $muriel-box-shadow-1dp: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
 	0 1px 3px 0 rgba(0, 0, 0, 0.12);
+$muriel-box-shadow-6dp: 0 3px 5px rgba(0, 0, 0, 0.2), 0 1px 18px rgba(0, 0, 0, 0.12),
+	0 6px 10px rgba(0, 0, 0, 0.14);
 $muriel-box-shadow-8dp: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
 	0 3px 14px 2px rgba(0, 0, 0, 0.12);
-$muriel-primary-500: #005fb7;

@@ -15,10 +15,10 @@ import { updateQueryString } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import AdvancedFilters from './advanced';
-import CompareFilter from './compare';
-import DateRangeFilterPicker from './date';
-import FilterPicker from './filter';
+import AdvancedFilters from '../advanced-filters';
+import CompareFilter from '../compare-filter';
+import DateRangeFilterPicker from '../date-range-filter-picker';
+import FilterPicker from '../filter-picker';
 import { H, Section } from '../section';
 
 /**

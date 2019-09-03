@@ -118,11 +118,10 @@ class FeaturePlugin {
 		$this->define( 'WC_ADMIN_ABSPATH', dirname( __DIR__ ) . '/' );
 		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'dist/' );
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'dist/' );
-		$this->define( 'WC_ADMIN_FEATURES_PATH', WC_ADMIN_ABSPATH . 'includes/features/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_ADMIN_ABSPATH . 'woocommerce-admin.php' );
 		// WARNING: Do not directly edit this version number constant.
 		// It is updated as part of the prebuild process from the package.json value.
-		$this->define( 'WC_ADMIN_VERSION_NUMBER', '0.17.0' );
+		$this->define( 'WC_ADMIN_VERSION_NUMBER', '0.18.0' );
 	}
 
 	/**
@@ -164,6 +163,11 @@ class FeaturePlugin {
 	public function replace_actionscheduler_store_class( $store_class ) {
 		// Don't override any other overrides.
 		if ( 'ActionScheduler_wpPostStore' !== $store_class ) {
+			return $store_class;
+		}
+
+		// Don't override if action scheduler is 3.0.0 or greater.
+		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
 			return $store_class;
 		}
 

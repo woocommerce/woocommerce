@@ -75,28 +75,176 @@
 	}
 }
 
-.woocommerce-dashboard__body {
-	background: $muriel-gray-0;
-	color: $muriel-gray-600;
-	font-family: $default-font;
+.woocommerce-onboarding {
+	.woocommerce-stepper .woocommerce-stepper__step {
+		.woocommerce-stepper__step-label {
+			color: $studio-gray-80;
+		}
 
-	#wpbody-content {
-		min-height: 100vh;
+		&.is-active,
+		&.is-complete {
+			.woocommerce-stepper__step-icon {
+				background: $studio-woocommerce-purple-60;
+				color: $studio-white;
+			}
+
+			.woocommerce-stepper__step-label {
+				color: $studio-gray-90;
+			}
+		}
+
+		.woocommerce-spinner {
+			background: $studio-woocommerce-purple-60;
+		}
 	}
 
-	/* Hide wp-admin and WooCommerce elements when the dashboard body class is present */
-	#adminmenumain,
-	.woocommerce-layout__header,
-	.update-nag,
-	.woocommerce-store-alerts,
-	.woocommerce-message,
-	.notice,
-	.error,
-	.updated {
-		display: none;
+	/* Muriel style overrides */
+	.muriel-component {
+		margin-top: $gap;
+		margin-bottom: $gap;
 	}
 
-	#wpcontent {
-		margin-left: 0;
+	.components-base-control.has-error {
+		margin-bottom: $gap * 2 !important;
+		border-color: $studio-red-50;
+
+		.components-base-control__help {
+			top: 100%;
+			position: absolute;
+			margin-top: $gap-smallest;
+			font-size: 12px;
+			font-style: normal;
+			color: $studio-red-50;
+		}
+	}
+
+	.muriel-input-text {
+		&.empty {
+			.components-base-control__label {
+				display: none;
+			}
+
+			input {
+				top: 14px;
+			}
+		}
+
+		input[type='text']:focus {
+			box-shadow: none;
+			border: 0;
+		}
+	}
+
+	.muriel-input-text label,
+	.muriel-select label {
+		display: initial;
+		width: auto;
+		right: auto;
+		left: $gap;
+	}
+
+	.muriel-select select {
+		left: 15px;
+	}
+
+	.muriel-select.empty label {
+		top: 15px;
+	}
+
+	.muriel-select::after {
+		margin-top: -$gap-smallest;
+	}
+
+	.muriel-input-text,
+	.muriel-select {
+		&.with-value,
+		&.active {
+			label {
+				display: block;
+				top: 8px;
+			}
+
+			input,
+			select {
+				top: 24px;
+			}
+		}
+	}
+
+	.muriel-input-text.active,
+	.muriel-select.active {
+		box-shadow: 0 0 0 2px $studio-woocommerce-purple-60;
+		border-color: transparent;
+	}
+
+	.muriel-checkbox label.components-checkbox-control__label {
+		margin-left: $gap-smaller;
+	}
+
+	.muriel-checkbox input[type='checkbox'] {
+		width: 18px;
+		height: 18px;
+	}
+
+	.muriel-checkbox input[type='checkbox']:checked::before {
+		font-size: 18px;
+		margin-left: -3px;
+		margin-top: -1px;
+	}
+
+	.muriel-button.is-button {
+		height: 48px;
+
+		&.is-busy {
+			cursor: progress;
+			/* stylelint-disable function-parentheses-space-inside, function-comma-space-after */
+			background-image: linear-gradient(
+				-45deg,
+				$studio-pink-50 28%,
+				color($studio-pink-50 shade(30%)) 28%,
+				color($studio-pink-50 shade(30%)) 72%,
+				$studio-pink-50 72%
+			) !important; // Gutenberg & PostCSS Add the gradient late in output, based on the 'primary' color, which in our case is purple. Our busy state should be pink.
+			/* stylelint-enable */
+		}
+	}
+
+	.muriel-checkbox input[type='checkbox']:checked {
+		background-color: $studio-woocommerce-purple-60;
+		border-color: $studio-woocommerce-purple-60;
+	}
+
+	.components-form-toggle {
+		display: inline-block;
+
+		label {
+			font-size: 14px;
+		}
+
+		.components-base-control {
+			display: inline-block;
+		}
+
+		.components-form-toggle__track {
+			width: 36px;
+			max-width: 36px;
+			height: 18px;
+			max-height: 18px;
+		}
+
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.muriel-checkbox label.components-checkbox-control__label {
+			margin-left: $gap-large;
+		}
+
+		&.is-checked {
+			.components-form-toggle__track {
+				background-color: $studio-woocommerce-purple-60;
+				border-color: $studio-woocommerce-purple-60;
+			}
+		}
 	}
 }

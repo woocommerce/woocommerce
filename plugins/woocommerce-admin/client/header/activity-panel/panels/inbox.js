@@ -93,7 +93,7 @@ class InboxPanel extends Component {
 					actioned: 'unactioned' !== note.status,
 				} ) }
 				title={ note.title }
-				date={ note.date_created_gmt }
+				date={ note.date_created }
 				icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
 				unread={
 					! lastRead ||

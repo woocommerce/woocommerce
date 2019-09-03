@@ -2,11 +2,11 @@
 
 .woocommerce-profile-wizard__body {
 	.woocommerce-profile-wizard__container a {
-		color: $muriel-gray-600;
+		color: $studio-pink-50;
 	}
 
 	.woocommerce-profile-wizard__skip.components-button.is-link {
-		color: $muriel-gray-600;
+		color: $studio-gray-60;
 		margin-top: 0;
 		margin-bottom: 0;
 		font-weight: normal;
@@ -18,9 +18,9 @@
 		h1,
 		h2,
 		h3 {
-			color: $muriel-gray-800;
+			color: $studio-gray-80;
 		}
-		color: $muriel-gray-600;
+		color: $studio-gray-60;
 		text-align: left;
 
 		.muriel-button {
@@ -36,47 +36,25 @@
 		}
 	}
 
-	.woocommerce-stepper .woocommerce-stepper__step {
-		.woocommerce-stepper__step-label {
-			color: $muriel-gray-800;
-		}
-
-		&.is-active,
-		&.is-complete {
-			.woocommerce-stepper__step-icon {
-				background: $muriel-hot-purple-600;
-				color: $muriel-white;
-			}
-
-			.woocommerce-stepper__step-label {
-				color: $muriel-gray-900;
-			}
-		}
-
-		.woocommerce-spinner {
-			background: $muriel-hot-purple-600;
-		}
-	}
-
 	.woocommerce-profile-wizard__header {
 		height: 56px;
-		border-bottom: 1px solid $muriel-gray-50;
+		border-bottom: 1px solid $studio-gray-5;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: $muriel-white;
+		background: $studio-white;
 
 		svg > g {
 			transform: translateX(25%);
 		}
 
 		.woocommerce-profile-wizard__plus {
-			stroke: $muriel-gray-800;
+			stroke: $studio-gray-80;
 		}
 	}
 
 	.woocommerce-profile-wizard__header-title {
-		color: $muriel-gray-800;
+		color: $studio-gray-80;
 		font-size: 24px;
 		line-height: 32px;
 		font-weight: 400;
@@ -84,7 +62,7 @@
 	}
 
 	.woocommerce-profile-wizard__header-subtitle {
-		color: $muriel-gray-600;
+		color: $studio-gray-60;
 		font-size: 16px;
 		line-height: 24px;
 		font-weight: 400;
@@ -137,114 +115,12 @@
 		padding-right: 0;
 	}
 
-	/* Muriel style overrides */
-	.muriel-component {
-		margin-top: $gap;
-		margin-bottom: $gap;
-	}
-
-	.components-base-control.has-error {
-		margin-bottom: $gap * 2 !important;
-		border-color: $muriel-red-500;
-
-		.components-base-control__help {
-			top: 100%;
-			position: absolute;
-			margin-top: $gap-smallest;
-			font-size: 12px;
-			font-style: normal;
-			color: $muriel-red-500;
-		}
-	}
-
 	.woocommerce-profile-wizard__error {
 		display: block;
 		margin-top: $gap;
 		margin-bottom: $gap;
 		font-size: 12px;
-		color: $muriel-red-500;
-	}
-
-	.muriel-input-text {
-		&.empty {
-			.components-base-control__label {
-				display: none;
-			}
-
-			input {
-				top: 14px;
-			}
-		}
-
-		input[type='text']:focus {
-			box-shadow: none;
-			border: 0;
-		}
-	}
-
-	.muriel-input-text label,
-	.muriel-select label {
-		display: initial;
-		width: auto;
-		right: auto;
-		left: $gap;
-	}
-
-	.muriel-select select {
-		left: 15px;
-	}
-
-	.muriel-select.empty label {
-		top: 15px;
-	}
-
-	.muriel-select::after {
-		margin-top: -$gap-smallest;
-	}
-
-	.muriel-input-text,
-	.muriel-select {
-		&.with-value,
-		&.active {
-			label {
-				top: 8px;
-			}
-
-			input,
-			select {
-				top: 24px;
-			}
-		}
-	}
-
-	.muriel-input-text.active,
-	.muriel-select.active {
-		box-shadow: 0 0 0 2px $muriel-hot-purple-600;
-		border-color: transparent;
-	}
-
-	.muriel-checkbox label.components-checkbox-control__label {
-		margin-left: $gap-smaller;
-	}
-
-	.muriel-checkbox input[type='checkbox'] {
-		width: 18px;
-		height: 18px;
-	}
-
-	.muriel-checkbox input[type='checkbox']:checked::before {
-		font-size: 18px;
-		margin-left: -3px;
-		margin-top: -1px;
-	}
-
-	.muriel-button.is-button {
-		height: 48px;
-	}
-
-	.muriel-checkbox input:checked {
-		background-color: $muriel-hot-purple-600;
-		border-color: $muriel-hot-purple-600;
+		color: $studio-red-50;
 	}
 
 	.woocommerce-profile-wizard__benefit {
@@ -266,7 +142,7 @@
 		.woocommerce-profile-wizard__benefit-content p {
 			padding-bottom: $gap;
 			margin-top: 0;
-			border-bottom: 1px solid $muriel-gray-50;
+			border-bottom: 1px solid $studio-gray-5;
 			font-size: 14px;
 		}
 
@@ -291,42 +167,6 @@
 			box-sizing: unset;
 			max-width: 100px;
 			max-height: 50%;
-		}
-	}
-
-	.woocommerce-profile-wizard__toggle {
-		label {
-			font-size: 14px;
-		}
-
-		.components-base-control {
-			display: inline-block;
-		}
-
-		&.components-form-toggle {
-			display: inline-block;
-		}
-
-		&.components-form-toggle .components-form-toggle__track {
-			width: 36px;
-			max-width: 36px;
-			height: 18px;
-			max-height: 18px;
-		}
-
-		.components-base-control__field {
-			margin-bottom: 0;
-		}
-
-		.muriel-checkbox label.components-checkbox-control__label {
-			margin-left: $gap-large;
-		}
-
-		&.components-form-toggle.is-checked {
-			.components-form-toggle__track {
-				background-color: $muriel-hot-purple-600;
-				border-color: $muriel-hot-purple-600;
-			}
 		}
 	}
 
@@ -368,7 +208,7 @@
 				left: $gap-large * 2 + $gap;
 				width: calc(100% - #{$gap-large * 2 + $gap});
 				height: 1px;
-				background-color: $muriel-gray-50;
+				background-color: $studio-gray-5;
 				bottom: 0;
 			}
 
@@ -387,7 +227,7 @@
 			}
 
 			label.components-checkbox-control__label {
-				color: $muriel-gray-800;
+				color: $studio-gray-80;
 			}
 
 			label.components-checkbox-control__label,
@@ -396,7 +236,7 @@
 			}
 
 			.components-base-control__help {
-				color: $muriel-gray-600;
+				color: $studio-gray-60;
 				font-size: 14px;
 				line-height: 20px;
 				margin-top: 3px;
@@ -423,7 +263,7 @@
 .woocommerce-profile-wizard__plugins-card {
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
-		margin-left: 64px;
+		margin-left: 44px;
 		min-height: 28px;
 
 		button.muriel-button {
@@ -431,6 +271,7 @@
 			height: 40px;
 			min-width: auto;
 			display: initial;
+			margin-right: $gap-small;
 		}
 	}
 }
@@ -445,7 +286,7 @@
 		z-index: 999;
 		width: 100%;
 		bottom: 0;
-		border-top: 1px solid $muriel-gray-50;
+		border-top: 1px solid $studio-gray-5;
 		border-bottom: none;
 	}
 

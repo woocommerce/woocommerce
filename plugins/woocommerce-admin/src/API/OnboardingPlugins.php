@@ -8,6 +8,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API;
+use Automattic\WooCommerce\Admin\Features\Onboarding;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,11 +52,24 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/active',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'active_plugins' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/activate',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'activate_plugin' ),
+					'callback'            => array( $this, 'activate_plugins' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_item_schema' ),
@@ -116,27 +130,13 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get an array of plugins that can be installed & activated via the endpoints.
-	 */
-	public function get_allowed_plugins() {
-		return apply_filters(
-			'woocommerce_onboarding_plugins_whitelist',
-			array(
-				'facebook-for-woocommerce' => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
-				'jetpack'                  => 'jetpack/jetpack.php',
-				'woocommerce-services'     => 'woocommerce-services/woocommerce-services.php',
-			)
-		);
-	}
-
-	/**
 	 * Installs the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array Plugin Status
 	 */
 	public function install_plugin( $request ) {
-		$allowed_plugins = $this->get_allowed_plugins();
+		$allowed_plugins = Onboarding::get_allowed_plugins();
 		$plugin          = sanitize_title_with_dashes( $request['plugin'] );
 		if ( ! in_array( $plugin, array_keys( $allowed_plugins ), true ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
@@ -191,36 +191,53 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Returns a list of active plugins.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array Active plugins
+	 */
+	public function active_plugins( $request ) {
+		$plugins = Onboarding::get_active_plugins();
+		return( array(
+			'plugins' => array_values( $plugins ),
+		) );
+	}
+
+	/**
 	 * Activate the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array Plugin Status
 	 */
-	public function activate_plugin( $request ) {
-		$allowed_plugins = $this->get_allowed_plugins();
-		$plugin          = sanitize_title_with_dashes( $request['plugin'] );
-		if ( ! in_array( $plugin, array_keys( $allowed_plugins ), true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
+	public function activate_plugins( $request ) {
+		$allowed_plugins = Onboarding::get_allowed_plugins();
+		$_plugins        = explode( ',', $request['plugins'] );
+		$plugins         = array_intersect( array_keys( $allowed_plugins ), $_plugins );
+
+		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
+			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Invalid plugins.', 'woocommerce-admin' ), 404 );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$slug              = $plugin;
-		$path              = $allowed_plugins[ $slug ];
-		$installed_plugins = get_plugins();
+		foreach( $plugins as $plugin ) {
+			$slug              = $plugin;
+			$path              = $allowed_plugins[ $slug ];
+			$installed_plugins = get_plugins();
 
-		if ( ! in_array( $path, array_keys( $installed_plugins ), true ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'Invalid plugin.', 'woocommerce-admin' ), 404 );
-		}
+			if ( ! in_array( $path, array_keys( $installed_plugins ), true ) ) {
+				return new \WP_Error( 'woocommerce_rest_invalid_plugin', sprintf( __( 'Invalid plugin %s.', 'woocommerce-admin' ), $slug ), 404 );
+			}
 
-		$result = activate_plugin( $path );
-		if ( ! is_null( $result ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugin', __( 'The requested plugin could not be activated.', 'woocommerce-admin' ), 500 );
+			$result = activate_plugin( $path );
+			if ( ! is_null( $result ) ) {
+				return new \WP_Error( 'woocommerce_rest_invalid_plugin', sprintf( __( 'The requested plugins could not be activated.', 'woocommerce-admin' ), $slug ), 500 );
+			}
 		}
 
 		return( array(
-			'slug'   => $slug,
-			'name'   => $installed_plugins[ $path ]['Name'],
+			'activatedPlugins' => array_values( $plugins ),
+			'active' => Onboarding::get_active_plugins(),
 			'status' => 'success',
 		) );
 	}
@@ -231,7 +248,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * @return array Connection URL for Jetpack
 	 */
 	public function connect_jetpack() {
-		if ( ! class_exists( 'Jetpack' ) ) {
+		if ( ! class_exists( '\Jetpack' ) ) {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
 		}
 
@@ -248,11 +265,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$connect_url = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
-		// Redirect to local calypso instead of production.
-		if ( defined( 'WOOCOMMERCE_CALYPSO_LOCAL' ) && WOOCOMMERCE_CALYPSO_LOCAL ) {
+		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
 			$connect_url = add_query_arg(
 				array(
-					'calypso_env' => 'development',
+					'calypso_env' => WOOCOMMERCE_CALYPSO_ENVIRONMENT,
 				),
 				$connect_url
 			);
@@ -310,12 +326,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			\WC_Helper_API::url( 'oauth/authorize' )
 		);
 
-		// Redirect to local calypso instead of production.
-		// @todo WordPress.com Connect / the OAuth flow does not currently respect this, but a patch is in the works to make this easier.
-		if ( defined( 'WOOCOMMERCE_CALYPSO_LOCAL' ) && WOOCOMMERCE_CALYPSO_LOCAL ) {
+		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
 			$connect_url = add_query_arg(
 				array(
-					'calypso_env' => 'development',
+					'calypso_env' => WOOCOMMERCE_CALYPSO_ENVIRONMENT,
 				),
 				$connect_url
 			);

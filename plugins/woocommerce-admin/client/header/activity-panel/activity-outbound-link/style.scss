@@ -13,7 +13,7 @@
 	font-weight: 500;
 	line-height: 18px;
 	margin: 0;
-	color: $woocommerce;
+	color: $studio-woocommerce-purple;
 	text-decoration: none;
 
 	.gridicon {
@@ -21,33 +21,33 @@
 	}
 
 	&:hover {
-		background: $white;
-		color: $woocommerce;
+		background: $studio-white;
+		color: $studio-woocommerce-purple;
 	}
 
 	&:active {
 		background: $core-grey-light-100;
-		color: $woocommerce-700;
+		color: $studio-woocommerce-purple-70;
 	}
 
 	&:focus {
-		color: $woocommerce;
+		color: $studio-woocommerce-purple;
 		background: $core-grey-light-200;
-		box-shadow: inset 0 0 0 1px $box-shadow-blue, inset 0 0 0 2px #fff;
+		box-shadow: inset 0 0 0 1px $box-shadow-blue, inset 0 0 0 2px $studio-white;
 	}
 
 	&:hover,
 	&:focus {
 		.gridicon {
 			display: initial;
-			color: $woocommerce;
+			color: $studio-woocommerce-purple;
 		}
 	}
 
 	&:active {
 		.gridicon {
 			display: initial;
-			color: $woocommerce-700;
+			color: $studio-woocommerce-purple-70;
 		}
 	}
 }

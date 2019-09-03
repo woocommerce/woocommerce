@@ -230,6 +230,8 @@ class ReportsSync {
 				self::SINGLE_ORDER_IMPORT_ACTION,
 			);
 			$store->clear_pending_wcadmin_actions( $action_types );
+		} elseif ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
+			$store->cancel_actions_by_group( self::QUEUE_GROUP );
 		} else {
 			self::queue()->cancel_all( null, array(), self::QUEUE_GROUP );
 		}

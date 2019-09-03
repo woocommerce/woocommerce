@@ -47,9 +47,17 @@ class OnboardingTasks {
 	 * Constructor
 	 */
 	public function __construct() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 ); // Run after Onboarding.
 		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
 		add_action( 'admin_init', array( $this, 'check_active_task_completion' ), 1 );
+	}
+
+	/**
+	 * Enqueue scripts and styles.
+	 */
+	public function add_media_scripts() {
+		wp_enqueue_media();
 	}
 
 	/**
@@ -71,7 +79,10 @@ class OnboardingTasks {
 			set_transient( self::TASKS_TRANSIENT, $tasks, DAY_IN_SECONDS );
 		}
 
-		$settings['onboarding']['tasks'] = $tasks;
+		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
+		$settings['onboarding']['customLogo']                     = get_theme_mod( 'custom_logo', false );
+		$settings['onboarding']['tasks']                          = $tasks;
+		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 
 		return $settings;
 	}
@@ -127,5 +138,20 @@ class OnboardingTasks {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get an array of countries that support automated tax.
+	 *
+	 * @return array
+	 */
+	public static function get_automated_tax_supported_countries() {
+		// https://developers.taxjar.com/api/reference/#countries .
+		$tax_supported_countries = array_merge(
+			array( 'US', 'CA', 'AU' ),
+			WC()->countries->get_european_union_countries()
+		);
+
+		return $tax_supported_countries;
 	}
 }

@@ -29,7 +29,7 @@ class List extends Component {
 		return (
 			<ul className={ listClassName } role="menu">
 				{ items.map( ( item, i ) => {
-					const { after, before, className: itemClasses, description, href, onClick, target, title } = item;
+					const { after, before, className: itemClasses, content, href, onClick, target, title } = item;
 					const hasAction = 'function' === typeof onClick || href;
 					const itemClassName = classnames( 'woocommerce-list__item', itemClasses, {
 						'has-action': hasAction,
@@ -63,9 +63,9 @@ class List extends Component {
 									<span className="woocommerce-list__item-title">
 										{ title }
 									</span>
-									{ description &&
-										<span className="woocommerce-list__item-description">
-											{ description }
+									{ content &&
+										<span className="woocommerce-list__item-content">
+											{ content }
 										</span>
 									}
 								</div>
@@ -106,9 +106,12 @@ List.propTypes = {
 			 */
 			className: PropTypes.string,
 			/**
-			 * Description displayed beneath the list item title.
+			 * Content displayed beneath the list item title.
 			 */
-			description: PropTypes.string,
+			content: PropTypes.oneOfType( [
+				PropTypes.string,
+				PropTypes.node,
+			] ),
 			/**
 			 * Href attribute used in a Link wrapped around the item.
 			 */

@@ -10,7 +10,7 @@
 
 	@include breakpoint( '<782px' ) {
 		position: relative;
-		background: $white;
+		background: $studio-white;
 		margin: 0;
 		padding: 0;
 		width: 100vw;
@@ -65,7 +65,7 @@
 		border: none;
 		outline: none;
 		cursor: pointer;
-		background-color: $white;
+		background-color: $studio-white;
 		color: $core-grey-dark-500;
 		max-width: min-content;
 		min-width: 80px;
@@ -74,7 +74,7 @@
 		height: $header-height;
 
 		&::before {
-			background-color: $woocommerce;
+			background-color: $studio-woocommerce-purple;
 			bottom: 0;
 			content: '';
 			height: 0;
@@ -103,7 +103,7 @@
 			position: absolute;
 			padding: 1px;
 			background: $core-orange;
-			border: 2px solid $white;
+			border: 2px solid $studio-white;
 			width: 4px;
 			height: 4px;
 			display: inline-block;
@@ -163,7 +163,7 @@
 	position: absolute;
 	padding: 1px;
 	background: $core-orange;
-	border: 2px solid $white;
+	border: 2px solid $studio-white;
 	width: 4px;
 	height: 4px;
 	display: inline-block;
@@ -239,7 +239,7 @@
 	.woocommerce-flag {
 		position: relative;
 		top: 16px;
-		border: 2px solid $white;
+		border: 2px solid $studio-white;
 	}
 }
 

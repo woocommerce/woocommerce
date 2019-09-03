@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { filter, noop } from 'lodash';
+import { filter } from 'lodash';
 import { compose } from '@wordpress/compose';
 
 /**
@@ -17,28 +17,34 @@ import { updateQueryString } from '@woocommerce/navigation';
  * Internal depdencies
  */
 import './style.scss';
+import Appearance from './tasks/appearance';
 import Connect from './tasks/connect';
 import Products from './tasks/products';
+import Shipping from './tasks/shipping';
+import Tax from './tasks/tax';
+import Payments from './tasks/payments';
 import withSelect from 'wc-api/with-select';
 
 class TaskDashboard extends Component {
 	componentDidMount() {
+		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-task-dashboard__body' );
 	}
 
 	componentWillUnmount() {
+		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-task-dashboard__body' );
 	}
 
 	getTasks() {
-		const { tasks } = wcSettings.onboarding;
+		const { shippingZonesCount, tasks } = wcSettings.onboarding;
 		const { profileItems, query } = this.props;
 
 		return [
 			{
 				key: 'connect',
 				title: __( 'Connect your store to WooCommerce.com', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Install and manage your extensions directly from your Dashboard',
 					'wooocommerce-admin'
 				),
@@ -51,7 +57,7 @@ class TaskDashboard extends Component {
 			{
 				key: 'products',
 				title: __( 'Add your first product', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Add products manually, import from a sheet or migrate from another platform',
 					'wooocommerce-admin'
 				),
@@ -67,48 +73,55 @@ class TaskDashboard extends Component {
 				visible: true,
 			},
 			{
-				key: 'personalize-store',
+				key: 'appearance',
 				title: __( 'Personalize your store', 'woocommerce-admin' ),
-				description: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
+				content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
 				before: <i className="material-icons-outlined">palette</i>,
 				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: noop,
+				onClick: () => updateQueryString( { task: 'appearance' } ),
+				container: <Appearance />,
 				visible: true,
 			},
 			{
 				key: 'shipping',
 				title: __( 'Set up shipping', 'woocommerce-admin' ),
-				description: __(
-					'Configure some basic shipping rates to get started',
-					'wooocommerce-admin'
-				),
-				before: <i className="material-icons-outlined">local_shipping</i>,
+				content: __( 'Configure some basic shipping rates to get started', 'wooocommerce-admin' ),
+				before:
+					shippingZonesCount > 0 ? (
+						<i className="material-icons-outlined">check_circle</i>
+					) : (
+						<i className="material-icons-outlined">local_shipping</i>
+					),
 				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: noop,
+				onClick: () => updateQueryString( { task: 'shipping' } ),
+				container: <Shipping />,
+				className: shippingZonesCount > 0 ? 'is-complete' : null,
 				visible: true,
 			},
 			{
 				key: 'tax',
 				title: __( 'Set up tax', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Choose how to configure tax rates - manually or automatically',
 					'wooocommerce-admin'
 				),
 				before: <i className="material-icons-outlined">account_balance</i>,
 				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: noop,
+				onClick: () => updateQueryString( { task: 'tax' } ),
+				container: <Tax />,
 				visible: true,
 			},
 			{
 				key: 'payments',
 				title: __( 'Set up payments', 'woocommerce-admin' ),
-				description: __(
+				content: __(
 					'Select which payment providers you’d like to use and configure them',
 					'wooocommerce-admin'
 				),
 				before: <i className="material-icons-outlined">payment</i>,
 				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: noop,
+				onClick: () => updateQueryString( { task: 'payments' } ),
+				container: <Payments />,
 				visible: true,
 			},
 		];
@@ -136,6 +149,7 @@ class TaskDashboard extends Component {
 						currentTask.container
 					) : (
 						<Card
+							className="woocommerce-task-card"
 							title={ __( 'Set up your store and start selling', 'woocommerce-admin' ) }
 							description={ __(
 								'Below you’ll find a list of the most important steps to get your store up and running.',

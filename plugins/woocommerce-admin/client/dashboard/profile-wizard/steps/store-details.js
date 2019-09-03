@@ -3,26 +3,26 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, SelectControl, TextControl, CheckboxControl } from 'newspack-components';
+import { Button, CheckboxControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { decodeEntities } from '@wordpress/html-entities';
 import { withDispatch } from '@wordpress/data';
 import { recordEvent } from 'lib/tracks';
 
 /**
  * Internal depdencies
  */
+import { getCountryCode } from 'dashboard/utils';
 import { H, Card, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
+import {
+	StoreAddress,
+	validateStoreAddress,
+} from '../../components/settings/general/store-address';
 
 class StoreDetails extends Component {
 	constructor() {
 		super( ...arguments );
-
-		this.state = {
-			countryStateOptions: [],
-		};
 
 		this.initialValues = {
 			addressLine1: '',
@@ -36,30 +36,6 @@ class StoreDetails extends Component {
 		this.onContinue = this.onContinue.bind( this );
 	}
 
-	componentWillMount() {
-		const countryStateOptions = this.getCountryStateOptions();
-		this.setState( { countryStateOptions } );
-	}
-
-	validate( values ) {
-		const errors = {};
-
-		if ( ! values.addressLine1.length ) {
-			errors.addressLine1 = __( 'Please add an address', 'woocommerce-admin' );
-		}
-		if ( ! values.countryState.length ) {
-			errors.countryState = __( 'Please select a country and state', 'woocommerce-admin' );
-		}
-		if ( ! values.city.length ) {
-			errors.city = __( 'Please add a city', 'woocommerce-admin' );
-		}
-		if ( ! values.postCode.length ) {
-			errors.postCode = __( 'Please add a post code', 'woocommerce-admin' );
-		}
-
-		return errors;
-	}
-
 	async onContinue( values ) {
 		const {
 			createNotice,
@@ -71,7 +47,7 @@ class StoreDetails extends Component {
 		} = this.props;
 
 		recordEvent( 'storeprofiler_store_details_continue', {
-			store_country: values.countryState.split( ':' )[ 0 ],
+			store_country: getCountryCode( values.countryState ),
 			setup_client: values.isClient,
 		} );
 
@@ -97,39 +73,7 @@ class StoreDetails extends Component {
 		}
 	}
 
-	getCountryStateOptions() {
-		const countries = ( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
-
-		const countryStateOptions = countries.reduce( ( acc, country ) => {
-			if ( ! country.states.length ) {
-				acc.push( {
-					value: country.code,
-					label: decodeEntities( country.name ),
-				} );
-
-				return acc;
-			}
-
-			const countryStates = country.states.map( state => {
-				return {
-					value: country.code + ':' + state.code,
-					label: decodeEntities( country.name ) + ' -- ' + decodeEntities( state.name ),
-				};
-			} );
-
-			acc.push( ...countryStates );
-
-			return acc;
-		}, [] );
-
-		countryStateOptions.unshift( { value: '', label: '' } );
-
-		return countryStateOptions;
-	}
-
 	render() {
-		const { countryStateOptions } = this.state;
-
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -146,41 +90,11 @@ class StoreDetails extends Component {
 					<Form
 						initialValues={ this.initialValues }
 						onSubmitCallback={ this.onContinue }
-						validate={ this.validate }
+						validate={ validateStoreAddress }
 					>
 						{ ( { getInputProps, handleSubmit } ) => (
 							<Fragment>
-								<TextControl
-									label={ __( 'Address line 1', 'woocommerce-admin' ) }
-									required
-									{ ...getInputProps( 'addressLine1' ) }
-								/>
-
-								<TextControl
-									label={ __( 'Address line 2 (optional)', 'woocommerce-admin' ) }
-									required
-									{ ...getInputProps( 'addressLine2' ) }
-								/>
-
-								<SelectControl
-									label={ __( 'Country / State', 'woocommerce-admin' ) }
-									required
-									options={ countryStateOptions }
-									{ ...getInputProps( 'countryState' ) }
-								/>
-
-								<TextControl
-									label={ __( 'City', 'woocommerce-admin' ) }
-									required
-									{ ...getInputProps( 'city' ) }
-								/>
-
-								<TextControl
-									label={ __( 'Post code', 'woocommerce-admin' ) }
-									required
-									{ ...getInputProps( 'postCode' ) }
-								/>
-
+								<StoreAddress getInputProps={ getInputProps } />
 								<CheckboxControl
 									label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
 									{ ...getInputProps( 'isClient' ) }

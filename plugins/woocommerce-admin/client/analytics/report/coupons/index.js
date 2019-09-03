@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { charts, filters } from './config';
+import { advancedFilters, charts, filters } from './config';
 import CouponsReportTable from './table';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
@@ -45,7 +45,13 @@ export default class CouponsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } filters={ filters } report="coupons" />
+				<ReportFilters
+					query={ query }
+					path={ path }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+					report="coupons"
+				/>
 				<ReportSummary
 					charts={ charts }
 					endpoint="coupons"
@@ -53,9 +59,11 @@ export default class CouponsReport extends Component {
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
 					filters={ filters }
+					advancedFilters={ advancedFilters }
 					mode={ mode }
 					endpoint="coupons"
 					path={ path }
@@ -64,7 +72,12 @@ export default class CouponsReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<CouponsReportTable isRequesting={ isRequesting } query={ query } filters={ filters } />
+				<CouponsReportTable
+					isRequesting={ isRequesting }
+					query={ query }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}

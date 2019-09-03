@@ -87,7 +87,7 @@
 		align-items: center;
 		margin-bottom: 0;
 		padding: $gap-small $gap;
-		background: $white;
+		background: $studio-white;
 		// !important to keep the border around on hover
 		border-bottom: 1px solid $core-grey-light-500 !important;
 		color: $core-grey-dark-500;
@@ -182,7 +182,7 @@
 			font-size: 0.8em;
 			line-height: 1.4;
 			color: $core-grey-dark-300;
-			background: $white;
+			background: $studio-white;
 			white-space: nowrap;
 		}
 	}

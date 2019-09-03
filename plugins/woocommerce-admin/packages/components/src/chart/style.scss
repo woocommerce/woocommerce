@@ -2,7 +2,7 @@
 .woocommerce-chart {
 	margin-top: -$gap;
 	margin-bottom: $gap-large;
-	background: $white;
+	background: $studio-white;
 	border: 1px solid $core-grey-light-700;
 	border-top: 0;
 
@@ -26,7 +26,7 @@
 
 		.woocommerce-chart__title {
 			height: 18px;
-			color: $black;
+			color: $wp-admin-sidebar;
 			font-size: 15px;
 			font-weight: 600;
 			line-height: 18px;

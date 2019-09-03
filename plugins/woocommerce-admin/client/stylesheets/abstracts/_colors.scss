@@ -1,9 +1,6 @@
 /** @format */
 
-@import 'node_modules/color-studio/dist/color-variables.scss';
-// @todo Replace duplicate colors below with their color-studio/Muriel counterparts.
-
-$white: rgba(255, 255, 255, 1);
+@import 'node_modules/@automattic/color-studio/dist/color-variables.scss';
 
 // Greys
 $core-grey-light-100: #f8f9f9;
@@ -27,18 +24,6 @@ $core-grey-dark-900: #191e23;
 
 $gray-text: $core-grey-dark-500;
 
-// WooCommerce Purples
-$woocommerce-100: #ffd7ff;
-$woocommerce-200: #e2a5d7;
-$woocommerce-300: #c88bbd;
-$woocommerce-400: #af72a4;
-$woocommerce-500: #95588a;
-$woocommerce-600: #7c3f71;
-$woocommerce-700: #622557;
-$woocommerce-800: #490c3e;
-$woocommerce-900: #2f0024;
-$woocommerce: $woocommerce-500;
-
 // Gutenberg
 $button-hover: #fafafa;
 $button-focus-inner: #00435d;
@@ -46,10 +31,6 @@ $button-focus-outer: #bfe7f3;
 $input-active-border: #00a0d2;
 $input-active-inner: $button-focus-inner;
 $input-active-outer: $button-focus-outer;
-
-// wp-admin
-$wp-admin-background: #f1f1f1;
-$black: #24292d; // same as wp-admin sidebar
 
 // Bright colors
 $valid-green: #4ab866;

@@ -5,19 +5,29 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { forEach } from 'lodash';
 import { compose } from '@wordpress/compose';
+import { difference, get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
+
+/**
+ * WooCommerce depdencies
+ */
+import { H, Stepper, Card } from '@woocommerce/components';
+import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal depdencies
  */
-import { H, Stepper, Card } from '@woocommerce/components';
-import { NAMESPACE } from 'wc-api/onboarding/constants';
 import { recordEvent } from 'lib/tracks';
+import withSelect from 'wc-api/with-select';
+import { pluginNames } from 'wc-api/onboarding/constants';
 
-const plugins = [ 'jetpack', 'woocommerce-services' ];
+const pluginsToInstall = [ 'jetpack', 'woocommerce-services' ];
+// We want to use the cached version of activePlugins here, otherwise the list we are dealing with could update as plugins are activated.
+const plugins = difference(
+	pluginsToInstall,
+	get( wcSettings, [ 'onboarding', 'activePlugins' ], [] )
+);
 
 class Plugins extends Component {
 	constructor() {
@@ -25,138 +35,77 @@ class Plugins extends Component {
 
 		this.state = {
 			step: 'install',
-			isPending: true,
-			isError: false,
-			pluginsInstalled: 0,
-			pluginsActivated: 0,
-			connectUrl: '',
 		};
 
 		this.activatePlugins = this.activatePlugins.bind( this );
 	}
 
 	componentDidMount() {
-		this.installPlugins();
+		if ( 0 === plugins.length ) {
+			return updateQueryString( { step: 'store-details' } );
+		}
+		this.props.installPlugins( plugins );
 	}
 
-	componentDidUpdate( prevProps, prevState ) {
+	componentDidUpdate( prevProps ) {
+		const {
+			createNotice,
+			errors,
+			installedPlugins,
+			activatedPlugins,
+			jetpackConnectUrl,
+		} = this.props;
+
+		if ( jetpackConnectUrl ) {
+			window.location = jetpackConnectUrl;
+		}
+
+		const newErrors = difference( errors, prevProps.errors );
+		newErrors.map( error => createNotice( 'error', error ) );
+
 		if (
-			this.state.pluginsInstalled !== prevState.pluginsInstalled &&
-			this.state.pluginsInstalled === plugins.length
+			prevProps.installedPlugins.length !== plugins.length &&
+			installedPlugins.length === plugins.length
 		) {
 			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				step: 'activate',
-				isPending: false,
-			} );
+			this.setState( { step: 'activate' } );
 			/* eslint-enable react/no-did-update-set-state */
 		}
 
+		// If Jetpack was already connected, we can go to store details after WCS is activated.
 		if (
-			this.state.pluginsActivated !== prevState.pluginsActivated &&
-			this.state.pluginsActivated === plugins.length
+			! plugins.includes( 'jetpack' ) &&
+			prevProps.activatedPlugins.length !== plugins.length &&
+			activatedPlugins.length === plugins.length
 		) {
-			this.connectJetpack();
+			/* eslint-disable react/no-did-update-set-state */
+			return updateQueryString( { step: 'store-details' } );
+			/* eslint-enable react/no-did-update-set-state */
 		}
 	}
 
-	installPlugins() {
-		forEach( plugins, async plugin => {
-			const response = await this.doPluginAction( 'install', plugin );
-			if ( 'success' === response.status ) {
-				this.setState( state => ( {
-					pluginsInstalled: state.pluginsInstalled + 1,
-				} ) );
-			}
-		} );
-	}
-
-	activatePlugins( event ) {
+	async activatePlugins( event ) {
 		event.preventDefault();
 
 		// Avoid double activating.
-		const { isPending } = this.state;
-		if ( isPending ) {
+		const { isRequesting } = this.props;
+		if ( isRequesting ) {
 			return false;
 		}
 
-		this.setState( {
-			isPending: true,
-		} );
-
 		recordEvent( 'storeprofiler_install_plugin' );
 
-		forEach( plugins, async plugin => {
-			const response = await this.doPluginAction( 'activate', plugin );
-			if ( 'success' === response.status ) {
-				this.setState( state => ( {
-					pluginsActivated: state.pluginsActivated + 1,
-				} ) );
-			}
-		} );
-	}
-
-	getErrorMessage( action, plugin ) {
-		return 'install' === action
-			? sprintf(
-					__( 'There was an error installing %s. Please try again.', 'woocommerce-admin' ),
-					this.getPluginName( plugin )
-				)
-			: sprintf(
-					__( 'There was an error activating %s. Please try again.', 'woocommerce-admin' ),
-					this.getPluginName( plugin )
-				);
-	}
-
-	async doPluginAction( action, plugin ) {
-		try {
-			const pluginResponse = await apiFetch( {
-				path: `${ NAMESPACE }/onboarding/plugins/${ action }`,
-				method: 'POST',
-				data: {
-					plugin,
-				},
-			} );
-			return pluginResponse;
-		} catch ( err ) {
-			this.props.createNotice( 'error', this.getErrorMessage( action, plugin ) );
-			this.setState( {
-				isPending: false,
-				isError: true,
-			} );
-		}
-	}
-
-	async connectJetpack() {
-		try {
-			const connectResponse = await apiFetch( {
-				path: `${ NAMESPACE }/onboarding/plugins/connect-jetpack`,
-			} );
-			if ( connectResponse && connectResponse.connectAction ) {
-				window.location = connectResponse.connectAction;
-				return;
-			}
-			throw new Error();
-		} catch ( err ) {
-			this.props.createNotice( 'error', this.getErrorMessage( 'activate', 'jetpack' ) );
-			this.setState( {
-				isPending: false,
-				isError: true,
-			} );
-		}
-	}
-
-	getPluginName( plugin ) {
-		switch ( plugin ) {
-			case 'jetpack':
-				return __( 'Jetpack', 'woocommerce-admin' );
-			case 'woocommerce-services':
-				return __( 'WooCommerce Services', 'woocommerce-admin' );
-		}
+		this.props.activatePlugins( plugins );
 	}
 
 	render() {
-		const { step, isPending, isError } = this.state;
+		const { hasErrors, isRequesting } = this.props;
+		const { step } = this.state;
+
+		const pluginLabel = plugins.includes( 'jetpack' )
+			? Object.values( pluginNames ).join( ' & ' )
+			: pluginNames[ 'woocommerce-services' ];
+
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -167,32 +116,31 @@ class Plugins extends Component {
 					<Stepper
 						isVertical={ true }
 						currentStep={ step }
-						isPending={ isPending }
+						isPending={ isRequesting && ! hasErrors }
 						steps={ [
 							{
-								label: __( 'Install Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								label: sprintf( __( 'Install %s', 'woocommerce-admin' ), pluginLabel ),
 								key: 'install',
 							},
 							{
-								label: __( 'Activate Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								label: sprintf( __( 'Activate %s', 'woocommerce-admin' ), pluginLabel ),
 								key: 'activate',
 							},
 						] }
 					/>
 
 					<div className="woocommerce-profile-wizard__plugins-actions">
-						{ isError && (
+						{ hasErrors && (
 							<Button isPrimary onClick={ () => location.reload() }>
 								{ __( 'Retry', 'woocommerce-admin' ) }
 							</Button>
 						) }
 
-						{ ! isError &&
-							'activate' === step && (
-								<Button isPrimary isBusy={ isPending } onClick={ this.activatePlugins }>
-									{ __( 'Activate & continue', 'woocommerce-admin' ) }
-								</Button>
-							) }
+						{ ! ( hasErrors && 'activate' === step ) && (
+							<Button isPrimary isBusy={ isRequesting } onClick={ this.activatePlugins }>
+								{ __( 'Activate & continue', 'woocommerce-admin' ) }
+							</Button>
+						) }
 					</div>
 				</Card>
 			</Fragment>
@@ -201,10 +149,64 @@ class Plugins extends Component {
 }
 
 export default compose(
+	withSelect( select => {
+		const {
+			getJetpackConnectUrl,
+			isGetJetpackConnectUrlRequesting,
+			getJetpackConnectUrlError,
+			getPluginInstallations,
+			getPluginInstallationErrors,
+			getPluginActivations,
+			getPluginActivationErrors,
+			isPluginActivateRequesting,
+			isPluginInstallRequesting,
+		} = select( 'wc-api' );
+
+		const isRequesting =
+			isPluginActivateRequesting() || isPluginInstallRequesting() || getJetpackConnectUrlError();
+
+		const activationErrors = getPluginActivationErrors( plugins );
+		const activatedPlugins = Object.keys( getPluginActivations( plugins ) );
+		const installationErrors = getPluginInstallationErrors( plugins );
+		const installedPlugins = Object.keys( getPluginInstallations( plugins ) );
+
+		const isJetpackConnectUrlRequesting = isGetJetpackConnectUrlRequesting();
+		const jetpackConnectUrlError = getJetpackConnectUrlError();
+		let jetpackConnectUrl = null;
+		if ( activatedPlugins.includes( 'jetpack' ) ) {
+			jetpackConnectUrl = getJetpackConnectUrl();
+		}
+
+		const errors = [];
+		Object.keys( activationErrors ).map( plugin =>
+			errors.push( activationErrors[ plugin ].message )
+		);
+		Object.keys( installationErrors ).map( plugin =>
+			errors.push( installationErrors[ plugin ].message )
+		);
+		if ( jetpackConnectUrlError ) {
+			errors.push( jetpackConnectUrlError.message );
+		}
+		const hasErrors = Boolean( errors.length );
+
+		return {
+			activatedPlugins,
+			installedPlugins,
+			jetpackConnectUrl,
+			isJetpackConnectUrlRequesting,
+			errors,
+			hasErrors,
+			isRequesting,
+		};
+	} ),
 	withDispatch( dispatch => {
 		const { createNotice } = dispatch( 'core/notices' );
+		const { activatePlugins, installPlugins } = dispatch( 'wc-api' );
+
 		return {
+			activatePlugins,
 			createNotice,
+			installPlugins,
 		};
 	} )
 )( Plugins );

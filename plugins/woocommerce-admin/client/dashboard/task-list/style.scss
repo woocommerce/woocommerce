@@ -2,29 +2,46 @@
 
 .woocommerce-task-dashboard__body {
 	.woocommerce-card__description {
-		color: $muriel-gray-500;
+		color: $studio-gray-50;
 	}
 
-	.woocommerce-card__body {
-		border-top: 1px solid $muriel-gray-50;
+	.woocommerce-task-card .woocommerce-card__body {
+		border-top: 1px solid $studio-gray-5;
 		padding: 0;
+	}
+
+	.woocommerce-card.is-narrow {
+		max-width: 680px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.muriel-button.components-button {
+		height: 40px;
+		min-width: 106px;
+		margin: $gap $gap-smaller 0 0;
+		justify-content: center;
+
+		&:not(.is-primary) {
+			color: $studio-pink-50;
+		}
 	}
 
 	.woocommerce-list {
 		margin: 0;
 
 		.woocommerce-list__item.is-complete {
-			background: $muriel-gray-0;
+			background: $studio-gray-0;
 
 			.woocommerce-list__item-before i {
-				color: $muriel-gray-200;
+				color: $studio-gray-20;
 			}
 
 			.woocommerce-list__item-title {
-				color: $muriel-gray-500;
+				color: $studio-gray-50;
 			}
 
-			.woocommerce-list__item-description {
+			.woocommerce-list__item-content {
 				display: none;
 			}
 		}
@@ -33,23 +50,184 @@
 			width: 36px;
 			height: 36px;
 			font-size: 36px;
-			color: $muriel-hot-purple-600;
+			color: $studio-woocommerce-purple-60;
 		}
 
 		.woocommerce-list__item-after i {
-			color: $muriel-gray-600;
+			color: $studio-gray-60;
 		}
 	}
 
 	.woocommerce-list__item-title {
-		color: $muriel-gray-800;
+		color: $studio-gray-80;
 	}
 
-	.woocommerce-list__item-description {
-		color: $muriel-gray-500;
+	.woocommerce-list__item-content {
+		color: $studio-gray-50;
 	}
 
 	#wpbody-content {
 		position: relative;
+	}
+}
+
+.woocommerce-shipping-rate {
+	display: flex;
+	padding-top: $gap-small;
+	padding-bottom: $gap-small;
+
+	.woocommerce-shipping-rate__main {
+		width: 100%;
+	}
+
+	.woocommerce-shipping-rate__icon {
+		padding-top: $gap;
+		margin-right: $gap-large;
+	}
+
+	.woocommerce-shipping-rate__name {
+		align-items: center;
+		display: flex;
+		padding-top: $gap;
+		font-size: 16px;
+		line-height: 22px;
+		color: $studio-gray-90;
+		margin-bottom: $gap-small;
+		border-top: 1px solid $studio-gray-5;
+
+		.components-form-toggle {
+			margin-left: auto;
+			height: 18px;
+		}
+	}
+
+	.woocommerce-shipping-rate__control-wrapper {
+		position: relative;
+
+		.muriel-input-text input {
+			left: $gap * 2;
+		}
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+
+		.woocommerce-shipping-rate__control-prefix,
+		.woocommerce-shipping-rate__control-suffix {
+			display: none;
+			position: absolute;
+			left: $gap;
+			top: 26px;
+			z-index: 1;
+			font-size: 16px;
+			line-height: 24px;
+			color: $studio-gray-50;
+		}
+
+		&.has-value {
+			.woocommerce-shipping-rate__control-prefix,
+			.woocommerce-shipping-rate__control-suffix {
+				display: block;
+			}
+		}
+
+		.woocommerce-shipping-rate__control-suffix {
+			left: auto;
+			right: $gap;
+		}
+	}
+}
+
+.woocommerce-task-tax__automated-tax-control {
+	display: flex;
+	align-items: center;
+	margin-top: $gap;
+
+	i {
+		margin-left: $gap;
+		margin-right: $gap-large;
+	}
+
+	.woocommerce-task-tax__automated-tax-control-inner {
+		border-top: 1px solid $studio-gray-5;
+		display: flex;
+		align-items: center;
+		flex: 1;
+		font-size: 16px;
+		padding-top: $gap;
+		padding-bottom: $gap;
+	}
+
+	.components-form-toggle {
+		margin-left: auto;
+	}
+}
+
+.woocommerce-task-tax__success {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: $gap-largest;
+	text-align: center;
+
+	.woocommerce-task-tax__success-icon {
+		font-size: 48px;
+		height: 48px;
+		align-items: center;
+		display: flex;
+	}
+
+	#woocommerce-task-tax__success-message {
+		font-size: 32px;
+		font-weight: 400;
+	}
+
+	.components-button.is-primary {
+		min-width: 328px;
+		@include breakpoint( '<782px' ) {
+			min-width: auto;
+		}
+	}
+
+	p {
+		margin-top: 0;
+		font-size: 16px;
+	}
+}
+
+.woocommerce-task-payments {
+	.woocommerce-list__item .woocommerce-list__item-after {
+		align-self: start;
+		margin-left: $gap;
+		margin-top: $gap-large;
+	}
+
+	.woocommerce-list__item-title {
+		border-top: 1px solid $studio-gray-5;
+		padding-top: $gap;
+	}
+
+	.woocommerce-task-payments__woocommerce-services-options {
+		border-top: 1px solid $studio-gray-5;
+		margin-top: $gap;
+		margin-left: $gap-larger;
+		padding-top: $gap;
+
+		.components-checkbox-control__input {
+			margin-left: -$gap-larger;
+		}
+
+		.components-checkbox-control__label {
+			font-size: 16px;
+			line-height: 22px;
+			padding-left: $gap-small;
+			color: #1a1a1a;
+		}
+	}
+}
+
+.woocommerce-task-appearance {
+	.muriel-image-upload {
+		margin-bottom: $gap-smallest;
 	}
 }

@@ -116,7 +116,7 @@
 
 	button.woocommerce-table__download-button.is-link {
 		padding: 6px $gap-small;
-		color: #000;
+		color: $studio-black;
 		text-decoration: none;
 
 		svg {
@@ -140,7 +140,7 @@
 		padding-top: $gap;
 		padding-bottom: $gap;
 		z-index: 1;
-		background: $white;
+		background: $studio-white;
 		position: relative;
 	}
 }
@@ -204,7 +204,7 @@
 	a {
 		&:hover,
 		&:focus {
-			color: $woocommerce-700;
+			color: $studio-woocommerce-purple-70;
 		}
 	}
 
@@ -326,7 +326,7 @@ th.woocommerce-table__item {
 	padding: $gap 0;
 	text-align: center;
 	z-index: 1;
-	background: #fff;
+	background: $studio-white;
 	position: relative;
 }
 
