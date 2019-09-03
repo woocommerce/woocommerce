@@ -265,11 +265,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$connect_url = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
-		// Redirect to local calypso instead of production.
-		if ( defined( 'WOOCOMMERCE_CALYPSO_LOCAL' ) && WOOCOMMERCE_CALYPSO_LOCAL ) {
+		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
 			$connect_url = add_query_arg(
 				array(
-					'calypso_env' => 'development',
+					'calypso_env' => WOOCOMMERCE_CALYPSO_ENVIRONMENT,
 				),
 				$connect_url
 			);
@@ -327,12 +326,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			\WC_Helper_API::url( 'oauth/authorize' )
 		);
 
-		// Redirect to local calypso instead of production.
-		// @todo WordPress.com Connect / the OAuth flow does not currently respect this, but a patch is in the works to make this easier.
-		if ( defined( 'WOOCOMMERCE_CALYPSO_LOCAL' ) && WOOCOMMERCE_CALYPSO_LOCAL ) {
+		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
 			$connect_url = add_query_arg(
 				array(
-					'calypso_env' => 'development',
+					'calypso_env' => WOOCOMMERCE_CALYPSO_ENVIRONMENT,
 				),
 				$connect_url
 			);

@@ -65,6 +65,7 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
 		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
+		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 	}
@@ -423,24 +424,110 @@ class Onboarding {
 			}
 
 			$screen->remove_help_tab( 'woocommerce_onboard_tab' );
-			$help_tab['content'] = '<h2>' . __( 'Setup wizard', 'woocommerce-admin' ) . '</h2>' .
-				'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-				'<p><a href="' . wc_admin_url( '&reset_profiler=1' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
+
+			$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
+			$onboarding_data  = get_option( 'wc_onboarding_profile', array() );
+			$is_completed     = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
+			$is_skipped       = isset( $onboarding_data['skipped'] ) && true === $onboarding_data['skipped'];
+			$is_enabled       = $is_completed || $is_skipped ? false : true;
+
+			$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
+
+			$help_tab['content'] .= '<h3>' . __( 'Profile Setup Wizard', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>'.
+			( $is_enabled
+				? '<p><a href="' . wc_admin_url( '&reset_profiler=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+				: '<p><a href="' . wc_admin_url( '&reset_profiler=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+			);
+
+			$help_tab['content'] .= '<h3>' . __( 'Task List', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the task list, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+			( 'yes' === $task_list_hidden
+				? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+				: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+			);
+
+
+			if ( Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$help_tab['content'] .= '<h3>' . __( 'Calypso / WordPress.com', 'woocommerce-admin' ) . '</h3>';
+				if ( class_exists( 'Jetpack' ) ) {
+					$help_tab['content'] .= '<p>' . __( 'Quickly access the Jetpack connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
+					$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_jetpack_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
+				}
+
+				$help_tab['content'] .= '<p>' . __( 'Quickly access the WooCommerce.com connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
+				$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_helper_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
+			}
+
 			$screen->add_help_tab( $help_tab );
 		}
+	}
 
-		$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
-		$task_list_tab    = array(
-			'id'      => 'woocommerce_task_list_tab',
-			'title'   => __( 'Task list', 'woocommerce-admin' ),
-			'content' => '<h2>' . __( 'Task list', 'woocommerce-admin' ) . '</h2>' .
-				'<p>' . __( 'If you need to enable or disable the task list, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-				( 'yes' === $task_list_hidden
-					? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
-					: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+	/**
+	 * Allows quick access to testing the calypso parts of onboarding.
+	 */
+	public static function calypso_tests() {
+		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		if ( Loader::is_admin_page() && class_exists( 'Jetpack' ) && isset( $_GET['test_wc_jetpack_connect'] ) && 1 === absint( $_GET['test_wc_jetpack_connect'] ) ) { // WPCS: CSRF ok.
+			$redirect_url = esc_url_raw(
+				add_query_arg(
+					array(
+						'page' => 'wc-admin',
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+
+			$connect_url = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
+			$connect_url = add_query_arg( array( 'calypso_env' => $calypso_env ), $connect_url );
+
+			wp_redirect( $connect_url );
+			exit;
+		}
+
+		if ( Loader::is_admin_page() && isset( $_GET['test_wc_helper_connect'] ) && 1 === absint( $_GET['test_wc_helper_connect'] ) ) { // WPCS: CSRF ok.
+			include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
+
+			$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
+
+			$request = \WC_Helper_API::post(
+				'oauth/request_token',
+				array(
+					'body' => array(
+						'home_url'     => home_url(),
+						'redirect_uri' => $redirect_uri,
+					),
+				)
+			);
+
+			$code = wp_remote_retrieve_response_code( $request );
+			if ( 200 !== $code ) {
+				wp_die( esc_html__( 'WooCommerce Helper was not able to connect to WooCommerce.com.', 'woocommerce-admin' ) );
+				exit;
+			}
+
+			$secret = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( empty( $secret ) ) {
+				wp_die( esc_html__( 'WooCommerce Helper was not able to connect to WooCommerce.com.', 'woocommerce-admin' ) );
+				exit;
+			}
+
+			$connect_url = add_query_arg(
+				array(
+					'home_url'     => rawurlencode( home_url() ),
+					'redirect_uri' => rawurlencode( $redirect_uri ),
+					'secret'       => rawurlencode( $secret ),
+					'wccom-from'   => 'onboarding',
 				),
-		);
-		$screen->add_help_tab( $task_list_tab );
+				\WC_Helper_API::url( 'oauth/authorize' )
+			);
+
+			$connect_url = add_query_arg( array( 'calypso_env' => $calypso_env ), $connect_url );
+
+			wp_redirect( $connect_url );
+			exit;
+		}
 	}
 
 	/**
@@ -449,11 +536,12 @@ class Onboarding {
 	public static function reset_profiler() {
 		if (
 			! Loader::is_admin_page() ||
-			! isset( $_GET['reset_profiler'] ) || // WPCS: CSRF ok.
-			1 !== absint( $_GET['reset_profiler'] ) // WPCS: CSRF ok.
+			! isset( $_GET['reset_profiler'] ) // WPCS: CSRF ok.
 		) {
 			return;
 		}
+
+		$new_value = 1 === absint( $_GET['reset_profiler'] ) ? false : true;
 
 		$request = new \WP_REST_Request( 'POST', '/wc-admin/v1/onboarding/profile' );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
@@ -461,7 +549,7 @@ class Onboarding {
 			wp_json_encode(
 				array(
 					'completed' => false,
-					'skipped'   => false,
+					'skipped'   => $new_value,
 				)
 			)
 		);
