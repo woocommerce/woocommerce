@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { SectionHeader, useFilters } from '@woocommerce/components';
+import { SectionHeader, useFilters, ScrollTo } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -163,7 +163,7 @@ class Settings extends Component {
 	}
 
 	render() {
-		const { createNotice } = this.props;
+		const { createNotice, query } = this.props;
 		const { hasError } = this.state;
 		if ( hasError ) {
 			return null;
@@ -190,7 +190,13 @@ class Settings extends Component {
 						</Button>
 					</div>
 				</div>
-				<HistoricalData createNotice={ createNotice } />
+				{ query.import === 'true' ? (
+					<ScrollTo offset="-56">
+						<HistoricalData createNotice={ createNotice } />
+					</ScrollTo>
+				) : (
+					<HistoricalData createNotice={ createNotice } />
+				) }
 			</Fragment>
 		);
 	}
