@@ -32,7 +32,9 @@ class Assets {
 	 */
 	public static function register_assets() {
 		self::register_style( 'wc-block-editor', plugins_url( 'build/editor.css', __DIR__ ), array( 'wp-edit-blocks' ) );
+		wp_style_add_data( 'wc-block-editor', 'rtl', 'replace' );
 		self::register_style( 'wc-block-style', plugins_url( 'build/style.css', __DIR__ ), [] );
+		wp_style_add_data( 'wc-block-style', 'rtl', 'replace' );
 
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-shared-settings', plugins_url( 'build/wc-shared-settings.js', __DIR__ ), [], false );

@@ -24,6 +24,9 @@
 		svg {
 			fill: currentColor;
 			outline: none;
+			.rtl & {
+				transform: rotate(180deg);
+			}
 		}
 		&:active {
 			color: currentColor;
