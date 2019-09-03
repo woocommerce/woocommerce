@@ -5,9 +5,12 @@
 /bin export-ignore
 /phpcs.xml export-ignore
 /phpunit.* export-ignore
+/composer.lock export-ignore
+/composer.json export-ignore
 /renovate.json export-ignore
 /webpack.config.js export-ignore
 /postcss.config.js export-ignore
+/bundlesize.config.json export-ignore
 /package.json export-ignore
 /package-lock.json export-ignore
 /babel-config.js export-ignore
