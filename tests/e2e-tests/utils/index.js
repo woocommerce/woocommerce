@@ -41,6 +41,34 @@ const settingsPageSaveChanges = async () => {
 };
 
 /**
+ * Set checkbox.
+ *
+ * @param {string} selector
+ */
+const setCheckbox = async( selector ) => {
+	await page.focus( selector );
+	const checkbox = await page.$( selector );
+	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
+	if ( checkboxStatus !== true ) {
+		await page.click( selector );
+	}
+};
+
+/**
+ * Unset checkbox.
+ *
+ * @param {string} selector
+ */
+const unsetCheckbox = async( selector ) => {
+	await page.focus( selector );
+	const checkbox = await page.$( selector );
+	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
+	if ( checkboxStatus === true ) {
+		await page.click( selector );
+	}
+};
+
+/**
  * Wait for UI blocking to end.
  */
 const uiUnblocked = async () => {
@@ -52,5 +80,7 @@ module.exports = {
 	clearAndFillInput,
 	clickTab,
 	settingsPageSaveChanges,
+	setCheckbox,
+	unsetCheckbox,
 	uiUnblocked,
 };

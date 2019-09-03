@@ -11,7 +11,7 @@ import { activatePlugin } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { clearAndFillInput, settingsPageSaveChanges, uiUnblocked } from "../../utils";
+import { clearAndFillInput, setCheckbox, settingsPageSaveChanges, uiUnblocked } from "../../utils";
 
 describe( 'WooCommerce Tax Settings', () => {
 	beforeAll( async () => {
@@ -26,7 +26,7 @@ describe( 'WooCommerce Tax Settings', () => {
 		await expect( page ).toMatchElement( 'a.nav-tab-active', { text: 'General' } );
 
 		// Enable tax calculation
-		await expect( page ).toClick( '#woocommerce_calc_taxes' );
+		await setCheckbox( 'input[name="woocommerce_calc_taxes"]' );
 		await settingsPageSaveChanges();
 		await expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } );
 
