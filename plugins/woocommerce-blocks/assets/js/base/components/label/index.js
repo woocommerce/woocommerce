@@ -32,7 +32,7 @@ const Label = ( { label, screenReaderLabel, wrapperElement, wrapperProps } ) => 
 	if ( label && screenReaderLabel && label !== screenReaderLabel ) {
 		return (
 			<Wrapper { ...wrapperProps }>
-				<span aria-hidden>
+				<span aria-hidden="true">
 					{ label }
 				</span>
 				<span className="screen-reader-text">
