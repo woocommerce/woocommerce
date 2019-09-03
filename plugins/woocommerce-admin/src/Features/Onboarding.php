@@ -417,7 +417,7 @@ class Onboarding {
 		}
 
 		$help_tabs = $screen->get_help_tabs();
-		
+
 		foreach ( $help_tabs as $help_tab ) {
 			if ( 'woocommerce_onboard_tab' !== $help_tab['id'] ) {
 				continue;
