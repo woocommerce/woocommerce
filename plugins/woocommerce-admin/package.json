@@ -116,7 +116,7 @@
     "@babel/plugin-transform-async-to-generator": "7.5.0",
     "@babel/plugin-transform-react-jsx": "7.3.0",
     "@babel/runtime-corejs2": "7.5.5",
-    "@octokit/rest": "16.28.7",
+    "@octokit/rest": "16.28.9",
     "@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
     "@wordpress/babel-plugin-makepot": "2.1.3",
     "@wordpress/babel-preset-default": "3.0.2",
