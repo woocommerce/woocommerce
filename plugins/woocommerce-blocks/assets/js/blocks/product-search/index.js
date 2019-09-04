@@ -13,11 +13,12 @@ import { Fragment } from '@wordpress/element';
 import './style.scss';
 import './editor.scss';
 import Block from './block.js';
+import { IconProductSearch } from '../../components/icons';
 
 registerBlockType( 'woocommerce/product-search', {
 	title: __( 'Product Search', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: 'search',
+		src: <IconProductSearch fillColor="#96588a" />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',
