@@ -159,6 +159,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 				'format'      => 'currency',
 			),
 			'orders_count'            => array(
+				'title'       => __( 'Orders', 'woocommerce-admin' ),
 				'description' => __( 'Number of orders', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),

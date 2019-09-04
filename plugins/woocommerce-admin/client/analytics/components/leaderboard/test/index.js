@@ -47,7 +47,7 @@ const headers = [
 		label: 'Items Sold',
 	},
 	{
-		label: 'Orders Count',
+		label: 'Orders',
 	},
 	{
 		label: 'Net Revenue',

@@ -84,7 +84,7 @@ class DashboardCharts extends Component {
 										} );
 									} }
 								>
-									{ __( `${ chart.label }`, 'woocommerce-admin' ) }
+									{ chart.label }
 								</MenuItem>
 							);
 						} ) }

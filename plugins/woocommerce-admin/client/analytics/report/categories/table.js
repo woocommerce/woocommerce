@@ -39,7 +39,7 @@ class CategoriesReportTable extends Component {
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce-admin' ),
+				label: __( 'Items Sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,

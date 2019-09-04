@@ -143,6 +143,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_item_schema() {
 		$totals = array(
 			'download_count' => array(
+				'title'       => __( 'Downloads', 'woocommerce-admin' ),
 				'description' => __( 'Number of downloads.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),

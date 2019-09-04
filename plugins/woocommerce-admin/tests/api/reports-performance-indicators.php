@@ -102,13 +102,13 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$this->assertEquals( 2, count( $reports ) );
 
 		$this->assertEquals( 'orders/orders_count', $reports[0]['stat'] );
-		$this->assertEquals( 'Number of orders', $reports[0]['label'] );
+		$this->assertEquals( 'Orders', $reports[0]['label'] );
 		$this->assertEquals( 1, $reports[0]['value'] );
 		$this->assertEquals( 'orders_count', $reports[0]['chart'] );
 		$this->assertEquals( '/analytics/orders', $response->data[0]['_links']['report'][0]['href'] );
 
 		$this->assertEquals( 'downloads/download_count', $reports[1]['stat'] );
-		$this->assertEquals( 'Number of downloads', $reports[1]['label'] );
+		$this->assertEquals( 'Downloads', $reports[1]['label'] );
 		$this->assertEquals( 2, $reports[1]['value'] );
 		$this->assertEquals( 'download_count', $reports[1]['chart'] );
 		$this->assertEquals( '/analytics/downloads', $response->data[1]['_links']['report'][0]['href'] );

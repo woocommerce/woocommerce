@@ -171,6 +171,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'format'      => 'currency',
 			),
 			'shipping'       => array(
+				'title'       => __( 'Shipping', 'woocommerce-admin' ),
 				'description' => __( 'Total of shipping.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
@@ -186,6 +187,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'format'      => 'currency',
 			),
 			'refunds'        => array(
+				'title'       => __( 'Refunds', 'woocommerce-admin' ),
 				'description' => __( 'Total of refunds.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
