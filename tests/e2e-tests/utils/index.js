@@ -67,11 +67,7 @@ const verifyCheckboxIsSet = async( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
-	if ( checkboxStatus === true ) {
-		return checkboxStatus;
-	} else {
-		console.log( selector + ' checkbox is not set.' );
-	}
+	await expect( checkboxStatus ).toBe( true );
 };
 
 /**
@@ -83,15 +79,11 @@ const verifyCheckboxIsUnset = async( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
 	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
-	if ( checkboxStatus !== true ) {
-		return checkboxStatus;
-	} else {
-		console.log( selector + ' checkbox is not unset.' );
-	}
+	await expect( checkboxStatus ).not.toBe( true );
 };
 
 /**
- * Verify the value of input field once it was saved.
+ * Verify the value of input field once it was saved (can be used for radio buttons verification as well).
  *
  * @param {string} selector Selector of the input field that needs to be verified.
  * @param {string} value Value of the input field that needs to be verified.
@@ -100,11 +92,7 @@ const verifyValueOfInputField = async( selector, value ) => {
 	await page.focus( selector );
 	const field = await page.$( selector );
 	const fieldValue = ( await ( await field.getProperty( 'value' ) ).jsonValue() );
-	if ( fieldValue === value ) {
-		return fieldValue;
-	} else {
-		console.log( 'The value of ' + selector + ' does not equal to ' + value + ' .' );
-	}
+	await expect( fieldValue ).toBe( value );
 };
 
 module.exports = {
