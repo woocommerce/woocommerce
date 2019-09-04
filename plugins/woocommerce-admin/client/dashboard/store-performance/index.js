@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
@@ -74,7 +74,7 @@ class StorePerformance extends Component {
 										} );
 									} }
 								>
-									{ sprintf( __( 'Show %s', 'woocommerce-admin' ), indicator.label ) }
+									{ indicator.label }
 								</MenuItem>
 							);
 						} ) }
