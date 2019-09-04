@@ -119,9 +119,6 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		// Run pending thrice to process batch and order.
-		WC_Helper_Queue::run_all_pending();
-		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
@@ -164,9 +161,6 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		// Run pending thrice to process batch and order.
-		WC_Helper_Queue::run_all_pending();
-		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
@@ -206,7 +200,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		// Verify there are actions to cancel.
 		$pending_actions = WC_Helper_Queue::get_all_pending();
-		$this->assertCount( 1, $pending_actions );
+		$this->assertCount( 2, $pending_actions ); // 1 for the user, 1 for order.
 
 		// Cancel outstanding actions.
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/cancel' );
@@ -267,9 +261,6 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		// Run pending three times to process batches and dependent actions.
-		WC_Helper_Queue::run_all_pending();
-		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
 		// Check that stats have been deleted.
@@ -377,10 +368,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 0, $report['orders_count'] );
 		$this->assertEquals( 4, $report['orders_total'] );
 
-		// Run pending thrice to process batch and order.
-		WC_Helper_Queue::process_pending();
-		WC_Helper_Queue::process_pending();
-		WC_Helper_Queue::process_pending();
+		WC_Helper_Queue::run_all_pending();
 
 		// Test import status after processing.
 		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/status' );

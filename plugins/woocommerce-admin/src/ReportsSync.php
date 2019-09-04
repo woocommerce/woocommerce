@@ -65,7 +65,12 @@ class ReportsSync {
 	const ORDERS_DELETE_BATCH_ACTION = 'wc-admin_delete_orders_batch';
 
 	/**
-	 * Action hook for importing a batch of orders.
+	 * Action hook for importing a single customer.
+	 */
+	const SINGLE_CUSTOMER_IMPORT_ACTION = 'wc-admin_import_customer';
+
+	/**
+	 * Action hook for importing a single order.
 	 */
 	const SINGLE_ORDER_IMPORT_ACTION = 'wc-admin_import_order';
 
@@ -108,6 +113,7 @@ class ReportsSync {
 	 */
 	public static function init() {
 		// Initialize syncing hooks.
+		add_action( 'wp_loaded', array( __CLASS__, 'customers_lookup_update_init' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'orders_lookup_update_init' ) );
 
 		// Initialize scheduled action handlers.
@@ -116,6 +122,7 @@ class ReportsSync {
 		add_action( self::CUSTOMERS_IMPORT_BATCH_ACTION, array( __CLASS__, 'customer_lookup_import_batch' ), 10, 3 );
 		add_action( self::CUSTOMERS_DELETE_BATCH_INIT, array( __CLASS__, 'customer_lookup_delete_batch_init' ) );
 		add_action( self::CUSTOMERS_DELETE_BATCH_ACTION, array( __CLASS__, 'customer_lookup_delete_batch' ) );
+		add_action( self::SINGLE_CUSTOMER_IMPORT_ACTION, array( __CLASS__, 'customer_lookup_import_customer' ) );
 		add_action( self::ORDERS_IMPORT_BATCH_ACTION, array( __CLASS__, 'orders_lookup_import_batch' ), 10, 4 );
 		add_action( self::ORDERS_IMPORT_BATCH_INIT, array( __CLASS__, 'orders_lookup_import_batch_init' ), 10, 3 );
 		add_action( self::ORDERS_DELETE_BATCH_ACTION, array( __CLASS__, 'orders_lookup_delete_batch' ), 10, 4 );
@@ -227,6 +234,7 @@ class ReportsSync {
 				self::ORDERS_IMPORT_BATCH_INIT,
 				self::ORDERS_DELETE_BATCH_INIT,
 				self::ORDERS_DELETE_BATCH_ACTION,
+				self::SINGLE_CUSTOMER_IMPORT_ACTION,
 				self::SINGLE_ORDER_IMPORT_ACTION,
 			);
 			$store->clear_pending_wcadmin_actions( $action_types );
@@ -310,6 +318,16 @@ class ReportsSync {
 	}
 
 	/**
+	 * Attach customer lookup update hooks.
+	 */
+	public static function customers_lookup_update_init() {
+		add_action( 'woocommerce_new_customer', array( __CLASS__, 'schedule_single_customer_import' ) );
+		add_action( 'woocommerce_update_customer', array( __CLASS__, 'schedule_single_customer_import' ) );
+
+		CustomersDataStore::init();
+	}
+
+	/**
 	 * Attach order lookup update hooks.
 	 */
 	public static function orders_lookup_update_init() {
@@ -322,7 +340,6 @@ class ReportsSync {
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'schedule_single_order_import' ) );
 
 		OrdersStatsDataStore::init();
-		CustomersDataStore::init();
 		CouponsDataStore::init();
 		ProductsDataStore::init();
 		TaxesDataStore::init();
@@ -714,7 +731,7 @@ class ReportsSync {
 
 		foreach ( $customer_ids as $customer_id ) {
 			// @todo Schedule single customer update if this fails?
-			CustomersDataStore::update_registered_customer( $customer_id );
+			self::customer_lookup_import_customer( $customer_id );
 		}
 
 		$imported_count = get_option( 'wc_admin_import_customers_count', 0 );
@@ -723,6 +740,44 @@ class ReportsSync {
 		$properties['imported_count'] = $imported_count;
 
 		wc_admin_record_tracks_event( 'import_job_complete', $properties );
+	}
+
+	/**
+	 * Schedule an action to import a single Customer.
+	 *
+	 * @param int $user_id User ID.
+	 * @return void
+	 */
+	public static function schedule_single_customer_import( $user_id ) {
+		// This can get called multiple times for a single customer, so we look
+		// for existing pending jobs for the same customer to avoid duplicating efforts.
+		$existing_jobs = self::queue()->search(
+			array(
+				'status'   => 'pending',
+				'per_page' => 1,
+				'claimed'  => false,
+				'hook'     => self::SINGLE_CUSTOMER_IMPORT_ACTION,
+				'args'     => array( $user_id ),
+				'group'    => self::QUEUE_GROUP,
+			)
+		);
+
+		if ( $existing_jobs ) {
+			// Bail out if there's a pending single customer action.
+			return;
+		}
+
+		self::queue()->schedule_single( time() + 5, self::SINGLE_CUSTOMER_IMPORT_ACTION, array( $user_id ), self::QUEUE_GROUP );
+	}
+
+	/**
+	 * Imports a single customer to update lookup tables for.
+	 *
+	 * @param int $user_id User ID.
+	 * @return void
+	 */
+	public static function customer_lookup_import_customer( $user_id ) {
+		CustomersDataStore::update_registered_customer( $user_id );
 	}
 
 	/**

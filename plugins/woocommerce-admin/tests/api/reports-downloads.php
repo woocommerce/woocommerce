@@ -169,6 +169,8 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$object->set_timestamp( date( 'Y-m-d H:00:00', $time - ( 2 * DAY_IN_SECONDS ) ) );
 		$id = $object->save();
 
+		WC_Helper_Queue::run_all_pending();
+		
 		return array(
 			'time'      => $time,
 			'product_1' => $product_1,
