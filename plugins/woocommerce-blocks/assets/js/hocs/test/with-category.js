@@ -6,26 +6,26 @@ import TestRenderer from 'react-test-renderer';
 /**
  * Internal dependencies
  */
-import withProduct from '../with-product';
+import withCategory from '../with-category';
 import * as mockUtils from '../../components/utils';
 import * as mockBaseUtils from '../../base/utils/errors';
 
 jest.mock( '../../components/utils', () => ( {
-	getProduct: jest.fn(),
+	getCategory: jest.fn(),
 } ) );
 
 jest.mock( '../../base/utils/errors', () => ( {
 	formatError: jest.fn(),
 } ) );
 
-const mockProduct = { name: 'T-Shirt' };
-const attributes = { productId: 1 };
-const TestComponent = withProduct( ( props ) => {
+const mockCategory = { name: 'Clothing' };
+const attributes = { categoryId: 1 };
+const TestComponent = withCategory( ( props ) => {
 	return <div
 		error={ props.error }
-		getProduct={ props.getProduct }
+		getCategory={ props.getCategory }
 		isLoading={ props.isLoading }
-		product={ props.product }
+		category={ props.category }
 	/>;
 } );
 const render = () => {
@@ -36,74 +36,74 @@ const render = () => {
 	);
 };
 
-describe( 'withProduct Component', () => {
+describe( 'withCategory Component', () => {
 	let renderer;
 	afterEach( () => {
-		mockUtils.getProduct.mockReset();
+		mockUtils.getCategory.mockReset();
 	} );
 
 	describe( 'lifecycle events', () => {
 		beforeEach( () => {
-			mockUtils.getProduct.mockImplementation( () => Promise.resolve() );
+			mockUtils.getCategory.mockImplementation( () => Promise.resolve() );
 			renderer = render();
 		} );
 
-		it( 'getProduct is called on mount with passed in product id', () => {
-			const { getProduct } = mockUtils;
+		it( 'getCategory is called on mount with passed in category id', () => {
+			const { getCategory } = mockUtils;
 
-			expect( getProduct ).toHaveBeenCalledWith( attributes.productId );
-			expect( getProduct ).toHaveBeenCalledTimes( 1 );
+			expect( getCategory ).toHaveBeenCalledWith( attributes.categoryId );
+			expect( getCategory ).toHaveBeenCalledTimes( 1 );
 		} );
 
-		it( 'getProduct is called on component update', () => {
-			const { getProduct } = mockUtils;
-			const newAttributes = { ...attributes, productId: 2 };
+		it( 'getCategory is called on component update', () => {
+			const { getCategory } = mockUtils;
+			const newAttributes = { ...attributes, categoryId: 2 };
 			renderer.update(
 				<TestComponent
 					attributes={ newAttributes }
 				/>
 			);
 
-			expect( getProduct ).toHaveBeenNthCalledWith( 2, newAttributes.productId );
-			expect( getProduct ).toHaveBeenCalledTimes( 2 );
+			expect( getCategory ).toHaveBeenNthCalledWith( 2, newAttributes.categoryId );
+			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
 
-		it( 'getProduct is hooked to the prop', () => {
-			const { getProduct } = mockUtils;
+		it( 'getCategory is hooked to the prop', () => {
+			const { getCategory } = mockUtils;
 			const props = renderer.root.findByType( 'div' ).props;
 
-			props.getProduct();
+			props.getCategory();
 
-			expect( getProduct ).toHaveBeenCalledTimes( 2 );
+			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
 
-	describe( 'when the API returns product data', () => {
+	describe( 'when the API returns category data', () => {
 		beforeEach( () => {
-			mockUtils.getProduct.mockImplementation(
-				( productId ) => Promise.resolve( { ...mockProduct, id: productId } )
+			mockUtils.getCategory.mockImplementation(
+				( categoryId ) => Promise.resolve( { ...mockCategory, id: categoryId } )
 			);
 			renderer = render();
 		} );
 
-		it( 'sets the product props', () => {
+		it( 'sets the category props', () => {
 			const props = renderer.root.findByType( 'div' ).props;
 
 			expect( props.error ).toBeNull();
-			expect( typeof props.getProduct ).toBe( 'function' );
+			expect( typeof props.getCategory ).toBe( 'function' );
 			expect( props.isLoading ).toBe( false );
-			expect( props.product ).toEqual( { ...mockProduct, id: attributes.productId } );
+			expect( props.category ).toEqual( { ...mockCategory, id: attributes.categoryId } );
 		} );
 	} );
 
 	describe( 'when the API returns an error', () => {
 		const error = { message: 'There was an error.' };
-		const getProductPromise = Promise.reject( error );
+		const getCategoryPromise = Promise.reject( error );
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
 		beforeEach( () => {
-			mockUtils.getProduct.mockImplementation(
-				() => getProductPromise,
+			mockUtils.getCategory.mockImplementation(
+				() => getCategoryPromise
 			);
 			mockBaseUtils.formatError.mockImplementation(
 				() => formattedError,
@@ -113,15 +113,15 @@ describe( 'withProduct Component', () => {
 
 		it( 'sets the error prop', ( done ) => {
 			const { formatError } = mockBaseUtils;
-			getProductPromise.catch( () => {
+			getCategoryPromise.catch( () => {
 				const props = renderer.root.findByType( 'div' ).props;
 
 				expect( formatError ).toHaveBeenCalledWith( error );
 				expect( formatError ).toHaveBeenCalledTimes( 1 );
 				expect( props.error ).toEqual( formattedError );
-				expect( typeof props.getProduct ).toBe( 'function' );
+				expect( typeof props.getCategory ).toBe( 'function' );
 				expect( props.isLoading ).toBe( false );
-				expect( props.product ).toBeNull();
+				expect( props.category ).toBeNull();
 
 				done();
 			} );
