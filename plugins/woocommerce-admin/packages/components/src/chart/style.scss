@@ -104,6 +104,7 @@
 	background: transparent !important;
 	&.components-icon-button {
 		color: $core-grey-light-700;
+		display: inline-flex;
 		&.woocommerce-chart__type-button-selected {
 			color: $core-grey-dark-500;
 		}
