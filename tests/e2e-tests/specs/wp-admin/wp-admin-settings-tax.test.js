@@ -11,7 +11,14 @@ import { activatePlugin } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { clearAndFillInput, setCheckbox, settingsPageSaveChanges, uiUnblocked } from "../../utils";
+import {
+	clearAndFillInput,
+	setCheckbox,
+	settingsPageSaveChanges,
+	uiUnblocked,
+	verifyCheckboxIsSet,
+	verifyValueOfInputField
+} from "../../utils";
 
 describe( 'WooCommerce Tax Settings', () => {
 	beforeAll( async () => {
@@ -28,7 +35,12 @@ describe( 'WooCommerce Tax Settings', () => {
 		// Enable tax calculation
 		await setCheckbox( 'input[name="woocommerce_calc_taxes"]' );
 		await settingsPageSaveChanges();
-		await expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } );
+
+		// Verify that settings have been saved
+		await Promise.all( [
+			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
+			verifyCheckboxIsSet( '#woocommerce_calc_taxes' ),
+		] );
 
 		// Verify that tax settings are now present
 		await expect( page ).toMatchElement( 'a.nav-tab', { text: 'Tax' } );
@@ -56,7 +68,17 @@ describe( 'WooCommerce Tax Settings', () => {
 		await expect( page ).toSelect( '#woocommerce_tax_total_display', 'As a single total' );
 
 		await settingsPageSaveChanges();
-		await expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } );
+
+		// Verify that settings have been saved
+		await Promise.all( [
+			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
+			verifyValueOfInputField( 'input[name="woocommerce_prices_include_tax"][value="no"]', 'no' ),
+			expect( page ).toMatchElement( '#woocommerce_tax_based_on', { text: 'Customer shipping address' } ),
+			expect( page ).toMatchElement( '#woocommerce_shipping_tax_class', { text: 'Standard' } ),
+			expect( page ).toMatchElement( '#woocommerce_tax_display_shop', { text: 'Excluding tax' } ),
+			expect( page ).toMatchElement( '#woocommerce_tax_display_cart', { text: 'Including tax' } ),
+			expect( page ).toMatchElement( '#woocommerce_tax_total_display', { text: 'As a single total' } ),
+		] );
 	} );
 
 	it( 'can add tax classes', async () => {
@@ -70,10 +92,21 @@ describe( 'WooCommerce Tax Settings', () => {
 		await clearAndFillInput( '#woocommerce_tax_classes', '' );
 		await settingsPageSaveChanges();
 
+		// Verify that settings have been saved
+		await Promise.all( [
+			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
+			verifyValueOfInputField( '#woocommerce_tax_classes', '' ),
+		] );
+
 		// Add a "fancy" tax class
 		await clearAndFillInput( '#woocommerce_tax_classes', 'Fancy' );
 		await settingsPageSaveChanges();
-		await expect( page ).toMatchElement( 'ul.subsubsub > li > a', { text: 'Fancy rates' } );
+
+		// Verify that settings have been saved
+		await Promise.all( [
+			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
+			expect( page ).toMatchElement( 'ul.subsubsub > li > a', { text: 'Fancy rates' } ),
+		] );
 	} );
 
 	it( 'can set rate settings', async () => {
@@ -131,7 +164,12 @@ describe( 'WooCommerce Tax Settings', () => {
 		// Remove "fancy" tax class
 		await clearAndFillInput( '#woocommerce_tax_classes', ' ' );
 		await settingsPageSaveChanges();
-		await expect( page ).not.toMatchElement( 'ul.subsubsub > li > a', { text: 'Fancy rates' } );
+
+		// Verify that settings have been saved
+		await Promise.all( [
+			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
+			expect( page ).not.toMatchElement( 'ul.subsubsub > li > a', { text: 'Fancy rates' } ),
+		] );
 		await page.waitFor( 10000 );
 	} );
 } );
