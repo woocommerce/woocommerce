@@ -17,7 +17,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal depdencies
  */
-import { NAMESPACE } from 'wc-api/onboarding/constants';
+import { NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 
 class Connect extends Component {
