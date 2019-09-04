@@ -8,6 +8,7 @@ import TestRenderer from 'react-test-renderer';
  */
 import withReviews from '../with-reviews';
 import * as mockUtils from '../../../blocks/reviews/utils';
+import * as mockBaseUtils from '../../utils/errors';
 
 jest.mock( '../../../blocks/reviews/utils', () => ( {
 	getOrderArgs: () => ( {
@@ -15,6 +16,10 @@ jest.mock( '../../../blocks/reviews/utils', () => ( {
 		orderby: 'date_gmt',
 	} ),
 	getReviews: jest.fn(),
+} ) );
+
+jest.mock( '../../utils/errors', () => ( {
+	formatError: jest.fn(),
 } ) );
 
 const mockReviews = [
@@ -109,21 +114,33 @@ describe( 'withReviews Component', () => {
 	} );
 
 	describe( 'when the API returns an error', () => {
+		const error = { message: 'There was an error.' };
+		const getReviewsPromise = Promise.reject( error );
+		const formattedError = { message: 'There was an error.', type: 'api' };
+
 		beforeEach( () => {
 			mockUtils.getReviews.mockImplementation(
-				() => Promise.reject( {
-					json: () => Promise.resolve( { message: 'There was an error.' } ),
-				} )
+				() => getReviewsPromise,
+			);
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError,
 			);
 			renderer = render();
 		} );
 
-		it( 'sets the error prop', () => {
-			const props = renderer.root.findByType( 'div' ).props;
+		it( 'sets the error prop', ( done ) => {
+			const { formatError } = mockBaseUtils;
+			getReviewsPromise.catch( () => {
+				const props = renderer.root.findByType( 'div' ).props;
 
-			expect( props.error ).toEqual( { apiMessage: 'There was an error.' } );
-			expect( props.isLoading ).toBe( false );
-			expect( props.reviews ).toEqual( [] );
+				expect( formatError ).toHaveBeenCalledWith( error );
+				expect( formatError ).toHaveBeenCalledTimes( 1 );
+				expect( props.error ).toEqual( formattedError );
+				expect( props.isLoading ).toBe( false );
+				expect( props.reviews ).toEqual( [] );
+
+				done();
+			} );
 		} );
 	} );
 } );

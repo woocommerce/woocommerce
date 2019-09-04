@@ -57,12 +57,10 @@ const withSearchedProducts = createHigherOrderComponent( ( OriginalComponent ) =
 				.catch( this.setError );
 		}
 
-		setError( errorResponse ) {
-			errorResponse.json().then( ( apiError ) => {
-				const error = formatError( apiError );
+		async setError( e ) {
+			const error = await formatError( e );
 
-				this.setState( { list: [], loading: false, error } );
-			} );
+			this.setState( { list: [], loading: false, error } );
 		}
 
 		render() {

@@ -45,8 +45,8 @@ const withCategory = createHigherOrderComponent(
 
 				getCategory( categoryId ).then( ( category ) => {
 					this.setState( { category, loading: false, error: null } );
-				} ).catch( ( apiError ) => {
-					const error = formatError( apiError );
+				} ).catch( async ( e ) => {
+					const error = await formatError( e );
 
 					this.setState( { category: null, loading: false, error } );
 				} );

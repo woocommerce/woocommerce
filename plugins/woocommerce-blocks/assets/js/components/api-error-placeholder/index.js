@@ -49,13 +49,13 @@ ApiErrorPlaceholder.propTypes = {
 	 */
 	error: PropTypes.shape( {
 		/**
-		 * API error message to display in case of a missing `message`.
-		 */
-		apiMessage: PropTypes.node,
-		/**
 		 * Human-readable error message to display.
 		 */
-		message: PropTypes.string,
+		message: PropTypes.node,
+		/**
+		 * Context in which the error was triggered. That will determine how the error is displayed to the user.
+		 */
+		type: PropTypes.oneOf( [ 'api', 'general' ] ),
 	} ),
 	/**
 	 * Whether there is a request running, so the 'Retry' button is hidden and

@@ -45,8 +45,8 @@ const withProduct = createHigherOrderComponent(
 
 				getProduct( productId ).then( ( product ) => {
 					this.setState( { product, loading: false, error: null } );
-				} ).catch( ( apiError ) => {
-					const error = formatError( apiError );
+				} ).catch( async ( e ) => {
+					const error = await formatError( e );
 
 					this.setState( { product: null, loading: false, error } );
 				} );

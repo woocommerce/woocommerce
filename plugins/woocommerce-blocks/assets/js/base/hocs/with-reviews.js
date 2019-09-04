@@ -122,15 +122,13 @@ const withReviews = ( OriginalComponent ) => {
 				.catch( this.setError );
 		}
 
-		setError( errorResponse ) {
-			errorResponse.json().then( ( apiError ) => {
-				const { onReviewsLoadError } = this.props;
-				const error = formatError( apiError );
+		async setError( e ) {
+			const { onReviewsLoadError } = this.props;
+			const error = await formatError( e );
 
-				this.setState( { reviews: [], loading: false, error } );
+			this.setState( { reviews: [], loading: false, error } );
 
-				onReviewsLoadError();
-			} );
+			onReviewsLoadError( error );
 		}
 
 		render() {
