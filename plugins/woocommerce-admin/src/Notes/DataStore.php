@@ -371,6 +371,14 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$where_clauses .= " AND status IN ($escaped_status_types)";
 		}
 
+		/**
+		 * Filter the notes WHERE clause before retrieving the data.
+		 *
+		 * Allows modification of the notes select criterial.
+		 *
+		 * @param string $where_clauses The generated WHERE clause.
+		 * @param array  $args          The original arguments for the request.
+		 */
 		return apply_filters( 'wc_admin_notes_where_clauses', $where_clauses, $args );
 	}
 
