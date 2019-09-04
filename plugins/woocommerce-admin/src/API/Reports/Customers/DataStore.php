@@ -515,6 +515,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%s',
 			'%s',
 			'%s',
+			'%s',
 		);
 
 		// Add registered customer data.
@@ -647,6 +648,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 		$format      = array(
 			'%d',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
