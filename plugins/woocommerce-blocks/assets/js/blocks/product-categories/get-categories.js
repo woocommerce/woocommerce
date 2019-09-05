@@ -15,7 +15,5 @@ export default function( { hasEmpty, isHierarchical } ) {
 	const categories = PRODUCT_CATEGORIES.filter(
 		( cat ) => hasEmpty || !! cat.count
 	);
-	return isHierarchical ?
-		buildTermsTree( categories ) :
-		categories;
+	return isHierarchical ? buildTermsTree( categories ) : categories;
 }

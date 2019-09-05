@@ -38,7 +38,8 @@ MergeExtractFilesPlugin.prototype.apply = function( compiler ) {
 				// noop silently ignores errors with deleting the file.
 				rimraf( f, noop );
 			} catch ( error ) {
-				console.log( /* eslint-disable-line no-console */
+				/* eslint-disable-next-line no-console */
+				console.log(
 					` There was an error merging ${ f } into ${ this.output }`,
 					error
 				);

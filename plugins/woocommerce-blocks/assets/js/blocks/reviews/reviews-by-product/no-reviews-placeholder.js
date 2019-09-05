@@ -26,14 +26,17 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 		return renderApiError();
 	}
 
-	const content = ( ! product || isLoading ) ?
-		<Spinner /> :
-		sprintf(
-			__(
-				"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
-				'woo-gutenberg-products-block'
-			),
-			product.name
+	const content =
+		! product || isLoading ? (
+			<Spinner />
+		) : (
+			sprintf(
+				__(
+					"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
+					'woo-gutenberg-products-block'
+				),
+				product.name
+			)
 		);
 
 	return (

@@ -12,23 +12,42 @@ import Label from '../label';
 import { getIndexes } from './utils.js';
 import './style.scss';
 
-const Pagination = ( { currentPage, displayFirstAndLastPages, displayNextAndPreviousArrows, pagesToDisplay, onPageChange, totalPages } ) => {
-	const { minIndex, maxIndex } = getIndexes( pagesToDisplay, currentPage, totalPages );
+const Pagination = ( {
+	currentPage,
+	displayFirstAndLastPages,
+	displayNextAndPreviousArrows,
+	pagesToDisplay,
+	onPageChange,
+	totalPages,
+} ) => {
+	const { minIndex, maxIndex } = getIndexes(
+		pagesToDisplay,
+		currentPage,
+		totalPages
+	);
 	const pages = [];
 	for ( let i = minIndex; i <= maxIndex; i++ ) {
 		pages.push( i );
 	}
 	const showFirstPage = displayFirstAndLastPages && Boolean( minIndex !== 1 );
-	const showLastPage = displayFirstAndLastPages && Boolean( maxIndex !== totalPages );
-	const showFirstPageEllipsis = displayFirstAndLastPages && Boolean( minIndex > 2 );
-	const showLastPageEllipsis = displayFirstAndLastPages && Boolean( maxIndex < totalPages - 1 );
-	const showPreviousArrow = displayNextAndPreviousArrows && Boolean( currentPage !== 1 );
-	const showNextArrow = displayNextAndPreviousArrows && Boolean( currentPage !== totalPages );
+	const showLastPage =
+		displayFirstAndLastPages && Boolean( maxIndex !== totalPages );
+	const showFirstPageEllipsis =
+		displayFirstAndLastPages && Boolean( minIndex > 2 );
+	const showLastPageEllipsis =
+		displayFirstAndLastPages && Boolean( maxIndex < totalPages - 1 );
+	const showPreviousArrow =
+		displayNextAndPreviousArrows && Boolean( currentPage !== 1 );
+	const showNextArrow =
+		displayNextAndPreviousArrows && Boolean( currentPage !== totalPages );
 
 	return (
 		<div className="wc-block-pagination">
 			<Label
-				screenReaderLabel={ __( 'Navigate to another page', 'woo-gutenberg-products-block' ) }
+				screenReaderLabel={ __(
+					'Navigate to another page',
+					'woo-gutenberg-products-block'
+				) }
 			/>
 			{ showPreviousArrow && (
 				<button
@@ -38,7 +57,10 @@ const Pagination = ( { currentPage, displayFirstAndLastPages, displayNextAndPrev
 				>
 					<Label
 						label="<"
-						screenReaderLabel={ __( 'Previous page', 'woo-gutenberg-products-block' ) }
+						screenReaderLabel={ __(
+							'Previous page',
+							'woo-gutenberg-products-block'
+						) }
 					/>
 				</button>
 			) }
@@ -89,7 +111,10 @@ const Pagination = ( { currentPage, displayFirstAndLastPages, displayNextAndPrev
 				>
 					<Label
 						label=">"
-						screenReaderLabel={ __( 'Next page', 'woo-gutenberg-products-block' ) }
+						screenReaderLabel={ __(
+							'Next page',
+							'woo-gutenberg-products-block'
+						) }
 					/>
 				</button>
 			) }

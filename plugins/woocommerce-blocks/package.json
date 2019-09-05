@@ -1,135 +1,139 @@
 {
-  "name": "@woocommerce/block-library",
-  "title": "WooCommerce Blocks",
-  "author": "Automattic",
-  "version": "2.5.0-dev",
-  "description": "WooCommerce blocks for the Gutenberg editor.",
-  "homepage": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/",
-  "keywords": [
-    "woocommerce",
-    "wordpress",
-    "blocks"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
-  },
-  "license": "GPL-3.0+",
-  "scripts": {
-    "deploy": "composer install --no-dev && npm run build --loglevel error && sh ./bin/github-deploy.sh",
-    "release": "sh ./bin/wordpress-deploy.sh",
-    "prepack": "npm install && npm run lint && npm run test && npm run build",
-    "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
-    "build:ci": "npm run build && npm run size-check && npm run lint:js && npm run lint:css",
-    "start": "cross-env BABEL_ENV=default webpack --watch --info-verbosity none",
-    "lint": "npm run lint:php && npm run lint:css && npm run lint:js",
-    "lint:php": "composer run-script phpcs .",
-    "lint:css": "stylelint 'assets/**/*.scss'",
-    "lint:css-fix": "stylelint 'assets/**/*.scss' --fix",
-    "lint:js": "eslint assets/js --ext=js,jsx",
-    "lint:js-fix": "eslint assets/js --ext=js,jsx --fix",
-    "package-plugin": "./bin/build-plugin-zip.sh",
-    "test": "wp-scripts test-unit-js --config tests/js/jest.config.json",
-    "test:help": "wp-scripts test-unit-js --help",
-    "test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
-    "test:watch": "npm run test -- --watch",
-    "size-check": "bundlesize",
-    "changelog": "node ./bin/changelog.js "
-  },
-  "devDependencies": {
-    "@babel/core": "7.5.5",
-    "@babel/plugin-proposal-class-properties": "7.5.5",
-    "@octokit/rest": "16.28.9",
-    "@woocommerce/navigation": "3.0.0",
-    "@wordpress/babel-preset-default": "4.4.0",
-    "@wordpress/blocks": "6.5.0",
-    "@wordpress/browserslist-config": "2.6.0",
-    "@wordpress/components": "8.1.0",
-    "@wordpress/date": "3.4.0",
-    "@wordpress/dependency-extraction-webpack-plugin": "1.1.0",
-    "@wordpress/editor": "9.5.0",
-    "@wordpress/element": "2.6.0",
-    "@wordpress/i18n": "3.6.0",
-    "@wordpress/is-shallow-equal": "1.5.0",
-    "@wordpress/jest-preset-default": "4.3.0",
-    "@wordpress/rich-text": "3.5.0",
-    "@wordpress/scripts": "3.4.0",
-    "autoprefixer": "9.6.1",
-    "babel-core": "7.0.0-bridge.0",
-    "babel-eslint": "10.0.3",
-    "babel-loader": "8.0.6",
-    "babel-plugin-transform-async-generator-functions": "6.24.1",
-    "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "babel-plugin-transform-react-jsx": "6.24.1",
-    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
-    "babel-plugin-transform-runtime": "6.23.0",
-    "babel-preset-env": "1.7.0",
-    "bundlesize": "0.18.0",
-    "chalk": "2.4.2",
-    "classnames": "2.2.6",
-    "clean-webpack-plugin": "3.0.0",
-    "core-js": "3.2.1",
-    "cross-env": "5.2.1",
-    "css-loader": "3.2.0",
-    "cssnano": "4.1.10",
-    "eslint": "6.3.0",
-    "eslint-plugin-jest": "22.16.0",
-    "har-validator": "5.1.3",
-    "husky": "2.4.1",
-    "ignore-loader": "0.1.2",
-    "interpolate-components": "1.1.1",
-    "js-md5": "0.7.3",
-    "lint-staged": "9.2.5",
-    "mini-css-extract-plugin": "0.8.0",
-    "node-sass": "4.12.0",
-    "po2json": "1.0.0-alpha",
-    "postcss-loader": "3.0.0",
-    "progress-bar-webpack-plugin": "1.12.1",
-    "promptly": "3.0.3",
-    "react-test-renderer": "16.8.6",
-    "request-promise": "4.2.4",
-    "rimraf": "3.0.0",
-    "sass-loader": "7.3.1",
-    "style-loader": "1.0.0",
-    "stylelint": "10.1.0",
-    "stylelint-config-wordpress": "14.0.0",
-    "webpack": "4.39.3",
-    "webpack-cli": "3.3.7",
-    "webpack-rtl-plugin": "2.0.0",
-    "yargs": "14.0.0"
-  },
-  "engines": {
-    "node": "10.16.3",
-    "npm": "6.11.2"
-  },
-  "dependencies": {
-    "@woocommerce/components": "3.2.0",
-    "gridicons": "3.3.1",
-    "trim-html": "0.1.9"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.scss": [
-      "npm run lint:css"
-    ],
-    "*.js": [
-      "npm run lint:js"
-    ],
-    "*.php": [
-      "php -d display_errors=1 -l",
-      "composer run-script phpcs"
-    ]
-  },
-  "files": [
-    "assets/**/*.{js,scss,php}",
-    "build/**/*.{js,json,css}",
-    "includes/**/*.php",
-    "languages/**/*.json",
-    "license.txt",
-    "woocommerce-gutenberg-products-block.php"
-  ]
+	"name": "@woocommerce/block-library",
+	"title": "WooCommerce Blocks",
+	"author": "Automattic",
+	"version": "2.5.0-dev",
+	"description": "WooCommerce blocks for the Gutenberg editor.",
+	"homepage": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/",
+	"keywords": [
+		"woocommerce",
+		"wordpress",
+		"blocks"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
+	},
+	"license": "GPL-3.0+",
+	"scripts": {
+		"deploy": "composer install --no-dev && npm run build --loglevel error && sh ./bin/github-deploy.sh",
+		"release": "sh ./bin/wordpress-deploy.sh",
+		"prepack": "npm install && npm run lint && npm run test && npm run build",
+		"build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
+		"build:ci": "npm run build && npm run size-check && npm run lint:js && npm run lint:css",
+		"start": "cross-env BABEL_ENV=default webpack --watch --info-verbosity none",
+		"lint": "npm run lint:php && npm run lint:css && npm run lint:js",
+		"lint:php": "composer run-script phpcs .",
+		"lint:css": "stylelint 'assets/**/*.scss'",
+		"lint:css-fix": "stylelint 'assets/**/*.scss' --fix",
+		"lint:js": "eslint assets/js --ext=js,jsx",
+		"lint:js-fix": "eslint assets/js --ext=js,jsx --fix",
+		"package-plugin": "./bin/build-plugin-zip.sh",
+		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",
+		"test": "wp-scripts test-unit-js --config tests/js/jest.config.json",
+		"test:help": "wp-scripts test-unit-js --help",
+		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
+		"test:watch": "npm run test -- --watch",
+		"size-check": "bundlesize",
+		"changelog": "node ./bin/changelog.js "
+	},
+	"devDependencies": {
+		"@babel/core": "7.5.5",
+		"@babel/plugin-proposal-class-properties": "7.5.5",
+		"@octokit/rest": "16.28.9",
+		"@woocommerce/navigation": "3.0.0",
+		"@wordpress/babel-preset-default": "4.4.0",
+		"@wordpress/blocks": "6.5.0",
+		"@wordpress/browserslist-config": "2.6.0",
+		"@wordpress/components": "8.1.0",
+		"@wordpress/date": "3.4.0",
+		"@wordpress/dependency-extraction-webpack-plugin": "1.1.0",
+		"@wordpress/editor": "9.5.0",
+		"@wordpress/element": "2.6.0",
+		"@wordpress/i18n": "3.6.0",
+		"@wordpress/is-shallow-equal": "1.5.0",
+		"@wordpress/jest-preset-default": "4.3.0",
+		"@wordpress/rich-text": "3.5.0",
+		"@wordpress/scripts": "3.4.0",
+		"autoprefixer": "9.6.1",
+		"babel-core": "7.0.0-bridge.0",
+		"babel-eslint": "10.0.3",
+		"babel-loader": "8.0.6",
+		"babel-plugin-transform-async-generator-functions": "6.24.1",
+		"babel-plugin-transform-object-rest-spread": "6.26.0",
+		"babel-plugin-transform-react-jsx": "6.24.1",
+		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
+		"babel-plugin-transform-runtime": "6.23.0",
+		"babel-preset-env": "1.7.0",
+		"bundlesize": "0.18.0",
+		"chalk": "2.4.2",
+		"classnames": "2.2.6",
+		"clean-webpack-plugin": "3.0.0",
+		"core-js": "3.2.1",
+		"cross-env": "5.2.1",
+		"css-loader": "3.2.0",
+		"cssnano": "4.1.10",
+		"eslint": "6.3.0",
+		"eslint-config-prettier": "^6.2.0",
+		"eslint-plugin-jest": "22.16.0",
+		"har-validator": "5.1.3",
+		"husky": "2.4.1",
+		"ignore-loader": "0.1.2",
+		"interpolate-components": "1.1.1",
+		"js-md5": "0.7.3",
+		"lint-staged": "9.2.5",
+		"mini-css-extract-plugin": "0.8.0",
+		"node-sass": "4.12.0",
+		"po2json": "1.0.0-alpha",
+		"postcss-loader": "3.0.0",
+		"prettier": "git+https://github.com/Automattic/wp-prettier.git#wp-prettier-1.17.0",
+		"progress-bar-webpack-plugin": "1.12.1",
+		"promptly": "3.0.3",
+		"react-test-renderer": "16.8.6",
+		"request-promise": "4.2.4",
+		"rimraf": "3.0.0",
+		"sass-loader": "7.3.1",
+		"style-loader": "1.0.0",
+		"stylelint": "10.1.0",
+		"stylelint-config-wordpress": "14.0.0",
+		"webpack": "4.39.3",
+		"webpack-cli": "3.3.7",
+		"webpack-rtl-plugin": "2.0.0",
+		"yargs": "14.0.0"
+	},
+	"engines": {
+		"node": "10.16.3",
+		"npm": "6.11.2"
+	},
+	"dependencies": {
+		"@woocommerce/components": "3.2.0",
+		"gridicons": "3.3.1",
+		"trim-html": "0.1.9"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.scss": [
+			"npm run lint:css"
+		],
+		"*.js": [
+			"prettier --write",
+			"npm run lint:js"
+		],
+		"*.php": [
+			"php -d display_errors=1 -l",
+			"composer run-script phpcs"
+		]
+	},
+	"files": [
+		"assets/**/*.{js,scss,php}",
+		"build/**/*.{js,json,css}",
+		"includes/**/*.php",
+		"languages/**/*.json",
+		"license.txt",
+		"woocommerce-gutenberg-products-block.php"
+	]
 }

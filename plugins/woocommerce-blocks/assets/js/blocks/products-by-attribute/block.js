@@ -62,7 +62,9 @@ class ProductsByAttributeBlock extends Component {
 				>
 					<GridContentControl
 						settings={ contentVisibility }
-						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { contentVisibility: value } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody
@@ -75,8 +77,10 @@ class ProductsByAttributeBlock extends Component {
 					<ProductAttributeControl
 						selected={ attributes }
 						onChange={ ( value = [] ) => {
-							const result = value.map( ( { id, attr_slug } ) => ( { // eslint-disable-line camelcase
+							// eslint-disable-next-line camelcase
+							const result = value.map( ( { id, attr_slug } ) => ( {
 								id,
+								// eslint-disable-next-line camelcase
 								attr_slug,
 							} ) );
 							setAttributes( { attributes: result } );
@@ -127,8 +131,10 @@ class ProductsByAttributeBlock extends Component {
 					<ProductAttributeControl
 						selected={ blockAttributes.attributes }
 						onChange={ ( value = [] ) => {
-							const result = value.map( ( { id, attr_slug } ) => ( { // eslint-disable-line camelcase
+							// eslint-disable-next-line camelcase
+							const result = value.map( ( { id, attr_slug } ) => ( {
 								id,
+								// eslint-disable-next-line camelcase
 								attr_slug,
 							} ) );
 							setAttributes( { attributes: result } );

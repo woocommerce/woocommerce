@@ -83,13 +83,15 @@ registerBlockType( 'woocommerce/product-search', {
 						title={ __( 'Content', 'woo-gutenberg-products-block' ) }
 						initialOpen
 					>
-
 						<ToggleControl
-							label={ __( 'Show search field label', 'woo-gutenberg-products-block' ) }
+							label={ __(
+								'Show search field label',
+								'woo-gutenberg-products-block'
+							) }
 							help={
-								hasLabel ?
-									__( 'Label is visible.', 'woo-gutenberg-products-block' ) :
-									__( 'Label is hidden.', 'woo-gutenberg-products-block' )
+								hasLabel
+									? __( 'Label is visible.', 'woo-gutenberg-products-block' )
+									: __( 'Label is hidden.', 'woo-gutenberg-products-block' )
 							}
 							checked={ hasLabel }
 							onChange={ () => setAttributes( { hasLabel: ! hasLabel } ) }

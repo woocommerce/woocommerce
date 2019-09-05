@@ -51,17 +51,20 @@ class ProductsBlock extends Component {
 						max={ MAX_COLUMNS }
 					/>
 					<ToggleControl
-						label={ __( 'Align Add to Cart buttons', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Align Add to Cart buttons',
+							'woo-gutenberg-products-block'
+						) }
 						help={
-							alignButtons ?
-								__(
-									'Buttons are aligned vertically.',
-									'woo-gutenberg-products-block'
-								) :
-								__(
-									'Buttons follow content.',
-									'woo-gutenberg-products-block'
-								)
+							alignButtons
+								? __(
+										'Buttons are aligned vertically.',
+										'woo-gutenberg-products-block'
+								  )
+								: __(
+										'Buttons follow content.',
+										'woo-gutenberg-products-block'
+								  )
 						}
 						checked={ alignButtons }
 						onChange={ () => setAttributes( { alignButtons: ! alignButtons } ) }
@@ -73,7 +76,9 @@ class ProductsBlock extends Component {
 				>
 					<GridContentControl
 						settings={ contentVisibility }
-						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { contentVisibility: value } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody

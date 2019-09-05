@@ -15,7 +15,18 @@ import { withAttributes } from '../../hocs';
 import ErrorMessage from '../api-error-placeholder/error-message.js';
 import './style.scss';
 
-const ProductAttributeControl = ( { attributes, error, expandedAttribute, onChange, onOperatorChange, isLoading, operator, selected, termsAreLoading, termsList } ) => {
+const ProductAttributeControl = ( {
+	attributes,
+	error,
+	expandedAttribute,
+	onChange,
+	onOperatorChange,
+	isLoading,
+	operator,
+	selected,
+	termsAreLoading,
+	termsList,
+} ) => {
 	const onExpandAttribute = ( item ) => {
 		return () => {
 			onChange( [] );
@@ -113,9 +124,7 @@ const ProductAttributeControl = ( { attributes, error, expandedAttribute, onChan
 	};
 
 	if ( error ) {
-		return (
-			<ErrorMessage error={ error } />
-		);
+		return <ErrorMessage error={ error } />;
 	}
 
 	return (

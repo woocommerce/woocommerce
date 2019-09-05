@@ -10,62 +10,69 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import { getCategory } from '../components/utils';
 import { formatError } from '../base/utils/errors.js';
 
-const withCategory = createHigherOrderComponent(
-	( OriginalComponent ) => {
-		return class WrappedComponent extends Component {
-			constructor() {
-				super( ...arguments );
-				this.state = {
-					error: null,
-					loading: false,
-					category: null,
-				};
-				this.loadCategory = this.loadCategory.bind( this );
-			}
+const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
+	return class WrappedComponent extends Component {
+		constructor() {
+			super( ...arguments );
+			this.state = {
+				error: null,
+				loading: false,
+				category: null,
+			};
+			this.loadCategory = this.loadCategory.bind( this );
+		}
 
-			componentDidMount() {
+		componentDidMount() {
+			this.loadCategory();
+		}
+
+		componentDidUpdate( prevProps ) {
+			if (
+				prevProps.attributes.categoryId !== this.props.attributes.categoryId
+			) {
 				this.loadCategory();
 			}
+		}
 
-			componentDidUpdate( prevProps ) {
-				if ( prevProps.attributes.categoryId !== this.props.attributes.categoryId ) {
-					this.loadCategory();
-				}
+		loadCategory() {
+			const { categoryId } = this.props.attributes;
+
+			if ( ! categoryId ) {
+				this.setState( {
+					category: null,
+					loading: false,
+					error: null,
+				} );
+				return;
 			}
 
-			loadCategory() {
-				const { categoryId } = this.props.attributes;
+			this.setState( { loading: true } );
 
-				if ( ! categoryId ) {
-					this.setState( { category: null, loading: false, error: null } );
-					return;
-				}
-
-				this.setState( { loading: true } );
-
-				getCategory( categoryId ).then( ( category ) => {
+			getCategory( categoryId )
+				.then( ( category ) => {
 					this.setState( { category, loading: false, error: null } );
-				} ).catch( async ( e ) => {
+				} )
+				.catch( async ( e ) => {
 					const error = await formatError( e );
 
 					this.setState( { category: null, loading: false, error } );
 				} );
-			}
+		}
 
-			render() {
-				const { error, loading, category } = this.state;
+		render() {
+			const { error, loading, category } = this.state;
 
-				return <OriginalComponent
+			return (
+				<OriginalComponent
 					{ ...this.props }
 					error={ error }
 					getCategory={ this.loadCategory }
 					isLoading={ loading }
 					category={ category }
-				/>;
-			}
-		};
-	},
-	'withCategory'
-);
+				/>
+			);
+		}
+	};
+}, 'withCategory' );
 
 export default withCategory;

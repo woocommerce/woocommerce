@@ -30,7 +30,15 @@ class ToggleButtonControl extends Component {
 	}
 
 	render() {
-		const { label, checked, instanceId, className, help, options, value } = this.props;
+		const {
+			label,
+			checked,
+			instanceId,
+			className,
+			help,
+			options,
+			value,
+		} = this.props;
 		const id = `inspector-toggle-button-control-${ instanceId }`;
 
 		let helpLabel;
@@ -43,7 +51,10 @@ class ToggleButtonControl extends Component {
 			<BaseControl
 				id={ id }
 				help={ helpLabel }
-				className={ classnames( 'components-toggle-button-control', className ) }
+				className={ classnames(
+					'components-toggle-button-control',
+					className
+				) }
 			>
 				<label
 					id={ id + '__label' }
@@ -52,9 +63,7 @@ class ToggleButtonControl extends Component {
 				>
 					{ label }
 				</label>
-				<ButtonGroup
-					aria-labelledby={ id + '__label' }
-				>
+				<ButtonGroup aria-labelledby={ id + '__label' }>
 					{ options.map( ( option, index ) => {
 						const buttonArgs = {};
 

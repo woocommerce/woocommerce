@@ -13,8 +13,7 @@ const argv = require( 'yargs' )
 	.describe( 'debug', 'Output which files are added to the zip during build.' )
 	.alias( 'debug', 'v' )
 	.default( 'source', './languages' )
-	.boolean( 'v' )
-	.argv;
+	.boolean( 'v' ).argv;
 
 const sourceDir = path.resolve( argv.source );
 const showDebug = argv.debug;
@@ -25,7 +24,9 @@ if ( ! fs.existsSync( sourceDir ) ) {
 }
 
 // Get .po files
-const files = fs.readdirSync( sourceDir ).filter( ( f ) => !! f.match( /\.po$/ ) );
+const files = fs
+	.readdirSync( sourceDir )
+	.filter( ( f ) => !! f.match( /\.po$/ ) );
 
 if ( ! files.length ) {
 	console.log( 'No language (.po) files found.' );
@@ -34,7 +35,9 @@ if ( ! files.length ) {
 console.log( `Found ${ files.length } language files to convert.` );
 
 // Get the built .js files
-const jsFiles = fs.readdirSync( './build' ).filter( ( f ) => !! f.match( /\.js$/ ) );
+const jsFiles = fs
+	.readdirSync( './build' )
+	.filter( ( f ) => !! f.match( /\.js$/ ) );
 console.log( `Found ${ jsFiles.length } scripts that need translations.` );
 
 files.forEach( ( file ) => {
@@ -42,12 +45,16 @@ files.forEach( ( file ) => {
 		console.log( `Converting ${ file }` );
 	}
 	const filePath = path.resolve( sourceDir, file );
-	const name = path.basename( file )
+	const name = path
+		.basename( file )
 		.replace( 'woo-gutenberg-products-block-', '' )
 		.replace( '.po', '' );
 
 	const poContent = fs.readFileSync( filePath );
-	const jsonContent = po2json.parse( poContent, { format: 'jed', stringify: true } );
+	const jsonContent = po2json.parse( poContent, {
+		format: 'jed',
+		stringify: true,
+	} );
 
 	jsFiles.forEach( ( jsFile ) => {
 		const hash = md5( `build/${ jsFile }` );

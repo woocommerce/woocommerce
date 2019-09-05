@@ -19,9 +19,7 @@ describe( 'Label', () => {
 		} );
 
 		test( 'should render only the label', () => {
-			const component = TestRenderer.create(
-				<Label label="Lorem" />
-			);
+			const component = TestRenderer.create( <Label label="Lorem" /> );
 
 			expect( component.toJSON() ).toMatchSnapshot();
 		} );

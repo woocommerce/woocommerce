@@ -6,9 +6,7 @@ import { isObject } from 'lodash';
 /**
  * Internal dependencies
  */
-import {
-	getImageSrcFromProduct,
-} from '../../utils/products';
+import { getImageSrcFromProduct } from '../../utils/products';
 
 /**
  * Generate a style object given either a product object or URL to an image.
@@ -34,9 +32,9 @@ function getBackgroundImageStyles( url ) {
  * @return {string} The class name, if applicable (not used for ratio 0 or 50).
  */
 function dimRatioToClass( ratio ) {
-	return ratio === 0 || ratio === 50 ?
-		null :
-		`has-background-dim-${ 10 * Math.round( ratio / 10 ) }`;
+	return ratio === 0 || ratio === 50
+		? null
+		: `has-background-dim-${ 10 * Math.round( ratio / 10 ) }`;
 }
 
 export { getBackgroundImageStyles, dimRatioToClass };

@@ -69,7 +69,12 @@ class ProductsByTagBlock extends Component {
 
 	setChangedAttributes( attributes ) {
 		this.setState( ( prevState ) => {
-			return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
+			return {
+				changedAttributes: {
+					...prevState.changedAttributes,
+					...attributes,
+				},
+			};
 		} );
 	}
 
@@ -128,7 +133,9 @@ class ProductsByTagBlock extends Component {
 				>
 					<GridContentControl
 						settings={ contentVisibility }
-						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { contentVisibility: value } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody
@@ -218,8 +225,10 @@ class ProductsByTagBlock extends Component {
 						label={ __( 'Products by Tag', 'woo-gutenberg-products-block' ) }
 						className="wc-block-products-grid wc-block-product-tag"
 					>
-						{ __( 'This block displays products from selected tags. Select at least one tag to display its products.', 'woo-gutenberg-products-block' ) }
-
+						{ __(
+							'This block displays products from selected tags. Select at least one tag to display its products.',
+							'woo-gutenberg-products-block'
+						) }
 					</Placeholder>
 				) }
 			</Disabled>
@@ -239,18 +248,15 @@ class ProductsByTagBlock extends Component {
 									{
 										icon: 'edit',
 										title: __( 'Edit' ),
-										onClick: () => isEditing ? this.stopEditing() : this.startEditing(),
+										onClick: () =>
+											isEditing ? this.stopEditing() : this.startEditing(),
 										isActive: isEditing,
 									},
 								] }
 							/>
 						</BlockControls>
 						{ this.getInspectorControls() }
-						{ isEditing ? (
-							this.renderEditMode()
-						) : (
-							this.renderViewMode()
-						) }
+						{ isEditing ? this.renderEditMode() : this.renderViewMode() }
 					</Fragment>
 				) : (
 					<Placeholder
@@ -258,8 +264,10 @@ class ProductsByTagBlock extends Component {
 						label={ __( 'Products by Tag', 'woo-gutenberg-products-block' ) }
 						className="wc-block-products-grid wc-block-product-tag"
 					>
-						{ __( "This block displays products from selected tags. In order to preview this you'll first need to create a product and assign it some tags.", 'woo-gutenberg-products-block' ) }
-
+						{ __(
+							"This block displays products from selected tags. In order to preview this you'll first need to create a product and assign it some tags.",
+							'woo-gutenberg-products-block'
+						) }
 					</Placeholder>
 				) }
 			</Fragment>

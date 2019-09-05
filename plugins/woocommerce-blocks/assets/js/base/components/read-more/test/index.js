@@ -19,12 +19,16 @@ describe( 'ReadMore Component', () => {
 		it( 'Truncate long HTML content, but avoid cutting off HTML tags.', async () => {
 			const truncatedContent = truncateHtml( longContent, 40 );
 
-			expect( truncatedContent ).toEqual( '<p>Lorem ipsum dolor sit amet, <strong>consectetur...</strong></p>' );
+			expect( truncatedContent ).toEqual(
+				'<p>Lorem ipsum dolor sit amet, <strong>consectetur...</strong></p>'
+			);
 		} );
 		it( 'No need to truncate short HTML content.', async () => {
 			const truncatedContent = truncateHtml( shortContent, 100 );
 
-			expect( truncatedContent ).toEqual( '<p>Lorem ipsum dolor sit amet, <strong>consectetur.</strong>.</p>' );
+			expect( truncatedContent ).toEqual(
+				'<p>Lorem ipsum dolor sit amet, <strong>consectetur.</strong>.</p>'
+			);
 		} );
 	} );
 } );

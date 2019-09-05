@@ -7,13 +7,19 @@ import { escapeHTML } from '@wordpress/escape-html';
 
 const getErrorMessage = ( { message, type } ) => {
 	if ( ! message ) {
-		return __( 'An unknown error occurred which prevented the block from being updated.', 'woo-gutenberg-products-block' );
+		return __(
+			'An unknown error occurred which prevented the block from being updated.',
+			'woo-gutenberg-products-block'
+		);
 	}
 
 	if ( type === 'general' ) {
 		return (
 			<span>
-				{ __( 'The following error was returned', 'woo-gutenberg-products-block' ) }
+				{ __(
+					'The following error was returned',
+					'woo-gutenberg-products-block'
+				) }
 				<br />
 				<code>{ escapeHTML( message ) }</code>
 			</span>
@@ -23,7 +29,10 @@ const getErrorMessage = ( { message, type } ) => {
 	if ( type === 'api' ) {
 		return (
 			<span>
-				{ __( 'The following error was returned from the API', 'woo-gutenberg-products-block' ) }
+				{ __(
+					'The following error was returned from the API',
+					'woo-gutenberg-products-block'
+				) }
 				<br />
 				<code>{ escapeHTML( message ) }</code>
 			</span>
@@ -34,9 +43,7 @@ const getErrorMessage = ( { message, type } ) => {
 };
 
 const ErrorMessage = ( { error } ) => (
-	<div className="wc-block-error-message">
-		{ getErrorMessage( error ) }
-	</div>
+	<div className="wc-block-error-message">{ getErrorMessage( error ) }</div>
 );
 
 ErrorMessage.propTypes = {

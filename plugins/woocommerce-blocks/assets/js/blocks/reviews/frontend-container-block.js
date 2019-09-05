@@ -34,7 +34,8 @@ class FrontendContainerBlock extends Component {
 		const { reviewsToDisplay } = this.state;
 
 		this.setState( {
-			reviewsToDisplay: reviewsToDisplay + parseInt( attributes.reviewsOnLoadMore, 10 ),
+			reviewsToDisplay:
+				reviewsToDisplay + parseInt( attributes.reviewsOnLoadMore, 10 ),
 		} );
 	}
 
@@ -56,7 +57,7 @@ class FrontendContainerBlock extends Component {
 					newReviews.length,
 					'woo-gutenberg-products-block'
 				),
-				newReviews.length,
+				newReviews.length
 			)
 		);
 	}
@@ -66,7 +67,12 @@ class FrontendContainerBlock extends Component {
 	}
 
 	onReviewsLoadError() {
-		speak( __( 'There was an error loading the reviews.', 'woo-gutenberg-products-block' ) );
+		speak(
+			__(
+				'There was an error loading the reviews.',
+				'woo-gutenberg-products-block'
+			)
+		);
 	}
 
 	render() {

@@ -1,9 +1,5 @@
 {
-  "extends": [
-    "config:base"
-  ],
-  "ignoreDeps": [
-    "husky"
-  ],
-  "schedule": ["before 3am on wednesday"]
+	"extends": [ "config:base" ],
+	"ignoreDeps": [ "husky" ],
+	"schedule": [ "before 3am on wednesday" ]
 }
