@@ -9,9 +9,23 @@
  */
 export const getIndexes = ( pagesToDisplay, currentPage, totalPages ) => {
 	const extraPagesToDisplay = pagesToDisplay - 1;
-	const tentativeMinIndex = Math.max( Math.floor( currentPage - ( extraPagesToDisplay / 2 ) ), 1 );
-	const maxIndex = Math.min( Math.ceil( currentPage + ( extraPagesToDisplay - ( currentPage - tentativeMinIndex ) ) ), totalPages );
-	const minIndex = Math.max( Math.floor( currentPage - ( extraPagesToDisplay - ( maxIndex - currentPage ) ) ), 1 );
+	const tentativeMinIndex = Math.max(
+		Math.floor( currentPage - extraPagesToDisplay / 2 ),
+		1
+	);
+	const maxIndex = Math.min(
+		Math.ceil(
+			currentPage +
+				( extraPagesToDisplay - ( currentPage - tentativeMinIndex ) )
+		),
+		totalPages
+	);
+	const minIndex = Math.max(
+		Math.floor(
+			currentPage - ( extraPagesToDisplay - ( maxIndex - currentPage ) )
+		),
+		1
+	);
 
 	return { minIndex, maxIndex };
 };

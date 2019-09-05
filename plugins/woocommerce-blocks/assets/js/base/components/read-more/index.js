@@ -47,7 +47,7 @@ class ReadMore extends Component {
 
 			const lineHeight = this.reviewSummary.current.clientHeight + 1;
 			const reviewHeight = this.reviewContent.current.clientHeight + 1;
-			const maxHeight = ( lineHeight * maxLines ) + 1;
+			const maxHeight = lineHeight * maxLines + 1;
 			const clampEnabled = reviewHeight > maxHeight;
 
 			this.setState( {
@@ -56,7 +56,12 @@ class ReadMore extends Component {
 
 			if ( clampEnabled ) {
 				this.setState( {
-					summary: clampLines( this.reviewContent.current.innerHTML, this.reviewSummary.current, maxHeight, ellipsis ),
+					summary: clampLines(
+						this.reviewContent.current.innerHTML,
+						this.reviewSummary.current,
+						maxHeight,
+						ellipsis
+					),
 				} );
 			}
 		}
@@ -111,9 +116,7 @@ class ReadMore extends Component {
 		if ( false === clampEnabled ) {
 			return (
 				<div className={ className }>
-					<div ref={ this.reviewContent }>
-						{ content }
-					</div>
+					<div ref={ this.reviewContent }>{ content }</div>
 				</div>
 			);
 		}
@@ -130,10 +133,7 @@ class ReadMore extends Component {
 					/>
 				) }
 				{ ( isExpanded || null === clampEnabled ) && (
-					<div
-						ref={ this.reviewContent }
-						aria-hidden={ ! isExpanded }
-					>
+					<div ref={ this.reviewContent } aria-hidden={ ! isExpanded }>
 						{ content }
 					</div>
 				) }

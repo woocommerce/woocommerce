@@ -97,12 +97,21 @@ registerBlockType( 'woocommerce/product-categories', {
 		return (
 			<div className="is-loading" { ...data }>
 				{ isDropdown ? (
-					<span aria-hidden className="wc-block-product-categories__placeholder" />
+					<span
+						aria-hidden
+						className="wc-block-product-categories__placeholder"
+					/>
 				) : (
 					<ul aria-hidden>
-						<li><span className="wc-block-product-categories__placeholder" /></li>
-						<li><span className="wc-block-product-categories__placeholder" /></li>
-						<li><span className="wc-block-product-categories__placeholder" /></li>
+						<li>
+							<span className="wc-block-product-categories__placeholder" />
+						</li>
+						<li>
+							<span className="wc-block-product-categories__placeholder" />
+						</li>
+						<li>
+							<span className="wc-block-product-categories__placeholder" />
+						</li>
 					</ul>
 				) }
 			</div>

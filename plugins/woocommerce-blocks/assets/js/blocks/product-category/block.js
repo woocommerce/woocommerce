@@ -46,12 +46,12 @@ class ProductByCategoryBlock extends Component {
 
 		// from withSpokenMessages
 		debouncedSpeak: PropTypes.func.isRequired,
-	}
+	};
 
 	state = {
 		changedAttributes: {},
 		isEditing: false,
-	}
+	};
 
 	componentDidMount() {
 		const { attributes } = this.props;
@@ -67,20 +67,25 @@ class ProductByCategoryBlock extends Component {
 			isEditing: true,
 			changedAttributes: {},
 		} );
-	}
+	};
 
 	stopEditing = () => {
 		this.setState( {
 			isEditing: false,
 			changedAttributes: {},
 		} );
-	}
+	};
 
 	setChangedAttributes = ( attributes ) => {
 		this.setState( ( prevState ) => {
-			return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
+			return {
+				changedAttributes: {
+					...prevState.changedAttributes,
+					...attributes,
+				},
+			};
 		} );
-	}
+	};
 
 	save = () => {
 		const { changedAttributes } = this.state;
@@ -88,7 +93,7 @@ class ProductByCategoryBlock extends Component {
 
 		setAttributes( changedAttributes );
 		this.stopEditing();
-	}
+	};
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
@@ -143,7 +148,9 @@ class ProductByCategoryBlock extends Component {
 				>
 					<GridContentControl
 						settings={ contentVisibility }
-						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { contentVisibility: value } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody
@@ -248,18 +255,15 @@ class ProductByCategoryBlock extends Component {
 							{
 								icon: 'edit',
 								title: __( 'Edit' ),
-								onClick: () => isEditing ? this.stopEditing() : this.startEditing(),
+								onClick: () =>
+									isEditing ? this.stopEditing() : this.startEditing(),
 								isActive: isEditing,
 							},
 						] }
 					/>
 				</BlockControls>
 				{ this.getInspectorControls() }
-				{ isEditing ? (
-					this.renderEditMode()
-				) : (
-					this.renderViewMode()
-				) }
+				{ isEditing ? this.renderEditMode() : this.renderViewMode() }
 			</Fragment>
 		);
 	}

@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import {
-	InspectorControls,
-} from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/editor';
 import {
 	Button,
 	PanelBody,
@@ -22,12 +20,20 @@ import ProductControl from '../../../components/product-control';
 import { IconReviewsByProduct } from '../../../components/icons';
 import EditorContainerBlock from '../editor-container-block.js';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
-import { getBlockControls, getSharedReviewContentControls, getSharedReviewListControls } from '../edit-utils.js';
+import {
+	getBlockControls,
+	getSharedReviewContentControls,
+	getSharedReviewListControls,
+} from '../edit-utils.js';
 
 /**
  * Component to handle edit mode of "Reviews by Product".
  */
-const ReviewsByProductEditor = ( { attributes, debouncedSpeak, setAttributes } ) => {
+const ReviewsByProductEditor = ( {
+	attributes,
+	debouncedSpeak,
+	setAttributes,
+} ) => {
 	const { editMode, productId } = attributes;
 
 	const renderProductControlItem = ( args ) => {
@@ -79,7 +85,9 @@ const ReviewsByProductEditor = ( { attributes, debouncedSpeak, setAttributes } )
 				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
 					{ getSharedReviewContentControls( attributes, setAttributes ) }
 				</PanelBody>
-				<PanelBody title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }>
+				<PanelBody
+					title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }
+				>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
 			</InspectorControls>

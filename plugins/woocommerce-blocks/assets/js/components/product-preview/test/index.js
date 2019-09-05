@@ -26,7 +26,9 @@ describe( 'ProductPreview', () => {
 				},
 			],
 		};
-		const component = TestRenderer.create( <ProductPreview product={ product } /> );
+		const component = TestRenderer.create(
+			<ProductPreview product={ product } />
+		);
 		expect( component.toJSON() ).toMatchSnapshot();
 	} );
 
@@ -38,7 +40,9 @@ describe( 'ProductPreview', () => {
 				'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&#36;</span>65.00</span>',
 			images: [],
 		};
-		const component = TestRenderer.create( <ProductPreview product={ product } /> );
+		const component = TestRenderer.create(
+			<ProductPreview product={ product } />
+		);
 		expect( component.toJSON() ).toMatchSnapshot();
 	} );
 } );

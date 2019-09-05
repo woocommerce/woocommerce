@@ -16,7 +16,10 @@ const NoCategoryReviewsPlaceholder = () => {
 			icon={ <IconAllReviews className="block-editor-block-icon" /> }
 			label={ __( 'All Reviews', 'woo-gutenberg-products-block' ) }
 		>
-			{ __( 'This block shows a list of all product reviews. Your store does not have any reviews yet, but they will show up here when it does.', 'woo-gutenberg-products-block' ) }
+			{ __(
+				'This block shows a list of all product reviews. Your store does not have any reviews yet, but they will show up here when it does.',
+				'woo-gutenberg-products-block'
+			) }
 		</Placeholder>
 	);
 };

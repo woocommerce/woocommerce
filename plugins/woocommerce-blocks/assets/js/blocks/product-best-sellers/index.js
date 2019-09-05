@@ -11,7 +11,9 @@ import Gridicon from 'gridicons';
  */
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-attributes';
+import sharedAttributes, {
+	sharedAttributeBlockTypes,
+} from '../../utils/shared-attributes';
 
 registerBlockType( 'woocommerce/product-best-sellers', {
 	title: __( 'Best Selling Products', 'woo-gutenberg-products-block' ),
@@ -37,11 +39,12 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 		from: [
 			{
 				type: 'block',
-				blocks: without( sharedAttributeBlockTypes, 'woocommerce/product-best-sellers' ),
-				transform: ( attributes ) => createBlock(
-					'woocommerce/product-best-sellers',
-					attributes
+				blocks: without(
+					sharedAttributeBlockTypes,
+					'woocommerce/product-best-sellers'
 				),
+				transform: ( attributes ) =>
+					createBlock( 'woocommerce/product-best-sellers', attributes ),
 			},
 		],
 	},

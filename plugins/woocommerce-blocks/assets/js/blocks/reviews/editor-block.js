@@ -28,10 +28,17 @@ class EditorBlock extends Component {
 		// from withReviews
 		reviews: PropTypes.array,
 		totalReviews: PropTypes.number,
-	}
+	};
 
 	render() {
-		const { attributes, error, isLoading, noReviewsPlaceholder: NoReviewsPlaceholder, reviews, totalReviews } = this.props;
+		const {
+			attributes,
+			error,
+			isLoading,
+			noReviewsPlaceholder: NoReviewsPlaceholder,
+			reviews,
+			totalReviews,
+		} = this.props;
 
 		if ( error ) {
 			return (
@@ -49,19 +56,16 @@ class EditorBlock extends Component {
 
 		return (
 			<Disabled>
-				{ ( attributes.showOrderby && ENABLE_REVIEW_RATING ) && (
-					<ReviewOrderSelect
-						readOnly
-						value={ attributes.orderby }
-					/>
+				{ attributes.showOrderby && ENABLE_REVIEW_RATING && (
+					<ReviewOrderSelect readOnly value={ attributes.orderby } />
 				) }
-				<ReviewList
-					attributes={ attributes }
-					reviews={ reviews }
-				/>
-				{ ( attributes.showLoadMore && totalReviews > reviews.length ) && (
+				<ReviewList attributes={ attributes } reviews={ reviews } />
+				{ attributes.showLoadMore && totalReviews > reviews.length && (
 					<LoadMoreButton
-						screenReaderLabel={ __( 'Load more reviews', 'woo-gutenberg-products-block' ) }
+						screenReaderLabel={ __(
+							'Load more reviews',
+							'woo-gutenberg-products-block'
+						) }
 					/>
 				) }
 			</Disabled>

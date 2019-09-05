@@ -48,7 +48,18 @@ import { withCategory } from '../../hocs';
 /**
  * Component to handle edit mode of "Featured Category".
  */
-const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCategory, isLoading, category, overlayColor, setOverlayColor, debouncedSpeak } ) => {
+const FeaturedCategory = ( {
+	attributes,
+	isSelected,
+	setAttributes,
+	error,
+	getCategory,
+	isLoading,
+	category,
+	overlayColor,
+	setOverlayColor,
+	debouncedSpeak,
+} ) => {
 	const renderApiError = () => (
 		<ApiErrorPlaceholder
 			className="wc-block-featured-category-error"
@@ -74,7 +85,10 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 					<Toolbar>
 						<MediaUpload
 							onSelect={ ( media ) => {
-								setAttributes( { mediaId: media.id, mediaSrc: media.url } );
+								setAttributes( {
+									mediaId: media.id,
+									mediaSrc: media.url,
+								} );
 							} }
 							allowedTypes={ [ 'image' ] }
 							value={ mediaId }
@@ -95,8 +109,7 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 	};
 
 	const getInspectorControls = () => {
-		const url =
-			attributes.mediaSrc || getCategoryImageSrc( category );
+		const url = attributes.mediaSrc || getCategoryImageSrc( category );
 		const { focalPoint = { x: 0.5, y: 0.5 } } = attributes;
 		// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
 		// so we need to check if it exists before using it.
@@ -108,7 +121,9 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 					<ToggleControl
 						label={ __( 'Show description', 'woo-gutenberg-products-block' ) }
 						checked={ attributes.showDesc }
-						onChange={ () => setAttributes( { showDesc: ! attributes.showDesc } ) }
+						onChange={ () =>
+							setAttributes( { showDesc: ! attributes.showDesc } )
+						}
 					/>
 				</PanelBody>
 				<PanelColorSettings
@@ -124,21 +139,26 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 					{ !! url && (
 						<Fragment>
 							<RangeControl
-								label={ __( 'Background Opacity', 'woo-gutenberg-products-block' ) }
+								label={ __(
+									'Background Opacity',
+									'woo-gutenberg-products-block'
+								) }
 								value={ attributes.dimRatio }
 								onChange={ ( ratio ) => setAttributes( { dimRatio: ratio } ) }
 								min={ 0 }
 								max={ 100 }
 								step={ 10 }
 							/>
-							{ focalPointPickerExists &&
+							{ focalPointPickerExists && (
 								<FocalPointPicker
 									label={ __( 'Focal Point Picker' ) }
 									url={ url }
 									value={ focalPoint }
-									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
+									onChange={ ( value ) =>
+										setAttributes( { focalPoint: value } )
+									}
 								/>
-							}
+							) }
 						</Fragment>
 					) }
 				</PanelColorSettings>
@@ -172,7 +192,11 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 						selected={ [ attributes.categoryId ] }
 						onChange={ ( value = [] ) => {
 							const id = value[ 0 ] ? value[ 0 ].id : 0;
-							setAttributes( { categoryId: id, mediaId: 0, mediaSrc: '' } );
+							setAttributes( {
+								categoryId: id,
+								mediaId: 0,
+								mediaSrc: '',
+							} );
 						} }
 						isSingle
 					/>
@@ -203,18 +227,17 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 			},
 			dimRatioToClass( dimRatio ),
 			contentAlign !== 'center' && `has-${ contentAlign }-content`,
-			className,
+			className
 		);
 		const mediaSrc = attributes.mediaSrc || getCategoryImageSrc( category );
-		const style = !! category ?
-			getBackgroundImageStyles( mediaSrc ) :
-			{};
+		const style = !! category ? getBackgroundImageStyles( mediaSrc ) : {};
 		if ( overlayColor.color ) {
 			style.backgroundColor = overlayColor.color;
 		}
 		if ( focalPoint ) {
-			style.backgroundPosition = `${ focalPoint.x * 100 }% ${ focalPoint.y *
-				100 }%`;
+			const bgPosX = focalPoint.x * 100;
+			const bgPosY = focalPoint.y * 100;
+			style.backgroundPosition = `${ bgPosX }% ${ bgPosY }%`;
 		}
 
 		const onResizeStop = ( event, direction, elt ) => {
@@ -251,10 +274,7 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 								[
 									'core/button',
 									{
-										text: __(
-											'Shop now',
-											'woo-gutenberg-products-block'
-										),
+										text: __( 'Shop now', 'woo-gutenberg-products-block' ),
 										url: category.permalink,
 										align: 'center',
 									},
@@ -296,11 +316,7 @@ const FeaturedCategory = ( { attributes, isSelected, setAttributes, error, getCa
 		<Fragment>
 			{ getBlockControls() }
 			{ getInspectorControls() }
-			{ category ? (
-				renderCategory()
-			) : (
-				renderNoCategory()
-			) }
+			{ category ? renderCategory() : renderNoCategory() }
 		</Fragment>
 	);
 };

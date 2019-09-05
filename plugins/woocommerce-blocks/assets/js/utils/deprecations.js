@@ -14,10 +14,7 @@ import getShortcode from './get-shortcode';
  */
 export const deprecatedConvertToShortcode = ( blockType ) => {
 	return function( props ) {
-		const {
-			align,
-			contentVisibility,
-		} = props.attributes;
+		const { align, contentVisibility } = props.attributes;
 		const classes = classnames( align ? `align${ align }` : '', {
 			'is-hidden-title': ! contentVisibility.title,
 			'is-hidden-price': ! contentVisibility.price,

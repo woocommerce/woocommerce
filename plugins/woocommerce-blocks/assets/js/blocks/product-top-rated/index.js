@@ -11,7 +11,9 @@ import { without } from 'lodash';
  */
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-attributes';
+import sharedAttributes, {
+	sharedAttributeBlockTypes,
+} from '../../utils/shared-attributes';
 
 const blockTypeName = 'woocommerce/product-top-rated';
 
@@ -40,10 +42,8 @@ registerBlockType( blockTypeName, {
 			{
 				type: 'block',
 				blocks: without( sharedAttributeBlockTypes, blockTypeName ),
-				transform: ( attributes ) => createBlock(
-					'woocommerce/product-top-rated',
-					attributes
-				),
+				transform: ( attributes ) =>
+					createBlock( 'woocommerce/product-top-rated', attributes ),
 			},
 		],
 	},

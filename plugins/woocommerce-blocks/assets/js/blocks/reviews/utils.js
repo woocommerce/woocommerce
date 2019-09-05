@@ -29,7 +29,11 @@ export const getOrderArgs = ( orderValue ) => {
 
 export const getReviews = ( args ) => {
 	return apiFetch( {
-		path: '/wc/blocks/products/reviews?' + Object.entries( args ).map( ( arg ) => arg.join( '=' ) ).join( '&' ),
+		path:
+			'/wc/blocks/products/reviews?' +
+			Object.entries( args )
+				.map( ( arg ) => arg.join( '=' ) )
+				.join( '&' ),
 		parse: false,
 	} ).then( ( response ) => {
 		return response.json().then( ( reviews ) => {
@@ -40,18 +44,22 @@ export const getReviews = ( args ) => {
 };
 
 export const getBlockClassName = ( blockClassName, attributes ) => {
-	const { className, showReviewDate, showReviewerName, showReviewContent, showProductName, showReviewImage, showReviewRating } = attributes;
-
-	return classNames(
-		blockClassName,
+	const {
 		className,
-		{
-			'has-image': showReviewImage,
-			'has-name': showReviewerName,
-			'has-date': showReviewDate,
-			'has-rating': showReviewRating,
-			'has-content': showReviewContent,
-			'has-product-name': showProductName,
-		}
-	);
+		showReviewDate,
+		showReviewerName,
+		showReviewContent,
+		showProductName,
+		showReviewImage,
+		showReviewRating,
+	} = attributes;
+
+	return classNames( blockClassName, className, {
+		'has-image': showReviewImage,
+		'has-name': showReviewerName,
+		'has-date': showReviewDate,
+		'has-rating': showReviewRating,
+		'has-content': showReviewContent,
+		'has-product-name': showProductName,
+	} );
 };

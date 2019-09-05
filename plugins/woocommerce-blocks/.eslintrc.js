@@ -1,7 +1,5 @@
 module.exports = {
-	extends: [
-		'plugin:@wordpress/eslint-plugin/recommended'
-	],
+	extends: [ 'plugin:@wordpress/eslint-plugin/recommended', 'prettier' ],
 	env: {
 		'jest/globals': true,
 	},
@@ -9,15 +7,16 @@ module.exports = {
 		wc_product_block_data: true,
 		wcSettings: true,
 	},
-	plugins: [
-		'jest',
-	],
+	plugins: [ 'jest' ],
 	rules: {
 		'@wordpress/dependency-group': 'off',
-		'camelcase': [ 'error', {
-			allow: [ 'wc_product_block_data' ],
-			properties: 'never',
-		} ],
+		camelcase: [
+			'error',
+			{
+				allow: [ 'wc_product_block_data' ],
+				properties: 'never',
+			},
+		],
 		'valid-jsdoc': 'off',
-	}
+	},
 };

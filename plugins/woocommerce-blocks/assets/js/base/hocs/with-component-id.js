@@ -24,10 +24,9 @@ const withComponentId = ( OriginalComponent ) => {
 		render() {
 			const componentId = this.generateUniqueID();
 
-			return <OriginalComponent
-				{ ...this.props }
-				componentId={ componentId }
-			/>;
+			return (
+				<OriginalComponent { ...this.props } componentId={ componentId } />
+			);
 		}
 	};
 };

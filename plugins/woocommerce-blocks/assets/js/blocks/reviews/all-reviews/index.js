@@ -31,8 +31,8 @@ registerBlockType( 'woocommerce/all-reviews', {
 	attributes: {
 		...sharedAttributes,
 		/**
-		* Show the product name.
-		*/
+		 * Show the product name.
+		 */
 		showProductName: {
 			type: 'boolean',
 			default: true,

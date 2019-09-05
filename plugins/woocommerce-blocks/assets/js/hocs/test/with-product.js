@@ -21,19 +21,17 @@ jest.mock( '../../base/utils/errors', () => ( {
 const mockProduct = { name: 'T-Shirt' };
 const attributes = { productId: 1 };
 const TestComponent = withProduct( ( props ) => {
-	return <div
-		error={ props.error }
-		getProduct={ props.getProduct }
-		isLoading={ props.isLoading }
-		product={ props.product }
-	/>;
-} );
-const render = () => {
-	return TestRenderer.create(
-		<TestComponent
-			attributes={ attributes }
+	return (
+		<div
+			error={ props.error }
+			getProduct={ props.getProduct }
+			isLoading={ props.isLoading }
+			product={ props.product }
 		/>
 	);
+} );
+const render = () => {
+	return TestRenderer.create( <TestComponent attributes={ attributes } /> );
 };
 
 describe( 'withProduct Component', () => {
@@ -58,13 +56,12 @@ describe( 'withProduct Component', () => {
 		it( 'getProduct is called on component update', () => {
 			const { getProduct } = mockUtils;
 			const newAttributes = { ...attributes, productId: 2 };
-			renderer.update(
-				<TestComponent
-					attributes={ newAttributes }
-				/>
-			);
+			renderer.update( <TestComponent attributes={ newAttributes } /> );
 
-			expect( getProduct ).toHaveBeenNthCalledWith( 2, newAttributes.productId );
+			expect( getProduct ).toHaveBeenNthCalledWith(
+				2,
+				newAttributes.productId
+			);
 			expect( getProduct ).toHaveBeenCalledTimes( 2 );
 		} );
 
@@ -80,8 +77,8 @@ describe( 'withProduct Component', () => {
 
 	describe( 'when the API returns product data', () => {
 		beforeEach( () => {
-			mockUtils.getProduct.mockImplementation(
-				( productId ) => Promise.resolve( { ...mockProduct, id: productId } )
+			mockUtils.getProduct.mockImplementation( ( productId ) =>
+				Promise.resolve( { ...mockProduct, id: productId } )
 			);
 			renderer = render();
 		} );
@@ -92,7 +89,10 @@ describe( 'withProduct Component', () => {
 			expect( props.error ).toBeNull();
 			expect( typeof props.getProduct ).toBe( 'function' );
 			expect( props.isLoading ).toBe( false );
-			expect( props.product ).toEqual( { ...mockProduct, id: attributes.productId } );
+			expect( props.product ).toEqual( {
+				...mockProduct,
+				id: attributes.productId,
+			} );
 		} );
 	} );
 
@@ -102,12 +102,8 @@ describe( 'withProduct Component', () => {
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
 		beforeEach( () => {
-			mockUtils.getProduct.mockImplementation(
-				() => getProductPromise,
-			);
-			mockBaseUtils.formatError.mockImplementation(
-				() => formattedError,
-			);
+			mockUtils.getProduct.mockImplementation( () => getProductPromise );
+			mockBaseUtils.formatError.mockImplementation( () => formattedError );
 			renderer = render();
 		} );
 

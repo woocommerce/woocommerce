@@ -7,7 +7,12 @@
  */
 export function buildTermsTree( list = [] ) {
 	// Group terms by the parent ID.
-	const termsByParent = list.reduce( ( r, v, i, a, k = v.parent ) => ( ( r[ k ] || ( r[ k ] = [] ) ).push( v ), r ), {} );
+	const termsByParent = list.reduce(
+		( r, v, i, a, k = v.parent ) => (
+			( r[ k ] || ( r[ k ] = [] ) ).push( v ), r
+		),
+		{}
+	);
 
 	const fillWithChildren = ( terms ) => {
 		return terms.map( ( term ) => {
@@ -15,7 +20,8 @@ export function buildTermsTree( list = [] ) {
 			delete termsByParent[ term.term_id ];
 			return {
 				...term,
-				children: children && children.length ? fillWithChildren( children ) : [],
+				children:
+					children && children.length ? fillWithChildren( children ) : [],
 			};
 		} );
 	};

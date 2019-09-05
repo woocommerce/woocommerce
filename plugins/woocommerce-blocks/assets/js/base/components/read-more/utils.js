@@ -26,7 +26,12 @@ export const truncateHtml = ( html, length, ellipsis = '...' ) => {
  * @param {string} ellipsis Character to append to clamped content.
  * @return {string} clamped content
  */
-export const clampLines = ( originalContent, targetElement, maxHeight, ellipsis ) => {
+export const clampLines = (
+	originalContent,
+	targetElement,
+	maxHeight,
+	ellipsis
+) => {
 	const length = calculateLength( originalContent, targetElement, maxHeight );
 
 	return truncateHtml( originalContent, length - ellipsis.length, ellipsis );

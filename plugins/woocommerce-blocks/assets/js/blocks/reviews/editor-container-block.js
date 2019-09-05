@@ -21,20 +21,36 @@ class EditorContainerBlock extends Component {
 		const { icon, name } = this.props;
 
 		return (
-			<Placeholder
-				icon={ icon }
-				label={ name }
-			>
-				{ __( 'The content for this block is hidden due to block settings.', 'woo-gutenberg-products-block' ) }
+			<Placeholder icon={ icon } label={ name }>
+				{ __(
+					'The content for this block is hidden due to block settings.',
+					'woo-gutenberg-products-block'
+				) }
 			</Placeholder>
 		);
 	}
 
 	render() {
 		const { attributes, className, noReviewsPlaceholder } = this.props;
-		const { categoryIds, productId, reviewsOnPageLoad, showProductName, showReviewDate, showReviewerName, showReviewContent, showReviewImage, showReviewRating } = attributes;
+		const {
+			categoryIds,
+			productId,
+			reviewsOnPageLoad,
+			showProductName,
+			showReviewDate,
+			showReviewerName,
+			showReviewContent,
+			showReviewImage,
+			showReviewRating,
+		} = attributes;
 		const { order, orderby } = getOrderArgs( attributes.orderby );
-		const isAllContentHidden = ! showReviewContent && ! showReviewRating && ! showReviewDate && ! showReviewerName && ! showReviewImage && ! showProductName;
+		const isAllContentHidden =
+			! showReviewContent &&
+			! showReviewRating &&
+			! showReviewDate &&
+			! showReviewerName &&
+			! showReviewImage &&
+			! showProductName;
 
 		if ( isAllContentHidden ) {
 			return this.renderHiddenContentPlaceholder();

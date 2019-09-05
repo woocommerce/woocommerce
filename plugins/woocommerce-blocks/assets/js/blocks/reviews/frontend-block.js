@@ -17,7 +17,13 @@ import withReviews from '../../base/hocs/with-reviews';
 /**
  * Block rendered in the frontend.
  */
-const FrontendBlock = ( { attributes, onAppendReviews, onChangeOrderby, reviews, totalReviews } ) => {
+const FrontendBlock = ( {
+	attributes,
+	onAppendReviews,
+	onChangeOrderby,
+	reviews,
+	totalReviews,
+} ) => {
 	const { orderby } = attributes;
 
 	if ( 0 === reviews.length ) {
@@ -26,22 +32,23 @@ const FrontendBlock = ( { attributes, onAppendReviews, onChangeOrderby, reviews,
 
 	return (
 		<Fragment>
-			{ ( attributes.showOrderby !== 'false' && ENABLE_REVIEW_RATING ) && (
+			{ attributes.showOrderby !== 'false' && ENABLE_REVIEW_RATING && (
 				<ReviewOrderSelect
 					defaultValue={ orderby }
 					onChange={ onChangeOrderby }
 				/>
 			) }
-			<ReviewList
-				attributes={ attributes }
-				reviews={ reviews }
-			/>
-			{ ( attributes.showLoadMore !== 'false' && totalReviews > reviews.length ) && (
-				<LoadMoreButton
-					onClick={ onAppendReviews }
-					screenReaderLabel={ __( 'Load more reviews', 'woo-gutenberg-products-block' ) }
-				/>
-			) }
+			<ReviewList attributes={ attributes } reviews={ reviews } />
+			{ attributes.showLoadMore !== 'false' &&
+				totalReviews > reviews.length && (
+					<LoadMoreButton
+						onClick={ onAppendReviews }
+						screenReaderLabel={ __(
+							'Load more reviews',
+							'woo-gutenberg-products-block'
+						) }
+					/>
+				) }
 		</Fragment>
 	);
 };

@@ -60,9 +60,7 @@ const ProductsControl = ( {
 	};
 
 	if ( error ) {
-		return (
-			<ErrorMessage error={ error } />
-		);
+		return <ErrorMessage error={ error } />;
 	}
 
 	return (

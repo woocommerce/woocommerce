@@ -15,7 +15,17 @@ import './style.scss';
  * Component used for 'Order by' selectors, which renders a label
  * and a <select> with the options provided in the props.
  */
-const OrderSelect = ( { className, componentId, defaultValue, label, onChange, options, screenReaderLabel, readOnly, value } ) => {
+const OrderSelect = ( {
+	className,
+	componentId,
+	defaultValue,
+	label,
+	onChange,
+	options,
+	screenReaderLabel,
+	readOnly,
+	value,
+} ) => {
 	const selectId = `wc-block-order-select__select-${ componentId }`;
 
 	return (
@@ -51,10 +61,12 @@ OrderSelect.propTypes = {
 	defaultValue: PropTypes.string,
 	label: PropTypes.string,
 	onChange: PropTypes.func,
-	options: PropTypes.arrayOf( PropTypes.shape( {
-		key: PropTypes.string.isRequired,
-		label: PropTypes.string.isRequired,
-	} ) ),
+	options: PropTypes.arrayOf(
+		PropTypes.shape( {
+			key: PropTypes.string.isRequired,
+			label: PropTypes.string.isRequired,
+		} )
+	),
 	readOnly: PropTypes.bool,
 	screenReaderLabel: PropTypes.string,
 	value: PropTypes.string,

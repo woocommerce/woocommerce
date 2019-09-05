@@ -56,9 +56,7 @@ class ProductTagControl extends Component {
 
 	renderItem( args ) {
 		const { item, search, depth = 0 } = args;
-		const classes = [
-			'woocommerce-product-tags__item',
-		];
+		const classes = [ 'woocommerce-product-tags__item' ];
 		if ( search.length ) {
 			classes.push( 'is-searching' );
 		}
@@ -66,9 +64,9 @@ class ProductTagControl extends Component {
 			classes.push( 'is-skip-level' );
 		}
 
-		const accessibleName = ! item.breadcrumbs.length ?
-			item.name :
-			`${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
+		const accessibleName = ! item.breadcrumbs.length
+			? item.name
+			: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
 
 		return (
 			<SearchListItem
@@ -83,7 +81,7 @@ class ProductTagControl extends Component {
 						'woo-gutenberg-products-block'
 					),
 					item.count,
-					accessibleName,
+					accessibleName
 				) }
 			/>
 		);
@@ -100,10 +98,7 @@ class ProductTagControl extends Component {
 				"Your store doesn't have any product tags.",
 				'woo-gutenberg-products-block'
 			),
-			search: __(
-				'Search for product tags',
-				'woo-gutenberg-products-block'
-			),
+			search: __( 'Search for product tags', 'woo-gutenberg-products-block' ),
 			selected: ( n ) =>
 				sprintf(
 					_n(
@@ -126,28 +121,42 @@ class ProductTagControl extends Component {
 					className="woocommerce-product-tags"
 					list={ list }
 					isLoading={ loading }
-					selected={ selected.map( ( id ) => find( list, { id } ) ).filter( Boolean ) }
+					selected={ selected
+						.map( ( id ) => find( list, { id } ) )
+						.filter( Boolean ) }
 					onChange={ onChange }
 					onSearch={ LIMIT_TAGS ? this.debouncedOnSearch : null }
 					renderItem={ this.renderItem }
 					messages={ messages }
 					isHierarchical
 				/>
-				{ ( !! onOperatorChange ) && (
+				{ !! onOperatorChange && (
 					<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
 						<SelectControl
 							className="woocommerce-product-tags__operator"
-							label={ __( 'Display products matching', 'woo-gutenberg-products-block' ) }
-							help={ __( 'Pick at least two tags to use this setting.', 'woo-gutenberg-products-block' ) }
+							label={ __(
+								'Display products matching',
+								'woo-gutenberg-products-block'
+							) }
+							help={ __(
+								'Pick at least two tags to use this setting.',
+								'woo-gutenberg-products-block'
+							) }
 							value={ operator }
 							onChange={ onOperatorChange }
 							options={ [
 								{
-									label: __( 'Any selected tags', 'woo-gutenberg-products-block' ),
+									label: __(
+										'Any selected tags',
+										'woo-gutenberg-products-block'
+									),
 									value: 'any',
 								},
 								{
-									label: __( 'All selected tags', 'woo-gutenberg-products-block' ),
+									label: __(
+										'All selected tags',
+										'woo-gutenberg-products-block'
+									),
 									value: 'all',
 								},
 							] }

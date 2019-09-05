@@ -6,11 +6,7 @@ import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import classNames from 'classnames';
-import {
-	Button,
-	Placeholder,
-	Spinner,
-} from '@wordpress/components';
+import { Button, Placeholder, Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies

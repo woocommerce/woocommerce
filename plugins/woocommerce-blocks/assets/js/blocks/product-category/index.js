@@ -11,7 +11,9 @@ import { without } from 'lodash';
 import './editor.scss';
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-attributes';
+import sharedAttributes, {
+	sharedAttributeBlockTypes,
+} from '../../utils/shared-attributes';
 
 /**
  * Register and run the "Products by Category" block.
@@ -56,11 +58,15 @@ registerBlockType( 'woocommerce/product-category', {
 		from: [
 			{
 				type: 'block',
-				blocks: without( sharedAttributeBlockTypes, 'woocommerce/product-category' ),
-				transform: ( attributes ) => createBlock(
-					'woocommerce/product-category',
-					{ ...attributes, editMode: false }
+				blocks: without(
+					sharedAttributeBlockTypes,
+					'woocommerce/product-category'
 				),
+				transform: ( attributes ) =>
+					createBlock( 'woocommerce/product-category', {
+						...attributes,
+						editMode: false,
+					} ),
 			},
 		],
 	},
