@@ -25,5 +25,4 @@ class DataCountries extends \WC_REST_Data_Countries_Controller {
 	 * @var string
 	 */
 	protected $namespace = 'wc/v4';
-
 }

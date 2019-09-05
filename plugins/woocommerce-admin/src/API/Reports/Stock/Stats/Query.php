@@ -29,5 +29,4 @@ class Query extends ReportsQuery {
 		$results    = $data_store->get_data();
 		return apply_filters( 'woocommerce_reports_stock_stats_query', $results );
 	}
-
 }

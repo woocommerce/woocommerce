@@ -25,5 +25,4 @@ class SettingOptions extends \WC_REST_Setting_Options_Controller {
 	 * @var string
 	 */
 	protected $namespace = 'wc/v4';
-
 }

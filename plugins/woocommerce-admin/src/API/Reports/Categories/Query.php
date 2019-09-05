@@ -48,5 +48,4 @@ class Query extends ReportsQuery {
 		$results = \WC_Data_Store::load( self::REPORT_NAME )->get_data( $args );
 		return apply_filters( 'woocommerce_reports_categories_select_query', $results, $args );
 	}
-
 }

@@ -432,5 +432,4 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function get_cache_key( $params ) {
 		return 'woocommerce_' . self::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
 	}
-
 }
