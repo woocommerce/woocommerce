@@ -19,7 +19,7 @@ import save from '../save.js';
 registerBlockType( 'woocommerce/all-reviews', {
 	title: __( 'All Reviews', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconAllReviews fillColor="#96588a" />,
+		src: <IconAllReviews />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

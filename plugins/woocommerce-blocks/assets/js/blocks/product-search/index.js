@@ -18,7 +18,7 @@ import { IconProductSearch } from '../../components/icons';
 registerBlockType( 'woocommerce/product-search', {
 	title: __( 'Product Search', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconProductSearch fillColor="#96588a" />,
+		src: <IconProductSearch />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',
