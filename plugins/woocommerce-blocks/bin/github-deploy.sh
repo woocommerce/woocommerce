@@ -52,7 +52,8 @@ echo
 echo "Before proceeding:"
 echo " • Ensure you have checked out the branch you wish to release"
 echo " • Ensure you have committed/pushed all local changes"
-echo " • Did you remember to update versions, changelogs, and stable tags in the readme and plugin files?"
+echo " • Did you remember to update changelogs, the readme and plugin files?"
+echo " • Are there any changes needed to the readme file?"
 echo " • If you are running this script directly instead of via '$ npm run deploy', ensure you have built assets and installed composer in --no-dev mode."
 echo
 output 3 "Do you want to continue? [y/N]: "
@@ -68,11 +69,23 @@ output 3 "Please enter the version number to tag, for example, 1.0.0:"
 read -r VERSION
 echo
 
+CURRENTBRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
 # Check if is a pre-release.
 if is_substring "-" "${VERSION}"; then
     IS_PRE_RELEASE=true
 	output 2 "Detected pre-release version!"
 fi
+
+# Version changes
+output 2 "Updating version numbers in files..."
+source $RELEASER_PATH/bin/version-changes.sh
+
+output 2 "Committing version change..."
+echo
+
+git commit -am "Bumping version strings to new version." --no-verify
+git push origin $CURRENTBRANCH
 
 if [ ! -d "build" ]; then
 	output 3 "Build directory not found. Aborting."
@@ -90,8 +103,6 @@ fi
 
 output 2 "Starting release to GitHub..."
 echo
-
-CURRENTBRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 # Create a release branch.
 BRANCH="build/${VERSION}"
