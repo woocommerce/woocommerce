@@ -167,7 +167,7 @@ const webpackConfig = {
 			},
 		} ),
 		new WebpackRTLPlugin( {
-			suffix: '-rtl',
+			filename: './dist/[name]/style-rtl.css',
 			minify: {
 				safe: true,
 			},
