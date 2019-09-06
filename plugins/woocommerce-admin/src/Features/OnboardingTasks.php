@@ -66,7 +66,8 @@ class OnboardingTasks {
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$tasks = get_transient( self::TASKS_TRANSIENT );
+		$tasks    = get_transient( self::TASKS_TRANSIENT );
+		$products = wp_count_posts( 'product' );
 
 		if ( ! $tasks ) {
 			$tasks     = array();
@@ -79,8 +80,11 @@ class OnboardingTasks {
 			set_transient( self::TASKS_TRANSIENT, $tasks, DAY_IN_SECONDS );
 		}
 
+		// @todo We may want to consider caching some of these and use to check against
+		// task completion along with cache busting for active tasks.
 		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
 		$settings['onboarding']['customLogo']                     = get_theme_mod( 'custom_logo', false );
+		$settings['onboarding']['hasProducts']                    = (int) $products->publish > 0 || (int) $products->draft > 0;
 		$settings['onboarding']['tasks']                          = $tasks;
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 

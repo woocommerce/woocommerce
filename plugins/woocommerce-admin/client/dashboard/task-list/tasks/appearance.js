@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Button, ImageUpload, TextControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -24,13 +25,20 @@ class Appearance extends Component {
 	constructor( props ) {
 		super( props );
 
+		this.stepVisibility = {
+			import: ! wcSettings.onboarding.hasProducts,
+			logo: ! wcSettings.onboarding.customLogo,
+		};
+
 		this.state = {
+			isPending: false,
 			logo: null,
 			stepIndex: 0,
 			storeNoticeText: props.options.woocommerce_demo_store_notice || '',
 		};
 
 		this.completeStep = this.completeStep.bind( this );
+		this.importProducts = this.importProducts.bind( this );
 		this.updateLogo = this.updateLogo.bind( this );
 		this.updateNotice = this.updateNotice.bind( this );
 	}
@@ -83,6 +91,34 @@ class Appearance extends Component {
 		}
 	}
 
+	importProducts() {
+		const { createNotice } = this.props;
+		this.setState( { isPending: true } );
+
+		apiFetch( { path: '/wc-admin/v1/onboarding/tasks/import_sample_products', method: 'POST' } )
+			.then( result => {
+				if ( result.failed && result.failed.length ) {
+					createNotice(
+						'error',
+						__( 'There was an error importing some of the demo products.', 'woocommerce-admin' )
+					);
+				} else {
+					createNotice(
+						'success',
+						__( 'All demo products have been imported.', 'woocommerce-admin' )
+					);
+					wcSettings.onboarding.hasProducts = true;
+				}
+
+				this.setState( { isPending: false } );
+				this.completeStep();
+			} )
+			.catch( error => {
+				createNotice( 'error', error.message );
+				this.setState( { isPending: false } );
+			} );
+	}
+
 	updateLogo() {
 		const { options, themeMods, updateOptions } = this.props;
 		const { logo } = this.state;
@@ -103,7 +139,7 @@ class Appearance extends Component {
 	}
 
 	getSteps() {
-		const { logo, storeNoticeText } = this.state;
+		const { isPending, logo, storeNoticeText } = this.state;
 		const { isRequesting } = this.props;
 
 		const steps = [
@@ -116,13 +152,15 @@ class Appearance extends Component {
 				),
 				content: (
 					<Fragment>
-						<Button isPrimary>{ __( 'Import products', 'woocommerce-admin' ) }</Button>
+						<Button onClick={ this.importProducts } isBusy={ isPending } isPrimary>
+							{ __( 'Import products', 'woocommerce-admin' ) }
+						</Button>
 						<Button onClick={ () => this.completeStep() }>
 							{ __( 'Skip', 'woocommerce-admin' ) }
 						</Button>
 					</Fragment>
 				),
-				visible: true,
+				visible: this.stepVisibility.import,
 			},
 			{
 				key: 'homepage',
@@ -156,7 +194,7 @@ class Appearance extends Component {
 						</Button>
 					</Fragment>
 				),
-				visible: ! wcSettings.onboarding.customLogo,
+				visible: this.stepVisibility.logo,
 			},
 			{
 				key: 'notice',
@@ -186,14 +224,14 @@ class Appearance extends Component {
 	}
 
 	render() {
-		const { stepIndex } = this.state;
+		const { isPending, stepIndex } = this.state;
 		const { isRequesting, hasErrors } = this.props;
 
 		return (
 			<div className="woocommerce-task-appearance">
 				<Card className="is-narrow">
 					<Stepper
-						isPending={ isRequesting && ! hasErrors }
+						isPending={ ( isRequesting && ! hasErrors ) || isPending }
 						isVertical
 						currentStep={ this.getSteps()[ stepIndex ].key }
 						steps={ this.getSteps() }
