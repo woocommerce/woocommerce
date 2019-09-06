@@ -196,7 +196,7 @@ class WC_Shortcode_Products {
 			$this->attributes['limit'] = $this->attributes['columns'] * $this->attributes['rows'];
 		}
 
-		$ordering_args         = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+		$ordering_args         = ( $query_args['orderby'] ) ? WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] ) : WC()->query->get_catalog_ordering_args();
 		$query_args['orderby'] = $ordering_args['orderby'];
 		$query_args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
