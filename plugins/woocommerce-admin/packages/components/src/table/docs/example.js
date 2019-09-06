@@ -3,6 +3,7 @@
  * Internal dependencies
  */
 import {
+	Card,
 	EmptyTable,
 	H,
 	Section,
@@ -75,11 +76,13 @@ export default withState( {
 
 		<H>Table only</H>
 		<Section component={ false }>
-			<Table
-				caption="Revenue Last Week"
-				rows={ rows }
-				headers={ headers }
-			/>
+			<Card className="woocommerce-analytics__card">
+				<Table
+					caption="Revenue Last Week"
+					rows={ rows }
+					headers={ headers }
+				/>
+			</Card>
 		</Section>
 
 		<H>Summary only</H>
@@ -89,10 +92,12 @@ export default withState( {
 
 		<H>Placeholder</H>
 		<Section component={ false }>
-			<TablePlaceholder
-				caption="Revenue Last Week"
-				headers={ headers }
-			/>
+			<Card className="woocommerce-analytics__card">
+				<TablePlaceholder
+					caption="Revenue Last Week"
+					headers={ headers }
+				/>
+			</Card>
 		</Section>
 
 		<H>Empty Table</H>
