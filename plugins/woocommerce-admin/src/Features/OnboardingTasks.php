@@ -27,13 +27,6 @@ class OnboardingTasks {
 	const ACTIVE_TASK_TRANSIENT = 'wc_onboarding_active_task';
 
 	/**
-	 * Name of the tasks transient.
-	 *
-	 * @var string
-	 */
-	const TASKS_TRANSIENT = 'wc_onboarding_tasks';
-
-	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -50,7 +43,7 @@ class OnboardingTasks {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
 		add_action( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 ); // Run after Onboarding.
 		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
-		add_action( 'admin_init', array( $this, 'check_active_task_completion' ), 1 );
+		add_action( 'current_screen', array( $this, 'check_active_task_completion' ), 1000 );
 	}
 
 	/**
@@ -66,26 +59,14 @@ class OnboardingTasks {
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$tasks    = get_transient( self::TASKS_TRANSIENT );
 		$products = wp_count_posts( 'product' );
-
-		if ( ! $tasks ) {
-			$tasks     = array();
-			$task_list = array( 'products' );
-
-			foreach ( $task_list as $task ) {
-				$tasks[ $task ] = self::check_task_completion( $task );
-			}
-
-			set_transient( self::TASKS_TRANSIENT, $tasks, DAY_IN_SECONDS );
-		}
 
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.
 		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
 		$settings['onboarding']['customLogo']                     = get_theme_mod( 'custom_logo', false );
-		$settings['onboarding']['hasProducts']                    = (int) $products->publish > 0 || (int) $products->draft > 0;
-		$settings['onboarding']['tasks']                          = $tasks;
+		$settings['onboarding']['hasHomepage']                    = self::check_task_completion( 'homepage' );
+		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 
 		return $settings;
@@ -122,7 +103,6 @@ class OnboardingTasks {
 
 		if ( self::check_task_completion( $active_task ) ) {
 			delete_transient( self::ACTIVE_TASK_TRANSIENT );
-			delete_transient( self::TASKS_TRANSIENT );
 			wp_safe_redirect( wc_admin_url() );
 			exit;
 		}
@@ -139,6 +119,24 @@ class OnboardingTasks {
 			case 'products':
 				$products = wp_count_posts( 'product' );
 				return (int) $products->publish > 0 || (int) $products->draft > 0;
+
+			case 'homepage':
+				// @todo This should be run client-side in a Gutenberg hook and add a notice
+				// to return to the task list if complete.
+				$homepage_id = get_option( 'woocommerce_onboarding_homepage_post_id', false );
+
+				if ( ! $homepage_id ) {
+					return false;
+				}
+
+				$post        = get_post( $homepage_id );
+				$completed   = $post && 'publish' === $post->post_status;
+				if ( $completed ) {
+					update_option( 'show_on_front', 'page' );
+					update_option( 'page_on_front', $homepage_id );
+				}
+
+				return $completed;
 		}
 
 		return false;

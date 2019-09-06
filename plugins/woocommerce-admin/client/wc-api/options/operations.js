@@ -40,21 +40,24 @@ function updateOptions( resourceNames, data, fetch ) {
 	const url = WC_ADMIN_NAMESPACE + '/options';
 
 	const filteredNames = resourceNames.filter( name => {
-		return name.startsWith( 'options' );
+		return name.startsWith( 'options-update' );
 	} );
 
 	return filteredNames.map( async resourceName => {
 		return fetch( { path: url, method: 'POST', data: data[ resourceName ] } )
-			.then( () => optionsToResource( data[ resourceName ] ) )
+			.then( () => optionsToResource( data[ resourceName ], true ) )
 			.catch( error => {
 				return { [ resourceName ]: { error } };
 			} );
 	} );
 }
 
-function optionsToResource( options ) {
+function optionsToResource( options, updateResource = false ) {
 	const optionNames = Object.keys( options );
-	const resourceName = getResourceName( 'options', optionNames );
+	const resourceName = getResourceName(
+		updateResource ? 'options-update' : 'options',
+		optionNames
+	);
 	const resources = {};
 
 	optionNames.forEach(

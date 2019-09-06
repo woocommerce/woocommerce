@@ -37,7 +37,7 @@ class TaskDashboard extends Component {
 	}
 
 	getTasks() {
-		const { shippingZonesCount, tasks } = wcSettings.onboarding;
+		const { customLogo, hasHomepage, hasProducts, shippingZonesCount } = wcSettings.onboarding;
 		const { profileItems, query } = this.props;
 
 		return [
@@ -61,7 +61,7 @@ class TaskDashboard extends Component {
 					'Add products manually, import from a sheet or migrate from another platform',
 					'wooocommerce-admin'
 				),
-				before: tasks.products ? (
+				before: hasProducts ? (
 					<i className="material-icons-outlined">check_circle</i>
 				) : (
 					<i className="material-icons-outlined">add_box</i>
@@ -69,7 +69,7 @@ class TaskDashboard extends Component {
 				after: <i className="material-icons-outlined">chevron_right</i>,
 				onClick: () => updateQueryString( { task: 'products' } ),
 				container: <Products />,
-				className: tasks.products ? 'is-complete' : null,
+				className: hasProducts ? 'is-complete' : null,
 				visible: true,
 			},
 			{
@@ -80,6 +80,7 @@ class TaskDashboard extends Component {
 				after: <i className="material-icons-outlined">chevron_right</i>,
 				onClick: () => updateQueryString( { task: 'appearance' } ),
 				container: <Appearance />,
+				className: customLogo && hasHomepage ? 'is-complete' : null,
 				visible: true,
 			},
 			{

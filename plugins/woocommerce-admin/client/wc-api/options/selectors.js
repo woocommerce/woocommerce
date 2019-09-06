@@ -31,8 +31,20 @@ const getOptionsError = getResource => optionNames => {
 	return getResource( getResourceName( 'options', optionNames ) ).error;
 };
 
-const isOptionsRequesting = getResource => optionNames => {
+const isGetOptionsRequesting = getResource => optionNames => {
 	const { lastReceived, lastRequested } = getResource( getResourceName( 'options', optionNames ) );
+
+	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {
+		return true;
+	}
+
+	return lastRequested > lastReceived;
+};
+
+const isUpdateOptionsRequesting = getResource => optionNames => {
+	const { lastReceived, lastRequested } = getResource(
+		getResourceName( 'options-update', optionNames )
+	);
 
 	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {
 		return true;
@@ -44,5 +56,6 @@ const isOptionsRequesting = getResource => optionNames => {
 export default {
 	getOptions,
 	getOptionsError,
-	isOptionsRequesting,
+	isGetOptionsRequesting,
+	isUpdateOptionsRequesting,
 };
