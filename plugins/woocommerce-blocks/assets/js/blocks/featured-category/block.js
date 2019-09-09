@@ -117,9 +117,14 @@ const FeaturedCategory = ( {
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
 					<ToggleControl
-						label={ __( 'Show description', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Show description',
+							'woo-gutenberg-products-block'
+						) }
 						checked={ attributes.showDesc }
 						onChange={ () =>
 							setAttributes( { showDesc: ! attributes.showDesc } )
@@ -132,7 +137,10 @@ const FeaturedCategory = ( {
 						{
 							value: overlayColor.color,
 							onChange: setOverlayColor,
-							label: __( 'Overlay Color', 'woo-gutenberg-products-block' ),
+							label: __(
+								'Overlay Color',
+								'woo-gutenberg-products-block'
+							),
 						},
 					] }
 				>
@@ -144,7 +152,9 @@ const FeaturedCategory = ( {
 									'woo-gutenberg-products-block'
 								) }
 								value={ attributes.dimRatio }
-								onChange={ ( ratio ) => setAttributes( { dimRatio: ratio } ) }
+								onChange={ ( ratio ) =>
+									setAttributes( { dimRatio: ratio } )
+								}
 								min={ 0 }
 								max={ 100 }
 								step={ 10 }
@@ -180,7 +190,10 @@ const FeaturedCategory = ( {
 		return (
 			<Placeholder
 				icon={ <IconFolderStar /> }
-				label={ __( 'Featured Category', 'woo-gutenberg-products-block' ) }
+				label={ __(
+					'Featured Category',
+					'woo-gutenberg-products-block'
+				) }
 				className="wc-block-featured-category"
 			>
 				{ __(
@@ -274,7 +287,10 @@ const FeaturedCategory = ( {
 								[
 									'core/button',
 									{
-										text: __( 'Shop now', 'woo-gutenberg-products-block' ),
+										text: __(
+											'Shop now',
+											'woo-gutenberg-products-block'
+										),
 										url: category.permalink,
 										align: 'center',
 									},
@@ -297,7 +313,10 @@ const FeaturedCategory = ( {
 			{ isLoading ? (
 				<Spinner />
 			) : (
-				__( 'No product category is selected.', 'woo-gutenberg-products-block' )
+				__(
+					'No product category is selected.',
+					'woo-gutenberg-products-block'
+				)
 			) }
 		</Placeholder>
 	);

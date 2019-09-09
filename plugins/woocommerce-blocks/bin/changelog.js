@@ -17,7 +17,9 @@ const headers = {
 };
 
 const getPullRequestType = ( labels ) => {
-	const typeLabel = labels.find( ( label ) => label.name.includes( 'type:' ) );
+	const typeLabel = labels.find( ( label ) =>
+		label.name.includes( 'type:' )
+	);
 	if ( ! typeLabel ) {
 		return 'dev';
 	}

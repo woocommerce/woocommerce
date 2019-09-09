@@ -102,8 +102,12 @@ describe( 'withCategory Component', () => {
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
 		beforeEach( () => {
-			mockUtils.getCategory.mockImplementation( () => getCategoryPromise );
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockUtils.getCategory.mockImplementation(
+				() => getCategoryPromise
+			);
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			renderer = render();
 		} );
 

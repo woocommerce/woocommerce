@@ -101,7 +101,10 @@ class ProductsByTagBlock extends Component {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Product Tag', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'Product Tag',
+						'woo-gutenberg-products-block'
+					) }
 					initialOpen={ ! attributes.tags.length && ! isEditing }
 				>
 					<ProductTagControl
@@ -177,7 +180,10 @@ class ProductsByTagBlock extends Component {
 		return (
 			<Placeholder
 				icon="tag"
-				label={ __( 'Products by Tag', 'woo-gutenberg-products-block' ) }
+				label={ __(
+					'Products by Tag',
+					'woo-gutenberg-products-block'
+				) }
 				className="wc-block-products-grid wc-block-product-tag"
 			>
 				{ __(
@@ -218,11 +224,17 @@ class ProductsByTagBlock extends Component {
 		return (
 			<Disabled>
 				{ selectedTags ? (
-					<ServerSideRender block={ name } attributes={ attributes } />
+					<ServerSideRender
+						block={ name }
+						attributes={ attributes }
+					/>
 				) : (
 					<Placeholder
 						icon="tag"
-						label={ __( 'Products by Tag', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Products by Tag',
+							'woo-gutenberg-products-block'
+						) }
 						className="wc-block-products-grid wc-block-product-tag"
 					>
 						{ __(
@@ -249,19 +261,26 @@ class ProductsByTagBlock extends Component {
 										icon: 'edit',
 										title: __( 'Edit' ),
 										onClick: () =>
-											isEditing ? this.stopEditing() : this.startEditing(),
+											isEditing
+												? this.stopEditing()
+												: this.startEditing(),
 										isActive: isEditing,
 									},
 								] }
 							/>
 						</BlockControls>
 						{ this.getInspectorControls() }
-						{ isEditing ? this.renderEditMode() : this.renderViewMode() }
+						{ isEditing
+							? this.renderEditMode()
+							: this.renderViewMode() }
 					</Fragment>
 				) : (
 					<Placeholder
 						icon="tag"
-						label={ __( 'Products by Tag', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Products by Tag',
+							'woo-gutenberg-products-block'
+						) }
 						className="wc-block-products-grid wc-block-product-tag"
 					>
 						{ __(

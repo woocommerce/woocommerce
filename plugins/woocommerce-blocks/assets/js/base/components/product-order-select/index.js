@@ -19,7 +19,10 @@ const ProductOrderSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 			options={ [
 				{
 					key: 'menu_order',
-					label: __( 'Default sorting', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Default sorting',
+						'woo-gutenberg-products-block'
+					),
 				},
 				{
 					key: 'popularity',
@@ -27,7 +30,10 @@ const ProductOrderSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 				},
 				{
 					key: 'rating',
-					label: __( 'Average rating', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Average rating',
+						'woo-gutenberg-products-block'
+					),
 				},
 				{
 					key: 'date',
@@ -35,11 +41,17 @@ const ProductOrderSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 				},
 				{
 					key: 'price',
-					label: __( 'Price: low to high', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Price: low to high',
+						'woo-gutenberg-products-block'
+					),
 				},
 				{
 					key: 'price-desc',
-					label: __( 'Price: high to low', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Price: high to low',
+						'woo-gutenberg-products-block'
+					),
 				},
 			] }
 			readOnly={ readOnly }

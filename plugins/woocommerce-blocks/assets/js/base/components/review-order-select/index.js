@@ -24,11 +24,17 @@ const ReviewOrderSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 				},
 				{
 					key: 'highest-rating',
-					label: __( 'Highest rating', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Highest rating',
+						'woo-gutenberg-products-block'
+					),
 				},
 				{
 					key: 'lowest-rating',
-					label: __( 'Lowest rating', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Lowest rating',
+						'woo-gutenberg-products-block'
+					),
 				},
 			] }
 			readOnly={ readOnly }

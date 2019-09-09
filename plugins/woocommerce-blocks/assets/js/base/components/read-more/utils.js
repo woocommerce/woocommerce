@@ -55,7 +55,10 @@ const calculateLength = ( originalContent, targetElement, maxHeight ) => {
 		markers.middle = Math.floor( ( markers.start + markers.end ) / 2 );
 
 		// We set the innerHTML directly in the DOM here so we can reliably check the clientHeight later in moveMarkers.
-		targetElement.innerHTML = truncateHtml( originalContent, markers.middle );
+		targetElement.innerHTML = truncateHtml(
+			originalContent,
+			markers.middle
+		);
 
 		markers = moveMarkers( markers, targetElement.clientHeight, maxHeight );
 	}

@@ -77,12 +77,14 @@ class ProductsByAttributeBlock extends Component {
 					<ProductAttributeControl
 						selected={ attributes }
 						onChange={ ( value = [] ) => {
-							// eslint-disable-next-line camelcase
-							const result = value.map( ( { id, attr_slug } ) => ( {
-								id,
-								// eslint-disable-next-line camelcase
-								attr_slug,
-							} ) );
+							/* eslint-disable camelcase */
+							const result = value.map(
+								( { id, attr_slug } ) => ( {
+									id,
+									attr_slug,
+								} )
+							);
+							/* eslint-enable camelcase */
 							setAttributes( { attributes: result } );
 						} }
 						operator={ attrOperator }
@@ -120,7 +122,10 @@ class ProductsByAttributeBlock extends Component {
 		return (
 			<Placeholder
 				icon={ <Gridicon icon="custom-post-type" /> }
-				label={ __( 'Products by Attribute', 'woo-gutenberg-products-block' ) }
+				label={ __(
+					'Products by Attribute',
+					'woo-gutenberg-products-block'
+				) }
 				className="wc-block-products-grid wc-block-products-by-attribute"
 			>
 				{ __(
@@ -131,12 +136,14 @@ class ProductsByAttributeBlock extends Component {
 					<ProductAttributeControl
 						selected={ blockAttributes.attributes }
 						onChange={ ( value = [] ) => {
-							// eslint-disable-next-line camelcase
-							const result = value.map( ( { id, attr_slug } ) => ( {
-								id,
-								// eslint-disable-next-line camelcase
-								attr_slug,
-							} ) );
+							/* eslint-disable camelcase */
+							const result = value.map(
+								( { id, attr_slug } ) => ( {
+									id,
+									attr_slug,
+								} )
+							);
+							/* eslint-enable camelcase */
 							setAttributes( { attributes: result } );
 						} }
 						operator={ blockAttributes.attrOperator }
@@ -164,7 +171,8 @@ class ProductsByAttributeBlock extends Component {
 							{
 								icon: 'edit',
 								title: __( 'Edit' ),
-								onClick: () => setAttributes( { editMode: ! editMode } ),
+								onClick: () =>
+									setAttributes( { editMode: ! editMode } ),
 								isActive: editMode,
 							},
 						] }
@@ -175,7 +183,10 @@ class ProductsByAttributeBlock extends Component {
 					this.renderEditMode()
 				) : (
 					<Disabled>
-						<ServerSideRender block={ name } attributes={ attributes } />
+						<ServerSideRender
+							block={ name }
+							attributes={ attributes }
+						/>
 					</Disabled>
 				) }
 			</Fragment>

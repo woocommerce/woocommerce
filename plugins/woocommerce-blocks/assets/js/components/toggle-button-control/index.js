@@ -78,7 +78,9 @@ class ToggleButtonControl extends Component {
 
 						return (
 							<Button
-								key={ `${ option.label }-${ option.value }-${ index }` }
+								key={ `${ option.label }-${
+									option.value
+								}-${ index }` }
 								value={ option.value }
 								onClick={ this.onClick }
 								aria-label={ label + ': ' + option.label }

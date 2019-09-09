@@ -118,18 +118,25 @@ const withReviews = ( OriginalComponent ) => {
 			} );
 
 			return getReviews( this.getArgs( oldReviews.length ) )
-				.then( ( { reviews: newReviews, totalReviews: newTotalReviews } ) => {
-					this.setState( {
-						reviews: oldReviews
-							.filter( ( review ) => Object.keys( review ).length )
-							.concat( newReviews ),
+				.then(
+					( {
+						reviews: newReviews,
 						totalReviews: newTotalReviews,
-						loading: false,
-						error: null,
-					} );
+					} ) => {
+						this.setState( {
+							reviews: oldReviews
+								.filter(
+									( review ) => Object.keys( review ).length
+								)
+								.concat( newReviews ),
+							totalReviews: newTotalReviews,
+							loading: false,
+							error: null,
+						} );
 
-					return { newReviews };
-				} )
+						return { newReviews };
+					}
+				)
 				.catch( this.setError );
 		}
 
@@ -162,12 +169,18 @@ const withReviews = ( OriginalComponent ) => {
 		order: PropTypes.oneOf( [ 'asc', 'desc' ] ).isRequired,
 		orderby: PropTypes.string.isRequired,
 		reviewsToDisplay: PropTypes.number.isRequired,
-		categoryIds: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
+		categoryIds: PropTypes.oneOfType( [
+			PropTypes.string,
+			PropTypes.array,
+		] ),
 		delayFunction: PropTypes.func,
 		onReviewsAppended: PropTypes.func,
 		onReviewsLoadError: PropTypes.func,
 		onReviewsReplaced: PropTypes.func,
-		productId: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
+		productId: PropTypes.oneOfType( [
+			PropTypes.string,
+			PropTypes.number,
+		] ),
 	};
 
 	WrappedComponent.defaultProps = {

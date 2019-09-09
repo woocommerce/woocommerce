@@ -38,7 +38,10 @@ registerBlockType( 'woocommerce/product-new', {
 		from: [
 			{
 				type: 'block',
-				blocks: without( sharedAttributeBlockTypes, 'woocommerce/product-new' ),
+				blocks: without(
+					sharedAttributeBlockTypes,
+					'woocommerce/product-new'
+				),
 				transform: ( attributes ) =>
 					createBlock( 'woocommerce/product-new', attributes ),
 			},

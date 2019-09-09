@@ -124,7 +124,9 @@ registerBlockType( 'woocommerce/handpicked-products', {
 					default: [],
 				},
 			},
-			save: deprecatedConvertToShortcode( 'woocommerce/handpicked-products' ),
+			save: deprecatedConvertToShortcode(
+				'woocommerce/handpicked-products'
+			),
 		},
 	],
 

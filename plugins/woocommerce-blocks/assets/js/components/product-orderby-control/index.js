@@ -15,27 +15,45 @@ const ProductOrderbyControl = ( { value, setAttributes } ) => {
 			value={ value }
 			options={ [
 				{
-					label: __( 'Newness - newest first', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Newness - newest first',
+						'woo-gutenberg-products-block'
+					),
 					value: 'date',
 				},
 				{
-					label: __( 'Price - low to high', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Price - low to high',
+						'woo-gutenberg-products-block'
+					),
 					value: 'price_asc',
 				},
 				{
-					label: __( 'Price - high to low', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Price - high to low',
+						'woo-gutenberg-products-block'
+					),
 					value: 'price_desc',
 				},
 				{
-					label: __( 'Rating - highest first', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Rating - highest first',
+						'woo-gutenberg-products-block'
+					),
 					value: 'rating',
 				},
 				{
-					label: __( 'Sales - most first', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Sales - most first',
+						'woo-gutenberg-products-block'
+					),
 					value: 'popularity',
 				},
 				{
-					label: __( 'Title - alphabetical', 'woo-gutenberg-products-block' ),
+					label: __(
+						'Title - alphabetical',
+						'woo-gutenberg-products-block'
+					),
 					value: 'title',
 				},
 				{

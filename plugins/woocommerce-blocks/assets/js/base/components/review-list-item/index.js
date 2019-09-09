@@ -47,7 +47,10 @@ function getReviewImage( review, imageType, isLoading ) {
 			{ review.verified && (
 				<div
 					className="wc-block-review-list-item__verified"
-					title={ __( 'Verified buyer', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'Verified buyer',
+						'woo-gutenberg-products-block'
+					) }
 				>
 					{ __( 'Verified buyer', 'woo-gutenberg-products-block' ) }
 				</div>
@@ -60,8 +63,14 @@ function getReviewContent( review ) {
 	return (
 		<ReadMore
 			maxLines={ 10 }
-			moreText={ __( 'Read full review', 'woo-gutenberg-products-block' ) }
-			lessText={ __( 'Hide full review', 'woo-gutenberg-products-block' ) }
+			moreText={ __(
+				'Read full review',
+				'woo-gutenberg-products-block'
+			) }
+			lessText={ __(
+				'Hide full review',
+				'woo-gutenberg-products-block'
+			) }
 			className="wc-block-review-list-item__text"
 		>
 			<div
@@ -86,7 +95,9 @@ function getReviewProductName( review ) {
 
 function getReviewerName( review ) {
 	const { reviewer = '' } = review;
-	return <div className="wc-block-review-list-item__author">{ reviewer }</div>;
+	return (
+		<div className="wc-block-review-list-item__author">{ reviewer }</div>
+	);
 }
 
 function getReviewDate( review ) {
@@ -111,10 +122,16 @@ function getReviewRating( review ) {
 	};
 	return (
 		<div className="wc-block-review-list-item__rating">
-			<div className="wc-block-review-list-item__rating__stars" role="img">
+			<div
+				className="wc-block-review-list-item__rating__stars"
+				role="img"
+			>
 				<span style={ starStyle }>
 					{ sprintf(
-						__( 'Rated %d out of 5', 'woo-gutenberg-products-block' ),
+						__(
+							'Rated %d out of 5',
+							'woo-gutenberg-products-block'
+						),
 						rating
 					) }
 				</span>
@@ -150,14 +167,16 @@ const ReviewListItem = ( { attributes, review = {} } ) => {
 				showReviewImage ||
 				showReviewRating ) && (
 				<div className="wc-block-review-list-item__info">
-					{ showReviewImage && getReviewImage( review, imageType, isLoading ) }
+					{ showReviewImage &&
+						getReviewImage( review, imageType, isLoading ) }
 					{ ( showProductName ||
 						showReviewerName ||
 						showReviewRating ||
 						showReviewDate ) && (
 						<div className="wc-block-review-list-item__meta">
 							{ showReviewRating && getReviewRating( review ) }
-							{ showProductName && getReviewProductName( review ) }
+							{ showProductName &&
+								getReviewProductName( review ) }
 							{ showReviewerName && getReviewerName( review ) }
 							{ showReviewDate && getReviewDate( review ) }
 						</div>

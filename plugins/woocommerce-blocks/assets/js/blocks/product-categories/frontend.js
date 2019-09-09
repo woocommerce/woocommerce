@@ -26,6 +26,9 @@ if ( containers.length ) {
 
 		el.classList.remove( 'is-loading' );
 
-		render( <Block attributes={ attributes } categories={ categories } />, el );
+		render(
+			<Block attributes={ attributes } categories={ categories } />,
+			el
+		);
 	} );
 }

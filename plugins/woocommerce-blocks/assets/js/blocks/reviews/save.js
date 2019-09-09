@@ -37,6 +37,9 @@ export default ( { attributes } ) => {
 	}
 
 	return (
-		<div className={ getBlockClassName( className, attributes ) } { ...data } />
+		<div
+			className={ getBlockClassName( className, attributes ) }
+			{ ...data }
+		/>
 	);
 };

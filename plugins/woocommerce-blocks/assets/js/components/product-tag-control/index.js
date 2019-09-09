@@ -92,13 +92,19 @@ class ProductTagControl extends Component {
 		const { onChange, onOperatorChange, operator, selected } = this.props;
 
 		const messages = {
-			clear: __( 'Clear all product tags', 'woo-gutenberg-products-block' ),
+			clear: __(
+				'Clear all product tags',
+				'woo-gutenberg-products-block'
+			),
 			list: __( 'Product Tags', 'woo-gutenberg-products-block' ),
 			noItems: __(
 				"Your store doesn't have any product tags.",
 				'woo-gutenberg-products-block'
 			),
-			search: __( 'Search for product tags', 'woo-gutenberg-products-block' ),
+			search: __(
+				'Search for product tags',
+				'woo-gutenberg-products-block'
+			),
 			selected: ( n ) =>
 				sprintf(
 					_n(
@@ -131,7 +137,11 @@ class ProductTagControl extends Component {
 					isHierarchical
 				/>
 				{ !! onOperatorChange && (
-					<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
+					<div
+						className={
+							selected.length < 2 ? 'screen-reader-text' : ''
+						}
+					>
 						<SelectControl
 							className="woocommerce-product-tags__operator"
 							label={ __(

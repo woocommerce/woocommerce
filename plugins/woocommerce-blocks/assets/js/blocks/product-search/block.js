@@ -21,7 +21,14 @@ import './style.scss';
 class ProductSearchBlock extends Component {
 	renderView() {
 		const {
-			attributes: { label, placeholder, formId, className, hasLabel, align },
+			attributes: {
+				label,
+				placeholder,
+				formId,
+				className,
+				hasLabel,
+				align,
+			},
 		} = this.props;
 		const classes = classnames(
 			'wc-block-product-search',
@@ -54,7 +61,10 @@ class ProductSearchBlock extends Component {
 						<button
 							type="submit"
 							className="wc-block-product-search__button"
-							label={ __( 'Search', 'woo-gutenberg-products-block' ) }
+							label={ __(
+								'Search',
+								'woo-gutenberg-products-block'
+							) }
 						>
 							<svg
 								aria-hidden="true"
@@ -103,14 +113,18 @@ class ProductSearchBlock extends Component {
 					<PlainText
 						className="wc-block-product-search__label"
 						value={ label }
-						onChange={ ( value ) => setAttributes( { label: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { label: value } )
+						}
 					/>
 				) }
 				<div className="wc-block-product-search__fields">
 					<PlainText
 						className="wc-block-product-search__field input-control"
 						value={ placeholder }
-						onChange={ ( value ) => setAttributes( { placeholder: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { placeholder: value } )
+						}
 					/>
 					<button
 						type="submit"

@@ -59,7 +59,10 @@ const ProductCategoryControl = ( {
 	};
 
 	const messages = {
-		clear: __( 'Clear all product categories', 'woo-gutenberg-products-block' ),
+		clear: __(
+			'Clear all product categories',
+			'woo-gutenberg-products-block'
+		),
 		list: __( 'Product Categories', 'woo-gutenberg-products-block' ),
 		noItems: __(
 			"Your store doesn't have any product categories.",
@@ -105,7 +108,11 @@ const ProductCategoryControl = ( {
 				isSingle={ isSingle }
 			/>
 			{ !! onOperatorChange && (
-				<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
+				<div
+					className={
+						selected.length < 2 ? 'screen-reader-text' : ''
+					}
+				>
 					<SelectControl
 						className="woocommerce-product-categories__operator"
 						label={ __(
