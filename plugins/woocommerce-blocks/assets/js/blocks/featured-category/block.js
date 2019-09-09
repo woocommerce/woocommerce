@@ -36,7 +36,7 @@ import { MIN_HEIGHT } from '@woocommerce/block-settings';
  */
 import { IconFolderStar } from '../../components/icons';
 import ProductCategoryControl from '../../components/product-category-control';
-import ApiErrorPlaceholder from '../../components/api-error-placeholder';
+import ErrorPlaceholder from '../../components/error-placeholder';
 import {
 	dimRatioToClass,
 	getBackgroundImageStyles,
@@ -61,7 +61,7 @@ const FeaturedCategory = ( {
 	debouncedSpeak,
 } ) => {
 	const renderApiError = () => (
-		<ApiErrorPlaceholder
+		<ErrorPlaceholder
 			className="wc-block-featured-category-error"
 			error={ error }
 			isLoading={ isLoading }

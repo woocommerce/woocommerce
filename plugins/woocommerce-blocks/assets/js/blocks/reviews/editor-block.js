@@ -10,7 +10,7 @@ import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import ApiErrorPlaceholder from '../../components/api-error-placeholder';
+import ErrorPlaceholder from '../../components/error-placeholder';
 import LoadMoreButton from '../../base/components/load-more-button';
 import ReviewList from '../../base/components/review-list';
 import ReviewOrderSelect from '../../base/components/review-order-select';
@@ -42,7 +42,7 @@ class EditorBlock extends Component {
 
 		if ( error ) {
 			return (
-				<ApiErrorPlaceholder
+				<ErrorPlaceholder
 					className="wc-block-featured-product-error"
 					error={ error }
 					isLoading={ isLoading }
