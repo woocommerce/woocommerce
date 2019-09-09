@@ -18,7 +18,10 @@ import save from '../save.js';
  */
 registerBlockType( 'woocommerce/reviews-by-category', {
 	title: __( 'Reviews by Category', 'woo-gutenberg-products-block' ),
-	icon: <IconReviewsByCategory />,
+	icon: {
+		src: <IconReviewsByCategory />,
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
