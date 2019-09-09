@@ -59,10 +59,15 @@ const GridLayoutControl = ( {
 								'Buttons are aligned vertically.',
 								'woo-gutenberg-products-block'
 						  )
-						: __( 'Buttons follow content.', 'woo-gutenberg-products-block' )
+						: __(
+								'Buttons follow content.',
+								'woo-gutenberg-products-block'
+						  )
 				}
 				checked={ alignButtons }
-				onChange={ () => setAttributes( { alignButtons: ! alignButtons } ) }
+				onChange={ () =>
+					setAttributes( { alignButtons: ! alignButtons } )
+				}
 			/>
 		</Fragment>
 	);

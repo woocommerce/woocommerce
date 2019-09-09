@@ -133,7 +133,10 @@ class ReadMore extends Component {
 					/>
 				) }
 				{ ( isExpanded || null === clampEnabled ) && (
-					<div ref={ this.reviewContent } aria-hidden={ ! isExpanded }>
+					<div
+						ref={ this.reviewContent }
+						aria-hidden={ ! isExpanded }
+					>
 						{ content }
 					</div>
 				) }

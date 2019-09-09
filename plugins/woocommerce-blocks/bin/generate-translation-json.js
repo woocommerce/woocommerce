@@ -10,7 +10,10 @@ const md5 = require( 'js-md5' );
 const argv = require( 'yargs' )
 	.usage( 'Usage: $0 [options]' )
 	.describe( 'source', 'Path to the language directory.' )
-	.describe( 'debug', 'Output which files are added to the zip during build.' )
+	.describe(
+		'debug',
+		'Output which files are added to the zip during build.'
+	)
 	.alias( 'debug', 'v' )
 	.default( 'source', './languages' )
 	.boolean( 'v' ).argv;

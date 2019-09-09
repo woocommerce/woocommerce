@@ -17,8 +17,14 @@ const GridContentControl = ( { onChange, settings } ) => {
 				label={ __( 'Product title', 'woo-gutenberg-products-block' ) }
 				help={
 					title
-						? __( 'Product title is visible.', 'woo-gutenberg-products-block' )
-						: __( 'Product title is hidden.', 'woo-gutenberg-products-block' )
+						? __(
+								'Product title is visible.',
+								'woo-gutenberg-products-block'
+						  )
+						: __(
+								'Product title is hidden.',
+								'woo-gutenberg-products-block'
+						  )
 				}
 				checked={ title }
 				onChange={ () => onChange( { ...settings, title: ! title } ) }
@@ -27,8 +33,14 @@ const GridContentControl = ( { onChange, settings } ) => {
 				label={ __( 'Product price', 'woo-gutenberg-products-block' ) }
 				help={
 					price
-						? __( 'Product price is visible.', 'woo-gutenberg-products-block' )
-						: __( 'Product price is hidden.', 'woo-gutenberg-products-block' )
+						? __(
+								'Product price is visible.',
+								'woo-gutenberg-products-block'
+						  )
+						: __(
+								'Product price is hidden.',
+								'woo-gutenberg-products-block'
+						  )
 				}
 				checked={ price }
 				onChange={ () => onChange( { ...settings, price: ! price } ) }
@@ -37,14 +49,23 @@ const GridContentControl = ( { onChange, settings } ) => {
 				label={ __( 'Product rating', 'woo-gutenberg-products-block' ) }
 				help={
 					rating
-						? __( 'Product rating is visible.', 'woo-gutenberg-products-block' )
-						: __( 'Product rating is hidden.', 'woo-gutenberg-products-block' )
+						? __(
+								'Product rating is visible.',
+								'woo-gutenberg-products-block'
+						  )
+						: __(
+								'Product rating is hidden.',
+								'woo-gutenberg-products-block'
+						  )
 				}
 				checked={ rating }
 				onChange={ () => onChange( { ...settings, rating: ! rating } ) }
 			/>
 			<ToggleControl
-				label={ __( 'Add to Cart button', 'woo-gutenberg-products-block' ) }
+				label={ __(
+					'Add to Cart button',
+					'woo-gutenberg-products-block'
+				) }
 				help={
 					button
 						? __(

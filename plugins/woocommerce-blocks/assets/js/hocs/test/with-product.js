@@ -103,7 +103,9 @@ describe( 'withProduct Component', () => {
 
 		beforeEach( () => {
 			mockUtils.getProduct.mockImplementation( () => getProductPromise );
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			renderer = render();
 		} );
 

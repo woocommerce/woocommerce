@@ -22,7 +22,10 @@ const Label = ( {
 		Wrapper = wrapperElement || 'span';
 		wrapperProps = {
 			...wrapperProps,
-			className: classNames( wrapperProps.className, 'screen-reader-text' ),
+			className: classNames(
+				wrapperProps.className,
+				'screen-reader-text'
+			),
 		};
 
 		return <Wrapper { ...wrapperProps }>{ screenReaderLabel }</Wrapper>;
@@ -34,7 +37,9 @@ const Label = ( {
 		return (
 			<Wrapper { ...wrapperProps }>
 				<span aria-hidden="true">{ label }</span>
-				<span className="screen-reader-text">{ screenReaderLabel }</span>
+				<span className="screen-reader-text">
+					{ screenReaderLabel }
+				</span>
 			</Wrapper>
 		);
 	}

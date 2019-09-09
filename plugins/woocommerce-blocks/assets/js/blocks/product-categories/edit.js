@@ -27,7 +27,10 @@ export default function( { attributes, setAttributes } ) {
 					initialOpen
 				>
 					<ToggleControl
-						label={ __( 'Show product count', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Show product count',
+							'woo-gutenberg-products-block'
+						) }
 						help={
 							hasCount
 								? __(
@@ -40,14 +43,25 @@ export default function( { attributes, setAttributes } ) {
 								  )
 						}
 						checked={ hasCount }
-						onChange={ () => setAttributes( { hasCount: ! hasCount } ) }
+						onChange={ () =>
+							setAttributes( { hasCount: ! hasCount } )
+						}
 					/>
 					<ToggleControl
-						label={ __( 'Show hierarchy', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Show hierarchy',
+							'woo-gutenberg-products-block'
+						) }
 						help={
 							isHierarchical
-								? __( 'Hierarchy is visible.', 'woo-gutenberg-products-block' )
-								: __( 'Hierarchy is hidden.', 'woo-gutenberg-products-block' )
+								? __(
+										'Hierarchy is visible.',
+										'woo-gutenberg-products-block'
+								  )
+								: __(
+										'Hierarchy is hidden.',
+										'woo-gutenberg-products-block'
+								  )
 						}
 						checked={ isHierarchical }
 						onChange={ () =>
@@ -73,23 +87,37 @@ export default function( { attributes, setAttributes } ) {
 								  )
 						}
 						checked={ hasEmpty }
-						onChange={ () => setAttributes( { hasEmpty: ! hasEmpty } ) }
+						onChange={ () =>
+							setAttributes( { hasEmpty: ! hasEmpty } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'List Settings',
+						'woo-gutenberg-products-block'
+					) }
 					initialOpen
 				>
 					<ToggleButtonControl
-						label={ __( 'Display style', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Display style',
+							'woo-gutenberg-products-block'
+						) }
 						value={ isDropdown ? 'dropdown' : 'list' }
 						options={ [
 							{
-								label: __( 'List', 'woo-gutenberg-products-block' ),
+								label: __(
+									'List',
+									'woo-gutenberg-products-block'
+								),
 								value: 'list',
 							},
 							{
-								label: __( 'Dropdown', 'woo-gutenberg-products-block' ),
+								label: __(
+									'Dropdown',
+									'woo-gutenberg-products-block'
+								),
 								value: 'dropdown',
 							},
 						] }
@@ -102,7 +130,11 @@ export default function( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 			{ categories.length > 0 ? (
-				<Block attributes={ attributes } categories={ categories } isPreview />
+				<Block
+					attributes={ attributes }
+					categories={ categories }
+					isPreview
+				/>
 			) : (
 				<Placeholder
 					className="wc-block-product-categories"

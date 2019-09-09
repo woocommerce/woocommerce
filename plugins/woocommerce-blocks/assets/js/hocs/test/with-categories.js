@@ -40,7 +40,9 @@ describe( 'withCategories Component', () => {
 
 	describe( 'lifecycle events', () => {
 		beforeEach( () => {
-			mockUtils.getCategories.mockImplementation( () => Promise.resolve() );
+			mockUtils.getCategories.mockImplementation( () =>
+				Promise.resolve()
+			);
 			renderer = render();
 		} );
 
@@ -75,8 +77,12 @@ describe( 'withCategories Component', () => {
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
 		beforeEach( () => {
-			mockUtils.getCategories.mockImplementation( () => getCategoriesPromise );
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockUtils.getCategories.mockImplementation(
+				() => getCategoriesPromise
+			);
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			renderer = render();
 		} );
 

@@ -97,7 +97,10 @@ const ProductAttributeControl = ( {
 	const currentList = [ ...attributes, ...currentTerms ];
 
 	const messages = {
-		clear: __( 'Clear all product attributes', 'woo-gutenberg-products-block' ),
+		clear: __(
+			'Clear all product attributes',
+			'woo-gutenberg-products-block'
+		),
 		list: __( 'Product Attributes', 'woo-gutenberg-products-block' ),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
@@ -142,7 +145,11 @@ const ProductAttributeControl = ( {
 				isHierarchical
 			/>
 			{ !! onOperatorChange && (
-				<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
+				<div
+					className={
+						selected.length < 2 ? 'screen-reader-text' : ''
+					}
+				>
 					<SelectControl
 						className="woocommerce-product-attributes__operator"
 						label={ __(

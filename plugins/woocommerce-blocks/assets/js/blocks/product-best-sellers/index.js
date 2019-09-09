@@ -44,7 +44,10 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 					'woocommerce/product-best-sellers'
 				),
 				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-best-sellers', attributes ),
+					createBlock(
+						'woocommerce/product-best-sellers',
+						attributes
+					),
 			},
 		],
 	},
@@ -53,7 +56,9 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 		{
 			// Deprecate shortcode save method in favor of dynamic rendering.
 			attributes: sharedAttributes,
-			save: deprecatedConvertToShortcode( 'woocommerce/product-best-sellers' ),
+			save: deprecatedConvertToShortcode(
+				'woocommerce/product-best-sellers'
+			),
 		},
 	],
 

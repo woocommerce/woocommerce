@@ -27,7 +27,10 @@ const withAttributes = createHigherOrderComponent( ( OriginalComponent ) => {
 
 			this.loadAttributes = this.loadAttributes.bind( this );
 			this.onExpandAttribute = this.onExpandAttribute.bind( this );
-			this.debouncedLoadTerms = debounce( this.loadTerms.bind( this ), 200 );
+			this.debouncedLoadTerms = debounce(
+				this.loadTerms.bind( this ),
+				200
+			);
 		}
 
 		componentDidMount() {
@@ -39,7 +42,9 @@ const withAttributes = createHigherOrderComponent( ( OriginalComponent ) => {
 		}
 
 		componentDidUpdate( prevProps, prevState ) {
-			if ( prevState.expandedAttribute !== this.state.expandedAttribute ) {
+			if (
+				prevState.expandedAttribute !== this.state.expandedAttribute
+			) {
 				this.debouncedLoadTerms();
 			}
 		}

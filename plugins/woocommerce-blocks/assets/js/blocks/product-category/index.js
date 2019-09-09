@@ -85,7 +85,9 @@ registerBlockType( 'woocommerce/product-category', {
 					default: 'date',
 				},
 			},
-			save: deprecatedConvertToShortcode( 'woocommerce/product-category' ),
+			save: deprecatedConvertToShortcode(
+				'woocommerce/product-category'
+			),
 		},
 	],
 

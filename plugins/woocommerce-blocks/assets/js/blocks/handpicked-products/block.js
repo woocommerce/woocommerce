@@ -35,7 +35,12 @@ import ProductOrderbyControl from '../../components/product-orderby-control';
 class ProductsBlock extends Component {
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, contentVisibility, orderby, alignButtons } = attributes;
+		const {
+			columns,
+			contentVisibility,
+			orderby,
+			alignButtons,
+		} = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -44,9 +49,14 @@ class ProductsBlock extends Component {
 					initialOpen
 				>
 					<RangeControl
-						label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Columns',
+							'woo-gutenberg-products-block'
+						) }
 						value={ columns }
-						onChange={ ( value ) => setAttributes( { columns: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { columns: value } )
+						}
 						min={ MIN_COLUMNS }
 						max={ MAX_COLUMNS }
 					/>
@@ -67,7 +77,9 @@ class ProductsBlock extends Component {
 								  )
 						}
 						checked={ alignButtons }
-						onChange={ () => setAttributes( { alignButtons: ! alignButtons } ) }
+						onChange={ () =>
+							setAttributes( { alignButtons: ! alignButtons } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody
@@ -121,7 +133,10 @@ class ProductsBlock extends Component {
 		return (
 			<Placeholder
 				icon={ <IconWidgets /> }
-				label={ __( 'Hand-picked Products', 'woo-gutenberg-products-block' ) }
+				label={ __(
+					'Hand-picked Products',
+					'woo-gutenberg-products-block'
+				) }
 				className="wc-block-products-grid wc-block-handpicked-products"
 			>
 				{ __(
@@ -156,7 +171,8 @@ class ProductsBlock extends Component {
 							{
 								icon: 'edit',
 								title: __( 'Edit' ),
-								onClick: () => setAttributes( { editMode: ! editMode } ),
+								onClick: () =>
+									setAttributes( { editMode: ! editMode } ),
 								isActive: editMode,
 							},
 						] }
@@ -167,7 +183,10 @@ class ProductsBlock extends Component {
 					this.renderEditMode()
 				) : (
 					<Disabled>
-						<ServerSideRender block={ name } attributes={ attributes } />
+						<ServerSideRender
+							block={ name }
+							attributes={ attributes }
+						/>
 					</Disabled>
 				) }
 			</Fragment>

@@ -86,9 +86,14 @@ const ReviewsByCategoryEditor = ( {
 						renderItem={ renderCategoryControlItem }
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
 					<ToggleControl
-						label={ __( 'Product name', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Product name',
+							'woo-gutenberg-products-block'
+						) }
 						checked={ attributes.showProductName }
 						onChange={ () =>
 							setAttributes( {
@@ -96,10 +101,16 @@ const ReviewsByCategoryEditor = ( {
 							} )
 						}
 					/>
-					{ getSharedReviewContentControls( attributes, setAttributes ) }
+					{ getSharedReviewContentControls(
+						attributes,
+						setAttributes
+					) }
 				</PanelBody>
 				<PanelBody
-					title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'List Settings',
+						'woo-gutenberg-products-block'
+					) }
 				>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
@@ -120,8 +131,13 @@ const ReviewsByCategoryEditor = ( {
 
 		return (
 			<Placeholder
-				icon={ <IconReviewsByCategory className="block-editor-block-icon" /> }
-				label={ __( 'Reviews by Category', 'woo-gutenberg-products-block' ) }
+				icon={
+					<IconReviewsByCategory className="block-editor-block-icon" />
+				}
+				label={ __(
+					'Reviews by Category',
+					'woo-gutenberg-products-block'
+				) }
 			>
 				{ __(
 					'Show product reviews from specific categories.',
@@ -154,8 +170,13 @@ const ReviewsByCategoryEditor = ( {
 			<EditorContainerBlock
 				attributes={ attributes }
 				className="wc-block-reviews-by-category"
-				icon={ <IconReviewsByCategory className="block-editor-block-icon" /> }
-				name={ __( 'Reviews by Category', 'woo-gutenberg-products-block' ) }
+				icon={
+					<IconReviewsByCategory className="block-editor-block-icon" />
+				}
+				name={ __(
+					'Reviews by Category',
+					'woo-gutenberg-products-block'
+				) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</Fragment>

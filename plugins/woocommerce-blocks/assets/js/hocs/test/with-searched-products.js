@@ -59,7 +59,8 @@ describe( 'withSearchedProducts Component', () => {
 		);
 		let props;
 		it(
-			'getProducts is called on mount with passed in selected ' + 'values',
+			'getProducts is called on mount with passed in selected ' +
+				'values',
 			() => {
 				expect( getProducts ).toHaveBeenCalledWith( { selected } );
 				expect( getProducts ).toHaveBeenCalledTimes( 1 );

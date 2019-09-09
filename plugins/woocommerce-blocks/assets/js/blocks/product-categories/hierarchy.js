@@ -21,7 +21,9 @@ export function buildTermsTree( list = [] ) {
 			return {
 				...term,
 				children:
-					children && children.length ? fillWithChildren( children ) : [],
+					children && children.length
+						? fillWithChildren( children )
+						: [],
 			};
 		} );
 	};

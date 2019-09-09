@@ -33,7 +33,10 @@ const withSearchedProducts = createHigherOrderComponent(
 					loading: true,
 				};
 				this.setError = this.setError.bind( this );
-				this.debouncedOnSearch = debounce( this.onSearch.bind( this ), 400 );
+				this.debouncedOnSearch = debounce(
+					this.onSearch.bind( this ),
+					400
+				);
 			}
 
 			componentDidMount() {
@@ -73,8 +76,12 @@ const withSearchedProducts = createHigherOrderComponent(
 						error={ error }
 						products={ list }
 						isLoading={ loading }
-						selected={ list.filter( ( { id } ) => selected.includes( id ) ) }
-						onSearch={ IS_LARGE_CATALOG ? this.debouncedOnSearch : null }
+						selected={ list.filter( ( { id } ) =>
+							selected.includes( id )
+						) }
+						onSearch={
+							IS_LARGE_CATALOG ? this.debouncedOnSearch : null
+						}
 					/>
 				);
 			}

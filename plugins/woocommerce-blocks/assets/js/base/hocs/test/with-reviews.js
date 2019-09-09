@@ -137,7 +137,9 @@ describe( 'withReviews Component', () => {
 
 		beforeEach( () => {
 			mockUtils.getReviews.mockImplementation( () => getReviewsPromise );
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			renderer = render();
 		} );
 

@@ -28,7 +28,8 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 
 		componentDidUpdate( prevProps ) {
 			if (
-				prevProps.attributes.categoryId !== this.props.attributes.categoryId
+				prevProps.attributes.categoryId !==
+				this.props.attributes.categoryId
 			) {
 				this.loadCategory();
 			}

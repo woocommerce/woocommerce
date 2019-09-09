@@ -48,7 +48,10 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				}
 			/>
 			{ attributes.showReviewRating && ! ENABLE_REVIEW_RATING && (
-				<Notice className="wc-block-reviews__notice" isDismissible={ false }>
+				<Notice
+					className="wc-block-reviews__notice"
+					isDismissible={ false }
+				>
 					<RawHTML>
 						{ sprintf(
 							escapeHTML(
@@ -105,19 +108,30 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 			{ attributes.showReviewImage && (
 				<Fragment>
 					<ToggleButtonControl
-						label={ __( 'Review image', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Review image',
+							'woo-gutenberg-products-block'
+						) }
 						value={ attributes.imageType }
 						options={ [
 							{
-								label: __( 'Reviewer photo', 'woo-gutenberg-products-block' ),
+								label: __(
+									'Reviewer photo',
+									'woo-gutenberg-products-block'
+								),
 								value: 'reviewer',
 							},
 							{
-								label: __( 'Product', 'woo-gutenberg-products-block' ),
+								label: __(
+									'Product',
+									'woo-gutenberg-products-block'
+								),
 								value: 'product',
 							},
 						] }
-						onChange={ ( value ) => setAttributes( { imageType: value } ) }
+						onChange={ ( value ) =>
+							setAttributes( { imageType: value } )
+						}
 					/>
 					{ attributes.imageType === 'reviewer' && ! SHOW_AVATARS && (
 						<Notice
@@ -194,7 +208,10 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 			/>
 			{ attributes.showLoadMore && (
 				<RangeControl
-					label={ __( 'Load More Reviews', 'woo-gutenberg-products-block' ) }
+					label={ __(
+						'Load More Reviews',
+						'woo-gutenberg-products-block'
+					) }
 					value={ attributes.reviewsOnLoadMore }
 					onChange={ ( reviewsOnLoadMore ) =>
 						setAttributes( { reviewsOnLoadMore } )

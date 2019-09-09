@@ -42,7 +42,9 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 	return (
 		<Placeholder
 			className="wc-block-reviews-by-product"
-			icon={ <IconReviewsByProduct className="block-editor-block-icon" /> }
+			icon={
+				<IconReviewsByProduct className="block-editor-block-icon" />
+			}
 			label={ __( 'Reviews by Product', 'woo-gutenberg-products-block' ) }
 		>
 			{ content }

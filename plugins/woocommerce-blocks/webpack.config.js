@@ -108,8 +108,10 @@ const GutenbergBlocksConfig = {
 		// Shared blocks code
 		blocks: './assets/js/index.js',
 		// Blocks
-		'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
-		'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
+		'handpicked-products':
+			'./assets/js/blocks/handpicked-products/index.js',
+		'product-best-sellers':
+			'./assets/js/blocks/product-best-sellers/index.js',
 		'product-category': './assets/js/blocks/product-category/index.js',
 		'product-categories': './assets/js/blocks/product-categories/index.js',
 		'product-new': './assets/js/blocks/product-new/index.js',
@@ -151,7 +153,10 @@ const GutenbergBlocksConfig = {
 					test: ( module = {} ) =>
 						module.constructor.name === 'CssModule' &&
 						( findModuleMatch( module, /editor\.scss$/ ) ||
-							findModuleMatch( module, /[\\/]assets[\\/]components[\\/]/ ) ),
+							findModuleMatch(
+								module,
+								/[\\/]assets[\\/]components[\\/]/
+							) ),
 					name: 'editor',
 					chunks: 'all',
 					priority: 10,
@@ -180,7 +185,9 @@ const GutenbergBlocksConfig = {
 										'babel-plugin-transform-react-remove-prop-types'
 								  )
 								: false,
-							require.resolve( '@babel/plugin-proposal-class-properties' ),
+							require.resolve(
+								'@babel/plugin-proposal-class-properties'
+							),
 						].filter( Boolean ),
 					},
 				},
@@ -239,7 +246,8 @@ const GutenbergBlocksConfig = {
 const BlocksFrontendConfig = {
 	...baseConfig,
 	entry: {
-		'product-categories': './assets/js/blocks/product-categories/frontend.js',
+		'product-categories':
+			'./assets/js/blocks/product-categories/frontend.js',
 		reviews: './assets/js/blocks/reviews/frontend.js',
 	},
 	output: {
@@ -264,19 +272,29 @@ const BlocksFrontendConfig = {
 								{
 									modules: false,
 									targets: {
-										browsers: [ 'extends @wordpress/browserslist-config' ],
+										browsers: [
+											'extends @wordpress/browserslist-config',
+										],
 									},
 								},
 							],
 						],
 						plugins: [
-							require.resolve( '@babel/plugin-proposal-object-rest-spread' ),
-							require.resolve( '@babel/plugin-transform-react-jsx' ),
+							require.resolve(
+								'@babel/plugin-proposal-object-rest-spread'
+							),
+							require.resolve(
+								'@babel/plugin-transform-react-jsx'
+							),
 							require.resolve(
 								'@babel/plugin-proposal-async-generator-functions'
 							),
-							require.resolve( '@babel/plugin-transform-runtime' ),
-							require.resolve( '@babel/plugin-proposal-class-properties' ),
+							require.resolve(
+								'@babel/plugin-transform-runtime'
+							),
+							require.resolve(
+								'@babel/plugin-proposal-class-properties'
+							),
 							NODE_ENV === 'production'
 								? require.resolve(
 										'babel-plugin-transform-react-remove-prop-types'

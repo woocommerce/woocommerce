@@ -53,7 +53,10 @@ const Pagination = ( {
 				<button
 					className="wc-block-pagination-page"
 					onClick={ () => onPageChange( currentPage - 1 ) }
-					title={ __( 'Previous page', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'Previous page',
+						'woo-gutenberg-products-block'
+					) }
 				>
 					<Label
 						label="<"
@@ -73,7 +76,10 @@ const Pagination = ( {
 				</button>
 			) }
 			{ showFirstPageEllipsis && (
-				<span className="wc-block-pagination-ellipsis" aria-hidden="true">
+				<span
+					className="wc-block-pagination-ellipsis"
+					aria-hidden="true"
+				>
 					{ __( '…', 'woo-gutenberg-products-block' ) }
 				</span>
 			) }
@@ -82,16 +88,24 @@ const Pagination = ( {
 					<button
 						key={ page }
 						className={ classNames( 'wc-block-pagination-page', {
-							'wc-block-pagination-page--active': currentPage === page,
+							'wc-block-pagination-page--active':
+								currentPage === page,
 						} ) }
-						onClick={ currentPage === page ? null : () => onPageChange( page ) }
+						onClick={
+							currentPage === page
+								? null
+								: () => onPageChange( page )
+						}
 					>
 						{ page }
 					</button>
 				);
 			} ) }
 			{ showLastPageEllipsis && (
-				<span className="wc-block-pagination-ellipsis" aria-hidden="true">
+				<span
+					className="wc-block-pagination-ellipsis"
+					aria-hidden="true"
+				>
 					{ __( '…', 'woo-gutenberg-products-block' ) }
 				</span>
 			) }

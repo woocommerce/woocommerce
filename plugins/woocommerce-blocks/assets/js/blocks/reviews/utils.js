@@ -37,7 +37,10 @@ export const getReviews = ( args ) => {
 		parse: false,
 	} ).then( ( response ) => {
 		return response.json().then( ( reviews ) => {
-			const totalReviews = parseInt( response.headers.get( 'x-wp-total' ), 10 );
+			const totalReviews = parseInt(
+				response.headers.get( 'x-wp-total' ),
+				10
+			);
 			return { reviews, totalReviews };
 		} );
 	} );

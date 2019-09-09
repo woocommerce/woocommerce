@@ -84,7 +84,10 @@ const FeaturedProduct = ( {
 				{ getBlockControls() }
 				<Placeholder
 					icon="star-filled"
-					label={ __( 'Featured Product', 'woo-gutenberg-products-block' ) }
+					label={ __(
+						'Featured Product',
+						'woo-gutenberg-products-block'
+					) }
 					className="wc-block-featured-product"
 				>
 					{ __(
@@ -152,7 +155,8 @@ const FeaturedProduct = ( {
 						{
 							icon: 'edit',
 							title: __( 'Edit' ),
-							onClick: () => setAttributes( { editMode: ! editMode } ),
+							onClick: () =>
+								setAttributes( { editMode: ! editMode } ),
 							isActive: editMode,
 						},
 					] }
@@ -170,9 +174,14 @@ const FeaturedProduct = ( {
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
 					<ToggleControl
-						label={ __( 'Show description', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Show description',
+							'woo-gutenberg-products-block'
+						) }
 						checked={ attributes.showDesc }
 						onChange={
 							// prettier-ignore
@@ -180,7 +189,10 @@ const FeaturedProduct = ( {
 						}
 					/>
 					<ToggleControl
-						label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Show price',
+							'woo-gutenberg-products-block'
+						) }
 						checked={ attributes.showPrice }
 						onChange={
 							// prettier-ignore
@@ -194,7 +206,10 @@ const FeaturedProduct = ( {
 						{
 							value: overlayColor.color,
 							onChange: setOverlayColor,
-							label: __( 'Overlay Color', 'woo-gutenberg-products-block' ),
+							label: __(
+								'Overlay Color',
+								'woo-gutenberg-products-block'
+							),
 						},
 					] }
 				>
@@ -206,7 +221,9 @@ const FeaturedProduct = ( {
 									'woo-gutenberg-products-block'
 								) }
 								value={ attributes.dimRatio }
-								onChange={ ( ratio ) => setAttributes( { dimRatio: ratio } ) }
+								onChange={ ( ratio ) =>
+									setAttributes( { dimRatio: ratio } )
+								}
 								min={ 0 }
 								max={ 100 }
 								step={ 10 }
@@ -251,14 +268,17 @@ const FeaturedProduct = ( {
 			className
 		);
 
-		const style = getBackgroundImageStyles( attributes.mediaSrc || product );
+		const style = getBackgroundImageStyles(
+			attributes.mediaSrc || product
+		);
 
 		if ( overlayColor.color ) {
 			style.backgroundColor = overlayColor.color;
 		}
 		if ( focalPoint ) {
-			style.backgroundPosition = `${ focalPoint.x * 100 }% ${ focalPoint.y *
-				100 }%`;
+			const bgPosX = focalPoint.x * 100;
+			const bgPosY = focalPoint.y * 100;
+			style.backgroundPosition = `${ bgPosX }% ${ bgPosY }%`;
 		}
 
 		const onResizeStop = ( event, direction, elt ) => {
@@ -311,7 +331,10 @@ const FeaturedProduct = ( {
 								[
 									'core/button',
 									{
-										text: __( 'Shop now', 'woo-gutenberg-products-block' ),
+										text: __(
+											'Shop now',
+											'woo-gutenberg-products-block'
+										),
 										url: product.permalink,
 										align: 'center',
 									},

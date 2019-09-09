@@ -62,7 +62,9 @@ class ProductControl extends Component {
 		getProducts( { selected, queryArgs } )
 			.then( ( products ) => {
 				products = products.map( ( product ) => {
-					const count = product.variations ? product.variations.length : 0;
+					const count = product.variations
+						? product.variations.length
+						: 0;
 					return {
 						...product,
 						parent: 0,
@@ -109,9 +111,12 @@ class ProductControl extends Component {
 		}
 
 		apiFetch( {
-			path: addQueryArgs( `${ ENDPOINTS.products }/${ product }/variations`, {
-				per_page: -1,
-			} ),
+			path: addQueryArgs(
+				`${ ENDPOINTS.products }/${ product }/variations`,
+				{
+					per_page: -1,
+				}
+			),
 		} )
 			.then( ( variations ) => {
 				variations = variations.map( ( variation ) => ( {
@@ -172,7 +177,9 @@ class ProductControl extends Component {
 		};
 
 		if ( item.breadcrumbs.length ) {
-			a11yProps[ 'aria-label' ] = `${ item.breadcrumbs[ 0 ] }: ${ item.name }`;
+			a11yProps[ 'aria-label' ] = `${ item.breadcrumbs[ 0 ] }: ${
+				item.name
+			}`;
 		}
 
 		if ( item.count ) {
@@ -239,7 +246,11 @@ class ProductControl extends Component {
 		}
 
 		return (
-			<SearchListItem className={ classes } { ...args } { ...a11yProps } />
+			<SearchListItem
+				className={ classes }
+				{ ...args }
+				{ ...a11yProps }
+			/>
 		);
 	}
 
@@ -277,7 +288,9 @@ class ProductControl extends Component {
 					selected={ selectedListItems }
 					onChange={ onChange }
 					renderItem={ renderItem }
-					onSearch={ IS_LARGE_CATALOG ? this.debouncedOnSearch : null }
+					onSearch={
+						IS_LARGE_CATALOG ? this.debouncedOnSearch : null
+					}
 					messages={ messages }
 					isHierarchical
 				/>

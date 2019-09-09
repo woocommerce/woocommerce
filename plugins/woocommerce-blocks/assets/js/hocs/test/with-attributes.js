@@ -59,8 +59,12 @@ describe( 'withAttributes Component', () => {
 
 		beforeEach( () => {
 			getAttributesPromise = Promise.resolve( mockAttributes );
-			mockUtils.getAttributes.mockImplementation( () => getAttributesPromise );
-			mockUtils.getTerms.mockImplementation( () => Promise.resolve( [] ) );
+			mockUtils.getAttributes.mockImplementation(
+				() => getAttributesPromise
+			);
+			mockUtils.getTerms.mockImplementation( () =>
+				Promise.resolve( [] )
+			);
 		} );
 
 		it( 'getAttributes is called on mount', () => {
@@ -127,8 +131,12 @@ describe( 'withAttributes Component', () => {
 		let renderer;
 
 		beforeEach( () => {
-			mockUtils.getAttributes.mockImplementation( () => getAttributesPromise );
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockUtils.getAttributes.mockImplementation(
+				() => getAttributesPromise
+			);
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			renderer = TestRenderer.create( <TestComponent /> );
 		} );
 

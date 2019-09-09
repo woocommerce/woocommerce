@@ -110,8 +110,13 @@ class ProductByCategoryBlock extends Component {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Product Category', 'woo-gutenberg-products-block' ) }
-					initialOpen={ ! attributes.categories.length && ! isEditing }
+					title={ __(
+						'Product Category',
+						'woo-gutenberg-products-block'
+					) }
+					initialOpen={
+						! attributes.categories.length && ! isEditing
+					}
 				>
 					<ProductCategoryControl
 						selected={ attributes.categories }
@@ -192,7 +197,10 @@ class ProductByCategoryBlock extends Component {
 		return (
 			<Placeholder
 				icon="category"
-				label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
+				label={ __(
+					'Products by Category',
+					'woo-gutenberg-products-block'
+				) }
 				className="wc-block-products-grid wc-block-products-category"
 			>
 				{ __(
@@ -233,7 +241,10 @@ class ProductByCategoryBlock extends Component {
 		return (
 			<Disabled>
 				{ hasCategories ? (
-					<ServerSideRender block={ name } attributes={ attributes } />
+					<ServerSideRender
+						block={ name }
+						attributes={ attributes }
+					/>
 				) : (
 					__(
 						'Select at least one category to display its products.',
@@ -256,7 +267,9 @@ class ProductByCategoryBlock extends Component {
 								icon: 'edit',
 								title: __( 'Edit' ),
 								onClick: () =>
-									isEditing ? this.stopEditing() : this.startEditing(),
+									isEditing
+										? this.stopEditing()
+										: this.startEditing(),
 								isActive: isEditing,
 							},
 						] }

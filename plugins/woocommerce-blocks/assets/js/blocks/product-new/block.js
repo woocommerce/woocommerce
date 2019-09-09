@@ -83,7 +83,10 @@ class ProductNewestBlock extends Component {
 			<Fragment>
 				{ this.getInspectorControls() }
 				<Disabled>
-					<ServerSideRender block={ name } attributes={ attributes } />
+					<ServerSideRender
+						block={ name }
+						attributes={ attributes }
+					/>
 				</Disabled>
 			</Fragment>
 		);

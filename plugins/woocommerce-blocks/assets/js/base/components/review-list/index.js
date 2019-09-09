@@ -17,7 +17,8 @@ const ReviewList = ( { attributes, reviews } ) => {
 	const showReviewImage =
 		( SHOW_AVATARS || attributes.imageType === 'product' ) &&
 		attributes.showReviewImage;
-	const showReviewRating = ENABLE_REVIEW_RATING && attributes.showReviewRating;
+	const showReviewRating =
+		ENABLE_REVIEW_RATING && attributes.showReviewRating;
 	const attrs = {
 		...attributes,
 		showReviewImage,

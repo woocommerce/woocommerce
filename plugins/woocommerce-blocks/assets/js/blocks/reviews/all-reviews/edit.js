@@ -25,9 +25,14 @@ const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
 					<ToggleControl
-						label={ __( 'Product name', 'woo-gutenberg-products-block' ) }
+						label={ __(
+							'Product name',
+							'woo-gutenberg-products-block'
+						) }
 						checked={ attributes.showProductName }
 						onChange={ () =>
 							setAttributes( {
@@ -35,10 +40,16 @@ const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 							} )
 						}
 					/>
-					{ getSharedReviewContentControls( attributes, setAttributes ) }
+					{ getSharedReviewContentControls(
+						attributes,
+						setAttributes
+					) }
 				</PanelBody>
 				<PanelBody
-					title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'List Settings',
+						'woo-gutenberg-products-block'
+					) }
 				>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>

@@ -80,7 +80,10 @@ registerBlockType( 'woocommerce/product-search', {
 			<Fragment>
 				<InspectorControls key="inspector">
 					<PanelBody
-						title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+						title={ __(
+							'Content',
+							'woo-gutenberg-products-block'
+						) }
 						initialOpen
 					>
 						<ToggleControl
@@ -90,11 +93,19 @@ registerBlockType( 'woocommerce/product-search', {
 							) }
 							help={
 								hasLabel
-									? __( 'Label is visible.', 'woo-gutenberg-products-block' )
-									: __( 'Label is hidden.', 'woo-gutenberg-products-block' )
+									? __(
+											'Label is visible.',
+											'woo-gutenberg-products-block'
+									  )
+									: __(
+											'Label is hidden.',
+											'woo-gutenberg-products-block'
+									  )
 							}
 							checked={ hasLabel }
-							onChange={ () => setAttributes( { hasLabel: ! hasLabel } ) }
+							onChange={ () =>
+								setAttributes( { hasLabel: ! hasLabel } )
+							}
 						/>
 					</PanelBody>
 				</InspectorControls>

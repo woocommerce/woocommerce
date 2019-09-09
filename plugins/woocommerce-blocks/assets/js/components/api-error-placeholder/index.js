@@ -17,7 +17,10 @@ import './style.scss';
 const ApiErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
 	<Placeholder
 		icon={ <Gridicon icon="notice" /> }
-		label={ __( 'Sorry, an error occurred', 'woo-gutenberg-products-block' ) }
+		label={ __(
+			'Sorry, an error occurred',
+			'woo-gutenberg-products-block'
+		) }
 		className={ classNames( 'wc-block-api-error', className ) }
 	>
 		<ErrorMessage error={ error } />

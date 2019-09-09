@@ -28,7 +28,8 @@ const withProduct = createHigherOrderComponent( ( OriginalComponent ) => {
 
 		componentDidUpdate( prevProps ) {
 			if (
-				prevProps.attributes.productId !== this.props.attributes.productId
+				prevProps.attributes.productId !==
+				this.props.attributes.productId
 			) {
 				this.loadProduct();
 			}

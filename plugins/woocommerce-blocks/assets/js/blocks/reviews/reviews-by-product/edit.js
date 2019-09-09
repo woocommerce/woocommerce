@@ -82,11 +82,19 @@ const ReviewsByProductEditor = ( {
 						renderItem={ renderProductControlItem }
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
-					{ getSharedReviewContentControls( attributes, setAttributes ) }
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
+					{ getSharedReviewContentControls(
+						attributes,
+						setAttributes
+					) }
 				</PanelBody>
 				<PanelBody
-					title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'List Settings',
+						'woo-gutenberg-products-block'
+					) }
 				>
 					{ getSharedReviewListControls( attributes, setAttributes ) }
 				</PanelBody>
@@ -107,8 +115,13 @@ const ReviewsByProductEditor = ( {
 
 		return (
 			<Placeholder
-				icon={ <IconReviewsByProduct className="block-editor-block-icon" /> }
-				label={ __( 'Reviews by Product', 'woo-gutenberg-products-block' ) }
+				icon={
+					<IconReviewsByProduct className="block-editor-block-icon" />
+				}
+				label={ __(
+					'Reviews by Product',
+					'woo-gutenberg-products-block'
+				) }
 			>
 				{ __(
 					'Show reviews of your product to build trust',
@@ -146,8 +159,13 @@ const ReviewsByProductEditor = ( {
 			<EditorContainerBlock
 				attributes={ attributes }
 				className="wc-block-all-reviews"
-				icon={ <IconReviewsByProduct className="block-editor-block-icon" /> }
-				name={ __( 'Reviews by Product', 'woo-gutenberg-products-block' ) }
+				icon={
+					<IconReviewsByProduct className="block-editor-block-icon" />
+				}
+				name={ __(
+					'Reviews by Product',
+					'woo-gutenberg-products-block'
+				) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</Fragment>
