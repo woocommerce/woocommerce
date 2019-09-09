@@ -42,18 +42,23 @@ class ProductCategoriesBlock extends Component {
 		const parentKey = 'parent-' + items[ 0 ].term_id;
 
 		return (
-			<ul key={ parentKey }>
+			<ul key={ parentKey } className="wc-block-product-categories-list">
 				{ items.map( ( cat ) => {
 					const count = hasCount ? (
-						<span>({ cat.count })</span>
+						<span className="wc-block-product-categories-list-item-count">
+							{ cat.count }
+						</span>
 					) : null;
 					return [
-						<li key={ cat.term_id }>
+						<li
+							key={ cat.term_id }
+							className="wc-block-product-categories-list-item"
+						>
 							{ /* eslint-disable-next-line jsx-a11y/anchor-is-valid */ }
 							<a href={ isPreview ? null : cat.link }>
 								{ cat.name }
 							</a>
-							{ ' ' + count + ' ' }
+							{ count }
 						</li>,
 						!! cat.children &&
 							!! cat.children.length &&
