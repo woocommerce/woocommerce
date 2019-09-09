@@ -36,7 +36,7 @@ import { MIN_HEIGHT } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import ProductControl from '../../components/product-control';
-import ApiErrorPlaceholder from '../../components/api-error-placeholder';
+import ErrorPlaceholder from '../../components/error-placeholder';
 import { dimRatioToClass, getBackgroundImageStyles } from './utils';
 import {
 	getImageSrcFromProduct,
@@ -60,7 +60,7 @@ const FeaturedProduct = ( {
 	setOverlayColor,
 } ) => {
 	const renderApiError = () => (
-		<ApiErrorPlaceholder
+		<ErrorPlaceholder
 			className="wc-block-featured-product-error"
 			error={ error }
 			isLoading={ isLoading }

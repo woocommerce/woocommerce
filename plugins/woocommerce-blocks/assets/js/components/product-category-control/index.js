@@ -12,7 +12,7 @@ import { SelectControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { withCategories } from '../../hocs';
-import ErrorMessage from '../api-error-placeholder/error-message.js';
+import ErrorMessage from '../error-placeholder/error-message.js';
 import './style.scss';
 
 const ProductCategoryControl = ( {

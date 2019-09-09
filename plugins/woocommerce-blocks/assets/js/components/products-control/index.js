@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { withSearchedProducts } from '../../hocs';
-import ErrorMessage from '../api-error-placeholder/error-message.js';
+import ErrorMessage from '../error-placeholder/error-message.js';
 
 /**
  * The products control exposes a custom selector for searching and selecting
