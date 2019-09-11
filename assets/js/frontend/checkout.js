@@ -311,7 +311,7 @@ jQuery( function( $ ) {
 			if ( false !== args.update_shipping_method ) {
 				var shipping_methods = {};
 
-        // eslint-disable-next-line max-len
+				// eslint-disable-next-line max-len
 				$( 'select.shipping_method, input[name^="shipping_method"][type="radio"]:checked, input[name^="shipping_method"][type="hidden"]' ).each( function() {
 					shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 				} );
@@ -415,27 +415,27 @@ jQuery( function( $ ) {
 				}
 
 			});
-    },
-    handleUnloadEvent: function( e ) {
-      // Modern browsers have their own standard generic messages that they will display.
-      // Confirm, alert, prompt or custom message are not allowed during the unload event
-      // Browsers will display their own standard messages
+		},
+		handleUnloadEvent: function( e ) {
+			// Modern browsers have their own standard generic messages that they will display.
+			// Confirm, alert, prompt or custom message are not allowed during the unload event
+			// Browsers will display their own standard messages
 
-      // Check if the browser is Internet Explorer
-      if((navigator.userAgent.indexOf('MSIE') !== -1 ) || (!!document.documentMode)) {
-        // IE handles unload events differently than modern browsers
-        e.preventDefault();
-        return undefined;
-      }
+			// Check if the browser is Internet Explorer
+			if((navigator.userAgent.indexOf('MSIE') !== -1 ) || (!!document.documentMode)) {
+				// IE handles unload events differently than modern browsers
+				e.preventDefault();
+				return undefined;
+			}
 
-      return true;
-    },
-    attachUnloadEventsOnSubmit: function() {
-      $( window ).on('beforeunload', this.handleUnloadEvent);
-    },
-    detachUnloadEventsOnSubmit: function() {
-      $( window ).unbind('beforeunload', this.handleUnloadEvent);
-    },
+			return true;
+		},
+		attachUnloadEventsOnSubmit: function() {
+			$( window ).on('beforeunload', this.handleUnloadEvent);
+		},
+		detachUnloadEventsOnSubmit: function() {
+			$( window ).unbind('beforeunload', this.handleUnloadEvent);
+		},
 		blockOnSubmit: function( $form ) {
 			var form_data = $form.data();
 
@@ -460,16 +460,16 @@ jQuery( function( $ ) {
 				return false;
 			}
 
-      // Trigger a handler to let gateways manipulate the checkout if needed
-      // eslint-disable-next-line max-len
+			// Trigger a handler to let gateways manipulate the checkout if needed
+			// eslint-disable-next-line max-len
 			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + wc_checkout_form.get_payment_method() ) !== false ) {
 
 				$form.addClass( 'processing' );
 
-        wc_checkout_form.blockOnSubmit( $form );
+				wc_checkout_form.blockOnSubmit( $form );
 
-        // Attach event to block reloading the page when the form has been submitted
-        wc_checkout_form.attachUnloadEventsOnSubmit();
+				// Attach event to block reloading the page when the form has been submitted
+				wc_checkout_form.attachUnloadEventsOnSubmit();
 
 				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
 				$.ajaxSetup( {
@@ -506,8 +506,8 @@ jQuery( function( $ ) {
 					data:		$form.serialize(),
 					dataType:   'json',
 					success:	function( result ) {
-            // Detach the unload handler that prevents a reload / redirect
-            wc_checkout_form.detachUnloadEventsOnSubmit();
+						// Detach the unload handler that prevents a reload / redirect
+						wc_checkout_form.detachUnloadEventsOnSubmit();
 
 						try {
 							if ( 'success' === result.result ) {
@@ -542,8 +542,8 @@ jQuery( function( $ ) {
 						}
 					},
 					error:	function( jqXHR, textStatus, errorThrown ) {
-            // Detach the unload handler that prevents a reload / redirect
-            wc_checkout_form.detachUnloadEventsOnSubmit();
+						// Detach the unload handler that prevents a reload / redirect
+						wc_checkout_form.detachUnloadEventsOnSubmit();
 
 						wc_checkout_form.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
 					}
