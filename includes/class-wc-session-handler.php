@@ -93,7 +93,7 @@ class WC_Session_Handler extends WC_Session {
 			$this->_data               = $this->get_session_data();
 
 			// If the user logs in, update session.
-			if ( is_user_logged_in() && get_current_user_id() !== $this->_customer_id ) {
+			if ( is_user_logged_in() && get_current_user_id() !== (int) $this->_customer_id ) {
 				$guest_session_id = $this->_customer_id;
 				$this->_customer_id = get_current_user_id();
 				$this->_dirty       = true;
