@@ -27,7 +27,7 @@ class ReportsSync {
 	/**
 	 * Action hook for queuing an action after another is complete.
 	 */
-	const QUEUE_DEPEDENT_ACTION = 'wc-admin_queue_dependent_action';
+	const QUEUE_DEPENDENT_ACTION = 'wc-admin_queue_dependent_action';
 
 	/**
 	 * Action hook for importing a batch of customers.
@@ -118,7 +118,7 @@ class ReportsSync {
 
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 4 );
-		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 3 );
+		add_action( self::QUEUE_DEPENDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 3 );
 		add_action( self::CUSTOMERS_IMPORT_BATCH_ACTION, array( __CLASS__, 'customer_lookup_import_batch' ), 10, 3 );
 		add_action( self::CUSTOMERS_DELETE_BATCH_INIT, array( __CLASS__, 'customer_lookup_delete_batch_init' ) );
 		add_action( self::CUSTOMERS_DELETE_BATCH_ACTION, array( __CLASS__, 'customer_lookup_delete_batch' ) );
@@ -226,7 +226,7 @@ class ReportsSync {
 			// If we're using our data store, call our bespoke deletion method.
 			$action_types = array(
 				self::QUEUE_BATCH_ACTION,
-				self::QUEUE_DEPEDENT_ACTION,
+				self::QUEUE_DEPENDENT_ACTION,
 				self::CUSTOMERS_IMPORT_BATCH_ACTION,
 				self::CUSTOMERS_DELETE_BATCH_INIT,
 				self::CUSTOMERS_DELETE_BATCH_ACTION,
@@ -305,7 +305,7 @@ class ReportsSync {
 			if (
 				( self::SINGLE_ORDER_IMPORT_ACTION === $existing_job->get_hook() ) ||
 				(
-					self::QUEUE_DEPEDENT_ACTION === $existing_job->get_hook() &&
+					self::QUEUE_DEPENDENT_ACTION === $existing_job->get_hook() &&
 					in_array( self::SINGLE_ORDER_IMPORT_ACTION, $existing_job->get_args(), true )
 				)
 			) {
@@ -602,11 +602,11 @@ class ReportsSync {
 		// Also, ensure that the next schedule is a DateTime (it can be null).
 		if (
 			is_a( $next_job_schedule, 'DateTime' ) &&
-			( self::QUEUE_DEPEDENT_ACTION !== $blocking_job_hook )
+			( self::QUEUE_DEPENDENT_ACTION !== $blocking_job_hook )
 		) {
 			self::queue()->schedule_single(
 				$next_job_schedule->getTimestamp() + 5,
-				self::QUEUE_DEPEDENT_ACTION,
+				self::QUEUE_DEPENDENT_ACTION,
 				array( $action, $action_args, $prerequisite_action ),
 				self::QUEUE_GROUP
 			);

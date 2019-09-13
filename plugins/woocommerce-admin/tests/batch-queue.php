@@ -154,7 +154,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 			1,
 			ReportsSync::queue()->search(
 				array(
-					'hook' => ReportsSync::QUEUE_DEPEDENT_ACTION,
+					'hook' => ReportsSync::QUEUE_DEPENDENT_ACTION,
 					'args' => array( 'dependent_action', array(), 'blocking_job' ),
 				)
 			)
@@ -175,7 +175,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 		$this->assertEmpty(
 			ReportsSync::queue()->search(
 				array(
-					'hook' => ReportsSync::QUEUE_DEPEDENT_ACTION,
+					'hook' => ReportsSync::QUEUE_DEPENDENT_ACTION,
 					'args' => array( 'another_dependent_action', array(), 'nonexistant_blocking_job' ),
 				)
 			)
@@ -183,6 +183,6 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 
 		// clean up.
 		ReportsSync::queue()->cancel_all( 'another_dependent_action' );
-		ReportsSync::queue()->cancel_all( ReportsSync::QUEUE_DEPEDENT_ACTION );
+		ReportsSync::queue()->cancel_all( ReportsSync::QUEUE_DEPENDENT_ACTION );
 	}
 }
