@@ -103,7 +103,7 @@
 	},
 	"engines": {
 		"node": "10.16.3",
-		"npm": "6.11.2"
+		"npm": "6.11.3"
 	},
 	"dependencies": {
 		"@woocommerce/components": "3.2.0",
