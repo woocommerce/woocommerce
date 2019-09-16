@@ -134,7 +134,7 @@ class WC_Shortcode_My_Account {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order || ! current_user_can( 'view_order', $order_id ) ) {
-			echo '<div class="woocommerce-error">' . esc_html__( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="wc-forward">' . esc_html__( 'My account', 'woocommerce' ) . '</a></div>';
+			echo '<div class="woocommerce-error">' . esc_html__( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="wc-forward">' . esc_html( get_the_title( wc_get_page_id( 'myaccount' ) ) ) . '</a></div>';
 
 			return;
 		}
