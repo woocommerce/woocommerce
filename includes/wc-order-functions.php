@@ -104,6 +104,51 @@ function wc_get_order_statuses() {
 }
 
 /**
+ * Get all payment statuses
+ *
+ * @since 3.8
+ * @used-by WC_Order::set_payment_status
+ * @return array
+ */
+function wc_get_payment_statuses() {
+	$payment_statuses = array(
+		'wc-pending-payment'    => _x( 'Pending payment', 'Payment status', 'woocommerce' ),
+		'wc-paid'               => _x( 'Paid', 'Payment status', 'woocommerce' ),
+		'wc-partially-refunded' => _x( 'Pending payment', 'Payment status', 'woocommerce' ),
+		'wc-refunded'           => _x( 'Refunded', 'Payment status', 'woocommerce' ),
+	);
+	return apply_filters( 'wc_payment_statuses', $payment_statuses );
+}
+
+/**
+ * Get all payment statuses
+ *
+ * @since 3.8
+ * @used-by WC_Order::set_fulfillment_status
+ * @return array
+ */
+function wc_get_fulfillment_statuses() {
+	$fulfillment_statuses = array(
+		'wc-' => _x( 'Pending fulfillment', 'Fulfillment status', 'woocommerce' ),
+	);
+	return apply_filters( 'wc_fulfillment_statuses', $fulfillment_statuses );
+}
+
+/**
+ * Get all payment statuses
+ *
+ * @since 3.8
+ * @used-by WC_Order::set_shipping_status
+ * @return array
+ */
+function wc_get_shipping_statuses() {
+	$shipping_statuses = array(
+		'wc-' => _x( 'Pending shipping', 'Shipping status', 'woocommerce' ),
+	);
+	return apply_filters( 'wc_shipping_statuses', $shipping_statuses );
+}
+
+/**
  * See if a string is an order status.
  *
  * @param  string $maybe_status Status, including any wc- prefix.
