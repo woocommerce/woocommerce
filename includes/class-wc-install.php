@@ -940,6 +940,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_order_statuses",
 			"{$wpdb->prefix}wc_product_meta_lookup",
 			"{$wpdb->prefix}wc_tax_rate_classes",
 			"{$wpdb->prefix}wc_webhooks",
