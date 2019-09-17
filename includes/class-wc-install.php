@@ -884,6 +884,18 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_order_statuses (
+  `order_status_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id` BIGINT UNSIGEND NOT NULL,
+  `payment_status` varchar(20),
+  `fulfillment_status` varchar(20),
+  `shipping_status` varchar(20),
+  PRIMARY KEY  (order_status_id),
+  KEY `order_id` (`order_id`),
+  KEY `payment_status` (`payment_status`),
+  KEY `fulfillment_status` (`fulfillment_status`),
+  KEY `shipping_status` (`shipping_status`)
+) $collate;
 CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
@@ -970,7 +982,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
