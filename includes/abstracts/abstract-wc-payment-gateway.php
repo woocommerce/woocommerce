@@ -227,7 +227,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Get a link to the transaction on the 3rd party gateway size (if applicable).
+	 * Get a link to the transaction on the 3rd party gateway site (if applicable).
 	 *
 	 * @param  WC_Order $order the order object.
 	 * @return string transaction URL, or empty string.
