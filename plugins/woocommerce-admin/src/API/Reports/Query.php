@@ -23,5 +23,4 @@ abstract class Query extends \WC_Object_Query {
 		/* translators: %s: Method name */
 		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce-admin' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
-
 }

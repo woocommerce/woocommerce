@@ -48,5 +48,4 @@ class Query extends ReportsQuery {
 		$results    = $data_store->get_data( $args );
 		return apply_filters( 'woocommerce_reports_variations_select_query', $results, $args );
 	}
-
 }

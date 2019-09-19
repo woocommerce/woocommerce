@@ -45,5 +45,4 @@ class Data extends \WC_REST_Data_Controller {
 		);
 		return $response;
 	}
-
 }

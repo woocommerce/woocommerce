@@ -202,5 +202,4 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 
 		return $order_by;
 	}
-
 }

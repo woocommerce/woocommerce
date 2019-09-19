@@ -91,5 +91,4 @@ class Coupons extends \WC_REST_Coupons_Controller {
 
 		return $where;
 	}
-
 }

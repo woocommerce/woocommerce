@@ -426,5 +426,4 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		return $order_by;
 	}
-
 }

@@ -318,5 +318,4 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 		return $params;
 	}
-
 }

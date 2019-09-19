@@ -1031,5 +1031,4 @@ class DataStore {
 		}
 		return $operator;
 	}
-
 }

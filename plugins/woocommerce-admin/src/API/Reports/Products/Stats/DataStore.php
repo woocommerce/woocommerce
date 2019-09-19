@@ -244,5 +244,4 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 
 		return $order_by;
 	}
-
 }
