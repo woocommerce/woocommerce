@@ -35,7 +35,7 @@ npm install
 
 The tests use environment variables to specify login test data needed to run tests. 
 
-To login to the site, `loginUser()` utility function of [`e2e-test-utils`](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils) package is being used. The function relies on the following [`config.js`](https://github.com/WordPress/gutenberg/blob/master/packages/e2e-test-utils/src/shared/config.js) file to specify base URL, Admin user details and Test user details (could be different from Admin. For example, customer):
+To login to the site, `loginUser()` utility function of [`e2e-test-utils`](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils) package is being used. The function relies on the following [`config.js`](https://github.com/WordPress/gutenberg/blob/master/packages/e2e-test-utils/src/shared/config.js) file to specify base URL (site where the tests will be running), Admin user details and Customer user details:
 
 ```
 const WP_ADMIN_USER = {
@@ -57,20 +57,24 @@ const WP_ADMIN_USER = {
  };
 ```    
 
-As per above, create an Admin user on the site and set its username and password:
+As per above, create an Admin user (with `Administrator` role) on the site and set its username and password exactly as shown below:
 
 - username: `admin`
 - password: `password`
 
-Specify base URL and Test user details using environment variables. 
+Next, create a Customer user (with `Customer` role) on the site. Feel free to give it any username and password. 
+
+Note that `wp-admin` tests are being run as an Admin user and `front-end` tests are being run as a Customer user. 
+
+Finally, specify base URL and Customer user details using environment variables. 
 
 #### Environment variables
 
-Set environmental variables as shown below. Note that you don't need to add the trailing slash ('/') at the end of the site URL:
+Set environmental variables (base URL and Customer user) as shown below. Note that you don't need to add the trailing slash ('/') at the end of the site URL:
 
 - `export WP_BASE_URL={your site URL}`
-- `export WP_USERNAME={your Test user username}`
-- `export WP_PASSWORD={your Test user password}`
+- `export WP_USERNAME={your Customer user username}`
+- `export WP_PASSWORD={your Customer user password}`
 
 You can unset the variables when you are done:
 
