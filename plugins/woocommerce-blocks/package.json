@@ -96,7 +96,7 @@
 		"style-loader": "1.0.0",
 		"stylelint": "10.1.0",
 		"stylelint-config-wordpress": "14.0.0",
-		"webpack": "4.39.3",
+		"webpack": "4.40.2",
 		"webpack-cli": "3.3.9",
 		"webpack-rtl-plugin": "2.0.0",
 		"yargs": "14.0.0"
