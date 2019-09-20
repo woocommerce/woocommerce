@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d8f1e958e216000e60535652daa35b4",
+    "content-hash": "14d894e5243d73a375a03082215f605d",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v1.3.1",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "531dc0541d873b1d54e9facb2732a09019184095"
+                "reference": "4ad9631e68e9da8b8a764615766287becfb27f81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/531dc0541d873b1d54e9facb2732a09019184095",
-                "reference": "531dc0541d873b1d54e9facb2732a09019184095",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/4ad9631e68e9da8b8a764615766287becfb27f81",
+                "reference": "4ad9631e68e9da8b8a764615766287becfb27f81",
                 "shasum": ""
             },
             "require": {
@@ -40,7 +40,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "time": "2019-09-16T22:34:52+00:00"
+            "time": "2019-06-24T15:13:23+00:00"
         },
         {
             "name": "composer/installers",
@@ -1907,8 +1907,8 @@
             "authors": [
                 {
                     "name": "Arne Blankerts",
-                    "email": "arne@blankerts.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "arne@blankerts.de"
                 }
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
