@@ -2,6 +2,7 @@
  * External dependencies
  */
 const path = require( 'path' );
+const { kebabCase } = require( 'lodash' );
 const MergeExtractFilesPlugin = require( './bin/merge-extract-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' );
@@ -36,10 +37,16 @@ const baseConfig = {
 	},
 };
 
+const alias = {
+	'@woocommerce/block-settings': path.resolve(
+		__dirname,
+		'assets/js/settings/blocks'
+	),
+};
+
 const requestToExternal = ( request ) => {
 	const wcDepMap = {
-		'@woocommerce/settings': [ 'wc', 'wc-shared-settings' ],
-		'@woocommerce/block-settings': [ 'wc', 'wc-block-settings' ],
+		'@woocommerce/settings': { this: [ 'wc', 'wcSettings' ] },
 	};
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
@@ -48,8 +55,8 @@ const requestToExternal = ( request ) => {
 
 const requestToHandle = ( request ) => {
 	const wcHandleMap = {
-		'@woocommerce/settings': 'wc-shared-settings',
-		'@woocommerce/block-settings': 'wc-block-settings',
+		'@woocommerce/settings': 'wc-settings',
+		'@woocommerce/block-settings': 'wc-settings',
 	};
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
@@ -59,11 +66,12 @@ const requestToHandle = ( request ) => {
 const CoreConfig = {
 	...baseConfig,
 	entry: {
-		'wc-shared-settings': './assets/js/settings/shared/index.js',
-		'wc-block-settings': './assets/js/settings/blocks/index.js',
+		wcSettings: './assets/js/settings/shared/index.js',
 	},
 	output: {
-		filename: '[name].js',
+		filename: ( chunkData ) => {
+			return `${ kebabCase( chunkData.chunk.name ) }.js`;
+		},
 		path: path.resolve( __dirname, './build/' ),
 		library: [ 'wc', '[name]' ],
 		libraryTarget: 'this',
@@ -241,6 +249,7 @@ const GutenbergBlocksConfig = {
 			requestToHandle,
 		} ),
 	],
+	resolve: { alias },
 };
 
 const BlocksFrontendConfig = {
@@ -326,6 +335,7 @@ const BlocksFrontendConfig = {
 			requestToHandle,
 		} ),
 	],
+	resolve: { alias },
 };
 
 module.exports = [ CoreConfig, GutenbergBlocksConfig, BlocksFrontendConfig ];

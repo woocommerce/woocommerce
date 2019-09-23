@@ -1,2 +1,3 @@
-// Exports shared settings from wcSettings global.
-export { default as currency } from './currency';
+export { getSetting } from './get-setting';
+export { setSetting } from './set-setting';
+export * from './default-constants';
