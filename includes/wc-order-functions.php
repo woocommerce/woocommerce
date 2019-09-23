@@ -131,7 +131,7 @@ function wc_get_payment_statuses() {
 }
 
 /**
- * Get all payment statuses
+ * Get all fulfillment statuses
  *
  * @since 3.8
  * @used-by WC_Order::set_fulfillment_status
@@ -147,17 +147,21 @@ function wc_get_fulfillment_statuses() {
 }
 
 /**
- * Get all payment statuses
+ * Get all delivery statuses
  *
  * @since 3.8
- * @used-by WC_Order::set_shipping_status
+ * @used-by WC_Order::set_delivery_status
  * @return array
  */
-function wc_get_shipping_statuses() {
-	$shipping_statuses = array(
-		'wc-' => _x( 'Pending shipping', 'Shipping status', 'woocommerce' ),
+function wc_get_delivery_statuses() {
+	$delivery_statuses = array(
+		'wc-in-transit'         => _x( 'In Transit', 'Delivery status', 'woocommerce' ),
+		'wc-multiple-shipments' => _x( 'Multiple Shipments', 'Delivery status', 'woocommerce' ),
+		'wc-delivered'          => _x( 'Delivered', 'Delivery status', 'woocommerce' ),
+		'wc-status-unknow'      => _x( 'Status Unknown', 'Delivery status', 'woocommerce' ),
+		'wc-delivery-error'     => _x( 'Delivery Error', 'Delivery status', 'woocommerce' ),
 	);
-	return apply_filters( 'wc_shipping_statuses', $shipping_statuses );
+	return apply_filters( 'wc_delivery_statuses', $delivery_statuses );
 }
 
 /**
