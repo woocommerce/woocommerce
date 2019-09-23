@@ -91,6 +91,7 @@ function wc_get_order( $the_order = false ) {
  * @return array
  */
 function wc_get_order_statuses() {
+	/*
 	$order_statuses = array(
 		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -99,6 +100,12 @@ function wc_get_order_statuses() {
 		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+	);
+	*/
+	$order_statuses = array(
+		'wc-open'   => _x( 'Open', 'Order status', 'woocommerce' ),
+		'wc-closed' => _x( 'Closed', 'Order status', 'woocommerce' ),
+		'wc-draft'  => _x( 'Draft', 'Order status', 'woocommerce' ),
 	);
 	return apply_filters( 'wc_order_statuses', $order_statuses );
 }
