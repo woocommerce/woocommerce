@@ -36,3 +36,7 @@ script:
   - bash bin/js_lint_test.sh
   - bash bin/phpunit.sh
   - bash bin/phpcs.sh
+
+branches:
+  only:
+    - master
