@@ -111,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 	<?php else : ?>
 		<?php /* translators: a url */ ?>
-		<p><?php printf( esc_html__( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
+		<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
 
 	<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
