@@ -112,10 +112,20 @@ function wc_get_order_statuses() {
  */
 function wc_get_payment_statuses() {
 	$payment_statuses = array(
-		'wc-pending-payment'    => _x( 'Pending payment', 'Payment status', 'woocommerce' ),
-		'wc-paid'               => _x( 'Paid', 'Payment status', 'woocommerce' ),
-		'wc-partially-refunded' => _x( 'Pending payment', 'Payment status', 'woocommerce' ),
-		'wc-refunded'           => _x( 'Refunded', 'Payment status', 'woocommerce' ),
+		'wc-unpaid'                  => _x( 'Unpaid', 'Payment status', 'woocommerce' ),
+		'wc-awaiting-authentication' => _x( 'Awaiting Authentication', 'Payment status', 'woocommerce' ),
+		'wc-payment-authorized'      => _x( 'Payment Authorized', 'Payment status', 'woocommerce' ),
+		'wc-disputed-needs-response' => _x( 'Disputed: Needs Response', 'Payment status', 'woocommerce' ),
+		'wc-disputed-in-review'      => _x( 'Disputed: In Review', 'Payment status', 'woocommerce' ),
+		'wc-paid'                    => _x( 'Paid', 'Payment status', 'woocommerce' ),
+		'wc-partial-refund'          => _x( 'Partial Refund', 'Payment status', 'woocommerce' ),
+		'wc-refunded'                => _x( 'Refunded', 'Payment status', 'woocommerce' ),
+		'wc-disputed-won'            => _x( 'Disputed: Won', 'Payment status', 'woocommerce' ),
+		'wc-disputed-lost'           => _x( 'Disputed: Lost', 'Payment status', 'woocommerce' ),
+		'wc-blocked'                 => _x( 'Blocked', 'Payment status', 'woocommerce' ),
+		'wc-failed'                  => _x( 'Failed', 'Payment status', 'woocommerce' ),
+		'wc-authorization-voided'    => _x( 'Authorization Voided', 'Payment status', 'woocommerce' ),
+		'wc-refund-failure'          => _x( 'Refund Failure', 'Payment status', 'woocommerce' ),
 	);
 	return apply_filters( 'wc_payment_statuses', $payment_statuses );
 }
