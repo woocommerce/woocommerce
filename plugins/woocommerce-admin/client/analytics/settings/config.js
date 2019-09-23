@@ -5,6 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import interpolateComponents from 'interpolate-components';
+import { getSetting, ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -13,7 +14,7 @@ import { DEFAULT_ACTIONABLE_STATUSES } from 'wc-api/constants';
 import DefaultDate from './default-date';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
-const DEFAUTL_DATE_RANGE = 'period=month&compare=previous_year';
+const DEFAULT_DATE_RANGE = 'period=month&compare=previous_year';
 
 const defaultOrderStatuses = [
 	'completed',
@@ -25,27 +26,33 @@ const defaultOrderStatuses = [
 	'on-hold',
 ];
 
-const actionableOrderStatuses = Array.isArray(
-	wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses
-)
-	? wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses
+const {
+	woocommerce_actionable_order_statuses,
+	woocommerce_excluded_report_order_statuses,
+	woocommerce_default_date_range,
+} = getSetting( 'wcAdminSettings', {
+	woocommerce_actionable_order_statuses: [],
+	woocommerce_excluded_report_order_statuses: [],
+	woocommerce_default_date_range: DEFAULT_DATE_RANGE,
+} );
+
+const actionableOrderStatuses = Array.isArray( woocommerce_actionable_order_statuses )
+	? woocommerce_actionable_order_statuses
 	: [];
 
-const excludedOrderStatuses = Array.isArray(
-	wcSettings.wcAdminSettings.woocommerce_excluded_report_order_statuses
-)
-	? wcSettings.wcAdminSettings.woocommerce_excluded_report_order_statuses
+const excludedOrderStatuses = Array.isArray( woocommerce_excluded_report_order_statuses )
+	? woocommerce_excluded_report_order_statuses
 	: [];
 
-const orderStatuses = Object.keys( wcSettings.orderStatuses )
+const orderStatuses = Object.keys( ORDER_STATUSES )
 	.filter( status => status !== 'refunded' )
 	.map( key => {
 		return {
 			value: key,
-			label: wcSettings.orderStatuses[ key ],
+			label: ORDER_STATUSES[ key ],
 			description: sprintf(
 				__( 'Exclude the %s status from reports', 'woocommerce-admin' ),
-				wcSettings.orderStatuses[ key ]
+				ORDER_STATUSES[ key ]
 			),
 		};
 	} );
@@ -112,7 +119,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 				'the default date range.',
 			'woocommerce-admin'
 		),
-		initialValue: wcSettings.wcAdminSettings.woocommerce_default_date_range || DEFAUTL_DATE_RANGE,
-		defaultValue: DEFAUTL_DATE_RANGE,
+		initialValue: woocommerce_default_date_range,
+		defaultValue: DEFAULT_DATE_RANGE,
 	},
 ] );

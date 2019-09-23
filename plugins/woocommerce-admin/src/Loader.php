@@ -8,6 +8,8 @@
 
 namespace Automattic\WooCommerce\Admin;
 
+use \_WP_Dependency;
+
 /**
  * Loader Class.
  */
@@ -47,9 +49,13 @@ class Loader {
 	 */
 	public function __construct() {
 		add_action( 'init', array( __CLASS__, 'load_features' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
+;		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
-		add_action( 'woocommerce_components_settings', array( __CLASS__, 'add_component_settings' ) );
+		// old settings injection
+		add_filter( 'woocommerce_components_settings', array( __CLASS__, 'add_component_settings' ) );
+		// new settings injection
+		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'register_page_handler' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
@@ -518,6 +524,23 @@ class Loader {
 	 * @return array Array of component settings.
 	 */
 	public static function add_component_settings( $settings ) {
+		if ( ! function_exists( 'wc_blocks_container' ) ) {
+			global $wp_locale;
+			// inject data not available via older versions of wc_blocks/woo.
+			$settings['orderStatuses']        = self::get_order_statuses( wc_get_order_statuses() );
+			$settings['currency']             = self::get_currency_settings();
+			$settings['locale'] = [
+				'siteLocale' => isset( $settings['siteLocale'] )
+					? $settings['siteLocale']
+					: get_locale(),
+				'userLocale' => isset( $settings['l10n']['userLocale'] )
+					? $settings['l10n']['userLocale']
+					: get_user_locale(),
+				'weekdaysShort' => isset( $settings['l10n']['weekdaysShort'] )
+					? $settings['l10n']['weekdaysShort']
+					: array_values( $wp_locale->weekday_abbrev )
+			];
+		}
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array( '/wc/v3' ) );
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
@@ -530,10 +553,7 @@ class Loader {
 		foreach ( self::get_user_data_fields() as $user_field ) {
 			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );
 		}
-
-		$settings['orderStatuses']        = self::get_order_statuses( wc_get_order_statuses() );
 		$settings['currentUserData']      = $current_user_data;
-		$settings['currency']             = self::get_currency_settings();
 		$settings['reviewsEnabled']       = get_option( 'woocommerce_enable_reviews' );
 		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );
 		$settings['commentModeration']    = get_option( 'comment_moderation' );
@@ -543,6 +563,9 @@ class Loader {
 		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', plugin_dir_path( dirname( __DIR__ ) ) . 'woocommerce-admin.php' );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
+			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
+				? $settings['dataEndpoints']
+				: [];
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
 				// Handle error case: rest_do_request() doesn't guarantee success.
 				if ( empty( $preload_data[ $endpoint ] ) ) {
@@ -553,11 +576,9 @@ class Loader {
 			}
 		}
 		$settings = self::get_custom_settings( $settings );
-
 		if ( self::is_embed_page() ) {
 			$settings['embedBreadcrumbs'] = self::get_embed_breadcrumbs();
 		}
-
 		return $settings;
 	}
 
@@ -664,13 +685,13 @@ class Loader {
 		return apply_filters(
 			'wc_currency_settings',
 			array(
-				'code'               => $code,
-				'precision'          => wc_get_price_decimals(),
-				'symbol'             => html_entity_decode( get_woocommerce_currency_symbol( $code ) ),
-				'position'           => get_option( 'woocommerce_currency_pos' ),
-				'decimal_separator'  => wc_get_price_decimal_separator(),
-				'thousand_separator' => wc_get_price_thousand_separator(),
-				'price_format'       => html_entity_decode( get_woocommerce_price_format() ),
+				'code'              => $code,
+				'precision'         => wc_get_price_decimals(),
+				'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $code ) ),
+				'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
+				'decimalSeparator'  => wc_get_price_decimal_separator(),
+				'thousandSeparator' => wc_get_price_thousand_separator(),
+				'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
 			)
 		);
 	}
@@ -736,5 +757,27 @@ class Loader {
 	 */
 	public static function get_user_data_fields() {
 		return apply_filters( 'wc_admin_get_user_data_fields', array() );
+	}
+
+	/**
+	 * Injects wp-shared-settings as a dependency if it's present.
+	 */
+	public static function inject_wc_settings_dependencies() {
+		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
+			$handles_for_injection = [
+				'wc-csv',
+				'wc-currency',
+				'wc-navigation',
+				'wc-number',
+				'wc-date',
+				'wc-components',
+			];
+			foreach( $handles_for_injection as $handle ) {
+				$script = wp_scripts()->query( $handle, 'registered' );
+				if ( $script instanceof _WP_Dependency ) {
+					$script->deps[] = 'wc-settings';
+				}
+			}
+		}
 	}
 }

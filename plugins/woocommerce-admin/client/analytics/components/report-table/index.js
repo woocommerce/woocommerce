@@ -300,7 +300,8 @@ export default compose(
 			const { getCurrentUserData } = select( 'wc-api' );
 			const userData = getCurrentUserData();
 
-			userPrefColumns = userData[ columnPrefsKey ];
+			userPrefColumns =
+				userData && userData[ columnPrefsKey ] ? userData[ columnPrefsKey ] : userPrefColumns;
 		}
 
 		if ( isRequesting || ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) ) {

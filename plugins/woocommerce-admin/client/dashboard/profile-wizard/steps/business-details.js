@@ -14,6 +14,7 @@ import { keys, pickBy } from 'lodash';
  * WooCommerce dependencies
  */
 import { numberFormat } from '@woocommerce/number';
+import { getSetting, CURRENCY as currency } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -22,6 +23,8 @@ import { H, Card, SimpleSelectControl, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import { formatCurrency } from '@woocommerce/currency';
+
+const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
 class BusinessDetails extends Component {
 	constructor() {
@@ -50,7 +53,7 @@ class BusinessDetails extends Component {
 		recordEvent( 'storeprofiler_store_business_details_continue', {
 			product_number: product_count,
 			already_selling: 'no' !== selling_venues,
-			currency: wcSettings.currency.code,
+			currency: currency.code,
 			revenue,
 			used_platform: other_platform,
 			install_facebook: facebook,
@@ -179,7 +182,7 @@ class BusinessDetails extends Component {
 				{ extensionBenefits.map( benefit => (
 					<div className="woocommerce-profile-wizard__benefit" key={ benefit.title }>
 						<div className="woocommerce-profile-wizard__business-extension">
-							<img src={ wcSettings.wcAdminAssetUrl + benefit.icon } alt="" />
+							<img src={ wcAdminAssetUrl + benefit.icon } alt="" />
 						</div>
 						<div className="woocommerce-profile-wizard__benefit-content">
 							<H className="woocommerce-profile-wizard__benefit-title">{ benefit.title }</H>

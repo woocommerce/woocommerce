@@ -15,7 +15,6 @@ import ReportFilters from 'analytics/components/report-filters';
 export default class StockReport extends Component {
 	render() {
 		const { query, path } = this.props;
-
 		return (
 			<Fragment>
 				<ReportFilters

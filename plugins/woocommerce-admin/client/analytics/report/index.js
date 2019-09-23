@@ -14,6 +14,7 @@ import { find } from 'lodash';
  */
 import { useFilters } from '@woocommerce/components';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -33,6 +34,7 @@ import { searchItemsByString } from 'wc-api/items/utils';
 import withSelect from 'wc-api/with-select';
 
 export const REPORTS_FILTER = 'woocommerce_admin_reports_list';
+const manageStock = getSetting( 'manageStock', 'no' );
 
 export const getReports = () => {
 	const reports = [
@@ -71,7 +73,7 @@ export const getReports = () => {
 			title: __( 'Downloads', 'woocommerce-admin' ),
 			component: DownloadsReport,
 		},
-		'yes' === wcSettings.manageStock
+		'yes' === manageStock
 			? {
 					report: 'stock',
 					title: __( 'Stock', 'woocommerce-admin' ),

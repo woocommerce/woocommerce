@@ -13,12 +13,16 @@ import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { numberFormat } from '@woocommerce/number';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
 import { isLowStock } from './utils';
+
+const manageStock = getSetting( 'manageStock', 'no' );
+const stockStatuses = getSetting( 'stockStatuses', {} );
 
 export default class VariationsReportTable extends Component {
 	constructor() {
@@ -64,13 +68,13 @@ export default class VariationsReportTable extends Component {
 				isSortable: true,
 				isNumeric: true,
 			},
-			'yes' === wcSettings.manageStock
+			'yes' === manageStock
 				? {
 						label: __( 'Status', 'woocommerce-admin' ),
 						key: 'stock_status',
 					}
 				: null,
-			'yes' === wcSettings.manageStock
+			'yes' === manageStock
 				? {
 						label: __( 'Stock', 'woocommerce-admin' ),
 						key: 'stock',
@@ -81,7 +85,6 @@ export default class VariationsReportTable extends Component {
 	}
 
 	getRowsContent( data = [] ) {
-		const { stockStatuses } = wcSettings;
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 
@@ -125,7 +128,7 @@ export default class VariationsReportTable extends Component {
 					),
 					value: orders_count,
 				},
-				'yes' === wcSettings.manageStock
+				'yes' === manageStock
 					? {
 							display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
 								<Link href={ editPostLink } type="wp-admin">
@@ -137,7 +140,7 @@ export default class VariationsReportTable extends Component {
 							value: stockStatuses[ stock_status ],
 						}
 					: null,
-				'yes' === wcSettings.manageStock
+				'yes' === manageStock
 					? {
 							display: stock_quantity,
 							value: stock_quantity,

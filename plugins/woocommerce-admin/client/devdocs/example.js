@@ -20,6 +20,7 @@ class Example extends Component {
 		try {
 			exampleComponent = require( `components/src/${ this.props.filePath }/docs/example` );
 		} catch ( e ) {
+			// eslint-disable-next-line no-console
 			console.error( e );
 		}
 

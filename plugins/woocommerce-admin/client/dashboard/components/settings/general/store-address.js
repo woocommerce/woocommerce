@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { SelectControl, TextControl } from 'newspack-components';
 import { useMemo } from 'react';
+import { COUNTRIES as countries } from '@woocommerce/wc-admin-settings';
 
 /**
  * Form validation.
@@ -38,8 +39,6 @@ export function validateStoreAddress( values ) {
  * @return {Object} Select options, { value: 'US:GA', label: 'United States - Georgia' }
  */
 export function getCountryStateOptions() {
-	const countries = ( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
-
 	const countryStateOptions = countries.reduce( ( acc, country ) => {
 		if ( ! country.states.length ) {
 			acc.push( {

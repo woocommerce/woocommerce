@@ -266,6 +266,7 @@ export default compose(
 			getReportItemsError,
 			isReportItemsRequesting,
 		} = select( 'wc-api' );
+		wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
 		const orderStatuses =
 			wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses ||
 			DEFAULT_ACTIONABLE_STATUSES;

@@ -19,6 +19,7 @@ import { textContent } from './utils';
  * WooCommerce dependencies
  */
 import { formatCurrency } from '@woocommerce/currency';
+import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 class NumberFilter extends Component {
 	getBetweenString() {
@@ -71,8 +72,7 @@ class NumberFilter extends Component {
 
 	getFormControl( { type, value, label, onChange } ) {
 		if ( 'currency' === type ) {
-			const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ] );
-			const symbolPosition = get( wcSettings, [ 'currency', 'position' ] );
+			const { symbol: currencySymbol, symbolPosition } = CURRENCY;
 
 			return (
 				0 === symbolPosition.indexOf( 'right' )

@@ -9,6 +9,7 @@ import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu } from '@wordpress/components';
 import { partial, uniqueId, find } from 'lodash';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -29,6 +30,9 @@ import { recordEvent } from 'lib/tracks';
 import ReviewsPanel from './panels/reviews';
 import withSelect from 'wc-api/with-select';
 import WordPressNotices from './wordpress-notices';
+
+const manageStock = getSetting( 'manageStock', 'no' );
+const reviewsEnabled = getSetting( 'reviewsEnabled', 'no' );
 
 class ActivityPanel extends Component {
 	constructor() {
@@ -128,7 +132,7 @@ class ActivityPanel extends Component {
 				icon: <Gridicon icon="pages" />,
 				unread: hasUnreadOrders,
 			},
-			'yes' === wcSettings.manageStock
+			'yes' === manageStock
 				? {
 						name: 'stock',
 						title: __( 'Stock', 'woocommerce-admin' ),
@@ -136,7 +140,7 @@ class ActivityPanel extends Component {
 						unread: hasUnreadStock,
 					}
 				: null,
-			'yes' === wcSettings.reviewsEnabled
+			'yes' === reviewsEnabled
 				? {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),

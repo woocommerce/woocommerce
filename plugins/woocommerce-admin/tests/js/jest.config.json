@@ -10,6 +10,7 @@
   "moduleDirectories": ["node_modules", "<rootDir>/client", "<rootDir>/packages"],
   "moduleNameMapper": {
     "tinymce": "<rootDir>/tests/js/mocks/tinymce",
+    "@woocommerce/(settings|wc-admin-settings)": "<rootDir>/client/settings/index.js",
     "@woocommerce/(.*)": "<rootDir>/packages/$1/src"
   },
   "setupFiles": [

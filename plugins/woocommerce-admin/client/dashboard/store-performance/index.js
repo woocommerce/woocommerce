@@ -16,6 +16,7 @@ import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from '@wooco
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { formatCurrency } from '@woocommerce/currency';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -33,11 +34,14 @@ import withSelect from 'wc-api/with-select';
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
 
+const { performanceIndicators: indicators } = getSetting( 'dataEndpoints', {
+	performanceIndicators: '',
+} );
+
 class StorePerformance extends Component {
 	renderMenu() {
 		const {
 			hiddenBlocks,
-			indicators,
 			isFirst,
 			isLast,
 			onMove,
@@ -193,8 +197,6 @@ export default compose(
 		const datesFromQuery = getCurrentDates( query );
 		const endPrimary = datesFromQuery.primary.before;
 		const endSecondary = datesFromQuery.secondary.before;
-
-		const indicators = wcSettings.dataEndpoints.performanceIndicators;
 		const userIndicators = indicators.filter(
 			indicator => ! hiddenBlocks.includes( indicator.stat )
 		);

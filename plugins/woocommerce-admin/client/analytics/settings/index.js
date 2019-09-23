@@ -116,6 +116,9 @@ class Settings extends Component {
 	 * @param {object} state - State
 	 */
 	persistChanges( state ) {
+		// @todo Should remove global state from the file. This creates
+		// potential hard to debug side-effects.
+		wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
 		analyticsSettings.forEach( setting => {
 			const updatedValue = state.settings[ setting.name ];
 			wcSettings.wcAdminSettings[ setting.name ] = updatedValue;

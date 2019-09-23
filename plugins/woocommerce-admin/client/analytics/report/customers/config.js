@@ -5,6 +5,7 @@
 import { __, _x } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { applyFilters } from '@wordpress/hooks';
+import { COUNTRIES as countries } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -116,9 +117,6 @@ export const advancedFilters = applyFilters( CUSTOMERS_REPORT_ADVANCED_FILTERS_F
 				component: 'Search',
 				type: 'countries',
 				getLabels: async value => {
-					const countries =
-						( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
-
 					const allLabels = countries.map( country => ( {
 						id: country.code,
 						label: decodeEntities( country.name ),

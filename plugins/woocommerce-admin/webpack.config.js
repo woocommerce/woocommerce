@@ -34,6 +34,7 @@ const externals = {
 	'@wordpress/html-entities': { this: [ 'wp', 'htmlEntities' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
 	'@wordpress/keycodes': { this: [ 'wp', 'keycodes' ] },
+	'@woocommerce/settings': { this: [ 'wc', 'wcSettings' ] },
 	tinymce: 'tinymce',
 	moment: 'moment',
 	react: 'React',
@@ -150,6 +151,10 @@ const webpackConfig = {
 			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
 			// @todo - remove once https://github.com/WordPress/gutenberg/pull/16196 is released.
 			'react-spring': 'react-spring/web.cjs',
+			'@woocommerce/wc-admin-settings': path.resolve(
+				__dirname,
+				'client/settings/index.js'
+			),
 		},
 	},
 	plugins: [

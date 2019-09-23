@@ -10,11 +10,18 @@ import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 
 /**
+ * WooCommerce Dependencies
+ */
+import { getSetting } from '@woocommerce/wc-admin-settings';
+
+/**
  * Internal dependencies
  */
 import { H, Card } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
+
+const onboarding = getSetting( 'onboarding', {} );
 
 class Industry extends Component {
 	constructor() {
@@ -77,7 +84,7 @@ class Industry extends Component {
 	}
 
 	render() {
-		const { industries } = wcSettings.onboarding;
+		const { industries } = onboarding;
 		const { error } = this.state;
 		return (
 			<Fragment>

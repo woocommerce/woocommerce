@@ -14,6 +14,7 @@ import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@wooco
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
 import { numberFormat } from '@woocommerce/number';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -23,6 +24,9 @@ import { isLowStock } from './utils';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
+
+const manageStock = getSetting( 'manageStock', 'no' );
+const stockStatuses = getSetting( 'stockStatuses', {} );
 
 class ProductsReportTable extends Component {
 	constructor() {
@@ -78,13 +82,13 @@ class ProductsReportTable extends Component {
 				key: 'variations',
 				isSortable: true,
 			},
-			'yes' === wcSettings.manageStock
+			'yes' === manageStock
 				? {
 						label: __( 'Status', 'woocommerce-admin' ),
 						key: 'stock_status',
 					}
 				: null,
-			'yes' === wcSettings.manageStock
+			'yes' === manageStock
 				? {
 						label: __( 'Stock', 'woocommerce-admin' ),
 						key: 'stock',
@@ -95,7 +99,6 @@ class ProductsReportTable extends Component {
 	}
 
 	getRowsContent( data = [] ) {
-		const { stockStatuses } = wcSettings;
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 
@@ -194,13 +197,13 @@ class ProductsReportTable extends Component {
 					display: numberFormat( variations.length ),
 					value: variations.length,
 				},
-				'yes' === wcSettings.manageStock
+				'yes' === manageStock
 					? {
 							display: manage_stock ? stockStatus : __( 'N/A', 'woocommerce-admin' ),
 							value: manage_stock ? stockStatuses[ stock_status ] : null,
 						}
 					: null,
-				'yes' === wcSettings.manageStock
+				'yes' === manageStock
 					? {
 							display: manage_stock
 								? numberFormat( stock_quantity )

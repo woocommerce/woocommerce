@@ -4,7 +4,34 @@
  */
 import { numberFormat } from '../index';
 
+/**
+ * WooCommerce dependencies
+ * Note: setCurrencyProp doesn't exist on the module alias, it's used for mocking
+ * values.
+ */
+import { setCurrencyProp, resetMock } from '@woocommerce/wc-admin-settings';
+
+jest.mock( '@woocommerce/wc-admin-settings', () => {
+	let mockedCurrency = jest.requireActual( '@woocommerce/wc-admin-settings' ).CURRENCY;
+	const originalCurrency = {
+		...mockedCurrency,
+	};
+	const reset = () => {
+		mockedCurrency = Object.assign( mockedCurrency, originalCurrency );
+	};
+	return {
+		setCurrencyProp: ( prop, value ) => {
+			mockedCurrency[ prop ] = value;
+		},
+		resetMock: reset,
+		CURRENCY: mockedCurrency,
+	};
+} );
+
 describe( 'numberFormat', () => {
+	beforeEach( () => {
+		resetMock();
+	} );
 	it( 'should default to precision=null decimal=. thousands=,', () => {
 		expect( numberFormat( 1000 ) ).toBe( '1,000' );
 	} );
@@ -30,10 +57,8 @@ describe( 'numberFormat', () => {
 	} );
 
 	it( 'uses store currency settings, not locale', () => {
-		global.wcSettings.siteLocale = 'en-US';
-		global.wcSettings.currency.decimal_separator = ',';
-		global.wcSettings.currency.thousand_separator = '.';
-
+		setCurrencyProp( 'decimalSeparator', ',' );
+		setCurrencyProp( 'thousandSeparator', '.' );
 		expect( numberFormat( '12345.6789', 3 ) ).toBe( '12.345,679' );
 	} );
 } );

@@ -2,13 +2,14 @@
 /**
  * External dependencies
  */
-import { get, isNaN } from 'lodash';
+import { isNaN } from 'lodash';
 import { sprintf } from '@wordpress/i18n';
 
 /**
  * WooCommerce dependencies
  */
 import { numberFormat } from '@woocommerce/number';
+import { CURRENCY as currency } from '@woocommerce/wc-admin-settings';
 
 /**
  * Formats money with a given currency code. Uses site's currency settings for formatting.
@@ -18,14 +19,13 @@ import { numberFormat } from '@woocommerce/number';
  * @returns {?String} A formatted string.
  */
 export function formatCurrency( number, currencySymbol ) {
-	// default to wcSettings (and then to $) if currency symbol is not passed in
 	if ( ! currencySymbol ) {
-		currencySymbol = get( wcSettings, [ 'currency', 'symbol' ], '$' );
+		currencySymbol = currency.symbol;
 	}
 
-	const precision = get( wcSettings, [ 'currency', 'precision' ], 2 );
+	const precision = currency.precision;
 	const formattedNumber = numberFormat( number, precision );
-	const priceFormat = get( wcSettings, [ 'currency', 'price_format' ], '%1$s%2$s' );
+	const priceFormat = currency.priceFormat;
 
 	if ( '' === formattedNumber ) {
 		return formattedNumber;
@@ -42,7 +42,7 @@ export function formatCurrency( number, currencySymbol ) {
  * @return {Number} The original number rounded to a decimal point
  */
 export function getCurrencyFormatDecimal( number ) {
-	const { precision = 2 } = wcSettings.currency;
+	const { precision = 2 } = currency;
 	if ( 'number' !== typeof number ) {
 		number = parseFloat( number );
 	}
@@ -60,7 +60,7 @@ export function getCurrencyFormatDecimal( number ) {
  * @return {String}               The original number rounded to a decimal point
  */
 export function getCurrencyFormatString( number ) {
-	const { precision = 2 } = wcSettings.currency;
+	const { precision = 2 } = currency;
 	if ( 'number' !== typeof number ) {
 		number = parseFloat( number );
 	}

@@ -8,6 +8,9 @@ import { DEFAULT_ACTIONABLE_STATUSES } from 'wc-api/constants';
 export function getUnreadNotes( select ) {
 	const { getCurrentUserData, getNotes, getNotesError, isGetNotesRequesting } = select( 'wc-api' );
 	const userData = getCurrentUserData();
+	if ( ! userData ) {
+		return null;
+	}
 	const notesQuery = {
 		page: 1,
 		per_page: 1,
@@ -33,6 +36,7 @@ export function getUnreadNotes( select ) {
 
 export function getUnreadOrders( select ) {
 	const { getItems, getItemsTotalCount, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
+	wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
 	const orderStatuses =
 		wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || DEFAULT_ACTIONABLE_STATUSES;
 

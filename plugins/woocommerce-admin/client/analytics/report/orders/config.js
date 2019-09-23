@@ -4,13 +4,12 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { getCouponLabels, getProductLabels } from 'lib/async-requests';
-
-const { orderStatuses } = wcSettings;
 
 const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
 const ORDERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_orders_report_filters';
@@ -87,9 +86,9 @@ export const advancedFilters = applyFilters( ORDERS_REPORT_ADVANCED_FILTERS_FILT
 			],
 			input: {
 				component: 'SelectControl',
-				options: Object.keys( orderStatuses ).map( key => ( {
+				options: Object.keys( ORDER_STATUSES ).map( key => ( {
 					value: key,
-					label: orderStatuses[ key ],
+					label: ORDER_STATUSES[ key ],
 				} ) ),
 			},
 		},

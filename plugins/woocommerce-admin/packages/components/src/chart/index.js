@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
-import { get, isEqual, partial, without } from 'lodash';
+import { isEqual, partial, without } from 'lodash';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
@@ -18,6 +18,7 @@ import { withViewportMatch } from '@wordpress/viewport';
  * WooCommerce dependencies
  */
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
+import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -42,12 +43,16 @@ function getD3CurrencyFormat( symbol, position ) {
 	}
 }
 
-const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ], '' );
-const symbolPosition = get( wcSettings, [ 'currency', 'position' ], 'left' );
+const {
+	symbol: currencySymbol,
+	symbolPosition,
+	decimalSeparator: decimal,
+	thousandSeparator: thousands,
+} = CURRENCY;
 
 d3FormatDefaultLocale( {
-	decimal: get( wcSettings, [ 'currency', 'decimal_separator' ], '.' ),
-	thousands: get( wcSettings, [ 'currency', 'thousand_separator' ], ',' ),
+	decimal,
+	thousands,
 	grouping: [ 3 ],
 	currency: getD3CurrencyFormat( currencySymbol, symbolPosition ),
 } );

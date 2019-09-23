@@ -8,7 +8,6 @@ import { Button, TextControl } from 'newspack-components';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { FormToggle } from '@wordpress/components';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -16,6 +15,9 @@ import PropTypes from 'prop-types';
  */
 import { Flag, Form } from '@woocommerce/components';
 import { getCurrencyFormatString } from '@woocommerce/currency';
+import { CURRENCY } from '@woocommerce/wc-admin-settings';
+
+const { symbol, symbolPosition } = CURRENCY;
 
 class ShippingRates extends Component {
 	constructor() {
@@ -81,26 +83,15 @@ class ShippingRates extends Component {
 	}
 
 	renderInputPrefix() {
-		const symbolPosition = get( wcSettings, [ 'currency', 'position' ] );
 		if ( 0 === symbolPosition.indexOf( 'right' ) ) {
 			return;
 		}
-
-		return (
-			<span className="woocommerce-shipping-rate__control-prefix">
-				{ get( wcSettings, [ 'currency', 'symbol' ], '$' ) }
-			</span>
-		);
+		return <span className="woocommerce-shipping-rate__control-prefix">{ symbol }</span>;
 	}
 
 	renderInputSuffix( rate ) {
-		const symbolPosition = get( wcSettings, [ 'currency', 'position' ] );
 		if ( 0 === symbolPosition.indexOf( 'right' ) ) {
-			return (
-				<span className="woocommerce-shipping-rate__control-suffix">
-					{ get( wcSettings, [ 'currency', 'symbol' ], '$' ) }
-				</span>
-			);
+			return <span className="woocommerce-shipping-rate__control-suffix">{ symbol }</span>;
 		}
 
 		return parseFloat( rate ) === parseFloat( 0 ) ? (

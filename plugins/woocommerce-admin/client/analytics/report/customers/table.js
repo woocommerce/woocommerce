@@ -13,6 +13,7 @@ import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { Date, Link } from '@woocommerce/components';
 import { numberFormat } from '@woocommerce/number';
+import { COUNTRIES as countries } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -102,9 +103,7 @@ export default class CustomersReportTable extends Component {
 	}
 
 	getCountryName( code ) {
-		const countries = ( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
-		const country = countries.find( c => c.code === code );
-		return country ? country.name : null;
+		return typeof countries[ code ] !== 'undefined' ? countries[ code ] : null;
 	}
 
 	getRowsContent( customers ) {

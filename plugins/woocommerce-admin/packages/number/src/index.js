@@ -2,7 +2,13 @@
 /**
  * External dependencies
  */
-import { get, isFinite } from 'lodash';
+import { isFinite } from 'lodash';
+
+/**
+ * WooCommerce dependencies
+ */
+import { CURRENCY } from '@woocommerce/wc-admin-settings';
+
 const number_format = require( 'locutus/php/strings/number_format' );
 
 /**
@@ -22,8 +28,10 @@ export function numberFormat( number, precision = null ) {
 		return '';
 	}
 
-	const decimalSeparator = get( wcSettings, [ 'currency', 'decimal_separator' ], '.' );
-	const thousandSeparator = get( wcSettings, [ 'currency', 'thousand_separator' ], ',' );
+	const {
+		decimalSeparator,
+		thousandSeparator,
+	} = CURRENCY;
 	precision = parseInt( precision );
 
 	if ( isNaN( precision ) ) {

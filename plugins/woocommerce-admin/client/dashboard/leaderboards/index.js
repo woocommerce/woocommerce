@@ -13,6 +13,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -161,7 +162,7 @@ export default compose(
 			'wc-api'
 		);
 		const userData = getCurrentUserData();
-		const allLeaderboards = wcSettings.dataEndpoints.leaderboards;
+		const { allLeaderboards } = getSetting( 'dataEndpoints', { leaderboards: {} } );
 
 		return {
 			allLeaderboards,

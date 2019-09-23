@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
-const { orderStatuses } = wcSettings;
+const { ORDER_STATUSES } = '@woocommerce/wc-admin-settings';
 
 const path = ( new URL( document.location ) ).searchParams.get( 'path' ) || '/devdocs';
 const query = {
@@ -33,9 +33,9 @@ const advancedFilters = {
 			],
 			input: {
 				component: 'SelectControl',
-				options: Object.keys( orderStatuses ).map( key => ( {
+				options: Object.keys( ORDER_STATUSES ).map( key => ( {
 					value: key,
-					label: orderStatuses[ key ],
+					label: ORDER_STATUSES[ key ],
 				} ) ),
 			},
 		},

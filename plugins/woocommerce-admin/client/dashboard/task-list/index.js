@@ -12,6 +12,7 @@ import { compose } from '@wordpress/compose';
  */
 import { Card, List } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal depdencies
@@ -25,6 +26,13 @@ import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 import withSelect from 'wc-api/with-select';
 
+const { customLogo, hasHomepage, hasProducts, shippingZonesCount } = getSetting( 'onboarding', {
+	customLogo: '',
+	hasHomePage: false,
+	hasProducts: false,
+	shippingZonesCount: 0,
+} );
+
 class TaskDashboard extends Component {
 	componentDidMount() {
 		document.body.classList.add( 'woocommerce-onboarding' );
@@ -37,7 +45,6 @@ class TaskDashboard extends Component {
 	}
 
 	getTasks() {
-		const { customLogo, hasHomepage, hasProducts, shippingZonesCount } = wcSettings.onboarding;
 		const { profileItems, query } = this.props;
 
 		return [
