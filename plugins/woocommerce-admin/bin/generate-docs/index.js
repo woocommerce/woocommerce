@@ -15,7 +15,6 @@ const {
 	ANALYTICS_FOLDER,
 	PACKAGES_FOLDER,
 	DOCS_FOLDER,
-	deleteExistingDocs,
 	getExportedFileList,
 	getMdFileName,
 	getRealFilePaths,
@@ -38,13 +37,10 @@ const fileCollections = [
 const tocSections = [];
 
 fileCollections.forEach( fileCollection => {
-	// Start by wiping the existing docs. **Change this if we end up manually editing docs**
-	deleteExistingDocs( fileCollection.route );
-
 	// Read components file to get a list of exported files, convert that to a list of absolute paths to public components.
 	const files = getRealFilePaths( getExportedFileList( path.resolve( fileCollection.folder, 'index.js' ) ), fileCollection.folder );
 
-	// Build documentation
+	// Build documentation for components missing them
 	buildComponentDocs( files, fileCollection.route );
 
 	// Concatenate TOC contents
@@ -87,7 +83,18 @@ function buildComponentDocs( files, route ) {
  * @param { boolean } multiple If there are multiple exports in this file, we need to use a different resolver.
  */
 function buildDocs( fileName, route, content, multiple = false ) {
-	const mdFileName = getMdFileName( fileName, route );
+	let mdFileName = getMdFileName( fileName, route );
+
+	// We symlink our package docs.
+	if ( 'packages' === route ) {
+		mdFileName = mdFileName.replace( 'docs/components/packages', 'packages/components/src' );
+	}
+
+	if ( fs.existsSync( mdFileName ) ) {
+		// Don't overwrite existing files.
+		return;
+	}
+
 	let markdown;
 
 	try {
@@ -118,6 +125,7 @@ function buildDocs( fileName, route, content, multiple = false ) {
 function generateMarkdown( docObject ) {
 	let markdownString = getTitle( docObject.displayName ) + '\n';
 	markdownString += getDescription( docObject.description ) + '\n';
+	markdownString += '## Usage\n\n```jsx\n```\n\n';
 	markdownString += getProps( docObject.props );
 	return markdownString + '\n';
 }

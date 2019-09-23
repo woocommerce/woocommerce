@@ -32,13 +32,16 @@ export const getPages = () => {
 		pages.push( {
 			container: DevDocs,
 			path: '/devdocs',
-			breadcrumbs: [ 'Documentation' ],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-		} );
-		pages.push( {
-			container: DevDocs,
-			path: '/devdocs/:component',
-			breadcrumbs: ( { match } ) => [ [ '/devdocs', 'Documentation' ], match.params.component ],
+			breadcrumbs: ( { location } ) => {
+				const searchParams = new URLSearchParams( location.search );
+				const component = searchParams.get( 'component' );
+
+				if ( component ) {
+					return [ [ '/devdocs', 'Documentation' ], component ];
+				}
+
+				return [ 'Documentation' ];
+			},
 			wpOpenMenu: 'toplevel_page_woocommerce',
 		} );
 	}
