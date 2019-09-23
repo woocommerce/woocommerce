@@ -31,7 +31,7 @@
     "chai-as-promised": "7.1.1",
     "chromedriver": "76.0.1",
     "config": "3.2.2",
-    "cross-env": "5.2.1",
+    "cross-env": "6.0.0",
     "eslint": "6.3.0",
     "eslint-config-wpcalypso": "4.0.1",
     "eslint-plugin-wpcalypso": "4.1.0",
