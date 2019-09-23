@@ -334,7 +334,58 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( empty( $status ) && 'view' === $context ) {
 			// In view context, return the default status if no status has been set.
-			$status = apply_filters( 'woocommerce_default_order_status', 'pending' );
+			$status = apply_filters( 'woocommerce_default_order_status', 'draft' );
+		}
+		return $status;
+	}
+
+	/**
+	 * Return the order fulfillment status without wc- internal prefix.
+	 *
+	 * @since 3.8.0
+	 * @param  string $context View or edit context.
+	 * @return string
+	 */
+	public function get_fulfillment_status( $context = 'view' ) {
+		$status = $this->get_prop( 'fulfillment_status', $context );
+
+		if ( empty( $status ) && 'view' === $context ) {
+			// In view context, return the default status if no status has been set.
+			$status = apply_filters( 'woocommerce_default_order_fulfillment_status', 'unfulfilled' );
+		}
+		return $status;
+	}
+
+	/**
+	 * Return the order payment status without wc- internal prefix.
+	 *
+	 * @since 3.8.0
+	 * @param  string $context View or edit context.
+	 * @return string
+	 */
+	public function get_payment_status( $context = 'view' ) {
+		$status = $this->get_prop( 'payment_status', $context );
+
+		if ( empty( $status ) && 'view' === $context ) {
+			// In view context, return the default status if no status has been set.
+			$status = apply_filters( 'woocommerce_default_order_payment_status', 'unpaid' );
+		}
+		return $status;
+	}
+
+	/**
+	 * Return the order delivery status without wc- internal prefix.
+	 *
+	 * @since 3.8.0
+	 * @param  string $context View or edit context.
+	 * @return string
+	 */
+	public function get_delivery_status( $context = 'view' ) {
+		$status = $this->get_prop( 'delivery_status', $context );
+
+		if ( empty( $status ) && 'view' === $context ) {
+			// In view context, return the default status if no status has been set.
+			$status = apply_filters( 'woocommerce_default_order_delivery_status', '' );
 		}
 		return $status;
 	}
@@ -488,6 +539,36 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get all valid fulfillment statuses for this order
+	 *
+	 * @since 3.8.0
+	 * @return array Fulfillment status keys eg. `wc-fulfilled`
+	 */
+	protected function get_valid_fulfillment_statuses() {
+		return array_keys( wc_get_fulfillment_statuses() );
+	}
+
+	/**
+	 * Get all valid payment statuses for this order
+	 *
+	 * @since 3.8.0
+	 * @return array Payment status keys eg. `wc-paid`
+	 */
+	protected function get_valid_payment_statuses() {
+		return array_keys( wc_get_payment_statuses() );
+	}
+
+	/**
+	 * Get all valid payment statuses for this order
+	 *
+	 * @since 3.8.0
+	 * @return array Payment status keys eg. `wc-paid`
+	 */
+	protected function get_valid_delivery_statuses() {
+		return array_keys( wc_get_delivery_statuses() );
+	}
+
+	/**
 	 * Get user ID. Used by orders, not other order types like refunds.
 	 *
 	 * @param  string $context View or edit context.
@@ -556,6 +637,102 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_prop( 'status', $new_status );
+
+		return array(
+			'from' => $old_status,
+			'to'   => $new_status,
+		);
+	}
+
+	/**
+	 * Set fulfillment status
+	 *
+	 * @since 3.8.0
+	 * @param string $new_status Status to change the fulfillment status of the order to, no wc- prefix needed.
+	 * @return array details of change
+	 */
+	public function set_fulfillment_status( $new_status ) {
+		$old_status = $this->get_fulfillment_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+
+		// If setting the status, ensure it's set to a valid status.
+		if ( true === $this->object_read ) {
+			// Only allow valid new status.
+			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_fulfillment_statuses(), true ) && 'trash' !== $new_status ) {
+				$new_status = 'unfulfilled';
+			}
+
+			// If the old status is set but unknown (e.g. draft) assume its unfulfilled for action usage.
+			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_fulfillment_statuses(), true ) && 'trash' !== $old_status ) {
+				$old_status = 'unfulfilled';
+			}
+		}
+
+		$this->set_prop( 'fulfillment_status', $new_status );
+
+		return array(
+			'from' => $old_status,
+			'to'   => $new_status,
+		);
+	}
+
+	/**
+	 * Set payment status
+	 *
+	 * @since 3.8.0
+	 * @param string $new_status Status to change the payment status of the order to, no wc- prefix needed.
+	 * @return array details of change.
+	 */
+	public function set_payment_status( $new_status ) {
+		$old_status = $this->get_payment_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+
+		// If setting the status, ensure it's set to a valid status.
+		if ( true === $this->object_read ) {
+			// Only allow valid new status.
+			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_payment_statuses(), true ) && 'trash' !== $new_status ) {
+				$new_status = 'unpaid';
+			}
+
+			// If the old status is set but unknown (e.g. draft) assume its unpaid for action usage.
+			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_payment_statuses(), true ) && 'trash' !== $old_status ) {
+				$old_status = 'unpaid';
+			}
+		}
+
+		$this->set_prop( 'payment_status', $new_status );
+
+		return array(
+			'from' => $old_status,
+			'to'   => $new_status,
+		);
+	}
+
+	/**
+	 * Set payment status
+	 *
+	 * @since 3.8.0
+	 * @param string $new_status Status to change the delivery status of the order to, no wc- prefix needed.
+	 * @return array details of change.
+	 */
+	public function set_delivery_status( $new_status ) {
+		$old_status = $this->get_delivery_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+
+		// If setting the status, ensure it's set to a valid status otherwise leave it blank.
+		if ( true === $this->object_read ) {
+			// Only allow valid new status.
+			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_delivery_statuses(), true ) && 'trash' !== $new_status ) {
+				$new_status = '';
+			}
+
+			// If the old status is set but unknown (e.g. draft) assume its blank.
+			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_delivery_statuses(), true ) && 'trash' !== $old_status ) {
+				$old_status = '';
+			}
+		}
+
+		$this->set_prop( 'delivery_status', $new_status );
 
 		return array(
 			'from' => $old_status,
@@ -1980,6 +2157,39 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function has_status( $status ) {
 		return apply_filters( 'woocommerce_order_has_status', ( is_array( $status ) && in_array( $this->get_status(), $status, true ) ) || $this->get_status() === $status, $this, $status );
+	}
+
+	/**
+	 * Checks the order status against a passed in status.
+	 *
+	 * @since 3.8.0
+	 * @param array|string $status Status to check.
+	 * @return bool
+	 */
+	public function has_payment_status( $status ) {
+		return apply_filters( 'woocommerce_order_has_payment_status', ( is_array( $status ) && in_array( $this->get_payment_status(), $status, true ) ) || $this->get_payment_status() === $status, $this, $status );
+	}
+
+	/**
+	 * Checks the order status against a passed in status.
+	 *
+	 * @since 3.8.0
+	 * @param array|string $status Status to check.
+	 * @return bool
+	 */
+	public function has_fulfillment_status( $status ) {
+		return apply_filters( 'woocommerce_order_has_fulfillment_status', ( is_array( $status ) && in_array( $this->get_fulfillment_status(), $status, true ) ) || $this->get_fulfillment_status() === $status, $this, $status );
+	}
+
+	/**
+	 * Checks the order status against a passed in status.
+	 *
+	 * @since 3.8.0
+	 * @param array|string $status Status to check.
+	 * @return bool
+	 */
+	public function has_delivery_status( $status ) {
+		return apply_filters( 'woocommerce_order_has_delivery_status', ( is_array( $status ) && in_array( $this->get_delivery_status(), $status, true ) ) || $this->get_delivery_status() === $status, $this, $status );
 	}
 
 	/**
