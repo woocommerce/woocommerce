@@ -139,7 +139,9 @@ function wc_get_payment_statuses() {
  */
 function wc_get_fulfillment_statuses() {
 	$fulfillment_statuses = array(
-		'wc-' => _x( 'Pending fulfillment', 'Fulfillment status', 'woocommerce' ),
+		'wc-unfulfilled'         => _x( 'Unfulfilled', 'Fulfillment status', 'woocommerce' ),
+		'wc-partially-fulfilled' => _x( 'Partially Fulfilled', 'Fulfillment status', 'woocommerce' ),
+		'wc-fulfilled'           => _x( 'Fulfilled', 'Fulfillment status', 'woocommerce' ),
 	);
 	return apply_filters( 'wc_fulfillment_statuses', $fulfillment_statuses );
 }
