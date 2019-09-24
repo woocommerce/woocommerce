@@ -7,49 +7,39 @@ Stable tag: 2.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Easily update to prerelease versions of WooCommerce for testing and development
-purposes.
+Easily update to prerelease versions of WooCommerce for testing and development purposes.
 
 == Description ==
 
-**WooCommerce Beta Tester** allows you to try out new versions of WooCommerce
-before they are officially released.
+**WooCommerce Beta Tester** allows you to try out new versions of WooCommerce before they are officially released.
 
 **Use with caution, not on production sites. Beta releases may not be stable.**
 
 After activation, you'll be able to choose an update channel:
 
 1. Beta - Update to beta releases, RC, or stable, depending on what is newest.
-2. Release Candidate - Update to RC releases or stable, depending on what is
-newest.
+2. Release Candidate - Update to RC releases or stable, depending on what is newest.
 3. Stable - No beta updates. Default WordPress behavior.
 
-These will surface pre-releases via automatic updates in WordPress. Updates will
-replace your installed version of WooCommerce.
+These will surface pre-releases via automatic updates in WordPress. Updates will replace your installed version of WooCommerce.
 
-**Note**, this will not check for updates on every admin page load unless you
-explicitly tell it to. You can do this by clicking the "Check Again" button from
-the WordPress updates screen or you can set the `WC_BETA_TESTER_FORCE_UPDATE` to
-true in your `wp-config.php` file.
+**Note**, this will not check for updates on every admin page load unless you explicitly tell it to. You can do this by clicking the "Check Again" button from the WordPress updates screen or you can set the `WC_BETA_TESTER_FORCE_UPDATE` to true in your `wp-config.php` file.
 
 == Frequently Asked Questions ==
 
-= Does this allow me to install multiple versions of WooCommerce at the same
-time?
+= Does this allow me to install multiple versions of WooCommerce at the same time?
 
-No; updates will replace your currently installed version of WooCommerce. You
-can switch to any version from this plugin via the interface however.
+No; updates will replace your currently installed version of WooCommerce. You can switch to any version from this plugin via the interface however.
 
 = Where do updates come from? =
 
-Updates are downloaded from the WordPress.org SVN repository where we tag
-prerelease versions specifically for this purpose.
+Updates are downloaded from the WordPress.org SVN repository where we tag prerelease versions specifically for this purpose.
 
 = Does this rollback my data? =
 
 This plugin does not rollback or update data on your store automatically.
-Database updates are manually ran like after regular updates. If you downgrade,
-data will not be modified. We don't recommend using this in production.
+
+Database updates are manually ran like after regular updates. If you downgrade, data will not be modified. We don't recommend using this in production.
 
 = Where can I report bugs or contribute to WooCommerce Beta Tester? =
 
