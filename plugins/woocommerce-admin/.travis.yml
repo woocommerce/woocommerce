@@ -40,3 +40,15 @@ script:
 branches:
   only:
     - master
+
+deploy:
+  local_dir: docs
+  provider: pages
+  skip_cleanup: true
+  github_token: $GH_PAGES_TOKEN
+  keep_history: true
+  on:
+    condition: $RUN_JS == 1 # only deploy on the PHP 7.2/JS build
+    branch: master
+  target_branch: gh-pages
+  verbose: true
