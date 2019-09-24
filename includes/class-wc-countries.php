@@ -1254,6 +1254,7 @@ class WC_Countries {
 					'VN' => array(
 						'state'     => array(
 							'required' => false,
+							'hidden' => true,
 						),
 						'postcode'  => array(
 							'priority' => 65,
