@@ -5,13 +5,13 @@
 /**
  * External dependencies
  */
-import { activatePlugin, switchUserToTest } from '@wordpress/e2e-test-utils';
+import { activatePlugin } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { createSimpleProduct, createVariableProduct } from "../../utils/components";
-import { CustomerFlow } from "../../utils/flows";
+import { CustomerFlow, StoreOwnerFlow } from "../../utils/flows";
 import { uiUnblocked } from '../../utils';
 
 describe( 'Single Product Page', () => {
@@ -19,7 +19,7 @@ describe( 'Single Product Page', () => {
 		await activatePlugin( 'woocommerce' );
 		await createSimpleProduct();
 		await createVariableProduct();
-		await switchUserToTest();
+		await StoreOwnerFlow.logout();
 	} );
 
 	it( 'should be able to add simple products to the cart', async () => {

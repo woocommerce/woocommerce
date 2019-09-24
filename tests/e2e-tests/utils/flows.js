@@ -82,6 +82,19 @@ const CustomerFlow = {
 };
 
 const StoreOwnerFlow = {
+	logout: async () => {
+		await page.goto( baseUrl + '/wp-login.php?action=logout', {
+			waitUntil: 'networkidle0',
+		} );
+
+		await expect( page ).toMatch( 'You are attempting to log out' );
+
+		await Promise.all( [
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			page.click( 'a' ),
+		] );
+	},
+
 	openNewProduct: async () => {
 		await page.goto( WP_ADMIN_NEW_PRODUCT, {
 			waitUntil: 'networkidle0',
