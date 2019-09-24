@@ -234,7 +234,7 @@ class WC_Query {
 	 * @return bool
 	 */
 	private function is_showing_page_on_front( $q ) {
-		return $q->is_home() && 'page' === get_option( 'show_on_front' );
+		return ( $q->is_home() && ! $q->is_posts_page ) && 'page' === get_option( 'show_on_front' );
 	}
 
 	/**
