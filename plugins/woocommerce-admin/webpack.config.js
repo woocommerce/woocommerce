@@ -63,7 +63,6 @@ const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
 		app: './client/index.js',
-		embedded: './client/embedded.js',
 		...entryPoints,
 	},
 	output: {
@@ -144,7 +143,6 @@ const webpackConfig = {
 		extensions: [ '.json', '.js', '.jsx' ],
 		modules: [
 			path.join( __dirname, 'client' ),
-			path.join( __dirname, 'packages' ),
 			'node_modules',
 		],
 		alias: {

@@ -284,16 +284,11 @@ class Loader {
 		);
 		wp_style_add_data( 'wc-components-ie', 'rtl', 'replace' );
 
-		$entry = 'app';
-		if ( self::is_embed_page() ) {
-			$entry = 'embedded';
-		}
-
 		wp_register_script(
 			WC_ADMIN_APP,
-			self::get_url( "{$entry}/index.js" ),
+			self::get_url( 'app/index.js' ),
 			array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n' ),
-			self::get_file_version( "{$entry}/index.js" ),
+			self::get_file_version( 'app/index.js' ),
 			true
 		);
 
@@ -301,9 +296,9 @@ class Loader {
 
 		wp_register_style(
 			WC_ADMIN_APP,
-			self::get_url( "{$entry}/style.css" ),
+			self::get_url( 'app/style.css' ),
 			array( 'wc-components' ),
-			self::get_file_version( "{$entry}/style.css" )
+			self::get_file_version('app/style.css' )
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
 
