@@ -162,7 +162,7 @@ export default compose(
 			'wc-api'
 		);
 		const userData = getCurrentUserData();
-		const { allLeaderboards } = getSetting( 'dataEndpoints', { leaderboards: {} } );
+		const { leaderboards: allLeaderboards } = getSetting( 'dataEndpoints', { leaderboards: [] } );
 
 		return {
 			allLeaderboards,
