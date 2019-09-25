@@ -44,4 +44,8 @@ if ( ! empty( $tabs ) ) : ?>
 		<?php endforeach; ?>
 	</div>
 
-<?php endif; ?>
+<?php endif;
+
+do_action( 'woocommerce_after_tabs' );
+
+?>
