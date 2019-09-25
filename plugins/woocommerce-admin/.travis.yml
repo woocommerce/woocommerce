@@ -41,6 +41,13 @@ branches:
   only:
     - master
 
+before_deploy:
+  # Remove our unneeded symlink.
+  - rm docs/components/packages
+  # Copy each component README to the docs folder.
+  - find packages/components/src -type f -name 'README.md' | sed 's/\(packages\/components\/src\/\)\(.*\)README\.md/docs\/components\/packages\/\2/g' | xargs mkdir -p
+  - find packages/components/src -type f -name 'README.md' | sed 's/\(packages\/components\/src\/\)\(.*\)\(README\.md\)/\1\2\3 docs\/components\/packages\/\2/g' | xargs -n2 cp
+
 deploy:
   local_dir: docs
   provider: pages
