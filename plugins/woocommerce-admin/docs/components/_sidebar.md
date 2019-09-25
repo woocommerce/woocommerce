@@ -33,6 +33,7 @@
     * [Pagination](components/packages/pagination/README.md)
     * [ProductImage](components/packages/product-image/README.md)
     * [Rating](components/packages/rating/README.md)
+    * [ScrollTo](components/packages/scroll-to/README.md)
     * [SearchListControl](components/packages/search-list-control/README.md)
     * [Search](components/packages/search/README.md)
     * [SectionHeader](components/packages/section-header/README.md)

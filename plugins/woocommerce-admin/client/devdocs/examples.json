@@ -23,6 +23,7 @@
   { "component": "Pagination" },
   { "component": "ProductImage" },
   { "component": "Rating" },
+  { "component": "ScrollTo" },
   { "component": "Search" },
   { "component": "SearchListControl" },
   { "component": "Section" },
