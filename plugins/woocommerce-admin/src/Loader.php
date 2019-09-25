@@ -519,6 +519,10 @@ class Loader {
 	 * @return array Array of component settings.
 	 */
 	public static function add_component_settings( $settings ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+		
 		if ( ! function_exists( 'wc_blocks_container' ) ) {
 			global $wp_locale;
 			// inject data not available via older versions of wc_blocks/woo.
@@ -536,6 +540,7 @@ class Loader {
 					: array_values( $wp_locale->weekday_abbrev )
 			];
 		}
+
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array( '/wc/v3' ) );
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
