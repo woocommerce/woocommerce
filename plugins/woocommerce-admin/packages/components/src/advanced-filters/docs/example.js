@@ -3,7 +3,7 @@
  * Internal dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
-const { ORDER_STATUSES } = '@woocommerce/wc-admin-settings';
+import { ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 
 const path = ( new URL( document.location ) ).searchParams.get( 'path' ) || '/devdocs';
 const query = {
