@@ -131,12 +131,20 @@ final class WC_Cart_Fees {
 	/**
 	 * Sort fees by amount.
 	 *
-	 * @param WC_Coupon $a Coupon object.
-	 * @param WC_Coupon $b Coupon object.
+	 * @param stdClass $a Fee object.
+	 * @param stdClass $b Fee object.
 	 * @return int
 	 */
 	protected function sort_fees_callback( $a, $b ) {
-		return ( $a->amount > $b->amount ) ? -1 : 1;
+		/**
+		 * Filter sort fees callback.
+		 *
+		 * @since 3.8.0
+		 * @param int Sort order, -1 or 1.
+		 * @param stdClass $a Fee object.
+		 * @param stdClass $b Fee object.
+		 */
+		return apply_filters( 'woocommerce_sort_fees_callback', $a->amount > $b->amount ? -1 : 1, $a, $b );
 	}
 
 	/**
