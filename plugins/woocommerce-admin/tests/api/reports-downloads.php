@@ -92,7 +92,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $this->user, $download_report['user_id'] );
 		$this->assertEquals( '1.2.3.4', $download_report['ip_address'] );
 		$this->assertEquals( 'help.png', $download_report['file_name'] );
-		$this->assertEquals( plugin_dir_url( __FILE__ ) . 'assets/images/help.png', $download_report['file_path'] );
+		$this->assertEquals( esc_url( plugin_dir_url( __FILE__ ) . 'assets/images/help.png' ), $download_report['file_path'] );
 	}
 
 	/**
@@ -170,7 +170,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$id = $object->save();
 
 		WC_Helper_Queue::run_all_pending();
-		
+
 		return array(
 			'time'      => $time,
 			'product_1' => $product_1,

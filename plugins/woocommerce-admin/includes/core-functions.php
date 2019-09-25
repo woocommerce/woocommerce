@@ -7,8 +7,6 @@
  * @package WC_Admin\Functions
  */
 
-defined( 'ABSPATH' ) || exit;
-
 use \Automattic\WooCommerce\Admin\Loader;
 
 /**
