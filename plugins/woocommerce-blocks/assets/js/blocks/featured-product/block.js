@@ -97,6 +97,7 @@ const FeaturedProduct = ( {
 					<div className="wc-block-featured-product__selection">
 						<ProductControl
 							selected={ attributes.productId || 0 }
+							showVariations
 							onChange={ ( value = [] ) => {
 								const id = value[ 0 ] ? value[ 0 ].id : 0;
 								setAttributes( {

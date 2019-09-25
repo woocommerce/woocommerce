@@ -68,7 +68,9 @@ const ProductsControl = ( {
 			className="woocommerce-products"
 			list={ products }
 			isLoading={ isLoading }
-			selected={ selected }
+			selected={ products.filter( ( { id } ) =>
+				selected.includes( id )
+			) }
 			onSearch={ onSearch }
 			onChange={ onChange }
 			messages={ messages }
