@@ -88,7 +88,7 @@
 		"prettier": "git+https://github.com/Automattic/wp-prettier.git#wp-prettier-1.17.0",
 		"progress-bar-webpack-plugin": "1.12.1",
 		"promptly": "3.0.3",
-		"react-test-renderer": "16.8.6",
+		"react-test-renderer": "16.9.0",
 		"request-promise": "4.2.4",
 		"rimraf": "3.0.0",
 		"sass-loader": "7.3.1",
