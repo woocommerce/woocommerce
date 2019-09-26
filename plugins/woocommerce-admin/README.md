@@ -17,7 +17,7 @@ For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', tru
 ## Development
 
 After cloning the repo, install dependencies:
- 
+
  - `npm install` to install JavaScript dependencies.
  - `composer install` to gather PHP dependencies.
 
@@ -28,15 +28,9 @@ Now you can build the files using one of these commands:
  - `npm start` : Build a development version, watch files for changes
  - `npm run build:release` : Build a WordPress plugin ZIP file (`woocommerce-admin.zip` will be created in the repository root)
 
-There are also some helper scripts:
+For more helper scripts [see here](./CONTRIBUTING.md#helper-scripts)
 
- - `npm run lint` : Run eslint over the javascript files
- - `npm run i18n` : A multi-step process, used to create a pot file from both the JS and PHP gettext calls. First it runs `i18n:js`, which creates a temporary `.pot` file from the JS files. Next it runs `i18n:php`, which converts that `.pot` file to a PHP file. Lastly, it runs `i18n:pot`, which creates the final `.pot` file from all the PHP files in the plugin (including the generated one with the JS strings).
- - `npm test` : Run the JS test suite
-
- To debug synced lookup information in the database, you can bypass the action scheduler and immediately sync order and customer information by using the `woocommerce_disable_order_scheduling` hook.
-
-`add_filter( 'woocommerce_disable_order_scheduling', '__return_true' );`
+For some debugging tools/help [see here](./CONTRIBUTING.md#debugging)
 
 ## Privacy
 
