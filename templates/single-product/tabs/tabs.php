@@ -50,7 +50,7 @@ if ( ! empty( $product_tabs ) ) : ?>
 			</div>
 		<?php endforeach; ?>
 
-		<?php do_action( 'woocommerce_after_tabs' ); ?>
+		<?php do_action( 'woocommerce_product_after_tabs' ); ?>
 	</div>
 
 <?php endif; ?>
