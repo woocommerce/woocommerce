@@ -71,6 +71,19 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.19.0 2019-09-24 =
+
+- Dev: Use upstream webpack-rtl-plugin #2870 (Build)
+- Dev: Fix variable name typo #2922
+- Fix: persist date_last_active for customer reports #2881 (Analytics) 👏 @cojennin
+- Tweak: consistent naming for report columns. #2845 (Design)
+- Tweak: schedule customer lookup table updates instead of running during checkout. #2832
+- Tweak: have Import note action scroll to import section of settings screen. #2799 (Activity Panel, Components, Inbox, Packages)
+- Bug: Fix chart type buttons misalignment #2871 (Components, Packages)
+- Updated to color-studio v2 and refreshed the color scheme #2837 (Build, Components, Packages)
+- Tweak: change report charts filter name. #2843 (Components, Documentation, Packages)
+- Dev: Update no data message in table #2854 (Components, Packages)
+
 = 0.18.0 2019-08-28 =
 
 - Fix: Product in dropdown clickable in FF/Safari #2839 (Components, Packages) 👏 @cojennin
