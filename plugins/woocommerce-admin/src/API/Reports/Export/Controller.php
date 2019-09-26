@@ -80,6 +80,11 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'type'              => 'object',
 			'validate_callback' => 'rest_validate_request_arg', // @todo: use each controller's schema?
 		);
+		$params['email']       = array(
+			'description'       => __( 'When true, email a link to download the export to the requesting user.', 'woocommerce-admin' ),
+			'type'              => 'boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		return $params;
 	}
 
@@ -150,9 +155,10 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	public function export_items( $request ) {
 		$report_type = $request['type'];
 		$report_args = empty( $request['report_args'] ) ? array() : $request['report_args'];
+		$send_email  = isset( $request['email'] ) ? $request['email'] : false;
 		$export_id   = str_replace( '.', '', microtime( true ) );
 
-		$total_rows = ReportExporter::queue_report_export( $export_id, $report_type, $report_args );
+		$total_rows = ReportExporter::queue_report_export( $export_id, $report_type, $report_args, $send_email );
 
 		if ( 0 === $total_rows ) {
 			$response = rest_ensure_response(

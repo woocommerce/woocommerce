@@ -36,6 +36,11 @@ class ReportExporter {
 	const DOWNLOAD_EXPORT_ACTION = 'woocommerce_admin_download_report_csv';
 
 	/**
+	 * Email export file download link action.
+	 */
+	const REPORT_EXPORT_EMAIL_ACTION = 'woocommerce_admin_email_report_download_link';
+
+	/**
 	 * Queue instance.
 	 *
 	 * @var WC_Queue_Interface
@@ -70,6 +75,8 @@ class ReportExporter {
 	public static function init() {
 		// Initialize scheduled action handlers.
 		add_action( self::REPORT_EXPORT_ACTION, array( __CLASS__, 'report_export_action' ), 10, 4 );
+		add_action( self::REPORT_EXPORT_EMAIL_ACTION, array( __CLASS__, 'report_export_email_action' ), 10, 3 );
+		
 		// Report download handler.
 		add_action( 'admin_init', array( __CLASS__, 'download_export_file' ) );
 	}
@@ -80,9 +87,10 @@ class ReportExporter {
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
+	 * @param bool   $send_email Optional. Send an email when the export is complete.
 	 * @return int Number of items to export.
 	 */
-	public static function queue_report_export( $export_id, $report_type, $report_args = array() ) {
+	public static function queue_report_export( $export_id, $report_type, $report_args = array(), $send_email = false ) {
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
 		$exporter->prepare_data_to_export();
 
@@ -96,6 +104,12 @@ class ReportExporter {
 
 		if ( 0 < $num_batches ) {
 			ReportsSync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
+
+			if ( $send_email ) {
+				$email_action_args = array( get_current_user_id(), $export_id, $report_type );
+
+				ReportsSync::queue_dependent_action( self::REPORT_EXPORT_EMAIL_ACTION, $email_action_args, self::REPORT_EXPORT_ACTION );
+			}
 		}
 
 		return $total_rows;
@@ -180,6 +194,29 @@ class ReportExporter {
 			$exporter = new ReportCSVExporter();
 			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
 			$exporter->export();
+		}
+	}
+
+	/**
+	 * Process a report export email action.
+	 *
+	 * @param int    $user_id User ID that requested the email.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @return void
+	 */
+	public static function report_export_email_action( $user_id, $export_id, $report_type ) {
+		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
+
+		if ( 100 === $percent_complete ) {
+			$query_args   = array(
+				'action'   => self::DOWNLOAD_EXPORT_ACTION,
+				'filename' => "wc-{$report_type}-report-export-{$export_id}",
+			);
+			$download_url = add_query_arg( $query_args, admin_url() );
+
+			$email = new ReportCSVEmail();
+			$email->trigger( $user_id, $report_type, $download_url );
 		}
 	}
 }
