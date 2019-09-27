@@ -537,6 +537,7 @@ class WC_Admin_Setup_Wizard {
 			</select>
 			</div>
 
+			<div class="sell-in-person-container">
 			<input
 				type="checkbox"
 				id="woocommerce_sell_in_person"
@@ -547,6 +548,7 @@ class WC_Admin_Setup_Wizard {
 			<label class="location-prompt" for="woocommerce_sell_in_person">
 				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
 			</label>
+			</div>
 
 			<div class="woocommerce-tracker">
 				<p class="checkbox">
