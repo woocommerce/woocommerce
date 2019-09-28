@@ -76,13 +76,8 @@ class Bootstrap {
 			AssetDataRegistry::class,
 			function( Container $container ) {
 				$asset_api        = $container->get( AssetApi::class );
-				$load_back_compat = (
-					defined( 'WC_ADMIN_VERSION_NUMBER' )
-					&& version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' )
-				) ||
-				(
-					version_compare( WC_VERSION, '3.7.0', '<=' )
-				);
+				$load_back_compat = defined( 'WC_ADMIN_VERSION_NUMBER' )
+					&& version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' );
 				return $load_back_compat
 					? new BackCompatAssetDataRegistry( $asset_api )
 					: new AssetDataRegistry( $asset_api );
