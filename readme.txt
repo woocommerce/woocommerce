@@ -183,6 +183,7 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
+* Tweak - Only consider orders created via checkout to hold stock. #24159
 * Tweak
 * Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
 * Template
@@ -193,15 +194,25 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Add woocommerce_get_zone_criteria filter hook to add custom criteria for matching zone ID. #24199
 * Dev - Fire actions `woocommerce_before_delete_product_variation`, `woocommerce_delete_product_variation` and `woocommerce_trash_product_variation` appropriately when deleting or trashing product variations. #24239
 * Dev - In filter `woocommerce_update_product_stock_query` use `$new_stock` instead of `$stock_quantity`. #24229
+* Dev - Introduced woocommerce_prevent_adjust_line_item_product_stock filter. #24279
+* Dev - Introduced `woocommerce_logout_default_redirect_url` filter to allow custom default URL. #24282
+* Dev - Added woocommerce_sort_fees_callback filter. #24280
 * Dev -
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Fix product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
 * Fix - Prevent duplicate processing/stock reduction when IPN or PDT notifications are enabled by checking if order is not already in `processing` or `completed` status. #24249
 * Fix - Fix position of ID section in mobile rows actions when displaying the list of products in the admin. #24277
+* Fix - Fix endpoints URLs to follow slashes preferences from WordPress permalinks. #24283
+* Fix - Ensure that postcode validation doesn't return any whitespace on beginning and end of a postcode. #24284
+* Fix - Fix shipping classes sort under products alphabetically. #24291
+* Fix - Fix shipping rates layout in admin settings. #24327
+* Fix - Retain the focus on the select box when product variation is changed. #24339
 * Fix -
 * Performance
-* Localization
+* Localization - Add Zambia's Provinces to the list of states. #24307
+* Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
+* Localization -
 
 = 3.7.0 - 2019-08-12 =
 * Enhancement - Added table ENGINE to system status report for debugging purposes. #23101
