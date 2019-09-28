@@ -181,11 +181,14 @@ INTERESTED IN DEVELOPMENT?
 
 = 3.8.0 - 2019-01-10 =
 * Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
+* Enhancement - Add support to allow connect and install for in-app purchase flow. #24451
 * Enhancement -
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
 * Tweak - Only consider orders created via checkout to hold stock. #24159
-* Tweak
+* Tweak - Stop to load order data twice in "View order" screen on "My Account" page. #24437
+* Tweak - Prevent PHP warnings in tracker if order doesn't have a created date yet. #24441
+* Tweak -
 * Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
 * Template
 * Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
@@ -204,6 +207,8 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Remove deprecations notices with PHP 7.4 by changing parameter order for `implode`. #24396
 * Dev - Add ``$this` param to email filter for additional_content added in 3.7. #24399
 * Dev - Add `woocommerce_product_import_process_item_data` filter to allow modifying a row before importing. #24412
+* Dev - Fixed warnings when error_get_last() returns null. #24442
+* Dev - Use brackets instead of braces to avoid deprecation notice in PHP 7.4. #24460
 * Dev -
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
@@ -221,10 +226,14 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Check if order exist before generate hash for downloads. #24384
 * Fix - Ensure WC_Product_Data_Store_CPT::is_existing_sku() return boolean. #24385
 * Fix - `function_exists` check for wc_hex_is_light(). #24391
+* Fix - Removed Emoji from default additional email content due problem on some database that doesn't allow Emojis. #24450
+* Fix - Fixed escaping on an attribute in `class-wc-admin-menus.php`. #24466
+* Fix - Add translation for image alt attribute text in WooCommerce setup wizard and in `html-oauth-start.php file`. #24467, #24468
 * Fix -
 * Performance
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
+* Localization - Fixed Namibian dollar symbol. #24438
 * Localization -
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
