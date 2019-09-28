@@ -181,7 +181,6 @@ INTERESTED IN DEVELOPMENT?
 
 = 3.8.0 - 2019-01-10 =
 * Enhancement
-* Tweak - Add new `woocommerce_product_post_type_link_parent_category_only` filter to hide child category slugs from urls. #23638
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
 * Tweak
@@ -190,9 +189,17 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
 * Dev - Added woocommerce_disable_password_change_notification filter, set to false by default. #24154
 * Dev - Add filter `woocommerce_cart_item_removed_message` and `woocommerce_cart_product_cannot_be_purchased_message` to filter notice content when an item is removed from cart, or when a product cannot be purchased. #24176
-* Dev
+* Dev - Prevent fatal error if trying to run `wc_load_cart()` before `before_woocommerce_init`. #24198
+* Dev - Add woocommerce_get_zone_criteria filter hook to add custom criteria for matching zone ID. #24199
+* Dev - Fire actions `woocommerce_before_delete_product_variation`, `woocommerce_delete_product_variation` and `woocommerce_trash_product_variation` appropriately when deleting or trashing product variations. #24239
+* Dev - In filter `woocommerce_update_product_stock_query` use `$new_stock` instead of `$stock_quantity`. #24229
+* Dev -
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
+* Fix - Fix product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
+* Fix - Prevent duplicate processing/stock reduction when IPN or PDT notifications are enabled by checking if order is not already in `processing` or `completed` status. #24249
+* Fix - Fix position of ID section in mobile rows actions when displaying the list of products in the admin. #24277
+* Fix -
 * Performance
 * Localization
 
