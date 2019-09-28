@@ -180,7 +180,8 @@ INTERESTED IN DEVELOPMENT?
 == Changelog ==
 
 = 3.8.0 - 2019-01-10 =
-* Enhancement
+* Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
+* Enhancement -
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
 * Tweak - Only consider orders created via checkout to hold stock. #24159
@@ -197,17 +198,29 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Introduced woocommerce_prevent_adjust_line_item_product_stock filter. #24279
 * Dev - Introduced `woocommerce_logout_default_redirect_url` filter to allow custom default URL. #24282
 * Dev - Added woocommerce_sort_fees_callback filter. #24280
+* Dev - Remove deprecated i18n/states directory. #24364
+* Dev - Add filter `woocommerce_shipping_show_shipping_calculator` for showing shipping calculator. #24375
+* Dev - Corrected UG states location. #24388
+* Dev - Remove deprecations notices with PHP 7.4 by changing parameter order for `implode`. #24396
+* Dev - Add ``$this` param to email filter for additional_content added in 3.7. #24399
+* Dev - Add `woocommerce_product_import_process_item_data` filter to allow modifying a row before importing. #24412
 * Dev -
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
-* Fix - Fix product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
+* Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
 * Fix - Prevent duplicate processing/stock reduction when IPN or PDT notifications are enabled by checking if order is not already in `processing` or `completed` status. #24249
-* Fix - Fix position of ID section in mobile rows actions when displaying the list of products in the admin. #24277
-* Fix - Fix endpoints URLs to follow slashes preferences from WordPress permalinks. #24283
+* Fix - Position of ID section in mobile rows actions when displaying the list of products in the admin. #24277
+* Fix - Endpoints URLs to follow slashes preferences from WordPress permalinks. #24283
 * Fix - Ensure that postcode validation doesn't return any whitespace on beginning and end of a postcode. #24284
-* Fix - Fix shipping classes sort under products alphabetically. #24291
-* Fix - Fix shipping rates layout in admin settings. #24327
+* Fix - Shipping classes sort under products alphabetically. #24291
+* Fix - Shipping rates layout in admin settings. #24327
 * Fix - Retain the focus on the select box when product variation is changed. #24339
+* Fix - Prevent PHP notice in WC_Order_Item_Data_Store::get_order_item_type() when there is no entry in the database for the order item ID passed. #24353
+* Fix - Add translation in class-wc-shipping.php for matching zone message. #24366
+* Fix - Previewing email template. #24380
+* Fix - Check if order exist before generate hash for downloads. #24384
+* Fix - Ensure WC_Product_Data_Store_CPT::is_existing_sku() return boolean. #24385
+* Fix - `function_exists` check for wc_hex_is_light(). #24391
 * Fix -
 * Performance
 * Localization - Add Zambia's Provinces to the list of states. #24307
