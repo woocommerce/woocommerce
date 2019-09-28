@@ -179,7 +179,22 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.8.0 - 2019-11-08 =
+= 3.8.0 - 2019-01-10 =
+* Enhancement
+* Tweak - Add new `woocommerce_product_post_type_link_parent_category_only` filter to hide child category slugs from urls. #23638
+* Tweak - Hide Vietnam's state field. #24158
+* Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
+* Tweak
+* Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
+* Template
+* Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
+* Dev - Added woocommerce_disable_password_change_notification filter, set to false by default. #24154
+* Dev - Add filter `woocommerce_cart_item_removed_message` and `woocommerce_cart_product_cannot_be_purchased_message` to filter notice content when an item is removed from cart, or when a product cannot be purchased. #24176
+* Dev
+* Fix - Clean products transients when term is removed. #23991
+* Fix - Only add the image node to structured data if product has image. #24191
+* Performance
+* Localization
 
 = 3.7.0 - 2019-08-12 =
 * Enhancement - Added table ENGINE to system status report for debugging purposes. #23101
