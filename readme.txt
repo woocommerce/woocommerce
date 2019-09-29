@@ -182,15 +182,15 @@ INTERESTED IN DEVELOPMENT?
 = 3.8.0 - 2019-01-10 =
 * Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
 * Enhancement - Add support to allow connect and install for in-app purchase flow. #24451
-* Enhancement -
+* Enhancement - Declared support to Unicode CLDR. #24564
+* Enhancement - Declared support for PHP 7.4 in CI by removing PHP 7.4 from list of allowed failures. #24668
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
 * Tweak - Only consider orders created via checkout to hold stock. #24159
 * Tweak - Stop to load order data twice in "View order" screen on "My Account" page. #24437
 * Tweak - Prevent PHP warnings in tracker if order doesn't have a created date yet. #24441
-* Tweak -
+* Tweak - Use `wc_get_checkout_url()` to get checkout URL. #24544
 * Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
-* Template
 * Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
 * Dev - Added woocommerce_disable_password_change_notification filter, set to false by default. #24154
 * Dev - Add filter `woocommerce_cart_item_removed_message` and `woocommerce_cart_product_cannot_be_purchased_message` to filter notice content when an item is removed from cart, or when a product cannot be purchased. #24176
@@ -209,7 +209,13 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Add `woocommerce_product_import_process_item_data` filter to allow modifying a row before importing. #24412
 * Dev - Fixed warnings when error_get_last() returns null. #24442
 * Dev - Use brackets instead of braces to avoid deprecation notice in PHP 7.4. #24460
-* Dev -
+* Dev - Implement Puppeteer's architecture for running E2E tests locally. #24479
+* Dev - Remove call to get_magic_quotes_runtime() as it is deprecated as of PHP 7.4. #24485
+* Dev - Return value of `$mailer->send()` in `wc_mail` function. #24505
+* Dev - Remove Selenium e2e tests & add Puppeteer new product e2e test. #24513
+* Dev - Add a filter `woocommerce_ajax_add_order_item_validation` to allow validations in `add_order_item` function. #24518
+* Dev - Use `wc_get_cart_url` instead of `wc_get_page_permalink( 'cart' )` because former has a filter `woocommerce_get_cart_url` to allow customization. #24530
+* Dev - Enable append hashes on custom events (like ajax requests) #24665 
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
@@ -228,13 +234,29 @@ INTERESTED IN DEVELOPMENT?
 * Fix - `function_exists` check for wc_hex_is_light(). #24391
 * Fix - Removed Emoji from default additional email content due problem on some database that doesn't allow Emojis. #24450
 * Fix - Fixed escaping on an attribute in `class-wc-admin-menus.php`. #24466
-* Fix - Add translation for image alt attribute text in WooCommerce setup wizard and in `html-oauth-start.php file`. #24467, #24468
-* Fix -
-* Performance
+* Fix - Add translation for image alt attribute text in multiple places. #24467, #24468, #24469
+* Fix - Uneven padding in the input field with class "location-input" in on boarding wizard. #24476
+* Fix - Duplicate id in pages settings. #24478
+* Fix - Use `esc_attr_e` instead of `esc_html_e` for escaping an attribute in multiple places. #24481, #24520, #24521, #24522, #24523, #24524
+* Fix - Use `esc_attr__` instead of `esc_html__` in escaping attributes string. #24525, #24529
+* Fix - Typo fix in payment captured error message. #24501
+* Fix - Remove broken download link for downloadable product in refund emails. #24526
+* Fix - Documentation URL in failed order email content. #24535
+* Fix - "Add to cart" links in feed. #24545
+* Fix - Escaping in Storefront banner. #24546
+* Fix - Use `wp_kses_post` to allow certain html tags in extensions page. #24589
+* Fix - Escape `$prefix` in item download links. #24601
+* Fix - Use `esc_attr` instead of `esc_html` in multiple places for proper escaping. #24613, #24614
+* Fix - Use `esc_html` instead of `esc_attr` in multiple places for proper escaping. #24616
+* Fix - Use `esc_html_e` instead of `_e` in multiple places for proper escaping. #24615, #24618, #24630
+* Fix - Use `esc_html__` instead of `esc_html` for proper escaping and some typo fixes. #24639
+* Fix - Add no-store and remove max-age header (no longer needed). #24652
+* Fix - Use correct meta value for `downloadable` column in product lookup table regenerate function. #24681
+* Fix - Fix admin sub-menus becoming unaligned when scrolling down in the orders page when there are no orders. #24688
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
-* Localization -
+* Localization - Change localization tag `action-scheduler` to `woocommerce`. #24474
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
