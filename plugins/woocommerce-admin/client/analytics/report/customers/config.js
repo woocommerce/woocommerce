@@ -5,7 +5,9 @@
 import { __, _x } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { applyFilters } from '@wordpress/hooks';
-import { COUNTRIES as countries } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/wc-admin-settings';
+
+const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 
 /**
  * Internal dependencies

@@ -13,7 +13,9 @@ import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { Date, Link } from '@woocommerce/components';
 import { numberFormat } from '@woocommerce/number';
-import { COUNTRIES as countries } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/wc-admin-settings';
+
+const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 
 /**
  * Internal dependencies

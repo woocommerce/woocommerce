@@ -6,8 +6,9 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { SelectControl, TextControl } from 'newspack-components';
 import { useMemo } from 'react';
-import { COUNTRIES as countries } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
+const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 /**
  * Form validation.
  *
