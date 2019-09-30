@@ -267,35 +267,21 @@ class DataStore {
 	 * @return bool
 	 */
 	protected function intervals_missing( $expected_interval_count, $db_records, $items_per_page, $page_no, $order, $order_by, $intervals_count ) {
-		if ( $expected_interval_count > $db_records ) {
-			if ( 'date' === $order_by ) {
-				$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
-				if ( $intervals_count < $expected_intervals_on_page ) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				if ( 'desc' === $order ) {
-					if ( $page_no > floor( $db_records / $items_per_page ) ) {
-						return true;
-					} else {
-						return false;
-					}
-				} elseif ( 'asc' === $order ) {
-					if ( $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page ) ) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					// Invalid ordering.
-					return false;
-				}
-			}
-		} else {
+		if ( $expected_interval_count <= $db_records ) {
 			return false;
 		}
+		if ( 'date' === $order_by ) {
+			$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
+			return $intervals_count < $expected_intervals_on_page;
+		}
+		if ( 'desc' === $order ) {
+			return $page_no > floor( $db_records / $items_per_page );
+		}
+		if ( 'asc' === $order ) {
+			return $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page );
+		}
+		// Invalid ordering.
+		return false;
 	}
 
 	/**
@@ -305,7 +291,7 @@ class DataStore {
 	 * to fetch correct records.
 	 *
 	 * @param array  $intervals_query Array with clauses for the Intervals SQL query.
-	 * @param array  $query_args Query arguements.
+	 * @param array  $query_args Query arguments.
 	 * @param int    $db_interval_count Database interval count.
 	 * @param int    $expected_interval_count Expected interval count on the output.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
