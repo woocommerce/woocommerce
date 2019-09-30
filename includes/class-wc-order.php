@@ -876,10 +876,17 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_billing_address( $empty_content = '' ) {
-		$address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
-		$address = WC()->countries->get_formatted_address( $address );
+		$raw_address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
+		$address     = WC()->countries->get_formatted_address( $raw_address );
 
-		return $address ? $address : $empty_content;
+		/**
+		 * Filter orders formatterd billing address.
+		 *
+		 * @since 3.8.0
+		 * @param string $address     Formatted billing address string.
+		 * @param array  $raw_address Raw billing address.
+		 */
+		return apply_filters( 'woocommerce_order_get_formatted_billing_address', $address ? $address : $empty_content, $raw_address );
 	}
 
 	/**
@@ -889,17 +896,22 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_shipping_address( $empty_content = '' ) {
-		$address = '';
-		if ( $this->has_shipping_address() ) {
-			$address = $this->get_address( 'shipping' );
-		}
-		$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $address, $this );
+		$address     = '';
+		$raw_address = $this->get_address( 'shipping' );
 
 		if ( $this->has_shipping_address() ) {
-			$address = WC()->countries->get_formatted_address( $address );
+			$raw_address = apply_filters( 'woocommerce_order_formatted_shipping_address', $raw_address, $this );
+			$address     = WC()->countries->get_formatted_address( $raw_address );
 		}
 
-		return $address ? $address : $empty_content;
+		/**
+		 * Filter orders formatterd shipping address.
+		 *
+		 * @since 3.8.0
+		 * @param string $address     Formatted shipping address string.
+		 * @param array  $raw_address Raw shipping address.
+		 */
+		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address );
 	}
 
 	/**
