@@ -882,7 +882,7 @@ class WC_Order extends WC_Abstract_Order {
 		/**
 		 * Filter orders formatterd billing address.
 		 *
-		 * @since 3.7.1
+		 * @since 3.8.0
 		 * @param string $address     Formatted billing address string.
 		 * @param array  $raw_address Raw billing address.
 		 */
@@ -907,7 +907,7 @@ class WC_Order extends WC_Abstract_Order {
 		/**
 		 * Filter orders formatterd shipping address.
 		 *
-		 * @since 3.7.1
+		 * @since 3.8.0
 		 * @param string $address     Formatted shipping address string.
 		 * @param array  $raw_address Raw shipping address.
 		 */
