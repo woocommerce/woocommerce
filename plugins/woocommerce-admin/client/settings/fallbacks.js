@@ -87,6 +87,5 @@ export function getSetting( name, fallback = false, filter = val => val ) {
  *                                               ensure it's a number)
  */
 export function setSetting( name, value, filter = val => val ) {
-	value = filter( value );
 	allSettings[ name ] = filter( value );
 }
