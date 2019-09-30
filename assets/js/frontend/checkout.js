@@ -357,8 +357,6 @@ jQuery( function( $ ) {
 						}
 					});
 					
-					// console.log(paymentDetails);
-
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
