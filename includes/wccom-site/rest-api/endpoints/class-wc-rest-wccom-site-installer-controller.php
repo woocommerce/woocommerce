@@ -84,6 +84,11 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_install_state( $request ) {
+		$requirements_met = WC_WCCOM_Site_Installer_Requirements_Check::met_requirements();
+		if ( is_wp_error( $requirements_met ) ) {
+			return $requirements_met;
+		}
+
 		return rest_ensure_response( WC_WCCOM_Site_Installer::get_state() );
 	}
 
