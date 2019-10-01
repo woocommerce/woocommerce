@@ -184,12 +184,17 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Add support to allow connect and install for in-app purchase flow. #24451
 * Enhancement - Declared support to Unicode CLDR. #24564
 * Enhancement - Declared support for PHP 7.4 in CI by removing PHP 7.4 from list of allowed failures. #24668
+* Enhancement - Update the recommended PHP version to 7.0 and the recommended WP version to 5.0. #24730
+* Enhancement - Change On Boarding Wizard to opt out of usage tracking by default. #24680
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
 * Tweak - Only consider orders created via checkout to hold stock. #24159
 * Tweak - Stop to load order data twice in "View order" screen on "My Account" page. #24437
 * Tweak - Prevent PHP warnings in tracker if order doesn't have a created date yet. #24441
 * Tweak - Use `wc_get_checkout_url()` to get checkout URL. #24544
+* Tweak - Maintain value of select fields in credit card form. #24720
+* Tweak - Prevent filter per category while exporting product variations. #24517
+* Tweak - Better wording for subtotal of items in cart and review order. #24440
 * Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
 * Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
 * Dev - Added woocommerce_disable_password_change_notification filter, set to false by default. #24154
@@ -215,7 +220,10 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Remove Selenium e2e tests & add Puppeteer new product e2e test. #24513
 * Dev - Add a filter `woocommerce_ajax_add_order_item_validation` to allow validations in `add_order_item` function. #24518
 * Dev - Use `wc_get_cart_url` instead of `wc_get_page_permalink( 'cart' )` because former has a filter `woocommerce_get_cart_url` to allow customization. #24530
+* Dev - New `woocommerce_product_after_tabs` action hook added. #24694
 * Dev - Enable append hashes on custom events (like ajax requests) #24665 
+* Dev - Introduced `woocommerce_order_get_formatted_billing_address` and `woocommerce_order_get_formatted_shipping_address` filters. #24677
+* Dev - Added 'applied_coupon' trigger to checkout.js. #24406
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
@@ -252,7 +260,11 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Use `esc_html__` instead of `esc_html` for proper escaping and some typo fixes. #24639
 * Fix - Add no-store and remove max-age header (no longer needed). #24652
 * Fix - Use correct meta value for `downloadable` column in product lookup table regenerate function. #24681
-* Fix - Fix admin sub-menus becoming unaligned when scrolling down in the orders page when there are no orders. #24688
+* Fix - Admin sub-menus becoming unaligned when scrolling down in the orders page when there are no orders. #24688
+* Fix - OWB country and sell in person alignment. #24700
+* Fix - Add selectWoo as dependency of country-select. #24347
+* Fix - Domain replacement script now replaces both double and single quoted `woo-gutenberg-products-block` with `woocommerce` in both PHP and JavaScript files. #24696
+* Fix - Convert `current_user_id` to string in some places to prevent unnecessary session database updates. #24016
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
