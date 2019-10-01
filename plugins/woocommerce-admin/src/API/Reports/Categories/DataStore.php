@@ -78,7 +78,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		// Avoid ambigious column order_id in SQL query.
-		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+		$this->report_columns['products_count'] = str_replace( 'product_id', $table_name . '.product_id', $this->report_columns['products_count'] );
+		$this->report_columns['orders_count']   = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
 	}
 
 	/**
@@ -93,20 +94,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 
-		// join wp_order_product_lookup_table with relationships and taxonomies
-		// @todo How to handle custom product tables?
-		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_relationships ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}term_relationships.object_id";
-		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id";
+		// join wp_order_product_lookup_table with relationships and taxonomies.
+		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->term_relationships} ON {$order_product_lookup_table}.product_id = {$wpdb->term_relationships}.object_id";
+		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->wc_category_lookup}.category_id";
 
 		$included_categories = $this->get_included_categories( $query_args );
 		if ( $included_categories ) {
-			$sql_query_params['where_clause'] .= " AND {$wpdb->prefix}term_taxonomy.term_id IN ({$included_categories})";
+			$sql_query_params['where_clause'] .= " AND {$wpdb->wc_category_lookup}.category_tree_id IN ({$included_categories})";
 
 			// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 			// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
 			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'outer_from_clause', 'default_results.category_id' );
 		} else {
-			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'from_clause', "{$wpdb->prefix}term_taxonomy.term_id" );
+			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'from_clause', "{$wpdb->wc_category_lookup}.category_tree_id" );
 		}
 
 		// @todo Only products in the category C or orders with products from category C (and, possibly others?).
@@ -121,7 +121,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
-		$sql_query_params['where_clause'] .= " AND taxonomy = 'product_cat' ";
+		$sql_query_params['where_clause'] .= " AND {$wpdb->wc_category_lookup}.category_tree_id IS NOT NULL";
 
 		return $sql_query_params;
 	}
@@ -290,7 +290,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$categories_data = $wpdb->get_results(
 				"${prefix}
 					SELECT
-						{$wpdb->prefix}term_taxonomy.term_id as category_id,
+						{$wpdb->wc_category_lookup}.category_tree_id as category_id,
 						{$selections}
 					FROM
 						{$table_name}
@@ -300,7 +300,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
-						category_id
+						{$wpdb->wc_category_lookup}.category_tree_id
 				{$suffix}
 					{$right_join}
 					{$sql_query_params['outer_from_clause']}

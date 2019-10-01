@@ -21,5 +21,6 @@ class WC_Helper_Reports {
 		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
 		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
 		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		\Automattic\WooCommerce\Admin\CategoryLookup::instance()->regenerate();
 	}
 }

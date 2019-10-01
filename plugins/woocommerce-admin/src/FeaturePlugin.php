@@ -86,6 +86,7 @@ class FeaturePlugin {
 		ReportsSync::clear_queued_actions();
 		WC_Admin_Notes::clear_queued_actions();
 		wp_clear_scheduled_hook( 'wc_admin_daily' );
+		wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 	}
 
 	/**
@@ -144,6 +145,9 @@ class FeaturePlugin {
 
 		// CRUD classes.
 		WC_Admin_Notes::init();
+
+		// Initialize category lookup.
+		CategoryLookup::instance()->init();
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.

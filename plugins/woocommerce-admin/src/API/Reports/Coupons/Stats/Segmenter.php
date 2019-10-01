@@ -297,10 +297,10 @@ class Segmenter extends ReportsSegmenter {
 			$segmenting_from           = "
 			INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)
 			LEFT JOIN {$wpdb->prefix}term_relationships ON {$product_segmenting_table}.product_id = {$wpdb->prefix}term_relationships.object_id
-			RIGHT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
+			LEFT JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->wc_category_lookup}.category_id
 			";
-			$segmenting_where          = " AND taxonomy = 'product_cat'";
-			$segmenting_groupby        = 'wp_term_taxonomy.term_id';
+			$segmenting_where          = " AND {$wpdb->wc_category_lookup}.category_tree_id IS NOT NULL";
+			$segmenting_groupby        = "{$wpdb->wc_category_lookup}.category_tree_id";
 			$segmenting_dimension_name = 'category_id';
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
