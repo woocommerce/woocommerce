@@ -151,7 +151,7 @@ class WC_Payment_Tokens {
 			}
 		}
 
-		$token_class = self::get_token_class( $token_result->type );
+		$token_class = self::get_token_classname( $token_result->type );
 
 		if ( class_exists( $token_class ) ) {
 			$meta        = $data_store->get_metadata( $token_id );
@@ -176,7 +176,7 @@ class WC_Payment_Tokens {
 	public static function delete( $token_id ) {
 		$type = self::get_token_type_by_id( $token_id );
 		if ( ! empty( $type ) ) {
-			$class = self::get_token_class( $type );
+			$class = self::get_token_classname( $type );
 			$token = new $class( $token_id );
 			$token->delete();
 		}
