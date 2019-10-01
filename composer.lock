@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "26bb94debff645f4dae6834eead746a6",
+    "content-hash": "6adb6d32393a8e67babe0749c8ab8214",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -44,16 +44,16 @@
         },
         {
             "name": "composer/installers",
-            "version": "v1.6.0",
+            "version": "v1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "cfcca6b1b60bc4974324efb5783c13dca6932b5b"
+                "reference": "141b272484481432cda342727a427dc1e206bfa0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/cfcca6b1b60bc4974324efb5783c13dca6932b5b",
-                "reference": "cfcca6b1b60bc4974324efb5783c13dca6932b5b",
+                "url": "https://api.github.com/repos/composer/installers/zipball/141b272484481432cda342727a427dc1e206bfa0",
+                "reference": "141b272484481432cda342727a427dc1e206bfa0",
                 "shasum": ""
             },
             "require": {
@@ -109,6 +109,7 @@
                 "RadPHP",
                 "SMF",
                 "Thelia",
+                "Whmcs",
                 "WolfCMS",
                 "agl",
                 "aimeos",
@@ -131,6 +132,7 @@
                 "installer",
                 "itop",
                 "joomla",
+                "known",
                 "kohana",
                 "laravel",
                 "lavalite",
@@ -160,25 +162,25 @@
                 "zend",
                 "zikula"
             ],
-            "time": "2018-08-27T06:10:37+00:00"
+            "time": "2019-08-12T15:00:31+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v2.3.0",
+            "version": "v2.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "79911c596a29ad675c7998bfc7939e92b7530bdc"
+                "reference": "2893f7b7a9a0bd1260f522da7b200731a3e2f01e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/79911c596a29ad675c7998bfc7939e92b7530bdc",
-                "reference": "79911c596a29ad675c7998bfc7939e92b7530bdc",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/2893f7b7a9a0bd1260f522da7b200731a3e2f01e",
+                "reference": "2893f7b7a9a0bd1260f522da7b200731a3e2f01e",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-autoloader": "1.2.0",
-                "composer/installers": "1.6.0"
+                "composer/installers": "1.7.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "6.5.14",
@@ -207,7 +209,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2019-08-12T11:08:10+00:00"
+            "time": "2019-09-23T14:48:40+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
