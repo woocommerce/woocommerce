@@ -32,7 +32,7 @@ class WC_WCCOM_Site_Installer_Requirements_Check {
 
 		if ( ! empty( $errs ) ) {
 			// translators: %s: Requirements unmet.
-			return new WP_Error( 'requirements_not_met', sprintf( __( 'Server requirements not met, missing requirement(s): %s.', 'woocommerce' ), implode( ', ', $errs ) ), array( 'status' => 503 ) );
+			return new WP_Error( 'requirements_not_met', sprintf( __( 'Server requirements not met, missing requirement(s): %s.', 'woocommerce' ), implode( ', ', $errs ) ), array( 'status' => 400 ) );
 		}
 
 		return true;
