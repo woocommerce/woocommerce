@@ -68,6 +68,44 @@ class DataStore {
 	private $order = '';
 
 	/**
+	 * Returns string to be used as cache key for the data.
+	 *
+	 * @param array $params Query parameters.
+	 * @return string
+	 */
+	protected function get_cache_key( $params ) {
+		return implode(
+			'_',
+			array(
+				'wc_report',
+				$this->cache_key,
+				md5( wp_json_encode( $params ) ),
+			)
+		);
+	}
+
+	/**
+	 * Wrapper around Cache::get().
+	 *
+	 * @param string $cache_key Cache key.
+	 * @return mixed
+	 */
+	protected function get_cached_data( $cache_key ) {
+		return Cache::get( $cache_key );
+	}
+
+	/**
+	 * Wrapper around Cache::set().
+	 *
+	 * @param string $cache_key Cache key.
+	 * @param mixed  $value     New value.
+	 * @return bool
+	 */
+	protected function set_cached_data( $cache_key, $value ) {
+		return Cache::set( $cache_key, $value );
+	}
+
+	/**
 	 * Compares two report data objects by pre-defined object property and ASC/DESC ordering.
 	 *
 	 * @param stdClass $a Object a.
@@ -370,6 +408,7 @@ class DataStore {
 					$new_start_date->setTimestamp( $new_start_date_timestamp );
 				}
 			}
+			// @todo - Do this without modifying $query_args?
 			$query_args['adj_after']               = $new_start_date;
 			$query_args['adj_before']              = $new_end_date;
 			$adj_after                             = $new_start_date->format( TimeInterval::$sql_datetime_format );
@@ -391,6 +430,7 @@ class DataStore {
 				$intervals_query['limit'] = 'LIMIT ' . $offset . ',' . $count;
 			}
 			// Otherwise no change in limit clause.
+			// @todo - Do this without modifying $query_args?
 			$query_args['adj_after']  = $query_args['after'];
 			$query_args['adj_before'] = $query_args['before'];
 		}

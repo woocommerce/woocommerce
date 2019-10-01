@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 
 /**
  * API\Reports\Taxes\DataStore.
@@ -24,6 +25,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var string
 	 */
 	const TABLE_NAME = 'wc_order_tax_lookup';
+
+	/**
+	 * Cache identifier.
+	 *
+	 * @var string
+	 */
+	protected $cache_key = 'taxes';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -181,8 +189,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
 
+		/*
+		 * We need to get the cache key here because
+		 * parent::update_intervals_sql_params() modifies $query_args.
+		 */
 		$cache_key = $this->get_cache_key( $query_args );
-		$data      = wp_cache_get( $cache_key, $this->cache_group );
+		$data      = $this->get_cached_data( $cache_key );
 
 		if ( false === $data ) {
 			$data = (object) array(
@@ -275,20 +287,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'page_no' => (int) $query_args['page'],
 			);
 
-			wp_cache_set( $cache_key, $data, $this->cache_group );
+			$this->set_cached_data( $cache_key, $data );
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Returns string to be used as cache key for the data.
-	 *
-	 * @param array $params Query parameters.
-	 * @return string
-	 */
-	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . self::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
 	}
 
 	/**
@@ -386,5 +388,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * @param int $order_id    Order ID.
 		 */
 		do_action( 'woocommerce_reports_delete_tax', 0, $order_id );
+
+		ReportsCache::invalidate();
 	}
 }

@@ -14,6 +14,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDa
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 
 /**
  * ReportsSync Class.
@@ -488,6 +489,8 @@ class ReportsSync {
 			)
 		);
 
+		ReportsCache::invalidate();
+
 		// If all updates were either skipped or successful, we're done.
 		// The update methods return -1 for skip, or a boolean success indicator.
 		if ( 4 === absint( $result ) ) {
@@ -817,6 +820,8 @@ class ReportsSync {
 			CustomersDataStore::delete_customer( $customer_id );
 		}
 
+		ReportsCache::invalidate();
+
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'customer' ) );
 	}
 
@@ -858,6 +863,8 @@ class ReportsSync {
 		foreach ( $order_ids as $order_id ) {
 			OrdersStatsDataStore::delete_order( $order_id );
 		}
+
+		ReportsCache::invalidate();
 
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );
 	}

@@ -125,10 +125,14 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
 
-		$cache_key    = $this->get_cache_key( $query_args );
-		$product_data = wp_cache_get( $cache_key, $this->cache_group );
+		/*
+		 * We need to get the cache key here because
+		 * parent::update_intervals_sql_params() modifies $query_args.
+		 */
+		$cache_key = $this->get_cache_key( $query_args );
+		$data      = $this->get_cached_data( $cache_key );
 
-		if ( false === $product_data ) {
+		if ( false === $data ) {
 			$selections      = $this->selected_columns( $query_args );
 			$totals_query    = array();
 			$intervals_query = array();

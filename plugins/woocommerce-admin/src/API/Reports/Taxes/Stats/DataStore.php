@@ -26,6 +26,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	const TABLE_NAME = 'wc_order_tax_lookup';
 
 	/**
+	 * Cache identifier.
+	 *
+	 * @var string
+	 */
+	protected $cache_key = 'taxes_stats';
+
+	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
 	 * @var array
@@ -165,8 +172,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
 
+		/*
+		 * We need to get the cache key here because
+		 * parent::update_intervals_sql_params() modifies $query_args.
+		 */
 		$cache_key = $this->get_cache_key( $query_args );
-		$data      = wp_cache_get( $cache_key, $this->cache_group );
+		$data      = $this->get_cached_data( $cache_key );
 
 		if ( false === $data ) {
 			$data = (object) array(
@@ -279,19 +290,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
 			$this->create_interval_subtotals( $data->intervals );
 
-			wp_cache_set( $cache_key, $data, $this->cache_group );
+			$this->set_cached_data( $cache_key, $data );
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Returns string to be used as cache key for the data.
-	 *
-	 * @param array $params Query parameters.
-	 * @return string
-	 */
-	protected function get_cache_key( $params ) {
-		return 'woocommerce_' . self::TABLE_NAME . '_stats_' . md5( wp_json_encode( $params ) );
 	}
 }
