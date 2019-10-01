@@ -133,7 +133,12 @@ class Bootstrap {
 	}
 
 	/**
-	 * Remove core blocks (for 3.6 and above).
+	 * Remove core blocks.
+	 *
+	 * Older installs of WooCommerce (3.6 and below) did not use the blocks package and instead included classes directly.
+	 * This code disables those core classes when running blocks as a feature plugin. Newer versions which use the Blocks package are unaffected.
+	 *
+	 * When the feature plugin supports only WooCommerce 3.7+ this method can be removed.
 	 */
 	protected function remove_core_blocks() {
 		remove_action( 'init', array( 'WC_Block_Library', 'init' ) );
