@@ -8,7 +8,7 @@ import { Component } from '@wordpress/element';
 import { IconButton, SelectControl } from '@wordpress/components';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import { isFinite, noop, uniqueId } from 'lodash';
+import { noop, uniqueId } from 'lodash';
 
 const PER_PAGE_OPTIONS = [ 25, 50, 75, 100 ];
 
@@ -70,7 +70,7 @@ class Pagination extends Component {
 		const { onPageChange, page } = this.props;
 		const newPage = parseInt( event.target.value, 10 );
 
-		if ( newPage !== page && isFinite( newPage ) && newPage > 0 && this.pageCount && this.pageCount >= newPage ) {
+		if ( newPage !== page && Number.isFinite( newPage ) && newPage > 0 && this.pageCount && this.pageCount >= newPage ) {
 			onPageChange( newPage, 'goto' );
 		}
 	}

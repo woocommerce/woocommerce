@@ -1,3 +1,6 @@
+# (unreleased)
+- Remove lodash dependency.
+
 # 1.0.4
 
 - Update dependencies.

@@ -1,8 +1,5 @@
 /** @format */
-/**
- * External dependencies
- */
-import { isFinite } from 'lodash';
+/* eslint-disable wpcalypso/import-docblock */
 
 /**
  * WooCommerce dependencies
@@ -50,7 +47,7 @@ export function numberFormat( number, precision = null ) {
  * @returns {?String} A formatted string.
  */
 export function formatValue( type, value ) {
-	if ( ! isFinite( value ) ) {
+	if ( ! Number.isFinite( value ) ) {
 		return null;
 	}
 
@@ -70,7 +67,7 @@ export function formatValue( type, value ) {
  * @returns {?int} Percent change between the primaryValue from the secondaryValue.
  */
 export function calculateDelta( primaryValue, secondaryValue ) {
-	if ( ! isFinite( primaryValue ) || ! isFinite( secondaryValue ) ) {
+	if ( ! Number.isFinite( primaryValue ) || ! Number.isFinite( secondaryValue ) ) {
 		return null;
 	}
 
