@@ -54,7 +54,7 @@
     "grunt-wp-i18n": "1.0.3",
     "husky": "3.0.7",
     "istanbul": "1.0.0-alpha.2",
-    "lint-staged": "9.4.0",
+    "lint-staged": "9.4.1",
     "mocha": "6.2.1",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
