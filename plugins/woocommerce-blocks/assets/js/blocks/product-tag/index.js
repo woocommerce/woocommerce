@@ -10,6 +10,7 @@ import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/block-settings';
  */
 import './editor.scss';
 import Block from './block';
+import { IconProductTag } from '../../components/icons';
 
 /**
  * Register and run the "Products by Tag" block.
@@ -17,7 +18,7 @@ import Block from './block';
 registerBlockType( 'woocommerce/product-tag', {
 	title: __( 'Products by Tag', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: 'tag',
+		src: <IconProductTag />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',
