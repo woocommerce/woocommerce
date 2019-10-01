@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { without } from 'lodash';
-import Gridicon from 'gridicons';
 
 /**
  * Internal dependencies
@@ -14,11 +13,12 @@ import { deprecatedConvertToShortcode } from '../../utils/deprecations';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
+import { IconProductOnSale } from '../../components/icons';
 
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Gridicon icon="tag" />,
+		src: <IconProductOnSale />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

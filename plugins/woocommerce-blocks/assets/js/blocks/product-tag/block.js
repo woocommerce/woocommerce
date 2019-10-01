@@ -26,6 +26,7 @@ import GridContentControl from '../../components/grid-content-control';
 import GridLayoutControl from '../../components/grid-layout-control';
 import ProductTagControl from '../../components/product-tag-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
+import { IconProductTag } from '../../components/icons';
 
 /**
  * Component to handle edit mode of "Products by Tag".
@@ -179,7 +180,7 @@ class ProductsByTagBlock extends Component {
 
 		return (
 			<Placeholder
-				icon="tag"
+				icon={ <IconProductTag className="block-editor-block-icon" /> }
 				label={ __(
 					'Products by Tag',
 					'woo-gutenberg-products-block'
@@ -230,7 +231,9 @@ class ProductsByTagBlock extends Component {
 					/>
 				) : (
 					<Placeholder
-						icon="tag"
+						icon={
+							<IconProductTag className="block-editor-block-icon" />
+						}
 						label={ __(
 							'Products by Tag',
 							'woo-gutenberg-products-block'
@@ -276,7 +279,9 @@ class ProductsByTagBlock extends Component {
 					</Fragment>
 				) : (
 					<Placeholder
-						icon="tag"
+						icon={
+							<IconProductTag className="block-editor-block-icon" />
+						}
 						label={ __(
 							'Products by Tag',
 							'woo-gutenberg-products-block'
