@@ -283,8 +283,6 @@ class WC_Structured_Data {
 					'post_status' => 'publish',
 					'post_type'   => 'product',
 					'parent'      => 0,
-					'meta_key'    => 'rating', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'orderby'     => 'meta_value_num',
 					'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						array(
 							'key'     => 'rating',
