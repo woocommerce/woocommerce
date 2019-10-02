@@ -233,10 +233,11 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Add WPML compatibility to the geolocation URL. #24722
 * Dev - Validate server requirements in WCCCOM Site Installer endpoints. #24690
 * Dev - Introduced woocommerce_payment_token_class filter. #24542
-* Dev - Added post type count to system status report. #24536
+* Dev - Add support for post type count to system status report. #24536
 * Dev - Check for max discount to be -ve to prevent overwriting refunded fee amount. #24341
 * Dev: Add filter woocommerce_european_union_countries to the method WC_Countries::get_european_union_countries(). #24741
 * Dev - Allow WC_Product_Query sort products by include order. #24294
+* Dev - Removed duplicated include of WC_Admin_Importers. #24751
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
@@ -281,6 +282,8 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Fixed description of failed order emails. #24737
 * Fix - Fixed Photoswipe styles. #24296
 * Fix - Also consider refunded item when updating order and adjusting stocks. #24745
+* Fix - Handle 0 attribute value for variations correctly. #24750
+* Fix - Fixed spaces in form fields of External Products. #24295
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
