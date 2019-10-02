@@ -119,7 +119,7 @@ class WC_Helper_Product {
 		$attributes     = array();
 
 		$attribute      = new WC_Product_Attribute();
-		$attribute_data = self::create_attribute( 'size', array( 'small', 'large' ) );
+		$attribute_data = self::create_attribute( 'size', array( 'small', 'large', 'huge' ) );
 		$attribute->set_id( $attribute_data['attribute_id'] );
 		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
 		$attribute->set_options( $attribute_data['term_ids'] );
@@ -130,6 +130,16 @@ class WC_Helper_Product {
 
 		$attribute      = new WC_Product_Attribute();
 		$attribute_data = self::create_attribute( 'colour', array( 'red', 'blue' ) );
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_position( 1 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$attributes[] = $attribute;
+
+		$attribute      = new WC_Product_Attribute();
+		$attribute_data = self::create_attribute( 'number', array( '0', '1', '2' ) );
 		$attribute->set_id( $attribute_data['attribute_id'] );
 		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
 		$attribute->set_options( $attribute_data['term_ids'] );
@@ -162,6 +172,40 @@ class WC_Helper_Product {
 		);
 		$variation_2->set_attributes( array( 'pa_size' => 'large' ) );
 		$variation_2->save();
+
+		$variation_3 = new WC_Product_Variation();
+		$variation_3->set_props(
+			array(
+				'parent_id'     => $product->get_id(),
+				'sku'           => 'DUMMY SKU VARIABLE HUGE RED 0',
+				'regular_price' => 16,
+			)
+		);
+		$variation_3->set_attributes(
+			array(
+				'pa_size' => 'huge',
+				'pa_colour' => 'red',
+				'pa_number' => '0',
+			)
+		);
+		$variation_3->save();
+
+		$variation_4 = new WC_Product_Variation();
+		$variation_4->set_props(
+			array(
+				'parent_id'     => $product->get_id(),
+				'sku'           => 'DUMMY SKU VARIABLE HUGE RED 2',
+				'regular_price' => 17,
+			)
+		);
+		$variation_4->set_attributes(
+			array(
+				'pa_size' => 'huge',
+				'pa_colour' => 'red',
+				'pa_number' => '2',
+			)
+		);
+		$variation_4->save();
 
 		return wc_get_product( $product->get_id() );
 	}

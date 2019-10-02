@@ -216,22 +216,29 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = new WC_Product_Variable( $product->get_id() );
 
-		$this->assertEquals( 2, count( $product->get_children() ) );
+		$this->assertEquals( 4, count( $product->get_children() ) );
 
 		$expected_prices['price'][ $children[0] ] = 8.00;
 		$expected_prices['price'][ $children[1] ] = 15.00;
+		$expected_prices['price'][ $children[2] ] = 16.00;
+		$expected_prices['price'][ $children[3] ] = 17.00;
 
 		$expected_prices['regular_price'][ $children[0] ] = 10.00;
 		$expected_prices['regular_price'][ $children[1] ] = 15.00;
+		$expected_prices['regular_price'][ $children[2] ] = 16.00;
+		$expected_prices['regular_price'][ $children[3] ] = 17.00;
 
 		$expected_prices['sale_price'][ $children[0] ] = 8.00;
 		$expected_prices['sale_price'][ $children[1] ] = 15.00;
+		$expected_prices['sale_price'][ $children[2] ] = 16.00;
+		$expected_prices['sale_price'][ $children[3] ] = 17.00;
 
 		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
 
 		$expected_attributes = array(
-			'pa_size'   => array( 'small', 'large' ),
-			'pa_colour' => array( 'blue', 'red' ),
+			'pa_size'   => array( 'small', 'large', 'huge' ),
+			'pa_colour' => array( 'red' ),
+			'pa_number' => array( '0', '2' ),
 		);
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 	}
@@ -1035,5 +1042,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 			array()
 		);
 		$this->assertEquals( 0, $match );
+
+		// Test numeric attribute values.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
+
+		$this->assertEquals( $children[3], $match );
 	}
 }
