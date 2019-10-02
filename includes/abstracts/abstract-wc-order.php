@@ -1070,10 +1070,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Apply all coupons in this order again to all line items.
+	 * This method is public since WooCommerce 3.8.0.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 */
-	protected function recalculate_coupons() {
+	public function recalculate_coupons() {
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
