@@ -214,11 +214,13 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
-	$diff = $item_quantity - $already_reduced_stock;
+	$order                  = $item->get_order();
+	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
+	$diff                   = $item_quantity + $refunded_item_quantity - $already_reduced_stock;
 
 	if ( $diff < 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff * -1, 'increase' );
-	} else {
+	} elseif ( $diff > 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff, 'decrease' );
 	}
 
@@ -226,8 +228,12 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return $new_stock;
 	}
 
-	$item->update_meta_data( '_reduced_stock', $item_quantity );
+	$item->update_meta_data( '_reduced_stock', $item_quantity + $refunded_item_quantity );
 	$item->save();
+
+	if ( 0 === $diff ) {
+		return false;
+	}
 
 	return array(
 		'from' => $new_stock + $diff,
