@@ -464,7 +464,7 @@ class WC_Frontend_Scripts {
 			case 'wc-geolocation':
 				$params = array(
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'home_url'     => home_url(),
+					'home_url'     => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
 					'hash'         => isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : '', // WPCS: input var ok, CSRF ok.
 				);
