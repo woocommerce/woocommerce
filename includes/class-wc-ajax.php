@@ -898,10 +898,11 @@ class WC_AJAX {
 				if ( ! $product ) {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
-				$check = apply_filters( 'woocommerce_ajax_add_order_item_validation', $product, $order, $qty );
+				$validation_error = new WP_Error();
+				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
-				if ( is_wp_error( $check ) ) {
-					throw new Exception( $check->get_error_message() );
+				if ( $validation_error->get_error_code() ) {
+					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $validation_error->get_error_message() );
 				}
 				$item_id                 = $order->add_product( $product, $qty );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
