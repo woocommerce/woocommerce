@@ -1112,7 +1112,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
 			foreach ( $variation as $attribute_key => $attribute_value ) {
-				$match_any_value = empty( $attribute_value );
+				$match_any_value = empty( $attribute_value ) && 0 != $attribute_value;
 
 				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
 					$match = false; // Requires a selection but no value was provide.
