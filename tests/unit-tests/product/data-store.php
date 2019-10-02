@@ -1054,5 +1054,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $children[3], $match );
+
+		// Test numeric attribute value 0.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '0',
+			)
+		);
+
+		$this->assertEquals( $children[2], $match );
 	}
 }
