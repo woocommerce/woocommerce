@@ -95,7 +95,7 @@ class OrdersPanel extends Component {
 		};
 
 		const orderCardTitle = order => {
-			const { extended_info, order_id } = order;
+			const { extended_info, order_id, order_number } = order;
 			const { customer } = extended_info || {};
 			const customerUrl = customer.customer_id
 				? getNewPath( {}, '/analytics/customers', {
@@ -113,7 +113,7 @@ class OrdersPanel extends Component {
 								'woocommerce-admin'
 							),
 							{
-								orderNumber: order_id,
+								orderNumber: order_number,
 								customerString: getCustomerString( order ),
 							}
 						),
