@@ -186,6 +186,7 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Declared support for PHP 7.4 in CI by removing PHP 7.4 from list of allowed failures. #24668
 * Enhancement - Update the recommended PHP version to 7.0 and the recommended WP version to 5.0. #24730
 * Enhancement - Change On Boarding Wizard to opt out of usage tracking by default. #24680
+* Enhancement - Add `Available on backorder` message for products available on backorder. #24559
 * Tweak - Hide Vietnam's state field. #24158
 * Tweak - Better wording when no downloads are available on My Account > Downloads. #24172
 * Tweak - Only consider orders created via checkout to hold stock. #24159
@@ -234,6 +235,8 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Introduced woocommerce_payment_token_class filter. #24542
 * Dev - Added post type count to system status report. #24536
 * Dev - Check for max discount to be -ve to prevent overwriting refunded fee amount. #24341
+* Dev: Add filter woocommerce_european_union_countries to the method WC_Countries::get_european_union_countries(). #24741
+* Dev - Allow WC_Product_Query sort products by include order. #24294
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
@@ -277,6 +280,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Convert `current_user_id` to string in some places to prevent unnecessary session database updates. #24016
 * Fix - Fixed description of failed order emails. #24737
 * Fix - Fixed Photoswipe styles. #24296
+* Fix - Also consider refunded item when updating order and adjusting stocks. #24745
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
