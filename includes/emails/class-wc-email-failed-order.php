@@ -29,7 +29,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		public function __construct() {
 			$this->id             = 'failed_order';
 			$this->title          = __( 'Failed order', 'woocommerce' );
-			$this->description    = __( 'Failed order emails are sent to chosen recipient(s) when orders have been marked failed (if they were previously processing or on-hold).', 'woocommerce' );
+			$this->description    = __( 'Failed order emails are sent to chosen recipient(s) when orders have been marked failed (if they were previously pending or on-hold).', 'woocommerce' );
 			$this->template_html  = 'emails/admin-failed-order.php';
 			$this->template_plain = 'emails/plain/admin-failed-order.php';
 			$this->placeholders   = array(
