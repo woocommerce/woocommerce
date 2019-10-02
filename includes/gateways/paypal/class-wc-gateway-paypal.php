@@ -461,7 +461,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function order_received_text( $text, $order ) {
-		if ( $this->id ) {
+		if ( $this->id === $order->get_payment_method() ) {
 			return esc_html__( 'Thank you for your payment. Your transaction has been completed, and a receipt for your purchase has been emailed to you. Log into your PayPal account to view transaction details.', 'woocommerce' );
 		}
 
