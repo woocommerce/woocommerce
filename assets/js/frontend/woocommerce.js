@@ -32,9 +32,11 @@ jQuery( function( $ ) {
 	});
 
 	// Make form field descriptions toggle on focus.
-	$( document.body ).on( 'click', function() {
-		$( '.woocommerce-input-wrapper span.description:visible' ).prop( 'aria-hidden', true ).slideUp( 250 );
-	} );
+	if ( $( '.woocommerce-input-wrapper span.description' ).length ) {
+		$( document.body ).on( 'click', function() {
+			$( '.woocommerce-input-wrapper span.description:visible' ).prop( 'aria-hidden', true ).slideUp( 250 );
+		} );
+	}
 
 	$( '.woocommerce-input-wrapper' ).on( 'click', function( event ) {
 		event.stopPropagation();
