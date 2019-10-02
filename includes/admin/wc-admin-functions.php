@@ -222,6 +222,8 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		$new_stock = wc_update_product_stock( $product, $diff * -1, 'increase' );
 	} elseif ( $diff > 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff, 'decrease' );
+	} else {
+		return false;
 	}
 
 	if ( is_wp_error( $new_stock ) ) {
@@ -230,10 +232,6 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 
 	$item->update_meta_data( '_reduced_stock', $item_quantity + $refunded_item_quantity );
 	$item->save();
-
-	if ( 0 === $diff ) {
-		return false;
-	}
 
 	return array(
 		'from' => $new_stock + $diff,
