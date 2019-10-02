@@ -195,7 +195,10 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Maintain value of select fields in credit card form. #24720
 * Tweak - Prevent filter per category while exporting product variations. #24517
 * Tweak - Better wording for subtotal of items in cart and review order. #24440
+* Tweak - Prevent new lines in product quantity in checkout details. #24311
+* Tweak - Add a tooltip in the "Coupon expity date" field. #24749
 * Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
+* Accessibility - Make $subtext color darker. #24739
 * Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
 * Dev - Added woocommerce_disable_password_change_notification filter, set to false by default. #24154
 * Dev - Add filter `woocommerce_cart_item_removed_message` and `woocommerce_cart_product_cannot_be_purchased_message` to filter notice content when an item is removed from cart, or when a product cannot be purchased. #24176
@@ -223,7 +226,14 @@ INTERESTED IN DEVELOPMENT?
 * Dev - New `woocommerce_product_after_tabs` action hook added. #24694
 * Dev - Enable append hashes on custom events (like ajax requests) #24665 
 * Dev - Introduced `woocommerce_order_get_formatted_billing_address` and `woocommerce_order_get_formatted_shipping_address` filters. #24677
+* Dev - WC_Abstract_Order::recalculate_coupons() is public now. #24740
 * Dev - Added 'applied_coupon' trigger to checkout.js. #24406
+* Dev - Introduced woocommerce_output_cart_shortcode_content filter. #24738
+* Dev - Add WPML compatibility to the geolocation URL. #24722
+* Dev - Validate server requirements in WCCCOM Site Installer endpoints. #24690
+* Dev - Introduced woocommerce_payment_token_class filter. #24542
+* Dev - Added post type count to system status report. #24536
+* Dev - Check for max discount to be -ve to prevent overwriting refunded fee amount. #24341
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
@@ -265,6 +275,8 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Add selectWoo as dependency of country-select. #24347
 * Fix - Domain replacement script now replaces both double and single quoted `woo-gutenberg-products-block` with `woocommerce` in both PHP and JavaScript files. #24696
 * Fix - Convert `current_user_id` to string in some places to prevent unnecessary session database updates. #24016
+* Fix - Fixed description of failed order emails. #24737
+* Fix - Fixed Photoswipe styles. #24296
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
