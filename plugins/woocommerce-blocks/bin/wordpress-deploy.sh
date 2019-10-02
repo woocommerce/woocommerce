@@ -54,6 +54,7 @@ copy_dest_files() {
 	--exclude=tests/ \
 	--exclude=phpcs.xml \
 	--exclude=phpunit.xml.dist \
+	--exclude=CODEOWNERS \
 	--exclude=renovate.json \
 	--exclude="*.config.js" \
 	--exclude="*-config.js" \
