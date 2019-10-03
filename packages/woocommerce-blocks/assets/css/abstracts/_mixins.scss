@@ -1,0 +1,75 @@
+// Rem output with px fallback
+@mixin font-size($sizeValue: 16, $lineHeight: false ) {
+	font-size: $sizeValue + px;
+	font-size: ($sizeValue / 16) + rem;
+	@if ($lineHeight) {
+		line-height: $lineHeight;
+	}
+}
+
+@mixin hover-state {
+	&:hover,
+	&:active,
+	&:focus {
+		@content;
+	}
+}
+
+@keyframes loading-fade {
+	0% {
+		opacity: 0.7;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.7;
+	}
+}
+
+// Adds animation to placeholder section
+@mixin placeholder( $lighten-percentage: 30% ) {
+	animation: loading-fade 1.6s ease-in-out infinite;
+	background-color: $core-grey-light-500;
+	color: transparent;
+
+	&::after {
+		content: "\00a0";
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		animation: none;
+	}
+}
+
+// Adds animation to transforms
+@mixin animate-transform( $duration: 0.2s ) {
+	transition: transform ease $duration;
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
+}
+
+// Hide an element from sighted users, but availble to screen reader users.
+@mixin visually-hidden() {
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	overflow: hidden;
+	/* Many screen reader and browser combinations announce broken words as they would appear visually. */
+	overflow-wrap: normal !important;
+	word-wrap: normal !important;
+}
+
+// Unhide a visually hidden element
+@mixin visually-shown() {
+	clip: auto;
+	clip-path: none;
+	height: auto;
+	width: auto;
+	margin: unset;
+	overflow: hidden;
+}
