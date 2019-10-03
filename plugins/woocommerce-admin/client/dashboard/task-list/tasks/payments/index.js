@@ -6,30 +6,93 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { filter, noop, keys, pickBy } from 'lodash';
+import { get, filter, noop, keys, pickBy, difference } from 'lodash';
 import { FormToggle, CheckboxControl } from '@wordpress/components';
 import { Button, TextControl } from 'newspack-components';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
 import { getCountryCode } from 'dashboard/utils';
 import { Form, Card, Stepper, List } from '@woocommerce/components';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
+import { WC_ASSET_URL as wcAssetUrl } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import withSelect from 'wc-api/with-select';
 import Plugins from '../steps/plugins';
+import Stripe from './stripe';
+import Square from './square';
+import PayPal from './paypal';
+import Klarna from './klarna';
 
 class Payments extends Component {
 	constructor() {
 		super( ...arguments );
-		this.state = {
-			step: 'choose',
-		};
+
 		this.completeStep = this.completeStep.bind( this );
+		this.markConfigured = this.markConfigured.bind( this );
+		this.setMethodRequestPending = this.setMethodRequestPending.bind( this );
+		this.completePluginInstall = this.completePluginInstall.bind( this );
+
+		const { methods, installed, configured } = this.props;
+
+		let step = 'choose';
+		let showIndividualConfigs = false;
+
+		// Figure out which step to show initially if there are still steps to be configured, or redirect back to the task list.
+		if ( methods.length > 0 && configured.length > 0 ) {
+			step = difference( methods, configured )[ 0 ] || '';
+			showIndividualConfigs = true;
+			const stepsLeft = difference( methods, configured ).length;
+			if ( 0 === stepsLeft ) {
+				this.state = {
+					step: 'done',
+					methodRequestPending: false,
+				};
+				this.completeTask();
+				return;
+			}
+		} else if ( 1 === installed && methods.length > 0 ) {
+			// Methods have been installed but not configured yet.
+			step = methods[ 0 ];
+			showIndividualConfigs = true;
+		}
+
+		this.state = {
+			step,
+			showIndividualConfigs,
+			methodRequestPending: false,
+		};
+	}
+
+	componentDidUpdate( prevProps ) {
+		const { methods, configured } = this.props;
+		if (
+			prevProps.configured.length !== configured.length &&
+			methods.length > 0 &&
+			configured.length > 0
+		) {
+			const stepsLeft = difference( methods, configured );
+			const nextStep = stepsLeft[ 0 ];
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				step: nextStep,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+	}
+
+	completeTask() {
+		this.props.updateOptions( {
+			[ 'woocommerce_onboarding_payments' ]: {
+				completed: 1,
+			},
+		} );
+		getHistory().push( getNewPath( {}, '/', {} ) );
 	}
 
 	getInitialValues() {
@@ -40,9 +103,7 @@ class Payments extends Component {
 			klarna_payments: false,
 			square: false,
 			create_stripe: false,
-			create_paypal: false,
 			stripe_email: '',
-			paypal_email: '',
 		};
 		return values;
 	}
@@ -63,6 +124,43 @@ class Payments extends Component {
 		} else {
 			getHistory().push( getNewPath( {}, '/', {} ) );
 		}
+	}
+
+	completePluginInstall() {
+		const { completed } = this.props;
+		this.props.updateOptions( {
+			[ 'woocommerce_onboarding_payments' ]: {
+				completed: completed || false,
+				installed: 1,
+				methods: this.getMethodsToConfigure(),
+			},
+		} );
+
+		this.setState( { showIndividualConfigs: true }, function() {
+			this.completeStep();
+		} );
+	}
+
+	markConfigured( method ) {
+		const { options, methods, configured } = this.props;
+		configured.push( method );
+		this.props.updateOptions( {
+			[ 'woocommerce_onboarding_payments' ]: {
+				...options.woocommerce_onboarding_payments,
+				configured,
+			},
+		} );
+
+		const stepsLeft = difference( methods, configured );
+		if ( 0 === stepsLeft.length ) {
+			this.completeTask();
+		}
+	}
+
+	setMethodRequestPending( status ) {
+		this.setState( {
+			methodRequestPending: status,
+		} );
 	}
 
 	// If Jetpack is connected and WCS is enabled, we will offer a streamlined option.
@@ -94,34 +192,6 @@ class Payments extends Component {
 		);
 	}
 
-	renderWooCommerceServicesPayPalConnect() {
-		const { getInputProps, values } = this.formData;
-		if ( ! values.paypal ) {
-			return null;
-		}
-
-		const { isJetpackConnected, activePlugins } = this.props;
-		if ( ! isJetpackConnected || ! activePlugins.includes( 'woocommerce-services' ) ) {
-			return null;
-		}
-
-		return (
-			<div className="woocommerce-task-payments__woocommerce-services-options">
-				<CheckboxControl
-					label={ __( 'Create a Paypal account for me', 'woocommerce-admin' ) }
-					{ ...getInputProps( 'create_paypal' ) }
-				/>
-
-				{ values.create_paypal && (
-					<TextControl
-						label={ __( 'Email address', 'woocommerce-admin' ) }
-						{ ...getInputProps( 'paypal_email' ) }
-					/>
-				) }
-			</div>
-		);
-	}
-
 	getMethodOptions() {
 		const { getInputProps } = this.formData;
 		const { countryCode, profileItems } = this.props;
@@ -138,7 +208,7 @@ class Payments extends Component {
 						{ this.renderWooCommerceServicesStripeConnect() }
 					</Fragment>
 				),
-				before: <div />, // @todo Logo
+				before: <img src={ wcAssetUrl + 'images/stripe.png' } alt="" />,
 				after: <FormToggle { ...getInputProps( 'stripe' ) } />,
 				visible: true,
 			},
@@ -150,10 +220,9 @@ class Payments extends Component {
 							"Safe and secure payments using credit cards or your customer's PayPal account.",
 							'woocommerce-admin'
 						) }
-						{ this.renderWooCommerceServicesPayPalConnect() }
 					</Fragment>
 				),
-				before: <div />, // @todo Logo
+				before: <img src={ wcAssetUrl + 'images/paypal.png' } alt="" />,
 				after: <FormToggle { ...getInputProps( 'paypal' ) } />,
 				visible: true,
 			},
@@ -163,7 +232,7 @@ class Payments extends Component {
 					'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.',
 					'woocommerce-admin'
 				),
-				before: <div />, // @todo Logo
+				before: <img src={ wcAssetUrl + 'images/klarna-black.png' } alt="" />,
 				after: <FormToggle { ...getInputProps( 'klarna_checkout' ) } />,
 				visible: [ 'SE', 'FI', 'NO', 'NL' ].includes( countryCode ),
 			},
@@ -173,7 +242,7 @@ class Payments extends Component {
 					'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.',
 					'woocommerce-admin'
 				),
-				before: <div />, // @todo Logo
+				before: <img src={ wcAssetUrl + 'images/klarna-black.png' } alt="" />,
 				after: <FormToggle { ...getInputProps( 'klarna_payments' ) } />,
 				visible: [ 'DK', 'DE', 'AT' ].includes( countryCode ),
 			},
@@ -184,7 +253,7 @@ class Payments extends Component {
 						'Sell online and in store and track sales and inventory in one place.',
 					'woocommerce-admin'
 				),
-				before: <div />, // @todo Logo
+				before: <img src={ wcAssetUrl + 'images/square-black.png' } alt="" />,
 				after: <FormToggle { ...getInputProps( 'square' ) } />,
 				visible:
 					[ 'brick-mortar', 'brick-mortar-other' ].includes( profileItems.selling_venues ) &&
@@ -193,6 +262,27 @@ class Payments extends Component {
 		];
 
 		return filter( methods, method => method.visible );
+	}
+
+	getMethodsToConfigure() {
+		const { options } = this.props;
+		if (
+			options &&
+			options.woocommerce_onboarding_payments &&
+			options.woocommerce_onboarding_payments.methods
+		) {
+			return options.woocommerce_onboarding_payments.methods;
+		}
+
+		const { values } = this.formData;
+		const methods = {
+			stripe: values.stripe,
+			paypal: values.paypal,
+			'klarna-checkout': values.klarna_checkout,
+			'klarna-payments': values.klarna_payments,
+			square: values.square,
+		};
+		return keys( pickBy( methods ) );
 	}
 
 	getPluginsToInstall() {
@@ -216,6 +306,14 @@ class Payments extends Component {
 			values.klarna_payments ||
 			values.square;
 
+		const { showIndividualConfigs } = this.state;
+		const { activePlugins, countryCode, isJetpackConnected } = this.props;
+
+		const manualConfig =
+			isJetpackConnected && activePlugins.includes( 'woocommerce-services' ) ? false : true;
+
+		const methods = this.getMethodsToConfigure();
+
 		const steps = [
 			{
 				key: 'choose',
@@ -238,9 +336,9 @@ class Payments extends Component {
 					'Install plugins required to offer the selected payment methods',
 					'woocommerce-admin'
 				),
-				content: (
+				content: ! showIndividualConfigs && (
 					<Plugins
-						onComplete={ this.completeStep }
+						onComplete={ this.completePluginInstall }
 						autoInstall
 						pluginSlugs={ this.getPluginsToInstall() }
 					/>
@@ -252,7 +350,74 @@ class Payments extends Component {
 				label: __( 'Configure payment methods', 'woocommerce-admin' ),
 				description: __( 'Set up your chosen payment methods', 'woocommerce-admin' ),
 				content: <Fragment />,
-				visible: true,
+				visible: ! showIndividualConfigs,
+			},
+			{
+				key: 'stripe',
+				label: __( 'Enable Stripe', 'woocommerce-admin' ),
+				description: __( 'Connect your store to your Stripe account', 'woocommerce-admin' ),
+				content: (
+					<Stripe
+						manualConfig={ manualConfig }
+						markConfigured={ this.markConfigured }
+						setRequestPending={ this.setMethodRequestPending }
+						createAccount={ values.create_stripe }
+						email={ values.stripe_email }
+						countryCode={ countryCode }
+						returnUrl={ getAdminLink( 'admin.php?page=wc-admin&task=payments&stripe-connect=1' ) }
+					/>
+				),
+				visible: showIndividualConfigs && methods.includes( 'stripe' ),
+			},
+			{
+				key: 'paypal',
+				label: __( 'Enable PayPal Checkout', 'woocommerce-admin' ),
+				description: __( 'Connect your store to your PayPal account', 'woocommerce-admin' ),
+				content: (
+					<PayPal
+						markConfigured={ this.markConfigured }
+						setRequestPending={ this.setMethodRequestPending }
+					/>
+				),
+				visible: showIndividualConfigs && methods.includes( 'paypal' ),
+			},
+			{
+				key: 'square',
+				label: __( 'Enable Square', 'woocommerce-admin' ),
+				description: __( 'Connect your store to your Square account', 'woocommerce-admin' ),
+				content: (
+					<Square
+						markConfigured={ this.markConfigured }
+						setRequestPending={ this.setMethodRequestPending }
+					/>
+				),
+				visible: showIndividualConfigs && methods.includes( 'square' ),
+			},
+			{
+				key: 'klarna-checkout',
+				label: __( 'Klarna', 'woocommerce-admin' ),
+				description: '',
+				content: (
+					<Klarna
+						markConfigured={ this.markConfigured }
+						setRequestPending={ this.setMethodRequestPending }
+						plugin={ 'checkout' }
+					/>
+				),
+				visible: showIndividualConfigs && methods.includes( 'klarna-checkout' ),
+			},
+			{
+				key: 'klarna-payments',
+				label: __( 'Klarna', 'woocommerce-admin' ),
+				description: '',
+				content: (
+					<Klarna
+						markConfigured={ this.markConfigured }
+						setRequestPending={ this.setMethodRequestPending }
+						plugin={ 'payments' }
+					/>
+				),
+				visible: showIndividualConfigs && methods.includes( 'klarna-payments' ),
 			},
 		];
 
@@ -260,7 +425,7 @@ class Payments extends Component {
 	}
 
 	render() {
-		const { step } = this.state;
+		const { step, methodRequestPending } = this.state;
 		const { isSettingsRequesting } = this.props;
 		return (
 			<Form
@@ -275,7 +440,7 @@ class Payments extends Component {
 							<Card className="is-narrow">
 								<Stepper
 									isVertical
-									isPending={ isSettingsRequesting || 'install' === step }
+									isPending={ methodRequestPending || isSettingsRequesting || 'install' === step }
 									currentStep={ step }
 									steps={ this.getSteps() }
 								/>
@@ -297,12 +462,21 @@ export default compose(
 			getProfileItems,
 			isJetpackConnected,
 			getActivePlugins,
+			getOptions,
 		} = select( 'wc-api' );
 
 		const settings = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
 		const countryCode = getCountryCode( settings.woocommerce_default_country );
+
+		const options = getOptions( [ 'woocommerce_onboarding_payments' ] );
+
+		const methods = get( options, [ 'woocommerce_onboarding_payments', 'methods' ], [] );
+		const installed = get( options, [ 'woocommerce_onboarding_payments', 'installed' ], false );
+		const configured = get( options, [ 'woocommerce_onboarding_payments', 'configured' ], [] );
+
+		const completed = get( options, [ 'woocommerce_onboarding_payments', 'completed' ], false );
 
 		return {
 			countryCode,
@@ -312,6 +486,19 @@ export default compose(
 			profileItems: getProfileItems(),
 			activePlugins: getActivePlugins(),
 			isJetpackConnected: isJetpackConnected(),
+			options,
+			methods,
+			installed,
+			configured,
+			completed,
+		};
+	} ),
+	withDispatch( dispatch => {
+		const { createNotice } = dispatch( 'core/notices' );
+		const { updateOptions } = dispatch( 'wc-api' );
+		return {
+			createNotice,
+			updateOptions,
 		};
 	} )
 )( Payments );

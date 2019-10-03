@@ -567,6 +567,13 @@ class Loader {
 			);
 		}
 
+		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
+		if ( ! empty( $preload_options ) ) {
+			foreach ( $preload_options as $option ) {
+				$settings['preloadOptions'][ $option ] = get_option( $option );
+			}
+		}
+
 		$current_user_data = array();
 		foreach ( self::get_user_data_fields() as $user_field ) {
 			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );

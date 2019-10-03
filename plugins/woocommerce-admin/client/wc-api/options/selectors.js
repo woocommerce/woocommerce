@@ -18,12 +18,15 @@ const getOptions = ( getResource, requireResource ) => (
 	const resourceName = getResourceName( 'options', optionNames );
 	const options = {};
 
-	const names = requireResource( requirement, resourceName ).data || [];
+	const names = requireResource( requirement, resourceName ).data || optionNames;
 
 	names.forEach( name => {
-		options[ name ] = getResource( getResourceName( 'options', name ) ).data;
+		const data =
+			getResource( getResourceName( 'options', name ) ).data || wcSettings.preloadOptions[ name ];
+		if ( data ) {
+			options[ name ] = data;
+		}
 	} );
-
 	return options;
 };
 

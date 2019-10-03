@@ -74,10 +74,13 @@ class Start extends Component {
 	}
 
 	async startWizard() {
-		const { createNotice, isSettingsError } = this.props;
+		const { updateOptions, createNotice, isSettingsError } = this.props;
 
 		recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
 
+		await updateOptions( {
+			woocommerce_setup_jetpack_opted_in: true,
+		} );
 		await this.updateTracking();
 
 		if ( ! isSettingsError ) {
@@ -243,6 +246,26 @@ class Start extends Component {
 						/>
 					</div>
 
+					<p className="woocommerce-profile-wizard__tos">
+						{ interpolateComponents( {
+							mixedString: __(
+								'By connecting your site you agree to our fascinating {{tosLink}}Terms of Service{{/tosLink}} and to ' +
+									'{{detailsLink}}share details{{/detailsLink}} with WordPress.com. ',
+								'woocommerce-admin'
+							),
+							components: {
+								tosLink: <Link href="https://wordpress.com/tos" target="_blank" type="external" />,
+								detailsLink: (
+									<Link
+										href="https://jetpack.com/support/what-data-does-jetpack-sync"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} ) }
+					</p>
+
 					<Button
 						isPrimary
 						onClick={ this.startWizard }
@@ -287,12 +310,13 @@ export default compose(
 		};
 	} ),
 	withDispatch( dispatch => {
-		const { updateProfileItems, updateSettings } = dispatch( 'wc-api' );
+		const { updateProfileItems, updateOptions, updateSettings } = dispatch( 'wc-api' );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
 			updateProfileItems,
+			updateOptions,
 			updateSettings,
 		};
 	} )

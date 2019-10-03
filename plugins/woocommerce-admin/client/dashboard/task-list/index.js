@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { filter } from 'lodash';
+import { filter, get } from 'lodash';
 import { compose } from '@wordpress/compose';
 
 /**
@@ -45,7 +45,7 @@ class TaskDashboard extends Component {
 	}
 
 	getTasks() {
-		const { profileItems, query } = this.props;
+		const { profileItems, query, paymentsCompleted } = this.props;
 
 		return [
 			{
@@ -130,6 +130,7 @@ class TaskDashboard extends Component {
 				after: <i className="material-icons-outlined">chevron_right</i>,
 				onClick: () => updateQueryString( { task: 'payments' } ),
 				container: <Payments />,
+				className: paymentsCompleted ? 'is-complete' : null,
 				visible: true,
 			},
 		];
@@ -175,8 +176,16 @@ class TaskDashboard extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItems } = select( 'wc-api' );
+		const { getProfileItems, getOptions } = select( 'wc-api' );
 		const profileItems = getProfileItems();
-		return { profileItems };
+
+		const options = getOptions( [ 'woocommerce_onboarding_payments' ] );
+		const paymentsCompleted = get(
+			options,
+			[ 'woocommerce_onboarding_payments', 'completed' ],
+			false
+		);
+
+		return { profileItems, paymentsCompleted };
 	} )
 )( TaskDashboard );

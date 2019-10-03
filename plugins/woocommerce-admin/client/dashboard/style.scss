@@ -1,5 +1,10 @@
 /** @format */
 
+.woocommerce-page:not(.woocommerce-embed-page) #klarna-banner,
+#klarna-kp-banner {
+	display: none;
+}
+
 .woocommerce-dashboard__columns {
 	display: grid;
 	grid-template-columns: calc(50% - #{$gap-large/2}) calc(50% - #{$gap-large/2});

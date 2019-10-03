@@ -114,6 +114,32 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_connect_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/connect-paypal',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'connect_paypal' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_connect_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/connect-square',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'connect_square' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_connect_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -400,6 +426,75 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		return array(
 			'success' => true,
 		);
+	}
+
+	/**
+	 * Returns a URL that can be used to connect to PayPal.
+	 *
+	 * @return array Connect URL.
+	 */
+	public function connect_paypal() {
+		if ( ! function_exists( 'wc_gateway_ppec' ) ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to PayPal.', 'woocommerce-admin' ), 500 );
+		}
+
+		$redirect_url = add_query_arg(
+			array(
+				'env'                     => 'live',
+				'wc_ppec_ips_admin_nonce' => wp_create_nonce( 'wc_ppec_ips' ),
+			),
+			wc_admin_url( '&task=payments&paypal-connect-finish=1' )
+		);
+
+		// https://github.com/woocommerce/woocommerce-gateway-paypal-express-checkout/blob/b6df13ba035038aac5024d501e8099a37e13d6cf/includes/class-wc-gateway-ppec-ips-handler.php#L79-L93
+		$query_args = array(
+			'redirect'    => urlencode( $redirect_url ),
+			'countryCode' => WC()->countries->get_base_country(),
+			'merchantId'  => md5( site_url( '/' ) . time() ),
+		);
+		$connect_url = add_query_arg( $query_args, wc_gateway_ppec()->ips->get_middleware_login_url( 'live' ) );
+
+		return( array(
+			'connectUrl' => $connect_url,
+		) );
+	}
+
+	/**
+	 * Returns a URL that can be used to connect to Square.
+	 *
+	 * @return array Connect URL.
+	 */
+	public function connect_square() {
+		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce-admin' ), 500 );
+		}
+
+		$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
+
+		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&square-connect-finish=1' ), 'wc_square_connected' );
+		$args         = array(
+			'redirect' => urlencode( urlencode( $redirect_url ) ),
+			'scopes'   => implode( ',', array(
+				'MERCHANT_PROFILE_READ',
+				'PAYMENTS_READ',
+				'PAYMENTS_WRITE',
+				'ORDERS_READ',
+				'ORDERS_WRITE',
+				'CUSTOMERS_READ',
+				'CUSTOMERS_WRITE',
+				'SETTLEMENTS_READ',
+				'ITEMS_READ',
+				'ITEMS_WRITE',
+				'INVENTORY_READ',
+				'INVENTORY_WRITE',
+			) ),
+		);
+
+		$connect_url = add_query_arg( $args, $url );
+
+		return( array(
+			'connectUrl' => $connect_url,
+		) );
 	}
 
 	/**

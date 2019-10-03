@@ -36,6 +36,19 @@
 		}
 	}
 
+	.woocommerce-profile-wizard__container {
+		.woocommerce-profile-wizard__tos {
+			font-size: 12px;
+			margin-top: 0;
+			margin-bottom: $gap-large;
+			padding: $gap-smaller;
+
+			a {
+				color: $studio-gray-60;
+			}
+		}
+	}
+
 	.woocommerce-profile-wizard__header {
 		height: 56px;
 		border-bottom: 1px solid $studio-gray-5;

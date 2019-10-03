@@ -202,6 +202,16 @@
 		margin-top: $gap-large;
 	}
 
+	.woocommerce-list__item .woocommerce-list__item-before {
+		max-width: 96px;
+		background: $studio-gray-0;
+		padding: $gap-small;
+
+		img {
+			max-width: 72px;
+		}
+	}
+
 	.woocommerce-list__item-title {
 		border-top: 1px solid $studio-gray-5;
 		padding-top: $gap;
@@ -223,6 +233,20 @@
 			padding-left: $gap-small;
 			color: #1a1a1a;
 		}
+	}
+}
+
+.components-modal__frame.woocommerce-task-payments__stripe-error-modal {
+	.components-modal__header {
+		border-bottom: 0;
+		margin-bottom: 0;
+	}
+
+	.woocommerce-task-payments__stripe-error-wrapper {
+		align-items: flex-end;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
 	}
 }
 
