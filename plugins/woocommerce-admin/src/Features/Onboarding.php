@@ -57,10 +57,10 @@ class Onboarding {
 		if ( $this->should_show_tasks() ) {
 			OnboardingTasks::get_instance();
 		}
-		// old settings injection
+		// old settings injection.
 		// Run after Automattic\WooCommerce\Admin\Loader.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
-		// new settings injection
+		// new settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
@@ -332,9 +332,9 @@ class Onboarding {
 
 		// Only fetch if the onboarding wizard is incomplete.
 		if ( $this->should_show_profiler() ) {
-			$settings['onboarding']['productTypes']  = self::get_allowed_product_types();
-			$settings['onboarding']['themes']        = self::get_themes();
-			$settings['onboarding']['activeTheme']   = get_option( 'stylesheet' );
+			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
+			$settings['onboarding']['themes']       = self::get_themes();
+			$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
 		}
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
@@ -345,6 +345,12 @@ class Onboarding {
 		return $settings;
 	}
 
+	/**
+	 * Preload options to prime state of the application.
+	 *
+	 * @param array $options Array of options to preload.
+	 * @return array
+	 */
 	public function preload_options( $options ) {
 		if ( ! $this->should_show_tasks() ) {
 			return $options;
@@ -377,13 +383,13 @@ class Onboarding {
 		return apply_filters(
 			'woocommerce_onboarding_plugins_whitelist',
 			array(
-				'jetpack'                                     => 'jetpack/jetpack.php',
-				'woocommerce-services'                        => 'woocommerce-services/woocommerce-services.php',
-				'woocommerce-gateway-stripe'                  => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',
+				'jetpack'                         => 'jetpack/jetpack.php',
+				'woocommerce-services'            => 'woocommerce-services/woocommerce-services.php',
+				'woocommerce-gateway-stripe'      => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',
 				'woocommerce-gateway-paypal-express-checkout' => 'woocommerce-gateway-paypal-express-checkout/woocommerce-gateway-paypal-express-checkout.php',
-				'klarna-checkout-for-woocommerce'             => 'klarna-checkout-for-woocommerce/klarna-checkout-for-woocommerce.php',
-				'klarna-payments-for-woocommerce'             => 'klarna-payments-for-woocommerce/klarna-payments-for-woocommerce.php',
-				'woocommerce-square'                          => 'woocommerce-square/woocommerce-square.php',
+				'klarna-checkout-for-woocommerce' => 'klarna-checkout-for-woocommerce/klarna-checkout-for-woocommerce.php',
+				'klarna-payments-for-woocommerce' => 'klarna-payments-for-woocommerce/klarna-payments-for-woocommerce.php',
+				'woocommerce-square'              => 'woocommerce-square/woocommerce-square.php',
 			)
 		);
 	}
@@ -397,9 +403,9 @@ class Onboarding {
 		$allowed_plugins      = self::get_allowed_plugins();
 		$active_plugin_files  = array_intersect( $all_active_plugins, $allowed_plugins );
 		$allowed_plugin_slugs = array_flip( $allowed_plugins );
-		$active_plugins = array();
+		$active_plugins       = array();
 		foreach ( $active_plugin_files as $file ) {
-			$slug = $allowed_plugin_slugs[ $file ];
+			$slug             = $allowed_plugin_slugs[ $file ];
 			$active_plugins[] = $slug;
 		}
 		return $active_plugins;
@@ -423,12 +429,16 @@ class Onboarding {
 
 	/**
 	 * Instead of redirecting back to the payment settings page, we will redirect back to the payments task list with our status.
+	 *
+	 * @param string $location URL of redirect.
+	 * @param int    $status HTTP response status code.
+	 * @return string URL of redirect.
 	 */
 	public function overwrite_paypal_redirect( $location, $status ) {
 		$settings_page = 'tab=checkout&section=ppec_paypal';
-		if ( $settings_page === substr( $location, -strlen( $settings_page ) ) ) {
+		if ( substr( $location, -strlen( $settings_page ) ) === $settings_page ) {
 			$settings_array = (array) get_option( 'woocommerce_ppec_paypal_settings', array() );
-			$connected = isset( $settings_array['api_username'] ) && isset( $settings_array['api_password'] ) ? true : false;
+			$connected      = isset( $settings_array['api_username'] ) && isset( $settings_array['api_password'] ) ? true : false;
 			return wc_admin_url( '&task=payments&paypal-connect=' . $connected );
 		}
 		return $location;
@@ -450,17 +460,21 @@ class Onboarding {
 		}
 
 		// @todo This is a bit hacky but works. Ideally, woocommerce-gateway-paypal-express-checkout would contain a filter for us.
-		add_filter( 'wp_redirect', array( $this, 'overwrite_paypal_redirect'), 10, 2 );
+		add_filter( 'wp_redirect', array( $this, 'overwrite_paypal_redirect' ), 10, 2 );
 		wc_gateway_ppec()->ips->maybe_received_credentials();
 		remove_filter( 'wp_redirect', array( $this, 'overwrite_paypal_redirect' ) );
 	}
 
 	/**
 	 * Instead of redirecting back to the payment settings page, we will redirect back to the payments task list with our status.
+	 *
+	 * @param string $location URL of redirect.
+	 * @param int    $status HTTP response status code.
+	 * @return string URL of redirect.
 	 */
 	public function overwrite_square_redirect( $location, $status ) {
 		$settings_page = 'page=wc-settings&tab=square';
-		if ( $settings_page === substr( $location, -strlen( $settings_page ) ) ) {
+		if ( substr( $location, -strlen( $settings_page ) ) === $settings_page ) {
 			return wc_admin_url( '&task=payments&square-connect=1' );
 		}
 		return $location;
@@ -484,7 +498,7 @@ class Onboarding {
 		$square = \WooCommerce\Square\Plugin::instance();
 
 		// @todo This is a bit hacky but works. Ideally, woocommerce-square would contain a filter for us.
-		add_filter( 'wp_redirect', array( $this, 'overwrite_square_redirect'), 10, 2 );
+		add_filter( 'wp_redirect', array( $this, 'overwrite_square_redirect' ), 10, 2 );
 		$square->get_connection_handler()->handle_connected();
 		remove_filter( 'wp_redirect', array( $this, 'overwrite_square_redirect' ) );
 	}
@@ -517,7 +531,7 @@ class Onboarding {
 			$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
 
 			$help_tab['content'] .= '<h3>' . __( 'Profile Setup Wizard', 'woocommerce-admin' ) . '</h3>';
-			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>'.
+			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
 			( $is_enabled
 				? '<p><a href="' . wc_admin_url( '&reset_profiler=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
 				: '<p><a href="' . wc_admin_url( '&reset_profiler=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
@@ -529,7 +543,6 @@ class Onboarding {
 				? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
 				: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
 			);
-
 
 			if ( Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				$help_tab['content'] .= '<h3>' . __( 'Calypso / WordPress.com', 'woocommerce-admin' ) . '</h3>';

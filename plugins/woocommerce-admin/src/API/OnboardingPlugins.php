@@ -8,6 +8,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API;
+
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 
 defined( 'ABSPATH' ) || exit;
@@ -246,12 +247,13 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		foreach( $plugins as $plugin ) {
+		foreach ( $plugins as $plugin ) {
 			$slug              = $plugin;
 			$path              = $allowed_plugins[ $slug ];
 			$installed_plugins = get_plugins();
 
 			if ( ! in_array( $path, array_keys( $installed_plugins ), true ) ) {
+				/* translators: %s: plugin slug (example: woocommerce-services) */
 				return new \WP_Error( 'woocommerce_rest_invalid_plugin', sprintf( __( 'Invalid plugin %s.', 'woocommerce-admin' ), $slug ), 404 );
 			}
 
@@ -263,8 +265,8 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		return( array(
 			'activatedPlugins' => array_values( $plugins ),
-			'active' => Onboarding::get_active_plugins(),
-			'status' => 'success',
+			'active'           => Onboarding::get_active_plugins(),
+			'status'           => 'success',
 		) );
 	}
 
@@ -446,8 +448,8 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			wc_admin_url( '&task=payments&paypal-connect-finish=1' )
 		);
 
-		// https://github.com/woocommerce/woocommerce-gateway-paypal-express-checkout/blob/b6df13ba035038aac5024d501e8099a37e13d6cf/includes/class-wc-gateway-ppec-ips-handler.php#L79-L93
-		$query_args = array(
+		// https://github.com/woocommerce/woocommerce-gateway-paypal-express-checkout/blob/b6df13ba035038aac5024d501e8099a37e13d6cf/includes/class-wc-gateway-ppec-ips-handler.php#L79-L93.
+		$query_args  = array(
 			'redirect'    => urlencode( $redirect_url ),
 			'countryCode' => WC()->countries->get_base_country(),
 			'merchantId'  => md5( site_url( '/' ) . time() ),
@@ -474,20 +476,23 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&square-connect-finish=1' ), 'wc_square_connected' );
 		$args         = array(
 			'redirect' => urlencode( urlencode( $redirect_url ) ),
-			'scopes'   => implode( ',', array(
-				'MERCHANT_PROFILE_READ',
-				'PAYMENTS_READ',
-				'PAYMENTS_WRITE',
-				'ORDERS_READ',
-				'ORDERS_WRITE',
-				'CUSTOMERS_READ',
-				'CUSTOMERS_WRITE',
-				'SETTLEMENTS_READ',
-				'ITEMS_READ',
-				'ITEMS_WRITE',
-				'INVENTORY_READ',
-				'INVENTORY_WRITE',
-			) ),
+			'scopes'   => implode(
+				',',
+				array(
+					'MERCHANT_PROFILE_READ',
+					'PAYMENTS_READ',
+					'PAYMENTS_WRITE',
+					'ORDERS_READ',
+					'ORDERS_WRITE',
+					'CUSTOMERS_READ',
+					'CUSTOMERS_WRITE',
+					'SETTLEMENTS_READ',
+					'ITEMS_READ',
+					'ITEMS_WRITE',
+					'INVENTORY_READ',
+					'INVENTORY_WRITE',
+				)
+			),
 		);
 
 		$connect_url = add_query_arg( $args, $url );
