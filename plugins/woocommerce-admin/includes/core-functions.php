@@ -20,8 +20,8 @@ function wc_admin_number_format( $number ) {
 	return number_format(
 		$number,
 		0,
-		$currency_settings['decimal_separator'],
-		$currency_settings['thousand_separator']
+		$currency_settings['decimalSeparator'],
+		$currency_settings['thousandSeparator']
 	);
 }
 
