@@ -92,7 +92,7 @@ class StoreDetails extends Component {
 						onSubmitCallback={ this.onContinue }
 						validate={ validateStoreAddress }
 					>
-						{ ( { getInputProps, handleSubmit } ) => (
+						{ ( { getInputProps, handleSubmit, isValidForm } ) => (
 							<Fragment>
 								<StoreAddress getInputProps={ getInputProps } />
 								<CheckboxControl
@@ -100,7 +100,7 @@ class StoreDetails extends Component {
 									{ ...getInputProps( 'isClient' ) }
 								/>
 
-								<Button isPrimary onClick={ handleSubmit }>
+								<Button isPrimary onClick={ handleSubmit } disabled={ ! isValidForm }>
 									{ __( 'Continue', 'woocommerce-admin' ) }
 								</Button>
 							</Fragment>

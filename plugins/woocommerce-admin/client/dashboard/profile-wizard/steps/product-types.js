@@ -87,7 +87,7 @@ class ProductTypes extends Component {
 
 	render() {
 		const { productTypes } = wcSettings.onboarding;
-		const { error } = this.state;
+		const { error, selected } = this.state;
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -134,6 +134,7 @@ class ProductTypes extends Component {
 						isPrimary
 						className="woocommerce-profile-wizard__continue"
 						onClick={ this.onContinue }
+						disabled={ ! selected.length }
 					>
 						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>

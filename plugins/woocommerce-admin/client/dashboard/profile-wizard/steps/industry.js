@@ -85,7 +85,7 @@ class Industry extends Component {
 
 	render() {
 		const { industries } = onboarding;
-		const { error } = this.state;
+		const { error, selected } = this.state;
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -108,7 +108,7 @@ class Industry extends Component {
 						{ error && <span className="woocommerce-profile-wizard__error">{ error }</span> }
 					</div>
 
-					<Button isPrimary onClick={ this.onContinue }>
+					<Button isPrimary onClick={ this.onContinue } disabled={ ! selected.length }>
 						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>
 				</Card>

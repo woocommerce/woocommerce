@@ -106,6 +106,7 @@ class Form extends Component {
 			setValue: this.setValue,
 			handleSubmit: this.handleSubmit,
 			getInputProps: this.getInputProps,
+			isValidForm: ! Object.keys( errors ).length,
 		};
 	}
 

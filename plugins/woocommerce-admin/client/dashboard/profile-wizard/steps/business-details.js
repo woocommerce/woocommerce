@@ -304,7 +304,7 @@ class BusinessDetails extends Component {
 				onSubmitCallback={ this.onContinue }
 				validate={ this.validate }
 			>
-				{ ( { getInputProps, handleSubmit, values } ) => {
+				{ ( { getInputProps, handleSubmit, values, isValidForm } ) => {
 					// Show extensions when the currently selling elsewhere checkbox has been answered.
 					const showExtensions = '' !== values.selling_venues;
 					return (
@@ -360,6 +360,7 @@ class BusinessDetails extends Component {
 										isPrimary
 										className="woocommerce-profile-wizard__continue"
 										onClick={ handleSubmit }
+										disabled={ ! isValidForm }
 									>
 										{ __( 'Continue', 'woocommerce-admin' ) }
 									</Button>

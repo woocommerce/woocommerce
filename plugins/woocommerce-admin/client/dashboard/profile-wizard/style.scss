@@ -130,8 +130,7 @@
 
 	.woocommerce-profile-wizard__error {
 		display: block;
-		margin-top: $gap;
-		margin-bottom: $gap;
+		padding: $gap;
 		font-size: 12px;
 		color: $studio-red-50;
 	}
