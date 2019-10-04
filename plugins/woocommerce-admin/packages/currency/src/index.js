@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import { isNaN } from 'lodash';
 import { sprintf } from '@wordpress/i18n';
 
 /**
@@ -46,7 +45,7 @@ export function getCurrencyFormatDecimal( number ) {
 	if ( 'number' !== typeof number ) {
 		number = parseFloat( number );
 	}
-	if ( isNaN( number ) ) {
+	if ( Number.isNaN( number ) ) {
 		return 0;
 	}
 	return Math.round( number * Math.pow( 10, precision ) ) / Math.pow( 10, precision );
@@ -64,7 +63,7 @@ export function getCurrencyFormatString( number ) {
 	if ( 'number' !== typeof number ) {
 		number = parseFloat( number );
 	}
-	if ( isNaN( number ) ) {
+	if ( Number.isNaN( number ) ) {
 		return '';
 	}
 	return number.toFixed( precision );
