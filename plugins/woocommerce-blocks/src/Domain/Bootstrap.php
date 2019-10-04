@@ -75,9 +75,23 @@ class Bootstrap {
 		$this->container->register(
 			AssetDataRegistry::class,
 			function( Container $container ) {
-				$asset_api        = $container->get( AssetApi::class );
-				$load_back_compat = defined( 'WC_ADMIN_VERSION_NUMBER' )
-					&& version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' );
+				$asset_api  = $container->get( AssetApi::class );
+				$js_package = \json_decode(
+					// phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+					\file_get_contents(
+						$this->package->get_path( 'package.json' )
+					),
+					true
+				);
+				$woocommerce_components_version =
+					isset( $js_package['dependencies']['@woocommerce/components'] )
+						? $js_package['dependencies']['@woocommerce/components']
+						: 0;
+				$load_back_compat               = '3.2.0' === $woocommerce_components_version
+					|| (
+						defined( 'WC_ADMIN_VERSION_NUMBER' )
+						&& version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' )
+					);
 				return $load_back_compat
 					? new BackCompatAssetDataRegistry( $asset_api )
 					: new AssetDataRegistry( $asset_api );
