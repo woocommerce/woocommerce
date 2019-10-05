@@ -76,7 +76,7 @@ abstract class WC_CSV_Exporter {
 	 *
 	 * @var string
 	 */
-	protected $delimiter = ",";
+	protected $delimiter = ',';
 
 	/**
 	 * Prepare data that will be exported.
@@ -121,7 +121,7 @@ abstract class WC_CSV_Exporter {
 	 * Return the delimiter to use in CSV file
 	 *
 	 * @since 3.9.0
-	 * @return String
+	 * @return string
 	 */
 	public function get_delimiter() {
 		return apply_filters( "woocommerce_{$this->export_type}_export_delimiter", $this->delimiter );
