@@ -9,7 +9,7 @@ import { HOME_URL } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import withComponentId from '../../base/hocs/with-component-id';
+import withComponentId from '@woocommerce/base-hocs/with-component-id';
 
 /**
  * Component displaying the categories as dropdown or list.

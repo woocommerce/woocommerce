@@ -24,10 +24,10 @@ import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import GridContentControl from '../../components/grid-content-control';
-import { IconWidgets } from '../../components/icons';
-import ProductsControl from '../../components/products-control';
-import ProductOrderbyControl from '../../components/product-orderby-control';
+import GridContentControl from '@woocommerce/block-components/grid-content-control';
+import { IconWidgets } from '@woocommerce/block-components/icons';
+import ProductsControl from '@woocommerce/block-components/products-control';
+import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
 
 /**
  * Component to handle edit mode of "Hand-picked Products".

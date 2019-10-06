@@ -10,7 +10,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import './editor.scss';
 import './style.scss';
 import edit from './edit.js';
-import { IconFolder } from '../../components/icons';
+import { IconFolder } from '@woocommerce/block-components/icons';
 
 registerBlockType( 'woocommerce/product-categories', {
 	title: __( 'Product Categories List', 'woo-gutenberg-products-block' ),

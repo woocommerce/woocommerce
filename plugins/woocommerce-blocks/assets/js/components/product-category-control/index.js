@@ -11,8 +11,8 @@ import { SelectControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { withCategories } from '../../hocs';
-import ErrorMessage from '../error-placeholder/error-message.js';
+import { withCategories } from '@woocommerce/block-hocs';
+import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
 import './style.scss';
 
 const ProductCategoryControl = ( {

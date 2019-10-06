@@ -13,7 +13,7 @@ import { Fragment } from '@wordpress/element';
 import './style.scss';
 import './editor.scss';
 import Block from './block.js';
-import { IconProductSearch } from '../../components/icons';
+import { IconProductSearch } from '@woocommerce/block-components/icons';
 
 registerBlockType( 'woocommerce/product-search', {
 	title: __( 'Product Search', 'woo-gutenberg-products-block' ),

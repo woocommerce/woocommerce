@@ -18,7 +18,7 @@ import {
 /**
  * Internal dependencies
  */
-import ToggleButtonControl from '../../components/toggle-button-control';
+import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 
 export const getBlockControls = ( editMode, setAttributes ) => (
 	<BlockControls>

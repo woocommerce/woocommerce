@@ -7,7 +7,7 @@ import { Placeholder } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { IconAllReviews } from '../../../components/icons';
+import { IconAllReviews } from '@woocommerce/block-components/icons';
 
 const NoCategoryReviewsPlaceholder = () => {
 	return (

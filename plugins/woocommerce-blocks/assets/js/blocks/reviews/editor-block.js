@@ -10,11 +10,11 @@ import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import ErrorPlaceholder from '../../components/error-placeholder';
-import LoadMoreButton from '../../base/components/load-more-button';
-import ReviewList from '../../base/components/review-list';
-import ReviewOrderSelect from '../../base/components/review-order-select';
-import withReviews from '../../base/hocs/with-reviews';
+import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
+import LoadMoreButton from '@woocommerce/base-components/load-more-button';
+import ReviewList from '@woocommerce/base-components/review-list';
+import ReviewOrderSelect from '@woocommerce/base-components/review-order-select';
+import withReviews from '@woocommerce/base-hocs/with-reviews';
 
 /**
  * Block rendered in the editor.

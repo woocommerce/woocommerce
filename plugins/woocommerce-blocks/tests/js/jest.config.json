@@ -6,16 +6,24 @@
 		"!**/vendor/**",
 		"!**/test/**"
 	],
-	"moduleDirectories": [ "node_modules" ],
+	"moduleDirectories": [
+		"node_modules"
+	],
 	"moduleNameMapper": {
 		"@woocommerce/settings": "assets/js/settings/shared",
-		"@woocommerce/block-settings": "assets/js/settings/blocks"
+		"@woocommerce/block-settings": "assets/js/settings/blocks",
+		"@woocommerce/block-components(.*)$": "assets/js/components/$1",
+		"@woocommerce/block-hocs(.*)$": "assets/js/hocs/$1",
+		"@woocommerce/base-components(.*)$": "assets/js/base/components/$1",
+		"@woocommerce/base-hocs(.*)$": "assets/js/base/hocs/$1"
 	},
 	"setupFiles": [
 		"<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
 		"<rootDir>/tests/js/setup-globals"
 	],
-	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
+	"transformIgnorePatterns": [
+		"node_modules/(?!(simple-html-tokenizer)/)"
+	],
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
 		"^.+\\.js$": "<rootDir>/tests/js/jestPreprocess.js"

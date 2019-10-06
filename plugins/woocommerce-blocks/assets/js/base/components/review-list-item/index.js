@@ -8,7 +8,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import ReadMore from '../read-more';
+import ReadMore from '@woocommerce/base-components/read-more';
 import './style.scss';
 
 function getReviewImage( review, imageType, isLoading ) {

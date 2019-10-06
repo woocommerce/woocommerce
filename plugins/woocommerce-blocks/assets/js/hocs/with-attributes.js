@@ -9,7 +9,7 @@ import { debounce } from 'lodash';
 /**
  * Internal dependencies
  */
-import { getAttributes, getTerms } from '../components/utils';
+import { getAttributes, getTerms } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 const withAttributes = createHigherOrderComponent( ( OriginalComponent ) => {

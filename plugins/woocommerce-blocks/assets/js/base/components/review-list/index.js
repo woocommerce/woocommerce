@@ -10,7 +10,7 @@ import {
 /**
  * Internal dependencies
  */
-import ReviewListItem from '../review-list-item';
+import ReviewListItem from '@woocommerce/base-components/review-list-item';
 import './style.scss';
 
 const ReviewList = ( { attributes, reviews } ) => {

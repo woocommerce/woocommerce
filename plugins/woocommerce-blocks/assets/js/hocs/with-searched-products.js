@@ -10,7 +10,7 @@ import { IS_LARGE_CATALOG } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import { getProducts } from '../components/utils';
+import { getProducts } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 /**

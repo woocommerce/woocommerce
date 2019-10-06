@@ -11,13 +11,16 @@ import {
 	withProductVariations,
 	withSearchedProducts,
 	withTransformSingleSelectToMultipleSelect,
-} from '../../hocs';
+} from '@woocommerce/block-hocs';
 
 /**
  * Internal dependencies
  */
-import { IconRadioSelected, IconRadioUnselected } from '../icons';
-import ErrorMessage from '../error-placeholder/error-message.js';
+import {
+	IconRadioSelected,
+	IconRadioUnselected,
+} from '@woocommerce/block-components/icons';
+import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
 import './style.scss';
 
 function getHighlightedName( name, search ) {

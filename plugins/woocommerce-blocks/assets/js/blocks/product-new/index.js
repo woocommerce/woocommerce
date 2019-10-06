@@ -10,7 +10,7 @@ import { without } from 'lodash';
  */
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import { IconNewReleases } from '../../components/icons';
+import { IconNewReleases } from '@woocommerce/block-components/icons';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';

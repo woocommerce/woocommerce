@@ -34,9 +34,9 @@ import { MIN_HEIGHT } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import { IconFolderStar } from '../../components/icons';
-import ProductCategoryControl from '../../components/product-category-control';
-import ErrorPlaceholder from '../../components/error-placeholder';
+import { IconFolderStar } from '@woocommerce/block-components/icons';
+import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
+import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 import {
 	dimRatioToClass,
 	getBackgroundImageStyles,

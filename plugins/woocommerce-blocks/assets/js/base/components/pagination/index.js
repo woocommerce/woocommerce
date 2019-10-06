@@ -8,7 +8,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Label from '../label';
+import Label from '@woocommerce/base-components/label';
 import { getIndexes } from './utils.js';
 import './style.scss';
 

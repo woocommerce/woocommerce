@@ -9,7 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import '../editor.scss';
 import Editor from './edit';
-import { IconAllReviews } from '../../../components/icons';
+import { IconAllReviews } from '@woocommerce/block-components/icons';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
 

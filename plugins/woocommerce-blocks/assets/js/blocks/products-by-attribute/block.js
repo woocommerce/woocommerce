@@ -22,10 +22,10 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import GridContentControl from '../../components/grid-content-control';
-import GridLayoutControl from '../../components/grid-layout-control';
-import ProductAttributeControl from '../../components/product-attribute-control';
-import ProductOrderbyControl from '../../components/product-orderby-control';
+import GridContentControl from '@woocommerce/block-components/grid-content-control';
+import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
+import ProductAttributeControl from '@woocommerce/block-components/product-attribute-control';
+import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
 
 /**
  * Component to handle edit mode of "Products by Attribute".
