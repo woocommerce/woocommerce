@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import OrderSelect from '../order-select';
+import OrderSelect from '@woocommerce/base-components/order-select';
 
 const ProductOrderSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 	return (

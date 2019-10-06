@@ -7,7 +7,7 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getCategories } from '../components/utils';
+import { getCategories } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 const withCategories = createHigherOrderComponent( ( OriginalComponent ) => {

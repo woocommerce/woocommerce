@@ -8,9 +8,9 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import ErrorPlaceholder from '../../../components/error-placeholder';
-import { IconReviewsByProduct } from '../../../components/icons';
-import { withProduct } from '../../../hocs';
+import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
+import { IconReviewsByProduct } from '@woocommerce/block-components/icons';
+import { withProduct } from '@woocommerce/block-hocs';
 
 const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 	const renderApiError = () => (

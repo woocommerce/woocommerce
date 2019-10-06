@@ -10,9 +10,9 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import GridContentControl from '../../components/grid-content-control';
-import GridLayoutControl from '../../components/grid-layout-control';
-import ProductCategoryControl from '../../components/product-category-control';
+import GridContentControl from '@woocommerce/block-components/grid-content-control';
+import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
+import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
 
 /**
  * Component to handle edit mode of "Newest Products".

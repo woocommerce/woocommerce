@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { IconAllReviews } from '../../../components/icons';
+import { IconAllReviews } from '@woocommerce/block-components/icons';
 import EditorContainerBlock from '../editor-container-block.js';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
 import {

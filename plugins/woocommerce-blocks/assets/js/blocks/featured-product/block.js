@@ -35,14 +35,14 @@ import { MIN_HEIGHT } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import ProductControl from '../../components/product-control';
-import ErrorPlaceholder from '../../components/error-placeholder';
+import ProductControl from '@woocommerce/block-components/product-control';
+import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 import { dimRatioToClass, getBackgroundImageStyles } from './utils';
 import {
 	getImageSrcFromProduct,
 	getImageIdFromProduct,
 } from '../../utils/products';
-import { withProduct } from '../../hocs';
+import { withProduct } from '@woocommerce/block-hocs';
 
 /**
  * Component to handle edit mode of "Featured Product".

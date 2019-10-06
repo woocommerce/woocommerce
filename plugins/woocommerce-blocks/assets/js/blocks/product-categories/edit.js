@@ -11,9 +11,9 @@ import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
  */
 import './editor.scss';
 import Block from './block.js';
-import ToggleButtonControl from '../../components/toggle-button-control';
+import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 import getCategories from './get-categories';
-import { IconFolder } from '../../components/icons';
+import { IconFolder } from '@woocommerce/block-components/icons';
 
 export default function( { attributes, setAttributes } ) {
 	const { hasCount, hasEmpty, isDropdown, isHierarchical } = attributes;

@@ -16,8 +16,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import ProductControl from '../../../components/product-control';
-import { IconReviewsByProduct } from '../../../components/icons';
+import ProductControl from '@woocommerce/block-components/product-control';
+import { IconReviewsByProduct } from '@woocommerce/block-components/icons';
 import EditorContainerBlock from '../editor-container-block.js';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
 import {

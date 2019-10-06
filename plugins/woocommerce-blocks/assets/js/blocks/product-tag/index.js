@@ -10,7 +10,7 @@ import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/block-settings';
  */
 import './editor.scss';
 import Block from './block';
-import { IconProductTag } from '../../components/icons';
+import { IconProductTag } from '@woocommerce/block-components/icons';
 
 /**
  * Register and run the "Products by Tag" block.

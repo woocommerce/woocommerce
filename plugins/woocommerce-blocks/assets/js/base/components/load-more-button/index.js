@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import Label from '../label';
+import Label from '@woocommerce/base-components/label';
 import './style.scss';
 
 export const LoadMoreButton = ( { onClick, label, screenReaderLabel } ) => {

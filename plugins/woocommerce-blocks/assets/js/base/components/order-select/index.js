@@ -7,8 +7,8 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import Label from '../label';
-import withComponentId from '../../hocs/with-component-id';
+import Label from '@woocommerce/base-components/label';
+import withComponentId from '@woocommerce/base-hocs/with-component-id';
 import './style.scss';
 
 /**

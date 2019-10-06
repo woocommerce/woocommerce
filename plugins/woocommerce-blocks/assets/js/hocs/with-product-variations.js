@@ -9,7 +9,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 /**
  * Internal dependencies
  */
-import { getProductVariations } from '../components/utils';
+import { getProductVariations } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 const withProductVariations = createHigherOrderComponent(

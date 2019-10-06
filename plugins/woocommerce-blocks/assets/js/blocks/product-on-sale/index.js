@@ -13,7 +13,7 @@ import { deprecatedConvertToShortcode } from '../../utils/deprecations';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
-import { IconProductOnSale } from '../../components/icons';
+import { IconProductOnSale } from '@woocommerce/block-components/icons';
 
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),

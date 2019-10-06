@@ -11,7 +11,7 @@ import { DEFAULT_COLUMNS } from '@woocommerce/block-settings';
 import './editor.scss';
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import { IconWidgets } from '../../components/icons';
+import { IconWidgets } from '@woocommerce/block-components/icons';
 
 registerBlockType( 'woocommerce/handpicked-products', {
 	title: __( 'Hand-picked Products', 'woo-gutenberg-products-block' ),
