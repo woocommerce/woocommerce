@@ -25,6 +25,7 @@ import Plugins from '../steps/plugins';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class Shipping extends Component {
 	constructor() {
@@ -148,7 +149,16 @@ class Shipping extends Component {
 				key: 'store_location',
 				label: __( 'Set store location', 'woocommerce-admin' ),
 				description: __( 'The address from which your business operates', 'woocommerce-admin' ),
-				content: <StoreLocation onComplete={ this.completeStep } { ...this.props } />,
+				content: (
+					<StoreLocation
+						onComplete={ values => {
+							const country = getCountryCode( values.countryState );
+							recordEvent( 'tasklist_shipping_set_location', { country } );
+							this.completeStep();
+						} }
+						{ ...this.props }
+					/>
+				),
 				visible: true,
 			},
 			{
@@ -177,8 +187,14 @@ class Shipping extends Component {
 				),
 				content: (
 					<Plugins
-						onComplete={ this.completeStep }
-						onSkip={ () => getHistory().push( getNewPath( {}, '/', {} ) ) }
+						onComplete={ () => {
+							recordEvent( 'tasklist_shipping_label_printing', { install: true } );
+							this.completeStep();
+						} }
+						onSkip={ () => {
+							recordEvent( 'tasklist_shipping_label_printing', { install: false } );
+							getHistory().push( getNewPath( {}, '/', {} ) );
+						} }
 						{ ...this.props }
 					/>
 				),
@@ -191,7 +207,15 @@ class Shipping extends Component {
 					'Connect your store to WordPress.com to enable label printing',
 					'woocommerce-admin'
 				),
-				content: <Connect completeStep={ this.completeStep } { ...this.props } />,
+				content: (
+					<Connect
+						completeStep={ this.completeStep }
+						{ ...this.props }
+						onConnect={ () => {
+							recordEvent( 'tasklist_shipping_connect_store' );
+						} }
+					/>
+				),
 				visible: 'US' === countryCode,
 			},
 		];

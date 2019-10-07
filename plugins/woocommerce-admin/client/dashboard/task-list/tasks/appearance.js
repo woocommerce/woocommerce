@@ -22,6 +22,7 @@ import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
  */
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class Appearance extends Component {
 	constructor( props ) {
@@ -137,6 +138,8 @@ class Appearance extends Component {
 		const { createNotice } = this.props;
 		this.setState( { isPending: true } );
 
+		recordEvent( 'tasklist_appearance_create_homepage', { create_homepage: true } );
+
 		apiFetch( { path: '/wc-admin/v1/onboarding/tasks/create_homepage', method: 'POST' } )
 			.then( response => {
 				createNotice( response.status, response.message );
@@ -157,6 +160,8 @@ class Appearance extends Component {
 		const { logo } = this.state;
 		const updateThemeMods = logo ? { ...themeMods, custom_logo: logo.id } : themeMods;
 
+		recordEvent( 'tasklist_appearance_upload_logo' );
+
 		updateOptions( {
 			[ `theme_mods_${ options.stylesheet }` ]: updateThemeMods,
 		} );
@@ -165,6 +170,10 @@ class Appearance extends Component {
 	updateNotice() {
 		const { updateOptions } = this.props;
 		const { storeNoticeText } = this.state;
+
+		recordEvent( 'tasklist_appearance_set_store_notice', {
+			added_text: Boolean( storeNoticeText.length ),
+		} );
 
 		updateOptions( {
 			woocommerce_demo_store: storeNoticeText.length ? 'yes' : 'no',
@@ -208,7 +217,12 @@ class Appearance extends Component {
 						<Button isPrimary onClick={ this.createHomepage }>
 							{ __( 'Create homepage', 'woocommerce-admin' ) }
 						</Button>
-						<Button onClick={ () => this.completeStep() }>
+						<Button
+							onClick={ () => {
+								recordEvent( 'tasklist_appearance_create_homepage', { create_homepage: false } );
+								this.completeStep();
+							} }
+						>
 							{ __( 'Skip', 'woocommerce-admin' ) }
 						</Button>
 					</Fragment>

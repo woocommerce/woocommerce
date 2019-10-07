@@ -17,6 +17,11 @@ import { Flag, Form } from '@woocommerce/components';
 import { getCurrencyFormatString } from '@woocommerce/currency';
 import { CURRENCY, getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
+/**
+ * Internal dependencies
+ */
+import { recordEvent } from 'lib/tracks';
+
 const { symbol, symbolPosition } = CURRENCY;
 
 class ShippingRates extends Component {
@@ -29,7 +34,17 @@ class ShippingRates extends Component {
 	async updateShippingZones( values ) {
 		const { createNotice, shippingZones } = this.props;
 
+		let restOfTheWorld = false;
+		let shippingCost = false;
 		shippingZones.map( zone => {
+			if ( 0 === zone.id ) {
+				restOfTheWorld = zone.toggleEnabled && values[ `${ zone.id }_enabled` ];
+			} else {
+				shippingCost =
+					'' !== values[ `${ zone.id }_rate` ] &&
+					parseFloat( values[ `${ zone.id }_rate` ] ) !== parseFloat( 0 );
+			}
+
 			const flatRateMethods = zone.methods
 				? zone.methods.filter( method => 'flat_rate' === method.method_id )
 				: [];
@@ -71,6 +86,11 @@ class ShippingRates extends Component {
 					},
 				} );
 			}
+		} );
+
+		recordEvent( 'tasklist_shipping_set_costs', {
+			shipping_cost: shippingCost,
+			rest_world: restOfTheWorld,
 		} );
 
 		// @todo This is a workaround to force the task to mark as complete.

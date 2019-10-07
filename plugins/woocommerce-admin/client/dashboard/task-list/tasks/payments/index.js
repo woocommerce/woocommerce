@@ -14,7 +14,6 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { getCountryCode } from 'dashboard/utils';
 import { Form, Card, Stepper, List } from '@woocommerce/components';
 import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
 import { WC_ASSET_URL as wcAssetUrl } from '@woocommerce/wc-admin-settings';
@@ -22,6 +21,8 @@ import { WC_ASSET_URL as wcAssetUrl } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
+import { recordEvent } from 'lib/tracks';
+import { getCountryCode } from 'dashboard/utils';
 import withSelect from 'wc-api/with-select';
 import Plugins from '../steps/plugins';
 import Stripe from './stripe';
@@ -33,6 +34,7 @@ class Payments extends Component {
 	constructor() {
 		super( ...arguments );
 
+		this.chooseMethods = this.chooseMethods.bind( this );
 		this.completeStep = this.completeStep.bind( this );
 		this.markConfigured = this.markConfigured.bind( this );
 		this.setMethodRequestPending = this.setMethodRequestPending.bind( this );
@@ -197,6 +199,7 @@ class Payments extends Component {
 		const { countryCode, profileItems } = this.props;
 		const methods = [
 			{
+				key: 'stripe',
 				title: __( 'Credit cards - powered by Stripe', 'woocommerce-admin' ),
 				content: (
 					<Fragment>
@@ -213,6 +216,7 @@ class Payments extends Component {
 				visible: true,
 			},
 			{
+				key: 'paypal',
 				title: __( 'PayPal Checkout', 'woocommerce-admin' ),
 				content: (
 					<Fragment>
@@ -227,6 +231,7 @@ class Payments extends Component {
 				visible: true,
 			},
 			{
+				key: 'klarna_checkout',
 				title: __( 'Klarna Checkout', 'woocommerce-admin' ),
 				content: __(
 					'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.',
@@ -237,6 +242,7 @@ class Payments extends Component {
 				visible: [ 'SE', 'FI', 'NO', 'NL' ].includes( countryCode ),
 			},
 			{
+				key: 'klarna_payments',
 				title: __( 'Klarna Payments', 'woocommerce-admin' ),
 				content: __(
 					'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.',
@@ -247,6 +253,7 @@ class Payments extends Component {
 				visible: [ 'DK', 'DE', 'AT' ].includes( countryCode ),
 			},
 			{
+				key: 'square',
 				title: __( 'Square', 'woocommerce-admin' ),
 				content: __(
 					'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). ' +
@@ -297,6 +304,21 @@ class Payments extends Component {
 		return keys( pickBy( pluginSlugs ) );
 	}
 
+	chooseMethods() {
+		const methodsDisplayed = this.getMethodOptions().map( method => method.key );
+		const methodsChosen = this.getMethodsToConfigure();
+		const { values } = this.formData;
+		const createAccount = values.create_stripe || false;
+
+		recordEvent( 'wcadmin_tasklist_payment_choose_method', {
+			payment_methods_displayed: methodsDisplayed,
+			payment_methods_chosen: methodsChosen,
+			create_stripe_account: createAccount,
+		} );
+
+		this.completeStep();
+	}
+
 	getSteps() {
 		const { values } = this.formData;
 		const isMethodSelected =
@@ -322,7 +344,7 @@ class Payments extends Component {
 				content: (
 					<Fragment>
 						<List items={ this.getMethodOptions() } />
-						<Button onClick={ this.completeStep } isPrimary disabled={ ! isMethodSelected }>
+						<Button onClick={ this.chooseMethods } isPrimary disabled={ ! isMethodSelected }>
 							{ __( 'Proceed', 'woocommerce-admin' ) }
 						</Button>
 					</Fragment>
@@ -338,7 +360,10 @@ class Payments extends Component {
 				),
 				content: ! showIndividualConfigs && (
 					<Plugins
-						onComplete={ this.completePluginInstall }
+						onComplete={ () => {
+							this.completePluginInstall();
+							recordEvent( 'tasklist_payment_install_method' );
+						} }
 						autoInstall
 						pluginSlugs={ this.getPluginsToInstall() }
 					/>

@@ -26,6 +26,7 @@ import { getCountryCode } from 'dashboard/utils';
 import Plugins from './steps/plugins';
 import StoreLocation from './steps/location';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class Tax extends Component {
 	constructor() {
@@ -61,8 +62,9 @@ class Tax extends Component {
 		const { stepIndex } = this.state;
 		const currentStep = this.getSteps()[ stepIndex ];
 		const currentStepKey = currentStep && currentStep.key;
-		const isCompleteAddress =
-			woocommerce_store_address && woocommerce_default_country && woocommerce_store_postcode;
+		const isCompleteAddress = Boolean(
+			woocommerce_store_address && woocommerce_default_country && woocommerce_store_postcode
+		);
 
 		// Show the success screen if all requirements are satisfied from the beginning.
 		if (
@@ -163,7 +165,16 @@ class Tax extends Component {
 						/>
 					</div>
 				</div>
-				<Button isPrimary onClick={ this.updateAutomatedTax } isBusy={ isTaxSettingsRequesting }>
+				<Button
+					isPrimary
+					onClick={ () => {
+						recordEvent( 'tasklist_tax_setup_automated_proceed', {
+							automated_taxes: automatedTaxEnabled,
+						} );
+						this.updateAutomatedTax();
+					} }
+					isBusy={ isTaxSettingsRequesting }
+				>
 					{ __( 'Complete task', 'woocommerce-admin' ) }
 				</Button>
 			</Fragment>
@@ -181,7 +192,11 @@ class Tax extends Component {
 				content: (
 					<StoreLocation
 						{ ...this.props }
-						onComplete={ this.completeStep }
+						onComplete={ values => {
+							const country = getCountryCode( values.countryState );
+							recordEvent( 'tasklist_tax_set_location', { country } );
+							this.completeStep();
+						} }
 						isSettingsRequesting={ isGeneralSettingsRequesting }
 						settings={ generalSettings }
 					/>
@@ -197,12 +212,16 @@ class Tax extends Component {
 				),
 				content: (
 					<Plugins
-						onComplete={ this.completeStep }
-						onSkip={ () =>
-							( window.location.href = getAdminLink(
+						onComplete={ () => {
+							recordEvent( 'tasklist_tax_install_extensions', { install_extensions: true } );
+							this.completeStep();
+						} }
+						onSkip={ () => {
+							recordEvent( 'tasklist_tax_install_extensions', { install_extensions: false } );
+							window.location.href = getAdminLink(
 								'admin.php?page=wc-settings&tab=tax&section=standard'
-							) )
-						}
+							);
+						} }
 						skipText={ __( 'Set up tax rates manually', 'woocommerce-admin' ) }
 					/>
 				),
@@ -215,7 +234,14 @@ class Tax extends Component {
 					'Connect your store to WordPress.com to enable automated sales tax calculations',
 					'woocommerce-admin'
 				),
-				content: <Connect { ...this.props } />,
+				content: (
+					<Connect
+						{ ...this.props }
+						onConnect={ () => {
+							recordEvent( 'tasklist_tax_connect_store' );
+						} }
+					/>
+				),
 				visible: this.isSupportedCountry(),
 			},
 			{
@@ -238,6 +264,9 @@ class Tax extends Component {
 				content: (
 					<Button
 						isPrimary
+						onClick={ () => {
+							recordEvent( 'tasklist_tax_config_rates' );
+						} }
 						href={ getAdminLink( 'admin.php?page=wc-settings&tab=tax&section=standard' ) }
 					>
 						{ __( 'Configure', 'woocommerce-admin' ) }
@@ -290,16 +319,22 @@ class Tax extends Component {
 							</p>
 							<Button
 								isPrimary
-								onClick={ () =>
-									this.setState( { automatedTaxEnabled: true }, this.updateAutomatedTax )
-								}
+								onClick={ () => {
+									recordEvent( 'tasklist_tax_setup_automated_simple', {
+										setup_automatically: true,
+									} );
+									this.setState( { automatedTaxEnabled: true }, this.updateAutomatedTax );
+								} }
 							>
 								{ __( 'Yes please', 'woocommerce-admin' ) }
 							</Button>
 							<Button
-								onClick={ () =>
-									this.setState( { automatedTaxEnabled: false }, this.updateAutomatedTax )
-								}
+								onClick={ () => {
+									recordEvent( 'tasklist_tax_setup_automated_simple', {
+										setup_automatically: false,
+									} );
+									this.setState( { automatedTaxEnabled: false }, this.updateAutomatedTax );
+								} }
 							>
 								{ __( "No thanks, I'll configure taxes manually", 'woocommerce-admin' ) }
 							</Button>

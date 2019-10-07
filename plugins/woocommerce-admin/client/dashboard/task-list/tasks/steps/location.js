@@ -39,7 +39,7 @@ export default class StoreLocation extends Component {
 		} );
 
 		if ( ! isSettingsError ) {
-			onComplete();
+			onComplete( values );
 		} else {
 			createNotice(
 				'error',

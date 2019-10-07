@@ -25,6 +25,7 @@ import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 const { customLogo, hasHomepage, hasProducts, shippingZonesCount } = getSetting( 'onboarding', {
 	customLogo: '',
@@ -37,11 +38,25 @@ class TaskDashboard extends Component {
 	componentDidMount() {
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-task-dashboard__body' );
+
+		this.recordEvent();
 	}
 
 	componentWillUnmount() {
 		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-task-dashboard__body' );
+	}
+
+	recordEvent() {
+		if ( this.getCurrentTask() ) {
+			return;
+		}
+		const { profileItems } = this.props;
+		const tasks = filter( this.getTasks(), task => task.visible );
+		recordEvent( 'tasklist_view', {
+			number_tasks: tasks.length,
+			store_connected: profileItems.wccom_connected,
+		} );
 	}
 
 	getTasks() {

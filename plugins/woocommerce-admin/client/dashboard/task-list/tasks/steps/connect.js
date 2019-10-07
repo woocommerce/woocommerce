@@ -29,7 +29,10 @@ class Connect extends Component {
 	}
 
 	async connectJetpack() {
-		const { jetpackConnectUrl } = this.props;
+		const { jetpackConnectUrl, onConnect } = this.props;
+		if ( onConnect ) {
+			onConnect();
+		}
 		window.location = jetpackConnectUrl;
 	}
 
