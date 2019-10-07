@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { difference, get } from 'lodash';
+import { difference } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -14,6 +14,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { H, Stepper, Card } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal depdencies
@@ -23,11 +24,9 @@ import withSelect from 'wc-api/with-select';
 import { pluginNames } from 'wc-api/onboarding/constants';
 
 const pluginsToInstall = [ 'jetpack', 'woocommerce-services' ];
+const { activePlugins = [] } = getSetting( 'onboarding', {} );
 // We want to use the cached version of activePlugins here, otherwise the list we are dealing with could update as plugins are activated.
-const plugins = difference(
-	pluginsToInstall,
-	get( wcSettings, [ 'onboarding', 'activePlugins' ], [] )
-);
+const plugins = difference( pluginsToInstall, activePlugins );
 
 class Plugins extends Component {
 	constructor() {

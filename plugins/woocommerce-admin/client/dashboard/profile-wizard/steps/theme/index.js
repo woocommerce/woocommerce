@@ -15,6 +15,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Card, H } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal depdencies
@@ -117,7 +118,7 @@ class Theme extends Component {
 
 	getThemeStatus( theme ) {
 		const { is_installed, price, slug } = theme;
-		const { activeTheme } = wcSettings.onboarding;
+		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 
 		if ( activeTheme === slug ) {
 			return __( 'Currently active theme', 'woocommerce-admin' );
@@ -142,7 +143,7 @@ class Theme extends Component {
 
 	getThemes() {
 		const { activeTab, uploadedThemes } = this.state;
-		const { themes } = wcSettings.onboarding;
+		const { themes = [] } = getSetting( 'onboarding', {} );
 		themes.concat( uploadedThemes );
 		const allThemes = [ ...themes, ...uploadedThemes ];
 

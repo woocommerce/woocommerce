@@ -13,6 +13,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { SectionHeader, useFilters, ScrollTo } from '@woocommerce/components';
+import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -116,14 +117,13 @@ class Settings extends Component {
 	 * @param {object} state - State
 	 */
 	persistChanges( state ) {
-		// @todo Should remove global state from the file. This creates
-		// potential hard to debug side-effects.
-		wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
+		const settings = getSetting( 'wcAdminSetting', {} );
 		analyticsSettings.forEach( setting => {
 			const updatedValue = state.settings[ setting.name ];
-			wcSettings.wcAdminSettings[ setting.name ] = updatedValue;
+			settings[ setting.name ] = updatedValue;
 			setting.initialValue = updatedValue;
 		} );
+		setSetting( 'wcAdminSetting', settings );
 	}
 
 	saveChanges = source => {

@@ -15,6 +15,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { Card, Stepper } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -25,10 +26,11 @@ import withSelect from 'wc-api/with-select';
 class Appearance extends Component {
 	constructor( props ) {
 		super( props );
+		const { hasHomepage, hasProducts } = getSetting( 'onboarding', {} );
 
 		this.stepVisibility = {
-			homepage: ! wcSettings.onboarding.hasHomepage,
-			import: ! wcSettings.onboarding.hasProducts,
+			homepage: ! hasHomepage,
+			import: ! hasProducts,
 		};
 
 		this.state = {
@@ -71,7 +73,10 @@ class Appearance extends Component {
 		if ( 'logo' === step && isRequestSuccessful ) {
 			createNotice( 'success', __( 'Store logo updated sucessfully.', 'woocommerce-admin' ) );
 			this.completeStep();
-			wcSettings.onboarding.customLogo = themeMods.custom_logo ? true : false;
+			setSetting( 'onboarding', {
+				...getSetting( 'onboarding', {} ),
+				customLogo: !! themeMods.custom_logo,
+			} );
 		}
 
 		if ( 'notice' === step && isRequestSuccessful ) {
@@ -113,7 +118,10 @@ class Appearance extends Component {
 						'success',
 						__( 'All demo products have been imported.', 'woocommerce-admin' )
 					);
-					wcSettings.onboarding.hasProducts = true;
+					setSetting( 'onboarding', {
+						...getSetting( 'onboarding', {} ),
+						hasProducts: true,
+					} );
 				}
 
 				this.setState( { isPending: false } );

@@ -13,6 +13,7 @@ import CustomizableDashboard from './customizable';
 import DashboardCharts from './dashboard-charts';
 import Leaderboards from './leaderboards';
 import { ReportFilters } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import StorePerformance from './store-performance';
 import TaskList from './task-list';
 import ProfileWizard from './profile-wizard';
@@ -26,12 +27,10 @@ class Dashboard extends Component {
 			return <ProfileWizard query={ query } />;
 		}
 
+		const { taskListHidden } = getSetting( 'onboarding', {} );
+
 		// @todo This should be replaced by a check of tasks from the REST API response from #1897.
-		if (
-			window.wcAdminFeatures.onboarding &&
-			wcSettings.onboarding &&
-			! wcSettings.onboarding.taskListHidden
-		) {
+		if ( window.wcAdminFeatures.onboarding && ! taskListHidden ) {
 			return <TaskList query={ query } />;
 		}
 

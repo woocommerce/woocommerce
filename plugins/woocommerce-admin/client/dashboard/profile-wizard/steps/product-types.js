@@ -14,6 +14,7 @@ import { withDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { H, Card, Link } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
@@ -86,7 +87,7 @@ class ProductTypes extends Component {
 	}
 
 	render() {
-		const { productTypes } = wcSettings.onboarding;
+		const { productTypes = {} } = getSetting( 'onboarding', {} );
 		const { error, selected } = this.state;
 		return (
 			<Fragment>

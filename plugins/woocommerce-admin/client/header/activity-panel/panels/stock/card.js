@@ -15,6 +15,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Link, ProductImage } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -132,7 +133,7 @@ class ProductStockCard extends Component {
 	render() {
 		const { product } = this.props;
 		const { edited, editing } = this.state;
-		const { notifyLowStockAmount } = wcSettings;
+		const notifyLowStockAmount = getSetting( 'notifyLowStockAmount', 0 );
 		const lowStockAmount = Number.isFinite( product.low_stock_amount )
 			? product.low_stock_amount
 			: notifyLowStockAmount;

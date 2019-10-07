@@ -4,6 +4,7 @@
  * Internal dependencies
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from 'wc-api/constants';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 export function getUnreadNotes( select ) {
 	const { getCurrentUserData, getNotes, getNotesError, isGetNotesRequesting } = select( 'wc-api' );
@@ -36,9 +37,9 @@ export function getUnreadNotes( select ) {
 
 export function getUnreadOrders( select ) {
 	const { getItems, getItemsTotalCount, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
-	wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
-	const orderStatuses =
-		wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || DEFAULT_ACTIONABLE_STATUSES;
+	const {
+		woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
+	} = getSetting( 'wcAdminSettings', {} );
 
 	if ( ! orderStatuses.length ) {
 		return false;
@@ -65,7 +66,9 @@ export function getUnreadOrders( select ) {
 
 export function getUnapprovedReviews( select ) {
 	const { getReviewsTotalCount, getReviewsError, isGetReviewsRequesting } = select( 'wc-api' );
-	if ( 'yes' === wcSettings.reviewsEnabled && '1' === wcSettings.commentModeration ) {
+	const reviewsEnabled = getSetting( 'reviewsEnabled' );
+	const commentModeration = getSetting( 'commentModeration' );
+	if ( 'yes' === reviewsEnabled && '1' === commentModeration ) {
 		const actionableReviewsQuery = {
 			page: 1,
 			// @todo we are not using this review, so when the endpoint supports it,

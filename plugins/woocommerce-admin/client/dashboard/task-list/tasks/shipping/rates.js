@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
  */
 import { Flag, Form } from '@woocommerce/components';
 import { getCurrencyFormatString } from '@woocommerce/currency';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
+import { CURRENCY, getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 const { symbol, symbolPosition } = CURRENCY;
 
@@ -75,7 +75,10 @@ class ShippingRates extends Component {
 
 		// @todo This is a workaround to force the task to mark as complete.
 		// This should probably be updated to use wc-api so we can fetch shipping methods.
-		wcSettings.onboarding.shippingZonesCount = 1;
+		setSetting( 'onboarding', {
+			...getSetting( 'onboarding', {} ),
+			shippingZonesCount: 1,
+		} );
 
 		createNotice( 'success', __( 'Your shipping rates have been updated.', 'woocommerce-admin' ) );
 

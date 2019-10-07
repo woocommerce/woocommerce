@@ -6,6 +6,11 @@
 import { isNil } from 'lodash';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getSetting } from '@woocommerce/wc-admin-settings';
+
+/**
  * Internal dependencies
  */
 import { DEFAULT_REQUIREMENT } from '../constants';
@@ -21,8 +26,11 @@ const getOptions = ( getResource, requireResource ) => (
 	const names = requireResource( requirement, resourceName ).data || optionNames;
 
 	names.forEach( name => {
-		const data =
-			getResource( getResourceName( 'options', name ) ).data || wcSettings.preloadOptions[ name ];
+		const data = getSetting(
+			'preloadOptions',
+			{},
+			po => getResource( getResourceName( 'options', name ) ).data || po[ name ]
+		);
 		if ( data ) {
 			options[ name ] = data;
 		}

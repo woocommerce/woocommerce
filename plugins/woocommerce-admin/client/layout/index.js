@@ -12,6 +12,7 @@ import { get, isFunction } from 'lodash';
  * WooCommerce dependencies
  */
 import { getHistory } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -139,7 +140,7 @@ export class EmbedLayout extends Component {
 		return (
 			<Layout
 				page={ {
-					breadcrumbs: wcSettings.embedBreadcrumbs,
+					breadcrumbs: getSetting( 'embedBreadcrumbs', [] ),
 				} }
 				isEmbedded
 			/>

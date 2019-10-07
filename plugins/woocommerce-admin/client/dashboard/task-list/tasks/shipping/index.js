@@ -14,6 +14,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { Card, Stepper } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -227,7 +228,7 @@ export default compose(
 
 		const countryCode = getCountryCode( settings.woocommerce_default_country );
 
-		const countries = ( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
+		const { countries = [] } = getSetting( 'dataEndpoints', {} );
 		const country = countryCode ? countries.find( c => c.code === countryCode ) : null;
 		const countryName = country ? country.name : null;
 

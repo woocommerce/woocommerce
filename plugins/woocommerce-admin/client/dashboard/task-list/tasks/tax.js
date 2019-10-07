@@ -16,6 +16,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { Card, H, Stepper } from '@woocommerce/components';
 import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -99,7 +100,7 @@ class Tax extends Component {
 
 	isSupportedCountry() {
 		const { countryCode } = this.props;
-		const { automatedTaxSupportedCountries } = wcSettings.onboarding;
+		const { automatedTaxSupportedCountries = [] } = getSetting( 'onboarding', {} );
 		return automatedTaxSupportedCountries.includes( countryCode );
 	}
 

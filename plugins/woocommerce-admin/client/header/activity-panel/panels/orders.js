@@ -17,6 +17,7 @@ import { keyBy, map, merge } from 'lodash';
 import { EmptyContent, Flag, Link, OrderStatus, Section } from '@woocommerce/components';
 import { formatCurrency } from '@woocommerce/currency';
 import { getAdminLink, getNewPath } from '@woocommerce/navigation';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -266,11 +267,9 @@ export default compose(
 			getReportItemsError,
 			isReportItemsRequesting,
 		} = select( 'wc-api' );
-		wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
-		const orderStatuses =
-			wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses ||
-			DEFAULT_ACTIONABLE_STATUSES;
-
+		const {
+			woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
+		} = getSetting( 'wcAdminSettings', {} );
 		if ( ! orderStatuses.length ) {
 			return { orders: [], isError: true, isRequesting: false, orderStatuses };
 		}
@@ -319,7 +318,7 @@ export default compose(
 		}
 
 		// Get a count of all orders for messaging purposes.
-		// @todo Add a property to wcSettings for this?
+		// @todo Add a property to settings api for this?
 		const allOrdersQuery = {
 			page: 1,
 			per_page: 1,

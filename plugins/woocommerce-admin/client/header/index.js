@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  */
 import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -79,7 +80,7 @@ class Header extends Component {
 			sprintf(
 				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce-admin' ),
 				documentTitle,
-				wcSettings.siteTitle
+				getSetting( 'siteTitle', '' )
 			)
 		);
 

@@ -15,6 +15,7 @@ import moment from 'moment';
  * WooCommerce dependencies
  */
 import { Card, DropdownButton } from '@woocommerce/components';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -174,7 +175,7 @@ class StoreAlerts extends Component {
 
 	render() {
 		const alerts = this.props.alerts || [];
-		const preloadAlertCount = wcSettings.alertCount && parseInt( wcSettings.alertCount );
+		const preloadAlertCount = getSetting( 'alertCount', 0, count => parseInt( count, 10 ) );
 
 		if ( preloadAlertCount > 0 && this.props.isLoading ) {
 			return <StoreAlertsPlaceholder hasMultipleAlerts={ preloadAlertCount > 1 } />;
