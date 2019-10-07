@@ -19,7 +19,7 @@ import { getSetting, CURRENCY as currency } from '@woocommerce/wc-admin-settings
 /**
  * Internal dependencies
  */
-import { H, Card, SimpleSelectControl, Form } from '@woocommerce/components';
+import { H, Card, SelectControl, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import { formatCurrency } from '@woocommerce/currency';
@@ -200,52 +200,52 @@ class BusinessDetails extends Component {
 	render() {
 		const productCountOptions = [
 			{
-				value: '1-10',
+				key: '1-10',
 				label: this.getNumberRangeString( 1, 10 ),
 			},
 			{
-				value: '11-100',
+				key: '11-100',
 				label: this.getNumberRangeString( 11, 100 ),
 			},
 			{
-				value: '101-1000',
+				key: '101-1000',
 				label: this.getNumberRangeString( 101, 1000 ),
 			},
 			{
-				value: '1000+',
+				key: '1000+',
 				label: this.getNumberRangeString( 1000 ),
 			},
 		];
 
 		const revenueOptions = [
 			{
-				value: 'none',
+				key: 'none',
 				label: sprintf(
 					_x( "%s (I'm just getting started)", '$0 revenue amount', 'woocommerce-admin' ),
 					formatCurrency( 0 )
 				),
 			},
 			{
-				value: 'up-to-2500',
+				key: 'up-to-2500',
 				label: sprintf(
 					_x( 'Up to %s', 'Up to a certain revenue amount', 'woocommerce-admin' ),
 					formatCurrency( 2500 )
 				),
 			},
 			{
-				value: '2500-10000',
+				key: '2500-10000',
 				label: this.getNumberRangeString( 2500, 10000, formatCurrency ),
 			},
 			{
-				value: '10000-50000',
+				key: '10000-50000',
 				label: this.getNumberRangeString( 10000, 50000, formatCurrency ),
 			},
 			{
-				value: '50000-250000',
+				key: '50000-250000',
 				label: this.getNumberRangeString( 50000, 250000, formatCurrency ),
 			},
 			{
-				value: 'more-than-250000',
+				key: 'more-than-250000',
 				label: sprintf(
 					_x( 'More than %s', 'More than a certain revenue amount', 'woocommerce-admin' ),
 					formatCurrency( 250000 )
@@ -255,19 +255,19 @@ class BusinessDetails extends Component {
 
 		const sellingVenueOptions = [
 			{
-				value: 'no',
+				key: 'no',
 				label: __( 'No', 'woocommerce-admin' ),
 			},
 			{
-				value: 'other',
+				key: 'other',
 				label: __( 'Yes, on another platform', 'woocommerce-admin' ),
 			},
 			{
-				value: 'brick-mortar',
+				key: 'brick-mortar',
 				label: __( 'Yes, in person at physical stores and/or events', 'woocommerce-admin' ),
 			},
 			{
-				value: 'brick-mortar-other',
+				key: 'brick-mortar-other',
 				label: __(
 					'Yes, on another platform and in person at physical stores and/or events',
 					'woocommerce-admin'
@@ -277,23 +277,23 @@ class BusinessDetails extends Component {
 
 		const otherPlatformOptions = [
 			{
-				value: 'shopify',
+				key: 'shopify',
 				label: __( 'Shopify', 'woocommerce-admin' ),
 			},
 			{
-				value: 'bigcommerce',
+				key: 'bigcommerce',
 				label: __( 'BigCommerce', 'woocommerce-admin' ),
 			},
 			{
-				value: 'magento',
+				key: 'magento',
 				label: __( 'Magento', 'woocommerce-admin' ),
 			},
 			{
-				value: 'wix',
+				key: 'wix',
 				label: __( 'Wix', 'woocommerce-admin' ),
 			},
 			{
-				value: 'other',
+				key: 'other',
 				label: __( 'Other', 'woocommerce-admin' ),
 			},
 		];
@@ -320,14 +320,14 @@ class BusinessDetails extends Component {
 							</p>
 							<Card>
 								<Fragment>
-									<SimpleSelectControl
+									<SelectControl
 										label={ __( 'How many products do you plan to add?', 'woocommerce-admin' ) }
 										options={ productCountOptions }
 										required
 										{ ...getInputProps( 'product_count' ) }
 									/>
 
-									<SimpleSelectControl
+									<SelectControl
 										label={ __( 'Currently selling elsewhere?', 'woocommerce-admin' ) }
 										options={ sellingVenueOptions }
 										required
@@ -337,7 +337,7 @@ class BusinessDetails extends Component {
 									{ [ 'other', 'brick-mortar', 'brick-mortar-other' ].includes(
 										values.selling_venues
 									) && (
-										<SimpleSelectControl
+										<SelectControl
 											label={ __( "What's your current annual revenue?", 'woocommerce-admin' ) }
 											options={ revenueOptions }
 											required
@@ -346,7 +346,7 @@ class BusinessDetails extends Component {
 									) }
 
 									{ [ 'other', 'brick-mortar-other' ].includes( values.selling_venues ) && (
-										<SimpleSelectControl
+										<SelectControl
 											label={ __( 'Which platform is the store using?', 'woocommerce-admin' ) }
 											options={ otherPlatformOptions }
 											required

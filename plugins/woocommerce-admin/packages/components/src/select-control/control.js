@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BACKSPACE } from '@wordpress/keycodes';
+import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
 import { Component, createRef } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
@@ -16,7 +16,7 @@ import Tags from './tags';
 /**
  * A search control to allow user input to filter the options.
  */
-class SearchControl extends Component {
+class Control extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -38,9 +38,15 @@ class SearchControl extends Component {
 	}
 
 	onFocus( onSearch ) {
+		const { isSearchable, setExpanded } = this.props;
+
 		return event => {
 			this.setState( { isActive: true } );
-			onSearch( event.target.value );
+			if ( isSearchable ) {
+				onSearch( event.target.value );
+			} else {
+				setExpanded( true );
+			}
 		};
 	}
 
@@ -49,11 +55,42 @@ class SearchControl extends Component {
 	}
 
 	onKeyDown( event ) {
-		const { selected, onChange, query } = this.props;
+		const {
+			decrementSelectedIndex,
+			incrementSelectedIndex,
+			selected,
+			onChange,
+			query,
+			setExpanded,
+		} = this.props;
 
 		if ( BACKSPACE === event.keyCode && ! query && selected.length ) {
 			onChange( [ ...selected.slice( 0, -1 ) ] );
 		}
+
+		if ( DOWN === event.keyCode ) {
+			incrementSelectedIndex();
+			setExpanded( true );
+			event.preventDefault();
+			event.stopPropagation();
+		}
+
+		if ( UP === event.keyCode ) {
+			decrementSelectedIndex();
+			setExpanded( true );
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	}
+
+	renderButton() {
+		const { multiple, selected } = this.props;
+
+		if ( multiple || ! selected.length ) {
+			return null;
+		}
+
+		return <div className="woocommerce-select-control__control-value">{ selected[ 0 ].label }</div>;
 	}
 
 	renderInput() {
@@ -63,46 +100,50 @@ class SearchControl extends Component {
 			inlineTags,
 			instanceId,
 			isExpanded,
+			isSearchable,
 			listboxId,
 			onSearch,
 			placeholder,
-			query,
 		} = this.props;
 		const { isActive } = this.state;
 
-		return <input
-			className="woocommerce-autocomplete__control-input"
-			id={ `woocommerce-autocomplete-${ instanceId }__control-input` }
-			ref={ this.input }
-			type={ 'search' }
-			value={ query }
-			placeholder={ isActive ? placeholder : '' }
-			onChange={ this.updateSearch( onSearch ) }
-			onFocus={ this.onFocus( onSearch ) }
-			onBlur={ this.onBlur }
-			onKeyDown={ this.onKeyDown }
-			role="combobox"
-			aria-autocomplete="list"
-			aria-expanded={ isExpanded }
-			aria-haspopup="true"
-			aria-owns={ listboxId }
-			aria-controls={ listboxId }
-			aria-activedescendant={ activeId }
-			aria-describedby={
-				hasTags && inlineTags ? `search-inline-input-${ instanceId }` : null
-			}
-		/>;
+		return (
+			<input
+				className="woocommerce-select-control__control-input"
+				id={ `woocommerce-select-control-${ instanceId }__control-input` }
+				ref={ this.input }
+				type={ isSearchable ? 'search' : 'button' }
+				value={ this.getInputValue() }
+				placeholder={ isActive ? placeholder : '' }
+				onChange={ this.updateSearch( onSearch ) }
+				onFocus={ this.onFocus( onSearch ) }
+				onBlur={ this.onBlur }
+				onKeyDown={ this.onKeyDown }
+				role="combobox"
+				aria-autocomplete="list"
+				aria-expanded={ isExpanded }
+				aria-haspopup="true"
+				aria-owns={ listboxId }
+				aria-controls={ listboxId }
+				aria-activedescendant={ activeId }
+				aria-describedby={ hasTags && inlineTags ? `search-inline-input-${ instanceId }` : null }
+			/>
+		);
+	}
+
+	getInputValue() {
+		const { isSearchable, multiple, query, selected } = this.props;
+		const selectedValue = selected.length ? selected[ 0 ].label : '';
+
+		if ( ! isSearchable && multiple ) {
+			return '';
+		}
+
+		return isSearchable ? query : selectedValue;
 	}
 
 	render() {
-		const {
-			hasTags,
-			help,
-			inlineTags,
-			instanceId,
-			label,
-			query,
-		} = this.props;
+		const { hasTags, help, inlineTags, instanceId, isSearchable, label, query } = this.props;
 		const { isActive } = this.state;
 
 		return (
@@ -113,40 +154,42 @@ class SearchControl extends Component {
 			// for the benefit of sighted users.
 			/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 			<div
-				className={ classnames( 'components-base-control', 'woocommerce-autocomplete__control', {
+				className={ classnames( 'components-base-control', 'woocommerce-select-control__control', {
 					empty: ! query.length,
 					'is-active': isActive,
 					'has-tags': inlineTags && hasTags,
-					'with-value': query.length,
+					'with-value': this.getInputValue().length,
 				} ) }
 				onClick={ () => {
 					this.input.current.focus();
 				} }
 			>
-				<i className="material-icons-outlined">search</i>
+				{ isSearchable && <i className="material-icons-outlined">search</i> }
 				{ inlineTags && <Tags { ...this.props } /> }
 
 				<div className="components-base-control__field">
-					{ !! label &&
+					{ !! label && (
 						<label
-							htmlFor={ `woocommerce-autocomplete-${ instanceId }__control-input` }
+							htmlFor={ `woocommerce-select-control-${ instanceId }__control-input` }
 							className="components-base-control__label"
 						>
 							{ label }
 						</label>
-					}
+					) }
 					{ this.renderInput() }
-					{ inlineTags && <span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-						{ __( 'Move backward for selected items', 'woocommerce-admin' ) }
-					</span> }
-					{ !! help &&
+					{ inlineTags && (
+						<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
+							{ __( 'Move backward for selected items', 'woocommerce-admin' ) }
+						</span>
+					) }
+					{ !! help && (
 						<p
-							id={ `woocommerce-autocomplete-${ instanceId }__help` }
+							id={ `woocommerce-select-control-${ instanceId }__help` }
 							className="components-base-control__help"
 						>
 							{ help }
 						</p>
-					}
+					) }
 				</div>
 			</div>
 			/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
@@ -154,7 +197,7 @@ class SearchControl extends Component {
 	}
 }
 
-SearchControl.propTypes = {
+Control.propTypes = {
 	/**
 	 * Bool to determine if tags should be rendered.
 	 */
@@ -162,16 +205,17 @@ SearchControl.propTypes = {
 	/**
 	 * Help text to be appended beneath the input.
 	 */
-	help: PropTypes.oneOfType( [
-		PropTypes.string,
-		PropTypes.node,
-	] ),
+	help: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ),
 	/**
 	 * Render tags inside input, otherwise render below input.
 	 */
 	inlineTags: PropTypes.bool,
 	/**
-	 * ID of the main Autocomplete instance.
+	 * Allow the select options to be filtered by search input.
+	 */
+	isSearchable: PropTypes.bool,
+	/**
+	 * ID of the main SelectControl instance.
 	 */
 	instanceId: PropTypes.number,
 	/**
@@ -205,13 +249,10 @@ SearchControl.propTypes = {
 	 */
 	selected: PropTypes.arrayOf(
 		PropTypes.shape( {
-			key: PropTypes.oneOfType( [
-				PropTypes.number,
-				PropTypes.string,
-			] ).isRequired,
+			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
 			label: PropTypes.string,
 		} )
 	),
 };
 
-export default SearchControl;
+export default Control;

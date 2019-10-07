@@ -23,11 +23,15 @@ class List extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { filteredOptions } = this.props;
+		const { options, selectedIndex } = this.props;
 
 		// Remove old option refs to avoid memory leaks.
-		if ( ! isEqual( filteredOptions, prevProps.filteredOptions ) ) {
+		if ( ! isEqual( options, prevProps.options ) ) {
 			this.optionRefs = {};
+		}
+
+		if ( selectedIndex !== prevProps.selectedIndex ) {
+			this.scrollToOption( selectedIndex );
 		}
 	}
 
@@ -52,59 +56,63 @@ class List extends Component {
 	scrollToOption( index ) {
 		const listbox = this.listbox.current;
 
-		if ( listbox.scrollHeight > listbox.clientHeight ) {
-			const option = this.optionRefs[ index ].current;
-			const scrollBottom = listbox.clientHeight + listbox.scrollTop;
-			const elementBottom = option.offsetTop + option.offsetHeight;
-			if ( elementBottom > scrollBottom ) {
-				listbox.scrollTop = elementBottom - listbox.clientHeight;
-			} else if ( option.offsetTop < listbox.scrollTop ) {
-				listbox.scrollTop = option.offsetTop;
-			}
+		if ( listbox.scrollHeight <= listbox.clientHeight ) {
+			return;
+		}
+
+		if ( ! this.optionRefs[ index ] ) {
+			return;
+		}
+
+		const option = this.optionRefs[ index ].current;
+		const scrollBottom = listbox.clientHeight + listbox.scrollTop;
+		const elementBottom = option.offsetTop + option.offsetHeight;
+		if ( elementBottom > scrollBottom ) {
+			listbox.scrollTop = elementBottom - listbox.clientHeight;
+		} else if ( option.offsetTop < listbox.scrollTop ) {
+			listbox.scrollTop = option.offsetTop;
 		}
 	}
 
 	handleKeyDown( event ) {
-		const { filteredOptions, onChange, onSearch, selectedIndex } = this.props;
-		if ( filteredOptions.length === 0 ) {
+		const {
+			decrementSelectedIndex,
+			incrementSelectedIndex,
+			options,
+			onSearch,
+			selectedIndex,
+			setExpanded,
+		} = this.props;
+		if ( options.length === 0 ) {
 			return;
 		}
 
-		let nextSelectedIndex;
 		switch ( event.keyCode ) {
 			case UP:
-				nextSelectedIndex = null !== selectedIndex
-					? ( selectedIndex === 0 ? filteredOptions.length : selectedIndex ) - 1
-					: filteredOptions.length - 1;
-				onChange( nextSelectedIndex );
-				this.scrollToOption( nextSelectedIndex );
+				decrementSelectedIndex();
 				event.preventDefault();
 				event.stopPropagation();
 				break;
 
 			case DOWN:
-				nextSelectedIndex = null !== selectedIndex
-					? ( selectedIndex + 1 ) % filteredOptions.length
-					: 0;
-				onChange( nextSelectedIndex );
-				this.scrollToOption( nextSelectedIndex );
+				incrementSelectedIndex();
 				event.preventDefault();
 				event.stopPropagation();
 				break;
 
 			case ENTER:
-				this.select( filteredOptions[ selectedIndex ] );
+				this.select( options[ selectedIndex ] );
 				event.preventDefault();
 				event.stopPropagation();
 				break;
 
 			case LEFT:
 			case RIGHT:
-				onChange( null );
+				setExpanded( false );
 				break;
 
 			case ESCAPE:
-				onChange( null );
+				setExpanded( false );
 				onSearch( null );
 				return;
 
@@ -133,30 +141,30 @@ class List extends Component {
 	}
 
 	render() {
-		const { filteredOptions, instanceId, listboxId, selectedIndex, staticList } = this.props;
-		const listboxClasses = classnames( 'woocommerce-autocomplete__listbox', {
+		const { instanceId, listboxId, options, selectedIndex, staticList } = this.props;
+		const listboxClasses = classnames( 'woocommerce-select-control__listbox', {
 			'is-static': staticList,
 		} );
 
 		return (
 			<div ref={ this.listbox } id={ listboxId } role="listbox" className={ listboxClasses }>
-				{ filteredOptions.map( ( option, index ) => (
-						<Button
-							ref={ this.getOptionRef( index ) }
-							key={ option.key }
-							id={ `woocommerce-autocomplete__option-${ instanceId }-${ option.key }` }
-							role="option"
-							aria-selected={ index === selectedIndex }
-							disabled={ option.isDisabled }
-							className={ classnames( 'woocommerce-autocomplete__option', {
-								'is-selected': index === selectedIndex,
-							} ) }
-							onClick={ () => this.select( option ) }
-							tabIndex="-1"
-						>
-							{ option.label }
-						</Button>
-					) ) }
+				{ options.map( ( option, index ) => (
+					<Button
+						ref={ this.getOptionRef( index ) }
+						key={ option.key }
+						id={ `woocommerce-select-control__option-${ instanceId }-${ option.key }` }
+						role="option"
+						aria-selected={ index === selectedIndex }
+						disabled={ option.isDisabled }
+						className={ classnames( 'woocommerce-select-control__option', {
+							'is-selected': index === selectedIndex,
+						} ) }
+						onClick={ () => this.select( option ) }
+						tabIndex="-1"
+					>
+						{ option.label }
+					</Button>
+				) ) }
 			</div>
 		);
 	}
@@ -164,22 +172,7 @@ class List extends Component {
 
 List.propTypes = {
 	/**
-	 * Array of filtered options to display.
-	 */
-	filteredOptions: PropTypes.arrayOf(
-		PropTypes.shape( {
-			isDisabled: PropTypes.bool,
-			key: PropTypes.oneOfType( [
-				PropTypes.number,
-				PropTypes.string,
-			] ).isRequired,
-			keywords: PropTypes.arrayOf( PropTypes.string ),
-			label: PropTypes.string,
-			value: PropTypes.any,
-		} )
-	).isRequired,
-	/**
-	 * ID of the main Autocomplete instance.
+	 * ID of the main SelectControl instance.
 	 */
 	instanceId: PropTypes.number,
 	/**
@@ -191,13 +184,21 @@ List.propTypes = {
 	 */
 	node: PropTypes.instanceOf( Element ).isRequired,
 	/**
-	 * Function called when selected results change, passed result list.
-	 */
-	onChange: PropTypes.func,
-	/**
 	 * Function to execute when an option is selected.
 	 */
 	onSelect: PropTypes.func,
+	/**
+	 * Array of options to display.
+	 */
+	options: PropTypes.arrayOf(
+		PropTypes.shape( {
+			isDisabled: PropTypes.bool,
+			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
+			keywords: PropTypes.arrayOf( PropTypes.string ),
+			label: PropTypes.string,
+			value: PropTypes.any,
+		} )
+	).isRequired,
 	/**
 	 * Integer for the currently selected item.
 	 */

@@ -4,9 +4,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { SelectControl, TextControl } from 'newspack-components';
+import { TextControl } from 'newspack-components';
 import { useMemo } from 'react';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+
+/**
+ * Internal depdencies
+ */
+import { SelectControl } from '@woocommerce/components';
 
 const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 /**
@@ -43,7 +48,7 @@ export function getCountryStateOptions() {
 	const countryStateOptions = countries.reduce( ( acc, country ) => {
 		if ( ! country.states.length ) {
 			acc.push( {
-				value: country.code,
+				key: country.code,
 				label: decodeEntities( country.name ),
 			} );
 
@@ -52,7 +57,7 @@ export function getCountryStateOptions() {
 
 		const countryStates = country.states.map( state => {
 			return {
-				value: country.code + ':' + state.code,
+				key: country.code + ':' + state.code,
 				label: decodeEntities( country.name ) + ' -- ' + decodeEntities( state.name ),
 			};
 		} );
@@ -61,8 +66,6 @@ export function getCountryStateOptions() {
 
 		return acc;
 	}, [] );
-
-	countryStateOptions.unshift( { value: '', label: '' } );
 
 	return countryStateOptions;
 }
@@ -95,6 +98,7 @@ export function StoreAddress( props ) {
 				label={ __( 'Country / State', 'woocommerce-admin' ) }
 				required
 				options={ countryStateOptions }
+				isSearchable
 				{ ...getInputProps( 'countryState' ) }
 			/>
 

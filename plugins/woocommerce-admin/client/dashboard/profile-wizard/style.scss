@@ -263,6 +263,35 @@
 		}
 	}
 
+	.woocommerce-select-control__control {
+		margin: $gap 0;
+		padding-right: $gap + 24px;
+
+		&.is-active {
+			box-shadow: 0 0 0 1px $studio-woocommerce-purple-60;
+		}
+
+		&::after {
+			display: block;
+			pointer-events: none;
+			cursor: pointer;
+			position: absolute;
+			float: right;
+			line-height: 56px;
+			font-family: dashicons, sans-serif;
+			font-size: 20px;
+			content: '\f140';
+			z-index: 1;
+			height: 24px;
+			width: 24px;
+			margin-top: 0;
+			top: 0;
+			right: $gap;
+			bottom: $gap;
+			color: $studio-black;
+		}
+	}
+
 	#wpadminbar {
 		display: none;
 	}

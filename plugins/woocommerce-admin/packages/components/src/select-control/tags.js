@@ -43,7 +43,7 @@ class Tags extends Component {
 			return null;
 		}
 
-		const classes = classnames( 'woocommerce-autocomplete__tags', {
+		const classes = classnames( 'woocommerce-select-control__tags', {
 			'has-clear': showClearButton,
 		} );
 
@@ -69,14 +69,12 @@ class Tags extends Component {
 						/>
 					);
 				} ) }
-				{ showClearButton && <Button
-					className="woocommerce-autocomplete__clear"
-					isLink
-					onClick={ this.removeAll }
-				>
-					<Icon icon="dismiss" />
-					<span className="screen-reader-text">{ __( 'Clear all', 'woocommerce-admin' ) }</span>
-				</Button> }
+				{ showClearButton && (
+					<Button className="woocommerce-select-control__clear" isLink onClick={ this.removeAll }>
+						<Icon icon="dismiss" />
+						<span className="screen-reader-text">{ __( 'Clear all', 'woocommerce-admin' ) }</span>
+					</Button>
+				) }
 			</div>
 		);
 	}
@@ -98,10 +96,7 @@ Tags.propTypes = {
 	 */
 	selected: PropTypes.arrayOf(
 		PropTypes.shape( {
-			key: PropTypes.oneOfType( [
-				PropTypes.number,
-				PropTypes.string,
-			] ).isRequired,
+			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
 			label: PropTypes.string,
 		} )
 	),

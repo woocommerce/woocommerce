@@ -7,7 +7,6 @@ import 'react-dates/initialize';
 
 export { default as AdvancedFilters } from './advanced-filters';
 export { default as AnimationSlider } from './animation-slider';
-export { default as Autocomplete } from './autocomplete';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { default as Card } from './card';
@@ -42,8 +41,8 @@ export { default as SearchListControl } from './search-list-control';
 export { default as SearchListItem } from './search-list-control/item';
 export { default as SectionHeader } from './section-header';
 export { default as SegmentedSelection } from './segmented-selection';
+export { default as SelectControl } from './select-control';
 export { default as ScrollTo } from './scroll-to';
-export { default as SimpleSelectControl } from './simple-select-control';
 export { default as SplitButton } from './split-button';
 export { default as Spinner } from './spinner';
 export { default as Stepper } from './stepper';
