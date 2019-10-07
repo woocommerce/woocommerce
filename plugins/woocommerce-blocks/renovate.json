@@ -2,5 +2,8 @@
 	"extends": [ "config:base" ],
 	"lockFileMaintenance": { "enabled": true },
 	"ignoreDeps": [ "husky" ],
-	"schedule": [ "before 3am on wednesday" ]
+	"schedule": [ "before 3am on wednesday" ],
+	"composer": {
+		"enabled": false
+	}
 }
