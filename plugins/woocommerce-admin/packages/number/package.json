@@ -20,7 +20,7 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@babel/runtime-corejs2": "7.5.5",
+		"@babel/runtime-corejs2": "7.6.2",
 		"locutus": "2.0.11"
 	},
 	"publishConfig": {
