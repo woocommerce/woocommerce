@@ -1141,3 +1141,14 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
 function wc_delete_order_note( $note_id ) {
 	return wp_delete_comment( $note_id, true );
 }
+
+/**
+ * Takes a single legacy order status and maps it to different status types.
+ *
+ * @since 3.9.0
+ * @param string $legacy_status The single legacy order status.
+ * @return array Key => Value pairs of status types with their statuses.
+ */
+function wc_get_order_statuses_from_legacy_status( $legacy_status ) {
+	return array();
+}

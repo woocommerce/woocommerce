@@ -289,6 +289,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			wc_update_user_last_active( $order->get_customer_id() );
 		}
 
+		// Map legacy order status to new order statuses.
+		if ( in_array( 'status', $updated_props, true ) ) {
+			$new_statuses = wc_get_order_statuses_from_legacy_status( $legacy_status );
+			$this->update_order_statuses_table( $id, $new_statuses );
+		}
+
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
 	}
 
@@ -791,5 +797,33 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function get_order_item_type( $order, $order_item_id ) {
 		global $wpdb;
 		return $wpdb->get_var( $wpdb->prepare( "SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d and order_item_id = %d;", $order->get_id(), $order_item_id ) );
+	}
+
+	/**
+	 * Update the order statuses table for an order.
+	 *
+	 * @since 3.9.0
+	 * @param int   $id Order ID.
+	 * @param array $statuses Array of key=>value status types with their statuses.
+	 * @return NULL
+	 */
+	protected function update_order_statuses_table( $id, $statuses ) {
+		global $wpdb;
+
+		$id = absint( $id );
+
+		if ( empty( $id ) ) {
+			return false;
+		}
+
+		$existing_data = wp_cache_get( 'order_statuses_table', 'object_' . $id );
+
+		if ( ! empty( $statuses ) && $statuses !== $existing_data ) {
+			$wpdb->replace(
+				'wc_order_statuses',
+				$statuses
+			);
+			wp_cache_set( 'order_statuses_table', $statuses, 'object_' . $id );
+		}
 	}
 }

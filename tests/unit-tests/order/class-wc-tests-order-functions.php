@@ -1359,6 +1359,21 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_order_statuses_from_legacy_status
+	 *
+	 * @since 3.9.0
+	 */
+	public function test_wc_get_order_statuses_from_legacy_status() {
+		$legacy_status = 'wc-pending';
+		$expected      = array(
+			'order_status'       => '',
+			'payment_status'     => '',
+			'fulfillment_status' => '',
+		);
+		$this->assertEquals( $expected, wc_get_order_statuses_from_legacy_status( $legacy_status ) );
+	}
+
+	/**
 	 * Test wc_order_search()
 	 *
 	 * @since 3.3.0
