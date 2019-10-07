@@ -70,21 +70,21 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
 		// Delete term taxonomies.
-		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $taxonomy ) {
+		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $_taxonomy ) {
 			$wpdb->delete(
-				$wpdb->term_taxonomy,
+				$wpdb->term__taxonomy,
 				array(
-					'taxonomy' => $taxonomy,
+					'taxonomy' => $_taxonomy,
 				)
 			);
 		}
 
 		// Delete term attributes.
-		foreach ( $wc_attributes as $taxonomy ) {
+		foreach ( $wc_attributes as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(
-					'taxonomy' => 'pa_' . $taxonomy,
+					'taxonomy' => 'pa_' . $_taxonomy,
 				)
 			);
 		}
