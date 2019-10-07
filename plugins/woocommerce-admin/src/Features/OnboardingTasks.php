@@ -41,10 +41,10 @@ class OnboardingTasks {
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
-		// old settings injection
+		// Old settings injection.
 		// Run after Onboarding.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 );
-		// new settings injection
+		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
 		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
 		add_action( 'current_screen', array( $this, 'check_active_task_completion' ), 1000 );
@@ -70,6 +70,14 @@ class OnboardingTasks {
 		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
 		$settings['onboarding']['customLogo']                     = get_theme_mod( 'custom_logo', false );
 		$settings['onboarding']['hasHomepage']                    = self::check_task_completion( 'homepage' );
+		$settings['onboarding']['hasPhysicalProducts']            = count(
+			wc_get_products(
+				array(
+					'virtual' => false,
+					'limit'   => 1,
+				)
+			)
+		) > 0;
 		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 
@@ -133,8 +141,8 @@ class OnboardingTasks {
 					return false;
 				}
 
-				$post        = get_post( $homepage_id );
-				$completed   = $post && 'publish' === $post->post_status;
+				$post      = get_post( $homepage_id );
+				$completed = $post && 'publish' === $post->post_status;
 				if ( $completed ) {
 					update_option( 'show_on_front', 'page' );
 					update_option( 'page_on_front', $homepage_id );
