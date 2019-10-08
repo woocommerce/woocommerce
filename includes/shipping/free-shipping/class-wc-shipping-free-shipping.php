@@ -106,7 +106,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'ignore_discounts' => array(
-				'title'       => __( 'Ignore discounts', 'woocommerce' ),
+				'title'       => __( 'Ignore coupons discounts', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Discounts will not be applied to the minimum order amount.', 'woocommerce' ),
 				'default'     => 'no',
@@ -151,12 +151,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			$total = WC()->cart->get_displayed_subtotal();
 
 			if ( WC()->cart->display_prices_including_tax() ) {
-				$total = round( $total - WC()->cart->get_discount_tax(), wc_get_price_decimals() );
+				$total = $total - WC()->cart->get_discount_tax();
 			}
 
 			if ( 'no' === $this->ignore_discounts ) {
-				$total = round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );
+				$total = $total - WC()->cart->get_discount_total();
 			}
+
+			$total = round( $total, wc_get_price_decimals() );
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;
