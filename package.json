@@ -20,7 +20,7 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "autoprefixer": "9.6.1",
+    "autoprefixer": "9.6.4",
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
     "babel-eslint": "10.0.3",
