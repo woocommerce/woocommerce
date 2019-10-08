@@ -48,4 +48,12 @@
 		<exclude-pattern>i18n/</exclude-pattern>
 		<exclude-pattern>src/</exclude-pattern>
 	</rule>
+
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customAutoEscapedFunctions" type="array">
+				<element value="wc_make_phone_clickable"/>
+			</property>
+		</properties>
+	</rule>
 </ruleset>
