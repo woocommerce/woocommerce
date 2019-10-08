@@ -383,6 +383,7 @@ class Onboarding {
 		return apply_filters(
 			'woocommerce_onboarding_plugins_whitelist',
 			array(
+				'facebook-for-woocommerce'        => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
 				'jetpack'                         => 'jetpack/jetpack.php',
 				'woocommerce-services'            => 'woocommerce-services/woocommerce-services.php',
 				'woocommerce-gateway-stripe'      => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',

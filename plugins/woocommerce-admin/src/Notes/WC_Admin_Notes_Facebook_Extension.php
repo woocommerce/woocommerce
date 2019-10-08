@@ -81,19 +81,22 @@ class WC_Admin_Notes_Facebook_Extension {
 
 	/**
 	 * Install Facebook extension when note is actioned.
+	 *
+	 * @param WC_Admin_Note $note Note being acted upon.
 	 */
 	public function install_facebook_extension( $note ) {
 		if ( self::NOTE_NAME === $note->get_name() ) {
-			$plugin    = array( 'plugin' => 'facebook-for-woocommerce' );
-			$installer = new \Automattic\WooCommerce\Admin\API\OnboardingPlugins();
-			$result    = $installer->install_plugin( $plugin );
+			$install_request = array( 'plugin' => 'facebook-for-woocommerce' );
+			$installer       = new \Automattic\WooCommerce\Admin\API\OnboardingPlugins();
+			$result          = $installer->install_plugin( $install_request );
 
 			if ( is_wp_error( $result ) ) {
 				// @todo Reset note actioned status?
 				return;
 			}
 
-			$installer->activate_plugin( $plugin );
+			$activate_request = array( 'plugins' => 'facebook-for-woocommerce' );
+			$installer->activate_plugins( $activate_request );
 		}
 	}
 }
