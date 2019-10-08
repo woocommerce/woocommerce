@@ -2,6 +2,8 @@
 - Renamed the `<Autocomplete />` component to `<SelectControl />`.
 - Added `isSearchable` prop to `<SelectControl />` to allow simple select dropdowns.
 - Removed the `<SimpleSelectControl />` component.
+- Removed WC-Admin specific actions from `<TableCard />` component.
+- Export the `<CompareButton />` component.
 
 # 4.0.0
 - Added a new `<ScrollTo />` component.

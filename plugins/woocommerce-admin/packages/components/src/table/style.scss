@@ -6,10 +6,6 @@
 		position: relative;
 	}
 
-	.woocommerce-search {
-		flex-grow: 1;
-	}
-
 	.woocommerce-card__action {
 		justify-self: flex-end;
 		margin: -($gap - 3) 0;
@@ -17,85 +13,6 @@
 
 	.woocommerce-card__menu {
 		justify-self: flex-end;
-	}
-
-	&.has-compare,
-	&.has-search {
-		.woocommerce-card__action {
-			align-items: center;
-			text-align: left;
-			display: grid;
-			width: 100%;
-			grid-template-columns: auto 1fr auto;
-		}
-
-		@include breakpoint( '<960px' ) {
-			.woocommerce-card__action {
-				grid-area: 1 / 1 / 3 / 4;
-				grid-gap: $gap-small;
-				grid-template-columns: auto 1fr 24px;
-				margin: 0;
-
-				.woocommerce-table__compare {
-					display: flex;
-					grid-area: 2 / 1 / 3 / 2;
-				}
-
-				.woocommerce-search {
-					grid-area: 2 / 2 / 3 / 4;
-					margin-right: 0;
-				}
-
-				.woocommerce-table__download-button {
-					grid-area: 1 / 2 / 2 / 3;
-					justify-self: end;
-					margin: -6px 0;
-				}
-			}
-		}
-
-		&.has-search:not(.has-compare) {
-			.woocommerce-card__action {
-				grid-template-columns: 1fr auto;
-
-				.woocommerce-search {
-					align-self: center;
-					grid-column-start: 1;
-					grid-column-end: 2;
-				}
-
-				.woocommerce-table__download-button {
-					align-self: center;
-					grid-column-start: 2;
-					grid-column-end: 3;
-				}
-			}
-
-			@include breakpoint( '<960px' ) {
-				.woocommerce-card__action {
-					grid-area: 1 / 1 / 3 / 4;
-					grid-template-columns: auto 1fr 24px;
-
-					.woocommerce-search {
-						grid-area: 2 / 1 / 3 / 4;
-						margin-left: 0;
-					}
-
-					.woocommerce-table__download-button {
-						grid-area: 1 / 2 / 2 / 3;
-					}
-				}
-			}
-		}
-
-		.woocommerce-search {
-			margin: 0 $gap;
-		}
-
-		.woocommerce-compare-button {
-			padding: 3px $gap-small;
-			height: auto;
-		}
 	}
 
 	$row-text-height: 1.1375rem;

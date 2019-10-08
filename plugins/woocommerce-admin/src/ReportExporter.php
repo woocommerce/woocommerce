@@ -76,7 +76,7 @@ class ReportExporter {
 		// Initialize scheduled action handlers.
 		add_action( self::REPORT_EXPORT_ACTION, array( __CLASS__, 'report_export_action' ), 10, 4 );
 		add_action( self::REPORT_EXPORT_EMAIL_ACTION, array( __CLASS__, 'report_export_email_action' ), 10, 3 );
-		
+
 		// Report download handler.
 		add_action( 'admin_init', array( __CLASS__, 'download_export_file' ) );
 	}
@@ -215,6 +215,7 @@ class ReportExporter {
 			);
 			$download_url = add_query_arg( $query_args, admin_url() );
 
+			\WC_Emails::instance();
 			$email = new ReportCSVEmail();
 			$email->trigger( $user_id, $report_type, $download_url );
 		}

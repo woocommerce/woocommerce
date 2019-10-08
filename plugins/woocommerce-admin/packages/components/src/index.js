@@ -11,7 +11,7 @@ export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { default as Card } from './card';
 export { default as Count } from './count';
-export { default as CompareFilter } from './compare-filter';
+export { CompareButton, CompareFilter } from './compare-filter';
 export { default as Date } from './date';
 export { default as DateRangeFilterPicker } from './date-range-filter-picker';
 export { default as DateRange } from './calendar/date-range';

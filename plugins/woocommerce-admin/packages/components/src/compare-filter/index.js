@@ -20,10 +20,12 @@ import Card from '../card';
 import CompareButton from './button';
 import Search from '../search';
 
+export { default as CompareButton } from './button';
+
 /**
  * Displays a card + search used to filter results as a comparison between objects.
  */
-class CompareFilter extends Component {
+export class CompareFilter extends Component {
 	constructor( { getLabels, param, query } ) {
 		super( ...arguments );
 		this.state = {
@@ -153,5 +155,3 @@ CompareFilter.defaultProps = {
 	labels: {},
 	query: {},
 };
-
-export default CompareFilter;

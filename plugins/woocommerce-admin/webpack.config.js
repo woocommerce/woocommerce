@@ -8,6 +8,7 @@ const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { DefinePlugin } = require( 'webpack' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+const FixStyleOnlyEntriesPlugin = require( 'webpack-fix-style-only-entries' );
 
 /**
  * WordPress dependencies
@@ -63,6 +64,7 @@ const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
 		app: './client/index.js',
+		ie: './client/ie.scss',
 		...entryPoints,
 	},
 	output: {
@@ -156,6 +158,7 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		new FixStyleOnlyEntriesPlugin(),
 		// Inject the current feature flags.
 		new DefinePlugin( {
 			'window.wcAdminFeatures': { ...WC_ADMIN_CONFIG.features },

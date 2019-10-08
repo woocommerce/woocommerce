@@ -3,6 +3,7 @@
 /**
  * Internal dependencies
  */
+import reportExport from './export';
 import items from './items';
 import imports from './imports';
 import notes from './notes';
@@ -18,6 +19,7 @@ function createWcApiSpec() {
 	return {
 		name: 'wcApi',
 		mutations: {
+			...reportExport.mutations,
 			...items.mutations,
 			...notes.mutations,
 			...onboarding.mutations,
@@ -59,6 +61,7 @@ function createWcApiSpec() {
 			},
 			update( resourceNames, data ) {
 				return [
+					...reportExport.operations.update( resourceNames, data ),
 					...items.operations.update( resourceNames, data ),
 					...notes.operations.update( resourceNames, data ),
 					...onboarding.operations.update( resourceNames, data ),
