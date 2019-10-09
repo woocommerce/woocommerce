@@ -71,6 +71,29 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.20.0 2019-09-24 =
+
+- Dev: Fix issue #2992 (order number in orders panel) #2994
+- Dev: Replace lodash isNaN() with native Number.isNaN() #2998 (Build, Packages)
+- Enhancement: add option to email a download link when exporting reports. #2899 (Analytics, REST API)
+- Dev: Ignore filename rules for PSR-4 classes. #2967 (Build)
+- Fix: Catch notices that are hooked earlier than priority 10. #2981
+- Dev: Category Lookup Table - Fix Category Segments #2253
+- Performance: add caching layer to analytics. #2970 (Analytics)
+- Dev: Replace lodash isFinite() with native Number.isFinite() #2977 (Build, Components, Packages)
+- Bug: Fix conflict with Blocks 2.4 #2846
+- Dev: Add filter to notes datastore where clauses. #2819
+- Dev: Copy component READMEs to docs folder before GH page deploy. #2952 (Build)
+- Dev: Add GitHub pages deploy step to Travis config. #2940 (Build, Documentation)
+- Dev: Fix plugin installation when working from a push instead of a pull request. #2950 (Build)
+- Dev: Fix pull request branch detection on CI (try #2) #2944 (Build)
+- Dev: Only build pushes to master branch. #2941 (Build)
+- Performance: reduce JS bundle size. #2933 (Build)
+- Dev: Fix pull request branch detection on CI #2942 (Build)
+- Dev: refresh component documentation #2872 (Build, Components, Documentation, Packages)
+- Dev: Simplified intervals_missing method of DataStore class #2920 👏 @codemascot
+- Dev: Simplified intervals_missing method of TimeInterval class #2920 👏 @codemascot
+
 = 0.19.0 2019-09-24 =
 
 - Dev: Use upstream webpack-rtl-plugin #2870 (Build)
