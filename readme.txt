@@ -179,6 +179,10 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
+= 3.7.1 - 2019-10-09 =
+* Security - Add an exit after the redirect when checking author archive capabilities for customers.
+* Security - Ensure 404 pages with single product urls cannot be exploited using Open Redirect.
+
 = 3.7.0 - 2019-08-12 =
 * Enhancement - Added table ENGINE to system status report for debugging purposes. #23101
 * Enhancement - Format empty cart message as information notice. #23152
