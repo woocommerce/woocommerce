@@ -55,7 +55,7 @@
 		"@wordpress/jest-preset-default": "4.3.0",
 		"@wordpress/rich-text": "3.7.0",
 		"@wordpress/scripts": "3.4.0",
-		"autoprefixer": "9.6.1",
+		"autoprefixer": "9.6.4",
 		"babel-core": "7.0.0-bridge.0",
 		"babel-eslint": "10.0.3",
 		"babel-loader": "8.0.6",
