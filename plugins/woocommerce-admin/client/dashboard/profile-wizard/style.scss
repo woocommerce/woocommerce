@@ -269,6 +269,7 @@
 
 		&.is-active {
 			box-shadow: 0 0 0 1px $studio-woocommerce-purple-60;
+			border-color: $studio-woocommerce-purple-60;
 		}
 
 		&::after {

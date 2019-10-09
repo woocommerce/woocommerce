@@ -4,6 +4,7 @@
 - Removed the `<SimpleSelectControl />` component.
 - Removed WC-Admin specific actions from `<TableCard />` component.
 - Export the `<CompareButton />` component.
+- Add `<TextControl />` component.
 
 # 4.0.0
 - Added a new `<ScrollTo />` component.

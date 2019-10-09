@@ -9,14 +9,14 @@ import apiFetch from '@wordpress/api-fetch';
 import { withDispatch } from '@wordpress/data';
 import interpolateComponents from 'interpolate-components';
 import { Modal } from '@wordpress/components';
-import { Button, TextControl } from 'newspack-components';
+import { Button } from 'newspack-components';
 import { getQuery } from '@woocommerce/navigation';
 import { get } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { Form, Link } from '@woocommerce/components';
+import { Form, Link, TextControl } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { WCS_NAMESPACE } from 'wc-api/constants';
 import { recordEvent } from 'lib/tracks';

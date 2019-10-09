@@ -4,14 +4,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { TextControl } from 'newspack-components';
 import { useMemo } from 'react';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal depdencies
  */
-import { SelectControl } from '@woocommerce/components';
+import { SelectControl, TextControl } from '@woocommerce/components';
 
 const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 /**

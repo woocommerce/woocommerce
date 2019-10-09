@@ -46,5 +46,6 @@
     * [Table](components/packages/table/README.md)
     * [Tag](components/packages/tag/README.md)
     * [TextControlWithAffixes](components/packages/text-control-with-affixes/README.md)
+    * [TextControl](components/packages/text-control/README.md)
     * [ViewMoreList](components/packages/view-more-list/README.md)
     * [WebPreview](components/packages/web-preview/README.md)

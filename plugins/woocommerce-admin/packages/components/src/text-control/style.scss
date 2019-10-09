@@ -1,0 +1,93 @@
+/** @format */
+
+.muriel-input-text {
+	background: $studio-white;
+	border: 1px solid $studio-gray-20;
+	border-radius: 0;
+	box-shadow: none;
+	padding: 12px 12px 4px;
+	position: relative;
+
+	&:hover {
+		border-color: $studio-gray-40;
+	}
+
+	label {
+		color: $studio-gray-50;
+		font-size: 14px;
+		line-height: 21px;
+
+		&.components-base-control__label {
+			margin: 0;
+		}
+	}
+
+	.components-text-control__input {
+		border: 0;
+		box-shadow: none;
+		font-size: 16px;
+		line-height: 21px;
+		margin: 0;
+		padding: 0;
+
+		&:focus {
+			box-shadow: none;
+		}
+	}
+
+	&.active {
+		box-shadow: 0 0 0 2px $studio-woocommerce-purple-60;
+		border-color: transparent;
+
+		input {
+			color: $studio-gray-80;
+		}
+	}
+
+	&.with-value {
+		.components-base-control__label {
+			display: block;
+		}
+
+		input {
+			color: $studio-gray-80;
+		}
+	}
+
+	&.empty {
+		label {
+			display: none;
+		}
+		input {
+			color: $studio-gray-50;
+		}
+	}
+
+	&.has-error {
+		box-shadow: none;
+	}
+
+	&.disabled {
+		label {
+			display: none;
+		}
+		input {
+			color: $studio-gray-20;
+
+			/* Placeholder styling: */
+			&::placeholder {
+				/* Chrome, Firefox, Opera, Safari 10.1+ */
+				color: $studio-gray-20;
+				opacity: 1; /* Firefox */
+			}
+			&:-ms-input-placeholder {
+				/* Internet Explorer 10-11 */
+				color: $studio-gray-20;
+			}
+			&::-ms-input-placeholder {
+				/* Microsoft Edge */
+				color: $studio-gray-20;
+			}
+		}
+	}
+}

@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Button, TextControl } from 'newspack-components';
+import { Button } from 'newspack-components';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { FormToggle } from '@wordpress/components';
@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { Flag, Form } from '@woocommerce/components';
+import { Flag, Form, TextControl } from '@woocommerce/components';
 import { getCurrencyFormatString } from '@woocommerce/currency';
 import { CURRENCY, getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 

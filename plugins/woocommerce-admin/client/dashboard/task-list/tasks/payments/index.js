@@ -8,13 +8,13 @@ import { Fragment, Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { get, filter, noop, keys, pickBy, difference } from 'lodash';
 import { FormToggle, CheckboxControl } from '@wordpress/components';
-import { Button, TextControl } from 'newspack-components';
+import { Button } from 'newspack-components';
 import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
-import { Form, Card, Stepper, List } from '@woocommerce/components';
+import { Form, Card, Stepper, TextControl, List } from '@woocommerce/components';
 import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
 import { WC_ASSET_URL as wcAssetUrl } from '@woocommerce/wc-admin-settings';
 

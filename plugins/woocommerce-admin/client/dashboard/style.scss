@@ -123,65 +123,6 @@
 		}
 	}
 
-	.muriel-input-text {
-		&.empty {
-			.components-base-control__label {
-				display: none;
-			}
-
-			input {
-				top: 14px;
-			}
-		}
-
-		input[type='text']:focus {
-			box-shadow: none;
-			border: 0;
-		}
-	}
-
-	.muriel-input-text label,
-	.muriel-select label {
-		display: initial;
-		width: auto;
-		right: auto;
-		left: $gap;
-	}
-
-	.muriel-select select {
-		left: 15px;
-	}
-
-	.muriel-select.empty label {
-		top: 15px;
-	}
-
-	.muriel-select::after {
-		margin-top: -$gap-smallest;
-	}
-
-	.muriel-input-text,
-	.muriel-select {
-		&.with-value,
-		&.active {
-			label {
-				display: block;
-				top: 8px;
-			}
-
-			input,
-			select {
-				top: 24px;
-			}
-		}
-	}
-
-	.muriel-input-text.active,
-	.muriel-select.active {
-		box-shadow: 0 0 0 2px $studio-woocommerce-purple-60;
-		border-color: transparent;
-	}
-
 	.muriel-checkbox label.components-checkbox-control__label {
 		margin-left: $gap-smaller;
 	}
