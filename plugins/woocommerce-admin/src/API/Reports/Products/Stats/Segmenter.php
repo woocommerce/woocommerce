@@ -104,7 +104,7 @@ class Segmenter extends ReportsSegmenter {
 		$orig_offset      = intval( $limit_parts[1] );
 		$orig_rowcount    = intval( $limit_parts[2] );
 		$segmenting_limit = $wpdb->prepare( 'LIMIT %d, %d', $orig_offset * $segment_count, $orig_rowcount * $segment_count );
-		
+
 		// Can't get all the numbers from one query, so split it into one query for product-level numbers and one for order-level numbers (which first need to have orders uniqued).
 		// Product-level numbers.
 		$segments_products = $wpdb->get_results(
@@ -191,8 +191,8 @@ class Segmenter extends ReportsSegmenter {
 
 			// Restrict our search space for category comparisons.
 			if ( isset( $this->query_args['categories'] ) ) {
-				$category_ids = implode( ',', $this->get_all_segments() );
-				$segmenting_where .= " AND wp_term_taxonomy.term_taxonomy_id IN ( $category_ids )";
+				$category_ids      = implode( ',', $this->get_all_segments() );
+				$segmenting_where .= " AND {$wpdb->wc_category_lookup}.category_id IN ( $category_ids )";
 			}
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
