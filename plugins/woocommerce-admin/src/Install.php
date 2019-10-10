@@ -26,7 +26,12 @@ class Install {
 	 *
 	 * @var array
 	 */
-	protected static $db_updates = array();
+	protected static $db_updates = array(
+		'0.20.1' => array(
+			'wc_admin_update_0201_order_status_index',
+			'wc_admin_update_0201_db_version',
+		),
+	);
 
 	/**
 	 * Hook in tabs.
@@ -74,7 +79,7 @@ class Install {
 		self::create_tables();
 		self::create_events();
 		self::create_notes();
-		self::update_db_version();
+		self::update_db();
 
 		delete_transient( 'wc_admin_installing' );
 
@@ -94,6 +99,9 @@ class Install {
 			$collate = $wpdb->get_charset_collate();
 		}
 
+		// Max DB index length. See wp_get_db_schema().
+		$max_index_length = 191;
+
 		$tables = "
 		CREATE TABLE {$wpdb->prefix}wc_order_stats (
 			order_id bigint(20) unsigned NOT NULL,
@@ -111,7 +119,7 @@ class Install {
 			PRIMARY KEY (order_id),
 			KEY date_created (date_created),
 			KEY customer_id (customer_id),
-			KEY status (status)
+			KEY status (status({$max_index_length}))
 		) $collate;
 		CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 			order_item_id BIGINT UNSIGNED NOT NULL,
@@ -262,11 +270,56 @@ class Install {
 	}
 
 	/**
-	 * Update WC Admin version to current.
+	 * Get list of DB update callbacks.
+	 *
+	 * @return array
 	 */
-	protected static function update_db_version() {
+	public static function get_db_update_callbacks() {
+		return self::$db_updates;
+	}
+
+	/**
+	 * Push all needed DB updates to the queue for processing.
+	 */
+	private static function update_db() {
+		$current_db_version = get_option( self::VERSION_OPTION );
+		$loop               = 0;
+
+		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
+			if ( version_compare( $current_db_version, $version, '<' ) ) {
+				foreach ( $update_callbacks as $update_callback ) {
+					$pending_jobs = WC()->queue()->search(
+						array(
+							'per_page' => 1,
+							'hook'     => 'woocommerce_run_update_callback',
+							'search'   => json_encode( array( $update_callback ) ),
+							'group'    => 'woocommerce-db-updates',
+						)
+					);
+
+					if ( empty( $pending_jobs ) ) {
+						WC()->queue()->schedule_single(
+							time() + $loop,
+							'woocommerce_run_update_callback',
+							array( $update_callback ),
+							'woocommerce-db-updates'
+						);
+					}
+
+					$loop++;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Update WC Admin version to current.
+	 *
+	 * @param string|null $version New WooCommerce Admin DB version or null.
+	 */
+	public static function update_db_version( $version = null ) {
 		delete_option( self::VERSION_OPTION );
-		add_option( self::VERSION_OPTION, WC_ADMIN_VERSION_NUMBER );
+		add_option( self::VERSION_OPTION, is_null( $version ) ? WC_ADMIN_VERSION_NUMBER : $version );
 	}
 
 	/**
