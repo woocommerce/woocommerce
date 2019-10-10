@@ -19,10 +19,15 @@ import {
 	StoreAddress,
 	validateStoreAddress,
 } from '../../components/settings/general/store-address';
+import UsageModal from './usage-modal';
 
 class StoreDetails extends Component {
 	constructor() {
 		super( ...arguments );
+
+		this.state = {
+			showUsageModal: false,
+		};
 
 		this.initialValues = {
 			addressLine1: '',
@@ -34,6 +39,18 @@ class StoreDetails extends Component {
 		};
 
 		this.onContinue = this.onContinue.bind( this );
+		this.onSubmit = this.onSubmit.bind( this );
+	}
+
+	onSubmit( values ) {
+		const { profileItems } = this.props;
+
+		if ( 'already-installed' === profileItems.wcs_jetpack ) {
+			this.setState( { showUsageModal: true } );
+			return;
+		}
+
+		this.onContinue( values );
 	}
 
 	async onContinue( values ) {
@@ -74,6 +91,7 @@ class StoreDetails extends Component {
 	}
 
 	render() {
+		const { showUsageModal } = this.state;
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -89,11 +107,17 @@ class StoreDetails extends Component {
 				<Card>
 					<Form
 						initialValues={ this.initialValues }
-						onSubmitCallback={ this.onContinue }
+						onSubmitCallback={ this.onSubmit }
 						validate={ validateStoreAddress }
 					>
-						{ ( { getInputProps, handleSubmit, isValidForm } ) => (
+						{ ( { getInputProps, handleSubmit, values, isValidForm } ) => (
 							<Fragment>
+								{ showUsageModal && (
+									<UsageModal
+										onContinue={ () => this.onContinue( values ) }
+										onClose={ () => this.setState( { showUsageModal: false } ) }
+									/>
+								) }
 								<StoreAddress getInputProps={ getInputProps } />
 								<CheckboxControl
 									label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
@@ -114,16 +138,29 @@ class StoreDetails extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting, getProfileItemsError } = select(
-			'wc-api'
-		);
+		const {
+			getSettings,
+			getSettingsError,
+			isGetSettingsRequesting,
+			getProfileItemsError,
+			getProfileItems,
+		} = select( 'wc-api' );
+
+		const profileItems = getProfileItems();
 
 		const settings = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 
-		return { getSettings, isProfileItemsError, isSettingsError, isSettingsRequesting, settings };
+		return {
+			getSettings,
+			isProfileItemsError,
+			profileItems,
+			isSettingsError,
+			isSettingsRequesting,
+			settings,
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { createNotice } = dispatch( 'core/notices' );

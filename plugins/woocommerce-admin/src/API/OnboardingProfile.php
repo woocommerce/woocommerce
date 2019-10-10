@@ -216,6 +216,18 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'wcs_jetpack'         => array(
+				'type'              => 'string',
+				'description'       => __( 'How the Jetpack/WooCommerce Services step was handled.', 'woocommerce-admin' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+				'enum'              => array(
+					'skipped',
+					'already-installed',
+					'wizard',
+				),
+			),
 			'account_type'        => array(
 				'type'              => 'string',
 				'description'       => __( 'Account type used for Jetpack.', 'woocommerce-admin' ),
@@ -278,7 +290,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 					'brick-mortar-other',
 				),
 			),
-			'revenue'      => array(
+			'revenue'             => array(
 				'type'              => 'string',
 				'description'       => __( 'Current annual revenue of the store.', 'woocommerce-admin' ),
 				'context'           => array( 'view' ),

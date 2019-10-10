@@ -12,6 +12,10 @@
 		font-weight: normal;
 	}
 
+	.woocommerce-profile-wizard__continue {
+		line-height: 32px;
+	}
+
 	.woocommerce-card {
 		margin-top: $gap;
 
@@ -339,5 +343,34 @@
 
 	.woocommerce-stepper__steps {
 		margin: 0;
+	}
+}
+
+.components-modal__frame.woocommerce-profile-wizard__usage-modal {
+	min-width: 600px;
+
+	.components-modal__header {
+		border-bottom: 0;
+		margin-bottom: 0;
+	}
+
+	.woocommerce-profile-wizard__usage-wrapper {
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
+
+		a {
+			color: $studio-gray-60;
+		}
+
+		button.is-primary {
+			min-width: 160px;
+			align-self: flex-end;
+			margin-bottom: 0;
+		}
+
+		.muriel-checkbox label.components-checkbox-control__label {
+			font-size: 13px;
+		}
 	}
 }

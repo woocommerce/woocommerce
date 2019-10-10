@@ -3,13 +3,12 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { FormToggle } from '@wordpress/components';
-import { Button, CheckboxControl } from 'newspack-components';
+import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch } from '@wordpress/data';
-import { filter } from 'lodash';
+import { filter, get } from 'lodash';
 
 /**
  * WooCommerce depdencies
@@ -27,63 +26,56 @@ import SpeedIcon from './images/flash_on';
 import MobileAppIcon from './images/phone_android';
 import PrintIcon from './images/print';
 import withSelect from 'wc-api/with-select';
+import UsageModal from '../usage-modal';
 import { recordEvent } from 'lib/tracks';
 
 class Start extends Component {
-	constructor() {
-		super( ...arguments );
-
+	constructor( props ) {
+		super( props );
 		this.state = {
-			allowTracking: true,
+			showUsageModal: false,
+			continueAction: '',
 		};
-
-		this.onTrackingChange = this.onTrackingChange.bind( this );
 		this.startWizard = this.startWizard.bind( this );
 		this.skipWizard = this.skipWizard.bind( this );
 	}
 
 	componentDidMount() {
+		const { updateProfileItems } = this.props;
 		if (
 			this.props.activePlugins.includes( 'jetpack' ) &&
 			this.props.activePlugins.includes( 'woocommerce-services' )
 		) {
+			updateProfileItems( { wcs_jetpack: 'already-installed' } );
 			return updateQueryString( { step: 'store-details' } );
 		}
 	}
 
-	async updateTracking() {
-		const { updateSettings } = this.props;
-		const allowTracking = this.state.allowTracking ? 'yes' : 'no';
-		await updateSettings( { advanced: { woocommerce_allow_tracking: allowTracking } } );
-	}
-
 	async skipWizard() {
-		const { createNotice, isProfileItemsError, updateProfileItems, isSettingsError } = this.props;
+		const { createNotice, isProfileItemsError, updateProfileItems } = this.props;
 
-		recordEvent( 'storeprofiler_welcome_clicked', { proceed_without_install: true } );
+		await updateProfileItems( { skipped: true, wcs_jetpack: 'skipped' } );
 
-		await updateProfileItems( { skipped: true } );
-		await this.updateTracking();
-
-		if ( isProfileItemsError || isSettingsError ) {
+		if ( isProfileItemsError ) {
 			createNotice(
 				'error',
 				__( 'There was a problem updating your preferences.', 'woocommerce-admin' )
 			);
+		} else {
+			recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
 		}
 	}
 
 	async startWizard() {
-		const { updateOptions, createNotice, isSettingsError } = this.props;
-
-		recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
+		const { createNotice, isProfileItemsError, updateProfileItems, updateOptions } = this.props;
 
 		await updateOptions( {
 			woocommerce_setup_jetpack_opted_in: true,
 		} );
-		await this.updateTracking();
+		await updateProfileItems( { wcs_jetpack: 'wizard' } );
 
-		if ( ! isSettingsError ) {
+		if ( ! isProfileItemsError ) {
+			recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
 			this.props.goToNextStep();
 		} else {
 			createNotice(
@@ -91,12 +83,6 @@ class Start extends Component {
 				__( 'There was a problem updating your preferences.', 'woocommerce-admin' )
 			);
 		}
-	}
-
-	onTrackingChange() {
-		this.setState( {
-			allowTracking: ! this.state.allowTracking,
-		} );
 	}
 
 	renderBenefit( benefit ) {
@@ -186,26 +172,23 @@ class Start extends Component {
 	}
 
 	render() {
-		const { allowTracking } = this.state;
+		const { showUsageModal, continueAction } = this.state;
 		const { activePlugins } = this.props;
+
 		const pluginNames = activePlugins.includes( 'jetpack' )
 			? __( 'WooCommerce Services', 'woocommerce-admin' )
 			: __( 'Jetpack & WooCommerce Services', 'woocommerce-admin' );
 
-		const trackingLabel = interpolateComponents( {
-			mixedString: __(
-				'Help improve WooCommerce with {{link}}usage tracking{{/link}}',
-				'woocommerce-admin'
-			),
-			components: {
-				link: (
-					<Link href="https://woocommerce.com/usage-tracking" target="_blank" type="external" />
-				),
-			},
-		} );
-
 		return (
 			<Fragment>
+				{ showUsageModal && (
+					<UsageModal
+						onContinue={ () =>
+							'wizard' === continueAction ? this.startWizard() : this.skipWizard()
+						}
+						onClose={ () => this.setState( { showUsageModal: false, continueAction: '' } ) }
+					/>
+				) }
 				<H className="woocommerce-profile-wizard__header-title">
 					{ __( 'Start setting up your WooCommerce store', 'woocommerce-admin' ) }
 				</H>
@@ -229,23 +212,6 @@ class Start extends Component {
 				<Card>
 					{ this.renderBenefits() }
 
-					<div className="woocommerce-profile-wizard__tracking">
-						<CheckboxControl
-							className="woocommerce-profile-wizard__tracking-checkbox"
-							checked={ allowTracking }
-							label={ __( trackingLabel, 'woocommerce-admin' ) }
-							onChange={ this.onTrackingChange }
-						/>
-
-						<FormToggle
-							aria-hidden="true"
-							checked={ allowTracking }
-							onChange={ this.onTrackingChange }
-							onClick={ e => e.stopPropagation() }
-							tabIndex="-1"
-						/>
-					</div>
-
 					<p className="woocommerce-profile-wizard__tos">
 						{ interpolateComponents( {
 							mixedString: __(
@@ -268,7 +234,7 @@ class Start extends Component {
 
 					<Button
 						isPrimary
-						onClick={ this.startWizard }
+						onClick={ () => this.setState( { showUsageModal: true, continueAction: 'wizard' } ) }
 						className="woocommerce-profile-wizard__continue"
 					>
 						{ __( 'Get started', 'woocommerce-admin' ) }
@@ -276,7 +242,11 @@ class Start extends Component {
 				</Card>
 
 				<p>
-					<Button isLink className="woocommerce-profile-wizard__skip" onClick={ this.skipWizard }>
+					<Button
+						isLink
+						className="woocommerce-profile-wizard__skip"
+						onClick={ () => this.setState( { showUsageModal: true, continueAction: 'skip' } ) }
+					>
 						{ sprintf( __( 'Proceed without %s', 'woocommerce-admin' ), pluginNames ) }
 					</Button>
 				</p>
@@ -287,37 +257,29 @@ class Start extends Component {
 
 export default compose(
 	withSelect( select => {
-		const {
-			getProfileItemsError,
-			getSettings,
-			getSettingsError,
-			isGetSettingsRequesting,
-			getActivePlugins,
-		} = select( 'wc-api' );
+		const { getProfileItemsError, getActivePlugins, getOptions } = select( 'wc-api' );
 
-		const isSettingsError = Boolean( getSettingsError( 'advanced' ) );
-		const isSettingsRequesting = isGetSettingsRequesting( 'advanced' );
 		const isProfileItemsError = Boolean( getProfileItemsError() );
+
+		const options = getOptions( [ 'woocommerce_allow_tracking' ] );
+		const allowTracking = 'yes' === get( options, [ 'woocommerce_allow_tracking' ], false );
 
 		const activePlugins = getActivePlugins();
 
 		return {
-			getSettings,
-			isSettingsError,
 			isProfileItemsError,
-			isSettingsRequesting,
 			activePlugins,
+			allowTracking,
 		};
 	} ),
 	withDispatch( dispatch => {
-		const { updateProfileItems, updateOptions, updateSettings } = dispatch( 'wc-api' );
+		const { updateProfileItems, updateOptions } = dispatch( 'wc-api' );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
 			updateProfileItems,
 			updateOptions,
-			updateSettings,
 		};
 	} )
 )( Start );
