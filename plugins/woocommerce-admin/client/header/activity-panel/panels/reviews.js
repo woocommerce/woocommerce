@@ -8,7 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
-import { get, noop, isNull } from 'lodash';
+import { get, isNull } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -21,7 +21,6 @@ import {
 	ProductImage,
 	ReviewRating,
 	Section,
-	SplitButton,
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/navigation';
 
@@ -33,6 +32,7 @@ import ActivityHeader from '../activity-header';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import sanitizeHTML from 'lib/sanitize-html';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class ReviewsPanel extends Component {
 	constructor() {
@@ -93,33 +93,20 @@ class ReviewsPanel extends Component {
 			</div>
 		);
 
-		const cardActions = () => {
-			const mainLabel =
-				'approved' === review.status
-					? __( 'Unapprove', 'woocommerce-admin' )
-					: __( 'Approve', 'woocommerce-admin' );
-			return (
-				<SplitButton
-					mainLabel={ mainLabel }
-					menuLabel={ __( 'Select an action', 'woocommerce-admin' ) }
-					onClick={ noop }
-					controls={ [
-						{
-							label: __( 'Reply', 'woocommerce-admin' ),
-							onClick: noop,
-						},
-						{
-							label: __( 'Spam', 'woocommerce-admin' ),
-							onClick: noop,
-						},
-						{
-							label: __( 'Trash', 'woocommerce-admin' ),
-							onClick: noop,
-						},
-					] }
-				/>
-			);
+		const manageReviewEvent = {
+			date: review.date_created_gmt,
+			status: review.status,
 		};
+
+		const cardActions = (
+			<Button
+				isDefault
+				onClick={ () => recordEvent( 'review_manage_click', manageReviewEvent ) }
+				href={ getAdminLink( 'comment.php?action=editcomment&c=' + review.id ) }
+			>
+				{ __( 'Manage', 'woocommerce-admin' ) }
+			</Button>
+		);
 
 		return (
 			<ActivityCard
@@ -129,7 +116,7 @@ class ReviewsPanel extends Component {
 				subtitle={ subtitle }
 				date={ review.date_created_gmt }
 				icon={ icon }
-				actions={ cardActions() }
+				actions={ cardActions }
 				unread={
 					review.status === 'hold' ||
 					! lastRead ||
