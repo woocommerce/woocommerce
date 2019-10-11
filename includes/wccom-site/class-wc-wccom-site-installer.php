@@ -293,6 +293,7 @@ class WC_WCCOM_Site_Installer {
 		} else {
 			// Retrieve download URL for non-wporg product.
 			WC_Helper_Updater::flush_updates_cache();
+			WC_Helper::_flush_subscriptions_cache();
 			$updates = WC_Helper_Updater::get_update_data();
 			if ( empty( $updates[ $product_id ]['package'] ) ) {
 				return new WP_Error( 'missing_product_package', __( 'Could not find product package.', 'woocommerce' ) );
