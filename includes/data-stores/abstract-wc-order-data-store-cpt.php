@@ -390,6 +390,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Add / Update order statuses in the custom table.
 	 *
+	 * @since 3.9.0
 	 * @param int   $order_id Order ID.
 	 * @param array $order_status_values Key=>Value pairs array of order statuses and their values.
 	 * @return bool Whether statuses were updated or not.

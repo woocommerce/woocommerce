@@ -31,6 +31,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $data = array(
 		'parent_id'          => 0,
 		'status'             => '',
+		'order_status'       => '',
 		'payment_status'     => '',
 		'fulfillment_status' => '',
 		'delivery_status'    => '',
