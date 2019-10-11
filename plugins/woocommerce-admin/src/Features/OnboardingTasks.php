@@ -8,6 +8,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore;
+
 /**
  * Contains the logic for completing onboarding tasks.
  */
@@ -79,6 +81,7 @@ class OnboardingTasks {
 			)
 		) > 0;
 		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
+		$settings['onboarding']['isTaxComplete']                  = 'yes' === get_option( 'wc_connect_taxes_enabled' ) || count( DataStore::get_taxes( array() ) ) > 0;
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 
 		return $settings;

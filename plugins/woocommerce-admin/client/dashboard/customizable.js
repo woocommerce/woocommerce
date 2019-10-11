@@ -5,7 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { partial } from 'lodash';
+import { partial, filter, get } from 'lodash';
 import { IconButton, Icon, Dropdown, Button } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
@@ -22,6 +22,8 @@ import defaultSections from './default-sections';
 import Section from './section';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
+import TaskList from './task-list';
+import { getTasks } from './task-list/tasks';
 
 class CustomizableDashboard extends Component {
 	constructor( props ) {
@@ -189,14 +191,28 @@ class CustomizableDashboard extends Component {
 	}
 
 	render() {
-		const { query, path } = this.props;
+		const { query, path, taskListHidden, taskListCompleted } = this.props;
 		const { sections } = this.state;
 		const visibleSectionKeys = sections
 			.filter( section => section.isVisible )
 			.map( section => section.key );
 
+		if (
+			window.wcAdminFeatures.onboarding &&
+			wcSettings.onboarding &&
+			! taskListHidden &&
+			( query.task || ! taskListCompleted )
+		) {
+			return <TaskList query={ query } />;
+		}
+
 		return (
 			<Fragment>
+				{ window.wcAdminFeatures.onboarding &&
+					wcSettings.onboarding &&
+					! taskListHidden &&
+					taskListCompleted && <TaskList query={ query } inline /> }
+
 				<ReportFilters query={ query } path={ path } />
 				{ sections.map( ( section, index ) => {
 					if ( section.isVisible ) {
@@ -226,11 +242,32 @@ class CustomizableDashboard extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getCurrentUserData } = select( 'wc-api' );
+	withSelect( ( select, props ) => {
+		const { getCurrentUserData, getProfileItems, getOptions } = select( 'wc-api' );
 		const userData = getCurrentUserData();
 
+		const profileItems = getProfileItems();
+		const taskListHidden =
+			'yes' ===
+			get(
+				getOptions( [ 'woocommerce_task_list_hidden' ] ),
+				[ 'woocommerce_task_list_hidden' ],
+				'no'
+			);
+
+		const tasks = getTasks( {
+			profileItems,
+			options: getOptions( [ 'woocommerce_onboarding_payments' ] ),
+			query: props.query,
+		} );
+
+		const visibleTasks = filter( tasks, task => task.visible );
+		const completedTasks = filter( tasks, task => task.visible && task.completed );
+		const taskListCompleted = visibleTasks.length === completedTasks.length;
+
 		return {
+			taskListHidden,
+			taskListCompleted,
 			userPrefSections: userData.dashboard_sections,
 		};
 	} ),

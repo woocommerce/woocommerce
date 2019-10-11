@@ -6,40 +6,23 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { filter, get } from 'lodash';
 import { compose } from '@wordpress/compose';
+import classNames from 'classnames';
+import { Snackbar, Icon, Button } from '@wordpress/components';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
-import { Card, List } from '@woocommerce/components';
+import { Card, List, MenuItem, EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal depdencies
  */
 import './style.scss';
-import Appearance from './tasks/appearance';
-import Connect from './tasks/connect';
-import Products from './tasks/products';
-import Shipping from './tasks/shipping';
-import Tax from './tasks/tax';
-import Payments from './tasks/payments';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-
-const {
-	customLogo,
-	hasHomepage,
-	hasPhysicalProducts,
-	hasProducts,
-	shippingZonesCount,
-} = getSetting( 'onboarding', {
-	customLogo: '',
-	hasHomePage: false,
-	hasPhysicalProducts: false,
-	hasProducts: false,
-	shippingZonesCount: 0,
-} );
+import { getTasks } from './tasks';
 
 class TaskDashboard extends Component {
 	componentDidMount() {
@@ -59,108 +42,36 @@ class TaskDashboard extends Component {
 			return;
 		}
 		const { profileItems } = this.props;
-		const tasks = filter( this.getTasks(), task => task.visible );
+		const tasks = filter( this.props.tasks, task => task.visible );
 		recordEvent( 'tasklist_view', {
 			number_tasks: tasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
 	}
 
-	getTasks() {
-		const { profileItems, query, paymentsCompleted } = this.props;
+	keepTaskCard() {
+		recordEvent( 'tasklist_completed', {
+			action: 'keep_card',
+		} );
 
-		return [
-			{
-				key: 'connect',
-				title: __( 'Connect your store to WooCommerce.com', 'woocommerce-admin' ),
-				content: __(
-					'Install and manage your extensions directly from your Dashboard',
-					'wooocommerce-admin'
-				),
-				before: <i className="material-icons-outlined">extension</i>,
-				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: () => updateQueryString( { task: 'connect' } ),
-				container: <Connect query={ query } />,
-				visible: profileItems.items_purchased && ! profileItems.wccom_connected,
-			},
-			{
-				key: 'products',
-				title: __( 'Add your first product', 'woocommerce-admin' ),
-				content: __(
-					'Add products manually, import from a sheet or migrate from another platform',
-					'wooocommerce-admin'
-				),
-				before: hasProducts ? (
-					<i className="material-icons-outlined">check_circle</i>
-				) : (
-					<i className="material-icons-outlined">add_box</i>
-				),
-				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: () => updateQueryString( { task: 'products' } ),
-				container: <Products />,
-				className: hasProducts ? 'is-complete' : null,
-				visible: true,
-			},
-			{
-				key: 'appearance',
-				title: __( 'Personalize your store', 'woocommerce-admin' ),
-				content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
-				before: <i className="material-icons-outlined">palette</i>,
-				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: () => updateQueryString( { task: 'appearance' } ),
-				container: <Appearance />,
-				className: customLogo && hasHomepage ? 'is-complete' : null,
-				visible: true,
-			},
-			{
-				key: 'shipping',
-				title: __( 'Set up shipping', 'woocommerce-admin' ),
-				content: __( 'Configure some basic shipping rates to get started', 'wooocommerce-admin' ),
-				before:
-					shippingZonesCount > 0 ? (
-						<i className="material-icons-outlined">check_circle</i>
-					) : (
-						<i className="material-icons-outlined">local_shipping</i>
-					),
-				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: () => updateQueryString( { task: 'shipping' } ),
-				container: <Shipping />,
-				className: shippingZonesCount > 0 ? 'is-complete' : null,
-				visible: profileItems.product_types.includes( 'physical' ) || hasPhysicalProducts,
-			},
-			{
-				key: 'tax',
-				title: __( 'Set up tax', 'woocommerce-admin' ),
-				content: __(
-					'Choose how to configure tax rates - manually or automatically',
-					'wooocommerce-admin'
-				),
-				before: <i className="material-icons-outlined">account_balance</i>,
-				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: () => updateQueryString( { task: 'tax' } ),
-				container: <Tax />,
-				visible: true,
-			},
-			{
-				key: 'payments',
-				title: __( 'Set up payments', 'woocommerce-admin' ),
-				content: __(
-					'Select which payment providers you’d like to use and configure them',
-					'wooocommerce-admin'
-				),
-				before: <i className="material-icons-outlined">payment</i>,
-				after: <i className="material-icons-outlined">chevron_right</i>,
-				onClick: () => updateQueryString( { task: 'payments' } ),
-				container: <Payments />,
-				className: paymentsCompleted ? 'is-complete' : null,
-				visible: true,
-			},
-		];
+		this.props.updateOptions( {
+			woocommerce_task_list_prompt_shown: true,
+		} );
+	}
+
+	hideTaskCard( action ) {
+		recordEvent( 'tasklist_completed', {
+			action,
+		} );
+		this.props.updateOptions( {
+			woocommerce_task_list_hidden: 'yes',
+			woocommerce_task_list_prompt_shown: true,
+		} );
 	}
 
 	getCurrentTask() {
 		const { task } = this.props.query;
-		const currentTask = this.getTasks().find( s => s.key === task );
+		const currentTask = this.props.tasks.find( s => s.key === task );
 
 		if ( ! currentTask ) {
 			return null;
@@ -169,9 +80,59 @@ class TaskDashboard extends Component {
 		return currentTask;
 	}
 
+	renderPrompt() {
+		if ( this.props.promptShown ) {
+			return null;
+		}
+
+		return (
+			<Snackbar className="woocommerce-task-card__prompt">
+				<div>
+					<div className="woocommerce-task-card__prompt-pointer" />
+					<span>{ __( 'Is this card useful?', 'woocommerce-admin' ) }</span>
+				</div>
+				<div className="woocommerce-task-card__prompt-actions">
+					<Button isLink onClick={ () => this.hideTaskCard( 'hide_card' ) }>
+						{ __( 'No, hide it', 'woocommerce-admin' ) }
+					</Button>
+
+					<Button isLink onClick={ () => this.keepTaskCard() }>
+						{ __( 'Yes, keep it', 'woocommerce-admin' ) }
+					</Button>
+				</div>
+			</Snackbar>
+		);
+	}
+
+	renderMenu() {
+		return (
+			<EllipsisMenu
+				label={ __( 'Task List Options', 'woocommerce-admin' ) }
+				renderContent={ () => (
+					<div className="woocommerce-task-card__section-controls">
+						<MenuItem isClickable onInvoke={ () => this.hideTaskCard( 'remove_card' ) }>
+							<Icon icon={ 'trash' } label={ __( 'Remove block' ) } />
+							{ __( 'Remove this card', 'woocommerce-admin' ) }
+						</MenuItem>
+					</div>
+				) }
+			/>
+		);
+	}
+
 	render() {
 		const currentTask = this.getCurrentTask();
-		const tasks = filter( this.getTasks(), task => task.visible );
+		const tasks = filter( this.props.tasks, task => task.visible ).map( task => {
+			task.className = classNames( task.completed ? 'is-complete' : null, task.className );
+			task.before = task.completed ? (
+				<i className="material-icons-outlined">check_circle</i>
+			) : (
+				<i className="material-icons-outlined">{ task.icon }</i>
+			);
+			task.after = <i className="material-icons-outlined">chevron_right</i>;
+			task.onClick = () => updateQueryString( { task: task.key } );
+			return task;
+		} );
 
 		return (
 			<Fragment>
@@ -179,16 +140,20 @@ class TaskDashboard extends Component {
 					{ currentTask ? (
 						currentTask.container
 					) : (
-						<Card
-							className="woocommerce-task-card"
-							title={ __( 'Set up your store and start selling', 'woocommerce-admin' ) }
-							description={ __(
-								'Below you’ll find a list of the most important steps to get your store up and running.',
-								'woocommerce-admin'
-							) }
-						>
-							<List items={ tasks } />
-						</Card>
+						<Fragment>
+							<Card
+								className="woocommerce-task-card"
+								title={ __( 'Set up your store and start selling', 'woocommerce-admin' ) }
+								description={ __(
+									'Below you’ll find a list of the most important steps to get your store up and running.',
+									'woocommerce-admin'
+								) }
+								menu={ this.props.inline && this.renderMenu() }
+							>
+								<List items={ tasks } />
+							</Card>
+							{ this.props.inline && this.renderPrompt() }
+						</Fragment>
 					) }
 				</div>
 			</Fragment>
@@ -197,17 +162,32 @@ class TaskDashboard extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select, props ) => {
 		const { getProfileItems, getOptions } = select( 'wc-api' );
 		const profileItems = getProfileItems();
 
-		const options = getOptions( [ 'woocommerce_onboarding_payments' ] );
-		const paymentsCompleted = get(
-			options,
-			[ 'woocommerce_onboarding_payments', 'completed' ],
+		const promptShown = get(
+			getOptions( [ 'woocommerce_task_list_prompt_shown' ] ),
+			[ 'woocommerce_task_list_prompt_shown' ],
 			false
 		);
 
-		return { profileItems, paymentsCompleted };
+		const tasks = getTasks( {
+			profileItems,
+			options: getOptions( [ 'woocommerce_onboarding_payments' ] ),
+			query: props.query,
+		} );
+
+		return {
+			profileItems,
+			promptShown,
+			tasks,
+		};
+	} ),
+	withDispatch( dispatch => {
+		const { updateOptions } = dispatch( 'wc-api' );
+		return {
+			updateOptions,
+		};
 	} )
 )( TaskDashboard );
