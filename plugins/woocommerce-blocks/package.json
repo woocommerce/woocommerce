@@ -106,6 +106,7 @@
 	},
 	"dependencies": {
 		"@woocommerce/components": "3.2.0",
+		"compare-versions": "^3.5.1",
 		"gridicons": "3.3.1",
 		"trim-html": "0.1.9"
 	},
