@@ -330,10 +330,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order statuses without wc- internal prefix.
 	 *
+	 * @deprecated 3.9.0
 	 * @param  string $context View or edit context.
 	 * @return string
 	 */
 	public function get_status( $context = 'view' ) {
+		wc_deprecated_function( 'WC_Abstract_Order->get_status', '3.9.0', 'WC_Abstract_Order->get_order_status' );
 		$status = $this->get_prop( 'status', $context );
 
 		if ( empty( $status ) && 'view' === $context ) {
@@ -636,11 +638,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set order status.
 	 *
+	 * @deprecated 3.9.0
 	 * @since 3.0.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @return array details of change
 	 */
 	public function set_status( $new_status ) {
+		wc_deprecated_function( 'WC_Abstract_Order->set_status', '3.9.0', 'WC_Abstract_Order->set_order_status' );
 		$old_status = $this->get_status();
 		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
 
