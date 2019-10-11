@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { shallow } from 'enzyme';
+import { setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -73,11 +74,12 @@ describe( 'ProductImage', () => {
 	} );
 
 	test( 'should render a placeholder image if no product images are found', () => {
-		global.wcSettings.wcAssetUrl = 'https://woocommerce.com/wp-content/plugins/woocommerce/assets/';
+		setSetting( 'wcAssetUrl', 'https://woocommerce.com/wp-content/plugins/woocommerce/assets/' );
 		const product = {
 			name: 'Test Product',
 		};
 		const image = shallow( <ProductImage product={ product } /> );
 		expect( image ).toMatchSnapshot();
+		setSetting( 'wcAssetUrl', '' );
 	} );
 } );

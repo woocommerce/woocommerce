@@ -21,6 +21,7 @@ import {
 	getPreviousDate,
 } from '@woocommerce/date';
 import { Chart } from '@woocommerce/components';
+import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -157,6 +158,7 @@ export class ReportChart extends Component {
 				valueType={ selectedChart.type }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
+				currency={ CURRENCY }
 			/>
 		);
 	}

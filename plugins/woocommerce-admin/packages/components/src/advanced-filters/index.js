@@ -21,7 +21,6 @@ import {
 	getQueryFromActiveFilters,
 	getHistory,
 } from '@woocommerce/navigation';
-import { LOCALE } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -37,8 +36,6 @@ const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },
 	{ value: 'any', label: __( 'Any', 'woocommerce-admin' ) },
 ];
-
-const { siteLocale } = LOCALE;
 
 /**
  * Displays a configurable set of filters which can modify query parameters.
@@ -189,7 +186,7 @@ class AdvancedFilters extends Component {
 	}
 
 	isEnglish() {
-		return /en-/.test( siteLocale );
+		return /en[-|_]/.test( this.props.siteLocale );
 	}
 
 	onFilter() {
@@ -200,12 +197,13 @@ class AdvancedFilters extends Component {
 	}
 
 	render() {
-		const { config, query } = this.props;
+		const { config, query, currency } = this.props;
 		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled = ( 'admin.php' + window.location.search === updateHref ) || 0 === activeFilters.length;
 		const isEnglish = this.isEnglish();
+		const { symbol: currencySymbol, symbolPosition } = currency;
 		return (
 			<Card className="woocommerce-filters-advanced woocommerce-analytics__card" title={ this.getTitle() }>
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
@@ -241,6 +239,8 @@ class AdvancedFilters extends Component {
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }
+										currencySymbol={ currencySymbol }
+										symbolPosition={ symbolPosition }
 									/>
 								) }
 								{ 'Currency' === input.component && (
@@ -251,6 +251,8 @@ class AdvancedFilters extends Component {
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }
+										currencySymbol={ currencySymbol }
+										symbolPosition={ symbolPosition }
 									/>
 								) }
 								{ 'Date' === input.component && (
@@ -366,11 +368,24 @@ AdvancedFilters.propTypes = {
 	 * Function to be called after an advanced filter action has been taken.
 	 */
 	onAdvancedFilterAction: PropTypes.func,
+	/**
+	 * The locale for the site.
+	 */
+	siteLocale: PropTypes.string,
+	/**
+	 * The currency settings for the site.
+	 */
+	currency: PropTypes.object,
 };
 
 AdvancedFilters.defaultProps = {
 	query: {},
 	onAdvancedFilterAction: () => {},
+	siteLocale: 'en_US',
+	currency: {
+		symbol: '$',
+		symbolPosition: 'left',
+	},
 };
 
 export default AdvancedFilters;

@@ -4,6 +4,7 @@
  * External dependencies
  */
 import { decodeEntities } from '@wordpress/html-entities';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -22,7 +23,11 @@ export default {
 	className: 'woocommerce-search__country-result',
 	isDebounced: true,
 	options() {
-		return wcSettings.dataEndpoints.countries || [];
+		const { countries } = getSetting(
+			'dataEndpoints',
+			{ countries: undefined }
+		);
+		return countries || [];
 	},
 	getSearchExpression( query ) {
 		return '^' + query;

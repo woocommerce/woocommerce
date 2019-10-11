@@ -66,6 +66,8 @@ Name | Type | Default | Description
 `path` | String | `null` | (required) Name of this filter, used in translations.
 `query` | Object | `null` | The query string represented in object form.
 `onAdvancedFilterAction` | Function | `null` | Function to be called after an advanced filter action has been taken.
+`siteLocale` | string | `'en_US'` | The siteLocale for the site.
+`currency` | Object | `{}` | The currency info for the site.
 
 
 ## Input Components

@@ -13,6 +13,7 @@ import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, renderCurrency } from '@woocommerce/currency';
 import { numberFormat } from '@woocommerce/number';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -161,7 +162,11 @@ export default class OrdersReportTable extends Component {
 				},
 				{
 					display: (
-						<OrderStatus className="woocommerce-orders-table__status" order={ { status } } />
+						<OrderStatus
+							className="woocommerce-orders-table__status"
+							order={ { status } }
+							orderStatusMap={ getSetting( 'orderStatuses', {} ) }
+						/>
 					),
 					value: status,
 				},

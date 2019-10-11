@@ -10,6 +10,7 @@ import { omitBy, isUndefined, snakeCase } from 'lodash';
  * WooCommerce dependencies
  */
 import { ReportFilters as Filters } from '@woocommerce/components';
+import { LOCALE, CURRENCY } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -65,6 +66,8 @@ export default class ReportFilters extends Component {
 		return (
 			<Filters
 				query={ query }
+				siteLocale={ LOCALE.siteLocale }
+				currency={ CURRENCY }
 				path={ path }
 				filters={ filters }
 				advancedFilters={ advancedFilters }

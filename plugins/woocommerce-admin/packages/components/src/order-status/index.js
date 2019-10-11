@@ -11,14 +11,13 @@ import PropTypes from 'prop-types';
  *
  * @return { object } -
  */
-const OrderStatus = ( { order, className } ) => {
+const OrderStatus = ( { order, className, orderStatusMap } ) => {
 	const { status } = order;
-	const { orderStatuses } = wcSettings;
 	const classes = classnames( 'woocommerce-order-status', className );
 	const indicatorClasses = classnames( 'woocommerce-order-status__indicator', {
 		[ 'is-' + status ]: true,
 	} );
-	const label = orderStatuses[ status ] || status;
+	const label = orderStatusMap[ status ] || status;
 	return (
 		<div className={ classes }>
 			<span className={ indicatorClasses } />
@@ -36,6 +35,10 @@ OrderStatus.propTypes = {
 	 * Additional CSS classes.
 	 */
 	className: PropTypes.string,
+	/**
+	 * A map of status to label for order statuses.
+	 */
+	orderStatusMap: PropTypes.object,
 };
 
 export default OrderStatus;

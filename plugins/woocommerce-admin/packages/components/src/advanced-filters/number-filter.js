@@ -19,7 +19,6 @@ import { textContent } from './utils';
  * WooCommerce dependencies
  */
 import { formatCurrency } from '@woocommerce/currency';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 class NumberFilter extends Component {
 	getBetweenString() {
@@ -70,10 +69,15 @@ class NumberFilter extends Component {
 		} ) );
 	}
 
-	getFormControl( { type, value, label, onChange } ) {
+	getFormControl( {
+		type,
+		value,
+		label,
+		onChange,
+		currencySymbol,
+		symbolPosition,
+	} ) {
 		if ( 'currency' === type ) {
-			const { symbol: currencySymbol, symbolPosition } = CURRENCY;
-
 			return (
 				0 === symbolPosition.indexOf( 'right' )
 				? <TextControlWithAffixes
@@ -107,7 +111,13 @@ class NumberFilter extends Component {
 	}
 
 	getFilterInputs() {
-		const { config, filter, onFilterChange } = this.props;
+		const {
+			config,
+			filter,
+			onFilterChange,
+			currencySymbol,
+			symbolPosition,
+		} = this.props;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
 		if ( 'between' === filter.rule ) {
@@ -138,11 +148,19 @@ class NumberFilter extends Component {
 			value: rangeStart || rangeEnd,
 			label: sprintf( labelFormat, { field: get( config, [ 'labels', 'add' ] ) } ),
 			onChange: partial( onFilterChange, filter.key, 'value' ),
+			currencySymbol,
+			symbolPosition,
 		} );
 	}
 
 	getRangeInput() {
-		const { config, filter, onFilterChange } = this.props;
+		const {
+			config,
+			filter,
+			onFilterChange,
+			currencySymbol,
+			symbolPosition,
+		} = this.props;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
 
@@ -167,6 +185,8 @@ class NumberFilter extends Component {
 						{ field: get( config, [ 'labels', 'add' ] ) }
 					),
 					onChange: rangeStartOnChange,
+					currencySymbol,
+					symbolPosition,
 				} ),
 				rangeEnd: this.getFormControl( {
 					type: inputType,
@@ -178,6 +198,8 @@ class NumberFilter extends Component {
 						{ field: get( config, [ 'labels', 'add' ] ) }
 					),
 					onChange: rangeEndOnChange,
+					currencySymbol,
+					symbolPosition,
 				} ),
 				span: <span className="separator" />,
 			},

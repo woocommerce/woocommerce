@@ -11,7 +11,6 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { H } from '../section';
-import ImageAsset from '../image-asset';
 
 /**
  * A component to be used when there is no data to show.
@@ -21,7 +20,7 @@ class EmptyContent extends Component {
 	renderIllustration() {
 		const { illustrationWidth, illustrationHeight, illustration } = this.props;
 		return (
-			<ImageAsset
+			<img
 				alt=""
 				src={ illustration }
 				width={ illustrationWidth }
@@ -110,7 +109,7 @@ EmptyContent.propTypes = {
 	 */
 	message: PropTypes.string,
 	/**
-	 * The url string of an image path. Prefix with `/` to load an image relative to the plugin directory.
+	 * The url string of an image path for img src.
 	 */
 	illustration: PropTypes.string,
 	/**
@@ -152,7 +151,8 @@ EmptyContent.propTypes = {
 };
 
 EmptyContent.defaultProps = {
-	illustration: '/empty-content.svg',
+	// eslint-disable-next-line max-len
+	illustration: 'data:image/svg+xml;utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"%3E%3Cpath d="M226.153073,88.3099993 L355.380187,301.446227 C363.970299,315.614028 359.448689,334.062961 345.280888,342.653073 C340.591108,345.496544 335.21158,347 329.727115,347 L71.2728854,347 C54.7043429,347 41.2728854,333.568542 41.2728854,317 C41.2728854,311.515534 42.7763415,306.136007 45.6198127,301.446227 L174.846927,88.3099993 C183.437039,74.1421985 201.885972,69.6205881 216.053773,78.2106999 C220.184157,80.7150022 223.64877,84.1796157 226.153073,88.3099993 Z M184.370159,153 L186.899684,255.024156 L213.459691,255.024156 L215.989216,153 L184.370159,153 Z M200.179688,307.722584 C209.770801,307.722584 217.359375,300.450201 217.359375,291.175278 C217.359375,281.900355 209.770801,274.627972 200.179688,274.627972 C190.588574,274.627972 183,281.900355 183,291.175278 C183,300.450201 190.588574,307.722584 200.179688,307.722584 Z" id="Combined-Shape" stroke="%23979797" fill="%2395588A" fill-rule="nonzero"%3E%3C/path%3E%3C/svg%3E',
 	illustrationWidth: 400,
 };
 

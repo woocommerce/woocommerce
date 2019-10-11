@@ -9,7 +9,18 @@ import {
 	ReportFilters,
 	Section,
 } from '@woocommerce/components';
-const { ORDER_STATUSES } = '@woocommerce/wc-admin-settings';
+
+const ORDER_STATUSES = {
+	cancelled: 'Cancelled',
+	completed: 'Completed',
+	failed: 'Failed',
+	'on-hold': 'On hold',
+	pending: 'Pending payment',
+	processing: 'Processing',
+	refunded: 'Refunded',
+};
+
+const siteLocale = 'en_US';
 
 const path = '';
 const query = {};
@@ -184,6 +195,7 @@ export default () => (
 		<H>Advanced Filters</H>
 		<Section component={ false }>
 			<AdvancedFilters
+				siteLocale={ siteLocale }
 				path={ path }
 				query={ query }
 				filterTitle="Orders"

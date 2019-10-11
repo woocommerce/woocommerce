@@ -3,7 +3,18 @@
  * Internal dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
-import { ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
+
+const ORDER_STATUSES = {
+	cancelled: 'Cancelled',
+	completed: 'Completed',
+	failed: 'Failed',
+	'on-hold': 'On hold',
+	pending: 'Pending payment',
+	processing: 'Processing',
+	refunded: 'Refunded',
+};
+
+const siteLocale = 'en_US';
 
 const path = ( new URL( document.location ) ).searchParams.get( 'path' ) || '/devdocs';
 const query = {
@@ -136,7 +147,8 @@ const advancedFilters = {
 };
 
 export default () => (
-    <AdvancedFilters
+	<AdvancedFilters
+		siteLocale={ siteLocale }
         path={ path }
         query={ query }
         filterTitle="Orders"

@@ -18,7 +18,6 @@ import { withViewportMatch } from '@wordpress/viewport';
  * WooCommerce dependencies
  */
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -42,20 +41,6 @@ function getD3CurrencyFormat( symbol, position ) {
 			return [ symbol, '' ];
 	}
 }
-
-const {
-	symbol: currencySymbol,
-	symbolPosition,
-	decimalSeparator: decimal,
-	thousandSeparator: thousands,
-} = CURRENCY;
-
-d3FormatDefaultLocale( {
-	decimal,
-	thousands,
-	grouping: [ 3 ],
-	currency: getD3CurrencyFormat( currencySymbol, symbolPosition ),
-} );
 
 /**
  * A chart container using d3, to display timeseries data with an interactive legend.
@@ -109,11 +94,27 @@ class Chart extends Component {
 
 	componentDidMount() {
 		this.updateDimensions();
+		this.setD3DefaultFormat();
 		window.addEventListener( 'resize', this.updateDimensions );
 	}
 
 	componentWillUnmount() {
 		window.removeEventListener( 'resize', this.updateDimensions );
+	}
+
+	setD3DefaultFormat() {
+		const {
+			symbol: currencySymbol,
+			symbolPosition,
+			decimalSeparator: decimal,
+			thousandSeparator: thousands,
+		} = this.props.currency;
+		d3FormatDefaultLocale( {
+			decimal,
+			thousands,
+			grouping: [ 3 ],
+			currency: getD3CurrencyFormat( currencySymbol, symbolPosition ),
+		} );
 	}
 
 	getOrderedKeys( focusedKeys, visibleKeys, selectedIds = [] ) {
@@ -550,6 +551,10 @@ Chart.propTypes = {
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
+	/**
+	 * A currency object passed to d3Format.
+	 */
+	currency: PropTypes.object,
 };
 
 Chart.defaultProps = {
@@ -567,6 +572,12 @@ Chart.defaultProps = {
 	tooltipValueFormat: ',',
 	xFormat: '%d',
 	x2Format: '%b %Y',
+	currency: {
+		symbol: '$',
+		symbolPosition: 'left',
+		decimalSeparator: '.',
+		thousandSeparator: ',',
+	},
 };
 
 export default withViewportMatch( {

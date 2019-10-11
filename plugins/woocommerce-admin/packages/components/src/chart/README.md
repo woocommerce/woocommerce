@@ -104,3 +104,4 @@ Name | Type | Default | Description
 `x2Format` | String | `'%b %Y'` | A datetime formatting string, passed to d3TimeFormat
 `yBelow1Format` | String | `null` | A number formatting string, passed to d3Format
 `yFormat` | String | `null` | A number formatting string, passed to d3Format
+`currency` | Object | `{}` | An object with currency properties for usage in the chart. The following properties are expected: `decimal`, `symbol`, `symbolPosition`, `thousands`. This is passed to d3Format.

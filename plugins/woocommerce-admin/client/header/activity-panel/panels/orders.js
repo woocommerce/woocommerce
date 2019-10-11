@@ -164,7 +164,7 @@ class OrdersPanel extends Component {
 						</Button>
 					}
 				>
-					<OrderStatus order={ order } />
+					<OrderStatus order={ order } orderStatusMap={ getSetting( 'orderStatuses', {} ) } />
 				</ActivityCard>
 			);
 		} );

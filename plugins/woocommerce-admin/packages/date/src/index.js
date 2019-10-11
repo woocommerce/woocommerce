@@ -278,10 +278,9 @@ export const getDateParamsFromQuery = ( { period, compare, after, before } ) => 
 			before: before ? moment( before ) : null,
 		};
 	}
-	wcSettings.wcAdminSettings = wcSettings.wcAdminSettings || {};
-	const defaultDateRange =
-		wcSettings.wcAdminSettings.woocommerce_default_date_range ||
-		'period=month&compare=previous_year';
+	const {
+		woocommerce_default_date_range: defaultDateRange = 'period=month&compare=previous_year',
+	} = getSetting( 'wcAdminSettings', {} );
 
 	const queryDefaults = parse( defaultDateRange.replace( /&amp;/g, '&' ) );
 

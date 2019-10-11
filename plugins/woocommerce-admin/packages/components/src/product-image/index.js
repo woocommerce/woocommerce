@@ -7,6 +7,11 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 /**
+ * Internal dependencies
+ */
+import { placeholderWhiteBackground as placeholder } from './placeholder';
+
+/**
  * Use `ProductImage` to display a product's or variation's featured image.
  * If no image can be found, a placeholder matching the front-end image
  * placeholder will be displayed.
@@ -26,7 +31,7 @@ const ProductImage = ( { product, alt, width, height, className, ...props } ) =>
 	return (
 		<img
 			className={ classes }
-			src={ src || wcSettings.wcAssetUrl + 'images/placeholder.png' }
+			src={ src || placeholder }
 			width={ width }
 			height={ height }
 			alt={ altText }
