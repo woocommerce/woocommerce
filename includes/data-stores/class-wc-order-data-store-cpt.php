@@ -290,6 +290,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		// Map legacy order status to new order statuses.
+		// @TODO: is this needed????
 		if ( in_array( 'status', $updated_props, true ) ) {
 			$new_statuses = wc_get_order_statuses_from_legacy_status( $legacy_status );
 			$this->update_order_statuses_table( $id, $new_statuses );

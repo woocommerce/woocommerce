@@ -343,9 +343,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Return the new order status without wc- internal prefix.
+	 *
+	 * @since 3.9.0
+	 * @param  string $context View or edit context.
+	 * @return string
+	 */
+	public function get_order_status( $context = 'view' ) {
+		$status = $this->get_prop( 'order_status', $context );
+
+		if ( empty( $status ) && 'view' === $context ) {
+			// In view context, return the default status if no status has been set.
+			$status = apply_filters( 'woocommerce_default_order_status', 'draft' );
+		}
+		return $status;
+	}
+
+	/**
 	 * Return the order fulfillment status without wc- internal prefix.
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @param  string $context View or edit context.
 	 * @return string
 	 */
@@ -362,7 +379,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order payment status without wc- internal prefix.
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @param  string $context View or edit context.
 	 * @return string
 	 */
@@ -379,7 +396,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order delivery status without wc- internal prefix.
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @param  string $context View or edit context.
 	 * @return string
 	 */
@@ -544,7 +561,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid fulfillment statuses for this order
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @return array Fulfillment status keys eg. `wc-fulfilled`
 	 */
 	protected function get_valid_fulfillment_statuses() {
@@ -554,7 +571,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid payment statuses for this order
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @return array Payment status keys eg. `wc-paid`
 	 */
 	protected function get_valid_payment_statuses() {
@@ -564,7 +581,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid payment statuses for this order
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @return array Payment status keys eg. `wc-paid`
 	 */
 	protected function get_valid_delivery_statuses() {
@@ -648,9 +665,42 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Set new order status
+	 *
+	 * @since 3.9.0
+	 * @param string $new_status Status to change the new order status of the order to, no wc- prefix needed.
+	 * @return array details of change
+	 */
+	public function set_order_status( $new_status ) {
+		$old_status = $this->get_order_status();
+		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+
+		// If setting the status, ensure it's set to a valid status.
+		if ( true === $this->object_read ) {
+			// Only allow valid new status.
+			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true ) && 'trash' !== $new_status ) {
+				$new_status = 'draft';
+			}
+
+			// If the old status is set but unknown assume its a draft for action usage.
+			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses(), true ) && 'trash' !== $old_status ) {
+				$old_status = 'draft';
+			}
+		}
+
+		$this->set_prop( 'order_status', $new_status );
+
+		return array(
+			'from' => $old_status,
+			'to'   => $new_status,
+		);
+	}
+
+
+	/**
 	 * Set fulfillment status
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @param string $new_status Status to change the fulfillment status of the order to, no wc- prefix needed.
 	 * @return array details of change
 	 */
@@ -682,7 +732,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set payment status
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @param string $new_status Status to change the payment status of the order to, no wc- prefix needed.
 	 * @return array details of change.
 	 */
@@ -714,7 +764,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set payment status
 	 *
-	 * @since 3.8.0
+	 * @since 3.9.0
 	 * @param string $new_status Status to change the delivery status of the order to, no wc- prefix needed.
 	 * @return array details of change.
 	 */

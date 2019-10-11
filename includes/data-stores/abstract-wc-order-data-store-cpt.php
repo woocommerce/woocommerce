@@ -111,6 +111,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		$this->read_order_data( $order, $post_object );
+		$this->read_order_statuses( $order );
 		$order->read_meta_data();
 		$order->set_object_read( true );
 
@@ -296,6 +297,41 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Read order status data. Can be overridden by child classes to load other props.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @since 3.9.0
+	 */
+	protected function read_order_statuses( &$order ) {
+		global $wpdb;
+		$id = $order->get_id();
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT `order_status`,
+					`payment_status`,
+					`fulfillment_status`,
+					`delivery_status`
+				FROM {wpdb->prefix}wc_order_statuses
+				WHERE `order_id` = %d
+				',
+				$id
+			)
+		);
+
+		if ( ! is_null( $row ) ) {
+			$order->set_props(
+				array(
+					'order_status'       => $row->order_status,
+					'payment_status'     => $row->payment_status,
+					'fulfillment_status' => $row->fulfillment_status,
+					'delivery_status'    => $row->delivery_status,
+				)
+			);
+		}
+	}
+
+	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order $order Order object.
@@ -332,7 +368,41 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			}
 		}
 
+		$order_status_props = array(
+			'order_status',
+			'payment_status',
+			'fulfillment_status',
+			'delivery_status',
+		);
+
+		$order_statuses_to_update = array();
+		foreach ( $order_status_props as $order_status ) {
+			$order_statuses_to_update[ $order_status ] = wp_slash( $order->{"get_$prop"}( 'edit' ) );
+		}
+		$statuses_updated = $this->update_order_statuses( $order->get_id(), $order_statuses_to_update );
+		if ( $statuses_updated ) {
+			$updated_props = array_merge( $updated_props, array_keys( $order_statuses_to_update ) );
+		}
+
 		do_action( 'woocommerce_order_object_updated_props', $order, $updated_props );
+	}
+
+	/**
+	 * Add / Update order statuses in the custom table.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $order_status_values Key=>Value pairs array of order statuses and their values.
+	 * @return bool Whether statuses were updated or not.
+	 */
+	protected function update_order_statuses( $order_id, $order_status_values ) {
+		global $wpdb;
+
+		$updated = $wpdb->replace(
+			$wpdb->prefix . 'wc_order_statuses',
+			array_merge( $order_status_values, array( 'order_id' => $order_id ) )
+		);
+
+		return $updated > 0 ? true : false;
 	}
 
 	/**
