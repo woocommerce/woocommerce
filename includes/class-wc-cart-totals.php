@@ -23,6 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 3.2.0
  */
 final class WC_Cart_Totals {
+	use WC_Item_Totals;
 
 	/**
 	 * Reference to cart object.
@@ -197,15 +198,6 @@ final class WC_Cart_Totals {
 			'total_tax' => 0,
 			'taxes'     => array(),
 		);
-	}
-
-	/**
-	 * Should we round at subtotal level only?
-	 *
-	 * @return bool
-	 */
-	protected function round_at_subtotal() {
-		return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 	}
 
 	/**
@@ -598,6 +590,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Round merged taxes.
 	 *
+	 * @deprecated 3.9.0 `calculate_item_subtotals` should already appropriately round the tax values.
 	 * @since 3.5.4
 	 * @param array $taxes Taxes to round.
 	 * @return array
@@ -681,12 +674,8 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
 		}
 
-		$items_total = array_sum(
-			array_map(
-				array( $this, 'round_item_subtotal' ),
-				array_values( wp_list_pluck( $this->items, 'total' ) )
-			)
-		);
+		$items_total = $this->get_rounded_items_total();
+
 		$this->set_total( 'items_total', round( $items_total ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
@@ -712,11 +701,14 @@ final class WC_Cart_Totals {
 	protected function calculate_item_subtotals() {
 		$merged_subtotal_taxes = array(); // Taxes indexed by tax rate ID for storage later.
 
+		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+		$is_customer_vat_exempt          = $this->cart->get_customer()->get_is_vat_exempt();
+
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax ) {
-				if ( $this->cart->get_customer()->get_is_vat_exempt() ) {
+				if ( $is_customer_vat_exempt ) {
 					$item = $this->remove_item_base_taxes( $item );
-				} elseif ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				} elseif ( $adjust_non_base_location_prices ) {
 					$item = $this->adjust_non_base_location_price( $item );
 				}
 			}
@@ -745,12 +737,8 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
 
-		$items_subtotal = array_sum(
-			array_map(
-				array( $this, 'round_item_subtotal' ),
-				array_values( wp_list_pluck( $this->items, 'subtotal' ) )
-			)
-		);
+		$items_subtotal = $this->get_rounded_items_total( 'subtotal' );
+
 		$this->set_total( 'items_subtotal', round( $items_subtotal ) );
 		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
 
@@ -884,20 +872,6 @@ final class WC_Cart_Totals {
 	protected function round_line_tax( $value ) {
 		if ( ! $this->round_at_subtotal() ) {
 			$value = wc_round_tax_total( $value, 0 );
-		}
-		return $value;
-	}
-
-	/**
-	 * Apply rounding to item subtotal before summing.
-	 *
-	 * @since 3.7.0
-	 * @param float $value Item subtotal value.
-	 * @return float
-	 */
-	protected function round_item_subtotal( $value ) {
-		if ( ! $this->round_at_subtotal() ) {
-			$value = round( $value );
 		}
 		return $value;
 	}

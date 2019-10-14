@@ -1510,7 +1510,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$cart_subtotal     = 0;
 		$cart_total        = 0;
-		$fees_total         = 0;
+		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
