@@ -18,6 +18,7 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php';
  * WC_Abstract_Order class.
  */
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
+	use WC_Item_Totals;
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
@@ -770,6 +771,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Return array of values for calculations.
+	 *
+	 * @param string $field Field name to return.
+	 *
+	 * @return array Array of values.
+	 */
+	protected function get_values_for_total( $field ) {
+		$items = array_map(
+			function ( $item ) use ( $field ) {
+				return wc_add_number_precision( $item[ $field ] );
+			},
+			array_values( $this->get_items() )
+		);
+		return $items;
+	}
+
+	/**
 	 * Return an array of coupons within this order.
 	 *
 	 * @since  3.7.0
@@ -1508,18 +1526,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
 		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		// Sum line item costs.
-		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += round( $item->get_subtotal(), wc_get_price_decimals() );
-			$cart_total    += round( $item->get_total(), wc_get_price_decimals() );
-		}
+		$cart_subtotal = wc_remove_number_precision( $this->get_rounded_items_total( 'subtotal' ) );
+		$cart_total = wc_remove_number_precision( $this->get_rounded_items_total() );
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {

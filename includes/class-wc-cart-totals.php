@@ -554,6 +554,16 @@ final class WC_Cart_Totals {
 	}
 
 	/**
+	 * Returns array of values for totals calculation.
+	 *
+	 * @param string $field Field name. Will probably be `total` or `subtotal`.
+	 * @return array Items object
+	 */
+	protected function get_values_for_total( $field ) {
+		return array_values( wp_list_pluck( $this->items, $field ) );
+	}
+
+	/**
 	 * Get taxes merged by type.
 	 *
 	 * @since 3.2.0

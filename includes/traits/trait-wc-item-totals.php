@@ -13,24 +13,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Trait WC_Item_Totals.
  *
+ * Right now this do not have much, but plan is to eventually move all shared calculation logic between Orders and Cart in this file.
+ *
  * @since 3.9.0
  */
 trait WC_Item_Totals {
 
 	/**
-	 * Line items to calculate. Overwrite in child class.
+	 * Line items to calculate. Define in child class.
 	 *
 	 * @since 3.9.0
-	 * @var WC_Order_Item[]
+	 * @param string $field Field name to calculate upon.
+	 *
+	 * @return array having `total`|`subtotal` property.
 	 */
-	protected $items = array();
+	abstract protected function get_values_for_total( $field );
 
 	/**
 	 * Return rounded total based on settings. Will be used by Cart and Orders.
 	 *
 	 * @since 3.9.0
 	 *
-	 * @param string $field Field to round and sum based on setting. Will likely be `total` or `subtotal`.
+	 * @param string $field Field to round and sum based on setting. Will likely be `total` or `subtotal`. Values must be without precision.
 	 *
 	 * @return float|int Appropriately rounded value.
 	 */
@@ -38,7 +42,7 @@ trait WC_Item_Totals {
 		return array_sum(
 			array_map(
 				array( $this, 'round_item_subtotal' ),
-				array_values( wp_list_pluck( $this->items, $field ) )
+				$this->get_values_for_total( $field )
 			)
 		);
 	}

@@ -62,7 +62,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 				array(
 					'product'  => $product,
 					'quantity' => 1,
-					'subtotal' => 909.09, // Ex tax.
+					'subtotal' => 909.09, // Ex tax 10%.
 					'total'    => 726.36,
 				)
 			);
