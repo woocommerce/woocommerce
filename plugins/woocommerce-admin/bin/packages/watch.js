@@ -12,7 +12,7 @@ const watch = require( 'node-watch' );
  */
 const getPackages = require( './get-packages' );
 
-const BUILD_CMD = `node ${ path.resolve( __dirname, './build.js' ) }`;
+const BUILD_CMD = `node ${ path.resolve( __dirname, './build.js' ).replace( /(\s+)/g, '\\$1' ) }`;
 
 let filesToBuild = new Map();
 
@@ -68,7 +68,7 @@ setInterval( () => {
 	if ( files.length ) {
 		filesToBuild = new Map();
 		try {
-			execSync( `${ BUILD_CMD } ${ files.join( ' ' ) }`, { stdio: [ 0, 1, 2 ] } );
+			execSync( `${ BUILD_CMD } ${ files.map( file => file.replace( /(\s+)/g, '\\$1' ) ).join( ' ' ) }`, { stdio: [ 0, 1, 2 ] } );
 		} catch ( e ) {}
 	}
 }, 100 );
