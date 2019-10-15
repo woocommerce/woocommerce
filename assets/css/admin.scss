@@ -3878,7 +3878,6 @@ img.help_tip {
 			width: 400px;
 			margin: 0;
 			box-sizing: border-box;
-			height: 32px;
 			line-height: 32px;
 			vertical-align: top;
 		}
@@ -5209,8 +5208,7 @@ img.help_tip {
 	}
 
 	select {
-		height: 30px;
-		line-height: 30px;
+		height: 40px;
 	}
 
 	&.dimensions_field {
