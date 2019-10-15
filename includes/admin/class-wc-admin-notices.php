@@ -9,14 +9,6 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Name for notice for showing minimum version requirements. Change value to invalidate previous dismissals when requirement changes in future.
- * Last changed in 3.8.
- *
- * @since 3.8.0.
- */
-define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_3_8' );
-
-/**
  * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
