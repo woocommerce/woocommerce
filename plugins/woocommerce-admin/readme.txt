@@ -71,6 +71,11 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.20.1 2019-09-24 =
+
+- Fix: use category lookup id instead of term taxonomy id (#3027)
+- Fix: Update order stats table status index length. (#3022)
+
 = 0.20.0 2019-09-24 =
 
 - Dev: Fix issue #2992 (order number in orders panel) #2994
