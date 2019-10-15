@@ -600,6 +600,12 @@
 	}
 }
 
+#variable_product_options {
+	.form-row select {
+		max-width: 100%;
+	}
+}
+
 .clear {
 	clear: both;
 }
