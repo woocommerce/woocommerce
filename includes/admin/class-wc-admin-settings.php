@@ -187,7 +187,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			}
 
 			if ( is_array( $option_value ) ) {
-				$option_value = array_map( 'stripslashes_deep', $option_value );
+				$option_value = wp_unslash( $option_value );
+				// $option_value = array_map( 'stripslashes', $option_value );
 			} elseif ( ! is_null( $option_value ) ) {
 				$option_value = stripslashes( $option_value );
 			}
