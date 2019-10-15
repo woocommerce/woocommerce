@@ -198,6 +198,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Better wording for subtotal of items in cart and review order. #24440
 * Tweak - Prevent new lines in product quantity in checkout details. #24311
 * Tweak - Add a tooltip in the "Coupon expity date" field. #24749
+* Tweak - CSS styling changes for WP 5.3. #24832
 * Template - Moved HTML for displaying product price filter widget to a new template `product price filter widget`. #23384
 * Accessibility - Make $subtext color darker. #24739
 * Dev - Consistent register/login submit button css class names. Preserve old class names as well for backwards compatibility. #23701
@@ -238,6 +239,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev: Add filter woocommerce_european_union_countries to the method WC_Countries::get_european_union_countries(). #24741
 * Dev - Allow WC_Product_Query sort products by include order. #24294
 * Dev - Removed duplicated include of WC_Admin_Importers. #24751
+* Dev - Refactor minimum requirement notice to use constant for easier changes in the future. #24830
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
