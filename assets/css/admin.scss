@@ -578,22 +578,6 @@
 	margin: 10px;
 }
 
-.edit_address {
-	.select2-selection--single {
-		height: 32px;
-
-		.select2-selection__rendered {
-			line-height: 32px;
-		}
-	}
-}
-
-.order_data_column_container {
-	p._billing_email_field {
-		margin-top: 13px;
-	}
-}
-
 #variable_product_options {
 	.form-row select {
 		max-width: 100%;
@@ -1113,6 +1097,10 @@ ul.wc_coupon_list_block {
 
 	.order_data_column_container {
 		clear: both;
+
+		p._billing_email_field {
+			margin-top: 13px;
+		}
 	}
 
 	.order_data_column {
@@ -1155,6 +1143,7 @@ ul.wc_coupon_list_block {
 
 			select {
 				width: 100%;
+				max-width: 100%;
 			}
 
 			.select2-container {
@@ -1216,6 +1205,17 @@ ul.wc_coupon_list_block {
 			display: none;
 			zoom: 1;
 			padding-right: 1px;
+
+			.select2-container {
+
+				.select2-selection--single {
+					height: 32px;
+
+					.select2-selection__rendered {
+						line-height: 32px;
+					}
+				}
+			}
 		}
 
 		.wc-customer-user,
