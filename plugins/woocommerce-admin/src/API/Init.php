@@ -79,7 +79,6 @@ class Init {
 			$controllers = array_merge(
 				$controllers,
 				array(
-					'Automattic\WooCommerce\Admin\API\OnboardingLevels',
 					'Automattic\WooCommerce\Admin\API\OnboardingProfile',
 					'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 					'Automattic\WooCommerce\Admin\API\OnboardingTasks',

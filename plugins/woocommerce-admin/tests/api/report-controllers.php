@@ -71,9 +71,6 @@ class WC_Tests_API_Report_Controllers extends WC_REST_Unit_Test_Case {
 			'/wc/v4/reports/customers/stats',
 			'/wc/v4/taxes',
 			'/wc/v4/reports/performance-indicators',
-			'/wc-admin/v1/onboarding/levels',
-			'/wc-admin/v1/onboarding/profile',
-			'/wc-admin/v1/onboarding/plugins',
 		);
 
 		foreach ( $endpoints as $endpoint ) {

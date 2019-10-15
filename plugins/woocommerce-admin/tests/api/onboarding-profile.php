@@ -154,4 +154,26 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'woo', $data['test_profile_datum'] );
 	}
+
+	/**
+	 * Ensure that every REST controller works with their defaults.
+	 */
+	public function test_default_params() {
+		$endpoints = array(
+			'/wc-admin/v1/onboarding/profile',
+			'/wc-admin/v1/onboarding/plugins',
+		);
+
+		foreach ( $endpoints as $endpoint ) {
+			$request  = new WP_REST_Request( 'GET', $endpoint );
+			$response = $this->server->dispatch( $request );
+
+			// Surface any errors for easier debugging.
+			if ( is_wp_error( $response ) ) {
+				$this->fail( $response->get_error_message() );
+			}
+
+			$this->assertTrue( is_array( $response->get_data() ) );
+		}
+	}
 }
