@@ -2023,6 +2023,10 @@ ul.wc_coupon_list_block {
 			border-bottom: 0;
 		}
 	}
+
+	button {
+		margin: 1px;
+	}
 }
 
 #poststuff #woocommerce-order-notes .inside {
@@ -2031,6 +2035,11 @@ ul.wc_coupon_list_block {
 
 	ul.order_notes li {
 		padding: 0 10px;
+	}
+
+	button {
+		margin: 1px;
+		vertical-align: top;
 	}
 }
 
