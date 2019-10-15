@@ -288,6 +288,9 @@ INTERESTED IN DEVELOPMENT?
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
 * Localization - Change localization tag `action-scheduler` to `woocommerce`. #24474
+* Localization - Fixed missing US Minor Outlying Islands states. #24826
+* Security - Add an exit after the redirect when checking author archive capabilities for customers.
+* Security - Ensure 404 pages with single product urls cannot be exploited using Open Redirect.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
