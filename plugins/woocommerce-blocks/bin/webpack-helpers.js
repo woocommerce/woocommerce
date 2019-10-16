@@ -237,8 +237,6 @@ const getFrontConfig = ( options = {} ) => {
 		  };
 	return {
 		entry: {
-			'product-categories':
-				'./assets/js/blocks/product-categories/frontend.js',
 			reviews: './assets/js/blocks/reviews/frontend.js',
 		},
 		output: {
