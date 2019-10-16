@@ -217,14 +217,20 @@ function wc_add_wp_error_notices( $errors ) {
  * @return string
  */
 function wc_kses_notice( $message ) {
-	return wp_kses( $message,
-		array_replace_recursive( // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
-			wp_kses_allowed_html( 'post' ),
-			array(
-				'a' => array(
-					'tabindex' => true,
-				),
-			)
+	$allowed_tags = array_replace_recursive(
+		wp_kses_allowed_html( 'post' ),
+		array(
+			'a' => array(
+				'tabindex' => true,
+			),
 		)
 	);
+
+	/**
+	 * Kses notice allowed tags.
+	 *
+	 * @since 3.9.0
+	 * @param array[]|string $allowed_tags An array of allowed HTML elements and attributes, or a context name such as 'post'.
+	 */
+	return wp_kses( $message, apply_filters( 'woocommerce_kses_notice_allowed_tags', $allowed_tags ) );
 }
