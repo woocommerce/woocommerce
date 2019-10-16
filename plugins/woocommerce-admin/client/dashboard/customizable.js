@@ -246,30 +246,31 @@ export default compose(
 		const { getCurrentUserData, getProfileItems, getOptions } = select( 'wc-api' );
 		const userData = getCurrentUserData();
 
-		const profileItems = getProfileItems();
-		const taskListHidden =
-			'yes' ===
-			get(
-				getOptions( [ 'woocommerce_task_list_hidden' ] ),
-				[ 'woocommerce_task_list_hidden' ],
-				'no'
-			);
-
-		const tasks = getTasks( {
-			profileItems,
-			options: getOptions( [ 'woocommerce_onboarding_payments' ] ),
-			query: props.query,
-		} );
-
-		const visibleTasks = filter( tasks, task => task.visible );
-		const completedTasks = filter( tasks, task => task.visible && task.completed );
-		const taskListCompleted = visibleTasks.length === completedTasks.length;
-
-		return {
-			taskListHidden,
-			taskListCompleted,
+		const withSelectData = {
 			userPrefSections: userData.dashboard_sections,
 		};
+
+		if ( window.wcAdminFeatures.onboarding ) {
+			const profileItems = getProfileItems();
+			const tasks = getTasks( {
+				profileItems,
+				options: getOptions( [ 'woocommerce_onboarding_payments' ] ),
+				query: props.query,
+			} );
+			const visibleTasks = filter( tasks, task => task.visible );
+			const completedTasks = filter( tasks, task => task.visible && task.completed );
+
+			withSelectData.taskListCompleted = visibleTasks.length === completedTasks.length;
+			withSelectData.taskListHidden =
+				'yes' ===
+				get(
+					getOptions( [ 'woocommerce_task_list_hidden' ] ),
+					[ 'woocommerce_task_list_hidden' ],
+					'no'
+				);
+		}
+
+		return withSelectData;
 	} ),
 	withDispatch( dispatch => {
 		const { updateCurrentUserData } = dispatch( 'wc-api' );
