@@ -61,9 +61,12 @@ export default compose(
 			getJetpackConnectUrlError,
 		} = select( 'wc-api' );
 
-		const isRequesting = isGetJetpackConnectUrlRequesting();
-		const error = getJetpackConnectUrlError();
-		const jetpackConnectUrl = getJetpackConnectUrl();
+		const queryArgs = {
+			redirect_url: window.location.href,
+		};
+		const isRequesting = isGetJetpackConnectUrlRequesting( queryArgs );
+		const error = getJetpackConnectUrlError( queryArgs );
+		const jetpackConnectUrl = getJetpackConnectUrl( queryArgs );
 
 		return {
 			error,

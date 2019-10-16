@@ -13,7 +13,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce depdencies
  */
 import { H, Stepper, Card } from '@woocommerce/components';
-import { updateQueryString } from '@woocommerce/navigation';
+import { getNewPath, updateQueryString } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -169,11 +169,14 @@ export default compose(
 		const installationErrors = getPluginInstallationErrors( plugins );
 		const installedPlugins = Object.keys( getPluginInstallations( plugins ) );
 
-		const isJetpackConnectUrlRequesting = isGetJetpackConnectUrlRequesting();
-		const jetpackConnectUrlError = getJetpackConnectUrlError();
+		const queryArgs = {
+			redirect_url: getNewPath( { step: 'store-details' } ),
+		};
+		const isJetpackConnectUrlRequesting = isGetJetpackConnectUrlRequesting( queryArgs );
+		const jetpackConnectUrlError = getJetpackConnectUrlError( queryArgs );
 		let jetpackConnectUrl = null;
 		if ( activatedPlugins.includes( 'jetpack' ) ) {
-			jetpackConnectUrl = getJetpackConnectUrl();
+			jetpackConnectUrl = getJetpackConnectUrl( queryArgs );
 		}
 
 		const errors = [];

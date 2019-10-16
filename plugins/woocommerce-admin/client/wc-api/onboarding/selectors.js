@@ -50,17 +50,21 @@ const isGetProfileItemsRequesting = getResource => () => {
 };
 
 const getJetpackConnectUrl = ( getResource, requireResource ) => (
+	query = {},
 	requirement = DEFAULT_REQUIREMENT
 ) => {
-	return requireResource( requirement, 'jetpack-connect-url' ).data;
+	const resourceName = getResourceName( 'jetpack-connect-url', query );
+	return requireResource( requirement, resourceName ).data;
 };
 
-const getJetpackConnectUrlError = getResource => () => {
-	return getResource( 'jetpack-connect-url' ).error;
+const getJetpackConnectUrlError = getResource => ( query = {} ) => {
+	const resourceName = getResourceName( 'jetpack-connect-url', query );
+	return getResource( resourceName ).error;
 };
 
-const isGetJetpackConnectUrlRequesting = getResource => () => {
-	const { lastReceived, lastRequested } = getResource( 'jetpack-connect-url' );
+const isGetJetpackConnectUrlRequesting = getResource => ( query = {} ) => {
+	const resourceName = getResourceName( 'jetpack-connect-url', query );
+	const { lastReceived, lastRequested } = getResource( resourceName );
 
 	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
 		return true;

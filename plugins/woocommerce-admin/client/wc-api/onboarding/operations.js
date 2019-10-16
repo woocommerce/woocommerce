@@ -4,12 +4,13 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import { getResourceName } from '../utils';
+import { getResourceIdentifier, getResourceName } from '../utils';
 import { JETPACK_NAMESPACE, WC_ADMIN_NAMESPACE } from '../constants';
 import { pluginNames } from './constants';
 
@@ -195,26 +196,25 @@ function readJetpackStatus( resourceNames, fetch ) {
 }
 
 function readJetpackConnectUrl( resourceNames, fetch ) {
-	const resourceName = 'jetpack-connect-url';
+	const filteredNames = resourceNames.filter( name => {
+		return name.startsWith( 'jetpack-connect-url' );
+	} );
 
-	if ( resourceNames.includes( resourceName ) ) {
-		const url = WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-jetpack';
+	return filteredNames.map( async resourceName => {
+		const query = getResourceIdentifier( resourceName );
+		const url = addQueryArgs( WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-jetpack', query );
 
-		return [
-			fetch( {
-				path: url,
+		return fetch( {
+			path: url,
+		} )
+			.then( response => {
+				return { [ resourceName ]: { data: response.connectAction } };
 			} )
-				.then( response => {
-					return { [ resourceName ]: { data: response.connectAction } };
-				} )
-				.catch( error => {
-					error.message = getPluginErrorMessage( 'connect', 'jetpack' );
-					return { [ resourceName ]: { error } };
-				} ),
-		];
-	}
-
-	return [];
+			.catch( error => {
+				error.message = getPluginErrorMessage( 'connect', 'jetpack' );
+				return { [ resourceName ]: { error } };
+			} );
+	} );
 }
 
 function getPluginErrorMessage( action, plugin ) {

@@ -273,25 +273,16 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Generates a Jetpack Connect URL.
 	 *
+	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array Connection URL for Jetpack
 	 */
-	public function connect_jetpack() {
+	public function connect_jetpack( $request ) {
 		if ( ! class_exists( '\Jetpack' ) ) {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
 		}
 
-		$next_step_slug = apply_filters( 'woocommerce_onboarding_after_jetpack_step', 'store-details' );
-		$redirect_url   = esc_url_raw(
-			add_query_arg(
-				array(
-					'page' => 'wc-admin',
-					'step' => $next_step_slug,
-				),
-				admin_url( 'admin.php' )
-			)
-		);
-
-		$connect_url = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
+		$redirect_url = apply_filters( 'woocommerce_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
+		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
 
 		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
 			$connect_url = add_query_arg(
