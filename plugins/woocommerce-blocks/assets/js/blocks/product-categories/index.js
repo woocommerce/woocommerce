@@ -9,7 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import './editor.scss';
 import './style.scss';
-import edit from './edit.js';
+import Block from './block.js';
 import { IconFolder } from '@woocommerce/block-components/icons';
 
 registerBlockType( 'woocommerce/product-categories', {
@@ -35,9 +35,6 @@ registerBlockType( 'woocommerce/product-categories', {
 		hasCount: {
 			type: 'boolean',
 			default: true,
-			source: 'attribute',
-			selector: 'div',
-			attribute: 'data-has-count',
 		},
 
 		/**
@@ -46,9 +43,6 @@ registerBlockType( 'woocommerce/product-categories', {
 		hasEmpty: {
 			type: 'boolean',
 			default: false,
-			source: 'attribute',
-			selector: 'div',
-			attribute: 'data-has-empty',
 		},
 
 		/**
@@ -57,9 +51,6 @@ registerBlockType( 'woocommerce/product-categories', {
 		isDropdown: {
 			type: 'boolean',
 			default: false,
-			source: 'attribute',
-			selector: 'div',
-			attribute: 'data-is-dropdown',
 		},
 
 		/**
@@ -68,53 +59,102 @@ registerBlockType( 'woocommerce/product-categories', {
 		isHierarchical: {
 			type: 'boolean',
 			default: true,
-			source: 'attribute',
-			selector: 'div',
-			attribute: 'data-is-hierarchical',
 		},
 	},
 
-	edit,
+	deprecated: [
+		{
+			// Deprecate HTML save method in favor of dynamic rendering.
+			attributes: {
+				hasCount: {
+					type: 'boolean',
+					default: true,
+					source: 'attribute',
+					selector: 'div',
+					attribute: 'data-has-count',
+				},
+				hasEmpty: {
+					type: 'boolean',
+					default: false,
+					source: 'attribute',
+					selector: 'div',
+					attribute: 'data-has-empty',
+				},
+				isDropdown: {
+					type: 'boolean',
+					default: false,
+					source: 'attribute',
+					selector: 'div',
+					attribute: 'data-is-dropdown',
+				},
+				isHierarchical: {
+					type: 'boolean',
+					default: true,
+					source: 'attribute',
+					selector: 'div',
+					attribute: 'data-is-hierarchical',
+				},
+			},
+			migrate( attributes ) {
+				return attributes;
+			},
+			save( props ) {
+				const {
+					hasCount,
+					hasEmpty,
+					isDropdown,
+					isHierarchical,
+				} = props.attributes;
+				const data = {};
+				if ( hasCount ) {
+					data[ 'data-has-count' ] = true;
+				}
+				if ( hasEmpty ) {
+					data[ 'data-has-empty' ] = true;
+				}
+				if ( isDropdown ) {
+					data[ 'data-is-dropdown' ] = true;
+				}
+				if ( isHierarchical ) {
+					data[ 'data-is-hierarchical' ] = true;
+				}
+				return (
+					<div className="is-loading" { ...data }>
+						{ isDropdown ? (
+							<span
+								aria-hidden
+								className="wc-block-product-categories__placeholder"
+							/>
+						) : (
+							<ul aria-hidden>
+								<li>
+									<span className="wc-block-product-categories__placeholder" />
+								</li>
+								<li>
+									<span className="wc-block-product-categories__placeholder" />
+								</li>
+								<li>
+									<span className="wc-block-product-categories__placeholder" />
+								</li>
+							</ul>
+						) }
+					</div>
+				);
+			},
+		},
+	],
 
 	/**
-	 * Save the props to post content.
+	 * Renders and manages the block.
 	 */
-	save( { attributes } ) {
-		const { hasCount, hasEmpty, isDropdown, isHierarchical } = attributes;
-		const data = {};
-		if ( hasCount ) {
-			data[ 'data-has-count' ] = true;
-		}
-		if ( hasEmpty ) {
-			data[ 'data-has-empty' ] = true;
-		}
-		if ( isDropdown ) {
-			data[ 'data-is-dropdown' ] = true;
-		}
-		if ( isHierarchical ) {
-			data[ 'data-is-hierarchical' ] = true;
-		}
-		return (
-			<div className="is-loading" { ...data }>
-				{ isDropdown ? (
-					<span
-						aria-hidden
-						className="wc-block-product-categories__placeholder"
-					/>
-				) : (
-					<ul aria-hidden>
-						<li>
-							<span className="wc-block-product-categories__placeholder" />
-						</li>
-						<li>
-							<span className="wc-block-product-categories__placeholder" />
-						</li>
-						<li>
-							<span className="wc-block-product-categories__placeholder" />
-						</li>
-					</ul>
-				) }
-			</div>
-		);
+	edit( props ) {
+		return <Block { ...props } />;
+	},
+
+	/**
+	 * Save nothing; rendered by server.
+	 */
+	save() {
+		return null;
 	},
 } );
