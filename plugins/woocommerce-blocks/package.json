@@ -38,7 +38,7 @@
 		"changelog": "node ./bin/changelog.js "
 	},
 	"devDependencies": {
-		"@babel/core": "7.6.3",
+		"@babel/core": "7.6.4",
 		"@babel/plugin-proposal-class-properties": "7.5.5",
 		"@octokit/rest": "16.33.1",
 		"@woocommerce/navigation": "3.0.0",
