@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5ee20699a045c2155fb5ca2244eff7e6",
+    "content-hash": "c955d86ce8d65e6fb1e0e97282642d7b",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -637,16 +637,16 @@
         },
         {
             "name": "phpcompatibility/phpcompatibility-wp",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP.git",
-                "reference": "cb303f0067cd5b366a41d4fb0e254fb40ff02efd"
+                "reference": "41bef18ba688af638b7310666db28e1ea9158b2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/cb303f0067cd5b366a41d4fb0e254fb40ff02efd",
-                "reference": "cb303f0067cd5b366a41d4fb0e254fb40ff02efd",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/41bef18ba688af638b7310666db28e1ea9158b2f",
+                "reference": "41bef18ba688af638b7310666db28e1ea9158b2f",
                 "shasum": ""
             },
             "require": {
@@ -654,10 +654,10 @@
                 "phpcompatibility/phpcompatibility-paragonie": "^1.0"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5"
             },
             "suggest": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3 || This Composer plugin will sort out the PHP_CodeSniffer 'installed_paths' automatically.",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5 || This Composer plugin will sort out the PHP_CodeSniffer 'installed_paths' automatically.",
                 "roave/security-advisories": "dev-master || Helps prevent installing dependencies with known security issues."
             },
             "type": "phpcodesniffer-standard",
@@ -683,7 +683,7 @@
                 "standards",
                 "wordpress"
             ],
-            "time": "2018-10-07T18:31:37+00:00"
+            "time": "2019-08-28T14:22:28+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -2001,23 +2001,23 @@
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
-            "version": "0.0.7",
+            "version": "0.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-sniffs.git",
-                "reference": "ca80d02513adeea6f05a433bd6e1c29494f88ab1"
+                "reference": "ccdae93ba678d59cd9741bec077d0c63c0a82958"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-sniffs/zipball/ca80d02513adeea6f05a433bd6e1c29494f88ab1",
-                "reference": "ca80d02513adeea6f05a433bd6e1c29494f88ab1",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-sniffs/zipball/ccdae93ba678d59cd9741bec077d0c63c0a82958",
+                "reference": "ccdae93ba678d59cd9741bec077d0c63c0a82958",
                 "shasum": ""
             },
             "require": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+                "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
                 "php": ">=7.0",
-                "phpcompatibility/phpcompatibility-wp": "2.0.0",
-                "wp-coding-standards/wpcs": "^2.1"
+                "phpcompatibility/phpcompatibility-wp": "2.1.0",
+                "wp-coding-standards/wpcs": "2.1.1"
             },
             "type": "phpcodesniffer-standard",
             "notification-url": "https://packagist.org/downloads/",
@@ -2037,7 +2037,7 @@
                 "woocommerce",
                 "wordpress"
             ],
-            "time": "2019-08-23T20:34:20+00:00"
+            "time": "2019-10-16T18:25:21+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
