@@ -103,8 +103,9 @@ const isJetpackConnected = ( getResource, requireResource ) => (
 	const data = getSetting(
 		'dataEndpoints',
 		{},
-		de => requireResource( requirement, 'jetpack-status' ) || de.jetpackStatus
+		de => requireResource( requirement, 'jetpack-status' ).data || de.jetpackStatus
 	);
+
 	return ( data && data.isActive ) || false;
 };
 
