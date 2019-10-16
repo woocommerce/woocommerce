@@ -77,7 +77,7 @@ class WC_Orders_Tracking {
 		}
 
 		$order        = wc_get_order( $id );
-		$date_created = $order->get_date_created()->date( 'Y-m-d H:i:s' );
+		$date_created = $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d H:i:s' ) : '';
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		$new_date = sprintf(
 			'%s %2d:%2d:%2d',
