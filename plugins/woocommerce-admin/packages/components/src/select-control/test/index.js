@@ -28,7 +28,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+		}, 0 );
 	} );
 
 	it( 'returns matching elements', () => {
@@ -40,7 +42,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+		}, 0 );
 	} );
 
 	it( "doesn't return matching excluded elements", () => {
@@ -60,7 +64,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+		}, 0 );
 	} );
 
 	it( 'trims spaces from input', () => {
@@ -72,7 +78,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '    ' + query + ' ' );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+		}, 0 );
 	} );
 
 	it( 'limits results', () => {
@@ -86,7 +94,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+		}, 0 );
 	} );
 
 	it( 'shows options initially', () => {
@@ -95,7 +105,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '' );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+		}, 0 );
 	} );
 
 	it( 'shows options after query', () => {
@@ -111,7 +123,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+		}, 0 );
 	} );
 
 	it( 'appends an option after filtering', () => {
@@ -127,7 +141,9 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( query );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+		}, 0 );
 	} );
 
 	it( 'changes the options on search', () => {
@@ -149,11 +165,15 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '' );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 0 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 0 );
+		}, 0 );
 
 		selectControl.instance().search( 'test' );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+		setTimeout( function() {
+			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+		}, 0 );
 	} );
 } );

@@ -104,6 +104,7 @@ class Control extends Component {
 			listboxId,
 			onSearch,
 			placeholder,
+			searchInputType,
 		} = this.props;
 		const { isActive } = this.state;
 
@@ -112,7 +113,7 @@ class Control extends Component {
 				className="woocommerce-select-control__control-input"
 				id={ `woocommerce-select-control-${ instanceId }__control-input` }
 				ref={ this.input }
-				type={ isSearchable ? 'search' : 'button' }
+				type={ isSearchable ? searchInputType : 'button' }
 				value={ this.getInputValue() }
 				placeholder={ isActive ? placeholder : '' }
 				onChange={ this.updateSearch( onSearch ) }

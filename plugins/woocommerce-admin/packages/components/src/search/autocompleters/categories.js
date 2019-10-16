@@ -22,14 +22,19 @@ export default {
 	name: 'categories',
 	className: 'woocommerce-search__product-result',
 	options( search ) {
-		const query = search ? {
-			search,
-			per_page: 10,
-			orderby: 'count',
-		} : {};
+		const query = search
+			? {
+				search,
+				per_page: 10,
+				orderby: 'count',
+			}
+			: {};
 		return apiFetch( { path: addQueryArgs( '/wc/v4/products/categories', query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( category ) {
+		return category.id;
+	},
 	getOptionKeywords( cat ) {
 		return [ cat.name ];
 	},
@@ -37,9 +42,14 @@ export default {
 		const label = (
 			<span key="name" className="woocommerce-search__result-name">
 				{ interpolateComponents( {
-					mixedString: __( 'All categories with titles that include {{query /}}', 'woocommerce-admin' ),
+					mixedString: __(
+						'All categories with titles that include {{query /}}',
+						'woocommerce-admin'
+					),
 					components: {
-						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
+						query: (
+							<strong className="components-form-token-field__suggestion-match">{ query }</strong>
+						),
 					},
 				} ) }
 			</span>
@@ -55,21 +65,21 @@ export default {
 	getOptionLabel( cat, query ) {
 		const match = computeSuggestionMatch( cat.name, query ) || {};
 		// @todo Bring back ProductImage, but allow for product category image
-		return [
+		return (
 			<span key="name" className="woocommerce-search__result-name" aria-label={ cat.name }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
 				</strong>
 				{ match.suggestionAfterMatch }
-			</span>,
-		];
+			</span>
+		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( cat ) {
 		const value = {
-			id: cat.id,
+			key: cat.id,
 			label: cat.name,
 		};
 		return value;

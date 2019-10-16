@@ -1,26 +1,12 @@
 /** @format */
 
-.woocommerce-search {
-	position: relative;
-	min-width: 0;
-
-	> div {
-		min-width: 0;
-	}
-
-	.woocommerce-search__icon {
+.woocommerce-search.woocommerce-select-control {
+	i.material-icons-outlined {
 		position: absolute;
-		top: 10px;
+		top: 9px;
 		left: 10px;
-		fill: $core-grey-light-900;
-	}
-
-	.woocommerce-tag {
-		max-width: 100%;
-	}
-
-	.woocommerce-tag .woocommerce-tag__text {
-		max-width: calc(100% - 24px);
+		color: $core-grey-light-900;
+		font-size: 20px;
 	}
 
 	&:not(.has-inline-tags) {
@@ -29,49 +15,23 @@
 		}
 	}
 
-	&.has-inline-tags {
-		.woocommerce-search__icon {
-			top: 50%;
-			transform: translateY(-50%);
-		}
-	}
-
-	.woocommerce-search__inline-container {
+	.woocommerce-select-control__control {
+		height: auto;
+		border-radius: 0;
+		font-size: 13px;
 		width: 100%;
-		padding: 4px 2px 4px 36px;
+		padding: 3px 2px 3px 36px;
 		border: 1px solid $core-grey-light-700;
-		background-color: $studio-white;
-		display: flex;
-		align-items: center;
-		position: relative;
 
 		&.is-active {
 			border-color: $input-active-border;
 			box-shadow: inset 0 0 0 $input-active-inner, 0 0 1px 2px $input-active-outer;
 		}
-
-		&.has-tags {
-			padding-right: 36px;
-		}
-
-		.woocommerce-search__token-list {
-			max-width: 100%;
-			display: inline-block;
-			padding: 1px 0;
-		}
 	}
 
-	.woocommerce-search__inline-input,
-	.woocommerce-search__inline-input:focus {
-		border: none;
-		outline: none;
-		box-shadow: none;
-		padding: 2px 0;
-		line-height: 20px;
-		max-width: 100%;
-		min-width: 70px;
-		font-size: inherit;
-		vertical-align: middle;
+	.components-base-control .woocommerce-select-control__control-input {
+		margin: 0;
+		font-size: 13px;
 
 		&[type='number']::-webkit-outer-spin-button,
 		&[type='number']::-webkit-inner-spin-button {
@@ -80,33 +40,39 @@
 		}
 	}
 
-	.woocommerce-search__input {
+	.components-base-control .components-base-control__label {
+		font-size: 13px;
+		color: #72777c;
+		position: static;
+		margin: 0;
 		width: 100%;
-		padding: $gap-smaller $gap-small $gap-smaller 36px;
-		border: 1px solid $core-grey-light-700;
 	}
 
-	.woocommerce-search__autocomplete-results {
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
+	.is-active.components-base-control .components-base-control__label,
+	.with-value.components-base-control .components-base-control__label,
+	&.has-inline-tags .has-tags.components-base-control .components-base-control__label {
+		display: none;
+	}
+
+	.components-base-control .woocommerce-select-control__tags {
+		margin: 0;
+	}
+
+	.components-base-control .woocommerce-tag {
+		max-height: 24px;
+	}
+
+	.woocommerce-select-control__listbox {
 		border: 1px solid $core-grey-light-700;
-		position: absolute;
-		left: 0;
-		right: 0;
-		z-index: 10;
+		top: 38px;
+	}
 
-		&:empty {
-			display: none;
-		}
-
-		&.is-static-results {
-			position: static;
-		}
+	&.is-static-results .woocommerce-select-control__listbox {
+		position: static;
 	}
 
 	// This a single `button` in the autocomplete popover
-	.woocommerce-search__autocomplete-result {
+	.woocommerce-select-control__option {
 		margin-bottom: 0;
 		display: flex;
 		flex-direction: row;
@@ -118,6 +84,8 @@
 		text-align: left;
 		background: $core-grey-light-100;
 		border-bottom: 1px solid $core-grey-light-500;
+		font-size: 13px;
+		min-height: 43px;
 
 		&:last-of-type {
 			border-bottom: none;
@@ -145,14 +113,4 @@
 
 .woocommerce-search__result-name {
 	text-decoration: underline; // @todo Not actually a link, should underline?
-}
-
-.woocommerce-search__clear {
-	position: absolute;
-	right: 10px;
-	top: calc(50% - 10px);
-
-	& > .dashicon {
-		color: #c9c9c9;
-	}
 }

@@ -22,13 +22,18 @@ export default {
 	name: 'coupons',
 	className: 'woocommerce-search__coupon-result',
 	options( search ) {
-		const query = search ? {
-			search,
-			per_page: 10,
-		} : {};
+		const query = search
+			? {
+				search,
+				per_page: 10,
+			}
+			: {};
 		return apiFetch( { path: addQueryArgs( '/wc/v4/coupons', query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( coupon ) {
+		return coupon.id;
+	},
 	getOptionKeywords( coupon ) {
 		return [ coupon.code ];
 	},
@@ -38,7 +43,9 @@ export default {
 				{ interpolateComponents( {
 					mixedString: __( 'All coupons with codes that include {{query /}}', 'woocommerce-admin' ),
 					components: {
-						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
+						query: (
+							<strong className="components-form-token-field__suggestion-match">{ query }</strong>
+						),
 					},
 				} ) }
 			</span>
@@ -53,21 +60,21 @@ export default {
 	},
 	getOptionLabel( coupon, query ) {
 		const match = computeSuggestionMatch( coupon.code, query ) || {};
-		return [
+		return (
 			<span key="name" className="woocommerce-search__result-name" aria-label={ coupon.code }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
 				</strong>
 				{ match.suggestionAfterMatch }
-			</span>,
-		];
+			</span>
+		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( coupon ) {
 		const value = {
-			id: coupon.id,
+			key: coupon.id,
 			label: coupon.code,
 		};
 		return value;

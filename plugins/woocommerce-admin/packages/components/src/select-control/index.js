@@ -154,14 +154,8 @@ export class SelectControl extends Component {
 		return isSearchable ? filteredOptions : options;
 	}
 
-	getFilteredOptions( query ) {
-		const {
-			excludeSelectedOptions,
-			getSearchExpression,
-			maxResults,
-			onFilter,
-			options,
-		} = this.props;
+	getFilteredOptions( options, query ) {
+		const { excludeSelectedOptions, getSearchExpression, maxResults, onFilter } = this.props;
 		const selectedKeys = this.getSelected().map( option => option.key );
 		const filtered = [];
 
@@ -195,7 +189,7 @@ export class SelectControl extends Component {
 			}
 		}
 
-		return onFilter( filtered );
+		return onFilter( filtered, query );
 	}
 
 	setExpanded( value ) {
@@ -204,22 +198,32 @@ export class SelectControl extends Component {
 
 	search( query ) {
 		const { hideBeforeSearch, onSearch, options } = this.props;
+		this.setState( { query } );
 
-		onSearch( query );
-		// Get all options if `hideBeforeSearch` is enabled and query is not null.
-		const filteredOptions =
-			null !== query && ! query.length && ! hideBeforeSearch
-				? options
-				: this.getFilteredOptions( query );
-		this.setState(
-			{
-				selectedIndex: 0,
-				filteredOptions,
-				isExpanded: Boolean( filteredOptions.length ),
-				query: query || '',
-			},
-			() => this.announce( filteredOptions )
-		);
+		const promise = ( this.activePromise = Promise.resolve( onSearch( options, query ) ).then(
+			searchOptions => {
+				if ( promise !== this.activePromise ) {
+					// Another promise has become active since this one was asked to resolve, so do nothing,
+					// or else we might end triggering a race condition updating the state.
+					return;
+				}
+
+				// Get all options if `hideBeforeSearch` is enabled and query is not null.
+				const filteredOptions =
+					null !== query && ! query.length && ! hideBeforeSearch
+						? searchOptions
+						: this.getFilteredOptions( searchOptions, query );
+
+				this.setState(
+					{
+						selectedIndex: 0,
+						filteredOptions,
+						isExpanded: Boolean( filteredOptions.length ),
+					},
+					() => this.announce( filteredOptions )
+				);
+			}
+		) );
 	}
 
 	render() {
@@ -314,7 +318,8 @@ SelectControl.propTypes = {
 	 */
 	onChange: PropTypes.func,
 	/**
-	 * Function to run after the search query is updated, passed the search query.
+	 * Function run after search query is updated, passed previousOptions and query,
+	 * should return a promise with an array of updated options.
 	 */
 	onSearch: PropTypes.func,
 	/**
@@ -325,8 +330,8 @@ SelectControl.propTypes = {
 		PropTypes.shape( {
 			isDisabled: PropTypes.bool,
 			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
-			keywords: PropTypes.arrayOf( PropTypes.string ),
-			label: PropTypes.string,
+			keywords: PropTypes.arrayOf( PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ) ),
+			label: PropTypes.oneOfType( [ PropTypes.string, PropTypes.object ] ),
 			value: PropTypes.any,
 		} )
 	).isRequired,
@@ -361,6 +366,10 @@ SelectControl.propTypes = {
 	 */
 	showClearButton: PropTypes.bool,
 	/**
+	 * The input type for the search box control.
+	 */
+	searchInputType: PropTypes.oneOf( [ 'text', 'search', 'number', 'email', 'tel', 'url' ] ),
+	/**
 	 * Only show list options after typing a search query.
 	 */
 	hideBeforeSearch: PropTypes.bool,
@@ -377,9 +386,10 @@ SelectControl.defaultProps = {
 	isSearchable: false,
 	onChange: noop,
 	onFilter: identity,
-	onSearch: noop,
+	onSearch: options => Promise.resolve( options ),
 	maxResults: 0,
 	multiple: false,
+	searchInputType: 'search',
 	selected: [],
 	showClearButton: false,
 	hideBeforeSearch: false,

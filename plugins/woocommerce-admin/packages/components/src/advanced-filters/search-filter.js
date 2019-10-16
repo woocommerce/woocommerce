@@ -37,9 +37,9 @@ class SearchFilter extends Component {
 
 		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
 			const { selected } = this.state;
-			const ids = selected.map( item => item.id );
+			const ids = selected.map( item => item.key );
 			const filterIds = getIdsFromQuery( filter.value );
-			const hasNewIds = filterIds.every( ( id ) => ! ids.includes( id ) );
+			const hasNewIds = filterIds.every( id => ! ids.includes( id ) );
 
 			if ( hasNewIds ) {
 				config.input.getLabels( filter.value, query ).then( this.updateLabels );
@@ -48,8 +48,8 @@ class SearchFilter extends Component {
 	}
 
 	updateLabels( selected ) {
-		const prevIds = this.state.selected.map( item => item.id );
-		const ids = selected.map( item => item.id );
+		const prevIds = this.state.selected.map( item => item.key );
+		const ids = selected.map( item => item.key );
 
 		if ( ! isEqual( ids.sort(), prevIds.sort() ) ) {
 			this.setState( { selected } );
@@ -61,7 +61,7 @@ class SearchFilter extends Component {
 			selected: values,
 		} );
 		const { filter, onFilterChange } = this.props;
-		const idList = values.map( value => value.id ).join( ',' );
+		const idList = values.map( value => value.key ).join( ',' );
 		onFilterChange( filter.key, 'value', idList );
 	}
 
@@ -75,13 +75,15 @@ class SearchFilter extends Component {
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		const filterStr = selected.map( item => item.label ).join( ', ' );
 
-		return textContent( interpolateComponents( {
-			mixedString: config.labels.title,
-			components: {
-				filter: <Fragment>{ filterStr }</Fragment>,
-				rule: <Fragment>{ rule.label }</Fragment>,
-			},
-		} ) );
+		return textContent(
+			interpolateComponents( {
+				mixedString: config.labels.title,
+				components: {
+					filter: <Fragment>{ filterStr }</Fragment>,
+					rule: <Fragment>{ rule.label }</Fragment>,
+				},
+			} )
+		);
 	}
 
 	render() {
@@ -121,9 +123,7 @@ class SearchFilter extends Component {
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
-				<legend className="screen-reader-text">
-					{ labels.add || '' }
-				</legend>
+				<legend className="screen-reader-text">{ labels.add || '' }</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
 						'is-english': isEnglish,
@@ -131,11 +131,7 @@ class SearchFilter extends Component {
 				>
 					{ children }
 				</div>
-				{ screenReaderText && (
-					<span className="screen-reader-text">
-						{ screenReaderText }
-					</span>
-				) }
+				{ screenReaderText && <span className="screen-reader-text">{ screenReaderText }</span> }
 			</fieldset>
 		);
 		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/

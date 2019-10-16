@@ -20,31 +20,40 @@ export default {
 	name: 'orders',
 	className: 'woocommerce-search__order-result',
 	options( search ) {
-		const query = search ? {
-			number: search,
-			per_page: 10,
-		} : {};
+		const query = search
+			? {
+				number: search,
+				per_page: 10,
+			}
+			: {};
 		return apiFetch( { path: addQueryArgs( '/wc/v4/orders', query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( order ) {
+		return order.id;
+	},
 	getOptionKeywords( order ) {
 		return [ '#' + order.number ];
 	},
 	getOptionLabel( order, query ) {
 		const match = computeSuggestionMatch( '#' + order.number, query ) || {};
-		return [
-			<span key="name" className="woocommerce-search__result-name" aria-label={ '#' + order.number }>
+		return (
+			<span
+				key="name"
+				className="woocommerce-search__result-name"
+				aria-label={ '#' + order.number }
+			>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
 				</strong>
 				{ match.suggestionAfterMatch }
-			</span>,
-		];
+			</span>
+		);
 	},
 	getOptionCompletion( order ) {
 		return {
-			id: order.id,
+			key: order.id,
 			label: '#' + order.number,
 		};
 	},

@@ -22,13 +22,18 @@ export default {
 	name: 'taxes',
 	className: 'woocommerce-search__tax-result',
 	options( search ) {
-		const query = search ? {
-			code: search,
-			per_page: 10,
-		} : {};
+		const query = search
+			? {
+				code: search,
+				per_page: 10,
+			}
+			: {};
 		return apiFetch( { path: addQueryArgs( '/wc/v4/taxes', query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( tax ) {
+		return tax.id;
+	},
 	getOptionKeywords( tax ) {
 		return [ tax.id, getTaxCode( tax ) ];
 	},
@@ -38,7 +43,9 @@ export default {
 				{ interpolateComponents( {
 					mixedString: __( 'All taxes with codes that include {{query /}}', 'woocommerce-admin' ),
 					components: {
-						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
+						query: (
+							<strong className="components-form-token-field__suggestion-match">{ query }</strong>
+						),
 					},
 				} ) }
 			</span>
@@ -53,21 +60,21 @@ export default {
 	},
 	getOptionLabel( tax, query ) {
 		const match = computeSuggestionMatch( getTaxCode( tax ), query ) || {};
-		return [
+		return (
 			<span key="name" className="woocommerce-search__result-name" aria-label={ tax.code }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
 				</strong>
 				{ match.suggestionAfterMatch }
-			</span>,
-		];
+			</span>
+		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( tax ) {
 		const value = {
-			id: tax.id,
+			key: tax.id,
 			label: getTaxCode( tax ),
 		};
 		return value;

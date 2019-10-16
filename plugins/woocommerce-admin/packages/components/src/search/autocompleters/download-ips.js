@@ -20,30 +20,39 @@ export default {
 	name: 'download-ips',
 	className: 'woocommerce-search__download-ip-result',
 	options( match ) {
-		const query = match ? {
-			match,
-		} : {};
+		const query = match
+			? {
+				match,
+			}
+			: {};
 		return apiFetch( { path: addQueryArgs( '/wc/v4/data/download-ips', query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( download ) {
+		return download.user_ip_address;
+	},
 	getOptionKeywords( download ) {
 		return [ download.user_ip_address ];
 	},
 	getOptionLabel( download, query ) {
 		const match = computeSuggestionMatch( download.user_ip_address, query ) || {};
-		return [
-			<span key="name" className="woocommerce-search__result-name" aria-label={ download.user_ip_address }>
+		return (
+			<span
+				key="name"
+				className="woocommerce-search__result-name"
+				aria-label={ download.user_ip_address }
+			>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
 				</strong>
 				{ match.suggestionAfterMatch }
-			</span>,
-		];
+			</span>
+		);
 	},
 	getOptionCompletion( download ) {
 		return {
-			id: download.user_ip_address,
+			key: download.user_ip_address,
 			label: download.user_ip_address,
 		};
 	},

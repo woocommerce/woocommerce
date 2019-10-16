@@ -4,6 +4,7 @@
  */
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
+import { Fragment } from '@wordpress/element';
 
 /**
  * WooCommerce dependencies
@@ -41,10 +42,12 @@ export default {
 	name: 'products',
 	className: 'woocommerce-search__product-result',
 	options( search ) {
-		const query = search ? {
-			search,
-			per_page: 10,
-		} : {};
+		const query = search
+			? {
+				search,
+				per_page: 10,
+			}
+			: {};
 		const product = getQuery().products;
 		if ( ! product || product.includes( ',' ) ) {
 			console.warn( 'Invalid product id supplied to Variations autocompleter' );
@@ -52,38 +55,43 @@ export default {
 		return apiFetch( { path: addQueryArgs( `/wc/v4/products/${ product }/variations`, query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( variation ) {
+		return variation.id;
+	},
 	getOptionKeywords( variation ) {
 		return [ getVariationName( variation ), variation.sku ];
 	},
 	getOptionLabel( variation, query ) {
 		const match = computeSuggestionMatch( getVariationName( variation ), query ) || {};
-		return [
-			<ProductImage
-				key="thumbnail"
-				className="woocommerce-search__result-thumbnail"
-				product={ variation }
-				width={ 18 }
-				height={ 18 }
-				alt=""
-			/>,
-			<span
-				key="name"
-				className="woocommerce-search__result-name"
-				aria-label={ variation.description }
-			>
-				{ match.suggestionBeforeMatch }
-				<strong className="components-form-token-field__suggestion-match">
-					{ match.suggestionMatch }
-				</strong>
-				{ match.suggestionAfterMatch }
-			</span>,
-		];
+		return (
+			<Fragment>
+				<ProductImage
+					key="thumbnail"
+					className="woocommerce-search__result-thumbnail"
+					product={ variation }
+					width={ 18 }
+					height={ 18 }
+					alt=""
+				/>,
+				<span
+					key="name"
+					className="woocommerce-search__result-name"
+					aria-label={ variation.description }
+				>
+					{ match.suggestionBeforeMatch }
+					<strong className="components-form-token-field__suggestion-match">
+						{ match.suggestionMatch }
+					</strong>
+					{ match.suggestionAfterMatch }
+				</span>,
+			</Fragment>
+		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( variation ) {
 		return {
-			id: variation.id,
+			key: variation.id,
 			label: getVariationName( variation ),
 		};
 	},

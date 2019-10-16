@@ -2,19 +2,15 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Component, createRef, Fragment } from '@wordpress/element';
-import { Button, Icon } from '@wordpress/components';
-import { withInstanceId } from '@wordpress/compose';
-import { findIndex, noop } from 'lodash';
-import Gridicon from 'gridicons';
+import { Component } from '@wordpress/element';
+import { noop } from 'lodash';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
-import Autocomplete from './autocomplete';
+import SelectControl from '../select-control';
 import {
 	countries,
 	coupons,
@@ -28,7 +24,6 @@ import {
 	usernames,
 	variations,
 } from './autocompleters';
-import Tag from '../tag';
 
 /**
  * A search box which autocompletes results while typing, allowing for the user to select an existing object
@@ -38,50 +33,11 @@ class Search extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			value: '',
-			isActive: false,
+			options: [],
 		};
-
-		this.input = createRef();
-
-		this.selectResult = this.selectResult.bind( this );
-		this.removeAll = this.removeAll.bind( this );
-		this.removeResult = this.removeResult.bind( this );
-		this.updateSearch = this.updateSearch.bind( this );
-		this.onFocus = this.onFocus.bind( this );
-		this.onBlur = this.onBlur.bind( this );
-		this.onKeyDown = this.onKeyDown.bind( this );
-	}
-
-	selectResult( value ) {
-		const { selected, onChange } = this.props;
-		// Check if this is already selected
-		const isSelected = findIndex( selected, { id: value.id } );
-		if ( -1 === isSelected ) {
-			this.setState( { value: '' } );
-			onChange( [ ...selected, value ] );
-		}
-	}
-
-	removeAll() {
-		const { onChange } = this.props;
-		onChange( [] );
-	}
-
-	removeResult( id ) {
-		return () => {
-			const { selected, onChange } = this.props;
-			const i = findIndex( selected, { id } );
-			onChange( [ ...selected.slice( 0, i ), ...selected.slice( i + 1 ) ] );
-		};
-	}
-
-	updateSearch( onChange ) {
-		return event => {
-			const value = event.target.value || '';
-			this.setState( { value } );
-			onChange( event );
-		};
+		this.appendFreeTextSearch = this.appendFreeTextSearch.bind( this );
+		this.fetchOptions = this.fetchOptions.bind( this );
+		this.updateSelected = this.updateSelected.bind( this );
 	}
 
 	getAutocompleter() {
@@ -113,172 +69,92 @@ class Search extends Component {
 		}
 	}
 
-	shouldRenderTags() {
-		const { selected } = this.props;
-		return selected.some( item => Boolean( item.label ) );
+	getFormattedOptions( options, query ) {
+		const autocompleter = this.getAutocompleter();
+		const formattedOptions = [];
+
+		options.forEach( option => {
+			const formattedOption = {
+				key: autocompleter.getOptionIdentifier( option ),
+				label: autocompleter.getOptionLabel( option, query ),
+				keywords: autocompleter.getOptionKeywords( option ),
+				value: option,
+			};
+			formattedOptions.push( formattedOption );
+		} );
+
+		return formattedOptions;
 	}
 
-	renderTags() {
-		const { selected } = this.props;
-
-		return this.shouldRenderTags() ? (
-			<Fragment>
-				{ selected.map( ( item, i ) => {
-					if ( ! item.label ) {
-						return null;
-					}
-					const screenReaderLabel = sprintf(
-						__( '%1$s (%2$s of %3$s)', 'woocommerce-admin' ),
-						item.label,
-						i + 1,
-						selected.length
-					);
-					return (
-						<Tag
-							key={ item.id }
-							id={ item.id }
-							label={ item.label }
-							remove={ this.removeResult }
-							screenReaderLabel={ screenReaderLabel }
-						/>
-					);
-				} ) }
-			</Fragment>
-		) : null;
+	fetchOptions( previousOptions, query ) {
+		const autocompleter = this.getAutocompleter();
+		return autocompleter.options( query ).then( async response => {
+			const options = this.getFormattedOptions( response, query );
+			this.setState( { options } );
+			return options;
+		} );
 	}
 
-	onFocus( onChange ) {
-		return event => {
-			this.setState( { isActive: true } );
-			onChange( event );
-		};
+	updateSelected( selected ) {
+		const { onChange } = this.props;
+		const autocompleter = this.getAutocompleter();
+
+		const formattedSelections = selected.map( option => {
+			return option.value ? autocompleter.getOptionCompletion( option.value ) : option;
+		} );
+
+		onChange( formattedSelections );
 	}
 
-	onBlur() {
-		this.setState( { isActive: false } );
-	}
+	appendFreeTextSearch( options, query ) {
+		const autocompleter = this.getAutocompleter();
+		const { allowFreeTextSearch } = this.props;
 
-	onKeyDown( event ) {
-		const { value } = this.state;
-		const { selected, onChange } = this.props;
-
-		if ( 8 === event.keyCode && ! value && selected.length ) {
-			onChange( [ ...selected.slice( 0, -1 ) ] );
+		if ( ! allowFreeTextSearch ) {
+			return options;
 		}
+
+		return [ ...autocompleter.getFreeTextOptions( query ), ...options ];
 	}
 
 	render() {
 		const autocompleter = this.getAutocompleter();
 		const {
-			allowFreeTextSearch,
 			className,
 			inlineTags,
-			instanceId,
 			placeholder,
 			selected,
 			showClearButton,
 			staticResults,
 			disabled,
 		} = this.props;
-		const { value = '', isActive } = this.state;
-		const aria = {
-			'aria-labelledby': this.props[ 'aria-labelledby' ],
-			'aria-label': this.props[ 'aria-label' ],
-		};
-		const shouldRenderTags = this.shouldRenderTags();
+		const { options } = this.state;
 		const inputType = autocompleter.inputType ? autocompleter.inputType : 'text';
-		const searchIcon = <Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />;
 
 		return (
-			<div className={ classnames( 'woocommerce-search', className, {
-				'has-inline-tags': inlineTags,
-			} ) }>
-				<Autocomplete
-					allowFreeText={ allowFreeTextSearch }
-					completer={ autocompleter }
-					onSelect={ this.selectResult }
-					selected={ selected.map( s => s.id ) }
-					staticResults={ staticResults }
-				>
-					{ ( { listBoxId, activeId, onChange } ) =>
-						// Disable reason: The div below visually simulates an input field. Its
-						// child input is the actual input and responds accordingly to all keyboard
-						// events, but click events need to be passed onto the child input. There
-						// is no appropriate aria role for describing this situation, which is only
-						// for the benefit of sighted users.
-						/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
-						inlineTags ? (
-							<div
-								className={ classnames( 'woocommerce-search__inline-container', {
-									'is-active': isActive,
-									'has-tags': inlineTags && shouldRenderTags,
-								} ) }
-								onClick={ () => {
-									this.input.current.focus();
-								} }
-							>
-								{ searchIcon }
-								<div className="woocommerce-search__token-list">
-									{ this.renderTags() }
-									<input
-										ref={ this.input }
-										type={ inputType }
-										size={
-											( ( value.length === 0 && placeholder && placeholder.length ) ||
-												value.length ) + 1
-										}
-										value={ value }
-										placeholder={ ( ! shouldRenderTags && placeholder ) || '' }
-										className="woocommerce-search__inline-input"
-										onChange={ this.updateSearch( onChange ) }
-										aria-owns={ listBoxId }
-										aria-activedescendant={ activeId }
-										onFocus={ this.onFocus( onChange ) }
-										onBlur={ this.onBlur }
-										onKeyDown={ this.onKeyDown }
-										aria-describedby={
-											shouldRenderTags ? `search-inline-input-${ instanceId }` : null
-										}
-										{ ...aria }
-										disabled={ disabled }
-									/>
-									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-										{ __( 'Move backward for selected items', 'woocommerce-admin' ) }
-									</span>
-								</div>
-							</div>
-						) : (
-							<Fragment>
-								{ searchIcon }
-								<input
-									type="search"
-									value={ value }
-									placeholder={ placeholder }
-									className="woocommerce-search__input"
-									onChange={ this.updateSearch( onChange ) }
-									aria-owns={ listBoxId }
-									aria-activedescendant={ activeId }
-									{ ...aria }
-									disabled={ disabled }
-								/>
-							</Fragment>
-						)
-					}
-				</Autocomplete>
-				{ ! inlineTags && this.renderTags() }
-				{ showClearButton && shouldRenderTags ? (
-					<Button
-						className="woocommerce-search__clear"
-						isLink
-						onClick={ this.removeAll }
-					>
-						<Icon icon="dismiss" />
-						<span className="screen-reader-text">{ __( 'Clear all', 'woocommerce-admin' ) }</span>
-					</Button>
-				) : null }
+			<div>
+				<SelectControl
+					className={ classnames( 'woocommerce-search', className, {
+						'is-static-results': staticResults,
+					} ) }
+					disabled={ disabled }
+					hideBeforeSearch
+					inlineTags={ inlineTags }
+					isSearchable
+					label={ placeholder }
+					getSearchExpression={ autocompleter.getSearchExpression }
+					multiple
+					placeholder={ placeholder }
+					onChange={ this.updateSelected }
+					onFilter={ this.appendFreeTextSearch }
+					onSearch={ this.fetchOptions }
+					options={ options }
+					searchInputType={ inputType }
+					selected={ selected }
+					showClearButton={ showClearButton }
+				/>
 			</div>
 		);
-		/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 	}
 }
 
@@ -322,10 +198,7 @@ Search.propTypes = {
 	 */
 	selected: PropTypes.arrayOf(
 		PropTypes.shape( {
-			id: PropTypes.oneOfType( [
-				PropTypes.number,
-				PropTypes.string,
-			] ).isRequired,
+			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
 			label: PropTypes.string,
 		} )
 	),
@@ -357,4 +230,4 @@ Search.defaultProps = {
 	disabled: false,
 };
 
-export default withInstanceId( Search );
+export default Search;

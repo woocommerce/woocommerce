@@ -22,14 +22,19 @@ export default {
 	name: 'customers',
 	className: 'woocommerce-search__customers-result',
 	options( name ) {
-		const query = name ? {
-			search: name,
-			searchby: 'name',
-			per_page: 10,
-		} : {};
+		const query = name
+			? {
+				search: name,
+				searchby: 'name',
+				per_page: 10,
+			}
+			: {};
 		return apiFetch( { path: addQueryArgs( '/wc/v4/customers', query ) } );
 	},
 	isDebounced: true,
+	getOptionIdentifier( customer ) {
+		return customer.id;
+	},
 	getOptionKeywords( customer ) {
 		return [ customer.name ];
 	},
@@ -37,9 +42,14 @@ export default {
 		const label = (
 			<span key="name" className="woocommerce-search__result-name">
 				{ interpolateComponents( {
-					mixedString: __( 'All customers with names that include {{query /}}', 'woocommerce-admin' ),
+					mixedString: __(
+						'All customers with names that include {{query /}}',
+						'woocommerce-admin'
+					),
 					components: {
-						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
+						query: (
+							<strong className="components-form-token-field__suggestion-match">{ query }</strong>
+						),
 					},
 				} ) }
 			</span>
@@ -54,21 +64,21 @@ export default {
 	},
 	getOptionLabel( customer, query ) {
 		const match = computeSuggestionMatch( customer.name, query ) || {};
-		return [
+		return (
 			<span key="name" className="woocommerce-search__result-name" aria-label={ customer.name }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
 				</strong>
 				{ match.suggestionAfterMatch }
-			</span>,
-		];
+			</span>
+		);
 	},
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( customer ) {
 		return {
-			id: customer.id,
+			key: customer.id,
 			label: customer.name,
 		};
 	},
