@@ -253,21 +253,28 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	 * @return array List of product IDs
 	 */
 	protected function get_products() {
-		$query_hash        = md5( wp_json_encode( $this->query_args ) . __CLASS__ );
-		$transient_name    = 'wc_block_' . $query_hash;
-		$transient_value   = get_transient( $transient_name );
-		$transient_version = \WC_Cache_Helper::get_transient_version( 'product_query' );
+		$is_cacheable = (bool) apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', true, $this->query_args );
 
-		if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+		if ( $is_cacheable ) {
+			$query_hash        = md5( wp_json_encode( $this->query_args ) . __CLASS__ );
+			$transient_name    = 'wc_block_' . $query_hash;
+			$transient_value   = get_transient( $transient_name );
+			$transient_version = \WC_Cache_Helper::get_transient_version( 'product_query' );
+		}
+
+		if ( isset( $transient_value['value'], $transient_value['version'], $transient_version ) && $transient_value['version'] === $transient_version ) {
 			$results = $transient_value['value'];
 		} else {
-			$query           = new \WP_Query( $this->query_args );
-			$results         = wp_parse_id_list( $query->posts );
-			$transient_value = array(
-				'version' => $transient_version,
-				'value'   => $results,
-			);
-			set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
+			$query   = new \WP_Query( $this->query_args );
+			$results = wp_parse_id_list( $query->posts );
+
+			if ( $is_cacheable ) {
+				$transient_value = array(
+					'version' => $transient_version,
+					'value'   => $results,
+				);
+				set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
+			}
 
 			// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
 			WC()->query->remove_ordering_args();
