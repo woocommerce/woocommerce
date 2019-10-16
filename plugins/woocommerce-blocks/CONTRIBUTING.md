@@ -82,7 +82,9 @@ __Important:__ Before running the release script ensure you have already pushed 
 
 ## Publishing `@woocommerce/block-library`
 
-We publish the blocks to npm at [@woocommerce/block-library,](https://www.npmjs.com/package/@woocommerce/block-library).
+In the past, we published the blocks to NPM at [@woocommerce/block-library](https://www.npmjs.com/package/@woocommerce/block-library).
+
+**Note: since version 2.3.0 `@woocommerce/block-library` has been deprecated, you shouldn't publish a new version without first discussing it with the team**
 
 To release a new version, perform the following steps:
 
