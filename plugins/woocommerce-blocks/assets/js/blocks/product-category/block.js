@@ -244,6 +244,21 @@ class ProductByCategoryBlock extends Component {
 					<ServerSideRender
 						block={ name }
 						attributes={ attributes }
+						EmptyResponsePlaceholder={ () => (
+							<Placeholder
+								icon="category"
+								label={ __(
+									'Products by Category',
+									'woo-gutenberg-products-block'
+								) }
+								className="wc-block-products-grid wc-block-products-category"
+							>
+								{ __(
+									'No products were found that matched your selection.',
+									'woo-gutenberg-products-block'
+								) }
+							</Placeholder>
+						) }
 					/>
 				) : (
 					__(
