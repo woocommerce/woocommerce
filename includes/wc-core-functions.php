@@ -320,6 +320,8 @@ function get_woocommerce_currency() {
 /**
  * Get full list of currency codes.
  *
+ * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ *
  * @return array
  */
 function get_woocommerce_currencies() {
@@ -505,6 +507,8 @@ function get_woocommerce_currencies() {
 /**
  * Get Currency symbol.
  *
+ * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ *
  * @param string $currency Currency. (default: '').
  * @return string
  */
@@ -619,7 +623,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'MXN' => '&#36;',
 			'MYR' => '&#82;&#77;',
 			'MZN' => 'MT',
-			'NAD' => '&#36;',
+			'NAD' => 'N&#36;',
 			'NGN' => '&#8358;',
 			'NIO' => 'C&#36;',
 			'NOK' => '&#107;&#114;',
@@ -695,11 +699,12 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
  * @param mixed  $message     Message.
  * @param string $headers     Headers. (default: "Content-Type: text/html\r\n").
  * @param string $attachments Attachments. (default: "").
+ * @return bool
  */
 function wc_mail( $to, $subject, $message, $headers = "Content-Type: text/html\r\n", $attachments = '' ) {
 	$mailer = WC()->mailer();
 
-	$mailer->send( $to, $subject, $message, $headers, $attachments );
+	return $mailer->send( $to, $subject, $message, $headers, $attachments );
 }
 
 /**
@@ -2263,6 +2268,12 @@ function wc_get_server_database_version() {
  * @return void
  */
 function wc_load_cart() {
+	if ( ! did_action( 'before_woocommerce_init' ) || doing_action( 'before_woocommerce_init' ) ) {
+		/* translators: 1: wc_load_cart 2: woocommerce_init */
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_load_cart', 'woocommerce_init' ), '3.7' );
+		return;
+	}
+
 	WC()->initialize_session();
 	WC()->initialize_cart();
 }

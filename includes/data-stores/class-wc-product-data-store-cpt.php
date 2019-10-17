@@ -949,7 +949,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-		return $wpdb->get_var(
+		return (bool) $wpdb->get_var(
 			$wpdb->prepare(
 				"
 				SELECT posts.ID
@@ -1088,7 +1088,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$query .= ' AND postmeta.meta_key IN ( "' . implode( '","', array_map( 'esc_sql', $meta_attribute_names ) ) . '" )';
 
-		$query.=' ORDER BY posts.menu_order ASC, postmeta.post_id ASC;';
+		$query .= ' ORDER BY posts.menu_order ASC, postmeta.post_id ASC;';
 
 		$attributes = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
@@ -1112,7 +1112,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
 			foreach ( $variation as $attribute_key => $attribute_value ) {
-				$match_any_value = empty( $attribute_value );
+				$match_any_value = '' === $attribute_value;
 
 				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
 					$match = false; // Requires a selection but no value was provide.
@@ -1384,7 +1384,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product_id_with_stock
 		);
 
-		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
+		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $new_stock, 'set' );
 
 		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 
@@ -1956,6 +1956,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Handle reviews_allowed.
 		if ( isset( $query_vars['reviews_allowed'] ) && is_bool( $query_vars['reviews_allowed'] ) ) {
 			add_filter( 'posts_where', array( $this, 'reviews_allowed_query_where' ), 10, 2 );
+		}
+
+		// Handle orderby.
+		if ( isset( $query_vars['orderby'] ) && 'include' === $query_vars['orderby'] ) {
+			$wp_query_args['orderby'] = 'post__in';
 		}
 
 		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );

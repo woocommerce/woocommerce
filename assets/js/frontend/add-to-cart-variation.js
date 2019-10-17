@@ -275,7 +275,6 @@
 		} else {
 			form.$form.trigger( 'woocommerce_variation_select_change' );
 			form.$form.trigger( 'check_variations' );
-			$( this ).blur();
 		}
 
 		// Custom event for when variation selection has been changed
