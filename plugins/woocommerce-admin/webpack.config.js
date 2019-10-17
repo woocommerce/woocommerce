@@ -23,6 +23,8 @@ if ( [ 'development', 'plugin', 'core' ].indexOf( WC_ADMIN_PHASE ) === -1 ) {
 	WC_ADMIN_PHASE = 'core';
 }
 const WC_ADMIN_CONFIG = require( path.join( __dirname, 'config', WC_ADMIN_PHASE + '.json' ) );
+const WC_ADMIN_ADDITIONAL_FEATURES = process.env.WC_ADMIN_ADDITIONAL_FEATURES &&
+	JSON.parse( process.env.WC_ADMIN_ADDITIONAL_FEATURES ) || {};
 
 const externals = {
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
@@ -161,7 +163,7 @@ const webpackConfig = {
 		new FixStyleOnlyEntriesPlugin(),
 		// Inject the current feature flags.
 		new DefinePlugin( {
-			'window.wcAdminFeatures': { ...WC_ADMIN_CONFIG.features },
+			'window.wcAdminFeatures': { ...WC_ADMIN_CONFIG.features, ...WC_ADMIN_ADDITIONAL_FEATURES },
 		} ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {

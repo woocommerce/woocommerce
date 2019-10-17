@@ -1,5 +1,17 @@
 #!/bin/bash
 
+ZIP_FILE='woocommerce-admin.zip';
+
+while [ $# -gt 0 ]; do
+	if [[ $1 == '-f' || $1 == '--features' ]]; then
+		export WC_ADMIN_ADDITIONAL_FEATURES="$2"
+	fi
+	if [[ $1 == '-s' || $1 == '--slug' ]]; then
+		ZIP_FILE="woocommerce-admin-$2.zip";
+	fi
+	shift
+done
+
 # Exit if any command fails.
 set -e
 
@@ -74,7 +86,7 @@ build_files=$(ls dist/*/*.{js,css})
 
 # Generate the plugin zip file.
 status "Creating archive... 🎁"
-zip -r woocommerce-admin.zip \
+zip -r ${ZIP_FILE} \
 	woocommerce-admin.php \
 	uninstall.php \
 	includes/ \
