@@ -1406,6 +1406,17 @@ return array(
 		'UG313' => __( 'Yumbe', 'woocommerce' ),
 		'UG330' => __( 'Zombo', 'woocommerce' ),
 	),
+	'UM' => array(
+		'81' => __( 'Baker Island', 'woocommerce' ),
+		'84' => __( 'Howland Island', 'woocommerce' ),
+		'86' => __( 'Jarvis Island', 'woocommerce' ),
+		'67' => __( 'Johnston Atoll', 'woocommerce' ),
+		'89' => __( 'Kingman Reef', 'woocommerce' ),
+		'71' => __( 'Midway Atoll', 'woocommerce' ),
+		'76' => __( 'Navassa Island', 'woocommerce' ),
+		'95' => __( 'Palmyra Atoll', 'woocommerce' ),
+		'79' => __( 'Wake Island', 'woocommerce' ),
+	),
 	'US' => array( // United States.
 		'AL' => __( 'Alabama', 'woocommerce' ),
 		'AK' => __( 'Alaska', 'woocommerce' ),

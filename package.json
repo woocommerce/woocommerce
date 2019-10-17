@@ -20,7 +20,7 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "autoprefixer": "9.6.4",
+    "autoprefixer": "9.6.5",
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
     "babel-eslint": "10.0.3",
@@ -52,13 +52,13 @@
     "grunt-shell": "3.0.1",
     "grunt-stylelint": "0.11.1",
     "grunt-wp-i18n": "1.0.3",
-    "husky": "3.0.8",
+    "husky": "3.0.9",
     "istanbul": "1.0.0-alpha.2",
     "lint-staged": "9.4.2",
     "mocha": "6.2.1",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
-    "stylelint": "11.0.0",
+    "stylelint": "11.1.1",
     "stylelint-config-wordpress": "15.0.0",
     "wc-e2e-page-objects": "0.10.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
