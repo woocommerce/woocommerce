@@ -1,0 +1,55 @@
+diff --git a/assets/js/admin/wc-product-import.js b/assets/js/admin/wc-product-import.js
+index 0af872b..967d84f 100644
+--- a/assets/js/admin/wc-product-import.js
++++ b/assets/js/admin/wc-product-import.js
+@@ -58,7 +58,8 @@
+ 					$this.$form.find('.woocommerce-importer-progress').val( response.data.percentage );
+ 
+ 					if ( 'done' === response.data.position ) {
+-						window.location = response.data.url + '&products-imported=' + parseInt( $this.imported, 10 ) + '&products-failed=' + parseInt( $this.failed, 10 ) + '&products-updated=' + parseInt( $this.updated, 10 ) + '&products-skipped=' + parseInt( $this.skipped, 10 );
++						var file_name = wc_product_import_params.file.split('/').pop();
++						window.location = response.data.url + '&products-imported=' + parseInt( $this.imported, 10 ) + '&products-failed=' + parseInt( $this.failed, 10 ) + '&products-updated=' + parseInt( $this.updated, 10 ) + '&products-skipped=' + parseInt( $this.skipped, 10 )+'&file-name='+file_name;
+ 					} else {
+ 						$this.run_import();
+ 					}
+diff --git a/includes/admin/importers/class-wc-product-csv-importer-controller.php b/includes/admin/importers/class-wc-product-csv-importer-controller.php
+index fbd20e7..104115b 100644
+--- a/includes/admin/importers/class-wc-product-csv-importer-controller.php
++++ b/includes/admin/importers/class-wc-product-csv-importer-controller.php
+@@ -455,11 +455,12 @@ class WC_Product_CSV_Importer_Controller {
+ 	 */
+ 	protected function done() {
+ 		check_admin_referer( 'woocommerce-csv-importer' );
+-		$imported = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
+-		$updated  = isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0;
+-		$failed   = isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0;
+-		$skipped  = isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0;
+-		$errors   = array_filter( (array) get_user_option( 'product_import_error_log' ) );
++		$imported  = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
++		$updated   = isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0;
++		$failed    = isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0;
++		$skipped   = isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0;
++		$file_name = isset( $_GET['file-name'] ) ? sanitize_text_field( wp_unslash( $_GET['file-name'] ) ) : '';
++		$errors    = array_filter( (array) get_user_option( 'product_import_error_log' ) );
+ 
+ 		include_once dirname( __FILE__ ) . '/views/html-csv-import-done.php';
+ 	}
+diff --git a/includes/admin/importers/views/html-csv-import-done.php b/includes/admin/importers/views/html-csv-import-done.php
+index 3f43869..1774001 100644
+--- a/includes/admin/importers/views/html-csv-import-done.php
++++ b/includes/admin/importers/views/html-csv-import-done.php
+@@ -50,6 +50,14 @@ if ( ! defined( 'ABSPATH' ) ) {
+ 			$results[] = '<a href="#" class="woocommerce-importer-done-view-errors">' . __( 'View import log', 'woocommerce' ) . '</a>';
+ 		}
+ 
++		if ( ! empty( $file_name ) ) {
++			$results[] = sprintf(
++				/* translators: %s: File name */
++				__( 'File uploaded: %s', 'woocommerce' ),
++				'<strong>' . $file_name . '</strong>'
++			);
++		}
++
+ 		/* translators: %d: import results */
+ 		echo wp_kses_post( __( 'Import complete!', 'woocommerce' ) . ' ' . implode( '. ', $results ) );
+ 		?>
