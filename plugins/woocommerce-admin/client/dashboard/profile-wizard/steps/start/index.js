@@ -41,20 +41,26 @@ class Start extends Component {
 	}
 
 	componentDidMount() {
-		const { updateProfileItems } = this.props;
+		const { updateProfileItems, profileItems } = this.props;
 		if (
 			this.props.activePlugins.includes( 'jetpack' ) &&
 			this.props.activePlugins.includes( 'woocommerce-services' )
 		) {
-			updateProfileItems( { wcs_jetpack: 'already-installed' } );
+			// Don't track event again if they revisit the start page.
+			if ( 'already-installed' !== profileItems.plugins ) {
+				recordEvent( 'wcadmin_storeprofiler_already_installed_plugins', {} );
+			}
+
+			updateProfileItems( { plugins: 'already-installed' } );
 			return updateQueryString( { step: 'store-details' } );
 		}
 	}
 
 	async skipWizard() {
-		const { createNotice, isProfileItemsError, updateProfileItems } = this.props;
+		const { createNotice, isProfileItemsError, updateProfileItems, activePlugins } = this.props;
 
-		await updateProfileItems( { skipped: true, wcs_jetpack: 'skipped' } );
+		const plugins = activePlugins.includes( 'jetpack' ) ? 'skipped-wcs' : 'skipped';
+		await updateProfileItems( { plugins } );
 
 		if ( isProfileItemsError ) {
 			createNotice(
@@ -62,21 +68,31 @@ class Start extends Component {
 				__( 'There was a problem updating your preferences.', 'woocommerce-admin' )
 			);
 		} else {
-			recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
+			recordEvent( 'storeprofiler_welcome_clicked', { get_started: true, plugins } );
+			return updateQueryString( { step: 'store-details' } );
 		}
 	}
 
 	async startWizard() {
-		const { createNotice, isProfileItemsError, updateProfileItems, updateOptions } = this.props;
+		const {
+			createNotice,
+			isProfileItemsError,
+			updateProfileItems,
+			updateOptions,
+			goToNextStep,
+			activePlugins,
+		} = this.props;
 
 		await updateOptions( {
 			woocommerce_setup_jetpack_opted_in: true,
 		} );
-		await updateProfileItems( { wcs_jetpack: 'wizard' } );
+
+		const plugins = activePlugins.includes( 'jetpack' ) ? 'installed-wcs' : 'installed';
+		await updateProfileItems( { plugins } );
 
 		if ( ! isProfileItemsError ) {
-			recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
-			this.props.goToNextStep();
+			recordEvent( 'storeprofiler_welcome_clicked', { get_started: true, plugins } );
+			goToNextStep();
 		} else {
 			createNotice(
 				'error',
@@ -257,7 +273,9 @@ class Start extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItemsError, getActivePlugins, getOptions } = select( 'wc-api' );
+		const { getProfileItemsError, getActivePlugins, getOptions, getProfileItems } = select(
+			'wc-api'
+		);
 
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 
@@ -265,11 +283,13 @@ export default compose(
 		const allowTracking = 'yes' === get( options, [ 'woocommerce_allow_tracking' ], false );
 
 		const activePlugins = getActivePlugins();
+		const profileItems = getProfileItems();
 
 		return {
 			isProfileItemsError,
 			activePlugins,
 			allowTracking,
+			profileItems,
 		};
 	} ),
 	withDispatch( dispatch => {

@@ -45,7 +45,7 @@ class StoreDetails extends Component {
 	onSubmit( values ) {
 		const { profileItems } = this.props;
 
-		if ( 'already-installed' === profileItems.wcs_jetpack ) {
+		if ( 'already-installed' === profileItems.plugins ) {
 			this.setState( { showUsageModal: true } );
 			return;
 		}

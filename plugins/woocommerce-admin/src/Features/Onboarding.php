@@ -77,7 +77,7 @@ class Onboarding {
 	}
 
 	/**
-	 * Returns true if the profiler should be displayed (not completed and not skipped).
+	 * Returns true if the profiler should be displayed (not completed).
 	 *
 	 * @return bool
 	 */
@@ -85,15 +85,14 @@ class Onboarding {
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
 
 		$is_completed = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
-		$is_skipped   = isset( $onboarding_data['skipped'] ) && true === $onboarding_data['skipped'];
 
 		// @todo When merging to WooCommerce Core, we should set the `completed` flag to true during the upgrade progress.
 		// https://github.com/woocommerce/woocommerce-admin/pull/2300#discussion_r287237498.
-		return $is_completed || $is_skipped ? false : true;
+		return ! $is_completed;
 	}
 
 	/**
-	 * Returns true if the task list should be displayed (not completed or hidden off the dashboard.
+	 * Returns true if the task list should be displayed (not completed or hidden off the dashboard).
 	 *
 	 * @return bool
 	 */
@@ -530,8 +529,7 @@ class Onboarding {
 			$task_list_hidden = get_option( 'woocommerce_task_list_hidden', 'no' );
 			$onboarding_data  = get_option( 'wc_onboarding_profile', array() );
 			$is_completed     = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
-			$is_skipped       = isset( $onboarding_data['skipped'] ) && true === $onboarding_data['skipped'];
-			$is_enabled       = $is_completed || $is_skipped ? false : true;
+			$is_enabled       = ! $is_completed;
 
 			$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
 
@@ -642,15 +640,23 @@ class Onboarding {
 			return;
 		}
 
-		$new_value = 1 === absint( $_GET['reset_profiler'] ) ? false : true;
+		$previous  = 1 === absint( $_GET['reset_profiler'] );
+		$new_value = ! $previous;
+
+		wc_admin_record_tracks_event(
+			'wcadmin_storeprofiler_toggled',
+			array(
+				'previous'  => $previous,
+				'new_value' => $new_value,
+			)
+		);
 
 		$request = new \WP_REST_Request( 'POST', '/wc-admin/v1/onboarding/profile' );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'completed' => false,
-					'skipped'   => $new_value,
+					'completed' => $new_value,
 				)
 			)
 		);

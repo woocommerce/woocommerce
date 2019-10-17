@@ -17,7 +17,7 @@ class Dashboard extends Component {
 	render() {
 		const { path, profileItems, query } = this.props;
 
-		if ( window.wcAdminFeatures.onboarding && ! profileItems.skipped && ! profileItems.completed ) {
+		if ( window.wcAdminFeatures.onboarding && ! profileItems.completed ) {
 			return <ProfileWizard query={ query } />;
 		}
 
