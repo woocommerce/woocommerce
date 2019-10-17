@@ -86,7 +86,9 @@ export function getTasks( { profileItems, options, query } ) {
 			icon: 'local_shipping',
 			container: <Shipping />,
 			completed: shippingZonesCount > 0,
-			visible: profileItems.product_types.includes( 'physical' ) || hasPhysicalProducts,
+			visible:
+				( profileItems.product_types && profileItems.product_types.includes( 'physical' ) ) ||
+				hasPhysicalProducts,
 		},
 		{
 			key: 'tax',
