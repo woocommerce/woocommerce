@@ -257,7 +257,7 @@ class WC_WCCOM_Site_Installer {
 	 *
 	 * @since 3.7.0
 	 * @param int $product_id Product ID.
-	 * @return bool|\WP_Error
+	 * @return array|\WP_Error
 	 */
 	private static function get_product_info( $product_id ) {
 		$product_info = array(
@@ -287,20 +287,26 @@ class WC_WCCOM_Site_Installer {
 		if ( ! empty( $result['_wporg_product'] ) && ! empty( $result['download_link'] ) ) {
 			// For wporg product, download is set already from info response.
 			$product_info['download_url'] = $result['download_link'];
-		} elseif ( ! WC_Helper::has_product_subscription( $product_id ) ) {
+			return $product_info;
+		}
+
+		// Clear the cache of customer's subscription before asking for them.
+		// Thus, they will be re-fetched from WooCommerce.com.
+		WC_Helper::_flush_subscriptions_cache();
+
+		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
 			// Non-wporg product needs subscription.
 			return new WP_Error( 'missing_subscription', __( 'Missing product subscription', 'woocommerce' ) );
-		} else {
-			// Retrieve download URL for non-wporg product.
-			WC_Helper_Updater::flush_updates_cache();
-			WC_Helper::_flush_subscriptions_cache();
-			$updates = WC_Helper_Updater::get_update_data();
-			if ( empty( $updates[ $product_id ]['package'] ) ) {
-				return new WP_Error( 'missing_product_package', __( 'Could not find product package.', 'woocommerce' ) );
-			}
-
-			$product_info['download_url'] = $updates[ $product_id ]['package'];
 		}
+
+		// Retrieve download URL for non-wporg product.
+		WC_Helper_Updater::flush_updates_cache();
+		$updates = WC_Helper_Updater::get_update_data();
+		if ( empty( $updates[ $product_id ]['package'] ) ) {
+			return new WP_Error( 'missing_product_package', __( 'Could not find product package.', 'woocommerce' ) );
+		}
+
+		$product_info['download_url'] = $updates[ $product_id ]['package'];
 
 		return $product_info;
 	}
