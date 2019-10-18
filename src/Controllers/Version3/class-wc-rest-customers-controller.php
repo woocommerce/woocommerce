@@ -304,4 +304,16 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 
 		return $this->add_additional_fields_schema( $schema );
 	}
+
+    /**
+	 * Add new options for 'orderby' to the collection params.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+    		$params                    = parent::get_collection_params();
+    		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'modified' ) );
+
+    		return $params;
+    	}
 }
