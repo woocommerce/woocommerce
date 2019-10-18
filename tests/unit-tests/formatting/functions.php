@@ -687,6 +687,10 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		update_option( 'gmt_offset', -4 );
 		$this->assertNotEquals( 'UTC', wc_timezone_string() );
 
+		// Test with float GMT offset.
+		update_option( 'gmt_offset', 2.5 );
+		$this->assertEquals( 'UTC', wc_timezone_string() );
+
 		// Test with invalid offset.
 		update_option( 'gmt_offset', 99 );
 		$this->assertEquals( 'UTC', wc_timezone_string() );
@@ -702,6 +706,21 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_timezone_offset() {
 		$this->assertEquals( 0.0, wc_timezone_offset() );
+
+		// Test with float GMT offset.
+		update_option( 'gmt_offset', 2.5 );
+		$this->assertEquals( 2.5 * 60 * 60, wc_timezone_offset() );
+
+		// Test with int GMT offset.
+		update_option( 'gmt_offset', 2 );
+		$this->assertEquals( 2 * 60 * 60, wc_timezone_offset() );
+
+		// Test with negative offset.
+		update_option( 'gmt_offset', -2 );
+		$this->assertEquals( -2 * 60 * 60, wc_timezone_offset() );
+
+		// Restore default.
+		update_option( 'gmt_offset', '0' );
 	}
 
 	/**
