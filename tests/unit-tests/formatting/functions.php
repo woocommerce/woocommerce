@@ -695,6 +695,10 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		update_option( 'gmt_offset', 99 );
 		$this->assertEquals( 'UTC', wc_timezone_string() );
 
+		// Test with a valid timezone string.
+		update_option( 'gmt_offset', -25200 );
+		$this->assertNotEquals( 'UTC', wc_timezone_string() );
+
 		// Restore default.
 		update_option( 'gmt_offset', '0' );
 	}
