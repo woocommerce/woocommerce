@@ -113,7 +113,7 @@ function wc_get_order_statuses() {
 /**
  * Get all payment statuses
  *
- * @since 3.8
+ * @since 3.9
  * @used-by WC_Order::set_payment_status
  * @return array
  */
@@ -140,7 +140,7 @@ function wc_get_payment_statuses() {
 /**
  * Get all fulfillment statuses
  *
- * @since 3.8
+ * @since 3.9
  * @used-by WC_Order::set_fulfillment_status
  * @return array
  */
@@ -156,7 +156,7 @@ function wc_get_fulfillment_statuses() {
 /**
  * Get all delivery statuses
  *
- * @since 3.8
+ * @since 3.9
  * @used-by WC_Order::set_delivery_status
  * @return array
  */
@@ -210,7 +210,7 @@ function wc_get_is_pending_statuses() {
  * @return string
  */
 function wc_get_order_status_name( $status ) {
-	$statuses = wc_get_order_statuses();
+	$statuses = array_merge( wc_get_order_statuses(), wc_get_payment_statuses(), wc_get_fulfillment_statuses(), wc_get_delivery_statuses() );
 	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
 	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
 	return $status;
