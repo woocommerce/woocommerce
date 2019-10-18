@@ -46,7 +46,7 @@ If you are contributing code to the REST API or editor blocks, these are develop
 
 ## Feature Requests 🚀
 
-Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?template=Feature_request.md). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
+Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?template=6-Feature-request.md). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
 
 Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
 
