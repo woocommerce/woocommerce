@@ -7,17 +7,19 @@
  */
 import { switchUserToTest } from '@wordpress/e2e-test-utils';
 
-const customerUsername = process.env.WP_USERNAME;
-
 describe( 'My account page', () => {
 	beforeAll( async () => {
 		await switchUserToTest();
 	} );
 
 	it( 'allows customer to login', async () => {
-		await expect( page ).toMatch( 'Hello ' + customerUsername );
+		await expect( page ).toMatch( 'Hello' );
 		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Dashboard' } );
 		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Orders' } );
+		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Downloads' } );
+		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Addresses' } );
+		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Account details' } );
+		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Logout' } );
 	} );
 
 	it( 'allows customer to see orders', async () => {
