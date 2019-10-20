@@ -95,7 +95,7 @@ describe( 'WooCommerce Tax Settings', () => {
 		// Verify that settings have been saved
 		await Promise.all( [
 			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
-			verifyValueOfInputField( '#woocommerce_tax_classes', '' ),
+			expect( page ).toMatchElement( '#woocommerce_tax_classes', { text: '' } ),
 		] );
 
 		// Add a "fancy" tax class
