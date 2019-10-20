@@ -221,7 +221,7 @@ class Tax extends Component {
 			},
 			{
 				key: 'manual_configuration',
-				label: __( 'Congifure tax rates', 'woocommerce-admin' ),
+				label: __( 'Configure tax rates', 'woocommerce-admin' ),
 				description: __(
 					'Head over to the tax rate settings screen to configure your tax rates',
 					'woocommerce-admin'
