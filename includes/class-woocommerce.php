@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.7.0';
+	public $version = '3.8.0';
 
 	/**
 	 * The single instance of the class.
@@ -199,7 +199,7 @@ final class WooCommerce {
 	 */
 	public function log_errors() {
 		$error = error_get_last();
-		if ( in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+		if ( $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
 			$logger = wc_get_logger();
 			$logger->critical(
 				/* translators: 1: error message 2: file name and path 3: line number */
@@ -229,8 +229,9 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
-		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '5.6.20' );
-		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '4.9' );
+		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.0' );
+		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.0' );
+		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
 	}
 
 	/**

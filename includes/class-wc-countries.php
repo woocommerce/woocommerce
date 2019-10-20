@@ -363,7 +363,7 @@ class WC_Countries {
 			$countries[] = 'IM';
 		}
 
-		return $countries;
+		return apply_filters( 'woocommerce_european_union_countries', $countries, $type );
 	}
 
 	/**
@@ -992,11 +992,21 @@ class WC_Countries {
 						),
 					),
 					'JP' => array(
+						'last_name' => array(
+							'class'    => array( 'form-row-first' ),
+							'priority' => 10,
+						),
+						'first_name' => array(
+							'class'    => array( 'form-row-last' ),
+							'priority' => 20,
+						),
 						'postcode'  => array(
+							'class'    => array( 'form-row-first' ),
 							'priority' => 65,
 						),
 						'state'     => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
+							'class'    => array( 'form-row-last' ),
 							'priority' => 66,
 						),
 						'city'      => array(
@@ -1244,6 +1254,7 @@ class WC_Countries {
 					'VN' => array(
 						'state'     => array(
 							'required' => false,
+							'hidden' => true,
 						),
 						'postcode'  => array(
 							'priority' => 65,

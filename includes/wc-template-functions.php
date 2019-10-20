@@ -25,7 +25,7 @@ function wc_template_redirect() {
 	// When on the checkout with an empty cart, redirect to cart page.
 	if ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 		wc_add_notice( __( 'Checkout is not available whilst your cart is empty.', 'woocommerce' ), 'notice' );
-		wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
+		wp_safe_redirect( wc_get_cart_url() );
 		exit;
 
 	}
@@ -699,7 +699,7 @@ function wc_product_class( $class = '', $product_id = null ) {
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
-		$values = $_GET; // WPCS: input var ok, CSRF ok.
+		$values = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	} elseif ( is_string( $values ) ) {
 		$url_parts = wp_parse_url( $values );
 		$values    = array();
@@ -707,9 +707,8 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		if ( ! empty( $url_parts['query'] ) ) {
 			// This is to preserve full-stops, pluses and spaces in the query string when ran through parse_str.
 			$replace_chars = array(
-				'.'   => '{dot}',
-				'+'   => '{plus}',
-				'%20' => '{space}',
+				'.' => '{dot}',
+				'+' => '{plus}',
 			);
 
 			$query_string = str_replace( array_keys( $replace_chars ), array_values( $replace_chars ), $url_parts['query'] );
@@ -745,7 +744,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		return $html;
 	}
 
-	echo $html; // WPCS: XSS ok.
+	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -1447,7 +1446,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 /**
  * Get HTML for a gallery image.
  *
- * Woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept name based image sizes, or an array of width/height values.
+ * Hooks: woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept name based image sizes, or an array of width/height values.
  *
  * @since 3.3.2
  * @param int  $attachment_id Attachment ID.
@@ -3480,7 +3479,7 @@ function wc_get_price_html_from_text() {
  * @return string
  */
 function wc_logout_url( $redirect = '' ) {
-	$redirect = $redirect ? $redirect : wc_get_page_permalink( 'myaccount' );
+	$redirect = $redirect ? $redirect : apply_filters( 'woocommerce_logout_default_redirect_url', wc_get_page_permalink( 'myaccount' ) );
 
 	if ( get_option( 'woocommerce_logout_endpoint' ) ) {
 		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
@@ -3602,7 +3601,7 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
  * @return string url to page
  */
 function wc_get_cart_remove_url( $cart_item_key ) {
-	$cart_page_url = wc_get_page_permalink( 'cart' );
+	$cart_page_url = wc_get_cart_url();
 	return apply_filters( 'woocommerce_get_remove_url', $cart_page_url ? wp_nonce_url( add_query_arg( 'remove_item', $cart_item_key, $cart_page_url ), 'woocommerce-cart' ) : '' );
 }
 
@@ -3614,7 +3613,7 @@ function wc_get_cart_remove_url( $cart_item_key ) {
  * @return string url to page
  */
 function wc_get_cart_undo_url( $cart_item_key ) {
-	$cart_page_url = wc_get_page_permalink( 'cart' );
+	$cart_page_url = wc_get_cart_url();
 
 	$query_args = array(
 		'undo_item' => $cart_item_key,
