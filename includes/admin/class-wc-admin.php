@@ -80,11 +80,6 @@ class WC_Admin {
 			}
 		}
 
-		// Importers.
-		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
-		}
-
 		// Helper.
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
 

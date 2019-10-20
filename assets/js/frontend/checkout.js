@@ -356,7 +356,7 @@ jQuery( function( $ ) {
 							}
 						}
 					});
-
+					
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
@@ -374,10 +374,11 @@ jQuery( function( $ ) {
 					if ( ! $.isEmptyObject( paymentDetails ) ) {
 						$( '.payment_box :input' ).each( function() {
 							var ID = $( this ).attr( 'id' );
-
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
 									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
+								} else if ( $.inArray( $( this ).attr( 'type' ), [ 'select' ] ) !== -1 ) {
+									$( this ).val( paymentDetails[ ID ] ).change();
 								} else if ( null !== $( this ).val() && 0 === $( this ).val().length ) {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
@@ -583,6 +584,7 @@ jQuery( function( $ ) {
 						$form.before( code );
 						$form.slideUp();
 
+						$( document.body ).trigger( 'applied_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 					}
 				},

@@ -578,6 +578,29 @@
 	margin: 10px;
 }
 
+#variable_product_options {
+	.form-row select {
+		max-width: 100%;
+	}
+
+	.toolbar-top {
+
+		.button {
+			margin: 1px;
+		}
+	}
+}
+
+#product_attributes {
+
+	.toolbar-top {
+
+		.button {
+			margin: 1px;
+		}
+	}
+}
+
 .clear {
 	clear: both;
 }
@@ -1074,6 +1097,10 @@ ul.wc_coupon_list_block {
 
 	.order_data_column_container {
 		clear: both;
+
+		p._billing_email_field {
+			margin-top: 13px;
+		}
 	}
 
 	.order_data_column {
@@ -1116,6 +1143,7 @@ ul.wc_coupon_list_block {
 
 			select {
 				width: 100%;
+				max-width: 100%;
 			}
 
 			.select2-container {
@@ -1177,6 +1205,17 @@ ul.wc_coupon_list_block {
 			display: none;
 			zoom: 1;
 			padding-right: 1px;
+
+			.select2-container {
+
+				.select2-selection--single {
+					height: 32px;
+
+					.select2-selection__rendered {
+						line-height: 32px;
+					}
+				}
+			}
 		}
 
 		.wc-customer-user,
@@ -1984,6 +2023,10 @@ ul.wc_coupon_list_block {
 			border-bottom: 0;
 		}
 	}
+
+	button {
+		margin: 1px;
+	}
 }
 
 #poststuff #woocommerce-order-notes .inside {
@@ -1992,6 +2035,11 @@ ul.wc_coupon_list_block {
 
 	ul.order_notes li {
 		padding: 0 10px;
+	}
+
+	button {
+		margin: 1px;
+		vertical-align: top;
 	}
 }
 
@@ -2114,6 +2162,21 @@ ul.wc_coupon_list_block {
 
 	.tablenav .one-page .displaying-num {
 		display: none;
+	}
+
+	.tablenav {
+
+		.select2-selection--single {
+			height: 32px;
+
+			.select2-selection__rendered {
+				line-height: 29px;
+			}
+
+			.select2-selection__arrow {
+				height: 30px;
+			}
+		}
 	}
 
 	.wp-list-table {
@@ -2757,6 +2820,10 @@ table.wp-list-table {
 		color: #999;
 	}
 
+	.row-actions span.id {
+		padding-top: 8px;
+	}
+
 	td.column-thumb img {
 		margin: 0;
 		width: auto;
@@ -3272,7 +3339,7 @@ table.wc_shipping {
 }
 
 .wc-shipping-zone-settings tbody {
-	display: inherit;
+	display: table-row-group;
 }
 
 table {
@@ -3864,7 +3931,6 @@ img.help_tip {
 			width: 400px;
 			margin: 0;
 			box-sizing: border-box;
-			height: 32px;
 			line-height: 32px;
 			vertical-align: top;
 		}
@@ -5195,8 +5261,7 @@ img.help_tip {
 	}
 
 	select {
-		height: 30px;
-		line-height: 30px;
+		height: 40px;
 	}
 
 	&.dimensions_field {
@@ -6476,16 +6541,16 @@ table.bar_chart {
 	}
 
 	.select2-selection--single {
-		height: 32px;
+		height: 40px;
 
 		.select2-selection__rendered {
-			line-height: 32px;
+			line-height: 40px;
 			padding-right: 24px;
 		}
 
 		.select2-selection__arrow {
 			right: 3px;
-			height: 30px;
+			height: 36px;
 		}
 	}
 
@@ -6533,7 +6598,6 @@ table.bar_chart {
 
 	select,
 	input {
-		line-height: 1;
 		height: 32px;
 	}
 

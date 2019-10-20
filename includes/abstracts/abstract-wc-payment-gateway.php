@@ -216,18 +216,14 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		if ( $order ) {
 			$return_url = $order->get_checkout_order_received_url();
 		} else {
-			$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_page_permalink( 'checkout' ) );
-		}
-
-		if ( is_ssl() || get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' ) {
-			$return_url = str_replace( 'http:', 'https:', $return_url );
+			$return_url = wc_get_endpoint_url( 'order-received', '', wc_get_checkout_url() );
 		}
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
 
 	/**
-	 * Get a link to the transaction on the 3rd party gateway size (if applicable).
+	 * Get a link to the transaction on the 3rd party gateway site (if applicable).
 	 *
 	 * @param  WC_Order $order the order object.
 	 * @return string transaction URL, or empty string.
@@ -524,7 +520,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_attr( $this->id ),
 			esc_html__( 'Save to account', 'woocommerce' )
 		);
-		
+
 		echo apply_filters( 'woocommerce_payment_gateway_save_new_payment_method_option_html', $html, $this );
 	}
 

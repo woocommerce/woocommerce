@@ -1,5 +1,10 @@
 language: php
-dist: trusty
+dist: xenial
+
+# Since Xenial services are not started by default, we need to instruct it below to start.
+services:
+  - xvfb
+  - mysql
 
 sudo: false
 
@@ -31,7 +36,7 @@ matrix:
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     addons:
-      chrome: stable
+      chrome: beta
       apt:
         packages:
           - nginx
@@ -40,6 +45,8 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   - name: "WooCommerce unit tests using WordPress nightly"
     php: 7.3
+    env: WP_VERSION=nightly WP_MULTISITE=0
+  - php: 7.4snapshot
     env: WP_VERSION=nightly WP_MULTISITE=0
   allow_failures:
   - php: 7.3
@@ -61,6 +68,7 @@ before_script:
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
       composer global require "phpunit/phpunit=5.7.*|7.5.*"
     fi
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 
 script:
   - bash tests/bin/phpunit.sh

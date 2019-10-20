@@ -67,6 +67,10 @@ class WC_Shortcode_Cart {
 	 * @param array $atts Shortcode attributes.
 	 */
 	public static function output( $atts ) {
+		if ( ! apply_filters( 'woocommerce_output_cart_shortcode_content', true ) ) {
+			return;
+		}
+
 		// Constants.
 		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 

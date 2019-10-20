@@ -36,6 +36,9 @@
 				<directory suffix=".php">./includes/updates</directory>
 				<directory suffix=".php">./includes/vendor</directory>
 				<directory suffix=".php">./includes/widgets</directory>
+				<directory suffix=".php">./packages</directory>
+				<directory suffix=".php">./src</directory>
+				<directory suffix=".php">./vendor</directory>
 				<file>./includes/wc-deprecated-functions.php</file>
 				<file>./includes/wc-template-hooks.php</file>
 				<file>./includes/wc-widget-functions.php</file>

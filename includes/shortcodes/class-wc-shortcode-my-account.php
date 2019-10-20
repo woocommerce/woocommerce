@@ -133,7 +133,7 @@ class WC_Shortcode_My_Account {
 	public static function view_order( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! current_user_can( 'view_order', $order_id ) ) {
+		if ( ! $order || ! current_user_can( 'view_order', $order_id ) ) {
 			echo '<div class="woocommerce-error">' . esc_html__( 'Invalid order.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '" class="wc-forward">' . esc_html__( 'My account', 'woocommerce' ) . '</a></div>';
 
 			return;
@@ -147,8 +147,8 @@ class WC_Shortcode_My_Account {
 			'myaccount/view-order.php',
 			array(
 				'status'   => $status, // @deprecated 2.2.
-				'order'    => wc_get_order( $order_id ),
-				'order_id' => $order_id,
+				'order'    => $order,
+				'order_id' => $order->get_id(),
 			)
 		);
 	}
@@ -376,7 +376,9 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		self::set_reset_password_cookie();
 
-		wp_password_change_notification( $user );
+		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
+			wp_password_change_notification( $user );
+		}
 	}
 
 	/**

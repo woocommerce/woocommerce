@@ -116,7 +116,8 @@ class WC_Meta_Box_Coupon_Data {
 						'value'             => esc_attr( $expiry_date ),
 						'label'             => __( 'Coupon expiry date', 'woocommerce' ),
 						'placeholder'       => 'YYYY-MM-DD',
-						'description'       => '',
+						'description'       => __( 'The coupon will expire at 00:00:00 of this date.', 'woocommerce' ),
+						'desc_tip'          => true,
 						'class'             => 'date-picker',
 						'custom_attributes' => array(
 							'pattern' => apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ),
