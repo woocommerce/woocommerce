@@ -2002,6 +2002,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$availability = __( 'Out of stock', 'woocommerce' );
 		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
 			$availability = $this->backorders_require_notification() ? __( 'Available on backorder', 'woocommerce' ) : '';
+		} elseif ( ! $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+			$availability = __( 'Available on backorder', 'woocommerce' );
 		} elseif ( $this->managing_stock() ) {
 			$availability = wc_format_stock_for_display( $this );
 		} else {
@@ -2018,7 +2020,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected function get_availability_class() {
 		if ( ! $this->is_in_stock() ) {
 			$class = 'out-of-stock';
-		} elseif ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) {
+		} elseif ( ( $this->managing_stock() && $this->is_on_backorder( 1 ) ) || ( ! $this->managing_stock() && $this->is_on_backorder( 1 ) ) ) {
 			$class = 'available-on-backorder';
 		} else {
 			$class = 'in-stock';

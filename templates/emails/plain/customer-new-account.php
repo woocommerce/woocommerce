@@ -34,7 +34,7 @@ if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $pa
 echo "\n\n----------------------------------------\n\n";
 
 /**
- * Show user-defined additonal content - this is set in each email's settings.
+ * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
 	echo esc_html( wp_strip_all_tags( wptexturize( $additional_content ) ) );

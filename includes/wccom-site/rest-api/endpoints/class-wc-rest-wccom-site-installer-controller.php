@@ -84,6 +84,11 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_install_state( $request ) {
+		$requirements_met = WC_WCCOM_Site_Installer_Requirements_Check::met_requirements();
+		if ( is_wp_error( $requirements_met ) ) {
+			return $requirements_met;
+		}
+
 		return rest_ensure_response( WC_WCCOM_Site_Installer::get_state() );
 	}
 
@@ -95,6 +100,11 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function install( $request ) {
+		$requirements_met = WC_WCCOM_Site_Installer_Requirements_Check::met_requirements();
+		if ( is_wp_error( $requirements_met ) ) {
+			return $requirements_met;
+		}
+
 		if ( empty( $request['products'] ) ) {
 			return new WP_Error( 'missing_products', __( 'Missing products in request body.', 'woocommerce' ), array( 'status' => 400 ) );
 		}

@@ -368,7 +368,7 @@ class WC_Email extends WC_Settings_API {
 	public function get_additional_content() {
 		$content = $this->get_option( 'additional_content', '' );
 
-		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $content ), $this->object );
+		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $content ), $this->object, $this );
 	}
 
 	/**
@@ -674,7 +674,7 @@ class WC_Email extends WC_Settings_API {
 			),
 			'additional_content' => array(
 				'title'       => __( 'Additional content', 'woocommerce' ),
-				'description' => __( 'Text to appear to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+				'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
 				'css'         => 'width:400px; height: 75px;',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'type'        => 'textarea',

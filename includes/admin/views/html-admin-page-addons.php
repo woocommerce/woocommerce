@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// translators: Count of updates for WooCommerce.com subscriptions.
 			$menu_title = sprintf( __( 'WooCommerce.com Subscriptions %s', 'woocommerce' ), $count_html );
 		?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php echo esc_html( $menu_title ); ?></a>
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php echo wp_kses_post( $menu_title ); ?></a>
 	</nav>
 
 	<h1 class="screen-reader-text"><?php esc_html_e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
@@ -39,9 +39,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 		</ul>
 
-		<?php if ( isset( $_GET['search'] ) ) : ?>
+		<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<h1 class="search-form-title" >
-				<?php printf( esc_html( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '</strong>' ); ?>
+				<?php printf( esc_html__( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '</strong>' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			</h1>
 		<?php endif; ?>
 
@@ -52,10 +52,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input
 				type="text"
 				name="search"
-				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); ?>"
-				placeholder="<?php esc_html_e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
+				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"
+				placeholder="<?php esc_attr_e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
 			<input type="hidden" name="page" value="wc-addons">
-			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_all'; ?>
+			<?php $page_section = ( isset( $_GET['section'] ) && '_featured' !== $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<input type="hidden" name="section" value="<?php echo esc_attr( $page_section ); ?>">
 		</form>
 		<?php if ( '_featured' === $current_section ) : ?>
@@ -111,15 +111,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php endif; ?>
 	<?php else : ?>
 		<?php /* translators: a url */ ?>
-		<p><?php printf( esc_html__( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
+		<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
 	<?php endif; ?>
 
 	<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
 		<div class="storefront">
-			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="Storefront" /></a>
+			<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
 			<h2><?php esc_html_e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
-			<p><?php esc_html_e( 'We recommend Storefront, the <em>official</em> WooCommerce theme.', 'woocommerce' ); ?></p>
-			<p><?php esc_html_e( 'Storefront is an intuitive, flexible and <strong>free</strong> WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ); ?></p>
+			<p><?php echo wp_kses_post( __( 'We recommend Storefront, the <em>official</em> WooCommerce theme.', 'woocommerce' ) ); ?></p>
+			<p><?php echo wp_kses_post( __( 'Storefront is an intuitive, flexible and <strong>free</strong> WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ) ); ?></p>
 			<p>
 				<a href="https://woocommerce.com/storefront/" target="_blank" class="button"><?php esc_html_e( 'Read all about it', 'woocommerce' ); ?></a>
 				<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Download &amp; install', 'woocommerce' ); ?></a>

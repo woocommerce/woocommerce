@@ -50,7 +50,7 @@ class ActionScheduler_AdminView extends ActionScheduler_AdminView_Deprecated {
 	 * @return array $tabs An associative array of tab key => label, including Action Scheduler's tabs
 	 */
 	public function register_system_status_tab( array $tabs ) {
-		$tabs['action-scheduler'] = __( 'Scheduled Actions', 'action-scheduler' );
+		$tabs['action-scheduler'] = __( 'Scheduled Actions', 'woocommerce' );
 
 		return $tabs;
 	}
@@ -65,8 +65,8 @@ class ActionScheduler_AdminView extends ActionScheduler_AdminView_Deprecated {
 	public function register_menu() {
 		add_submenu_page(
 			'tools.php',
-			__( 'Scheduled Actions', 'action-scheduler' ),
-			__( 'Scheduled Actions', 'action-scheduler' ),
+			__( 'Scheduled Actions', 'woocommerce' ),
+			__( 'Scheduled Actions', 'woocommerce' ),
 			'manage_options',
 			'action-scheduler',
 			array( $this, 'render_admin_ui' )

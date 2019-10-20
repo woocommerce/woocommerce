@@ -89,17 +89,17 @@ defined( 'ABSPATH' ) || exit;
 					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>:
 					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo esc_attr( $loop ); ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ), true ), true ); ?> />
 				</label>
-				<label class="tips" data-tip="<?php esc_html_e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
+				<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
 					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>:
 					<input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_downloadable( 'edit' ), true ); ?> />
 				</label>
-				<label class="tips" data-tip="<?php esc_html_e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>">
+				<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>">
 					<?php esc_html_e( 'Virtual', 'woocommerce' ); ?>:
 					<input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_virtual( 'edit' ), true ); ?> />
 				</label>
 
 				<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-					<label class="tips" data-tip="<?php esc_html_e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>">
+					<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option to enable stock management at variation level', 'woocommerce' ); ?>">
 						<?php esc_html_e( 'Manage stock?', 'woocommerce' ); ?>
 						<input type="checkbox" class="checkbox variable_manage_stock" name="variable_manage_stock[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_manage_stock(), true ); // Use view context so 'parent' is considered. ?> />
 					</label>

@@ -799,6 +799,13 @@ class WC_Helper {
 			WC_Tracker::send_tracking_data( true );
 		}
 
+		// If connecting through in-app purchase, redirects back to WooCommerce.com
+		// for product installation.
+		if ( ! empty( $_GET['wccom-install-url'] ) ) {
+			wp_redirect( wp_unslash( $_GET['wccom-install-url'] ) );
+			exit;
+		}
+
 		wp_safe_redirect(
 			add_query_arg(
 				array(
