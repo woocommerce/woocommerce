@@ -1452,15 +1452,18 @@ function wc_update_product_lookup_tables_column( $column ) {
 		case 'downloadable':
 		case 'virtual':
 			$column = esc_sql( $column );
-
+			$meta_key = '_' . $column;
 			$wpdb->query(
-				"
-				UPDATE
-					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_virtual'
-				SET
-					lookup_table.`{$column}` = IF ( meta1.meta_value = 'yes', 1, 0 )
-				"
+				$wpdb->prepare(
+					"
+					UPDATE
+						{$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = %s
+					SET
+						lookup_table.`{$column}` = IF ( meta1.meta_value = 'yes', 1, 0 )
+					",
+					$meta_key
+				)
 			);
 			break;
 		case 'onsale':

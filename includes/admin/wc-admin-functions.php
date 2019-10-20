@@ -194,6 +194,18 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
+	/**
+	 * Prevent adjust line item product stock.
+	 *
+	 * @since 3.7.1
+	 * @param bool $prevent If should prevent.
+	 * @param WC_Order_Item $item Item object.
+	 * @param int           $item_quantity Optional quantity to check against.
+	 */
+	if ( apply_filters( 'woocommerce_prevent_adjust_line_item_product_stock', false, $item, $item_quantity ) ) {
+		return false;
+	}
+
 	$product               = $item->get_product();
 	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
@@ -202,19 +214,23 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
-	$diff = $item_quantity - $already_reduced_stock;
+	$order                  = $item->get_order();
+	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
+	$diff                   = $item_quantity + $refunded_item_quantity - $already_reduced_stock;
 
 	if ( $diff < 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff * -1, 'increase' );
-	} else {
+	} elseif ( $diff > 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff, 'decrease' );
+	} else {
+		return false;
 	}
 
 	if ( is_wp_error( $new_stock ) ) {
 		return $new_stock;
 	}
 
-	$item->update_meta_data( '_reduced_stock', $item_quantity );
+	$item->update_meta_data( '_reduced_stock', $item_quantity + $refunded_item_quantity );
 	$item->save();
 
 	return array(
