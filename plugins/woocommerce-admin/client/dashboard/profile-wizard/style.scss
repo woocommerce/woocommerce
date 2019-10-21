@@ -155,11 +155,14 @@
 			margin-bottom: $gap-smaller;
 		}
 
-		.woocommerce-profile-wizard__benefit-content p {
-			padding-bottom: $gap;
-			margin-top: 0;
-			border-bottom: 1px solid $studio-gray-5;
-			font-size: 14px;
+		.woocommerce-profile-wizard__benefit-content {
+			margin-left: $gap;
+			p {
+				padding-bottom: $gap;
+				margin-top: 0;
+				border-bottom: 1px solid $studio-gray-5;
+				font-size: 14px;
+			}
 		}
 
 		.woocommerce-profile-wizard__benefit-toggle {
