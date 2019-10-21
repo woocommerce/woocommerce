@@ -62,6 +62,13 @@ wcAdminPackages.forEach( name => {
 	entryPoints[ name ] = `./packages/${ name }`;
 } );
 
+const wpAdminScripts = [
+	'onboarding-homepage-notice',
+];
+wpAdminScripts.forEach( name => {
+	entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
+} );
+
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
@@ -70,7 +77,9 @@ const webpackConfig = {
 		...entryPoints,
 	},
 	output: {
-		filename: './dist/[name]/index.js',
+		filename: ( data ) => {
+			return wpAdminScripts.includes( data.chunk.name ) ? './dist/wp-admin-scripts/[name].js' : './dist/[name]/index.js';
+		},
 		path: __dirname,
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'this',

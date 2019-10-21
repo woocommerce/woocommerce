@@ -8,6 +8,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use \Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding;
 
@@ -56,8 +57,10 @@ class OnboardingTasks {
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 30 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
+
 		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
-		add_action( 'current_screen', array( $this, 'check_active_task_completion' ), 1000 );
+		add_filter( 'post_updated_messages', array( $this, 'update_product_success_message' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ), 10, 1 );
 	}
 
 	/**
@@ -95,9 +98,8 @@ class OnboardingTasks {
 		return $settings;
 	}
 
-
 	/**
-	 * Temporarily store the active task.
+	 * Temporarily store the active task to persist across page loads when neccessary (such as publishing a product). Most tasks do not need to do this.
 	 */
 	public static function set_active_task() {
 		if ( isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) ) { // WPCS: csrf ok.
@@ -116,19 +118,21 @@ class OnboardingTasks {
 	}
 
 	/**
-	 * Check for active task completion and redirect if complete.
+	 * Check for active task completion, and clears the transient.
 	 */
 	public static function check_active_task_completion() {
 		$active_task = get_transient( self::ACTIVE_TASK_TRANSIENT );
+
 		if ( ! $active_task ) {
-			return;
+			return false;
 		}
 
 		if ( self::check_task_completion( $active_task ) ) {
 			delete_transient( self::ACTIVE_TASK_TRANSIENT );
-			wp_safe_redirect( wc_admin_url() );
-			exit;
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
@@ -142,27 +146,38 @@ class OnboardingTasks {
 			case 'products':
 				$products = wp_count_posts( 'product' );
 				return (int) $products->publish > 0 || (int) $products->draft > 0;
-
 			case 'homepage':
-				// @todo This should be run client-side in a Gutenberg hook and add a notice
-				// to return to the task list if complete.
 				$homepage_id = get_option( 'woocommerce_onboarding_homepage_post_id', false );
-
 				if ( ! $homepage_id ) {
 					return false;
 				}
-
 				$post      = get_post( $homepage_id );
 				$completed = $post && 'publish' === $post->post_status;
-				if ( $completed ) {
-					update_option( 'show_on_front', 'page' );
-					update_option( 'page_on_front', $homepage_id );
-				}
-
 				return $completed;
 		}
-
 		return false;
+	}
+
+	/**
+	 * Updates the product published message with a continue setup link, if the products task is currently active.
+	 */
+	function update_product_success_message( $messages ) {
+		if ( ! $this->check_active_task_completion() ) {
+			return $messages;
+		}
+		/* translators: 1: onboarding task list url */
+		$messages['product'][6] = sprintf( __( 'You created your first product! <a href="%s">Continue Setup</a>.', 'woocommerce-admin' ), esc_url( wc_admin_url() ) );
+		return $messages;
+	}
+
+	/**
+	 * Hooks into the post page to display a different success notice and sets the active page as the site's home page if visted from onboarding.
+	 */
+	function add_onboarding_homepage_notice_admin_script( $hook ) {
+		global $post;
+		if ( $hook == 'post.php' && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // WPCS: csrf ok.
+			wp_enqueue_script(  'onboarding-homepage-notice', Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice.js' ), array( 'wc-navigation' ) );
+		}
 	}
 
 	/**
