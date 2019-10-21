@@ -30,6 +30,12 @@ class TaskDashboard extends Component {
 		document.body.classList.add( 'woocommerce-task-dashboard__body' );
 
 		this.recordEvent();
+
+		if ( this.props.inline ) {
+			this.props.updateOptions( {
+				woocommerce_task_list_complete: true,
+			} );
+		}
 	}
 
 	componentWillUnmount() {

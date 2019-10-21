@@ -9,6 +9,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding;
 
 /**
  * Contains the logic for completing onboarding tasks.
@@ -42,6 +43,13 @@ class OnboardingTasks {
 	 * Constructor
 	 */
 	public function __construct() {
+		// This hook needs to run when options are updated via REST.		
+		add_action( 'add_option_woocommerce_task_list_complete', array( $this, 'add_completion_note' ), 10, 2 );
+
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
 		// Old settings injection.
 		// Run after Onboarding.
@@ -170,5 +178,17 @@ class OnboardingTasks {
 		);
 
 		return $tax_supported_countries;
+	}
+
+	/**
+	 * Add the task list completion note after completing all tasks.
+	 *
+	 * @param mixed $old_value Old value.
+	 * @param mixed $new_value New value.
+	 */
+	public static function add_completion_note( $old_value, $new_value ) {
+		if ( $new_value ) {
+			WC_Admin_Notes_Onboarding::add_task_list_complete_note();
+		}
 	}
 }

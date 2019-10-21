@@ -49,14 +49,15 @@ class Onboarding {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		if ( ! is_admin() ) {
-			return;
-		}
-
 		// Include WC Admin Onboarding classes.
 		if ( $this->should_show_tasks() ) {
 			OnboardingTasks::get_instance();
 		}
+
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		// Old settings injection.
 		// Run after Automattic\WooCommerce\Admin\Loader.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
