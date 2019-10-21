@@ -19,6 +19,7 @@ class RestApi {
 	 */
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ), 10 );
+		add_filter( 'rest_authentication_errors', array( __CLASS__, 'maybe_init_cart_session' ), 1, 2 );
 	}
 
 	/**
@@ -31,6 +32,27 @@ class RestApi {
 			$instance = new $class();
 			$instance->register_routes();
 		}
+	}
+
+	/**
+	 * If we're making a cart request, we may need to load some additonal classes from WC Core so we're ready to deal with requests.
+	 *
+	 * Note: We load the session here early so guest nonces are in place.
+	 *
+	 * @param mixed $return Value being filtered.
+	 * @param array $request Request data.
+	 * @return mixed
+	 */
+	public static function maybe_init_cart_session( $return, $request = false ) {
+		// Pass through other errors.
+		if ( ! empty( $error ) ) {
+			return $error;
+		}
+		wc()->frontend_includes();
+		wc()->initialize_session();
+		wc()->initialize_cart();
+		wc()->cart->get_cart();
+		return $return;
 	}
 
 	/**
@@ -47,6 +69,8 @@ class RestApi {
 			'products'                => __NAMESPACE__ . '\RestApi\Controllers\Products',
 			'variations'              => __NAMESPACE__ . '\RestApi\Controllers\Variations',
 			'product-reviews'         => __NAMESPACE__ . '\RestApi\Controllers\ProductReviews',
+			'store-cart'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Cart',
+			'store-cart-items'        => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
 		];
 	}
 }
