@@ -13,6 +13,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use \WC_REST_Products_Controller;
+use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
 
 /**
  * REST API Products controller class.
@@ -211,51 +212,10 @@ class Products extends WC_REST_Products_Controller {
 			'description'    => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
 			'price'          => $product->get_price(),
 			'price_html'     => $product->get_price_html(),
-			'images'         => $this->get_images( $product ),
+			'images'         => ( new ProductImages() )->images_to_array( $product ),
 			'average_rating' => $product->get_average_rating(),
 			'review_count'   => $product->get_review_count(),
 		);
-	}
-
-	/**
-	 * Get the images for a product or product variation.
-	 *
-	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
-	 * @return array
-	 */
-	protected function get_images( $product ) {
-		$images         = array();
-		$attachment_ids = array();
-
-		// Add featured image.
-		if ( $product->get_image_id() ) {
-			$attachment_ids[] = $product->get_image_id();
-		}
-
-		// Add gallery images.
-		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
-
-		// Build image data.
-		foreach ( $attachment_ids as $attachment_id ) {
-			$attachment_post = get_post( $attachment_id );
-			if ( is_null( $attachment_post ) ) {
-				continue;
-			}
-
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
-			if ( ! is_array( $attachment ) ) {
-				continue;
-			}
-
-			$images[] = array(
-				'id'   => (int) $attachment_id,
-				'src'  => current( $attachment ),
-				'name' => get_the_title( $attachment_id ),
-				'alt'  => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-			);
-		}
-
-		return $images;
 	}
 
 	/**
