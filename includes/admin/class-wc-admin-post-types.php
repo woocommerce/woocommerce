@@ -643,6 +643,12 @@ class WC_Admin_Post_Types {
 					break;
 			}
 		}
+		else
+		{
+			//Reset values if Manage Stock status is disabled
+			$product->set_stock_quantity('');
+			$product->set_manage_stock('no');
+		}
 
 		// Apply product type constraints to stock status.
 		if ( $product->is_type( 'external' ) ) {
