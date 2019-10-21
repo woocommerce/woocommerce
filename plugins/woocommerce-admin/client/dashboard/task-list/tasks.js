@@ -5,6 +5,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import { get } from 'lodash';
 
 /**
@@ -45,7 +46,7 @@ export function getTasks( { profileItems, options, query } ) {
 		false
 	);
 
-	return [
+	const tasks = [
 		{
 			key: 'connect',
 			title: __( 'Connect your store to WooCommerce.com', 'woocommerce-admin' ),
@@ -115,4 +116,6 @@ export function getTasks( { profileItems, options, query } ) {
 			visible: true,
 		},
 	];
+
+	return applyFilters( 'woocommerce_onboarding_task_list', tasks, query );
 }

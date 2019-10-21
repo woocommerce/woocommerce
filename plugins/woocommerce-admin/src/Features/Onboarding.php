@@ -50,7 +50,7 @@ class Onboarding {
 	 */
 	public function __construct() {
 		// Include WC Admin Onboarding classes.
-		if ( $this->should_show_tasks() ) {
+		if ( self::should_show_tasks() ) {
 			OnboardingTasks::get_instance();
 		}
 
@@ -82,7 +82,7 @@ class Onboarding {
 	 *
 	 * @return bool
 	 */
-	public function should_show_profiler() {
+	public static function should_show_profiler() {
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
 
 		$is_completed = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
@@ -97,7 +97,7 @@ class Onboarding {
 	 *
 	 * @return bool
 	 */
-	public function should_show_tasks() {
+	public static function should_show_tasks() {
 		return 'no' === get_option( 'woocommerce_task_list_hidden', 'no' );
 	}
 
@@ -330,14 +330,14 @@ class Onboarding {
 		);
 
 		// Only fetch if the onboarding wizard is incomplete.
-		if ( $this->should_show_profiler() ) {
+		if ( self::should_show_profiler() ) {
 			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
 			$settings['onboarding']['themes']       = self::get_themes();
 			$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
 		}
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
-		if ( $this->should_show_profiler() || $this->should_show_tasks() ) {
+		if ( self::should_show_profiler() || self::should_show_tasks() ) {
 			$settings['onboarding']['activePlugins'] = self::get_active_plugins();
 		}
 
@@ -353,7 +353,7 @@ class Onboarding {
 	public function preload_options( $options ) {
 		$options[] = 'woocommerce_task_list_hidden';
 
-		if ( ! $this->should_show_tasks() && ! $this->should_show_profiler() ) {
+		if ( ! self::should_show_tasks() && ! self::should_show_profiler() ) {
 			return $options;
 		}
 
@@ -423,7 +423,7 @@ class Onboarding {
 	 * @return bool
 	 */
 	public function is_loading( $is_loading ) {
-		$show_profiler = $this->should_show_profiler();
+		$show_profiler = self::should_show_profiler();
 		$is_dashboard  = ! isset( $_GET['path'] ); // WPCS: csrf ok.
 
 		if ( ! $show_profiler || ! $is_dashboard ) {

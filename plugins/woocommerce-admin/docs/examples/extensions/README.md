@@ -23,5 +23,6 @@ You can make changes to Javascript and PHP files in the example and see changes 
 ## Example Extensions
 
 - `add-report` - Create a "Hello World" report page.
+- `add-task` - Create a custom task for the onboarding task list.
 - `dashboard-section` - Adding a custom "section" to the new dashboard area.
 - `table-column` - An example of how to add column(s) to any report.
