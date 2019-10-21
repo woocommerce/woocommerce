@@ -120,11 +120,14 @@ class BusinessDetails extends Component {
 
 	getNumberRangeString( min, max = false, format = numberFormat ) {
 		if ( ! max ) {
-			return sprintf( _x( '%s+', 'store product count', 'woocommerce-admin' ), format( min ) );
+			return sprintf(
+				_x( '%s+', 'store product count or revenue', 'woocommerce-admin' ),
+				format( min )
+			);
 		}
 
 		return sprintf(
-			_x( '%s - %s', 'store product count', 'woocommerce-admin' ),
+			_x( '%1$s - %2$s', 'store product count or revenue range', 'woocommerce-admin' ),
 			format( min ),
 			format( max )
 		);
