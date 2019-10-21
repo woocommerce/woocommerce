@@ -13,7 +13,8 @@ cache:
 
 before_install:
   - timedatectl
-  - nvm install --latest-npm
+  - nvm install
+  - npm rebuild
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
