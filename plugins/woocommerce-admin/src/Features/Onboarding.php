@@ -357,10 +357,12 @@ class Onboarding {
 			return $options;
 		}
 
+		$options[] = 'wc_connect_options';
 		$options[] = 'woocommerce_task_list_prompt_shown';
 		$options[] = 'woocommerce_onboarding_payments';
 		$options[] = 'woocommerce_allow_tracking';
 		$options[] = 'woocommerce_stripe_settings';
+
 		return $options;
 	}
 

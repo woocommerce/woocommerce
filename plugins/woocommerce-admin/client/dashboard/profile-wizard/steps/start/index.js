@@ -41,10 +41,11 @@ class Start extends Component {
 	}
 
 	componentDidMount() {
-		const { updateProfileItems, profileItems } = this.props;
+		const { updateProfileItems, profileItems, tosAccepted } = this.props;
 		if (
 			this.props.activePlugins.includes( 'jetpack' ) &&
-			this.props.activePlugins.includes( 'woocommerce-services' )
+			this.props.activePlugins.includes( 'woocommerce-services' ) &&
+			tosAccepted
 		) {
 			// Don't track event again if they revisit the start page.
 			if ( 'already-installed' !== profileItems.plugins ) {
@@ -161,8 +162,7 @@ class Start extends Component {
 					'Save time at the Post Office by printing USPS shipping labels at home.',
 					'woocommerce-admin'
 				),
-				visible:
-					activePlugins.includes( 'jetpack' ) && ! activePlugins.includes( 'woocommerce-services' ),
+				visible: activePlugins.includes( 'jetpack' ),
 			},
 			{
 				title: __( 'Simple payment setup', 'woocommerce-admin' ),
@@ -171,8 +171,7 @@ class Start extends Component {
 					'WooCommerce Services enables us to provision Stripe and Paypal accounts quickly and easily for you.',
 					'woocommerce-admin'
 				),
-				visible:
-					activePlugins.includes( 'jetpack' ) && ! activePlugins.includes( 'woocommerce-services' ),
+				visible: activePlugins.includes( 'jetpack' ),
 			},
 		];
 	}
@@ -279,8 +278,8 @@ export default compose(
 
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 
-		const options = getOptions( [ 'woocommerce_allow_tracking' ] );
-		const allowTracking = 'yes' === get( options, [ 'woocommerce_allow_tracking' ], false );
+		const options = getOptions( [ 'woocommerce_setup_jetpack_opted_in', 'wc_connect_options' ] );
+		const tosAccepted = get( options, [ 'wc_connect_options' ], {} ).tos_accepted;
 
 		const activePlugins = getActivePlugins();
 		const profileItems = getProfileItems();
@@ -288,7 +287,7 @@ export default compose(
 		return {
 			isProfileItemsError,
 			activePlugins,
-			allowTracking,
+			tosAccepted,
 			profileItems,
 		};
 	} ),
