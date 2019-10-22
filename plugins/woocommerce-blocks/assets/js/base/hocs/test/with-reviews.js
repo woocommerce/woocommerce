@@ -50,6 +50,7 @@ const TestComponent = withReviews( ( props ) => {
 const render = () => {
 	return TestRenderer.create(
 		<TestComponent
+			attributes={ {} }
 			order="desc"
 			orderby="date_gmt"
 			productId={ 1 }

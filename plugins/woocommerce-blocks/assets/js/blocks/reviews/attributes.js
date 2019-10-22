@@ -94,4 +94,9 @@ export default {
 		type: 'boolean',
 		default: true,
 	},
+
+	previewReviews: {
+		type: 'array',
+		default: null,
+	},
 };

@@ -12,6 +12,7 @@ import Editor from './edit';
 import { IconReviewsByCategory } from '@woocommerce/block-components/icons';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
+import { example } from '../example';
 
 /**
  * Register and run the "Reviews by category" block.
@@ -28,6 +29,14 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 		'Show product reviews from specific categories.',
 		'woo-gutenberg-products-block'
 	),
+	example: {
+		...example,
+		attributes: {
+			...example.attributes,
+			categoryIds: [ 1 ],
+			showProductName: true,
+		},
+	},
 	attributes: {
 		...sharedAttributes,
 		/**

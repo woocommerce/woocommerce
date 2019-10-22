@@ -12,6 +12,7 @@ import Editor from './edit';
 import { IconAllReviews } from '@woocommerce/block-components/icons';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
+import { example } from '../example';
 
 /**
  * Register and run the "All Reviews" block.
@@ -28,6 +29,13 @@ registerBlockType( 'woocommerce/all-reviews', {
 		'Shows a list of all product reviews.',
 		'woo-gutenberg-products-block'
 	),
+	example: {
+		...example,
+		attributes: {
+			...example.attributes,
+			showProductName: true,
+		},
+	},
 	attributes: {
 		...sharedAttributes,
 		/**
