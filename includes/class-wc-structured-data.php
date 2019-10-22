@@ -307,10 +307,6 @@ class WC_Structured_Data {
 							'@type' => 'Person',
 							'name'  => get_comment_author( $comment->comment_ID ),
 						),
-						'itemReviewed'  => array(
-							'@type' => 'Product',
-							'name'  => $product->get_name(),
-						),
 						'reviewRating'  => array(
 							'@type'       => 'Rating',
 							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
