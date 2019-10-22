@@ -366,15 +366,18 @@ class WC_Order extends WC_Abstract_Order {
 					/* translators: 1: old order status 2: new order status */
 					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
 
+					// Note the transition occurred.
+					$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+
 					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
 				} else {
 					/* translators: %s: new order status */
 					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
-				}
 
-				// Note the transition occurred.
-				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+					// Note the transition occurred.
+					$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+				}
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
 				$logger->error(
