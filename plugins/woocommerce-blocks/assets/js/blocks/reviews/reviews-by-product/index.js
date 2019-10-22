@@ -12,6 +12,7 @@ import Editor from './edit';
 import { IconReviewsByProduct } from '@woocommerce/block-components/icons';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
+import { example } from '../example';
 
 /**
  * Register and run the "Reviews by Product" block.
@@ -28,6 +29,13 @@ registerBlockType( 'woocommerce/reviews-by-product', {
 		'Show reviews of your product to build trust.',
 		'woo-gutenberg-products-block'
 	),
+	example: {
+		...example,
+		attributes: {
+			...example.attributes,
+			productId: 1,
+		},
+	},
 	attributes: {
 		...sharedAttributes,
 		/**
