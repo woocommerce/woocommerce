@@ -643,7 +643,7 @@ class WC_Admin_Post_Types {
 					break;
 			}
 		} else {
-			// Reset values if Manage Stock status is disabled.
+			// Reset values if WooCommerce Setting - Manage Stock status is disabled.
 			$product->set_stock_quantity( '' );
 			$product->set_manage_stock( 'no' );
 		}
