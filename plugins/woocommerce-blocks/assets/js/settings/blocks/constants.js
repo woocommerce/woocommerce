@@ -15,4 +15,4 @@ export const THUMBNAIL_SIZE = getSetting( 'thumbnail_size', 300 );
 export const IS_LARGE_CATALOG = getSetting( 'isLargeCatalog' );
 export const LIMIT_TAGS = getSetting( 'limitTags' );
 export const HAS_TAGS = getSetting( 'hasTags', true );
-export const HOME_URL = getSetting( 'homeUrl ', '' );
+export const HOME_URL = getSetting( 'homeUrl', '' );
