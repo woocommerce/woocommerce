@@ -56,13 +56,45 @@
 
 	.components-button.is-button.is-primary {
 		color: $studio-white;
+		box-shadow: none;
 
 		&:not(:disabled) {
 			&:hover,
 			&:active,
 			&:focus {
+				box-shadow: none;
 				color: $studio-white;
 			}
+		}
+	}
+
+	.components-button.is-button.is-default {
+		color: $gray-text;
+		border-color: $button-border;
+		background: $button;
+		box-shadow: none;
+
+		&:not(:disabled) {
+			&:hover,
+			&:active,
+			&:focus {
+				color: $gray-text;
+				background: $button-hover;
+				border-color: $button-hover-border;
+			}
+		}
+	}
+
+	.components-button.is-default:disabled {
+		color: $button-disabled;
+		border-color: $button-disabled-border;
+		background: $button;
+		&:hover,
+		&:active,
+		&:focus {
+			color: $button-disabled;
+			border-color: $button-disabled-border;
+			background: $button;
 		}
 	}
 

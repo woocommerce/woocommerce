@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import { TabPanel, Button } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
@@ -21,6 +21,7 @@ class DatePickerContent extends Component {
 	constructor() {
 		super();
 		this.onTabSelect = this.onTabSelect.bind( this );
+		this.controlsRef = createRef();
 	}
 	onTabSelect( tab ) {
 		const { onUpdate, period } = this.props;
@@ -101,12 +102,14 @@ class DatePickerContent extends Component {
 										afterError={ afterError }
 										beforeError={ beforeError }
 										shortDateFormat={ shortDateFormat }
+										losesFocusTo={ this.controlsRef.current }
 									/>
 								) }
 								<div
 									className={ classnames( 'woocommerce-filters-date__content-controls', {
 										'is-custom': selected.name === 'custom',
 									} ) }
+									ref={ this.controlsRef }
 								>
 									<H className="woocommerce-filters-date__text">
 										{ __( 'compare to', 'woocommerce-admin' ) }

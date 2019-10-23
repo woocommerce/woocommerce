@@ -55,7 +55,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -93,7 +93,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-1"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-1 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -136,7 +136,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-1"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-1 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -179,7 +179,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-2"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-2 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -222,7 +222,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -260,7 +260,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -356,7 +356,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -394,7 +394,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -432,7 +432,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -470,7 +470,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -508,7 +508,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -546,7 +546,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -642,7 +642,7 @@ exports[`SearchListControl should render a search box and list of options with a
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -680,7 +680,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -718,7 +718,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -756,7 +756,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -794,7 +794,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -832,7 +832,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1010,7 +1010,7 @@ exports[`SearchListControl should render a search box and list of options, with 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1048,7 +1048,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1086,7 +1086,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1124,7 +1124,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1162,7 +1162,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1200,7 +1200,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1440,7 +1440,7 @@ exports[`SearchListControl should render a search box with a search term, and on
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1478,7 +1478,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1575,7 +1575,7 @@ exports[`SearchListControl should render a search box with a search term, and on
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1613,7 +1613,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1701,6 +1701,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         onBlur={[Function]}
         onClick={[Function]}
         onFocus={[Function]}
+        onMouseDown={[Function]}
         onMouseEnter={[Function]}
         onMouseLeave={[Function]}
         type="button"
@@ -1762,7 +1763,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1800,7 +1801,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={true}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1838,7 +1839,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1876,7 +1877,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1914,7 +1915,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1952,7 +1953,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2040,6 +2041,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         onBlur={[Function]}
         onClick={[Function]}
         onFocus={[Function]}
+        onMouseDown={[Function]}
         onMouseEnter={[Function]}
         onMouseLeave={[Function]}
         type="button"
@@ -2085,6 +2087,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         onBlur={[Function]}
         onClick={[Function]}
         onFocus={[Function]}
+        onMouseDown={[Function]}
         onMouseEnter={[Function]}
         onMouseLeave={[Function]}
         type="button"
@@ -2146,7 +2149,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2184,7 +2187,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={true}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2222,7 +2225,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2260,7 +2263,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={true}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2298,7 +2301,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2336,7 +2339,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
+        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"

@@ -98,6 +98,7 @@ exports[`SplitButton it should render a split button with a menu label 1`] = `
       onBlur={[Function]}
       onClick={[Function]}
       onFocus={[Function]}
+      onMouseDown={[Function]}
       onMouseEnter={[Function]}
       onMouseLeave={[Function]}
       type="button"

@@ -72,6 +72,7 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
     onBlur={[Function]}
     onClick={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
     type="button"

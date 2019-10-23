@@ -6,7 +6,7 @@ import 'core-js/fn/object/assign';
 import 'core-js/fn/array/from';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
+import { Component, createRef } from '@wordpress/element';
 import { DayPickerRangeController } from 'react-dates';
 import moment from 'moment';
 import { partial } from 'lodash';
@@ -25,6 +25,10 @@ import DateInput from './input';
 import phrases from './phrases';
 
 const isRTL = () => document.documentElement.dir === 'rtl';
+// Blur event sources
+const CONTAINER_DIV = 'container';
+const NEXT_MONTH_CLICK = 'onNextMonthClick';
+const PREV_MONTH_CLICK = 'onPrevMonthClick';
 
 /**
  * This is wrapper for a [react-dates](https://github.com/airbnb/react-dates) powered calendar.
@@ -36,6 +40,88 @@ class DateRange extends Component {
 		this.onDatesChange = this.onDatesChange.bind( this );
 		this.onFocusChange = this.onFocusChange.bind( this );
 		this.onInputChange = this.onInputChange.bind( this );
+		this.nodeRef = createRef();
+		this.keepFocusInside = this.keepFocusInside.bind( this );
+	}
+
+	/*
+	 * Todo: We should remove this function when possible.
+	 * It is kept because focus is lost when we click on the previous and next
+	 * month buttons or clicking on a date in the calendar.
+	 * This focus loss closes the date picker popover.
+	 * Ideally we should add an upstream commit on react-dates to fix this issue.
+	 *
+	 * See: https://github.com/WordPress/gutenberg/pull/17201.
+	 */
+	keepFocusInside( blurSource, e ) {
+		if ( ! this.nodeRef.current ) {
+			return;
+		}
+
+		const { losesFocusTo } = this.props;
+
+		// Blur triggered internal to the DayPicker component.
+		if (
+			CONTAINER_DIV === blurSource &&
+			e.target &&
+			(
+				e.target.classList.contains( 'DayPickerNavigation_button' ) ||
+				e.target.classList.contains( 'CalendarDay' )
+			) &&
+			(
+				// Allow other DayPicker elements to take focus.
+				! e.relatedTarget ||
+				(
+					! e.relatedTarget.classList.contains( 'DayPickerNavigation_button' ) &&
+					! e.relatedTarget.classList.contains( 'CalendarDay' )
+				)
+			)
+		) {
+			// Allow other DayPicker elements to take focus.
+			if (
+				e.relatedTarget &&
+				(
+					e.relatedTarget.classList.contains( 'DayPickerNavigation_button' ) ||
+					e.relatedTarget.classList.contains( 'CalendarDay' )
+				)
+			) {
+				return;
+			}
+
+			// Allow elements inside a specified ref to take focus.
+			if (
+				e.relatedTarget &&
+				losesFocusTo &&
+				losesFocusTo.contains( e.relatedTarget )
+			) {
+				return;
+			}
+
+			// DayPickerNavigation or CalendarDay mouseUp() is blurring,
+			// so switch focus to the DayPicker's focus region.
+			const focusRegion = this.nodeRef.current.querySelector( '.DayPicker_focusRegion' );
+			if ( focusRegion ) {
+				focusRegion.focus();
+			}
+
+			return;
+		}
+
+		// Blur triggered after next/prev click callback props.
+		if (
+			PREV_MONTH_CLICK === blurSource ||
+			NEXT_MONTH_CLICK === blurSource
+		) {
+			// DayPicker's updateStateAfterMonthTransition() is about to blur
+			// the activeElement, so focus a DayPickerNavigation button so the next
+			// blur event gets fixed by the above logic path.
+			const focusRegion = this.nodeRef.current.querySelector( '.DayPickerNavigation_button' );
+			if ( focusRegion ) {
+				focusRegion.focus();
+			}
+
+			return;
+		}
 	}
 
 	onDatesChange( { startDate, endDate } ) {
@@ -137,8 +223,15 @@ class DateRange extends Component {
 						onFocus={ () => this.onFocusChange( 'endDate' ) }
 					/>
 				</div>
-				<div className="woocommerce-calendar__react-dates">
+				<div
+					className="woocommerce-calendar__react-dates"
+					ref={ this.nodeRef }
+					onBlur={ partial( this.keepFocusInside, CONTAINER_DIV ) }
+					tabIndex={ -1 }
+				>
 					<DayPickerRangeController
+						onNextMonthClick={ partial( this.keepFocusInside, NEXT_MONTH_CLICK ) }
+						onPrevMonthClick={ partial( this.keepFocusInside, PREV_MONTH_CLICK ) }
 						onDatesChange={ this.onDatesChange }
 						onFocusChange={ this.onFocusChange }
 						focusedInput={ focusedInput }
@@ -203,6 +296,11 @@ DateRange.propTypes = {
 	 * The date format in moment.js-style tokens.
 	 */
 	shortDateFormat: PropTypes.string.isRequired,
+	/**
+	 * A ref that the DateRange can lose focus to.
+	 * See: https://github.com/woocommerce/woocommerce-admin/pull/2929.
+	 */
+	losesFocusTo: PropTypes.instanceOf( Element ),
 };
 
 export default withViewportMatch( {
