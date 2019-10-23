@@ -41,6 +41,8 @@ class Plugins extends Component {
 			installedPlugins,
 			isRequesting,
 			pluginSlugs,
+			onError,
+			hasErrors,
 		} = this.props;
 
 		const newErrors = difference( errors, prevProps.errors );
@@ -61,6 +63,10 @@ class Plugins extends Component {
 				__( 'Plugins were successfully installed and activated.', 'woocommerce-admin' )
 			);
 			onComplete();
+		}
+
+		if ( ! prevProps.hasErrors && hasErrors ) {
+			onError();
 		}
 	}
 
@@ -87,9 +93,14 @@ class Plugins extends Component {
 
 		if ( hasErrors ) {
 			return (
-				<Button isPrimary onClick={ () => location.reload() }>
-					{ __( 'Retry', 'woocommerce-admin' ) }
-				</Button>
+				<Fragment>
+					<Button isPrimary isBusy={ isRequesting } onClick={ this.installAndActivatePlugins }>
+						{ __( 'Retry', 'woocommerce-admin' ) }
+					</Button>
+					<Button onClick={ this.skipInstaller }>
+						{ __( 'Continue without installing', 'woocommerce-admin' ) }
+					</Button>
+				</Fragment>
 			);
 		}
 

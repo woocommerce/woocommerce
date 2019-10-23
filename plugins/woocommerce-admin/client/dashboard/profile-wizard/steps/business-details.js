@@ -23,6 +23,8 @@ import { H, Card, SelectControl, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import { formatCurrency } from '@woocommerce/currency';
+import Plugins from 'dashboard/task-list/tasks/steps/plugins';
+import { pluginNames } from 'wc-api/onboarding/constants';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
@@ -35,11 +37,17 @@ class BusinessDetails extends Component {
 			product_count: '',
 			selling_venues: '',
 			revenue: '',
-			facebook: true,
-			mailchimp: true,
+			'facebook-for-woocommerce': true,
+			'mailchimp-for-woocommerce': true,
 		};
 
-		this.extensions = [ 'facebook', 'mailchimp' ];
+		this.state = {
+			installExtensions: false,
+			isInstallingExtensions: false,
+			extensionInstallError: false,
+		};
+
+		this.extensions = [ 'facebook-for-woocommerce', 'mailchimp-for-woocommerce' ];
 
 		this.onContinue = this.onContinue.bind( this );
 		this.validate = this.validate.bind( this );
@@ -47,7 +55,7 @@ class BusinessDetails extends Component {
 
 	async onContinue( values ) {
 		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
-		const { facebook, mailchimp, other_platform, product_count, revenue, selling_venues } = values;
+		const { other_platform, product_count, revenue, selling_venues } = values;
 		const businessExtensions = this.getBusinessExtensions( values );
 
 		recordEvent( 'storeprofiler_store_business_details_continue', {
@@ -56,8 +64,8 @@ class BusinessDetails extends Component {
 			currency: currency.code,
 			revenue,
 			used_platform: other_platform,
-			install_facebook: facebook,
-			install_mailchimp: mailchimp,
+			install_facebook: values[ 'facebook-for-woocommerce' ],
+			install_mailchimp: values[ 'mailchimp-for-woocommerce' ],
 		} );
 
 		const _updates = {
@@ -79,7 +87,15 @@ class BusinessDetails extends Component {
 		await updateProfileItems( updates );
 
 		if ( ! isError ) {
-			goToNextStep();
+			if ( 0 === businessExtensions.length ) {
+				goToNextStep();
+				return;
+			}
+
+			this.setState( {
+				installExtensions: true,
+				isInstallingExtensions: true,
+			} );
 		} else {
 			createNotice(
 				'error',
@@ -134,34 +150,37 @@ class BusinessDetails extends Component {
 	}
 
 	renderBusinessExtensionHelpText( values ) {
+		const { isInstallingExtensions } = this.state;
 		const extensions = this.getBusinessExtensions( values );
-		const extensionSlugs = {
-			facebook: __( 'Facebook for WooCommerce', 'woocommerce-admin' ),
-			mailchimp: __( 'Mailchimp for WooCommerce', 'woocommerce-admin' ),
-		};
 
 		if ( 0 === extensions.length ) {
 			return null;
 		}
 
+		const extensionsList = extensions
+			.map( extension => {
+				return pluginNames[ extension ];
+			} )
+			.join( ', ' );
+
+		if ( isInstallingExtensions ) {
+			return <p>{ sprintf( __( 'Installing the following plugins: %s' ), extensionsList ) }</p>;
+		}
+
 		return (
 			<p>
-				{ sprintf(
-					__( 'The following plugins will be installed for free: %s' ),
-					extensions
-						.map( extension => {
-							return extensionSlugs[ extension ];
-						} )
-						.join( ', ' )
-				) }
+				{ sprintf( __( 'The following plugins will be installed for free: %s' ), extensionsList ) }
 			</p>
 		);
 	}
 
 	renderBusinessExtensions( values, getInputProps ) {
+		const { installExtensions } = this.state;
+		const { goToNextStep } = this.props;
+		const extensionsToInstall = this.getBusinessExtensions( values );
 		const extensionBenefits = [
 			{
-				slug: 'facebook',
+				slug: 'facebook-for-woocommerce',
 				title: __( 'Market on Facebook', 'woocommerce-admin' ),
 				icon: 'onboarding/facebook.png',
 				description: __(
@@ -170,7 +189,7 @@ class BusinessDetails extends Component {
 				),
 			},
 			{
-				slug: 'mailchimp',
+				slug: 'mailchimp-for-woocommerce',
 				title: __( 'Contact customers with Mailchimp', 'woocommerce-admin' ),
 				icon: 'onboarding/mailchimp.png',
 				description: __(
@@ -181,26 +200,51 @@ class BusinessDetails extends Component {
 		];
 
 		return (
-			<div className="woocommerce-profile-wizard__benefits">
-				{ extensionBenefits.map( benefit => (
-					<div className="woocommerce-profile-wizard__benefit" key={ benefit.title }>
-						<div className="woocommerce-profile-wizard__business-extension">
-							<img src={ wcAdminAssetUrl + benefit.icon } alt="" />
+			<Fragment>
+				<div className="woocommerce-profile-wizard__benefits">
+					{ extensionBenefits.map( benefit => (
+						<div className="woocommerce-profile-wizard__benefit" key={ benefit.title }>
+							<div className="woocommerce-profile-wizard__business-extension">
+								<img src={ wcAdminAssetUrl + benefit.icon } alt="" />
+							</div>
+							<div className="woocommerce-profile-wizard__benefit-content">
+								<H className="woocommerce-profile-wizard__benefit-title">{ benefit.title }</H>
+								<p>{ benefit.description }</p>
+							</div>
+							<div className="woocommerce-profile-wizard__benefit-toggle">
+								<FormToggle
+									checked={ values[ benefit.slug ] }
+									{ ...getInputProps( benefit.slug ) }
+								/>
+							</div>
 						</div>
-						<div className="woocommerce-profile-wizard__benefit-content">
-							<H className="woocommerce-profile-wizard__benefit-title">{ benefit.title }</H>
-							<p>{ benefit.description }</p>
-						</div>
-						<div className="woocommerce-profile-wizard__benefit-toggle">
-							<FormToggle checked={ values[ benefit.slug ] } { ...getInputProps( benefit.slug ) } />
-						</div>
-					</div>
-				) ) }
-			</div>
+					) ) }
+				</div>
+
+				{ installExtensions && (
+					<Plugins
+						onComplete={ () => {
+							goToNextStep();
+						} }
+						onSkip={ () => {
+							goToNextStep();
+						} }
+						onError={ () => {
+							this.setState( {
+								extensionInstallError: true,
+								isInstallingExtensions: false,
+							} );
+						} }
+						autoInstall
+						pluginSlugs={ extensionsToInstall }
+					/>
+				) }
+			</Fragment>
 		);
 	}
 
 	render() {
+		const { isInstallingExtensions, extensionInstallError } = this.state;
 		const productCountOptions = [
 			{
 				key: '1-10',
@@ -359,14 +403,17 @@ class BusinessDetails extends Component {
 
 									{ showExtensions && this.renderBusinessExtensions( values, getInputProps ) }
 
-									<Button
-										isPrimary
-										className="woocommerce-profile-wizard__continue"
-										onClick={ handleSubmit }
-										disabled={ ! isValidForm }
-									>
-										{ __( 'Continue', 'woocommerce-admin' ) }
-									</Button>
+									{ ! extensionInstallError && (
+										<Button
+											isPrimary
+											className="woocommerce-profile-wizard__continue"
+											onClick={ handleSubmit }
+											disabled={ ! isValidForm }
+											isBusy={ isInstallingExtensions }
+										>
+											{ __( 'Continue', 'woocommerce-admin' ) }
+										</Button>
+									) }
 								</Fragment>
 							</Card>
 
