@@ -75,7 +75,7 @@
 		"cssnano": "4.1.10",
 		"eslint": "6.5.1",
 		"eslint-config-prettier": "6.4.0",
-		"eslint-plugin-jest": "22.17.0",
+		"eslint-plugin-jest": "22.20.0",
 		"har-validator": "5.1.3",
 		"husky": "2.4.1",
 		"ignore-loader": "0.1.2",
