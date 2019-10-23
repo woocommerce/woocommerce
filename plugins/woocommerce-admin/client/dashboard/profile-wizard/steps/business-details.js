@@ -247,6 +247,10 @@ class BusinessDetails extends Component {
 		const { isInstallingExtensions, extensionInstallError } = this.state;
 		const productCountOptions = [
 			{
+				key: '0',
+				label: __( "I don't have any products yet.", 'woocommerce-admin' ),
+			},
+			{
 				key: '1-10',
 				label: this.getNumberRangeString( 1, 10 ),
 			},

@@ -266,6 +266,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 				'enum'              => array(
+					'0',
 					'1-10',
 					'11-100',
 					'101-1000',
