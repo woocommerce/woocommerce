@@ -83,7 +83,7 @@
     "@wordpress/viewport": "2.8.1",
     "browser-filesaver": "1.1.1",
     "classnames": "2.2.6",
-    "core-js": "2.6.9",
+    "core-js": "2.6.10",
     "d3-axis": "1.0.12",
     "d3-format": "1.4.1",
     "d3-scale": "2.2.2",
