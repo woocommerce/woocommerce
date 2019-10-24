@@ -11,6 +11,7 @@ import {
 	MediaUploadCheck,
 	PanelColorSettings,
 	withColors,
+	RichText,
 } from '@wordpress/editor';
 import {
 	Button,
@@ -259,7 +260,7 @@ const FeaturedProduct = ( {
 		const classes = classnames(
 			'wc-block-featured-product',
 			{
-				'is-selected': isSelected,
+				'is-selected': isSelected && attributes.productId !== 'preview',
 				'is-loading': ! product && isLoading,
 				'is-not-found': ! product && ! isLoading,
 				'has-background-dim': dimRatio !== 0,
@@ -327,25 +328,54 @@ const FeaturedProduct = ( {
 						/>
 					) }
 					<div className="wc-block-featured-product__link">
-						<InnerBlocks
-							template={ [
-								[
-									'core/button',
-									{
-										text: __(
-											'Shop now',
-											'woo-gutenberg-products-block'
-										),
-										url: product.permalink,
-										align: 'center',
-									},
-								],
-							] }
-							templateLock="all"
-						/>
+						{ renderButton() }
 					</div>
 				</div>
 			</ResizableBox>
+		);
+	};
+
+	const renderButton = () => {
+		const buttonClasses = classnames(
+			'wp-block-button__link',
+			'is-style-fill'
+		);
+		const buttonStyle = {
+			backgroundColor: 'vivid-green-cyan',
+			borderRadius: '5px',
+		};
+		const wrapperStyle = {
+			width: '100%',
+		};
+		return attributes.productId === 'preview' ? (
+			<div className="wp-block-button aligncenter" style={ wrapperStyle }>
+				<RichText.Content
+					tagName="a"
+					className={ buttonClasses }
+					href={ product.url }
+					title={ attributes.linkText }
+					style={ buttonStyle }
+					value={ attributes.linkText }
+					target={ product.url }
+				/>
+			</div>
+		) : (
+			<InnerBlocks
+				template={ [
+					[
+						'core/button',
+						{
+							text: __(
+								'Shop now',
+								'woo-gutenberg-products-block'
+							),
+							url: product.permalink,
+							align: 'center',
+						},
+					],
+				] }
+				templateLock="all"
+			/>
 		);
 	};
 

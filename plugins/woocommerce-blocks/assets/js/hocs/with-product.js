@@ -12,15 +12,14 @@ import { formatError } from '../base/utils/errors.js';
 
 const withProduct = createHigherOrderComponent( ( OriginalComponent ) => {
 	return class WrappedComponent extends Component {
-		constructor() {
-			super( ...arguments );
-			this.state = {
-				error: null,
-				loading: false,
-				product: null,
-			};
-			this.loadProduct = this.loadProduct.bind( this );
-		}
+		state = {
+			error: null,
+			loading: false,
+			product:
+				this.props.attributes.productId === 'preview'
+					? this.props.attributes.previewProduct
+					: null,
+		};
 
 		componentDidMount() {
 			this.loadProduct();
@@ -37,6 +36,10 @@ const withProduct = createHigherOrderComponent( ( OriginalComponent ) => {
 
 		loadProduct() {
 			const { productId } = this.props.attributes;
+
+			if ( productId === 'preview' ) {
+				return;
+			}
 
 			if ( ! productId ) {
 				this.setState( { product: null, loading: false, error: null } );
