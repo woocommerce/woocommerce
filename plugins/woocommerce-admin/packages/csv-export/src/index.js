@@ -5,17 +5,40 @@
 import moment from 'moment';
 import { saveAs } from 'browser-filesaver';
 
+function escapeCSVValue( value ) {
+	let stringValue = value.toString();
+
+	// Prevent CSV injection.
+	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	// See: WC_CSV_Exporter::escape_data()
+	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
+		stringValue = "'" + stringValue;
+	} else if ( stringValue.match( /[,"\s]/ ) ) {
+		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
+	}
+
+	return stringValue;
+}
+
 function getCSVHeaders( headers ) {
-	return Array.isArray( headers ) ? headers.map( header => header.label ).join( ',' ) : [];
+	return Array.isArray( headers )
+		? headers
+			.map( header => escapeCSVValue( header.label ) )
+			.join( ',' )
+		: [];
 }
 
 function getCSVRows( rows ) {
 	return Array.isArray( rows )
 		? rows
 				.map( row =>
-					row.map( rowItem =>
-						rowItem.value !== undefined && rowItem.value !== null ? rowItem.value.toString().replace( /,/g, ''
-					) : '' ).join( ',' )
+					row.map( rowItem => {
+						if ( undefined === rowItem.value || null === rowItem.value ) {
+							return '';
+						}
+
+						return escapeCSVValue( rowItem.value );
+					} ).join( ',' )
 				)
 				.join( '\n' )
 		: [];

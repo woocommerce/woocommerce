@@ -294,10 +294,20 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return array
 	 */
 	public function get_order_statuses() {
+		return array_keys( $this->get_order_status_labels() );
+	}
+
+	/**
+	 * Get order statuses (and labels) without prefixes.
+	 *
+	 * @return array
+	 */
+	public function get_order_status_labels() {
 		$order_statuses = array();
 
-		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
-			$order_statuses[] = str_replace( 'wc-', '', $status );
+		foreach ( wc_get_order_statuses() as $key => $label ) {
+			$new_key                    = str_replace( 'wc-', '', $key );
+			$order_statuses[ $new_key ] = $label;
 		}
 
 		return $order_statuses;

@@ -11,13 +11,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+
 /**
  * REST API Reports coupons controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
 
 	/**
 	 * Endpoint namespace.
@@ -288,5 +290,42 @@ class Controller extends \WC_REST_Reports_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the column names for export.
+	 *
+	 * @return array Key value pair of Column ID => Label.
+	 */
+	public function get_export_columns() {
+		return array(
+			'code'         => __( 'Coupon Code', 'woocommerce-admin' ),
+			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
+			'amount'       => __( 'Amount Discounted', 'woocommerce-admin' ),
+			'created'      => __( 'Created', 'woocommerce-admin' ),
+			'expires'      => __( 'Expires', 'woocommerce-admin' ),
+			'type'         => __( 'Type', 'woocommerce-admin' ),
+		);
+	}
+
+	/**
+	 * Get the column values for export.
+	 *
+	 * @param array $item Single report item/row.
+	 * @return array Key value pair of Column ID => Row Value.
+	 */
+	public function prepare_item_for_export( $item ) {
+		$date_expires = empty( $item['extended_info']['date_expires'] )
+			? __( 'N/A', 'woocommerce-admin' )
+			: $item['extended_info']['date_expires'];
+
+		return array(
+			'code'         => $item['extended_info']['code'],
+			'orders_count' => $item['orders_count'],
+			'amount'       => $item['amount'],
+			'created'      => $item['extended_info']['date_created'],
+			'expires'      => $date_expires,
+			'type'         => $item['extended_info']['discount_type'],
+		);
 	}
 }

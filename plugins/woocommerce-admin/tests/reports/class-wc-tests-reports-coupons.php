@@ -274,40 +274,31 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test the CSV export.
 		$expected_csv_columns = array(
-			'coupon_id',
-			'amount',
-			'orders_count',
-			'code',
-			'date_created',
-			'date_created_gmt',
-			'date_expires',
-			'date_expires_gmt',
-			'discount_type',
+			'"Coupon Code"',
+			'Orders',
+			'"Amount Discounted"',
+			'Created',
+			'Expires',
+			'Type',
 		);
 
 		// Expected CSV for Coupon 2.
 		$coupon_2_csv = array(
-			$coupon_2_response['coupon_id'],
-			$coupon_2_response['amount'],
-			$coupon_2_response['orders_count'],
 			$coupon_2_response['extended_info']['code'],
+			$coupon_2_response['orders_count'],
+			$coupon_2_response['amount'],
 			$coupon_2_response['extended_info']['date_created'],
-			$coupon_2_response['extended_info']['date_created_gmt'],
-			$coupon_2_response['extended_info']['date_expires'],
-			$coupon_2_response['extended_info']['date_expires_gmt'],
+			$coupon_2_response['extended_info']['date_expires'] ? : 'N/A',
 			$coupon_2_response['extended_info']['discount_type'],
 		);
 
 		// Expected CSV for Coupon 1.
 		$coupon_1_csv = array(
-			$coupon_1_response['coupon_id'],
-			$coupon_1_response['amount'],
-			$coupon_1_response['orders_count'],
 			$coupon_1_response['extended_info']['code'],
+			$coupon_1_response['orders_count'],
+			$coupon_1_response['amount'],
 			$coupon_1_response['extended_info']['date_created'],
-			$coupon_1_response['extended_info']['date_created_gmt'],
-			$coupon_1_response['extended_info']['date_expires'],
-			$coupon_1_response['extended_info']['date_expires_gmt'],
+			$coupon_1_response['extended_info']['date_expires'] ? : 'N/A',
 			$coupon_1_response['extended_info']['discount_type'],
 		);
 

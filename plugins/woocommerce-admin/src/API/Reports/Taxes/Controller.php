@@ -11,13 +11,20 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+
 /**
  * REST API Reports taxes controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+	/**
+	 * Exportable traits.
+	 */
+	use ExportableTraits;
 
 	/**
 	 * Endpoint namespace.
@@ -286,5 +293,38 @@ class Controller extends \WC_REST_Reports_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the column names for export.
+	 *
+	 * @return array Key value pair of Column ID => Label.
+	 */
+	public function get_export_columns() {
+		return array(
+			'tax_code'     => __( 'Tax Code', 'woocommerce-admin' ),
+			'rate'         => __( 'Rate', 'woocommerce-admin' ),
+			'total_tax'    => __( 'Total Tax', 'woocommerce-admin' ),
+			'order_tax'    => __( 'Order Tax', 'woocommerce-admin' ),
+			'shipping_tax' => __( 'Shipping Tax', 'woocommerce-admin' ),
+			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
+		);
+	}
+
+	/**
+	 * Get the column values for export.
+	 *
+	 * @param array $item Single report item/row.
+	 * @return array Key value pair of Column ID => Row Value.
+	 */
+	public function prepare_item_for_export( $item ) {
+		return array(
+			'tax_code'     => \WC_Tax::get_rate_code( $item['tax_rate_id'] ),
+			'rate'         => $item['tax_rate'],
+			'total_tax'    => self::csv_number_format( $item['total_tax'] ),
+			'order_tax'    => self::csv_number_format( $item['order_tax'] ),
+			'shipping_tax' => self::csv_number_format( $item['shipping_tax'] ),
+			'orders_count' => $item['orders_count'],
+		);
 	}
 }

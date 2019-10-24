@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+
 /**
  * Include dependencies.
  */
@@ -103,6 +105,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return bool|WC_REST_Reports_Controller Report controller instance or boolean false on error.
 	 */
 	protected function map_report_controller() {
+		// @todo - Add filter to this list.
 		$controller_map = array(
 			'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
 			'variations' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
@@ -113,6 +116,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 			'stock'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
 			'downloads'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
 			'customers'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
+			'revenue'    => 'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
 		);
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
@@ -129,11 +133,17 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
-	 * Get the report columns from the schema.
+	 * Get the report columns from the controller.
 	 *
 	 * @return array Array of report column names.
 	 */
 	protected function get_report_columns() {
+		// Default to the report's defined export columns.
+		if ( $this->controller instanceof ExportableInterface ) {
+			return $this->controller->get_export_columns();
+		}
+
+		// Fallback to generating columns from the report schema.
 		$report_columns = array();
 		$report_schema  = $this->controller->get_item_schema();
 
@@ -190,20 +200,32 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		$request->set_default_params( $defaults );
 		$request->set_query_params( $this->report_args );
 
-		$response         = $this->controller->get_items( $request );
+		// Does the controller have an export-specific item retrieval method?
+		// @todo - Potentially revisit. This is only for /revenue/stats/.
+		if ( is_callable( array( $this->controller, 'get_export_items' ) ) ) {
+			$response = $this->controller->get_export_items( $request );
+		} else {
+			$response = $this->controller->get_items( $request );
+		}
+
+		// Use WP_REST_Server::response_to_data() to embed links in data.
+		add_filter( 'woocommerce_rest_check_permissions', '__return_true' );
+		$rest_server = rest_get_server();
+		$report_data = $rest_server->response_to_data( $response, true );
+		remove_filter( 'woocommerce_rest_check_permissions', '__return_true' );
+
 		$report_meta      = $response->get_headers();
-		$report_data      = $response->get_data();
 		$this->total_rows = $report_meta['X-WP-Total'];
 		$this->row_data   = array_map( array( $this, 'generate_row_data' ), $report_data );
 	}
 
 	/**
-	 * Take a report item and generate row data from it for export.
+	 * Generate row data from a raw report item.
 	 *
 	 * @param object $item Report item data.
 	 * @return array CSV row data.
 	 */
-	protected function generate_row_data( $item ) {
+	protected function get_raw_row_data( $item ) {
 		$columns = $this->get_column_names();
 		$row     = array();
 
@@ -234,6 +256,24 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 			}
 
 			$row[ $column_id ] = $value;
+		}
+
+		return $row;
+	}
+
+	/**
+	 * Get the export row for a given report item.
+	 *
+	 * @param object $item Report item data.
+	 * @return array CSV row data.
+	 */
+	protected function generate_row_data( $item ) {
+		// Default to the report's export method.
+		if ( $this->controller instanceof ExportableInterface ) {
+			$row = $this->controller->prepare_item_for_export( $item );
+		} else {
+			// Fallback to raw report data.
+			$row = $this->get_raw_row_data( $item );
 		}
 
 		return apply_filters( "woocommerce_export_{$this->export_type}_row_data", $row, $item );

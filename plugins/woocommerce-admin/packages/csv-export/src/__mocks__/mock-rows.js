@@ -11,8 +11,8 @@ export default [
 			value: '30',
 		},
 		{
-			display: 'Lorem, ipsum',
-			value: 'lorem, ipsum',
+			display: 'Lorem, "ipsum"',
+			value: 'Lorem, "ipsum"',
 		},
 		{
 			display: '€200.00',
@@ -37,6 +37,10 @@ export default [
 		{
 			display: '€200.00',
 			value: 200,
+		},
+		{
+			display: '-123',
+			value: -123,
 		},
 	],
 ];

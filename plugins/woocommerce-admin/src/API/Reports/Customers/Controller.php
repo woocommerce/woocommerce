@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
@@ -19,7 +21,11 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+	/**
+	 * Exportable traits.
+	 */
+	use ExportableTraits;
 
 	/**
 	 * Endpoint namespace.
@@ -221,7 +227,7 @@ class Controller extends \WC_REST_Reports_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'state'                 => array(
+				'state'                => array(
 					'description' => __( 'Region.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -524,5 +530,50 @@ class Controller extends \WC_REST_Reports_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the column names for export.
+	 *
+	 * @return array Key value pair of Column ID => Label.
+	 */
+	public function get_export_columns() {
+		return array(
+			'name'            => __( 'Name', 'woocommerce-admin' ),
+			'username'        => __( 'Username', 'woocommerce-admin' ),
+			'last_active'     => __( 'Last Active', 'woocommerce-admin' ),
+			'registered'      => __( 'Sign Up', 'woocommerce-admin' ),
+			'email'           => __( 'Email', 'woocommerce-admin' ),
+			'orders_count'    => __( 'Orders', 'woocommerce-admin' ),
+			'total_spend'     => __( 'Total Spend', 'woocommerce-admin' ),
+			'avg_order_value' => __( 'AOV', 'woocommerce-admin' ),
+			'country'         => __( 'Country', 'woocommerce-admin' ),
+			'city'            => __( 'City', 'woocommerce-admin' ),
+			'region'          => __( 'Region', 'woocommerce-admin' ),
+			'postcode'        => __( 'Postal Code', 'woocommerce-admin' ),
+		);
+	}
+
+	/**
+	 * Get the column values for export.
+	 *
+	 * @param array $item Single report item/row.
+	 * @return array Key value pair of Column ID => Row Value.
+	 */
+	public function prepare_item_for_export( $item ) {
+		return array(
+			'name'            => $item['name'],
+			'username'        => $item['username'],
+			'last_active'     => $item['date_last_active'],
+			'registered'      => $item['date_registered'],
+			'email'           => $item['email'],
+			'orders_count'    => $item['orders_count'],
+			'total_spend'     => self::csv_number_format( $item['total_spend'] ),
+			'avg_order_value' => self::csv_number_format( $item['avg_order_value'] ),
+			'country'         => $item['country'],
+			'city'            => $item['city'],
+			'region'          => $item['state'],
+			'postcode'        => $item['postcode'],
+		);
 	}
 }

@@ -1,3 +1,8 @@
+# 1.2.0 (Unreleased)
+
+- Properly escape values with double quotes.
+- Prevent CSV injection.
+
 # 1.1.2
 
 - Update dependencies.

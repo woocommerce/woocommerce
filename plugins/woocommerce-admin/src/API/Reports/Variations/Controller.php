@@ -11,13 +11,20 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Variations;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+
 /**
  * REST API Reports products controller class.
  *
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class Controller extends \WC_REST_Reports_Controller {
+class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+	/**
+	 * Exportable traits.
+	 */
+	use ExportableTraits;
 
 	/**
 	 * Endpoint namespace.
@@ -326,5 +333,62 @@ class Controller extends \WC_REST_Reports_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get stock status column export value.
+	 *
+	 * @param array $status Stock status from report row.
+	 * @return string
+	 */
+	protected function _get_stock_status( $status ) {
+		$statuses = wc_get_product_stock_status_options();
+
+		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : '';
+	}
+
+	/**
+	 * Get the column names for export.
+	 *
+	 * @return array Key value pair of Column ID => Label.
+	 */
+	public function get_export_columns() {
+		$export_columns = array(
+			'product_name' => __( 'Product / Variation Title', 'woocommerce-admin' ),
+			'sku'          => __( 'SKU', 'woocommerce-admin' ),
+			'items_sold'   => __( 'Items Sold', 'woocommerce-admin' ),
+			'net_revenue'  => __( 'N. Revenue', 'woocommerce-admin' ),
+			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
+		);
+
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			$export_columns['stock_status'] = __( 'Status', 'woocommerce-admin' );
+			$export_columns['stock']        = __( 'Stock', 'woocommerce-admin' );
+		}
+
+		return $export_columns;
+	}
+
+	/**
+	 * Get the column values for export.
+	 *
+	 * @param array $item Single report item/row.
+	 * @return array Key value pair of Column ID => Row Value.
+	 */
+	public function prepare_item_for_export( $item ) {
+		$export_item = array(
+			'product_name' => $item['extended_info']['name'],
+			'sku'          => $item['extended_info']['sku'],
+			'items_sold'   => $item['items_sold'],
+			'net_revenue'  => self::csv_number_format( $item['net_revenue'] ),
+			'orders_count' => $item['orders_count'],
+		);
+
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			$export_item['stock_status'] = $this->_get_stock_status( $item['extended_info']['stock_status'] );
+			$export_item['stock']        = $item['extended_info']['stock_quantity'];
+		}
+
+		return $export_item;
 	}
 }

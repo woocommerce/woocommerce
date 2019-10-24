@@ -11,13 +11,16 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+
 /**
  * REST API Reports downloads controller class.
  *
  * @package WooCommerce/API
  * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
  */
-class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
+class Controller extends ReportsController implements ExportableInterface {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -377,5 +380,38 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the column names for export.
+	 *
+	 * @return array Key value pair of Column ID => Label.
+	 */
+	public function get_export_columns() {
+		return array(
+			'date'         => __( 'Date', 'woocommerce-admin' ),
+			'product'      => __( 'Product Title', 'woocommerce-admin' ),
+			'file_name'    => __( 'File Name', 'woocommerce-admin' ),
+			'order_number' => __( 'Order #', 'woocommerce-admin' ),
+			'user_id'      => __( 'User Name', 'woocommerce-admin' ),
+			'ip_address'   => __( 'IP', 'woocommerce-admin' ),
+		);
+	}
+
+	/**
+	 * Get the column values for export.
+	 *
+	 * @param array $item Single report item/row.
+	 * @return array Key value pair of Column ID => Row Value.
+	 */
+	public function prepare_item_for_export( $item ) {
+		return array(
+			'date'         => $item['date'],
+			'product'      => $item['_embedded']['product'][0]['name'],
+			'file_name'    => $item['file_name'],
+			'order_number' => $item['order_number'],
+			'user_id'      => $item['username'],
+			'ip_address'   => $item['ip_address'],
+		);
 	}
 }

@@ -186,7 +186,11 @@ export default class OrdersReportTable extends Component {
 							href: product.href,
 						} ) )
 					),
-					value: formattedProducts.map( product => product.label ).join( ' ' ),
+					value: formattedProducts
+						.map( ( { quantity, label } ) =>
+							sprintf( __( '%s× %s', 'woocommerce-admin' ), quantity, label )
+						)
+						.join( ', ' ),
 				},
 				{
 					display: numberFormat( num_items_sold ),
