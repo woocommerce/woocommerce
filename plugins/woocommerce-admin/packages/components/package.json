@@ -52,7 +52,7 @@
     "prop-types": "15.7.2",
     "qs": "6.9.0",
     "react-dates": "17.2.0",
-    "react-router-dom": "5.1.0",
+    "react-router-dom": "5.1.2",
     "react-transition-group": "2.9.0"
   },
   "publishConfig": {

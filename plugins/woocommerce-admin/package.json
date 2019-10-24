@@ -104,7 +104,7 @@
     "qs": "6.9.0",
     "react-click-outside": "3.0.1",
     "react-dates": "17.2.0",
-    "react-router-dom": "5.1.0",
+    "react-router-dom": "5.1.2",
     "react-transition-group": "2.9.0",
     "redux": "4.0.4"
   },
