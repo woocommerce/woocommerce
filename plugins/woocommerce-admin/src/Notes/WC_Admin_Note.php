@@ -84,6 +84,23 @@ class WC_Admin_Note extends \WC_Data {
 		}
 	}
 
+	/**
+	 * Merge changes with data and clear.
+	 *
+	 * @since 3.0.0
+	 */
+	public function apply_changes() {
+		$this->data = array_replace_recursive( $this->data, $this->changes ); // @codingStandardsIgnoreLine
+
+		// Note actions need to be replaced wholesale.
+		// Merging arrays doesn't allow for deleting note actions.
+		if ( isset( $this->changes['actions'] ) ) {
+			$this->data['actions'] = $this->changes['actions'];
+		}
+
+		$this->changes = array();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Helpers
