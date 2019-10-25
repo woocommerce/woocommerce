@@ -17,8 +17,6 @@ use \WC_Helper_Product as ProductHelper;
 class CartItems extends TestCase {
 	/**
 	 * Setup test products data. Called before every test.
-	 *
-	 * @since 1.2.0
 	 */
 	public function setUp() {
 		parent::setUp();
@@ -49,8 +47,6 @@ class CartItems extends TestCase {
 
 	/**
 	 * Test route registration.
-	 *
-	 * @since 3.6.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -86,7 +82,7 @@ class CartItems extends TestCase {
 		$this->assertEquals( '10.00', $data['price'] );
 		$this->assertEquals( '20.00', $data['line_price'] );
 
-		$request = new WP_REST_Request( 'DELETE', '/wc/store/cart/items/XXX815416f775098fe977004015c6193' );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/items/XXX815416f775098fe977004015c6193' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -109,14 +105,14 @@ class CartItems extends TestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( $this->products[0]->get_id(), $data['id'] );
 		$this->assertEquals( 10, $data['quantity'] );
 
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEquals( $this->products[0]->get_id(), $data['id'] );
 		$this->assertEquals( 20, $data['quantity'] );
 	}

@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * AbstractBlock class.
+ *
+ * @since $VID:$
  */
 abstract class AbstractSchema {
 	/**
@@ -42,4 +44,23 @@ abstract class AbstractSchema {
 	 * @return array
 	 */
 	abstract protected function get_properties();
+
+	/**
+	 * Force all schema properties to be readonly.
+	 *
+	 * @param array $properties Schema.
+	 * @return array Updated schema.
+	 */
+	protected function force_schema_readonly( $properties ) {
+		return array_map(
+			function( $property ) {
+				$property['readonly'] = true;
+				if ( isset( $property['items']['properties'] ) ) {
+					$property['items']['properties'] = $this->force_schema_readonly( $property['items']['properties'] );
+				}
+				return $property;
+			},
+			$properties
+		);
+	}
 }

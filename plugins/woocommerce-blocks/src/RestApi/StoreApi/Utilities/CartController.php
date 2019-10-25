@@ -16,6 +16,8 @@ use \WC_REST_Exception as RestException;
 
 /**
  * Woo Cart Controller class.
+ *
+ * @since $VID:$
  */
 class CartController {
 
