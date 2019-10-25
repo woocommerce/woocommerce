@@ -172,6 +172,12 @@ class Onboarding {
 
 			if ( ! is_wp_error( $theme_data ) ) {
 				$theme_data = json_decode( $theme_data['body'] );
+				usort( $theme_data->products, function ($product_1, $product_2) {
+					if ( 'Storefront' === $product_1->slug ) {
+						return -1;
+					}
+					return $product_1->id < $product_2->id ? 1 : -1;
+				} );
 
 				foreach ( $theme_data->products as $theme ) {
 					$slug                                       = sanitize_title( $theme->slug );
