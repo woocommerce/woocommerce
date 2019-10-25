@@ -121,16 +121,16 @@ function wc_maybe_increase_stock_levels( $order_id ) {
 	}
 
 	$stock_reduced  = $order->get_data_store()->get_stock_reduced( $order_id );
-	$trigger_reduce = (bool) $stock_reduced;
+	$trigger_increase = (bool) $stock_reduced;
 
-	// Only continue if we're reducing stock.
-	if ( ! $trigger_reduce ) {
+	// Only continue if we're increasing stock.
+	if ( ! $trigger_increase ) {
 		return;
 	}
 
 	wc_increase_stock_levels( $order );
 
-	// Ensure stock is marked as "reduced" in case payment complete or other stock actions are called.
+	// Ensure stock is not marked as "reduced" anymore.
 	$order->get_data_store()->set_stock_reduced( $order_id, false );
 }
 add_action( 'woocommerce_order_status_cancelled', 'wc_maybe_increase_stock_levels' );
@@ -261,7 +261,7 @@ function wc_increase_stock_levels( $order_id ) {
 			continue;
 		}
 
-		// Only reduce stock once for each item.
+		// Only increase stock once for each item.
 		$product            = $item->get_product();
 		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
 
@@ -307,12 +307,15 @@ function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 			"
 			SELECT SUM( order_item_meta.meta_value ) AS held_qty
 			FROM {$wpdb->posts} AS posts
+			LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
 			WHERE 	order_item_meta.meta_key    = '_qty'
 			AND 	order_item_meta2.meta_key   = %s
 			AND 	order_item_meta2.meta_value = %d
+			AND		postmeta.meta_key			= '_created_via'
+			AND		postmeta.meta_value			= 'checkout'
 			AND 	posts.post_type             IN ( '" . implode( "','", wc_get_order_types() ) . "' )
 			AND 	posts.post_status           = 'wc-pending'
 			AND		posts.ID                    != %d;",

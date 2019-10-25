@@ -59,12 +59,12 @@ class WC_Admin_Duplicate_Product {
 				get_delete_post_link( $the_product->get_id(), '', false ),
 				/* translators: %s: post title */
 				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'woocommerce' ), $the_product->get_name() ) ),
-				__( 'Trash', 'woocommerce' )
+				esc_html__( 'Trash', 'woocommerce' )
 			);
 		}
 
 		$actions['duplicate'] = '<a href="' . wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&amp;post=' . $post->ID ), 'woocommerce-duplicate-product_' . $post->ID ) . '" aria-label="' . esc_attr__( 'Make a duplicate from this product', 'woocommerce' )
-			. '" rel="permalink">' . __( 'Duplicate', 'woocommerce' ) . '</a>';
+			. '" rel="permalink">' . esc_html__( 'Duplicate', 'woocommerce' ) . '</a>';
 
 		return $actions;
 	}
@@ -90,7 +90,7 @@ class WC_Admin_Duplicate_Product {
 		if ( isset( $_GET['post'] ) ) {
 			$notify_url = wp_nonce_url( admin_url( 'edit.php?post_type=product&action=duplicate_product&post=' . absint( $_GET['post'] ) ), 'woocommerce-duplicate-product_' . $_GET['post'] );
 			?>
-			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php _e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
+			<div id="duplicate-action"><a class="submitduplicate duplication" href="<?php echo esc_url( $notify_url ); ?>"><?php esc_html_e( 'Copy to a new draft', 'woocommerce' ); ?></a></div>
 			<?php
 		}
 	}
@@ -100,7 +100,7 @@ class WC_Admin_Duplicate_Product {
 	 */
 	public function duplicate_product_action() {
 		if ( empty( $_REQUEST['post'] ) ) {
-			wp_die( __( 'No product to duplicate has been supplied!', 'woocommerce' ) );
+			wp_die( esc_html__( 'No product to duplicate has been supplied!', 'woocommerce' ) );
 		}
 
 		$product_id = isset( $_REQUEST['post'] ) ? absint( $_REQUEST['post'] ) : '';
@@ -111,7 +111,7 @@ class WC_Admin_Duplicate_Product {
 
 		if ( false === $product ) {
 			/* translators: %s: product id */
-			wp_die( sprintf( __( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $product_id ) );
+			wp_die( sprintf( esc_html__( 'Product creation failed, could not find original product: %s', 'woocommerce' ), $product_id ) );
 		}
 
 		$duplicate = $this->product_duplicate( $product );
@@ -137,7 +137,7 @@ class WC_Admin_Duplicate_Product {
 
 		$duplicate = clone $product;
 		$duplicate->set_id( 0 );
-		$duplicate->set_name( sprintf( __( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
+		$duplicate->set_name( sprintf( esc_html__( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
 			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );

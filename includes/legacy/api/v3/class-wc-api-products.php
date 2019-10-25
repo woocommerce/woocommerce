@@ -2752,6 +2752,7 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_read_product_attribute_terms', __( 'You do not have permission to read product attribute terms', 'woocommerce' ), 401 );
 			}
 
+			$attribute_id = absint( $attribute_id );
 			$taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
 			if ( ! $taxonomy ) {
@@ -2792,6 +2793,7 @@ class WC_API_Products extends WC_API_Resource {
 
 		try {
 			$id = absint( $id );
+			$attribute_id = absint( $attribute_id );
 
 			// Validate ID
 			if ( empty( $id ) ) {

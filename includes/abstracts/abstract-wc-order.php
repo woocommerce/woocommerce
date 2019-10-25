@@ -1070,10 +1070,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Apply all coupons in this order again to all line items.
+	 * This method is public since WooCommerce 3.8.0.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
 	 */
-	protected function recalculate_coupons() {
+	public function recalculate_coupons() {
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
@@ -1534,7 +1535,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( 0 > $fee_total ) {
 				$max_discount = round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
 
-				if ( $fee_total < $max_discount ) {
+				if ( $fee_total < $max_discount && 0 > $max_discount ) {
 					$item->set_total( $max_discount );
 				}
 			}
