@@ -34,7 +34,7 @@ const withProduct = createHigherOrderComponent( ( OriginalComponent ) => {
 			}
 		}
 
-		loadProduct() {
+		loadProduct = () => {
 			const { productId } = this.props.attributes;
 
 			if ( productId === 'preview' ) {
@@ -57,7 +57,7 @@ const withProduct = createHigherOrderComponent( ( OriginalComponent ) => {
 
 					this.setState( { product: null, loading: false, error } );
 				} );
-		}
+		};
 
 		render() {
 			const { error, loading, product } = this.state;
