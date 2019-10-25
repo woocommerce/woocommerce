@@ -17,8 +17,6 @@ use \WC_Helper_Product as ProductHelper;
 class Cart extends TestCase {
 	/**
 	 * Setup test products data. Called before every test.
-	 *
-	 * @since 1.2.0
 	 */
 	public function setUp() {
 		parent::setUp();
@@ -49,8 +47,6 @@ class Cart extends TestCase {
 
 	/**
 	 * Test route registration.
-	 *
-	 * @since 3.6.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();

@@ -18,6 +18,8 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
 
 /**
  * Cart API.
+ *
+ * @since $VID:$
  */
 class Cart extends RestContoller {
 	/**
@@ -37,15 +39,15 @@ class Cart extends RestContoller {
 	/**
 	 * Schema class instance.
 	 *
-	 * @var array
+	 * @var object
 	 */
-	protected $cart_schema;
+	protected $schema;
 
 	/**
 	 * Setup API class.
 	 */
 	public function __construct() {
-		$this->cart_schema = new CartSchema();
+		$this->schema = new CartSchema();
 	}
 
 	/**
@@ -94,7 +96,7 @@ class Cart extends RestContoller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return $this->cart_schema->get_item_schema();
+		return $this->schema->get_item_schema();
 	}
 
 	/**
@@ -105,7 +107,7 @@ class Cart extends RestContoller {
 	 * @return \WP_REST_Response Response object.
 	 */
 	public function prepare_item_for_response( $cart, $request ) {
-		$data = $this->cart_schema->get_item_response( $cart );
+		$data = $this->schema->get_item_response( $cart );
 
 		return rest_ensure_response( $data );
 	}

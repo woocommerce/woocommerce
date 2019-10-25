@@ -62,15 +62,17 @@ class RestApi {
 	 */
 	protected static function get_controllers() {
 		return [
-			'product-attributes'      => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributes',
-			'product-attribute-terms' => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributeTerms',
-			'product-categories'      => __NAMESPACE__ . '\RestApi\Controllers\ProductCategories',
-			'product-tags'            => __NAMESPACE__ . '\RestApi\Controllers\ProductTags',
-			'products'                => __NAMESPACE__ . '\RestApi\Controllers\Products',
-			'variations'              => __NAMESPACE__ . '\RestApi\Controllers\Variations',
-			'product-reviews'         => __NAMESPACE__ . '\RestApi\Controllers\ProductReviews',
-			'store-cart'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Cart',
-			'store-cart-items'        => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
+			'product-attributes'            => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributes',
+			'product-attribute-terms'       => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributeTerms',
+			'product-categories'            => __NAMESPACE__ . '\RestApi\Controllers\ProductCategories',
+			'product-tags'                  => __NAMESPACE__ . '\RestApi\Controllers\ProductTags',
+			'products'                      => __NAMESPACE__ . '\RestApi\Controllers\Products',
+			'variations'                    => __NAMESPACE__ . '\RestApi\Controllers\Variations',
+			'product-reviews'               => __NAMESPACE__ . '\RestApi\Controllers\ProductReviews',
+			'store-cart'                    => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Cart',
+			'store-cart-items'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
+			'store-products'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Products',
+			'store-product-collection-data' => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductCollectionData',
 		];
 	}
 }
