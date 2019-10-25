@@ -1234,31 +1234,7 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $country_code Country code.
 	 */
 	protected function is_stripe_supported_country( $country_code ) {
-		$stripe_supported_countries = array(
-			'AU',
-			'AT',
-			'BE',
-			'CA',
-			'DK',
-			'FI',
-			'FR',
-			'DE',
-			'HK',
-			'IE',
-			'JP',
-			'LU',
-			'NL',
-			'NZ',
-			'NO',
-			'SG',
-			'ES',
-			'SE',
-			'CH',
-			'GB',
-			'US',
-		);
-
-		return in_array( $country_code, $stripe_supported_countries, true );
+		return in_array( $country_code, WC()->countries->get_stripe_supported_countries(), true );
 	}
 
 	/**

@@ -348,6 +348,49 @@ class WC_Countries {
 	}
 
 	/**
+	 * Gets an array of countries that can use Stripe.
+	 *
+	 * @return string[]
+	 */
+	public function get_stripe_supported_countries() {
+		// https://stripe.com/global.
+		$countries = array(
+			'AU',
+			'AT',
+			'BE',
+			'CA',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HK',
+			'IE',
+			'IT',
+			'JP',
+			'LV',
+			'LT',
+			'LU',
+			'MY',
+			'NL',
+			'NZ',
+			'NO',
+			'PL',
+			'PT',
+			'SG',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'CH',
+			'GB',
+			'US',
+		);
+		return $countries;
+	}
+
+	/**
 	 * Gets an array of countries in the EU.
 	 *
 	 * MC (monaco) and IM (isle of man, part of UK) also use VAT.
