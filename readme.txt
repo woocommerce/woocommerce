@@ -278,7 +278,6 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Use correct meta value for `downloadable` column in product lookup table regenerate function. #24681
 * Fix - Admin sub-menus becoming unaligned when scrolling down in the orders page when there are no orders. #24688
 * Fix - OWB country and sell in person alignment. #24700
-* Fix - Add selectWoo as dependency of country-select. #24347
 * Fix - Domain replacement script now replaces both double and single quoted `woo-gutenberg-products-block` with `woocommerce` in both PHP and JavaScript files. #24696
 * Fix - Convert `current_user_id` to string in some places to prevent unnecessary session database updates. #24016
 * Fix - Fixed description of failed order emails. #24737
