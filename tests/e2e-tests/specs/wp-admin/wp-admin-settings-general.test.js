@@ -11,7 +11,7 @@ import { activatePlugin } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { settingsPageSaveChanges, verifyValueOfInputField } from "../../utils";
+import { settingsPageSaveChanges, verifyValueOfInputField } from '../../utils';
 
 describe( 'WooCommerce General Settings', () => {
 	beforeAll( async () => {
