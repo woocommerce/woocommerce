@@ -221,6 +221,11 @@
 			padding: $gap-small $gap;
 			min-height: 56px;
 
+			input[type='checkbox']:checked::before {
+				left: -1px;
+				top: 0;
+			}
+
 			&::after {
 				content: '';
 				position: absolute;
@@ -247,6 +252,7 @@
 
 			label.components-checkbox-control__label {
 				color: $studio-gray-80;
+				margin-top: $gap-smallest;
 			}
 
 			label.components-checkbox-control__label,
@@ -370,6 +376,10 @@
 			min-width: 160px;
 			align-self: flex-end;
 			margin-bottom: 0;
+		}
+
+		.muriel-checkbox input[type='checkbox']:checked {
+			content: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27#{url-friendly-colour($studio-white)}%27%2F%3E%3C%2Fsvg%3E');
 		}
 
 		.muriel-checkbox label.components-checkbox-control__label {

@@ -129,11 +129,8 @@
 		border-color: $studio-woocommerce-purple-60;
 	}
 
-	input[type='checkbox']:checked::before {
-		color: $studio-white;
-		font-size: 18px;
-		margin-left: -2.5px;
-		margin-top: -1px;
+	input[type='checkbox']:focus:checked {
+		border: 2px solid $studio-woocommerce-purple-60;
 	}
 
 	input[type='radio']:checked::before {
@@ -141,5 +138,37 @@
 		margin-left: 4px;
 		margin-top: 4px;
 		background-color: $studio-white;
+	}
+
+	input[type='checkbox']:checked::before,
+	.muriel-checkbox input[type='checkbox']:checked::before {
+		font-size: 16px;
+		color: $studio-white;
+		content: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27#{url-friendly-colour($studio-white)}%27%2F%3E%3C%2Fsvg%3E');
+		margin-left: -2px;
+		margin-top: 0;
+		height: 18px;
+		width: 16px;
+	}
+
+	.muriel-checkbox input[type='checkbox']:checked::before {
+		margin-left: 0;
+		margin-top: 0;
+		position: absolute;
+		left: 1px;
+		top: 4px;
+	}
+
+	.muriel-input-text input {
+		min-height: auto;
+	}
+
+	.muriel-input-text.with-value input {
+		top: 24px;
+	}
+
+	.muriel-checkbox .components-base-control__field {
+		align-items: center;
+		display: flex;
 	}
 }

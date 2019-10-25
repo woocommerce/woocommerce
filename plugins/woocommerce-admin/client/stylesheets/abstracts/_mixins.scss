@@ -9,6 +9,10 @@
 	}
 }
 
+@function url-friendly-colour( $color ) {
+	@return '%23' + str-slice( '#{ $color }', 2, -1 );
+}
+
 @mixin hover-state {
 	&:hover,
 	&:active,

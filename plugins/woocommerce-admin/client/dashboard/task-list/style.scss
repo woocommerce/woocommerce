@@ -117,7 +117,7 @@
 			display: none;
 			position: absolute;
 			left: $gap;
-			top: 26px;
+			top: 28px;
 			z-index: 1;
 			font-size: 16px;
 			line-height: 24px;
@@ -206,6 +206,8 @@
 		max-width: 96px;
 		background: $studio-gray-0;
 		padding: $gap-small;
+		align-self: start;
+		margin-top: $gap;
 
 		img {
 			max-width: 72px;
@@ -222,6 +224,11 @@
 		margin-top: $gap;
 		margin-left: $gap-larger;
 		padding-top: $gap;
+
+		.components-base-control__field {
+			align-items: center;
+			display: flex;
+		}
 
 		.components-checkbox-control__input {
 			margin-left: -$gap-larger;
