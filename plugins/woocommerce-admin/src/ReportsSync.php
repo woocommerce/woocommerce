@@ -401,7 +401,7 @@ class ReportsSync {
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
 				WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
-				AND post_status NOT IN ( 'auto-draft', 'trash' )
+				AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 				{$where_clause}
 				ORDER BY post_date ASC
 				LIMIT %d
