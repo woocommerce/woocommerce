@@ -51,7 +51,14 @@ describe( 'Add New Product Page', () => {
 		await clickTab( 'General' );
 		await expect( page ).toFill( '#_regular_price',  '9.99' );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 
 	it( 'can create product with variations', async () => {
@@ -170,6 +177,13 @@ describe( 'Add New Product Page', () => {
 		await page.focus( 'button.save-variation-changes' );
 		await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 } );
