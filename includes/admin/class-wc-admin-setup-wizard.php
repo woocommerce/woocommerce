@@ -204,7 +204,7 @@ class WC_Admin_Setup_Wizard {
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), WC_VERSION );
 
-		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util', 'jquery-tiptip' ), WC_VERSION );
+		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util', 'jquery-tiptip', 'backbone', 'wc-backbone-modal' ), WC_VERSION );
 		wp_localize_script(
 			'wc-setup',
 			'wc_setup_params',
@@ -360,7 +360,7 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
-			<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="WooCommerce" /></a></h1>
+			<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 		<?php
 	}
 
@@ -456,6 +456,7 @@ class WC_Admin_Setup_Wizard {
 		$currency_by_country = wp_list_pluck( $locale_info, 'currency_code' );
 		?>
 		<form method="post" class="address-step">
+			<input type="hidden" name="save_step" value="store_setup" />
 			<?php wp_nonce_field( 'wc-setup' ); ?>
 			<p class="store-setup"><?php esc_html_e( 'The following wizard will help you configure your store and get you started quickly.', 'woocommerce' ); ?></p>
 
@@ -537,6 +538,7 @@ class WC_Admin_Setup_Wizard {
 			</select>
 			</div>
 
+			<div class="sell-in-person-container">
 			<input
 				type="checkbox"
 				id="woocommerce_sell_in_person"
@@ -547,23 +549,64 @@ class WC_Admin_Setup_Wizard {
 			<label class="location-prompt" for="woocommerce_sell_in_person">
 				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
 			</label>
-
-			<div class="woocommerce-tracker">
-				<p class="checkbox">
-					<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" checked />
-					<label for="wc_tracker_checkbox"><?php esc_html_e( 'Help WooCommerce improve with usage tracking.', 'woocommerce' ); ?></label>
-				</p>
-				<p>
-				<?php
-				esc_html_e( 'Gathering usage data allows us to make WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
-				echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
-				?>
-				</p>
 			</div>
+
+			<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" <?php checked( 'yes', get_option( 'woocommerce_allow_tracking', 'no' ) ); ?> />
+
+			<?php $this->tracking_modal(); ?>
+
 			<p class="wc-setup-actions step">
-				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></button>
+				<button class="button-primary button button-large" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></button>
 			</p>
 		</form>
+		<?php
+	}
+
+	/**
+	 * Template for the usage tracking modal.
+	 */
+	public function tracking_modal() {
+		?>
+		<script type="text/template" id="tmpl-wc-modal-tracking-setup">
+			<div class="wc-backbone-modal woocommerce-tracker">
+				<div class="wc-backbone-modal-content">
+					<section class="wc-backbone-modal-main" role="main">
+						<header class="wc-backbone-modal-header">
+							<h1><?php esc_html_e( 'Help improve WooCommerce with usage tracking', 'woocommerce' ); ?></h1>
+						</header>
+						<article>
+							<p>
+							<?php
+								printf(
+									wp_kses(
+										/* translators: %1$s: usage tracking help link */
+										__( 'Learn more about how usage tracking works, and how you\'ll be helping <a href="%1$s" target="_blank">here</a>.', 'woocommerce' ),
+										array(
+											'a'    => array(
+												'href'   => array(),
+												'target' => array(),
+											),
+										)
+									),
+									'https://woocommerce.com/usage-tracking/'
+								);
+							?>
+							</p>
+							<p class="woocommerce-tracker-checkbox">
+								<input type="checkbox" id="wc_tracker_checkbox_dialog" name="wc_tracker_checkbox_dialog" value="yes" <?php checked( 'yes', get_option( 'woocommerce_allow_tracking', 'no' ) ); ?> />
+								<label for="wc_tracker_checkbox_dialog"><?php esc_html_e( 'Enable usage tracking and help improve WooCommerce', 'woocommerce' ); ?></label>
+							</p>
+						</article>
+						<footer>
+							<div class="inner">
+								<button class="button button-primary button-large" id="wc_tracker_submit" aria-label="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></a>
+							</div>
+						</footer>
+					</section>
+				</div>
+			</div>
+			<div class="wc-backbone-modal-backdrop modal-close"></div>
+		</script>
 		<?php
 	}
 
@@ -1078,7 +1121,7 @@ class WC_Admin_Setup_Wizard {
 
 			<p class="wc-setup-actions step">
 				<?php $this->plugin_install_info(); ?>
-				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
+				<button class="button-primary button button-large button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 				<?php wp_nonce_field( 'wc-setup' ); ?>
 			</p>
 		</form>
@@ -2132,7 +2175,7 @@ class WC_Admin_Setup_Wizard {
 				<img
 					class="jetpack-logo"
 					src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_horizontal_logo.png' ); ?>"
-					alt="Jetpack logo"
+					alt="<?php esc_attr_e( 'Jetpack logo', 'woocommerce' ); ?>"
 				/>
 				<img
 					class="wcs-notice"
@@ -2143,7 +2186,7 @@ class WC_Admin_Setup_Wizard {
 			<img
 				class="jetpack-logo"
 				src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/jetpack_vertical_logo.png' ); ?>"
-				alt="Jetpack logo"
+				alt="<?php esc_attr_e( 'Jetpack logo', 'woocommerce' ); ?>"
 			/>
 		<?php endif; ?>
 
@@ -2320,7 +2363,7 @@ class WC_Admin_Setup_Wizard {
 					<p class="wc-setup-actions step newsletter-form-button-container">
 						<button
 							type="submit"
-							value="<?php esc_html_e( 'Yes please!', 'woocommerce' ); ?>"
+							value="<?php esc_attr_e( 'Yes please!', 'woocommerce' ); ?>"
 							name="subscribe"
 							id="mc-embedded-subscribe"
 							class="button-primary button newsletter-form-button"

@@ -659,9 +659,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( ! empty( $variation_ids ) ) {
 			foreach ( $variation_ids as $variation_id ) {
 				if ( $force_delete ) {
+					do_action( 'woocommerce_before_delete_product_variation', $variation_id );
 					wp_delete_post( $variation_id, true );
+					do_action( 'woocommerce_delete_product_variation', $variation_id );
 				} else {
 					wp_trash_post( $variation_id );
+					do_action( 'woocommerce_trash_product_variation', $variation_id );
 				}
 			}
 		}

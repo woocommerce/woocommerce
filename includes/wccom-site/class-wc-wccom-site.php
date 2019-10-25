@@ -36,6 +36,7 @@ class WC_WCCOM_Site {
 	protected static function includes() {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer-requirements-check.php';
 	}
 
 	/**
