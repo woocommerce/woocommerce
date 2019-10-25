@@ -36,7 +36,6 @@ describe( 'Add New Order Page', () => {
 			'.order_actions li .save_order',
 			'#message',
 			'Order updated.',
-			'Move to trash',
 			'1 order moved to the Trash.'
 		);
 	} );

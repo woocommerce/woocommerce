@@ -25,10 +25,9 @@ const uiUnblocked = async () => {
  * @param {string} button (Publish)
  * @param {string} publishNotice
  * @param {string} publishVerification
- * @param {string} moveToTrash
  * @param {string} trashVerification
  */
-const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, moveToTrash, trashVerification ) => {
+const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
 
@@ -49,7 +48,7 @@ const verifyPublishAndTrash = async ( button, publishNotice, publishVerification
 	}
 
 	// Trash
-	await expect( page ).toClick( 'a', { text: moveToTrash } );
+	await expect( page ).toClick( 'a', { text: "Move to Trash" } );
 	await page.waitForSelector( '#message' );
 
 	// Verify

@@ -39,7 +39,6 @@ describe( 'Add New Coupon Page', () => {
 			'#publish',
 			'#message',
 			'Coupon updated.',
-			'Move to Trash',
 			'1 coupon moved to the Trash.'
 		);
 
