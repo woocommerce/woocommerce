@@ -989,9 +989,7 @@ class WC_Form_Handler {
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
-					$message = $user->get_error_message();
-					$message = str_replace( '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', '<strong>' . esc_html( $creds['user_login'] ) . '</strong>', $message );
-					throw new Exception( $message );
+					throw new Exception( $user->get_error_message() );
 				} else {
 
 					if ( ! empty( $_POST['redirect'] ) ) {
