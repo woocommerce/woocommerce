@@ -719,7 +719,7 @@ function wc_timezone_string() {
 
 	// Get UTC offset, if it isn't set then return UTC.
 	$utc_offset = floatval( get_option( 'gmt_offset', 0 ) );
-	if ( 0 === $utc_offset ) {
+	if ( 0.0 === $utc_offset ) {
 		return 'UTC';
 	}
 
