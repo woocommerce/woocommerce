@@ -943,7 +943,6 @@ class WC_Discounts {
 	 * - 114: Excluded categories.
 	 *
 	 * @since  3.2.0
-	 * @throws Exception Error message.
 	 * @param  WC_Coupon $coupon Coupon data.
 	 * @return bool|WP_Error
 	 */
