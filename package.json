@@ -20,7 +20,7 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "autoprefixer": "9.6.5",
+    "autoprefixer": "9.7.0",
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
     "babel-eslint": "10.0.3",
@@ -30,7 +30,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chromedriver": "77.0.0",
-    "config": "3.2.3",
+    "config": "3.2.4",
     "cross-env": "6.0.3",
     "eslint": "6.5.1",
     "eslint-config-wpcalypso": "4.0.1",
