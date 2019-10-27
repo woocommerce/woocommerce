@@ -264,7 +264,6 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Use `esc_attr_e` instead of `esc_html_e` for escaping an attribute in multiple places. #24481, #24520, #24521, #24522, #24523, #24524
 * Fix - Use `esc_attr__` instead of `esc_html__` in escaping attributes string. #24525, #24529
 * Fix - Typo fix in payment captured error message. #24501
-* Fix - Remove broken download link for downloadable product in refund emails. #24526
 * Fix - Documentation URL in failed order email content. #24535
 * Fix - "Add to cart" links in feed. #24545
 * Fix - Escaping in Storefront banner. #24546
