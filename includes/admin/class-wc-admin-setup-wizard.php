@@ -551,7 +551,10 @@ class WC_Admin_Setup_Wizard {
 			</label>
 			</div>
 
-			<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" <?php checked( 'yes', get_option( 'woocommerce_allow_tracking', 'no' ) ); ?> />
+			<div class="woocommerce-tracker-checkbox">
+				<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" <?php checked( 'yes', get_option( 'woocommerce_allow_tracking', 'no' ) ); ?> />
+				<label for="wc_tracker_checkbox"><?php esc_html_e( 'Enable usage tracking and help improve WooCommerce', 'woocommerce' ); ?></label>
+			</div>
 
 			<?php $this->tracking_modal(); ?>
 
