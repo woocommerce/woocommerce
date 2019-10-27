@@ -78,4 +78,17 @@ jQuery( function( $ ) {
 			}, 1000 );
 		}
 	};
+
+	// Show password visiblity hover icon on woocommerce forms
+	$( '.woocommerce form input[type="password"]' ).wrap( '<span class="password-input"></span>' );
+	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
+
+	$( '.show-password-input' ).hover(
+		function() {
+			$( this ).siblings( array( 'input[name="password"]', 'input[type="password"]' ) ).prop( 'type', 'text' );
+		},
+		function() {
+			$( this ).siblings( array( 'input[name="password"]', 'input[type="password"]' ) ).prop( 'type', 'password' );
+		}
+	);
 });

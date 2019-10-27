@@ -352,6 +352,27 @@
 		.form-row-wide {
 			clear: both;
 		}
+
+		.password-input {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			position: relative;
+		}
+
+		.show-password-input {
+			position: absolute;
+			right: 0.7em;
+			top: 0.7em;
+		}
+
+		.show-password-input::after {
+			@include iconafter( "\e010" ); 	// Icon styles and glyph
+		}
+
+		.show-password-input:hover::after {
+			color: #e8e8e8;
+		}
 	}
 
 	#payment {
