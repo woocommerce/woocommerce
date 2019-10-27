@@ -1592,7 +1592,7 @@ class WC_Helper {
 	/**
 	 * Flush subscriptions cache.
 	 */
-	private static function _flush_subscriptions_cache() {
+	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
 	}
 
