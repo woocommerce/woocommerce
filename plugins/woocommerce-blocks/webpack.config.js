@@ -29,6 +29,9 @@ const baseConfig = {
 		hash: true,
 		timings: true,
 	},
+	watchOptions: {
+		ignored: /node_modules/,
+	},
 };
 
 const CoreConfig = {

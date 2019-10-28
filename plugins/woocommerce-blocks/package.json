@@ -18,7 +18,6 @@
 	"scripts": {
 		"deploy": "composer install --no-dev && npm run build --loglevel error && sh ./bin/github-deploy.sh",
 		"release": "sh ./bin/wordpress-deploy.sh",
-		"prepack": "npm install && npm run lint && npm run test && npm run build",
 		"build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
 		"build:ci": "npm run build && npm run size-check && npm run lint:js && npm run lint:css",
 		"start": "cross-env BABEL_ENV=default webpack --watch --info-verbosity none",
