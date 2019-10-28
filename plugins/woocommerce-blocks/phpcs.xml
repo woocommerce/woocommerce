@@ -39,4 +39,9 @@
 	<rule ref="Generic.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
+
+	<rule ref="Generic.Commenting.Todo">
+    	<exclude name="Generic.Commenting.Todo.TaskFound"/>
+		<exclude name="Generic.Commenting.Todo.CommentFound"/>
+	</rule>
 </ruleset>

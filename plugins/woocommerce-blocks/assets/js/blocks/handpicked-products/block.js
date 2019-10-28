@@ -62,7 +62,7 @@ class ProductsBlock extends Component {
 					/>
 					<ToggleControl
 						label={ __(
-							'Align Add to Cart buttons',
+							'Align Buttons',
 							'woo-gutenberg-products-block'
 						) }
 						help={

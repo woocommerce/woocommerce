@@ -39,6 +39,7 @@ class RestApi {
 	 *
 	 * Note: We load the session here early so guest nonces are in place.
 	 *
+	 * @todo check compat < WC 3.6. Make specific to cart endpoint.
 	 * @param mixed $return Value being filtered.
 	 * @param array $request Request data.
 	 * @return mixed
@@ -48,10 +49,12 @@ class RestApi {
 		if ( ! empty( $error ) ) {
 			return $error;
 		}
+
 		wc()->frontend_includes();
 		wc()->initialize_session();
 		wc()->initialize_cart();
 		wc()->cart->get_cart();
+
 		return $return;
 	}
 

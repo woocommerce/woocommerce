@@ -8,23 +8,26 @@
  * @return {object} Object containing the min and max index to display in the pagination component.
  */
 export const getIndexes = ( pagesToDisplay, currentPage, totalPages ) => {
+	if ( totalPages <= 2 ) {
+		return { minIndex: null, maxIndex: null };
+	}
 	const extraPagesToDisplay = pagesToDisplay - 1;
 	const tentativeMinIndex = Math.max(
 		Math.floor( currentPage - extraPagesToDisplay / 2 ),
-		1
+		2
 	);
 	const maxIndex = Math.min(
 		Math.ceil(
 			currentPage +
 				( extraPagesToDisplay - ( currentPage - tentativeMinIndex ) )
 		),
-		totalPages
+		totalPages - 1
 	);
 	const minIndex = Math.max(
 		Math.floor(
 			currentPage - ( extraPagesToDisplay - ( maxIndex - currentPage ) )
 		),
-		1
+		2
 	);
 
 	return { minIndex, maxIndex };

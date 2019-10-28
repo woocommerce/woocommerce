@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { getOrderArgs } from './utils';
+import { getSortArgs } from './utils';
 import FrontendBlock from './frontend-block';
 
 /**
@@ -79,7 +79,7 @@ class FrontendContainerBlock extends Component {
 		const { attributes } = this.props;
 		const { categoryIds, productId } = attributes;
 		const { reviewsToDisplay } = this.state;
-		const { order, orderby } = getOrderArgs( this.state.orderby );
+		const { order, orderby } = getSortArgs( this.state.orderby );
 
 		return (
 			<FrontendBlock
