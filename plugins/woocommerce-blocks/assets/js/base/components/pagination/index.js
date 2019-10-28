@@ -20,26 +20,33 @@ const Pagination = ( {
 	onPageChange,
 	totalPages,
 } ) => {
-	const { minIndex, maxIndex } = getIndexes(
+	let { minIndex, maxIndex } = getIndexes(
 		pagesToDisplay,
 		currentPage,
 		totalPages
 	);
-	const pages = [];
-	for ( let i = minIndex; i <= maxIndex; i++ ) {
-		pages.push( i );
-	}
 	const showFirstPage = displayFirstAndLastPages && Boolean( minIndex !== 1 );
 	const showLastPage =
 		displayFirstAndLastPages && Boolean( maxIndex !== totalPages );
 	const showFirstPageEllipsis =
-		displayFirstAndLastPages && Boolean( minIndex > 2 );
+		displayFirstAndLastPages && Boolean( minIndex > 3 );
 	const showLastPageEllipsis =
-		displayFirstAndLastPages && Boolean( maxIndex < totalPages - 1 );
-	const showPreviousArrow =
-		displayNextAndPreviousArrows && Boolean( currentPage !== 1 );
-	const showNextArrow =
-		displayNextAndPreviousArrows && Boolean( currentPage !== totalPages );
+		displayFirstAndLastPages && Boolean( maxIndex < totalPages - 2 );
+
+	// Handle the cases where there would be an ellipsis replacing one single page
+	if ( showFirstPage && minIndex === 3 ) {
+		minIndex = minIndex - 1;
+	}
+	if ( showLastPage && maxIndex === totalPages - 2 ) {
+		maxIndex = maxIndex + 1;
+	}
+
+	const pages = [];
+	if ( minIndex && maxIndex ) {
+		for ( let i = minIndex; i <= maxIndex; i++ ) {
+			pages.push( i );
+		}
+	}
 
 	return (
 		<div className="wc-block-pagination">
@@ -49,7 +56,7 @@ const Pagination = ( {
 					'woo-gutenberg-products-block'
 				) }
 			/>
-			{ showPreviousArrow && (
+			{ displayNextAndPreviousArrows && (
 				<button
 					className="wc-block-pagination-page"
 					onClick={ () => onPageChange( currentPage - 1 ) }
@@ -57,6 +64,7 @@ const Pagination = ( {
 						'Previous page',
 						'woo-gutenberg-products-block'
 					) }
+					disabled={ currentPage <= 1 }
 				>
 					<Label
 						label="<"
@@ -69,8 +77,11 @@ const Pagination = ( {
 			) }
 			{ showFirstPage && (
 				<button
-					className="wc-block-pagination-page"
+					className={ classNames( 'wc-block-pagination-page', {
+						'wc-block-pagination-page--active': currentPage === 1,
+					} ) }
 					onClick={ () => onPageChange( 1 ) }
+					disabled={ currentPage === 1 }
 				>
 					1
 				</button>
@@ -96,6 +107,7 @@ const Pagination = ( {
 								? null
 								: () => onPageChange( page )
 						}
+						disabled={ currentPage === page }
 					>
 						{ page }
 					</button>
@@ -111,17 +123,22 @@ const Pagination = ( {
 			) }
 			{ showLastPage && (
 				<button
-					className="wc-block-pagination-page"
+					className={ classNames( 'wc-block-pagination-page', {
+						'wc-block-pagination-page--active':
+							currentPage === totalPages,
+					} ) }
 					onClick={ () => onPageChange( totalPages ) }
+					disabled={ currentPage === totalPages }
 				>
 					{ totalPages }
 				</button>
 			) }
-			{ showNextArrow && (
+			{ displayNextAndPreviousArrows && (
 				<button
 					className="wc-block-pagination-page"
 					onClick={ () => onPageChange( currentPage + 1 ) }
 					title={ __( 'Next page', 'woo-gutenberg-products-block' ) }
+					disabled={ currentPage >= totalPages }
 				>
 					<Label
 						label=">"

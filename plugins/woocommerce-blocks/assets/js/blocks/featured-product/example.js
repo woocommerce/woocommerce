@@ -5,7 +5,7 @@ import { DEFAULT_HEIGHT } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import { previewProducts } from '../../previews/products';
+import { previewProducts } from '@woocommerce/resource-previews';
 
 export const example = {
 	attributes: {

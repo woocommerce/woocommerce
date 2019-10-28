@@ -11,7 +11,7 @@ import * as mockUtils from '../../../blocks/reviews/utils';
 import * as mockBaseUtils from '../../utils/errors';
 
 jest.mock( '../../../blocks/reviews/utils', () => ( {
-	getOrderArgs: () => ( {
+	getSortArgs: () => ( {
 		order: 'desc',
 		orderby: 'date_gmt',
 	} ),

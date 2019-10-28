@@ -1,4 +1,4 @@
-import { previewReviews } from '../../previews/reviews';
+import { previewReviews } from '@woocommerce/resource-previews';
 
 export const example = {
 	attributes: {

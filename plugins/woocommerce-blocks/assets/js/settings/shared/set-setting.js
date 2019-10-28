@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { allSettings } from './settings-init';
 
 /**

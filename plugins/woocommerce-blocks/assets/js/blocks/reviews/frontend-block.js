@@ -10,7 +10,7 @@ import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import LoadMoreButton from '@woocommerce/base-components/load-more-button';
-import ReviewOrderSelect from '@woocommerce/base-components/review-order-select';
+import ReviewSortSelect from '@woocommerce/base-components/review-sort-select';
 import ReviewList from '@woocommerce/base-components/review-list';
 import withReviews from '@woocommerce/base-hocs/with-reviews';
 
@@ -33,7 +33,7 @@ const FrontendBlock = ( {
 	return (
 		<Fragment>
 			{ attributes.showOrderby !== 'false' && ENABLE_REVIEW_RATING && (
-				<ReviewOrderSelect
+				<ReviewSortSelect
 					defaultValue={ orderby }
 					onChange={ onChangeOrderby }
 				/>

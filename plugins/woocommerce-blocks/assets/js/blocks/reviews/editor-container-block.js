@@ -11,7 +11,7 @@ import { Placeholder } from '@wordpress/components';
  * Internal dependencies
  */
 import EditorBlock from './editor-block.js';
-import { getBlockClassName, getOrderArgs } from './utils.js';
+import { getBlockClassName, getSortArgs } from './utils.js';
 
 /**
  * Container of the block rendered in the editor.
@@ -43,7 +43,7 @@ class EditorContainerBlock extends Component {
 			showReviewImage,
 			showReviewRating,
 		} = attributes;
-		const { order, orderby } = getOrderArgs( attributes.orderby );
+		const { order, orderby } = getSortArgs( attributes.orderby );
 		const isAllContentHidden =
 			! showReviewContent &&
 			! showReviewRating &&

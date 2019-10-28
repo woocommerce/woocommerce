@@ -8,6 +8,7 @@ const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const chalk = require( 'chalk' );
+const { omit } = require( 'lodash' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -22,7 +23,9 @@ function findModuleMatch( module, match ) {
 
 const requestToExternal = ( request ) => {
 	const wcDepMap = {
+		'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 		'@woocommerce/settings': [ 'wc', 'wcSettings' ],
+		'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
 	};
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
@@ -31,8 +34,10 @@ const requestToExternal = ( request ) => {
 
 const requestToHandle = ( request ) => {
 	const wcHandleMap = {
+		'@woocommerce/blocks-registry': 'wc-blocks-registry',
 		'@woocommerce/settings': 'wc-settings',
 		'@woocommerce/block-settings': 'wc-settings',
+		'@woocommerce/block-data': 'wc-blocks-data-store',
 	};
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
@@ -43,6 +48,10 @@ const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
+		'@woocommerce/blocks-registry': path.resolve(
+			__dirname,
+			'../assets/js/blocks-registry'
+		),
 		'@woocommerce/block-settings': path.resolve(
 			__dirname,
 			'../assets/js/settings/blocks'
@@ -51,9 +60,17 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }base/components/`
 		),
+		'@woocommerce/base-context': path.resolve(
+			__dirname,
+			`../assets/js/${ pathPart }base/context/`
+		),
 		'@woocommerce/base-hocs': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }base/hocs/`
+		),
+		'@woocommerce/base-hooks': path.resolve(
+			__dirname,
+			`../assets/js/${ pathPart }base/hooks/`
 		),
 		'@woocommerce/block-components': path.resolve(
 			__dirname,
@@ -63,7 +80,50 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }hocs`
 		),
+		'@woocommerce/atomic-components': path.resolve(
+			__dirname,
+			`../assets/js/${ pathPart }atomic/components/`
+		),
+		'@woocommerce/resource-previews': path.resolve(
+			__dirname,
+			`../assets/js/${ pathPart }previews/`
+		),
 	};
+};
+
+const mainEntry = {
+	// Shared blocks code
+	blocks: './assets/js/index.js',
+	// Blocks
+	'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
+	'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
+	'product-category': './assets/js/blocks/product-category/index.js',
+	'product-categories': './assets/js/blocks/product-categories/index.js',
+	'product-new': './assets/js/blocks/product-new/index.js',
+	'product-on-sale': './assets/js/blocks/product-on-sale/index.js',
+	'product-top-rated': './assets/js/blocks/product-top-rated/index.js',
+	'products-by-attribute':
+		'./assets/js/blocks/products-by-attribute/index.js',
+	'featured-product': './assets/js/blocks/featured-product/index.js',
+	'all-reviews': './assets/js/blocks/reviews/all-reviews/index.js',
+	'reviews-by-product':
+		'./assets/js/blocks/reviews/reviews-by-product/index.js',
+	'reviews-by-category':
+		'./assets/js/blocks/reviews/reviews-by-category/index.js',
+	'product-search': './assets/js/blocks/product-search/index.js',
+	'product-tag': './assets/js/blocks/product-tag/index.js',
+	'featured-category': './assets/js/blocks/featured-category/index.js',
+	'all-products': './assets/js/blocks/products/all-products/index.js',
+};
+
+const frontEndEntry = {
+	reviews: './assets/js/blocks/reviews/frontend.js',
+	'all-products': './assets/js/blocks/products/all-products/frontend.js',
+};
+
+const getEntryConfig = ( main = true, exclude = [] ) => {
+	const entryConfig = main ? mainEntry : frontEndEntry;
+	return omit( entryConfig, exclude );
 };
 
 const getMainConfig = ( options = {} ) => {
@@ -79,34 +139,7 @@ const getMainConfig = ( options = {} ) => {
 				plugins: resolvePlugins,
 		  };
 	return {
-		entry: {
-			// Shared blocks code
-			blocks: './assets/js/index.js',
-			// Blocks
-			'handpicked-products':
-				'./assets/js/blocks/handpicked-products/index.js',
-			'product-best-sellers':
-				'./assets/js/blocks/product-best-sellers/index.js',
-			'product-category': './assets/js/blocks/product-category/index.js',
-			'product-categories':
-				'./assets/js/blocks/product-categories/index.js',
-			'product-new': './assets/js/blocks/product-new/index.js',
-			'product-on-sale': './assets/js/blocks/product-on-sale/index.js',
-			'product-top-rated':
-				'./assets/js/blocks/product-top-rated/index.js',
-			'products-by-attribute':
-				'./assets/js/blocks/products-by-attribute/index.js',
-			'featured-product': './assets/js/blocks/featured-product/index.js',
-			'all-reviews': './assets/js/blocks/reviews/all-reviews/index.js',
-			'reviews-by-product':
-				'./assets/js/blocks/reviews/reviews-by-product/index.js',
-			'reviews-by-category':
-				'./assets/js/blocks/reviews/reviews-by-category/index.js',
-			'product-search': './assets/js/blocks/product-search/index.js',
-			'product-tag': './assets/js/blocks/product-tag/index.js',
-			'featured-category':
-				'./assets/js/blocks/featured-category/index.js',
-		},
+		entry: getEntryConfig( true, options.exclude || [] ),
 		output: {
 			path: path.resolve( __dirname, '../build/' ),
 			filename: `[name]${ fileSuffix }.js`,
@@ -203,8 +236,11 @@ const getMainConfig = ( options = {} ) => {
 				filename: `[name]${ fileSuffix }.css`,
 			} ),
 			new MergeExtractFilesPlugin(
-				[ 'build/editor.js', 'build/style.js' ],
-				'build/vendors.js'
+				[
+					`build/editor${ fileSuffix }.js`,
+					`build/style${ fileSuffix }.js`,
+				],
+				`build/vendors${ fileSuffix }.js`
 			),
 			new ProgressBarPlugin( {
 				format:
@@ -236,9 +272,7 @@ const getFrontConfig = ( options = {} ) => {
 				plugins: resolvePlugins,
 		  };
 	return {
-		entry: {
-			reviews: './assets/js/blocks/reviews/frontend.js',
-		},
+		entry: getEntryConfig( false, options.exclude || [] ),
 		output: {
 			path: path.resolve( __dirname, '../build/' ),
 			filename: `[name]${ fileSuffix }-frontend.js`,
