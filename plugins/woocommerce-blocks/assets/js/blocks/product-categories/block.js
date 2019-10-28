@@ -13,6 +13,22 @@ import { IconFolder } from '@woocommerce/block-components/icons';
  */
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 
+const EmptyPlaceHolder = () => (
+	<Placeholder
+		icon={ <IconFolder /> }
+		label={ __(
+			'Product Categories List',
+			'woo-gutenberg-products-block'
+		) }
+		className="wc-block-product-categories"
+	>
+		{ __(
+			"This block shows product categories for your store. To use it, you'll first need to create a product and assign it to a category.",
+			'woo-gutenberg-products-block'
+		) }
+	</Placeholder>
+);
+
 /**
  * Component displaying the categories as dropdown or list.
  */
@@ -138,21 +154,7 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 			<ServerSideRender
 				block={ name }
 				attributes={ attributes }
-				EmptyResponsePlaceholder={ () => (
-					<Placeholder
-						icon={ <IconFolder /> }
-						label={ __(
-							'Product Categories List',
-							'woo-gutenberg-products-block'
-						) }
-						className="wc-block-product-categories"
-					>
-						{ __(
-							"This block shows product categories for your store. To use it, you'll first need to create a product and assign it to a category.",
-							'woo-gutenberg-products-block'
-						) }
-					</Placeholder>
-				) }
+				EmptyResponsePlaceholder={ EmptyPlaceHolder }
 			/>
 		</Fragment>
 	);
