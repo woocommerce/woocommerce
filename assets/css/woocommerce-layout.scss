@@ -364,13 +364,14 @@
 			position: absolute;
 			right: 0.7em;
 			top: 0.7em;
+			cursor: pointer;
 		}
 
 		.show-password-input::after {
 			@include iconafter( "\e010" ); 	// Icon styles and glyph
 		}
 
-		.show-password-input:hover::after {
+		.show-password-input.display-password:after {
 			color: #e8e8e8;
 		}
 	}
