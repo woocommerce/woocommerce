@@ -85,10 +85,10 @@ jQuery( function( $ ) {
 
 	$( '.show-password-input' ).hover(
 		function() {
-			$( this ).siblings( array( 'input[name="password"]', 'input[type="password"]' ) ).prop( 'type', 'text' );
+			$( this ).siblings( ['input[name="password"]', 'input[type="password"]'] ).prop( 'type', 'text' );
 		},
 		function() {
-			$( this ).siblings( array( 'input[name="password"]', 'input[type="password"]' ) ).prop( 'type', 'password' );
+			$( this ).siblings( ['input[name="password"]', 'input[type="password"]'] ).prop( 'type', 'password' );
 		}
 	);
 });
