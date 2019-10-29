@@ -1,6 +1,7 @@
 # unreleased
 
 - Remove lodash dependency.
+- Added getCurrencyData, for returning code, position, thousands separator, decimal separator, and precision information by region.
 
 # 1.1.3
 

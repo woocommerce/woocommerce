@@ -8,18 +8,21 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import { recordEvent } from 'lib/tracks';
+import { without } from 'lodash';
 
 /**
  * Internal depdencies
  */
 import { getCountryCode } from 'dashboard/utils';
 import { H, Card, Form } from '@woocommerce/components';
+import { getCurrencyData } from '@woocommerce/currency';
 import withSelect from 'wc-api/with-select';
 import {
 	StoreAddress,
 	validateStoreAddress,
 } from '../../components/settings/general/store-address';
 import UsageModal from './usage-modal';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 class StoreDetails extends Component {
 	constructor() {
@@ -40,6 +43,24 @@ class StoreDetails extends Component {
 
 		this.onContinue = this.onContinue.bind( this );
 		this.onSubmit = this.onSubmit.bind( this );
+	}
+
+	deriveCurrencySettings( countryState ) {
+		if ( ! countryState ) {
+			return null;
+		}
+
+		let region = getCountryCode( countryState );
+		const euCountries = without(
+			getSetting( 'onboarding', { euCountries: [] } ).euCountries,
+			'GB'
+		);
+		if ( euCountries.includes( region ) ) {
+			region = 'EU';
+		}
+
+		const currencyData = getCurrencyData();
+		return currencyData[ region ] || currencyData.US;
 	}
 
 	onSubmit( values ) {
@@ -63,8 +84,11 @@ class StoreDetails extends Component {
 			isProfileItemsError,
 		} = this.props;
 
+		const currencySettings = this.deriveCurrencySettings( values.countryState );
+
 		recordEvent( 'storeprofiler_store_details_continue', {
 			store_country: getCountryCode( values.countryState ),
+			derived_currency: currencySettings.code,
 			setup_client: values.isClient,
 		} );
 
@@ -75,6 +99,11 @@ class StoreDetails extends Component {
 				woocommerce_default_country: values.countryState,
 				woocommerce_store_city: values.city,
 				woocommerce_store_postcode: values.postCode,
+				woocommerce_currency: currencySettings.code,
+				woocommerce_currency_pos: currencySettings.position,
+				woocommerce_price_thousand_sep: currencySettings.grouping,
+				woocommerce_price_decimal_sep: currencySettings.decimal,
+				woocommerce_price_num_decimals: currencySettings.precision,
 			},
 		} );
 

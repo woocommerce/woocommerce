@@ -346,6 +346,7 @@ class Onboarding {
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
 			$settings['onboarding']['activePlugins']            = self::get_active_plugins();
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
+			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
 		}
 
 		return $settings;
