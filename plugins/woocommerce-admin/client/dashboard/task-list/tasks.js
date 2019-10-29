@@ -12,6 +12,7 @@ import { get } from 'lodash';
  * WooCommerce dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { updateQueryString, getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -113,6 +114,13 @@ export function getTasks( { profileItems, options, query } ) {
 			icon: 'payment',
 			container: <Payments />,
 			completed: paymentsCompleted,
+			onClick: () => {
+				if ( paymentsCompleted ) {
+					window.location = getAdminLink( 'admin.php?page=wc-settings&tab=checkout' );
+					return;
+				}
+				updateQueryString( { task: 'payments' } );
+			},
 			visible: true,
 		},
 	];

@@ -158,7 +158,11 @@ class TaskDashboard extends Component {
 				<i className="material-icons-outlined">{ task.icon }</i>
 			);
 			task.after = <i className="material-icons-outlined">chevron_right</i>;
-			task.onClick = () => updateQueryString( { task: task.key } );
+
+			if ( ! task.onClick ) {
+				task.onClick = () => updateQueryString( { task: task.key } );
+			}
+
 			return task;
 		} );
 

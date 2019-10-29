@@ -344,7 +344,8 @@ class Onboarding {
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
-			$settings['onboarding']['activePlugins'] = self::get_active_plugins();
+			$settings['onboarding']['activePlugins']            = self::get_active_plugins();
+			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 		}
 
 		return $settings;
@@ -368,6 +369,7 @@ class Onboarding {
 		$options[] = 'woocommerce_onboarding_payments';
 		$options[] = 'woocommerce_allow_tracking';
 		$options[] = 'woocommerce_stripe_settings';
+		$options[] = 'woocommerce_default_country';
 
 		return $options;
 	}
@@ -384,6 +386,20 @@ class Onboarding {
 		}
 		$endpoints['jetpackStatus'] = '/jetpack/v4/connection';
 		return $endpoints;
+	}
+
+	/**
+	 * Returns a list of Stripe supported countries. This method can be removed once merged to core.
+	 *
+	 * @param array $endpoints Array of preloaded endpoints.
+	 * @return array
+	 */
+	private static function get_stripe_supported_countries() {
+		// https://stripe.com/global.
+		return array(
+			'AU', 'AT', 'BE', 'CA', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HK', 'IE', 'IT', 'JP', 'LV', 'LT', 'LU', 'MY', 'NL', 'NZ', 'NO',
+			'PL', 'PT', 'SG', 'SK', 'SI', 'ES', 'SE', 'CH', 'GB', 'US',
+		);
 	}
 
 	/**
