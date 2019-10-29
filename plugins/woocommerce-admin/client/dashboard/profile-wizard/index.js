@@ -71,6 +71,15 @@ class ProfileWizard extends Component {
 		this.goToNextStep = this.goToNextStep.bind( this );
 	}
 
+	componentDidUpdate( prevProps ) {
+		const { step: prevStep } = prevProps.query;
+		const { step } = this.props.query;
+
+		if ( prevStep !== step ) {
+			window.document.documentElement.scrollTop = 0;
+		}
+	}
+
 	componentDidMount() {
 		document.documentElement.classList.remove( 'wp-toolbar' );
 		document.body.classList.add( 'woocommerce-onboarding' );

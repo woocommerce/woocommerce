@@ -40,10 +40,11 @@ class TaskDashboard extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { task } = this.props.query;
 		const { task: prevTask } = prevProps.query;
+		const { task } = this.props.query;
 
 		if ( prevTask !== task ) {
+			window.document.documentElement.scrollTop = 0;
 			this.recordTaskView();
 		}
 	}
