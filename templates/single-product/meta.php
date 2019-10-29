@@ -31,13 +31,17 @@ global $product;
 
 	<?php endif; ?>
 
-	<?php if ( apply_filters( 'wc_product_categories_enabled', true ) ) : 
-		echo wc_get_product_category_list( $product->get_id(), ', ', '<span class="posted_in">' . _n( 'Category:', 'Categories:', count( $product->get_category_ids() ), 'woocommerce' ) . ' ', '</span>' ); 
-	endif; ?>
+	<?php if ( apply_filters( 'wc_product_categories_enabled', true ) ) : ?>
 	
-	<?php if ( apply_filters( 'wc_product_tags_enabled', true ) ) :
-		echo wc_get_product_tag_list( $product->get_id(), ', ', '<span class="tagged_as">' . _n( 'Tag:', 'Tags:', count( $product->get_tag_ids() ), 'woocommerce' ) . ' ', '</span>' ); 
-	endif;?>
+	<?php echo wc_get_product_category_list( $product->get_id(), ', ', '<span class="posted_in">' . _n( 'Category:', 'Categories:', count( $product->get_category_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
+
+	<?php endif; ?>
+	
+	<?php if ( apply_filters( 'wc_product_tags_enabled', true ) ) : ?>
+
+	<?php echo wc_get_product_tag_list( $product->get_id(), ', ', '<span class="tagged_as">' . _n( 'Tag:', 'Tags:', count( $product->get_tag_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
+
+	<?php endif;?>
 
 	<?php do_action( 'woocommerce_product_meta_end' ); ?>
 
