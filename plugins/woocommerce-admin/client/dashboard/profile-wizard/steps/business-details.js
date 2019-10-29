@@ -372,7 +372,7 @@ class BusinessDetails extends Component {
 							<Card>
 								<Fragment>
 									<SelectControl
-										label={ __( 'How many products do you plan to add?', 'woocommerce-admin' ) }
+										label={ __( 'How many products do you plan to sell?', 'woocommerce-admin' ) }
 										options={ productCountOptions }
 										required
 										{ ...getInputProps( 'product_count' ) }

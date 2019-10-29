@@ -192,7 +192,7 @@ class Appearance extends Component {
 				key: 'import',
 				label: __( 'Import demo products', 'woocommerce-admin' ),
 				description: __(
-					'We’ll add some products that it will make it easier to see what your store looks like.',
+					'We’ll add some products that will make it easier to see what your store looks like',
 					'woocommerce-admin'
 				),
 				content: (
