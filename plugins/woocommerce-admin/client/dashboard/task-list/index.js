@@ -29,7 +29,8 @@ class TaskDashboard extends Component {
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-task-dashboard__body' );
 
-		this.recordEvent();
+		this.recordTaskView();
+		this.recordTaskListView();
 
 		if ( this.props.inline ) {
 			this.props.updateOptions( {
@@ -38,12 +39,33 @@ class TaskDashboard extends Component {
 		}
 	}
 
+	componentDidUpdate( prevProps ) {
+		const { task } = this.props.query;
+		const { task: prevTask } = prevProps.query;
+
+		if ( prevTask !== task ) {
+			this.recordTaskView();
+		}
+	}
+
 	componentWillUnmount() {
 		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-task-dashboard__body' );
 	}
 
-	recordEvent() {
+	recordTaskView() {
+		const { task } = this.props.query;
+
+		if ( ! task ) {
+			return;
+		}
+
+		recordEvent( 'task_view', {
+			task_name: task,
+		} );
+	}
+
+	recordTaskListView() {
 		if ( this.getCurrentTask() ) {
 			return;
 		}

@@ -104,6 +104,8 @@ class Appearance extends Component {
 		const { createNotice } = this.props;
 		this.setState( { isPending: true } );
 
+		recordEvent( 'tasklist_appearance_import_demo', {} );
+
 		apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/import_sample_products`,
 			method: 'POST',
