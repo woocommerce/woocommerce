@@ -61,6 +61,25 @@ wc_admin_connect_page(
 	)
 );
 
+// WooCommerce > Settings > Tax
+wc_admin_connect_page(
+	array(
+		'id'        => 'woocommerce-settings-tax',
+		'parent'    => 'woocommerce-settings',
+		'screen_id' => 'woocommerce_page_wc-settings-tax',
+		'title'     => array(
+			__( 'Tax', 'woocommerce-admin' ),
+		),
+		'path'      => add_query_arg(
+			array(
+				'page' => 'wc-settings',
+				'tab'  => 'tax',
+			),
+			$admin_page_base
+		),
+	)
+);
+
 // WooCommerce > Settings > Shipping > Shipping zones (default tab).
 wc_admin_connect_page(
 	array(
@@ -219,6 +238,25 @@ foreach ( $wc_email_ids as $email_id ) {
 		)
 	);
 }
+
+// WooCommerce > Settings > Integration
+wc_admin_connect_page(
+	array(
+		'id'        => 'woocommerce-settings-integration',
+		'parent'    => 'woocommerce-settings',
+		'screen_id' => 'woocommerce_page_wc-settings-integration',
+		'title'     => array(
+			__( 'Integration', 'woocommerce-admin' ),
+		),
+		'path'      => add_query_arg(
+			array(
+				'page' => 'wc-settings',
+				'tab'  => 'integration',
+			),
+			$admin_page_base
+		),
+	)
+);
 
 // WooCommerce > Settings > Advanced > Page setup (default tab).
 wc_admin_connect_page(

@@ -23,7 +23,9 @@ const subTasks = [
 		before: <i className="material-icons-outlined">add_box</i>,
 		after: <i className="material-icons-outlined">chevron_right</i>,
 		onClick: () => recordEvent( 'tasklist_add_product', { method: 'manually' } ),
-		href: getAdminLink( 'post-new.php?post_type=product&wc_onboarding_active_task=products' ),
+		href: getAdminLink(
+			'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
+		),
 	},
 	{
 		title: __( 'Import', 'woocommerce-admin' ),
