@@ -79,7 +79,7 @@ class Install {
 		self::create_tables();
 		self::create_events();
 		self::create_notes();
-		self::update_db();
+		self::maybe_update_db_version();
 
 		delete_transient( 'wc_admin_installing' );
 
@@ -279,9 +279,34 @@ class Install {
 	}
 
 	/**
+	 * Is a DB update needed?
+	 *
+	 * @return boolean
+	 */
+	public static function needs_db_update() {
+		$current_db_version = get_option( self::VERSION_OPTION );
+		$updates            = self::get_db_update_callbacks();
+		$update_versions    = array_keys( $updates );
+		usort( $update_versions, 'version_compare' );
+
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
+	}
+
+	/**
+	 * See if we need to show or run database updates during install.
+	 */
+	private static function maybe_update_db_version() {
+		if ( self::needs_db_update() ) {
+			self::update();
+		} else {
+			self::update_db_version();
+		}
+	}
+
+	/**
 	 * Push all needed DB updates to the queue for processing.
 	 */
-	private static function update_db() {
+	private static function update() {
 		$current_db_version = get_option( self::VERSION_OPTION );
 		$loop               = 0;
 
