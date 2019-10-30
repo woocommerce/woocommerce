@@ -288,26 +288,37 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  *
  * Uses wp_get_attachment_image if using an attachment ID @since 3.6.0 to handle responsiveness.
  *
- * @param string $size Image size.
+ * @param string       $size Image size.
+ * @param string|array $attr Optional. Attributes for the image markup. Default empty.
  * @return string
  */
-function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
+function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 	$dimensions        = wc_get_image_size( $size );
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	$default_attr = array(
+		'class' => 'woocommerce-placeholder wp-post-image',
+		'alt'   => __( 'Placeholder', 'woocommerce' ),
+	);
+
+	$attr = wp_parse_args( $attr, $default_attr );
 
 	if ( wp_attachment_is_image( $placeholder_image ) ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
 			false,
-			array(
-				'alt'   => __( 'Placeholder', 'woocommerce' ),
-				'class' => 'woocommerce-placeholder wp-post-image',
-			)
+			$attr
 		);
 	} else {
 		$image      = wc_placeholder_img_src( $size );
-		$image_html = '<img src="' . esc_attr( $image ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />';
+		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
+		$attr = array_map( 'esc_attr', $attr );
+		$image_html = rtrim( '<img src="' . esc_attr( $image ) . '" ' . $hwstring );
+		foreach ( $attr as $name => $value ) {
+			$image_html .= " $name=" . '"' . $value . '"';
+		}
+		$image_html .= ' />';
 	}
 
 	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
