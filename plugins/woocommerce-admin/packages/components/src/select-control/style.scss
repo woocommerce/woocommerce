@@ -75,6 +75,11 @@
 		}
 	}
 
+	.woocommerce-select-control__autofill-input {
+		position: absolute;
+		z-index: -1;
+	}
+
 	.woocommerce-select-control__tags {
 		position: relative;
 		margin: $gap-small 0;

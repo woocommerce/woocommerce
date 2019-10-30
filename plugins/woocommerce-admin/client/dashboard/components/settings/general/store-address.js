@@ -4,7 +4,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useMemo } from 'react';
+import { escapeRegExp } from 'lodash';
+import { Fragment } from '@wordpress/element';
+import { useEffect, useMemo, useState } from 'react';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -70,13 +72,73 @@ export function getCountryStateOptions() {
 }
 
 /**
+ * Get the autofill countryState fields and set value from filtered options.
+ *
+ * @param {Array} options Array of filterable options.
+ * @param {String} countryState The value of the countryState field.
+ * @param {Function} setValue Set value of the countryState input.
+ * @return {Object} React component.
+ */
+export function getCountryStateAutofill( options, countryState, setValue ) {
+	const [ autofillCountry, setAutofillCountry ] = useState( '' );
+	const [ autofillState, setAutofillState ] = useState( '' );
+
+	useEffect(
+		() => {
+			let filteredOptions = [];
+			if ( autofillState.length || autofillCountry.length ) {
+				const countrySearch = new RegExp(
+					escapeRegExp( autofillCountry.replace( /\s/g, '' ) ),
+					'i'
+				);
+				filteredOptions = options.filter( option =>
+					countrySearch.test( option.label.replace( '-', '' ).replace( /\s/g, '' ) )
+				);
+			}
+			if ( autofillCountry.length && autofillState.length ) {
+				const stateSearch = new RegExp( escapeRegExp( autofillState.replace( /\s/g, '' ) ), 'i' );
+				filteredOptions = filteredOptions.filter( option =>
+					stateSearch.test( option.label.replace( '-', '' ).replace( /\s/g, '' ) )
+				);
+			}
+			if ( 1 === filteredOptions.length && countryState !== filteredOptions[ 0 ].key ) {
+				setValue( 'countryState', filteredOptions[ 0 ].key );
+			}
+		},
+		[ autofillCountry, autofillState ]
+	);
+
+	return (
+		<Fragment>
+			<input
+				onChange={ event => setAutofillCountry( event.target.value ) }
+				value={ autofillCountry }
+				name="country"
+				type="text"
+				className="woocommerce-select-control__autofill-input"
+				tabIndex="-1"
+			/>
+
+			<input
+				onChange={ event => setAutofillState( event.target.value ) }
+				value={ autofillState }
+				name="state"
+				type="text"
+				className="woocommerce-select-control__autofill-input"
+				tabIndex="-1"
+			/>
+		</Fragment>
+	);
+}
+
+/**
  * Store address fields.
  *
  * @param {Object} props Props for input components.
  * @return {Object} -
  */
 export function StoreAddress( props ) {
-	const { getInputProps } = props;
+	const { getInputProps, setValue } = props;
 	const countryStateOptions = useMemo( () => getCountryStateOptions(), [] );
 
 	return (
@@ -99,7 +161,13 @@ export function StoreAddress( props ) {
 				options={ countryStateOptions }
 				isSearchable
 				{ ...getInputProps( 'countryState' ) }
-			/>
+			>
+				{ getCountryStateAutofill(
+					countryStateOptions,
+					getInputProps( 'countryState' ).value,
+					setValue
+				) }
+			</SelectControl>
 
 			<TextControl
 				label={ __( 'City', 'woocommerce-admin' ) }

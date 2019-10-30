@@ -25,6 +25,7 @@ export class SelectControl extends Component {
 	static getInitialState() {
 		return {
 			isExpanded: false,
+			isFocused: false,
 			query: '',
 		};
 	}
@@ -40,6 +41,7 @@ export class SelectControl extends Component {
 		this.bindNode = this.bindNode.bind( this );
 		this.decrementSelectedIndex = this.decrementSelectedIndex.bind( this );
 		this.incrementSelectedIndex = this.incrementSelectedIndex.bind( this );
+		this.onAutofillChange = this.onAutofillChange.bind( this );
 		this.search = this.search.bind( this );
 		this.selectOption = this.selectOption.bind( this );
 		this.setExpanded = this.setExpanded.bind( this );
@@ -198,7 +200,7 @@ export class SelectControl extends Component {
 
 	search( query ) {
 		const { hideBeforeSearch, onSearch, options } = this.props;
-		this.setState( { query } );
+		this.setState( { query, isFocused: true } );
 
 		const promise = ( this.activePromise = Promise.resolve( onSearch( options, query ) ).then(
 			searchOptions => {
@@ -226,9 +228,26 @@ export class SelectControl extends Component {
 		) );
 	}
 
+	onAutofillChange( event ) {
+		const { options } = this.props;
+		const filteredOptions = this.getFilteredOptions( options, event.target.value );
+
+		if ( 1 === filteredOptions.length ) {
+			this.selectOption( filteredOptions[ 0 ] );
+		}
+	}
+
 	render() {
-		const { className, inlineTags, instanceId, isSearchable, options } = this.props;
-		const { isExpanded, selectedIndex } = this.state;
+		const {
+			autofill,
+			children,
+			className,
+			inlineTags,
+			instanceId,
+			isSearchable,
+			options,
+		} = this.props;
+		const { isExpanded, isFocused, selectedIndex } = this.state;
 
 		const hasTags = this.hasTags();
 		const { key: selectedKey = '' } = options[ selectedIndex ] || {};
@@ -241,10 +260,21 @@ export class SelectControl extends Component {
 			<div
 				className={ classnames( 'woocommerce-select-control', className, {
 					'has-inline-tags': hasTags && inlineTags,
+					'is-focused': isFocused,
 					'is-searchable': isSearchable,
 				} ) }
 				ref={ this.bindNode }
 			>
+				{ autofill && (
+					<input
+						onChange={ this.onAutofillChange }
+						name={ autofill }
+						type="text"
+						className="woocommerce-select-control__autofill-input"
+						tabIndex="-1"
+					/>
+				) }
+				{ children }
 				<Control
 					{ ...this.props }
 					{ ...this.state }
@@ -280,6 +310,14 @@ export class SelectControl extends Component {
 }
 
 SelectControl.propTypes = {
+	/**
+	 * Name to use for the autofill field, not used if no string is passed.
+	 */
+	autofill: PropTypes.string,
+	/**
+	 * A renderable component (or string) which will be displayed before the `Control` of this component.
+	 */
+	children: PropTypes.node,
 	/**
 	 * Class name applied to parent div.
 	 */
@@ -380,6 +418,7 @@ SelectControl.propTypes = {
 };
 
 SelectControl.defaultProps = {
+	autofill: null,
 	excludeSelectedOptions: true,
 	getSearchExpression: identity,
 	inlineTags: false,

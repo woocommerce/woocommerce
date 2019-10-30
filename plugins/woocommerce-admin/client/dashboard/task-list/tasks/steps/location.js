@@ -81,9 +81,9 @@ export default class StoreLocation extends Component {
 				onSubmitCallback={ this.onSubmit }
 				validate={ validateStoreAddress }
 			>
-				{ ( { getInputProps, handleSubmit } ) => (
+				{ ( { getInputProps, handleSubmit, setValue } ) => (
 					<Fragment>
-						<StoreAddress getInputProps={ getInputProps } />
+						<StoreAddress getInputProps={ getInputProps } setValue={ setValue } />
 						<Button isPrimary onClick={ handleSubmit }>
 							{ __( 'Continue', 'woocommerce-admin' ) }
 						</Button>

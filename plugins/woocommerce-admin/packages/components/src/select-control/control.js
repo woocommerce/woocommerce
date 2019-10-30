@@ -110,6 +110,7 @@ class Control extends Component {
 
 		return (
 			<input
+				autoComplete="off"
 				className="woocommerce-select-control__control-input"
 				id={ `woocommerce-select-control-${ instanceId }__control-input` }
 				ref={ this.input }
@@ -133,14 +134,14 @@ class Control extends Component {
 	}
 
 	getInputValue() {
-		const { isSearchable, multiple, query, selected } = this.props;
+		const { isFocused, isSearchable, multiple, query, selected } = this.props;
 		const selectedValue = selected.length ? selected[ 0 ].label : '';
 
 		if ( ! isSearchable && multiple ) {
 			return '';
 		}
 
-		return isSearchable ? query : selectedValue;
+		return isSearchable && isFocused ? query : selectedValue;
 	}
 
 	render() {

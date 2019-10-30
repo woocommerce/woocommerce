@@ -139,7 +139,7 @@ class StoreDetails extends Component {
 						onSubmitCallback={ this.onSubmit }
 						validate={ validateStoreAddress }
 					>
-						{ ( { getInputProps, handleSubmit, values, isValidForm } ) => (
+						{ ( { getInputProps, handleSubmit, values, isValidForm, setValue } ) => (
 							<Fragment>
 								{ showUsageModal && (
 									<UsageModal
@@ -147,7 +147,7 @@ class StoreDetails extends Component {
 										onClose={ () => this.setState( { showUsageModal: false } ) }
 									/>
 								) }
-								<StoreAddress getInputProps={ getInputProps } />
+								<StoreAddress getInputProps={ getInputProps } setValue={ setValue } />
 								<CheckboxControl
 									label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
 									{ ...getInputProps( 'isClient' ) }
