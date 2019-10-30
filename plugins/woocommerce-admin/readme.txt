@@ -36,7 +36,7 @@ WooCommerce Admin also allows store owners to customize a new dashboard screen w
 
 * WordPress 5.2
 * WooCommerce 3.6.0 or greater
-* PHP version 5.4 or greater. PHP 7.2 or greater is recommended
+* PHP version 5.6.20 or greater. PHP 7.2 or greater is recommended
 * MySQL version 5.0 or greater. MySQL 5.6 or greater is recommended
 
 Visit the [WooCommerce server requirements documentation](https://docs.woocommerce.com/document/server-requirements/) for a detailed list of server requirements.
@@ -47,7 +47,7 @@ Automatic installation is the easiest option, as WordPress handles the file tran
 1. Log in to your WordPress dashboard.
 2. Go to: Plugins > Add New.
 3. Enter “WooCommerce Admin” in the Search field, and view details about its point release, the rating and description.
-4. Select “Install Now” when you’re ready
+4. Select “Install Now” when you’re ready.
 
 = Manual installation =
 
