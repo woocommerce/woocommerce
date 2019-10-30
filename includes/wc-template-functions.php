@@ -80,7 +80,8 @@ add_action( 'template_redirect', 'wc_template_redirect' );
  * @since  2.3.10
  */
 function wc_send_frame_options_header() {
-	if ( is_checkout() || is_account_page() ) {
+
+	if ( ( is_checkout() || is_account_page() ) && ! is_customize_preview() ) {
 		send_frame_options_header();
 	}
 }
