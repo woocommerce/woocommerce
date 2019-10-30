@@ -25,7 +25,6 @@
     * [Flag](components/packages/flag/README.md)
     * [Form](components/packages/form/README.md)
     * [Gravatar](components/packages/gravatar/README.md)
-    * [ImageAsset](components/packages/image-asset/README.md)
     * [Link](components/packages/link/README.md)
     * [List](components/packages/list/README.md)
     * [OrderStatus](components/packages/order-status/README.md)
