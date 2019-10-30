@@ -429,6 +429,11 @@ function wc_render_action_buttons( $actions ) {
 function wc_render_invalid_variation_notice( $product_object ) {
 	global $wpdb;
 
+	// Give ability for extensions to hide this notice.
+	if ( ! apply_filters( 'show_invalid_variations_notice', true ) ) {
+		return;
+	}
+
 	$variation_ids = $product_object ? $product_object->get_children() : array();
 
 	if ( empty( $variation_ids ) ) {
