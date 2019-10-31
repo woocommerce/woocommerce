@@ -354,7 +354,7 @@ class WC_Countries {
 	 * @return string[]
 	 */
 	public function get_european_union_countries( $deprecated = '' ) {
-		$countries = array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
+		$countries = array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
 
 		if ( ! empty( $deprecated ) ) {
 			wc_deprecated_argument( 'type', '3.9.0', 'Use the WC_Countries::get_vat_countries method instead.' );
@@ -374,8 +374,9 @@ class WC_Countries {
 		$eu_countries = get_european_union_countries();
 
 		$countries = array(
-			'MC',
+			'GB',
 			'IM',
+			'MC',
 			'NO',
 		);
 
