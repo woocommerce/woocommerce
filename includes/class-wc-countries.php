@@ -350,20 +350,36 @@ class WC_Countries {
 	/**
 	 * Gets an array of countries in the EU.
 	 *
-	 * MC (monaco) and IM (isle of man, part of UK) also use VAT.
-	 *
-	 * @param  string $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
+	 * @param  string $deprecated Function used to return VAT countries based on this.
 	 * @return string[]
 	 */
-	public function get_european_union_countries( $type = '' ) {
+	public function get_european_union_countries( $deprecated = '' ) {
 		$countries = array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
 
-		if ( 'eu_vat' === $type ) {
-			$countries[] = 'MC';
-			$countries[] = 'IM';
+		if ( ! empty( $deprecated ) ) {
+			wc_deprecated_argument( 'type', '3.9.0', 'Use the WC_Countries::get_vat_countries method instead.' );
+			$countries = get_vat_countries();
 		}
 
-		return apply_filters( 'woocommerce_european_union_countries', $countries, $type );
+		return apply_filters( 'woocommerce_european_union_countries', $countries, $deprecated );
+	}
+
+	/**
+	 * Gets an array of countries using VAT.
+	 *
+	 * @since 3.9.0
+	 * @return array of country codes.
+	 */
+	public function get_vat_countries() {
+		$eu_countries = get_european_union_countries();
+
+		$countries = array(
+			'MC',
+			'IM',
+			'NO',
+		);
+
+		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $countries ) );
 	}
 
 	/**
@@ -400,7 +416,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function tax_or_vat() {
-		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ), true ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), $this->get_vat_countries(), true ) ? __( 'VAT', 'woocommerce' ) : __( 'Tax', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_tax_or_vat', $return );
 	}
@@ -411,7 +427,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function inc_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ), true ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), $this->get_vat_countries(), true ) ? __( '(incl. VAT)', 'woocommerce' ) : __( '(incl. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_inc_tax_or_vat', $return );
 	}
@@ -422,7 +438,7 @@ class WC_Countries {
 	 * @return string
 	 */
 	public function ex_tax_or_vat() {
-		$return = in_array( $this->get_base_country(), array_merge( $this->get_european_union_countries( 'eu_vat' ), array( 'NO' ) ), true ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
+		$return = in_array( $this->get_base_country(), $this->get_vat_countries(), true ) ? __( '(ex. VAT)', 'woocommerce' ) : __( '(ex. tax)', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_countries_ex_tax_or_vat', $return );
 	}
