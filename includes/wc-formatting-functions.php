@@ -1117,7 +1117,8 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 
 	if ( '' !== $value ) {
-		wp_schedule_single_event( time() + ( absint( $value ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		$duration = apply_filters( 'woocommerce_cancel_unpaid_orders_duration', $value );
+		wp_schedule_single_event( time() + ( absint( $duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 	}
 
 	return $value;

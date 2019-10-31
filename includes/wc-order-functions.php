@@ -909,6 +909,7 @@ function wc_cancel_unpaid_orders() {
 		}
 	}
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	$held_duration = apply_filters( 'woocommerce_cancel_unpaid_orders_duration', $held_duration );
 	wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 }
 add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
