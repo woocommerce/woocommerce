@@ -198,4 +198,36 @@ class WC_Tests_Countries extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'AU', $locales );
 		$this->assertArrayHasKey( 'default', $locales );
 	}
+
+	/**
+	 * Test get_european_union_countries.
+	 *
+	 * @return void
+	 */
+	public function test_get_european_union_countries() {
+		// After Brexit there should be 27 countries in the EU.
+		$countries = new WC_Countries();
+		$this->assertCount( 27, count( $countries->get_european_union_countries() ) );
+	}
+
+	/**
+	 * Test get_vat_countries.
+	 *
+	 * @return void
+	 */
+	public function test_get_vat_countries() {
+		$countries = new WC_Countries();
+		// All EU countries use VAT.
+		$eu_countries = $countries->get_european_union_countries();
+
+		// Additional countries using VAT.
+		$vat_countries = array(
+			'GB',
+			'IM',
+			'MC',
+			'NO',
+		);
+
+		$this->assertEquals( array_merge( $eu_countries, $vat_countries ), $countries->get_vat_countries() );
+	}
 }
