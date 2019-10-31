@@ -207,7 +207,7 @@ class WC_Tests_Countries extends WC_Unit_Test_Case {
 	public function test_get_european_union_countries() {
 		// After Brexit there should be 27 countries in the EU.
 		$countries = new WC_Countries();
-		$this->assertCount( 27, count( $countries->get_european_union_countries() ) );
+		$this->assertCount( 27, $countries->get_european_union_countries() );
 	}
 
 	/**

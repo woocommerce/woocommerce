@@ -371,7 +371,7 @@ class WC_Countries {
 	 * @return array of country codes.
 	 */
 	public function get_vat_countries() {
-		$eu_countries = get_european_union_countries();
+		$eu_countries = $this->get_european_union_countries();
 
 		$countries = array(
 			'GB',
