@@ -24,10 +24,8 @@ class Products extends TestCase {
 		wp_set_current_user( 0 );
 
 		$this->products = [];
-		$this->products[0] = ProductHelper::create_simple_product( false );
-		$this->products[0]->save();
-		$this->products[1] = ProductHelper::create_simple_product( false );
-		$this->products[1]->save();
+		$this->products[0] = ProductHelper::create_simple_product( true );
+		$this->products[1] = ProductHelper::create_simple_product( true );
 	}
 
 	/**
@@ -55,6 +53,11 @@ class Products extends TestCase {
 		$this->assertEquals( $this->products[0]->get_price_html(), $data['price_html'] );
 		$this->assertEquals( $this->products[0]->get_average_rating(), $data['average_rating'] );
 		$this->assertEquals( $this->products[0]->get_review_count(), $data['review_count'] );
+		$this->assertEquals( $this->products[0]->has_options(), $data['has_options'] );
+		$this->assertEquals( $this->products[0]->is_purchasable(), $data['is_purchasable'] );
+		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
+		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']['text'] );
+		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']['description'] );
 	}
 
 	/**
@@ -77,6 +80,10 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'average_rating', $data[0] );
 		$this->assertArrayHasKey( 'review_count', $data[0] );
 		$this->assertArrayHasKey( 'images', $data[0] );
+		$this->assertArrayHasKey( 'has_options', $data[0] );
+		$this->assertArrayHasKey( 'is_purchasable', $data[0] );
+		$this->assertArrayHasKey( 'is_in_stock', $data[0] );
+		$this->assertArrayHasKey( 'add_to_cart', $data[0] );
 	}
 
 	/**
@@ -97,6 +104,10 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'average_rating', $schema['properties'] );
 		$this->assertArrayHasKey( 'review_count', $schema['properties'] );
 		$this->assertArrayHasKey( 'images', $schema['properties'] );
+		$this->assertArrayHasKey( 'has_options', $schema['properties'] );
+		$this->assertArrayHasKey( 'is_purchasable', $schema['properties'] );
+		$this->assertArrayHasKey( 'is_in_stock', $schema['properties'] );
+		$this->assertArrayHasKey( 'add_to_cart', $schema['properties'] );
 	}
 
 	/**
@@ -117,6 +128,10 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'average_rating', $response->get_data() );
 		$this->assertArrayHasKey( 'review_count', $response->get_data() );
 		$this->assertArrayHasKey( 'images', $response->get_data() );
+		$this->assertArrayHasKey( 'has_options', $response->get_data() );
+		$this->assertArrayHasKey( 'is_purchasable', $response->get_data() );
+		$this->assertArrayHasKey( 'is_in_stock', $response->get_data() );
+		$this->assertArrayHasKey( 'add_to_cart', $response->get_data() );
 	}
 
 	/**

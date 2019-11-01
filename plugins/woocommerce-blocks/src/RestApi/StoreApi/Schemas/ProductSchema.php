@@ -119,6 +119,48 @@ class ProductSchema extends AbstractSchema {
 					),
 				),
 			),
+			'has_options'    => array(
+				'description' => __( 'Does the product have options?', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'is_purchasable' => array(
+				'description' => __( 'Is the product purchasable?', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'is_in_stock'    => array(
+				'description' => __( 'Is the product in stock?', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'add_to_cart'    => array(
+				'description' => __( 'Add to cart button parameters.', 'woo-gutenberg-products-block' ),
+				'type'        => 'object',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'text'        => array(
+							'description' => __( 'Button text.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'Button description.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+					),
+				),
+			),
+
 		];
 	}
 
@@ -141,6 +183,13 @@ class ProductSchema extends AbstractSchema {
 			'average_rating' => $product->get_average_rating(),
 			'review_count'   => $product->get_review_count(),
 			'images'         => ( new ProductImages() )->images_to_array( $product ),
+			'has_options'    => $product->has_options(),
+			'is_purchasable' => $product->is_purchasable(),
+			'is_in_stock'    => $product->is_in_stock(),
+			'add_to_cart'    => [
+				'text'        => $product->add_to_cart_text(),
+				'description' => $product->add_to_cart_description(),
+			],
 		];
 	}
 }
