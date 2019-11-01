@@ -2,7 +2,7 @@
 Contributors: automattic
 Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activity, notices, insights, stats, woo commerce, woocommerce
 Requires at least: 5.2.0
-Tested up to: 5.2.4
+Tested up to: 5.3.0
 Requires PHP: 5.6.20
 Stable tag: 1.0.0
 License: GPLv3
