@@ -51,7 +51,7 @@ class ThemePreview extends Component {
 	}
 
 	render() {
-		const { onChoose, onClose, theme } = this.props;
+		const { isBusy, onChoose, onClose, theme } = this.props;
 		const { demo_url, slug, title } = theme;
 		const { device: currentDevice } = this.state;
 
@@ -86,7 +86,7 @@ class ThemePreview extends Component {
 							</Button>
 						) ) }
 					</div>
-					<Button isPrimary onClick={ () => onChoose( slug, 'preview' ) }>
+					<Button isPrimary onClick={ () => onChoose( slug, 'preview' ) } isBusy={ isBusy }>
 						{ __( 'Choose', 'woocommerce-admin' ) }
 					</Button>
 				</div>

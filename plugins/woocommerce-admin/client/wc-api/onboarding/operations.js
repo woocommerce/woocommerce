@@ -99,7 +99,12 @@ function profileItemToResource( items ) {
 		resources[ getResourceName( resourceName, key ) ] = { data: item };
 	} );
 
-	return resources;
+	return {
+		[ resourceName ]: {
+			lastReceived: Date.now(),
+		},
+		...resources,
+	};
 }
 
 function readActivePlugins( resourceNames, fetch ) {

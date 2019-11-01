@@ -3,10 +3,13 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
+import { get } from 'lodash';
+import { getAdminLink, updateQueryString } from '@woocommerce/navigation';
 import Gridicon from 'gridicons';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -25,6 +28,7 @@ import './style.scss';
 import { recordEvent } from 'lib/tracks';
 import ThemeUploader from './uploader';
 import ThemePreview from './preview';
+import { getNewPath } from '../../../../../packages/navigation/src';
 
 class Theme extends Component {
 	constructor() {
@@ -32,6 +36,7 @@ class Theme extends Component {
 
 		this.state = {
 			activeTab: 'all',
+			chosen: null,
 			demo: null,
 			uploadedThemes: [],
 		};
@@ -43,9 +48,58 @@ class Theme extends Component {
 		this.openDemo = this.openDemo.bind( this );
 	}
 
+	componentWillUnmount() {
+		const productIds = this.getProductIds();
+		if ( productIds.length ) {
+			this.redirectToCart();
+		} else {
+			updateQueryString( {}, '/', {} );
+		}
+	}
+
+	getProductIds() {
+		const productIds = [];
+		const profileItems = get( this.props, 'profileItems', {} );
+
+		profileItems.product_types.forEach( product_type => {
+			if (
+				wcSettings.onboarding.productTypes[ product_type ] &&
+				wcSettings.onboarding.productTypes[ product_type ].product
+			) {
+				productIds.push( wcSettings.onboarding.productTypes[ product_type ].product );
+			}
+		} );
+
+		const theme = wcSettings.onboarding.themes.find(
+			themeData => themeData.slug === profileItems.theme
+		);
+
+		if ( theme && theme.id && ! theme.is_installed ) {
+			productIds.push( theme.id );
+		}
+
+		return productIds;
+	}
+
+	redirectToCart() {
+		if ( ! window.wcAdminFeatures.onboarding ) {
+			return;
+		}
+
+		document.body.classList.add( 'woocommerce-admin-is-loading' );
+
+		const productIds = this.getProductIds();
+		const url = addQueryArgs( 'https://woocommerce.com/cart', {
+			'wccom-back': getAdminLink( getNewPath( {}, '/', {} ) ),
+			'wccom-replace-with': productIds.join( ',' ),
+		} );
+		window.location = url;
+	}
+
 	async onChoose( theme, location = '' ) {
 		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
+		this.setState( { chosen: theme } );
 		recordEvent( 'storeprofiler_store_theme_choose', { theme, location } );
 		await updateProfileItems( { theme } );
 
@@ -53,6 +107,7 @@ class Theme extends Component {
 			// @todo This should send profile information to woocommerce.com.
 			goToNextStep();
 		} else {
+			this.setState( { chosen: null } );
 			createNotice(
 				'error',
 				__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
@@ -75,6 +130,7 @@ class Theme extends Component {
 
 	renderTheme( theme ) {
 		const { demo_url, has_woocommerce_support, image, slug, title } = theme;
+		const { chosen } = this.state;
 
 		return (
 			<Card className="woocommerce-profile-wizard__theme" key={ theme.slug }>
@@ -102,6 +158,7 @@ class Theme extends Component {
 							isPrimary={ Boolean( demo_url ) }
 							isDefault={ ! Boolean( demo_url ) }
 							onClick={ () => this.onChoose( slug, 'card' ) }
+							isBusy={ chosen === slug }
 						>
 							{ __( 'Choose', 'woocommerce-admin' ) }
 						</Button>
@@ -170,7 +227,7 @@ class Theme extends Component {
 
 	render() {
 		const themes = this.getThemes();
-		const { demo } = this.state;
+		const { chosen, demo } = this.state;
 
 		return (
 			<Fragment>
@@ -210,7 +267,12 @@ class Theme extends Component {
 					) }
 				</TabPanel>
 				{ demo && (
-					<ThemePreview theme={ demo } onChoose={ this.onChoose } onClose={ this.onClosePreview } />
+					<ThemePreview
+						theme={ demo }
+						onChoose={ this.onChoose }
+						onClose={ this.onClosePreview }
+						isBusy={ chosen === demo.slug }
+					/>
 				) }
 			</Fragment>
 		);
@@ -219,11 +281,12 @@ class Theme extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
 
-		const isError = Boolean( getProfileItemsError() );
-
-		return { isError };
+		return {
+			isError: Boolean( getProfileItemsError() ),
+			profileItems: getProfileItems(),
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { updateProfileItems } = dispatch( 'wc-api' );
