@@ -3,7 +3,7 @@
  */
 import { QUERY_STATE_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect, useCallback } from '@wordpress/element';
 import { useShallowEqual } from './use-shallow-equal';
 
 /**
@@ -52,8 +52,16 @@ export const useQueryStateByKey = ( context, queryKey ) => {
 		},
 		[ context, queryKey ]
 	);
+
 	const { setQueryValue } = useDispatch( storeKey );
-	return [ queryValue, setQueryValue ];
+	const setQueryValueByKey = useCallback(
+		( value ) => {
+			setQueryValue( context, queryKey, value );
+		},
+		[ context, queryKey ]
+	);
+
+	return [ queryValue, setQueryValueByKey ];
 };
 
 /**
