@@ -88,7 +88,15 @@ function getReviewContent( review ) {
 function getReviewProductName( review ) {
 	return (
 		<div className="wc-block-review-list-item__product">
-			<a href={ review.product_permalink }>{ review.product_name }</a>
+			<a
+				href={ review.product_permalink }
+				dangerouslySetInnerHTML={ {
+					// `product_name` might have html entities for things like
+					// emdash. So to display properly we need to allow the
+					// browser to render.
+					__html: review.product_name,
+				} }
+			/>
 		</div>
 	);
 }
@@ -193,4 +201,13 @@ ReviewListItem.propTypes = {
 	review: PropTypes.object,
 };
 
+/**
+ * BE AWARE. ReviewListItem expects product data that is equivalent to what is
+ * made avaialble for output in a public view. Thus content that may contain
+ * html data is not sanitized further.
+ *
+ * Currently the following data is trusted (assumed to already be sanitized):
+ * - `review.review` (review content).
+ * - `review.product_name` (the product title)
+ */
 export default ReviewListItem;
