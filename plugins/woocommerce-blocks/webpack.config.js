@@ -106,7 +106,7 @@ const LegacyBlocksConfig = {
 				getAlias( { pathPart: 'legacy' } )
 			),
 		],
-		exclude: [ 'all-products' ],
+		exclude: [ 'all-products', 'price-filter' ],
 	} ),
 };
 
@@ -122,7 +122,7 @@ const LegacyFrontendBlocksConfig = {
 				getAlias( { pathPart: 'legacy' } )
 			),
 		],
-		exclude: [ 'all-products' ],
+		exclude: [ 'all-products', 'price-filter' ],
 	} ),
 };
 

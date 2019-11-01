@@ -28,10 +28,12 @@
 }
 
 // Adds animation to placeholder section
-@mixin placeholder( $lighten-percentage: 30% ) {
-	animation: loading-fade 1.6s ease-in-out infinite;
-	background-color: $core-grey-light-500;
+@mixin placeholder() {
+	animation: loading-fade 1.2s ease-in-out infinite;
+	background-color: $core-grey-light-500 !important;
 	color: transparent;
+	border: 0;
+	box-shadow: none;
 
 	&::after {
 		content: "\00a0";

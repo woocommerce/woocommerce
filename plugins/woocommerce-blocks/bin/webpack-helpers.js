@@ -114,11 +114,13 @@ const mainEntry = {
 	'product-tag': './assets/js/blocks/product-tag/index.js',
 	'featured-category': './assets/js/blocks/featured-category/index.js',
 	'all-products': './assets/js/blocks/products/all-products/index.js',
+	'price-filter': './assets/js/blocks/price-filter/index.js',
 };
 
 const frontEndEntry = {
 	reviews: './assets/js/blocks/reviews/frontend.js',
 	'all-products': './assets/js/blocks/products/all-products/frontend.js',
+	'price-filter': './assets/js/blocks/price-filter/frontend.js',
 };
 
 const getEntryConfig = ( main = true, exclude = [] ) => {

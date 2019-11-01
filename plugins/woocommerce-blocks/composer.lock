@@ -440,16 +440,16 @@
         },
         {
             "name": "phpcompatibility/php-compatibility",
-            "version": "9.3.1",
+            "version": "9.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
-                "reference": "9999344e47e7af6b00e1a898eacc4e4368fb7196"
+                "reference": "bfca2be3992f40e92206e5a7ebe5eaee37280b58"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/9999344e47e7af6b00e1a898eacc4e4368fb7196",
-                "reference": "9999344e47e7af6b00e1a898eacc4e4368fb7196",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/bfca2be3992f40e92206e5a7ebe5eaee37280b58",
+                "reference": "bfca2be3992f40e92206e5a7ebe5eaee37280b58",
                 "shasum": ""
             },
             "require": {
@@ -494,20 +494,20 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2019-09-05T18:36:49+00:00"
+            "time": "2019-10-16T21:24:24+00:00"
         },
         {
             "name": "phpcompatibility/phpcompatibility-paragonie",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie.git",
-                "reference": "b1bb79a7cab1fb856b56f1b5cf110b6e52d8e936"
+                "reference": "94b2388c4fe99e9e2ef0772e280fa0eafa1d0603"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityParagonie/zipball/b1bb79a7cab1fb856b56f1b5cf110b6e52d8e936",
-                "reference": "b1bb79a7cab1fb856b56f1b5cf110b6e52d8e936",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityParagonie/zipball/94b2388c4fe99e9e2ef0772e280fa0eafa1d0603",
+                "reference": "94b2388c4fe99e9e2ef0772e280fa0eafa1d0603",
                 "shasum": ""
             },
             "require": {
@@ -546,7 +546,7 @@
                 "polyfill",
                 "standards"
             ],
-            "time": "2019-08-28T15:58:19+00:00"
+            "time": "2019-10-16T21:41:26+00:00"
         },
         {
             "name": "phpcompatibility/phpcompatibility-wp",
@@ -1765,16 +1765,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.5.0",
+            "version": "3.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "0afebf16a2e7f1e434920fa976253576151effe9"
+                "reference": "65b12cdeaaa6cd276d4c3033a95b9b88b12701e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/0afebf16a2e7f1e434920fa976253576151effe9",
-                "reference": "0afebf16a2e7f1e434920fa976253576151effe9",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/65b12cdeaaa6cd276d4c3033a95b9b88b12701e7",
+                "reference": "65b12cdeaaa6cd276d4c3033a95b9b88b12701e7",
                 "shasum": ""
             },
             "require": {
@@ -1812,7 +1812,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2019-09-26T23:12:26+00:00"
+            "time": "2019-10-28T04:36:32+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
