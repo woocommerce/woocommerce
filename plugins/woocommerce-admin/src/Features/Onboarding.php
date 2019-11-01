@@ -366,6 +366,7 @@ class Onboarding {
 		}
 
 		$options[] = 'wc_connect_options';
+		$options[] = 'woocommerce_task_list_welcome_modal_dismissed';
 		$options[] = 'woocommerce_task_list_prompt_shown';
 		$options[] = 'woocommerce_onboarding_payments';
 		$options[] = 'woocommerce_allow_tracking';

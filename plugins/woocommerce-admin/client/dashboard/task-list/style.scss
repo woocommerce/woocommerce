@@ -16,7 +16,8 @@
 		margin-right: auto;
 	}
 
-	.muriel-button.components-button {
+	.muriel-button.components-button,
+	.components-modal__frame .components-button.is-button {
 		height: 40px;
 		min-width: 106px;
 		margin: $gap $gap-smaller 0 0;
@@ -68,6 +69,82 @@
 
 	#wpbody-content {
 		position: relative;
+	}
+
+	.components-modal__screen-overlay {
+		background: rgba(43, 45, 47, 0.4);
+	}
+
+	.components-modal__frame {
+		.components-modal__header {
+			border-bottom: 0;
+			margin-bottom: 0;
+		}
+
+		.woocommerce-task-payments__stripe-error-wrapper {
+			align-items: flex-end;
+			flex-grow: 1;
+			display: flex;
+			flex-direction: column;
+		}
+	}
+
+	.woocommerce-task-dashboard__welcome-modal {
+		width: 400px;
+
+		.components-modal__header-heading-container {
+			justify-content: center;
+		}
+
+		.components-modal__header-heading {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			font-size: 20px;
+		}
+
+		.woocommerce-task-dashboard__welcome-modal-icon {
+			font-size: 56px;
+			margin-bottom: $gap;
+		}
+
+		.components-modal__header {
+			height: auto;
+			margin-bottom: $gap;
+			position: static;
+		}
+
+		.components-modal__content {
+			padding: $gap * 2;
+			text-align: center;
+		}
+
+		.woocommerce-task-dashboard__welcome-modal-message p {
+			font-size: 16px;
+			color: $studio-gray-60;
+		}
+
+		.components-modal__header .components-icon-button {
+			position: absolute;
+			left: auto;
+			right: 0;
+			top: 0;
+			padding: $gap;
+
+			&:hover {
+				box-shadow: none;
+			}
+
+			svg {
+				width: 30px;
+				height: 30px;
+			}
+
+			svg path {
+				fill: $studio-gray-60;
+			}
+		}
 	}
 }
 
@@ -240,20 +317,6 @@
 			padding-left: $gap-small;
 			color: #1a1a1a;
 		}
-	}
-}
-
-.components-modal__frame.woocommerce-task-payments__stripe-error-modal {
-	.components-modal__header {
-		border-bottom: 0;
-		margin-bottom: 0;
-	}
-
-	.woocommerce-task-payments__stripe-error-wrapper {
-		align-items: flex-end;
-		flex-grow: 1;
-		display: flex;
-		flex-direction: column;
 	}
 }
 
