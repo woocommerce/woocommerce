@@ -14,3 +14,5 @@ export { default as IconReviewsByProduct } from './reviews-by-product';
 export { default as IconReviewsByCategory } from './reviews-by-category';
 export { default as IconWidgets } from './widgets';
 export { default as IconWoo } from './woo';
+export { default as IconMoney } from './money';
+export { default as IconExternal } from './external';
