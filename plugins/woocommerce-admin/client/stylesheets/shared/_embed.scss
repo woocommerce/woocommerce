@@ -18,6 +18,9 @@
 				width: calc(100% - 40px);
 			}
 		}
+		.wrap {
+			padding: 0;
+		}
 	}
 
 	#woocommerce-embedded-root.is-embed-loading + #wpbody .wrap {
