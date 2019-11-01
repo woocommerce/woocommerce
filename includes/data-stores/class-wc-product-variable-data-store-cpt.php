@@ -286,84 +286,89 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'sale_price'    => array(),
 				);
 
-				$variation_ids = $product->get_visible_children();
+				// Allow 3rd parties to skip a full calculation of this data in favor of, for example, a background task.
+				$skip_price_data = apply_filters( 'woocommerce_variation_skip_price_data', false, $product );
 
-				if ( is_callable( '_prime_post_caches' ) ) {
-					_prime_post_caches( $variation_ids );
-				}
+				if ( ! $skip_price_data ) {
+					$variation_ids = $product->get_visible_children();
 
-				foreach ( $variation_ids as $variation_id ) {
-					$variation = wc_get_product( $variation_id );
+					if ( is_callable( '_prime_post_caches' ) ) {
+						_prime_post_caches( $variation_ids );
+					}
 
-					if ( $variation ) {
-						$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
-						$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price( 'edit' ), $variation, $product );
-						$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
+					foreach ( $variation_ids as $variation_id ) {
+						$variation = wc_get_product( $variation_id );
 
-						// Skip empty prices.
-						if ( '' === $price ) {
-							continue;
-						}
+						if ( $variation ) {
+							$price         = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
+							$regular_price = apply_filters( 'woocommerce_variation_prices_regular_price', $variation->get_regular_price( 'edit' ), $variation, $product );
+							$sale_price    = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
 
-						// If sale price does not equal price, the product is not yet on sale.
-						if ( $sale_price === $regular_price || $sale_price !== $price ) {
-							$sale_price = $regular_price;
-						}
-
-						// If we are getting prices for display, we need to account for taxes.
-						if ( $for_display ) {
-							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
-								$price         = '' === $price ? '' : wc_get_price_including_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $price,
-									)
-								);
-								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $regular_price,
-									)
-								);
-								$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $sale_price,
-									)
-								);
-							} else {
-								$price         = '' === $price ? '' : wc_get_price_excluding_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $price,
-									)
-								);
-								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $regular_price,
-									)
-								);
-								$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $sale_price,
-									)
-								);
+							// Skip empty prices.
+							if ( '' === $price ) {
+								continue;
 							}
+
+							// If sale price does not equal price, the product is not yet on sale.
+							if ( $sale_price === $regular_price || $sale_price !== $price ) {
+								$sale_price = $regular_price;
+							}
+
+							// If we are getting prices for display, we need to account for taxes.
+							if ( $for_display ) {
+								if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
+									$price         = '' === $price ? '' : wc_get_price_including_tax(
+										$variation,
+										array(
+											'qty'   => 1,
+											'price' => $price,
+										)
+									);
+									$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
+										$variation,
+										array(
+											'qty'   => 1,
+											'price' => $regular_price,
+										)
+									);
+									$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
+										$variation,
+										array(
+											'qty'   => 1,
+											'price' => $sale_price,
+										)
+									);
+								} else {
+									$price         = '' === $price ? '' : wc_get_price_excluding_tax(
+										$variation,
+										array(
+											'qty'   => 1,
+											'price' => $price,
+										)
+									);
+									$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
+										$variation,
+										array(
+											'qty'   => 1,
+											'price' => $regular_price,
+										)
+									);
+									$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
+										$variation,
+										array(
+											'qty'   => 1,
+											'price' => $sale_price,
+										)
+									);
+								}
+							}
+
+							$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
+							$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
+							$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+
+							$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
 						}
-
-						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
-						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
-						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
-
-						$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
 					}
 				}
 
@@ -372,7 +377,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$transient_cached_prices_array[ $price_hash ][ $key ] = $values;
 				}
 
-				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
+				if ( ! $skip_price_data ) {
+					set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
+				}
 			}
 
 			/**
