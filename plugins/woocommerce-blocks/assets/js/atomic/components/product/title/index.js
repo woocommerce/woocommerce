@@ -24,7 +24,7 @@ const ProductTitle = ( { className, product, headingLevel, productLink } ) => {
 					{ productName }
 				</a>
 			) : (
-				{ productName }
+				productName
 			) }
 		</TagName>
 	);
