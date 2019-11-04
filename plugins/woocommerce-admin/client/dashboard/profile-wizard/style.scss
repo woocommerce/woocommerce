@@ -215,7 +215,7 @@
 	}
 
 	.woocommerce-profile-wizard__checkbox-group {
-		margin: -$gap -$gap 0 -$gap;
+		margin: #{-$gap} #{-$gap} 0 -#{$gap};
 
 		.muriel-checkbox {
 			margin-top: 0;
