@@ -57,7 +57,11 @@
 		justify-content: center;
 		background: $studio-white;
 
-		svg > g {
+		svg.woocommerce-profile-wizard__header-logo > g {
+			transform: translateX(12%);
+		}
+
+		svg.woocommerce-profile-wizard__header-logo-with-jetpack > g {
 			transform: translateX(25%);
 		}
 
