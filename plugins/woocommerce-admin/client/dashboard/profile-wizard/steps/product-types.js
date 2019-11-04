@@ -96,7 +96,7 @@ class ProductTypes extends Component {
 				</H>
 				<p>{ __( 'Choose any that apply' ) }</p>
 
-				<Card className="has-checkbox-group">
+				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( productTypes ).map( slug => {
 							const helpText = interpolateComponents( {
