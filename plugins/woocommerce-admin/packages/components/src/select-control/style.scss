@@ -31,6 +31,8 @@
 
 		.components-base-control__label {
 			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
 			color: $studio-gray-50;
 			font-size: 16px;
 		}
