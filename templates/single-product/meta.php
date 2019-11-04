@@ -12,7 +12,7 @@
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @package 	WooCommerce/Templates
- * @version     3.0.0
+ * @version     3.8.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,9 +31,17 @@ global $product;
 
 	<?php endif; ?>
 
+	<?php if ( wc_product_categories_enabled() ) : ?>
+
 	<?php echo wc_get_product_category_list( $product->get_id(), ', ', '<span class="posted_in">' . _n( 'Category:', 'Categories:', count( $product->get_category_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
 
+	<?php endif; ?>
+
+	<?php if ( wc_product_tags_enabled() ) : ?>
+
 	<?php echo wc_get_product_tag_list( $product->get_id(), ', ', '<span class="tagged_as">' . _n( 'Tag:', 'Tags:', count( $product->get_tag_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
+
+	<?php endif; ?>
 
 	<?php do_action( 'woocommerce_product_meta_end' ); ?>
 

@@ -125,8 +125,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$show_columns['price']        = __( 'Price', 'woocommerce' );
-		$show_columns['product_cat']  = __( 'Categories', 'woocommerce' );
-		$show_columns['product_tag']  = __( 'Tags', 'woocommerce' );
+		if ( wc_product_categories_enabled() ) {
+			$show_columns['product_cat']  = __( 'Categories', 'woocommerce' );
+		}
+		if ( wc_product_tags_enabled() ) {
+			$show_columns['product_tag']  = __( 'Tags', 'woocommerce' );
+		}
 		$show_columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
 		$show_columns['date']         = __( 'Date', 'woocommerce' );
 

@@ -74,6 +74,24 @@ function wc_product_sku_enabled() {
 }
 
 /**
+ * Returns whether or not product categories are enabled.
+ *
+ * @return bool
+ */
+function wc_product_categories_enabled() {
+	return apply_filters( 'wc_product_categories_enabled', true );
+}
+
+/**
+ * Returns whether or not product tags are enabled.
+ *
+ * @return bool
+ */
+function wc_product_tags_enabled() {
+	return apply_filters( 'wc_product_tags_enabled', true );
+}
+
+/**
  * Returns whether or not product weights are enabled.
  *
  * @return bool
