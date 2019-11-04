@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Button, CheckboxControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -43,6 +44,10 @@ class StoreDetails extends Component {
 
 		this.onContinue = this.onContinue.bind( this );
 		this.onSubmit = this.onSubmit.bind( this );
+	}
+
+	componentWillUnmount() {
+		apiFetch( { path: '/wc-admin/v1/onboarding/tasks/create_store_pages', method: 'POST' } );
 	}
 
 	deriveCurrencySettings( countryState ) {
@@ -175,11 +180,11 @@ export default compose(
 			getProfileItems,
 		} = select( 'wc-api' );
 
-		const profileItems = getProfileItems();
-
 		const settings = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
+
+		const profileItems = getProfileItems();
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 
 		return {

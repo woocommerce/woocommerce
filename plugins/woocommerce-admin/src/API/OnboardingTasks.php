@@ -52,12 +52,25 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/create_store_pages',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_store_pages' ),
+					'permission_callback' => array( $this, 'create_pages_permission_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/create_homepage',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_homepage' ),
-					'permission_callback' => array( $this, 'create_homepage_permission_check' ),
+					'permission_callback' => array( $this, 'create_pages_permission_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -84,9 +97,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function create_homepage_permission_check( $request ) {
+	public function create_pages_permission_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'page', 'create' ) || ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create a new homepage.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create new pages.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -359,6 +372,14 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		}
 
 		return $images_for_post;
+	}
+
+	/*
+	 * Creates base store starter pages like my account and checkout.
+	 * Note that WC_Install::create_pages already checks if pages exist before creating them again.
+	 */
+	public static function create_store_pages() {
+		\WC_Install::create_pages();
 	}
 
 	/**
