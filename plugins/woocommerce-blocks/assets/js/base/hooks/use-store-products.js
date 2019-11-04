@@ -25,7 +25,7 @@ export const useStoreProducts = ( query ) => {
 	// @todo see @https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1097
 	// where the namespace is going to be changed. Not doing in this pull.
 	const collectionOptions = {
-		namespace: '/wc/blocks',
+		namespace: '/wc/store',
 		resourceName: 'products',
 		query,
 	};
