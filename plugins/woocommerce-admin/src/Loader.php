@@ -583,6 +583,19 @@ class Loader {
 			}
 		}
 
+		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
+		if ( ! empty( $preload_settings ) ) {
+			$setting_options = new \WC_REST_Setting_Options_V2_Controller;
+			foreach ( $preload_settings as $group ) {
+				$group_settings   = $setting_options->get_group_settings( $group );
+				$preload_settings = [];
+				foreach( $group_settings as $option ) {
+					$preload_settings[ $option[ 'id' ] ] = $option[ 'value' ];
+				}
+				$settings['preloadSettings'][ $group ] = $preload_settings;
+			}
+		}
+
 		$current_user_data = array();
 		foreach ( self::get_user_data_fields() as $user_field ) {
 			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );

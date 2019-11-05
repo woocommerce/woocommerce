@@ -65,6 +65,7 @@ class Onboarding {
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
+		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
 		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
@@ -372,6 +373,22 @@ class Onboarding {
 		$options[] = 'woocommerce_allow_tracking';
 		$options[] = 'woocommerce_stripe_settings';
 		$options[] = 'woocommerce_default_country';
+
+		return $options;
+	}
+
+	/**
+	 * Preload WC setting options to prime state of the application.
+	 *
+	 * @param array $options Array of options to preload.
+	 * @return array
+	 */
+	public function preload_settings( $options ) {
+		if ( ! self::should_show_profiler() ) {
+			return $options;
+		}
+
+		$options[] = 'general';
 
 		return $options;
 	}

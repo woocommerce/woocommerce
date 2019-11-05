@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { Button, CheckboxControl } from 'newspack-components';
-import { includes, filter } from 'lodash';
+import { includes, filter, get } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch } from '@wordpress/data';
 
@@ -19,12 +19,13 @@ import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
 class ProductTypes extends Component {
-	constructor() {
+	constructor( props ) {
 		super();
+		const profileItems = get( props, 'profileItems', {} );
 
 		this.state = {
 			error: null,
-			selected: [],
+			selected: profileItems.product_types || [],
 		};
 
 		this.onContinue = this.onContinue.bind( this );
@@ -125,6 +126,7 @@ class ProductTypes extends Component {
 									label={ productTypes[ slug ].label }
 									help={ helpText }
 									onChange={ () => this.onChange( slug ) }
+									checked={ selected.includes( slug ) }
 								/>
 							);
 						} ) }
@@ -147,11 +149,12 @@ class ProductTypes extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
 
-		const isError = Boolean( getProfileItemsError() );
-
-		return { isError };
+		return {
+			isError: Boolean( getProfileItemsError() ),
+			profileItems: getProfileItems(),
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { updateProfileItems } = dispatch( 'wc-api' );

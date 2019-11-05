@@ -5,8 +5,8 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Button, CheckboxControl } from 'newspack-components';
-import { includes, filter } from 'lodash';
 import { compose } from '@wordpress/compose';
+import { filter, get, includes } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -24,11 +24,13 @@ import { recordEvent } from 'lib/tracks';
 const onboarding = getSetting( 'onboarding', {} );
 
 class Industry extends Component {
-	constructor() {
+	constructor( props ) {
+		const profileItems = get( props, 'profileItems', {} );
+
 		super();
 		this.state = {
 			error: null,
-			selected: [],
+			selected: profileItems.industry || [],
 		};
 		this.onContinue = this.onContinue.bind( this );
 		this.onChange = this.onChange.bind( this );
@@ -86,6 +88,7 @@ class Industry extends Component {
 	render() {
 		const { industries } = onboarding;
 		const { error, selected } = this.state;
+
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -102,6 +105,7 @@ class Industry extends Component {
 									key={ slug }
 									label={ industries[ slug ] }
 									onChange={ () => this.onChange( slug ) }
+									checked={ selected.includes( slug ) }
 								/>
 							);
 						} ) }
@@ -119,11 +123,12 @@ class Industry extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
 
-		const isError = Boolean( getProfileItemsError() );
-
-		return { isError };
+		return {
+			isError: Boolean( getProfileItemsError() ),
+			profileItems: getProfileItems(),
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { updateProfileItems } = dispatch( 'wc-api' );

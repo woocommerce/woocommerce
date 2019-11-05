@@ -8,7 +8,7 @@ import { compose } from '@wordpress/compose';
 import { FormToggle } from '@wordpress/components';
 import { Button } from 'newspack-components';
 import { withDispatch } from '@wordpress/data';
-import { keys, pickBy } from 'lodash';
+import { keys, get, pickBy } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -29,16 +29,22 @@ import { pluginNames } from 'wc-api/onboarding/constants';
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
 class BusinessDetails extends Component {
-	constructor() {
+	constructor( props ) {
 		super();
+		const profileItems = get( props, 'profileItems', {} );
+		const businessExtensions = get( profileItems, 'business_extensions', false );
 
 		this.initialValues = {
-			other_platform: '',
-			product_count: '',
-			selling_venues: '',
-			revenue: '',
-			'facebook-for-woocommerce': true,
-			'mailchimp-for-woocommerce': true,
+			other_platform: profileItems.other_platform || '',
+			product_count: profileItems.product_count || '',
+			selling_venues: profileItems.selling_venues || '',
+			revenue: profileItems.revenue || '',
+			'facebook-for-woocommerce': businessExtensions
+				? businessExtensions.includes( 'facebook-for-woocommerce' )
+				: true,
+			'mailchimp-for-woocommerce': businessExtensions
+				? businessExtensions.includes( 'mailchimp-for-woocommerce' )
+				: true,
 		};
 
 		this.state = {
@@ -432,11 +438,12 @@ class BusinessDetails extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
 
-		const isError = Boolean( getProfileItemsError() );
-
-		return { isError };
+		return {
+			isError: Boolean( getProfileItemsError() ),
+			profileItems: getProfileItems(),
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { updateProfileItems } = dispatch( 'wc-api' );

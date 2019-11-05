@@ -6,6 +6,11 @@
 import { isNil } from 'lodash';
 
 /**
+ * WooCommerce dependencies
+ */
+import { getSetting } from '@woocommerce/wc-admin-settings';
+
+/**
  * Internal dependencies
  */
 import { DEFAULT_REQUIREMENT } from '../constants';
@@ -20,8 +25,20 @@ const getSettings = ( getResource, requireResource ) => (
 	const ids = requireResource( requirement, resourceName ).data || [];
 	const settings = {};
 
+	if ( ! ids.length ) {
+		const preloadSettings = getSetting( 'preloadSettings', {} );
+		if ( preloadSettings[ group ] ) {
+			return preloadSettings[ group ];
+		}
+	}
+
 	ids.forEach( id => {
-		settings[ id ] = getResource( getResourceName( resourceName, id ) ).data;
+		settings[ id ] = getSetting(
+			'preloadSettings',
+			{},
+			preloadSettings =>
+				getResource( getResourceName( resourceName, id ) ).data || preloadSettings[ id ]
+		);
 	} );
 
 	return settings;
