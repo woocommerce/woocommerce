@@ -11,6 +11,7 @@ import {
 	MediaUploadCheck,
 	PanelColorSettings,
 	withColors,
+	RichText,
 } from '@wordpress/editor';
 import {
 	Button,
@@ -221,6 +222,50 @@ const FeaturedCategory = ( {
 		);
 	};
 
+	const renderButton = () => {
+		const buttonClasses = classnames(
+			'wp-block-button__link',
+			'is-style-fill'
+		);
+		const buttonStyle = {
+			backgroundColor: 'vivid-green-cyan',
+			borderRadius: '5px',
+		};
+		const wrapperStyle = {
+			width: '100%',
+		};
+		return attributes.categoryId === 'preview' ? (
+			<div className="wp-block-button aligncenter" style={ wrapperStyle }>
+				<RichText.Content
+					tagName="a"
+					className={ buttonClasses }
+					href={ category.permalink }
+					title={ attributes.linkText }
+					style={ buttonStyle }
+					value={ attributes.linkText }
+					target={ category.permalink }
+				/>
+			</div>
+		) : (
+			<InnerBlocks
+				template={ [
+					[
+						'core/button',
+						{
+							text: __(
+								'Shop now',
+								'woo-gutenberg-products-block'
+							),
+							url: category.permalink,
+							align: 'center',
+						},
+					],
+				] }
+				templateLock="all"
+			/>
+		);
+	};
+
 	const renderCategory = () => {
 		const {
 			className,
@@ -233,7 +278,7 @@ const FeaturedCategory = ( {
 		const classes = classnames(
 			'wc-block-featured-category',
 			{
-				'is-selected': isSelected,
+				'is-selected': isSelected && attributes.productId !== 'preview',
 				'is-loading': ! category && isLoading,
 				'is-not-found': ! category && ! isLoading,
 				'has-background-dim': dimRatio !== 0,
@@ -282,22 +327,7 @@ const FeaturedCategory = ( {
 						/>
 					) }
 					<div className="wc-block-featured-category__link">
-						<InnerBlocks
-							template={ [
-								[
-									'core/button',
-									{
-										text: __(
-											'Shop now',
-											'woo-gutenberg-products-block'
-										),
-										url: category.permalink,
-										align: 'center',
-									},
-								],
-							] }
-							templateLock="all"
-						/>
+						{ renderButton() }
 					</div>
 				</div>
 			</ResizableBox>
