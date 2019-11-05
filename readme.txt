@@ -284,6 +284,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Also consider refunded item when updating order and adjusting stocks. #24745
 * Fix - Handle 0 attribute value for variations correctly. #24750
 * Fix - Fixed spaces in form fields of External Products. #24295
+* Fix - Removed links to downloadable products from refund emails. #24952
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
