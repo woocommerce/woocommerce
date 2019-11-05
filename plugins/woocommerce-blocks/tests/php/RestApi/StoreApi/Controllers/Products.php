@@ -49,8 +49,7 @@ class Products extends TestCase {
 		$this->assertEquals( $this->products[0]->get_title(), $data['name'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
-		$this->assertEquals( $this->products[0]->get_price(), $data['price'] );
-		$this->assertEquals( $this->products[0]->get_price_html(), $data['price_html'] );
+		$this->assertEquals( $this->products[0]->get_price(), $data['prices']['price'] );
 		$this->assertEquals( $this->products[0]->get_average_rating(), $data['average_rating'] );
 		$this->assertEquals( $this->products[0]->get_review_count(), $data['review_count'] );
 		$this->assertEquals( $this->products[0]->has_options(), $data['has_options'] );
@@ -75,8 +74,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'permalink', $data[0] );
 		$this->assertArrayHasKey( 'description', $data[0] );
 		$this->assertArrayHasKey( 'sku', $data[0] );
-		$this->assertArrayHasKey( 'price', $data[0] );
-		$this->assertArrayHasKey( 'price_html', $data[0] );
+		$this->assertArrayHasKey( 'prices', $data[0] );
 		$this->assertArrayHasKey( 'average_rating', $data[0] );
 		$this->assertArrayHasKey( 'review_count', $data[0] );
 		$this->assertArrayHasKey( 'images', $data[0] );
@@ -99,8 +97,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'permalink', $schema['properties'] );
 		$this->assertArrayHasKey( 'description', $schema['properties'] );
 		$this->assertArrayHasKey( 'sku', $schema['properties'] );
-		$this->assertArrayHasKey( 'price', $schema['properties'] );
-		$this->assertArrayHasKey( 'price_html', $schema['properties'] );
+		$this->assertArrayHasKey( 'prices', $schema['properties'] );
 		$this->assertArrayHasKey( 'average_rating', $schema['properties'] );
 		$this->assertArrayHasKey( 'review_count', $schema['properties'] );
 		$this->assertArrayHasKey( 'images', $schema['properties'] );
@@ -123,8 +120,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'permalink', $response->get_data() );
 		$this->assertArrayHasKey( 'description', $response->get_data() );
 		$this->assertArrayHasKey( 'sku', $response->get_data() );
-		$this->assertArrayHasKey( 'price', $response->get_data() );
-		$this->assertArrayHasKey( 'price_html', $response->get_data() );
+		$this->assertArrayHasKey( 'prices', $response->get_data() );
 		$this->assertArrayHasKey( 'average_rating', $response->get_data() );
 		$this->assertArrayHasKey( 'review_count', $response->get_data() );
 		$this->assertArrayHasKey( 'images', $response->get_data() );

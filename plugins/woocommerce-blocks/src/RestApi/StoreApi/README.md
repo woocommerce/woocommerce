@@ -222,8 +222,18 @@ Example response:
 		"permalink": "http://local.wordpress.test/product/wordpress-pennant/",
 		"sku": "wp-pennant",
 		"description": "<p>This is an external product.</p>\n",
-		"price": "0",
-		"price_html": "<span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">&pound;</span>0.00</span>",
+		"prices": {
+			"currency_code": "GBP",
+			"decimal_separator": ".",
+			"thousand_separator": ",",
+			"decimals": 2,
+			"price_prefix": "£",
+			"price_suffix": "",
+			"price": 18,
+			"regular_price": 18,
+			"sale_price": 18,
+			"price_range": null
+		},
 		"average_rating": "3.60",
 		"review_count": 5,
 		"images": [
@@ -264,8 +274,18 @@ Example response:
 	"permalink": "http://local.wordpress.test/product/wordpress-pennant/",
 	"sku": "wp-pennant",
 	"description": "<p>This is an external product.</p>\n",
-	"price": "0",
-	"price_html": "<span class=\"woocommerce-Price-amount amount\"><span class=\"woocommerce-Price-currencySymbol\">&pound;</span>0.00</span>",
+	"prices": {
+		"currency_code": "GBP",
+		"decimal_separator": ".",
+		"thousand_separator": ",",
+		"decimals": 2,
+		"price_prefix": "£",
+		"price_suffix": "",
+		"price": 18,
+		"regular_price": 18,
+		"sale_price": 18,
+		"price_range": null
+	},
 	"average_rating": "3.60",
 	"review_count": 5,
 	"images": [
