@@ -428,7 +428,7 @@ class WC_Emails {
 	 * @param string   $email         Email address.
 	 */
 	public function order_downloads( $order, $sent_to_admin = false, $plain_text = false, $email = '' ) {
-		$show_downloads = $order->has_downloadable_item() && $order->is_download_permitted() && ! $sent_to_admin;
+		$show_downloads = $order->has_downloadable_item() && $order->is_download_permitted() && ! $sent_to_admin && ! is_a( $email, 'WC_Email_Customer_Refunded_Order' );
 
 		if ( ! $show_downloads ) {
 			return;
