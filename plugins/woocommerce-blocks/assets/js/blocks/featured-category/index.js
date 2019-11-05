@@ -12,6 +12,7 @@ import { DEFAULT_HEIGHT } from '@woocommerce/block-settings';
 import './style.scss';
 import './editor.scss';
 import Block from './block';
+import { example } from './example';
 import { IconFolderStar } from '@woocommerce/block-components/icons';
 
 /**
@@ -33,6 +34,7 @@ registerBlockType( 'woocommerce/featured-category', {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
+	example,
 	attributes: {
 		/**
 		 * Alignment of content inside block.
@@ -124,6 +126,14 @@ registerBlockType( 'woocommerce/featured-category', {
 		showDesc: {
 			type: 'boolean',
 			default: true,
+		},
+
+		/**
+		 * Category preview.
+		 */
+		previewCategory: {
+			type: 'object',
+			default: null,
 		},
 	},
 
