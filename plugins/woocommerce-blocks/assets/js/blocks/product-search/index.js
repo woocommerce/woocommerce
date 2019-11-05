@@ -30,7 +30,11 @@ registerBlockType( 'woocommerce/product-search', {
 	supports: {
 		align: [ 'wide', 'full' ],
 	},
-
+	example: {
+		attributes: {
+			hasLabel: true,
+		},
+	},
 	attributes: {
 		/**
 		 * Whether to show the field label.

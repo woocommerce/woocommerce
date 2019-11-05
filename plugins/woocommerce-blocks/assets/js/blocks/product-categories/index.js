@@ -27,7 +27,11 @@ registerBlockType( 'woocommerce/product-categories', {
 	supports: {
 		align: [ 'wide', 'full' ],
 	},
-
+	example: {
+		attributes: {
+			hasCount: true,
+		},
+	},
 	attributes: {
 		/**
 		 * Whether to show the product count in each category.
