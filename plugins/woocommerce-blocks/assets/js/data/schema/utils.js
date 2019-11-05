@@ -13,7 +13,7 @@
  */
 export const extractModelNameFromRoute = ( namespace, route ) => {
 	route = route.replace( `${ namespace }/`, '' );
-	return route.replace( /\/\(\?P\<[a-z_]*\>\[[a-z]]\+\)/g, '' );
+	return route.replace( /\/\(\?P\<[a-z_]*\>\[\\*[a-z]\]\+\)/g, '' );
 };
 
 /**
