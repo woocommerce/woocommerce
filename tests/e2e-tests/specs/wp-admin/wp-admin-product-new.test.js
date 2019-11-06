@@ -33,7 +33,7 @@ const verifyPublishAndTrash = async () => {
 	await expect( page ).toMatchElement( '.updated.notice', { text: '1 product moved to the Trash.' } );
 };
 
-describe( 'Add New Product Page', () => {
+describe( 'Add New Simple Product Page', () => {
 	beforeAll( async () => {
 		await activatePlugin( 'woocommerce' );
 	} );
@@ -51,9 +51,21 @@ describe( 'Add New Product Page', () => {
 		await clickTab( 'General' );
 		await expect( page ).toFill( '#_regular_price',  '9.99' );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
+} );
 
+describe( 'Add New Variable Product Page', () => {
+	beforeAll( async () => {
+		await activatePlugin( 'woocommerce' );
+	} );
 	it( 'can create product with variations', async () => {
 		// Go to "add product" page
 		await StoreOwnerFlow.openNewProduct();
@@ -149,16 +161,19 @@ describe( 'Add New Product Page', () => {
 		] );
 
 		await expect( page ).toClick( '.woocommerce_variation:nth-of-type(2) .handlediv' );
+		await page.waitFor( 2000 );
 		await page.focus( 'input[name="variable_is_virtual[0]"]' );
 		await expect( page ).toClick( 'input[name="variable_is_virtual[0]"]' );
 		await expect( page ).toFill( 'input[name="variable_regular_price[0]"]', '9.99' );
 
 		await expect( page ).toClick( '.woocommerce_variation:nth-of-type(3) .handlediv' );
+		await page.waitFor( 2000 );
 		await page.focus( 'input[name="variable_is_virtual[1]"]' );
 		await expect( page ).toClick( 'input[name="variable_is_virtual[1]"]' );
 		await expect( page ).toFill( 'input[name="variable_regular_price[1]"]', '11.99' );
 
 		await expect( page ).toClick( '.woocommerce_variation:nth-of-type(4) .handlediv' );
+		await page.waitFor( 2000 );
 		await page.focus( 'input[name="variable_manage_stock[2]"]' );
 		await expect( page ).toClick( 'input[name="variable_manage_stock[2]"]' );
 		await expect( page ).toFill( 'input[name="variable_regular_price[2]"]', '20' );
@@ -170,6 +185,13 @@ describe( 'Add New Product Page', () => {
 		await page.focus( 'button.save-variation-changes' );
 		await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 } );
