@@ -9,7 +9,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 import { get } from 'lodash';
-import { getAdminLink, updateQueryString } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/navigation';
 import Gridicon from 'gridicons';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -38,6 +38,7 @@ class Theme extends Component {
 			activeTab: 'all',
 			chosen: null,
 			demo: null,
+			isRedirectingToCart: false,
 			uploadedThemes: [],
 		};
 
@@ -49,12 +50,34 @@ class Theme extends Component {
 	}
 
 	componentWillUnmount() {
-		const productIds = this.getProductIds();
-		if ( productIds.length ) {
+		const { isRedirectingToCart } = this.state;
+		if ( isRedirectingToCart ) {
 			this.redirectToCart();
-		} else {
-			updateQueryString( {}, '/', {} );
 		}
+	}
+
+	componentDidUpdate( prevProps ) {
+		const { isGetProfileItemsRequesting, isError, createNotice, goToNextStep } = this.props;
+		const { chosen } = this.state;
+
+		/* eslint-disable react/no-did-update-set-state */
+		if ( prevProps.isGetProfileItemsRequesting && ! isGetProfileItemsRequesting && chosen ) {
+			if ( ! isError ) {
+				// @todo This should send profile information to woocommerce.com.
+				const productIds = this.getProductIds();
+				if ( productIds.length ) {
+					this.setState( { isRedirectingToCart: true } );
+				}
+				goToNextStep();
+			} else {
+				this.setState( { chosen: null } );
+				createNotice(
+					'error',
+					__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
+				);
+			}
+		}
+		/* eslint-enable react/no-did-update-set-state */
 	}
 
 	getProductIds() {
@@ -89,30 +112,26 @@ class Theme extends Component {
 		document.body.classList.add( 'woocommerce-admin-is-loading' );
 
 		const productIds = this.getProductIds();
+		const backUrl = getAdminLink( getNewPath( {}, '/', {} ) );
+		const { connectNonce } = getSetting( 'onboarding', {} );
+
 		const url = addQueryArgs( 'https://woocommerce.com/cart', {
-			'wccom-back': getAdminLink( getNewPath( {}, '/', {} ) ),
+			'wccom-site': getSetting( 'siteUrl' ),
+			'wccom-woo-version': getSetting( 'wcVersion' ),
+			'wccom-back': backUrl,
 			'wccom-replace-with': productIds.join( ',' ),
+			'wccom-connect-nonce': connectNonce,
 		} );
+
 		window.location = url;
 	}
 
 	async onChoose( theme, location = '' ) {
-		const { createNotice, goToNextStep, isError, updateProfileItems } = this.props;
+		const { updateProfileItems } = this.props;
 
 		this.setState( { chosen: theme } );
 		recordEvent( 'storeprofiler_store_theme_choose', { theme, location } );
-		await updateProfileItems( { theme } );
-
-		if ( ! isError ) {
-			// @todo This should send profile information to woocommerce.com.
-			goToNextStep();
-		} else {
-			this.setState( { chosen: null } );
-			createNotice(
-				'error',
-				__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
-			);
-		}
+		updateProfileItems( { theme } );
 	}
 
 	onClosePreview() {
@@ -281,10 +300,13 @@ class Theme extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError, isGetProfileItemsRequesting } = select(
+			'wc-api'
+		);
 
 		return {
 			isError: Boolean( getProfileItemsError() ),
+			isGetProfileItemsRequesting: isGetProfileItemsRequesting(),
 			profileItems: getProfileItems(),
 		};
 	} ),

@@ -348,6 +348,7 @@ class Onboarding {
 			$settings['onboarding']['activePlugins']            = self::get_active_plugins();
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
+			$settings['onboarding']['connectNonce']             = wp_create_nonce( 'connect' );
 		}
 
 		return $settings;
