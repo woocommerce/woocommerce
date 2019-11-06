@@ -28,16 +28,20 @@ const createSimpleProduct = async () => {
 	await StoreOwnerFlow.openNewProduct();
 
 	// Make sure we're on the add order page
-	await expect(page.title()).resolves.toMatch('Add new product');
+	await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
 	// Set product data
-	await expect(page).toFill('#title', 'Simple product');
-	await expect(page).toClick('#_virtual');
-	await clickTab('General');
-	await expect(page).toFill('#_regular_price', '9.99');
+	await expect( page ).toFill( '#title', 'Simple product' );
+	await expect( page ).toClick( '#_virtual' );
+	await clickTab( 'General' );
+	await expect( page ).toFill( '#_regular_price', '9.99' );
 
 	await verifyAndPublish();
-};
+
+	const simplePostId = await page.$( '#post_ID' );
+	let simplePostIdValue = ( await ( await simplePostId.getProperty( 'value' ) ).jsonValue() );
+	return simplePostIdValue;
+} ;
 
 /**
  * Create variable product.
@@ -50,7 +54,7 @@ const createVariableProduct = async () => {
 	await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
 	// Set product data
-	await expect( page ).toFill( '#title', 'Variable Product with Two Variations' );
+	await expect( page ).toFill( '#title', 'Variable Product with Three Variations' );
 	await expect( page ).toSelect( '#product-type', 'Variable product' );
 
 	// Create attributes for variations
@@ -102,17 +106,55 @@ const createVariableProduct = async () => {
 
 	await page.waitForSelector( '.woocommerce_variation .handlediv' );
 
-	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(1) .handlediv' );
+	// Verify that variations were created
+	await Promise.all( [
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[0]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[0]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[0]"]', { text: 'val1' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[1]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[1]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[1]"]', { text: 'val2' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[2]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[2]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[2]"]', { text: 'val1' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[3]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[3]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[3]"]', { text: 'val2' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[4]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[4]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[4]"]', { text: 'val1' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[5]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[5]"]', { text: 'val1' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[5]"]', { text: 'val2' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[6]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[6]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[6]"]', { text: 'val1' } ),
+
+		expect( page ).toMatchElement( 'select[name="attribute_attr-1[7]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-2[7]"]', { text: 'val2' } ),
+		expect( page ).toMatchElement( 'select[name="attribute_attr-3[7]"]', { text: 'val2' } ),
+	] );
+
+	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(2) .handlediv' );
+	await page.waitFor( 2000 );
 	await page.focus( 'input[name="variable_is_virtual[0]"]' );
 	await expect( page ).toClick( 'input[name="variable_is_virtual[0]"]' );
 	await expect( page ).toFill( 'input[name="variable_regular_price[0]"]', '9.99' );
 
-	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(2) .handlediv' );
+	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(3) .handlediv' );
+	await page.waitFor( 2000 );
 	await page.focus( 'input[name="variable_is_virtual[1]"]' );
 	await expect( page ).toClick( 'input[name="variable_is_virtual[1]"]' );
 	await expect( page ).toFill( 'input[name="variable_regular_price[1]"]', '11.99' );
 
-	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(3) .handlediv' );
+	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(4) .handlediv' );
+	await page.waitFor( 2000 );
 	await page.focus( 'input[name="variable_manage_stock[2]"]' );
 	await expect( page ).toClick( 'input[name="variable_manage_stock[2]"]' );
 	await expect( page ).toFill( 'input[name="variable_regular_price[2]"]', '20' );
@@ -125,6 +167,10 @@ const createVariableProduct = async () => {
 	await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
 	await verifyAndPublish();
+
+	const variablePostId = await page.$( '#post_ID' );
+	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
+	return variablePostIdValue;
 };
 
 export { createSimpleProduct, createVariableProduct };

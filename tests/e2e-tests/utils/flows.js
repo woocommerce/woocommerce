@@ -1,3 +1,5 @@
+import { clickTab } from "./index";
+
 /**
  * @format
  */
@@ -9,7 +11,7 @@ const WP_ADMIN_NEW_ORDER = baseUrl + '/wp-admin/post-new.php?post_type=shop_orde
 const WP_ADMIN_NEW_PRODUCT = baseUrl + '/wp-admin/post-new.php?post_type=product';
 const WP_ADMIN_WC_SETTINGS = baseUrl + '/wp-admin/admin.php?page=wc-settings&tab=';
 
-const SHOP_PRODUCT = baseUrl + '/product/';
+const SHOP_PRODUCT = baseUrl + '/?p=';
 const SHOP_CART_PAGE = baseUrl + '/cart/';
 
 const getProductColumnExpression = ( productTitle ) => (
@@ -46,7 +48,6 @@ const getRemoveExpression = () => (
 	'td[@class="product-remove"]//a[@class="remove"]'
 );
 
-
 const CustomerFlow = {
 	addToCart: async () => {
 		await Promise.all( [
@@ -63,8 +64,8 @@ const CustomerFlow = {
 		await removeButton.click();
 	},
 
-	goToProduct: async ( productSlug ) => {
-		await page.goto( SHOP_PRODUCT + productSlug, {
+	goToProduct: async ( postID ) => {
+		await page.goto( SHOP_PRODUCT + postID, {
 			waitUntil: 'networkidle0',
 		} );
 	},
