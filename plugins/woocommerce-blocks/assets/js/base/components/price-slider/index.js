@@ -12,7 +12,7 @@ import {
 } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { useDebounce } from '@woocommerce/base-hooks';
+import { useDebounce, usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -47,15 +47,25 @@ const PriceSlider = ( {
 		formatCurrencyForInput( maxPrice, priceFormat, currencySymbol )
 	);
 	const debouncedChangeValue = useDebounce( [ minPrice, maxPrice ], 500 );
+	const prevMinConstraint = usePrevious( minConstraint );
+	const prevMaxConstraint = usePrevious( maxConstraint );
 
 	useEffect( () => {
-		if ( minPrice === undefined || minConstraint > minPrice ) {
+		if (
+			minPrice === undefined ||
+			minConstraint > minPrice ||
+			minPrice === prevMinConstraint
+		) {
 			setMinPrice( minConstraint );
 		}
 	}, [ minConstraint ] );
 
 	useEffect( () => {
-		if ( maxPrice === undefined || maxConstraint < maxPrice ) {
+		if (
+			maxPrice === undefined ||
+			maxConstraint < maxPrice ||
+			maxPrice === prevMaxConstraint
+		) {
 			setMaxPrice( maxConstraint );
 		}
 	}, [ maxConstraint ] );
@@ -82,6 +92,18 @@ const PriceSlider = ( {
 	 * Handles styles for the shaded area of the range slider.
 	 */
 	const getProgressStyle = useMemo( () => {
+		if (
+			! isFinite( minPrice ) ||
+			! isFinite( maxPrice ) ||
+			! isFinite( minConstraint ) ||
+			! isFinite( maxConstraint )
+		) {
+			return {
+				'--low': '0%',
+				'--high': '100%',
+			};
+		}
+
 		const low =
 			Math.round(
 				100 *
@@ -99,7 +121,7 @@ const PriceSlider = ( {
 			'--low': low + '%',
 			'--high': high + '%',
 		};
-	}, [ minPrice, minConstraint, maxPrice, maxConstraint ] );
+	}, [ minPrice, maxPrice, minConstraint, maxConstraint ] );
 
 	/**
 	 * Trigger the onChange prop callback with new values.
