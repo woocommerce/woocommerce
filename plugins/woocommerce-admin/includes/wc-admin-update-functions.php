@@ -7,8 +7,6 @@
  * @package WooCommerce/Admin
  */
 
-defined( 'ABSPATH' ) || exit;
-
 use \Automattic\WooCommerce\Admin\Install as Installer;
 
 /**
