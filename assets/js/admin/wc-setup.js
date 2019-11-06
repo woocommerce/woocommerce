@@ -216,6 +216,11 @@ jQuery( function( $ ) {
 		waitForJetpackInstall();
 	} );
 
+	$( '.activate-new-onboarding' ).on( 'click', '.button-primary', function() {
+		// Show pending spinner while activate happens.
+		blockWizardUI();
+	} );
+
 	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account, input#ppec_paypal_reroute_requests', function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( this ).closest( '.wc-wizard-service-settings' )

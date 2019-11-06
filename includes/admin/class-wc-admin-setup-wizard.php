@@ -156,6 +156,27 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Should we show the new WooCommerce Admin onboarding experience?
+	 *
+	 * @return boolean
+	 */
+	protected function should_show_wc_admin_onboarding() {
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return false;
+		}
+
+		$ab_test = get_option( 'woocommerce_setup_ab_wc_admin_onboarding' );
+
+		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
+		if ( ! $ab_test ) {
+			$ab_test = 1 !== rand( 1, 10 ) ? 'a' : 'b'; // 10% of users. b gets the new experience.
+			update_option( 'woocommerce_setup_ab_wc_admin_onboarding', $ab_test );
+		}
+
+		return 'b' === $ab_test;
+	}
+
+	/**
 	 * Should we display the 'Recommended' step?
 	 * True if at least one of the recommendations will be displayed.
 	 *
@@ -251,37 +272,47 @@ class WC_Admin_Setup_Wizard {
 			return;
 		}
 		$default_steps = array(
-			'store_setup' => array(
-				'name'    => __( 'Store setup', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_store_setup' ),
-				'handler' => array( $this, 'wc_setup_store_setup_save' ),
+			'new_onboarding' => array(
+				'name'       => '',
+				'view'       => array( $this, 'wc_setup_new_onboarding' ),
+				'handler'    => array( $this, 'wc_setup_new_onboarding_save' ),
 			),
-			'payment'     => array(
-				'name'    => __( 'Payment', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_payment' ),
-				'handler' => array( $this, 'wc_setup_payment_save' ),
+			'store_setup'    => array(
+				'name'       => __( 'Store setup', 'woocommerce' ),
+				'view'       => array( $this, 'wc_setup_store_setup' ),
+				'handler'    => array( $this, 'wc_setup_store_setup_save' ),
 			),
-			'shipping'    => array(
-				'name'    => __( 'Shipping', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_shipping' ),
-				'handler' => array( $this, 'wc_setup_shipping_save' ),
+			'payment'        => array(
+				'name'       => __( 'Payment', 'woocommerce' ),
+				'view'       => array( $this, 'wc_setup_payment' ),
+				'handler'    => array( $this, 'wc_setup_payment_save' ),
 			),
-			'recommended' => array(
-				'name'    => __( 'Recommended', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_recommended' ),
-				'handler' => array( $this, 'wc_setup_recommended_save' ),
+			'shipping'       => array(
+				'name'       => __( 'Shipping', 'woocommerce' ),
+				'view'       => array( $this, 'wc_setup_shipping' ),
+				'handler'    => array( $this, 'wc_setup_shipping_save' ),
 			),
-			'activate'    => array(
-				'name'    => __( 'Activate', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_activate' ),
-				'handler' => array( $this, 'wc_setup_activate_save' ),
+			'recommended'    => array(
+				'name'       => __( 'Recommended', 'woocommerce' ),
+				'view'       => array( $this, 'wc_setup_recommended' ),
+				'handler'    => array( $this, 'wc_setup_recommended_save' ),
 			),
-			'next_steps'  => array(
-				'name'    => __( 'Ready!', 'woocommerce' ),
-				'view'    => array( $this, 'wc_setup_ready' ),
-				'handler' => '',
+			'activate'       => array(
+				'name'       => __( 'Activate', 'woocommerce' ),
+				'view'       => array( $this, 'wc_setup_activate' ),
+				'handler'    => array( $this, 'wc_setup_activate_save' ),
+			),
+			'next_steps'     => array(
+				'name'       => __( 'Ready!', 'woocommerce' ),
+				'view'       => array( $this, 'wc_setup_ready' ),
+				'handler'    => '',
 			),
 		);
+
+		// Hide the new/improved onboarding experience screen if the user is not part of the a/b test.
+		if ( ! $this->should_show_wc_admin_onboarding() ) {
+			unset( $default_steps['new_onboarding'] );
+		}
 
 		// Hide recommended step if nothing is going to be shown there.
 		if ( ! $this->should_show_recommended_step() ) {
@@ -360,7 +391,12 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui">
-			<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
+		<?php
+		if ( 'new_onboarding' === $this->step ) {
+			return;
+		}
+		?>
+		<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 		<?php
 	}
 
@@ -369,7 +405,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function setup_wizard_footer() {
 		?>
-			<?php if ( 'store_setup' === $this->step ) : ?>
+			<?php if ( 'new_onboarding' === $this->step ) : ?>
+				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Continue with the old setup wizard', 'woocommerce' ); ?></a>
+			<?php elseif ( 'store_setup' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
 			<?php elseif ( 'recommended' === $this->step || 'activate' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
@@ -391,6 +429,13 @@ class WC_Admin_Setup_Wizard {
 		// features are selected, or unless the Activate step was already taken.
 		if ( class_exists( 'Jetpack' ) && Jetpack::is_active() && empty( $selected_features ) && 'yes' !== get_transient( 'wc_setup_activated' ) ) {
 			unset( $output_steps['activate'] );
+		}
+
+		unset( $output_steps['new_onboarding'] );
+
+		// Don't show the navigation on the onboarding prompt screen.
+		if ( 'new_onboarding' === $this->step ) {
+			return;
 		}
 
 		?>
@@ -429,6 +474,72 @@ class WC_Admin_Setup_Wizard {
 			call_user_func( $this->steps[ $this->step ]['view'], $this );
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * Display's a prompt for users to try out the new improved WooCommerce onboarding experience in WooCommerce Admin.
+	 */
+	public function wc_setup_new_onboarding() {
+		?>
+			<div class="wc-setup-new-onboarding">
+				<p class="onboarding-welcome"><?php esc_html_e( 'Welcome to', 'woocommerce' ); ?></p>
+				<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
+				<p><?php esc_html_e( 'Get your store up and running more quickly with our new and improved setup experience', 'woocommerce' ); ?></p>
+
+				<form method="post" class="activate-new-onboarding">
+					<?php wp_nonce_field( 'wc-setup' ); ?>
+					<input type="hidden" name="save_step" value="new_onboarding" />
+					<p class="wc-setup-actions step">
+						<button class="button-primary button button-large" value="<?php esc_attr_e( 'Yes please', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Yes please', 'woocommerce' ); ?></button>
+					</p>
+				</form>
+
+				<p class="onboarding-plugin-info"><?php esc_html_e( 'The "WooCommerce Admin" plugin will be installed and activated', 'woocommerce' ); ?></p>
+			</div>
+		<?php
+	}
+
+	/**
+	 * Installs WooCommerce admin and redirects to the new onboarding experience.
+	 */
+	public function wc_setup_new_onboarding_save() {
+		check_admin_referer( 'wc-setup' );
+
+		update_option( 'wc_onboarding_opt_in', true );
+
+		if ( function_exists( 'wc_admin_url' ) ) {
+			$this->wc_setup_redirect_to_wc_admin_onboarding();
+			exit;
+		}
+
+		WC_Install::background_installer(
+			'woocommerce-admin',
+			array(
+				'name'      => __( 'WooCommerce Admin', 'woocommerce' ),
+				'repo-slug' => 'woocommerce-admin',
+			)
+		);
+
+		// The plugin was not successfully installed, so continue with normal setup.
+		if ( ! function_exists( 'wc_admin_url' ) ) {
+			wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
+			exit;
+		}
+
+		$this->wc_setup_redirect_to_wc_admin_onboarding();
+		exit;
+	}
+
+	/**
+	 * Redirects to the onboarding wizard in WooCommerce Admin.
+	 */
+	private function wc_setup_redirect_to_wc_admin_onboarding() {
+		// Renables the wizard.
+		$profile_updates = array( 'completed' => false );
+		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
+		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
+
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
 	}
 
 	/**
