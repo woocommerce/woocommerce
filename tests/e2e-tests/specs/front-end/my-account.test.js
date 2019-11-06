@@ -23,40 +23,32 @@ describe( 'My account page', () => {
 	} );
 
 	it( 'allows customer to see orders', async () => {
-		await Promise.all( [
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Orders' } ),
-		] );
+		expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Orders' } );
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 		expect( page.url() ).toMatch( '/my-account/orders' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Orders' } );
 	} );
 
 	it( 'allows customer to see downloads', async () => {
-		await Promise.all( [
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Downloads' } ),
-		] );
+		expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Downloads' } )
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 		expect( page.url() ).toMatch( '/my-account/downloads' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Downloads' } );
 	} );
 
-	it( 'allows customer to edit addresses', async () => {
-		await Promise.all( [
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Addresses' } ),
-		] );
+	it( 'allows customer to see addresses', async () => {
+		expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Addresses' } );
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 		expect( page.url() ).toMatch( '/my-account/edit-address' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Addresses' } );
 	} );
 
-	it( 'allows customer to edit account details', async () => {
-		await Promise.all( [
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Account details' } ),
-		] );
+	it( 'allows customer to see account details', async () => {
+		expect( page ).toClick( '.woocommerce-MyAccount-navigation-link', { text: 'Account details' } );
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 		expect( page.url() ).toMatch( '/my-account/edit-account' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Account details' } );
