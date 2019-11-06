@@ -1,3 +1,5 @@
+/** @format */
+
 .woocommerce-stepper {
 	$step-icon-size: 24px;
 
@@ -8,10 +10,26 @@
 	}
 
 	.woocommerce-stepper__step {
-		display: inline-flex;
 		padding: $gap-smaller;
 		font-weight: 400;
 		position: relative;
+
+		.woocommerce-stepper__step-label-wrapper {
+			display: flex;
+			text-align: left;
+			border: 0;
+			background-color: transparent;
+			padding: 0;
+
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+		}
+
+		button.woocommerce-stepper__step-label-wrapper {
+			cursor: pointer;
+		}
 
 		.woocommerce-stepper__step-text {
 			width: 100%;
@@ -39,7 +57,7 @@
 			display: block;
 			margin-right: $gap-small;
 			max-height: $step-icon-size;
-			min-width: auto;
+			min-width: 24px;
 			width: 24px;
 			border-radius: 50%;
 			background: $studio-blue-50;
@@ -127,7 +145,7 @@
 			content: '';
 			position: absolute;
 			left: $step-icon-size / 2 + $gap-smaller;
-			top: $step-icon-size + ( $gap-smaller * 2 );
+			top: $step-icon-size + ($gap-smaller * 2);
 			height: calc(100% - #{$step-icon-size} - #{ $gap-smaller * 2 });
 			border-left: 1px solid $studio-gray-5;
 		}
@@ -153,6 +171,7 @@
 
 		.woocommerce-stepper_content {
 			margin-top: $gap-smaller;
+			margin-left: $gap-small + $step-icon-size;
 		}
 	}
 }

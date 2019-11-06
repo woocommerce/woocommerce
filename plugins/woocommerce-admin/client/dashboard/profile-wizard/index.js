@@ -27,44 +27,6 @@ import Theme from './steps/theme';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 
-const getSteps = () => {
-	const steps = [];
-	steps.push( {
-		key: 'start',
-		container: Start,
-	} );
-	steps.push( {
-		key: 'plugins',
-		container: Plugins,
-	} );
-	steps.push( {
-		key: 'store-details',
-		container: StoreDetails,
-		label: __( 'Store Details', 'woocommerce-admin' ),
-	} );
-	steps.push( {
-		key: 'industry',
-		container: Industry,
-		label: __( 'Industry', 'woocommerce-admin' ),
-	} );
-	steps.push( {
-		key: 'product-types',
-		container: ProductTypes,
-		label: __( 'Product Types', 'woocommerce-admin' ),
-	} );
-	steps.push( {
-		key: 'business-details',
-		container: BusinessDetails,
-		label: __( 'Business Details', 'woocommerce-admin' ),
-	} );
-	steps.push( {
-		key: 'theme',
-		container: Theme,
-		label: __( 'Theme', 'woocommerce-admin' ),
-	} );
-	return steps;
-};
-
 class ProfileWizard extends Component {
 	constructor() {
 		super( ...arguments );
@@ -94,12 +56,61 @@ class ProfileWizard extends Component {
 		document.body.classList.remove( 'woocommerce-admin-full-screen' );
 	}
 
+	getSteps() {
+		const { profileItems } = this.props;
+		const steps = [];
+
+		steps.push( {
+			key: 'start',
+			container: Start,
+		} );
+		steps.push( {
+			key: 'plugins',
+			container: Plugins,
+			isComplete: profileItems.hasOwnProperty( 'plugins' ) && null !== profileItems.plugins,
+		} );
+		steps.push( {
+			key: 'store-details',
+			container: StoreDetails,
+			label: __( 'Store Details', 'woocommerce-admin' ),
+			isComplete:
+				profileItems.hasOwnProperty( 'setup_client' ) && null !== profileItems.setup_client,
+		} );
+		steps.push( {
+			key: 'industry',
+			container: Industry,
+			label: __( 'Industry', 'woocommerce-admin' ),
+			isComplete: profileItems.hasOwnProperty( 'industry' ) && null !== profileItems.industry,
+		} );
+		steps.push( {
+			key: 'product-types',
+			container: ProductTypes,
+			label: __( 'Product Types', 'woocommerce-admin' ),
+			isComplete:
+				profileItems.hasOwnProperty( 'product_types' ) && null !== profileItems.product_types,
+		} );
+		steps.push( {
+			key: 'business-details',
+			container: BusinessDetails,
+			label: __( 'Business Details', 'woocommerce-admin' ),
+			isComplete:
+				profileItems.hasOwnProperty( 'product_count' ) && null !== profileItems.product_count,
+		} );
+		steps.push( {
+			key: 'theme',
+			container: Theme,
+			label: __( 'Theme', 'woocommerce-admin' ),
+			isComplete: profileItems.hasOwnProperty( 'theme' ) && null !== profileItems.theme,
+		} );
+		return steps;
+	}
+
 	getCurrentStep() {
 		const { step } = this.props.query;
-		const currentStep = getSteps().find( s => s.key === step );
+		const currentStep = this.getSteps().find( s => s.key === step );
 
 		if ( ! currentStep ) {
-			return getSteps()[ 0 ];
+			return this.getSteps()[ 0 ];
 		}
 
 		return currentStep;
@@ -108,8 +119,8 @@ class ProfileWizard extends Component {
 	async goToNextStep() {
 		const { createNotice, isError, updateProfileItems } = this.props;
 		const currentStep = this.getCurrentStep();
-		const currentStepIndex = getSteps().findIndex( s => s.key === currentStep.key );
-		const nextStep = getSteps()[ currentStepIndex + 1 ];
+		const currentStepIndex = this.getSteps().findIndex( s => s.key === currentStep.key );
+		const nextStep = this.getSteps()[ currentStepIndex + 1 ];
 
 		if ( 'undefined' === typeof nextStep ) {
 			await updateProfileItems( { completed: true } );
@@ -135,7 +146,7 @@ class ProfileWizard extends Component {
 			step,
 			goToNextStep: this.goToNextStep,
 		} );
-		const steps = getSteps().map( _step => pick( _step, [ 'key', 'label' ] ) );
+		const steps = this.getSteps().map( _step => pick( _step, [ 'key', 'label', 'isComplete' ] ) );
 
 		return (
 			<Fragment>
@@ -148,11 +159,12 @@ class ProfileWizard extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
 
-		const isError = Boolean( getProfileItemsError() );
-
-		return { isError };
+		return {
+			isError: Boolean( getProfileItemsError() ),
+			profileItems: getProfileItems(),
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { updateProfileItems } = dispatch( 'wc-api' );
