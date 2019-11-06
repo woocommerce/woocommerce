@@ -14,7 +14,7 @@
     "woocommerce/woocommerce-rest-api": "1.0.3"
   },
   "require-dev": {
-    "phpunit/phpunit": "7.5.16",
+    "phpunit/phpunit": "8.4.3",
     "woocommerce/woocommerce-sniffs": "0.0.8"
   },
   "config": {
