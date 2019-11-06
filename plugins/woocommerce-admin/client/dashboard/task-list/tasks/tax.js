@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from 'newspack-components';
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { difference, filter, get } from 'lodash';
 import interpolateComponents from 'interpolate-components';
@@ -13,7 +13,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, H, Stepper } from '@woocommerce/components';
+import { Card, H, Link, Stepper } from '@woocommerce/components';
 import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
@@ -40,6 +40,7 @@ class Tax extends Component {
 		this.state = this.initialState;
 
 		this.completeStep = this.completeStep.bind( this );
+		this.configureTaxRates = this.configureTaxRates.bind( this );
 		this.updateAutomatedTax = this.updateAutomatedTax.bind( this );
 	}
 
@@ -54,11 +55,12 @@ class Tax extends Component {
 	componentDidUpdate( prevProps ) {
 		const { generalSettings, isJetpackConnected, pluginsToActivate, taxSettings } = this.props;
 		const {
+			woocommerce_calc_taxes,
 			woocommerce_store_address,
 			woocommerce_default_country,
 			woocommerce_store_postcode,
 		} = generalSettings;
-		const { stepIndex } = this.state;
+		const { isPending, stepIndex } = this.state;
 		const currentStep = this.getSteps()[ stepIndex ];
 		const currentStepKey = currentStep && currentStep.key;
 		const isCompleteAddress = Boolean(
@@ -97,6 +99,10 @@ class Tax extends Component {
 		if ( 'connect' === currentStepKey && isJetpackConnected ) {
 			this.completeStep();
 		}
+
+		if ( isPending && 'yes' === woocommerce_calc_taxes ) {
+			window.location = getAdminLink( 'admin.php?page=wc-settings&tab=tax&section=standard' );
+		}
 	}
 
 	isTaxJarSupported() {
@@ -117,6 +123,23 @@ class Tax extends Component {
 			this.setState( { stepIndex: stepIndex + 1 } );
 		} else {
 			getHistory().push( getNewPath( {}, '/', {} ) );
+		}
+	}
+
+	configureTaxRates() {
+		const { generalSettings, updateSettings } = this.props;
+
+		recordEvent( 'tasklist_tax_config_rates' );
+
+		if ( 'yes' !== generalSettings.woocommerce_calc_taxes ) {
+			this.setState( { isPending: true } );
+			updateSettings( {
+				general: {
+					woocommerce_calc_taxes: 'yes',
+				},
+			} );
+		} else {
+			window.location = getAdminLink( 'admin.php?page=wc-settings&tab=tax&section=standard' );
 		}
 	}
 
@@ -158,6 +181,7 @@ class Tax extends Component {
 			isJetpackConnected,
 			pluginsToActivate,
 		} = this.props;
+		const { isPending } = this.state;
 
 		const steps = [
 			{
@@ -227,15 +251,30 @@ class Tax extends Component {
 					'woocommerce-admin'
 				),
 				content: (
-					<Button
-						isPrimary
-						onClick={ () => {
-							recordEvent( 'tasklist_tax_config_rates' );
-						} }
-						href={ getAdminLink( 'admin.php?page=wc-settings&tab=tax&section=standard' ) }
-					>
-						{ __( 'Configure', 'woocommerce-admin' ) }
-					</Button>
+					<Fragment>
+						<Button isPrimary isBusy={ isPending } onClick={ this.configureTaxRates }>
+							{ __( 'Configure', 'woocommerce-admin' ) }
+						</Button>
+						<p>
+							{ 'yes' !== generalSettings.woocommerce_calc_taxes &&
+								interpolateComponents( {
+									mixedString: __(
+										'By clicking "Configure" you\'re enabling tax rates and calculations.' +
+											'More info {{link}}here{{/link}}.',
+										'woocommerce-admin'
+									),
+									components: {
+										link: (
+											<Link
+												href="https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/#section-1"
+												target="_blank"
+												type="external"
+											/>
+										),
+									},
+								} ) }
+						</p>
+					</Fragment>
 				),
 				visible: ! this.isTaxJarSupported(),
 			},
