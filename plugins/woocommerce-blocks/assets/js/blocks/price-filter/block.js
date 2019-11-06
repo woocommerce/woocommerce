@@ -45,10 +45,12 @@ const PriceFilterBlock = ( { attributes } ) => {
 	const { showInputFields, showFilterButton } = attributes;
 	const minConstraint = isLoading
 		? undefined
-		: parseInt( results.min_price, 10 );
+		: // Round up to nearest 10 to match the step attribute.
+		  Math.floor( parseInt( results.min_price, 10 ) / 10 ) * 10;
 	const maxConstraint = isLoading
 		? undefined
-		: parseInt( results.max_price, 10 );
+		: // Round down to nearest 10 to match the step attribute.
+		  Math.ceil( parseInt( results.max_price, 10 ) / 10 ) * 10;
 
 	const onChange = useCallback(
 		( prices ) => {
