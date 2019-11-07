@@ -4,7 +4,7 @@
 import {
 	useCollection,
 	useQueryStateByKey,
-	useQueryStateContext,
+	useQueryStateByContext,
 } from '@woocommerce/base-hooks';
 import { useCallback } from '@wordpress/element';
 
@@ -26,7 +26,7 @@ const PriceFilterBlock = ( { attributes } ) => {
 		'product-grid',
 		'max_price'
 	);
-	const [ queryState ] = useQueryStateContext( 'product-grid' );
+	const [ queryState ] = useQueryStateByContext( 'product-grid' );
 	const { results, isLoading } = useCollection( {
 		namespace: '/wc/store',
 		resourceName: 'products/collection-data',

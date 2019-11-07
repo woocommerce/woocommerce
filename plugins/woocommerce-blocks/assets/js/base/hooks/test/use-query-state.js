@@ -8,7 +8,7 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
  * Internal dependencies
  */
 import {
-	useQueryStateContext,
+	useQueryStateByContext,
 	useQueryStateByKey,
 	useSynchronizedQueryState,
 } from '../use-query-state';
@@ -104,8 +104,8 @@ describe( 'Testing Query State Hooks', () => {
 			},
 		} );
 	};
-	describe( 'useQueryStateContext', () => {
-		const TestComponent = getTestComponent( useQueryStateContext, [
+	describe( 'useQueryStateByContext', () => {
+		const TestComponent = getTestComponent( useQueryStateByContext, [
 			'context',
 		] );
 		let renderer;
