@@ -505,7 +505,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_new_onboarding_save() {
 		check_admin_referer( 'wc-setup' );
 
-		update_option( 'wc_onboarding_opt_in', true );
+		update_option( 'wc_onboarding_opt_in', 'yes' );
 
 		if ( function_exists( 'wc_admin_url' ) ) {
 			$this->wc_setup_redirect_to_wc_admin_onboarding();
