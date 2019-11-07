@@ -22,7 +22,7 @@ export default function getShortcode( props, name ) {
 
 	if ( categories && categories.length ) {
 		shortcodeAtts.set( 'category', categories.join( ',' ) );
-		if ( catOperator && 'all' === catOperator ) {
+		if ( catOperator && catOperator === 'all' ) {
 			shortcodeAtts.set( 'cat_operator', 'AND' );
 		}
 	}
@@ -33,19 +33,19 @@ export default function getShortcode( props, name ) {
 			attributes.map( ( { id } ) => id ).join( ',' )
 		);
 		shortcodeAtts.set( 'attribute', attributes[ 0 ].attr_slug );
-		if ( attrOperator && 'all' === attrOperator ) {
+		if ( attrOperator && attrOperator === 'all' ) {
 			shortcodeAtts.set( 'terms_operator', 'AND' );
 		}
 	}
 
 	if ( orderby ) {
-		if ( 'price_desc' === orderby ) {
+		if ( orderby === 'price_desc' ) {
 			shortcodeAtts.set( 'orderby', 'price' );
 			shortcodeAtts.set( 'order', 'DESC' );
-		} else if ( 'price_asc' === orderby ) {
+		} else if ( orderby === 'price_asc' ) {
 			shortcodeAtts.set( 'orderby', 'price' );
 			shortcodeAtts.set( 'order', 'ASC' );
-		} else if ( 'date' === orderby ) {
+		} else if ( orderby === 'date' ) {
 			shortcodeAtts.set( 'orderby', 'date' );
 			shortcodeAtts.set( 'order', 'DESC' );
 		} else {

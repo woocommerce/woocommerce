@@ -185,7 +185,7 @@ class Editor extends Component {
 			allowedBlocks: Object.keys( this.blockMap ),
 		};
 
-		if ( 0 !== this.props.attributes.layoutConfig.length ) {
+		if ( this.props.attributes.layoutConfig.length !== 0 ) {
 			InnerBlockProps.renderAppender = false;
 		}
 
@@ -248,7 +248,7 @@ class Editor extends Component {
 	renderViewMode = () => {
 		const { attributes } = this.props;
 		const { layoutConfig } = attributes;
-		const hasContent = layoutConfig && 0 !== layoutConfig.length;
+		const hasContent = layoutConfig && layoutConfig.length !== 0;
 		const blockTitle = this.getTitle();
 		const blockIcon = this.getIcon();
 

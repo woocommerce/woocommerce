@@ -50,7 +50,7 @@ class EditorBlock extends Component {
 			);
 		}
 
-		if ( 0 === reviews.length && ! isLoading ) {
+		if ( reviews.length === 0 && ! isLoading ) {
 			return <NoReviewsPlaceholder attributes={ attributes } />;
 		}
 

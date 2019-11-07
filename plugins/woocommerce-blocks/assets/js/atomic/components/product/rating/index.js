@@ -16,7 +16,7 @@ class ProductRating extends Component {
 		const { product, className } = this.props;
 		const rating = parseFloat( product.average_rating );
 
-		if ( ! Number.isFinite( rating ) || 0 === rating ) {
+		if ( ! Number.isFinite( rating ) || rating === 0 ) {
 			return null;
 		}
 

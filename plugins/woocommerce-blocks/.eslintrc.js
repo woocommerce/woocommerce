@@ -10,5 +10,6 @@ module.exports = {
 	rules: {
 		'@wordpress/dependency-group': 'off',
 		'valid-jsdoc': 'off',
+		yoda: [ 'error', 'never' ],
 	},
 };
