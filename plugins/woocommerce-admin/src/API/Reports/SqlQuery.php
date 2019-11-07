@@ -43,7 +43,7 @@ class SqlQuery {
 			'where',
 			'where_time',
 		),
-		'join' => array(
+		'join'  => array(
 			'right_join',
 			'join',
 			'left_join',
@@ -81,7 +81,7 @@ class SqlQuery {
 	 * Get SQL clause by type.
 	 *
 	 * @param string $type     Clause type.
-	 * @param string $handling Whether to filter the return value (filtered|unfiltered). Default unfiltered. 
+	 * @param string $handling Whether to filter the return value (filtered|unfiltered). Default unfiltered.
 	 *
 	 * @return string SQL clause.
 	 */
@@ -100,7 +100,7 @@ class SqlQuery {
 
 		if ( isset( $this->sql_filters[ $type ] ) ) {
 			$clauses = array();
-			foreach( $this->sql_filters[ $type ] as $subset ) {
+			foreach ( $this->sql_filters[ $type ] as $subset ) {
 				$clauses = array_merge( $clauses, $this->sql_clauses[ $subset ] );
 			}
 		} else {
@@ -162,7 +162,6 @@ class SqlQuery {
 		$group_by = $this->get_sql_clause( 'group_by', 'filtered' );
 		$having   = $this->get_sql_clause( 'having', 'filtered' );
 		$order_by = $this->get_sql_clause( 'order_by', 'filtered' );
-
 
 		$statement = "
 			SELECT

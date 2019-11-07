@@ -128,8 +128,9 @@ class ReportCSVEmail extends \WC_Email {
 	/**
 	 * Trigger the sending of this email.
 	 *
-	 * @param int            $order_id The order ID.
-	 * @param WC_Order|false $order Order object.
+	 * @param int    $user_id User ID to email.
+	 * @param string $report_type The type of report export being emailed.
+	 * @param string $download_url The URL for downloading the report.
 	 */
 	public function trigger( $user_id, $report_type, $download_url ) {
 		$user               = new \WP_User( $user_id );
