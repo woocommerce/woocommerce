@@ -95,6 +95,7 @@ class OnboardingTasks {
 		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
 		$settings['onboarding']['isTaxComplete']                  = self::check_task_completion( 'tax' );
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
+		$settings['onboarding']['taxJarActivated']                = class_exists( 'WC_Taxjar' );
 
 		return $settings;
 	}

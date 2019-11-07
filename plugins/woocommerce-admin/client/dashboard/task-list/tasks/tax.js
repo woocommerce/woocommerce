@@ -107,10 +107,12 @@ class Tax extends Component {
 
 	isTaxJarSupported() {
 		const { countryCode, wc_connect_options } = this.props;
-		const { automatedTaxSupportedCountries = [] } = getSetting( 'onboarding', {} );
+		const { automatedTaxSupportedCountries = [], taxJarActivated } = getSetting( 'onboarding', {} );
 
 		return (
-			wc_connect_options.tos_accepted && automatedTaxSupportedCountries.includes( countryCode )
+			! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
+			wc_connect_options.tos_accepted &&
+			automatedTaxSupportedCountries.includes( countryCode )
 		);
 	}
 
