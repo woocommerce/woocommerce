@@ -26,7 +26,7 @@ const FrontendBlock = ( {
 } ) => {
 	const { orderby } = attributes;
 
-	if ( 0 === reviews.length ) {
+	if ( reviews.length === 0 ) {
 		return null;
 	}
 

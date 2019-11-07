@@ -57,7 +57,7 @@ const ProductAttributeControl = ( {
 					isSelected={ expandedAttribute === item.id }
 					onSelect={ onSelectAttribute }
 					isSingle
-					disabled={ '0' === item.count }
+					disabled={ item.count === '0' }
 					aria-expanded={ expandedAttribute === item.id }
 					aria-label={ sprintf(
 						_n(

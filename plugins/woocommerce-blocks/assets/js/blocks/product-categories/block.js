@@ -139,7 +139,7 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 						] }
 						onChange={ ( value ) =>
 							setAttributes( {
-								isDropdown: 'dropdown' === value,
+								isDropdown: value === 'dropdown',
 							} )
 						}
 					/>

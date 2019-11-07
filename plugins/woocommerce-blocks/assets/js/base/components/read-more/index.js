@@ -113,7 +113,7 @@ class ReadMore extends Component {
 			return null;
 		}
 
-		if ( false === clampEnabled ) {
+		if ( clampEnabled === false ) {
 			return (
 				<div className={ className }>
 					<div ref={ this.reviewContent }>{ content }</div>
@@ -123,7 +123,7 @@ class ReadMore extends Component {
 
 		return (
 			<div className={ className }>
-				{ ( ! isExpanded || null === clampEnabled ) && (
+				{ ( ! isExpanded || clampEnabled === null ) && (
 					<div
 						ref={ this.reviewSummary }
 						aria-hidden={ isExpanded }
@@ -132,7 +132,7 @@ class ReadMore extends Component {
 						} }
 					/>
 				) }
-				{ ( isExpanded || null === clampEnabled ) && (
+				{ ( isExpanded || clampEnabled === null ) && (
 					<div
 						ref={ this.reviewContent }
 						aria-hidden={ ! isExpanded }

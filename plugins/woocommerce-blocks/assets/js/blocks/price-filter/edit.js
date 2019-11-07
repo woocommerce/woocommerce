@@ -58,7 +58,7 @@ export default function( { attributes, setAttributes } ) {
 						] }
 						onChange={ ( value ) =>
 							setAttributes( {
-								showInputFields: 'editable' === value,
+								showInputFields: value === 'editable',
 							} )
 						}
 					/>
@@ -131,7 +131,7 @@ export default function( { attributes, setAttributes } ) {
 
 	return (
 		<Fragment>
-			{ 0 === PRODUCT_COUNT ? (
+			{ PRODUCT_COUNT === 0 ? (
 				noProductsPlaceholder()
 			) : (
 				<Fragment>

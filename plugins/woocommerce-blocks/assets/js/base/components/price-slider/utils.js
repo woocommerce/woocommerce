@@ -56,7 +56,7 @@ export const formatCurrencyForInput = (
 	priceFormat,
 	currencySymbol
 ) => {
-	if ( '' === value || undefined === value ) {
+	if ( value === '' || undefined === value ) {
 		return '';
 	}
 	const formattedNumber = parseInt( value, 10 );
