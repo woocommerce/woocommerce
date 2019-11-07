@@ -83,7 +83,9 @@ class Install {
 
 		delete_transient( 'wc_admin_installing' );
 
-		update_option( 'wc_admin_install_timestamp', time() );
+		// Use add_option() here to avoid overwriting this value with each
+		// plugin version update. We base plugin age off of this value.
+		add_option( 'wc_admin_install_timestamp', time() );
 		do_action( 'wc_admin_installed' );
 	}
 
