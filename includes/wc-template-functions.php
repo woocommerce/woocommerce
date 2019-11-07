@@ -3664,3 +3664,29 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
 	}
 }
+
+/**
+ * Display pay buttons HTML.
+ *
+ * @since 3.9.0
+ */
+function wc_get_pay_buttons() {
+	$supported_gateways = array();
+	$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+	foreach ( $available_gateways as $gateway ) {
+		if ( $gateway->supports( 'pay_button' ) ) {
+			$supported_gateways[] = $gateway->get_pay_button_id();
+		}
+	}
+
+	if ( ! $supported_gateways ) {
+		return;
+	}
+
+	echo '<div class="woocommerce-pay-buttons">';
+	foreach ( $supported_gateways as $pay_button_id ) {
+		echo sprintf( '<div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div>', esc_attr( $pay_button_id ) );
+	}
+	echo '</div>';
+}

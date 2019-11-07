@@ -142,4 +142,40 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$expected_html = '<input type="hidden" name="test_something" value="something else" />';
 		$this->assertEquals( $expected_html, $actual_html );
 	}
+
+	/**
+	 * Test test_wc_get_pay_buttons().
+	 */
+	public function test_wc_get_pay_buttons() {
+		// Test default.
+		ob_start();
+		wc_get_pay_buttons();
+		$actual_html = ob_get_clean();
+
+		$this->assertEquals( '', $actual_html );
+
+		// Include a payment gateway that supports "pay button".
+		add_filter(
+			'woocommerce_payment_gateways',
+			function( $gateways ) {
+				$gateways[] = 'WC_Mock_Payment_Gateway';
+
+				return $gateways;
+			}
+		);
+		WC()->payment_gateways()->init();
+
+		// Test pay buttons HTML.
+		ob_start();
+		wc_get_pay_buttons();
+		$actual_html = ob_get_clean();
+
+		$gateway       = new WC_Mock_Payment_Gateway();
+		$expected_html = sprintf(
+			'<div class="woocommerce-pay-buttons"><div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div></div>',
+			$gateway->get_pay_button_id()
+		);
+
+		$this->assertEquals( $expected_html, $actual_html );
+	}
 }
