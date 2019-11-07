@@ -129,8 +129,6 @@ class Tax extends Component {
 	configureTaxRates() {
 		const { generalSettings, updateSettings } = this.props;
 
-		recordEvent( 'tasklist_tax_config_rates' );
-
 		if ( 'yes' !== generalSettings.woocommerce_calc_taxes ) {
 			this.setState( { isPending: true } );
 			updateSettings( {
@@ -139,7 +137,9 @@ class Tax extends Component {
 				},
 			} );
 		} else {
-			window.location = getAdminLink( 'admin.php?page=wc-settings&tab=tax&section=standard' );
+			window.location = getAdminLink(
+				'admin.php?page=wc-settings&tab=tax&section=standard&wc_onboarding_active_task=tax'
+			);
 		}
 	}
 
@@ -164,7 +164,7 @@ class Tax extends Component {
 			if ( automatedTaxEnabled ) {
 				getHistory().push( getNewPath( {}, '/', {} ) );
 			} else {
-				window.location = getAdminLink( 'admin.php?page=wc-settings&tab=tax&section=standard' );
+				this.configureTaxRates();
 			}
 		} else {
 			createNotice(
@@ -252,7 +252,14 @@ class Tax extends Component {
 				),
 				content: (
 					<Fragment>
-						<Button isPrimary isBusy={ isPending } onClick={ this.configureTaxRates }>
+						<Button
+							isPrimary
+							isBusy={ isPending }
+							onClick={ () => {
+								recordEvent( 'tasklist_tax_config_rates' );
+								this.configureTaxRates();
+							} }
+						>
 							{ __( 'Configure', 'woocommerce-admin' ) }
 						</Button>
 						<p>
