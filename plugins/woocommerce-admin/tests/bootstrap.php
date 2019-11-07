@@ -89,6 +89,7 @@ function _manually_load_plugin() {
 	define( 'WC_USE_TRANSACTIONS', false );
 	update_option( 'woocommerce_enable_coupons', 'yes' );
 	update_option( 'woocommerce_calc_taxes', 'yes' );
+	define( 'WOOCOMMERCE_ADMIN_ONBOARDING_ENABLED', true );
 
 	require_once wc_dir() . '/woocommerce.php';
 	require dirname( __DIR__ ) . '/vendor/autoload.php';

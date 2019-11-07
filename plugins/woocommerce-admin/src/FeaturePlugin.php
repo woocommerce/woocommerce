@@ -305,7 +305,7 @@ class FeaturePlugin {
 	 * Adds a menu item for the wc-admin devdocs.
 	 */
 	public function register_devdocs_page() {
-		if ( Loader::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+		if ( Loader::is_dev() ) {
 			wc_admin_register_page(
 				array(
 					'title'  => 'DevDocs',

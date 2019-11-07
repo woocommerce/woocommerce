@@ -20,6 +20,7 @@ import './style.scss';
 import CustomizableDashboard from './customizable';
 import ProfileWizard from './profile-wizard';
 import withSelect from 'wc-api/with-select';
+import { isOnboardingEnabled } from 'dashboard/utils';
 
 class Dashboard extends Component {
 	componentDidUpdate( prevProps ) {
@@ -56,7 +57,7 @@ class Dashboard extends Component {
 	}
 
 	redirectToCart() {
-		if ( ! window.wcAdminFeatures.onboarding ) {
+		if ( ! isOnboardingEnabled() ) {
 			return;
 		}
 
@@ -77,7 +78,7 @@ class Dashboard extends Component {
 	render() {
 		const { path, profileItems, query } = this.props;
 
-		if ( window.wcAdminFeatures.onboarding && ! profileItems.completed ) {
+		if ( isOnboardingEnabled() && ! profileItems.completed ) {
 			return <ProfileWizard query={ query } />;
 		}
 
@@ -91,7 +92,7 @@ class Dashboard extends Component {
 
 export default compose(
 	withSelect( select => {
-		if ( ! window.wcAdminFeatures.onboarding ) {
+		if ( ! isOnboardingEnabled() ) {
 			return;
 		}
 

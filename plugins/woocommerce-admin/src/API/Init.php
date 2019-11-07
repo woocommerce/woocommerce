@@ -75,7 +75,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Themes',
 		);
 
-		if ( Loader::is_feature_enabled( 'onboarding' ) ) {
+		if ( Loader::is_onboarding_enabled() ) {
 			$controllers = array_merge(
 				$controllers,
 				array(

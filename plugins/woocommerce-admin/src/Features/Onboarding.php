@@ -49,6 +49,11 @@ class Onboarding {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
+
+		if ( ! Loader::is_onboarding_enabled() ) {
+			return;
+		}
+
 		// Include WC Admin Onboarding classes.
 		if ( self::should_show_tasks() ) {
 			OnboardingTasks::get_instance();
@@ -173,12 +178,15 @@ class Onboarding {
 
 			if ( ! is_wp_error( $theme_data ) ) {
 				$theme_data = json_decode( $theme_data['body'] );
-				usort( $theme_data->products, function ($product_1, $product_2) {
-					if ( 'Storefront' === $product_1->slug ) {
-						return -1;
+				usort(
+					$theme_data->products,
+					function ( $product_1, $product_2 ) {
+						if ( 'Storefront' === $product_1->slug ) {
+							return -1;
+						}
+						return $product_1->id < $product_2->id ? 1 : -1;
 					}
-					return $product_1->id < $product_2->id ? 1 : -1;
-				} );
+				);
 
 				foreach ( $theme_data->products as $theme ) {
 					$slug                                       = sanitize_title( $theme->slug );
@@ -411,14 +419,42 @@ class Onboarding {
 	/**
 	 * Returns a list of Stripe supported countries. This method can be removed once merged to core.
 	 *
-	 * @param array $endpoints Array of preloaded endpoints.
 	 * @return array
 	 */
 	private static function get_stripe_supported_countries() {
 		// https://stripe.com/global.
 		return array(
-			'AU', 'AT', 'BE', 'CA', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HK', 'IE', 'IT', 'JP', 'LV', 'LT', 'LU', 'MY', 'NL', 'NZ', 'NO',
-			'PL', 'PT', 'SG', 'SK', 'SI', 'ES', 'SE', 'CH', 'GB', 'US',
+			'AU',
+			'AT',
+			'BE',
+			'CA',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HK',
+			'IE',
+			'IT',
+			'JP',
+			'LV',
+			'LT',
+			'LU',
+			'MY',
+			'NL',
+			'NZ',
+			'NO',
+			'PL',
+			'PT',
+			'SG',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'CH',
+			'GB',
+			'US',
 		);
 	}
 

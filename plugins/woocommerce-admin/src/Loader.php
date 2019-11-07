@@ -96,6 +96,16 @@ class Loader {
 	}
 
 	/**
+	 * Returns true if WooCommerce Admin is currently running in a development environment.
+	 */
+	public static function is_dev() {
+		if ( self::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Gets an array of enabled WooCommerce Admin features/sections.
 	 *
 	 * @return bool Enabled Woocommerce Admin features/sections.
@@ -113,6 +123,28 @@ class Loader {
 	public static function is_feature_enabled( $feature ) {
 		$features = self::get_features();
 		return in_array( $feature, $features, true );
+	}
+
+	/**
+	 * Returns if the onboarding feature of WooCommerce Admin should be enabled.
+	 *
+	 * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build, but only if the user recieved the test/opted in.
+	 *
+	 * @return bool Returns true if the onboarding is enabled.
+	 */
+	public static function is_onboarding_enabled() {
+		if ( ! self::is_feature_enabled( 'onboarding' ) ) {
+			return false;
+		}
+
+		$onboarding_opt_in        = 'yes' === get_option( 'wc_onboarding_opt_in', 'no' );
+		$onboarding_filter_opt_in = defined( 'WOOCOMMERCE_ADMIN_ONBOARDING_ENABLED' ) && true === WOOCOMMERCE_ADMIN_ONBOARDING_ENABLED;
+
+		if ( self::is_dev() || $onboarding_filter_opt_in || $onboarding_opt_in ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -585,12 +617,12 @@ class Loader {
 
 		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
 		if ( ! empty( $preload_settings ) ) {
-			$setting_options = new \WC_REST_Setting_Options_V2_Controller;
+			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
 			foreach ( $preload_settings as $group ) {
 				$group_settings   = $setting_options->get_group_settings( $group );
 				$preload_settings = [];
-				foreach( $group_settings as $option ) {
-					$preload_settings[ $option[ 'id' ] ] = $option[ 'value' ];
+				foreach ( $group_settings as $option ) {
+					$preload_settings[ $option['id'] ] = $option['value'];
 				}
 				$settings['preloadSettings'][ $group ] = $preload_settings;
 			}
@@ -607,9 +639,10 @@ class Loader {
 		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
 		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
 		// and `wcAssetUrl` can be used in its place throughout the codebase.
-		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
-		$settings['wcVersion']       = WC_VERSION;
-		$settings['siteUrl']         = site_url();
+		$settings['wcAdminAssetUrl']   = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
+		$settings['wcVersion']         = WC_VERSION;
+		$settings['siteUrl']           = site_url();
+		$settings['onboardingEnabled'] = self::is_onboarding_enabled();
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )

@@ -24,6 +24,7 @@ import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import TaskList from './task-list';
 import { getTasks } from './task-list/tasks';
+import { isOnboardingEnabled } from 'dashboard/utils';
 
 class CustomizableDashboard extends Component {
 	constructor( props ) {
@@ -198,7 +199,7 @@ class CustomizableDashboard extends Component {
 			.map( section => section.key );
 
 		if (
-			window.wcAdminFeatures.onboarding &&
+			isOnboardingEnabled() &&
 			wcSettings.onboarding &&
 			! taskListHidden &&
 			( query.task || ! taskListCompleted )
@@ -208,7 +209,7 @@ class CustomizableDashboard extends Component {
 
 		return (
 			<Fragment>
-				{ window.wcAdminFeatures.onboarding &&
+				{ isOnboardingEnabled() &&
 					wcSettings.onboarding &&
 					! taskListHidden &&
 					taskListCompleted && <TaskList query={ query } inline /> }
@@ -250,7 +251,7 @@ export default compose(
 			userPrefSections: userData.dashboard_sections,
 		};
 
-		if ( window.wcAdminFeatures.onboarding ) {
+		if ( isOnboardingEnabled() ) {
 			const profileItems = getProfileItems();
 			const tasks = getTasks( {
 				profileItems,

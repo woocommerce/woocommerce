@@ -105,10 +105,6 @@ class Theme extends Component {
 	}
 
 	redirectToCart() {
-		if ( ! window.wcAdminFeatures.onboarding ) {
-			return;
-		}
-
 		document.body.classList.add( 'woocommerce-admin-is-loading' );
 
 		const productIds = this.getProductIds();
