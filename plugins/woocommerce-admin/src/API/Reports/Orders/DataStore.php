@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Orders\DataStore.
@@ -22,7 +23,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	const TABLE_NAME = 'wc_order_stats';
+	protected static $table_name = 'wc_order_stats';
 
 	/**
 	 * Cache identifier.
@@ -50,18 +51,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	);
 
 	/**
-	 * SQL columns to select in the db query and their mapping to SQL code.
+	 * Data store context used to pass to filters.
 	 *
-	 * @var array
+	 * @var string
 	 */
-	protected $report_columns = array();
+	protected $context = 'orders';
 
 	/**
-	 * Constructor
+	 * Assign report columns once full table name has been assigned.
 	 */
-	public function __construct() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
+	protected function assign_report_columns() {
+		$table_name = self::get_db_table_name();
 		// Avoid ambigious columns in SQL query.
 		$this->report_columns = array(
 			'order_id'         => "{$table_name}.order_id",
@@ -81,22 +81,23 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Updates the database query with parameters used for orders report: coupons and products filters.
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
-	 * @return array            Array of parameters used for SQL query.
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
-		$order_stats_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-		$operator                 = $this->get_match_operator( $query_args );
-		$where_subquery           = array();
+		$order_stats_lookup_table   = self::get_db_table_name();
+		$order_coupon_lookup_table  = $wpdb->prefix . 'wc_order_coupon_lookup';
+		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+		$operator                   = $this->get_match_operator( $query_args );
+		$where_subquery             = array();
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_stats_lookup_table );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
+		$this->get_time_period_sql_params( $query_args, $order_stats_lookup_table );
+		$this->get_limit_sql_params( $query_args );
+		$this->get_order_by_sql_params( $query_args );
 
 		$status_subquery = $this->get_status_subquery( $query_args );
 		if ( $status_subquery ) {
 			if ( empty( $query_args['status_is'] ) && empty( $query_args['status_is_not'] ) ) {
-				$sql_query_params['where_clause'] .= " AND {$status_subquery}";
+				$this->subquery->add_sql_clause( 'where', "AND {$status_subquery}" );
 			} else {
 				$where_subquery[] = $status_subquery;
 			}
@@ -117,17 +118,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = ${returning_customer}";
 		}
 
-		$refund_subquery                  = $this->get_refund_subquery( $query_args );
-		$sql_query_params['from_clause'] .= $refund_subquery['from_clause'] ? $refund_subquery['from_clause'] : '';
+		$refund_subquery = $this->get_refund_subquery( $query_args );
+		$this->subquery->add_sql_clause( 'from', $refund_subquery['from_clause'] );
 		if ( $refund_subquery['where_clause'] ) {
 			$where_subquery[] = $refund_subquery['where_clause'];
 		}
 
-		$included_coupons          = $this->get_included_coupons( $query_args );
-		$excluded_coupons          = $this->get_excluded_coupons( $query_args );
-		$order_coupon_lookup_table = $wpdb->prefix . 'wc_order_coupon_lookup';
+		$included_coupons = $this->get_included_coupons( $query_args );
+		$excluded_coupons = $this->get_excluded_coupons( $query_args );
 		if ( $included_coupons || $excluded_coupons ) {
-			$sql_query_params['from_clause'] .= " JOIN {$order_coupon_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_coupon_lookup_table}.order_id";
+			$this->subquery->add_sql_clause( 'join', "JOIN {$order_coupon_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_coupon_lookup_table}.order_id" );
 		}
 		if ( $included_coupons ) {
 			$where_subquery[] = "{$order_coupon_lookup_table}.coupon_id IN ({$included_coupons})";
@@ -136,11 +136,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[] = "{$order_coupon_lookup_table}.coupon_id NOT IN ({$excluded_coupons})";
 		}
 
-		$included_products          = $this->get_included_products( $query_args );
-		$excluded_products          = $this->get_excluded_products( $query_args );
-		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+		$included_products = $this->get_included_products( $query_args );
+		$excluded_products = $this->get_excluded_products( $query_args );
 		if ( $included_products || $excluded_products ) {
-			$sql_query_params['from_clause'] .= " JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id";
+			$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
 		}
 		if ( $included_products ) {
 			$where_subquery[] = "{$order_product_lookup_table}.product_id IN ({$included_products})";
@@ -150,10 +149,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		if ( 0 < count( $where_subquery ) ) {
-			$sql_query_params['where_clause'] .= ' AND (' . implode( " {$operator} ", $where_subquery ) . ')';
+			$this->subquery->add_sql_clause( 'where', 'AND (' . implode( " {$operator} ", $where_subquery ) . ')' );
 		}
-
-		return $sql_query_params;
 	}
 
 	/**
@@ -165,7 +162,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$table_name = self::get_db_table_name();
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
@@ -198,6 +195,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$data      = $this->get_cached_data( $cache_key );
 
 		if ( false === $data ) {
+			$this->initialize_queries();
+
 			$data = (object) array(
 				'data'    => array(),
 				'total'   => 0,
@@ -205,26 +204,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'page_no' => 0,
 			);
 
-			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$selections = $this->selected_columns( $query_args );
+			$params     = $this->get_limit_params( $query_args );
+			$this->get_sql_query_params( $query_args );
 			$db_records_count = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM (
-							SELECT
-								{$table_name}.order_id
-							FROM
-								{$table_name}
-								{$sql_query_params['from_clause']}
-							WHERE
-								1=1
-								{$sql_query_params['where_time_clause']}
-								{$sql_query_params['where_clause']}
-					  		) AS tt"
+					{$this->subquery->get_query_statement()}
+				) AS tt"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( 0 === $sql_query_params['per_page'] ) {
+			if ( 0 === $params['per_page'] ) {
 				$total_pages = 0;
 			} else {
-				$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+				$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
 			}
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				$data = (object) array(
@@ -236,20 +228,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				return $data;
 			}
 
+			$this->subquery->clear_sql_clause( 'select' );
+			$this->subquery->add_sql_clause( 'select', $selections );
+			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$orders_data = $wpdb->get_results(
-				"SELECT
-						{$selections}
-					FROM
-						{$table_name}
-						{$sql_query_params['from_clause']}
-					WHERE
-						1=1
-						{$sql_query_params['where_time_clause']}
-						{$sql_query_params['where_clause']}
-					ORDER BY
-						{$sql_query_params['order_by_clause']}
-					{$sql_query_params['limit']}
-					",
+				$this->subquery->get_query_statement(),
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -271,7 +255,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->set_cached_data( $cache_key, $data );
 		}
-
 		return $data;
 	}
 
@@ -368,8 +351,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$products = $wpdb->get_results(
 			"SELECT order_id, ID as product_id, post_title as product_name, product_qty as product_quantity
-				FROM {$wpdb->prefix}posts
-				JOIN {$order_product_lookup_table} ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}posts.ID
+				FROM {$wpdb->posts}
+				JOIN {$order_product_lookup_table} ON {$order_product_lookup_table}.product_id = {$wpdb->posts}.ID
 				WHERE
 					order_id IN ({$included_order_ids})
 				",
@@ -423,8 +406,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$coupons = $wpdb->get_results(
 			"SELECT order_id, coupon_id, post_title as coupon_code
-				FROM {$wpdb->prefix}posts
-				JOIN {$order_coupon_lookup_table} ON {$order_coupon_lookup_table}.coupon_id = {$wpdb->prefix}posts.ID
+				FROM {$wpdb->posts}
+				JOIN {$order_coupon_lookup_table} ON {$order_coupon_lookup_table}.coupon_id = {$wpdb->posts}.ID
 				WHERE
 					order_id IN ({$included_order_ids})
 				",
@@ -432,5 +415,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 		return $coupons;
+	}
+
+	/**
+	 * Initialize query objects.
+	 */
+	protected function initialize_queries() {
+		$this->clear_all_clauses();
+		$this->subquery = new SqlQuery( $this->context . '_subquery' );
+		$this->subquery->add_sql_clause( 'select', self::get_db_table_name() . '.order_id' );
+		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
 	}
 }

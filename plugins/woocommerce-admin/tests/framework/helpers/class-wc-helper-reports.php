@@ -17,10 +17,10 @@ class WC_Helper_Reports {
 	 */
 	public static function reset_stats_dbs() {
 		global $wpdb;
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
+		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
+		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
+		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
 		\Automattic\WooCommerce\Admin\CategoryLookup::instance()->regenerate();
 	}
 }

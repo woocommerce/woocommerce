@@ -137,7 +137,7 @@ class ReportCSVEmail extends \WC_Email {
 		$this->download_url = $download_url;
 
 		if ( isset( $this->report_labels[ $report_type ] ) ) {
-			$this->report_type = $this->report_labels[ $report_type ];
+			$this->report_type                   = $this->report_labels[ $report_type ];
 			$this->placeholders['{report_name}'] = $this->report_type;
 		}
 

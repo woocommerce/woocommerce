@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Variations\DataStore.
@@ -23,7 +24,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	const TABLE_NAME = 'wc_order_product_lookup';
+	protected static $table_name = 'wc_order_product_lookup';
 
 	/**
 	 * Cache identifier.
@@ -53,19 +54,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	);
 
 	/**
-	 * SQL columns to select in the db query and their mapping to SQL code.
-	 *
-	 * @var array
-	 */
-	protected $report_columns = array(
-		'product_id'   => 'product_id',
-		'variation_id' => 'variation_id',
-		'items_sold'   => 'SUM(product_qty) as items_sold',
-		'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
-		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
-	);
-
-	/**
 	 * Extended product attributes to include in the data.
 	 *
 	 * @var array
@@ -82,72 +70,83 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	);
 
 	/**
-	 * Constructor
+	 * Data store context used to pass to filters.
+	 *
+	 * @var string
 	 */
-	public function __construct() {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		// Avoid ambigious column order_id in SQL query.
-		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+	protected $context = 'variations';
+
+	/**
+	 * Assign report columns once full table name has been assigned.
+	 */
+	protected function assign_report_columns() {
+		$table_name = self::get_db_table_name();
+		$this->report_columns = array(
+			'product_id'   => 'product_id',
+			'variation_id' => 'variation_id',
+			'items_sold'   => 'SUM(product_qty) as items_sold',
+			'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
+			'orders_count' => "COUNT(DISTINCT {$table_name}.order_id) as orders_count",
+		);
 	}
 
 	/**
 	 * Fills FROM clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array  $query_args Parameters supplied by the user.
-	 * @param string $arg_name   Name of the FROM sql param.
-	 * @return array
+	 * @param string $arg_name   Target of the JOIN sql param.
 	 */
 	protected function get_from_sql_params( $query_args, $arg_name ) {
 		global $wpdb;
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query['from_clause']       = '';
-		$sql_query['outer_from_clause'] = '';
-		if ( 'sku' === $query_args['orderby'] ) {
-			$sql_query[ $arg_name ] .= " JOIN {$wpdb->prefix}postmeta AS postmeta ON {$order_product_lookup_table}.variation_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
+		if ( 'sku' !== $query_args['orderby'] ) {
+			return;
 		}
 
-		return $sql_query;
+		$table_name = self::get_db_table_name();
+		$join       = "JOIN {$wpdb->postmeta} AS postmeta ON {$table_name}.variation_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
+
+		if ( 'inner' === $arg_name ) {
+			$this->subquery->add_sql_clause( 'join', $join );
+		} else {
+			$this->add_sql_clause( 'join', $join );
+		}
 	}
 
 	/**
 	 * Updates the database query with parameters used for Products report: categories and order status.
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
-	 * @return array Array of parameters used for SQL query.
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
+		$order_product_lookup_table = self::get_db_table_name();
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
+		$this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
+		$this->get_limit_sql_params( $query_args );
+		$this->get_order_by_sql_params( $query_args );
 
 		if ( count( $query_args['variations'] ) > 0 ) {
-			$sql_query_params = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'outer_from_clause' ) );
+			$this->get_from_sql_params( $query_args, 'outer' );
 		} else {
-			$sql_query_params = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'from_clause' ) );
+			$this->get_from_sql_params( $query_args, 'inner' );
 		}
 
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
-			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
+			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
 		}
 
 		if ( count( $query_args['variations'] ) > 0 ) {
-			$allowed_variations_str            = implode( ',', $query_args['variations'] );
-			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.variation_id IN ({$allowed_variations_str})";
+			$allowed_variations_str = self::get_filtered_ids( $query_args, 'variations' );
+			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.variation_id IN ({$allowed_variations_str})" );
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
-			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
+			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
+			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
-
-		return $sql_query_params;
 	}
 
 	/**
@@ -158,11 +157,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-
 		if ( 'date' === $order_by ) {
-			return $table_name . '.date_created';
+			return self::get_db_table_name() . '.date_created';
 		}
 		if ( 'sku' === $order_by ) {
 			return 'meta_value';
@@ -237,7 +233,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$table_name = self::get_db_table_name();
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
@@ -263,6 +259,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$data      = $this->get_cached_data( $cache_key );
 
 		if ( false === $data ) {
+			$this->initialize_queries();
+
 			$data = (object) array(
 				'data'    => array(),
 				'total'   => 0,
@@ -270,78 +268,56 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'page_no' => 0,
 			);
 
-			$selections        = $this->selected_columns( $query_args );
 			$included_products = $this->get_included_products_array( $query_args );
 
+			$this->get_sql_query_params( $query_args );
+			$params = $this->get_limit_params( $query_args );
 			if ( count( $included_products ) > 0 && count( $query_args['variations'] ) > 0 ) {
-				$sql_query_params = $this->get_sql_query_params( $query_args );
-
+				$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
 				if ( 'date' === $query_args['orderby'] ) {
-					$selections .= ", {$table_name}.date_created";
+					$this->subquery->add_sql_clause( 'select', ", {$table_name}.date_created" );
 				}
 
 				$total_results = count( $query_args['variations'] );
-				$total_pages   = (int) ceil( $total_results / $sql_query_params['per_page'] );
+				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
 
 				$fields          = $this->get_fields( $query_args );
 				$join_selections = $this->format_join_selections( $fields, array( 'product_id', 'variation_id' ) );
 				$ids_table       = $this->get_ids_table( $query_args['variations'], 'variation_id', array( 'product_id' => $included_products[0] ) );
 
-				$prefix     = "SELECT {$join_selections} FROM (";
-				$suffix     = ") AS {$table_name}";
-				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.variation_id = {$table_name}.variation_id";
-			} else {
-				$sql_query_params = $this->get_sql_query_params( $query_args );
+				$this->add_sql_clause( 'select', $join_selections );
+				$this->add_sql_clause( 'from', '(' );
+				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
+				$this->add_sql_clause( 'from', ") AS {$table_name}" );
+				$this->add_sql_clause(
+					'right_join',
+					"RIGHT JOIN ( {$ids_table} ) AS default_results
+					ON default_results.variation_id = {$table_name}.variation_id"
+				);
 
+				$variations_query = $this->get_query_statement();
+			} else {
 				$db_records_count = (int) $wpdb->get_var(
 					"SELECT COUNT(*) FROM (
-								SELECT
-									product_id
-								FROM
-									{$table_name}
-									{$sql_query_params['from_clause']}
-								WHERE
-									1=1
-									{$sql_query_params['where_time_clause']}
-									{$sql_query_params['where_clause']}
-								GROUP BY
-									product_id, variation_id
-								) AS tt"
+						{$this->subquery->get_query_statement()}
+					) AS tt"
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 				$total_results = $db_records_count;
-				$total_pages   = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+				$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
 
 				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 					return $data;
 				}
 
-				$prefix     = '';
-				$suffix     = '';
-				$right_join = '';
+				$this->subquery->clear_sql_clause( 'select' );
+				$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+				$variations_query = $this->subquery->get_query_statement();
 			}
 
 			$product_data = $wpdb->get_results(
-				"{$prefix}
-					SELECT
-						{$selections}
-					FROM
-						{$table_name}
-						{$sql_query_params['from_clause']}
-					WHERE
-						1=1
-						{$sql_query_params['where_time_clause']}
-						{$sql_query_params['where_clause']}
-					GROUP BY
-						product_id, variation_id
-				{$suffix}
-					{$right_join}
-					{$sql_query_params['outer_from_clause']}
-					ORDER BY
-						{$sql_query_params['order_by_clause']}
-					{$sql_query_params['limit']}
-					",
+				$variations_query,
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -363,5 +339,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Initialize query objects.
+	 */
+	protected function initialize_queries() {
+		$this->clear_all_clauses();
+		$this->subquery = new SqlQuery( $this->context . '_subquery' );
+		$this->subquery->add_sql_clause( 'select', 'product_id' );
+		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
+		$this->subquery->add_sql_clause( 'group_by', 'product_id, variation_id' );
 	}
 }

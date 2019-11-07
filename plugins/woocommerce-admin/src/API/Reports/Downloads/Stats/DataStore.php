@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore as DownloadsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Downloads\Stats\DataStore.
@@ -28,15 +29,6 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 	);
 
 	/**
-	 * SQL columns to select in the db query and their mapping to SQL code.
-	 *
-	 * @var array
-	 */
-	protected $report_columns = array(
-		'download_count' => 'COUNT(DISTINCT download_log_id) as download_count',
-	);
-
-	/**
 	 * Cache identifier.
 	 *
 	 * @var string
@@ -44,12 +36,20 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 	protected $cache_key = 'downloads_stats';
 
 	/**
-	 * Constructor
+	 * Data store context used to pass to filters.
+	 *
+	 * @var string
 	 */
-	public function __construct() {
-		global $wpdb;
-	}
+	protected $context = 'download_stats';
 
+	/**
+	 * Assign report columns once full table name has been assigned.
+	 */
+	protected function assign_report_columns() {
+		$this->report_columns = array(
+			'download_count' => 'COUNT(DISTINCT download_log_id) as download_count',
+		);
+	}
 
 	/**
 	 * Returns the report data based on parameters supplied by the user.
@@ -60,7 +60,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$table_name = self::get_db_table_name();
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
@@ -84,53 +84,35 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		$data      = $this->get_cached_data( $cache_key );
 
 		if ( false === $data ) {
-			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
-			$totals_query     = array_merge( array(), $this->get_time_period_sql_params( $query_args, $table_name ) );
-			$intervals_query  = array_merge( array(), $this->get_intervals_sql_params( $query_args, $table_name ) );
+			$this->initialize_queries();
+			$selections = $this->selected_columns( $query_args );
+			$this->get_sql_query_params( $query_args );
+			$this->get_time_period_sql_params( $query_args, $table_name );
+			$this->get_intervals_sql_params( $query_args, $table_name );
 
-			$totals_query['where_clause']        .= $sql_query_params['where_clause'];
-			$totals_query['from_clause']         .= $sql_query_params['from_clause'];
-			$intervals_query['where_clause']     .= $sql_query_params['where_clause'];
-			$intervals_query['from_clause']      .= $sql_query_params['from_clause'];
-			$intervals_query['select_clause']     = str_replace( 'date_created', 'timestamp', $intervals_query['select_clause'] );
-			$intervals_query['where_time_clause'] = str_replace( 'date_created', 'timestamp', $intervals_query['where_time_clause'] );
+			$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
+			$this->interval_query->str_replace_clause( 'select', 'date_created', 'timestamp' );
+			$this->interval_query->str_replace_clause( 'where_time', 'date_created', 'timestamp' );
 
 			$db_intervals = $wpdb->get_col(
-				"SELECT
-					{$intervals_query['select_clause']} AS time_interval
-					FROM
-						{$table_name}
-						{$intervals_query['from_clause']}
-					WHERE
-						1=1
-						{$intervals_query['where_time_clause']}
-						{$intervals_query['where_clause']}
-					GROUP BY
-					time_interval"
+				$this->interval_query->get_query_statement()
 			); // WPCS: cache ok, DB call ok, , unprepared SQL ok.
 
 			$db_records_count = count( $db_intervals );
 
+			$params                  = $this->get_limit_params( $query_args );
 			$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
+			$total_pages             = (int) ceil( $expected_interval_count / $params['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return array();
 			}
 
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_records_count, $expected_interval_count, $table_name );
-			$intervals_query['where_time_clause'] = str_replace( 'date_created', 'timestamp', $intervals_query['where_time_clause'] );
-
+			$this->update_intervals_sql_params( $query_args, $db_records_count, $expected_interval_count, $table_name );
+			$this->interval_query->str_replace_clause( 'where_time', 'date_created', 'timestamp' );
+			$this->total_query->add_sql_clause( 'select', $selections );
+			$this->total_query->add_sql_clause( 'where', $this->interval_query->get_sql_clause( 'where' ) );
 			$totals = $wpdb->get_results(
-				"SELECT
-						{$selections}
-					FROM
-						{$table_name}
-						{$totals_query['from_clause']}
-					WHERE
-						1=1
-						{$totals_query['where_time_clause']}
-						{$totals_query['where_clause']}",
+				$this->total_query->get_query_statement(),
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -138,27 +120,15 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 				return new \WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
 			}
 
+			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+			$this->interval_query->add_sql_clause( 'select', ', MAX(timestamp) AS datetime_anchor' );
 			if ( '' !== $selections ) {
-				$selections = ', ' . $selections;
+				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
 
 			$intervals = $wpdb->get_results(
-				"SELECT
-					MAX(timestamp) AS datetime_anchor,
-					{$intervals_query['select_clause']} AS time_interval
-					{$selections}
-					FROM
-						{$table_name}
-						{$intervals_query['from_clause']}
-					WHERE
-						1=1
-						{$intervals_query['where_time_clause']}
-						{$intervals_query['where_clause']}
-					GROUP BY
-						time_interval
-					ORDER BY
-						{$intervals_query['order_by_clause']}
-						{$intervals_query['limit']}",
+				$this->interval_query->get_query_statement(),
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -175,10 +145,10 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			if ( $this->intervals_missing( $expected_interval_count, $db_records_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+			if ( $this->intervals_missing( $expected_interval_count, $db_records_count, $params['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_records_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );
+				$this->remove_extra_records( $data, $query_args['page'], $params['per_page'], $db_records_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );
 			} else {
 				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 			}
@@ -202,5 +172,19 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		}
 
 		return $order_by;
+	}
+
+	/**
+	 * Initialize query objects.
+	 */
+	protected function initialize_queries() {
+		$this->clear_all_clauses();
+		unset( $this->subquery );
+		$this->total_query = new SqlQuery( $this->context . '_total' );
+		$this->total_query->add_sql_clause( 'from', self::get_db_table_name() );
+
+		$this->interval_query = new SqlQuery( $this->context . '_interval' );
+		$this->interval_query->add_sql_clause( 'from', self::get_db_table_name() );
+		$this->interval_query->add_sql_clause( 'group_by', 'time_interval' );
 	}
 }
