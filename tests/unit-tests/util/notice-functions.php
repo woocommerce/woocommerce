@@ -1,9 +1,12 @@
 <?php
-
 /**
  * Class Notice_Functions.
  * @package WooCommerce\Tests\Util
  * @since 2.2
+ */
+
+/**
+ * WC_Tests_Notice_Functions class.
  */
 class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
@@ -22,20 +25,20 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	function test_wc_notice_count() {
+	public function test_wc_notice_count() {
 
-		// no error notices
+		// No error notices.
 		$this->assertEquals( 0, wc_notice_count( 'error' ) );
 
-		// single notice
+		// Single notice.
 		wc_add_notice( 'Bogus Notice', 'success' );
 		$this->assertEquals( 1, wc_notice_count() );
 
-		// specific notice
+		// Specific notice.
 		wc_add_notice( 'Bogus Error Notice', 'error' );
 		$this->assertEquals( 1, wc_notice_count( 'error' ) );
 
-		// multiple notices of different types.
+		// Multiple notices of different types.
 		wc_clear_notices();
 		wc_add_notice( 'Bogus 1', 'success' );
 		wc_add_notice( 'Bogus 2', 'success' );
@@ -60,13 +63,13 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	function test_wc_has_notice() {
+	public function test_wc_has_notice() {
 
-		// negative
+		// Negative.
 		wc_add_notice( 'Bogus Notice', 'success' );
 		$this->assertFalse( wc_has_notice( 'Legit Notice' ) );
 
-		// positive
+		// Positive.
 		wc_add_notice( 'One True Notice', 'notice' );
 		$this->assertTrue( wc_has_notice( 'One True Notice', 'notice' ) );
 	}
@@ -76,22 +79,23 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	function test_wc_add_notice() {
+	public function test_wc_add_notice() {
 
-		// default type
+		// Default type.
 		wc_add_notice( 'Test Notice' );
 		$notices = wc_get_notices();
 		$this->assertArrayHasKey( 'success', $notices );
-		$this->assertEquals( 'Test Notice', $notices['success'][0] );
+		$this->assertEquals( 'Test Notice', $notices['success'][0]['notice'] );
 
-		// clear notices
+		// Clear notices.
 		WC()->session->set( 'wc_notices', null );
 
-		// specific type
-		wc_add_notice( 'Test Error Notice', 'error' );
+		// Specific type.
+		wc_add_notice( 'Test Error Notice', 'error', array( 'id' => 'billing_postcode' ) );
 		$notices = wc_get_notices();
 		$this->assertArrayHasKey( 'error', $notices );
-		$this->assertEquals( 'Test Error Notice', $notices['error'][0] );
+		$this->assertEquals( 'Test Error Notice', $notices['error'][0]['notice'] );
+		$this->assertEquals( array( 'id' => 'billing_postcode' ), $notices['error'][0]['data'] );
 	}
 
 	/**
@@ -99,7 +103,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	function test_wc_clear_notices() {
+	public function test_wc_clear_notices() {
 
 		wc_add_notice( 'Test Notice' );
 		wc_clear_notices();
@@ -153,10 +157,23 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_error_notice() {
 
-		// specific type
+		// Specific type.
 		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li>Error!</li></ul>' );
 
 		wc_print_notice( 'Error!', 'error' );
+	}
+
+	/**
+	 * Test wc_print_notice() w/ data.
+	 *
+	 * @since 2.2
+	 */
+	public function test_wc_print_notice_data() {
+
+		// Specific type.
+		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li data-element-id="billing_postcode">Error!</li></ul>' );
+
+		wc_print_notice( 'Error!', 'error', array( 'id' => 'billing_postcode' ) );
 	}
 
 	/**
@@ -166,20 +183,38 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_notices() {
 
-		// no notices
+		// No notices.
 		$notices = wc_get_notices();
 		$this->assertInternalType( 'array', $notices );
 		$this->assertEmpty( $notices );
 
-		// default type
+		// Default type.
 		wc_add_notice( 'Another Notice' );
-		$this->assertEquals( array( 'success' => array( 'Another Notice' ) ), wc_get_notices() );
+		$this->assertEquals(
+			array(
+				'success' => array(
+					array(
+						'notice' => 'Another Notice',
+						'data'   => array(),
+					),
+				),
+			),
+			wc_get_notices()
+		);
 
-		// specific type
-		wc_add_notice( 'Error Notice', 'error' );
-		$this->assertEquals( array( 'Error Notice' ), wc_get_notices( 'error' ) );
+		// Specific type.
+		wc_add_notice( 'Error Notice', 'error', array( 'id' => 'billing_email' ) );
+		$this->assertEquals(
+			array(
+				array(
+					'notice' => 'Error Notice',
+					'data'   => array( 'id' => 'billing_email' ),
+				),
+			),
+			wc_get_notices( 'error' )
+		);
 
-		// invalid type
+		// Invalid type.
 		$notices = wc_get_notices( 'bogus_type' );
 		$this->assertInternalType( 'array', $notices );
 		$this->assertEmpty( $notices );
