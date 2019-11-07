@@ -132,6 +132,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $new_method_label = '';
 
 	/**
+	 * Pay button ID if supported.
+	 *
+	 * @var string
+	 */
+	public $pay_button_id = '';
+
+	/**
 	 * Contains a users saved tokens for this gateway.
 	 *
 	 * @var array
@@ -315,6 +322,16 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+	}
+
+	/**
+	 * Return the gateway's pay button ID.
+	 *
+	 * @since 3.9.0
+	 * @return string
+	 */
+	public function get_pay_button_id() {
+		return sanitize_html_class( $this->pay_button_id );
 	}
 
 	/**
