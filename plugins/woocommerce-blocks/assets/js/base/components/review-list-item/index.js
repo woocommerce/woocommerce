@@ -203,11 +203,11 @@ ReviewListItem.propTypes = {
 
 /**
  * BE AWARE. ReviewListItem expects product data that is equivalent to what is
- * made avaialble for output in a public view. Thus content that may contain
+ * made available for output in a public view. Thus content that may contain
  * html data is not sanitized further.
  *
  * Currently the following data is trusted (assumed to already be sanitized):
- * - `review.review` (review content).
+ * - `review.review` (review content)
  * - `review.product_name` (the product title)
  */
 export default ReviewListItem;

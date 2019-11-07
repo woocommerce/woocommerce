@@ -36,7 +36,7 @@ This selector will return the collection for the given arguments. It has a sibli
 | `query`       | Object  |  The query arguments for the collection. Eg. `{ order: 'ASC', sortBy: Price }`                                                                                                                          |
 | `ids`         | Array   |  If the collection route has placeholders for ids you provide the values for those placeholders in this array (in order).                                                                               |
 
-### `getCollectionHeader( namespace, modelName, header, query = null, ids = [])
+### `getCollectionHeader( namespace, modelName, header, query = null, ids = [])`
 
 This selector will return a header from the collection response using the given arguments. It has a sibling resolver that will resolve `getCollection` using the arguments if that has never been resolved.
 

@@ -1,25 +1,20 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { render } from 'react-dom';
+import renderFrontend from '../../utils/render-frontend.js';
 
 /**
  * Internal dependencies
  */
 import Block from './block.js';
 
-const containers = document.querySelectorAll(
-	'.wp-block-woocommerce-price-filter'
-);
-
-if ( containers.length ) {
-	Array.prototype.forEach.call( containers, ( el ) => {
-		const attributes = {
+const getProps = ( el ) => {
+	return {
+		attributes: {
 			showInputFields: el.dataset.showinputfields === 'true',
 			showFilterButton: el.dataset.showfilterbutton === 'true',
-		};
-		el.classList.remove( 'is-loading' );
+		},
+	};
+};
 
-		render( <Block attributes={ attributes } />, el );
-	} );
-}
+renderFrontend( '.wp-block-woocommerce-price-filter', Block, getProps );

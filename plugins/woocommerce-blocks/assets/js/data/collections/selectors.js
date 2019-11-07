@@ -108,7 +108,7 @@ export const getCollectionHeader = (
 	);
 	// Can't just do a truthy check because `getCollectionHeaders` resolver
 	// invokes the `getCollection` selector to trigger the resolution of the
-	// collection request. It's fallback is an empty array.
+	// collection request. Its fallback is an empty array.
 	if ( headers && headers.get ) {
 		return headers.has( header ) ? headers.get( header ) : undefined;
 	}
