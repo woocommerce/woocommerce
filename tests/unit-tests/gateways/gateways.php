@@ -64,5 +64,20 @@ class WC_Tests_Gateways extends WC_Unit_Test_Case {
 		$order->save();
 		$this->assertFalse( $gateway->can_refund_order( $order ) );
 	}
+
+	/**
+	 * Test WC_Payment_Gateway::get_pay_button_id();
+	 *
+	 * @return void
+	 */
+	public function test_get_pay_button_id() {
+		$gateway = new WC_Mock_Payment_Gateway();
+
+		$this->assertEquals( $gateway->pay_button_id, $gateway->get_pay_button_id() );
+
+		$gateway->pay_button_id = 'new-pay-button';
+
+		$this->assertEquals( $gateway->pay_button_id, $gateway->get_pay_button_id() );
+	}
 }
 
