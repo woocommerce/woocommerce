@@ -68,7 +68,7 @@
 		}
 	}
 
-	.components-button.is-button.is-default {
+	.components-button.is-button.is-default:not(.is-primary) {
 		color: $gray-text;
 		border-color: $button-border;
 		background: $button;
@@ -85,7 +85,7 @@
 		}
 	}
 
-	.components-button.is-default:disabled {
+	.components-button.is-default:disabled:not(.is-primary) {
 		color: $button-disabled;
 		border-color: $button-disabled-border;
 		background: $button;
