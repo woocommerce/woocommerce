@@ -171,7 +171,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	public function test_wc_print_notice_data() {
 
 		// Specific type.
-		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li data-element-id="billing_postcode">Error!</li></ul>' );
+		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li data-id="billing_postcode">Error!</li></ul>' );
 
 		wc_print_notice( 'Error!', 'error', array( 'id' => 'billing_postcode' ) );
 	}

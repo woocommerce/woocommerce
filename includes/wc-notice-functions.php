@@ -264,9 +264,19 @@ function wc_kses_notice( $message ) {
  * @return string
  */
 function wc_get_notice_data_attr( $notice ) {
-	if ( ! isset( $notice['data']['id'] ) ) {
+	if ( empty( $notice['data'] ) ) {
 		return;
 	}
 
-	return sprintf( ' data-element-id="%s"', esc_attr( $notice['data']['id'] ) );
+	$attr = '';
+
+	foreach ( $notice['data'] as $key => $value ) {
+		$attr .= sprintf(
+			' data-%1$s="%2$s"',
+			sanitize_title( $key ),
+			esc_attr( $value )
+		);
+	}
+
+	return $attr;
 }
