@@ -3,11 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import SortSelect from '@woocommerce/base-components/sort-select';
 
 /**
  * Internal dependencies
  */
-import SortSelect from '@woocommerce/base-components/sort-select';
 import './style.scss';
 
 const ProductSortSelect = ( { defaultValue, onChange, readOnly, value } ) => {

@@ -7,10 +7,6 @@ import {
 	useQueryStateByContext,
 } from '@woocommerce/base-hooks';
 import { useCallback } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { CURRENCY } from '@woocommerce/settings';
 

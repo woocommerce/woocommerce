@@ -12,6 +12,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { PRODUCT_COUNT } from '@woocommerce/block-settings';
+import { ADMIN_URL } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import { PRODUCT_COUNT } from '@woocommerce/block-settings';
 import Block from './block.js';
 import './editor.scss';
 import { IconMoney, IconExternal } from '../../components/icons';
-import { ADMIN_URL } from '@woocommerce/settings';
 import ToggleButtonControl from '../../components/toggle-button-control';
 
 export default function( { attributes, setAttributes } ) {

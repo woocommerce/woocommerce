@@ -3,13 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
+import { ProductSaleBadge } from '@woocommerce/atomic-components/product';
+import { IconProductOnSale } from '@woocommerce/block-components/icons';
 
 /**
  * Internal dependencies
  */
-import { ProductSaleBadge } from '@woocommerce/atomic-components/product';
 import sharedConfig from '../shared-config';
-import { IconProductOnSale } from '@woocommerce/block-components/icons';
 
 const blockConfig = {
 	title: __( 'On-Sale Badge', 'woo-gutenberg-products-block' ),

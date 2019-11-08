@@ -6,11 +6,11 @@ import { InspectorControls } from '@wordpress/editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { IconAllReviews } from '@woocommerce/block-components/icons';
 
 /**
  * Internal dependencies
  */
-import { IconAllReviews } from '@woocommerce/block-components/icons';
 import EditorContainerBlock from '../editor-container-block.js';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
 import {

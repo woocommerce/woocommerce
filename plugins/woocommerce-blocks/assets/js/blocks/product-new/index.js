@@ -4,13 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { without } from 'lodash';
+import { IconNewReleases } from '@woocommerce/block-components/icons';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
-import { IconNewReleases } from '@woocommerce/block-components/icons';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';

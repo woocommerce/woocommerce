@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import trimHtml from 'trim-html';
 
 /**

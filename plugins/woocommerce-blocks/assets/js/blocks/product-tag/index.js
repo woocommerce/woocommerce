@@ -4,13 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/block-settings';
+import { IconProductTag } from '@woocommerce/block-components/icons';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
 import Block from './block';
-import { IconProductTag } from '@woocommerce/block-components/icons';
 
 /**
  * Register and run the "Products by Tag" block.

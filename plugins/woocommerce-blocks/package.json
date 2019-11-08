@@ -108,6 +108,7 @@
 	"dependencies": {
 		"@woocommerce/components": "3.2.0",
 		"compare-versions": "3.5.1",
+		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"gridicons": "3.3.1",
 		"react-number-format": "4.3.1",
 		"trim-html": "0.1.9"

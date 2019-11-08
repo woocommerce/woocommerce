@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { previewReviews } from '@woocommerce/resource-previews';
 
 export const example = {

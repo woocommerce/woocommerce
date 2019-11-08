@@ -4,10 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Placeholder } from '@wordpress/components';
 import classNames from 'classnames';
-
-/**
- * Internal dependencies
- */
 import { adminUrl } from '@woocommerce/settings';
 import { IconExternal } from '@woocommerce/block-components/icons';
 

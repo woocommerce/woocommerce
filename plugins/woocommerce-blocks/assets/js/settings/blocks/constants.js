@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { getSetting } from '@woocommerce/settings';
 
 export const ENABLE_REVIEW_RATING = getSetting( 'enableReviewRating', true );

@@ -1,14 +1,14 @@
 /**
- * External dependencies.
+ * External dependencies
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-
-/**
- * Internal dependencies.
- */
 import { useInnerBlockParentNameContext } from '@woocommerce/base-context/inner-block-parent-name-context';
 import withComponentId from '@woocommerce/base-hocs/with-component-id';
+
+/**
+ * Internal dependencies
+ */
 import { renderProductLayout } from './utils';
 
 const ProductListItem = ( { product, attributes, componentId } ) => {

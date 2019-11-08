@@ -3,6 +3,9 @@
  */
 import { Component, createRef, Fragment } from 'react';
 
+/**
+ * Internal dependencies
+ */
 import './style.scss';
 
 /**

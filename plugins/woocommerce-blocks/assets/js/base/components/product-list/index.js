@@ -3,10 +3,6 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-
-/**
- * Internal dependencies
- */
 import Pagination from '@woocommerce/base-components/pagination';
 import ProductSortSelect from '@woocommerce/base-components/product-sort-select';
 import ProductListItem from '@woocommerce/base-components/product-list-item';
@@ -15,6 +11,10 @@ import {
 	useSynchronizedQueryState,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
+
+/**
+ * Internal dependencies
+ */
 import './style.scss';
 
 const generateQuery = ( { sortValue, currentPage, attributes } ) => {

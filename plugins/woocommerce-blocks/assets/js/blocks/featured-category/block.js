@@ -31,13 +31,13 @@ import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { MIN_HEIGHT } from '@woocommerce/block-settings';
+import { IconFolderStar } from '@woocommerce/block-components/icons';
+import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
+import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 
 /**
  * Internal dependencies
  */
-import { IconFolderStar } from '@woocommerce/block-components/icons';
-import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
-import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 import {
 	dimRatioToClass,
 	getBackgroundImageStyles,

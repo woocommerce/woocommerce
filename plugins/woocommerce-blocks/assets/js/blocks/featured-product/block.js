@@ -32,18 +32,18 @@ import { compose } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { MIN_HEIGHT } from '@woocommerce/block-settings';
+import ProductControl from '@woocommerce/block-components/product-control';
+import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
+import { withProduct } from '@woocommerce/block-hocs';
 
 /**
  * Internal dependencies
  */
-import ProductControl from '@woocommerce/block-components/product-control';
-import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 import { dimRatioToClass, getBackgroundImageStyles } from './utils';
 import {
 	getImageSrcFromProduct,
 	getImageIdFromProduct,
 } from '../../utils/products';
-import { withProduct } from '@woocommerce/block-hocs';
 
 /**
  * Component to handle edit mode of "Featured Product".

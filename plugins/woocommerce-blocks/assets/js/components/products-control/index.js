@@ -4,10 +4,6 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { SearchListControl } from '@woocommerce/components';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
 import { withSearchedProducts } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
 

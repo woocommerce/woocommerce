@@ -20,10 +20,6 @@ import {
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { MAX_COLUMNS, MIN_COLUMNS } from '@woocommerce/block-settings';
-
-/**
- * Internal dependencies
- */
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
 import { IconWidgets } from '@woocommerce/block-components/icons';
 import ProductsControl from '@woocommerce/block-components/products-control';

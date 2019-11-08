@@ -12,15 +12,15 @@ import {
 	withSearchedProducts,
 	withTransformSingleSelectToMultipleSelect,
 } from '@woocommerce/block-hocs';
-
-/**
- * Internal dependencies
- */
 import {
 	IconRadioSelected,
 	IconRadioUnselected,
 } from '@woocommerce/block-components/icons';
 import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
+
+/**
+ * Internal dependencies
+ */
 import './style.scss';
 
 function getHighlightedName( name, search ) {

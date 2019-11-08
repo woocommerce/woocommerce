@@ -5,11 +5,11 @@ import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
+import { getAttributes, getTerms } from '@woocommerce/block-components/utils';
 
 /**
  * Internal dependencies
  */
-import { getAttributes, getTerms } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 const withAttributes = createHigherOrderComponent( ( OriginalComponent ) => {

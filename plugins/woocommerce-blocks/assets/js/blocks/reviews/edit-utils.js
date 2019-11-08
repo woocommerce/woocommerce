@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { __, sprintf } from '@wordpress/i18n';
 import { Fragment, RawHTML } from '@wordpress/element';
 import { escapeHTML } from '@wordpress/escape-html';
@@ -14,10 +17,6 @@ import {
 	ENABLE_REVIEW_RATING,
 	SHOW_AVATARS,
 } from '@woocommerce/block-settings';
-
-/**
- * Internal dependencies
- */
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 
 export const getBlockControls = ( editMode, setAttributes ) => (

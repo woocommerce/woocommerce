@@ -3,13 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
+import { IconReviewsByProduct } from '@woocommerce/block-components/icons';
 
 /**
  * Internal dependencies
  */
 import '../editor.scss';
 import Editor from './edit';
-import { IconReviewsByProduct } from '@woocommerce/block-components/icons';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
 import { example } from '../example';

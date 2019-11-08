@@ -5,10 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
-
-/**
- * Internal dependencies
- */
 import LoadMoreButton from '@woocommerce/base-components/load-more-button';
 import ReviewSortSelect from '@woocommerce/base-components/review-sort-select';
 import ReviewList from '@woocommerce/base-components/review-list';

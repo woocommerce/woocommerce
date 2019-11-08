@@ -6,11 +6,11 @@ import { debounce } from 'lodash';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { IS_LARGE_CATALOG } from '@woocommerce/block-settings';
+import { getProducts } from '@woocommerce/block-components/utils';
 
 /**
  * Internal dependencies
  */
-import { getProducts } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 /**

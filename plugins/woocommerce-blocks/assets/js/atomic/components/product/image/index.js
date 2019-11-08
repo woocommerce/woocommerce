@@ -4,11 +4,11 @@
 import PropTypes from 'prop-types';
 import { Component, Fragment } from 'react';
 import classnames from 'classnames';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
-import { PLACEHOLDER_IMG_SRC } from '@woocommerce/block-settings';
 import { ProductSaleBadge } from '../../../components/product';
 
 class ProductImage extends Component {

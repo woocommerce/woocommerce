@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { setWith, clone } from 'lodash';
 
 /**

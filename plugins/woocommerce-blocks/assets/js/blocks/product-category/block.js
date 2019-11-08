@@ -17,10 +17,6 @@ import {
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';

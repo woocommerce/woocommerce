@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import Gridicon from 'gridicons';
-
-/**
- * Internal dependencies
- */
 import { previewProducts } from '@woocommerce/resource-previews';
 
 /**

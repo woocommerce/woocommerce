@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { Component } from 'react';
 import { addQueryArgs, getQueryArg } from '@wordpress/url';
 

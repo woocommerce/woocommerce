@@ -4,11 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Label from '@woocommerce/base-components/label';
 
 /**
  * Internal dependencies
  */
-import Label from '@woocommerce/base-components/label';
 import { getIndexes } from './utils.js';
 import './style.scss';
 

@@ -7,10 +7,6 @@ import { InspectorControls, ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
 import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
 import { IconFolder } from '@woocommerce/block-components/icons';
-
-/**
- * Internal dependencies
- */
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 
 const EmptyPlaceHolder = () => (
