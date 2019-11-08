@@ -13,12 +13,12 @@ import {
 import { SearchListItem } from '@woocommerce/components';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
+import { IconReviewsByCategory } from '@woocommerce/block-components/icons';
 
 /**
  * Internal dependencies
  */
-import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
-import { IconReviewsByCategory } from '@woocommerce/block-components/icons';
 import EditorContainerBlock from '../editor-container-block.js';
 import NoReviewsPlaceholder from './no-reviews-placeholder.js';
 import {

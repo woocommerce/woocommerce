@@ -4,6 +4,10 @@
 import { QUERY_STATE_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useRef, useEffect, useCallback } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
 import { useShallowEqual } from './use-shallow-equal';
 
 /**

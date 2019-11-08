@@ -4,10 +4,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Placeholder, Spinner } from '@wordpress/components';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
 import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 import { IconReviewsByProduct } from '@woocommerce/block-components/icons';
 import { withProduct } from '@woocommerce/block-hocs';

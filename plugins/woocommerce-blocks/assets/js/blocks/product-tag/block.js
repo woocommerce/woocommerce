@@ -18,10 +18,6 @@ import {
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { HAS_TAGS } from '@woocommerce/block-settings';
-
-/**
- * Internal dependencies
- */
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import ProductTagControl from '@woocommerce/block-components/product-tag-control';

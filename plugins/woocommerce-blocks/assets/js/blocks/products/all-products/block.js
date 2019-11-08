@@ -3,10 +3,6 @@
  */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
 import ProductListContainer from '@woocommerce/base-components/product-list/container';
 import { InnerBlockParentNameProvider } from '@woocommerce/base-context/inner-block-parent-name-context';
 import { ProductLayoutContextProvider } from '@woocommerce/base-context/product-layout-context';

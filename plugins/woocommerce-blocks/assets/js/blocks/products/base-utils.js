@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { getRegisteredInnerBlocks } from '@woocommerce/blocks-registry';
-
-/**
- * Internal dependencies
- */
 import {
 	ProductTitle,
 	ProductPrice,

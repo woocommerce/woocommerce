@@ -3,12 +3,12 @@
  */
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Label from '@woocommerce/base-components/label';
+import withComponentId from '@woocommerce/base-hocs/with-component-id';
 
 /**
  * Internal dependencies
  */
-import Label from '@woocommerce/base-components/label';
-import withComponentId from '@woocommerce/base-hocs/with-component-id';
 import './style.scss';
 
 /**

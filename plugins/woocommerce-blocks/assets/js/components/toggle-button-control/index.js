@@ -4,10 +4,6 @@
 import { isFunction } from 'lodash';
 import classnames from 'classnames';
 import { BaseControl, ButtonGroup, Button } from '@wordpress/components';
-
-/**
- * WordPress dependencies
- */
 import { Component } from '@wordpress/element';
 import { withInstanceId } from '@wordpress/compose';
 

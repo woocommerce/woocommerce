@@ -1,5 +1,5 @@
 /**
- * Internal imports
+ * Internal dependencies
  */
 import { compareWithWpVersion, setSetting } from '..';
 

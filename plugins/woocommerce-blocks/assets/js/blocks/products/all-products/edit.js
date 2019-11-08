@@ -23,6 +23,8 @@ import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
+import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
+import { HAS_PRODUCTS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -38,8 +40,6 @@ import {
 	getProductLayoutConfig,
 } from '../base-utils';
 import { getSharedContentControls, getSharedListControls } from '../edit';
-import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
-import { HAS_PRODUCTS } from '@woocommerce/block-settings';
 import Block from './block';
 
 /**

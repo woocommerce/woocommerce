@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Placeholder } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
 import { IconAllReviews } from '@woocommerce/block-components/icons';
 
 const NoCategoryReviewsPlaceholder = () => {

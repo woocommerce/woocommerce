@@ -3,12 +3,12 @@
  */
 import { Component } from 'react';
 import PropTypes from 'prop-types';
+import withQueryStringValues from '@woocommerce/base-hocs/with-query-string-values';
 
 /**
  * Internal dependencies
  */
 import ProductList from './index';
-import withQueryStringValues from '@woocommerce/base-hocs/with-query-string-values';
 
 class ProductListContainer extends Component {
 	onPageChange = ( newPage ) => {

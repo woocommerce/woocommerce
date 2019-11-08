@@ -4,11 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import ReadMore from '@woocommerce/base-components/read-more';
 
 /**
  * Internal dependencies
  */
-import ReadMore from '@woocommerce/base-components/read-more';
 import './style.scss';
 
 function getReviewImage( review, imageType, isLoading ) {

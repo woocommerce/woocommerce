@@ -4,11 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import Gridicon from 'gridicons';
+import { ProductPrice } from '@woocommerce/atomic-components/product';
 
 /**
  * Internal dependencies
  */
-import { ProductPrice } from '@woocommerce/atomic-components/product';
 import sharedConfig from '../shared-config';
 
 const blockConfig = {

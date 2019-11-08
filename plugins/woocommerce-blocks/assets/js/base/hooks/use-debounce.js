@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { useState, useEffect } from 'react';
 
 /**

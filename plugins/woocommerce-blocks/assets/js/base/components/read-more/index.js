@@ -1,7 +1,5 @@
 /**
- * Show text based content, limited to a number of lines, with a read more link.
- *
- * Based on https://github.com/zoltantothcom/react-clamp-lines.
+ * External dependencies
  */
 import React, { createRef, Component } from 'react';
 import PropTypes from 'prop-types';
@@ -12,6 +10,11 @@ import { __ } from '@wordpress/i18n';
  */
 import { clampLines } from './utils';
 
+/**
+ * Show text based content, limited to a number of lines, with a read more link.
+ *
+ * Based on https://github.com/zoltantothcom/react-clamp-lines.
+ */
 class ReadMore extends Component {
 	constructor( props ) {
 		super( ...arguments );

@@ -3,6 +3,9 @@
  */
 import TestRenderer from 'react-test-renderer';
 
+/**
+ * Internal dependencies
+ */
 import withComponentId from '../with-component-id';
 
 const TestComponent = withComponentId( ( props ) => {

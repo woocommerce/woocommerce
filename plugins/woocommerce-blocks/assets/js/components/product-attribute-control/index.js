@@ -7,12 +7,12 @@ import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl, Spinner } from '@wordpress/components';
+import { withAttributes } from '@woocommerce/block-hocs';
+import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
 
 /**
  * Internal dependencies
  */
-import { withAttributes } from '@woocommerce/block-hocs';
-import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
 import './style.scss';
 
 const ProductAttributeControl = ( {

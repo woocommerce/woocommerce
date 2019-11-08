@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
 import Gridicon from 'gridicons';
+import { ProductButton } from '@woocommerce/atomic-components/product';
 
 /**
  * Internal dependencies
  */
-import { ProductButton } from '@woocommerce/atomic-components/product';
 import sharedConfig from '../shared-config';
 
 const blockConfig = {

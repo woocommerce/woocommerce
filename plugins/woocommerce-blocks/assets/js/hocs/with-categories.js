@@ -3,11 +3,11 @@
  */
 import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
+import { getCategories } from '@woocommerce/block-components/utils';
 
 /**
  * Internal dependencies
  */
-import { getCategories } from '@woocommerce/block-components/utils';
 import { formatError } from '../base/utils/errors.js';
 
 const withCategories = createHigherOrderComponent( ( OriginalComponent ) => {

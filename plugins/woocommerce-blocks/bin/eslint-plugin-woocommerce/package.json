@@ -1,0 +1,11 @@
+{
+	"name": "eslint-plugin-woocommerce",
+	"version": "0.0.1",
+	"main": "index.js",
+	"devDependencies": {
+		"eslint": "6.6.0"
+	},
+	"engines": {
+		"node": "10.17.0"
+	}
+}

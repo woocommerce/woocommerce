@@ -13,10 +13,6 @@ import {
 } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { find } from 'lodash';
-
-/**
- * Internal dependencies
- */
 import { useCollection } from '@woocommerce/base-hooks';
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
