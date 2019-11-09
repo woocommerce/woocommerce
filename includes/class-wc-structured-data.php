@@ -179,9 +179,10 @@ class WC_Structured_Data {
 	 *
 	 * Hooked into `woocommerce_single_product_summary` action hook.
 	 *
-	 * @param WC_Product $product Product data (default: null).
+	 * @param WC_Product $product   Product data (default: null).
+	 * @param bool       $review_id Reveiw ID to include in product permalink (default: null).
 	 */
-	public function get_product_data( $product = null, $review_id = false ) {
+	public function generate_product_data( $product = null, $review_id = null ) {
 		if ( ! is_object( $product ) ) {
 			global $product;
 		}
@@ -204,9 +205,11 @@ class WC_Structured_Data {
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		//if a review_id was supplied, add the review_id to the @id to differentiate between different instances of itemReviewed
-		if( $review_id ) $markup['@id'] .= '-review-' . $review_id;
-		
+		// If a review_id was supplied, append the review_id to the permalink to differentiate betwee this @id and other instances of the @id on this page.
+		if ( $review_id ) {
+			$markup['@id'] .= '-review-' . $review_id;
+		}
+
 		if ( $image ) {
 			$markup['image'] = $image;
 		}
@@ -323,12 +326,15 @@ class WC_Structured_Data {
 		if ( empty( $markup['aggregateRating'] ) && empty( $markup['offers'] ) && empty( $markup['review'] ) ) {
 			return;
 		}
-		
-		return apply_filters( 'woocommerce_structured_data_product', $markup, $product );
-	}
 
-	public function generate_product_data( $product = null ) {
-		$this->set_data( $this->get_product_data( $product ) );
+		$markup = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
+
+		// If this function was called from a product review, return the $markup now.
+		if ( $review_id ){
+			return $markup;
+		}
+
+		$this->set_data( $markup );
 	}
 
 	/**
@@ -344,7 +350,7 @@ class WC_Structured_Data {
 		$markup['@id']           = get_comment_link( $comment->comment_ID );
 		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
 		$markup['description']   = get_comment_text( $comment->comment_ID );
-		$markup['itemReviewed']  = $this->get_product_data( wc_get_product( $comment->comment_post_ID ), $comment->comment_ID );
+		$markup['itemReviewed']  = $this->generate_product_data( wc_get_product( $comment->comment_post_ID ), $comment->comment_ID );
 
 		// Skip replies unless they have a rating.
 		$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
