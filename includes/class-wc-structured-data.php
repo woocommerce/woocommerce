@@ -330,7 +330,7 @@ class WC_Structured_Data {
 		$markup = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
 
 		// If this function was called from a product review, return the $markup now.
-		if ( $review_id ){
+		if ( $review_id ) {
 			return $markup;
 		}
 
