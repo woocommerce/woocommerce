@@ -20,7 +20,7 @@ A pre-configured SelectControl for product orderby settings.
 
 Display a preview for a given product.
 
-## `ProductAttributeControl`
+## `ProductAttributeTermControl`
 
 A component using [`SearchListControl`](https://woocommerce.github.io/woocommerce-admin/#/components/packages/search-list-control) to show product attributes as selectable options. Only allows for selecting attribute terms from one attribute at a time (multiple terms can be selected).
 

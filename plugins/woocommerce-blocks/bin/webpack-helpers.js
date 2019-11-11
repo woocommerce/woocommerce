@@ -115,12 +115,14 @@ const mainEntry = {
 	'featured-category': './assets/js/blocks/featured-category/index.js',
 	'all-products': './assets/js/blocks/products/all-products/index.js',
 	'price-filter': './assets/js/blocks/price-filter/index.js',
+	'attribute-filter': './assets/js/blocks/attribute-filter/index.js',
 };
 
 const frontEndEntry = {
 	reviews: './assets/js/blocks/reviews/frontend.js',
 	'all-products': './assets/js/blocks/products/all-products/frontend.js',
 	'price-filter': './assets/js/blocks/price-filter/frontend.js',
+	'attribute-filter': './assets/js/blocks/attribute-filter/frontend.js',
 };
 
 const getEntryConfig = ( main = true, exclude = [] ) => {

@@ -36,7 +36,12 @@ import { useShallowEqual } from './use-shallow-equal';
  *                              loading (true) or not.
  */
 export const useCollection = ( options ) => {
-	const { namespace, resourceName, resourceValues, query } = options;
+	const {
+		namespace,
+		resourceName,
+		resourceValues = [],
+		query = {},
+	} = options;
 	if ( ! namespace || ! resourceName ) {
 		throw new Error(
 			'The options object must have valid values for the namespace and ' +
@@ -55,7 +60,7 @@ export const useCollection = ( options ) => {
 				resourceName,
 				currentQuery,
 				currentResourceValues,
-			].filter( ( item ) => typeof item !== 'undefined' );
+			];
 			return {
 				results: store.getCollection( ...args ),
 				isLoading: ! store.hasFinishedResolution(

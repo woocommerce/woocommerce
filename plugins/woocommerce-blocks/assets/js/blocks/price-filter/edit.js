@@ -12,7 +12,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { PRODUCT_COUNT } from '@woocommerce/block-settings';
-import { ADMIN_URL } from '@woocommerce/settings';
+import { getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -113,7 +113,7 @@ export default function( { attributes, setAttributes } ) {
 				className="wc-block-price-slider__add_product_button"
 				isDefault
 				isLarge
-				href={ ADMIN_URL + 'post-new.php?post_type=product' }
+				href={ getAdminLink( 'post-new.php?post_type=product' ) }
 			>
 				{ __( 'Add new product', 'woo-gutenberg-products-block' ) +
 					' ' }

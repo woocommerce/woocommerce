@@ -20,7 +20,7 @@ import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
-import ProductAttributeControl from '@woocommerce/block-components/product-attribute-control';
+import ProductAttributeTermControl from '@woocommerce/block-components/product-attribute-term-control';
 import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
 
 /**
@@ -70,7 +70,7 @@ class ProductsByAttributeBlock extends Component {
 					) }
 					initialOpen={ false }
 				>
-					<ProductAttributeControl
+					<ProductAttributeTermControl
 						selected={ attributes }
 						onChange={ ( value = [] ) => {
 							/* eslint-disable camelcase */
@@ -129,7 +129,7 @@ class ProductsByAttributeBlock extends Component {
 					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-products-by-attribute__selection">
-					<ProductAttributeControl
+					<ProductAttributeTermControl
 						selected={ blockAttributes.attributes }
 						onChange={ ( value = [] ) => {
 							/* eslint-disable camelcase */

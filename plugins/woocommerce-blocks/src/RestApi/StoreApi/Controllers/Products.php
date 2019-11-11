@@ -358,10 +358,28 @@ class Products extends RestContoller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['category_operator'] = array(
+			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => [ 'in', 'not in', 'and' ],
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		$params['tag'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['tag_operator'] = array(
+			'description'       => __( 'Operator to compare product tags.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => [ 'in', 'not in', 'and' ],
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -394,33 +412,6 @@ class Products extends RestContoller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$params['category_operator'] = array(
-			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
-			'type'              => 'string',
-			'enum'              => array( 'in', 'not_in', 'and' ),
-			'default'           => 'in',
-			'sanitize_callback' => 'sanitize_key',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		$params['tag_operator'] = array(
-			'description'       => __( 'Operator to compare product tags.', 'woo-gutenberg-products-block' ),
-			'type'              => 'string',
-			'enum'              => array( 'in', 'not_in', 'and' ),
-			'default'           => 'in',
-			'sanitize_callback' => 'sanitize_key',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		$params['attribute_operator'] = array(
-			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
-			'type'              => 'string',
-			'enum'              => array( 'in', 'not_in', 'and' ),
-			'default'           => 'in',
-			'sanitize_callback' => 'sanitize_key',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
 		$params['attributes'] = array(
 			'description' => __( 'Limit result set to products with selected global attributes.', 'woo-gutenberg-products-block' ),
 			'type'        => 'array',
@@ -433,13 +424,14 @@ class Products extends RestContoller {
 						'sanitize_callback' => 'wc_sanitize_taxonomy_name',
 					),
 					'term_id'   => array(
-						'description'       => __( 'Attribute term ID.', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'List of attribute term IDs.', 'woo-gutenberg-products-block' ),
 						'type'              => 'array',
 						'sanitize_callback' => 'wp_parse_id_list',
 					),
 					'slug'      => array(
-						'description' => __( 'Comma separatede list of attribute slug(s). If a term ID is provided, this will be ignored.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
+						'description'       => __( 'List of attribute slug(s). If a term ID is provided, this will be ignored.', 'woo-gutenberg-products-block' ),
+						'type'              => 'array',
+						'sanitize_callback' => 'wp_parse_slug_list',
 					),
 					'operator'  => array(
 						'description' => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
@@ -449,6 +441,15 @@ class Products extends RestContoller {
 				),
 			),
 			'default'     => array(),
+		);
+
+		$params['attribute_relation'] = array(
+			'description'       => __( 'The logical relationship between attributes when filtering across multiple at once.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => [ 'in', 'and' ],
+			'default'           => 'and',
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['catalog_visibility'] = array(

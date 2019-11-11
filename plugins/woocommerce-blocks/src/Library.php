@@ -48,6 +48,7 @@ class Library {
 		if ( version_compare( $wp_version, '5.2', '>' ) ) {
 			$blocks[] = 'AllProducts';
 			$blocks[] = 'PriceFilter';
+			$blocks[] = 'AttributeFilter';
 		}
 		foreach ( $blocks as $class ) {
 			$class    = __NAMESPACE__ . '\\BlockTypes\\' . $class;
