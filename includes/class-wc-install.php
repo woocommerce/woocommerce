@@ -892,7 +892,7 @@ CREATE TABLE {$wpdb->prefix}wc_order_statuses (
   `fulfillment_status` varchar(20) NOT NULL,
   `delivery_status` varchar(20) NULL DEFAULT '',
   PRIMARY KEY  (`order_status_id`),
-  KEY `order_id` (`order_id`),
+  UNIQUE KEY `order_id` (`order_id`),
   KEY `order_status` (`order_status`),
   KEY `payment_status` (`payment_status`),
   KEY `fulfillment_status` (`fulfillment_status`),

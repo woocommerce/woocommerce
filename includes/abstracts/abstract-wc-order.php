@@ -355,8 +355,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_order_status( $context = 'view' ) {
 		$status = $this->get_prop( 'order_status', $context );
 
-		if ( empty( $status ) && 'view' === $context ) {
-			// In view context, return the default status if no status has been set.
+		if ( empty( $status ) ) {
+			// Return the default status if no status has been set.
 			$status = apply_filters( 'woocommerce_default_order_status', 'draft' );
 		}
 		return $status;
@@ -372,8 +372,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_fulfillment_status( $context = 'view' ) {
 		$status = $this->get_prop( 'fulfillment_status', $context );
 
-		if ( empty( $status ) && 'view' === $context ) {
-			// In view context, return the default status if no status has been set.
+		if ( empty( $status ) ) {
+			// Return the default status if no status has been set.
 			$status = apply_filters( 'woocommerce_default_order_fulfillment_status', 'unfulfilled' );
 		}
 		return $status;
@@ -389,8 +389,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_payment_status( $context = 'view' ) {
 		$status = $this->get_prop( 'payment_status', $context );
 
-		if ( empty( $status ) && 'view' === $context ) {
-			// In view context, return the default status if no status has been set.
+		if ( empty( $status ) ) {
+			// Return the default status if no status has been set.
 			$status = apply_filters( 'woocommerce_default_order_payment_status', 'unpaid' );
 		}
 		return $status;
@@ -406,8 +406,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_delivery_status( $context = 'view' ) {
 		$status = $this->get_prop( 'delivery_status', $context );
 
-		if ( empty( $status ) && 'view' === $context ) {
-			// In view context, return the default status if no status has been set.
+		if ( empty( $status ) ) {
+			// Return the default status if no status has been set.
 			$status = apply_filters( 'woocommerce_default_order_delivery_status', '' );
 		}
 		return $status;
