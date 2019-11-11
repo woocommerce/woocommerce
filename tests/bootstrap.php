@@ -82,6 +82,10 @@ class WC_Unit_Tests_Bootstrap {
 
 		WC_Install::install();
 
+		// Initialize the WC API extensions.
+		\Automattic\WooCommerce\Admin\Install::create_tables();
+		\Automattic\WooCommerce\Admin\Install::create_events();
+
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
