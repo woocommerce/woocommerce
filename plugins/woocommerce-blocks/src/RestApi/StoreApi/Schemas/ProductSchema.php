@@ -25,7 +25,7 @@ class ProductSchema extends AbstractSchema {
 	protected $title = 'product';
 
 	/**
-	 * Cart schema properties.
+	 * Product schema properties.
 	 *
 	 * @return array
 	 */

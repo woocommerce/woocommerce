@@ -58,10 +58,10 @@ class ProductQueryFilters {
 	 * Get attribute counts for the current products.
 	 *
 	 * @param \WP_REST_Request $request The request object.
-	 * @param array            $attribute_names Attributes to count.
+	 * @param array            $attributes Attributes to count, either names or ids.
 	 * @return array termId=>count pairs.
 	 */
-	public function get_attribute_counts( $request, $attribute_names = [] ) {
+	public function get_attribute_counts( $request, $attributes = [] ) {
 		global $wpdb;
 
 		// Grab the request from the WP Query object, and remove SQL_CALC_FOUND_ROWS and Limits so we get a list of all products.
@@ -80,7 +80,11 @@ class ProductQueryFilters {
 		remove_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
-		$attributes_to_count     = array_map( 'wc_sanitize_taxonomy_name', $attribute_names );
+		if ( count( $attributes ) === count( array_filter( $attributes, 'is_numeric' ) ) ) {
+			$attributes = array_map( 'wc_attribute_taxonomy_name_by_id', wp_parse_id_list( $attributes ) );
+		}
+
+		$attributes_to_count     = array_map( 'wc_sanitize_taxonomy_name', $attributes );
 		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . implode( '","', $attributes_to_count ) . '")';
 		$attribute_count_sql     = "
 			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id

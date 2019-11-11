@@ -76,6 +76,12 @@ class ProductQuery {
 		// tag, shipping class, and attribute.
 		$tax_query = array();
 
+		$operator_mapping = array(
+			'in'     => 'IN',
+			'not_in' => 'NOT IN',
+			'and'    => 'AND',
+		);
+
 		// Map between taxonomy name and arg's key.
 		$taxonomies = array(
 			'product_cat' => 'category',
@@ -85,10 +91,12 @@ class ProductQuery {
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
+				$operator    = $request->get_param( $key . '_operator' ) && isset( $operator_mapping[ $request->get_param( $key . '_operator' ) ] ) ? $operator_mapping[ $request->get_param( $key . '_operator' ) ] : 'IN';
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
 					'terms'    => $request[ $key ],
+					'operator' => $operator,
 				);
 			}
 		}
@@ -104,18 +112,32 @@ class ProductQuery {
 
 		// Filter by attributes.
 		if ( ! empty( $request['attributes'] ) ) {
+			$att_queries = [];
+
 			foreach ( $request['attributes'] as $attribute ) {
 				if ( empty( $attribute['term_id'] ) && empty( $attribute['slug'] ) ) {
 					continue;
 				}
 				if ( in_array( $attribute['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
-					$tax_query[] = array(
+					$operator      = isset( $attribute['operator'], $operator_mapping[ $attribute['operator'] ] ) ? $operator_mapping[ $attribute['operator'] ] : 'IN';
+					$att_queries[] = array(
 						'taxonomy' => $attribute['attribute'],
 						'field'    => ! empty( $attribute['term_id'] ) ? 'term_id' : 'slug',
 						'terms'    => ! empty( $attribute['term_id'] ) ? $attribute['term_id'] : $attribute['slug'],
-						'operator' => isset( $attribute['operator'] ) ? $attribute['operator'] : 'IN',
+						'operator' => $operator,
 					);
 				}
+			}
+
+			if ( 1 < count( $att_queries ) ) {
+				// Add relation arg when using multiple attributes.
+				$relation    = $request->get_param( 'attribute_relation' ) && isset( $operator_mapping[ $request->get_param( 'attribute_relation' ) ] ) ? $operator_mapping[ $request->get_param( 'attribute_relation' ) ] : 'IN';
+				$tax_query[] = array(
+					'relation' => $relation,
+					$att_queries,
+				);
+			} else {
+				$tax_query = array_merge( $tax_query, $att_queries );
 			}
 		}
 
@@ -147,37 +169,6 @@ class ProductQuery {
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
 			$args[ $on_sale_key ] += $on_sale_ids;
-		}
-
-		$operator_mapping = array(
-			'in'     => 'IN',
-			'not_in' => 'NOT IN',
-			'and'    => 'AND',
-		);
-
-		if ( isset( $args['tax_query'] ) ) {
-			$category_operator  = $request->get_param( 'category_operator' );
-			$tag_operator       = $request->get_param( 'tag_operator' );
-			$attribute_operator = $request->get_param( 'attribute_operator' );
-
-			foreach ( $args['tax_query'] as $i => $tax_query ) {
-				if ( $category_operator && 'product_cat' === $tax_query['taxonomy'] ) {
-					$operator = isset( $operator_mapping[ $category_operator ] ) ? $operator_mapping[ $category_operator ] : 'IN';
-
-					$args['tax_query'][ $i ]['operator']         = $operator;
-					$args['tax_query'][ $i ]['include_children'] = 'AND' === $operator ? false : true;
-				}
-				if ( 'product_tag' === $tax_query['taxonomy'] ) {
-					$operator = isset( $operator_mapping[ $tag_operator ] ) ? $operator_mapping[ $tag_operator ] : 'IN';
-
-					$args['tax_query'][ $i ]['operator'] = $operator;
-				}
-				if ( in_array( $tax_query['taxonomy'], wc_get_attribute_taxonomy_names(), true ) ) {
-					$operator = isset( $operator_mapping[ $attribute_operator ] ) ? $operator_mapping[ $attribute_operator ] : 'IN';
-
-					$args['tax_query'][ $i ]['operator'] = $operator;
-				}
-			}
 		}
 
 		$catalog_visibility = $request->get_param( 'catalog_visibility' );

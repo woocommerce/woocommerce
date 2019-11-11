@@ -15,7 +15,7 @@ import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-
  */
 import './style.scss';
 
-const ProductAttributeControl = ( {
+const ProductAttributeTermControl = ( {
 	attributes,
 	error,
 	expandedAttribute,
@@ -186,7 +186,7 @@ const ProductAttributeControl = ( {
 	);
 };
 
-ProductAttributeControl.propTypes = {
+ProductAttributeTermControl.propTypes = {
 	/**
 	 * Callback to update the selected product attributes.
 	 */
@@ -213,8 +213,8 @@ ProductAttributeControl.propTypes = {
 	termsList: PropTypes.object,
 };
 
-ProductAttributeControl.defaultProps = {
+ProductAttributeTermControl.defaultProps = {
 	operator: 'any',
 };
 
-export default withAttributes( ProductAttributeControl );
+export default withAttributes( ProductAttributeTermControl );

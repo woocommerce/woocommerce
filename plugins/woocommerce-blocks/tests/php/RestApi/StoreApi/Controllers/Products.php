@@ -161,7 +161,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'stock_status', $params );
 		$this->assertArrayHasKey( 'category_operator', $params );
 		$this->assertArrayHasKey( 'tag_operator', $params );
-		$this->assertArrayHasKey( 'attribute_operator', $params );
+		$this->assertArrayHasKey( 'attribute_relation', $params );
 		$this->assertArrayHasKey( 'attributes', $params );
 		$this->assertArrayHasKey( 'catalog_visibility', $params );
 		$this->assertArrayHasKey( 'rating', $params );
