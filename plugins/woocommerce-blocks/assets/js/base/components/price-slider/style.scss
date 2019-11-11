@@ -180,12 +180,21 @@
 		}
 	}
 
-	&.is-loading {
+	&.is-loading,
+	&.is-disabled {
 		.wc-block-price-filter__range-input-wrapper,
 		.wc-block-price-filter__amount,
 		.wc-block-price-filter__button {
 			@include placeholder();
 			box-shadow: none;
+		}
+	}
+
+	&.is-disabled:not(.is-loading) {
+		.wc-block-price-filter__range-input-wrapper,
+		.wc-block-price-filter__amount,
+		.wc-block-price-filter__button {
+			animation: none;
 		}
 	}
 }
@@ -247,10 +256,17 @@
 			}
 		}
 
-		&.is-loading {
+		&.is-loading,
+		&.is-disabled {
 			.wc-block-price-filter__range-input-wrapper {
 				@include placeholder();
 				box-shadow: none;
+			}
+		}
+
+		&.is-disabled:not(.is-loading) {
+			.wc-block-price-filter__range-input-wrapper {
+				animation: none;
 			}
 		}
 	}
