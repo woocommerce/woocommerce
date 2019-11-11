@@ -1,12 +1,8 @@
 /**
- * External dependencies
- */
-import renderFrontend from '../../utils/render-frontend.js';
-
-/**
  * Internal dependencies
  */
 import Block from './block.js';
+import renderFrontend from '../../utils/render-frontend.js';
 
 const getProps = ( el ) => {
 	return {
