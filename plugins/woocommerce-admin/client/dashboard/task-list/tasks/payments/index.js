@@ -105,14 +105,15 @@ class Payments extends Component {
 	}
 
 	getInitialValues() {
+		const stripeEmail = getSetting( 'onboarding', { userEmail: '' } ).userEmail;
 		const values = {
 			stripe: this.isStripeEnabled(),
 			paypal: false,
 			klarna_checkout: false,
 			klarna_payments: false,
 			square: false,
-			create_stripe: false,
-			stripe_email: '',
+			create_stripe: this.isStripeEnabled(),
+			stripe_email: ( this.isStripeEnabled() && stripeEmail ) || '',
 		};
 		return values;
 	}
@@ -393,7 +394,7 @@ class Payments extends Component {
 						manualConfig={ manualConfig }
 						markConfigured={ this.markConfigured }
 						setRequestPending={ this.setMethodRequestPending }
-						createAccount={ values.create_stripe }
+						createAccount={ values.create_stripe && ! manualConfig }
 						email={ values.stripe_email }
 						countryCode={ countryCode }
 						returnUrl={ getAdminLink( 'admin.php?page=wc-admin&task=payments&stripe-connect=1' ) }

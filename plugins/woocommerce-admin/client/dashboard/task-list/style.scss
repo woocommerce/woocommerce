@@ -314,8 +314,13 @@
 		.components-checkbox-control__label {
 			font-size: 16px;
 			line-height: 22px;
-			padding-left: $gap-small;
+			padding-left: 0;
+			margin-left: -$gap-large;
 			color: #1a1a1a;
+		}
+
+		.muriel-component {
+			margin-left: $gap-smallest;
 		}
 	}
 }

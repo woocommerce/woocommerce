@@ -357,6 +357,8 @@ class Onboarding {
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
 			$settings['onboarding']['connectNonce']             = wp_create_nonce( 'connect' );
+			$current_user                                       = wp_get_current_user();
+			$settings['onboarding']['userEmail']                = esc_html( $current_user->user_email );
 		}
 
 		return $settings;
