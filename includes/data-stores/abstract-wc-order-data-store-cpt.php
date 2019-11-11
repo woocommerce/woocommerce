@@ -308,13 +308,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT `order_status`,
+				"SELECT `order_status`,
 					`payment_status`,
 					`fulfillment_status`,
 					`delivery_status`
-				FROM {wpdb->prefix}wc_order_statuses
+				FROM {$wpdb->prefix}wc_order_statuses
 				WHERE `order_id` = %d
-				',
+				",
 				$id
 			)
 		);
