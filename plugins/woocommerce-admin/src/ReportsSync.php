@@ -116,6 +116,10 @@ class ReportsSync {
 		// Initialize syncing hooks.
 		add_action( 'wp_loaded', array( __CLASS__, 'customers_lookup_update_init' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'orders_lookup_update_init' ) );
+		add_action( 'woocommerce_update_product', array( __CLASS__, 'clear_stock_count_cache' ) );
+		add_action( 'woocommerce_new_product', array( __CLASS__, 'clear_stock_count_cache' ) );
+		add_action( 'update_option_woocommerce_notify_low_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
+		add_action( 'update_option_woocommerce_notify_no_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
 
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 4 );
@@ -867,5 +871,20 @@ class ReportsSync {
 		ReportsCache::invalidate();
 
 		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );
+	}
+
+	/**
+	 * Clear the count cache when products are added or updated, or when
+	 * the no/low stock options are changed.
+	 *
+	 * @param int $id Post/product ID.
+	 */
+	public static function clear_stock_count_cache( $id ) {
+		delete_transient( 'wc_admin_stock_count_lowstock' );
+		delete_transient( 'wc_admin_product_count' );
+		$status_options = wc_get_product_stock_status_options();
+		foreach ( $status_options as $status => $label ) {
+			delete_transient( 'wc_admin_stock_count_' . $status );
+		}
 	}
 }

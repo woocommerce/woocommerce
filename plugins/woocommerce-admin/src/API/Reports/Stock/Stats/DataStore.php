@@ -132,23 +132,3 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		return intval( $query->found_posts );
 	}
 }
-
-/**
- * Clear the count cache when products are added or updated, or when
- * the no/low stock options are changed.
- *
- * @param int $id Post/product ID.
- */
-function wc_admin_clear_stock_count_cache( $id ) {
-	delete_transient( 'wc_admin_stock_count_lowstock' );
-	delete_transient( 'wc_admin_product_count' );
-	$status_options = wc_get_product_stock_status_options();
-	foreach ( $status_options as $status => $label ) {
-		delete_transient( 'wc_admin_stock_count_' . $status );
-	}
-}
-
-add_action( 'woocommerce_update_product', 'wc_admin_clear_stock_count_cache' );
-add_action( 'woocommerce_new_product', 'wc_admin_clear_stock_count_cache' );
-add_action( 'update_option_woocommerce_notify_low_stock_amount', 'wc_admin_clear_stock_count_cache' );
-add_action( 'update_option_woocommerce_notify_no_stock_amount', 'wc_admin_clear_stock_count_cache' );
