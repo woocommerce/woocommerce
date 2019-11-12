@@ -22,10 +22,11 @@ class TermQuery {
 	 * @return array
 	 */
 	public function prepare_objects_query( $request ) {
-		$args             = array();
-		$args['order']    = $request['order'];
-		$args['orderby']  = $request['orderby'];
-		$args['taxonomy'] = $request['taxonomy'];
+		$args               = array();
+		$args['order']      = $request['order'];
+		$args['orderby']    = $request['orderby'];
+		$args['taxonomy']   = $request['taxonomy'];
+		$args['hide_empty'] = (bool) $request['hide_empty'];
 		return $args;
 	}
 

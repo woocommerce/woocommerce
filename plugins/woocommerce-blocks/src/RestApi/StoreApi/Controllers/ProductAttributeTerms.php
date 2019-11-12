@@ -116,8 +116,15 @@ class ProductAttributeTerms extends RestContoller {
 			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Attribute does not exist.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
 		}
 
-		$request['taxonomy'] = $attribute->slug;
-		$objects             = $this->term_query->get_objects( $request );
+		$term_request = [
+			'taxonomy'   => $attribute->slug,
+			'order'      => $request['order'],
+			'orderby'    => $request['orderby'],
+			'hide_empty' => $request['hide_empty'],
+		];
+
+		$objects = $this->term_query->get_objects( $term_request );
+		$return  = [];
 
 		foreach ( $objects as $object ) {
 			$data     = $this->prepare_item_for_response( $object, $request );
@@ -155,6 +162,12 @@ class ProductAttributeTerms extends RestContoller {
 				'count',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['hide_empty'] = array(
+			'description' => __( 'Should empty terms be hidden?', 'woo-gutenberg-products-block' ),
+			'type'        => 'boolean',
+			'default'     => true,
 		);
 
 		return $params;

@@ -70,10 +70,11 @@ class TermSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $term ) {
 		return [
-			'id'    => (int) $term->term_id,
-			'name'  => $term->name,
-			'slug'  => $term->slug,
-			'count' => (int) $term->count,
+			'id'          => (int) $term->term_id,
+			'name'        => $term->name,
+			'description' => $term->description,
+			'slug'        => $term->slug,
+			'count'       => (int) $term->count,
 		];
 	}
 }
