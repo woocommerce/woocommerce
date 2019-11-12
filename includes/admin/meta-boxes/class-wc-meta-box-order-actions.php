@@ -40,7 +40,7 @@ class WC_Meta_Box_Order_Actions {
 			$status_actions['fulfill_order'] = __( 'Fulfill order', 'woocommerce' );
 		}
 		if ( $theorder->has_status( 'completed' ) ) {
-			$status_actions['complete_order'] = __( 'Complete order', 'woocommerce' );
+			$status_actions['complete_order'] = __( 'Mark order as complete', 'woocommerce' );
 		}
 		$order_actions = apply_filters(
 			'woocommerce_order_actions',
