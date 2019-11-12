@@ -379,7 +379,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $order_status_props as $order_status ) {
 			$order_statuses_to_update[ $order_status ] = wp_slash( $order->{"get_$order_status"}( 'edit' ) );
 		}
-		$statuses_updated = $this->insert_update_order_statuses( $order->get_id(), $order_statuses_to_update );
+		$statuses_updated = $this->insert_update_order_statuses( $order, $order_statuses_to_update );
 		if ( $statuses_updated ) {
 			$updated_props = array_merge( $updated_props, array_keys( $order_statuses_to_update ) );
 		}
@@ -391,11 +391,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Insert / Update order statuses in the custom table.
 	 *
 	 * @since 3.9.0
-	 * @param int   $order_id Order ID.
-	 * @param array $order_status_values Key=>Value pairs array of order statuses and their values.
-	 * @return bool Whether statuses were updated or not.
+	 * @param WC_Order $order Order object.
+	 * @param array    $order_status_values Key=>Value pairs array of order statuses and their values.
+	 * @return bool    Whether statuses were updated or not.
 	 */
-	protected function insert_update_order_statuses( $order_id, $order_status_values ) {
+	protected function insert_update_order_statuses( $order, $order_status_values ) {
 		global $wpdb;
 
 		$wpdb->query(
@@ -407,7 +407,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				 `payment_status` = VALUES(`payment_status`),
 				 `fulfillment_status` = VALUES(`fulfillment_status`),
 				 `delivery_status` = VALUES(`delivery_status`)",
-				$order_id,
+				$order->get_id(),
 				$order_status_values['order_status'],
 				$order_status_values['payment_status'],
 				$order_status_values['fulfillment_status'],
