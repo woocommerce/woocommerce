@@ -181,6 +181,10 @@ class WC_Meta_Box_Order_Data {
 
 					?>
 				</h2>
+				<?php
+				printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_payment_status() ) ), esc_html( wc_get_order_status_name( $order->get_payment_status() ) ) );
+				printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_fulfillment_status() ) ), esc_html( wc_get_order_status_name( $order->get_fulfillment_status() ) ) );
+				?>
 				<p class="woocommerce-order-data__meta order_number">
 					<?php
 
