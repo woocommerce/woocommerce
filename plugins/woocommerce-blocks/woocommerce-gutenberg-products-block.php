@@ -87,8 +87,10 @@ function wc_blocks_container( $reset = false ) {
 		$container->register(
 			Automattic\WooCommerce\Blocks\Domain\Package::class,
 			function ( $container ) {
+				// leave for automated version bumping.
+				$version = '2.5.0-dev';
 				return new Automattic\WooCommerce\Blocks\Domain\Package(
-					'2.5.0-dev',
+					$version,
 					__FILE__
 				);
 			}

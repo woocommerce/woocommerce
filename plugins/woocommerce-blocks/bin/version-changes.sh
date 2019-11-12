@@ -12,9 +12,7 @@ perl -i -pe 's/Stable tag:*.+/Stable tag: '${VERSION}'/' readme.txt
 
 # Update version in main plugin file
 perl -i -pe 's/Version:*.+/Version: '${VERSION}'/' woocommerce-gutenberg-products-block.php
+perl -i -pe "s/version \= '*.+';/version = '${VERSION}';/" woocommerce-gutenberg-products-block.php
 
 # Update version in package.json
 perl -i -pe 's/"version":*.+/"version": "'${VERSION}'",/' package.json
-
-# Update version in main file
-perl -i -pe "s/VERSION =*.+/VERSION = '${VERSION}';/" src/Package.php
