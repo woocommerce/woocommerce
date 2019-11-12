@@ -12,4 +12,8 @@ export const pluginNames = {
 	'woocommerce-services': __( 'WooCommerce Services', 'woocommerce-admin' ),
 	'mailchimp-for-woocommerce': __( 'Mailchimp for WooCommerce', 'woocommerce-admin' ),
 	'facebook-for-woocommerce': __( 'Facebook for WooCommerce', 'woocommerce-admin' ),
+	'woocommerce-shipstation-integration': __(
+		'WooCommerce ShipStation Gateway',
+		'woocommerce-admin'
+	),
 };

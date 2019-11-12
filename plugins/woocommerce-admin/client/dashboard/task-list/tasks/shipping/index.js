@@ -7,12 +7,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { filter } from 'lodash';
+import interpolateComponents from 'interpolate-components';
 import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
-import { Card, Stepper } from '@woocommerce/components';
+import { Card, Link, Stepper } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
@@ -143,6 +144,9 @@ class Shipping extends Component {
 
 	getSteps() {
 		const { countryCode } = this.props;
+		const plugins = [ 'GB', 'CA', 'AU' ].includes( countryCode )
+			? [ 'woocommerce-shipstation-integration' ]
+			: [ 'jetpack', 'woocommerce-services' ];
 
 		const steps = [
 			{
@@ -180,21 +184,39 @@ class Shipping extends Component {
 			{
 				key: 'label_printing',
 				label: __( 'Enable shipping label printing', 'woocommerce-admin' ),
-				description: __(
-					'With WooCommerce Services and Jetpack you can save time at the ' +
-						'Post Office by printing your shipping labels at home',
-					'woocommerce-admin'
-				),
+				description: [ 'GB', 'CA', 'AU' ].includes( countryCode )
+					? interpolateComponents( {
+							mixedString: __(
+								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
+									'labels at home. Try ShipStation free for 30 days. {{link}}Learn more{{/link}}.',
+								'woocommerce-admin'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://docs.woocommerce.com/document/shipstation-for-woocommerce/"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} )
+					: __(
+							'With WooCommerce Services and Jetpack you can save time at the ' +
+								'Post Office by printing your shipping labels at home',
+							'woocommerce-admin'
+						),
 				content: (
 					<Plugins
 						onComplete={ () => {
-							recordEvent( 'tasklist_shipping_label_printing', { install: true } );
+							recordEvent( 'tasklist_shipping_label_printing', { install: true, plugins } );
 							this.completeStep();
 						} }
 						onSkip={ () => {
-							recordEvent( 'tasklist_shipping_label_printing', { install: false } );
+							recordEvent( 'tasklist_shipping_label_printing', { install: false, plugins } );
 							getHistory().push( getNewPath( {}, '/', {} ) );
 						} }
+						pluginSlugs={ plugins }
 						{ ...this.props }
 					/>
 				),

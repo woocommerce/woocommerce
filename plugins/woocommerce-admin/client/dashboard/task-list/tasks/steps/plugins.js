@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { difference } from 'lodash';
+import { difference, noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
 
@@ -146,6 +146,7 @@ Plugins.propTypes = {
 
 Plugins.defaultProps = {
 	autoInstall: false,
+	onError: noop,
 	pluginSlugs: [ 'jetpack', 'woocommerce-services' ],
 };
 

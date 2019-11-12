@@ -109,7 +109,7 @@ Stepper.propTypes = {
 			/**
 			 * Description displayed beneath the label.
 			 */
-			description: PropTypes.string,
+			description: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
 			/**
 			 * Optionally mark a step complete regardless of step index.
 			 */
