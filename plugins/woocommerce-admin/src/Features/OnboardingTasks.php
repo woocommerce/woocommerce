@@ -58,10 +58,10 @@ class OnboardingTasks {
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
 
-		add_action( 'admin_init', array( $this, 'set_active_task' ), 20 );
-		add_filter( 'post_updated_messages', array( $this, 'update_product_success_message' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ), 10, 1 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_tax_notice_admin_script' ), 10, 1 );
+		add_action( 'admin_init', array( $this, 'set_active_task' ), 5 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_product_notice_admin_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_tax_notice_admin_script' ) );
 	}
 
 	/**
@@ -120,10 +120,19 @@ class OnboardingTasks {
 	}
 
 	/**
+	 * Get the name of the active task.
+	 *
+	 * @return string
+	 */
+	public static function get_active_task() {
+		return get_transient( self::ACTIVE_TASK_TRANSIENT );
+	}
+
+	/**
 	 * Check for active task completion, and clears the transient.
 	 */
-	public static function check_active_task_completion() {
-		$active_task = get_transient( self::ACTIVE_TASK_TRANSIENT );
+	public static function is_active_task_complete() {
+		$active_task = self::get_active_task();
 
 		if ( ! $active_task ) {
 			return false;
@@ -163,17 +172,22 @@ class OnboardingTasks {
 	}
 
 	/**
-	 * Updates the product published message with a continue setup link, if the products task is currently active.
+	 * Hooks into the product page to add a notice to return to the task list if a product was added.
 	 *
-	 * @param array $messages Array of messages to display.
+	 * @param string $hook Page hook.
 	 */
-	public static function update_product_success_message( $messages ) {
-		if ( ! self::check_active_task_completion() ) {
-			return $messages;
+	public static function add_onboarding_product_notice_admin_script( $hook ) {
+		global $post;
+		if (
+			'post.php' !== $hook ||
+			'product' !== $post->post_type ||
+			'products' !== self::get_active_task() ||
+			! self::is_active_task_complete()
+		) {
+			return;
 		}
-		/* translators: 1: onboarding task list url */
-		$messages['product'][6] = sprintf( __( 'You created your first product! <a href="%s">Continue Setup</a>.', 'woocommerce-admin' ), esc_url( wc_admin_url() ) );
-		return $messages;
+
+		wp_enqueue_script( 'onboarding-product-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
 	}
 
 	/**
@@ -192,14 +206,14 @@ class OnboardingTasks {
 	 * Adds a notice to return to the task list when the save button is clicked on tax settings pages.
 	 */
 	public static function add_onboarding_tax_notice_admin_script() {
-		$page        = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
-		$tab         = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
-		$active_task = isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) ? $_GET[ self::ACTIVE_TASK_TRANSIENT ] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
 		if (
 			'wc-settings' === $page &&
 			'tax' === $tab &&
-			'tax' === $active_task
+			'tax' === self::get_active_task() &&
+			! self::is_active_task_complete()
 		) {
 			wp_enqueue_script( 'onboarding-tax-notice', Loader::get_url( 'wp-admin-scripts/onboarding-tax-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
 		}

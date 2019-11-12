@@ -181,4 +181,12 @@ body.woocommerce-page {
 			color: $studio-white;
 		}
 	}
+
+	.components-snackbar .components-button.is-tertiary {
+		color: $studio-white;
+
+		&:not(:disabled):not([aria-disabled='true']):not(.is-default):hover {
+			color: $studio-white;
+		}
+	}
 }
