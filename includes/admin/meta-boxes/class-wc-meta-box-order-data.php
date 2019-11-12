@@ -237,29 +237,22 @@ class WC_Meta_Box_Order_Data {
 							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', strtotime( $post->post_date ) ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
 							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', strtotime( $post->post_date ) ) ); ?>" />
 						</p>
-
-						<p class="form-field form-field-wide wc-order-status">
-							<label for="order_status">
-								<?php
-								_e( 'Status:', 'woocommerce' );
-								if ( $order->needs_payment() ) {
-									printf(
-										'<a href="%s">%s</a>',
-										esc_url( $order->get_checkout_payment_url() ),
-										__( 'Customer payment page &rarr;', 'woocommerce' )
-									);
-								}
-								?>
-							</label>
-							<select id="order_status" name="order_status" class="wc-enhanced-select">
-								<?php
-								$statuses = wc_get_order_statuses();
-								foreach ( $statuses as $status => $status_name ) {
-									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
-								}
-								?>
-							</select>
-						</p>
+						<?php
+						if ( $order->needs_payment() ) {
+							?>
+							<p class="form-field form-field-wide wc-payment-link">
+							<?php
+							_esc_html_e( 'Payment link:', 'woocommerce' );
+							printf(
+								'<a href="%s">%s</a>',
+								esc_url( $order->get_checkout_payment_url() ),
+								esc_html__( 'Customer payment page &rarr;', 'woocommerce' )
+							);
+							?>
+							</p>
+							<?php
+						}
+						?>
 
 						<p class="form-field form-field-wide wc-customer-user">
 							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
