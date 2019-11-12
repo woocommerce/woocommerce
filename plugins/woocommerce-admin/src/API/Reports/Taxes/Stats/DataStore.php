@@ -57,7 +57,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'tax_codes'    => 'COUNT(DISTINCT tax_rate_id) as tax_codes',
 			'total_tax'    => 'SUM(total_tax) AS total_tax',
@@ -65,31 +65,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
 			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
-	}
-
-	/**
-	 * Updates the database query with parameters used for Taxes report: categories and order status.
-	 *
-	 * @param array $query_args Query arguments supplied by the user.
-	 */
-	protected function get_sql_query_params( $query_args ) {
-		global $wpdb;
-
-		$order_tax_lookup_table = self::get_db_table_name();
-
-		$this->get_time_period_sql_params( $query_args, $order_tax_lookup_table );
-		$this->get_limit_sql_params( $query_args );
-		$this->get_order_by_sql_params( $query_args );
-
-		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
-			$this->interval_query->add_sql_clause( 'where', "AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
-		}
-
-		$order_status_filter = $this->get_status_subquery( $query_args );
-		if ( $order_status_filter ) {
-			$this->interval_query->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
-		}
 	}
 
 	/**
@@ -104,6 +79,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes       = implode( ',', $query_args['taxes'] );
 			$taxes_where_clause .= " AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})";
+		}
+
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
+			$taxes_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
 		$this->get_time_period_sql_params( $query_args, $order_tax_lookup_table );
