@@ -374,7 +374,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( empty( $status ) ) {
 			// Return the default status if no status has been set.
-			$status = apply_filters( 'woocommerce_default_order_fulfillment_status', 'unfulfilled' );
+			$status = apply_filters( 'woocommerce_default_order_fulfillment_status', '' );
 		}
 		return $status;
 	}

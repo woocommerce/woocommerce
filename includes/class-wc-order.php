@@ -1463,9 +1463,24 @@ class WC_Order extends WC_Abstract_Order {
 	 * once the order is processed this code/transient does not need to persist.
 	 *
 	 * @since 3.0.0
+	 * @deprecated 3.9.0
 	 * @return bool
 	 */
 	public function needs_processing() {
+		wc_deprecated_function( 'WC_Order::needs_processing', '3.9.0', 'WC_Order::needs_fulfillment' );
+		return $this->needs_fulfillment();
+	}
+
+	/**
+	 * See if the order needs fulfillment before it can be completed.
+	 *
+	 * Duplicate of needs_processing but with new naming.
+	 * Orders which only contain virtual, downloadable items do not need fulfillment
+	 *
+	 * @since 3.9.0
+	 * @return boolean
+	 */
+	public function needs_fulfillment() {
 		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
 		$needs_processing = get_transient( $transient_name );
 
