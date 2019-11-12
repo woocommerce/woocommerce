@@ -15,7 +15,7 @@ class WC_Tests_API_Data extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/data';
+	protected $endpoint = '/wc-analytics/data';
 
 	/**
 	 * Setup test data. Called before every test.

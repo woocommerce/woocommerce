@@ -26,7 +26,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.
@@ -425,7 +425,6 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				$export_item['stock_status'] = __( 'N/A', 'woocommerce-admin' );
 				$export_item['stock']        = __( 'N/A', 'woocommerce-admin' );
 			}
-			
 		}
 
 		return $export_item;

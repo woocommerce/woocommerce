@@ -15,7 +15,7 @@ class WC_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/stock/stats';
+	protected $endpoint = '/wc-analytics/reports/stock/stats';
 
 	/**
 	 * Setup test reports stock data.
@@ -94,7 +94,7 @@ class WC_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$backorder_stock->set_stock_status( 'onbackorder' );
 		$backorder_stock->save();
 
-		// Clear caches
+		// Clear caches.
 		delete_transient( 'wc_admin_stock_count_lowstock' );
 		delete_transient( 'wc_admin_stock_count_outofstock' );
 		delete_transient( 'wc_admin_stock_count_onbackorder' );

@@ -31,7 +31,7 @@ export default {
 				orderby: 'popularity',
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/products', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/products', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( product ) {

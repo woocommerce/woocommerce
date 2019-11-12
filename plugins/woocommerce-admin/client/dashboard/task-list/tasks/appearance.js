@@ -142,7 +142,7 @@ class Appearance extends Component {
 
 		recordEvent( 'tasklist_appearance_create_homepage', { create_homepage: true } );
 
-		apiFetch( { path: '/wc-admin/v1/onboarding/tasks/create_homepage', method: 'POST' } )
+		apiFetch( { path: '/wc-admin/onboarding/tasks/create_homepage', method: 'POST' } )
 			.then( response => {
 				createNotice( response.status, response.message );
 

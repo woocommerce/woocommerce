@@ -24,7 +24,7 @@ class Products extends \WC_REST_Products_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Adds properties that can be embed via ?_embed=1.

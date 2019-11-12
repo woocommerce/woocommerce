@@ -29,7 +29,7 @@ export default {
 				orderby: 'count',
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/products/categories', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/products/categories', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( category ) {

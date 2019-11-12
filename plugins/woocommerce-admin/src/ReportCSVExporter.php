@@ -187,7 +187,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * Prepare data for export.
 	 */
 	public function prepare_data_to_export() {
-		$request  = new \WP_REST_Request( 'GET', "/wc/v4/reports/{$this->report_type}" );
+		$request  = new \WP_REST_Request( 'GET', "/wc-analytics/reports/{$this->report_type}" );
 		$params   = $this->controller->get_collection_params();
 		$defaults = array();
 

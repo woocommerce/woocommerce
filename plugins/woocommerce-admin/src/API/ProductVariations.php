@@ -23,7 +23,7 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Get the query params for collections.

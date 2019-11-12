@@ -28,7 +28,7 @@ export default {
 				per_page: 10,
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/taxes', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/taxes', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( tax ) {

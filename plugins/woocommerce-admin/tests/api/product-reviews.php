@@ -15,7 +15,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/products/reviews';
+	protected $endpoint = '/wc-analytics/products/reviews';
 
 	/**
 	 * Setup test data. Called before every test.
@@ -38,7 +38,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC_Helper_Product::create_product_review( $product->get_id() );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v4/products/reviews' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/products/reviews' );
 
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();

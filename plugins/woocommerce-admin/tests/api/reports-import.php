@@ -18,7 +18,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/import';
+	protected $endpoint = '/wc-analytics/reports/import';
 
 	/**
 	 * Setup test reports products data.
@@ -121,7 +121,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
@@ -129,7 +129,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( $this->customer, $reports[0]['user_id'] );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
@@ -163,7 +163,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
@@ -171,7 +171,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( 'Steve User', $reports[0]['name'] );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 5 ) );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
@@ -237,7 +237,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		// Check that stats exist before deleting.
 		WC_Helper_Queue::run_all_pending();
 
-		$request = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 25 ) );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
@@ -245,7 +245,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 25, $reports );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$request->set_query_params( array( 'per_page' => 25 ) );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
@@ -264,14 +264,14 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Check that stats have been deleted.
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $reports );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 

@@ -20,7 +20,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/customers';
+	protected $endpoint = '/wc-analytics/reports/customers';
 
 	/**
 	 * Setup test reports products data.

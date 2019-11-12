@@ -737,7 +737,7 @@ class Onboarding {
 			)
 		);
 
-		$request = new \WP_REST_Request( 'POST', '/wc-admin/v1/onboarding/profile' );
+		$request = new \WP_REST_Request( 'POST', '/wc-admin/onboarding/profile' );
 		$request->set_headers( array( 'content-type' => 'application/json' ) );
 		$request->set_body(
 			wp_json_encode(

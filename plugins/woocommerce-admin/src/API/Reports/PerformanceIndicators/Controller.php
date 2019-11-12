@@ -24,7 +24,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.
@@ -119,7 +119,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			return true;
 		}
 
-		$request  = new \WP_REST_Request( 'GET', '/wc/v4/reports' );
+		$request  = new \WP_REST_Request( 'GET', '/wc-analytics/reports' );
 		$response = rest_do_request( $request );
 
 		if ( is_wp_error( $response ) ) {

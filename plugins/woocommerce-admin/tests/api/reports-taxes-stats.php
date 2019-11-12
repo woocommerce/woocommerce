@@ -16,7 +16,7 @@ class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/taxes/stats';
+	protected $endpoint = '/wc-analytics/reports/taxes/stats';
 
 	/**
 	 * Setup test reports taxes data.

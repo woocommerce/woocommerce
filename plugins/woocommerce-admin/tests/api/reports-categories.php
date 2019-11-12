@@ -16,7 +16,7 @@ class WC_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/categories';
+	protected $endpoint = '/wc-analytics/reports/categories';
 
 	/**
 	 * Setup test reports categories data.

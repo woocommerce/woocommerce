@@ -14,7 +14,7 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/leaderboards';
+	protected $endpoint = '/wc-analytics/leaderboards';
 
 	/**
 	 * Setup test data. Called before every test.

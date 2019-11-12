@@ -15,7 +15,7 @@ class WC_Tests_API_Products extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/products';
+	protected $endpoint = '/wc-analytics/products';
 
 	/**
 	 * Setup test data. Called before every test.
@@ -36,7 +36,7 @@ class WC_Tests_API_Products extends WC_REST_Unit_Test_Case {
 	public function test_product_schema() {
 		wp_set_current_user( $this->user );
 		$product    = WC_Helper_Product::create_simple_product();
-		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v4/products/' . $product->get_id() );
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc-analytics/products/' . $product->get_id() );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];

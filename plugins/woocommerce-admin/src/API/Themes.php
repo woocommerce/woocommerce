@@ -26,7 +26,7 @@ class Themes extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin/v1';
+	protected $namespace = 'wc-admin';
 
 	/**
 	 * Route base.
@@ -75,7 +75,8 @@ class Themes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function upload_theme( $request ) {
-		if ( ! isset( $_FILES['pluginzip'] ) || ! is_uploaded_file( $_FILES['pluginzip']['tmp_name'] ) || ! is_file( $_FILES['pluginzip']['tmp_name'] ) ) { // WPCS: sanitization ok.
+		if (
+			! isset( $_FILES['pluginzip'] ) || ! isset( $_FILES['pluginzip']['tmp_name'] ) || ! is_uploaded_file( $_FILES['pluginzip']['tmp_name'] ) || ! is_file( $_FILES['pluginzip']['tmp_name'] ) ) { // WPCS: sanitization ok.
 			return new \WP_Error( 'woocommerce_rest_invalid_file', __( 'Specified file failed upload test.', 'woocommerce-admin' ) );
 		}
 

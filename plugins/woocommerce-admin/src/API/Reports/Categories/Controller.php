@@ -27,7 +27,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

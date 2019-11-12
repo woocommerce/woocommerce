@@ -29,7 +29,7 @@ export default {
 				per_page: 10,
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/customers', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/customers', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( customer ) {

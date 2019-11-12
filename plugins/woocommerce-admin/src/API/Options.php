@@ -23,7 +23,7 @@ class Options extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin/v1';
+	protected $namespace = 'wc-admin';
 
 	/**
 	 * Route base.

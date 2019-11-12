@@ -15,7 +15,7 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/performance-indicators';
+	protected $endpoint = '/wc-analytics/reports/performance-indicators';
 
 	/**
 	 * Setup tests.

@@ -47,7 +47,7 @@ class ThemeUploader extends Component {
 		const body = new FormData();
 		body.append( 'pluginzip', file );
 
-		return apiFetch( { path: '/wc-admin/v1/themes', method: 'POST', body } )
+		return apiFetch( { path: '/wc-admin/themes', method: 'POST', body } )
 			.then( response => {
 				onUploadComplete( response );
 				this.setState( { isUploading: false } );

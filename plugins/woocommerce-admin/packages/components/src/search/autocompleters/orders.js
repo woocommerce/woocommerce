@@ -26,7 +26,7 @@ export default {
 				per_page: 10,
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/orders', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/orders', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( order ) {

@@ -17,7 +17,7 @@ class WC_Tests_API_Options extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc-admin/v1/options';
+	protected $endpoint = '/wc-admin/options';
 
 	/**
 	 * Setup test data. Called before every test.

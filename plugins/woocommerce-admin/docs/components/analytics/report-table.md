@@ -13,7 +13,7 @@ Component that extends `TableCard` to facilitate its usage in reports.
 Name | Type | Default | Description
 --- | --- | --- | ---
 `columnPrefsKey` | String | ``null`` | The key for user preferences settings for column visibility
-`endpoint` | String | ``null`` | The endpoint to use in API calls to populate the table rows and summary. For example, if `taxes` is provided, data will be fetched from the report `taxes` endpoint (ie: `/wc/v4/reports/taxes` and `/wc/v4/reports/taxes/stats`). If the provided endpoint doesn't exist, an error will be shown to the user with `ReportError`
+`endpoint` | String | ``null`` | The endpoint to use in API calls to populate the table rows and summary. For example, if `taxes` is provided, data will be fetched from the report `taxes` endpoint (ie: `/wc-analytics/reports/taxes` and `/wc/v4/reports/taxes/stats`). If the provided endpoint doesn't exist, an error will be shown to the user with `ReportError`
 `extendItemsMethodNames` | Object
   - getError: String
   - isRequesting: String

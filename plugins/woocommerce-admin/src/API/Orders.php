@@ -8,7 +8,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API;
- 
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -23,7 +23,7 @@ class Orders extends \WC_REST_Orders_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Get the query params for collections.

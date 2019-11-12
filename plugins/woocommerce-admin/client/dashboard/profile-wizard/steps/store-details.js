@@ -49,7 +49,7 @@ class StoreDetails extends Component {
 	}
 
 	componentWillUnmount() {
-		apiFetch( { path: '/wc-admin/v1/onboarding/tasks/create_store_pages', method: 'POST' } );
+		apiFetch( { path: '/wc-admin/onboarding/tasks/create_store_pages', method: 'POST' } );
 	}
 
 	deriveCurrencySettings( countryState ) {

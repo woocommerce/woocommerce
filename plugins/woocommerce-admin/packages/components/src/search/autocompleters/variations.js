@@ -52,7 +52,7 @@ export default {
 		if ( ! product || product.includes( ',' ) ) {
 			console.warn( 'Invalid product id supplied to Variations autocompleter' );
 		}
-		return apiFetch( { path: addQueryArgs( `/wc/v4/products/${ product }/variations`, query ) } );
+		return apiFetch( { path: addQueryArgs( `/wc-analytics/products/${ product }/variations`, query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( variation ) {

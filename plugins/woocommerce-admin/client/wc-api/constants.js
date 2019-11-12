@@ -5,8 +5,8 @@
 import { MINUTE } from '@fresh-data/framework';
 
 export const JETPACK_NAMESPACE = '/jetpack/v4';
-export const NAMESPACE = '/wc/v4';
-export const WC_ADMIN_NAMESPACE = '/wc-admin/v1';
+export const NAMESPACE = '/wc-analytics';
+export const WC_ADMIN_NAMESPACE = '/wc-admin';
 export const WCS_NAMESPACE = '/wc/v1'; // WCS endpoints like Stripe are not avaiable on later /wc versions
 
 export const DEFAULT_REQUIREMENT = {

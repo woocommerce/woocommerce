@@ -18,7 +18,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/admin/notes';
+	protected $endpoint = '/wc-analytics/admin/notes';
 
 	/**
 	 * Setup test admin notes data. Called before every test.

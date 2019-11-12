@@ -21,7 +21,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/orders';
+	protected $endpoint = '/wc-analytics/reports/orders';
 
 	/**
 	 * Setup test reports orders data.

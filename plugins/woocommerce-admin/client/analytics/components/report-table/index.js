@@ -460,7 +460,7 @@ ReportTable.propTypes = {
 	/**
 	 * The endpoint to use in API calls to populate the table rows and summary.
 	 * For example, if `taxes` is provided, data will be fetched from the report
-	 * `taxes` endpoint (ie: `/wc/v4/reports/taxes` and `/wc/v4/reports/taxes/stats`).
+	 * `taxes` endpoint (ie: `/wc-analytics/reports/taxes` and `/wc/v4/reports/taxes/stats`).
 	 * If the provided endpoint doesn't exist, an error will be shown to the user
 	 * with `ReportError`.
 	 */

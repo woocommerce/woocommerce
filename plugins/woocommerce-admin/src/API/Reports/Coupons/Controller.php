@@ -26,7 +26,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

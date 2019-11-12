@@ -8,6 +8,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API;
+
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 
 defined( 'ABSPATH' ) || exit;
@@ -24,7 +25,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin/v1';
+	protected $namespace = 'wc-admin';
 
 	/**
 	 * Route base.
@@ -108,7 +109,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Import sample products from WooCommerce sample CSV.
 	 *
-	 * @return WP_Error|WP_REST_Response	 * 
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -117,9 +118,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( file_exists( $file ) && class_exists( 'WC_Product_CSV_Importer' ) ) {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			global $locale;
-			$locale = false;
+			$locale         = false; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
-			$args           = array( 'parse' => true, 'mapping' => self::get_header_mappings( $file ) );
+			$args           = array(
+				'parse'   => true,
+				'mapping' => self::get_header_mappings( $file ),
+			);
 			$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 
 			$importer = new $importer_class( $file, $args );
@@ -133,7 +137,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Get header mappings from CSV columns.
 	 *
-	 * @param string File path.
+	 * @param string $file File path.
 	 * @return array Mapped headers.
 	 */
 	public static function get_header_mappings( $file ) {
@@ -182,8 +186,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Block content.
 	 */
 	private static function get_homepage_cover_block( $image ) {
-		if ( ! empty ( $image['url'] ) && ! empty( $image['id'] ) ) {
-			return '<!-- wp:cover {"url":"' . esc_url( $image['url'] ) .'","id":' . intval( $image['id'] ) . '} -->
+		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
+			return '<!-- wp:cover {"url":"' . esc_url( $image['url'] ) . '","id":' . intval( $image['id'] ) . '} -->
 			<div class="wp-block-cover has-background-dim" style="background-image:url(' . esc_url( $image['url'] ) . ')"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
 			<p class="has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce-admin' ) . '</p>
 			<!-- /wp:paragraph -->
@@ -224,7 +228,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$media_position = 'right' === $align ? '"mediaPosition":"right",' : '';
 		$css_class      = 'right' === $align ? ' has-media-on-the-right' : '';
 
-		if ( ! empty ( $image['url'] ) && ! empty( $image['id'] ) ) {
+		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
 			return '<!-- wp:media-text {' . $media_position . '"mediaId":' . intval( $image['id'] ) . ',"mediaType":"image"} -->
 			<div class="wp-block-media-text alignwide' . $css_class . '""><figure class="wp-block-media-text__media"><img src="' . esc_url( $image['url'] ) . '" alt="" class="wp-image-' . intval( $image['id'] ) . '"/></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
 			<p class="has-large-font-size"></p>
@@ -233,7 +237,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		}
 
 		return '<!-- wp:media-text {' . $media_position . '} -->
-		<div class="wp-block-media-text alignwide' . $css_class . '"><figure class="wp-block-media-text__media"></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…' , 'woocommerce-admin' ) . '","fontSize":"large"} -->
+		<div class="wp-block-media-text alignwide' . $css_class . '"><figure class="wp-block-media-text__media"></figure><div class="wp-block-media-text__content"><!-- wp:paragraph {"placeholder":"' . __( 'Content…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
 		<p class="has-large-font-size"></p>
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:media-text -->';
@@ -294,7 +298,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		return $cover . '
 		<!-- wp:heading {"align":"center"} -->
-		<h2 class="has-text-align-center">' . __( 'New products', 'woocommerce-admin' ). '</h2>
+		<h2 class="has-text-align-center">' . __( 'New products', 'woocommerce-admin' ) . '</h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:woocommerce/product-new /--> ' .
@@ -312,15 +316,15 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return array An array of images by industry.
 	 */
 	private static function get_available_homepage_images() {
-		$industry_images    = array();
-		$industries         = Onboarding::get_allowed_industries();
+		$industry_images = array();
+		$industries      = Onboarding::get_allowed_industries();
 		foreach ( $industries as $industry_slug => $label ) {
 			$file_path = WC_ADMIN_ABSPATH . 'images/onboarding/' . $industry_slug . '.jpg';
 			if ( 'other' === $industry_slug || ! file_exists( $file_path ) ) {
 				$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/other.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
 				continue;
 			}
-			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/' . $industry_slug .'.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
+			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/' . $industry_slug . '.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
 		}
 		return $industry_images;
 	}
@@ -328,8 +332,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Uploads a number of images to a homepage template, depending on the selected industry from the profile wizard.
 	 *
-	 * @param  int   $post_id ID of the homepage template.
-	 * @param  int   $number_of_images The number of images that should be sideloaded (depending on how many media slots are in the template).
+	 * @param  int $post_id ID of the homepage template.
+	 * @param  int $number_of_images The number of images that should be sideloaded (depending on how many media slots are in the template).
 	 * @return array An array of images that have been attached to the post.
 	 */
 	private static function sideload_homepage_images( $post_id, $number_of_images ) {
@@ -342,15 +346,15 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 
 		if ( ! empty( $profile['industry'] ) ) {
-			foreach( $profile['industry'] as $selected_industry ) {
-				$images_to_sideload[] = ! empty ( $available_images[ $selected_industry ] ) ? $available_images[ $selected_industry ] : $available_images[ 'other' ];
+			foreach ( $profile['industry'] as $selected_industry ) {
+				$images_to_sideload[] = ! empty( $available_images[ $selected_industry ] ) ? $available_images[ $selected_industry ] : $available_images['other'];
 			}
 		}
 
 		// Make sure we have at least {$number_of_images} images.
 		if ( count( $images_to_sideload ) < $number_of_images ) {
 			for ( $i = count( $images_to_sideload ); $i < $number_of_images; $i++ ) {
-				$images_to_sideload[] = ! empty( $profile['industry'] ) && ! empty ( $available_images[ $profile['industry'][0] ] ) ? $available_images[ $profile['industry'][ 0 ] ] : $available_images[ 'other' ];
+				$images_to_sideload[] = ! empty( $profile['industry'] ) && ! empty( $available_images[ $profile['industry'][0] ] ) ? $available_images[ $profile['industry'][0] ] : $available_images['other'];
 			}
 		}
 
@@ -363,18 +367,21 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				continue;
 			}
 
-			$sideload_id =  \media_sideload_image( $image, $post_id, null, 'id' );
+			$sideload_id = \media_sideload_image( $image, $post_id, null, 'id' );
 			if ( ! is_wp_error( $sideload_id ) ) {
-				$sideload_url = wp_get_attachment_url( $sideload_id );
-				$already_sideloaded[ $image ] = array( 'id' => $sideload_id, 'url' => $sideload_url );
-				$images_for_post[] = $already_sideloaded[ $image ];
+				$sideload_url                 = wp_get_attachment_url( $sideload_id );
+				$already_sideloaded[ $image ] = array(
+					'id'  => $sideload_id,
+					'url' => $sideload_url,
+				);
+				$images_for_post[]            = $already_sideloaded[ $image ];
 			}
 		}
 
 		return $images_for_post;
 	}
 
-	/*
+	/**
 	 * Creates base store starter pages like my account and checkout.
 	 * Note that WC_Install::create_pages already checks if pages exist before creating them again.
 	 */
@@ -398,10 +405,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! is_wp_error( $post_id ) ) {
 
 			$template = self::get_homepage_template( $post_id );
-			wp_update_post( array(
-				 'ID'          => $post_id,
-				'post_content' => $template,
-			) );
+			wp_update_post(
+				array(
+					'ID'           => $post_id,
+					'post_content' => $template,
+				)
+			);
 
 			update_option( 'woocommerce_onboarding_homepage_post_id', $post_id );
 

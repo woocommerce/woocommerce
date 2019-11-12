@@ -25,7 +25,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

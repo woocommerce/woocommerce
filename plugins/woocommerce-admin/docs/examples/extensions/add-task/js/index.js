@@ -16,7 +16,7 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
 /* global addTaskData */
 const markTaskComplete = () => {
 	apiFetch( {
-		path: '/wc-admin/v1/options',
+		path: '/wc-admin/options',
 		method: 'POST',
 		data: { woocommerce_admin_add_task_example_complete: true },
 	} )
@@ -34,7 +34,7 @@ const markTaskComplete = () => {
 
 const markTaskIncomplete = () => {
 	apiFetch( {
-		path: '/wc-admin/v1/options',
+		path: '/wc-admin/options',
 		method: 'POST',
 		data: { woocommerce_admin_add_task_example_complete: false },
 	} )

@@ -119,7 +119,7 @@ ReportSummary.propTypes = {
 	/**
 	 * The endpoint to use in API calls to populate the Summary Numbers.
 	 * For example, if `taxes` is provided, data will be fetched from the report
-	 * `taxes` endpoint (ie: `/wc/v4/reports/taxes/stats`). If the provided endpoint
+	 * `taxes` endpoint (ie: `/wc-analytics/reports/taxes/stats`). If the provided endpoint
 	 * doesn't exist, an error will be shown to the user with `ReportError`.
 	 */
 	endpoint: PropTypes.string.isRequired,

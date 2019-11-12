@@ -15,14 +15,14 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $export_route = '/wc/v4/reports/(?P<type>[a-z]+)/export';
+	protected $export_route = '/wc-analytics/reports/(?P<type>[a-z]+)/export';
 
 	/**
 	 * Export status route.
 	 *
 	 * @var string
 	 */
-	protected $status_route = '/wc/v4/reports/(?P<type>[a-z]+)/export/(?P<export_id>[a-z0-9]+)/status';
+	protected $status_route = '/wc-analytics/reports/(?P<type>[a-z]+)/export/(?P<export_id>[a-z0-9]+)/status';
 
 	/**
 	 * Setup test reports categories data.
@@ -56,7 +56,7 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_request_export_without_permission() {
 		wp_set_current_user( 0 );
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v4/reports/taxes/export' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc-analytics/reports/taxes/export' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
@@ -121,14 +121,14 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Initiate an export of the taxes report.
-		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v4/reports/taxes/export' ) );
+		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc-analytics/reports/taxes/export' ) );
 		$export     = $response->get_data();
 		$status_url = $export['_links']['status'][0]['href'];
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $export['status'] );
 		$this->assertEquals( 'Your report file is being generated.', $export['message'] );
-		$this->assertStringMatchesFormat( '%s/wc/v4/reports/taxes/export/%d/status', $status_url );
+		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status_url );
 
 		// Check the initial status of the export.
 		$status_url_query = array();
@@ -140,7 +140,7 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 0, $status['percent_complete'] );
-		$this->assertStringMatchesFormat( '%s/wc/v4/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
+		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
 
 		// Run the pending export jobs.
 		WC_Helper_Queue::run_all_pending();
@@ -152,6 +152,6 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 100, $status['percent_complete'] );
 		$this->assertStringMatchesFormat( '%s/wp-admin/?action=woocommerce_admin_download_report_csv&filename=wc-taxes-report-export-%d', $status['download_url'] );
-		$this->assertStringMatchesFormat( '%s/wc/v4/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
+		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
 	}
 }

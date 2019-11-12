@@ -52,8 +52,8 @@ class AnalyticsDashboard {
 	 * @return array
 	 */
 	public function add_preload_endpoints( $endpoints ) {
-		$endpoints['performanceIndicators'] = '/wc/v4/reports/performance-indicators/allowed';
-		$endpoints['leaderboards']          = '/wc/v4/leaderboards/allowed';
+		$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
+		$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
 		return $endpoints;
 	}
 

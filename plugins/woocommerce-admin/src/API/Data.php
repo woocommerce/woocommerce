@@ -24,7 +24,7 @@ class Data extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Return the list of data resources.

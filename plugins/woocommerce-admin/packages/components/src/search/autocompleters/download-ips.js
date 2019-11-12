@@ -25,7 +25,7 @@ export default {
 				match,
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/data/download-ips', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/data/download-ips', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( download ) {

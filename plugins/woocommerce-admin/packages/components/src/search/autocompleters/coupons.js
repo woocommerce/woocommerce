@@ -28,7 +28,7 @@ export default {
 				per_page: 10,
 			}
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc/v4/coupons', query ) } );
+		return apiFetch( { path: addQueryArgs( '/wc-analytics/coupons', query ) } );
 	},
 	isDebounced: true,
 	getOptionIdentifier( coupon ) {

@@ -17,7 +17,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc-admin/v1/onboarding/profile';
+	protected $endpoint = '/wc-admin/onboarding/profile';
 
 	/**
 	 * Setup test data. Called before every test.
@@ -159,8 +159,8 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_default_params() {
 		$endpoints = array(
-			'/wc-admin/v1/onboarding/profile',
-			'/wc-admin/v1/onboarding/plugins',
+			'/wc-admin/onboarding/profile',
+			'/wc-admin/onboarding/plugins',
 		);
 
 		foreach ( $endpoints as $endpoint ) {

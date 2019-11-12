@@ -15,7 +15,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/reports/downloads';
+	protected $endpoint = '/wc-analytics/reports/downloads';
 
 	/**
 	 * Setup test reports downloads data.

@@ -45,7 +45,7 @@ class Analytics {
 	 * @return array
 	 */
 	public function add_preload_endpoints( $endpoints ) {
-		$endpoints['countries'] = '/wc/v4/data/countries';
+		$endpoints['countries'] = '/wc-analytics/data/countries';
 		return $endpoints;
 	}
 
