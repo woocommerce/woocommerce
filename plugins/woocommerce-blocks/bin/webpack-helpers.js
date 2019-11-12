@@ -279,7 +279,7 @@ const getFrontConfig = ( options = {} ) => {
 		entry: getEntryConfig( false, options.exclude || [] ),
 		output: {
 			path: path.resolve( __dirname, '../build/' ),
-			filename: `[name]${ fileSuffix }-frontend.js`,
+			filename: `[name]-frontend${ fileSuffix }.js`,
 			// This fixes an issue with multiple webpack projects using chunking
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
