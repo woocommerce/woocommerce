@@ -1839,7 +1839,7 @@ function wc_update_343_cleanup_foreign_keys() {
 
 	if ( $results ) {
 		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 }
@@ -2045,4 +2045,22 @@ function wc_update_370_mro_std_currency() {
  */
 function wc_update_370_db_version() {
 	WC_Install::update_db_version( '3.7.0' );
+}
+
+/**
+ * Backfill new status types for each order and update main order statuses to new ones
+ *
+ * @return void
+ */
+function wc_update_390_order_statuses() {
+
+}
+
+/**
+ * Update DB version for 3.9.0
+ *
+ * @return void
+ */
+function wc_update_390_db_version() {
+	WC_Install::update_db_version( '3.9.0' );
 }
