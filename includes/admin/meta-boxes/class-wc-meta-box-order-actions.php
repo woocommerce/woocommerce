@@ -4,8 +4,6 @@
  *
  * Functions for displaying the order actions meta box.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin/Meta Boxes
  * @version     2.1.0
  */
@@ -32,11 +30,23 @@ class WC_Meta_Box_Order_Actions {
 			$theorder = wc_get_order( $post->ID );
 		}
 
+		$actions = array(
+			'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
+			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
+			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
+		);
+		$status_actions = array();
+		if ( $theorder->needs_fulfillment() && ! $theorder->has_fulfillment_status( 'fullfilled' ) ) {
+			$status_actions['fulfill_order'] = __( 'Fulfill order', 'woocommerce' );
+		}
+		if ( $theorder->has_status( 'completed' ) ) {
+			$status_actions['complete_order'] = __( 'Complete order', 'woocommerce' );
+		}
 		$order_actions = apply_filters(
-			'woocommerce_order_actions', array(
-				'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
-				'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
-				'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
+			'woocommerce_order_actions',
+			array_merge(
+				$status_actions,
+				$actions
 			)
 		);
 		?>
@@ -129,9 +139,12 @@ class WC_Meta_Box_Order_Actions {
 				$data_store = WC_Data_Store::load( 'customer-download' );
 				$data_store->delete_by_order_id( $post_id );
 				wc_downloadable_product_permissions( $post_id, true );
-
+			} elseif ( 'fulfill_order' === $action ) {
+				$order->set_fulfillment_status( 'fulfilled' );
+			} elseif ( 'complete_order' === $action ) {
+				$order->set_status( 'completed' );
+				$order->set_order_status( 'completed' );
 			} else {
-
 				if ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
 					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
 				}
