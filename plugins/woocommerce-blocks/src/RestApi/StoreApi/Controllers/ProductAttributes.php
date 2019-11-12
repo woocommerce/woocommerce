@@ -149,16 +149,4 @@ class ProductAttributes extends RestContoller {
 
 		return rest_ensure_response( $return );
 	}
-
-	/**
-	 * Get the query params for collections of attributes.
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$params                       = array();
-		$params['context']            = $this->get_context_param();
-		$params['context']['default'] = 'view';
-		return $params;
-	}
 }
