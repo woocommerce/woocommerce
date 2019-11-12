@@ -580,7 +580,7 @@ class WC_Admin_Setup_Wizard {
 								printf(
 									wp_kses(
 										/* translators: %1$s: usage tracking help link */
-										__( 'Learn more about how usage tracking works, and how you\'ll be helping <a href="%1$s" target="_blank">here</a>.', 'woocommerce' ),
+										__( 'Learn more about how usage tracking works, and how you\'ll be helping at <a href="%1$s" target="_blank">%1$s</a>.', 'woocommerce' ),
 										array(
 											'a'    => array(
 												'href'   => array(),
