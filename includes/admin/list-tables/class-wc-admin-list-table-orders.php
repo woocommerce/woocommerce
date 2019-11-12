@@ -116,15 +116,16 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function define_columns( $columns ) {
-		$show_columns                     = array();
-		$show_columns['cb']               = $columns['cb'];
-		$show_columns['order_number']     = __( 'Order', 'woocommerce' );
-		$show_columns['order_date']       = __( 'Date', 'woocommerce' );
-		$show_columns['order_status']     = __( 'Status', 'woocommerce' );
-		$show_columns['billing_address']  = __( 'Billing', 'woocommerce' );
-		$show_columns['shipping_address'] = __( 'Ship to', 'woocommerce' );
-		$show_columns['order_total']      = __( 'Total', 'woocommerce' );
-		$show_columns['wc_actions']       = __( 'Actions', 'woocommerce' );
+		$show_columns                       = array();
+		$show_columns['cb']                 = $columns['cb'];
+		$show_columns['order_number']       = __( 'Order', 'woocommerce' );
+		$show_columns['order_date']         = __( 'Date', 'woocommerce' );
+		$show_columns['payment_status']     = __( 'Payment', 'woocommerce' );
+		$show_columns['fulfillment_status'] = __( 'Fulfillment', 'woocommerce' );
+		$show_columns['billing_address']    = __( 'Billing', 'woocommerce' );
+		$show_columns['shipping_address']   = __( 'Ship to', 'woocommerce' );
+		$show_columns['order_total']        = __( 'Total', 'woocommerce' );
+		$show_columns['wc_actions']         = __( 'Actions', 'woocommerce' );
 
 		wp_enqueue_script( 'wc-orders' );
 
@@ -201,40 +202,17 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_status.
+	 * Render columm: payment_status.
 	 */
-	protected function render_order_status_column() {
-		$tooltip                 = '';
-		$comment_count           = get_comment_count( $this->object->get_id() );
-		$approved_comments_count = absint( $comment_count['approved'] );
+	protected function render_payment_status_column() {
+		printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $this->object->get_payment_status() ) ), esc_html( wc_get_order_status_name( $this->object->get_payment_status() ) ) );
+	}
 
-		if ( $approved_comments_count ) {
-			$latest_notes = wc_get_order_notes(
-				array(
-					'order_id' => $this->object->get_id(),
-					'limit'    => 1,
-					'orderby'  => 'date_created_gmt',
-				)
-			);
-
-			$latest_note = current( $latest_notes );
-
-			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
-				$tooltip = wc_sanitize_tooltip( $latest_note->content );
-			} elseif ( isset( $latest_note->content ) ) {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
-			} else {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
-			}
-		}
-
-		if ( $tooltip ) {
-			printf( '<mark class="order-status %s tips" data-tip="%s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $this->object->get_status() ) ), wp_kses_post( $tooltip ), esc_html( wc_get_order_status_name( $this->object->get_status() ) ) );
-		} else {
-			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $this->object->get_status() ) ), esc_html( wc_get_order_status_name( $this->object->get_status() ) ) );
-		}
+	/**
+	 * Render columm: fulfillment_status.
+	 */
+	protected function render_fulfillment_status_column() {
+		printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $this->object->get_fulfillment_status() ) ), esc_html( wc_get_order_status_name( $this->object->get_fulfillment_status() ) ) );
 	}
 
 	/**
