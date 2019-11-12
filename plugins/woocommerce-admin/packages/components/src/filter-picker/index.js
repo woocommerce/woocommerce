@@ -126,7 +126,7 @@ class FilterPicker extends Component {
 		const { value, settings } = filter;
 		const { param: filterParam } = settings;
 		if ( tag ) {
-			this.update( value, { [ filterParam ]: tag.id } );
+			this.update( value, { [ filterParam ]: tag.key } );
 			onClose();
 		} else {
 			this.update( config.defaultValue || DEFAULT_FILTER );
