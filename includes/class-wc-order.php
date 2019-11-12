@@ -1471,47 +1471,6 @@ class WC_Order extends WC_Abstract_Order {
 		return $this->needs_fulfillment();
 	}
 
-	/**
-	 * See if the order needs fulfillment before it can be completed.
-	 *
-	 * Duplicate of needs_processing but with new naming.
-	 * Orders which only contain virtual, downloadable items do not need fulfillment
-	 *
-	 * @since 3.9.0
-	 * @return boolean
-	 */
-	public function needs_fulfillment() {
-		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
-		$needs_processing = get_transient( $transient_name );
-
-		if ( false === $needs_processing ) {
-			$needs_processing = 0;
-
-			if ( count( $this->get_items() ) > 0 ) {
-				foreach ( $this->get_items() as $item ) {
-					if ( $item->is_type( 'line_item' ) ) {
-						$product = $item->get_product();
-
-						if ( ! $product ) {
-							continue;
-						}
-
-						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-							$needs_processing = 1;
-							break;
-						}
-					}
-				}
-			}
-
-			set_transient( $transient_name, $needs_processing, DAY_IN_SECONDS );
-		}
-
-		return 1 === absint( $needs_processing );
-	}
-
 	/*
 	|--------------------------------------------------------------------------
 	| URLs and Endpoints

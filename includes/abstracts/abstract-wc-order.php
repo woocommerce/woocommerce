@@ -716,12 +716,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// If setting the status, ensure it's set to a valid status.
 		if ( true === $this->object_read ) {
 			// Only allow valid new status.
-			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_fulfillment_statuses(), true ) && 'trash' !== $new_status ) {
+			if ( $this->needs_fulfillment() && ! in_array( 'wc-' . $new_status, $this->get_valid_fulfillment_statuses(), true ) && 'trash' !== $new_status ) {
 				$new_status = 'unfulfilled';
 			}
 
 			// If the old status is set but unknown (e.g. draft) assume its unfulfilled for action usage.
-			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_fulfillment_statuses(), true ) && 'trash' !== $old_status ) {
+			if ( $this->needs_fulfillment() && $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_fulfillment_statuses(), true ) && 'trash' !== $old_status ) {
 				$old_status = 'unfulfilled';
 			}
 		}
@@ -2278,5 +2278,46 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * See if the order needs fulfillment before it can be completed.
+	 *
+	 * Duplicate of needs_processing but with new naming.
+	 * Orders which only contain virtual, downloadable items do not need fulfillment
+	 *
+	 * @since 3.9.0
+	 * @return boolean
+	 */
+	public function needs_fulfillment() {
+		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
+		$needs_processing = get_transient( $transient_name );
+
+		if ( false === $needs_processing ) {
+			$needs_processing = 0;
+
+			if ( count( $this->get_items() ) > 0 ) {
+				foreach ( $this->get_items() as $item ) {
+					if ( $item->is_type( 'line_item' ) ) {
+						$product = $item->get_product();
+
+						if ( ! $product ) {
+							continue;
+						}
+
+						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+
+						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+							$needs_processing = 1;
+							break;
+						}
+					}
+				}
+			}
+
+			set_transient( $transient_name, $needs_processing, DAY_IN_SECONDS );
+		}
+
+		return 1 === absint( $needs_processing );
 	}
 }
