@@ -2,9 +2,10 @@
 /**
  * External dependencies
  */
-import { select, subscribe, dispatch } from '@wordpress/data';
+import { dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import domReady from '@wordpress/dom-ready';
 
 /**
  * WooCommerce dependencies
@@ -12,63 +13,89 @@ import apiFetch from '@wordpress/api-fetch';
 import { getAdminLink } from '@woocommerce/navigation';
 
 /**
- * Displays a notice on page save and updates the hompage options.
+ * Returns a promise and resolves when the post begins to publish.
  *
- * Adapted from WSUWP Help Docs by Washington State University (GPL v2).
- * https://github.com/washingtonstateuniversity/WSUWP-Plugin-Help-Docs/blob/master/src/_js/blocks/notices.js
+ * @return {Promise} Promise for overlay existence.
+ */
+const saveStarted = () => {
+	if ( document.querySelector( '.editor-post-publish-button' ) === null ) {
+		const promise = new Promise( resolve => {
+			requestAnimationFrame( resolve );
+		} );
+		return promise.then( () => saveStarted() );
+	}
+
+	return Promise.resolve( true );
+};
+
+/**
+ * Returns a promise and resolves when the post has been saved and notices have shown.
+ *
+ * @return {Promise} Promise for overlay existence.
+ */
+const saveCompleted = () => {
+	if ( null === document.querySelector( '.post-publish-panel__postpublish' ) ) {
+		const promise = new Promise( resolve => {
+			requestAnimationFrame( resolve );
+		} );
+		return promise.then( () => saveCompleted() );
+	}
+
+	return Promise.resolve( true );
+};
+
+/**
+ * Displays a notice on page save and updates the hompage options.
  */
 const onboardingHomepageNotice = () => {
-	const post = select( 'core/editor' ).getCurrentPost();
+	const saveButton = document.querySelector( '.editor-post-publish-button' );
+	if ( saveButton.classList.contains( 'is-clicked' ) ) {
+		return;
+	}
 
-	const noticeMeta = {
-		wasPublishingPost: select( 'core/editor' ).isPublishingPost(),
-		wasStatus: post.status,
-	};
+	saveButton.classList.add( 'is-clicked' );
 
-	subscribe( () => {
-		const isPublishingPost = select( 'core/editor' ).isPublishingPost();
-		const isStatus = select( 'core/editor' ).getCurrentPost().status;
+	saveCompleted().then( () => {
+		const postId = document.querySelector( '#post_ID' ).value;
+		const notificationType =
+			null !== document.querySelector( '.components-snackbar__content' ) ? 'snackbar' : 'default';
 
-		const shouldTriggerAdminNotice =
-			'publish' === isStatus && noticeMeta.wasPublishingPost && ! isStatus.isPublishingPost;
+		apiFetch( {
+			path: '/wc-admin/v1/options',
+			method: 'POST',
+			data: {
+				show_on_front: 'page',
+				page_on_front: postId,
+			},
+		} );
 
-		noticeMeta.wasPublishingPost = isPublishingPost;
-		noticeMeta.wasStatus = isStatus;
-
-		if ( shouldTriggerAdminNotice ) {
-			if ( select( 'core/editor' ).didPostSaveRequestSucceed() ) {
-				setTimeout( () => {
-					wp.data.dispatch( 'core/notices' ).removeNotice( 'SAVE_POST_NOTICE_ID' );
-				}, 0 );
-
-				apiFetch( {
-					path: '/wc-admin/v1/options',
-					method: 'POST',
-					data: {
-						show_on_front: 'page',
-						page_on_front: post.id,
-					},
-				} );
-
-				dispatch( 'core/notices' ).createSuccessNotice(
-					__( 'Your homepage was published.', 'woocommerce-admin' ),
+		dispatch( 'core/notices' ).removeNotice( 'SAVE_POST_NOTICE_ID' );
+		dispatch( 'core/notices' ).createSuccessNotice(
+			__( 'Your homepage was published.', 'woocommerce-admin' ),
+			{
+				id: 'WOOCOMMERCE_ONBOARDING_HOME_PAGE_NOTICE',
+				type: notificationType,
+				actions: [
 					{
-						id: 'WOOCOMMERCE_ONBOARDING_HOME_PAGE_NOTICE',
-						actions: [
-							{
-								url: getAdminLink( 'admin.php?page=wc-admin&task=appearance' ),
-								label: __( 'Continue setup.', 'woocommerce-admin' ),
-							},
-						],
-					}
-				);
+						url: getAdminLink( 'admin.php?page=wc-admin&task=appearance' ),
+						label: __( 'Continue setup.', 'woocommerce-admin' ),
+					},
+				],
 			}
-		}
+		);
 	} );
 };
 
-wp.domReady( () => {
-	if ( 'page' === select( 'core/editor' ).getCurrentPostType() ) {
-		onboardingHomepageNotice();
+domReady( () => {
+	const publishButton = document.querySelector( '.editor-post-publish-panel__toggle' );
+	if ( publishButton ) {
+		publishButton.addEventListener( 'click', function() {
+			saveStarted().then( () => {
+				const confirmButton = document.querySelector( '.editor-post-publish-button' );
+				if ( confirmButton ) {
+					confirmButton.addEventListener( 'click', onboardingHomepageNotice );
+				}
+			} );
+		} );
 	}
 } );

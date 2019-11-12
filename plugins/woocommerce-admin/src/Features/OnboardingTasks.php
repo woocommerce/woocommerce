@@ -198,7 +198,7 @@ class OnboardingTasks {
 	public static function add_onboarding_homepage_notice_admin_script( $hook ) {
 		global $post;
 		if ( 'post.php' === $hook && 'page' === $post->post_type && isset( $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) && 'homepage' === $_GET[ self::ACTIVE_TASK_TRANSIENT ] ) { // phpcs:ignore csrf ok.
-			wp_enqueue_script( 'onboarding-homepage-notice', Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice.js' ), array( 'wc-navigation' ), WC_ADMIN_VERSION_NUMBER, true );
+			wp_enqueue_script( 'onboarding-homepage-notice', Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
 		}
 	}
 
