@@ -1467,7 +1467,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function needs_processing() {
-		wc_deprecated_function( 'WC_Order::needs_processing', '3.9.0', 'WC_Order::needs_fulfillment' );
+		wc_deprecated_function( 'WC_Order::needs_processing', '3.9.0', 'WC_Abstract_Order::needs_fulfillment' );
 		return $this->needs_fulfillment();
 	}
 
