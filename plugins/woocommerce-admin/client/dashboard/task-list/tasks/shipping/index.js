@@ -194,7 +194,7 @@ class Shipping extends Component {
 							components: {
 								link: (
 									<Link
-										href="https://docs.woocommerce.com/document/shipstation-for-woocommerce/"
+										href="https://woocommerce.com/products/shipstation-integration"
 										target="_blank"
 										type="external"
 									/>
