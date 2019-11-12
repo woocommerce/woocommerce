@@ -165,8 +165,7 @@ class Assets {
 	 * @param string $name Name of the script used to identify the file inside build folder.
 	 */
 	public static function register_block_script( $name ) {
-		$filename = 'build/' . $name . '.js';
-		self::register_script( 'wc-' . $name, plugins_url( $filename, __DIR__ ) );
+		self::register_script( 'wc-' . $name, plugins_url( self::get_block_asset_build_path( $name ), __DIR__ ) );
 		wp_enqueue_script( 'wc-' . $name );
 	}
 
