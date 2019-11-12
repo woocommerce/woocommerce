@@ -390,13 +390,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$order_items = $order->get_items();
-		$num_updated = 0;
-		$decimals    = wc_get_price_decimals();
-		$round_tax   = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
+		$table_name     = self::get_db_table_name();
+		$existing_items = $wpdb->get_col( $wpdb->prepare( "SELECT order_item_id FROM {$table_name} WHERE order_id = %d", $order_id ) );
+		$existing_items = array_flip( $existing_items );
+		$order_items    = $order->get_items();
+		$num_updated    = 0;
+		$decimals       = wc_get_price_decimals();
+		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
 		foreach ( $order_items as $order_item ) {
 			$order_item_id       = $order_item->get_id();
+			unset( $existing_items[ $order_item_id ] );
 			$product_qty         = $order_item->get_quantity( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
@@ -467,6 +471,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+		}
+
+		if ( ! empty( $existing_items ) ) {
+			$existing_items = array_flip( $existing_items );
+			$format         = array_fill( 0, count( $existing_items ), '%d' );
+			$format         = implode( ',', $format );
+			array_unshift( $existing_items, $order_id );
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id in ({$format})",
+					$existing_items
+				)
+			);
 		}
 
 		return ( count( $order_items ) === $num_updated );

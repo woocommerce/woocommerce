@@ -335,12 +335,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return true;
 		}
 
+		$table_name         = self::get_db_table_name();
+		$existing_items     = $wpdb->get_col( $wpdb->prepare( "SELECT coupon_id FROM {$table_name} WHERE order_id = %d", $order_id ) );
+		$existing_items     = array_flip( $existing_items );
 		$coupon_items       = $order->get_items( 'coupon' );
 		$coupon_items_count = count( $coupon_items );
 		$num_updated        = 0;
 
 		foreach ( $coupon_items as $coupon_item ) {
 			$coupon_id = wc_get_coupon_id_by_code( $coupon_item->get_code() );
+			unset( $existing_items[ $coupon_id ] );
 
 			if ( ! $coupon_id ) {
 				$coupon_items_count--;
@@ -373,6 +377,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
+		}
+
+		if ( ! empty( $existing_items ) ) {
+			$existing_items = array_flip( $existing_items );
+			$format         = array_fill( 0, count( $existing_items ), '%d' );
+			$format         = implode( ',', $format );
+			array_unshift( $existing_items, $order_id );
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$table_name} WHERE order_id = %d AND coupon_id in ({$format})",
+					$existing_items
+				)
+			);
 		}
 
 		return ( $coupon_items_count === $num_updated );
