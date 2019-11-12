@@ -103,9 +103,9 @@ function wc_get_order_statuses() {
 	);
 	*/
 	$order_statuses = array(
-		'wc-open'   => _x( 'Open', 'Order status', 'woocommerce' ),
-		'wc-closed' => _x( 'Closed', 'Order status', 'woocommerce' ),
-		'wc-draft'  => _x( 'Draft', 'Order status', 'woocommerce' ),
+		'wc-open'      => _x( 'Open', 'Order status', 'woocommerce' ),
+		'wc-completed' => _x( 'Completed', 'Order status', 'woocommerce' ),
+		'wc-cancelled' => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 	);
 	return apply_filters( 'wc_order_statuses', $order_statuses );
 }
@@ -121,18 +121,20 @@ function wc_get_payment_statuses() {
 	$payment_statuses = array(
 		'wc-unpaid'                  => _x( 'Unpaid', 'Payment status', 'woocommerce' ),
 		'wc-awaiting-authentication' => _x( 'Awaiting Authentication', 'Payment status', 'woocommerce' ),
+		'wc-awaiting-payment'        => _x( 'Awaiting Payment', 'Payment status', 'woocommerce' ),
 		'wc-payment-authorized'      => _x( 'Payment Authorized', 'Payment status', 'woocommerce' ),
+		'wc-partial-payment'         => _x( 'Partial Payment', 'Payment status', 'woocommerce' ),
 		'wc-disputed-needs-response' => _x( 'Disputed: Needs Response', 'Payment status', 'woocommerce' ),
-		'wc-disputed-in-review'      => _x( 'Disputed: In Review', 'Payment status', 'woocommerce' ),
 		'wc-paid'                    => _x( 'Paid', 'Payment status', 'woocommerce' ),
 		'wc-partial-refund'          => _x( 'Partial Refund', 'Payment status', 'woocommerce' ),
 		'wc-refunded'                => _x( 'Refunded', 'Payment status', 'woocommerce' ),
+		'wc-authorization-voided'    => _x( 'Authorization Voided', 'Payment status', 'woocommerce' ),
 		'wc-disputed-won'            => _x( 'Disputed: Won', 'Payment status', 'woocommerce' ),
 		'wc-disputed-lost'           => _x( 'Disputed: Lost', 'Payment status', 'woocommerce' ),
-		'wc-blocked'                 => _x( 'Blocked', 'Payment status', 'woocommerce' ),
-		'wc-failed'                  => _x( 'Failed', 'Payment status', 'woocommerce' ),
-		'wc-authorization-voided'    => _x( 'Authorization Voided', 'Payment status', 'woocommerce' ),
-		'wc-refund-failure'          => _x( 'Refund Failure', 'Payment status', 'woocommerce' ),
+		'wc-disputed-in-review'      => _x( 'Disputed: In Review', 'Payment status', 'woocommerce' ),
+		'wc-blocked'                 => _x( 'Blocked Payment', 'Payment status', 'woocommerce' ),
+		'wc-failed'                  => _x( 'Failed Payment', 'Payment status', 'woocommerce' ),
+		'wc-authorized-expired'      => _x( 'Authorized Expired', 'Payment status', 'woocommerce' ),
 	);
 	return apply_filters( 'wc_payment_statuses', $payment_statuses );
 }
