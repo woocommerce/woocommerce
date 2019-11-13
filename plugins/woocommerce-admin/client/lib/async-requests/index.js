@@ -14,6 +14,7 @@ import { getIdsFromQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
+import { getTaxCode } from 'analytics/report/taxes/utils';
 import { NAMESPACE } from 'wc-api/constants';
 
 /**
@@ -44,31 +45,36 @@ export function getRequestByIdString( path, handleData = identity ) {
 export const getCategoryLabels = getRequestByIdString(
 	NAMESPACE + '/products/categories',
 	category => ( {
-		id: category.id,
+		key: category.id,
 		label: category.name,
 	} )
 );
 
 export const getCouponLabels = getRequestByIdString( NAMESPACE + '/coupons', coupon => ( {
-	id: coupon.id,
+	key: coupon.id,
 	label: coupon.code,
 } ) );
 
 export const getCustomerLabels = getRequestByIdString( NAMESPACE + '/customers', customer => ( {
-	id: customer.id,
+	key: customer.id,
 	label: customer.name,
 } ) );
 
 export const getProductLabels = getRequestByIdString( NAMESPACE + '/products', product => ( {
-	id: product.id,
+	key: product.id,
 	label: product.name,
+} ) );
+
+export const getTaxRateLabels = getRequestByIdString( NAMESPACE + '/taxes', tax_rate => ( {
+	key: tax_rate.id,
+	label: getTaxCode( tax_rate ),
 } ) );
 
 export const getVariationLabels = getRequestByIdString(
 	query => NAMESPACE + `/products/${ query.products }/variations`,
 	variation => {
 		return {
-			id: variation.id,
+			key: variation.id,
 			label: variation.attributes.reduce(
 				( desc, attribute, index, arr ) =>
 					desc + `${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`,

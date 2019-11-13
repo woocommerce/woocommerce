@@ -11,6 +11,7 @@ import { map } from 'lodash';
  */
 import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { getTaxCode } from './utils';
 import { numberFormat } from '@woocommerce/number';
 
@@ -71,12 +72,17 @@ export default class TaxesReportTable extends Component {
 
 	getRowsContent( taxes ) {
 		return map( taxes, tax => {
-			const { order_tax, orders_count, tax_rate, total_tax, shipping_tax } = tax;
+			const { query } = this.props;
+			const { order_tax, orders_count, tax_rate, tax_rate_id, total_tax, shipping_tax } = tax;
 			const taxCode = getTaxCode( tax );
 
-			// @todo Must link to the tax detail report
+			const persistedQuery = getPersistedQuery( query );
+			const ordersTaxLink = getNewPath( persistedQuery, '/analytics/orders', {
+				filter: 'advanced',
+				tax_rate_includes: tax_rate_id,
+			} );
 			const taxLink = (
-				<Link href="" type="wc-admin">
+				<Link href={ ordersTaxLink } type="wc-admin">
 					{ taxCode }
 				</Link>
 			);

@@ -87,6 +87,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_stats_lookup_table   = self::get_db_table_name();
 		$order_coupon_lookup_table  = $wpdb->prefix . 'wc_order_coupon_lookup';
 		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+		$order_tax_lookup_table     = $wpdb->prefix . 'wc_order_tax_lookup';
 		$operator                   = $this->get_match_operator( $query_args );
 		$where_subquery             = array();
 
@@ -148,6 +149,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[] = "{$order_product_lookup_table}.product_id NOT IN ({$excluded_products})";
 		}
 
+		$included_tax_rates = ! empty( $query_args['tax_rate_includes'] ) ? implode( ',', $query_args['tax_rate_includes'] ) : false;
+		$excluded_tax_rates = ! empty( $query_args['tax_rate_excludes'] ) ? implode( ',', $query_args['tax_rate_excludes'] ) : false;
+		if ( $included_tax_rates || $excluded_tax_rates ) {
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$order_tax_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_tax_lookup_table}.order_id" );
+		}
+		if ( $included_tax_rates ) {
+			$where_subquery[] = "{$order_tax_lookup_table}.tax_rate_id IN ({$included_tax_rates})";
+		}
+		if ( $excluded_tax_rates ) {
+			$where_subquery[] = "{$order_tax_lookup_table}.tax_rate_id NOT IN ({$excluded_tax_rates}) OR {$order_tax_lookup_table}.tax_rate_id IS NULL";
+		}
+
 		if ( 0 < count( $where_subquery ) ) {
 			$this->subquery->add_sql_clause( 'where', 'AND (' . implode( " {$operator} ", $where_subquery ) . ')' );
 		}
@@ -166,23 +179,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'         => get_option( 'posts_per_page' ),
-			'page'             => 1,
-			'order'            => 'DESC',
-			'orderby'          => 'date_created',
-			'before'           => '',
-			'after'            => '',
-			'fields'           => '*',
-			'product_includes' => array(),
-			'product_excludes' => array(),
-			'coupon_includes'  => array(),
-			'coupon_excludes'  => array(),
-			'customer_type'    => null,
-			'status_is'        => array(),
-			'extended_info'    => false,
-			'refunds'          => null,
-			'order_includes'   => array(),
-			'order_excludes'   => array(),
+			'per_page'          => get_option( 'posts_per_page' ),
+			'page'              => 1,
+			'order'             => 'DESC',
+			'orderby'           => 'date_created',
+			'before'            => '',
+			'after'             => '',
+			'fields'            => '*',
+			'product_includes'  => array(),
+			'product_excludes'  => array(),
+			'coupon_includes'   => array(),
+			'coupon_excludes'   => array(),
+			'tax_rate_includes' => array(),
+			'tax_rate_excludes' => array(),
+			'customer_type'     => null,
+			'status_is'         => array(),
+			'extended_info'     => false,
+			'refunds'           => null,
+			'order_includes'    => array(),
+			'order_excludes'    => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );

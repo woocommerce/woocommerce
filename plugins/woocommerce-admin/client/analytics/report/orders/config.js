@@ -9,7 +9,7 @@ import { ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { getCouponLabels, getProductLabels } from 'lib/async-requests';
+import { getCouponLabels, getProductLabels, getTaxRateLabels } from 'lib/async-requests';
 
 const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
 const ORDERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_orders_report_filters';
@@ -183,6 +183,34 @@ export const advancedFilters = applyFilters( ORDERS_REPORT_ADVANCED_FILTERS_FILT
 					{ value: 'none', label: __( 'None', 'woocommerce-admin' ) },
 				],
 				defaultOption: 'all',
+			},
+		},
+		tax_rate: {
+			labels: {
+				add: __( 'Tax Rates', 'woocommerce-admin' ),
+				placeholder: __( 'Search tax rates', 'woocommerce-admin' ),
+				remove: __( 'Remove tax rate filter', 'woocommerce-admin' ),
+				rule: __( 'Select a tax rate filter match', 'woocommerce-admin' ),
+				/* translators: A sentence describing a tax rate filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
+				title: __( '{{title}}Tax Rate{{/title}} {{rule /}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select tax rates', 'woocommerce-admin' ),
+			},
+			rules: [
+				{
+					value: 'includes',
+					/* translators: Sentence fragment, logical, "Includes" refers to orders including a given tax rate(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+					label: _x( 'Includes', 'tax rate', 'woocommerce-admin' ),
+				},
+				{
+					value: 'excludes',
+					/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given tax rate(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+					label: _x( 'Excludes', 'tax rate', 'woocommerce-admin' ),
+				},
+			],
+			input: {
+				component: 'Search',
+				type: 'taxes',
+				getLabels: getTaxRateLabels,
 			},
 		},
 	},

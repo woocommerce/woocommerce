@@ -113,6 +113,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$orders_stats_table = self::get_db_table_name();
 		$product_lookup     = $wpdb->prefix . 'wc_order_product_lookup';
 		$coupon_lookup      = $wpdb->prefix . 'wc_order_coupon_lookup';
+		$tax_rate_lookup    = $wpdb->prefix . 'wc_order_tax_lookup';
 		$operator           = $this->get_match_operator( $query_args );
 
 		$where_filters = array();
@@ -151,6 +152,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'coupon_id',
 			'NOT IN',
 			$this->get_excluded_coupons( $query_args )
+		);
+
+		// Tax rate filters.
+		$where_filters[] = $this->get_object_where_filter(
+			$orders_stats_table,
+			'order_id',
+			$tax_rate_lookup,
+			'tax_rate_id',
+			'IN',
+			implode( ',', $query_args['tax_rate_includes'] )
+		);
+		$where_filters[] = $this->get_object_where_filter(
+			$orders_stats_table,
+			'order_id',
+			$tax_rate_lookup,
+			'tax_rate_id',
+			'NOT IN',
+			implode( ',', $query_args['tax_rate_excludes'] )
 		);
 
 		$where_filters[] = $this->get_customer_subquery( $query_args );
@@ -194,25 +213,27 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
 		$defaults   = array(
-			'per_page'         => get_option( 'posts_per_page' ),
-			'page'             => 1,
-			'order'            => 'DESC',
-			'orderby'          => 'date',
-			'before'           => TimeInterval::default_before(),
-			'after'            => TimeInterval::default_after(),
-			'interval'         => 'week',
-			'fields'           => '*',
-			'segmentby'        => '',
+			'per_page'          => get_option( 'posts_per_page' ),
+			'page'              => 1,
+			'order'             => 'DESC',
+			'orderby'           => 'date',
+			'before'            => TimeInterval::default_before(),
+			'after'             => TimeInterval::default_after(),
+			'interval'          => 'week',
+			'fields'            => '*',
+			'segmentby'         => '',
 
-			'match'            => 'all',
-			'status_is'        => array(),
-			'status_is_not'    => array(),
-			'product_includes' => array(),
-			'product_excludes' => array(),
-			'coupon_includes'  => array(),
-			'coupon_excludes'  => array(),
-			'customer'         => '',
-			'categories'       => array(),
+			'match'             => 'all',
+			'status_is'         => array(),
+			'status_is_not'     => array(),
+			'product_includes'  => array(),
+			'product_excludes'  => array(),
+			'coupon_includes'   => array(),
+			'coupon_excludes'   => array(),
+			'tax_rate_includes' => array(),
+			'tax_rate_excludes' => array(),
+			'customer'          => '',
+			'categories'        => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
@@ -235,7 +256,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'page_no'   => 0,
 			);
 
-			$selections  = $this->selected_columns( $query_args );
+			$selections = $this->selected_columns( $query_args );
 			$this->get_time_period_sql_params( $query_args, $table_name );
 			$this->get_intervals_sql_params( $query_args, $table_name );
 			$this->get_order_by_sql_params( $query_args );
@@ -261,12 +282,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$totals = $wpdb->get_results(
 				$this->total_query->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
-			// @todo remove these assignements when refactoring segmenter classes to use query objects.
+			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
 			$totals_query    = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 				'where_time_clause' => $where_time,
@@ -293,7 +314,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->interval_query->add_sql_clause( 'where_time', $where_time );
 			$db_intervals = $wpdb->get_col(
 				$this->interval_query->get_query_statement()
-			); // WPCS: cache ok, DB call ok, , unprepared SQL ok.
+			); // phpcs:ignore cache ok, DB call ok, , unprepared SQL ok.
 
 			$db_interval_count       = count( $db_intervals );
 			$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
@@ -313,7 +334,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$intervals = $wpdb->get_results(
 				$this->interval_query->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
 				return new \WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
@@ -370,7 +391,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					1=1
 					{$where_time_clause}
 					{$where_clause}"
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 	}
 
 	/**
@@ -395,7 +416,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					1=1
 					{$where_time_clause}
 					{$where_clause}"
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 	}
 
 	/**
