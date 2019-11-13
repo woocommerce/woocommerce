@@ -71,6 +71,23 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.22.0 2019-11-13 =
+
+- Fix: Incorrect calculation of tax summary on Taxes screen. #3158 (Analytics)
+- Fix: Correct product and coupon count on edited orders. #3103 (Analytics)
+- Bug: Update filter picker to use key instead of id #3214 (Analytics, Components, Packages)
+- Enhancement: prompt stores to add their first product(s). #3119 (Inbox)
+- Dev: Move Analytics REST endpoints to `wc-analytics` namespace. #3204 (Components, Packages)
+- Tweak: add usage tracking inbox notice. #3112 (Activity Panel, Inbox)
+- Task: Fix PHP linter errors. #3188
+- Enhancement: Add query filters to data stores.
+- Dev: Refactor data store classes. #2961 (REST API)
+- Dev: WooCommerce Admin has been marked as compatible with WooCommerce 3.8.0. #3201
+- Bug: Fix ellipsis menu style #3141 (Analytics, Components, Packages)
+- Tweak: Field misalignment in product edit screen. #3145
+- Dev: update tested to version for WC and WP #3162
+- none needed. #3138 (Documentation)
+
 = 0.21.0 2019-10-30 =
 
 - Fix: report export format when generated server-side. #2987 (Analytics, Packages)
