@@ -76,7 +76,7 @@ function wc_get_product( $the_product = false, $deprecated = array() ) {
 function wc_get_product_classname( $product_type, $product_id = 0 ) {
 	$classname = WC_Product_Factory::get_product_classname( $product_id, $product_type );
 
-	return new $classname();
+	return new $classname( $product_id );
 }
 
 /**
