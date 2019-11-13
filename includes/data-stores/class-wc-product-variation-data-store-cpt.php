@@ -48,7 +48,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$post_object = get_post( $product->get_id() );
 
-		if ( ! $post_object || ! in_array( $post_object->post_type, array( 'product', 'product_variation' ), true ) ) {
+		if ( ! $post_object || 'product_variation' !== $post_object->post_type ) {
 			return;
 		}
 
