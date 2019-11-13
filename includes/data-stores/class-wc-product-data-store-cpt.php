@@ -1178,7 +1178,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( in_array( $possible_attribute, $existing_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				continue;
 			}
-			$variation = new WC_Product_Variation();
+			$variation = wc_get_product_classname( 'variation' );
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();

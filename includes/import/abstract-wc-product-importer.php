@@ -173,13 +173,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				return new WP_Error( 'woocommerce_product_importer_invalid_type', __( 'Invalid product type.', 'woocommerce' ), array( 'status' => 401 ) );
 			}
 
-			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
-
-			$product = new $classname( $id );
+			$product = wc_get_product_classname( $data['type'], $id );
 		} elseif ( ! empty( $data['id'] ) ) {
 			$product = wc_get_product( $id );
 
@@ -195,7 +189,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				);
 			}
 		} else {
-			$product = new WC_Product_Simple( $id );
+			$product = wc_get_product_classname( 'simple', $id );
 		}
 
 		return apply_filters( 'woocommerce_product_import_get_product_object', $product, $data );
