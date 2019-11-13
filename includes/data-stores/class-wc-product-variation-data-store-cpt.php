@@ -76,7 +76,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
+		if ( ! $product->get_parent_id() ) {
+			$product->set_object_read( true );
+			return;
+		}
+
 		$updates = array();
+
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
