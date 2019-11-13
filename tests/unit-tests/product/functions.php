@@ -741,6 +741,22 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_product_classname().
+	 *
+	 * @since 3.9.0
+	 */
+	public function test_wc_get_product_classname() {
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_classname( 'simple' ) );
+		$this->assertInstanceOf( 'WC_Product_Grouped', wc_get_product_classname( 'grouped' ) );
+		$this->assertInstanceOf( 'WC_Product_External', wc_get_product_classname( 'external' ) );
+		$this->assertInstanceOf( 'WC_Product_Variable', wc_get_product_classname( 'variable' ) );
+		$this->assertInstanceOf( 'WC_Product_Variation', wc_get_product_classname( 'variation' ) );
+
+		// Test incorrect type.
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_classname( 'foo+bar' ), 10 );
+	}
+
+	/**
 	 * Test wc_update_product_stock().
 	 *
 	 * @since 2.3
