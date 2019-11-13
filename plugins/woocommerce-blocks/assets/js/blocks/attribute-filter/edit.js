@@ -3,7 +3,7 @@
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { Fragment, useState, useCallback } from '@wordpress/element';
-import { InspectorControls, BlockControls } from '@wordpress/editor';
+import { InspectorControls, BlockControls, PlainText } from '@wordpress/editor';
 import {
 	Placeholder,
 	Disabled,
@@ -15,9 +15,10 @@ import {
 } from '@wordpress/components';
 import Gridicon from 'gridicons';
 import { SearchListControl } from '@woocommerce/components';
-import { mapValues, toArray, sortBy } from 'lodash';
+import { mapValues, toArray, sortBy, find } from 'lodash';
 import { ATTRIBUTES } from '@woocommerce/block-settings';
 import { getAdminLink } from '@woocommerce/navigation';
+import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
 
 /**
  * Internal dependencies
@@ -76,6 +77,21 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 							setAttributes( {
 								showCounts: ! showCounts,
 							} )
+						}
+					/>
+					<p>
+						{ __(
+							'Heading Level',
+							'woo-gutenberg-products-block'
+						) }
+					</p>
+					<HeadingToolbar
+						isCollapsed={ false }
+						minLevel={ 2 }
+						maxLevel={ 7 }
+						selectedLevel={ attributes.headingLevel }
+						onChange={ ( newLevel ) =>
+							setAttributes( { headingLevel: newLevel } )
 						}
 					/>
 				</PanelBody>
@@ -190,8 +206,25 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	}, [] );
 
 	const onChange = useCallback( ( selected ) => {
+		const selectedId = selected[ 0 ].id;
+		const productAttribute = find( ATTRIBUTES, [
+			'attribute_id',
+			selectedId.toString(),
+		] );
+
+		if ( ! productAttribute || attributes.attributeId === selectedId ) {
+			return;
+		}
+
+		const attributeName = productAttribute.attribute_name;
+
 		setAttributes( {
-			attributeId: selected[ 0 ].id,
+			attributeId: selectedId,
+			heading: sprintf(
+				// Translators: %s attribute name.
+				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
+				attributeName
+			),
 		} );
 	}, [] );
 
@@ -276,6 +309,8 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		);
 	};
 
+	const TagName = `h${ attributes.headingLevel }`;
+
 	return Object.keys( ATTRIBUTES ).length === 0 ? (
 		noAttributesPlaceholder()
 	) : (
@@ -285,9 +320,20 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			{ isEditing ? (
 				renderEditMode()
 			) : (
-				<Disabled>
-					<Block attributes={ attributes } isPreview />
-				</Disabled>
+				<Fragment>
+					<TagName>
+						<PlainText
+							className="wc-block-attribute-filter-heading"
+							value={ attributes.heading }
+							onChange={ ( value ) =>
+								setAttributes( { heading: value } )
+							}
+						/>
+					</TagName>
+					<Disabled>
+						<Block attributes={ attributes } isPreview />
+					</Disabled>
+				</Fragment>
 			) }
 		</Fragment>
 	);

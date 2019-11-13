@@ -22,9 +22,7 @@ registerBlockType( 'woocommerce/attribute-filter', {
 		'Display a list of filters based on a chosen product attribute.',
 		'woo-gutenberg-products-block'
 	),
-	supports: {
-		align: [ 'wide', 'full' ],
-	},
+	supports: {},
 	attributes: {
 		attributeId: {
 			type: 'number',
@@ -38,18 +36,38 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			type: 'string',
 			default: 'or',
 		},
+		heading: {
+			type: 'string',
+			default: __(
+				'Filter by attribute',
+				'woo-gutenberg-products-block'
+			),
+		},
+		headingLevel: {
+			type: 'number',
+			default: 3,
+		},
 	},
 	edit,
 	/**
 	 * Save the props to post content.
 	 */
 	save( { attributes } ) {
-		const { showCounts, displayStyle, queryType, attributeId } = attributes;
+		const {
+			showCounts,
+			displayStyle,
+			queryType,
+			attributeId,
+			heading,
+			headingLevel,
+		} = attributes;
 		const data = {
 			'data-attribute-id': attributeId,
 			'data-show-counts': showCounts,
 			'data-display-style': displayStyle,
 			'data-query-type': queryType,
+			'data-heading': heading,
+			'data-heading-level': headingLevel,
 		};
 		return (
 			<div className="is-loading" { ...data }>

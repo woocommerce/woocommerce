@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { InspectorControls } from '@wordpress/editor';
+import { InspectorControls, PlainText } from '@wordpress/editor';
 import {
 	Placeholder,
 	Disabled,
@@ -13,6 +13,7 @@ import {
 } from '@wordpress/components';
 import { PRODUCT_COUNT } from '@woocommerce/block-settings';
 import { getAdminLink } from '@woocommerce/navigation';
+import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
 
 /**
  * Internal dependencies
@@ -85,6 +86,21 @@ export default function( { attributes, setAttributes } ) {
 							} )
 						}
 					/>
+					<p>
+						{ __(
+							'Heading Level',
+							'woo-gutenberg-products-block'
+						) }
+					</p>
+					<HeadingToolbar
+						isCollapsed={ false }
+						minLevel={ 2 }
+						maxLevel={ 7 }
+						selectedLevel={ attributes.headingLevel }
+						onChange={ ( newLevel ) =>
+							setAttributes( { headingLevel: newLevel } )
+						}
+					/>
 				</PanelBody>
 			</InspectorControls>
 		);
@@ -129,6 +145,8 @@ export default function( { attributes, setAttributes } ) {
 		</Placeholder>
 	);
 
+	const TagName = `h${ attributes.headingLevel }`;
+
 	return (
 		<Fragment>
 			{ PRODUCT_COUNT === 0 ? (
@@ -136,6 +154,15 @@ export default function( { attributes, setAttributes } ) {
 			) : (
 				<Fragment>
 					{ getInspectorControls() }
+					<TagName>
+						<PlainText
+							className="wc-block-attribute-filter-heading"
+							value={ attributes.heading }
+							onChange={ ( value ) =>
+								setAttributes( { heading: value } )
+							}
+						/>
+					</TagName>
 					<Disabled>
 						<Block attributes={ attributes } isPreview />
 					</Disabled>
