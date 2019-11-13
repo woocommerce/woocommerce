@@ -1153,6 +1153,7 @@ h3.jetpack-reasons {
 	color: #444;
 	background-color: #fff;
 	display: block;
+	margin: 0;
 
 	&.dropdown {
 		width: 100%;
@@ -1368,7 +1369,7 @@ p.jetpack-terms {
 
 	.payment-checkbox-input {
 		order: 1;
-		margin-top: 5px;
+		margin-top: 3px;
 		margin-left: 0;
 		margin-right: 0;
 	}
