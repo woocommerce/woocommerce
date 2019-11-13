@@ -1404,7 +1404,6 @@ function wc_update_product_lookup_tables_column( $column ) {
 		return;
 	}
 	global $wpdb;
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	switch ( $column ) {
 		case 'min_max_price':
 			$wpdb->query(
@@ -1450,7 +1449,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 			} else {
 				$meta_key = '_' . $column;
 			}
-			$column   = esc_sql( $column );
+			$column = esc_sql( $column );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
 					"
@@ -1463,11 +1463,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$meta_key
 				)
 			);
+			// phpcs:enable
 			break;
 		case 'downloadable':
 		case 'virtual':
-			$column = esc_sql( $column );
+			$column   = esc_sql( $column );
 			$meta_key = '_' . $column;
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
 					"
@@ -1480,11 +1482,12 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$meta_key
 				)
 			);
+			// phpcs:enable
 			break;
 		case 'onsale':
 			$column   = esc_sql( $column );
 			$decimals = absint( wc_get_price_decimals() );
-
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
 					"
@@ -1503,11 +1506,10 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$decimals
 				)
 			);
-
+			// phpcs:enable
 			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
 			break;
 	}
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 }
 add_action( 'wc_update_product_lookup_tables_column', 'wc_update_product_lookup_tables_column' );
 
