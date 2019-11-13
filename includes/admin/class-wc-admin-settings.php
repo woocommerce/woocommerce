@@ -706,7 +706,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );
 			} elseif ( $description ) {
-				$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
+				$description = '<p class="description">' . wp_kses_post( $description ) . '</p>';
 			}
 
 			if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ), true ) ) {
