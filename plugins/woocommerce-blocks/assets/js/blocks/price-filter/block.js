@@ -6,14 +6,14 @@ import {
 	useQueryStateByKey,
 	useQueryStateByContext,
 } from '@woocommerce/base-hooks';
-import { useCallback } from '@wordpress/element';
+import { useCallback, Fragment } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { CURRENCY } from '@woocommerce/settings';
 
 /**
  * Component displaying a price filter.
  */
-const PriceFilterBlock = ( { attributes } ) => {
+const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 	const [ minPrice, setMinPrice ] = useQueryStateByKey(
 		'product-grid',
 		'min_price'
@@ -65,22 +65,29 @@ const PriceFilterBlock = ( { attributes } ) => {
 		[ minConstraint, maxConstraint, minPrice, maxPrice ]
 	);
 
+	const TagName = `h${ attributes.headingLevel }`;
+
 	return (
-		<div className="wc-block-price-slider">
-			<PriceSlider
-				minConstraint={ minConstraint }
-				maxConstraint={ maxConstraint }
-				initialMin={ undefined }
-				initialMax={ undefined }
-				step={ 10 }
-				currencySymbol={ CURRENCY.symbol }
-				priceFormat={ CURRENCY.price_format }
-				showInputFields={ showInputFields }
-				showFilterButton={ showFilterButton }
-				onChange={ onChange }
-				isLoading={ isLoading }
-			/>
-		</div>
+		<Fragment>
+			{ ! isPreview && attributes.heading && (
+				<TagName>{ attributes.heading }</TagName>
+			) }
+			<div className="wc-block-price-slider">
+				<PriceSlider
+					minConstraint={ minConstraint }
+					maxConstraint={ maxConstraint }
+					initialMin={ undefined }
+					initialMax={ undefined }
+					step={ 10 }
+					currencySymbol={ CURRENCY.symbol }
+					priceFormat={ CURRENCY.price_format }
+					showInputFields={ showInputFields }
+					showFilterButton={ showFilterButton }
+					onChange={ onChange }
+					isLoading={ isLoading }
+				/>
+			</div>
+		</Fragment>
 	);
 };
 

@@ -25,7 +25,7 @@ import { getTaxonomyFromAttributeId } from '../../utils/attributes';
 /**
  * Component displaying an attribute filter.
  */
-const AttributeFilterBlock = ( { attributes } ) => {
+const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 	const [ options, setOptions ] = useState( [] );
 	const [ checkedOptions, setCheckedOptions ] = useState( [] );
 	const { showCounts, attributeId, queryType } = attributes;
@@ -168,19 +168,26 @@ const AttributeFilterBlock = ( { attributes } ) => {
 		setCheckedOptions( checked );
 	}, [] );
 
-	if ( ! taxonomy ) {
+	if ( ! taxonomy || ( options.length === 0 && ! attributeTermsLoading ) ) {
 		return null;
 	}
 
+	const TagName = `h${ attributes.headingLevel }`;
+
 	return (
-		<div className="wc-block-attribute-filter">
-			<CheckboxList
-				className={ 'wc-block-attribute-filter-list' }
-				options={ options }
-				onChange={ onChange }
-				isLoading={ attributeTermsLoading }
-			/>
-		</div>
+		<Fragment>
+			{ ! isPreview && attributes.heading && (
+				<TagName>{ attributes.heading }</TagName>
+			) }
+			<div className="wc-block-attribute-filter">
+				<CheckboxList
+					className={ 'wc-block-attribute-filter-list' }
+					options={ options }
+					onChange={ onChange }
+					isLoading={ attributeTermsLoading }
+				/>
+			</div>
+		</Fragment>
 	);
 };
 

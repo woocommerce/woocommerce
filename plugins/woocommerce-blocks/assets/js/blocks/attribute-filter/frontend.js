@@ -10,6 +10,8 @@ const getProps = ( el ) => {
 			attributeId: parseInt( el.dataset.attributeId || 0, 10 ),
 			showCounts: el.dataset.showCounts === 'true',
 			queryType: el.dataset.queryType,
+			heading: el.dataset.heading,
+			headingLevel: el.dataset.headingLevel || 3,
 		},
 	};
 };

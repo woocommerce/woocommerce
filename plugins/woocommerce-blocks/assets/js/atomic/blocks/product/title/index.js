@@ -8,12 +8,12 @@ import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/editor';
 import { ProductTitle } from '@woocommerce/atomic-components/product';
 import { previewProducts } from '@woocommerce/resource-previews';
+import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
 
 /**
  * Internal dependencies
  */
 import sharedConfig from '../shared-config';
-import HeadingToolbar from './heading-toolbar';
 
 const blockConfig = {
 	title: __( 'Product Title', 'woo-gutenberg-products-block' ),
