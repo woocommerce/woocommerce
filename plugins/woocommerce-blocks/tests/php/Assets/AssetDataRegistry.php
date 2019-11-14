@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\Assets;
 use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Tests\Mocks\AssetDataRegistryMock;
+use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
 
 /**
@@ -17,7 +18,7 @@ class AssetDataRegistry extends WP_UnitTestCase {
 
 	public function setUp() {
 		$this->registry = new AssetDataRegistryMock(
-			wc_blocks_container()->get( API::class )
+			Package::container()->get( API::class )
 		);
 	}
 

@@ -22,6 +22,8 @@ if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 	return;
 }
 
+define( 'WC_BLOCKS_PLUGIN_FILE', __FILE__ );
+
 /**
  * Autoload packages.
  *
@@ -70,51 +72,5 @@ if ( is_readable( $autoloader ) ) {
 	return;
 }
 
-/**
- * Loads the dependency injection container for woocommerce blocks.
- *
- * @param boolean $reset Used to reset the container to a fresh instance.
- *                       Note: this means all dependencies will be reconstructed.
- */
-function wc_blocks_container( $reset = false ) {
-	static $container;
-	if (
-		! $container instanceof Automattic\WooCommerce\Blocks\Registry\Container
-		|| $reset
-	) {
-		$container = new Automattic\WooCommerce\Blocks\Registry\Container();
-		// register Package.
-		$container->register(
-			Automattic\WooCommerce\Blocks\Domain\Package::class,
-			function ( $container ) {
-				// leave for automated version bumping.
-				$version = '2.5.0-dev';
-				return new Automattic\WooCommerce\Blocks\Domain\Package(
-					$version,
-					__FILE__
-				);
-			}
-		);
-		// register Bootstrap.
-		$container->register(
-			Automattic\WooCommerce\Blocks\Domain\Bootstrap::class,
-			function ( $container ) {
-				return new Automattic\WooCommerce\Blocks\Domain\Bootstrap(
-					$container
-				);
-			}
-		);
-	}
-	return $container;
-}
+add_action( 'plugins_loaded', array( '\Automattic\WooCommerce\Blocks\Package', 'init' ) );
 
-add_action( 'plugins_loaded', 'wc_blocks_bootstrap' );
-/**
- * Boostrap WooCommerce Blocks App
- */
-function wc_blocks_bootstrap() {
-	// initialize bootstrap.
-	wc_blocks_container()->get(
-		Automattic\WooCommerce\Blocks\Domain\Bootstrap::class
-	);
-}
