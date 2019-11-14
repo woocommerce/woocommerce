@@ -49,8 +49,12 @@ class Onboarding {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
+		// Adds the ability to toggle the new onboarding experience on or off.
+		// @todo This option should be removed when merging the onboarding feature to core.
+		add_action( 'current_screen', array( $this, 'enable_onboarding' ) );
 
 		if ( ! Loader::is_onboarding_enabled() ) {
+			add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
 			return;
 		}
 
@@ -75,7 +79,7 @@ class Onboarding {
 		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
 		add_action( 'current_screen', array( $this, 'finish_square_connect' ) );
-		add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
+		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
 		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
@@ -594,9 +598,60 @@ class Onboarding {
 	}
 
 	/**
-	 * Update the help tab setup link to reset the onboarding profiler.
+	 * Update the existing help tab and add an option to enable the new onboarding experience.
 	 */
 	public static function update_help_tab() {
+		$screen = get_current_screen();
+
+		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+			return;
+		}
+
+		$help_tabs = $screen->get_help_tabs();
+
+		foreach ( $help_tabs as $help_tab ) {
+			if ( 'woocommerce_onboard_tab' !== $help_tab['id'] ) {
+				continue;
+			}
+
+			$screen->remove_help_tab( 'woocommerce_onboard_tab' );
+			$help_tab['content'] .= '<h3>' . __( 'New onboarding experience', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'If you want to try out the new WooCommerce onboarding experience, click the button below.', 'woocommerce-admin' ) . '</p>';
+			$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&enable_onboarding=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>';
+			$screen->add_help_tab( $help_tab );
+		}
+	}
+
+	/**
+	 * Reset the onboarding profiler and redirect to the profiler.
+	 */
+	public static function enable_onboarding() {
+		if (
+			! Loader::is_admin_page() ||
+			! isset( $_GET['enable_onboarding'] ) // phpcs:ignore CSRF ok.
+		) {
+			return;
+		}
+
+		$enabled = 1 === absint( $_GET['enable_onboarding'] ); // phpcs:ignore CSRF ok.
+
+		wc_admin_record_tracks_event(
+			'wcadmin_onboarding_toggled',
+			array(
+				'previous'  => ! $enabled,
+				'new_value' => $enabled,
+			)
+		);
+
+		update_option( 'wc_onboarding_opt_in', $enabled ? 'yes' : 'no' );
+		wp_safe_redirect( wc_admin_url() );
+		exit;
+	}
+
+	/**
+	 * Update the help tab setup link to reset the onboarding profiler.
+	 */
+	public static function add_help_tab() {
 		$screen = get_current_screen();
 
 		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
@@ -643,6 +698,10 @@ class Onboarding {
 				$help_tab['content'] .= '<p>' . __( 'Quickly access the WooCommerce.com connection flow in Calypso.', 'woocommerce-admin' ) . '</p>';
 				$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&test_wc_helper_connect=1' ) . '" class="button button-primary">' . __( 'Connect', 'woocommerce-admin' ) . '</a></p>';
 			}
+
+			$help_tab['content'] .= '<h3>' . __( 'New onboarding experience', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'To disable the new WooCommerce onboarding experience, click the button below.', 'woocommerce-admin' ) . '</p>';
+			$help_tab['content'] .= '<p><a href="' . wc_admin_url( '&enable_onboarding=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>';
 
 			$screen->add_help_tab( $help_tab );
 		}
