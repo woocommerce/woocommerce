@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { useInnerBlockParentNameContext } from '@woocommerce/base-context/inner-block-parent-name-context';
+import { useInnerBlockConfigurationContext } from '@woocommerce/base-context/inner-block-configuration-context';
 import withComponentId from '@woocommerce/base-hocs/with-component-id';
 
 /**
@@ -13,7 +13,7 @@ import { renderProductLayout } from './utils';
 
 const ProductListItem = ( { product, attributes, componentId } ) => {
 	const { layoutConfig } = attributes;
-	const blockName = useInnerBlockParentNameContext();
+	const { parentName } = useInnerBlockConfigurationContext();
 	const isLoading = ! Object.keys( product ).length > 0;
 	const classes = classnames( 'wc-block-grid__product', {
 		'is-loading': isLoading,
@@ -22,7 +22,7 @@ const ProductListItem = ( { product, attributes, componentId } ) => {
 	return (
 		<li className={ classes } aria-hidden={ isLoading }>
 			{ renderProductLayout(
-				blockName,
+				parentName,
 				product,
 				layoutConfig,
 				componentId
