@@ -109,7 +109,7 @@ class Assets {
 				'placeholderImgSrc'  => wc_placeholder_img_src(),
 				'min_height'         => wc_get_theme_support( 'featured_block::min_height', 500 ),
 				'default_height'     => wc_get_theme_support( 'featured_block::default_height', 500 ),
-				'isLargeCatalog'     => $product_counts->publish > 200,
+				'isLargeCatalog'     => $product_counts->publish > 100,
 				'limitTags'          => $tag_count > 100,
 				'hasTags'            => $tag_count > 0,
 				'homeUrl'            => esc_url( home_url( '/' ) ),
