@@ -102,7 +102,7 @@ class Plugins extends Component {
 	}
 
 	render() {
-		const { hasErrors, isRequesting, isJetpackConnected } = this.props;
+		const { hasErrors, isRequesting, isJetpackConnected, jetpackConnectUrl } = this.props;
 		const { step } = this.state;
 
 		if ( 0 === plugins.length && ! isJetpackConnected ) {
@@ -123,6 +123,10 @@ class Plugins extends Component {
 		}
 
 		const pluginLabel = plugins.map( pluginSlug => pluginNames[ pluginSlug ] ).join( ' & ' );
+
+		// Shows the "Activate & continue" button as busy during the request and redirect, so users see feedback.
+		const activateButtonBusy =
+			isRequesting || ( ! isJetpackConnected && null !== jetpackConnectUrl );
 
 		return (
 			<Fragment>
@@ -155,7 +159,7 @@ class Plugins extends Component {
 						) }
 
 						{ ! ( hasErrors && 'activate' === step ) && (
-							<Button isPrimary isBusy={ isRequesting } onClick={ this.activatePlugins }>
+							<Button isPrimary isBusy={ activateButtonBusy } onClick={ this.activatePlugins }>
 								{ __( 'Activate & continue', 'woocommerce-admin' ) }
 							</Button>
 						) }
@@ -180,10 +184,6 @@ export default compose(
 			isPluginInstallRequesting,
 			isJetpackConnected,
 		} = select( 'wc-api' );
-
-		const isRequesting =
-			isPluginActivateRequesting() || isPluginInstallRequesting() || getJetpackConnectUrlError();
-
 		const activationErrors = getPluginActivationErrors( plugins );
 		const activatedPlugins = Object.keys( getPluginActivations( plugins ) );
 		const installationErrors = getPluginInstallationErrors( plugins );
@@ -192,15 +192,18 @@ export default compose(
 		const queryArgs = {
 			redirect_url: getAdminLink( getNewPath( { step: 'store-details' } ) ),
 		};
-		const isJetpackConnectUrlRequesting = isGetJetpackConnectUrlRequesting( queryArgs );
-		const jetpackConnectUrlError = getJetpackConnectUrlError( queryArgs );
+
 		let jetpackConnectUrl = null;
+		let isJetpackConnectUrlRequesting = false;
+		let jetpackConnectUrlError = null;
 		if (
 			activatedPlugins.includes( 'jetpack' ) ||
 			( 0 === plugins.length && ! isJetpackConnected() ) ||
 			( activatedPlugins.includes( 'woocommerce-services' ) && ! isJetpackConnected() )
 		) {
+			isJetpackConnectUrlRequesting = isGetJetpackConnectUrlRequesting( queryArgs );
 			jetpackConnectUrl = getJetpackConnectUrl( queryArgs );
+			jetpackConnectUrlError = getJetpackConnectUrlError( queryArgs );
 		}
 
 		const errors = [];
@@ -214,6 +217,9 @@ export default compose(
 			errors.push( jetpackConnectUrlError.message );
 		}
 		const hasErrors = Boolean( errors.length );
+
+		const isRequesting =
+			isPluginActivateRequesting() || isPluginInstallRequesting() || isJetpackConnectUrlRequesting;
 
 		return {
 			activatedPlugins,
