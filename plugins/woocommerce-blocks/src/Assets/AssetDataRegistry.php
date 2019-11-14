@@ -127,7 +127,7 @@ class AssetDataRegistry {
 		 *
 		 * Developers, do not use this hook as it is likely to be removed.
 		 * Instead, use the data api:
-		 * wc_blocks_container()
+		 * Automattic\WooCommerce\Blocks\Package::container()
 		 *     ->get( Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )
 		 *     ->add( $key, $value )
 		 */

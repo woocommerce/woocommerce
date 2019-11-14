@@ -8,13 +8,15 @@
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package as NewPackage;
+use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
+use Automattic\WooCommerce\Blocks\Registry\Container;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Main package class.
+ * Main package class. (Loader in the WC Core context as well)
  *
- * @deprecated $VID:$
+ * @since $VID:$
  */
 class Package {
 
@@ -27,7 +29,7 @@ class Package {
 	 * @return Package  The Package instance class
 	 */
 	protected static function get_package() {
-		return wc_blocks_container()->get( NewPackage::class );
+		return self::container()->get( NewPackage::class );
 	}
 
 	/**
@@ -36,7 +38,7 @@ class Package {
 	 * @since $VID:$ Handled by new NewPackage.
 	 */
 	public static function init() {
-		// noop.
+		self::container()->get( Bootstrap::class );
 	}
 
 	/**
@@ -55,5 +57,44 @@ class Package {
 	 */
 	public static function get_path() {
 		return self::get_package()->get_path();
+	}
+
+	/**
+	 * Loads the dependency injection container for woocommerce blocks.
+	 *
+	 * @param boolean $reset Used to reset the container to a fresh instance.
+	 *                       Note: this means all dependencies will be
+	 *                       reconstructed.
+	 */
+	public static function container( $reset = false ) {
+		static $container;
+		if (
+				! $container instanceof Container
+				|| $reset
+			) {
+			$container = new Container();
+			// register Package.
+			$container->register(
+				NewPackage::class,
+				function ( $container ) {
+					// leave for automated version bumping.
+					$version = '2.5.0-dev';
+					return new NewPackage(
+						$version,
+						WC_BLOCKS_PLUGIN_FILE
+					);
+				}
+			);
+			// register Bootstrap.
+			$container->register(
+				Bootstrap::class,
+				function ( $container ) {
+					return new Bootstrap(
+						$container
+					);
+				}
+			);
+		}
+		return $container;
 	}
 }

@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\Bootstrap;
 use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
 use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * Test class for the bootstrap in the plugin main file
@@ -30,16 +31,16 @@ class MainFile extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		// reset container
-		$this->container = wc_blocks_container( true );
+		$this->container = Package::container( true );
 	}
 
-	public function test_wc_blocks_container_returns_same_instance() {
-		$container = wc_blocks_container();
+	public function test_container_returns_same_instance() {
+		$container = Package::container();
 		$this->assertSame( $container, $this->container );
 	}
 
-	public function test_wc_blocks_container_reset() {
-		$container = wc_blocks_container( true );
+	public function test_container_reset() {
+		$container = Package::container( true );
 		$this->assertNotSame( $container, $this->container );
 	}
 
