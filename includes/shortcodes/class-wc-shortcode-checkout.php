@@ -153,7 +153,7 @@ class WC_Shortcode_Checkout {
 							$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $order->get_id() ) : 0;
 							$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
-							if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
+							if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() > ( $held_stock + $required_stock ) ), $product, $order ) ) {
 								/* translators: 1: product name 2: quantity in stock */
 								throw new Exception( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
 							}
