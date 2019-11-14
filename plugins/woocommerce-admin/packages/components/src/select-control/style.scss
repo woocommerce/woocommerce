@@ -117,7 +117,7 @@
 		right: 0;
 		top: 57px;
 		z-index: 10;
-		overflow-y: scroll;
+		overflow-y: auto;
 		max-height: 350px;
 
 		&.is-static {
