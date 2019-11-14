@@ -55,7 +55,7 @@ const blockConfig = {
 						<p>{ __( 'Level', 'woo-gutenberg-products-block' ) }</p>
 						<HeadingToolbar
 							isCollapsed={ false }
-							minLevel={ 1 }
+							minLevel={ 2 }
 							maxLevel={ 7 }
 							selectedLevel={ level }
 							onChange={ ( newLevel ) =>
