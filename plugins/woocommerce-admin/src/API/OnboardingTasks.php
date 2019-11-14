@@ -118,7 +118,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( file_exists( $file ) && class_exists( 'WC_Product_CSV_Importer' ) ) {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			global $locale;
-			$locale         = false; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+			$locale         = false; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
 			$args           = array(
 				'parse'   => true,
@@ -298,7 +298,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		return $cover . '
 		<!-- wp:heading {"align":"center"} -->
-		<h2 class="has-text-align-center">' . __( 'New products', 'woocommerce-admin' ) . '</h2>
+		<h2 style="text-align:center">' . __( 'New Products', 'woocommerce-admin' ) . '</h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:woocommerce/product-new /--> ' .
