@@ -14,15 +14,9 @@ import { CURRENCY } from '@woocommerce/settings';
  * Component displaying a price filter.
  */
 const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
-	const [ minPrice, setMinPrice ] = useQueryStateByKey(
-		'product-grid',
-		'min_price'
-	);
-	const [ maxPrice, setMaxPrice ] = useQueryStateByKey(
-		'product-grid',
-		'max_price'
-	);
-	const [ queryState ] = useQueryStateByContext( 'product-grid' );
+	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min-price' );
+	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
+	const [ queryState ] = useQueryStateByContext();
 	const { results, isLoading } = useCollection( {
 		namespace: '/wc/store',
 		resourceName: 'products/collection-data',

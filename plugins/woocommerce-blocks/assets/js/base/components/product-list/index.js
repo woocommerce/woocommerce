@@ -52,11 +52,7 @@ const ProductList = ( {
 	sortValue,
 	scrollToTop,
 } ) => {
-	// @todo query-state context (which is hardcoded 'product-grid' here) should
-	// be provided via a provider. This allows us to control query state context
-	// at the app level for anything nested within the provider.
 	const [ queryState ] = useSynchronizedQueryState(
-		'product-grid',
 		generateQuery( { attributes, sortValue, currentPage } )
 	);
 	// @todo should add an <ErrorBoundary> in parent component to handle any

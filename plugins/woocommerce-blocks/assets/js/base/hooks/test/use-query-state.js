@@ -151,8 +151,9 @@ describe( 'Testing Query State Hooks', () => {
 	} );
 	describe( 'useQueryStateByKey', () => {
 		const TestComponent = getTestComponent( useQueryStateByKey, [
-			'context',
 			'queryKey',
+			undefined,
+			'context',
 		] );
 		let renderer;
 		beforeEach( () => {
@@ -205,8 +206,8 @@ describe( 'Testing Query State Hooks', () => {
 	// actually updated by the action dispatch via our mocks.
 	describe( 'useSynchronizedQueryState', () => {
 		const TestComponent = getTestComponent( useSynchronizedQueryState, [
-			'context',
 			'synchronizedQuery',
+			'context',
 		] );
 		const initialQuery = { a: 'b' };
 		let renderer;
