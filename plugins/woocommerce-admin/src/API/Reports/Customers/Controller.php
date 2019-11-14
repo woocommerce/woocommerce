@@ -131,6 +131,33 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		return $response;
 	}
 
+
+	/**
+	 * Get one report.
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 * @return array|WP_Error
+	 */
+	public function get_item( $request ) {
+		$query_args              = $this->prepare_reports_query( $request );
+		$query_args['customers'] = array( $request->get_param( 'id' ) );
+		$customers_query         = new Query( $query_args );
+		$report_data             = $customers_query->get_data();
+
+		$data = array();
+
+		foreach ( $report_data->data as $customer_data ) {
+			$item   = $this->prepare_item_for_response( $customer_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
+		}
+
+		$response = rest_ensure_response( $data );
+		$response->header( 'X-WP-Total', (int) $report_data->total );
+		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
+
+		return $response;
+	}
+
 	/**
 	 * Prepare a report object for serialization.
 	 *
@@ -174,8 +201,11 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		}
 
 		return array(
-			'customer' => array(
-				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object['user_id'] ) ),
+			'customer'   => array(
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object['id'] ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/customers', $this->namespace ) ),
 			),
 		);
 	}
