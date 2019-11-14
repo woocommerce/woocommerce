@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
@@ -15,7 +16,9 @@ class HeaderLogo extends Component {
 	render() {
 		const { isJetpackConnected } = this.props;
 
-		const ariaLabel = ! isJetpackConnected ? 'Jetpack + WooCommerce' : 'WooCommerce';
+		const ariaLabel = ! isJetpackConnected
+			? __( 'Jetpack + WooCommerce', 'woocommerce-admin' )
+			: __( 'WooCommerce', 'woocommerce-admin' );
 		const classes = classNames( 'woocommerce-profile-wizard__header-logo', {
 			'woocommerce-profile-wizard__header-logo-with-jetpack': ! isJetpackConnected,
 		} );
