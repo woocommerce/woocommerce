@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.8.0 - 2019-01-10 =
+= 3.8.0 - 2019-11-05 =
 * Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
 * Enhancement - Add support to allow connect and install for in-app purchase flow. #24451
 * Enhancement - Declared support to Unicode CLDR. #24564
