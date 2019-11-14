@@ -21,8 +21,7 @@ Headers = Headers
  * This is a generic response action.
  *
  * @param {string}   namespace        The namespace for the collection route.
- * @param {string}   modelName        The model name for the collection route.
- *                                    string generating them.
+ * @param {string}   resourceName     The resource name for the collection route.
  * @param {string}   [queryString=''] The query string for the collection
  * @param {array}    [ids=[]]         An array of ids (in correct order) for the
  *                                    model.
@@ -38,7 +37,7 @@ Headers = Headers
  * 	{
  * 		type: string,
  * 		namespace: string,
- * 		modelName: string,
+ * 		resourceName: string,
  * 		queryString: string,
  * 		ids: Array<*>,
  * 		items: Array<*>,
@@ -47,7 +46,7 @@ Headers = Headers
  */
 export function receiveCollection(
 	namespace,
-	modelName,
+	resourceName,
 	queryString = '',
 	ids = [],
 	response = { items: [], headers: Headers },
@@ -56,7 +55,7 @@ export function receiveCollection(
 	return {
 		type: replace ? types.RESET_COLLECTION : types.RECEIVE_COLLECTION,
 		namespace,
-		modelName,
+		resourceName,
 		queryString,
 		ids,
 		response,

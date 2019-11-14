@@ -8,7 +8,7 @@ import { combineReducers } from '@wordpress/data';
  */
 import { ACTION_TYPES as types } from './action-types';
 import {
-	extractModelNameFromRoute,
+	extractResourceNameFromRoute,
 	getRouteIds,
 	simplifyRouteWithId,
 } from './utils';
@@ -26,16 +26,23 @@ export const receiveRoutes = ( state = {}, action ) => {
 	const { type, routes, namespace } = action;
 	if ( type === types.RECEIVE_MODEL_ROUTES ) {
 		routes.forEach( ( route ) => {
-			const modelName = extractModelNameFromRoute( namespace, route );
-			if ( modelName && modelName !== namespace ) {
+			const resourceName = extractResourceNameFromRoute(
+				namespace,
+				route
+			);
+			if ( resourceName && resourceName !== namespace ) {
 				const routeIdNames = getRouteIds( route );
 				const savedRoute = simplifyRouteWithId( route, routeIdNames );
 				if (
-					! hasInState( state, [ namespace, modelName, savedRoute ] )
+					! hasInState( state, [
+						namespace,
+						resourceName,
+						savedRoute,
+					] )
 				) {
 					state = updateState(
 						state,
-						[ namespace, modelName, savedRoute ],
+						[ namespace, resourceName, savedRoute ],
 						routeIdNames
 					);
 				}

@@ -2,12 +2,12 @@
  * Internal dependencies
  */
 import {
-	extractModelNameFromRoute,
+	extractResourceNameFromRoute,
 	getRouteIds,
 	simplifyRouteWithId,
 } from '../utils';
 
-describe( 'extractModelNameFromRoute', () => {
+describe( 'extractResourceNameFromRoute', () => {
 	it.each`
 		namespace      | route                                                                          | expected
 		${'wc/blocks'} | ${'wc/blocks/products'}                                                        | ${'products'}
@@ -19,7 +19,7 @@ describe( 'extractModelNameFromRoute', () => {
 	`(
 		'returns "$expected" when namespace is "$namespace" and route is "$route"',
 		( { namespace, route, expected } ) => {
-			expect( extractModelNameFromRoute( namespace, route ) ).toBe(
+			expect( extractResourceNameFromRoute( namespace, route ) ).toBe(
 				expected
 			);
 		}

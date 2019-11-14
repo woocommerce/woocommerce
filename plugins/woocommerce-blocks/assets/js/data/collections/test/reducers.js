@@ -29,7 +29,7 @@ describe( 'receiveCollection', () => {
 			const testAction = {
 				type: types.RECEIVE_COLLECTION,
 				namespace: 'wc/blocks',
-				modelName: 'products',
+				resourceName: 'products',
 				queryString: '?someQuery=2',
 				response: {
 					items: [ 'bar' ],
@@ -48,7 +48,7 @@ describe( 'receiveCollection', () => {
 			const testAction = {
 				type: types.RESET_COLLECTION,
 				namespace: 'wc/blocks',
-				modelName: 'products',
+				resourceName: 'products',
 				queryString: '?someQuery=2',
 				response: {
 					items: [ 'cheeseburger' ],
@@ -69,7 +69,7 @@ describe( 'receiveCollection', () => {
 		const testAction = {
 			type: types.RECEIVE_COLLECTION,
 			namespace: 'wc/blocks',
-			modelName: 'products',
+			resourceName: 'products',
 			queryString: '?someQuery=3',
 			response: { items: [ 'cheeseburger' ], headers: { foo: 'bar' } },
 		};
@@ -83,7 +83,7 @@ describe( 'receiveCollection', () => {
 		const testAction = {
 			type: types.RECEIVE_COLLECTION,
 			namespace: 'wc/blocks',
-			modelName: 'products/attributes',
+			resourceName: 'products/attributes',
 			queryString: '?something',
 			response: { items: [ 10, 20 ], headers: { foo: 'bar' } },
 			ids: [ 30, 42 ],

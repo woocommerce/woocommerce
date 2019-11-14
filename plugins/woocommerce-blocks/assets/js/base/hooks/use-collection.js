@@ -45,7 +45,7 @@ export const useCollection = ( options ) => {
 	if ( ! namespace || ! resourceName ) {
 		throw new Error(
 			'The options object must have valid values for the namespace and ' +
-				'the modelName properties.'
+				'the resource properties.'
 		);
 	}
 	// ensure we feed the previous reference if it's equivalent

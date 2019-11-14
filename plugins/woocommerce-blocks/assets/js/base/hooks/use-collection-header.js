@@ -50,7 +50,7 @@ export const useCollectionHeader = ( headerKey, options ) => {
 	if ( ! namespace || ! resourceName ) {
 		throw new Error(
 			'The options object must have valid values for the namespace and ' +
-				'the modelName properties.'
+				'the resource name properties.'
 		);
 	}
 	// ensure we feed the previous reference if it's equivalent

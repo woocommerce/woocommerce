@@ -1,5 +1,5 @@
 /**
- * This returns a "modelName" string as an index for a given route.
+ * This returns a resource name string as an index for a given route.
  *
  * For example:
  * /wc/blocks/products/attributes/(?P<id>[\d]+)/terms
@@ -9,9 +9,9 @@
  * @param {string} namespace
  * @param {string} route
  *
- * @return {string} The model name extracted from the route.
+ * @return {string} The resource name extracted from the route.
  */
-export const extractModelNameFromRoute = ( namespace, route ) => {
+export const extractResourceNameFromRoute = ( namespace, route ) => {
 	route = route.replace( `${ namespace }/`, '' );
 	return route.replace( /\/\(\?P\<[a-z_]*\>\[\\*[a-z]\]\+\)/g, '' );
 };
