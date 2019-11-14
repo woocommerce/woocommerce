@@ -13,6 +13,7 @@
 		"@woocommerce/block-components(.*)$": "assets/js/components/$1",
 		"@woocommerce/block-hocs(.*)$": "assets/js/hocs/$1",
 		"@woocommerce/base-components(.*)$": "assets/js/base/components/$1",
+		"@woocommerce/base-context(.*)$": "assets/js/base/context/$1",
 		"@woocommerce/base-hocs(.*)$": "assets/js/base/hocs/$1",
 		"@woocommerce/block-data": "assets/js/data"
 	},

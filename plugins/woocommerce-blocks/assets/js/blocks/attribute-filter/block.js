@@ -30,10 +30,8 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 	const [ checkedOptions, setCheckedOptions ] = useState( [] );
 	const { showCounts, attributeId, queryType } = attributes;
 	const taxonomy = getTaxonomyFromAttributeId( attributeId );
-
-	const [ queryState ] = useQueryStateByContext( 'product-grid' );
+	const [ queryState ] = useQueryStateByContext();
 	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
-		'product-grid',
 		'attributes',
 		[]
 	);
