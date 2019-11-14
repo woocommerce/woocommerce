@@ -208,7 +208,7 @@ class Tax extends Component {
 				key: 'plugins',
 				label: __( 'Install Jetpack and WooCommerce Services', 'woocommerce-admin' ),
 				description: __(
-					'Jetpack and WooCommerce services allow you to automate sales tax calculations',
+					'Jetpack and WooCommerce Services allow you to automate sales tax calculations',
 					'woocommerce-admin'
 				),
 				content: (
