@@ -55,7 +55,7 @@ describe( 'getCollection', () => {
 				);
 				expect( value.type ).toBe( expected.type );
 				expect( value.namespace ).toBe( expected.namespace );
-				expect( value.modelName ).toBe( expected.modelName );
+				expect( value.resourceName ).toBe( expected.resourceName );
 				expect( value.queryString ).toBe( expected.queryString );
 				expect( value.ids ).toEqual( expected.ids );
 				expect( Object.keys( value.response ) ).toEqual(

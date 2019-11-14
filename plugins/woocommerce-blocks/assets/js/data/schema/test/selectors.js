@@ -34,8 +34,8 @@ const testState = deepFreeze( {
 } );
 
 describe( 'getRoute', () => {
-	const invokeTest = ( namespace, modelName, ids = [] ) => () => {
-		return getRoute( testState, namespace, modelName, ids );
+	const invokeTest = ( namespace, resourceName, ids = [] ) => () => {
+		return getRoute( testState, namespace, resourceName, ids );
 	};
 	describe( 'with throwing errors', () => {
 		beforeEach( () => mockHasFinishedResolution.mockReturnValue( true ) );
@@ -44,16 +44,14 @@ describe( 'getRoute', () => {
 		} );
 		it(
 			'throws an error if there are routes for the given namespace, but no ' +
-				'route for the given model',
+				'route for the given resource',
 			() => {
-				expect( invokeTest( 'wc/blocks', 'invalid' ) ).toThrowError(
-					/given model name/
-				);
+				expect( invokeTest( 'wc/blocks', 'invalid' ) ).toThrowError();
 			}
 		);
 		it(
 			'throws an error if there are routes for the given namespace and ' +
-				'model name, but no routes for the given ids',
+				'resource name, but no routes for the given ids',
 			() => {
 				expect(
 					invokeTest( 'wc/blocks', 'products/attributes', [ 10 ] )
@@ -64,10 +62,10 @@ describe( 'getRoute', () => {
 	describe( 'with no throwing of errors if resolution has not finished', () => {
 		beforeEach( () => mockHasFinishedResolution.mockReturnValue( false ) );
 		it.each`
-			description                                                                             | args
-			${'is no route for the given namespace'}                                                | ${[ 'invalid' ]}
-			${'are no routes for the given namespace, but no route for the given model'}            | ${[ 'wc/blocks', 'invalid' ]}
-			${'are routes for the given namespace and model name, but no routes for the given ids'} | ${[ 'wc/blocks', 'products/attributes', [ 10 ] ]}
+			description                                                                                | args
+			${'is no route for the given namespace'}                                                   | ${[ 'invalid' ]}
+			${'are no routes for the given namespace, but no route for the given resource'}            | ${[ 'wc/blocks', 'invalid' ]}
+			${'are routes for the given namespace and resource name, but no routes for the given ids'} | ${[ 'wc/blocks', 'products/attributes', [ 10 ] ]}
 		`( 'does not throw an error if there $description', ( { args } ) => {
 			expect( invokeTest( ...args ) ).not.toThrowError();
 		} );

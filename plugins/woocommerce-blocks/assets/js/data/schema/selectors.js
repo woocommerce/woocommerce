@@ -12,12 +12,13 @@ import { STORE_KEY } from './constants';
 /**
  * Returns the requested route for the given arguments.
  *
- * @param {Object} state     The original state.
- * @param {string} namespace The namespace for the route.
- * @param {string} modelName The model being requested (i.e. products/attributes)
- * @param {Array}  [ids]     This is for any ids that might be implemented in
- *                           the route request. It is not for any query
- *                           parameters.
+ * @param {Object} state        The original state.
+ * @param {string} namespace    The namespace for the route.
+ * @param {string} resourceName The resource being requested
+ *                              (eg. products/attributes)
+ * @param {Array}  [ids]        This is for any ids that might be implemented in
+ *                              the route request. It is not for any query
+ *                              parameters.
  *
  * Ids example:
  * If you are looking for the route for a single product on the `wc/blocks`
@@ -31,7 +32,7 @@ import { STORE_KEY } from './constants';
  * @return {string} The route if it is available.
  */
 export const getRoute = createRegistrySelector(
-	( select ) => ( state, namespace, modelName, ids = [] ) => {
+	( select ) => ( state, namespace, resourceName, ids = [] ) => {
 		const hasResolved = select( STORE_KEY ).hasFinishedResolution(
 			'getRoutes',
 			[ namespace ]
@@ -43,10 +44,10 @@ export const getRoute = createRegistrySelector(
 				'There is no route for the given namespace (%s) in the store',
 				namespace
 			);
-		} else if ( ! state[ namespace ][ modelName ] ) {
+		} else if ( ! state[ namespace ][ resourceName ] ) {
 			error = sprintf(
-				'There is no route for the given model name (%s) in the store',
-				modelName
+				'There is no route for the given resource name (%s) in the store',
+				resourceName
 			);
 		}
 		if ( error !== '' ) {
@@ -55,18 +56,18 @@ export const getRoute = createRegistrySelector(
 			}
 			return '';
 		}
-		const route = getRouteFromModelEntries(
-			state[ namespace ][ modelName ],
+		const route = getRouteFromResourceEntries(
+			state[ namespace ][ resourceName ],
 			ids
 		);
 		if ( route === '' ) {
 			if ( hasResolved ) {
 				throw new Error(
 					sprintf(
-						'While there is a route for the given namespace (%s) and model name (%s), there is no route utilizing the number of ids you included in the select arguments. The available routes are: (%s)',
+						'While there is a route for the given namespace (%s) and resource name (%s), there is no route utilizing the number of ids you included in the select arguments. The available routes are: (%s)',
 						namespace,
-						modelName,
-						JSON.stringify( state[ namespace ][ modelName ] )
+						resourceName,
+						JSON.stringify( state[ namespace ][ resourceName ] )
 					)
 				);
 			}
@@ -102,10 +103,10 @@ export const getRoutes = createRegistrySelector(
 			return [];
 		}
 		let namespaceRoutes = [];
-		for ( const modelName in routes ) {
+		for ( const resourceName in routes ) {
 			namespaceRoutes = [
 				...namespaceRoutes,
-				...Object.keys( routes[ modelName ] ),
+				...Object.keys( routes[ resourceName ] ),
 			];
 		}
 		return namespaceRoutes;
@@ -116,13 +117,13 @@ export const getRoutes = createRegistrySelector(
  * Returns the route from the given slice of the route state.
  *
  * @param {Object} stateSlice This will be a slice of the route state from a
- *                            given namespace and model name.
+ *                            given namespace and resource name.
  * @param {Array} [ids=[]]  Any id references that are to be replaced in
  *                            route placeholders.
  *
  * @returns {string}  The route or an empty string if nothing found.
  */
-const getRouteFromModelEntries = ( stateSlice, ids = [] ) => {
+const getRouteFromResourceEntries = ( stateSlice, ids = [] ) => {
 	// convert to array for easier discovery
 	stateSlice = Object.entries( stateSlice );
 	const match = stateSlice.find( ( [ , idNames ] ) => {

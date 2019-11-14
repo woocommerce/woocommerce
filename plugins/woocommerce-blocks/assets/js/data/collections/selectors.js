@@ -12,7 +12,7 @@ import { DEFAULT_EMPTY_ARRAY } from './constants';
 const getFromState = ( {
 	state,
 	namespace,
-	modelName,
+	resourceName,
 	query,
 	ids,
 	type = 'items',
@@ -21,8 +21,8 @@ const getFromState = ( {
 	// prep ids and query for state retrieval
 	ids = JSON.stringify( ids );
 	query = query !== null ? addQueryArgs( '', query ) : '';
-	if ( hasInState( state, [ namespace, modelName, ids, query, type ] ) ) {
-		return state[ namespace ][ modelName ][ ids ][ query ][ type ];
+	if ( hasInState( state, [ namespace, resourceName, ids, query, type ] ) ) {
+		return state[ namespace ][ resourceName ][ ids ][ query ][ type ];
 	}
 	return fallback;
 };
@@ -30,14 +30,14 @@ const getFromState = ( {
 const getCollectionHeaders = (
 	state,
 	namespace,
-	modelName,
+	resourceName,
 	query = null,
 	ids = DEFAULT_EMPTY_ARRAY
 ) => {
 	return getFromState( {
 		state,
 		namespace,
-		modelName,
+		resourceName,
 		query,
 		ids,
 		type: 'headers',
@@ -50,7 +50,7 @@ const getCollectionHeaders = (
  *
  * @param {Object} state        The current collections state.
  * @param {string} namespace    The namespace for the collection.
- * @param {string} modelName    The model name for the collection.
+ * @param {string} resourceName The resource name for the collection.
  * @param {Object} [query=null] The query for the collection request.
  * @param {Array}  [ids=[]]     Any ids for the collection request (these are
  *                              values that would be added to the route for a
@@ -60,11 +60,11 @@ const getCollectionHeaders = (
 export const getCollection = (
 	state,
 	namespace,
-	modelName,
+	resourceName,
 	query = null,
 	ids = DEFAULT_EMPTY_ARRAY
 ) => {
-	return getFromState( { state, namespace, modelName, query, ids } );
+	return getFromState( { state, namespace, resourceName, query, ids } );
 };
 
 /**
@@ -81,7 +81,7 @@ export const getCollection = (
  * @param {string} state        The current collection state.
  * @param {string} header       The header to retrieve.
  * @param {string} namespace    The namespace for the collection.
- * @param {string} modelName    The model name for the collection.
+ * @param {string} resourceName The model name for the collection.
  * @param {Object} [query=null] The query object on the collection request.
  * @param {Array}  [ids=[]]     Any ids for the collection request (these are
  *                              values that would be added to the route for a
@@ -95,14 +95,14 @@ export const getCollectionHeader = (
 	state,
 	header,
 	namespace,
-	modelName,
+	resourceName,
 	query = null,
 	ids = DEFAULT_EMPTY_ARRAY
 ) => {
 	const headers = getCollectionHeaders(
 		state,
 		namespace,
-		modelName,
+		resourceName,
 		query,
 		ids
 	);

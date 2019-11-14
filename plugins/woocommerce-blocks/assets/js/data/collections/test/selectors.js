@@ -44,7 +44,7 @@ describe( 'getCollection', () => {
 	it( 'returns empty array when namespace does not exist in state', () => {
 		expect( getCollection( state, 'invalid', 'products' ) ).toEqual( [] );
 	} );
-	it( 'returns empty array when modelName does not exist in state', () => {
+	it( 'returns empty array when resourceName does not exist in state', () => {
 		expect( getCollection( state, 'wc/blocks', 'invalid' ) ).toEqual( [] );
 	} );
 	it( 'returns empty array when query does not exist in state', () => {
@@ -63,15 +63,21 @@ describe( 'getCollection', () => {
 	} );
 	describe( 'returns expected values for items existing in state', () => {
 		test.each`
-			modelName                      | ids          | query                | expected
+			resourceName                   | ids          | query                | expected
 			${'products'}                  | ${'[]'}      | ${{ someQuery: 2 }}  | ${[ 'foo' ]}
 			${'products/attributes'}       | ${'[10]'}    | ${{ someQuery: 2 }}  | ${[ 'bar' ]}
 			${'products/attributes/terms'} | ${'[10,30]'} | ${{ someQuery: 10 }} | ${[ 42 ]}
 		`(
-			'for "$modelName", "$ids", and "$query"',
-			( { modelName, ids, query } ) => {
+			'for "$resourceName", "$ids", and "$query"',
+			( { resourceName, ids, query } ) => {
 				expect(
-					getCollection( state, 'wc/blocks', modelName, query, ids )
+					getCollection(
+						state,
+						'wc/blocks',
+						resourceName,
+						query,
+						ids
+					)
 				);
 			}
 		);
