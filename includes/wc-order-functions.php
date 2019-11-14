@@ -91,23 +91,12 @@ function wc_get_order( $the_order = false ) {
  * @return array
  */
 function wc_get_order_statuses() {
-	/*
-	$order_statuses = array(
-		'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
-		'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
-		'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
-		'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
-		'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
-		'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
-		'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
-	);
-	*/
 	$order_statuses = array(
 		'wc-open'      => _x( 'Open', 'Order status', 'woocommerce' ),
 		'wc-completed' => _x( 'Completed', 'Order status', 'woocommerce' ),
 		'wc-cancelled' => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 	);
-	return apply_filters( 'wc_order_statuses', $order_statuses );
+	return apply_filters( 'woocommerce_order_statuses', $order_statuses );
 }
 
 /**
@@ -136,7 +125,7 @@ function wc_get_payment_statuses() {
 		'wc-failed'                  => _x( 'Failed Payment', 'Payment status', 'woocommerce' ),
 		'wc-authorized-expired'      => _x( 'Authorized Expired', 'Payment status', 'woocommerce' ),
 	);
-	return apply_filters( 'wc_payment_statuses', $payment_statuses );
+	return apply_filters( 'woocommerce_payment_statuses', $payment_statuses );
 }
 
 /**
@@ -152,7 +141,7 @@ function wc_get_fulfillment_statuses() {
 		'wc-partially-fulfilled' => _x( 'Partially Fulfilled', 'Fulfillment status', 'woocommerce' ),
 		'wc-fulfilled'           => _x( 'Fulfilled', 'Fulfillment status', 'woocommerce' ),
 	);
-	return apply_filters( 'wc_fulfillment_statuses', $fulfillment_statuses );
+	return apply_filters( 'woocommerce_fulfillment_statuses', $fulfillment_statuses );
 }
 
 /**
@@ -170,7 +159,7 @@ function wc_get_delivery_statuses() {
 		'wc-status-unknow'      => _x( 'Status Unknown', 'Delivery status', 'woocommerce' ),
 		'wc-delivery-error'     => _x( 'Delivery Error', 'Delivery status', 'woocommerce' ),
 	);
-	return apply_filters( 'wc_delivery_statuses', $delivery_statuses );
+	return apply_filters( 'woocommerce_delivery_statuses', $delivery_statuses );
 }
 
 /**

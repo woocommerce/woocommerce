@@ -58,6 +58,7 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 		'woocommerce_credit_card_type_labels'        => 'wocommerce_credit_card_type_labels',
 		'woocommerce_settings_tabs_advanced'         => 'woocommerce_settings_tabs_api',
 		'woocommerce_settings_advanced'              => 'woocommerce_settings_api',
+		'woocommerce_order_statuses'                 => 'wc_order_statuses',
 	);
 
 	/**
@@ -103,6 +104,7 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 		'wocommerce_credit_card_type_labels'         => '3.0.0',
 		'woocommerce_settings_tabs_api'              => '3.4.0',
 		'woocommerce_settings_api'                   => '3.4.0',
+		'wc_order_statuses'                          => '4.0.0',
 	);
 
 	/**
