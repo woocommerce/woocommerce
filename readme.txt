@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 4.9
 Tested up to: 5.2
 Requires PHP: 5.6
-Stable tag: 3.7.0
+Stable tag: 3.8.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.8.0 - 2019-01-10 =
+= 3.8.0 - 2019-11-05 =
 * Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
 * Enhancement - Add support to allow connect and install for in-app purchase flow. #24451
 * Enhancement - Declared support to Unicode CLDR. #24564
@@ -284,6 +284,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Also consider refunded item when updating order and adjusting stocks. #24745
 * Fix - Handle 0 attribute value for variations correctly. #24750
 * Fix - Fixed spaces in form fields of External Products. #24295
+* Fix - Removed links to downloadable products from refund emails. #24952
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
