@@ -12,7 +12,7 @@ import { recordEvent } from 'lib/tracks';
 import { without, get } from 'lodash';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import { getCountryCode } from 'dashboard/utils';
 import { H, Card, Form } from '@woocommerce/components';

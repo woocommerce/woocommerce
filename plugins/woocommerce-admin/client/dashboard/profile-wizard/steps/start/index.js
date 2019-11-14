@@ -11,13 +11,13 @@ import { withDispatch } from '@wordpress/data';
 import { filter, get } from 'lodash';
 
 /**
- * WooCommerce depdencies
+ * WooCommerce dependencies
  */
 import { Card, H, Link } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import CardIcon from './images/card';
 import SecurityIcon from './images/security';

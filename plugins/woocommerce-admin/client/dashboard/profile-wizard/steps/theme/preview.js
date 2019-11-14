@@ -14,7 +14,7 @@ import interpolateComponents from 'interpolate-components';
 import { WebPreview } from '@woocommerce/components';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import { recordEvent } from 'lib/tracks';
 

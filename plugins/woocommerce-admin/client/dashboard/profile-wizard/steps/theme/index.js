@@ -21,7 +21,7 @@ import { Card, H } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import withSelect from 'wc-api/with-select';
 import './style.scss';

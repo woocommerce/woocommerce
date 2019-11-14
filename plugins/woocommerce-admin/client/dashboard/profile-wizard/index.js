@@ -14,7 +14,7 @@ import { withDispatch } from '@wordpress/data';
 import { updateQueryString } from '@woocommerce/navigation';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import BusinessDetails from './steps/business-details';
 import Industry from './steps/industry';

@@ -12,7 +12,7 @@ import interpolateComponents from 'interpolate-components';
 import { FormToggle, Modal } from '@wordpress/components';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import { Link } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';

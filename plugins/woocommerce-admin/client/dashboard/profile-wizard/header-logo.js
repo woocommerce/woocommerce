@@ -7,8 +7,9 @@ import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
 
 /**
- * Internal depdencies
- */ import withSelect from 'wc-api/with-select';
+ * Internal dependencies
+ */
+import withSelect from 'wc-api/with-select';
 
 class HeaderLogo extends Component {
 	render() {

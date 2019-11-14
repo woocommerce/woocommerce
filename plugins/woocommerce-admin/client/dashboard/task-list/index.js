@@ -17,7 +17,7 @@ import { Card, List, MenuItem, EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import './style.scss';
 import withSelect from 'wc-api/with-select';

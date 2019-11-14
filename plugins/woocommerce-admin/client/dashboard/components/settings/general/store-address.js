@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
- * Internal depdencies
+ * Internal dependencies
  */
 import { SelectControl, TextControl } from '@woocommerce/components';
 
