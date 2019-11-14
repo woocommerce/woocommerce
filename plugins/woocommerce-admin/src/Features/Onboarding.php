@@ -81,6 +81,7 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
+		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
 	}
 
 	/**
@@ -766,5 +767,20 @@ class Onboarding {
 		update_option( 'woocommerce_task_list_hidden', $new_value );
 		wp_safe_redirect( wc_admin_url() );
 		exit;
+	}
+
+	/**
+	 * Remove the install notice that prompts the user to visit the old onboarding setup wizard.
+	 *
+	 * @param bool   $show Show or hide the notice.
+	 * @param string $notice The slug of the notice.
+	 * @return bool
+	 */
+	public static function remove_install_notice( $show, $notice ) {
+		if ( 'install' === $notice ) {
+			return false;
+		}
+
+		return $show;
 	}
 }
