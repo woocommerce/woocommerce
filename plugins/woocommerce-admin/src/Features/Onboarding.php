@@ -63,6 +63,9 @@ class Onboarding {
 			OnboardingTasks::get_instance();
 		}
 
+		// Rest API hooks need to run before is_admin() checks.
+		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
+
 		if ( ! is_admin() ) {
 			return;
 		}
@@ -84,7 +87,6 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
-		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
 	}
 

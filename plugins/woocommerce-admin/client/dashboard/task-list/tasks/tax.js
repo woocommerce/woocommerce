@@ -25,16 +25,18 @@ import { getCountryCode } from 'dashboard/utils';
 import Plugins from './steps/plugins';
 import StoreLocation from './steps/location';
 import withSelect from 'wc-api/with-select';
-import { recordEvent } from 'lib/tracks';
+import { recordEvent, queueRecordEvent } from 'lib/tracks';
 
 class Tax extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( props ) {
+		super( props );
 
 		this.initialState = {
 			isPending: false,
 			stepIndex: 0,
 			automatedTaxEnabled: true,
+			// Cache the value of pluginsToActivate so that we can show/hide tasks based on it, but not have them update mid task.
+			pluginsToActivate: props.pluginsToActivate,
 		};
 
 		this.state = this.initialState;
@@ -177,13 +179,8 @@ class Tax extends Component {
 	}
 
 	getSteps() {
-		const {
-			generalSettings,
-			isGeneralSettingsRequesting,
-			isJetpackConnected,
-			pluginsToActivate,
-		} = this.props;
-		const { isPending } = this.state;
+		const { generalSettings, isGeneralSettingsRequesting, isJetpackConnected } = this.props;
+		const { isPending, pluginsToActivate } = this.state;
 
 		const steps = [
 			{
@@ -218,7 +215,7 @@ class Tax extends Component {
 							this.completeStep();
 						} }
 						onSkip={ () => {
-							recordEvent( 'tasklist_tax_install_extensions', { install_extensions: false } );
+							queueRecordEvent( 'tasklist_tax_install_extensions', { install_extensions: false } );
 							window.location.href = getAdminLink(
 								'admin.php?page=wc-settings&tab=tax&section=standard'
 							);
@@ -334,7 +331,7 @@ class Tax extends Component {
 							<Button
 								isPrimary
 								onClick={ () => {
-									recordEvent( 'tasklist_tax_setup_automated_simple', {
+									recordEvent( 'tasklist_tax_setup_automated_proceed', {
 										setup_automatically: true,
 									} );
 									this.setState( { automatedTaxEnabled: true }, this.updateAutomatedTax );
@@ -344,7 +341,7 @@ class Tax extends Component {
 							</Button>
 							<Button
 								onClick={ () => {
-									recordEvent( 'tasklist_tax_setup_automated_simple', {
+									recordEvent( 'tasklist_tax_setup_automated_proceed', {
 										setup_automatically: false,
 									} );
 									this.setState( { automatedTaxEnabled: false }, this.updateAutomatedTax );

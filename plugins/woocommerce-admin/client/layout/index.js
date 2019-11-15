@@ -59,6 +59,13 @@ class Layout extends Component {
 	}
 
 	recordPageViewTrack() {
+		const { isEmbedded } = this.props;
+		if ( isEmbedded ) {
+			const path = document.location.pathname + document.location.search;
+			recordPageView( path, { isEmbedded } );
+			return;
+		}
+
 		const pathname = get( this.props, 'location.pathname' );
 		if ( ! pathname ) {
 			return;
