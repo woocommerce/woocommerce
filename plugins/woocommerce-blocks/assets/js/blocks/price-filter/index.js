@@ -23,6 +23,7 @@ registerBlockType( 'woocommerce/price-filter', {
 		'woo-gutenberg-products-block'
 	),
 	supports: {},
+	example: {},
 	attributes: {
 		showInputFields: {
 			type: 'boolean',

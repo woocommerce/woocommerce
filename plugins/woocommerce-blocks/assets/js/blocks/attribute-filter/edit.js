@@ -33,7 +33,9 @@ import { IconExternal } from '../../components/icons';
 import ToggleButtonControl from '../../components/toggle-button-control';
 
 const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
-	const [ isEditing, setIsEditing ] = useState( ! attributes.attributeId );
+	const [ isEditing, setIsEditing ] = useState(
+		! attributes.attributeId && ! attributes.isPreview
+	);
 
 	const getBlockControls = () => {
 		return (
@@ -335,7 +337,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 						/>
 					</TagName>
 					<Disabled>
-						<Block attributes={ attributes } isPreview />
+						<Block attributes={ attributes } isEditor />
 					</Disabled>
 				</Fragment>
 			) }
