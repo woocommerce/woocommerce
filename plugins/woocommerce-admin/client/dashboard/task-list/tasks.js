@@ -34,7 +34,7 @@ export function getTasks( { profileItems, options, query } ) {
 		shippingZonesCount,
 	} = getSetting( 'onboarding', {
 		customLogo: '',
-		hasHomePage: false,
+		hasHomepage: false,
 		hasPhysicalProducts: false,
 		hasProducts: false,
 		isTaxComplete: false,
