@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Fragment } from 'react';
 import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
-import { InspectorControls } from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { ProductTitle } from '@woocommerce/atomic-components/product';
 import { previewProducts } from '@woocommerce/resource-previews';
 import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';

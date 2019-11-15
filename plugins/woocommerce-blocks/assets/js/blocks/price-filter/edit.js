@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { InspectorControls, PlainText } from '@wordpress/editor';
+import { InspectorControls, PlainText } from '@wordpress/block-editor';
 import {
 	Placeholder,
 	Disabled,

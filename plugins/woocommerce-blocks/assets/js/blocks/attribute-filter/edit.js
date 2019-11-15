@@ -3,7 +3,11 @@
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { Fragment, useState, useCallback } from '@wordpress/element';
-import { InspectorControls, BlockControls, PlainText } from '@wordpress/editor';
+import {
+	InspectorControls,
+	BlockControls,
+	PlainText,
+} from '@wordpress/block-editor';
 import {
 	Placeholder,
 	Disabled,
