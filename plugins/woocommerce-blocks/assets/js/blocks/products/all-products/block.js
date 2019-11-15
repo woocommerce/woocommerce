@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import ProductListContainer from '@woocommerce/base-components/product-list/container';
 import { InnerBlockConfigurationProvider } from '@woocommerce/base-context/inner-block-configuration-context';
 import { ProductLayoutContextProvider } from '@woocommerce/base-context/product-layout-context';
+import { gridBlockPreview } from '@woocommerce/resource-previews';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 const layoutContextConfig = {
@@ -27,6 +28,11 @@ class Block extends Component {
 
 	render() {
 		const { attributes, urlParameterSuffix } = this.props;
+
+		if ( attributes.isPreview ) {
+			return gridBlockPreview;
+		}
+
 		/**
 		 * Todo classes
 		 *

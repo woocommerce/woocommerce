@@ -22,6 +22,7 @@ import GridContentControl from '@woocommerce/block-components/grid-content-contr
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import ProductAttributeTermControl from '@woocommerce/block-components/product-attribute-term-control';
 import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
+import { gridBlockPreview } from '@woocommerce/resource-previews';
 
 /**
  * Component to handle edit mode of "Products by Attribute".
@@ -158,6 +159,10 @@ class ProductsByAttributeBlock extends Component {
 	render() {
 		const { attributes, name, setAttributes } = this.props;
 		const { editMode } = attributes;
+
+		if ( attributes.isPreview ) {
+			return gridBlockPreview;
+		}
 
 		return (
 			<Fragment>

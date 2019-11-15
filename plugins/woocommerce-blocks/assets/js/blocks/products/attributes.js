@@ -58,4 +58,12 @@ export default {
 		type: 'array',
 		default: DEFAULT_PRODUCT_LIST_LAYOUT,
 	},
+
+	/**
+	 * Are we previewing?
+	 */
+	isPreview: {
+		type: 'boolean',
+		default: false,
+	},
 };

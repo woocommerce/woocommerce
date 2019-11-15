@@ -55,6 +55,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'contentVisibility' => $this->get_schema_content_visibility(),
 			'align'             => $this->get_schema_align(),
 			'alignButtons'      => $this->get_schema_boolean( false ),
+			'isPreview'         => $this->get_schema_boolean( false ),
 		);
 	}
 

@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
+import { gridBlockPreview } from '@woocommerce/resource-previews';
 
 /**
  * Component to handle edit mode of "Top Rated Products".
@@ -74,6 +75,10 @@ class ProductTopRatedBlock extends Component {
 
 	render() {
 		const { name, attributes } = this.props;
+
+		if ( attributes.isPreview ) {
+			return gridBlockPreview;
+		}
 
 		return (
 			<Fragment>

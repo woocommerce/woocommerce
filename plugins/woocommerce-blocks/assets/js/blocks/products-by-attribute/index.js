@@ -31,6 +31,11 @@ registerBlockType( blockTypeName, {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: {
 		/**
 		 * Product attributes, used to display only products with the given attributes.
@@ -97,6 +102,14 @@ registerBlockType( blockTypeName, {
 		 * How to align cart buttons.
 		 */
 		alignButtons: {
+			type: 'boolean',
+			default: false,
+		},
+
+		/**
+		 * Are we previewing?
+		 */
+		isPreview: {
 			type: 'boolean',
 			default: false,
 		},

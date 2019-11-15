@@ -64,4 +64,12 @@ export default {
 			button: true,
 		},
 	},
+
+	/**
+	 * Are we previewing?
+	 */
+	isPreview: {
+		type: 'boolean',
+		default: false,
+	},
 };
