@@ -35,7 +35,7 @@ class TestErrorBoundary extends ReactComponent {
 	}
 }
 
-describe( 'useStoreProducts', () => {
+describe( 'useCollection', () => {
 	let registry, mocks, renderer;
 	const getProps = ( testRenderer ) => {
 		const { results, isLoading } = testRenderer.root.findByType(
@@ -233,4 +233,65 @@ describe( 'useStoreProducts', () => {
 			renderer.unmount();
 		}
 	);
+	it( 'should return previous query results if `shouldSelect` is false', () => {
+		mocks.selectors.getCollection.mockImplementation(
+			( state, ...args ) => {
+				return args;
+			}
+		);
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						resourceValues: [ 10, 20 ],
+					},
+				} )
+			);
+		} );
+		const { results } = getProps( renderer );
+		// rerender but with shouldSelect to false
+		act( () => {
+			renderer.update(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'productsb',
+						resourceValues: [ 10, 30 ],
+						shouldSelect: false,
+					},
+				} )
+			);
+		} );
+		const { results: results2 } = getProps( renderer );
+		expect( results2 ).toBe( results );
+		// expect 2 calls because internally, useSelect invokes callback twice
+		// on mount.
+		expect( mocks.selectors.getCollection ).toHaveBeenCalledTimes( 2 );
+
+		// rerender again but set shouldSelect to true again and we should see
+		// new results
+		act( () => {
+			renderer.update(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'productsb',
+						resourceValues: [ 10, 30 ],
+						shouldSelect: true,
+					},
+				} )
+			);
+		} );
+		const { results: results3 } = getProps( renderer );
+		expect( results3 ).not.toEqual( results );
+		expect( results3 ).toEqual( [
+			'test/store',
+			'productsb',
+			{},
+			[ 10, 30 ],
+		] );
+	} );
 } );
