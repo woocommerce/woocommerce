@@ -61,7 +61,7 @@ const onboardingHomepageNotice = () => {
 			null !== document.querySelector( '.components-snackbar__content' ) ? 'snackbar' : 'default';
 
 		apiFetch( {
-			path: '/wc-admin/v1/options',
+			path: '/wc-admin/options',
 			method: 'POST',
 			data: {
 				show_on_front: 'page',
