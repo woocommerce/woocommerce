@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import ProductListContainer from '@woocommerce/base-components/product-list/container';
 import { InnerBlockConfigurationProvider } from '@woocommerce/base-context/inner-block-configuration-context';
 import { ProductLayoutContextProvider } from '@woocommerce/base-context/product-layout-context';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 const layoutContextConfig = {
 	layoutStyleClassPrefix: 'wc-block-grid',
@@ -33,14 +34,16 @@ class Block extends Component {
 		 * wc-block-{$this->block_name},
 		 */
 		return (
-			<InnerBlockConfigurationProvider value={ parentBlockConfig }>
-				<ProductLayoutContextProvider value={ layoutContextConfig }>
-					<ProductListContainer
-						attributes={ attributes }
-						urlParameterSuffix={ urlParameterSuffix }
-					/>
-				</ProductLayoutContextProvider>
-			</InnerBlockConfigurationProvider>
+			<BlockErrorBoundary>
+				<InnerBlockConfigurationProvider value={ parentBlockConfig }>
+					<ProductLayoutContextProvider value={ layoutContextConfig }>
+						<ProductListContainer
+							attributes={ attributes }
+							urlParameterSuffix={ urlParameterSuffix }
+						/>
+					</ProductLayoutContextProvider>
+				</InnerBlockConfigurationProvider>
+			</BlockErrorBoundary>
 		);
 	}
 }
