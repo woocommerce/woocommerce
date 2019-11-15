@@ -52,6 +52,6 @@ export const previewProducts = [
 		has_options: false,
 		is_purchasable: true,
 		is_in_stock: true,
-		onsale: true,
+		on_sale: true,
 	},
 ];
