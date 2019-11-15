@@ -23,6 +23,11 @@ registerBlockType( 'woocommerce/attribute-filter', {
 		'woo-gutenberg-products-block'
 	),
 	supports: {},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: {
 		attributeId: {
 			type: 'number',
@@ -46,6 +51,13 @@ registerBlockType( 'woocommerce/attribute-filter', {
 		headingLevel: {
 			type: 'number',
 			default: 3,
+		},
+		/**
+		 * Are we previewing?
+		 */
+		isPreview: {
+			type: 'boolean',
+			default: false,
 		},
 	},
 	edit,
