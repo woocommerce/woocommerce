@@ -7,7 +7,7 @@ import { has } from 'lodash';
  * Utility for returning whether the given path exists in the state.
  *
  * @param {Object} state The state being checked
- * @param {array}  path  The path to check
+ * @param {Array}  path  The path to check
  *
  * @return {bool} True means this exists in the state.
  */

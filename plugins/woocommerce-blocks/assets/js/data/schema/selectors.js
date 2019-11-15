@@ -147,7 +147,7 @@ const getRouteFromResourceEntries = ( stateSlice, ids = [] ) => {
  * For a given route, route parts and ids,
  *
  * @param {string} route
- * @param {array}  routeParts
+ * @param {Array}  routeParts
  * @param {Array}  ids
  *
  * @returns {string}

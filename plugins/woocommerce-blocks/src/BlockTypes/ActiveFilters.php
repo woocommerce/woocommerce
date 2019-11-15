@@ -1,6 +1,6 @@
 <?php
 /**
- * Attribute filter block.
+ * Active filters block.
  *
  * @package WooCommerce/Blocks
  */
@@ -10,16 +10,16 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * AttributeFilter class.
+ * ActiveFilters class.
  */
-class AttributeFilter extends AbstractBlock {
+class ActiveFilters extends AbstractBlock {
 
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'attribute-filter';
+	protected $block_name = 'active-filters';
 
 	/**
 	 * Registers the block type with WordPress.

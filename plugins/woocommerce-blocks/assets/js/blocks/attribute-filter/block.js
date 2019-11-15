@@ -13,7 +13,6 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import { sortBy } from 'lodash';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
@@ -21,30 +20,41 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
  * Internal dependencies
  */
 import './style.scss';
-import { getTaxonomyFromAttributeId } from '../../utils/attributes';
+import { getAttributeFromID } from '../../utils/attributes';
+import { updateAttributeFilter } from '../../utils/attributes-query';
 
 /**
  * Component displaying an attribute filter.
  */
-const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
-	const [ options, setOptions ] = useState( [] );
-	const [ checkedOptions, setCheckedOptions ] = useState( [] );
-	const { showCounts, attributeId, queryType } = attributes;
-	const taxonomy = getTaxonomyFromAttributeId( attributeId );
+const AttributeFilterBlock = ( {
+	attributes: blockAttributes,
+	isPreview = false,
+} ) => {
+	const [ displayedOptions, setDisplayedOptions ] = useState( [] );
+	const attributeObject = getAttributeFromID( blockAttributes.attributeId );
 	const [ queryState ] = useQueryStateByContext();
-	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
-		'attributes',
-		[]
-	);
+	const [
+		productAttributesQuery,
+		setProductAttributesQuery,
+	] = useQueryStateByKey( 'attributes', [] );
+
+	const checked = useMemo( () => {
+		return productAttributesQuery
+			.filter(
+				( attribute ) =>
+					attribute.attribute === attributeObject.taxonomy
+			)
+			.flatMap( ( attribute ) => attribute.slug );
+	}, [ productAttributesQuery, attributeObject ] );
 
 	const filteredCountsQueryState = useMemo( () => {
 		// If doing an "AND" query, we need to remove current taxonomy query so counts are not affected.
 		const modifiedQueryState =
-			queryType === 'or'
-				? productAttributes.filter(
-						( item ) => item.attribute !== taxonomy
+			blockAttributes.queryType === 'or'
+				? productAttributesQuery.filter(
+						( item ) => item.attribute !== attributeObject.taxonomy
 				  )
-				: productAttributes;
+				: productAttributesQuery;
 
 		// Take current query and remove paging args.
 		return {
@@ -54,9 +64,14 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 			per_page: undefined,
 			page: undefined,
 			attributes: modifiedQueryState,
-			calculate_attribute_counts: [ taxonomy ],
+			calculate_attribute_counts: [ attributeObject.taxonomy ],
 		};
-	}, [ queryState, taxonomy, queryType, productAttributes ] );
+	}, [
+		queryState,
+		attributeObject,
+		blockAttributes,
+		productAttributesQuery,
+	] );
 
 	const {
 		results: attributeTerms,
@@ -64,7 +79,7 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 	} = useCollection( {
 		namespace: '/wc/store',
 		resourceName: 'products/attributes/terms',
-		resourceValues: [ attributeId ],
+		resourceValues: [ attributeObject.id ],
 	} );
 
 	const {
@@ -76,12 +91,15 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 		query: filteredCountsQueryState,
 	} );
 
+	/**
+	 * Get the label for an attribute term filter.
+	 */
 	const getLabel = useCallback(
 		( name, count ) => {
 			return (
 				<Fragment key="label">
 					{ name }
-					{ showCounts && (
+					{ blockAttributes.showCounts && count !== null && (
 						<span className="wc-block-attribute-filter-list-count">
 							{ count }
 						</span>
@@ -89,13 +107,16 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 				</Fragment>
 			);
 		},
-		[ showCounts ]
+		[ blockAttributes ]
 	);
 
+	/**
+	 * Get count data about a given term by ID.
+	 */
 	const getFilteredTerm = useCallback(
 		( id ) => {
 			if ( ! filteredCounts.attribute_counts ) {
-				return {};
+				return null;
 			}
 			return filteredCounts.attribute_counts.find(
 				( { term } ) => term === id
@@ -108,7 +129,6 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 	 * Compare intersection of all terms and filtered counts to get a list of options to display.
 	 */
 	useEffect( () => {
-		// Do nothing until we have the attribute terms from the API.
 		if ( attributeTermsLoading || filteredCountsLoading ) {
 			return;
 		}
@@ -117,18 +137,13 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 
 		attributeTerms.forEach( ( term ) => {
 			const filteredTerm = getFilteredTerm( term.id );
-			const isChecked = checkedOptions.includes( term.slug );
-			const inCollection = !! filteredTerm;
+			const isChecked = checked.includes( term.slug );
+			const count = filteredTerm ? filteredTerm.count : null;
 
 			// If there is no match this term doesn't match the current product collection - only render if checked.
-			if ( ! inCollection && ! isChecked ) {
+			if ( ! filteredTerm && ! isChecked ) {
 				return;
 			}
-
-			const filteredCount = filteredTerm
-				? filteredTerm.count
-				: term.count;
-			const count = ! inCollection && isChecked ? 0 : filteredCount;
 
 			newOptions.push( {
 				key: term.slug,
@@ -136,54 +151,89 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 			} );
 		} );
 
-		setOptions( newOptions );
+		setDisplayedOptions( newOptions );
 	}, [
-		filteredCountsLoading,
 		attributeTerms,
 		attributeTermsLoading,
+		filteredCountsLoading,
 		getFilteredTerm,
 		getLabel,
-		checkedOptions,
+		checked,
 	] );
 
-	useEffect( () => {
-		const newProductAttributes = productAttributes.filter(
-			( item ) => item.attribute !== taxonomy
-		);
+	/**
+	 * Returns an array of term objects that have been chosen via the checkboxes.
+	 */
+	const getSelectedTerms = useCallback(
+		( newChecked ) => {
+			return attributeTerms.reduce( ( acc, term ) => {
+				if ( newChecked.includes( term.slug ) ) {
+					acc.push( term );
+				}
+				return acc;
+			}, [] );
+		},
+		[ attributeTerms ]
+	);
 
-		if ( checkedOptions ) {
-			const updatedQuery = {
-				attribute: taxonomy,
-				operator: queryType === 'or' ? 'in' : 'and',
-				slug: checkedOptions,
-			};
-			newProductAttributes.push( updatedQuery );
-		}
+	/**
+	 * When a checkbox in the list changes, update state.
+	 */
+	const onChange = useCallback(
+		( event ) => {
+			const isChecked = event.target.checked;
+			const checkedValue = event.target.value;
+			const newChecked = checked.filter(
+				( value ) => value !== checkedValue
+			);
 
-		setProductAttributes( sortBy( newProductAttributes, 'attribute' ) );
-	}, [ checkedOptions, taxonomy, productAttributes, queryType ] );
+			if ( isChecked ) {
+				newChecked.push( checkedValue );
+				newChecked.sort();
+			}
 
-	const onChange = useCallback( ( checked ) => {
-		setCheckedOptions( checked );
-	}, [] );
+			const newSelectedTerms = getSelectedTerms( newChecked );
 
-	if ( ! taxonomy || ( options.length === 0 && ! attributeTermsLoading ) ) {
+			updateAttributeFilter(
+				productAttributesQuery,
+				setProductAttributesQuery,
+				attributeObject,
+				newSelectedTerms,
+				blockAttributes.queryType === 'or' ? 'in' : 'and'
+			);
+		},
+		[
+			attributeTerms,
+			checked,
+			productAttributesQuery,
+			setProductAttributesQuery,
+			attributeObject,
+			blockAttributes,
+		]
+	);
+
+	if (
+		! attributeObject ||
+		( displayedOptions.length === 0 && ! attributeTermsLoading )
+	) {
 		return null;
 	}
 
-	const TagName = `h${ attributes.headingLevel }`;
+	const TagName = `h${ blockAttributes.headingLevel }`;
 
 	return (
 		<BlockErrorBoundary>
-			{ ! isPreview && attributes.heading && (
-				<TagName>{ attributes.heading }</TagName>
+			{ ! isPreview && blockAttributes.heading && (
+				<TagName>{ blockAttributes.heading }</TagName>
 			) }
 			<div className="wc-block-attribute-filter">
 				<CheckboxList
 					className={ 'wc-block-attribute-filter-list' }
-					options={ options }
+					options={ displayedOptions }
+					checked={ checked }
 					onChange={ onChange }
 					isLoading={ attributeTermsLoading }
+					isDisabled={ filteredCountsLoading }
 				/>
 			</div>
 		</BlockErrorBoundary>

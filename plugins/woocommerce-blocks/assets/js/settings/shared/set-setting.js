@@ -10,7 +10,7 @@ import { allSettings } from './settings-init';
  * @param {string}   name                        The setting property key for the
  *                                               setting being mutated.
  * @param {mixed}    value                       The value to set.
- * @param {function} [filter=( val ) => val]     Allows for providing a callback
+ * @param {Function} [filter=( val ) => val]     Allows for providing a callback
  *                                               to sanitize the setting (eg.
  *                                               ensure it's a number)
  */

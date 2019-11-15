@@ -12,93 +12,59 @@ import {
 } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { useDebounce, usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { constrainRangeSliderValues, formatCurrencyForInput } from './utils';
+import { constrainRangeSliderValues } from './utils';
+import { formatPrice } from '../../utils/price';
 import SubmitButton from './submit-button';
 import PriceLabel from './price-label';
 import PriceInput from './price-input';
 
 const PriceSlider = ( {
-	initialMin,
-	initialMax,
+	minPrice,
+	maxPrice,
 	minConstraint,
 	maxConstraint,
-	onChange,
-	step,
-	currencySymbol,
-	priceFormat,
-	showInputFields,
-	showFilterButton,
-	isLoading,
+	onChange = () => {},
+	step = 10,
+	currencySymbol = '$',
+	priceFormat = '%1$s%2$s',
+	showInputFields = true,
+	showFilterButton = false,
+	isLoading = false,
+	onSubmit = () => {},
 } ) => {
 	const minRange = useRef();
 	const maxRange = useRef();
-	const [ minPrice, setMinPrice ] = useState( initialMin );
-	const [ maxPrice, setMaxPrice ] = useState( initialMax );
+
 	const [ formattedMinPrice, setFormattedMinPrice ] = useState(
-		formatCurrencyForInput( minPrice, priceFormat, currencySymbol )
+		formatPrice( minPrice, priceFormat, currencySymbol )
 	);
 	const [ formattedMaxPrice, setFormattedMaxPrice ] = useState(
-		formatCurrencyForInput( maxPrice, priceFormat, currencySymbol )
+		formatPrice( maxPrice, priceFormat, currencySymbol )
 	);
-	const debouncedChangeValue = useDebounce( [ minPrice, maxPrice ], 500 );
-	const prevMinConstraint = usePrevious( minConstraint );
-	const prevMaxConstraint = usePrevious( maxConstraint );
-
-	useEffect( () => {
-		if ( isNaN( minConstraint ) ) {
-			setMinPrice( 0 );
-			return;
-		}
-		if (
-			minPrice === undefined ||
-			minConstraint > minPrice ||
-			minPrice === prevMinConstraint
-		) {
-			setMinPrice( minConstraint );
-		}
-	}, [ minConstraint ] );
-
-	useEffect( () => {
-		if ( isNaN( maxConstraint ) ) {
-			setMaxPrice( 100 );
-			return;
-		}
-		if (
-			maxPrice === undefined ||
-			maxConstraint < maxPrice ||
-			maxPrice === prevMaxConstraint
-		) {
-			setMaxPrice( maxConstraint );
-		}
-	}, [ maxConstraint ] );
 
 	useEffect( () => {
 		setFormattedMinPrice(
-			formatCurrencyForInput( minPrice, priceFormat, currencySymbol )
+			formatPrice( minPrice, priceFormat, currencySymbol )
 		);
 	}, [ minPrice, priceFormat, currencySymbol ] );
 
 	useEffect( () => {
 		setFormattedMaxPrice(
-			formatCurrencyForInput( maxPrice, priceFormat, currencySymbol )
+			formatPrice( maxPrice, priceFormat, currencySymbol )
 		);
 	}, [ maxPrice, priceFormat, currencySymbol ] );
 
+	/**
+	 * Checks if the min and max constraints are valid.
+	 */
 	const hasValidConstraints = useMemo( () => {
 		return isFinite( minConstraint ) && isFinite( maxConstraint );
 	}, [ minConstraint, maxConstraint ] );
-
-	useEffect( () => {
-		if ( ! showFilterButton && ! isLoading && hasValidConstraints ) {
-			triggerChange();
-		}
-	}, [ debouncedChangeValue ] );
 
 	/**
 	 * Handles styles for the shaded area of the range slider.
@@ -139,13 +105,6 @@ const PriceSlider = ( {
 		maxConstraint,
 		hasValidConstraints,
 	] );
-
-	/**
-	 * Trigger the onChange prop callback with new values.
-	 */
-	const triggerChange = useCallback( () => {
-		onChange( [ minPrice, maxPrice ] );
-	}, [ minPrice, maxPrice ] );
 
 	/**
 	 * Works around an IE issue where only one range selector is visible by changing the display order
@@ -206,8 +165,10 @@ const PriceSlider = ( {
 				step,
 				isMin
 			);
-			setMinPrice( parseInt( values[ 0 ], 10 ) );
-			setMaxPrice( parseInt( values[ 1 ], 10 ) );
+			onChange( [
+				parseInt( values[ 0 ], 10 ),
+				parseInt( values[ 1 ], 10 ),
+			] );
 		},
 		[ minPrice, maxPrice, minConstraint, maxConstraint, step ]
 	);
@@ -232,8 +193,24 @@ const PriceSlider = ( {
 				step,
 				isMin
 			);
-			setMinPrice( parseInt( values[ 0 ], 10 ) );
-			setMaxPrice( parseInt( values[ 1 ], 10 ) );
+			onChange( [
+				parseInt( values[ 0 ], 10 ),
+				parseInt( values[ 1 ], 10 ),
+			] );
+			setFormattedMinPrice(
+				formatPrice(
+					parseInt( values[ 0 ], 10 ),
+					priceFormat,
+					currencySymbol
+				)
+			);
+			setFormattedMaxPrice(
+				formatPrice(
+					parseInt( values[ 1 ], 10 ),
+					priceFormat,
+					currencySymbol
+				)
+			);
 		},
 		[ minPrice, maxPrice, minConstraint, maxConstraint, step ]
 	);
@@ -250,19 +227,11 @@ const PriceSlider = ( {
 			);
 			if ( isMin ) {
 				setFormattedMinPrice(
-					formatCurrencyForInput(
-						newValue,
-						priceFormat,
-						currencySymbol
-					)
+					formatPrice( newValue, priceFormat, currencySymbol )
 				);
 			} else {
 				setFormattedMaxPrice(
-					formatCurrencyForInput(
-						newValue,
-						priceFormat,
-						currencySymbol
-					)
+					formatPrice( newValue, priceFormat, currencySymbol )
 				);
 			}
 		},
@@ -339,7 +308,7 @@ const PriceSlider = ( {
 				{ showFilterButton && (
 					<SubmitButton
 						disabled={ isLoading || ! hasValidConstraints }
-						onClick={ triggerChange }
+						onClick={ onSubmit }
 					/>
 				) }
 			</div>
@@ -353,13 +322,17 @@ PriceSlider.propTypes = {
 	 */
 	onChange: PropTypes.func.isRequired,
 	/**
-	 * Initial min value.
+	 * Callback fired when the filter button is pressed.
 	 */
-	initialMin: PropTypes.number,
+	onSubmit: PropTypes.func,
 	/**
-	 * Initial max value.
+	 * Min value.
 	 */
-	initialMax: PropTypes.number,
+	minPrice: PropTypes.number,
+	/**
+	 * Max value.
+	 */
+	maxPrice: PropTypes.number,
 	/**
 	 * Minimum allowed price.
 	 */
@@ -392,15 +365,6 @@ PriceSlider.propTypes = {
 	 * Whether or not to show filter button above the slider.
 	 */
 	isLoading: PropTypes.bool,
-};
-
-PriceSlider.defaultProps = {
-	step: 1,
-	currencySymbol: '$',
-	priceFormat: '%1$s%2$s',
-	showInputFields: true,
-	showFilterButton: false,
-	isLoading: false,
 };
 
 export default PriceSlider;

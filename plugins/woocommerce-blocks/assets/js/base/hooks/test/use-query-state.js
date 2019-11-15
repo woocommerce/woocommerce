@@ -31,7 +31,7 @@ describe( 'Testing Query State Hooks', () => {
 	 *
 	 * @param {Object} testRenderer   An instance of the created test component.
 	 *
-	 * @return {array} A tuple containing the expected query value as the first
+	 * @return {Array} A tuple containing the expected query value as the first
 	 *                 element and the expected query action creator as the
 	 *                 second argument.
 	 */
@@ -61,9 +61,9 @@ describe( 'Testing Query State Hooks', () => {
 	 * expected PropKeys for obtaining the values to be fed to the hook as
 	 * arguments.
 	 *
-	 * @param {function} hookTested      The hook being tested to use in the
+	 * @param {Function} hookTested      The hook being tested to use in the
 	 *                                   test comopnent.
-	 * @param {array}    propKeysForArgs An array of keys for the props that
+	 * @param {Array}    propKeysForArgs An array of keys for the props that
 	 *                                   will be used on the test component that
 	 *                                   will have values fed to the tested
 	 *                                   hook.

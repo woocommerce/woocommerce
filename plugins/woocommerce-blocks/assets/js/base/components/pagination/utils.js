@@ -5,7 +5,7 @@
  * @param {integer} pagesToDisplay Maximum number of pages to display in the pagination component.
  * @param {integer} currentPage Page currently visible.
  * @param {integer} totalPages Total pages available.
- * @return {object} Object containing the min and max index to display in the pagination component.
+ * @return {Object} Object containing the min and max index to display in the pagination component.
  */
 export const getIndexes = ( pagesToDisplay, currentPage, totalPages ) => {
 	if ( totalPages <= 2 ) {

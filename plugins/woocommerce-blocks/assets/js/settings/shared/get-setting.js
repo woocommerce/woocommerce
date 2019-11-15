@@ -11,7 +11,7 @@ import { allSettings } from './settings-init';
  * @param {mixed}    [fallback=false]             The value to use as a fallback
  *                                                if the setting is not in the
  *                                                state.
- * @param {function} [filter=( val ) => val]  	  A callback for filtering the
+ * @param {Function} [filter=( val ) => val]  	  A callback for filtering the
  *                                                value before it's returned.
  *                                                Receives both the found value
  *                                                (if it exists for the key) and

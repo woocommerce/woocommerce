@@ -23,7 +23,7 @@ Headers = Headers
  * @param {string}   namespace        The namespace for the collection route.
  * @param {string}   resourceName     The resource name for the collection route.
  * @param {string}   [queryString=''] The query string for the collection
- * @param {array}    [ids=[]]         An array of ids (in correct order) for the
+ * @param {Array}    [ids=[]]         An array of ids (in correct order) for the
  *                                    model.
  * @param {Object}   [response={}]    An object containing the response from the
  *                                    collection request.
