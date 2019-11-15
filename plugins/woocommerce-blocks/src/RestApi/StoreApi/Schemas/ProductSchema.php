@@ -59,6 +59,12 @@ class ProductSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 			),
+			'on_sale'        => array(
+				'description' => __( 'Is the product on sale?', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 			'sku'            => array(
 				'description' => __( 'Unique identifier.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
@@ -254,6 +260,7 @@ class ProductSchema extends AbstractSchema {
 			'permalink'      => $product->get_permalink(),
 			'sku'            => $product->get_sku(),
 			'description'    => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
+			'on_sale'        => $product->is_on_sale(),
 			'prices'         => $this->get_prices( $product ),
 			'average_rating' => $product->get_average_rating(),
 			'review_count'   => $product->get_review_count(),

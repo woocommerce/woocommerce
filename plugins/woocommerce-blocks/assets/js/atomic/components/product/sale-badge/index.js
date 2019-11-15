@@ -10,7 +10,7 @@ const ProductSaleBadge = ( { className, product, align } ) => {
 			? 'wc-block-grid__product-onsale--align' + align
 			: '';
 
-	if ( product && product.onsale ) {
+	if ( product && product.on_sale ) {
 		return (
 			<div
 				className={ classnames(

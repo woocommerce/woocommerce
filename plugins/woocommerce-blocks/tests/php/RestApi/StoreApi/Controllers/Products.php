@@ -57,6 +57,7 @@ class Products extends TestCase {
 		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
 		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']['text'] );
 		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']['description'] );
+		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
 	}
 
 	/**
@@ -73,6 +74,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'variation', $data[0] );
 		$this->assertArrayHasKey( 'permalink', $data[0] );
 		$this->assertArrayHasKey( 'description', $data[0] );
+		$this->assertArrayHasKey( 'on_sale', $data[0] );
 		$this->assertArrayHasKey( 'sku', $data[0] );
 		$this->assertArrayHasKey( 'prices', $data[0] );
 		$this->assertArrayHasKey( 'average_rating', $data[0] );
@@ -96,6 +98,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'variation', $schema['properties'] );
 		$this->assertArrayHasKey( 'permalink', $schema['properties'] );
 		$this->assertArrayHasKey( 'description', $schema['properties'] );
+		$this->assertArrayHasKey( 'on_sale', $schema['properties'] );
 		$this->assertArrayHasKey( 'sku', $schema['properties'] );
 		$this->assertArrayHasKey( 'prices', $schema['properties'] );
 		$this->assertArrayHasKey( 'average_rating', $schema['properties'] );
@@ -119,6 +122,7 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'variation', $response->get_data() );
 		$this->assertArrayHasKey( 'permalink', $response->get_data() );
 		$this->assertArrayHasKey( 'description', $response->get_data() );
+		$this->assertArrayHasKey( 'on_sale', $response->get_data() );
 		$this->assertArrayHasKey( 'sku', $response->get_data() );
 		$this->assertArrayHasKey( 'prices', $response->get_data() );
 		$this->assertArrayHasKey( 'average_rating', $response->get_data() );
