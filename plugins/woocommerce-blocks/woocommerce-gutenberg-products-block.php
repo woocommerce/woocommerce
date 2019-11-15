@@ -18,7 +18,68 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
+$minimum_wp_version  = '5.0';
+$minimum_php_version = '5.6';
+
+/**
+ * Whether notices must be displayed in the current page (plugins and WooCommerce pages).
+ *
+ * @since $VID:$
+ */
+function should_display_compatibility_notices() {
+	$current_screen = get_current_screen();
+
+	if ( ! isset( $current_screen ) ) {
+		return false;
+	}
+
+	$is_plugins_page     =
+		property_exists( $current_screen, 'id' ) &&
+		'plugins' === $current_screen->id;
+	$is_woocommerce_page =
+		property_exists( $current_screen, 'parent_base' ) &&
+		'woocommerce' === $current_screen->parent_base;
+
+	return $is_plugins_page || $is_woocommerce_page;
+}
+
+if ( version_compare( $GLOBALS['wp_version'], $minimum_wp_version, '<' ) ) {
+	/**
+	 * Outputs for an admin notice about running WooCommerce Blocks on outdated WordPress.
+	 *
+	 * @since $VID:$
+	 */
+	function woocommerce_blocks_admin_unsupported_wp_notice() {
+		if ( should_display_compatibility_notices() ) {
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p><?php esc_html_e( 'WooCommerce Blocks requires a more recent version of WordPress and has been paused. Please update WordPress to continue enjoying WooCommerce Blocks.', 'woo-gutenberg-products-block' ); ?></p>
+			</div>
+			<?php
+		}
+	}
+	add_action( 'admin_notices', 'woocommerce_blocks_admin_unsupported_wp_notice' );
+	return;
+}
+
+if ( version_compare( PHP_VERSION, $minimum_php_version, '<' ) ) {
+	/**
+	 * Outputs an admin notice for folks running an outdated version of PHP.
+	 *
+	 * @todo: Remove once WP 5.2 is the minimum version.
+	 *
+	 * @since $VID:$
+	 */
+	function woocommerce_blocks_admin_unsupported_php_notice() {
+		if ( should_display_compatibility_notices() ) {
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p><?php esc_html_e( 'WooCommerce Blocks requires a more recent version of PHP and has been paused. Please update PHP to continue enjoying WooCommerce Blocks.', 'woo-gutenberg-products-block' ); ?></p>
+			</div>
+			<?php
+		}
+	}
+	add_action( 'admin_notices', 'woocommerce_blocks_admin_unsupported_php_notice' );
 	return;
 }
 
