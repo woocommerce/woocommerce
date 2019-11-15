@@ -31,6 +31,11 @@ registerBlockType( 'woocommerce/product-tag', {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: {
 		/**
 		 * Number of columns.
@@ -91,6 +96,14 @@ registerBlockType( 'woocommerce/product-tag', {
 		orderby: {
 			type: 'string',
 			default: 'date',
+		},
+
+		/**
+		 * Are we previewing?
+		 */
+		isPreview: {
+			type: 'boolean',
+			default: false,
 		},
 	},
 

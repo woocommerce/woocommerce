@@ -34,6 +34,11 @@ registerBlockType( 'woocommerce/product-new', {
 	attributes: {
 		...sharedAttributes,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	transforms: {
 		from: [
 			{

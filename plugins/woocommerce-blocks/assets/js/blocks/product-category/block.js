@@ -21,6 +21,7 @@ import GridContentControl from '@woocommerce/block-components/grid-content-contr
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
 import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
+import { gridBlockPreview } from '@woocommerce/resource-previews';
 
 /**
  * Component to handle edit mode of "Products by Category".
@@ -268,6 +269,11 @@ class ProductByCategoryBlock extends Component {
 
 	render() {
 		const { isEditing } = this.state;
+		const { attributes } = this.props;
+
+		if ( attributes.isPreview ) {
+			return gridBlockPreview;
+		}
 
 		return (
 			<Fragment>

@@ -29,6 +29,11 @@ registerBlockType( 'woocommerce/handpicked-products', {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: {
 		/**
 		 * Alignment of product grid
@@ -86,6 +91,14 @@ registerBlockType( 'woocommerce/handpicked-products', {
 		 * How to align cart buttons.
 		 */
 		alignButtons: {
+			type: 'boolean',
+			default: false,
+		},
+
+		/**
+		 * Are we previewing?
+		 */
+		isPreview: {
 			type: 'boolean',
 			default: false,
 		},

@@ -34,6 +34,11 @@ registerBlockType( 'woocommerce/product-category', {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: {
 		...sharedAttributes,
 

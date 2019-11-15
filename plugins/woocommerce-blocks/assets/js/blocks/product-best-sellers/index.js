@@ -31,6 +31,11 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 		align: [ 'wide', 'full' ],
 		html: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: {
 		...sharedAttributes,
 	},
