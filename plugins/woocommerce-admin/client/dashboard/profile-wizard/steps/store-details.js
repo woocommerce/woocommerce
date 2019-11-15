@@ -35,11 +35,17 @@ class StoreDetails extends Component {
 			showUsageModal: false,
 		};
 
+		const countryState =
+			( profileItems.hasOwnProperty( 'setup_client' ) &&
+				null !== profileItems.setup_client &&
+				settings.woocommerce_default_country ) ||
+			'';
+
 		this.initialValues = {
 			addressLine1: settings.woocommerce_store_address || '',
 			addressLine2: settings.woocommerce_store_address_2 || '',
 			city: settings.woocommerce_store_city || '',
-			countryState: settings.woocommerce_default_country || '',
+			countryState,
 			postCode: settings.woocommerce_store_postcode || '',
 			isClient: profileItems.setup_client || false,
 		};
