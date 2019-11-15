@@ -7,8 +7,8 @@ import { render } from 'react-dom';
  * Renders a block component in the place of a specified set of selectors.
  *
  * @param {string}   selector   CSS selector to match the elements to replace.
- * @param {function} Block      React block to use as a replacement.
- * @param {function} [getProps] Function to generate the props object for the
+ * @param {Function} Block      React block to use as a replacement.
+ * @param {Function} [getProps] Function to generate the props object for the
  * block.
  */
 export default ( selector, Block, getProps = () => {} ) => {

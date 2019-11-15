@@ -55,7 +55,7 @@ const getCollectionHeaders = (
  * @param {Array}  [ids=[]]     Any ids for the collection request (these are
  *                              values that would be added to the route for a
  *                              route with id placeholders)
- * @return {array} an array of items stored in the collection.
+ * @return {Array} an array of items stored in the collection.
  */
 export const getCollection = (
 	state,

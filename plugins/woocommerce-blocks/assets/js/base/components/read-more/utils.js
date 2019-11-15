@@ -24,7 +24,7 @@ export const truncateHtml = ( html, length, ellipsis = '...' ) => {
  * value of the lines prop. Content is updated once limited.
  *
  * @param {string} originalContent Content to be clamped.
- * @param {object} targetElement Element which will contain the clamped content.
+ * @param {Object} targetElement Element which will contain the clamped content.
  * @param {integer} maxHeight Max height of the clamped content.
  * @param {string} ellipsis Character to append to clamped content.
  * @return {string} clamped content
@@ -44,7 +44,7 @@ export const clampLines = (
  * Calculate how long the content can be based on the maximum number of lines allowed, and client height.
  *
  * @param {string} originalContent Content to be clamped.
- * @param {object} targetElement Element which will contain the clamped content.
+ * @param {Object} targetElement Element which will contain the clamped content.
  * @param {integer} maxHeight Max height of the clamped content.
  */
 const calculateLength = ( originalContent, targetElement, maxHeight ) => {
@@ -72,7 +72,7 @@ const calculateLength = ( originalContent, targetElement, maxHeight ) => {
 /**
  * Move string markers. Used by calculateLength.
  *
- * @param {object} markers Markers for clamped content.
+ * @param {Object} markers Markers for clamped content.
  * @param {integer} currentHeight Current height of clamped content.
  * @param {integer} maxHeight Max height of the clamped content.
  */

@@ -49,7 +49,7 @@ export const getRouteIds = ( route ) => {
  * /wc/blocks/products/attributes/{attribute_id}/terms/{id}
  *
  * @param {string} route     The route to manipulate
- * @param {array}  matchIds  An array of named ids ( [ attribute_id, id ] )
+ * @param {Array}  matchIds  An array of named ids ( [ attribute_id, id ] )
  *
  * @return {string} The route with new id placeholders
  */

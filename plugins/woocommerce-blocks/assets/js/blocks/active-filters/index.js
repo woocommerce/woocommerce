@@ -10,38 +10,30 @@ import Gridicon from 'gridicons';
  */
 import edit from './edit.js';
 
-registerBlockType( 'woocommerce/attribute-filter', {
-	title: __( 'Filter Products by Attribute', 'woo-gutenberg-products-block' ),
+registerBlockType( 'woocommerce/active-filters', {
+	title: __( 'Active Product Filters', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Gridicon icon="menus" />,
+		src: <Gridicon icon="list-checkmark" />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display a list of filters based on a chosen product attribute.',
+		'Display a list of active product filters.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {},
+	example: {
+		attributes: {},
+	},
 	attributes: {
-		attributeId: {
-			type: 'number',
-			default: 0,
-		},
-		showCounts: {
-			type: 'boolean',
-			default: true,
-		},
-		queryType: {
+		displayStyle: {
 			type: 'string',
-			default: 'or',
+			default: 'list',
 		},
 		heading: {
 			type: 'string',
-			default: __(
-				'Filter by attribute',
-				'woo-gutenberg-products-block'
-			),
+			default: __( 'Active filters', 'woo-gutenberg-products-block' ),
 		},
 		headingLevel: {
 			type: 'number',
@@ -53,17 +45,9 @@ registerBlockType( 'woocommerce/attribute-filter', {
 	 * Save the props to post content.
 	 */
 	save( { attributes } ) {
-		const {
-			showCounts,
-			queryType,
-			attributeId,
-			heading,
-			headingLevel,
-		} = attributes;
+		const { displayStyle, heading, headingLevel } = attributes;
 		const data = {
-			'data-attribute-id': attributeId,
-			'data-show-counts': showCounts,
-			'data-query-type': queryType,
+			'data-display-style': displayStyle,
 			'data-heading': heading,
 			'data-heading-level': headingLevel,
 		};
@@ -71,7 +55,7 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			<div className="is-loading" { ...data }>
 				<span
 					aria-hidden
-					className="wc-block-product-attribute-filter__placeholder"
+					className="wc-block-active-product-filters__placeholder"
 				/>
 			</div>
 		);

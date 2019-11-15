@@ -3,13 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import {
-	Fragment,
-	useCallback,
-	useMemo,
-	useState,
-	useEffect,
-} from '@wordpress/element';
+import { Fragment, useMemo, useState } from '@wordpress/element';
 import classNames from 'classnames';
 
 /**
@@ -24,16 +18,12 @@ const CheckboxList = ( {
 	className,
 	onChange = () => {},
 	options = [],
+	checked = [],
 	isLoading = false,
+	isDisabled = false,
 	limit = 10,
 } ) => {
-	// Holds all checked options.
-	const [ checked, setChecked ] = useState( [] );
 	const [ showExpanded, setShowExpanded ] = useState( false );
-
-	useEffect( () => {
-		onChange( checked );
-	}, [ checked ] );
 
 	const placeholder = useMemo( () => {
 		return [ ...Array( 5 ) ].map( ( x, i ) => (
@@ -46,24 +36,6 @@ const CheckboxList = ( {
 			/>
 		) );
 	}, [] );
-
-	const onCheckboxChange = useCallback(
-		( event ) => {
-			const isChecked = event.target.checked;
-			const checkedValue = event.target.value;
-			const newChecked = checked.filter(
-				( value ) => value !== checkedValue
-			);
-
-			if ( isChecked ) {
-				newChecked.push( checkedValue );
-				newChecked.sort();
-			}
-
-			setChecked( newChecked );
-		},
-		[ checked ]
-	);
 
 	const renderedShowMore = useMemo( () => {
 		const optionCount = options.length;
@@ -135,8 +107,9 @@ const CheckboxList = ( {
 								type="checkbox"
 								id={ option.key }
 								value={ option.key }
-								onChange={ onCheckboxChange }
+								onChange={ onChange }
 								checked={ checked.includes( option.key ) }
+								disabled={ isDisabled }
 							/>
 							<label htmlFor={ option.key }>
 								{ option.label }
@@ -155,9 +128,9 @@ const CheckboxList = ( {
 		checked,
 		showExpanded,
 		limit,
-		onCheckboxChange,
 		renderedShowLess,
 		renderedShowMore,
+		isDisabled,
 	] );
 
 	const classes = classNames(
@@ -183,8 +156,10 @@ CheckboxList.propTypes = {
 			label: PropTypes.node.isRequired,
 		} )
 	),
+	checked: PropTypes.array,
 	className: PropTypes.string,
 	isLoading: PropTypes.bool,
+	isDisabled: PropTypes.bool,
 	limit: PropTypes.number,
 };
 

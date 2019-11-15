@@ -32,7 +32,7 @@ import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
  *    @type {bool}     addingToCart  Whether the product is currently being
  *                                   added to the cart (true).
  *    @type {bool}     cartIsLoading Whether the cart is being loaded.
- *    @type {function} addToCart     An action dispatcher for adding a single
+ *    @type {Function} addToCart     An action dispatcher for adding a single
  *                                   quantity of the product to the cart.
  *                                   Receives no arguments, it operates on the
  *                                   current product.

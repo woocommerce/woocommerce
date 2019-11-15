@@ -21,7 +21,7 @@ import { useShallowEqual } from './use-shallow-equal';
  * @param {string} options.resourceName   The name of the resource for the
  *                                        collection. Example:
  *                                        `'products/attributes'`
- * @param {array}  options.resourceValues An array of values (in correct order)
+ * @param {Array}  options.resourceValues An array of values (in correct order)
  *                                        that are substituted in the route
  *                                        placeholders for the collection route.
  *                                        Example: `[10, 20]`
