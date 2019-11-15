@@ -46,6 +46,9 @@ function wc_get_products( $args ) {
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
+ * This function should only be called after 'init' action is finished, as there might be taxonomies that are getting
+ * registered during the init action.
+ *
  * @since 2.2.0
  *
  * @param mixed $the_product Post object or post ID of the product.
