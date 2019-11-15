@@ -6,9 +6,10 @@ import {
 	useQueryStateByKey,
 	useQueryStateByContext,
 } from '@woocommerce/base-hooks';
-import { useCallback, Fragment } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { CURRENCY } from '@woocommerce/settings';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Component displaying a price filter.
@@ -62,7 +63,7 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 	const TagName = `h${ attributes.headingLevel }`;
 
 	return (
-		<Fragment>
+		<BlockErrorBoundary>
 			{ ! isPreview && attributes.heading && (
 				<TagName>{ attributes.heading }</TagName>
 			) }
@@ -81,7 +82,7 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 					isLoading={ isLoading }
 				/>
 			</div>
-		</Fragment>
+		</BlockErrorBoundary>
 	);
 };
 

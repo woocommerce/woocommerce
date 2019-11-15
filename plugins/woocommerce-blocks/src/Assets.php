@@ -117,6 +117,7 @@ class Assets {
 				'enableReviewRating' => 'yes' === get_option( 'woocommerce_enable_review_rating' ),
 				'productCount'       => array_sum( (array) $product_counts ),
 				'attributes'         => wc_get_attribute_taxonomies(),
+				'wcBlocksAssetUrl'   => plugins_url( 'assets/', __DIR__ ),
 			]
 		);
 	}

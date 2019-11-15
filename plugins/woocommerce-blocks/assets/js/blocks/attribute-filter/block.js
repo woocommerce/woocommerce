@@ -15,6 +15,7 @@ import {
 } from '@wordpress/element';
 import { sortBy } from 'lodash';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Internal dependencies
@@ -173,7 +174,7 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 	const TagName = `h${ attributes.headingLevel }`;
 
 	return (
-		<Fragment>
+		<BlockErrorBoundary>
 			{ ! isPreview && attributes.heading && (
 				<TagName>{ attributes.heading }</TagName>
 			) }
@@ -185,7 +186,7 @@ const AttributeFilterBlock = ( { attributes, isPreview = false } ) => {
 					isLoading={ attributeTermsLoading }
 				/>
 			</div>
-		</Fragment>
+		</BlockErrorBoundary>
 	);
 };
 
