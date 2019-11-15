@@ -1,8 +1,8 @@
 # WooCommerce Product Blocks
 
-Feature plugin for WooCommerce + Gutenberg. Now that the product blocks have been merged into WooCommerce 3.6, this plugin serves as a space to iterate and explore how else WooCommerce might work with the block editor. 
+Feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks for WooCommerce, and how WooCommerce might work with the block editor.
 
-If you're just looking to use these blocks, update to WooCommerce 3.6! The blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
+If you're just looking to use these blocks, update to the latest version of WooCommerce! The blocks are bundled into WooCommerce since version 3.6, and can be added from the "WooCommerce" section in the block inserter.
 
 If you want to see what we're working on for future versions, or want to help out, read on.
 
@@ -22,13 +22,13 @@ If you want to see what we're working on for future versions, or want to help ou
 
 We release a new version of WooCommerce Blocks onto WordPress.org every few weeks, which can be used as an easier way to preview the features.
 
-1. Make sure you have WordPress 5.0+ and WooCommerce 3.6+
+1. Make sure you have WordPress 5.0+ and WooCommerce 3.7+
 2. The stable version is available on WordPress.org. [Download the stable version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
 3. Activate the plugin.
 
 ## Installing the development version
 
-1. Make sure you have WordPress 5.0+ and WooCommerce 3.6+
+1. Make sure you have WordPress 5.0+ and WooCommerce 3.7+
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
 3. `npm install` to install the dependencies.
 4. `composer install` to install core dependencies.

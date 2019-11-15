@@ -9,7 +9,7 @@
  * Text Domain:  woo-gutenberg-products-block
  * Requires at least: 5.0
  * Requires PHP: 5.6
- * WC requires at least: 3.6
+ * WC requires at least: 3.7
  * WC tested up to: 3.8
  *
  * @package WooCommerce\Blocks
@@ -18,8 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$minimum_wp_version  = '5.0';
-$minimum_php_version = '5.6';
+$minimum_wp_version = '5.0';
 
 /**
  * Whether notices must be displayed in the current page (plugins and WooCommerce pages).
@@ -59,27 +58,6 @@ if ( version_compare( $GLOBALS['wp_version'], $minimum_wp_version, '<' ) ) {
 		}
 	}
 	add_action( 'admin_notices', 'woocommerce_blocks_admin_unsupported_wp_notice' );
-	return;
-}
-
-if ( version_compare( PHP_VERSION, $minimum_php_version, '<' ) ) {
-	/**
-	 * Outputs an admin notice for folks running an outdated version of PHP.
-	 *
-	 * @todo: Remove once WP 5.2 is the minimum version.
-	 *
-	 * @since $VID:$
-	 */
-	function woocommerce_blocks_admin_unsupported_php_notice() {
-		if ( should_display_compatibility_notices() ) {
-			?>
-			<div class="notice notice-error is-dismissible">
-				<p><?php esc_html_e( 'WooCommerce Blocks requires a more recent version of PHP and has been paused. Please update PHP to continue enjoying WooCommerce Blocks.', 'woo-gutenberg-products-block' ); ?></p>
-			</div>
-			<?php
-		}
-	}
-	add_action( 'admin_notices', 'woocommerce_blocks_admin_unsupported_php_notice' );
 	return;
 }
 
