@@ -6,7 +6,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import Gridicon from 'gridicons';
 import { Fragment } from '@wordpress/element';
 import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
-import { InspectorControls } from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 import { ProductImage } from '@woocommerce/atomic-components/product';
 import { previewProducts } from '@woocommerce/resource-previews';

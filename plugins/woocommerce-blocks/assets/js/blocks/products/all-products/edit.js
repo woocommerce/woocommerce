@@ -7,7 +7,7 @@ import {
 	BlockControls,
 	InnerBlocks,
 	InspectorControls,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 import { withDispatch, withSelect } from '@wordpress/data';
 import {
 	PanelBody,
