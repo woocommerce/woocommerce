@@ -188,8 +188,16 @@ install_deps() {
 		# Default to the pull request repo if this is a PR, otherwise default.
 		REPO=${TRAVIS_PULL_REQUEST_SLUG:-$TRAVIS_REPO_SLUG}
 		BRANCH="$(sed 's/#/%23/' <<<$BRANCH)"
-		# Install with WP CLI.
-		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
+		# Checkout plugin via Git so all files are gathered.
+		cd "$WP_CORE_DIR/wp-content/plugins"
+		git clone https://github.com/woocommerce/woocommerce-admin.git
+		cd woocommerce-admin
+		git fetch origin $BRANCH
+		git checkout -b $BRANCH origin/$BRANCH
+		# Activate the plugin
+		cd "$WP_CORE_DIR"
+		php wp-cli.phar plugin activate woocommerce-admin
+
 	fi
 
 	# Back to original dir

@@ -19,10 +19,8 @@
   ],
   "scripts": {
     "prebuild": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
-    "build": "npm run build:feature-config && npm run build:packages && npm run build:plugin",
+    "build": "npm run build:feature-config && npm run build:packages && cross-env NODE_ENV=production webpack",
     "postbuild": "npm run -s i18n:php && npm run -s i18n:pot",
-    "build:core": "cross-env NODE_ENV=production webpack",
-    "build:plugin": "cross-env NODE_ENV=production WC_ADMIN_PHASE=plugin webpack",
     "build:feature-config": "php bin/generate-feature-config.php",
     "build:packages": "node ./bin/packages/build.js",
     "build:release": "./bin/build-plugin-zip.sh",

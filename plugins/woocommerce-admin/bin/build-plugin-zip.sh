@@ -1,12 +1,17 @@
 #!/bin/bash
 
 ZIP_FILE='woocommerce-admin.zip';
+IS_CUSTOM_BUILD=false;
+SLUG='';
 
 while [ $# -gt 0 ]; do
 	if [[ $1 == '-f' || $1 == '--features' ]]; then
 		export WC_ADMIN_ADDITIONAL_FEATURES="$2"
+		IS_CUSTOM_BUILD=true
 	fi
 	if [[ $1 == '-s' || $1 == '--slug' ]]; then
+		IS_CUSTOM_BUILD=true
+		SLUG=$2
 		ZIP_FILE="woocommerce-admin-$2.zip";
 	fi
 	shift
@@ -39,6 +44,31 @@ warning () {
 }
 
 status "💃 Time to release WooCommerce Admin 🕺"
+
+warning "Please enter the version number to tag, for example, 1.0.0: "
+read -r VERSION
+
+if [ $IS_CUSTOM_BUILD = true ]; then
+	PLUGIN_TAG="${VERSION}-${SLUG}"
+
+	warning "You are building a custom build of wc-admin with these features ${GREEN_BOLD}$WC_ADMIN_ADDITIONAL_FEATURES${YELLOW_BOLD} applied."
+	warning "A release on Github will be made with the tag ${GREEN_BOLD}$PLUGIN_TAG${COLOR_RESET}"
+	warning "The resulting zip will be called ${GREEN_BOLD}$ZIP_FILE${COLOR_RESET}"
+else
+	PLUGIN_TAG="${VERSION}-plugin"
+	CORE_TAG="${VERSION}"
+
+	warning "You are building a regular release of wc-admin."
+	warning "A plugin and Core release will be made to Github with the tags ${GREEN_BOLD}$PLUGIN_TAG${YELLOW_BOLD} and ${GREEN_BOLD}$CORE_TAG${COLOR_RESET}"
+fi
+
+warning "Ready to proceed? [y/N]: "
+read -r PROCEED
+
+if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
+  error "Release cancelled!"
+  exit 1
+fi
 
 # Make sure there are no changes in the working tree. Release builds should be
 # traceable to a particular commit and reliably reproducible. (This is not
@@ -77,25 +107,26 @@ fi
 status "Gathering PHP dependencies... 🐿️"
 composer install --no-dev
 
-# Run the build.
-status "Generating build... 👷‍♀️"
-npm run build
-npm run docs
+# Build the plugin files.
+status "Generating the plugin build... 👷‍♀️"
+ WC_ADMIN_PHASE=plugin npm run build
 
-build_files=$(ls dist/*/*.{js,css})
+# Make a Github release.
+status "Starting a Github release... 👷‍♀️"
+./bin/github-deploy.sh ${PLUGIN_TAG} ${ZIP_FILE}
 
-# Generate the plugin zip file.
-status "Creating archive... 🎁"
-zip -r ${ZIP_FILE} \
-	woocommerce-admin.php \
-	uninstall.php \
-	includes/ \
-	images/ \
-	$build_files \
-	languages/woocommerce-admin.pot \
-	languages/woocommerce-admin.php \
-	readme.txt \
-	src/ \
-	vendor/
+if [ $IS_CUSTOM_BUILD = false ]; then
+	# Install PHP dependencies
+	status "Gathering PHP dependencies... 🐿️"
+	composer install --no-dev
+
+	# Build the Core files.
+	status "Generating a Core build... 👷‍♀️"
+	WC_ADMIN_PHASE=core npm run build
+
+	# Make a Github release.
+	status "Starting a Github release... 👷‍♀️"
+	./bin/github-deploy.sh ${CORE_TAG} ${ZIP_FILE}
+fi
 
 success "Done. You've built WooCommerce Admin! 🎉 "
