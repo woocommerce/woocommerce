@@ -77,7 +77,7 @@ class Search extends Component {
 			const formattedOption = {
 				key: autocompleter.getOptionIdentifier( option ),
 				label: autocompleter.getOptionLabel( option, query ),
-				keywords: autocompleter.getOptionKeywords( option ),
+				keywords: autocompleter.getOptionKeywords( option ).filter( Boolean ),
 				value: option,
 			};
 			formattedOptions.push( formattedOption );
