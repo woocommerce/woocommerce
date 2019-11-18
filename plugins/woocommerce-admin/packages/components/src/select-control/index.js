@@ -94,6 +94,8 @@ export class SelectControl extends Component {
 		const { query } = this.state;
 		const newSelected = multiple ? [ ...selected, option ] : [ option ];
 
+		this.reset( newSelected );
+
 		// Trigger a change if the selected value is different and pass back
 		// an array or string depending on the original value.
 		if ( Array.isArray( selected ) ) {
@@ -104,8 +106,6 @@ export class SelectControl extends Component {
 		} else if ( selected !== option.key ) {
 			onChange( option.key, query );
 		}
-
-		this.reset( newSelected );
 	}
 
 	decrementSelectedIndex() {
