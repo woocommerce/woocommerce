@@ -173,6 +173,12 @@ class WC_Admin_Duplicate_Product {
 				$child_duplicate->set_id( 0 );
 				$child_duplicate->set_date_created( null );
 
+				// If we wait and let the insertion generate the slug, we will see extreme performance degradation
+				// in the case where a product is used as a template. Every time the template is duplicated, each
+				// variation will query every consecutive slug until it finds an empty one. To avoid this, we can
+				// optimize the generation ourselves, avoiding the issue altogether.
+				$this->generate_unique_slug( $child_duplicate );
+
 				if ( '' !== $child->get_sku( 'edit' ) ) {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
 				}
@@ -223,6 +229,42 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		return $post;
+	}
+
+	/**
+	 * Generates a unique slug for a given product. We do this so that we can override the
+	 * behavior of wp_unique_post_slug(). The normal slug generation will run single
+	 * select queries on every non-unique slug, resulting in very bad performance.
+	 *
+	 * @param WC_Product $product The product to generate a slug for.
+	 */
+	private function generate_unique_slug( $product ) {
+		global $wpdb;
+
+		// We want to remove the suffix from the slug so that we can find the maximum suffix using this root slug.
+		// This will allow us to find the next-highest suffix that is unique. While this does not support gap
+		// filling, this shouldn't matter for our use-case.
+		$root_slug = preg_replace( '/-[0-9]+$/', '', $product->get_slug() );
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare( "SELECT post_name FROM $wpdb->posts WHERE post_name LIKE %s AND post_type IN ( 'product', 'product_variation' )", $root_slug . '%' )
+		);
+
+		// The slug is already unique!
+		if ( empty( $results ) ) {
+			return;
+		}
+
+		// Find the maximum suffix so we can ensure uniqueness.
+		$max_suffix = 1;
+		foreach ( $results as $result ) {
+			$suffix = intval( substr( $result->post_name, strrpos( $result->post_name, '-' ) + 1 ) );
+			if ( $suffix > $max_suffix ) {
+				$max_suffix = $suffix;
+			}
+		}
+
+		$product->set_slug( $root_slug . '-' . ( $max_suffix + 1 ) );
 	}
 }
 
