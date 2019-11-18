@@ -137,11 +137,17 @@ class Control extends Component {
 		const { isFocused, isSearchable, multiple, query, selected } = this.props;
 		const selectedValue = selected.length ? selected[ 0 ].label : '';
 
-		if ( ! isSearchable && multiple ) {
-			return '';
+		// Show the selected value for simple select dropdowns.
+		if ( ! multiple && ! isFocused ) {
+			return selectedValue;
 		}
 
-		return isSearchable && isFocused ? query : selectedValue;
+		// Show the search query when focused on searchable controls.
+		if ( isSearchable && isFocused ) {
+			return query;
+		}
+
+		return '';
 	}
 
 	render() {
