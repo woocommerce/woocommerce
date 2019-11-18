@@ -384,9 +384,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Creates base store starter pages like my account and checkout.
 	 * Note that WC_Install::create_pages already checks if pages exist before creating them again.
+	 *
+	 * @return bool
 	 */
 	public static function create_store_pages() {
 		\WC_Install::create_pages();
+		return true;
 	}
 
 	/**
