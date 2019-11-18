@@ -3,8 +3,10 @@
  */
 import NumberFormat from 'react-number-format';
 import classnames from 'classnames';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 
 const ProductPrice = ( { className, product } ) => {
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const prices = product.prices || {};
 	const numberFormatArgs = {
 		displayType: 'text',
@@ -24,10 +26,12 @@ const ProductPrice = ( { className, product } ) => {
 			<div
 				className={ classnames(
 					className,
-					'wc-block-grid__product-price'
+					`${ layoutStyleClassPrefix }__product-price`
 				) }
 			>
-				<span className="wc-block-grid__product-price__value">
+				<span
+					className={ `${ layoutStyleClassPrefix }__product-price__value` }
+				>
 					<NumberFormat
 						value={ prices.price_range.min_amount }
 						{ ...numberFormatArgs }
@@ -46,18 +50,22 @@ const ProductPrice = ( { className, product } ) => {
 		<div
 			className={ classnames(
 				className,
-				'wc-block-grid__product-price'
+				`${ layoutStyleClassPrefix }__product-price`
 			) }
 		>
 			{ prices.regular_price !== prices.price && (
-				<del className="wc-block-grid__product-price__regular">
+				<del
+					className={ `${ layoutStyleClassPrefix }__product-price__regular` }
+				>
 					<NumberFormat
 						value={ prices.regular_price }
 						{ ...numberFormatArgs }
 					/>
 				</del>
 			) }
-			<span className="wc-block-grid__product-price__value">
+			<span
+				className={ `${ layoutStyleClassPrefix }__product-price__value` }
+			>
 				<NumberFormat value={ prices.price } { ...numberFormatArgs } />
 			</span>
 		</div>
