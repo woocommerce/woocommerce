@@ -366,15 +366,18 @@ class WC_Order extends WC_Abstract_Order {
 					/* translators: 1: old order status 2: new order status */
 					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
 
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $status_transition );
+
 					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
 				} else {
 					/* translators: %s: new order status */
 					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
-				}
 
-				// Note the transition occurred.
-				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $status_transition );
+				}
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
 				$logger->error(
@@ -1705,6 +1708,19 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		return $comment_id;
+	}
+
+	/**
+	 * Add an order note for status transition
+	 *
+	 * @since 3.9.0
+	 * @uses WC_Order::add_order_note()
+	 * @param string $note          Note to be added giving status transition from and to details.
+	 * @param bool   $transition    Details of the status transition.
+	 * @return int                  Comment ID.
+	 */
+	private function add_status_transition_note( $note, $transition ) {
+		return $this->add_order_note( trim( $transition['note'] . ' ' . $note ), 0, $transition['manual'] );
 	}
 
 	/**
