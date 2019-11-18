@@ -303,15 +303,16 @@ class WC_Structured_Data {
 				foreach ( $comments as $comment ) {
 					$markup['review'][] = array(
 						'@type'         => 'Review',
-						'author'        => array(
-							'@type' => 'Person',
-							'name'  => get_comment_author( $comment->comment_ID ),
-						),
 						'reviewRating'  => array(
 							'@type'       => 'Rating',
 							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
 						),
-						'datePublished' => get_comment_date( 'c', $comment->comment_ID ),
+						'author'        => array(
+							'@type' => 'Person',
+							'name'  => get_comment_author( $comment ),
+						),
+						'reviewBody'    => get_comment_text( $comment ),
+						'datePublished' => get_comment_date( 'c', $comment ),
 					);
 				}
 			}
