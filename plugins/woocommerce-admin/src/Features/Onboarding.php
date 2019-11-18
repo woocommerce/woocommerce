@@ -261,7 +261,7 @@ class Onboarding {
 	}
 
 	/**
-	 * Check if theme has declared support for WooCommerce
+	 * Check if theme has declared support for WooCommerce.
 	 *
 	 * @param WP_Theme $theme Theme to check.
 	 * @return bool
@@ -470,6 +470,7 @@ class Onboarding {
 	/**
 	 * Gets an array of plugins that can be installed & activated via the onboarding wizard.
 	 *
+	 * @return array
 	 * @todo Handle edgecase of where installed plugins may have versioned folder names (i.e. `jetpack-master/jetpack.php`).
 	 */
 	public static function get_allowed_plugins() {

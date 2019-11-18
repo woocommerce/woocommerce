@@ -394,6 +394,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 	/**
 	 * Create a homepage from a template.
+	 *
+	 * @return WP_Error|array
 	 */
 	public static function create_homepage() {
 		$post_id = wp_insert_post(

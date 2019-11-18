@@ -160,7 +160,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Installs the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array Plugin Status
+	 * @return WP_Error|array Plugin Status
 	 */
 	public function install_plugin( $request ) {
 		$allowed_plugins = Onboarding::get_allowed_plugins();
@@ -234,7 +234,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Activate the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array Plugin Status
+	 * @return WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
 		$allowed_plugins = Onboarding::get_allowed_plugins();
@@ -274,7 +274,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Generates a Jetpack Connect URL.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array Connection URL for Jetpack
+	 * @return WP_Error|array Connection URL for Jetpack
 	 */
 	public function connect_jetpack( $request ) {
 		if ( ! class_exists( '\Jetpack' ) ) {
@@ -298,7 +298,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 *  Kicks off the WCCOM Connect process.
 	 *
-	 * @return array Connection URL for WooCommerce.com
+	 * @return WP_Error|array Connection URL for WooCommerce.com
 	 */
 	public function request_wccom_connect() {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
@@ -358,7 +358,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Finishes connecting to WooCommerce.com.
 	 *
 	 * @param  object $rest_request Request details.
-	 * @return array Contains success status.
+	 * @return WP_Error|array Contains success status.
 	 */
 	public function finish_wccom_connect( $rest_request ) {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
@@ -419,7 +419,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a URL that can be used to connect to PayPal.
 	 *
-	 * @return array Connect URL.
+	 * @return WP_Error|array Connect URL.
 	 */
 	public function connect_paypal() {
 		if ( ! function_exists( 'wc_gateway_ppec' ) ) {
@@ -450,7 +450,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a URL that can be used to connect to Square.
 	 *
-	 * @return array Connect URL.
+	 * @return WP_Error|array Connect URL.
 	 */
 	public function connect_square() {
 		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {
