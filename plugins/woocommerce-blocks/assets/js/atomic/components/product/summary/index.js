@@ -3,8 +3,10 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 
 const ProductSummary = ( { className, product } ) => {
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	if ( ! product.description ) {
 		return null;
 	}
@@ -13,7 +15,7 @@ const ProductSummary = ( { className, product } ) => {
 		<div
 			className={ classnames(
 				className,
-				'wc-block-grid__product-summary'
+				`${ layoutStyleClassPrefix }__product-summary`
 			) }
 			dangerouslySetInnerHTML={ {
 				__html: product.description,

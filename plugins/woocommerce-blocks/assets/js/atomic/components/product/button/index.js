@@ -15,6 +15,7 @@ import { useDispatch } from '@wordpress/data';
 import { find } from 'lodash';
 import { useCollection } from '@woocommerce/base-hooks';
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 
 /**
  * A custom hook for exposing cart related data for a given product id and an
@@ -94,6 +95,7 @@ const ProductButton = ( { product, className } ) => {
 		cartIsLoading,
 		addToCart,
 	} = useAddToCart( id );
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const addedToCart = cartQuantity > 0;
 	const getButtonText = () => {
 		if ( Number.isFinite( cartQuantity ) && addedToCart ) {
@@ -106,7 +108,7 @@ const ProductButton = ( { product, className } ) => {
 	};
 	const wrapperClasses = classnames(
 		className,
-		'wc-block-grid__product-add-to-cart',
+		`${ layoutStyleClassPrefix }__product-add-to-cart`,
 		'wp-block-button'
 	);
 

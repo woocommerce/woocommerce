@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useInnerBlockConfigurationContext } from '@woocommerce/base-context/inner-block-configuration-context';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 import withComponentId from '@woocommerce/base-hocs/with-component-id';
 
 /**
@@ -14,8 +15,9 @@ import { renderProductLayout } from './utils';
 const ProductListItem = ( { product, attributes, componentId } ) => {
 	const { layoutConfig } = attributes;
 	const { parentName } = useInnerBlockConfigurationContext();
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const isLoading = ! Object.keys( product ).length > 0;
-	const classes = classnames( 'wc-block-grid__product', {
+	const classes = classnames( `${ layoutStyleClassPrefix }__product`, {
 		'is-loading': isLoading,
 	} );
 

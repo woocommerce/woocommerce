@@ -3,11 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 
 const ProductSaleBadge = ( { className, product, align } ) => {
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const alignClass =
 		typeof align === 'string'
-			? 'wc-block-grid__product-onsale--align' + align
+			? `${ layoutStyleClassPrefix }__product-onsale--align${ align }`
 			: '';
 
 	if ( product && product.on_sale ) {
@@ -16,7 +18,7 @@ const ProductSaleBadge = ( { className, product, align } ) => {
 				className={ classnames(
 					className,
 					alignClass,
-					'wc-block-grid__product-onsale'
+					`${ layoutStyleClassPrefix }__product-onsale`
 				) }
 			>
 				{ __( 'Sale', 'woo-gutenberg-products-block' ) }

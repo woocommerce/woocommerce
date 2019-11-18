@@ -11,6 +11,7 @@ import {
 	useSynchronizedQueryState,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 
 /**
  * Internal dependencies
@@ -55,9 +56,8 @@ const ProductList = ( {
 	const [ queryState ] = useSynchronizedQueryState(
 		generateQuery( { attributes, sortValue, currentPage } )
 	);
-	// @todo should add an <ErrorBoundary> in parent component to handle any
-	// errors from the store and format etc.
 	const { products, totalProducts } = useStoreProducts( queryState );
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const onPaginationChange = ( newPage ) => {
 		scrollToTop( { focusableSelector: 'a, button' } );
 		onPageChange( newPage );
@@ -68,7 +68,7 @@ const ProductList = ( {
 		const alignClass = typeof align !== 'undefined' ? 'align' + align : '';
 
 		return classnames(
-			'wc-block-grid',
+			layoutStyleClassPrefix,
 			className,
 			alignClass,
 			'has-' + columns + '-columns',
@@ -94,7 +94,7 @@ const ProductList = ( {
 					value={ sortValue }
 				/>
 			) }
-			<ul className="wc-block-grid__products">
+			<ul className={ `${ layoutStyleClassPrefix }__products` }>
 				{ listProducts.map( ( product = {}, i ) => (
 					<ProductListItem
 						key={ product.id || i }

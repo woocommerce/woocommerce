@@ -2,99 +2,104 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { Component, Fragment } from 'react';
+import { Fragment, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/block-settings';
+import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
 
 /**
  * Internal dependencies
  */
 import { ProductSaleBadge } from '../../../components/product';
 
-class ProductImage extends Component {
-	static propTypes = {
-		className: PropTypes.string,
-		product: PropTypes.object.isRequired,
-		productLink: PropTypes.bool,
-		showSaleBadge: PropTypes.bool,
-		saleBadgeAlign: PropTypes.string,
-	};
+const SaleBadge = ( { product, saleBadgeAlign, shouldRender } ) => {
+	return shouldRender ? (
+		<ProductSaleBadge product={ product } align={ saleBadgeAlign } />
+	) : null;
+};
 
-	static defaultProps = {
-		productLink: true,
-		showSaleBadge: true,
-		saleBadgeAlign: 'right',
-	};
+const Image = ( { layoutPrefix, loaded, image, onLoad } ) => {
+	const cssClass = classnames( `${ layoutPrefix }__product-image__image`, {
+		[ `${ layoutPrefix }__product-image__image_placeholder` ]:
+			! loaded && ! image,
+	} );
+	const { thumbnail, srcset, sizes, alt } = image || {};
+	return (
+		<Fragment>
+			{ image && (
+				<img
+					className={ cssClass }
+					src={ thumbnail }
+					srcSet={ srcset }
+					sizes={ sizes }
+					alt={ alt }
+					onLoad={ onLoad }
+					hidden={ ! loaded }
+				/>
+			) }
+			{ ! loaded && (
+				<img
+					className={ cssClass }
+					src={ PLACEHOLDER_IMG_SRC }
+					alt=""
+				/>
+			) }
+		</Fragment>
+	);
+};
 
-	state = {
-		loaded: false,
-	};
+const ProductImage = ( {
+	className,
+	product,
+	productLink = true,
+	showSaleBadge = true,
+	saleBadgeAlign = 'right',
+} ) => {
+	const [ imageLoaded, setImageLoaded ] = useState( false );
+	const { layoutStyleClassPrefix } = useProductLayoutContext();
+	const image =
+		product.images && product.images.length ? product.images[ 0 ] : null;
 
-	onImageLoaded = () => {
-		this.setState( {
-			loaded: true,
-		} );
-	};
+	const renderedSalesAndImage = (
+		<Fragment>
+			<SaleBadge
+				product={ product }
+				saleBadgeAlign={ saleBadgeAlign }
+				shouldRender={ showSaleBadge }
+			/>
+			<Image
+				layoutPrefix={ layoutStyleClassPrefix }
+				loaded={ imageLoaded }
+				image={ image }
+				onLoad={ () => setImageLoaded( true ) }
+			/>
+		</Fragment>
+	);
 
-	renderSaleBadge = () => {
-		const { product, saleBadgeAlign } = this.props;
-		return (
-			<ProductSaleBadge product={ product } align={ saleBadgeAlign } />
-		);
-	};
+	return (
+		<div
+			className={ classnames(
+				className,
+				`${ layoutStyleClassPrefix }__product-image`
+			) }
+		>
+			{ productLink ? (
+				<a href={ product.permalink } rel="nofollow">
+					{ renderedSalesAndImage }
+				</a>
+			) : (
+				{ renderedSalesAndImage }
+			) }
+		</div>
+	);
+};
 
-	renderImage = ( image ) => {
-		const { loaded } = this.state;
-		return (
-			<Fragment>
-				{ image && (
-					<img
-						className="wc-block-grid__product-image__image"
-						src={ image.thumbnail }
-						srcSet={ image.srcset }
-						sizes={ image.sizes }
-						alt={ image.alt }
-						onLoad={ this.onImageLoaded }
-						hidden={ ! loaded }
-					/>
-				) }
-				{ ! loaded && (
-					<img
-						className="wc-block-grid__product-image__image wc-block-grid__product-image__image_placeholder"
-						src={ PLACEHOLDER_IMG_SRC }
-						alt=""
-					/>
-				) }
-			</Fragment>
-		);
-	};
-
-	render() {
-		const { className, product, productLink, showSaleBadge } = this.props;
-		const image =
-			product.images && product.images.length ? product.images[ 0 ] : {};
-
-		return (
-			<div
-				className={ classnames(
-					className,
-					'wc-block-grid__product-image'
-				) }
-			>
-				{ productLink ? (
-					<a href={ product.permalink } rel="nofollow">
-						{ showSaleBadge && this.renderSaleBadge() }
-						{ this.renderImage( image ) }
-					</a>
-				) : (
-					<Fragment>
-						{ showSaleBadge && this.renderSaleBadge() }
-						{ this.renderImage( image ) }
-					</Fragment>
-				) }
-			</div>
-		);
-	}
-}
+ProductImage.propTypes = {
+	className: PropTypes.string,
+	product: PropTypes.object.isRequired,
+	productLink: PropTypes.bool,
+	showSaleBadge: PropTypes.bool,
+	saleBadgeAlign: PropTypes.string,
+};
 
 export default ProductImage;

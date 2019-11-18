@@ -25,6 +25,9 @@ import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import { HAS_PRODUCTS } from '@woocommerce/block-settings';
+import { InnerBlockConfigurationProvider } from '@woocommerce/base-context/inner-block-configuration-context';
+import { ProductLayoutContextProvider } from '@woocommerce/base-context/product-layout-context';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Internal dependencies
@@ -41,6 +44,12 @@ import {
 } from '../base-utils';
 import { getSharedContentControls, getSharedListControls } from '../edit';
 import Block from './block';
+
+const layoutContextConfig = {
+	layoutStyleClassPrefix: 'wc-block-grid',
+};
+
+const parentBlockConfig = { parentName: 'woocommerce/all-products' };
 
 /**
  * Component to handle edit mode of "All Products".
@@ -274,16 +283,24 @@ class Editor extends Component {
 		}
 
 		return (
-			<div
-				className={ getBlockClassName(
-					'wc-block-all-products',
-					attributes
-				) }
-			>
-				{ this.getBlockControls() }
-				{ this.getInspectorControls() }
-				{ isEditing ? this.renderEditMode() : this.renderViewMode() }
-			</div>
+			<BlockErrorBoundary>
+				<InnerBlockConfigurationProvider value={ parentBlockConfig }>
+					<ProductLayoutContextProvider value={ layoutContextConfig }>
+						<div
+							className={ getBlockClassName(
+								'wc-block-all-products',
+								attributes
+							) }
+						>
+							{ this.getBlockControls() }
+							{ this.getInspectorControls() }
+							{ isEditing
+								? this.renderEditMode()
+								: this.renderViewMode() }
+						</div>
+					</ProductLayoutContextProvider>
+				</InnerBlockConfigurationProvider>
+			</BlockErrorBoundary>
 		);
 	};
 }
