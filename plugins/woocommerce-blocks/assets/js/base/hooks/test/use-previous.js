@@ -9,8 +9,8 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { usePrevious } from '../use-previous';
 
 describe( 'usePrevious', () => {
-	const TestComponent = ( { testValue } ) => {
-		const previousValue = usePrevious( testValue );
+	const TestComponent = ( { testValue, validation } ) => {
+		const previousValue = usePrevious( testValue, validation );
 		return <div testValue={ testValue } previousValue={ previousValue } />;
 	};
 
@@ -53,5 +53,37 @@ describe( 'usePrevious', () => {
 			.previousValue;
 		expect( testValue ).toBe( 3 );
 		expect( testPreviousValue ).toBe( 2 );
+	} );
+
+	it( 'should not update value if validation fails', () => {
+		let testValue;
+		let testPreviousValue;
+		act( () => {
+			renderer = TestRenderer.create(
+				<TestComponent testValue={ 1 } validation={ Number.isFinite } />
+			);
+		} );
+
+		act( () => {
+			renderer.update(
+				<TestComponent testValue="abc" validation={ Number.isFinite } />
+			);
+		} );
+		testValue = renderer.root.findByType( 'div' ).props.testValue;
+		testPreviousValue = renderer.root.findByType( 'div' ).props
+			.previousValue;
+		expect( testValue ).toBe( 'abc' );
+		expect( testPreviousValue ).toBe( 1 );
+
+		act( () => {
+			renderer.update(
+				<TestComponent testValue={ 3 } validation={ Number.isFinite } />
+			);
+		} );
+		testValue = renderer.root.findByType( 'div' ).props.testValue;
+		testPreviousValue = renderer.root.findByType( 'div' ).props
+			.previousValue;
+		expect( testValue ).toBe( 3 );
+		expect( testPreviousValue ).toBe( 1 );
 	} );
 } );
