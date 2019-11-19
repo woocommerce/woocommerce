@@ -6,9 +6,11 @@ import classnames from 'classnames';
 import Pagination from '@woocommerce/base-components/pagination';
 import ProductSortSelect from '@woocommerce/base-components/product-sort-select';
 import ProductListItem from '@woocommerce/base-components/product-list-item';
+import { useEffect, useRef } from '@wordpress/element';
 import {
 	useStoreProducts,
 	useSynchronizedQueryState,
+	usePrevious,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
@@ -56,7 +58,24 @@ const ProductList = ( {
 	const [ queryState ] = useSynchronizedQueryState(
 		generateQuery( { attributes, sortValue, currentPage } )
 	);
-	const { products, totalProducts } = useStoreProducts( queryState );
+	const previousPage = usePrevious( queryState.page );
+	const isInitialized = useRef( false );
+	useEffect( () => {
+		// if page did not change in the query state then that means something
+		// else changed and we should reset the current page number
+		if ( previousPage === queryState.page && isInitialized.current ) {
+			onPageChange( 1 );
+		}
+	}, [ queryState ] );
+
+	const { products, totalProducts, productsLoading } = useStoreProducts(
+		queryState
+	);
+	useEffect( () => {
+		if ( ! productsLoading ) {
+			isInitialized.current = true;
+		}
+	}, [ productsLoading ] );
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const onPaginationChange = ( newPage ) => {
 		scrollToTop( { focusableSelector: 'a, button' } );
