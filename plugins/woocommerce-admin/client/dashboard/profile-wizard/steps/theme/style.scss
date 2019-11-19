@@ -62,8 +62,9 @@
 	}
 
 	.woocommerce-profile-wizard__theme-image {
-		display: block;
 		width: 100%;
+		height: 300px;
+		background-size: cover;
 	}
 
 	.woocommerce-profile-wizard__theme-name {

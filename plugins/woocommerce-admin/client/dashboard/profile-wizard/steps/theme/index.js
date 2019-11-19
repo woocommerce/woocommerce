@@ -150,7 +150,12 @@ class Theme extends Component {
 		return (
 			<Card className="woocommerce-profile-wizard__theme" key={ theme.slug }>
 				{ image && (
-					<img alt={ title } src={ image } className="woocommerce-profile-wizard__theme-image" />
+					<div
+						className="woocommerce-profile-wizard__theme-image"
+						style={ { backgroundImage: `url(${ image })` } }
+						role="img"
+						aria-label={ title }
+					/>
 				) }
 				<div className="woocommerce-profile-wizard__theme-details">
 					<H className="woocommerce-profile-wizard__theme-name">
