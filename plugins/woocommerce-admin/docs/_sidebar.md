@@ -1,6 +1,6 @@
 * [Overview](/)
 * [Components](components/)
-* [Feature Flags](feature-flags)
+* [Features](features/)
 * [Data](data)
 * [Documentation](documentation)
 * [Layout](layout)
