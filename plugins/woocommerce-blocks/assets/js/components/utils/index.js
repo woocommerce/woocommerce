@@ -129,10 +129,11 @@ export const getCategory = ( categoryId ) => {
 /**
  * Get a promise that resolves to an array of category objects from the API.
  */
-export const getCategories = () => {
+export const getCategories = ( queryArgs ) => {
 	return apiFetch( {
 		path: addQueryArgs( `${ ENDPOINTS.products }/categories`, {
 			per_page: -1,
+			...queryArgs,
 		} ),
 	} );
 };

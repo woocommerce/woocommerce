@@ -24,6 +24,7 @@ const ProductCategoryControl = ( {
 	operator,
 	selected,
 	isSingle,
+	showReviewCount,
 } ) => {
 	const renderItem = ( args ) => {
 		const { item, search, depth = 0 } = args;
@@ -39,12 +40,18 @@ const ProductCategoryControl = ( {
 			? item.name
 			: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
 
-		return (
-			<SearchListItem
-				className={ classes.join( ' ' ) }
-				{ ...args }
-				showCount
-				aria-label={ sprintf(
+		const listItemAriaLabel = showReviewCount
+			? sprintf(
+					_n(
+						'%s, has %d review',
+						'%s, has %d reviews',
+						item.review_count,
+						'woo-gutenberg-products-block'
+					),
+					accessibleName,
+					item.review_count
+			  )
+			: sprintf(
 					_n(
 						'%s, has %d product',
 						'%s, has %d products',
@@ -53,7 +60,34 @@ const ProductCategoryControl = ( {
 					),
 					accessibleName,
 					item.count
-				) }
+			  );
+
+		const listItemCountLabel = showReviewCount
+			? sprintf(
+					_n(
+						'%d Review',
+						'%d Reviews',
+						item.review_count,
+						'woo-gutenberg-products-block'
+					),
+					item.review_count
+			  )
+			: sprintf(
+					_n(
+						'%d Product',
+						'%d Products',
+						item.count,
+						'woo-gutenberg-products-block'
+					),
+					item.count
+			  );
+		return (
+			<SearchListItem
+				className={ classes.join( ' ' ) }
+				{ ...args }
+				showCount
+				countLabel={ listItemCountLabel }
+				aria-label={ listItemAriaLabel }
 			/>
 		);
 	};
