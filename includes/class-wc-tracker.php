@@ -528,8 +528,25 @@ class WC_Tracker {
 			$gross_total = 0;
 		}
 
+		$processing_gross_total = $wpdb->get_var(
+			"
+			SELECT
+				SUM( order_meta.meta_value ) AS 'gross_total'
+			FROM {$wpdb->prefix}posts AS orders
+			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+			WHERE order_meta.meta_key =  '_order_total'
+				AND orders.post_status = 'wc-processing'
+			GROUP BY order_meta.meta_key
+		"
+		);
+
+		if ( is_null( $processing_gross_total ) ) {
+			$processing_gross_total = 0;
+		}
+
 		return array(
-			'gross' => $gross_total,
+			'gross'            => $gross_total,
+			'processing_gross' => $processing_gross_total,
 		);
 	}
 
@@ -559,7 +576,25 @@ class WC_Tracker {
 			);
 		}
 
-		return $min_max;
+		$processing_min_max = $wpdb->get_row(
+			"
+			SELECT
+				MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
+			FROM {$wpdb->prefix}posts
+			WHERE post_type = 'shop_order'
+			AND post_status = 'wc-processing'
+		",
+			ARRAY_A
+		);
+
+		if ( is_null( $processing_min_max ) ) {
+			$processing_min_max = array(
+				'processing_first' => '-',
+				'processing_last'  => '-',
+			);
+		}
+
+		return array_merge( $min_max, $processing_min_max );
 	}
 }
 
