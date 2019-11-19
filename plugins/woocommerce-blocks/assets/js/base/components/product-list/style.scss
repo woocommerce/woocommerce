@@ -11,6 +11,27 @@
 	text-align: center;
 }
 
+.wc-block-grid__no-products {
+	padding: $gap-largest;
+	text-align: center;
+	width: 100%;
+
+	.wc-block-grid__no-products-image {
+		max-width: 150px;
+		margin: 0 auto 1em;
+		display: block;
+	}
+	.wc-block-grid__no-products-title {
+		display: block;
+		margin: 0;
+		font-weight: bold;
+	}
+	.wc-block-grid__no-products-description {
+		display: block;
+		margin: 0.25em 0 1em 0;
+	}
+}
+
 .wc-block-grid__products {
 	display: flex;
 	flex-wrap: wrap;
