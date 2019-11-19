@@ -117,8 +117,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( file_exists( $file ) && class_exists( 'WC_Product_CSV_Importer' ) ) {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
-			global $locale;
-			$locale         = false; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			add_filter( 'locale', '__return_false', 9999 );
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
 			$args           = array(
 				'parse'   => true,
