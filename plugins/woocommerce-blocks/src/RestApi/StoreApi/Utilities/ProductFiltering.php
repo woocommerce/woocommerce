@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQuery;
 /**
  * Product Query fllters class.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class ProductQueryFilters {
 	/**

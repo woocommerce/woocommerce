@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductAttributeSchem
 /**
  * Product attributes API.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class ProductAttributes extends RestContoller {
 	/**

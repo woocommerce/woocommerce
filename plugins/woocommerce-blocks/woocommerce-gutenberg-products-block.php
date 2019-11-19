@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Blocks
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
  * Description: WooCommerce blocks for the Gutenberg editor.
- * Version: 2.5.0-dev
+ * Version: 2.5.0
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
@@ -23,7 +23,7 @@ $minimum_wp_version = '5.0';
 /**
  * Whether notices must be displayed in the current page (plugins and WooCommerce pages).
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 function should_display_compatibility_notices() {
 	$current_screen = get_current_screen();
@@ -46,7 +46,7 @@ if ( version_compare( $GLOBALS['wp_version'], $minimum_wp_version, '<' ) ) {
 	/**
 	 * Outputs for an admin notice about running WooCommerce Blocks on outdated WordPress.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 */
 	function woocommerce_blocks_admin_unsupported_wp_notice() {
 		if ( should_display_compatibility_notices() ) {

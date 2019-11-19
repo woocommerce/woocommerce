@@ -18,7 +18,7 @@ use Automattic\WooCommerce\Blocks\RestApi;
 /**
  * Takes care of bootstrapping the plugin.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Bootstrap {
 

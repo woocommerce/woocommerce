@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
 /**
  * AbstractBlock class.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class CartItemSchema extends AbstractSchema {
 	/**

@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Main package class. (Loader in the WC Core context as well)
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Package {
 
@@ -25,7 +25,7 @@ class Package {
 	 * class with Automattic\Woocommerce\Blocks\Container and make Package a
 	 * dependency.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 * @return Package  The Package instance class
 	 */
 	protected static function get_package() {
@@ -35,7 +35,7 @@ class Package {
 	/**
 	 * Init the package - load the blocks library and define constants.
 	 *
-	 * @since $VID:$ Handled by new NewPackage.
+	 * @since 2.5.0 Handled by new NewPackage.
 	 */
 	public static function init() {
 		self::container()->get( Bootstrap::class );
@@ -78,7 +78,7 @@ class Package {
 				NewPackage::class,
 				function ( $container ) {
 					// leave for automated version bumping.
-					$version = '2.5.0-dev';
+					$version = '2.5.0';
 					return new NewPackage(
 						$version,
 						WC_BLOCKS_PLUGIN_FILE

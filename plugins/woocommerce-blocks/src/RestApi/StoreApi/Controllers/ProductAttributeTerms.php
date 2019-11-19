@@ -20,7 +20,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\TermQuery;
 /**
  * Product attribute terms API.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class ProductAttributeTerms extends RestContoller {
 	/**

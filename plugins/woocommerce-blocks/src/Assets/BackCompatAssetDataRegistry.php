@@ -3,7 +3,7 @@
  * Backwards Compatibility file for plugins using wcSettings in prior versions
  *
  * @package WooCommerce/Blocks
- * @since $VID:$
+ * @since 2.5.0
  */
 
 namespace Automattic\WooCommerce\Blocks\Assets;
@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\Blocks\Assets;
  *
  * Note: This will be removed at some point.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class BackCompatAssetDataRegistry extends AssetDataRegistry {
 	/**
@@ -28,7 +28,7 @@ class BackCompatAssetDataRegistry extends AssetDataRegistry {
 		 * Back-compat filter, developers, use 'woocommerce_shared_settings'
 		 * filter, not this one.
 		 *
-		 * @deprecated $VID:$
+		 * @deprecated 2.5.0
 		 */
 		$data = apply_filters(
 			'woocommerce_components_settings',

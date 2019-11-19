@@ -14,7 +14,7 @@ namespace Automattic\WooCommerce\Blocks\Registry;
  * Dependency Injection Container for storing dependencies to invoke as they
  * are needed.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 abstract class AbstractDependencyType {
 
