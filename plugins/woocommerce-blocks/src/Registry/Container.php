@@ -15,7 +15,7 @@ use Exception;
  *
  * This is used to manage dependencies used throughout the plugin.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Container {
 

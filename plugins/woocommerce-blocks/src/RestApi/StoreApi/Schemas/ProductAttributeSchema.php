@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * ProductAttributeSchema class.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class ProductAttributeSchema extends AbstractSchema {
 	/**

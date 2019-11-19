@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Registry;
 /**
  * A definition for the SharedType dependency type.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class SharedType extends AbstractDependencyType {
 

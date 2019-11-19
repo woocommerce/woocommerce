@@ -4,7 +4,7 @@
  * `wc-settings` is enqueued (directly or via dependency)
  *
  * @package WooCommerce/Blocks
- * @since $VID:$
+ * @since 2.5.0
  */
 
 namespace Automattic\WooCommerce\Blocks\Assets;
@@ -16,7 +16,7 @@ use InvalidArgumentException;
  * Class instance for registering data used on the current view session by
  * assets.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class AssetDataRegistry {
 	/**

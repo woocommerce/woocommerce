@@ -17,7 +17,7 @@ class Assets {
 	/**
 	 * Initialize class features on init.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 * Moved most initialization to BootStrap and AssetDataRegistry
 	 * classes as a part of ongoing refactor
 	 */
@@ -30,7 +30,7 @@ class Assets {
 	/**
 	 * Register block scripts & styles.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 * Moved data related enqueuing to new AssetDataRegistry class
 	 * as part of ongoing refactoring.
 	 */
@@ -90,7 +90,7 @@ class Assets {
 	 * @param array $settings The original settings array from the filter.
 	 *
 	 * @since 2.4.0
-	 * @since $VID:$ returned merged data along with incoming $settings
+	 * @since 2.5.0 returned merged data along with incoming $settings
 	 */
 	public static function get_wc_block_data( $settings ) {
 		$tag_count      = wp_count_terms( 'product_tag' );

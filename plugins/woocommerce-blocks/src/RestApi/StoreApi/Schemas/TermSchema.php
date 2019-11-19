@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * TermSchema class.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class TermSchema extends AbstractSchema {
 	/**

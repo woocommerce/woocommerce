@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Blocks\Domain\Package;
 /**
  * The Api class provides an interface to various asset registration helpers.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Api {
 
@@ -88,7 +88,7 @@ class Api {
 	 * Registers a script according to `wp_register_script`, additionally
 	 * loading the translations for the file.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 *
 	 * @param string $handle        Name of the script. Should be unique.
 	 * @param string $relative_src  Relative url for the script to the path
@@ -120,7 +120,7 @@ class Api {
 	/**
 	 * Queues a block script.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 *
 	 * @param string $name Name of the script used to identify the file inside build folder.
 	 */
@@ -134,7 +134,7 @@ class Api {
 	/**
 	 * Registers a style according to `wp_register_style`.
 	 *
-	 * @since $VID:$
+	 * @since 2.5.0
 	 *
 	 * @param string $handle Name of the stylesheet. Should be unique.
 	 * @param string $src    Full URL of the stylesheet, or path of the stylesheet relative to the WordPress root directory.

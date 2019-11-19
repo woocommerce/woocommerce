@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Registry;
 /**
  * Definition for the FactoryType dependency type.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class FactoryType extends AbstractDependencyType {
 	/**

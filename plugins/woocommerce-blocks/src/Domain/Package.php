@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Domain;
 /**
  * Main package class.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Package {
 

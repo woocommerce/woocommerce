@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Pagination class.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Pagination {
 

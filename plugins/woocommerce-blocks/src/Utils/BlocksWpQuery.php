@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * BlocksWpQuery query.
  *
- * @deprecated $VID:$
+ * @deprecated 2.5.0
  */
 class BlocksWpQuery extends WP_Query {
 	/**

@@ -21,7 +21,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQuery;
 /**
  * Products API.
  *
- * @since $VID:$
+ * @since 2.5.0
  */
 class Products extends RestContoller {
 	/**
