@@ -116,6 +116,22 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.0 - 2019-11-19 =
+
+- Feature: Introduce an All Products block, a new block listing products using client side rendering. Requires WordPress 5.3.
+- Feature: Introduce a Filter Products by Price block. Allow customers to filter the All Products block by price. Requires WordPress 5.3.
+- Feature: Introduce a Filter Products by Attribute block which works alongside the new "All products" block. Requires WordPress 5.3.
+- Feature: Introduce an Active Filters block that lists all currently used filters. Requires WordPress 5.3.
+- Show a friendly error message in the frontend if blocks throw a JS error.
+- Show a message in the editor if no products are found rather than show nothing.
+- Show previews for all included blocks in the block inserter. Requires WordPress 5.3.
+- Products on Sale, Products Tag and Product Search blocks have new icons.
+- Officialy deprecate NPM package `@woocommerce/block-library`.
+- Use Server Side Rendering for Product Category List block to remove the need to pass large amounts of data around when not needed.
+- RTL fixes to several blocks.
+- All block icons are displayed gray in the editor shortcuts inserter.
+- Make it easier for themes to style the Product Categories List block: new class names allow writing simpler selectors and it's now possible to remove the parentheses around the count number.
+
 = 2.4.1 - 2019-08-30 =
 
 - Fix conflict with WooCommerce Admin.
