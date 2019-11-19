@@ -12,6 +12,7 @@ import {
 	usePrevious,
 	useStoreProducts,
 	useSynchronizedQueryState,
+	useQueryStateByKey,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
@@ -20,6 +21,8 @@ import { useProductLayoutContext } from '@woocommerce/base-context/product-layou
  * Internal dependencies
  */
 import './style.scss';
+import NoProducts from './no-products';
+import NoMatchingProducts from './no-matching-products';
 
 const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 	const { columns, rows } = attributes;
@@ -79,11 +82,20 @@ const ProductList = ( {
 		} )
 	);
 	const results = useStoreProducts( queryState );
-	const { products } = results;
+	const { products, productsLoading } = results;
 	const totalProducts = parseInt( results.totalProducts );
 
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
+
+	// These are possible filters.
+	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
+		'attributes',
+		[]
+	);
+	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
+	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
+
 	// Only update previous query totals if the query is different and
 	// the total number of products is a finite number.
 	const previousQueryTotals = usePrevious(
@@ -136,24 +148,41 @@ const ProductList = ( {
 	const listProducts = products.length
 		? products
 		: Array.from( { length: perPage } );
+	const hasProducts = products.length !== 0 || productsLoading;
+	const hasFilters =
+		productAttributes.length > 0 ||
+		Number.isFinite( minPrice ) ||
+		Number.isFinite( maxPrice );
 
 	return (
 		<div className={ getClassnames() }>
-			{ contentVisibility.orderBy && (
+			{ contentVisibility.orderBy && hasProducts && (
 				<ProductSortSelect
 					onChange={ onSortChange }
 					value={ sortValue }
 				/>
 			) }
-			<ul className={ `${ layoutStyleClassPrefix }__products` }>
-				{ listProducts.map( ( product = {}, i ) => (
-					<ProductListItem
-						key={ product.id || i }
-						attributes={ attributes }
-						product={ product }
-					/>
-				) ) }
-			</ul>
+			{ ! hasProducts && hasFilters && (
+				<NoMatchingProducts
+					resetCallback={ () => {
+						setProductAttributes( [] );
+						setMinPrice( null );
+						setMaxPrice( null );
+					} }
+				/>
+			) }
+			{ ! hasProducts && ! hasFilters && <NoProducts /> }
+			{ hasProducts && (
+				<ul className={ `${ layoutStyleClassPrefix }__products` }>
+					{ listProducts.map( ( product = {}, i ) => (
+						<ProductListItem
+							key={ product.id || i }
+							attributes={ attributes }
+							product={ product }
+						/>
+					) ) }
+				</ul>
+			) }
 			{ totalPages > 1 && (
 				<Pagination
 					currentPage={ currentPage }
