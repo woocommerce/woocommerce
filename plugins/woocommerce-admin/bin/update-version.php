@@ -19,6 +19,9 @@ function replace_version( $filename, $package_json ) {
 		if ( stripos( $line, ">define( 'WC_ADMIN_VERSION_NUMBER'," ) !== false ) {
 			$line = "\t\t\$this->define( 'WC_ADMIN_VERSION_NUMBER', '{$package_json->version}' );\n";
 		}
+		if ( stripos( $line, "const VERSION =" ) !== false ) {
+			$line = "\tconst VERSION = '{$package_json->version}';\n";
+		}
 		$lines[] = $line;
 	}
 	file_put_contents( $filename, $lines );
@@ -26,3 +29,4 @@ function replace_version( $filename, $package_json ) {
 
 replace_version( 'woocommerce-admin.php', $package );
 replace_version( 'src/FeaturePlugin.php', $package );
+replace_version( 'src/Package.php', $package );
