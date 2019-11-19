@@ -107,15 +107,35 @@ class ProductCategories extends WC_REST_Product_Categories_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(
-			'id'          => (int) $item->term_id,
-			'name'        => $item->name,
-			'slug'        => $item->slug,
-			'parent'      => (int) $item->parent,
-			'count'       => (int) $item->count,
-			'description' => $item->description,
-			'image'       => null,
-			'permalink'   => get_term_link( $item->term_id, 'product_cat' ),
+			'id'           => (int) $item->term_id,
+			'name'         => $item->name,
+			'slug'         => $item->slug,
+			'parent'       => (int) $item->parent,
+			'count'        => (int) $item->count,
+			'description'  => $item->description,
+			'image'        => null,
+			'review_count' => null,
+			'permalink'    => get_term_link( $item->term_id, 'product_cat' ),
 		);
+
+		if ( $request->get_param( 'show_review_count' ) ) {
+			global $wpdb;
+
+			$products_of_category_sql = $wpdb->prepare(
+				"SELECT SUM( DISTINCT comment_count) as review_count
+				FROM {$wpdb->posts} AS posts
+				INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
+				WHERE terms.term_id=%d
+				AND term_taxonomy.taxonomy='product_cat'",
+				$item->term_id
+			);
+
+			$review_count = $wpdb->get_var( $products_of_category_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+			$data['review_count'] = (int) $review_count;
+		}
 
 		$image_id = get_term_meta( $item->term_id, 'thumbnail_id', true );
 
@@ -144,6 +164,25 @@ class ProductCategories extends WC_REST_Product_Categories_Controller {
 		return $response;
 	}
 
+
+	/**
+	 * Update the collection params.
+	 *
+	 * Adds new options for 'show_review_count'.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params                      = parent::get_collection_params();
+		$params['show_review_count'] = array(
+			'description' => __( 'Should we return how many reviews in a category?', 'woo-gutenberg-products-block' ),
+			'type'        => 'boolean',
+			'default'     => false,
+		);
+
+		return $params;
+	}
+
 	/**
 	 * Get the Product's schema, conforming to JSON Schema.
 	 *
@@ -165,7 +204,14 @@ class ProductCategories extends WC_REST_Product_Categories_Controller {
 		$schema['properties']['count']       = $raw_schema['properties']['count'];
 		$schema['properties']['description'] = $raw_schema['properties']['description'];
 		$schema['properties']['image']       = $raw_schema['properties']['image'];
-		$schema['properties']['permalink']   = array(
+		// review_count will return null unless show_review_count param is trus.
+		$schema['properties']['review_count'] = array(
+			'description' => __( 'Number of reviews in the category.', 'woo-gutenberg-products-block' ),
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
+		$schema['properties']['permalink']    = array(
 			'description' => __( 'Category URL.', 'woo-gutenberg-products-block' ),
 			'type'        => 'string',
 			'format'      => 'uri',

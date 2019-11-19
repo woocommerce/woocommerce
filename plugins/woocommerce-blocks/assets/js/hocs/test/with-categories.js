@@ -49,7 +49,9 @@ describe( 'withCategories Component', () => {
 		it( 'getCategories is called on mount', () => {
 			const { getCategories } = mockUtils;
 
-			expect( getCategories ).toHaveBeenCalledWith();
+			expect( getCategories ).toHaveBeenCalledWith( {
+				show_review_count: false,
+			} );
 			expect( getCategories ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );

@@ -150,6 +150,7 @@ const ReviewsByCategoryEditor = ( {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categoryIds: ids } );
 						} }
+						showReviewCount={ true }
 					/>
 					<Button isDefault onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
