@@ -59,7 +59,7 @@ a.button {
 	form .form-row {
 
 		.required {
-			color: firebrick;
+			color: #b22222;
 			text-decoration: none;
 			visibility: hidden; // Only show optional by default.
 
@@ -109,16 +109,13 @@ a.button {
 	display: inline-block;
 	background: $highlights-color;
 	color: #fff;
-	display: inline-block;
 	font-family: $headings;
 	font-size: 0.71111em;
 	font-weight: 700;
 	letter-spacing: -0.02em;
 	line-height: 1.2;
 	padding: 0.5rem;
-	position: absolute;
 	text-transform: uppercase;
-	top: 0;
 	z-index: 1;
 }
 
@@ -170,7 +167,7 @@ a.button {
 }
 
 .woocommerce-error {
-	background: firebrick;
+	background: #b22222;
 }
 
 .woocommerce-info {
@@ -301,7 +298,7 @@ ul.products {
 	line-height: 1;
 	font-size: 1em;
 	width: 5.4em;
-	font-family: "star";
+	font-family: star;
 
 	&::before {
 		content: "\73\73\73\73\73";
@@ -338,7 +335,7 @@ a.remove {
 	text-align: center;
 	border-radius: 100%;
 	text-decoration: none !important;
-	background: firebrick;
+	background: #b22222;
 	color: #fff;
 
 	&:hover {
@@ -592,7 +589,7 @@ table.variations {
 	.comment-reply-title {
 		font-family: $headings;
 		font-size: 1em;
-		font-weight: bold;
+		font-weight: 700;
 		margin: 0 0 0.75rem;
 		display: block;
 	}
@@ -640,7 +637,7 @@ table.variations {
 					width: 1em;
 					height: 1em;
 					line-height: 1;
-					font-family: "WooCommerce";
+					font-family: WooCommerce;
 					content: "\e021";
 					text-indent: 0;
 				}
@@ -755,7 +752,7 @@ table.variations {
 			font-size: 16px;
 			text-align: center;
 			border-radius: 100%;
-			border: 1px solid black;
+			border: 1px solid #000;
 			margin-right: 0.25rem;
 		}
 	}
@@ -854,7 +851,7 @@ table.variations {
 		padding-right: 100px;
 	}
 
-	input[type=submit] {
+	input[type="submit"] {
 		position: absolute;
 		top: 0.5rem;
 		right: 0.5rem;
@@ -1054,7 +1051,7 @@ table.variations {
 				display: block;
 				width: 14px;
 				height: 14px;
-				background: white;
+				background: #fff;
 				position: absolute;
 				top: 7px;
 				right: 17px;
@@ -1063,15 +1060,15 @@ table.variations {
 			}
 		}
 
-		input[type=checkbox] {
+		input[type="checkbox"] {
 			display: none;
 		}
 
-		input[type=checkbox]:checked + span::after {
+		input[type="checkbox"]:checked + span::after {
 			right: 3px;
 		}
 
-		input[type=checkbox]:checked + span::before {
+		input[type="checkbox"]:checked + span::before {
 			border-color: #000;
 			background: #000;
 		}
@@ -1122,7 +1119,7 @@ table.variations {
 	.woocommerce-input-wrapper {
 
 		.description {
-			background: royalblue;
+			background: #4169e1;
 			color: #fff;
 			border-radius: 3px;
 			padding: 1rem;
@@ -1140,14 +1137,14 @@ table.variations {
 
 			&::before {
 				left: 50%;
-				top: 0%;
+				top: 0;
 				margin-top: -4px;
 				transform: translateX(-50%) rotate(180deg);
 				content: "";
 				position: absolute;
 				border-width: 4px 6px 0 6px;
 				border-style: solid;
-				border-color: royalblue transparent transparent transparent;
+				border-color: #4169e1 transparent transparent transparent;
 				z-index: 100;
 				display: block;
 			}
@@ -1176,7 +1173,7 @@ table.variations {
 	}
 
 	.select2-container--focus .select2-selection {
-		border-color: black;
+		border-color: #000;
 	}
 }
 
@@ -1256,7 +1253,7 @@ table.variations {
 		cursor: pointer;
 	}
 
-	input.input-radio[name=payment_method] {
+	input.input-radio[name="payment_method"] {
 		display: none;
 
 		& + label {
@@ -1266,9 +1263,9 @@ table.variations {
 				display: inline-block;
 				width: 16px;
 				height: 16px;
-				border: 2px solid white;
-				box-shadow: 0 0 0 2px black;
-				background: white;
+				border: 2px solid #fff;
+				box-shadow: 0 0 0 2px #000;
+				background: #fff;
 				margin-left: 4px;
 				margin-right: 0.5rem;
 				border-radius: 100%;
@@ -1279,7 +1276,7 @@ table.variations {
 		&:checked + label {
 
 			&::before {
-				background: black;
+				background: #000;
 			}
 		}
 	}
