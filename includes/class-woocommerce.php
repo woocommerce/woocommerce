@@ -473,7 +473,7 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		if ( wc_is_active_theme( array( 'twentynineteen', 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( wc_is_active_theme( array( 'twentytwenty', 'twentynineteen', 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php';
@@ -501,6 +501,9 @@ final class WooCommerce {
 					break;
 				case 'twentynineteen':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-nineteen.php';
+					break;
+				case 'twentytwenty':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty.php';
 					break;
 			}
 		}
