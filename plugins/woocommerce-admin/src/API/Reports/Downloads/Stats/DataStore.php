@@ -86,9 +86,9 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		if ( false === $data ) {
 			$this->initialize_queries();
 			$selections = $this->selected_columns( $query_args );
-			$this->get_sql_query_params( $query_args );
-			$this->get_time_period_sql_params( $query_args, $table_name );
-			$this->get_intervals_sql_params( $query_args, $table_name );
+			$this->add_sql_query_params( $query_args );
+			$this->add_time_period_sql_params( $query_args, $table_name );
+			$this->add_intervals_sql_params( $query_args, $table_name );
 
 			$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
 			$this->interval_query->str_replace_clause( 'select', 'date_created', 'timestamp' );

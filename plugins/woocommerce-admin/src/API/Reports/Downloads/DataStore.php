@@ -77,7 +77,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function add_sql_query_params( $query_args ) {
 		global $wpdb;
 
 		$lookup_table     = self::get_db_table_name();
@@ -86,7 +86,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$where_filters    = array();
 		$join             = "JOIN {$permission_table} as product_permissions ON {$lookup_table}.permission_id = product_permissions.permission_id";
 
-		$where_time = $this->get_time_period_sql_params( $query_args, $lookup_table );
+		$where_time = $this->add_time_period_sql_params( $query_args, $lookup_table );
 		if ( $where_time ) {
 			if ( isset( $this->subquery ) ) {
 				$this->subquery->add_sql_clause( 'where_time', $where_time );
@@ -180,7 +180,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		} else {
 			$this->interval_query->add_sql_clause( 'join', $join );
 		}
-		$this->get_order_by( $query_args );
+		$this->add_order_by( $query_args );
 	}
 
 	/**
@@ -236,7 +236,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 * @return string
 	 */
-	protected function get_time_period_sql_params( $query_args, $table_name ) {
+	protected function add_time_period_sql_params( $query_args, $table_name ) {
 		$where_time = '';
 		if ( $query_args['before'] ) {
 			$datetime_str = $query_args['before']->format( TimeInterval::$sql_datetime_format );
@@ -257,7 +257,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 */
-	protected function get_order_by( $query_args ) {
+	protected function add_order_by( $query_args ) {
 		global $wpdb;
 		$this->clear_sql_clause( 'order_by' );
 		$order_by = '';
@@ -314,8 +314,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'page_no' => 0,
 			);
 
-			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$selections = $this->selected_columns( $query_args );
+			$this->add_sql_query_params( $query_args );
 
 			$db_records_count = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM (

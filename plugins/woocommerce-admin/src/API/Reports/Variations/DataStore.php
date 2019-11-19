@@ -80,7 +80,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'product_id'   => 'product_id',
 			'variation_id' => 'variation_id',
@@ -96,7 +96,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array  $query_args Parameters supplied by the user.
 	 * @param string $arg_name   Target of the JOIN sql param.
 	 */
-	protected function get_from_sql_params( $query_args, $arg_name ) {
+	protected function add_from_sql_params( $query_args, $arg_name ) {
 		global $wpdb;
 
 		if ( 'sku' !== $query_args['orderby'] ) {
@@ -118,18 +118,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function add_sql_query_params( $query_args ) {
 		global $wpdb;
 		$order_product_lookup_table = self::get_db_table_name();
 
-		$this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $order_product_lookup_table );
 		$this->get_limit_sql_params( $query_args );
-		$this->get_order_by_sql_params( $query_args );
+		$this->add_order_by_sql_params( $query_args );
 
 		if ( count( $query_args['variations'] ) > 0 ) {
-			$this->get_from_sql_params( $query_args, 'outer' );
+			$this->add_from_sql_params( $query_args, 'outer' );
 		} else {
-			$this->get_from_sql_params( $query_args, 'inner' );
+			$this->add_from_sql_params( $query_args, 'inner' );
 		}
 
 		$included_products = $this->get_included_products( $query_args );
@@ -270,7 +270,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$included_products = $this->get_included_products_array( $query_args );
 
-			$this->get_sql_query_params( $query_args );
+			$this->add_sql_query_params( $query_args );
 			$params = $this->get_limit_params( $query_args );
 			if ( count( $included_products ) > 0 && count( $query_args['variations'] ) > 0 ) {
 				$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );

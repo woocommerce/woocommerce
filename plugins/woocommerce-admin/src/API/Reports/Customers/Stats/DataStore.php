@@ -93,8 +93,8 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 				'avg_avg_order_value' => 0.0,
 			);
 
-			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$selections = $this->selected_columns( $query_args );
+			$this->add_sql_query_params( $query_args );
 			// Clear SQL clauses set for parent class queries that are different here.
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', 'SUM( gross_total ) AS total_spend,' );

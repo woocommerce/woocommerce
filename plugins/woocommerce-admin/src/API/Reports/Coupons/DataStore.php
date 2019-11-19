@@ -56,7 +56,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'coupon_id'    => 'coupon_id',
 			'amount'       => 'SUM(discount_amount) as amount',
@@ -90,20 +90,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function add_sql_query_params( $query_args ) {
 		global $wpdb;
 		$order_coupon_lookup_table = self::get_db_table_name();
 
-		$this->get_time_period_sql_params( $query_args, $order_coupon_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $order_coupon_lookup_table );
 		$this->get_limit_sql_params( $query_args );
 
 		$included_coupons = $this->get_included_coupons( $query_args, 'coupons' );
 		if ( $included_coupons ) {
 			$this->subquery->add_sql_clause( 'where', "AND {$order_coupon_lookup_table}.coupon_id IN ({$included_coupons})" );
 
-			$this->get_order_by_params( $query_args, 'outer', 'default_results.coupon_id' );
+			$this->add_order_by_params( $query_args, 'outer', 'default_results.coupon_id' );
 		} else {
-			$this->get_order_by_params( $query_args, 'inner', "{$order_coupon_lookup_table}.coupon_id" );
+			$this->add_order_by_params( $query_args, 'inner', "{$order_coupon_lookup_table}.coupon_id" );
 		}
 
 		$this->add_order_status_clause( $query_args, $order_coupon_lookup_table, $this->subquery );
@@ -116,7 +116,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param string $from_arg   Target of the JOIN sql param.
 	 * @param string $id_cell    ID cell identifier, like `table_name.id_column_name`.
 	 */
-	protected function get_order_by_params( $query_args, $from_arg, $id_cell ) {
+	protected function add_order_by_params( $query_args, $from_arg, $id_cell ) {
 		global $wpdb;
 		$lookup_table    = self::get_db_table_name();
 		$order_by_clause = $this->add_order_by_clause( $query_args, $this );
@@ -249,7 +249,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$included_coupons = $this->get_included_coupons_array( $query_args );
 			$limit_params     = $this->get_limit_params( $query_args );
 			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->get_sql_query_params( $query_args );
+			$this->add_sql_query_params( $query_args );
 
 			if ( count( $included_coupons ) > 0 ) {
 				$total_results = count( $included_coupons );
@@ -275,12 +275,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$this->subquery->clear_sql_clause( array( 'select', 'order_by' ) );
 				$this->subquery->add_sql_clause( 'select', 'coupon_id' );
+				$coupon_subquery = "SELECT COUNT(*) FROM (
+					{$this->subquery->get_query_statement()}
+				) AS tt";
 
 				$db_records_count = (int) $wpdb->get_var(
-					"SELECT COUNT(*) FROM (
-								{$this->subquery->get_query_statement()}
-								) AS tt"
-				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+					$coupon_subquery // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				);
 
 				$total_results = $db_records_count;
 				$total_pages   = (int) ceil( $db_records_count / $limit_params['per_page'] );
@@ -290,10 +291,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			$coupon_data = $wpdb->get_results(
-				$coupons_query,
+				$coupons_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
+			);
 			if ( null === $coupon_data ) {
 				return $data;
 			}
@@ -335,8 +335,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return true;
 		}
 
-		$table_name         = self::get_db_table_name();
-		$existing_items     = $wpdb->get_col( $wpdb->prepare( "SELECT coupon_id FROM {$table_name} WHERE order_id = %d", $order_id ) );
+		$table_name     = self::get_db_table_name();
+		$existing_items = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT coupon_id FROM {$table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
 		$existing_items     = array_flip( $existing_items );
 		$coupon_items       = $order->get_items( 'coupon' );
 		$coupon_items_count = count( $coupon_items );
@@ -386,6 +392,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			array_unshift( $existing_items, $order_id );
 			$wpdb->query(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					"DELETE FROM {$table_name} WHERE order_id = %d AND coupon_id in ({$format})",
 					$existing_items
 				)
@@ -452,7 +459,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$query .= " AND ID IN ({$included_coupons})";
 		}
 
-		return $wpdb->get_results( $query );  // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**

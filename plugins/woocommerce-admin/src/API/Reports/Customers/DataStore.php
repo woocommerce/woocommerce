@@ -59,7 +59,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		global $wpdb;
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'id'               => "{$table_name}.customer_id as id",
 			'user_id'          => 'user_id',
@@ -121,7 +121,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array  $query_args Parameters supplied by the user.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 */
-	protected function get_time_period_sql_params( $query_args, $table_name ) {
+	protected function add_time_period_sql_params( $query_args, $table_name ) {
 		global $wpdb;
 
 		$this->clear_sql_clause( array( 'where', 'where_time', 'having' ) );
@@ -188,14 +188,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function add_sql_query_params( $query_args ) {
 		global $wpdb;
 		$customer_lookup_table  = self::get_db_table_name();
 		$order_stats_table_name = $wpdb->prefix . 'wc_order_stats';
 
-		$this->get_time_period_sql_params( $query_args, $customer_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $customer_lookup_table );
 		$this->get_limit_sql_params( $query_args );
-		$this->get_order_by_sql_params( $query_args );
+		$this->add_order_by_sql_params( $query_args );
 		$this->subquery->add_sql_clause( 'left_join', "LEFT JOIN {$order_stats_table_name} ON {$customer_lookup_table}.customer_id = {$order_stats_table_name}.customer_id" );
 
 		$match_operator = $this->get_match_operator( $query_args );
@@ -352,7 +352,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 
 			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$sql_query_params = $this->add_sql_query_params( $query_args );
 
 			$db_records_count = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM (

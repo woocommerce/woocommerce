@@ -462,10 +462,10 @@ class DataStore extends SqlQuery {
 				}
 			}
 			// @todo - Do this without modifying $query_args?
-			$query_args['adj_after']               = $new_start_date;
-			$query_args['adj_before']              = $new_end_date;
-			$adj_after                             = $new_start_date->format( TimeInterval::$sql_datetime_format );
-			$adj_before                            = $new_end_date->format( TimeInterval::$sql_datetime_format );
+			$query_args['adj_after']  = $new_start_date;
+			$query_args['adj_before'] = $new_end_date;
+			$adj_after                = $new_start_date->format( TimeInterval::$sql_datetime_format );
+			$adj_before               = $new_end_date->format( TimeInterval::$sql_datetime_format );
 			$this->interval_query->clear_sql_clause( array( 'where_time', 'limit' ) );
 			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.date_created <= '$adj_before'" );
 			$this->interval_query->add_sql_clause( 'where_time', "AND {$table_name}.date_created >= '$adj_after'" );
@@ -649,7 +649,7 @@ class DataStore extends SqlQuery {
 	 * @param array  $query_args Parameters supplied by the user.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 */
-	protected function get_time_period_sql_params( $query_args, $table_name ) {
+	protected function add_time_period_sql_params( $query_args, $table_name ) {
 		$this->clear_sql_clause( array( 'from', 'where_time', 'where' ) );
 		if ( isset( $this->subquery ) ) {
 			$this->subquery->clear_sql_clause( 'where_time' );
@@ -777,7 +777,7 @@ class DataStore extends SqlQuery {
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 */
-	protected function get_order_by_sql_params( $query_args ) {
+	protected function add_order_by_sql_params( $query_args ) {
 		if ( isset( $query_args['orderby'] ) ) {
 			$order_by_clause = $this->normalize_order_by( $query_args['orderby'] );
 		} else {
@@ -795,13 +795,13 @@ class DataStore extends SqlQuery {
 	 * @param array  $query_args Parameters supplied by the user.
 	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 */
-	protected function get_intervals_sql_params( $query_args, $table_name ) {
+	protected function add_intervals_sql_params( $query_args, $table_name ) {
 		$this->clear_sql_clause( array( 'from', 'where_time', 'where' ) );
 
-		$this->get_time_period_sql_params( $query_args, $table_name );
+		$this->add_time_period_sql_params( $query_args, $table_name );
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
-			$interval                         = $query_args['interval'];
+			$interval = $query_args['interval'];
 			$this->clear_sql_clause( 'select' );
 			$this->add_sql_clause( 'select', TimeInterval::db_datetime_format( $interval, $table_name ) );
 		}

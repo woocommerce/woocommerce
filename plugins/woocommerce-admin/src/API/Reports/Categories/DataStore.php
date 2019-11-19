@@ -71,7 +71,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'items_sold'     => 'SUM(product_qty) as items_sold',
 			'net_revenue'    => 'SUM(product_net_revenue) AS net_revenue',
@@ -85,11 +85,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function add_sql_query_params( $query_args ) {
 		global $wpdb;
 		$order_product_lookup_table = self::get_db_table_name();
 
-		$this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $order_product_lookup_table );
 
 		// join wp_order_product_lookup_table with relationships and taxonomies
 		// @todo How to handle custom product tables?
@@ -102,9 +102,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 			// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
-			$this->get_order_by_params( $query_args, 'outer', 'default_results.category_id' );
+			$this->add_order_by_params( $query_args, 'outer', 'default_results.category_id' );
 		} else {
-			$this->get_order_by_params( $query_args, 'inner', "{$wpdb->wc_category_lookup}.category_tree_id" );
+			$this->add_order_by_params( $query_args, 'inner', "{$wpdb->wc_category_lookup}.category_tree_id" );
 		}
 
 		// @todo Only products in the category C or orders with products from category C (and, possibly others?).
@@ -124,7 +124,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param string $from_arg   Target of the JOIN sql param.
 	 * @param string $id_cell    ID cell identifier, like `table_name.id_column_name`.
 	 */
-	protected function get_order_by_params( $query_args, $from_arg, $id_cell ) {
+	protected function add_order_by_params( $query_args, $from_arg, $id_cell ) {
 		global $wpdb;
 		$lookup_table    = self::get_db_table_name();
 		$order_by_clause = $this->add_order_by_clause( $query_args, $this );
@@ -243,7 +243,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
 			$included_categories = $this->get_included_categories_array( $query_args );
-			$this->get_sql_query_params( $query_args );
+			$this->add_sql_query_params( $query_args );
 
 			if ( count( $included_categories ) > 0 ) {
 				$fields    = $this->get_fields( $query_args );

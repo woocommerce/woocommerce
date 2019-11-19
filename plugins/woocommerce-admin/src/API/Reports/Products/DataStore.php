@@ -89,7 +89,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'product_id'   => 'product_id',
 			'items_sold'   => 'SUM(product_qty) as items_sold',
@@ -112,7 +112,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param string $arg_name   Target of the JOIN sql param.
 	 * @param string $id_cell    ID cell identifier, like `table_name.id_column_name`.
 	 */
-	protected function get_from_sql_params( $query_args, $arg_name, $id_cell ) {
+	protected function add_from_sql_params( $query_args, $arg_name, $id_cell ) {
 		global $wpdb;
 
 		$type = 'join';
@@ -146,20 +146,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function add_sql_query_params( $query_args ) {
 		global $wpdb;
 		$order_product_lookup_table = self::get_db_table_name();
 
-		$this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $order_product_lookup_table );
 		$this->get_limit_sql_params( $query_args );
-		$this->get_order_by_sql_params( $query_args );
+		$this->add_order_by_sql_params( $query_args );
 
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
-			$this->get_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
+			$this->add_from_sql_params( $query_args, 'outer', 'default_results.product_id' );
 			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.product_id IN ({$included_products})" );
 		} else {
-			$this->get_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
+			$this->add_from_sql_params( $query_args, 'inner', "{$order_product_lookup_table}.product_id" );
 		}
 
 		$included_variations = $this->get_included_variations( $query_args );
@@ -302,7 +302,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$selections        = $this->selected_columns( $query_args );
 			$included_products = $this->get_included_products_array( $query_args );
 			$params            = $this->get_limit_params( $query_args );
-			$this->get_sql_query_params( $query_args );
+			$this->add_sql_query_params( $query_args );
 
 			if ( count( $included_products ) > 0 ) {
 				$total_results = count( $included_products );
@@ -330,11 +330,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 				$products_query = $this->get_query_statement();
 			} else {
-				$db_records_count = (int) $wpdb->get_var(
-					"SELECT COUNT(*) FROM (
+				$count_query      = "SELECT COUNT(*) FROM (
 						{$this->subquery->get_query_statement()}
-					) AS tt"
-				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+					) AS tt";
+				$db_records_count = (int) $wpdb->get_var(
+					$count_query // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				);
 
 				$total_results = $db_records_count;
 				$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
@@ -351,9 +352,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			$product_data = $wpdb->get_results(
-				$products_query,
+				$products_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
 
 			if ( null === $product_data ) {
 				return $data;
@@ -391,7 +392,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$table_name     = self::get_db_table_name();
-		$existing_items = $wpdb->get_col( $wpdb->prepare( "SELECT order_item_id FROM {$table_name} WHERE order_id = %d", $order_id ) );
+		$existing_items = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT order_item_id FROM {$table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
 		$existing_items = array_flip( $existing_items );
 		$order_items    = $order->get_items();
 		$num_updated    = 0;
@@ -399,7 +406,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
 		foreach ( $order_items as $order_item ) {
-			$order_item_id       = $order_item->get_id();
+			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
 			$product_qty         = $order_item->get_quantity( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
@@ -480,6 +487,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			array_unshift( $existing_items, $order_id );
 			$wpdb->query(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id in ({$format})",
 					$existing_items
 				)

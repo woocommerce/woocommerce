@@ -57,7 +57,7 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
-		$table_name = self::get_db_table_name();
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
 			'amount'        => 'SUM(discount_amount) as amount',
 			'coupons_count' => 'COUNT(DISTINCT coupon_id) as coupons_count',
@@ -75,7 +75,7 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 
 		$clauses = array(
 			'where' => '',
-			'join' => '',
+			'join'  => '',
 		);
 
 		$order_coupon_lookup_table = self::get_db_table_name();
@@ -91,8 +91,8 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 			$clauses['where'] .= " AND ( {$order_status_filter} )";
 		}
 
-		$this->get_time_period_sql_params( $query_args, $order_coupon_lookup_table );
-		$this->get_intervals_sql_params( $query_args, $order_coupon_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $order_coupon_lookup_table );
+		$this->add_intervals_sql_params( $query_args, $order_coupon_lookup_table );
 		$clauses['where_time'] = $this->get_sql_clause( 'where_time' );
 
 		$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
@@ -178,12 +178,12 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 			}
 
 			// @todo remove these assignements when refactoring segmenter classes to use query objects.
-			$totals_query    = array(
+			$totals_query          = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 				'where_time_clause' => $this->total_query->get_sql_clause( 'where_time' ),
 				'where_clause'      => $this->total_query->get_sql_clause( 'where' ),
 			);
-			$intervals_query = array(
+			$intervals_query       = array(
 				'select_clause'     => $this->get_sql_clause( 'select' ),
 				'from_clause'       => $this->interval_query->get_sql_clause( 'join' ),
 				'where_time_clause' => $this->interval_query->get_sql_clause( 'where_time' ),

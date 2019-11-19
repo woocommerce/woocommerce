@@ -86,10 +86,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$taxes_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
-		$this->get_time_period_sql_params( $query_args, $order_tax_lookup_table );
+		$this->add_time_period_sql_params( $query_args, $order_tax_lookup_table );
 		$this->total_query->add_sql_clause( 'where', $taxes_where_clause );
 
-		$this->get_intervals_sql_params( $query_args, $order_tax_lookup_table );
+		$this->add_intervals_sql_params( $query_args, $order_tax_lookup_table );
 		$this->interval_query->add_sql_clause( 'where', $taxes_where_clause );
 		$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
 		$this->interval_query->add_sql_clause( 'where_time', $this->get_sql_clause( 'where_time' ) );
