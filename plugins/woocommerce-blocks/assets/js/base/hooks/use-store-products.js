@@ -32,11 +32,9 @@ export const useStoreProducts = ( query ) => {
 		...collectionOptions,
 		query,
 	} );
-	// eslint-disable-next-line no-unused-vars, camelcase
-	const { order, orderby, page, per_page, ...totalQuery } = query;
 	const { value: totalProducts } = useCollectionHeader( 'x-wp-total', {
 		...collectionOptions,
-		query: totalQuery,
+		query,
 	} );
 	return {
 		products,
