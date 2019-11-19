@@ -148,11 +148,36 @@ module.exports = function( grunt ) {
 		// Minify all .css files.
 		cssmin: {
 			minify: {
-				expand: true,
-				cwd: '<%= dirs.css %>/',
-				src: ['*.css'],
-				dest: '<%= dirs.css %>/',
-				ext: '.css'
+				files: [
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/',
+						src: ['*.css'],
+						dest: '<%= dirs.css %>/',
+						ext: '.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/jquery-ui/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/jquery-ui/',
+						ext: '.min.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/photoswipe/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/photoswipe/',
+						ext: '.min.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/photoswipe/default-skin/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/photoswipe/default-skin/',
+						ext: '.min.css'
+					}
+				]
 			}
 		},
 
