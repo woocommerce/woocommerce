@@ -33,7 +33,7 @@
     "config": "3.2.4",
     "cross-env": "6.0.3",
     "eslint": "6.6.0",
-    "eslint-config-wpcalypso": "4.0.1",
+    "eslint-config-wpcalypso": "5.0.0",
     "eslint-plugin-wpcalypso": "4.1.0",
     "grunt": "1.0.4",
     "grunt-checktextdomain": "1.0.1",
