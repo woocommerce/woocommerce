@@ -120,13 +120,13 @@ export const advancedFilters = applyFilters( CUSTOMERS_REPORT_ADVANCED_FILTERS_F
 				type: 'countries',
 				getLabels: async value => {
 					const allLabels = countries.map( country => ( {
-						id: country.code,
+						key: country.code,
 						label: decodeEntities( country.name ),
 					} ) );
 
 					const labels = value.split( ',' );
 					return await allLabels.filter( label => {
-						return labels.includes( label.id );
+						return labels.includes( label.key );
 					} );
 				},
 			},

@@ -304,6 +304,7 @@ class Loader {
 				'wp-data',
 				'wp-element',
 				'wp-hooks',
+				'wp-html-entities',
 				'wp-i18n',
 				'wp-keycodes',
 				'wc-csv',
