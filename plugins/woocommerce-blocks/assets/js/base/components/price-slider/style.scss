@@ -72,16 +72,13 @@
 
 	.wc-block-price-filter__controls {
 		display: flex;
-		flex-flow: row nowrap;
-		justify-content: flex-start;
-		align-items: center;
 
 		.wc-block-price-filter__amount {
 			margin: 0;
 			border-radius: 4px;
 			width: auto;
-			flex-grow: 2;
 			max-width: 100px;
+			min-width: 0;
 
 			&.wc-block-price-filter__amount--min {
 				margin-right: 10px;
@@ -90,10 +87,6 @@
 				margin-left: auto;
 			}
 		}
-
-		.wc-block-price-filter__button {
-			margin-left: auto;
-		}
 	}
 	&.wc-block-price-filter--has-filter-button {
 		.wc-block-price-filter__controls {
@@ -101,6 +94,12 @@
 
 			.wc-block-price-filter__amount.wc-block-price-filter__amount--max {
 				margin-left: 0;
+				margin-right: 10px;
+			}
+
+			.wc-block-price-filter__button {
+				margin-left: auto;
+				white-space: nowrap;
 			}
 		}
 	}
