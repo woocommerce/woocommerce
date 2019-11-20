@@ -323,6 +323,7 @@ class WC_Checkout {
 			return $order_id;
 		}
 
+		$error = null;
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
@@ -366,6 +367,7 @@ class WC_Checkout {
 				}
 			}
 
+			$order->hold_stock_for_checkout( WC()->cart );
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
@@ -403,6 +405,9 @@ class WC_Checkout {
 
 			return $order_id;
 		} catch ( Exception $e ) {
+			if ( $order && $order instanceof WC_Order ) {
+				$order->release_held_stock();
+			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
 	}

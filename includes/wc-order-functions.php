@@ -803,6 +803,8 @@ function wc_order_search( $term ) {
 function wc_update_total_sales_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
+	$order->release_held_stock();
+
 	if ( ! $order || $order->get_data_store()->get_recorded_sales( $order ) ) {
 		return;
 	}
@@ -906,6 +908,7 @@ function wc_cancel_unpaid_orders() {
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
+			$order->release_held_stock();
 		}
 	}
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );

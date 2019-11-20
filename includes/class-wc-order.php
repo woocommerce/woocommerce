@@ -2044,4 +2044,118 @@ class WC_Order extends WC_Abstract_Order {
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
+
+	/**
+	 * Adds a '_held_for_checkout` record for all products in cart.
+	 *
+	 * @param WC_Cart $cart Cart instance.
+	 * @throws Exception When unable to hold stock for checkout.
+	 */
+	public function hold_stock_for_checkout( $cart ) {
+		if ( ! apply_filters( 'enable_hold_stock_3_9', true ) ) {
+			return;
+		}
+
+		if ( ! get_option( 'woocommerce_manage_stock' ) ) {
+			return;
+		}
+
+		$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
+		if ( 0 >= $hold_stock_minutes ) {
+			return;
+		}
+
+		$product_qty_in_cart = $cart->get_cart_item_quantities();
+		$stock_held_keys     = [];
+		$error = null;
+
+		try {
+			// TODO: Move to correct place.
+			foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+				$product                        = wc_get_product( $values['data'] );
+				$product_id                     = $product->get_stock_managed_by_id();
+				$result = $this->hold_product_for_checkout( $product, $product_qty_in_cart[ $product_id ] );
+				if ( false === $result ) {
+					// translators: Name of the product.
+					throw new Exception( sprintf( __( 'Something changed during checkout. %s is no longer available.', 'woocommerce' ), $product->get_name() ) );
+				}
+				if ( null === $result ) {
+					continue;
+				}
+				$stock_held_keys[ $product_id ] = $result;
+			}
+		} catch ( Exception $e ) {
+			$error = $e;
+		} finally {
+			if ( 0 < count( $stock_held_keys ) ) {
+				$this->record_held_stock( $stock_held_keys );
+			}
+			if ( $error instanceof Exception ) {
+				throw $error;
+			}
+		}
+	}
+
+	/**
+	 * Adds a `_held_for_checkout` record for a product in checkout.
+	 *
+	 * @param WC_Product $product  Instance of product.
+	 * @param int        $quantity Quantity of product to hold.
+	 *
+	 * @return bool|string|null Returns `false` when unable to hold stock, meta key when stock was held successfully, `null` when holding stock is not needed.
+	 */
+	protected function hold_product_for_checkout( $product, $quantity ) {
+		global $wpdb;
+		if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
+			return null;
+		}
+		$product_id           = $product->get_stock_managed_by_id();
+		$product_data_store   = WC_Data_Store::load( 'product' );
+		$held_unique_str      = wp_generate_password( 6, false );
+		$db_timestamp         = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
+		$hold_stock_minutes   = (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
+		$expire_timestamp     = (int) $db_timestamp + ( $hold_stock_minutes * 60 );
+		$held_key             = "_held_for_checkout_${expire_timestamp}_$held_unique_str";
+		$query_for_held_stock = $product_data_store->get_query_for_held_stock( $product_id );
+		$query_for_stock      = $product_data_store->get_query_for_stock( $product_id );
+
+		$insert_statement = $wpdb->prepare(
+			"
+					INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
+					SELECT %d, %s, %d from DUAL
+					WHERE ( $query_for_stock ) - ( $query_for_held_stock ) >= %d
+					",
+			$product->get_stock_managed_by_id(),
+			$held_key,
+			$quantity,
+			$quantity
+		); // WPCS: unprepared SQL ok.
+
+		$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
+		return $result > 0 ? $held_key : false;
+	}
+
+	/**
+	 * Save keys used to held stock to DB.
+	 *
+	 * @param array $keys Array of keys to save.
+	 */
+	public function record_held_stock( $keys ) {
+		if ( is_array( $keys ) && 0 < count( $keys ) ) {
+			$this->update_meta_data( '_stock_held_keys', $keys );
+		}
+	}
+
+	/**
+	 * Releases held stock, also deletes keys for the order.
+	 */
+	public function release_held_stock() {
+		$stock_held_keys = $this->get_meta( '_stock_held_keys' );
+		if ( is_array( $stock_held_keys ) ) {
+			foreach ( $stock_held_keys as $product_managed_id => $meta_key ) {
+				delete_post_meta( $product_managed_id, $meta_key );
+			}
+		}
+		$this->delete_meta_data( '_stock_held_keys' );
+	}
 }
