@@ -259,6 +259,7 @@ class WC_Admin_Duplicate_Product {
 		// Find the maximum suffix so we can ensure uniqueness.
 		$max_suffix = 1;
 		foreach ( $results as $result ) {
+			// Pull a numerical suffix off the slug after the last hyphen.
 			$suffix = intval( substr( $result->post_name, strrpos( $result->post_name, '-' ) + 1 ) );
 			if ( $suffix > $max_suffix ) {
 				$max_suffix = $suffix;
