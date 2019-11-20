@@ -21,6 +21,7 @@ class WC_Orders_Tracking {
 		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
+		add_action( 'woocommerce_thankyou', array( $this, 'track_order_placed' ), 10 );
 	}
 
 	/**
@@ -148,5 +149,28 @@ class WC_Orders_Tracking {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Track orders placed by customers
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public function track_order_placed( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		$properties = array(
+			'order_id'       => $order->get_id(),
+			'total'          => $order->get_total(),
+			'currency'       => $order->get_currency(),
+			'status'         => $order->get_status(),
+			'payment_method' => $order->get_payment_method(),
+		);
+
+		WC_Tracks::record_event( 'order_placed', $properties );
 	}
 }
