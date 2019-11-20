@@ -158,13 +158,6 @@ module.exports = function( grunt ) {
 					},
 					{
 						expand: true,
-						cwd: '<%= dirs.css %>/jquery-ui/',
-						src: ['*.css', '!*.min.css'],
-						dest: '<%= dirs.css %>/jquery-ui/',
-						ext: '.min.css'
-					},
-					{
-						expand: true,
 						cwd: '<%= dirs.css %>/photoswipe/',
 						src: ['*.css', '!*.min.css'],
 						dest: '<%= dirs.css %>/photoswipe/',

@@ -20,9 +20,7 @@ none
 
 # Compiled CSS
 /assets/css/*.css
-/assets/css/photoswipe/*.min.css
-/assets/css/photoswipe/default-skin/*.min.css
-/assets/css/jquery-ui/*.min.css
+/assets/css/photoswipe/**/*.min.css
 
 # Minified JS
 /assets/js/admin/*.min.js
