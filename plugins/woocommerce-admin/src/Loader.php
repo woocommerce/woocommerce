@@ -302,7 +302,6 @@ class Loader {
 			self::get_url( 'components/index.js' ),
 			array(
 				'wp-api-fetch',
-				'wp-components',
 				'wp-data',
 				'wp-element',
 				'wp-hooks',
@@ -324,7 +323,7 @@ class Loader {
 		wp_register_style(
 			'wc-components',
 			self::get_url( 'components/style.css' ),
-			array( 'wp-components' ),
+			array(),
 			self::get_file_version( 'components/style.css' )
 		);
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
@@ -332,7 +331,7 @@ class Loader {
 		wp_register_style(
 			'wc-components-ie',
 			self::get_url( 'components/ie.css' ),
-			array( 'wp-components' ),
+			array(),
 			self::get_file_version( 'components/ie.css' )
 		);
 		wp_style_add_data( 'wc-components-ie', 'rtl', 'replace' );

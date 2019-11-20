@@ -26,7 +26,7 @@
     "@woocommerce/currency": "1.1.1",
     "@woocommerce/date": "1.0.7",
     "@woocommerce/navigation": "2.1.0",
-    "@wordpress/components": "7.4.0",
+    "@wordpress/components": "8.3.1",
     "@wordpress/compose": "3.7.1",
     "@wordpress/date": "3.5.0",
     "@wordpress/element": "2.8.1",

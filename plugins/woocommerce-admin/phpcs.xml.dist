@@ -37,6 +37,10 @@
 		<exclude-pattern>src/*</exclude-pattern>
 	</rule>
 
+	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
+      <exclude-pattern>src/*</exclude-pattern>
+    </rule>
+
 	<rule ref="Generic.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
