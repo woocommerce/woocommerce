@@ -237,6 +237,7 @@ class WC_Admin_Duplicate_Product {
 	 * select queries on every non-unique slug, resulting in very bad performance.
 	 *
 	 * @param WC_Product $product The product to generate a slug for.
+	 * @since 3.9.0
 	 */
 	private function generate_unique_slug( $product ) {
 		global $wpdb;
