@@ -73,8 +73,10 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 
 	// Track price STATE changes - if state changes, update the query.
 	useEffect( () => {
-		debouncedUpdateQuery();
-	}, [ minPrice, maxPrice ] );
+		if ( ! attributes.showFilterButton ) {
+			debouncedUpdateQuery();
+		}
+	}, [ minPrice, maxPrice, attributes.showFilterButton ] );
 
 	// Track PRICE QUERY changes so the slider reflects current filters.
 	useEffect( () => {
