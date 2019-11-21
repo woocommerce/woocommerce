@@ -38,7 +38,7 @@ if ( $related_products ) : ?>
 					<?php
 					$post_object = get_post( $related_product->get_id() );
 
-					setup_postdata( $GLOBALS['post'] =& $post_object );
+					setup_postdata( $GLOBALS['post'] =& $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited, Squiz.PHP.DisallowMultipleAssignments.Found
 
 					wc_get_template_part( 'content', 'product' );
 					?>
@@ -48,8 +48,7 @@ if ( $related_products ) : ?>
 		<?php woocommerce_product_loop_end(); ?>
 
 	</section>
-
-<?php
+	<?php
 endif;
 
 wp_reset_postdata();
