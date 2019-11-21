@@ -22,7 +22,6 @@ class WC_Order_Factory {
 	 * @return WC_Order|bool
 	 */
 	public static function get_order( $order_id = false ) {
-		$passed_args = $order_id;
 		$order_id = self::get_order_id( $order_id );
 
 		if ( ! $order_id ) {
@@ -47,7 +46,7 @@ class WC_Order_Factory {
 		try {
 			return new $classname( $order_id );
 		} catch ( Exception $e ) {
-			wc_caught_exception( $e, __FUNCTION__, $passed_args );
+			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
 		}
 	}
