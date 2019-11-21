@@ -69,8 +69,21 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 	 */
 	public function test_store_sub_type() {
 		$this->load_dummy_store();
+
 		$store = WC_Data_Store::load( 'dummy-sub' );
 		$this->assertEquals( 'WC_Dummy_Data_Store_CPT', $store->get_current_class_name() );
+	}
+
+	/**
+	 * Test WC_Data_Store::__call().
+	 */
+	public function test_data_store_method_overloading() {
+		$this->load_dummy_store();
+		$store = WC_Data_Store::load( 'dummy-sub' );
+		$this->assertEquals(
+			array( 'first param', 'second param', 'third param' ),
+			$store->custom_method( 'first param', 'second param', 'third param', 'asdfsdf' )
+		);
 	}
 
 	/* Helper Functions. */

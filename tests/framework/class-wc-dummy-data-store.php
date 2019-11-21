@@ -27,6 +27,15 @@ class WC_Dummy_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 	public function delete_meta( &$data, $meta ) { }
 	public function add_meta( &$data, $meta ) { }
 	public function update_meta( &$data, $meta ) { }
+
+	/**
+	 * Method used to test WC_Data_Store::__call().
+	 *
+	 * @return array
+	 */
+	public function custom_method( $first_param, $second_param, $third_param ) {
+		return array( $first_param, $second_param, $third_param );
+	}
 }
 
 /**
