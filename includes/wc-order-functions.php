@@ -882,6 +882,22 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		}
 	}
 }
+
+/**
+ * Release held stock if any for an order.
+ *
+ * @param int $order_id Order ID.
+ */
+function wc_release_held_stock( $order_id ) {
+	$order = new WC_Order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+
+	$order->release_held_stock();
+}
+add_action( 'woocommerce_order_status_cancelled', 'wc_release_held_stock' );
+
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
@@ -908,7 +924,6 @@ function wc_cancel_unpaid_orders() {
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
 				$order->update_status( 'cancelled', __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
-			$order->release_held_stock();
 		}
 	}
 	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );

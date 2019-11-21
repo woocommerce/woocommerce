@@ -2072,9 +2072,9 @@ class WC_Order extends WC_Abstract_Order {
 		try {
 			// TODO: Move to correct place.
 			foreach ( $cart->get_cart() as $cart_item_key => $values ) {
-				$product                        = wc_get_product( $values['data'] );
-				$product_id                     = $product->get_stock_managed_by_id();
-				$result = $this->hold_product_for_checkout( $product, $product_qty_in_cart[ $product_id ] );
+				$product    = wc_get_product( $values['data'] );
+				$product_id = $product->get_stock_managed_by_id();
+				$result     = $this->hold_product_for_checkout( $product, $product_qty_in_cart[ $product_id ] );
 				if ( false === $result ) {
 					// translators: Name of the product.
 					throw new Exception( sprintf( __( 'Something changed during checkout. %s is no longer available.', 'woocommerce' ), $product->get_name() ) );
