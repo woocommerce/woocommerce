@@ -121,6 +121,8 @@ const mainEntry = {
 	'price-filter': './assets/js/blocks/price-filter/index.js',
 	'attribute-filter': './assets/js/blocks/attribute-filter/index.js',
 	'active-filters': './assets/js/blocks/active-filters/index.js',
+	'block-error-boundary':
+		'./assets/js/base/components/block-error-boundary/style.scss',
 };
 
 const frontEndEntry = {
