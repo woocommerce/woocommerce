@@ -1114,13 +1114,13 @@ function wc_get_price_to_display( $product, $args = array() ) {
 		array(
 			'qty'   => 1,
 			'price' => $product->get_price(),
-			'price_location' => 'shop'
+			'display_location' => 'shop'
 		)
 	);
 
 	$price = $args['price'];
 	$qty   = $args['qty'];
-	$price_location = $args['location'];
+	$price_location = $args['display_location'];
 
 	$tax_display = $price_location === 'cart' ? get_option( 'woocommerce_tax_display_cart' ) : get_option( 'woocommerce_tax_display_shop' );
 
