@@ -13,6 +13,9 @@
 	}
 }
 
+// @todo Once we switch to the Gutenberg `Card` component, we should probably
+// drop this class and override all cards within the wc-admin scope or make an
+// exportable card based on the Gutenberg component that houses wc-admin styles.
 .woocommerce-analytics__card {
 	border-radius: 0;
 	border: 1px solid $core-grey-light-700;
