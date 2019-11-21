@@ -33,6 +33,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				'price',
 			), $product );
 
+			do_action( 'woocommerce_grouped_product_list_before' );
+
 			foreach ( $grouped_products as $grouped_product_child ) {
 				$post_object        = get_post( $grouped_product_child->get_id() );
 				$quantites_required = $quantites_required || ( $grouped_product_child->is_purchasable() && ! $grouped_product_child->has_options() );
@@ -90,6 +92,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			}
 			$post = $previous_post; // WPCS: override ok.
 			setup_postdata( $post );
+
+			do_action( 'woocommerce_grouped_product_list_after' );
 			?>
 		</tbody>
 	</table>
