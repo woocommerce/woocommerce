@@ -30,7 +30,7 @@ const blockConfig = {
 			type: 'object',
 			default: previewProducts[ 0 ],
 		},
-		level: {
+		headingLevel: {
 			type: 'number',
 			default: 2,
 		},
@@ -41,7 +41,7 @@ const blockConfig = {
 	},
 	edit( props ) {
 		const { attributes, setAttributes } = props;
-		const { level, productLink } = attributes;
+		const { headingLevel, productLink } = attributes;
 
 		return (
 			<Fragment>
@@ -57,9 +57,9 @@ const blockConfig = {
 							isCollapsed={ false }
 							minLevel={ 2 }
 							maxLevel={ 7 }
-							selectedLevel={ level }
+							selectedLevel={ headingLevel }
 							onChange={ ( newLevel ) =>
-								setAttributes( { level: newLevel } )
+								setAttributes( { headingLevel: newLevel } )
 							}
 						/>
 						<ToggleControl
@@ -82,7 +82,7 @@ const blockConfig = {
 				</InspectorControls>
 				<Disabled>
 					<ProductTitle
-						headingLevel={ level }
+						headingLevel={ headingLevel }
 						productLink={ productLink }
 						product={ attributes.product }
 					/>
