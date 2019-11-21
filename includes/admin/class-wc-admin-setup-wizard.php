@@ -700,7 +700,7 @@ class WC_Admin_Setup_Wizard {
 	public function run_deferred_actions() {
 		$this->close_http_connection();
 		foreach ( $this->deferred_actions as $action ) {
-			call_user_func_array( $action['func'], $action['args'] );
+			$action['func']( ...$action['args'] );
 
 			// Clear the background installation flag if this is a plugin.
 			if (
