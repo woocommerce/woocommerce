@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import Gridicon from 'gridicons';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -45,14 +46,17 @@ registerBlockType( 'woocommerce/active-filters', {
 	 * Save the props to post content.
 	 */
 	save( { attributes } ) {
-		const { displayStyle, heading, headingLevel } = attributes;
+		const { className, displayStyle, heading, headingLevel } = attributes;
 		const data = {
 			'data-display-style': displayStyle,
 			'data-heading': heading,
 			'data-heading-level': headingLevel,
 		};
 		return (
-			<div className="is-loading" { ...data }>
+			<div
+				className={ classNames( 'is-loading', className ) }
+				{ ...data }
+			>
 				<span
 					aria-hidden
 					className="wc-block-active-product-filters__placeholder"

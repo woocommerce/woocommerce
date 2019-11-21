@@ -33,8 +33,18 @@ import { IconExternal } from '../../components/icons';
 import ToggleButtonControl from '../../components/toggle-button-control';
 
 const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
+	const {
+		attributeId,
+		className,
+		heading,
+		headingLevel,
+		isPreview,
+		queryType,
+		showCounts,
+	} = attributes;
+
 	const [ isEditing, setIsEditing ] = useState(
-		! attributes.attributeId && ! attributes.isPreview
+		! attributeId && ! isPreview
 	);
 
 	const getBlockControls = () => {
@@ -55,8 +65,6 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	};
 
 	const getInspectorControls = () => {
-		const { showCounts, queryType } = attributes;
-
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
@@ -95,7 +103,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 						isCollapsed={ false }
 						minLevel={ 2 }
 						maxLevel={ 7 }
-						selectedLevel={ attributes.headingLevel }
+						selectedLevel={ headingLevel }
 						onChange={ ( newLevel ) =>
 							setAttributes( { headingLevel: newLevel } )
 						}
@@ -218,7 +226,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			selectedId.toString(),
 		] );
 
-		if ( ! productAttribute || attributes.attributeId === selectedId ) {
+		if ( ! productAttribute || attributeId === selectedId ) {
 			return;
 		}
 
@@ -235,8 +243,6 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	}, [] );
 
 	const renderAttributeControl = () => {
-		const { attributeId } = attributes;
-
 		const messages = {
 			clear: __(
 				'Clear selected attribute',
@@ -315,7 +321,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		);
 	};
 
-	const TagName = `h${ attributes.headingLevel }`;
+	const TagName = `h${ headingLevel }`;
 
 	return Object.keys( ATTRIBUTES ).length === 0 ? (
 		noAttributesPlaceholder()
@@ -326,11 +332,11 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			{ isEditing ? (
 				renderEditMode()
 			) : (
-				<Fragment>
+				<div className={ className }>
 					<TagName>
 						<PlainText
 							className="wc-block-attribute-filter-heading"
-							value={ attributes.heading }
+							value={ heading }
 							onChange={ ( value ) =>
 								setAttributes( { heading: value } )
 							}
@@ -339,7 +345,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 					<Disabled>
 						<Block attributes={ attributes } isEditor />
 					</Disabled>
-				</Fragment>
+				</div>
 			) }
 		</Fragment>
 	);

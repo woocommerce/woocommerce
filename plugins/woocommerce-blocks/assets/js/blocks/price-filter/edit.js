@@ -24,9 +24,15 @@ import { IconMoney, IconExternal } from '../../components/icons';
 import ToggleButtonControl from '../../components/toggle-button-control';
 
 export default function( { attributes, setAttributes } ) {
-	const getInspectorControls = () => {
-		const { showInputFields, showFilterButton } = attributes;
+	const {
+		className,
+		heading,
+		headingLevel,
+		showInputFields,
+		showFilterButton,
+	} = attributes;
 
+	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
@@ -96,7 +102,7 @@ export default function( { attributes, setAttributes } ) {
 						isCollapsed={ false }
 						minLevel={ 2 }
 						maxLevel={ 7 }
-						selectedLevel={ attributes.headingLevel }
+						selectedLevel={ headingLevel }
 						onChange={ ( newLevel ) =>
 							setAttributes( { headingLevel: newLevel } )
 						}
@@ -145,19 +151,19 @@ export default function( { attributes, setAttributes } ) {
 		</Placeholder>
 	);
 
-	const TagName = `h${ attributes.headingLevel }`;
+	const TagName = `h${ headingLevel }`;
 
 	return (
 		<Fragment>
 			{ PRODUCT_COUNT === 0 ? (
 				noProductsPlaceholder()
 			) : (
-				<Fragment>
+				<div className={ className }>
 					{ getInspectorControls() }
 					<TagName>
 						<PlainText
 							className="wc-block-attribute-filter-heading"
-							value={ attributes.heading }
+							value={ heading }
 							onChange={ ( value ) =>
 								setAttributes( { heading: value } )
 							}
@@ -166,7 +172,7 @@ export default function( { attributes, setAttributes } ) {
 					<Disabled>
 						<Block attributes={ attributes } isPreview />
 					</Disabled>
-				</Fragment>
+				</div>
 			) }
 		</Fragment>
 	);
