@@ -145,7 +145,9 @@ describe( 'Testing Query State Hooks', () => {
 				act( () => {
 					setQueryState( { foo: 'bar' } );
 				} );
-				expect( action ).toHaveBeenCalledWith( { foo: 'bar' } );
+				expect( action ).toHaveBeenCalledWith( 'test-context', {
+					foo: 'bar',
+				} );
 			}
 		);
 	} );

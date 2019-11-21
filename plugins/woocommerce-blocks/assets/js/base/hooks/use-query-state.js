@@ -37,7 +37,14 @@ export const useQueryStateByContext = ( context ) => {
 		},
 		[ context ]
 	);
-	const { setValueForQueryContext: setQueryState } = useDispatch( storeKey );
+	const { setValueForQueryContext } = useDispatch( storeKey );
+	const setQueryState = useCallback(
+		( value ) => {
+			setValueForQueryContext( context, value );
+		},
+		[ context ]
+	);
+
 	return [ queryState, setQueryState ];
 };
 
@@ -115,7 +122,7 @@ export const useSynchronizedQueryState = ( synchronizedQuery, context ) => {
 	const isInitialized = useRef( false );
 	// update queryState anytime incoming synchronizedQuery changes
 	useEffect( () => {
-		setQueryState( context, {
+		setQueryState( {
 			...queryState,
 			...currentSynchronizedQuery,
 		} );
