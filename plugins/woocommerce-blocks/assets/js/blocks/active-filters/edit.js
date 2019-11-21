@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, PlainText } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { Disabled, PanelBody, withSpokenMessages } from '@wordpress/components';
 import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
+import BlockTitle from '@woocommerce/block-components/block-title';
 
 /**
  * Internal dependencies
@@ -72,20 +73,14 @@ const Edit = ( { attributes, setAttributes } ) => {
 		);
 	};
 
-	const TagName = `h${ headingLevel }`;
-
 	return (
 		<div className={ className }>
 			{ getInspectorControls() }
-			<TagName>
-				<PlainText
-					className="wc-block-attribute-filter-heading"
-					value={ heading }
-					onChange={ ( value ) =>
-						setAttributes( { heading: value } )
-					}
-				/>
-			</TagName>
+			<BlockTitle
+				headingLevel={ headingLevel }
+				heading={ heading }
+				onChange={ ( value ) => setAttributes( { heading: value } ) }
+			/>
 			<Disabled>
 				<Block attributes={ attributes } isPreview />
 			</Disabled>
