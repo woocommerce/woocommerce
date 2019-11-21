@@ -43,3 +43,7 @@ These are a collection of custom icons used by the blocks or components, usually
 ## Utilities
 
 There are some functions that work across components, these have been extracted into this utilities folder.
+
+## Block Title
+
+A block that is responsible for showing the title for some of our blocks.
