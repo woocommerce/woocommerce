@@ -261,7 +261,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function handle_multipart( $mailer ) {
 		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
-			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
 			);
 			$this->sending   = false;
