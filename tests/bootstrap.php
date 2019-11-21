@@ -31,7 +31,7 @@ class WC_Unit_Tests_Bootstrap {
 	public function __construct() {
 
 		// phpcs:disable
-		ini_set( 'display_errors', 'on' ); // @codingStandardsIgnoreLine
+		ini_set( 'display_errors', 'on' );
 		error_reporting( E_ALL );
 		// phpcs:enable
 
