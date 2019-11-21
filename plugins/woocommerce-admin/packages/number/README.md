@@ -17,14 +17,26 @@ _This package assumes that your code will run in an **ES2015+** environment. If 
 ```JS
 import { formatNumber, formatValue, calculateDelta } from '@woocommerce/number';
 
-// Formats a number using site's current locale.
-// Defaults to en-US localization
-const localizedNumber = formatNumber( 1337 ); // '1,377'
+// It's best to retrieve the site currency settings and compose them with the format functions.
+import { partial } from 'lodash';
+// Retrieve this from the API or a global settings object.
+const siteNumberOptions = {
+    precision: 2,
+	decimalSeparator: '.',
+	thousandSeparator: ',',
+};
+// Compose.
+const formatStoreNumber = partial( siteNumberOptions, formatNumber );
+const formatStoreValue = partial( siteNumberOptions, formatValue );
 
-// formatValue's first argument is a type: average, or number
-// The second argument is the number/value to format
-const formattedAverage = formatValue( 'average', '10.5' ); // 11 just uses Math.round
-const formattedNumber = formatValue( 'number', '1337' ); // 1,337 calls formatNumber ( see above )
+// Formats a number using site's current locale.
+const localizedNumber = formatStoreNumber( 1337 ); // '1,377'
+
+// formatValue's second argument is a type: average, or number
+// The third argument is the number/value to format
+// (The first argument is the config object we composed with earlier)
+const formattedAverage = formatStoreValue( 'average', '10.5' ); // 11 just uses Math.round
+const formattedNumber = formatStoreValue( 'number', '1337' ); // 1,337 calls formatNumber ( see above )
 
 // Get a rounded percent change/delta between two numbers
 const delta = calculateDelta( 10, 8 ); // '25'

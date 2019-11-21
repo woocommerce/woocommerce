@@ -1,22 +1,21 @@
 /** @format */
 /* eslint-disable wpcalypso/import-docblock */
 
-/**
- * WooCommerce dependencies
- */
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
-
 const number_format = require( 'locutus/php/strings/number_format' );
 
 /**
  * Formats a number using site's current locale
  *
  * @see http://locutus.io/php/strings/number_format/
+ * @param {Object} numberConfig number formatting configuration object.
  * @param {Number|String} number number to format
- * @param {int|null} [precision=null] optional decimal precision
  * @returns {?String} A formatted string.
  */
-export function numberFormat( number, precision = null ) {
+export function numberFormat( {
+	precision = null,
+	decimalSeparator = '.',
+	thousandSeparator = ',',
+}, number ) {
 	if ( 'number' !== typeof number ) {
 		number = parseFloat( number );
 	}
@@ -25,10 +24,6 @@ export function numberFormat( number, precision = null ) {
 		return '';
 	}
 
-	const {
-		decimalSeparator,
-		thousandSeparator,
-	} = CURRENCY;
 	precision = parseInt( precision );
 
 	if ( isNaN( precision ) ) {
@@ -42,11 +37,12 @@ export function numberFormat( number, precision = null ) {
 /**
  * Formats a number string based on type of `average` or `number`.
  *
+ * @param {Object} numberConfig number formatting configuration object.
  * @param {String} type of number to format, average or number
  * @param {int} value to format.
  * @returns {?String} A formatted string.
  */
-export function formatValue( type, value ) {
+export function formatValue( numberConfig, type, value ) {
 	if ( ! Number.isFinite( value ) ) {
 		return null;
 	}
@@ -55,7 +51,7 @@ export function formatValue( type, value ) {
 		case 'average':
 			return Math.round( value );
 		case 'number':
-			return numberFormat( value );
+			return numberFormat( { ...numberConfig, precision: null }, value );
 	}
 }
 

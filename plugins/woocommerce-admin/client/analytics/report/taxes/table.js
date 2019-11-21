@@ -10,10 +10,10 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { Link } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { getTaxCode } from './utils';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 
 /**
  * Internal dependencies
@@ -109,7 +109,7 @@ export default class TaxesReportTable extends Component {
 					value: getCurrencyFormatDecimal( shipping_tax ),
 				},
 				{
-					display: numberFormat( orders_count ),
+					display: formatValue( 'number', orders_count ),
 					value: orders_count,
 				},
 			];
@@ -127,7 +127,7 @@ export default class TaxesReportTable extends Component {
 		return [
 			{
 				label: _n( 'tax code', 'tax codes', tax_codes, 'woocommerce-admin' ),
-				value: numberFormat( tax_codes ),
+				value: formatValue( 'number', tax_codes ),
 			},
 			{
 				label: __( 'total tax', 'woocommerce-admin' ),
@@ -143,7 +143,7 @@ export default class TaxesReportTable extends Component {
 			},
 			{
 				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: numberFormat( orders_count ),
+				value: formatValue( 'number', orders_count ),
 			},
 		];
 	}

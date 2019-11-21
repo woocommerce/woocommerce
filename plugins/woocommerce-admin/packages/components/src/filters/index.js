@@ -155,17 +155,13 @@ ReportFilters.propTypes = {
 	 */
 	onAdvancedFilterAction: PropTypes.func,
 	/**
-	 * The currency settings for the site.
+	 * The currency formatting instance for the site.
 	 */
-	currency: PropTypes.object,
+	currency: PropTypes.object.isRequired,
 };
 
 ReportFilters.defaultProps = {
 	siteLocale: 'en_US',
-	currency: {
-		symbol: '$',
-		symbolPosition: 'left',
-	},
 	advancedFilters: {},
 	filters: [],
 	query: {},

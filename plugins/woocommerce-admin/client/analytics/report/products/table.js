@@ -10,10 +10,10 @@ import { map } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -152,7 +152,7 @@ class ProductsReportTable extends Component {
 					value: sku,
 				},
 				{
-					display: numberFormat( items_sold ),
+					display: formatValue( 'number', items_sold ),
 					value: items_sold,
 				},
 				{
@@ -194,7 +194,7 @@ class ProductsReportTable extends Component {
 					value: productCategories.map( category => category.name ).join( ', ' ),
 				},
 				{
-					display: numberFormat( variations.length ),
+					display: formatValue( 'number', variations.length ),
 					value: variations.length,
 				},
 				'yes' === manageStock
@@ -206,7 +206,7 @@ class ProductsReportTable extends Component {
 				'yes' === manageStock
 					? {
 							display: manage_stock
-								? numberFormat( stock_quantity )
+								? formatValue( 'number', stock_quantity )
 								: __( 'N/A', 'woocommerce-admin' ),
 							value: stock_quantity,
 						}
@@ -220,11 +220,11 @@ class ProductsReportTable extends Component {
 		return [
 			{
 				label: _n( 'product', 'products', products_count, 'woocommerce-admin' ),
-				value: numberFormat( products_count ),
+				value: formatValue( 'number', products_count ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', items_sold, 'woocommerce-admin' ),
-				value: numberFormat( items_sold ),
+				value: formatValue( 'number', items_sold ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
@@ -232,7 +232,7 @@ class ProductsReportTable extends Component {
 			},
 			{
 				label: _n( 'orders', 'orders', orders_count, 'woocommerce-admin' ),
-				value: numberFormat( orders_count ),
+				value: formatValue( 'number', orders_count ),
 			},
 		];
 	}

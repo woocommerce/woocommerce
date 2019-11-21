@@ -10,9 +10,9 @@ import { Tooltip } from '@wordpress/components';
  * WooCommerce dependencies
  */
 import { defaultTableDateFormat } from '@woocommerce/date';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { Date, Link } from '@woocommerce/components';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
@@ -178,7 +178,7 @@ export default class CustomersReportTable extends Component {
 					value: email,
 				},
 				{
-					display: numberFormat( orders_count ),
+					display: formatValue( 'number', orders_count ),
 					value: orders_count,
 				},
 				{
@@ -219,11 +219,11 @@ export default class CustomersReportTable extends Component {
 		return [
 			{
 				label: _n( 'customer', 'customers', customers_count, 'woocommerce-admin' ),
-				value: numberFormat( customers_count ),
+				value: formatValue( 'number', customers_count ),
 			},
 			{
 				label: _n( 'average order', 'average orders', avg_orders_count, 'woocommerce-admin' ),
-				value: numberFormat( avg_orders_count ),
+				value: formatValue( 'number', avg_orders_count ),
 			},
 			{
 				label: __( 'average lifetime spend', 'woocommerce-admin' ),

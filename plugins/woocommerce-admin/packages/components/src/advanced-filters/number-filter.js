@@ -15,11 +15,6 @@ import { sprintf, __, _x } from '@wordpress/i18n';
 import TextControlWithAffixes from '../text-control-with-affixes';
 import { textContent } from './utils';
 
-/**
- * WooCommerce dependencies
- */
-import { formatCurrency } from '@woocommerce/currency';
-
 class NumberFilter extends Component {
 	getBetweenString() {
 		return _x(
@@ -30,6 +25,7 @@ class NumberFilter extends Component {
 	}
 
 	getScreenReaderText( filter, config ) {
+		const { currency } = this.props;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		let [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
@@ -43,8 +39,8 @@ class NumberFilter extends Component {
 		}
 
 		if ( 'currency' === inputType ) {
-			rangeStart = formatCurrency( rangeStart );
-			rangeEnd = formatCurrency( rangeEnd );
+			rangeStart = currency.formatCurrency( rangeStart );
+			rangeEnd = currency.formatCurrency( rangeEnd );
 		}
 
 		let filterStr = rangeStart;
@@ -115,9 +111,12 @@ class NumberFilter extends Component {
 			config,
 			filter,
 			onFilterChange,
-			currencySymbol,
-			symbolPosition,
+			currency,
 		} = this.props;
+		const {
+			symbol: currencySymbol,
+			symbolPosition,
+		} = currency;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
 		if ( 'between' === filter.rule ) {
@@ -158,9 +157,12 @@ class NumberFilter extends Component {
 			config,
 			filter,
 			onFilterChange,
-			currencySymbol,
-			symbolPosition,
+			currency,
 		} = this.props;
+		const {
+			symbol: currencySymbol,
+			symbolPosition,
+		} = currency;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
 

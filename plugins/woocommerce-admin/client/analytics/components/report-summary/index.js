@@ -13,8 +13,8 @@ import PropTypes from 'prop-types';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { getNewPath } from '@woocommerce/navigation';
 import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
-import { calculateDelta, formatValue } from '@woocommerce/number';
-import { formatCurrency } from '@woocommerce/currency';
+import { calculateDelta, formatValue } from 'lib/number-format';
+import { formatCurrency } from 'lib/currency-format';
 
 /**
  * Internal dependencies

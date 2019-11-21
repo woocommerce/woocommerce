@@ -13,7 +13,7 @@ import { keys, get, pickBy } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { numberFormat } from '@woocommerce/number';
+import { numberFormat } from 'lib/number-format';
 import { getSetting, CURRENCY as currency } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -22,7 +22,7 @@ import { getSetting, CURRENCY as currency } from '@woocommerce/wc-admin-settings
 import { H, Card, SelectControl, Form } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import { formatCurrency } from '@woocommerce/currency';
+import { formatCurrency } from 'lib/currency-format';
 import Plugins from 'dashboard/task-list/tasks/steps/plugins';
 import { pluginNames } from 'wc-api/onboarding/constants';
 

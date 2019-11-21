@@ -203,7 +203,6 @@ class AdvancedFilters extends Component {
 		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled = ( 'admin.php' + window.location.search === updateHref ) || 0 === activeFilters.length;
 		const isEnglish = this.isEnglish();
-		const { symbol: currencySymbol, symbolPosition } = currency;
 		return (
 			<Card className="woocommerce-filters-advanced woocommerce-analytics__card" title={ this.getTitle() }>
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
@@ -239,8 +238,7 @@ class AdvancedFilters extends Component {
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }
-										currencySymbol={ currencySymbol }
-										symbolPosition={ symbolPosition }
+										currency={ currency }
 									/>
 								) }
 								{ 'Currency' === input.component && (
@@ -251,8 +249,7 @@ class AdvancedFilters extends Component {
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }
-										currencySymbol={ currencySymbol }
-										symbolPosition={ symbolPosition }
+										currency={ currency }
 									/>
 								) }
 								{ 'Date' === input.component && (
@@ -373,19 +370,15 @@ AdvancedFilters.propTypes = {
 	 */
 	siteLocale: PropTypes.string,
 	/**
-	 * The currency settings for the site.
+	 * The currency formatting instance for the site.
 	 */
-	currency: PropTypes.object,
+	currency: PropTypes.object.isRequired,
 };
 
 AdvancedFilters.defaultProps = {
 	query: {},
 	onAdvancedFilterAction: () => {},
 	siteLocale: 'en_US',
-	currency: {
-		symbol: '$',
-		symbolPosition: 'left',
-	},
 };
 
 export default AdvancedFilters;

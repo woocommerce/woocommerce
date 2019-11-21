@@ -10,10 +10,10 @@ import { map } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 
 /**
  * Internal dependencies
@@ -82,7 +82,7 @@ class CategoriesReportTable extends Component {
 					value: category && category.name,
 				},
 				{
-					display: numberFormat( items_sold ),
+					display: formatValue( 'number', items_sold ),
 					value: items_sold,
 				},
 				{
@@ -98,13 +98,13 @@ class CategoriesReportTable extends Component {
 							} ) }
 							type="wc-admin"
 						>
-							{ numberFormat( products_count ) }
+							{ formatValue( 'number', products_count ) }
 						</Link>
 					),
 					value: products_count,
 				},
 				{
-					display: numberFormat( orders_count ),
+					display: formatValue( 'number', orders_count ),
 					value: orders_count,
 				},
 			];
@@ -116,11 +116,11 @@ class CategoriesReportTable extends Component {
 		return [
 			{
 				label: _n( 'category', 'categories', totalResults, 'woocommerce-admin' ),
-				value: numberFormat( totalResults ),
+				value: formatValue( 'number', totalResults ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', items_sold, 'woocommerce-admin' ),
-				value: numberFormat( items_sold ),
+				value: formatValue( 'number', items_sold ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
@@ -128,7 +128,7 @@ class CategoriesReportTable extends Component {
 			},
 			{
 				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: numberFormat( orders_count ),
+				value: formatValue( 'number', orders_count ),
 			},
 		];
 	}

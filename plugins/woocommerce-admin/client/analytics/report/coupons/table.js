@@ -11,9 +11,9 @@ import { map } from 'lodash';
  */
 import { Date, Link } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 
 /**
  * Internal dependencies
@@ -92,7 +92,7 @@ export default class CouponsReportTable extends Component {
 			} );
 			const ordersLink = (
 				<Link href={ ordersUrl } type="wc-admin">
-					{ numberFormat( orders_count ) }
+					{ formatValue( 'number', orders_count ) }
 				</Link>
 			);
 
@@ -134,11 +134,11 @@ export default class CouponsReportTable extends Component {
 		return [
 			{
 				label: _n( 'coupon', 'coupons', coupons_count, 'woocommerce-admin' ),
-				value: numberFormat( coupons_count ),
+				value: formatValue( 'number', coupons_count ),
 			},
 			{
 				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: numberFormat( orders_count ),
+				value: formatValue( 'number', orders_count ),
 			},
 			{
 				label: __( 'amount discounted', 'woocommerce-admin' ),

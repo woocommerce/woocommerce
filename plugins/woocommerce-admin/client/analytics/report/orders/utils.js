@@ -6,7 +6,7 @@
 /**
  * WooCommerce dependencies
  */
-import { getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { getCurrencyFormatDecimal } from 'lib/currency-format';
 import { getOrderRefundTotal } from 'lib/order-values';
 
 export function formatTableOrders( orders ) {

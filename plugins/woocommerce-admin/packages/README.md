@@ -4,7 +4,7 @@ Currently we have a small set of public-facing packages that can be dowloaded fr
 
 - `@woocommerce/components`: A library of components that can be used to create pages in the WooCommerce dashboard and reports pages.
 - `@woocommerce/csv-export`: A set of functions to convert data into CSV values, and enable a browser download of the CSV data.
-- `@woocommerce/currency`: A collection of utilities to display and work with currency values.
+- `@woocommerce/currency`: A class to display and work with currency values.
 - `@woocommerce/date`: A collection of utilities to display and work with date values.
 - `@woocommerce/navigation`: A collection of navigation-related functions for handling query parameter objects, serializing query parameters, updating query parameters, and triggering path changes.
 

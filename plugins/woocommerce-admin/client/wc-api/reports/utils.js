@@ -11,7 +11,7 @@ import moment from 'moment';
  */
 import { appendTimestamp, getCurrentDates, getIntervalForQuery } from '@woocommerce/date';
 import { flattenFilters, getActiveFiltersFromQuery, getUrlKey } from '@woocommerce/navigation';
-import { formatCurrency } from '@woocommerce/currency';
+import { formatCurrency } from 'lib/currency-format';
 
 /**
  * Internal dependencies

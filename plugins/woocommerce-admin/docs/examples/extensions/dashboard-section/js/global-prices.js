@@ -8,7 +8,10 @@ import moment from 'moment';
  * WooCommerce dependencies
  */
 import { Card, Chart } from '@woocommerce/components';
-import { formatCurrency } from '@woocommerce/currency';
+import Currency from '@woocommerce/currency';
+
+const storeCurrency = new Currency(); // give this store settings.
+const formatCurrency = storeCurrency.formatCurrency.bind( storeCurrency );
 
 const data = [];
 

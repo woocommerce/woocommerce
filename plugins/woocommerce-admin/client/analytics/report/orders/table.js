@@ -11,8 +11,8 @@ import { map } from 'lodash';
  */
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
-import { formatCurrency, renderCurrency } from '@woocommerce/currency';
-import { numberFormat } from '@woocommerce/number';
+import { formatCurrency, renderCurrency } from 'lib/currency-format';
+import { formatValue } from 'lib/number-format';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -193,7 +193,7 @@ export default class OrdersReportTable extends Component {
 						.join( ', ' ),
 				},
 				{
-					display: numberFormat( num_items_sold ),
+					display: formatValue( 'number', num_items_sold ),
 					value: num_items_sold,
 				},
 				{
@@ -224,11 +224,11 @@ export default class OrdersReportTable extends Component {
 		return [
 			{
 				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: numberFormat( orders_count ),
+				value: formatValue( 'number', orders_count ),
 			},
 			{
 				label: _n( 'new customer', 'new customers', num_new_customers, 'woocommerce-admin' ),
-				value: numberFormat( num_new_customers ),
+				value: formatValue( 'number', num_new_customers ),
 			},
 			{
 				label: _n(
@@ -237,19 +237,19 @@ export default class OrdersReportTable extends Component {
 					num_returning_customers,
 					'woocommerce-admin'
 				),
-				value: numberFormat( num_returning_customers ),
+				value: formatValue( 'number', num_returning_customers ),
 			},
 			{
 				label: _n( 'product', 'products', products, 'woocommerce-admin' ),
-				value: numberFormat( products ),
+				value: formatValue( 'number', products ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', num_items_sold, 'woocommerce-admin' ),
-				value: numberFormat( num_items_sold ),
+				value: formatValue( 'number', num_items_sold ),
 			},
 			{
 				label: _n( 'coupon', 'coupons', coupons_count, 'woocommerce-admin' ),
-				value: numberFormat( coupons_count ),
+				value: formatValue( 'number', coupons_count ),
 			},
 			{
 				label: __( 'net revenue', 'woocommerce-admin' ),

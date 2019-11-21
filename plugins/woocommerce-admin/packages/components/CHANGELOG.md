@@ -5,6 +5,7 @@
 - Removed WC-Admin specific actions from `<TableCard />` component.
 - Export the `<CompareButton />` component.
 - Add `<TextControl />` component.
+- Require `currency` prop in `<AdvancedFilters />` component.
 
 # 4.0.0
 - Added a new `<ScrollTo />` component.

@@ -13,7 +13,7 @@ import moment from 'moment';
 import { defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 
 /**
  * Internal dependencies
@@ -140,11 +140,11 @@ export default class CouponsReportTable extends Component {
 		return [
 			{
 				label: _n( 'day', 'days', days, 'woocommerce-admin' ),
-				value: numberFormat( days ),
+				value: formatValue( 'number', days ),
 			},
 			{
 				label: _n( 'download', 'downloads', download_count, 'woocommerce-admin' ),
-				value: numberFormat( download_count ),
+				value: formatValue( 'number', download_count ),
 			},
 		];
 	}

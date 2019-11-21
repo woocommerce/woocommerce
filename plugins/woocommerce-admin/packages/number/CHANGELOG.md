@@ -1,5 +1,6 @@
 # (unreleased)
 - Remove lodash dependency.
+- Decouple from global wcSettings object.
 
 # 1.0.4
 

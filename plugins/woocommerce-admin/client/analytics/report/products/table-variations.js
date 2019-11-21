@@ -10,9 +10,9 @@ import { map, get } from 'lodash';
  * WooCommerce dependencies
  */
 import { Link } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { numberFormat } from '@woocommerce/number';
+import { formatValue } from 'lib/number-format';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -113,7 +113,7 @@ export default class VariationsReportTable extends Component {
 					value: sku,
 				},
 				{
-					display: numberFormat( items_sold ),
+					display: formatValue( 'number', items_sold ),
 					value: items_sold,
 				},
 				{
@@ -155,11 +155,11 @@ export default class VariationsReportTable extends Component {
 		return [
 			{
 				label: _n( 'variation sold', 'variations sold', variations_count, 'woocommerce-admin' ),
-				value: numberFormat( variations_count ),
+				value: formatValue( 'number', variations_count ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', items_sold, 'woocommerce-admin' ),
-				value: numberFormat( items_sold ),
+				value: formatValue( 'number', items_sold ),
 			},
 			{
 				label: __( 'net revenue', 'woocommerce-admin' ),
@@ -167,7 +167,7 @@ export default class VariationsReportTable extends Component {
 			},
 			{
 				label: _n( 'orders', 'orders', orders_count, 'woocommerce-admin' ),
-				value: numberFormat( orders_count ),
+				value: formatValue( 'number', orders_count ),
 			},
 		];
 	}

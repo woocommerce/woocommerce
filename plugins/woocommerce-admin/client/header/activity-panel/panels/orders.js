@@ -15,7 +15,7 @@ import { keyBy, map, merge } from 'lodash';
  * WooCommerce dependencies
  */
 import { EmptyContent, Flag, Link, OrderStatus, Section } from '@woocommerce/components';
-import { formatCurrency } from '@woocommerce/currency';
+import { formatCurrency } from 'lib/currency-format';
 import { getAdminLink, getNewPath } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 

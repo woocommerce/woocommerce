@@ -14,8 +14,8 @@ import { find } from 'lodash';
  */
 import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from '@woocommerce/date';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { calculateDelta, formatValue } from '@woocommerce/number';
-import { formatCurrency } from '@woocommerce/currency';
+import { calculateDelta, formatValue } from 'lib/number-format';
+import { formatCurrency } from 'lib/currency-format';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**

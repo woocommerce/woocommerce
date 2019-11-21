@@ -10,12 +10,13 @@ import { omitBy, isUndefined, snakeCase } from 'lodash';
  * WooCommerce dependencies
  */
 import { ReportFilters as Filters } from '@woocommerce/components';
-import { LOCALE, CURRENCY } from '@woocommerce/wc-admin-settings';
+import { LOCALE } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { recordEvent } from 'lib/tracks';
+import { Currency } from 'lib/currency-format';
 
 export default class ReportFilters extends Component {
 	constructor() {
@@ -67,7 +68,7 @@ export default class ReportFilters extends Component {
 			<Filters
 				query={ query }
 				siteLocale={ LOCALE.siteLocale }
-				currency={ CURRENCY }
+				currency={ Currency }
 				path={ path }
 				filters={ filters }
 				advancedFilters={ advancedFilters }

@@ -3,6 +3,7 @@
  * Internal dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
+import Currency from '@woocommerce/currency';
 
 const ORDER_STATUSES = {
 	cancelled: 'Cancelled',
@@ -15,6 +16,7 @@ const ORDER_STATUSES = {
 };
 
 const siteLocale = 'en_US';
+const siteCurrency = new Currency(); // pass site currency settings.
 
 const path = ( new URL( document.location ) ).searchParams.get( 'path' ) || '/devdocs';
 const query = {
@@ -153,5 +155,6 @@ export default () => (
         query={ query }
         filterTitle="Orders"
 		config={ advancedFilters }
+		currency={ siteCurrency }
     />
 );
