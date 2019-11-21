@@ -61,7 +61,7 @@
     "mocha": "6.2.2",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
-    "puppeteer": "1.20.0",
+    "puppeteer": "2.0.0",
     "stylelint": "11.1.1",
     "stylelint-config-wordpress": "15.0.0"
   },
