@@ -26,8 +26,8 @@ if ( $related_products ) : ?>
 		<?php
 		$heading = apply_filters( 'woocommerce_product_related_products_heading', __( 'Related products', 'woocommerce' ) );
 
-		if ( $heading ) : 
-		?>
+		if ( $heading ) :
+			?>
 			<h2><?php echo esc_html( $heading ); ?></h2>
 		<?php endif; ?>
 		
@@ -41,7 +41,7 @@ if ( $related_products ) : ?>
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 
 					wc_get_template_part( 'content', 'product' );
-			?>
+					?>
 
 			<?php endforeach; ?>
 
@@ -49,7 +49,7 @@ if ( $related_products ) : ?>
 
 	</section>
 
-<?php 
+<?php
 endif;
 
 wp_reset_postdata();
