@@ -74,7 +74,7 @@ class WC_AJAX {
 	public static function do_wc_ajax() {
 		global $wp_query;
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['wc-ajax'] ) ) {
 			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
 		}
