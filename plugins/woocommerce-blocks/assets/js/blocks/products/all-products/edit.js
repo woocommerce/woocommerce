@@ -27,7 +27,6 @@ import GridLayoutControl from '@woocommerce/block-components/grid-layout-control
 import { HAS_PRODUCTS } from '@woocommerce/block-settings';
 import { InnerBlockConfigurationProvider } from '@woocommerce/base-context/inner-block-configuration-context';
 import { ProductLayoutContextProvider } from '@woocommerce/base-context/product-layout-context';
-import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Internal dependencies
@@ -283,24 +282,22 @@ class Editor extends Component {
 		}
 
 		return (
-			<BlockErrorBoundary>
-				<InnerBlockConfigurationProvider value={ parentBlockConfig }>
-					<ProductLayoutContextProvider value={ layoutContextConfig }>
-						<div
-							className={ getBlockClassName(
-								'wc-block-all-products',
-								attributes
-							) }
-						>
-							{ this.getBlockControls() }
-							{ this.getInspectorControls() }
-							{ isEditing
-								? this.renderEditMode()
-								: this.renderViewMode() }
-						</div>
-					</ProductLayoutContextProvider>
-				</InnerBlockConfigurationProvider>
-			</BlockErrorBoundary>
+			<InnerBlockConfigurationProvider value={ parentBlockConfig }>
+				<ProductLayoutContextProvider value={ layoutContextConfig }>
+					<div
+						className={ getBlockClassName(
+							'wc-block-all-products',
+							attributes
+						) }
+					>
+						{ this.getBlockControls() }
+						{ this.getInspectorControls() }
+						{ isEditing
+							? this.renderEditMode()
+							: this.renderViewMode() }
+					</div>
+				</ProductLayoutContextProvider>
+			</InnerBlockConfigurationProvider>
 		);
 	};
 }

@@ -6,11 +6,10 @@ import {
 	useQueryStateByKey,
 	useQueryStateByContext,
 } from '@woocommerce/base-hooks';
-import { useCallback, useState, useEffect } from '@wordpress/element';
+import { Fragment, useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { CURRENCY } from '@woocommerce/settings';
 import { useDebouncedCallback } from 'use-debounce';
-import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Component displaying a price filter.
@@ -109,7 +108,7 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 		: maxPrice;
 
 	return (
-		<BlockErrorBoundary>
+		<Fragment>
 			{ ! isPreview && attributes.heading && (
 				<TagName>{ attributes.heading }</TagName>
 			) }
@@ -129,7 +128,7 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 					isLoading={ isLoading }
 				/>
 			</div>
-		</BlockErrorBoundary>
+		</Fragment>
 	);
 };
 
