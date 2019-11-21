@@ -14,6 +14,7 @@
     "build-watch": "grunt watch",
     "lint:js": "eslint assets/js --ext=js",
     "test:e2e": "./tests/bin/e2e-test-integration.js",
+    "test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
     "makepot": "grunt makepot",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
@@ -61,7 +62,7 @@
     "mocha": "6.2.2",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
-    "puppeteer": "1.20.0",
+    "puppeteer": "2.0.0",
     "stylelint": "11.1.1",
     "stylelint-config-wordpress": "15.0.0"
   },
