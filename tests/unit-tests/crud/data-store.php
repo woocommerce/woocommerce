@@ -97,13 +97,4 @@ class WC_Tests_Data_Store extends WC_Unit_Test_Case {
 	function set_dummy_store( $store ) {
 		return 'WC_Dummy_Data_Store_Custom_Table';
 	}
-
-	/**
-	 * Helper function/filter to swap out the 'dummy' store for the default one.
-	 *
-	 * @since 3.0.0
-	 */
-	function set_default_product_store( $store ) {
-		return 'WC_Dummy_Data_Store_CPT';
-	}
 }
