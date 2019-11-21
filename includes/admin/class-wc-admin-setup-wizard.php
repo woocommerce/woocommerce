@@ -390,13 +390,8 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_print_styles' ); ?>
 			<?php do_action( 'admin_head' ); ?>
 		</head>
-		<body class="wc-setup wp-core-ui">
-		<?php
-		if ( 'new_onboarding' === $this->step ) {
-			return;
-		}
-		?>
-		<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
+		<body class="wc-setup wp-core-ui <?php echo esc_attr( 'wc-setup-step__' . $this->step ); ?>">
+		<h1 class="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 		<?php
 	}
 
@@ -432,11 +427,6 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		unset( $output_steps['new_onboarding'] );
-
-		// Don't show the navigation on the onboarding prompt screen.
-		if ( 'new_onboarding' === $this->step ) {
-			return;
-		}
 
 		?>
 		<ol class="wc-setup-steps">
@@ -481,9 +471,9 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_new_onboarding() {
 		?>
-			<div class="wc-setup-new-onboarding">
-				<p class="onboarding-welcome"><?php esc_html_e( 'Welcome to', 'woocommerce' ); ?></p>
-				<h1 id="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
+			<div class="wc-setup-step__new_onboarding-wrapper">
+				<p class="wc-setup-step__new_onboarding-welcome"><?php esc_html_e( 'Welcome to', 'woocommerce' ); ?></p>
+				<h1 class="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 				<p><?php esc_html_e( 'Get your store up and running more quickly with our new and improved setup experience', 'woocommerce' ); ?></p>
 
 				<form method="post" class="activate-new-onboarding">
@@ -494,7 +484,7 @@ class WC_Admin_Setup_Wizard {
 					</p>
 				</form>
 
-				<p class="onboarding-plugin-info"><?php esc_html_e( 'The "WooCommerce Admin" plugin will be installed and activated', 'woocommerce' ); ?></p>
+				<p class="wc-setup-step__new_onboarding-plugin-info"><?php esc_html_e( 'The "WooCommerce Admin" plugin will be installed and activated', 'woocommerce' ); ?></p>
 			</div>
 		<?php
 	}
