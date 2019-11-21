@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -50,6 +51,7 @@ registerBlockType( 'woocommerce/price-filter', {
 	 */
 	save( { attributes } ) {
 		const {
+			className,
 			showInputFields,
 			showFilterButton,
 			heading,
@@ -62,7 +64,10 @@ registerBlockType( 'woocommerce/price-filter', {
 			'data-heading-level': headingLevel,
 		};
 		return (
-			<div className="is-loading" { ...data }>
+			<div
+				className={ classNames( 'is-loading', className ) }
+				{ ...data }
+			>
 				<span
 					aria-hidden
 					className="wc-block-product-categories__placeholder"

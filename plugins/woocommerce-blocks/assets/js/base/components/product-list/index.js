@@ -124,12 +124,11 @@ const ProductList = ( {
 	};
 
 	const getClassnames = () => {
-		const { columns, rows, className, alignButtons, align } = attributes;
+		const { columns, rows, alignButtons, align } = attributes;
 		const alignClass = typeof align !== 'undefined' ? 'align' + align : '';
 
 		return classnames(
 			layoutStyleClassPrefix,
-			className,
 			alignClass,
 			'has-' + columns + '-columns',
 			{

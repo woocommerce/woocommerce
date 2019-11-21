@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import Gridicon from 'gridicons';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -66,6 +67,7 @@ registerBlockType( 'woocommerce/attribute-filter', {
 	 */
 	save( { attributes } ) {
 		const {
+			className,
 			showCounts,
 			queryType,
 			attributeId,
@@ -80,7 +82,10 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			'data-heading-level': headingLevel,
 		};
 		return (
-			<div className="is-loading" { ...data }>
+			<div
+				className={ classNames( 'is-loading', className ) }
+				{ ...data }
+			>
 				<span
 					aria-hidden
 					className="wc-block-product-attribute-filter__placeholder"
