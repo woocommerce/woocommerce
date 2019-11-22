@@ -54,6 +54,11 @@ a.button {
 	}
 }
 
+.theme-twentytwenty {
+	/* Override default beige background to make the design more versatile and clean */
+	background: #fff;
+}
+
 .woocommerce {
 
 	form .form-row {
