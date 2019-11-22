@@ -93,5 +93,8 @@
     "> 0.1%",
     "ie 8",
     "ie 9"
-  ]
+  ],
+  "dependencies": {
+    "@jest/test-sequencer": "^24.9.0"
+  }
 }
