@@ -373,6 +373,13 @@ dl.variation,
 
 	div.product {
 		position: relative;
+
+		.product_meta {
+			clear: both;
+			font-size: .7em;
+			padding-top: 0.5em;
+			margin-top: 3rem;
+		}
 	}
 
 	.single-featured-image-header {
