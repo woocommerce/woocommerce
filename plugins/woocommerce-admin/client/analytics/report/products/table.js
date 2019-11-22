@@ -14,7 +14,7 @@ import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/cu
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
 import { formatValue } from 'lib/number-format';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -131,7 +131,7 @@ class ProductsReportTable extends Component {
 				[];
 
 			const stockStatus = isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
-				<Link href={ 'post.php?action=edit&post=' + product_id } type="wp-admin">
+				<Link href={ getAdminLink( 'post.php?action=edit&post=' + product_id ) } type="wp-admin">
 					{ _x( 'Low', 'Indication of a low quantity', 'woocommerce-admin' ) }
 				</Link>
 			) : (

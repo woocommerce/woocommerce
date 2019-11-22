@@ -9,7 +9,7 @@ import domReady from '@wordpress/dom-ready';
 /**
  * WooCommerce dependencies
  */
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Displays a notice after product creation.

@@ -89,3 +89,13 @@ export function getSetting( name, fallback = false, filter = val => val ) {
 export function setSetting( name, value, filter = val => val ) {
 	allSettings[ name ] = filter( value );
 }
+
+/**
+ * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
+ *
+ * @param {String} path Relative path.
+ * @return {String} Full admin URL.
+ */
+export function getAdminLink( path ) {
+	return ( ADMIN_URL || '' ) + path;
+}

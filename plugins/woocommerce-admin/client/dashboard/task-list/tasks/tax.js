@@ -14,8 +14,8 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Card, H, Link, Stepper } from '@woocommerce/components';
-import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
-import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
+import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { getAdminLink, getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies

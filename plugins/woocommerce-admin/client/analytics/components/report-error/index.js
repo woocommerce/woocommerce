@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
  * WooCommerce dependencies
  */
 import { EmptyContent } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Component to render when there is an error in a report component due to data

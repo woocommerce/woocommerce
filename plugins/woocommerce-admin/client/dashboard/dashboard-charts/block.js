@@ -10,7 +10,8 @@ import { __, sprintf } from '@wordpress/i18n';
  * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
-import { getAdminLink, getHistory, getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { getHistory, getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies

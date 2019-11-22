@@ -13,8 +13,8 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { H, Stepper, Card } from '@woocommerce/components';
-import { getNewPath, updateQueryString, getAdminLink } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getNewPath, updateQueryString } from '@woocommerce/navigation';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies

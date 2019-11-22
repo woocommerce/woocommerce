@@ -9,7 +9,7 @@ import domReady from '@wordpress/dom-ready';
 /**
  * WooCommerce dependencies
  */
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Returns a promise and resolves when the loader overlay no longer exists.

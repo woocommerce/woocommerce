@@ -11,8 +11,8 @@ import { get } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { getSetting } from '@woocommerce/wc-admin-settings';
-import { updateQueryString, getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies

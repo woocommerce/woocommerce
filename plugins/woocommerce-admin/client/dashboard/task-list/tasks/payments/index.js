@@ -15,8 +15,12 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Form, Card, Stepper, TextControl, List } from '@woocommerce/components';
-import { getAdminLink, getHistory, getNewPath } from '@woocommerce/navigation';
-import { WC_ASSET_URL as wcAssetUrl, getSetting } from '@woocommerce/wc-admin-settings';
+import { getHistory, getNewPath } from '@woocommerce/navigation';
+import {
+	WC_ASSET_URL as wcAssetUrl,
+	getAdminLink,
+	getSetting,
+} from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies

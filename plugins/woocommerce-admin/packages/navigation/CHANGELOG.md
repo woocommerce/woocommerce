@@ -5,6 +5,7 @@
 - `stringifyQuery` method is no longer available, instead use `addQueryArgs` from `@wordpress/url` package.
 - Added a new `<Form />` component.
 - Stepper component: Add new `content` and `description` props.
+- Remove `getAdminLink()` and dependency on global settings object.
 
 # 2.1.1
 

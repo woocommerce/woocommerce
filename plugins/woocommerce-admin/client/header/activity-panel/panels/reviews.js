@@ -22,7 +22,7 @@ import {
 	ReviewRating,
 	Section,
 } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies

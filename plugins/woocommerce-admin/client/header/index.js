@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
  */
 import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -88,12 +88,14 @@ class Header extends Component {
 			'is-scrolled': isScrolled,
 		} );
 
+		const firstBreadCrumbPath = 'admin.php?page=wc-admin';
+
 		return (
 			<div className={ className }>
 				<h1 className="woocommerce-layout__header-breadcrumbs">
 					<span>
 						<Link
-							href={ 'admin.php?page=wc-admin' }
+							href={ isEmbedded ? getAdminLink( firstBreadCrumbPath ) : firstBreadCrumbPath }
 							type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
 							onClick={ this.trackLinkClick }
 						>
@@ -103,7 +105,9 @@ class Header extends Component {
 					{ _sections.map( ( section, i ) => {
 						const sectionPiece = Array.isArray( section ) ? (
 							<Link
-								href={ isEmbedded ? section[ 0 ] : getNewPath( {}, section[ 0 ], {} ) }
+								href={
+									isEmbedded ? getAdminLink( section[ 0 ] ) : getNewPath( {}, section[ 0 ], {} )
+								}
 								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
 								onClick={ this.trackLinkClick }
 							>

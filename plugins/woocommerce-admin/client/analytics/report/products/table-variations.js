@@ -13,7 +13,7 @@ import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -97,7 +97,7 @@ export default class VariationsReportTable extends Component {
 				filter: 'advanced',
 				product_includes: query.products,
 			} );
-			const editPostLink = `post.php?post=${ product_id }&action=edit`;
+			const editPostLink = getAdminLink( `post.php?post=${ product_id }&action=edit` );
 
 			return [
 				{

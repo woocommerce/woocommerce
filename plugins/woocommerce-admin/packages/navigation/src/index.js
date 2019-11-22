@@ -5,7 +5,6 @@
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick, uniq } from 'lodash';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -23,14 +22,6 @@ export * from './filters';
  */
 // Import the module into itself. Functions consumed from this import can be mocked in tests.
 import * as navUtils from './index';
-
-/**
- * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
- *
- * @param {String} path Relative path.
- * @return {String} Full admin URL.
- */
-export const getAdminLink = path => getSetting( 'adminUrl', '' ) + path;
 
 /**
  * Get the current path from history.

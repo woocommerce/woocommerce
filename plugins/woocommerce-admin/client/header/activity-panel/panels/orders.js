@@ -16,8 +16,8 @@ import { keyBy, map, merge } from 'lodash';
  */
 import { EmptyContent, Flag, Link, OrderStatus, Section } from '@woocommerce/components';
 import { formatCurrency } from 'lib/currency-format';
-import { getAdminLink, getNewPath } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getNewPath } from '@woocommerce/navigation';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -119,7 +119,12 @@ class OrdersPanel extends Component {
 							}
 						),
 						components: {
-							orderLink: <Link href={ 'post.php?action=edit&post=' + order_id } type="wp-admin" />,
+							orderLink: (
+								<Link
+									href={ getAdminLink( 'post.php?action=edit&post=' + order_id ) }
+									type="wp-admin"
+								/>
+							),
 							destinationFlag: customer.country ? (
 								<Flag code={ customer.country } round={ false } />
 							) : null,

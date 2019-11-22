@@ -9,7 +9,6 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 import { get } from 'lodash';
-import { getAdminLink } from '@woocommerce/navigation';
 import Gridicon from 'gridicons';
 import { TabPanel, Tooltip } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -18,7 +17,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Card, H } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies

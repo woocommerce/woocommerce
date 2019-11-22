@@ -14,6 +14,7 @@ import { defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -111,7 +112,10 @@ export default class CouponsReportTable extends Component {
 				},
 				{
 					display: (
-						<Link href={ `post.php?post=${ order_id }&action=edit` } type="wp-admin">
+						<Link
+							href={ getAdminLink( `post.php?post=${ order_id }&action=edit` ) }
+							type="wp-admin"
+						>
 							{ order_number }
 						</Link>
 					),

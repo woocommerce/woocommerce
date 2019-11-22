@@ -26,3 +26,4 @@ export const DEFAULT_DATE_RANGE = SOURCE.DEFAULT_DATE_RANGE;
 
 export const getSetting = SOURCE.getSetting;
 export const setSetting = SOURCE.setSetting;
+export const getAdminLink = SOURCE.getAdminLink;

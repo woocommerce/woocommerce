@@ -11,7 +11,7 @@ import { Component } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -85,12 +85,13 @@ export default class StockReportTable extends Component {
 				</Link>
 			);
 
+			const editProductLink = getAdminLink( 'post.php?action=edit&post=' + ( parent_id || id ) );
 			const stockStatusLink = isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
-				<Link href={ 'post.php?action=edit&post=' + ( parent_id || id ) } type="wp-admin">
+				<Link href={ editProductLink } type="wp-admin">
 					{ _x( 'Low', 'Indication of a low quantity', 'woocommerce-admin' ) }
 				</Link>
 			) : (
-				<Link href={ 'post.php?action=edit&post=' + ( parent_id || id ) } type="wp-admin">
+				<Link href={ editProductLink } type="wp-admin">
 					{ stockStatuses[ stock_status ] }
 				</Link>
 			);
