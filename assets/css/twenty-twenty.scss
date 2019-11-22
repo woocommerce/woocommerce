@@ -135,13 +135,17 @@ a.button {
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
-	margin-bottom: 1.5rem;
-	padding: 1rem;
+	margin-bottom: 5rem;
+	padding: 1.5rem 3rem;
 	background: #eee;
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
+	display: flex;
+	justify-content: space-between;
+	flex-direction: row-reverse;
+	align-items: center;
 }
 
 .woocommerce-message {
