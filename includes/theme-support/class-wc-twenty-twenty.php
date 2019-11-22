@@ -43,6 +43,9 @@ class WC_Twenty_Twenty {
 			)
 		);
 
+		// Background color change.
+		add_action( 'after_setup_theme', array( __CLASS__, 'set_white_background' ), 10 );
+
 	}
 
 	/**
@@ -59,6 +62,19 @@ class WC_Twenty_Twenty {
 	public static function output_content_wrapper_end() {
 		echo '</main>';
 		echo '</section>';
+	}
+
+	public static function set_white_background() {
+		$background = sanitize_hex_color_no_hash( get_theme_mod( 'background_color' ) );
+		$background_default = 'f5efe0';
+
+		// Don't change user's choice of background color.
+		if ( ! empty($background) && $background !== $background_default ) {
+			return;
+		}
+
+		// In case default background is found, change it to white.
+		set_theme_mod( 'background_color', 'fff' );
 	}
 
 	/**
