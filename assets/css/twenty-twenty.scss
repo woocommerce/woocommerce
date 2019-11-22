@@ -386,14 +386,11 @@ dl.variation,
 		display: none;
 	}
 
-	.entry {
+	.entry-title {
+		margin: 0 0 2.5rem;
 
-		.entry-title {
+		&::before {
 			margin-top: 0;
-
-			&::before {
-				margin-top: 0;
-			}
 		}
 	}
 
@@ -405,7 +402,7 @@ dl.variation,
 	}
 
 	.woocommerce-product-rating {
-		margin: 1rem 0 4rem;
+		margin: -1rem 0 4rem;
 		line-height: 1;
 		font-size: 1.4rem;
 
