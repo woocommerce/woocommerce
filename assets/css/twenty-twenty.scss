@@ -303,6 +303,7 @@ ul.products {
 	font-size: 1em;
 	width: 5.4em;
 	font-family: star;
+	margin-bottom: 0.7rem;
 
 	&::before {
 		content: "\73\73\73\73\73";
@@ -557,7 +558,40 @@ a.reset_variations {
 }
 
 .woocommerce-tabs {
-	margin: 0 0 2rem;
+	margin: 4rem 0 2rem;
+
+	/* reset description tab width to full width */
+	#tab-description{
+
+		h2,
+		p {
+			max-width: 100vw;
+			width: 100%;
+		}
+	}
+
+	/* reset additional info tab width to full width */
+	#tab-additional_information {
+
+		.woocommerce-product-attributes {
+			max-width: 100vw;
+			width: 100%;
+		}
+	}
+
+	#tab-reviews {
+
+		/* reset reviews tab width to full width */
+		.woocommerce-Reviews {
+			max-width: 100vw;
+			width: 100%;
+		}
+
+		#submit {
+			float: right;
+		}
+	}
+
 
 	ul {
 		margin: 0 0 1.5rem;
@@ -565,7 +599,7 @@ a.reset_variations {
 		font-family: $headings;
 
 		li {
-			margin-right: 1rem;
+			margin: 0.5rem 4rem 2rem 0;
 
 			a {
 				color: $body-color;
@@ -598,8 +632,8 @@ a.reset_variations {
 		}
 
 		h2:first-of-type {
-			font-size: 1em;
-			margin: 0 0 1rem;
+			font-size: 3rem;
+			margin: 0 0 2rem;
 		}
 	}
 
@@ -619,13 +653,13 @@ a.reset_variations {
 
 		ol.commentlist {
 			padding: 0;
+			margin: 0;
 		}
 
 		li.review,
 		li.comment {
 			list-style: none;
-			margin-right: 0;
-			margin-bottom: 2.5rem;
+			margin: 0.5rem 0 2.5rem 0;
 
 			.avatar {
 				max-height: 36px;
@@ -635,6 +669,14 @@ a.reset_variations {
 
 			p.meta {
 				margin-bottom: 0.5em;
+			}
+		}
+
+		.comment-form-rating{
+
+			label {
+				max-width: 58rem;
+				margin: 0 auto;
 			}
 		}
 
