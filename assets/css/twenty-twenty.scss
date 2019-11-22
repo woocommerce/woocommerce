@@ -80,7 +80,7 @@ a.button {
 }
 
 .woocommerce-breadcrumb {
-	margin-bottom: 3rem;
+	margin-bottom: 5rem;
 	font-size: 0.88889em;
 	font-family: $headings;
 }
@@ -1447,9 +1447,12 @@ table.variations {
 	.woocommerce {
 
 		.content-area {
+			max-width: 1600px;
+			padding: 4vw 6vw;
+			margin: 0 auto;
 
 			.site-main {
-				max-width: calc(6 * (100vw / 12) - 28px);
+
 			}
 		}
 	}
