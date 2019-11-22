@@ -102,14 +102,11 @@ const CustomerFlow = {
 		] );
 	},
 
-	productIsInCheckout: async ( productTitle, quantity, total ) => {
-		const checkoutItemXPath =
-			'//tr[@class="cart_item" and ' +
-			`.//td[contains(., "${ productTitle }") and contains(., "× ${ quantity }")] and ` +
-			`.//td[contains(., "${ total }")]` +
-			']';
-
-		await expect( page.$x( checkoutItemXPath ) ).resolves.toHaveLength( 1 );
+	productIsInCheckout: async ( productTitle, quantity, total, cartSubtotal ) => {
+		await expect( page ).toMatchElement( '.product-name', { text: productTitle } );
+		await expect( page ).toMatchElement( '.product-quantity', { text: quantity } );
+		await expect( page ).toMatchElement( '.product-total .amount', { text: total } );
+		await expect( page ).toMatchElement( '.cart-subtotal .amount', { text: cartSubtotal } );
 	},
 
 	goToCart: async () => {
@@ -123,6 +120,54 @@ const CustomerFlow = {
 		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
 
 		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
+	},
+
+	fillBillingDetails: async (
+		firstName,
+		lastName,
+		company,
+		country,
+		addressFirst,
+		addressSecond,
+		city,
+		state,
+		postcode,
+		phone,
+		email
+	) => {
+		await expect( page ).toFill( '#billing_first_name', firstName );
+		await expect( page ).toFill( '#billing_last_name', lastName );
+		await expect( page ).toFill( '#billing_company', company );
+		await expect( page ).toSelect( '#billing_country', country );
+		await expect( page ).toFill( '#billing_address_1', addressFirst );
+		await expect( page ).toFill( '#billing_address_2', addressSecond );
+		await expect( page ).toFill( '#billing_city', city );
+		await expect( page ).toSelect( '#billing_state', state );
+		await expect( page ).toFill( '#billing_postcode', postcode );
+		await expect( page ).toFill( '#billing_phone', phone );
+		await expect( page ).toFill( '#billing_email', email );
+	},
+
+	fillShippingDetails: async (
+		firstName,
+		lastName,
+		company,
+		country,
+		addressFirst,
+		addressSecond,
+		city,
+		state,
+		postcode
+	) => {
+		await expect( page ).toFill( '#shipping_first_name', firstName );
+		await expect( page ).toFill( '#shipping_last_name', lastName );
+		await expect( page ).toFill( '#shipping_company', company );
+		await expect( page ).toSelect( '#shipping_country', country );
+		await expect( page ).toFill( '#shipping_address_1', addressFirst );
+		await expect( page ).toFill( '#shipping_address_2', addressSecond );
+		await expect( page ).toFill( '#shipping_city', city );
+		await expect( page ).toSelect( '#shipping_state', state );
+		await expect( page ).toFill( '#shipping_postcode', postcode );
 	},
 
 };

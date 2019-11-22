@@ -32,7 +32,6 @@ const createSimpleProduct = async () => {
 
 	// Set product data
 	await expect( page ).toFill( '#title', 'Simple product' );
-	await expect( page ).toClick( '#_virtual' );
 	await clickTab( 'General' );
 	await expect( page ).toFill( '#_regular_price', '9.99' );
 
