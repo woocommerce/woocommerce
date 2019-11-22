@@ -449,6 +449,7 @@ table.variations {
 }
 
 .woocommerce-product-gallery {
+	max-width: 600px;
 	position: relative;
 	margin-bottom: 3rem;
 
@@ -1419,7 +1420,6 @@ table.variations {
 
 			.site-main {
 				margin: 0;
-				max-width: calc(8 * (100vw / 12) - 28px);
 			}
 		}
 	}
