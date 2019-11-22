@@ -18,26 +18,28 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 class Segmenter extends ReportsSegmenter {
 
 	/**
-	 * Returns SELECT clause statements to be used for product-related product-level segmenting query (e.g. coupon discount amount for product X when segmenting by product id or category).
+	 * Returns column => query mapping to be used for product-related product-level segmenting query
+	 * (e.g. coupon discount amount for product X when segmenting by product id or category).
 	 *
 	 * @param string $products_table Name of SQL table containing the product-level segmenting info.
 	 *
-	 * @return string SELECT clause statements.
+	 * @return array Column => SELECT query mapping.
 	 */
 	protected function get_segment_selections_product_level( $products_table ) {
 		$columns_mapping = array(
 			'amount' => "SUM($products_table.coupon_amount) as amount",
 		);
 
-		return $this->prepare_selections( $columns_mapping );
+		return $columns_mapping;
 	}
 
 	/**
-	 * Returns SELECT clause statements to be used for order-related product-level segmenting query (e.g. orders_count when segmented by category).
+	 * Returns column => query mapping to be used for order-related product-level segmenting query
+	 * (e.g. orders_count when segmented by category).
 	 *
 	 * @param string $coupons_lookup_table Name of SQL table containing the order-level segmenting info.
 	 *
-	 * @return string SELECT clause statements.
+	 * @return array Column => SELECT query mapping.
 	 */
 	protected function get_segment_selections_order_level( $coupons_lookup_table ) {
 		$columns_mapping = array(
@@ -45,16 +47,17 @@ class Segmenter extends ReportsSegmenter {
 			'orders_count'  => "COUNT(DISTINCT $coupons_lookup_table.order_id) as orders_count",
 		);
 
-		return $this->prepare_selections( $columns_mapping );
+		return $columns_mapping;
 	}
 
 	/**
-	 * Returns SELECT clause statements to be used for order-level segmenting query (e.g. discount amount when segmented by coupons).
+	 * Returns column => query mapping to be used for order-level segmenting query
+	 * (e.g. discount amount when segmented by coupons).
 	 *
 	 * @param string $coupons_lookup_table Name of SQL table containing the order-level info.
 	 * @param array  $overrides Array of overrides for default column calculations.
 	 *
-	 * @return string
+	 * @return array Column => SELECT query mapping.
 	 */
 	protected function segment_selections_orders( $coupons_lookup_table, $overrides = array() ) {
 		$columns_mapping = array(
@@ -67,7 +70,7 @@ class Segmenter extends ReportsSegmenter {
 			$columns_mapping = array_merge( $columns_mapping, $overrides );
 		}
 
-		return $this->prepare_selections( $columns_mapping );
+		return $columns_mapping;
 	}
 
 	/**
@@ -265,10 +268,13 @@ class Segmenter extends ReportsSegmenter {
 		// while coupon and customer are bound to order, so we don't need the extra JOIN for those.
 		// This also means that segment selections need to be calculated differently.
 		if ( 'product' === $this->query_args['segmentby'] ) {
+			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
+			$order_level_columns       = $this->get_segment_selections_order_level( $table_name );
 			$segmenting_selections     = array(
-				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
-				'order_level'   => $this->get_segment_selections_order_level( $table_name ),
+				'product_level' => $this->prepare_selections( $product_level_columns ),
+				'order_level'   => $this->prepare_selections( $order_level_columns ),
 			);
+			$this->report_columns      = array_merge( $product_level_columns, $order_level_columns );
 			$segmenting_from           = "INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)";
 			$segmenting_groupby        = $product_segmenting_table . '.product_id';
 			$segmenting_dimension_name = 'product_id';
@@ -279,10 +285,13 @@ class Segmenter extends ReportsSegmenter {
 				throw new ParameterException( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'woocommerce-admin' ) );
 			}
 
+			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
+			$order_level_columns       = $this->get_segment_selections_order_level( $table_name );
 			$segmenting_selections     = array(
-				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
-				'order_level'   => $this->get_segment_selections_order_level( $table_name ),
+				'product_level' => $this->prepare_selections( $product_level_columns ),
+				'order_level'   => $this->prepare_selections( $order_level_columns ),
 			);
+			$this->report_columns      = array_merge( $product_level_columns, $order_level_columns );
 			$segmenting_from           = "INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)";
 			$segmenting_where          = "AND $product_segmenting_table.product_id = {$this->query_args['product_includes'][0]}";
 			$segmenting_groupby        = $product_segmenting_table . '.variation_id';
@@ -290,10 +299,13 @@ class Segmenter extends ReportsSegmenter {
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
 		} elseif ( 'category' === $this->query_args['segmentby'] ) {
+			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
+			$order_level_columns       = $this->get_segment_selections_order_level( $table_name );
 			$segmenting_selections     = array(
-				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
-				'order_level'   => $this->get_segment_selections_order_level( $table_name ),
+				'product_level' => $this->prepare_selections( $product_level_columns ),
+				'order_level'   => $this->prepare_selections( $order_level_columns ),
 			);
+			$this->report_columns      = array_merge( $product_level_columns, $order_level_columns );
 			$segmenting_from           = "
 			INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)
 			LEFT JOIN {$wpdb->prefix}term_relationships ON {$product_segmenting_table}.product_id = {$wpdb->prefix}term_relationships.object_id
@@ -305,7 +317,9 @@ class Segmenter extends ReportsSegmenter {
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
 		} elseif ( 'coupon' === $this->query_args['segmentby'] ) {
-			$segmenting_selections = $this->segment_selections_orders( $table_name );
+			$coupon_level_columns  = $this->segment_selections_orders( $table_name );
+			$segmenting_selections = $this->prepare_selections( $coupon_level_columns );
+			$this->report_columns  = $coupon_level_columns;
 			$segmenting_from       = '';
 			$segmenting_groupby    = "$table_name.coupon_id";
 

@@ -42,13 +42,14 @@ class Query extends ReportsQuery {
 			'fields'   => array(
 				'orders_count',
 				'num_items_sold',
-				'gross_revenue',
+				'total_sales',
 				'coupons',
 				'coupons_count',
 				'refunds',
 				'taxes',
 				'shipping',
 				'net_revenue',
+				'gross_sales',
 			),
 		);
 	}

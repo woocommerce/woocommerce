@@ -165,8 +165,8 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_item_schema() {
 		$data_values = array(
-			'gross_revenue'  => array(
-				'description' => __( 'Gross revenue.', 'woocommerce-admin' ),
+			'total_sales'    => array(
+				'description' => __( 'Total Sales.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -174,7 +174,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'format'      => 'currency',
 			),
 			'net_revenue'    => array(
-				'description' => __( 'Net revenue.', 'woocommerce-admin' ),
+				'description' => __( 'Net Sales.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -236,6 +236,14 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+			),
+			'gross_sales'    => array(
+				'description' => __( 'Gross Sales.', 'woocommerce-admin' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'indicator'   => true,
+				'format'      => 'currency',
 			),
 		);
 
@@ -390,7 +398,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'gross_revenue',
+				'total_sales',
 				'coupons',
 				'refunds',
 				'shipping',
@@ -398,6 +406,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'net_revenue',
 				'orders_count',
 				'items_sold',
+				'gross_sales',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -438,14 +447,14 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_export_columns() {
 		return array(
-			'date'          => __( 'Date', 'woocommerce-admin' ),
-			'orders_count'  => __( 'Orders', 'woocommerce-admin' ),
-			'gross_revenue' => __( 'Gross Revenue', 'woocommerce-admin' ),
-			'refunds'       => __( 'Refunds', 'woocommerce-admin' ),
-			'coupons'       => __( 'Coupons', 'woocommerce-admin' ),
-			'taxes'         => __( 'Taxes', 'woocommerce-admin' ),
-			'shipping'      => __( 'Shipping', 'woocommerce-admin' ),
-			'net_revenue'   => __( 'Net Revenue', 'woocommerce-admin' ),
+			'date'         => __( 'Date', 'woocommerce-admin' ),
+			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
+			'total_sales'  => __( 'Total Sales', 'woocommerce-admin' ),
+			'refunds'      => __( 'Refunds', 'woocommerce-admin' ),
+			'coupons'      => __( 'Coupons', 'woocommerce-admin' ),
+			'taxes'        => __( 'Taxes', 'woocommerce-admin' ),
+			'shipping'     => __( 'Shipping', 'woocommerce-admin' ),
+			'net_revenue'  => __( 'Net Revenue', 'woocommerce-admin' ),
 		);
 	}
 
@@ -459,14 +468,14 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$subtotals = (array) $item['subtotals'];
 
 		return array(
-			'date'          => $item['date_start'],
-			'orders_count'  => $subtotals['orders_count'],
-			'gross_revenue' => self::csv_number_format( $subtotals['gross_revenue'] ),
-			'refunds'       => self::csv_number_format( $subtotals['refunds'] ),
-			'coupons'       => self::csv_number_format( $subtotals['coupons'] ),
-			'taxes'         => self::csv_number_format( $subtotals['taxes'] ),
-			'shipping'      => self::csv_number_format( $subtotals['shipping'] ),
-			'net_revenue'   => self::csv_number_format( $subtotals['net_revenue'] ),
+			'date'         => $item['date_start'],
+			'orders_count' => $subtotals['orders_count'],
+			'total_sales'  => self::csv_number_format( $subtotals['total_sales'] ),
+			'refunds'      => self::csv_number_format( $subtotals['refunds'] ),
+			'coupons'      => self::csv_number_format( $subtotals['coupons'] ),
+			'taxes'        => self::csv_number_format( $subtotals['taxes'] ),
+			'shipping'     => self::csv_number_format( $subtotals['shipping'] ),
+			'net_revenue'  => self::csv_number_format( $subtotals['net_revenue'] ),
 		);
 	}
 }

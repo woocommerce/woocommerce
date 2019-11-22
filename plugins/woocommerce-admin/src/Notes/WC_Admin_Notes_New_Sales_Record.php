@@ -54,7 +54,7 @@ class WC_Admin_Notes_New_Sales_Record {
 			return;
 		}
 
-		$yesterday = date( 'Y-m-d', current_time( 'timestamp', 0 ) - DAY_IN_SECONDS );
+		$yesterday = gmdate( 'Y-m-d', current_time( 'timestamp', 0 ) - DAY_IN_SECONDS );
 		$total     = self::sum_sales_for_date( $yesterday );
 
 		// No sales yesterday? Bail.
@@ -77,14 +77,14 @@ class WC_Admin_Notes_New_Sales_Record {
 			update_option( self::RECORD_DATE_OPTION_KEY, $yesterday );
 			update_option( self::RECORD_AMOUNT_OPTION_KEY, $total );
 
-			$formatted_yesterday   = date( 'F jS', strtotime( $yesterday ) );
+			$formatted_yesterday   = gmdate( 'F jS', strtotime( $yesterday ) );
 			$formatted_total       = html_entity_decode( wp_strip_all_tags( wc_price( $total ) ) );
-			$formatted_record_date = date( 'F jS', strtotime( $record_date ) );
+			$formatted_record_date = gmdate( 'F jS', strtotime( $record_date ) );
 			$formatted_record_amt  = html_entity_decode( wp_strip_all_tags( wc_price( $record_amt ) ) );
 
 			$content = sprintf(
 				/* translators: 1 and 4: Date (e.g. October 16th), 2 and 3: Amount (e.g. $160.00) */
-				__( 'Woohoo, %1$s was your record day for sales! Net revenue was %2$s beating the previous record of %3$s set on %4$s.', 'woocommerce-admin' ),
+				__( 'Woohoo, %1$s was your record day for sales! Net Sales was %2$s beating the previous record of %3$s set on %4$s.', 'woocommerce-admin' ),
 				$formatted_yesterday,
 				$formatted_total,
 				$formatted_record_amt,

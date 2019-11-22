@@ -45,7 +45,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'status'           => 'strval',
 		'customer_id'      => 'intval',
 		'net_total'        => 'floatval',
-		'gross_total'      => 'floatval',
+		'total_sales'      => 'floatval',
 		'num_items_sold'   => 'intval',
 		'customer_type'    => 'strval',
 	);
@@ -71,7 +71,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'status'           => "REPLACE({$table_name}.status, 'wc-', '') as status",
 			'customer_id'      => "{$table_name}.customer_id",
 			'net_total'        => "{$table_name}.net_total",
-			'gross_total'      => "{$table_name}.gross_total",
+			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
 			'customer_type'    => "(CASE WHEN {$table_name}.returning_customer = 1 THEN 'returning' WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE '' END) as customer_type",
 		);

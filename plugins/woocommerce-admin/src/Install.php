@@ -31,6 +31,10 @@ class Install {
 			'wc_admin_update_0201_order_status_index',
 			'wc_admin_update_0201_db_version',
 		),
+		'0.23.0' => array(
+			'wc_admin_update_0230_rename_gross_total',
+			'wc_admin_update_0230_db_version',
+		),
 	);
 
 	/**
@@ -128,7 +132,7 @@ class Install {
 			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			num_items_sold int(11) DEFAULT 0 NOT NULL,
-			gross_total double DEFAULT 0 NOT NULL,
+			total_sales double DEFAULT 0 NOT NULL,
 			tax_total double DEFAULT 0 NOT NULL,
 			shipping_total double DEFAULT 0 NOT NULL,
 			net_total double DEFAULT 0 NOT NULL,

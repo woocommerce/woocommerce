@@ -231,7 +231,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$stat_order = apply_filters(
 			'woocommerce_rest_report_sort_performance_indicators',
 			array(
-				'revenue/gross_revenue',
+				'revenue/total_sales',
 				'revenue/net_revenue',
 				'orders/orders_count',
 				'orders/avg_order_value',

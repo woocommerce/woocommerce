@@ -19,8 +19,8 @@ describe( 'ReportSummary', () => {
 		props
 	) {
 		const selectedChart = {
-			key: 'gross_revenue',
-			label: 'Gross Revenue',
+			key: 'total_sales',
+			label: 'Total Sales',
 			type,
 		};
 		const charts = [ selectedChart ];
@@ -29,10 +29,10 @@ describe( 'ReportSummary', () => {
 		const summaryData = {
 			totals: {
 				primary: {
-					gross_revenue: primaryValue,
+					total_sales: primaryValue,
 				},
 				secondary: {
-					gross_revenue: secondaryValue,
+					total_sales: secondaryValue,
 				},
 			},
 			isError,

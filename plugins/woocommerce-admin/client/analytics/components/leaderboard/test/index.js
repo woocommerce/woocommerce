@@ -50,7 +50,7 @@ const headers = [
 		label: 'Orders',
 	},
 	{
-		label: 'Net Revenue',
+		label: 'Net Sales',
 	},
 ];
 

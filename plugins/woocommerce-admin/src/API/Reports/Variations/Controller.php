@@ -185,7 +185,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 					'type'        => 'number',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Total net revenue of all items sold.', 'woocommerce-admin' ),
+					'description' => __( 'Total Net Sales of all items sold.', 'woocommerce-admin' ),
 				),
 				'orders_count'  => array(
 					'type'        => 'integer',

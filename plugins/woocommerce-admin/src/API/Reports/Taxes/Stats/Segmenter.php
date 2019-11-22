@@ -17,11 +17,11 @@ use \Automattic\WooCommerce\Admin\API\Reports\Segmenter as ReportsSegmenter;
 class Segmenter extends ReportsSegmenter {
 
 	/**
-	 * Returns SELECT clause statements to be used for order-related order-level segmenting query (e.g. tax_rate_id).
+	 * Returns column => query mapping to be used for order-related order-level segmenting query (e.g. tax_rate_id).
 	 *
 	 * @param string $lookup_table Name of SQL table containing the order-level segmenting info.
 	 *
-	 * @return string SELECT clause statements.
+	 * @return array Column => SELECT query mapping.
 	 */
 	protected function get_segment_selections_order_level( $lookup_table ) {
 		$columns_mapping = array(
@@ -32,7 +32,7 @@ class Segmenter extends ReportsSegmenter {
 			'orders_count' => "COUNT(DISTINCT $lookup_table.order_id) as orders_count",
 		);
 
-		return $this->prepare_selections( $columns_mapping );
+		return $columns_mapping;
 	}
 
 	/**
@@ -140,8 +140,10 @@ class Segmenter extends ReportsSegmenter {
 		$segments         = array();
 
 		if ( 'tax_rate_id' === $this->query_args['segmentby'] ) {
-			$segmenting_select  = $this->get_segment_selections_order_level( $table_name );
-			$segmenting_groupby = $table_name . '.tax_rate_id';
+			$tax_rate_level_columns = $this->get_segment_selections_order_level( $table_name );
+			$segmenting_select      = $this->prepare_selections( $tax_rate_level_columns );
+			$this->report_columns   = $tax_rate_level_columns;
+			$segmenting_groupby     = $table_name . '.tax_rate_id';
 
 			$segments = $this->get_order_related_segments( $type, $segmenting_select, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params );
 		}

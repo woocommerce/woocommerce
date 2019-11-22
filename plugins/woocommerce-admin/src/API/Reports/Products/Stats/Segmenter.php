@@ -18,11 +18,12 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 class Segmenter extends ReportsSegmenter {
 
 	/**
-	 * Returns SELECT clause statements to be used for product-related product-level segmenting query (e.g. products sold, revenue from product X when segmenting by category).
+	 * Returns column => query mapping to be used for product-related product-level segmenting query
+	 * (e.g. products sold, revenue from product X when segmenting by category).
 	 *
 	 * @param string $products_table Name of SQL table containing the product-level segmenting info.
 	 *
-	 * @return string SELECT clause statements.
+	 * @return array Column => SELECT query mapping.
 	 */
 	protected function get_segment_selections_product_level( $products_table ) {
 		$columns_mapping = array(
@@ -33,7 +34,7 @@ class Segmenter extends ReportsSegmenter {
 			'variations_count' => "COUNT( DISTINCT $products_table.variation_id ) AS variations_count",
 		);
 
-		return $this->prepare_selections( $columns_mapping );
+		return $columns_mapping;
 	}
 
 	/**
@@ -155,9 +156,11 @@ class Segmenter extends ReportsSegmenter {
 		// while coupon and customer are bound to order, so we don't need the extra JOIN for those.
 		// This also means that segment selections need to be calculated differently.
 		if ( 'product' === $this->query_args['segmentby'] ) {
+			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$segmenting_selections     = array(
-				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
+				'product_level' => $this->prepare_selections( $product_level_columns ),
 			);
+			$this->report_columns      = $product_level_columns;
 			$segmenting_from           = '';
 			$segmenting_groupby        = $product_segmenting_table . '.product_id';
 			$segmenting_dimension_name = 'product_id';
@@ -168,9 +171,11 @@ class Segmenter extends ReportsSegmenter {
 				throw new ParameterException( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'woocommerce-admin' ) );
 			}
 
+			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$segmenting_selections     = array(
-				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
+				'product_level' => $this->prepare_selections( $product_level_columns ),
 			);
+			$this->report_columns      = $product_level_columns;
 			$segmenting_from           = '';
 			$segmenting_where          = "AND $product_segmenting_table.product_id = {$this->query_args['product_includes'][0]}";
 			$segmenting_groupby        = $product_segmenting_table . '.variation_id';
@@ -178,9 +183,11 @@ class Segmenter extends ReportsSegmenter {
 
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
 		} elseif ( 'category' === $this->query_args['segmentby'] ) {
+			$product_level_columns     = $this->get_segment_selections_product_level( $product_segmenting_table );
 			$segmenting_selections     = array(
-				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
+				'product_level' => $this->prepare_selections( $product_level_columns ),
 			);
+			$this->report_columns      = $product_level_columns;
 			$segmenting_from           = "
 			LEFT JOIN {$wpdb->term_relationships} ON {$product_segmenting_table}.product_id = {$wpdb->term_relationships}.object_id
 			LEFT JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->wc_category_lookup}.category_id

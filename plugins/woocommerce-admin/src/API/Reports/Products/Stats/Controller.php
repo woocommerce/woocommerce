@@ -165,7 +165,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'indicator'   => true,
 			),
 			'net_revenue'  => array(
-				'description' => __( 'Net revenue.', 'woocommerce-admin' ),
+				'description' => __( 'Net Sales.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

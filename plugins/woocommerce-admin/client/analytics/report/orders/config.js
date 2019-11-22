@@ -23,7 +23,7 @@ export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Revenue', 'woocommerce-admin' ),
+		label: __( 'Net Sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_total',
 		type: 'currency',

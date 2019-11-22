@@ -60,8 +60,8 @@ class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'N. Revenue', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net Revenue', 'woocommerce-admin' ),
+				label: __( 'Net Sales', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Net Sales', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,

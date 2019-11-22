@@ -97,14 +97,14 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 			$this->add_sql_query_params( $query_args );
 			// Clear SQL clauses set for parent class queries that are different here.
 			$this->subquery->clear_sql_clause( 'select' );
-			$this->subquery->add_sql_clause( 'select', 'SUM( gross_total ) AS total_spend,' );
+			$this->subquery->add_sql_clause( 'select', 'SUM( total_sales ) AS total_spend,' );
 			$this->subquery->add_sql_clause(
 				'select',
 				'CASE WHEN COUNT( order_id ) = 0 THEN NULL ELSE COUNT( order_id ) END AS orders_count,'
 			);
 			$this->subquery->add_sql_clause(
 				'select',
-				'CASE WHEN COUNT( order_id ) = 0 THEN NULL ELSE SUM( gross_total ) / COUNT( order_id ) END AS avg_order_value'
+				'CASE WHEN COUNT( order_id ) = 0 THEN NULL ELSE SUM( total_sales ) / COUNT( order_id ) END AS avg_order_value'
 			);
 
 			$this->clear_sql_clause( array( 'order_by', 'limit' ) );

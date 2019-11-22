@@ -47,7 +47,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $column_types = array(
 		'orders_count'            => 'intval',
 		'num_items_sold'          => 'intval',
-		'gross_revenue'           => 'floatval',
+		'gross_sales'             => 'floatval',
+		'total_sales'             => 'floatval',
 		'coupons'                 => 'floatval',
 		'coupons_count'           => 'intval',
 		'refunds'                 => 'floatval',
@@ -75,13 +76,23 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
 		// Avoid ambigious columns in SQL query.
+		$refunds     = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
+		$gross_sales =
+			"( SUM({$table_name}.total_sales)" .
+			' + COALESCE( SUM(discount_amount), 0 )' . // SUM() all nulls gives null.
+			" - SUM({$table_name}.tax_total)" .
+			" - SUM({$table_name}.shipping_total)" .
+			" + {$refunds}" .
+			' ) as gross_sales';
+
 		$this->report_columns = array(
 			'orders_count'            => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) as orders_count",
 			'num_items_sold'          => "SUM({$table_name}.num_items_sold) as num_items_sold",
-			'gross_revenue'           => "SUM( CASE WHEN {$table_name}.gross_total > 0 THEN {$table_name}.gross_total END ) AS gross_revenue",
-			'coupons'                 => 'SUM(discount_amount) AS coupons',
-			'coupons_count'           => 'coupons_count',
-			'refunds'                 => "ABS( SUM( CASE WHEN {$table_name}.gross_total < 0 THEN {$table_name}.gross_total END ) ) AS refunds",
+			'gross_sales'             => $gross_sales,
+			'total_sales'             => "SUM({$table_name}.total_sales) AS total_sales",
+			'coupons'                 => 'COALESCE( SUM(discount_amount), 0 ) AS coupons', // SUM() all nulls gives null.
+			'coupons_count'           => 'COALESCE( coupons_count, 0 ) as coupons_count',
+			'refunds'                 => "{$refunds} AS refunds",
 			'taxes'                   => "SUM({$table_name}.tax_total) AS taxes",
 			'shipping'                => "SUM({$table_name}.shipping_total) AS shipping",
 			'net_revenue'             => "SUM({$table_name}.net_total) AS net_revenue",
@@ -458,7 +469,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
 			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
 			'num_items_sold'     => self::get_num_items_sold( $order ),
-			'gross_total'        => $order->get_total(),
+			'total_sales'        => $order->get_total(),
 			'tax_total'          => $order->get_total_tax(),
 			'shipping_total'     => $order->get_shipping_total(),
 			'net_total'          => self::get_net_total( $order ),

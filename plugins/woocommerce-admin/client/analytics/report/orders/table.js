@@ -81,8 +81,8 @@ export default class OrdersReportTable extends Component {
 				isSortable: false,
 			},
 			{
-				label: __( 'N. Revenue', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net Revenue', 'woocommerce-admin' ),
+				label: __( 'Net Sales', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Net Sales', 'woocommerce-admin' ),
 				key: 'net_total',
 				required: true,
 				isSortable: true,
@@ -252,7 +252,7 @@ export default class OrdersReportTable extends Component {
 				value: formatValue( 'number', coupons_count ),
 			},
 			{
-				label: __( 'net revenue', 'woocommerce-admin' ),
+				label: __( 'net sales', 'woocommerce-admin' ),
 				value: formatCurrency( net_revenue ),
 			},
 		];

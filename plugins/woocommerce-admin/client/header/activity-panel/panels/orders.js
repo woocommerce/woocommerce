@@ -136,7 +136,7 @@ class OrdersPanel extends Component {
 			const productsCount =
 				extended_info && extended_info.products ? extended_info.products.length : 0;
 
-			const total = order.gross_total;
+			const total = order.total_sales;
 
 			cards.push(
 				<ActivityCard

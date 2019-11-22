@@ -48,8 +48,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		// /reports/revenue/stats is mapped to Orders_Data_Store.
 		$data_store = new OrdersStatsDataStore();
 
-		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
-		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
 
 		$args           = array(
 			'interval' => 'hour',
@@ -60,7 +60,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			'totals'    => array(
 				'orders_count'            => 1,
 				'num_items_sold'          => 4,
-				'gross_revenue'           => 97,
+				'total_sales'             => 97,
+				'gross_sales'             => 100,
 				'coupons'                 => 20,
 				'coupons_count'           => 1,
 				'refunds'                 => 0,
@@ -76,7 +77,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => date( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
+					'interval'       => gmdate( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
 					'date_start'     => $start_time,
 					'date_start_gmt' => $start_time,
 					'date_end'       => $end_time,
@@ -84,7 +85,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 					'subtotals'      => array(
 						'orders_count'            => 1,
 						'num_items_sold'          => 4,
-						'gross_revenue'           => 97,
+						'total_sales'             => 97,
+						'gross_sales'             => 100,
 						'coupons'                 => 20,
 						'coupons_count'           => 1,
 						'refunds'                 => 0,
@@ -112,7 +114,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			'totals'    => array(
 				'orders_count'   => 1,
 				'num_items_sold' => 4,
-				'gross_revenue'  => 97,
+				'total_sales'    => 97,
+				'gross_sales'    => 100,
 				'coupons'        => 20,
 				'coupons_count'  => 1,
 				'refunds'        => 0,
@@ -124,7 +127,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => date( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
+					'interval'       => gmdate( 'Y-m-d H', $order->get_date_created()->getTimestamp() ),
 					'date_start'     => $start_time,
 					'date_start_gmt' => $start_time,
 					'date_end'       => $end_time,
@@ -132,7 +135,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 					'subtotals'      => array(
 						'orders_count'   => 1,
 						'num_items_sold' => 4,
-						'gross_revenue'  => 97,
+						'total_sales'    => 97,
+						'gross_sales'    => 100,
 						'coupons'        => 20,
 						'coupons_count'  => 1,
 						'refunds'        => 0,

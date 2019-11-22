@@ -106,7 +106,7 @@ class Segmenter {
 			}
 
 			unset( $segment_data[ $segment_dimension ] );
-			$segment_datum = array(
+			$segment_datum                 = array(
 				'segment_id'    => $segment_id,
 				'segment_label' => $segment_labels[ $segment_id ],
 				'subtotals'     => $segment_data,
@@ -391,7 +391,7 @@ class Segmenter {
 			// This is to catch simple products with prior sales converted into variable products.
 			// See: https://github.com/woocommerce/woocommerce-admin/issues/2719.
 			if ( empty( $this->query_args['variations'] ) ) {
-				$parent_object = wc_get_product( $this->query_args['product_includes'][0] );
+				$parent_object     = wc_get_product( $this->query_args['product_includes'][0] );
 				$segments[]        = 0;
 				$segment_labels[0] = $parent_object->get_name();
 			}
@@ -496,7 +496,6 @@ class Segmenter {
 	 * @return array
 	 */
 	protected function fill_in_missing_segments( $segments ) {
-
 		$segment_subtotals = array();
 		if ( isset( $this->query_args['fields'] ) && is_array( $this->query_args['fields'] ) ) {
 			foreach ( $this->query_args['fields'] as $field ) {
@@ -620,7 +619,9 @@ class Segmenter {
 	 */
 	public function get_totals_segments( $query_params, $table_name ) {
 		$segments = $this->get_segments( 'totals', $query_params, $table_name );
-		return $this->fill_in_missing_segments( $segments );
+		$segments = $this->fill_in_missing_segments( $segments );
+
+		return $segments;
 	}
 
 	/**
@@ -632,6 +633,7 @@ class Segmenter {
 	 */
 	public function add_intervals_segments( &$data, $intervals_query, $table_name ) {
 		$intervals_segments = $this->get_segments( 'intervals', $intervals_query, $table_name );
+
 		$this->assign_segments_to_intervals( $data->intervals, $intervals_segments );
 		$this->fill_in_missing_interval_segments( $data );
 	}
