@@ -767,6 +767,12 @@ a.reset_variations {
 				}
 			}
 		}
+
+		.comment-form-author,
+		.comment-form-email{
+			float: none;
+			margin-left: auto;
+		}
 	}
 }
 
