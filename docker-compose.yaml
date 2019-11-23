@@ -1,0 +1,53 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: mysql:5.7
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+
+  wordpress-woocomerce-dev:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8084:80
+    restart: on-failure
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: testdb
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_TABLE_PREFIX: "wp_"
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - wordpress:/var/www/html
+
+  wordpress-cli:
+    depends_on:
+      - db
+      - wordpress-woocomerce-dev
+    image: wordpress:cli
+    restart: on-failure
+    user: xfs
+    command: >
+      /bin/sh -c '
+      wp core install --url=http://localhost:8084 --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=/var/www/html --skip-email;
+      wp plugin activate woocommerce;
+      wp user create customer customer@e2ewootestsite.com --user_pass=customer_password --role=customer --path=/var/www/html;
+      '
+    volumes:
+      - wordpress:/var/www/html
+
+volumes:
+  db:
+  wordpress:

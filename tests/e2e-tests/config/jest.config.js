@@ -28,4 +28,7 @@ module.exports = {
 
 	// The glob patterns Jest uses to detect test files
 	testMatch: [ '**/*.(test|spec).js' ],
+
+	// Sort test path alphabetically. This is needed so that `activate-and-setup` tests run first
+	testSequencer: '<rootDir>/tests/e2e-tests/config/jest-custom-sequencer.js',
 };
