@@ -481,6 +481,7 @@ a.reset_variations {
 .woocommerce-product-gallery {
 	max-width: 600px;
 	position: relative;
+	margin-bottom: 2rem;
 
 	figure {
 		margin: 0;
@@ -1448,6 +1449,20 @@ a.reset_variations {
 			font-size: 0.8em;
 			font-family: $headings;
 		}
+
+		.related.products {
+
+			ul.products {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				li.product {
+					margin-bottom: 5em;
+				}
+			}
+		}
+
 
 	}
 }
