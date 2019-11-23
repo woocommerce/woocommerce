@@ -208,6 +208,13 @@ a.button {
 	margin-bottom: 1.5em;
 }
 
+/* Make thumbnails in the gallery affect parent's height and wrapping */
+.flex-control-nav::after {
+	clear: both;
+	content: '';
+	display: table;
+}
+
 /**
 * Tables
 */
