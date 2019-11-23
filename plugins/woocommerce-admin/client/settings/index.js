@@ -26,4 +26,7 @@ export const DEFAULT_DATE_RANGE = SOURCE.DEFAULT_DATE_RANGE;
 
 export const getSetting = SOURCE.getSetting;
 export const setSetting = SOURCE.setSetting;
-export const getAdminLink = SOURCE.getAdminLink;
+
+// this needs to be shimmed separately because WooCommerce Blocks plugin version
+// might have `SHARED.getSetting` and thus `fallbacks.js` will not get loaded.
+export const getAdminLink = SOURCE.getAdminLink || FALLBACKS.getAdminLink;
