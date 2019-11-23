@@ -5,6 +5,7 @@ import {
 	useCollection,
 	useQueryStateByKey,
 	useQueryStateByContext,
+	useCollectionData,
 } from '@woocommerce/base-hooks';
 import {
 	useCallback,
@@ -91,32 +92,6 @@ const AttributeFilterBlock = ( {
 			.flatMap( ( attribute ) => attribute.slug );
 	}, [ productAttributesQuery, attributeObject ] );
 
-	const filteredCountsQueryState = useMemo( () => {
-		// If doing an "AND" query, we need to remove current taxonomy query so counts are not affected.
-		const modifiedQueryState =
-			blockAttributes.queryType === 'or'
-				? productAttributesQuery.filter(
-						( item ) => item.attribute !== attributeObject.taxonomy
-				  )
-				: productAttributesQuery;
-
-		// Take current query and remove paging args.
-		return {
-			...queryState,
-			orderby: undefined,
-			order: undefined,
-			per_page: undefined,
-			page: undefined,
-			attributes: modifiedQueryState,
-			calculate_attribute_counts: [ attributeObject.taxonomy ],
-		};
-	}, [
-		queryState,
-		attributeObject,
-		blockAttributes,
-		productAttributesQuery,
-	] );
-
 	const {
 		results: attributeTerms,
 		isLoading: attributeTermsLoading,
@@ -130,11 +105,12 @@ const AttributeFilterBlock = ( {
 	const {
 		results: filteredCounts,
 		isLoading: filteredCountsLoading,
-	} = useCollection( {
-		namespace: '/wc/store',
-		resourceName: 'products/collection-data',
-		query: filteredCountsQueryState,
-		shouldSelect: blockAttributes.attributeId > 0,
+	} = useCollectionData( {
+		queryAttribute: {
+			taxonomy: attributeObject.taxonomy,
+			queryType: blockAttributes.queryType,
+		},
+		queryState,
 	} );
 
 	/**

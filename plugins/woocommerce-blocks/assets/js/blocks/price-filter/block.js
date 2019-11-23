@@ -2,9 +2,9 @@
  * External dependencies
  */
 import {
-	useCollection,
 	useQueryStateByKey,
 	useQueryStateByContext,
+	useCollectionData,
 } from '@woocommerce/base-hooks';
 import { Fragment, useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
@@ -22,19 +22,9 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 		'max_price'
 	);
 	const [ queryState ] = useQueryStateByContext();
-	const { results, isLoading } = useCollection( {
-		namespace: '/wc/store',
-		resourceName: 'products/collection-data',
-		query: {
-			...queryState,
-			min_price: undefined,
-			max_price: undefined,
-			orderby: undefined,
-			order: undefined,
-			per_page: undefined,
-			page: undefined,
-			calculate_price_range: true,
-		},
+	const { results, isLoading } = useCollectionData( {
+		queryPrices: true,
+		queryState,
 	} );
 
 	const [ minPrice, setMinPrice ] = useState();
