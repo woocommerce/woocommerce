@@ -64,6 +64,12 @@ class ProductQueryFilters {
 	public function get_attribute_counts( $request, $attributes = [] ) {
 		global $wpdb;
 
+		// Remove paging and sorting params from the request.
+		$request->set_param( 'page', null );
+		$request->set_param( 'per_page', null );
+		$request->set_param( 'order', null );
+		$request->set_param( 'orderby', null );
+
 		// Grab the request from the WP Query object, and remove SQL_CALC_FOUND_ROWS and Limits so we get a list of all products.
 		$product_query = new ProductQuery();
 

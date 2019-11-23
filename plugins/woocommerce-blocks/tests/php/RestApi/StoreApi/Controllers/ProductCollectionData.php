@@ -107,7 +107,15 @@ class ProductCollectionData extends TestCase {
 		ProductHelper::create_variation_product();
 
 		$request = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
-		$request->set_param( 'calculate_attribute_counts', 'pa_size' );
+		$request->set_param(
+			'calculate_attribute_counts',
+			[
+				[
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'and',
+				]
+			]
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
