@@ -113,3 +113,72 @@ if ( is_readable( $autoloader ) ) {
 
 add_action( 'plugins_loaded', array( '\Automattic\WooCommerce\Blocks\Package', 'init' ) );
 
+/**
+ * Pre-filters script translations for the given file, script handle and text domain.
+ *
+ * @param string|false|null $translations JSON-encoded translation data. Default null.
+ * @param string|false      $file         Path to the translation file to load. False if there isn't one.
+ * @param string            $handle       Name of the script to register a translation domain to.
+ * @param string            $domain       The text domain.
+ * @return string JSON translations.
+ */
+function woocommerce_blocks_get_i18n_data_json( $translations, $file, $handle, $domain ) {
+	if ( 'woo-gutenberg-products-block' !== $domain ) {
+		return $translations;
+	}
+
+	global $wp_scripts;
+
+	if ( ! isset( $wp_scripts->registered[ $handle ], $wp_scripts->registered[ $handle ]->src ) ) {
+		return $translations;
+	}
+
+	$handle_filename = basename( $wp_scripts->registered[ $handle ]->src );
+	$locale          = determine_locale();
+	$lang_dir        = WP_LANG_DIR . '/plugins';
+
+	// Translations are always based on the unminified filename.
+	if ( substr( $handle_filename, -7 ) === '.min.js' ) {
+		$handle_filename = substr( $handle_filename, 0, -7 ) . '.js';
+	}
+
+	// WordPress 5.0 uses md5 hashes of file paths to associate translation
+	// JSON files with the file they should be included for. This is an md5
+	// of 'packages/woocommerce-blocks/build/FILENAME.js'.
+	$core_path_md5     = md5( 'packages/woocommerce-blocks/build/' . $handle_filename );
+	$core_json_file    = $lang_dir . '/woocommerce-' . $locale . '-' . $core_path_md5 . '.json';
+	$json_translations = is_file( $core_json_file ) && is_readable( $core_json_file ) ? file_get_contents( $core_json_file ) : false; // phpcs:ignore
+
+	if ( ! $json_translations ) {
+		return $translations;
+	}
+
+	// Rather than short circuit pre_load_script_translations, we will output
+	// core translations using an inline script. This will allow us to continue
+	// to load feature-plugin translations which may exist as well.
+	$output = <<<JS
+	( function( domain, translations ) {
+		var localeData = translations.locale_data[ domain ] || translations.locale_data.messages;
+		localeData[""].domain = domain;
+		wp.i18n.setLocaleData( localeData, domain );
+	} )( "{$domain}", {$json_translations} );
+JS;
+
+	printf( "<script type='text/javascript'>\n%s\n</script>\n", $output ); // phpcs:ignore
+
+	// Finally, short circuit the pre_load_script_translations hook by returning
+	// the translation JSON from the feature plugin, if it exists so this hook
+	// does not run again for the current handle.
+	$path_md5     = md5( 'build/' . $handle_filename );
+	$json_file    = $lang_dir . '/' . $domain . '-' . $locale . '-' . $path_md5 . '.json';
+	$translations = is_file( $json_file ) && is_readable( $json_file ) ? file_get_contents( $json_file ) : false; // phpcs:ignore
+
+	if ( $translations ) {
+		return $translations;
+	}
+
+	// Return valid empty Jed locale.
+	return '{ "locale_data": { "messages": { "": {} } } }';
+}
+
+add_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
