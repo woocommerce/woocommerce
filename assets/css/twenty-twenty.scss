@@ -543,8 +543,18 @@ a.reset_variations {
 
 .woocommerce-product-gallery--columns-4 {
 
+	ol {
+		margin-left: 0;
+		margin-bottom: 0;
+	}
+
 	.flex-control-thumbs li {
-		width: 25%;
+		width: 14.2857142857%;
+		margin: 0 14.2857142857% 1.6em 0;
+	}
+
+	.flex-control-thumbs li:nth-child(4n) {
+		margin-right: 0;
 	}
 
 	.flex-control-thumbs li:nth-child(4n+1) {
