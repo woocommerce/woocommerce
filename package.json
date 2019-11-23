@@ -47,7 +47,7 @@
     "grunt-phpcs": "0.4.0",
     "grunt-postcss": "0.9.0",
     "grunt-prompt": "1.3.3",
-    "grunt-rtlcss": "2.0.1",
+    "grunt-rtlcss": "2.0.2",
     "grunt-sass": "3.1.0",
     "grunt-shell": "3.0.1",
     "grunt-stylelint": "0.12.0",
