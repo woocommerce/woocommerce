@@ -204,6 +204,10 @@ a.button {
 	}
 }
 
+.flex-viewport {
+	margin-bottom: 1.5em;
+}
+
 /**
 * Tables
 */
@@ -1384,10 +1388,14 @@ a.reset_variations {
  */
 .woocommerce {
 
+	section {
+		padding-top: 2rem;
+	}
+
 	.content-area {
 
 		.site-main {
-			margin: calc(2 * 1rem) 1rem;
+			margin: 0 5vw;
 		}
 	}
 }
