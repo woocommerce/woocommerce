@@ -1,11 +1,12 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import renderFrontend from '../../utils/render-frontend.js';
+import { withRestApiHydration } from '@woocommerce/block-hocs';
 
 /**
  * Internal dependencies
  */
+import renderFrontend from '../../utils/render-frontend.js';
 import Block from './block.js';
 
 const getProps = ( el ) => {
@@ -17,4 +18,8 @@ const getProps = ( el ) => {
 	};
 };
 
-renderFrontend( '.wp-block-woocommerce-price-filter', Block, getProps );
+renderFrontend(
+	'.wp-block-woocommerce-price-filter',
+	withRestApiHydration( Block ),
+	getProps
+);

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { withRestApiHydration } from '@woocommerce/block-hocs';
+
+/**
  * Internal dependencies
  */
 import Block from './block';
@@ -8,4 +13,8 @@ const getProps = ( el ) => ( {
 	attributes: JSON.parse( el.dataset.attributes ),
 } );
 
-renderFrontend( '.wp-block-woocommerce-all-products', Block, getProps );
+renderFrontend(
+	'.wp-block-woocommerce-all-products',
+	withRestApiHydration( Block ),
+	getProps
+);

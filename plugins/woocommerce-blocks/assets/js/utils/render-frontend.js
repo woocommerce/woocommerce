@@ -16,7 +16,7 @@ export default ( selector, Block, getProps = () => {} ) => {
 	const containers = document.querySelectorAll( selector );
 
 	if ( containers.length ) {
-		// Use Array.forEach for IE11 compatibility
+		// Use Array.forEach for IE11 compatibility.
 		Array.prototype.forEach.call( containers, ( el, i ) => {
 			const props = getProps( el, i );
 			const attributes = {
