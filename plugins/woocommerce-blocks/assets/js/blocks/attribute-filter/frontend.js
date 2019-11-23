@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { withRestApiHydration } from '@woocommerce/block-hocs';
+
+/**
  * Internal dependencies
  */
 import Block from './block.js';
@@ -16,4 +21,8 @@ const getProps = ( el ) => {
 	};
 };
 
-renderFrontend( '.wp-block-woocommerce-attribute-filter', Block, getProps );
+renderFrontend(
+	'.wp-block-woocommerce-attribute-filter',
+	withRestApiHydration( Block ),
+	getProps
+);

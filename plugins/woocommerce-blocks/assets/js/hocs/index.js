@@ -7,3 +7,4 @@ export { default as withSearchedProducts } from './with-searched-products';
 export {
 	default as withTransformSingleSelectToMultipleSelect,
 } from './with-transform-single-select-to-multiple-select';
+export { default as withRestApiHydration } from './with-rest-api-hydration';

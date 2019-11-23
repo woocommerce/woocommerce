@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { withRestApiHydration } from '@woocommerce/block-hocs';
+
+/**
  * Internal dependencies
  */
 import Block from './block.js';
@@ -14,4 +19,8 @@ const getProps = ( el ) => {
 	};
 };
 
-renderFrontend( '.wp-block-woocommerce-active-filters', Block, getProps );
+renderFrontend(
+	'.wp-block-woocommerce-active-filters',
+	withRestApiHydration( Block ),
+	getProps
+);
