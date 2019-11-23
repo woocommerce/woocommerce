@@ -1419,6 +1419,13 @@ a.reset_variations {
 				}
 			}
 		}
+
+		.woocommerce-breadcrumb {
+			margin-bottom: 4rem;
+			font-size: 0.8em;
+			font-family: $headings;
+		}
+
 	}
 }
 
@@ -1524,6 +1531,13 @@ a.reset_variations {
 			}
 		}
 	}
+
+	.woocommerce-breadcrumb {
+		margin-bottom: 5rem;
+		font-size: 0.88889em;
+		font-family: $headings;
+	}
+
 }
 
 @media only screen and (min-width: 1168px) {
@@ -1540,4 +1554,11 @@ a.reset_variations {
 			}
 		}
 	}
+
+	.woocommerce-breadcrumb {
+		margin-bottom: 5rem;
+		font-size: 0.88889em;
+		font-family: $headings;
+	}
+
 }
