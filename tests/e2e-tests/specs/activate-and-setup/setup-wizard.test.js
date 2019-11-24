@@ -56,17 +56,23 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 		// Verify that checkbox next to "I will also be selling products or services in person." is not selected
 		await verifyCheckboxIsUnset( '#woocommerce_sell_in_person' );
 
-		// Expecting usage tracking pop-up window to appear as soon as "Let's go!" button is clicked
-		await expect( page ).toDisplayDialog( async () => {
-			await expect( page ).toClick(`button[name=save_step]`, { text: 'Let\'s go!' } );
+		// Click on "Let's go!" button to move to the next step
+		await page.click( 'button[name=save_step]', { text: 'Let\'s go!' } );
 
-			// Verify that checkbox next to "Enable usage tracking and help improve WooCommerce" is not selected
-			await verifyCheckboxIsUnset( '#wc_tracker_checkbox_dialog' );
+		// Wait for usage tracking pop-up window to appear
+		await page.waitForSelector( '#wc-backbone-modal-dialog' );
 
-			// Click on "Continue" button to move to the next step
-			await page.$eval( '#wc_tracker_submit', elem => elem.click() );
-		});
-	}, 15000 );
+		await page.waitForSelector('#wc_tracker_checkbox_dialog');
+
+		// Verify that checkbox next to "Enable usage tracking and help improve WooCommerce" is not selected
+		await verifyCheckboxIsUnset('#wc_tracker_checkbox_dialog');
+
+		// Click on "Continue" button to move to the next step
+		await page.$eval( '#wc_tracker_submit', elem => elem.click() );
+
+		// Wait for the Payment section to load
+		await page.waitForNavigation();
+	} );
 
 	it( 'Can fill out Payment details', async () => {
 		// Turn off Stripe account toggle
