@@ -3,11 +3,6 @@
  */
 
 /**
- * External dependencies
- */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
@@ -27,7 +22,7 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 
 	it( 'Can make sure WooCommerce is activated. If not, activate it', async () => {
 		const slug = 'woocommerce';
-		await visitAdminPage( 'plugins.php' );
+		await StoreOwnerFlow.openPlugins();
 		const disableLink = await page.$( `tr[data-slug="${ slug }"] .deactivate a` );
 		if ( disableLink ) {
 			return;

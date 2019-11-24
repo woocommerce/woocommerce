@@ -41,9 +41,9 @@ services:
     user: xfs
     command: >
       /bin/sh -c '
-      wp core install --url=http://localhost:8084 --title="WooCommerce Core E2E Test Suite" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=/var/www/html --skip-email;
+      wp core install --url=http://localhost:8084 --title="WooCommerce Core E2E Test Suite" --admin_user=admin --admin_password=password --admin_email=admin@woocommercecoree2etestsuite.com --path=/var/www/html --skip-email;
       wp plugin activate woocommerce;
-      wp user create customer customer@e2ewootestsite.com --user_pass=customer_password --role=customer --path=/var/www/html;
+      wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=customer --path=/var/www/html;
       '
     volumes:
       - wordpress:/var/www/html
