@@ -237,8 +237,9 @@ a.button {
 	text-align: center;
 }
 
-.woocommerce-result-count {
-	margin: 0;
+.woocommerce-result-count,
+.woocommerce-ordering {
+	margin: 0 0 1rem;
 	padding: 0.75rem 0;
 }
 
@@ -298,9 +299,7 @@ ul.products {
 		}
 
 		.added_to_cart {
-			margin-left: 0.5rem;
-			font-size: 0.88889em;
-			font-family: $headings;
+			margin: 0.5rem;
 		}
 	}
 }
@@ -1482,7 +1481,19 @@ a.reset_variations {
 			}
 		}
 
+		.woocommerce-products-header__title.page-title {
+			margin: 3rem auto 4rem;
+		}
 
+		.woocommerce-result-count,
+		.woocommerce-ordering {
+			font-size: 0.8em;
+		}
+
+		.woocommerce-ordering {
+			float: none;
+			margin-bottom: 3rem;
+		}
 	}
 }
 
