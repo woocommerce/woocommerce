@@ -1502,6 +1502,13 @@ a.reset_variations {
 		.woocommerce-ordering {
 			margin-bottom: 3rem;
 		}
+
+		ul.products[class*=columns-] {
+
+			li.product {
+				width: 100%;
+			}
+		}
 	}
 }
 
