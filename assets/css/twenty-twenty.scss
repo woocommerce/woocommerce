@@ -233,9 +233,8 @@ a.button {
  * Shop page
  */
 .woocommerce-products-header__title.page-title {
-	font-size: 1.6875em;
-	font-weight: 700;
-	font-family: $headings;
+	font-size: 6rem;
+	text-align: center;
 }
 
 .woocommerce-result-count {
@@ -1510,7 +1509,8 @@ a.reset_variations {
 	* Shop page
 	*/
 	.woocommerce-products-header__title.page-title {
-		font-size: 2.25em;
+		font-size: 8.4rem;
+		font-weight: 800;
 	}
 
 	.woocommerce-pagination {
