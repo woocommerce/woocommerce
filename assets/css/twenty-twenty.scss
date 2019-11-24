@@ -1434,6 +1434,15 @@ a.reset_variations {
 	}
 }
 
+@media only screen and (max-width: 600px) {
+	.woocommerce {
+		.woocommerce-ordering {
+			float: left;
+			clear: both;
+		}
+	}
+}
+
 @media only screen and (max-width: 768px) {
 
 	.woocommerce,
@@ -1491,7 +1500,6 @@ a.reset_variations {
 		}
 
 		.woocommerce-ordering {
-			float: none;
 			margin-bottom: 3rem;
 		}
 	}
