@@ -343,17 +343,17 @@ a.remove {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
-	line-height: 17px;
+	line-height: 18px;
 	font-size: 20px;
 	font-weight: 700;
 	text-align: center;
 	border-radius: 100%;
 	text-decoration: none !important;
-	background: #b22222;
-	color: #fff;
+	background: #fff;
+	color: #000;
 
 	&:hover {
-		background: #000;
+		background: $highlights-color;
 		color: #fff !important;
 	}
 }
@@ -367,7 +367,9 @@ dl.variation,
 		float: left;
 		clear: both;
 		margin-right: 0.25rem;
+		margin-top: 0;
 		list-style: none outside;
+		font-weight: 400;
 	}
 
 	dd {
@@ -1027,13 +1029,20 @@ a.reset_variations {
 .woocommerce-cart-form {
 
 	img {
-		max-width: 42px;
+		max-width: 120px;
 		height: auto;
 		display: block;
 	}
 
 	dl.variation {
-		margin-top: 0;
+		margin-top: 1rem;
+
+		dt,
+		dd,
+		p {
+			font-family: $headings;
+			font-size: 1.4rem;
+		}
 
 		p,
 		&:last-child {
@@ -1052,12 +1061,57 @@ a.reset_variations {
 			float: left;
 			margin-right: 0.25rem;
 		}
+
+		.button {
+			background: #f9f9f9;
+			border: 1px solid #555;
+			color: #555;
+		}
 	}
 
 	.quantity {
 
 		input {
-			width: 4rem;
+			width: 8rem;
+			border: 1px solid #eee;
+		}
+	}
+
+	table {
+		border: 0;
+
+		th,
+		tbody,
+		td {
+			border: 0;
+		}
+
+		td.product-thumbnail {
+			padding: 1.4rem;
+			width: 10%;
+		}
+
+		td.product-name {
+			padding-left: 1.5vw;
+		}
+
+		tbody {
+			tr {
+				border-top: 1px solid #eee;
+			}
+		}
+
+		input.qty {
+			display: inline-block;
+		}
+	}
+
+	.actions {
+
+		button {
+			padding-top: 1.55rem;
+			padding-bottom: 1.59rem;
+			font-size: 1.6rem;
 		}
 	}
 }
@@ -1074,7 +1128,28 @@ a.reset_variations {
 	}
 
 	.woocommerce-shipping-destination {
-		margin-bottom: 0;
+		margin-bottom: 1.5rem;
+		font-family: $headings;
+	}
+
+	table {
+		border: 0;
+
+		tbody,
+		th,
+		tr,
+		td {
+			border: 0;
+			padding: 1rem;
+		}
+
+		th {
+			width: 33%;
+		}
+	}
+
+	.checkout-button {
+		width: 100%;
 	}
 }
 
@@ -1090,18 +1165,21 @@ a.reset_variations {
 #shipping_method {
 	list-style: none;
 	margin: 0;
-	padding: 0;
+	padding: 0 0 1.5rem;
+	font-family: $headings;
 
 	li {
 		margin-bottom: 0.5rem;
+		margin-left: 0;
 
 		input {
 			float: left;
-			margin-top: 0.17rem;
+			margin-top: 0.5rem;
+			margin-right: 0.6rem;
 		}
 
 		label {
-			line-height: 1.5rem;
+			line-height: 2.5rem;
 		}
 	}
 }
@@ -1120,6 +1198,33 @@ a.reset_variations {
 	&::after {
 		content: "→";
 		margin-left: 0.5rem;
+	}
+}
+
+.woocommerce-cart {
+
+	.post-inner {
+		padding-top: 0;
+	}
+
+	#site-content {
+
+		.entry-header {
+			padding: 3vw 0 1.5vw;
+		}
+
+		.woocommerce {
+			max-width: 1600px;
+			padding: 0 5vw;
+			margin: 0 auto;
+
+		}
+	}
+
+	.woocommerce-message,
+	.woocommerce-error,
+	.woocommerce-info {
+		flex-direction: row;
 	}
 }
 
@@ -1445,6 +1550,38 @@ a.reset_variations {
 
 @media only screen and (max-width: 768px) {
 
+	#site-content {
+
+		.woocommerce {
+
+			.woocommerce-cart-form {
+
+				.actions {
+
+					.coupon {
+						margin-bottom: 2rem;
+
+						button {
+							width: 100%;
+						}
+					}
+				}
+
+				#coupon_code {
+					width: 100% !important;
+				}
+			}
+		}
+
+		#shipping_method {
+
+			li {
+				display: flex;
+				justify-content: flex-end;
+			}
+		}
+	}
+
 	.woocommerce,
 	.woocommerce-page {
 
@@ -1461,6 +1598,13 @@ a.reset_variations {
 					margin-bottom: 0;
 				}
 
+				&:nth-child(2n) {
+
+					td {
+						background: #fff;
+					}
+				}
+
 				td {
 					border-bottom-width: 0;
 
@@ -1468,7 +1612,28 @@ a.reset_variations {
 						border-bottom-width: 1px;
 					}
 				}
+
+				td.product-quantity::before {
+					padding-top: 0.9rem;
+				}
+
+				.product-remove {
+					float: right;
+				}
+
+				.product-thumbnail {
+					display: block;
+
+					img {
+						width: 70px;
+					}
+
+					&::before {
+						content: '';
+					}
+				}
 			}
+
 		}
 
 		.woocommerce-breadcrumb {
@@ -1507,6 +1672,20 @@ a.reset_variations {
 
 			li.product {
 				width: 100%;
+			}
+		}
+	}
+
+	.woocommerce-cart-form {
+
+		table {
+
+			td.product-name {
+				padding-left: 0.5em;
+			}
+
+			input.qty {
+				padding: 1rem 1.5rem;
 			}
 		}
 	}
