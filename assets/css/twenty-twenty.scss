@@ -1417,6 +1417,23 @@ a.reset_variations {
 			margin: 0 5vw;
 		}
 	}
+
+	/* Shop layout */
+	ul.products {
+		display: flex;
+		justify-content: space-evenly;
+		align-items: stretch;
+		flex-direction: row;
+		flex-wrap: wrap;
+
+		li.product {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 5em;
+		}
+	}
 }
 
 @media only screen and (max-width: 768px) {
