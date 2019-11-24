@@ -3,11 +3,6 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
@@ -35,7 +30,7 @@ const verifyPublishAndTrash = async () => {
 
 describe( 'Add New Simple Product Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 	} );
 
 	it( 'can create simple virtual product titled "Simple Product" with regular price $9.99', async () => {
@@ -64,7 +59,7 @@ describe( 'Add New Simple Product Page', () => {
 
 describe( 'Add New Variable Product Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 	} );
 	it( 'can create product with variations', async () => {
 		// Go to "add product" page

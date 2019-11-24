@@ -1,0 +1,13 @@
+{
+  "url": "http://example.com",
+  "users": {
+    "admin": {
+      "username": "",
+      "password": ""
+    },
+    "customer": {
+      "username": "",
+      "password": ""
+    }
+  }
+}

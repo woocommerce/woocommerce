@@ -3,19 +3,14 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { setCheckbox, settingsPageSaveChanges, unsetCheckbox, verifyCheckboxIsSet, verifyCheckboxIsUnset } from "../../utils";
+import { setCheckbox, settingsPageSaveChanges, unsetCheckbox, verifyCheckboxIsSet, verifyCheckboxIsUnset } from '../../utils';
 
 describe( 'WooCommerce Products > Downloadable Products Settings', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 	} );
 
 	it( 'can update settings', async () => {

@@ -1,5 +1,16 @@
-import { StoreOwnerFlow } from '../../utils/flows';
+/**
+ * @format
+ */
+
+/**
+ * External dependencies
+ */
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
+
+/**
+ * Internal dependencies
+ */
+import { StoreOwnerFlow } from '../../utils/flows';
 import {
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,

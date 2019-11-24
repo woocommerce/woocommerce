@@ -1,10 +1,14 @@
-import { clickTab } from "./index";
-
 /**
  * @format
  */
 
-const baseUrl = process.env.WP_BASE_URL;
+/**
+ * Internal dependencies
+ */
+import { clearAndFillInput } from './index';
+
+const config = require( 'config' );
+const baseUrl = config.get( 'url' );
 
 const WP_ADMIN_LOGIN = baseUrl + '/wp-login.php';
 const WP_ADMIN_DASHBOARD = baseUrl + '/wp-admin/';
@@ -97,8 +101,10 @@ const StoreOwnerFlow = {
 
 		await expect( page.title() ).resolves.toMatch( 'Log In' );
 
-		await page.type( '#user_login', 'admin' );
-		await page.type( '#user_pass', 'password' );
+		await clearAndFillInput( '#user_login', ' ' );
+
+		await page.type( '#user_login', config.get( 'users.admin.username' ) );
+		await page.type( '#user_pass', config.get( 'users.admin.password' ) );
 
 		await Promise.all( [
 			page.click( 'input[type=submit]' ),
