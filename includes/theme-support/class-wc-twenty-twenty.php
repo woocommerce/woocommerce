@@ -38,7 +38,7 @@ class WC_Twenty_Twenty {
 		add_theme_support(
 			'woocommerce',
 			array(
-				'thumbnail_image_width' => 300,
+				'thumbnail_image_width' => 450,
 				'single_image_width'    => 600,
 			)
 		);
