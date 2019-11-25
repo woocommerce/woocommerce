@@ -152,15 +152,8 @@ export function getLastPeriod( period, compare ) {
 			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
 		}
 	} else {
-		secondaryStart =
-			'week' === period
-				? primaryStart
-						.clone()
-						.subtract( 1, 'years' )
-						.week( primaryStart.week() )
-						.startOf( 'week' )
-				: primaryStart.clone().subtract( 1, 'years' );
-		secondaryEnd = secondaryStart.clone().endOf( period );
+		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' );
 	}
 	return {
 		primaryStart,
@@ -189,15 +182,9 @@ export function getCurrentPeriod( period, compare ) {
 		secondaryStart = primaryStart.clone().subtract( 1, period );
 		secondaryEnd = primaryEnd.clone().subtract( 1, period );
 	} else {
-		secondaryStart =
-			'week' === period
-				? primaryStart
-						.clone()
-						.subtract( 1, 'years' )
-						.week( primaryStart.week() )
-						.startOf( 'week' )
-				: primaryStart.clone().subtract( 1, 'years' );
-		secondaryEnd = secondaryStart.clone().add( daysSoFar, 'days' );
+		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
+		// Set the end time to 23:59:59.
+		secondaryEnd = secondaryStart.clone().add( daysSoFar + 1, 'days' ).subtract( 1, 'seconds' );
 	}
 	return {
 		primaryStart,

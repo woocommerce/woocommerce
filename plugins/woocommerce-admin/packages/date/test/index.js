@@ -213,11 +213,8 @@ describe( 'getCurrentPeriod', () => {
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getCurrentPeriod( 'week', 'previous_year' );
 			const daysSoFar = today.diff( thisWeekStart, 'days' );
-			const thisWeekLastYearStart = thisWeekStart
-				.clone()
-				.subtract( 1, 'years' )
-				.week( thisWeekStart.week() )
-				.startOf( 'week' );
+			// Last year weeks are aligned by calendar date not day of week.
+			const thisWeekLastYearStart = thisWeekStart.clone().subtract( 1, 'years' );
 			const todayThisWeekLastYear = thisWeekLastYearStart.clone().add( daysSoFar, 'days' );
 
 			expect( thisWeekLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
@@ -394,12 +391,9 @@ describe( 'getLastPeriod', () => {
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'week', 'previous_year' );
 
-			const lastWeekLastYearStart = lastWeekStart
-				.clone()
-				.subtract( 1, 'year' )
-				.week( lastWeekStart.week() )
-				.startOf( 'week' );
-			const lastWeekLastYearEnd = lastWeekLastYearStart.clone().endOf( 'week' );
+			// Last year weeks are aligned by calendar date not day of week.
+			const lastWeekLastYearStart = lastWeekStart.clone().subtract( 1, 'year' );
+			const lastWeekLastYearEnd = lastWeekEnd.clone().subtract( 1, 'year' );
 
 			expect( lastWeekLastYearStart.isSame( dateValue.secondaryStart, 'day' ) ).toBe( true );
 			expect( lastWeekLastYearEnd.isSame( dateValue.secondaryEnd, 'day' ) ).toBe( true );
