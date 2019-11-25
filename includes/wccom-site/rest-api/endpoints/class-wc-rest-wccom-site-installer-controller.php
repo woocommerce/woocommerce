@@ -70,7 +70,11 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 */
 	public function check_permission( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'install_themes' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_install_product', __( 'You do not have permission to install plugin or theme', 'woocommerce' ), array( 'status' => 401 ) );
+			return new WP_Error(
+				\WC_REST_WCCOM_Site_Installer_Errors::NO_PERMISSION_CODE,
+				\WC_REST_WCCOM_Site_Installer_Errors::NO_PERMISSION_MESSAGE,
+				array( 'status' => \WC_REST_WCCOM_Site_Installer_Errors::NO_PERMISSION_HTTP_CODE )
+			);
 		}
 
 		return true;
