@@ -21,9 +21,9 @@ You can also set the following configuration flag in your `wp-config.php`:
 
 To power the new onboarding flow client side, new REST API endpoints have been introduced. These are purpose built endpoints that exist under the `/wc-admin/onboarding/` namespace, and are not meant to be shipped in the core rest API package. The source is stored in `src/API/OnboardingPlugins.php`, `src/API/OnboardingProfile.php`, and `src/API/OnboardingTasks.php` respectively.
 
-* POST `/wc-admin/onboarding/plugins/install` - Installs a requested plugin, if present in the `woocommerce_onboarding_plugins_whitelist` array.
+* POST `/wc-admin/onboarding/plugins/install` - Installs a requested plugin, if present in the `woocommerce_admin_onboarding_plugins_whitelist` array.
 * GET `/wc-admin/onboarding/plugins/active` - Returns a list of the currently active plugins.
-* POST `/wc-admin/onboarding/plugins/activate` - Activates the requested plugins,  if present in the `woocommerce_onboarding_plugins_whitelist` array. Multiple plugins can be passed to activate at once.
+* POST `/wc-admin/onboarding/plugins/activate` - Activates the requested plugins,  if present in the `woocommerce_admin_onboarding_plugins_whitelist` array. Multiple plugins can be passed to activate at once.
 * GET `/wc-admin/onboarding/plugins/connect-jetpack` - Generates a URL for connecting to Jetpack. A `redirect_url` is accepted, which is used upon a successful connection.
 * POST `/wc-admin/onboarding/plugins/request-wccom-connect` - Generates a URL for the WooCommerce.com connection process.
 * POST `/wc-admin/onboarding/plugins/finish-wccom-connect` - Finishes the WooCommerce.com connection process by storing the received access token.
@@ -37,18 +37,17 @@ To power the new onboarding flow client side, new REST API endpoints have been i
 
 ## Onboarding filters
 
-* `woocommerce_onboarding_profile_properties` filters the properties we track as part of the profile wizard (such as information from store/business details steps). When the `completed` property is set to true, the profile wizard is completely dismissed and hidden.
-* `woocommerce_rest_onboarding_profile_object_query` filters the query arguments for requests to `/wc-admin/onboarding/profile`.
-* `woocommerce_rest_prepare_onboarding_profile` filters the response for requests to `/wc-admin/onboarding/profile`.
-* `rest_onboarding_profile_collection_params` filters the collection parameters for requests to  `/wc-admin/onboarding/profile`.
+* `woocommerce_admin_onboarding_profile_properties` filters the properties we track as part of the profile wizard (such as information from store/business details steps). When the `completed` property is set to true, the profile wizard is completely dismissed and hidden.
 * `woocommerce_admin_onboarding_industries` filters the list of allowed industries displayed in the profile wizard.
 * `woocommerce_admin_onboarding_industry_image` filters the images used for homepage templates in the appearance task. When creating a homepage, example images are used based on industry. These images are stored in `images/onboarding`.
 * `woocommerce_admin_onboarding_product_types` filters the product types displayed in the profile wizard.
-* `woocommerce_onboarding_plugins_whitelist` filters the list of plugins that can installed & activated via onboarding. This acts as a whitelist so only certain plugins can be used via the `/wc-admin/onboarding/profile/install` and `/wc-admin/onboarding/profile/activate` endpoints.
+* `woocommerce_admin_onboarding_plugins_whitelist` filters the list of plugins that can installed & activated via onboarding. This acts as a whitelist so only certain plugins can be used via the `/wc-admin/onboarding/profile/install` and `/wc-admin/onboarding/profile/activate` endpoints.
 * `woocommerce_admin_onboarding_themes` filters the themes displayed in the profile wizard.
-* `woocommerce_onboarding_jetpack_connect_redirect_url` filters the Jetpack connection redirect URL outlined in the Jetpack connection section below.
-* `woocommerce_onboarding_task_list` filters the list of tasks on the task list dashboard. This allows extensions to add new tasks. See [the extension docs](https://github.com/woocommerce/woocommerce-admin/tree/42015d17a919e8f9e54ba75869c50b04b8dc9241/docs/examples/extensions) for an example of how to do this.
-
+* `woocommerce_admin_onboarding_jetpack_connect_redirect_url` filters the Jetpack connection redirect URL outlined in the Jetpack connection section below.
+* `woocommerce_admin_onboarding_task_list` filters the list of tasks on the task list dashboard. This allows extensions to add new tasks. See [the extension docs](https://github.com/woocommerce/woocommerce-admin/tree/42015d17a919e8f9e54ba75869c50b04b8dc9241/docs/examples/extensions) for an example of how to do this.
+* `woocommerce_rest_onboarding_profile_collection_params` filters the collection parameters for requests to  `/wc-admin/onboarding/profile`.
+* `woocommerce_rest_onboarding_profile_object_query` filters the query arguments for requests to `/wc-admin/onboarding/profile`.
+* `woocommerce_rest_onboarding_prepare_onboarding_profile` filters the response for requests to `/wc-admin/onboarding/profile`.
 
 ## Options and settings
 
@@ -58,7 +57,7 @@ A few new WordPress options have been introduced to store information and settin
 * `woocommerce_task_list_hidden`. This option is used to conditionally show the entire task list. The task list can be hidden by the user after they have completed all tasks. Hiding the wizard stops it from showing in both full screen mode, and the collapsed inline version that shows above the dashboard analytics cards.
 * `woocommerce_task_list_welcome_modal_dismissed`. This option is used to show a congratulations modal during the transition between the profile wizard and task list.
 * `woocommerce_task_list_prompt_shown`. This option is used to conditionally show the "Is this card useful?" snackbar notice, shown once right after a user completes all the task list tasks.
-* `woocommerce_onboarding_payments`. Since the payments step requires multiple redirects to payment providers to setup accounts, we cache the current progress of the payments step in an option, so that we can quickly drop users back into the correct part of the task.
+* `woocommerce_task_list_payments`. Since the payments step requires multiple redirects to payment providers to setup accounts, we cache the current progress of the payments step in an option, so that we can quickly drop users back into the correct part of the task.
 
 We also use existing options from WooCommerce Core or extensions like WooCommerce Services or Stripe. The list below may not be complete, as new tasks are introduced, but you can generally find usage of these by searching for the [getOptions selector](https://github.com/woocommerce/woocommerce-admin/search?q=getOptions&unscoped_q=getOptions).
 

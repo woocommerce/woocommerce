@@ -394,7 +394,7 @@ class Onboarding {
 		$options[] = 'wc_connect_options';
 		$options[] = 'woocommerce_task_list_welcome_modal_dismissed';
 		$options[] = 'woocommerce_task_list_prompt_shown';
-		$options[] = 'woocommerce_onboarding_payments';
+		$options[] = 'woocommerce_task_list_payments';
 		$options[] = 'woocommerce_allow_tracking';
 		$options[] = 'woocommerce_stripe_settings';
 		$options[] = 'woocommerce_default_country';
@@ -482,7 +482,7 @@ class Onboarding {
 	 */
 	public static function get_allowed_plugins() {
 		return apply_filters(
-			'woocommerce_onboarding_plugins_whitelist',
+			'woocommerce_admin_onboarding_plugins_whitelist',
 			array(
 				'facebook-for-woocommerce'            => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
 				'mailchimp-for-woocommerce'           => 'mailchimp-for-woocommerce/mailchimp-woocommerce.php',

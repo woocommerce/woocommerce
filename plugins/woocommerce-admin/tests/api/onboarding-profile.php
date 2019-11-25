@@ -123,7 +123,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		add_filter(
-			'woocommerce_onboarding_profile_properties',
+			'woocommerce_admin_onboarding_profile_properties',
 			function( $properties ) {
 				$properties['test_profile_datum'] = array(
 					'type'        => 'array',

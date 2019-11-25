@@ -69,9 +69,9 @@ const Task = () => {
 };
 
 /**
- * Use the 'woocommerce_onboarding_task_list' filter to add a task page.
+ * Use the 'woocommerce_admin_onboarding_task_list' filter to add a task page.
  */
-addFilter( 'woocommerce_onboarding_task_list', 'plugin-domain', tasks => {
+addFilter( 'woocommerce_admin_onboarding_task_list', 'plugin-domain', tasks => {
 	return [
 		...tasks,
 		{

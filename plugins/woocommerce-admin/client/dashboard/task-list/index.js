@@ -276,7 +276,7 @@ export default compose(
 
 		const tasks = getTasks( {
 			profileItems,
-			options: getOptions( [ 'woocommerce_onboarding_payments' ] ),
+			options: getOptions( [ 'woocommerce_task_list_payments' ] ),
 			query: props.query,
 		} );
 

@@ -192,7 +192,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 		 * @param array            $item     The original item.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_onboarding_profile', $response, $item, $request );
+		return apply_filters( 'woocommerce_rest_onboarding_prepare_profile', $response, $item, $request );
 	}
 
 	/**
@@ -358,7 +358,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 		);
 
-		return apply_filters( 'woocommerce_onboarding_profile_properties', $properties );
+		return apply_filters( 'woocommerce_admin_onboarding_profile_properties', $properties );
 	}
 
 	/**
@@ -401,6 +401,6 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 
 		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
 
-		return apply_filters( 'rest_onboarding_profile_collection_params', $params );
+		return apply_filters( 'woocommerce_rest_onboarding_profile_collection_params', $params );
 	}
 }

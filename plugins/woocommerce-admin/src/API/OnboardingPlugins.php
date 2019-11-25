@@ -311,7 +311,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
 		}
 
-		$redirect_url = apply_filters( 'woocommerce_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
+		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
 		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
 
 		// @todo When implementing user-facing split testing, this should be abled to a default of 'production'.
