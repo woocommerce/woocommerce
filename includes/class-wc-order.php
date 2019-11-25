@@ -1473,7 +1473,11 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function needs_payment() {
 		/**
+		 * An array of payment statuses that an order needs to be in before it can be paid.
 		 *
+		 * @since 4.0.0
+		 *
+		 * @param array An array of payment statuses that is valid before an order can be paid.
 		 */
 		$valid_pending_payment_statuses = apply_filters( 'woocommerce_valid_pending_payment_statuses', array( 'unpaid', 'awaiting-authentication' ), $this );
 		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_payment_status( $valid_pending_payment_statuses ) && $this->get_total() > 0 ), $this, $valid_pending_payment_statuses );
