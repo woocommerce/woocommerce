@@ -1449,8 +1449,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function needs_payment() {
-		$valid_payment_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'unpaid', 'awaiting-authentication' ), $this );
-		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_payment_status( $valid_payment_statuses ) && $this->get_total() > 0 ), $this, $valid_payment_statuses );
+		/**
+		 *
+		 */
+		$valid_pending_payment_statuses = apply_filters( 'woocommerce_valid_pending_payment_statuses', array( 'unpaid', 'awaiting-authentication' ), $this );
+		return apply_filters( 'woocommerce_order_needs_payment', ( $this->has_payment_status( $valid_pending_payment_statuses ) && $this->get_total() > 0 ), $this, $valid_pending_payment_statuses );
 	}
 
 	/**
