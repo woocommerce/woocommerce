@@ -684,7 +684,7 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
 		}
 
-		$items_total = $this->get_rounded_items_total();
+		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
 
 		$this->set_total( 'items_total', round( $items_total ) );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
@@ -747,7 +747,7 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
 
-		$items_subtotal = $this->get_rounded_items_total( 'subtotal' );
+		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
 
 		$this->set_total( 'items_subtotal', round( $items_subtotal ) );
 		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );

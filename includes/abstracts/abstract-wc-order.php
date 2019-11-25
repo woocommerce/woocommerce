@@ -780,7 +780,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function get_values_for_total( $field ) {
 		$items = array_map(
 			function ( $item ) use ( $field ) {
-				return wc_add_number_precision( $item[ $field ] );
+				return wc_add_number_precision( $item[ $field ], false );
 			},
 			array_values( $this->get_items() )
 		);
@@ -1531,8 +1531,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		$cart_subtotal = wc_remove_number_precision( $this->get_rounded_items_total( 'subtotal' ) );
-		$cart_total = wc_remove_number_precision( $this->get_rounded_items_total() );
+		$cart_subtotal = wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'subtotal' )
+			)
+		);
+
+		$cart_total = wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'total' )
+			)
+		);
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {

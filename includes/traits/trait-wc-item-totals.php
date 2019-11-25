@@ -34,15 +34,15 @@ trait WC_Item_Totals {
 	 *
 	 * @since 3.9.0
 	 *
-	 * @param string $field Field to round and sum based on setting. Will likely be `total` or `subtotal`. Values must be without precision.
+	 * @param array $values Values to round. Should be with precision.
 	 *
 	 * @return float|int Appropriately rounded value.
 	 */
-	protected function get_rounded_items_total( $field = 'total' ) {
+	public static function get_rounded_items_total( $values ) {
 		return array_sum(
 			array_map(
-				array( $this, 'round_item_subtotal' ),
-				$this->get_values_for_total( $field )
+				array( self::class, 'round_item_subtotal' ),
+				$values
 			)
 		);
 	}
@@ -54,8 +54,8 @@ trait WC_Item_Totals {
 	 * @param float $value Item subtotal value.
 	 * @return float
 	 */
-	protected function round_item_subtotal( $value ) {
-		if ( ! $this->round_at_subtotal() ) {
+	public static function round_item_subtotal( $value ) {
+		if ( ! self::round_at_subtotal() ) {
 			$value = round( $value );
 		}
 		return $value;
@@ -67,7 +67,8 @@ trait WC_Item_Totals {
 	 * @since 3.9.0
 	 * @return bool
 	 */
-	protected function round_at_subtotal() {
+	protected static function round_at_subtotal() {
 		return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 	}
+
 }
