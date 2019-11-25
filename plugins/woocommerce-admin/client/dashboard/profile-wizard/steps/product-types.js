@@ -100,25 +100,27 @@ class ProductTypes extends Component {
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( productTypes ).map( slug => {
-							const helpText = interpolateComponents( {
-								mixedString:
-									productTypes[ slug ].description +
-									( productTypes[ slug ].more_url ? ' {{moreLink/}}' : '' ),
-								components: {
-									moreLink: productTypes[ slug ].more_url ? (
-										<Link
-											href={ productTypes[ slug ].more_url }
-											target="_blank"
-											type="external"
-											onClick={ () => this.onLearnMore( slug ) }
-										>
-											{ __( 'Learn more', 'woocommerce-admin' ) }
-										</Link>
-									) : (
-										''
-									),
-								},
-							} );
+							const helpText =
+								productTypes[ slug ].description &&
+								interpolateComponents( {
+									mixedString:
+										productTypes[ slug ].description +
+										( productTypes[ slug ].more_url ? ' {{moreLink/}}' : '' ),
+									components: {
+										moreLink: productTypes[ slug ].more_url ? (
+											<Link
+												href={ productTypes[ slug ].more_url }
+												target="_blank"
+												type="external"
+												onClick={ () => this.onLearnMore( slug ) }
+											>
+												{ __( 'Learn more', 'woocommerce-admin' ) }
+											</Link>
+										) : (
+											''
+										),
+									},
+								} );
 
 							return (
 								<CheckboxControl

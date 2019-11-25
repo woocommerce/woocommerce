@@ -310,17 +310,24 @@ class Onboarding {
 		$products     = array();
 
 		// Map product data by ID.
-		foreach ( $product_data->products as $product_datum ) {
-			$products[ $product_datum->id ] = $product_datum;
+		if ( isset( $product_data ) && isset( $product_data->products ) ) {
+			foreach ( $product_data->products as $product_datum ) {
+				if ( isset( $product_datum->id ) ) {
+					$products[ $product_datum->id ] = $product_datum;
+				}
+			}
 		}
 
 		// Loop over product types and append data.
 		foreach ( $product_types as $key => $product_type ) {
-			if ( isset( $product_type['product'] ) ) {
+			if ( isset( $product_type['product'] ) && isset( $products[ $product_type['product'] ] ) ) {
 				/* translators: Amount of product per year (e.g. Bookings - $240.00 per year) */
 				$product_types[ $key ]['label']      .= sprintf( __( ' — %s per year', 'woocommerce-admin' ), html_entity_decode( $products[ $product_type['product'] ]->price ) );
 				$product_types[ $key ]['description'] = $products[ $product_type['product'] ]->excerpt;
 				$product_types[ $key ]['more_url']    = $products[ $product_type['product'] ]->link;
+			} elseif ( isset( $product_type['product'] ) ) {
+				/* translators: site currency symbol (used to show that the product costs money) */
+				$product_types[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce-admin' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
 			}
 		}
 
