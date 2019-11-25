@@ -1273,6 +1273,61 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test create refund when additional fee is also refunded.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/24238
+	 */
+	public function test_wc_create_refund_24238() {
+		$order = new WC_Order();
+		$order->add_product( WC_Helper_Product::create_simple_product(), 10 );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Some Fee',
+				'tax_status' => 'taxable',
+				'total'      => '10',
+				'tax_class'  => '',
+			)
+		);
+		$order->add_item( $fee );
+		$order->calculate_totals( true );
+		$order->save();
+		$this->assertEquals( 110, $order->get_total() );
+
+		$products = $order->get_items( 'line_item' );
+		$this->assertCount( 1, $products );
+		$product_id = array_keys( $products )[0];
+
+		$fee_items = $order->get_items( 'fee' );
+		$this->assertCount( 1, $fee_items );
+
+		$fee_id = array_keys( $fee_items )[0];
+
+		$args = array(
+			'amount'     => 55,
+			'order_id'   => $order->get_id(),
+			'line_items' => array(
+				$fee_id     => array(
+					'refund_total' => 5,
+				),
+				$product_id => array(
+					'qty'          => 5,
+					'refund_total' => 50,
+				),
+			),
+		);
+
+		$refund_obj = wc_create_refund( $args );
+
+		$refunded_fee_items = $refund_obj->get_items( 'fee' );
+		$this->assertCount( 1, $refunded_fee_items );
+
+		$refunded_fee = array_values( $refunded_fee_items )[0];
+		$this->assertEquals( -5, $refunded_fee->get_total() );
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {

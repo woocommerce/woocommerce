@@ -26,16 +26,16 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                   => 'install_notice',
-		'update'                    => 'update_notice',
-		'template_files'            => 'template_file_check_notice',
-		'legacy_shipping'           => 'legacy_shipping_notice',
-		'no_shipping_methods'       => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'   => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
-		'no_secure_connection'      => 'secure_connection_notice',
-		'wc_admin'                  => 'wc_admin_feature_plugin_notice',
-		'wp_php_min_requirements'   => 'wp_php_min_requirements_notice',
+		'install'                      => 'install_notice',
+		'update'                       => 'update_notice',
+		'template_files'               => 'template_file_check_notice',
+		'legacy_shipping'              => 'legacy_shipping_notice',
+		'no_shipping_methods'          => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'      => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'    => 'regenerating_lookup_table_notice',
+		'no_secure_connection'         => 'secure_connection_notice',
+		'wc_admin'                     => 'wc_admin_feature_plugin_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
 	);
 
 	/**
@@ -380,7 +380,7 @@ class WC_Admin_Notices {
 	 */
 	public static function add_min_version_notice() {
 		if ( version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' ) ) {
-			self::add_notice( 'wp_php_min_requirements' );
+			self::add_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
 		}
 	}
 
@@ -391,8 +391,8 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
-		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_wp_php_min_requirements_notice', true ) ) ) {
-			self::remove_notice( 'wp_php_min_requirements' );
+		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_' . WC_PHP_MIN_REQUIREMENTS_NOTICE . '_notice', true ) ) ) {
+			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
 			return;
 		}
 

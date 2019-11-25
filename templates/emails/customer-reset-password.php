@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php
 /**
- * Show user-defined additonal content - this is set in each email's settings.
+ * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );

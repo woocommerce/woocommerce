@@ -699,7 +699,7 @@ function wc_product_class( $class = '', $product_id = null ) {
  */
 function wc_query_string_form_fields( $values = null, $exclude = array(), $current_key = '', $return = false ) {
 	if ( is_null( $values ) ) {
-		$values = $_GET; // WPCS: input var ok, CSRF ok.
+		$values = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	} elseif ( is_string( $values ) ) {
 		$url_parts = wp_parse_url( $values );
 		$values    = array();
@@ -707,9 +707,8 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		if ( ! empty( $url_parts['query'] ) ) {
 			// This is to preserve full-stops, pluses and spaces in the query string when ran through parse_str.
 			$replace_chars = array(
-				'.'   => '{dot}',
-				'+'   => '{plus}',
-				'%20' => '{space}',
+				'.' => '{dot}',
+				'+' => '{plus}',
 			);
 
 			$query_string = str_replace( array_keys( $replace_chars ), array_values( $replace_chars ), $url_parts['query'] );
@@ -745,7 +744,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		return $html;
 	}
 
-	echo $html; // WPCS: XSS ok.
+	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -1949,6 +1948,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			array(
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
+				'order'			 => $order,
 				'columns'        => $columns,
 			)
 		);
@@ -1956,6 +1956,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns ) );
 
 		$orderby = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
+		$order   = apply_filters( 'woocommerce_upsells_order', isset( $args['order'] ) ? $args['order'] : $order );
 		$limit   = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
 
 		// Get visible upsells then sort them at random, then limit result set.
