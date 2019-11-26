@@ -2158,6 +2158,22 @@ ul.wc_coupon_list_block {
 	}
 }
 
+.branch-5-3 {
+
+	.widefat {
+
+		.column-wc_actions {
+
+			a.button {
+
+				&::after {
+					margin-top: 2px;
+				}
+			}
+		}
+	}
+}
+
 .post-type-shop_order {
 
 	.tablenav .one-page .displaying-num {
@@ -4183,7 +4199,7 @@ img.help_tip {
 				right: -8px;
 				padding: 2px;
 				display: none;
-				
+
 				@media (max-width: 768px) {
 					display: block;
 				}
