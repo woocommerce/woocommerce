@@ -12,7 +12,7 @@ import { find } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from '@woocommerce/date';
+import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from 'lib/date';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from 'lib/number-format';
 import { formatCurrency } from 'lib/currency-format';

@@ -8,11 +8,6 @@ import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from '@woocommerce/date';
-
-/**
  * Internal dependencies
  */
 import DatePickerContent from './content';
@@ -36,16 +31,25 @@ class DateRangeFilterPicker extends Component {
 		this.resetCustomValues = this.resetCustomValues.bind( this );
 	}
 
+	formatDate( date, format ) {
+		if ( date && date._isAMomentObject && ( 'function' === typeof date.format ) ) {
+			return date.format( format );
+		}
+
+		return '';
+	}
+
 	getResetState() {
-		const { period, compare, before, after } = getDateParamsFromQuery( this.props.query );
+		const { period, compare, before, after } = this.props.dateQuery;
+
 		return {
 			period,
 			compare,
 			before,
 			after,
 			focusedInput: 'startDate',
-			afterText: after ? after.format( shortDateFormat ) : '',
-			beforeText: before ? before.format( shortDateFormat ) : '',
+			afterText: this.formatDate( after, shortDateFormat ),
+			beforeText: this.formatDate( before, shortDateFormat ),
 			afterError: null,
 			beforeError: null,
 		};
@@ -56,7 +60,7 @@ class DateRangeFilterPicker extends Component {
 	}
 
 	onSelect( selectedTab, onClose ) {
-		const { onRangeSelect } = this.props;
+		const { isoDateFormat, onRangeSelect } = this.props;
 		return event => {
 			const { period, compare, after, before } = this.state;
 			const data = {
@@ -64,8 +68,8 @@ class DateRangeFilterPicker extends Component {
 				compare,
 			};
 			if ( 'custom' === selectedTab ) {
-				data.after = after ? after.format( isoDateFormat ) : '';
-				data.before = before ? before.format( isoDateFormat ) : '';
+				data.after = this.formatDate( after, isoDateFormat );
+				data.before = this.formatDate( before, isoDateFormat );
 			} else {
 				data.after = undefined;
 				data.before = undefined;
@@ -76,10 +80,10 @@ class DateRangeFilterPicker extends Component {
 	}
 
 	getButtonLabel() {
-		const { primary, secondary } = getCurrentDates( this.props.query );
+		const { primaryDate, secondaryDate } = this.props.dateQuery;
 		return [
-			`${ primary.label } (${ primary.range })`,
-			`${ __( 'vs.', 'woocommerce-admin' ) } ${ secondary.label } (${ secondary.range })`,
+			`${ primaryDate.label } (${ primaryDate.range })`,
+			`${ __( 'vs.', 'woocommerce-admin' ) } ${ secondaryDate.label } (${ secondaryDate.range })`,
 		];
 	}
 
@@ -161,13 +165,22 @@ DateRangeFilterPicker.propTypes = {
 	 */
 	onRangeSelect: PropTypes.func.isRequired,
 	/**
-	 * The query string represented in object form.
+	 * The date query string represented in object form.
 	 */
-	query: PropTypes.object,
-};
-
-DateRangeFilterPicker.defaultProps = {
-	query: {},
+	dateQuery: PropTypes.shape( {
+		period: PropTypes.string.isRequired,
+		compare: PropTypes.string.isRequired,
+		before: PropTypes.object,
+		after: PropTypes.object,
+		primaryDate: PropTypes.shape( {
+			label: PropTypes.string.isRequired,
+			range: PropTypes.string.isRequired,
+		} ).isRequired,
+		secondaryDate: PropTypes.shape( {
+			label: PropTypes.string.isRequired,
+			range: PropTypes.string.isRequired,
+		} ).isRequired,
+	} ).isRequired,
 };
 
 export default DateRangeFilterPicker;

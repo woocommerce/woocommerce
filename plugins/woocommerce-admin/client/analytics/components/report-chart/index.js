@@ -19,7 +19,7 @@ import {
 	getIntervalForQuery,
 	getChartTypeForQuery,
 	getPreviousDate,
-} from '@woocommerce/date';
+} from 'lib/date';
 import { Chart } from '@woocommerce/components';
 import { CURRENCY } from '@woocommerce/wc-admin-settings';
 

@@ -7,11 +7,6 @@ import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
 
-/**
- * WooCommerce dependencies
- */
-import { getSetting } from '@woocommerce/wc-admin-settings';
-
 export const isoDateFormat = 'YYYY-MM-DD';
 
 /**
@@ -250,13 +245,16 @@ function getDateValue( period, compare, after, before ) {
 /**
  * Add default date-related parameters to a query object
  *
- * @param {string} [period] - period value, ie `last_week`
- * @param {string} [compare] - compare value, ie `previous_year`
- * @param {string} [after] - date in iso date format, ie `2018-07-03`
- * @param {string} [before] - date in iso date format, ie `2018-07-03`
+ * @param {Object} query - query object
+ * @property {string} query.period - period value, ie `last_week`
+ * @property {string} query.compare - compare value, ie `previous_year`
+ * @property {string} query.after - date in iso date format, ie `2018-07-03`
+ * @property {string} query.before - date in iso date format, ie `2018-07-03`
+ * @param {string} defaultDateRange - the store's default date range
  * @return {DateParams} - date parameters derived from query parameters with added defaults
  */
-export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
+export const getDateParamsFromQuery = ( query, defaultDateRange = 'period=month&compare=previous_year' ) => {
+	const { period, compare, after, before } = query;
 	if ( period && compare ) {
 		return {
 			period,
@@ -265,10 +263,6 @@ export const getDateParamsFromQuery = ( { period, compare, after, before } ) => 
 			before: before ? moment( before ) : null,
 		};
 	}
-	const {
-		woocommerce_default_date_range: defaultDateRange = 'period=month&compare=previous_year',
-	} = getSetting( 'wcAdminSettings', {} );
-
 	const queryDefaults = parse( defaultDateRange.replace( /&amp;/g, '&' ) );
 
 	return {
@@ -282,15 +276,16 @@ export const getDateParamsFromQuery = ( { period, compare, after, before } ) => 
 /**
  * Get Date Value Objects for a primary and secondary date range
  *
- * @param {Object} query - date parameters derived from query parameters
- * @property {string} [period] - period value, ie `last_week`
- * @property {string} [compare] - compare value, ie `previous_year`
- * @property {string} [after] - date in iso date format, ie `2018-07-03`
- * @property {string} [before] - date in iso date format, ie `2018-07-03`
+ * @param {Object} query - query object
+ * @property {string} query.period - period value, ie `last_week`
+ * @property {string} query.compare - compare value, ie `previous_year`
+ * @property {string} query.after - date in iso date format, ie `2018-07-03`
+ * @property {string} query.before - date in iso date format, ie `2018-07-03`
+ * @param {string} defaultDateRange - the store's default date range
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
-export const getCurrentDates = query => {
-	const { period, compare, after, before } = getDateParamsFromQuery( query );
+export const getCurrentDates = ( query, defaultDateRange = 'period=month&compare=previous_year' ) => {
+	const { period, compare, after, before } = getDateParamsFromQuery( query, defaultDateRange );
 	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } = getDateValue(
 		period,
 		compare,
@@ -508,9 +503,10 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
  * Gutenberg's moment instance is loaded with i18n values, which are
  * PHP date formats, ie 'LLL: "F j, Y g:i a"'. Override those with translations
  * of moment style js formats.
+ *
+ * @param {Object} config Locale config object, from store settings.
  */
-export function loadLocaleData() {
-	const { userLocale, weekdaysShort } = getSetting( 'locale' );
+export function loadLocaleData( { userLocale, weekdaysShort } ) {
 	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.
 	if ( 'en' !== moment.locale() ) {
 		moment.updateLocale( userLocale, {
@@ -525,8 +521,6 @@ export function loadLocaleData() {
 		} );
 	}
 }
-
-loadLocaleData();
 
 export const dateValidationMessages = {
 	invalid: __( 'Invalid date', 'woocommerce-admin' ),

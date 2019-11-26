@@ -10,7 +10,7 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { Date, Link } from '@woocommerce/components';
-import { defaultTableDateFormat } from '@woocommerce/date';
+import { defaultTableDateFormat } from 'lib/date';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';

@@ -15,7 +15,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/components';
-import { getAllowedIntervalsForQuery } from '@woocommerce/date';
+import { getAllowedIntervalsForQuery } from 'lib/date';
 
 /**
  * Internal dependencies

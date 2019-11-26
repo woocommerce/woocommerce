@@ -9,7 +9,7 @@ import { Tooltip } from '@wordpress/components';
 /**
  * WooCommerce dependencies
  */
-import { defaultTableDateFormat } from '@woocommerce/date';
+import { defaultTableDateFormat } from 'lib/date';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from 'lib/number-format';

@@ -10,7 +10,7 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
+import { defaultTableDateFormat, getCurrentDates } from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';

@@ -10,7 +10,7 @@ import { SelectControl } from '@wordpress/components';
  * WooCommerce dependencies
  */
 import { DatePicker } from '@woocommerce/components';
-import { dateValidationMessages } from '@woocommerce/date';
+import { dateValidationMessages } from 'lib/date';
 
 function HistoricalDataPeriodSelector( {
 	dateFormat,

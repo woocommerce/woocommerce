@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { getDateParamsFromQuery } from '@woocommerce/date';
+import { getDateParamsFromQuery } from 'lib/date';
 import { getNewPath } from '@woocommerce/navigation';
 import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
 import { calculateDelta, formatValue } from 'lib/number-format';

@@ -18,3 +18,4 @@ Name | Type | Default | Description
 `onDateSelect` | Function | `() => {}` | Function to be called after date selection
 `onFilterSelect` | Function | `null` | Function to be called after filter selection
 `onAdvancedFilterAction` | Function | `null` | Function to be called after an advanced filter action has been taken
+`storeDate` | object | `null` | (required) Date utility function object bound to store settings.

@@ -83,7 +83,15 @@ class ReportFilters extends Component {
 	}
 
 	render() {
-		const { filters, query, path, showDatePicker, onFilterSelect } = this.props;
+		const {
+			dateQuery,
+			filters,
+			query,
+			path,
+			showDatePicker,
+			onFilterSelect,
+			isoDateFormat,
+		} = this.props;
 		return (
 			<Fragment>
 				<H className="screen-reader-text">{ __( 'Filters', 'woocommerce-admin' ) }</H>
@@ -92,8 +100,9 @@ class ReportFilters extends Component {
 						{ showDatePicker && (
 							<DateRangeFilterPicker
 								key={ JSON.stringify( query ) }
-								query={ query }
+								dateQuery={ dateQuery }
 								onRangeSelect={ this.onRangeSelect }
+								isoDateFormat={ isoDateFormat }
 							/>
 						) }
 						{ filters.map( config => {
@@ -158,6 +167,27 @@ ReportFilters.propTypes = {
 	 * The currency formatting instance for the site.
 	 */
 	currency: PropTypes.object.isRequired,
+	/**
+	 * The date query string represented in object form.
+	 */
+	dateQuery: PropTypes.shape( {
+		period: PropTypes.string.isRequired,
+		compare: PropTypes.string.isRequired,
+		before: PropTypes.object,
+		after: PropTypes.object,
+		primaryDate: PropTypes.shape( {
+			label: PropTypes.string.isRequired,
+			range: PropTypes.string.isRequired,
+		} ).isRequired,
+		secondaryDate: PropTypes.shape( {
+			label: PropTypes.string.isRequired,
+			range: PropTypes.string.isRequired,
+		} ).isRequired,
+	} ).isRequired,
+	/**
+	 * ISO date format string.
+	 */
+	isoDateFormat: PropTypes.string.isRequired,
 };
 
 ReportFilters.defaultProps = {

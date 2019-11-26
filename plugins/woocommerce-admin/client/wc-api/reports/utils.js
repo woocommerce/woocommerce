@@ -9,7 +9,7 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, getCurrentDates, getIntervalForQuery } from '@woocommerce/date';
+import { appendTimestamp, getCurrentDates, getIntervalForQuery } from 'lib/date';
 import { flattenFilters, getActiveFiltersFromQuery, getUrlKey } from '@woocommerce/navigation';
 import { formatCurrency } from 'lib/currency-format';
 

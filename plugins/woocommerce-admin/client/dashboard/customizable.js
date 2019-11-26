@@ -25,6 +25,7 @@ import { recordEvent } from 'lib/tracks';
 import TaskList from './task-list';
 import { getTasks } from './task-list/tasks';
 import { isOnboardingEnabled } from 'dashboard/utils';
+import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
 
 class CustomizableDashboard extends Component {
 	constructor( props ) {
@@ -207,6 +208,17 @@ class CustomizableDashboard extends Component {
 			return <TaskList query={ query } />;
 		}
 
+		const { period, compare, before, after } = getDateParamsFromQuery( query );
+		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates( query );
+		const dateQuery = {
+			period,
+			compare,
+			before,
+			after,
+			primaryDate,
+			secondaryDate,
+		};
+
 		return (
 			<Fragment>
 				{ isOnboardingEnabled() &&
@@ -214,7 +226,7 @@ class CustomizableDashboard extends Component {
 					! taskListHidden &&
 					taskListCompleted && <TaskList query={ query } inline /> }
 
-				<ReportFilters query={ query } path={ path } />
+				<ReportFilters query={ query } path={ path } dateQuery={ dateQuery } isoDateFormat={ isoDateFormat } />
 				{ sections.map( ( section, index ) => {
 					if ( section.isVisible ) {
 						return (

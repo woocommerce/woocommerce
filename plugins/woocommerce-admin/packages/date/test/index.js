@@ -8,7 +8,6 @@ import moment from 'moment';
  * WooCommerce settings
  */
 import {
-	setSetting,
 	getSetting,
 } from '@woocommerce/wc-admin-settings';
 
@@ -511,24 +510,20 @@ describe( 'loadLocaleData', () => {
 	const originalLocale = getSetting( 'locale' );
 	beforeEach( () => {
 		// Reset to default settings
-		setSetting( 'locale', originalLocale );
+		loadLocaleData( originalLocale );
 	} );
 
 	it( 'should load locale data on user locale', () => {
-		setSetting(
-			'locale',
-			{
-				userLocale: 'fr_FR',
-				weekdaysShort: [ 'dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam' ],
-			}
-		);
-
 		// initialize locale. Gutenberg normaly does this, but not in test environment.
 		moment.locale( 'fr_FR', {} );
 
-		loadLocaleData();
-		expect( moment.localeData().weekdaysMin() )
-			.toEqual( getSetting( 'locale' ).weekdaysShort );
+		const weekdaysShort = [ 'dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam' ];
+
+		loadLocaleData( {
+			userLocale: 'fr_FR',
+			weekdaysShort,
+		} );
+		expect( moment.localeData().weekdaysMin() ).toEqual( weekdaysShort );
 	} );
 } );
 

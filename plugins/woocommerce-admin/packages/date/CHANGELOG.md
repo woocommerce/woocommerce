@@ -1,3 +1,7 @@
+# Unreleased
+
+- Decouple from global wcSettings object.
+
 # 1.2.1
 
 - Update dependencies.

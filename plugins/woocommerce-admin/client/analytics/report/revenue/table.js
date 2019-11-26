@@ -11,7 +11,7 @@ import { get } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
+import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/currency-format';
 import { formatValue } from 'lib/number-format';

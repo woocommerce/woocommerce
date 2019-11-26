@@ -7,6 +7,7 @@
 - Add `<TextControl />` component.
 - Require `currency` prop in `<AdvancedFilters />` component.
 - Remove call to `getAdminLink()` inside the `<Link />` component.
+- Add `storeDate` prop to `<ReportFilters />` and `<DateRangeFilterPicker />` components.
 
 # 4.0.0
 - Added a new `<ScrollTo />` component.
