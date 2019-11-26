@@ -64,6 +64,7 @@ class HandpickedProducts extends AbstractProductGrid {
 			'orderby'           => $this->get_schema_orderby(),
 			'products'          => $this->get_schema_list_ids(),
 			'contentVisibility' => $this->get_schema_content_visibility(),
+			'isPreview'         => $this->get_schema_boolean( false ),
 		);
 	}
 }

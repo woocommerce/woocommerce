@@ -74,6 +74,7 @@ class ProductsByAttribute extends AbstractProductGrid {
 			'editMode'          => $this->get_schema_boolean( true ),
 			'orderby'           => $this->get_schema_orderby(),
 			'rows'              => $this->get_schema_number( wc_get_theme_support( 'product_blocks::default_rows', 1 ) ),
+			'isPreview'         => $this->get_schema_boolean( false ),
 		);
 	}
 }
