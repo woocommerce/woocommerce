@@ -18,6 +18,14 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Setup.
+	 */
+	public function setUp() {
+		parent::setUp();
+		WC()->cart->empty_cart();
+	}
+
+	/**
 	 * Helper method to create a managed product and a order for that product.
 	 *
 	 * @return array( WC_Product, WC_Order ) array
