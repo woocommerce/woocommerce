@@ -1,13 +1,13 @@
 {
-  "url": "http://example.com/",
+  "url": "http://localhost:8084/",
   "users": {
     "admin": {
-      "username": "",
-      "password": ""
+      "username": "admin",
+      "password": "password"
     },
     "customer": {
-      "username": "",
-      "password": ""
+      "username": "customer",
+      "password": "password"
     }
   }
 }
