@@ -5,6 +5,8 @@ dist: xenial
 services:
   - xvfb
   - mysql
+  - docker
+  - docker-compose
 
 sudo: false
 
@@ -32,14 +34,10 @@ matrix:
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "e2e tests"
-    php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
-    addons:
-      chrome: beta
-      apt:
-        packages:
-          - nginx
+  - name: "E2E tests"
+    env: RUN_E2E=1
+    script:
+    - docker-compose up -d
   - name: "Unit tests code coverage"
     php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1

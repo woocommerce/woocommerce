@@ -1,15 +1,15 @@
-version: '3.1'
+version: '3.7'
 
 services:
 
   db:
-    image: mysql:5.7
+    image: mariadb:10.4
     restart: on-failure
     environment:
       MYSQL_DATABASE: testdb
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
-      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
     volumes:
       - db:/var/lib/mysql
 

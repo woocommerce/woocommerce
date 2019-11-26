@@ -71,7 +71,7 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 		await page.$eval( '#wc_tracker_submit', elem => elem.click() );
 
 		// Wait for the Payment section to load
-		await page.waitForNavigation();
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	} );
 
 	it( 'Can fill out Payment details', async () => {
