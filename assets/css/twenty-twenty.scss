@@ -1084,6 +1084,12 @@ a.reset_variations {
 			border: 1px solid #555;
 			color: #555;
 		}
+
+		button[name="update_cart"] {
+			background: #fff;
+			color: #000;
+			width: calc(50% - 100px);
+		}
 	}
 
 	.quantity {
