@@ -1321,6 +1321,34 @@ a.reset_variations {
 	.checkout-button {
 		width: 100%;
 	}
+
+	input[type='radio'].shipping_method {
+		display: none;
+
+		& + label {
+
+			&::before {
+				content: "";
+				display: inline-block;
+				width: 14px;
+				height: 14px;
+				border: 2px solid #fff;
+				box-shadow: 0 0 0 2px #6d6d6d;
+				background: #fff;
+				margin-left: 4px;
+				margin-right: 1.2rem;
+				border-radius: 100%;
+				transform: translateY(2px);
+			}
+		}
+
+		&:checked + label {
+
+			&::before {
+				background: #555;
+			}
+		}
+	}
 }
 
 .shipping-calculator-button {
@@ -1731,7 +1759,7 @@ a.reset_variations {
 
 .woocommerce-checkout-review-order-table {
 
-	input.shipping_method {
+	input[type='radio'].shipping_method {
 		display: none;
 
 		& + label {
