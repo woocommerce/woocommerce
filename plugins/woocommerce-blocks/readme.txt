@@ -116,6 +116,19 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.1 - 2019-11-26 =
+- Fix Products by Tag, Products by Attribute and Handpicked products blocks showing an invalid attributes error. #1254
+- Fix the price slider updating instantly even when filter button was enabled. #1228
+- Fix price slider layout in narrow columns. #1231
+- Honor CSS classes in the editor for blocks added in 2.5. #1227
+- Fix variable products price format in All Products block. #1210
+- Allow the feature plugin to use WooCommerce Core translated strings. #1242
+- Reduce number of queries ran by multiple filter blocks with All Products block. #1233
+- Fix heading level setting for the All Products Title Block. #1230
+- Fix editor styles (background color) for titles of "Filter by…" blocks. #1256
+- Fix bug with cart not updating. #1258
+- Fix issue in the Filter by Attribute selector that was preventing to reselect the currently selected attribute. #1264
+
 = 2.5.0 - 2019-11-19 =
 
 - Feature: Introduce an All Products block, a new block listing products using client side rendering. Requires WordPress 5.3.
