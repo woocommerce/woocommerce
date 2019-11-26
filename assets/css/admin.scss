@@ -6563,6 +6563,12 @@ table.bar_chart {
 		border-radius: 0;
 		line-height: 1.5;
 
+		&:focus-within {
+			border-color: #5b9dd9;
+			box-shadow: 0 0 2px rgba(30,140,190,.8);
+			outline: 2px solid transparent;
+		}
+
 		li {
 			margin: 0;
 		}
@@ -6586,6 +6592,21 @@ table.bar_chart {
 		font-size: inherit;
 		font-weight: inherit;
 		padding: 3px 0;
+	}
+}
+
+.branch-5-3 {
+
+	.select2-container {
+		.select2-selection--multiple {
+			border-radius: 4px;
+
+			&:focus-within {
+				border-color: #007cba;
+				box-shadow: 0 0 0 1px #007cba;
+				outline: 2px solid transparent;
+			}
+		}
 	}
 }
 
