@@ -175,13 +175,16 @@ a.button {
 }
 
 .woocommerce-info {
-	background: $highlights-color;
+	background: #eee;
+	color: #000;
+	border-top: 2px solid $highlights-color;
 }
 
 .woocommerce-store-notice {
-	background: $highlights-color;
-	color: #fff;
-	padding: 1rem;
+	background: #eee;
+	color: #000;
+	border-top: 2px solid $highlights-color;
+	padding: 2rem;
 	position: absolute;
 	top: 0;
 	left: 0;
