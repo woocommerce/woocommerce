@@ -579,6 +579,7 @@
 }
 
 #variable_product_options {
+
 	.form-row select {
 		max-width: 100%;
 	}
@@ -4183,7 +4184,7 @@ img.help_tip {
 				right: -8px;
 				padding: 2px;
 				display: none;
-				
+
 				@media (max-width: 768px) {
 					display: block;
 				}
@@ -4545,7 +4546,6 @@ img.help_tip {
 
 .woocommerce_options_panel .checkbox,
 .woocommerce_variable_attributes .checkbox {
-	width: auto;
 	margin: 4px 0 !important;
 	vertical-align: middle;
 	float: left;
