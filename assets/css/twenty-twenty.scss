@@ -73,6 +73,23 @@ a.button {
 			visibility: visible;
 		}
 	}
+
+	form.woocommerce-form-login,
+	form.woocommerce-form-register {
+
+		p,
+		label {
+			font-family: $headings;
+		}
+
+		input {
+			border: 1px solid #ddd;
+		}
+	}
+
+	.woocommerce-form-login__rememberme {
+		margin: 1rem 0 3rem 0;
+	}
 }
 
 .woocommerce-breadcrumb {
@@ -154,6 +171,7 @@ a.button {
 .woocommerce-error,
 .woocommerce-info {
 	margin-bottom: 5rem;
+	margin-left: 0;
 	padding: 1.5rem 3rem;
 	background: #eee;
 	font-size: 0.88889em;
@@ -184,6 +202,14 @@ a.button {
 		&.button {
 			background: #111;
 		}
+	}
+}
+
+#site-content {
+
+	.woocommerce-error,
+	.woocommerce-info {
+		font-family: $headings;
 	}
 }
 
@@ -1029,8 +1055,6 @@ a.reset_variations {
 			max-width: 1600px;
 			padding: 0 6vw;
 			margin: 0 auto;
-			display: flex;
-			flex-direction: row;
 		}
 	}
 
@@ -1145,6 +1169,17 @@ a.reset_variations {
 
 		button {
 			margin-top: 3rem;
+		}
+	}
+}
+
+.logged-in.woocommerce-account {
+
+	#site-content {
+
+		.woocommerce {
+			display: flex;
+			flex-direction: row;
 		}
 	}
 }
@@ -1631,6 +1666,25 @@ a.reset_variations {
 				display: block;
 			}
 		}
+	}
+
+	.woocommerce-form-login {
+		p.form-row.form-row-first,
+		p.form-row.form-row-last {
+			float: none;
+		}
+	}
+
+	input#coupon_code {
+		padding-top: 1.55rem;
+		padding-bottom: 1.59rem;
+		border: 1px solid #ddd;
+	}
+
+	button[name="apply_coupon"] {
+		padding-top: 1.55rem;
+		padding-bottom: 1.8rem;
+		font-size: 1.6rem;
 	}
 
 	.select2-choice,
