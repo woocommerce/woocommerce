@@ -2066,7 +2066,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		$product_qty_in_cart = $cart->get_cart_item_quantities();
-		$stock_held_keys     = [];
+		$stock_held_keys     = array();
 		$error = null;
 
 		try {
