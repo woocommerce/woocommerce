@@ -1,3 +1,3 @@
-FROM wordpress:5.3
+FROM wordpress:latest
 
 COPY . /var/www/html/wp-content/plugins/woocommerce
