@@ -1579,6 +1579,10 @@ a.reset_variations {
 
 	.select2-container .select2-selection--single .select2-selection__rendered {
 		line-height: 48px;
+		font-family: $headings;
+		font-size: 1.6rem;
+		color: #000;
+		padding-left: 1.8rem;
 	}
 
 	.select2-container--default .select2-selection--single .select2-selection__arrow {
@@ -1587,6 +1591,18 @@ a.reset_variations {
 
 	.select2-container--focus .select2-selection {
 		border-color: #000;
+	}
+
+	.select2-results__option {
+		margin-left: 0;
+	}
+
+	.select2-container {
+
+		.select2-search__field {
+			height: 4rem;
+			background: #eee;
+		}
 	}
 }
 
