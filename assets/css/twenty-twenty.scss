@@ -1280,7 +1280,7 @@ a.reset_variations {
 				box-sizing: content-box;
 				transition: all ease-in-out 0.3s;
 				position: absolute;
-				top: 4px;
+				top: 0;
 				right: 0;
 			}
 
@@ -1291,7 +1291,7 @@ a.reset_variations {
 				height: 14px;
 				background: #fff;
 				position: absolute;
-				top: 7px;
+				top: 3px;
 				right: 17px;
 				border-radius: 13rem;
 				transition: all ease-in-out 0.3s;
@@ -1354,6 +1354,17 @@ a.reset_variations {
 
 .woocommerce-checkout {
 
+	.post-inner {
+		padding-top: 0;
+	}
+
+	.woocommerce-billing-fields {
+
+		h3 {
+			margin-top: 4rem;
+		}
+	}
+
 	form {
 
 		.col2-set {
@@ -1373,11 +1384,16 @@ a.reset_variations {
 
 			label {
 				font-family: $headings;
+				letter-spacing: normal;
 			}
 
 			p {
 				margin-bottom: 1.15em;
 			}
+		}
+
+		#order_review_heading {
+			margin-top: 4rem;
 		}
 
 		#order_review_heading,
@@ -1400,8 +1416,19 @@ a.reset_variations {
 					display: none;
 				}
 
+				tbody::after {
+						content: '';
+						display: block;
+						height: 2rem;
+				}
+
 				.woocommerce-Price-amount {
 					font-weight: bold;
+				}
+
+				.cart-subtotal,
+				.order-total{
+					border-top: 1px solid #ddd;
 				}
 			}
 		}
@@ -1525,8 +1552,12 @@ a.reset_variations {
 .woocommerce-checkout-review-order {
 
 	ul {
-		margin: 2rem 0 1rem;
+		margin: 2rem 0 3rem;
 		padding-left: 0;
+	}
+
+	#place_order {
+		width: 100%;
 	}
 }
 
@@ -1609,6 +1640,30 @@ a.reset_variations {
 			&::before {
 				background: #555;
 			}
+		}
+	}
+}
+
+.wc_payment_methods {
+
+	.payment_box {
+
+		p {
+			font-family: $headings;
+			font-size: 1.6rem;
+		}
+	}
+}
+
+
+.woocommerce-terms-and-conditions-wrapper {
+	margin-bottom: 5rem;
+
+	.woocommerce-privacy-policy-text {
+
+		p {
+			font-family: $headings;
+			font-size: 1.6rem;
 		}
 	}
 }
