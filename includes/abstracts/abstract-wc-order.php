@@ -1517,6 +1517,34 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart subtotal (assuming all other settings are same).
+	 *
+	 * @return float Cart subtotal.
+	 */
+	protected function get_cart_subtotal_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'subtotal' )
+			)
+		);
+	}
+
+	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart total (assuming all other settings are same).
+	 *
+	 * @return float Cart total.
+	 */
+	protected function get_cart_total_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'total' )
+			)
+		);
+	}
+
+	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
@@ -1531,17 +1559,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		$cart_subtotal = wc_remove_number_precision(
-			$this->get_rounded_items_total(
-				$this->get_values_for_total( 'subtotal' )
-			)
-		);
-
-		$cart_total = wc_remove_number_precision(
-			$this->get_rounded_items_total(
-				$this->get_values_for_total( 'total' )
-			)
-		);
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
@@ -1762,15 +1781,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$subtotal    = 0;
+		$subtotal    = $this->get_cart_subtotal_for_order();
 
 		if ( ! $compound ) {
-			foreach ( $this->get_items() as $item ) {
-				$subtotal += $item->get_subtotal();
 
-				if ( 'incl' === $tax_display ) {
-					$subtotal += $item->get_subtotal_tax();
+			if ( 'incl' === $tax_display ) {
+				$subtotal_taxes = 0;
+				foreach ( $this->get_items() as $item ) {
+					$subtotal_taxes += self::round_line_tax( $item->get_subtotal_tax(), false );
 				}
+				$subtotal += wc_round_tax_total( $subtotal_taxes );
 			}
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
@@ -1781,10 +1801,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			if ( 'incl' === $tax_display ) {
 				return '';
-			}
-
-			foreach ( $this->get_items() as $item ) {
-				$subtotal += $item->get_subtotal();
 			}
 
 			// Add Shipping Costs.

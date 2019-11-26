@@ -71,4 +71,19 @@ trait WC_Item_Totals {
 		return 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
 	}
 
+	/**
+	 * Apply rounding to an array of taxes before summing. Rounds to store DP setting, ignoring precision.
+	 *
+	 * @since  3.2.6
+	 * @param  float $value    Tax value.
+	 * @param  bool  $in_cents Whether precision of value is in cents.
+	 * @return float
+	 */
+	protected static function round_line_tax( $value, $in_cents = true ) {
+		if ( ! self::round_at_subtotal() ) {
+			$value = wc_round_tax_total( $value, $in_cents ? 0 : null );
+		}
+		return $value;
+	}
+
 }

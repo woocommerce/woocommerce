@@ -871,18 +871,4 @@ final class WC_Cart_Totals {
 		// Allow plugins to filter the grand total, and sum the cart totals in case of modifications.
 		$this->cart->set_total( max( 0, apply_filters( 'woocommerce_calculated_total', $this->get_total( 'total' ), $this->cart ) ) );
 	}
-
-	/**
-	 * Apply rounding to an array of taxes before summing. Rounds to store DP setting, ignoring precision.
-	 *
-	 * @since  3.2.6
-	 * @param  float $value Tax value.
-	 * @return float
-	 */
-	protected function round_line_tax( $value ) {
-		if ( ! $this->round_at_subtotal() ) {
-			$value = wc_round_tax_total( $value, 0 );
-		}
-		return $value;
-	}
 }
