@@ -1860,6 +1860,56 @@ a.reset_variations {
 			}
 		}
 	}
+
+	.woocommerce-checkout {
+
+		form {
+
+			.col2-set {
+				width: 100%;
+				float: none;
+				padding-right: 0;
+
+				.col-1,
+				.col-2 {
+					float: none;
+					width: 100%;
+				}
+			}
+
+			#order_review_heading {
+				margin-top: 4rem;
+			}
+
+			#order_review_heading,
+			#order_review {
+				width: 100%;
+				padding-left: 0;
+				float: none;
+			}
+
+			table {
+
+				tbody {
+
+					td.product-total {
+						text-align: end;
+					}
+				}
+
+				tfoot {
+
+					.cart-subtotal,
+					.order-total {
+
+						td {
+							text-align: end;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 @media only screen and (min-width: 768px) {
