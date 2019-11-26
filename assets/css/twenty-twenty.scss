@@ -144,7 +144,6 @@ a.button {
 	overflow: hidden;
 	display: flex;
 	justify-content: space-between;
-	flex-direction: row-reverse;
 	align-items: center;
 }
 
@@ -153,8 +152,7 @@ a.button {
 	color: $body-color;
 }
 
-.woocommerce-error,
-.woocommerce-info {
+.woocommerce-error {
 	color: #fff;
 
 	a {
@@ -178,6 +176,18 @@ a.button {
 	background: #eee;
 	color: #000;
 	border-top: 2px solid $highlights-color;
+
+	a {
+		color: #444;
+
+		&:hover {
+			color: #000;
+		}
+
+		&.button {
+			background: #111;
+		}
+	}
 }
 
 .woocommerce-store-notice {
