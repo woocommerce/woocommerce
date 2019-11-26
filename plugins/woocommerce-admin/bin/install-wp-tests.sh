@@ -193,7 +193,7 @@ install_deps() {
 		git clone https://github.com/woocommerce/woocommerce-admin.git
 		cd woocommerce-admin
 		git fetch origin $BRANCH
-		git checkout -b $BRANCH origin/$BRANCH
+		git checkout -B $BRANCH origin/$BRANCH
 		# Activate the plugin
 		cd "$WP_CORE_DIR"
 		php wp-cli.phar plugin activate woocommerce-admin
