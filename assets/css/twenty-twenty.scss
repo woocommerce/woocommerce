@@ -462,6 +462,10 @@ dl.variation,
 			opacity: 0.2;
 		}
 	}
+
+	.woocommerce-message {
+		flex-direction: row-reverse;
+	}
 }
 
 table.variations {
