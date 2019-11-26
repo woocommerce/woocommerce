@@ -226,7 +226,8 @@ a.button {
 		}
 
 		&.button {
-			background: #111;
+			background: $highlights-color;
+			color: #f5efe0;
 		}
 	}
 }
