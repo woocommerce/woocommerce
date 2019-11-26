@@ -64,12 +64,15 @@ class WC_Twenty_Twenty {
 		echo '</section>';
 	}
 
+	/**
+	 * Set background color to white if it's default, otherwise don't touch it.
+	 */
 	public static function set_white_background() {
 		$background = sanitize_hex_color_no_hash( get_theme_mod( 'background_color' ) );
 		$background_default = 'f5efe0';
 
 		// Don't change user's choice of background color.
-		if ( ! empty($background) && $background !== $background_default ) {
+		if ( ! empty( $background ) && $background !== $background_default ) {
 			return;
 		}
 
