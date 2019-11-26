@@ -119,6 +119,24 @@ a.button {
 	z-index: 1;
 }
 
+.wc-block-grid__products {
+	.wc-block-grid__product-onsale {
+		position: absolute;
+		top: 0;
+		display: inline-block;
+		background: $highlights-color;
+		color: #fff;
+		font-family: $headings;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		line-height: 1.2;
+		text-transform: uppercase;
+		z-index: 1;
+		font-size: 1.5rem;
+		padding: 1rem;
+	}
+}
+
 .price {
 	font-family: $headings;
 
@@ -215,6 +233,16 @@ a.button {
 
 .flex-viewport {
 	margin-bottom: 1.5em;
+}
+
+#site-content {
+	.post-inner {
+		padding-top: 0;
+	}
+
+	.wp-block-cover {
+		margin-top: 0;
+	}
 }
 
 /* Make thumbnails in the gallery affect parent's height and wrapping */
@@ -1856,9 +1884,57 @@ a.reset_variations {
 			align-items: center;
 			margin-bottom: 5em;
 
-			a.added_to_cart {
+		}
 
+		li.product-category {
+
+			a {
+				text-align: center;
+
+				h2.woocommerce-loop-category__title {
+					font-family: $headings;
+					font-size: 3rem;
+				}
 			}
+		}
+	}
+}
+
+ul.wc-block-grid__products {
+	display: flex;
+	align-items: stretch;
+	flex-direction: row;
+	flex-wrap: wrap;
+
+	li.wc-block-grid__product {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 5em;
+	}
+}
+
+.wc-block-grid__product {
+
+	.wc-block-grid__product-title {
+		font-family: $headings;
+		color: #000;
+		font-size: 2.5rem;
+	}
+
+	.wc-block-grid__product-price {
+
+		.woocommerce-Price-amount {
+
+			font-size: 1.8rem;
+		}
+	}
+
+	.wc-block-grid__product-rating {
+
+		.star-rating {
+			font-size: 0.7em
 		}
 	}
 }
@@ -2121,6 +2197,13 @@ a.reset_variations {
 		}
 	}
 
+	.wc-block-grid__products {
+		.wc-block-grid__product-onsale {
+			font-size: 1.5rem;
+			padding: 1rem;
+		}
+	}
+
 	/**
 	* Shop page
 	*/
@@ -2282,6 +2365,13 @@ a.reset_variations {
 		}
 
 		.onsale {
+			font-size: 1.7rem;
+			padding: 1.5rem;
+		}
+	}
+
+	.wc-block-grid__products {
+		.wc-block-grid__product-onsale {
 			font-size: 1.7rem;
 			padding: 1.5rem;
 		}
