@@ -21,6 +21,62 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test whether totals are correct when discount is applied.
+	 */
+	public function test_cart_total_with_discount_and_taxes() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		WC()->cart->empty_cart();
+
+		$tax_rate    = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'TAX20',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '20percent',
+		);
+		$tax_rate_20 = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create product with price 19.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 8.99 );
+		$product->set_regular_price( 8.99 );
+		$product->set_tax_class( '20percent' );
+		$product->save();
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'off5', array( 'coupon_amount' => 5 ) );
+
+		// Create a flat rate method.
+		$flat_rate_settings = array(
+			'enabled'      => 'yes',
+			'title'        => 'Flat rate',
+			'availability' => 'all',
+			'countries'    => '',
+			'tax_status'   => 'taxable',
+			'cost'         => '9.59',
+		);
+		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals( '13.58', WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 0.66, WC()->cart->get_total_tax() );
+		$this->assertEquals( 4.17, WC()->cart->get_discount_total() );
+		$this->assertEquals( 0.83, WC()->cart->get_discount_tax() );
+
+	}
+
+	/**
 	 * Test for subtotals and multiple tax rounding.
 	 * Ticket:
 	 *  https://github.com/woocommerce/woocommerce/issues/21871
