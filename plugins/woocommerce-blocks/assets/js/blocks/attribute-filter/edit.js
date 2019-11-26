@@ -216,28 +216,31 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		);
 	}, [] );
 
-	const onChange = useCallback( ( selected ) => {
-		const selectedId = selected[ 0 ].id;
-		const productAttribute = find( ATTRIBUTES, [
-			'attribute_id',
-			selectedId.toString(),
-		] );
+	const onChange = useCallback(
+		( selected ) => {
+			const selectedId = selected[ 0 ].id;
+			const productAttribute = find( ATTRIBUTES, [
+				'attribute_id',
+				selectedId.toString(),
+			] );
 
-		if ( ! productAttribute || attributeId === selectedId ) {
-			return;
-		}
+			if ( ! productAttribute || attributeId === selectedId ) {
+				return;
+			}
 
-		const attributeName = productAttribute.attribute_name;
+			const attributeName = productAttribute.attribute_name;
 
-		setAttributes( {
-			attributeId: selectedId,
-			heading: sprintf(
-				// Translators: %s attribute name.
-				__( 'Filter by %s', 'woo-gutenberg-products-block' ),
-				attributeName
-			),
-		} );
-	}, [] );
+			setAttributes( {
+				attributeId: selectedId,
+				heading: sprintf(
+					// Translators: %s attribute name.
+					__( 'Filter by %s', 'woo-gutenberg-products-block' ),
+					attributeName
+				),
+			} );
+		},
+		[ attributeId ]
+	);
 
 	const renderAttributeControl = () => {
 		const messages = {
