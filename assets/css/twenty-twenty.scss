@@ -1354,6 +1354,60 @@ a.reset_variations {
 
 .woocommerce-checkout {
 
+	form {
+
+		.col2-set {
+			width: 50%;
+			float: left;
+			padding-right: 1.5vw;
+
+			.col-1,
+			.col-2 {
+				float: none;
+				width: 100%;
+			}
+
+			input {
+				border: 1px solid #ddd;
+			}
+
+			label {
+				font-family: $headings;
+			}
+
+			p {
+				margin-bottom: 1.15em;
+			}
+		}
+
+		#order_review_heading,
+		#order_review {
+			width: 50%;
+			padding-left: 1.5vw;
+			float: right;
+			clear: right;
+
+			.woocommerce-checkout-review-order-table {
+				margin-top: 2.85rem;
+				border: 0;
+
+				th,
+				td {
+					border: 0;
+				}
+
+				thead {
+					display: none;
+				}
+
+				.woocommerce-Price-amount {
+					font-weight: bold;
+				}
+			}
+		}
+	}
+
+
 	.woocommerce-input-wrapper {
 
 		.description {
@@ -1417,8 +1471,36 @@ a.reset_variations {
 
 .woocommerce-checkout-review-order-table {
 
+	input.shipping_method {
+		display: none;
+
+		& + label {
+
+			&::before {
+				content: "";
+				display: inline-block;
+				width: 14px;
+				height: 14px;
+				border: 2px solid #fff;
+				box-shadow: 0 0 0 2px #6d6d6d;
+				background: #fff;
+				margin-left: 4px;
+				margin-right: 1.2rem;
+				border-radius: 100%;
+				transform: translateY(2px);
+			}
+		}
+
+		&:checked + label {
+
+			&::before {
+				background: #555;
+			}
+		}
+	}
+
 	td {
-		padding: 1rem 0.5rem;
+		padding: 1rem 0.5em;
 	}
 
 	dl.variation {
@@ -1426,6 +1508,16 @@ a.reset_variations {
 
 		p {
 			margin: 0;
+		}
+
+		dt,
+		dd {
+			font-family: $headings;
+
+			p {
+				padding-top: 1px;
+				font-family: $headings;
+			}
 		}
 	}
 }
@@ -1495,17 +1587,18 @@ a.reset_variations {
 		display: none;
 
 		& + label {
+			font-family: $headings;
 
 			&::before {
 				content: "";
 				display: inline-block;
-				width: 16px;
-				height: 16px;
+				width: 14px;
+				height: 14px;
 				border: 2px solid #fff;
-				box-shadow: 0 0 0 2px #000;
+				box-shadow: 0 0 0 2px #6d6d6d;
 				background: #fff;
 				margin-left: 4px;
-				margin-right: 0.5rem;
+				margin-right: 1.2rem;
 				border-radius: 100%;
 				transform: translateY(2px);
 			}
@@ -1514,7 +1607,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #000;
+				background: #555;
 			}
 		}
 	}
@@ -1831,6 +1924,19 @@ a.reset_variations {
 
 	.woocommerce-product-gallery {
 		margin-bottom: 8rem;
+	}
+
+	.woocommerce-checkout {
+
+		#site-content {
+
+			.woocommerce {
+
+				max-width: 1600px;
+				padding: 0 6vw;
+				margin: 0 auto;
+			}
+		}
 	}
 
 }
