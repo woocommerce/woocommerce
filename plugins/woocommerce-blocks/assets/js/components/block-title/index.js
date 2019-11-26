@@ -5,6 +5,11 @@ import PropTypes from 'prop-types';
 import { PlainText } from '@wordpress/block-editor';
 import classnames from 'classnames';
 
+/**
+ * Internal dependencies
+ */
+import './editor.scss';
+
 const BlockTitle = ( { className, headingLevel, onChange, heading } ) => {
 	const TagName = `h${ headingLevel }`;
 	return (
