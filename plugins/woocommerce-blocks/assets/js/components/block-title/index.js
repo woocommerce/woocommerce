@@ -25,23 +25,24 @@ const BlockTitle = ( { className, headingLevel, onChange, heading } ) => {
 		</TagName>
 	);
 };
+
 BlockTitle.propTypes = {
 	/**
 	 * Classname to add to title in addition to the defaults.
 	 */
 	className: PropTypes.string,
 	/**
-	 * The value of the heading
+	 * The value of the heading.
 	 */
 	value: PropTypes.string,
 	/**
-	 * Callback to update the attribute when text is changed
+	 * Callback to update the attribute when text is changed.
 	 */
 	onChange: PropTypes.func,
 	/**
-	 * Callback to update the attribute when text is changed
+	 * Level of the heading tag (1, 2, 3... will render <h1>, <h2>, <h3>... elements).
 	 */
-	headingLevel: PropTypes.func,
+	headingLevel: PropTypes.number,
 };
 
 export default BlockTitle;
