@@ -2308,7 +2308,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
 
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
+						if ( apply_filters( 'woocommerce_order_item_needs_fulfillment', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
 							$needs_processing = 1;
 							break;
 						}

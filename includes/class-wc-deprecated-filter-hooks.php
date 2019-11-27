@@ -60,6 +60,7 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 		'woocommerce_settings_advanced'              => 'woocommerce_settings_api',
 		'woocommerce_order_statuses'                 => 'wc_order_statuses',
 		'woocommerce_valid_pending_payment_statuses' => 'woocommerce_valid_order_statuses_for_payment',
+		'woocommerce_order_item_needs_fulfillment'   => 'woocommerce_order_item_needs_processing',
 	);
 
 	/**
@@ -107,6 +108,7 @@ class WC_Deprecated_Filter_Hooks extends WC_Deprecated_Hooks {
 		'woocommerce_settings_api'                     => '3.4.0',
 		'wc_order_statuses'                            => '4.0.0',
 		'woocommerce_valid_order_statuses_for_payment' => '4.0.0',
+		'woocommerce_order_item_needs_processing'      => '4.0.0',
 	);
 
 	/**
