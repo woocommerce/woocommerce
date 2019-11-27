@@ -102,7 +102,7 @@ function wc_get_order_statuses() {
 /**
  * Get all payment statuses
  *
- * @since 3.9
+ * @since 4.0.0
  * @used-by WC_Order::set_payment_status
  * @return array
  */
@@ -125,13 +125,20 @@ function wc_get_payment_statuses() {
 		'wc-failed'                  => _x( 'Failed Payment', 'Payment status', 'woocommerce' ),
 		'wc-authorized-expired'      => _x( 'Authorized Expired', 'Payment status', 'woocommerce' ),
 	);
+
+	/**
+	 * Filter payment order statuses.
+	 *
+	 * @since 4.0.0
+	 * @param array Array of key => name pairs of payment statuses.
+	 */
 	return apply_filters( 'woocommerce_payment_statuses', $payment_statuses );
 }
 
 /**
  * Get all fulfillment statuses
  *
- * @since 3.9
+ * @since 4.0.0
  * @used-by WC_Order::set_fulfillment_status
  * @return array
  */
@@ -141,13 +148,20 @@ function wc_get_fulfillment_statuses() {
 		'wc-partially-fulfilled' => _x( 'Partially Fulfilled', 'Fulfillment status', 'woocommerce' ),
 		'wc-fulfilled'           => _x( 'Fulfilled', 'Fulfillment status', 'woocommerce' ),
 	);
+
+	/**
+	 * Filter fulfillment order statuses.
+	 *
+	 * @since 4.0.0
+	 * @param array Array of key => name pairs of fulfillment statuses.
+	 */
 	return apply_filters( 'woocommerce_fulfillment_statuses', $fulfillment_statuses );
 }
 
 /**
  * Get all delivery statuses
  *
- * @since 3.9
+ * @since 4.0.0
  * @used-by WC_Order::set_delivery_status
  * @return array
  */
@@ -159,6 +173,13 @@ function wc_get_delivery_statuses() {
 		'wc-status-unknow'      => _x( 'Status Unknown', 'Delivery status', 'woocommerce' ),
 		'wc-delivery-error'     => _x( 'Delivery Error', 'Delivery status', 'woocommerce' ),
 	);
+
+	/**
+	 * Filter delivery order statuses.
+	 *
+	 * @since 4.0.0
+	 * @param array Array of key => name pairs of delivery statuses.
+	 */
 	return apply_filters( 'woocommerce_delivery_statuses', $delivery_statuses );
 }
 
@@ -434,7 +455,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	$download->set_user_email( $order->get_billing_email() );
 	$download->set_order_key( $order->get_order_key() );
 	$download->set_downloads_remaining( 0 > $product->get_download_limit() ? '' : $product->get_download_limit() * $qty );
-	$download->set_access_granted( current_time( 'timestamp', true ) );
+	$download->set_access_granted( time() );
 	$download->set_download_count( 0 );
 
 	$expiry = $product->get_download_expiry();
@@ -1136,7 +1157,7 @@ function wc_delete_order_note( $note_id ) {
 /**
  * Takes a single legacy order status and maps it to different status types.
  *
- * @since 3.9.0
+ * @since 4.0.0
  * @param string $legacy_status The single legacy order status.
  * @return array Key => Value pairs of status types with their statuses.
  */

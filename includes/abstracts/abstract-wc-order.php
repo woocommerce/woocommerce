@@ -348,8 +348,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the new order status without wc- internal prefix.
 	 *
-	 * @since 3.9.0
-	 * @param  string $context View or edit context.
+	 * @since 4.0.0
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_order_status( $context = 'view' ) {
@@ -365,8 +365,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order fulfillment status without wc- internal prefix.
 	 *
-	 * @since 3.9.0
-	 * @param  string $context View or edit context.
+	 * @since 4.0.0
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_fulfillment_status( $context = 'view' ) {
@@ -382,8 +382,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order payment status without wc- internal prefix.
 	 *
-	 * @since 3.9.0
-	 * @param  string $context View or edit context.
+	 * @since 4.0.0
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_payment_status( $context = 'view' ) {
@@ -399,8 +399,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Return the order delivery status without wc- internal prefix.
 	 *
-	 * @since 3.9.0
-	 * @param  string $context View or edit context.
+	 * @since 4.0.0
+	 * @param string $context View or edit context.
 	 * @return string
 	 */
 	public function get_delivery_status( $context = 'view' ) {
@@ -564,7 +564,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid fulfillment statuses for this order
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @return array Fulfillment status keys eg. `wc-fulfilled`
 	 */
 	protected function get_valid_fulfillment_statuses() {
@@ -574,7 +574,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid payment statuses for this order
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @return array Payment status keys eg. `wc-paid`
 	 */
 	protected function get_valid_payment_statuses() {
@@ -584,7 +584,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get all valid payment statuses for this order
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @return array Payment status keys eg. `wc-paid`
 	 */
 	protected function get_valid_delivery_statuses() {
@@ -672,7 +672,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set new order status
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @param string $new_status Status to change the new order status of the order to, no wc- prefix needed.
 	 * @return array details of change
 	 */
@@ -705,7 +705,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set fulfillment status
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @param string $new_status Status to change the fulfillment status of the order to, no wc- prefix needed.
 	 * @return array details of change
 	 */
@@ -737,7 +737,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set payment status
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @param string $new_status Status to change the payment status of the order to, no wc- prefix needed.
 	 * @return array details of change.
 	 */
@@ -769,7 +769,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set payment status
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @param string $new_status Status to change the delivery status of the order to, no wc- prefix needed.
 	 * @return array details of change.
 	 */
@@ -2287,7 +2287,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Duplicate of needs_processing but with new naming.
 	 * Orders which only contain virtual, downloadable items do not need fulfillment
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @return boolean
 	 */
 	public function needs_fulfillment() {
@@ -2307,7 +2307,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						}
 
 						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
+						/**
+						 * Filter to alter if an order item needs fulfillment.
+						 *
+						 * @since 4.0.0
+						 *
+						 * @param Bool Whether the product is not virtual or downloadable.
+						 * @param WC_Product Product object.
+						 * @param Int Item ID.
+						 */
 						if ( apply_filters( 'woocommerce_order_item_needs_fulfillment', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
 							$needs_processing = 1;
 							break;

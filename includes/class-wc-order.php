@@ -113,7 +113,7 @@ class WC_Order extends WC_Abstract_Order {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp', true ) );
+					$this->set_date_paid( time() );
 				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
@@ -292,11 +292,11 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( $this->has_status( $payment_completed_status ) ) {
 				// If payment complete status is reached, set paid now.
-				$this->set_date_paid( current_time( 'timestamp', true ) );
+				$this->set_date_paid( time() );
 
 			} elseif ( 'processing' === $payment_completed_status && $this->has_status( 'completed' ) ) {
 				// If payment complete status was processing, but we've passed that and still have no date, set it now.
-				$this->set_date_paid( current_time( 'timestamp', true ) );
+				$this->set_date_paid( time() );
 			}
 		}
 	}
@@ -310,7 +310,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_completed( current_time( 'timestamp', true ) );
+			$this->set_date_completed( time() );
 		}
 	}
 
@@ -1493,11 +1493,11 @@ class WC_Order extends WC_Abstract_Order {
 	 * once the order is processed this code/transient does not need to persist.
 	 *
 	 * @since 3.0.0
-	 * @deprecated 3.9.0
+	 * @deprecated 4.0.0
 	 * @return bool
 	 */
 	public function needs_processing() {
-		wc_deprecated_function( 'WC_Order::needs_processing', '3.9.0', 'WC_Abstract_Order::needs_fulfillment' );
+		wc_deprecated_function( 'WC_Order::needs_processing', '4.0.0', 'WC_Abstract_Order::needs_fulfillment' );
 		return $this->needs_fulfillment();
 	}
 

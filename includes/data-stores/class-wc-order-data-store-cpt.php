@@ -485,7 +485,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				AND     posts.post_status = 'wc-pending'
 				AND     posts.post_modified < %s",
 				// @codingStandardsIgnoreEnd
-				date( 'Y-m-d H:i:s', absint( $date ) )
+				gmdate( 'Y-m-d H:i:s', absint( $date ) )
 			)
 		);
 
@@ -803,7 +803,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	/**
 	 * Update the order statuses table for an order.
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @param int   $id Order ID.
 	 * @param array $statuses Array of key=>value status types with their statuses.
 	 * @return NULL

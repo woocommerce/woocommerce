@@ -1416,7 +1416,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_order_statuses_from_legacy_status
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 */
 	public function test_wc_get_order_statuses_from_legacy_status() {
 		$legacy_status = 'wc-pending';

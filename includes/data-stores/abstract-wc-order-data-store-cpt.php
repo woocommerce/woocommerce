@@ -55,7 +55,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function create( &$order ) {
 		$order->set_version( WC_VERSION );
-		$order->set_date_created( current_time( 'timestamp', true ) );
+		$order->set_date_created( time() );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
 		$id = wp_insert_post(
@@ -135,7 +135,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order->set_version( WC_VERSION );
 
 		if ( null === $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( current_time( 'timestamp', true ) );
+			$order->set_date_created( time() );
 		}
 
 		$changes = $order->get_changes();
@@ -300,7 +300,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Read order status data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 */
 	protected function read_order_statuses( &$order ) {
 		global $wpdb;
@@ -390,7 +390,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Insert / Update order statuses in the custom table.
 	 *
-	 * @since 3.9.0
+	 * @since 4.0.0
 	 * @param WC_Order $order Order object.
 	 * @param array    $order_status_values Key=>Value pairs array of order statuses and their values.
 	 * @return bool    Whether statuses were updated or not.
