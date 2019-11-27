@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 3.8.1 - 2019-11-27 =
+* Tweak - Include 5 latest reviews to Product's schema. - #24278
+* Fix - Improve select2 style and admin screen button alignments in WP 5.3 #25125
+* Fix - Fix order action button centering for WP 5.3. #25119
+* Fix - Improved WooCommerce and Twenty twenty styling. #25085
+
 = 3.8.0 - 2019-11-05 =
 * Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
 * Enhancement - Add support to allow connect and install for in-app purchase flow. #24451
