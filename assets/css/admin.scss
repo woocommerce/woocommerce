@@ -6554,32 +6554,15 @@ table.bar_chart {
 }
 
 .select2-dropdown {
-	border-color: #007cba;
-
-	&::after {
-		position: absolute;
-		left: 0;
-		right: 0;
-		height: 1px;
-		background: #fff;
-		content: "";
-	}
+	border-color: #ddd;
 }
 
 .select2-dropdown--below {
-	box-shadow: 0 0 0 1px #007cba, 0 2px 1px rgba(0, 0, 0, 0.1);
-
-	&::after {
-		top: -1px;
-	}
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .select2-dropdown--above {
-	box-shadow: 0 0 0 1px #007cba, 0 -2px 1px rgba(0, 0, 0, 0.1);
-
-	&::after {
-		bottom: -1px;
-	}
+	box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .select2-container {
@@ -6605,60 +6588,23 @@ table.bar_chart {
 	}
 
 	.select2-selection--single {
-		height: 30px;
-		border-color: #7e8993;
-
-		@media only screen and (max-width: 782px) {
-			height: 40px;
-		}
-
-		&:focus {
-			outline: none;
-		}
+		height: 40px;
 
 		.select2-selection__rendered {
-			line-height: 28px;
+			line-height: 40px;
 			padding-right: 24px;
-
-			@media only screen and (max-width: 782px) {
-				line-height: 38px;
-			}
-
-			&:hover {
-				color: #007cba;
-			}
 		}
 
 		.select2-selection__arrow {
-			right: 1px;
-			height: 28px;
-			width: 28px;
-			background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E") no-repeat right 5px top 55%;
-			background-size: 16px 16px;
-
-			@media only screen and (max-width: 782px) {
-				height: 38px;
-			}
-
-			b {
-				display: none;
-			}
+			right: 3px;
+			height: 36px;
 		}
 	}
 
-	&.select2-container--focus .select2-selection--single,
-	&.select2-container--open .select2-selection--single,
-	&.select2-container--open .select2-selection--multiple {
-		border-color: #007cba;
-		box-shadow: 0 0 0 1px #007cba;
-	}
-
 	.select2-selection--multiple {
-		min-height: 30px;
+		min-height: 28px;
 		border-radius: 0;
 		line-height: 1.5;
-		border-color: #7e8993;
-		border-radius: 4px;
 
 		li {
 			margin: 0;
@@ -6682,7 +6628,7 @@ table.bar_chart {
 		font-family: inherit;
 		font-size: inherit;
 		font-weight: inherit;
-		padding: 0 0 0 3px;
+		padding: 3px 0;
 		min-height: 28px;
 	}
 }
@@ -6693,6 +6639,102 @@ table.bar_chart {
 	@media only screen and (max-width: 782px) {
 		min-width: 100% !important;
 	}
+}
+
+/**
+  * Select2 style for WP3.5+
+  */
+.branch-5-3 {
+	.select2-dropdown {
+		border-color: #007cba;
+
+		&::after {
+			position: absolute;
+			left: 0;
+			right: 0;
+			height: 1px;
+			background: #fff;
+			content: "";
+		}
+	}
+
+	.select2-dropdown--below {
+		box-shadow: 0 0 0 1px #007cba, 0 2px 1px rgba(0, 0, 0, 0.1);
+
+		&::after {
+			top: -1px;
+		}
+	}
+
+	.select2-dropdown--above {
+		box-shadow: 0 0 0 1px #007cba, 0 -2px 1px rgba(0, 0, 0, 0.1);
+
+		&::after {
+			bottom: -1px;
+		}
+	}
+
+	.select2-container {
+		.select2-selection--single {
+			height: 30px;
+			border-color: #7e8993;
+
+			@media only screen and (max-width: 782px) {
+				height: 40px;
+			}
+
+			&:focus {
+				outline: none;
+			}
+
+			.select2-selection__rendered {
+				line-height: 28px;
+
+				@media only screen and (max-width: 782px) {
+					line-height: 38px;
+				}
+
+				&:hover {
+					color: #007cba;
+				}
+			}
+
+			.select2-selection__arrow {
+				right: 1px;
+				height: 28px;
+				width: 28px;
+				background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E") no-repeat right 5px top 55%;
+				background-size: 16px 16px;
+
+				@media only screen and (max-width: 782px) {
+					height: 38px;
+				}
+
+				b {
+					display: none;
+				}
+			}
+		}
+
+		&.select2-container--focus .select2-selection--single,
+		&.select2-container--open .select2-selection--single,
+		&.select2-container--open .select2-selection--multiple {
+			border-color: #007cba;
+			box-shadow: 0 0 0 1px #007cba;
+		}
+
+		.select2-selection--multiple {
+			min-height: 30px;
+			border-color: #7e8993;
+			border-radius: 4px;
+		}
+
+		.select2-search--inline .select2-search__field {
+			padding: 0 0 0 3px;
+			min-height: 28px;
+		}
+	}
+
 }
 
 /**
@@ -6711,7 +6753,7 @@ table.bar_chart {
 
 	@each $name, $color in $wp_admin_colors {
 
-		&-#{$name} {
+		&-#{$name}.branch-5-3 {
 
 			.select2-dropdown {
 				border-color: $color;
