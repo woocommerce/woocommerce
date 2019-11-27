@@ -1153,10 +1153,17 @@ h3.jetpack-reasons {
 	color: #444;
 	background-color: #fff;
 	display: block;
-	margin: 0;
 
 	&.dropdown {
 		width: 100%;
+	}
+}
+
+.branch-5-3 {
+
+	.location-input {
+		margin: 0;
+
 	}
 }
 
@@ -1369,7 +1376,7 @@ p.jetpack-terms {
 
 	.payment-checkbox-input {
 		order: 1;
-		margin-top: 3px;
+		margin-top: 5px;
 		margin-left: 0;
 		margin-right: 0;
 	}
@@ -1378,6 +1385,17 @@ p.jetpack-terms {
 	.ppec_paypal_reroute_requests {
 		order: 2;
 		margin-left: 0.3em;
+	}
+}
+
+.branch-5-3 {
+
+	.wc-wizard-service-setting-stripe_create_account,
+	.wc-wizard-service-setting-ppec_paypal_reroute_requests {
+
+		.payment-checkbox-input {
+			margin-top: 3px;
+		}
 	}
 }
 
