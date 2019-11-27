@@ -2486,17 +2486,11 @@ ul.wc-block-grid__products {
 			td,
 			th {
 				border: 0;
+				padding: 0;
 			}
 
-			td {
-				padding-left: 1.5rem;
-				padding-right: 1.5rem;
-
-				&:first-of-type {
-					padding-top: 2rem;
-				}
-			}
-
+			th,
+			td,
 			td.woocommerce-orders-table__cell-order-actions {
 				padding-right: 0.5rem;
 				padding-left: 0.5rem;
@@ -2510,7 +2504,7 @@ ul.wc-block-grid__products {
 				padding-left: 0.5em;
 				padding-right: 0.5em;
 				width: 100%;
-				margin: 2rem 0;
+				margin: 1.5rem 0;
 			}
 		}
 	}
@@ -2613,6 +2607,8 @@ ul.wc-block-grid__products {
 
 		table.account-orders-table {
 
+			th,
+			td,
 			td.woocommerce-orders-table__cell-order-actions {
 				padding-right: 1.5rem;
 				padding-left: 1.5rem;
