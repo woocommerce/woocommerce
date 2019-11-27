@@ -932,7 +932,8 @@ a.reset_variations {
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
-			align-items: center;
+			align-items: flex-start;
+			width: 29.5%;
 		}
 	}
 }
@@ -990,6 +991,10 @@ a.reset_variations {
 			margin: 0 0.5rem 0 0;
 		}
 	}
+}
+
+.woocommerce-shopping-totals {
+	vertical-align: text-top;
 }
 
 .widget_layered_nav {
@@ -1308,7 +1313,6 @@ a.reset_variations {
 		button[name="update_cart"] {
 			background: #fff;
 			color: #000;
-			width: calc(50% - 100px);
 		}
 	}
 
@@ -1541,7 +1545,7 @@ a.reset_variations {
 	margin: 1.42em 0;
 
 	label {
-		font-weight: 300;
+		font-weight: 400;
 		cursor: pointer;
 
 		span {
@@ -2077,7 +2081,7 @@ a.reset_variations {
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
-			align-items: center;
+			align-items: flex-start;
 			margin-bottom: 5em;
 
 		}
@@ -2140,6 +2144,42 @@ ul.wc-block-grid__products {
 		.woocommerce-ordering {
 			float: left;
 			clear: both;
+		}
+	}
+}
+
+@media only screen and (max-width: 667px) {
+
+	.woocommerce,
+	.woocommerce-page {
+
+		ul.products[class*=columns-] {
+
+			li.product {
+				width: 100%;
+			}
+		}
+	}
+}
+
+@media only screen and (min-width: 668px) and (max-width: 768px) {
+
+	.woocommerce,
+	.woocommerce-page {
+
+		ul.products[class*=columns-] {
+
+			li.product {
+				width: 50%;
+			}
+
+			li.product:nth-of-type(2n+1) {
+				padding: 0 2vw 3em 0;
+			}
+
+			li.product:nth-of-type(2n) {
+				padding: 0 0 3em 2vw;
+			}
 		}
 	}
 }
@@ -2243,7 +2283,7 @@ ul.wc-block-grid__products {
 			ul.products {
 				display: flex;
 				flex-direction: column;
-				align-items: center;
+				align-items: flex-start;
 
 				li.product {
 					margin-bottom: 5em;
@@ -2262,13 +2302,6 @@ ul.wc-block-grid__products {
 
 		.woocommerce-ordering {
 			margin-bottom: 3rem;
-		}
-
-		ul.products[class*=columns-] {
-
-			li.product {
-				width: 100%;
-			}
 		}
 	}
 
@@ -2480,13 +2513,6 @@ ul.wc-block-grid__products {
 				margin: 2rem 0;
 			}
 		}
-	}
-
-	/**
-	* Checkout
-	*/
-	#ship-to-different-address {
-		display: block;
 	}
 
 	/**
