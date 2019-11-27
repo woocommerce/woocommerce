@@ -1,11 +1,19 @@
 <?php
+/**
+ * Tests for the WC_Shopping_Zones class.
+ *
+ * @package WooCommerce\Tests\Shipping
+ */
 
 /**
  * Class Shipping_Zones.
- * @package WooCommerce\Tests\Shipping_Zones
+ * @package WooCommerce\Tests\Shipping
  */
 class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 
+	/**
+	 * Set up tests.
+	 */
 	public function setUp() {
 		parent::setUp();
 
@@ -16,10 +24,10 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zones::get_zones
 	 */
 	public function test_get_zones() {
-		// Test
+		// Test.
 		$zones = WC_Shipping_Zones::get_zones();
 
-		// Assert
+		// Assert.
 		$this->assertTrue( is_array( $zones ) );
 		$this->assertTrue( 4 === count( $zones ) );
 	}
@@ -28,10 +36,10 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zones::get_zone
 	 */
 	public function test_get_zone() {
-		// Test
+		// Test.
 		$zone = WC_Shipping_Zones::get_zone( 1 );
 
-		// Assert that the first zone is our local zone
+		// Assert that the first zone is our local zone.
 		$this->assertInstanceOf( 'WC_Shipping_Zone', $zone );
 		$this->assertEquals( $zone->get_zone_name(), 'Local' );
 	}
@@ -40,19 +48,19 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zones::get_zone_by
 	 */
 	public function test_get_zone_by() {
-		// Test
+		// Test.
 		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', 2 );
 
-		// Assert
+		// Assert.
 		$this->assertInstanceOf( 'WC_Shipping_Zone', $zone );
 		$this->assertEquals( $zone->get_zone_name(), 'Europe' );
 
-		// Test instance_id
+		// Test instance_id.
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
 		$zone = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
 
-		// Assert
+		// Assert.
 		$this->assertInstanceOf( 'WC_Shipping_Zone', $zone );
 		$this->assertEquals( $zone->get_zone_name(), 'Europe' );
 	}
@@ -61,12 +69,12 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zones::get_shipping_method
 	 */
 	public function test_get_shipping_method() {
-		// Test
+		// Test.
 		$zone            = WC_Shipping_Zones::get_zone_by( 'zone_id', 1 );
 		$instance_id     = $zone->add_shipping_method( 'flat_rate' );
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 
-		// Assert
+		// Assert.
 		$this->assertInstanceOf( 'WC_Shipping_Flat_Rate', $shipping_method );
 	}
 
@@ -74,11 +82,11 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zones::delete_zone
 	 */
 	public function test_delete_zone() {
-		// Test
+		// Test.
 		WC_Shipping_Zones::delete_zone( 1 );
 		$zones = WC_Shipping_Zones::get_zones();
 
-		// Assert
+		// Assert.
 		$this->assertTrue( 3 === count( $zones ) );
 	}
 
@@ -86,7 +94,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	 * Test: WC_Shipping_Zones::get_zone_matching_package
 	 */
 	public function test_get_zone_matching_package() {
-		// Test
+		// Test.
 		$zone1 = WC_Shipping_Zones::get_zone_matching_package(
 			array(
 				'destination' => array(
@@ -124,7 +132,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Assert
+		// Assert.
 		$this->assertEquals( 'Local', $zone1->get_zone_name() );
 		$this->assertEquals( 'Europe', $zone2->get_zone_name() );
 		$this->assertEquals( 'California', $zone3->get_zone_name() );

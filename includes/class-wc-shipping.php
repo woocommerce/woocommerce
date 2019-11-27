@@ -277,20 +277,33 @@ class WC_Shipping {
 	/**
 	 * See if package is shippable.
 	 *
-	 * Packages are shippable until proven otherwise e.g. after getting a shipping country.
+	 * Packages must have a valid destination to be shipped.
 	 *
 	 * @param  array $package Package of cart items.
 	 * @return bool
 	 */
-	protected function is_package_shippable( $package ) {
-
-		// Packages are shippable until proven otherwise.
+	public function is_package_shippable( $package ) {
 		if ( empty( $package['destination']['country'] ) ) {
-			return true;
+			return false;
+		}
+		$country = $package['destination']['country'];
+
+		$countries = array_keys( WC()->countries->get_shipping_countries() );
+		if ( ! in_array( $country, $countries, true ) ) {
+			return false;
 		}
 
-		$allowed = array_keys( WC()->countries->get_shipping_countries() );
-		return in_array( $package['destination']['country'], $allowed, true );
+		$states = array_keys( WC()->countries->get_states( $country ) );
+		if ( is_array( $states ) && ! in_array( $package['destination']['state'], $states, true ) ) {
+			return false;
+		}
+
+		$postcode = wc_format_postcode( $package['destination']['postcode'], $country );
+		if ( ! WC_Validation::is_postcode( $postcode, $country ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
