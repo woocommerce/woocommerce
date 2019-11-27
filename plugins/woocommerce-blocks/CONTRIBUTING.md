@@ -48,6 +48,10 @@ Run `$ npm run package-plugin` to trigger install and build, and then create a z
 
 These instructions cover new releases of the blocks plugin for those with commit access.
 
+### Prerequisites
+
+- Have [Github's Hub](https://github.com/github/hub) cli installed and authenticated.
+
 **Before any release** ensure you update:
 
 - The `readme.txt` file supported versions, changelog and list of blocks if the release includes new blocks.
@@ -79,6 +83,10 @@ $ npm run release
 This will ask for a tagged version number, check it out from GitHub, check out the SVN repository, and prepare all files. It will give you a command when it's finished to do the actual commit; you have a chance to test/check the files before pushing to WordPress.org.
 
 __Important:__ Before running the release script ensure you have already pushed a new release to GitHub.
+
+### Pumping the version
+
+After you release, create a commit to master that changes the version, [refere to this](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
 
 ## Publishing `@woocommerce/block-library`
 
