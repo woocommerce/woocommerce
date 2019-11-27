@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { H, ReportFilters } from '@woocommerce/components';
+import { H } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -26,6 +26,7 @@ import TaskList from './task-list';
 import { getTasks } from './task-list/tasks';
 import { isOnboardingEnabled } from 'dashboard/utils';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
+import ReportFilters from 'analytics/components/report-filters';
 
 class CustomizableDashboard extends Component {
 	constructor( props ) {
@@ -226,7 +227,13 @@ class CustomizableDashboard extends Component {
 					! taskListHidden &&
 					taskListCompleted && <TaskList query={ query } inline /> }
 
-				<ReportFilters query={ query } path={ path } dateQuery={ dateQuery } isoDateFormat={ isoDateFormat } />
+				<ReportFilters
+					report="dashboard"
+					query={ query }
+					path={ path }
+					dateQuery={ dateQuery }
+					isoDateFormat={ isoDateFormat }
+				/>
 				{ sections.map( ( section, index ) => {
 					if ( section.isVisible ) {
 						return (
