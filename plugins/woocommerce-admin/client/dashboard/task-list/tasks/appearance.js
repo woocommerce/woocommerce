@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button, ImageUpload } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { difference, filter } from 'lodash';
+import { difference, filter, isEmpty } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -55,10 +55,18 @@ class Appearance extends Component {
 		const isRequestSuccessful = ! isRequesting && prevProps.isRequesting && ! hasErrors;
 
 		if ( themeMods && prevProps.themeMods.custom_logo !== themeMods.custom_logo ) {
-			await wp.media.attachment( themeMods.custom_logo ).fetch();
-			const logoUrl = wp.media.attachment( themeMods.custom_logo ).get( 'url' );
 			/* eslint-disable react/no-did-update-set-state */
-			this.setState( { logo: { id: themeMods.custom_logo, url: logoUrl } } );
+			this.setState( { isPending: true } );
+			wp.media
+				.attachment( themeMods.custom_logo )
+				.fetch()
+				.then( () => {
+					const logoUrl = wp.media.attachment( themeMods.custom_logo ).get( 'url' );
+					this.setState( {
+						isPending: false,
+						logo: { id: themeMods.custom_logo, url: logoUrl },
+					} );
+				} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
 
@@ -185,7 +193,7 @@ class Appearance extends Component {
 
 	getSteps() {
 		const { isPending, logo, storeNoticeText } = this.state;
-		const { isRequesting } = this.props;
+		const { isRequesting, themeMods } = this.props;
 
 		const steps = [
 			{
@@ -235,17 +243,18 @@ class Appearance extends Component {
 				key: 'logo',
 				label: __( 'Upload a logo', 'woocommerce-admin' ),
 				description: __( 'Ensure your store is on-brand by adding your logo', 'woocommerce-admin' ),
-				content: (
-					<Fragment>
-						<ImageUpload image={ logo } onChange={ image => this.setState( { logo: image } ) } />
-						<Button onClick={ this.updateLogo } isBusy={ isRequesting } isPrimary>
-							{ __( 'Proceed', 'woocommerce-admin' ) }
-						</Button>
-						<Button onClick={ () => this.completeStep() }>
-							{ __( 'Skip', 'woocommerce-admin' ) }
-						</Button>
-					</Fragment>
-				),
+				content:
+					isPending || isEmpty( themeMods ) ? null : (
+						<Fragment>
+							<ImageUpload image={ logo } onChange={ image => this.setState( { logo: image } ) } />
+							<Button onClick={ this.updateLogo } isBusy={ isRequesting } isPrimary>
+								{ __( 'Proceed', 'woocommerce-admin' ) }
+							</Button>
+							<Button onClick={ () => this.completeStep() }>
+								{ __( 'Skip', 'woocommerce-admin' ) }
+							</Button>
+						</Fragment>
+					),
 				visible: true,
 			},
 			{
@@ -277,15 +286,20 @@ class Appearance extends Component {
 
 	render() {
 		const { isPending, stepIndex } = this.state;
-		const { isRequesting, hasErrors } = this.props;
+		const { isRequesting, hasErrors, themeMods } = this.props;
+		const currentStep = this.getSteps()[ stepIndex ].key;
 
 		return (
 			<div className="woocommerce-task-appearance">
 				<Card className="is-narrow">
 					<Stepper
-						isPending={ ( isRequesting && ! hasErrors ) || isPending }
+						isPending={
+							( isRequesting && ! hasErrors ) ||
+							isPending ||
+							( isEmpty( themeMods ) && 'logo' === currentStep )
+						}
 						isVertical
-						currentStep={ this.getSteps()[ stepIndex ].key }
+						currentStep={ currentStep }
 						steps={ this.getSteps() }
 					/>
 				</Card>
