@@ -4136,6 +4136,7 @@ img.help_tip {
 			input[type="url"],
 			input[type="tel"],
 			input.regular-input {
+				padding: 0 8px;
 
 				@media only screen and (max-width: 782px) {
 					width: 100%;
