@@ -228,7 +228,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 				return;
 			}
 
-			const attributeName = productAttribute.attribute_name;
+			const attributeName = productAttribute.attribute_label;
 
 			setAttributes( {
 				attributeId: selectedId,
