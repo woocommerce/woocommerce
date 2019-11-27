@@ -84,9 +84,9 @@ This will ask for a tagged version number, check it out from GitHub, check out t
 
 __Important:__ Before running the release script ensure you have already pushed a new release to GitHub.
 
-### Pumping the version
+### Bumping the version
 
-After you release, create a commit to master that changes the version, [refere to this](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
+After you release, create a commit to master that updates the version to the next minor with a `-dev` suffix.  For example, if you just released `2.5.0`, you'd do an update changing the version to `2.6.0-dev`.  See an [example here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
 
 ## Publishing `@woocommerce/block-library`
 
