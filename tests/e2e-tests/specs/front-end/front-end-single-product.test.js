@@ -3,11 +3,6 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { createSimpleProduct, createVariableProduct } from '../../utils/components';
@@ -19,7 +14,7 @@ let variablePostIdValue;
 
 describe( 'Single Product Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 		simplePostIdValue = await createSimpleProduct();
 		await StoreOwnerFlow.logout();
 	} );
@@ -44,7 +39,7 @@ describe( 'Single Product Page', () => {
 
 describe( 'Variable Product Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 		variablePostIdValue = await createVariableProduct();
 		await StoreOwnerFlow.logout();
 	} );

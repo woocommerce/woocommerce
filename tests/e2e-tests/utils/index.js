@@ -41,6 +41,17 @@ const settingsPageSaveChanges = async () => {
 };
 
 /**
+ * Save changes on Permalink settings page.
+ */
+const permalinkSettingsPageSaveChanges = async () => {
+	await page.focus( '.wp-core-ui .button-primary' );
+	await Promise.all( [
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		page.click( '.wp-core-ui .button-primary' ),
+	] );
+};
+
+/**
  * Set checkbox.
  *
  * @param {string} selector
@@ -153,6 +164,7 @@ module.exports = {
 	clearAndFillInput,
 	clickTab,
 	settingsPageSaveChanges,
+	permalinkSettingsPageSaveChanges,
 	setCheckbox,
 	unsetCheckbox,
 	uiUnblocked,
