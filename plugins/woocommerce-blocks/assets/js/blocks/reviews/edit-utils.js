@@ -12,7 +12,7 @@ import {
 	SelectControl,
 } from '@wordpress/components';
 import { BlockControls } from '@wordpress/editor';
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 import {
 	ENABLE_REVIEW_RATING,
 	SHOW_AVATARS,

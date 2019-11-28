@@ -12,7 +12,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { PRODUCT_COUNT } from '@woocommerce/block-settings';
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
 import BlockTitle from '@woocommerce/block-components/block-title';
 

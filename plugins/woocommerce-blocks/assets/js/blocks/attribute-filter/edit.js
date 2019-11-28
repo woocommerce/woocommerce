@@ -17,7 +17,7 @@ import Gridicon from 'gridicons';
 import { SearchListControl } from '@woocommerce/components';
 import { mapValues, toArray, sortBy, find } from 'lodash';
 import { ATTRIBUTES } from '@woocommerce/block-settings';
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
 import BlockTitle from '@woocommerce/block-components/block-title';
 
