@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Welcome_Message;
 
@@ -352,6 +353,7 @@ class Install {
 							array( $update_callback ),
 							'woocommerce-db-updates'
 						);
+						Cache::invalidate();
 					}
 
 					$loop++;
