@@ -115,7 +115,7 @@ export class Controller extends Component {
 		const { url, params } = match;
 		const query = this.getQuery( location.search );
 
-		window.wpNavMenuUrlUpdate( page, query );
+		window.wpNavMenuUrlUpdate( query );
 		window.wpNavMenuClassChange( page, url );
 		return createElement( page.container, { params, path: url, pathMatch: page.path, query } );
 	}
@@ -154,7 +154,7 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 }
 
 // Update's wc-admin links in wp-admin menu
-window.wpNavMenuUrlUpdate = function( page, query ) {
+window.wpNavMenuUrlUpdate = function( query ) {
 	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
 		'devdocs',
 		'stock',

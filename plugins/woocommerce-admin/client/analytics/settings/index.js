@@ -117,17 +117,18 @@ class Settings extends Component {
 	 * @param {object} state - State
 	 */
 	persistChanges( state ) {
-		const settings = getSetting( 'wcAdminSetting', {} );
+		const settings = getSetting( 'wcAdminSettings', {} );
 		analyticsSettings.forEach( setting => {
 			const updatedValue = state.settings[ setting.name ];
 			settings[ setting.name ] = updatedValue;
 			setting.initialValue = updatedValue;
 		} );
-		setSetting( 'wcAdminSetting', settings );
+		setSetting( 'wcAdminSettings', settings );
 	}
 
 	saveChanges = source => {
 		const { settings } = this.state;
+		const { query } = this.props;
 		this.persistChanges( this.state );
 		this.props.updateSettings( { wc_admin: settings } );
 
@@ -146,6 +147,15 @@ class Settings extends Component {
 
 		// TODO: remove this optimistic set of isDirty to false once #2541 is resolved.
 		this.setState( { saving: true, isDirty: false } );
+
+		// On save, reset persisted query properties of Nav Menu links to default
+		query.period = undefined;
+		query.compare = undefined;
+		query.before = undefined;
+		query.after = undefined;
+		query.interval = undefined;
+		query.type = undefined;
+		window.wpNavMenuUrlUpdate( query );
 	};
 
 	handleInputChange( e ) {
