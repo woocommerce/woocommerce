@@ -9,10 +9,6 @@ import { switchUserToTest } from '@wordpress/e2e-test-utils';
 import { CustomerFlow } from "../../utils/flows";
 
 describe( 'My account page', () => {
-	beforeAll( async () => {
-		await switchUserToTest();
-	} );
-
 	it( 'allows customer to login', async () => {
 		await expect( page ).toMatch( 'Hello' );
 		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Dashboard' } );
@@ -25,25 +21,25 @@ describe( 'My account page', () => {
 
 	it( 'allows customer to see orders', async () => {
 		await CustomerFlow.goToOrders();
-		await expect( page.url() ).toMatch( '/my-account/orders' );
+		await expect( page.url() ).toMatch( 'my-account/orders' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Orders' } );
 	} );
 
 	it( 'allows customer to see downloads', async () => {
 		await CustomerFlow.goToDownloads();
-		expect( page.url() ).toMatch( '/my-account/downloads' );
+		expect( page.url() ).toMatch( 'my-account/downloads' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Downloads' } );
 	} );
 
 	it( 'allows customer to see addresses', async () => {
 		await CustomerFlow.goToAddresses();
-		expect( page.url() ).toMatch( '/my-account/edit-address' );
+		expect( page.url() ).toMatch( 'my-account/edit-address' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Addresses' } );
 	} );
 
 	it( 'allows customer to see account details', async () => {
 		await CustomerFlow.goToAccountDetails();
-		expect( page.url() ).toMatch( '/my-account/edit-account' );
+		expect( page.url() ).toMatch( 'my-account/edit-account' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Account details' } );
 	} );
 } );
