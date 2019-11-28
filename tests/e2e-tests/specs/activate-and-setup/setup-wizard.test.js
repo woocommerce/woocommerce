@@ -29,7 +29,7 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 		}
 		await page.click( `tr[data-slug="${ slug }"] .activate a` );
 		await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
-	});
+	} );
 
 } );
 

@@ -3,13 +3,13 @@
  */
 
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { switchUserToTest } from '@wordpress/e2e-test-utils';
-import { CustomerFlow } from "../../utils/flows";
+import { CustomerFlow } from '../../utils/flows';
 
 describe( 'My account page', () => {
 	it( 'allows customer to login', async () => {
+		await CustomerFlow.login();
 		await expect( page ).toMatch( 'Hello' );
 		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Dashboard' } );
 		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Orders' } );
