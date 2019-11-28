@@ -40,7 +40,6 @@
 		"@babel/core": "7.7.4",
 		"@babel/plugin-proposal-class-properties": "7.7.4",
 		"@octokit/rest": "16.35.0",
-		"@woocommerce/navigation": "3.0.0",
 		"@wordpress/babel-preset-default": "4.6.0",
 		"@wordpress/blocks": "6.7.0",
 		"@wordpress/browserslist-config": "2.6.0",
