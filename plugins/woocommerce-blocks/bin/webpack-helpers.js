@@ -153,6 +153,7 @@ const getMainConfig = ( options = {} ) => {
 	return {
 		entry: getEntryConfig( true, options.exclude || [] ),
 		output: {
+			devtoolNamespace: 'wc',
 			path: path.resolve( __dirname, '../build/' ),
 			filename: `[name]${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
@@ -286,6 +287,7 @@ const getFrontConfig = ( options = {} ) => {
 	return {
 		entry: getEntryConfig( false, options.exclude || [] ),
 		output: {
+			devtoolNamespace: 'wc',
 			path: path.resolve( __dirname, '../build/' ),
 			filename: `[name]-frontend${ fileSuffix }.js`,
 			// This fixes an issue with multiple webpack projects using chunking
