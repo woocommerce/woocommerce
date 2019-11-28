@@ -236,8 +236,9 @@ class WC_Shortcode_Checkout {
 		// Empty awaiting payment session.
 		unset( WC()->session->order_awaiting_payment );
 
-		// In case order is created from admin, but paid by the actual customer, store the ip address of the payer.
-		if ( $order ) {
+		// In case order is created from admin, but paid by the actual customer, store the ip address of the payer
+		// when they visit the payment confirmation page.
+		if ( $order && 'admin' === $order->get_created_via() ) {
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->save();
 		}
