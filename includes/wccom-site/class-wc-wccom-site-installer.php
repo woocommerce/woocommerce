@@ -123,6 +123,10 @@ class WC_WCCOM_Site_Installer {
 			'products' => $products,
 		);
 
+		// Clear the cache of customer's subscription before asking for them.
+		// Thus, they will be re-fetched from WooCommerce.com after a purchase.
+		WC_Helper::_flush_subscriptions_cache();
+
 		WC()->queue()->cancel_all( 'woocommerce_wccom_install_products', $args );
 		WC()->queue()->add( 'woocommerce_wccom_install_products', $args );
 
@@ -257,7 +261,7 @@ class WC_WCCOM_Site_Installer {
 	 *
 	 * @since 3.7.0
 	 * @param int $product_id Product ID.
-	 * @return bool|\WP_Error
+	 * @return array|\WP_Error
 	 */
 	private static function get_product_info( $product_id ) {
 		$product_info = array(

@@ -4183,6 +4183,10 @@ img.help_tip {
 				right: -8px;
 				padding: 2px;
 				display: none;
+				
+				@media (max-width: 768px) {
+					display: block;
+				}
 
 				li {
 					float: right;

@@ -247,7 +247,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-country-select'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'selectWoo' ),
+				'deps'    => array( 'jquery' ),
 				'version' => WC_VERSION,
 			),
 			'wc-credit-card-form'        => array(

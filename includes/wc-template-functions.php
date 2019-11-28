@@ -1948,6 +1948,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			array(
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
+				'order'			 => $order,
 				'columns'        => $columns,
 			)
 		);
@@ -1955,6 +1956,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns ) );
 
 		$orderby = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
+		$order   = apply_filters( 'woocommerce_upsells_order', isset( $args['order'] ) ? $args['order'] : $order );
 		$limit   = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
 
 		// Get visible upsells then sort them at random, then limit result set.

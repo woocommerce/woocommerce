@@ -3,11 +3,6 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
@@ -35,7 +30,7 @@ const verifyPublishAndTrash = async () => {
 
 describe( 'Add New Simple Product Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 	} );
 
 	it( 'can create simple virtual product titled "Simple Product" with regular price $9.99', async () => {
@@ -51,15 +46,21 @@ describe( 'Add New Simple Product Page', () => {
 		await clickTab( 'General' );
 		await expect( page ).toFill( '#_regular_price',  '9.99' );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 } );
 
 describe( 'Add New Variable Product Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 	} );
-
 	it( 'can create product with variations', async () => {
 		// Go to "add product" page
 		await StoreOwnerFlow.openNewProduct();
@@ -179,6 +180,13 @@ describe( 'Add New Variable Product Page', () => {
 		await page.focus( 'button.save-variation-changes' );
 		await expect( page ).toClick( 'button.save-variation-changes', { text: 'Save changes' } );
 
-		await verifyPublishAndTrash();
+		// Publish product, verify that it was published. Trash product, verify that it was trashed.
+		await verifyPublishAndTrash(
+			'#publish',
+			'.updated.notice',
+			'Product published.',
+			'Move to Trash',
+			'1 product moved to the Trash.'
+		);
 	} );
 } );

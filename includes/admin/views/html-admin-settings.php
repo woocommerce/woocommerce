@@ -18,6 +18,7 @@ if ( ! $tab_exists ) {
 }
 ?>
 <div class="wrap woocommerce">
+	<?php do_action( 'woocommerce_before_settings_' . $current_tab ); ?>
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
 		<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 			<?php
@@ -46,4 +47,5 @@ if ( ! $tab_exists ) {
 			<?php wp_nonce_field( 'woocommerce-settings' ); ?>
 		</p>
 	</form>
+	<?php do_action( 'woocommerce_after_settings_' . $current_tab ); ?>
 </div>

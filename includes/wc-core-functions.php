@@ -1140,7 +1140,7 @@ function wc_get_customer_default_location() {
 	$allowed_country_codes = WC()->countries->get_allowed_countries();
 
 	if ( ! empty( $location['country'] ) && ! array_key_exists( $location['country'], $allowed_country_codes ) ) {
-		$location['country'] = current( $allowed_country_codes );
+		$location['country'] = current( array_keys( $allowed_country_codes ) );
 		$location['state']   = '';
 	}
 
