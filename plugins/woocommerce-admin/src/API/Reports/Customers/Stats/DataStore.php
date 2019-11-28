@@ -100,20 +100,21 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'select', 'SUM( total_sales ) AS total_spend,' );
 			$this->subquery->add_sql_clause(
 				'select',
-				'CASE WHEN COUNT( order_id ) = 0 THEN NULL ELSE COUNT( order_id ) END AS orders_count,'
+				'SUM( CASE WHEN parent_id = 0 THEN 1 END ) as orders_count,'
 			);
 			$this->subquery->add_sql_clause(
 				'select',
-				'CASE WHEN COUNT( order_id ) = 0 THEN NULL ELSE SUM( total_sales ) / COUNT( order_id ) END AS avg_order_value'
+				'CASE WHEN SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) = 0 THEN NULL ELSE SUM( total_sales ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) END AS avg_order_value'
 			);
 
 			$this->clear_sql_clause( array( 'order_by', 'limit' ) );
 			$this->add_sql_clause( 'select', $selections );
 			$this->add_sql_clause( 'from', "({$this->subquery->get_query_statement()}) AS tt" );
+
 			$report_data = $wpdb->get_results(
-				$this->get_query_statement(),
+				$this->get_query_statement(), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
 
 			if ( null === $report_data ) {
 				return $data;
