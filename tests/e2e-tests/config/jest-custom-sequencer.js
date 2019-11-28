@@ -10,4 +10,3 @@ class CustomSequencer extends Sequencer {
 }
 
 module.exports = CustomSequencer;
-

@@ -10,12 +10,12 @@
     "automattic/jetpack-autoloader": "^1.2.0",
     "php": ">=5.6|>=7.0",
     "composer/installers": "1.7.0",
-    "woocommerce/woocommerce-blocks": "2.4.3",
+    "woocommerce/woocommerce-blocks": "2.4.5",
     "woocommerce/woocommerce-rest-api": "1.0.3"
   },
   "require-dev": {
-    "phpunit/phpunit": "7.5.16",
-    "woocommerce/woocommerce-sniffs": "0.0.8"
+    "phpunit/phpunit": "7.5.17",
+    "woocommerce/woocommerce-sniffs": "0.0.9"
   },
   "config": {
     "platform": {

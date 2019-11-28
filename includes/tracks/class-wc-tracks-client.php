@@ -43,6 +43,11 @@ class WC_Tracks_Client {
 	 * @return void
 	 */
 	public static function maybe_set_identity_cookie() {
+		// Do not set on AJAX requests.
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			return;
+		}
+
 		// Bail if cookie already set.
 		if ( isset( $_COOKIE['tk_ai'] ) ) {
 			return;

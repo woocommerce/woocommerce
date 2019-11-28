@@ -3,19 +3,14 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { clickTab, verifyPublishAndTrash } from "../../utils";
+import { clickTab, verifyPublishAndTrash } from '../../utils';
 
 describe( 'Add New Coupon Page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 	} );
 
 	it( 'can create new coupon', async () => {
