@@ -674,7 +674,7 @@ function wc_update_220_attributes() {
 	}
 
 	delete_transient( 'wc_attribute_taxonomies' );
-	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+	WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 }
 
 /**

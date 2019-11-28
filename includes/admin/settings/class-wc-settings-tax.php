@@ -128,7 +128,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		}
 
 		// Invalidate caches.
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
 	}
