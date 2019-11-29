@@ -92,12 +92,14 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 	}
 
 	const TagName = `h${ attributes.headingLevel }`;
-	const min = Number.isFinite( minConstraint )
-		? Math.max( minPrice, minConstraint )
-		: minPrice;
-	const max = Number.isFinite( maxConstraint )
-		? Math.min( maxPrice, maxConstraint )
-		: maxPrice;
+	const min = Math.max(
+		Number.isFinite( minPrice ) ? minPrice : -Infinity,
+		Number.isFinite( minConstraint ) ? minConstraint : -Infinity
+	);
+	const max = Math.min(
+		Number.isFinite( maxPrice ) ? maxPrice : Infinity,
+		Number.isFinite( maxConstraint ) ? maxConstraint : Infinity
+	);
 
 	return (
 		<Fragment>
