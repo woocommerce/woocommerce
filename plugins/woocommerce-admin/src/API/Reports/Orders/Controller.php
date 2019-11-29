@@ -497,9 +497,9 @@ class Controller extends ReportsController implements ExportableInterface {
 			'order_number'   => $item['order_number'],
 			'status'         => $item['status'],
 			'customer_type'  => $item['customer_type'],
-			'products'       => $this->_get_products( $item['extended_info']['products'] ),
+			'products'       => isset( $item['extended_info']['products'] ) ? $this->_get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold' => $item['num_items_sold'],
-			'coupons'        => $this->_get_coupons( $item['extended_info']['coupons'] ),
+			'coupons'        => isset( $item['extended_info']['coupons'] ) ? $this->_get_coupons( $item['extended_info']['coupons'] ) : null,
 			'net_total'      => $item['net_total'],
 		);
 	}
