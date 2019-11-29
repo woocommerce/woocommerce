@@ -88,6 +88,32 @@ __Important:__ Before running the release script ensure you have already pushed 
 
 After you release, create a commit to master that updates the version to the next minor with a `-dev` suffix.  For example, if you just released `2.5.0`, you'd do an update changing the version to `2.6.0-dev`.  See an [example here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
 
+## Updating a single file in WordPress.org
+
+Sometimes, we need to update a single file in WordPress.org without wanting to do a full release, for example, updating the `readme.txt` versions or descriptions. In order to do that, refer to the _[Editing Existing Files](https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/#editing-existing-files)_ section of the Subversion guide in developer.wordpress.org or follow these steps:
+
+1. Checkout the plugin repo:
+
+```
+svn co "http://plugins.svn.wordpress.org/woo-gutenberg-products-block/"
+cd woo-gutenberg-products-block
+```
+
+2. Modify the files you want to change in `trunk` or `tags/x.y.z`.
+
+3. Check your changes with:
+
+```
+svn stat
+svn diff
+```
+
+4. Commit the changes to the server:
+
+```
+svn ci -m "Updated readme.txt description"
+```
+
 ## Publishing `@woocommerce/block-library`
 
 In the past, we published the blocks to NPM at [@woocommerce/block-library](https://www.npmjs.com/package/@woocommerce/block-library).
