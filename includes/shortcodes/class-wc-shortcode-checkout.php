@@ -238,7 +238,7 @@ class WC_Shortcode_Checkout {
 
 		// In case order is created from admin, but paid by the actual customer, store the ip address of the payer
 		// when they visit the payment confirmation page.
-		if ( $order && 'admin' === $order->get_created_via() ) {
+		if ( $order && $order->is_created_via( 'admin' ) ) {
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->save();
 		}
