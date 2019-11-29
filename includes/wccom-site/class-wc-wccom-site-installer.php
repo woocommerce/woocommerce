@@ -16,6 +16,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_WCCOM_Site_Installer {
 
 	/**
+	 * Error message returned install_package if the folder already exists.
+	 *
+	 * @var string
+	 */
+	private static $folder_exists = 'folder_exists';
+
+	/**
 	 * Default state.
 	 *
 	 * @var array
@@ -249,6 +256,9 @@ class WC_WCCOM_Site_Installer {
 					break;
 				case 'move_product':
 					$state_steps[ $product_id ]['installed_path'] = $result['destination'];
+					if ( $result[ self::$folder_exists ] ) {
+						$state_steps[ $product_id ]['warning'] = self::$folder_exists;
+					}
 					break;
 			}
 		}
@@ -369,7 +379,18 @@ class WC_WCCOM_Site_Installer {
 			),
 		);
 
-		return $upgrader->install_package( $package );
+		$result = $upgrader->install_package( $package );
+
+		/**
+		 * If install package returns error 'folder_exists' threat as success.
+		 */
+		if ( is_wp_error( $result ) && array_key_exists( self::$folder_exists, $result->errors ) ) {
+			return array(
+				self::$folder_exists => true,
+				'destination'        => $result->error_data[ self::$folder_exists ],
+			);
+		}
+		return $result;
 	}
 
 	/**
