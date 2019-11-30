@@ -12,7 +12,7 @@ import {
 	settingsPageSaveChanges,
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset, verifyValueOfInputField
-} from "../../utils";
+} from '../../utils';
 
 describe( 'Store owner can login and make sure WooCommerce is activated', () => {
 
@@ -29,7 +29,7 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 		}
 		await page.click( `tr[data-slug="${ slug }"] .activate a` );
 		await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
-	});
+	} );
 
 } );
 
@@ -68,21 +68,26 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 		// Verify that checkbox next to "Enable usage tracking and help improve WooCommerce" is not selected
 		await verifyCheckboxIsUnset('#wc_tracker_checkbox_dialog');
 
-		await Promise.all([
+		await Promise.all( [
 			// Click on "Continue" button to move to the next step
 			page.$eval( '#wc_tracker_submit', elem => elem.click() ),
 
 			// Wait for the Payment section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-		]);
+		] );
 	} );
 
 	it( 'Can fill out Payment details', async () => {
 		// Turn off Stripe account toggle
 		await page.click( '.wc-wizard-service-toggle' );
 
-		// Click on "Continue" button to move to the next step
-		await page.click( 'button[name=save_step]', { text: 'Continue' } );
+		await Promise.all( [
+			// Click on "Continue" button to move to the next step
+			page.click( 'button[name=save_step]', { text: 'Continue' } ),
+
+			// Wait for the Shipping section to load
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
 	} );
 
 	it( 'Can fill out Shipping details', async () => {
@@ -92,23 +97,27 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 		await page.waitForSelector( 'select[name="shipping_zones[domestic][method]"]' );
 		await page.waitForSelector( 'select[name="shipping_zones[intl][method]"]' );
 
-		// Select Free Shipping method for domestic shipping zone
+		// Select Flat Rate shipping method for domestic shipping zone
 		await page.evaluate( () => {
-			document.querySelector( 'select[name="shipping_zones[domestic][method]"] > option:nth-child(2)' ).selected = true;
+			document.querySelector( 'select[name="shipping_zones[domestic][method]"] > option:nth-child(1)' ).selected = true;
 			let element = document.querySelector( 'select[name="shipping_zones[domestic][method]"]' );
 			let event = new Event( 'change', { bubbles: true } );
 			event.simulated=true;
 			element.dispatchEvent( event );
 		} );
 
-		// Select Free Shipping method for the rest of the world shipping zone
+		await page.$eval('input[name="shipping_zones[domestic][flat_rate][cost]"]', e => e.setAttribute( 'value', '10.00' ) );
+
+		// Select Flat Rate shipping method for the rest of the world shipping zone
 		await page.evaluate( () => {
-			document.querySelector( 'select[name="shipping_zones[intl][method]"] > option:nth-child(2)' ).selected = true;
+			document.querySelector( 'select[name="shipping_zones[intl][method]"] > option:nth-child(1)' ).selected = true;
 			let element = document.querySelector( 'select[name="shipping_zones[intl][method]"]' );
 			let event = new Event( 'change', { bubbles: true } );
 			event.simulated=true;
 			element.dispatchEvent( event );
-		});
+		} );
+
+		await page.$eval('input[name="shipping_zones[intl][flat_rate][cost]"]', e => e.setAttribute( 'value', '20.00' ) );
 
 		// Select product weight and product dimensions options
 		await expect( page ).toSelect( 'select[name="weight_unit"]', 'Pounds' );
@@ -152,7 +161,7 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 describe( 'Store owner can finish initial store setup', () => {
 
-	it('Can enable tax rates and calculations', async () => {
+	it( 'Can enable tax rates and calculations', async () => {
 		// Go to general settings page
 		await StoreOwnerFlow.openSettings( 'general' );
 
@@ -169,9 +178,9 @@ describe( 'Store owner can finish initial store setup', () => {
 			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
 			verifyCheckboxIsSet( '#woocommerce_calc_taxes' ),
 		] );
-	});
+	} );
 
-	it('Can configure permalink settings', async () => {
+	it( 'Can configure permalink settings', async () => {
 		// Go to Permalink Settings page
 		await StoreOwnerFlow.openPermalinkSettings();
 
@@ -192,6 +201,5 @@ describe( 'Store owner can finish initial store setup', () => {
 			verifyValueOfInputField( '#permalink_structure', '/%postname%/' ),
 			verifyValueOfInputField( '#woocommerce_permalink_structure', '/product/' ),
 		] );
-	});
-
+	} );
 } );

@@ -3,20 +3,17 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { createSimpleProduct } from '../../utils/components';
 import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
-import { setCheckbox, settingsPageSaveChanges, uiUnblocked, verifyCheckboxIsSet } from "../../utils";
+import { setCheckbox, settingsPageSaveChanges, uiUnblocked, verifyCheckboxIsSet } from '../../utils';
+
+let orderId;
 
 describe( 'Checkout page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 		await createSimpleProduct();
 
 		// Go to general settings page
@@ -67,14 +64,14 @@ describe( 'Checkout page', () => {
 		await StoreOwnerFlow.logout();
 	} );
 
-	it( 'should display cart items in order review', async () => {
+	it( 'Should display cart items in order review', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 		await CustomerFlow.goToCheckout();
 		await CustomerFlow.productIsInCheckout( 'Simple product', 1, 9.99, 9.99 );
 	} );
 
-	it( 'allows customer to choose available payment methods', async () => {
+	it( 'Allows customer to choose available payment methods', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 		await CustomerFlow.goToCheckout();
@@ -85,7 +82,7 @@ describe( 'Checkout page', () => {
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'Cash on delivery' } );
 	} );
 
-	it( 'allows customer to fill billing details', async () => {
+	it( 'Allows customer to fill billing details', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 		await CustomerFlow.goToCheckout();
@@ -105,7 +102,7 @@ describe( 'Checkout page', () => {
 		);
 	} );
 
-	it( 'allows customer to fill shipping details', async () => {
+	it( 'Allows customer to fill shipping details', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 		await CustomerFlow.goToCheckout();
@@ -127,7 +124,7 @@ describe( 'Checkout page', () => {
 		);
 	} );
 
-	it( 'allows guest customer to place order', async () => {
+	it( 'Allows guest customer to place order', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 		await CustomerFlow.goToCheckout();
@@ -153,5 +150,24 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.placeOrder();
 
 		await expect( page ).toMatch( 'Order received' );
+
+		// Get order ID from the Thank you page URL
+		let reg = /.+?\:\/\/.+?(\/.+?)(?:#|\?|$)/;
+		orderId = reg.exec( page.url() )[1].split( '/' )[3];
+		return orderId;
+	} );
+
+	it( 'Store owner can confirm the order was received', async () => {
+		await StoreOwnerFlow.login();
+		await StoreOwnerFlow.openAllOrdersView();
+
+		// Click on the order which was placed in the previous step
+		await Promise.all( [
+			page.click( '#post-' + orderId ),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+
+		// Verify that the order page is indeed of the order that was placed
+		await expect( page ).toMatchElement( '.woocommerce-order-data__heading', { text: 'Order #' + orderId + ' details' } );
 	} );
 } );
