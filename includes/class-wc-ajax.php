@@ -898,6 +898,10 @@ class WC_AJAX {
 				if ( ! $product ) {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
+				if ( 'variable' === $product->get_type() ) {
+					/* translators: %s product name */
+					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
+				}
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
