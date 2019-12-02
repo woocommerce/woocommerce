@@ -3,6 +3,11 @@
  */
 
 /**
+ * External dependencies
+ */
+import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
+
+/**
  * Internal dependencies
  */
 import { clearAndFillInput } from './index';
@@ -20,9 +25,9 @@ const WP_ADMIN_NEW_PRODUCT = baseUrl + 'wp-admin/post-new.php?post_type=product'
 const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=';
 const WP_ADMIN_PERMALINK_SETTINGS = baseUrl + 'wp-admin/options-permalink.php';
 
-const SHOP_PAGE = baseUrl + '/shop/';
+const SHOP_PAGE = baseUrl + 'shop';
 const SHOP_PRODUCT = baseUrl + '?p=';
-const SHOP_CART_PAGE = baseUrl + 'cart/';
+const SHOP_CART_PAGE = baseUrl + 'cart';
 
 const getProductColumnExpression = ( productTitle ) => (
 	'td[@class="product-name" and ' +

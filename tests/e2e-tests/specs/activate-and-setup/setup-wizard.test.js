@@ -29,7 +29,7 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 		}
 		await page.click( `tr[data-slug="${ slug }"] .activate a` );
 		await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
-	});
+	} );
 
 } );
 
@@ -68,13 +68,13 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 		// Verify that checkbox next to "Enable usage tracking and help improve WooCommerce" is not selected
 		await verifyCheckboxIsUnset('#wc_tracker_checkbox_dialog');
 
-		await Promise.all([
+		await Promise.all( [
 			// Click on "Continue" button to move to the next step
 			page.$eval( '#wc_tracker_submit', elem => elem.click() ),
 
 			// Wait for the Payment section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-		]);
+		]) ;
 	} );
 
 	it( 'Can fill out Payment details', async () => {
@@ -108,7 +108,7 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 			let event = new Event( 'change', { bubbles: true } );
 			event.simulated=true;
 			element.dispatchEvent( event );
-		});
+		} );
 
 		// Select product weight and product dimensions options
 		await expect( page ).toSelect( 'select[name="weight_unit"]', 'Pounds' );
@@ -152,7 +152,7 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 describe( 'Store owner can finish initial store setup', () => {
 
-	it('Can enable tax rates and calculations', async () => {
+	it( 'Can enable tax rates and calculations', async () => {
 		// Go to general settings page
 		await StoreOwnerFlow.openSettings( 'general' );
 
@@ -169,9 +169,9 @@ describe( 'Store owner can finish initial store setup', () => {
 			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
 			verifyCheckboxIsSet( '#woocommerce_calc_taxes' ),
 		] );
-	});
+	} );
 
-	it('Can configure permalink settings', async () => {
+	it( 'Can configure permalink settings', async () => {
 		// Go to Permalink Settings page
 		await StoreOwnerFlow.openPermalinkSettings();
 
@@ -192,6 +192,6 @@ describe( 'Store owner can finish initial store setup', () => {
 			verifyValueOfInputField( '#permalink_structure', '/%postname%/' ),
 			verifyValueOfInputField( '#woocommerce_permalink_structure', '/product/' ),
 		] );
-	});
+	} );
 
 } );

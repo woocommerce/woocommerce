@@ -3,11 +3,6 @@
  */
 
 /**
- * External dependencies
- */
-import { activatePlugin } from '@wordpress/e2e-test-utils';
-
-/**
  * Internal dependencies
  */
 import { createSimpleProduct } from '../../utils/components';
@@ -16,7 +11,7 @@ import { uiUnblocked } from '../../utils';
 
 describe( 'Cart page', () => {
 	beforeAll( async () => {
-		await activatePlugin( 'woocommerce' );
+		await StoreOwnerFlow.login();
 		await createSimpleProduct();
 		await StoreOwnerFlow.logout();
 	} );
@@ -26,7 +21,7 @@ describe( 'Cart page', () => {
 		await expect( page ).toMatchElement( '.cart-empty', { text: 'Your cart is currently empty.' } );
 	} );
 
-	it( 'should adds the product to the cart when "Add to cart" is clicked', async () => {
+	it( 'should add the product to the cart when "Add to cart" is clicked', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 
@@ -34,7 +29,7 @@ describe( 'Cart page', () => {
 		await CustomerFlow.productIsInCart( 'Simple product' );
 	} );
 
-	it( 'should increases item qty when "Add to cart" of the same product is clicked', async () => {
+	it( 'should increase item qty when "Add to cart" of the same product is clicked', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
 
@@ -42,7 +37,7 @@ describe( 'Cart page', () => {
 		await CustomerFlow.productIsInCart( 'Simple product', 2 );
 	} );
 
-	it( 'should updates qty when updated via qty input', async () => {
+	it( 'should update qty when updated via qty input', async () => {
 		await CustomerFlow.goToCart();
 		await CustomerFlow.setCartQuantity( 'Simple product', 4 );
 		await expect( page ).toClick( 'button', { text: 'Update cart' } );
