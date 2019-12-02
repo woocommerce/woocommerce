@@ -2023,7 +2023,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
-			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 			$this->server->send_status( 201 );
 
@@ -2109,7 +2109,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
-			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 			return $this->get_product_attribute( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -2171,7 +2171,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
-			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {

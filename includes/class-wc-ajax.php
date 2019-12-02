@@ -2603,7 +2603,7 @@ class WC_AJAX {
 			}
 		}
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		wp_send_json_success(

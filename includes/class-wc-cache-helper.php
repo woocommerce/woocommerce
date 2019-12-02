@@ -94,7 +94,7 @@ class WC_Cache_Helper {
 		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
 
 		if ( false === $prefix ) {
-			$prefix = 1;
+			$prefix = microtime();
 			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
 		}
 
@@ -107,7 +107,18 @@ class WC_Cache_Helper {
 	 * @param string $group Group of cache to clear.
 	 */
 	public static function incr_cache_prefix( $group ) {
-		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
+		wc_deprecated_function( 'WC_Cache_Helper::incr_cache_prefix', '3.9.0', 'WC_Cache_Helper::invalidate_cache_group' );
+		self::invalidate_cache_group( $group );
+	}
+
+	/**
+	 * Invalidate cache group.
+	 *
+	 * @param string $group Group of cache to clear.
+	 * @since 3.9.0
+	 */
+	public static function invalidate_cache_group( $group ) {
+		wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
 	}
 
 	/**
