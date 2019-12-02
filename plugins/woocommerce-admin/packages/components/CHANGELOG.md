@@ -1,17 +1,30 @@
-# 4.1.0 (Unreleased)
+# 4.0.0
+
+## Breaking Changes
+- Added a new `<ScrollTo />` component.
+- Changed the `<List />` `description` prop to `content` and allowed content nodes to be passed in addition to strings.
+- Removed the `<SimpleSelectControl />` component.
+
+### Decouple wcSettings from published packages (#3001)
+- `AdvancedFilters` component now receives `siteLocale` as a prop.
+- `ReportsFilters` component now receives `siteLocale` as a prop.
+- `NumberFilter` component now receives `currencySymbol` and `symbolPosition` as props.
+- `AdvancedFilters` and `ReportsFilters` receive `currency` as a prop, it is required and must be an instance of the new `Currency` object exported by `@woocommerce/currency`
+- `Chart` receives `currency` as a prop.
+- Add `storeDate` prop to `<ReportFilters />` and `<DateRangeFilterPicker />` components.
+- `AdvancedFilters` and `ReportFilters` now receive a required `storeDate` prop as a means to pass down date initialization values from client.
+- The `href` prop in the `<Link>` component must now receive the full url instead of relative.
+
+## Other Changes
 - Renamed the `<Autocomplete />` component to `<SelectControl />`.
 - Added `isSearchable` prop to `<SelectControl />` to allow simple select dropdowns.
-- Removed the `<SimpleSelectControl />` component.
 - Removed WC-Admin specific actions from `<TableCard />` component.
 - Export the `<CompareButton />` component.
 - Add `<TextControl />` component.
 - Require `currency` prop in `<AdvancedFilters />` component.
 - Remove call to `getAdminLink()` inside the `<Link />` component.
-- Add `storeDate` prop to `<ReportFilters />` and `<DateRangeFilterPicker />` components.
-
-# 4.0.0
-- Added a new `<ScrollTo />` component.
-- Changed the `<List />` `description` prop to `content` and allowed content nodes to be passed in addition to strings.
+- Explicitly import component styles from `@wordpress/base-styles` (#3292)
+- Update various dependencies
 
 # 3.2.0
 - AdvancedFilters component: fire `onAdvancedFilterAction` for match changes.

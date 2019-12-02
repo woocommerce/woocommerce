@@ -1,3 +1,10 @@
+# 4.0.0
+
+## Breaking Changes
+
+- decouples `wcSettings` from the package (#3294)
+- `getAdminLink` is no longer available from this package. It is exported on the `wcSettings` global via the woo-blocks plugin (v2.5 or WC 3.9) when enqueued via the `wc-settings` handle.
+
 # 3.0.0
 
 - `getHistory` updated to reflect path parameters in url query.

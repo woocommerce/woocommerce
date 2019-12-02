@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/components",
-  "version": "4.1.0",
+  "version": "4.0.0",
   "description": "UI components for WooCommerce.",
   "author": "Automattic",
   "license": "GPL-3.0-or-later",
@@ -22,10 +22,10 @@
   "react-native": "src/index",
   "dependencies": {
     "@babel/runtime-corejs2": "7.7.4",
-    "@woocommerce/csv-export": "1.1.0",
-    "@woocommerce/currency": "1.1.1",
-    "@woocommerce/date": "1.0.7",
-    "@woocommerce/navigation": "2.1.0",
+    "@woocommerce/csv-export": "1.2.0",
+    "@woocommerce/currency": "2.0.0",
+    "@woocommerce/date": "2.0.0",
+    "@woocommerce/navigation": "4.0.0",
     "@wordpress/components": "8.4.0",
     "@wordpress/compose": "3.7.1",
     "@wordpress/date": "3.5.0",
