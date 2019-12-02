@@ -82,7 +82,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 				onChange={ ( value ) => setAttributes( { heading: value } ) }
 			/>
 			<Disabled>
-				<Block attributes={ attributes } isPreview />
+				<Block attributes={ attributes } isEditor={ true } />
 			</Disabled>
 		</div>
 	);

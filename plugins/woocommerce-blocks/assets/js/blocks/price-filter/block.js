@@ -10,11 +10,12 @@ import { Fragment, useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
 import { CURRENCY } from '@woocommerce/settings';
 import { useDebouncedCallback } from 'use-debounce';
+import PropTypes from 'prop-types';
 
 /**
  * Component displaying a price filter.
  */
-const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
+const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(
 		'min_price'
 	);
@@ -103,7 +104,7 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 
 	return (
 		<Fragment>
-			{ ! isPreview && attributes.heading && (
+			{ ! isEditor && attributes.heading && (
 				<TagName>{ attributes.heading }</TagName>
 			) }
 			<div className="wc-block-price-slider">
@@ -124,6 +125,17 @@ const PriceFilterBlock = ( { attributes, isPreview = false } ) => {
 			</div>
 		</Fragment>
 	);
+};
+
+PriceFilterBlock.propTypes = {
+	/**
+	 * The attributes for this block.
+	 */
+	attributes: PropTypes.object.isRequired,
+	/**
+	 * Whether it's in the editor or frontend display.
+	 */
+	isEditor: PropTypes.bool,
 };
 
 export default PriceFilterBlock;
