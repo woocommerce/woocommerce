@@ -124,10 +124,17 @@ class WC_WCCOM_Site {
 	 * @return bool
 	 */
 	protected static function is_request_to_wccom_site_rest_api() {
-		global $wp;
-		$route = ltrim( $wp->query_vars['rest_route'], '/' );
+		$route = '/';
+		$rest_prefix = '';
 
-		return 0 !== strpos( $rest_route, 'wccom-site/' );
+		if ( isset( $_REQUEST['rest_route'] ) ) {
+			$route = esc_url_raw( wp_unslash( $_REQUEST['rest_route'] ) );
+		} else {
+			$route = esc_url_raw( wp_unslash( add_query_arg( array() ) ) );
+			$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		}
+
+		return false !== strpos( $route, $rest_prefix . 'wccom-site/' );
 	}
 
 	/**
