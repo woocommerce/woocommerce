@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 3.7.0-beta.1
+ * Version: 3.9.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce
@@ -39,7 +39,7 @@ if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
 
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
-	include_once dirname( __FILE__ ) . '/includes/class-woocommerce.php';
+	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
 }
 
 /**

@@ -27,9 +27,9 @@ class WC_Orders_Tracking {
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
 	public function track_orders_view() {
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-			// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+			// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 			$properties = array(
 				'status' => isset( $_GET['post_status'] ) ? sanitize_text_field( $_GET['post_status'] ) : 'all',
 			);
@@ -48,13 +48,12 @@ class WC_Orders_Tracking {
 	 */
 	public function track_order_status_change( $id, $previous_status, $next_status ) {
 		$order = wc_get_order( $id );
-		$date  = $order->get_date_created();
 
 		$properties = array(
 			'order_id'        => $id,
 			'next_status'     => $next_status,
 			'previous_status' => $previous_status,
-			'date_created'    => $date->date( 'Y-m-d' ),
+			'date_created'    => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '',
 			'payment_method'  => $order->get_payment_method(),
 		);
 
@@ -78,9 +77,9 @@ class WC_Orders_Tracking {
 		}
 
 		$order        = wc_get_order( $id );
-		$date_created = $order->get_date_created()->date( 'Y-m-d H:i:s' );
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
-		$new_date     = sprintf(
+		$date_created = $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d H:i:s' ) : '';
+		// phpcs:disable WordPress.Security.NonceVerification
+		$new_date = sprintf(
 			'%s %2d:%2d:%2d',
 			isset( $_POST['order_date'] ) ? wc_clean( wp_unslash( $_POST['order_date'] ) ) : '',
 			isset( $_POST['order_date_hour'] ) ? wc_clean( wp_unslash( $_POST['order_date_hour'] ) ) : '',
@@ -91,8 +90,8 @@ class WC_Orders_Tracking {
 
 		if ( $new_date !== $date_created ) {
 			$properties = array(
-				'order_id'   => $id,
-				'status'     => $order->get_status(),
+				'order_id' => $id,
+				'status'   => $order->get_status(),
 			);
 
 			WC_Tracks::record_event( 'order_edit_date_created', $properties );
@@ -105,7 +104,7 @@ class WC_Orders_Tracking {
 	 * @param int $order_id Order ID.
 	 */
 	public function track_order_action( $order_id ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! empty( $_POST['wc_order_action'] ) ) {
 			$order      = wc_get_order( $order_id );
 			$action     = wc_clean( wp_unslash( $_POST['wc_order_action'] ) );
@@ -124,14 +123,14 @@ class WC_Orders_Tracking {
 	 * Track "add order" button on the Edit Order screen.
 	 */
 	public function track_add_order_from_edit() {
-		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) {
 			$referer = wp_get_referer();
 
 			if ( $referer ) {
-				$referring_page = parse_url( $referer );
+				$referring_page = wp_parse_url( $referer );
 				$referring_args = array();
-				$post_edit_page = parse_url( admin_url( 'post.php' ) );
+				$post_edit_page = wp_parse_url( admin_url( 'post.php' ) );
 
 				if ( ! empty( $referring_page['query'] ) ) {
 					parse_str( $referring_page['query'], $referring_args );

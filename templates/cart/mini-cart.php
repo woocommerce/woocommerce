@@ -44,7 +44,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						sprintf(
 							'<a href="%s" class="remove remove_from_cart_button" aria-label="%s" data-product_id="%s" data-cart_item_key="%s" data-product_sku="%s">&times;</a>',
 							esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
-							esc_html__( 'Remove this item', 'woocommerce' ),
+							esc_attr__( 'Remove this item', 'woocommerce' ),
 							esc_attr( $product_id ),
 							esc_attr( $cart_item_key ),
 							esc_attr( $_product->get_sku() )
@@ -73,7 +73,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	<p class="woocommerce-mini-cart__total total">
 		<?php
 		/**
-		 * Woocommerce_widget_shopping_cart_total hook.
+		 * Hook: woocommerce_widget_shopping_cart_total.
 		 *
 		 * @hooked woocommerce_widget_shopping_cart_subtotal - 10
 		 */

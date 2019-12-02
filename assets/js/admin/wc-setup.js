@@ -22,6 +22,35 @@ jQuery( function( $ ) {
 		return true;
 	} );
 
+	$( 'form.address-step' ).on( 'submit', function( e ) {
+		var form = $( this );
+		if ( ( 'function' !== typeof form.checkValidity ) || form.checkValidity() ) {
+			blockWizardUI();
+		}
+
+		e.preventDefault();
+		$('.wc-setup-content').unblock();
+
+		$( this ).WCBackboneModal( {
+			template: 'wc-modal-tracking-setup'
+		} );
+
+		$( document.body ).on( 'wc_backbone_modal_response', function() {
+			form.unbind( 'submit' ).submit();
+		} );
+
+		$( '#wc_tracker_checkbox_dialog' ).on( 'change', function( e ) {
+			var eventTarget = $( e.target );
+			$( '#wc_tracker_checkbox' ).prop( 'checked', eventTarget.prop( 'checked' ) );
+		} );
+
+		$( '#wc_tracker_submit' ).on( 'click', function () {
+			form.unbind( 'submit' ).submit();
+		} );
+
+		return true;
+	} );
+
 	$( '#store_country' ).on( 'change', function() {
 		// Prevent if we don't have the metabox data
 		if ( wc_setup_params.states === null ){

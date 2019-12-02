@@ -87,7 +87,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	public function test_wc_dropdown_variation_attribute_options_should_return_attributes_list() {
 		$product = WC_Helper_Product::create_variation_product();
 
-		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="large" >large</option><option value="small" >small</option></select>' );
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
 
 		wc_dropdown_variation_attribute_options(
 			array(
@@ -104,7 +104,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$product                       = WC_Helper_Product::create_variation_product();
 		$_REQUEST['attribute_pa_size'] = 'large';
 
-		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="large"  selected=\'selected\'>large</option><option value="small" >small</option></select>' );
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large"  selected=\'selected\'>large</option><option value="small" >small</option></select>' );
 
 		wc_dropdown_variation_attribute_options(
 			array(
@@ -139,7 +139,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_html, $actual_html );
 
 		$actual_html   = wc_query_string_form_fields( '?test%20something=something%20else', array(), '', true );
-		$expected_html = '<input type="hidden" name="test%20something" value="something%20else" />';
+		$expected_html = '<input type="hidden" name="test_something" value="something else" />';
 		$this->assertEquals( $expected_html, $actual_html );
 	}
 }

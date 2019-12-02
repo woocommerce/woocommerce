@@ -427,7 +427,7 @@ class WC_Admin_Addons {
 					<?php foreach ( $block_data['logos'] as $logo ) : ?>
 						<li>
 							<img
-								alt="<?php echo esc_url( $logo['alt'] ); ?>"
+								alt="<?php echo esc_attr( $logo['alt'] ); ?>"
 								class="wcs-service-logo"
 								src="<?php echo esc_url( $logo['link'] ); ?>"
 							>
@@ -487,9 +487,10 @@ class WC_Admin_Addons {
 		// so WCCOM "back" link returns user to where they were.
 		$back_admin_path = add_query_arg( array() );
 		return array(
-			'wccom-site'        => site_url(),
-			'wccom-back'        => esc_url( $back_admin_path ),
-			'wccom-woo-version' => WC_VERSION,
+			'wccom-site'          => site_url(),
+			'wccom-back'          => esc_url( $back_admin_path ),
+			'wccom-woo-version'   => WC_VERSION,
+			'wccom-connect-nonce' => wp_create_nonce( 'connect' ),
 		);
 	}
 

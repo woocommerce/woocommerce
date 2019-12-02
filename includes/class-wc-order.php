@@ -366,15 +366,18 @@ class WC_Order extends WC_Abstract_Order {
 					/* translators: 1: old order status 2: new order status */
 					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
 
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $status_transition );
+
 					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
 				} else {
 					/* translators: %s: new order status */
 					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
-				}
 
-				// Note the transition occurred.
-				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $status_transition );
+				}
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
 				$logger->error(
@@ -876,10 +879,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_billing_address( $empty_content = '' ) {
-		$address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
-		$address = WC()->countries->get_formatted_address( $address );
+		$raw_address = apply_filters( 'woocommerce_order_formatted_billing_address', $this->get_address( 'billing' ), $this );
+		$address     = WC()->countries->get_formatted_address( $raw_address );
 
-		return $address ? $address : $empty_content;
+		/**
+		 * Filter orders formatterd billing address.
+		 *
+		 * @since 3.8.0
+		 * @param string   $address     Formatted billing address string.
+		 * @param array    $raw_address Raw billing address.
+		 * @param WC_Order $order       Order data. @since 3.9.0
+		 */
+		return apply_filters( 'woocommerce_order_get_formatted_billing_address', $address ? $address : $empty_content, $raw_address, $this );
 	}
 
 	/**
@@ -889,17 +900,23 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_formatted_shipping_address( $empty_content = '' ) {
-		$address = '';
-		if ( $this->has_shipping_address() ) {
-			$address = $this->get_address( 'shipping' );
-		}
-		$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $address, $this );
+		$address     = '';
+		$raw_address = $this->get_address( 'shipping' );
 
 		if ( $this->has_shipping_address() ) {
-			$address = WC()->countries->get_formatted_address( $address );
+			$raw_address = apply_filters( 'woocommerce_order_formatted_shipping_address', $raw_address, $this );
+			$address     = WC()->countries->get_formatted_address( $raw_address );
 		}
 
-		return $address ? $address : $empty_content;
+		/**
+		 * Filter orders formatterd shipping address.
+		 *
+		 * @since 3.8.0
+		 * @param string   $address     Formatted billing address string.
+		 * @param array    $raw_address Raw billing address.
+		 * @param WC_Order $order       Order data. @since 3.9.0
+		 */
+		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address, $this );
 	}
 
 	/**
@@ -1414,6 +1431,12 @@ class WC_Order extends WC_Abstract_Order {
 				continue;
 			}
 
+			// Check item refunds.
+			$refunded_qty = abs( $this->get_qty_refunded_for_item( $item->get_id() ) );
+			if ( $refunded_qty && $item->get_quantity() === $refunded_qty ) {
+				continue;
+			}
+
 			if ( $item->is_type( 'line_item' ) ) {
 				$item_downloads = $item->get_item_downloads();
 				$product        = $item->get_product();
@@ -1510,11 +1533,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_checkout_payment_url( $on_checkout = false ) {
-		$pay_url = wc_get_endpoint_url( 'order-pay', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
-
-		if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
-			$pay_url = str_replace( 'http:', 'https:', $pay_url );
-		}
+		$pay_url = wc_get_endpoint_url( 'order-pay', $this->get_id(), wc_get_checkout_url() );
 
 		if ( $on_checkout ) {
 			$pay_url = add_query_arg( 'key', $this->get_order_key(), $pay_url );
@@ -1537,12 +1556,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_checkout_order_received_url() {
-		$order_received_url = wc_get_endpoint_url( 'order-received', $this->get_id(), wc_get_page_permalink( 'checkout' ) );
-
-		if ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) || is_ssl() ) {
-			$order_received_url = str_replace( 'http:', 'https:', $order_received_url );
-		}
-
+		$order_received_url = wc_get_endpoint_url( 'order-received', $this->get_id(), wc_get_checkout_url() );
 		$order_received_url = add_query_arg( 'key', $this->get_order_key(), $order_received_url );
 
 		return apply_filters( 'woocommerce_get_checkout_order_received_url', $order_received_url, $this );
@@ -1600,7 +1614,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string the cancel endpoint; either the cart page or the home page.
 	 */
 	public function get_cancel_endpoint() {
-		$cancel_endpoint = wc_get_page_permalink( 'cart' );
+		$cancel_endpoint = wc_get_cart_url();
 		if ( ! $cancel_endpoint ) {
 			$cancel_endpoint = home_url();
 		}
@@ -1694,6 +1708,19 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		return $comment_id;
+	}
+
+	/**
+	 * Add an order note for status transition
+	 *
+	 * @since 3.9.0
+	 * @uses WC_Order::add_order_note()
+	 * @param string $note          Note to be added giving status transition from and to details.
+	 * @param bool   $transition    Details of the status transition.
+	 * @return int                  Comment ID.
+	 */
+	private function add_status_transition_note( $note, $transition ) {
+		return $this->add_order_note( trim( $transition['note'] . ' ' . $note ), 0, $transition['manual'] );
 	}
 
 	/**
