@@ -9,6 +9,8 @@ import { createSimpleProduct } from '../../utils/components';
 import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 import { setCheckbox, settingsPageSaveChanges, uiUnblocked, verifyCheckboxIsSet } from '../../utils';
 
+const config = require( 'config' );
+
 let orderId;
 
 describe( 'Checkout page', () => {
@@ -88,17 +90,17 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToCheckout();
 		await CustomerFlow.productIsInCheckout( 'Simple product', 3, 29.97, 29.97 );
 		await CustomerFlow.fillBillingDetails(
-			'John',
-			'Doe',
-			'Automattic',
-			'United States (US)',
-			'addr 1',
-			'addr 2',
-			'San Francisco',
-			'California',
-			'94107',
-			'123456789',
-			'john.doe@example.com'
+			config.get( 'addresses.customer.billing.firstname' ),
+			config.get( 'addresses.customer.billing.lastname' ),
+			config.get( 'addresses.customer.billing.company' ),
+			config.get( 'addresses.customer.billing.country' ),
+			config.get( 'addresses.customer.billing.addressfirstline' ),
+			config.get( 'addresses.customer.billing.addresssecondline' ),
+			config.get( 'addresses.customer.billing.city' ),
+			config.get( 'addresses.customer.billing.state' ),
+			config.get( 'addresses.customer.billing.postcode' ),
+			config.get( 'addresses.customer.billing.phone' ),
+			config.get( 'addresses.customer.billing.email' )
 		);
 	} );
 
@@ -112,15 +114,15 @@ describe( 'Checkout page', () => {
 		await uiUnblocked();
 
 		await CustomerFlow.fillShippingDetails(
-			'John',
-			'Doe',
-			'Automattic',
-			'United States (US)',
-			'addr 1',
-			'addr 2',
-			'San Francisco',
-			'California',
-			'94107'
+			config.get( 'addresses.customer.shipping.firstname' ),
+			config.get( 'addresses.customer.shipping.lastname' ),
+			config.get( 'addresses.customer.shipping.company' ),
+			config.get( 'addresses.customer.shipping.country' ),
+			config.get( 'addresses.customer.shipping.addressfirstline' ),
+			config.get( 'addresses.customer.shipping.addresssecondline' ),
+			config.get( 'addresses.customer.shipping.city' ),
+			config.get( 'addresses.customer.shipping.state' ),
+			config.get( 'addresses.customer.shipping.postcode' )
 		);
 	} );
 
@@ -130,17 +132,17 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToCheckout();
 		await CustomerFlow.productIsInCheckout( 'Simple product', 5, 49.95, 49.95 );
 		await CustomerFlow.fillBillingDetails(
-			'John',
-			'Doe',
-			'Automattic',
-			'United States (US)',
-			'addr 1',
-			'addr 2',
-			'San Francisco',
-			'California',
-			'94107',
-			'123456789',
-			'john.doe@example.com'
+			config.get( 'addresses.customer.billing.firstname' ),
+			config.get( 'addresses.customer.billing.lastname' ),
+			config.get( 'addresses.customer.billing.company' ),
+			config.get( 'addresses.customer.billing.country' ),
+			config.get( 'addresses.customer.billing.addressfirstline' ),
+			config.get( 'addresses.customer.billing.addresssecondline' ),
+			config.get( 'addresses.customer.billing.city' ),
+			config.get( 'addresses.customer.billing.state' ),
+			config.get( 'addresses.customer.billing.postcode' ),
+			config.get( 'addresses.customer.billing.phone' ),
+			config.get( 'addresses.customer.billing.email' )
 		);
 		await uiUnblocked();
 
@@ -168,6 +170,19 @@ describe( 'Checkout page', () => {
 		] );
 
 		// Verify that the order page is indeed of the order that was placed
+		// Verify order number
 		await expect( page ).toMatchElement( '.woocommerce-order-data__heading', { text: 'Order #' + orderId + ' details' } );
+
+		// Verify product name
+		await expect( page ).toMatchElement( '.wc-order-item-name', { text: 'Simple product' } );
+
+		// Verify product cost
+		await expect( page ).toMatchElement( '.woocommerce-Price-amount.amount', { text: '9.99' } );
+
+		// Verify product quantity
+		await expect( page ).toMatchElement( '.quantity', { text: '5' } );
+
+		// Verify total order amount without shipping
+		await expect( page ).toMatchElement( '.line_cost', { text: '49.95' } );
 	} );
 } );

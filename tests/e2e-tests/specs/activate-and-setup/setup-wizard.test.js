@@ -14,6 +14,8 @@ import {
 	verifyCheckboxIsUnset, verifyValueOfInputField
 } from '../../utils';
 
+const config = require( 'config' );
+
 describe( 'Store owner can login and make sure WooCommerce is activated', () => {
 
 	it( 'Can login', async () => {
@@ -41,12 +43,12 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 	it( 'Can fill out Store setup details', async () => {
 		// Fill out store address details
-		await expect( page ).toSelect( 'select[name="store_country"]', 'United States (US)' );
-		await expect( page ).toFill( '#store_address', 'addr 1' );
-		await expect( page ).toFill( '#store_address_2', 'addr 2' );
-		await expect( page ).toFill( '#store_city', 'San Francisco' );
-		await expect( page ).toSelect( 'select[name="store_state"]', 'California' );
-		await expect( page ).toFill( '#store_postcode', '94107' );
+		await expect( page ).toSelect( 'select[name="store_country"]', config.get( 'addresses.admin.store.country' ) );
+		await expect( page ).toFill( '#store_address', config.get( 'addresses.admin.store.addressfirstline' ) );
+		await expect( page ).toFill( '#store_address_2', config.get( 'addresses.admin.store.addresssecondline' ) );
+		await expect( page ).toFill( '#store_city', config.get( 'addresses.admin.store.city' ) );
+		await expect( page ).toSelect( 'select[name="store_state"]', config.get( 'addresses.admin.store.state' ) );
+		await expect( page ).toFill( '#store_postcode', config.get( 'addresses.admin.store.postcode' ) );
 
 		// Select currency and type of products to sell details
 		await expect( page ).toSelect( 'select[name="currency_code"]', '\n' +
