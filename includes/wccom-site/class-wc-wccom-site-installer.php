@@ -247,6 +247,7 @@ class WC_WCCOM_Site_Installer {
 				case 'get_product_info':
 					$state_steps[ $product_id ]['download_url'] = $result['download_url'];
 					$state_steps[ $product_id ]['product_type'] = $result['product_type'];
+					$state_steps[ $product_id ]['product_name'] = $result['product_name'];
 					break;
 				case 'download_product':
 					$state_steps[ $product_id ]['download_path'] = $result;
@@ -257,7 +258,10 @@ class WC_WCCOM_Site_Installer {
 				case 'move_product':
 					$state_steps[ $product_id ]['installed_path'] = $result['destination'];
 					if ( $result[ self::$folder_exists ] ) {
-						$state_steps[ $product_id ]['warning'] = self::$folder_exists;
+						$state_steps[ $product_id ]['warning'] = array(
+							'message'     => self::$folder_exists,
+							'plugin_info' => self::get_plugin_info( $state_steps[ $product_id ]['installed_path'] ),
+						);
 					}
 					break;
 			}
@@ -297,6 +301,7 @@ class WC_WCCOM_Site_Installer {
 		$result = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		$product_info['product_type'] = $result['_product_type'];
+		$product_info['product_name'] = $result['name'];
 
 		if ( ! empty( $result['_wporg_product'] ) && ! empty( $result['download_link'] ) ) {
 			// For wporg product, download is set already from info response.
@@ -530,6 +535,43 @@ class WC_WCCOM_Site_Installer {
 			}
 		}
 
+		return false;
+	}
+
+
+	/**
+	 * Get plugin info
+	 *
+	 * @since 3.9.0
+	 * @param string $dir Directory name of the plugin.
+	 * @return bool|array
+	 */
+	private static function get_plugin_info( $dir ) {
+		$plugin_folder = basename( $dir );
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$plugins = get_plugins();
+
+		$related_plugins = array_filter(
+			$plugins,
+			function( $key ) use ( $plugin_folder ) {
+				return strpos( $key, $plugin_folder . '/' ) === 0;
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		if ( 1 === count( $related_plugins ) ) {
+			$plugin_key = array_keys( $related_plugins )[0];
+			$plugin_data = $plugins[ $plugin_key ];
+			return array(
+				'name'    => $plugin_data['Name'],
+				'version' => $plugin_data['Version'],
+				'active'  => is_plugin_active( $plugin_key ),
+			);
+		}
 		return false;
 	}
 }
