@@ -5,10 +5,11 @@
 /**
  * Internal dependencies
  */
-import { CustomerFlow } from '../../utils/flows';
+import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 
 describe( 'My account page', () => {
 	it( 'allows customer to login', async () => {
+		await StoreOwnerFlow.logout();
 		await CustomerFlow.login();
 		await expect( page ).toMatch( 'Hello' );
 		await expect( page ).toMatchElement( '.woocommerce-MyAccount-navigation-link', { text: 'Dashboard' } );
