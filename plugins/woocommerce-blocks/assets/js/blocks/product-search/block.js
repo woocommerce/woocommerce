@@ -152,7 +152,7 @@ class ProductSearchBlock extends Component {
 	}
 
 	render() {
-		if ( this.props.isPreview ) {
+		if ( this.props.isEditor ) {
 			return this.renderEdit();
 		}
 
@@ -170,9 +170,9 @@ ProductSearchBlock.propTypes = {
 	 */
 	instanceId: PropTypes.number,
 	/**
-	 * Whether this is the block preview or frontend display.
+	 * Whether it's in the editor or frontend display.
 	 */
-	isPreview: PropTypes.bool,
+	isEditor: PropTypes.bool,
 	/**
 	 * A callback to update attributes.
 	 */

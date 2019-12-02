@@ -167,7 +167,7 @@ export default function( { attributes, setAttributes } ) {
 						}
 					/>
 					<Disabled>
-						<Block attributes={ attributes } isPreview />
+						<Block attributes={ attributes } isEditor={ true } />
 					</Disabled>
 				</div>
 			) }
