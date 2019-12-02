@@ -20,6 +20,10 @@ class AssetDataRegistryMock extends AssetDataRegistry {
 		$this->debug = $debug;
 	}
 
+	public function initialize_core_data() {
+		return parent::initialize_core_data();
+	}
+
 	protected function debug() {
 		return $this->debug;
 	}

@@ -53,4 +53,41 @@ class AssetDataRegistry extends WP_UnitTestCase {
 		$this->expectException( InvalidArgumentException::class );
 		$this->registry->add( 'foo', 'yar' );
 	}
+
+	/**
+	 * This tests the 'woocommerce_shared_settings' filter.
+	 * A reminder this filter is only temporary but just using this as for
+	 * testing with.
+	 * @group newTest
+	 */
+	public function test_woocommerce_filter_with_protected_data() {
+		$this->registry->initialize_core_data();
+		$original_data = $this->registry->get();
+		add_filter( 'woocommerce_shared_settings', [ self::class, 'pdatcallback' ] );
+		$data = $this->registry->get();
+		$this->registry->initialize_core_data();
+		$this->assertEquals( $original_data, $data );
+		remove_filter( 'woocommerce_shared_settings', [ self::class, 'pdatcallback' ] );
+	}
+
+	public static function pdatcallback( $existing_data ) {
+		$existing_data['locale']['siteLocale'] = 'cheeseburger';
+		return $existing_data;
+	}
+
+	public static function ndcallback( $existing_data ) {
+		$existing_data['cheeseburger'] = 'fries';
+		return $existing_data;
+	}
+
+	public function test_woocommerce_filter_with_new_data() {
+		$this->registry->initialize_core_data();
+		$original_data = $this->registry->get();
+		add_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
+		$this->registry->initialize_core_data();
+		$data = $this->registry->get();
+		$original_data['cheeseburger'] = 'fries';
+		$this->assertEquals( $original_data, $data );
+		remove_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
+	}
 }

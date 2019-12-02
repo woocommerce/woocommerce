@@ -75,17 +75,12 @@ class Bootstrap {
 		$this->container->register(
 			AssetDataRegistry::class,
 			function( Container $container ) {
-				$asset_api = $container->get( AssetApi::class );
-				// phpcs:disable Squiz . PHP . CommentedOutCode . Found
-				// @todo: this needs added back in once the @woocommerce/components
-				// package has been updated.
-				// $load_back_compat = defined( 'WC_ADMIN_VERSION_NUMBER' )
-				// && version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' );
-				// return $load_back_compat
-				// ? new BackCompatAssetDataRegistry( $asset_api )
-				// : new AssetDataRegistry( $asset_api );
-				// phpcs:enable
-				return new BackCompatAssetDataRegistry( $asset_api );
+				$asset_api        = $container->get( AssetApi::class );
+				$load_back_compat = defined( 'WC_ADMIN_VERSION_NUMBER' )
+					&& version_compare( WC_ADMIN_VERSION_NUMBER, '0.19.0', '<=' );
+				return $load_back_compat
+					? new BackCompatAssetDataRegistry( $asset_api )
+					: new AssetDataRegistry( $asset_api );
 			}
 		);
 

@@ -135,9 +135,10 @@ class AssetDataRegistry {
 			'woocommerce_shared_settings',
 			$this->data
 		);
+
 		// note this WILL wipe any data already registered to these keys because
 		// they are protected.
-		$this->data = array_merge_recursive( $settings, $this->get_core_data() );
+		$this->data = array_replace_recursive( $settings, $this->get_core_data() );
 	}
 
 	/**
