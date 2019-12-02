@@ -46,7 +46,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	public function render( $attributes = array(), $content = '' ) {
 		$id       = isset( $attributes['categoryId'] ) ? (int) $attributes['categoryId'] : 0;
 		$category = get_term( $id, 'product_cat' );
-		if ( ! $category ) {
+		if ( ! $category || is_wp_error( $category ) ) {
 			return '';
 		}
 		$attributes = wp_parse_args( $attributes, $this->defaults );
