@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { Fragment, Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { get, filter, noop, keys, pickBy, difference } from 'lodash';
-import { FormToggle, CheckboxControl } from '@wordpress/components';
-import { Button } from 'newspack-components';
+import { Button, FormToggle, CheckboxControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**

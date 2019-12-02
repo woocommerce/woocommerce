@@ -16,6 +16,7 @@
   { "component": "Form" },
   { "component": "Gravatar" },
   { "component": "ImageAsset" },
+  { "component": "ImageUpload" },
   { "component": "Link" },
   { "component": "List" },
   { "component": "OrderStatus" },

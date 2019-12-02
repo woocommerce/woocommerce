@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { Button } from 'newspack-components';
+import { Button } from '@wordpress/components';
 import interpolateComponents from 'interpolate-components';
 
 /**

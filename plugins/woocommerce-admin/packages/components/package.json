@@ -29,6 +29,7 @@
     "@wordpress/components": "8.4.0",
     "@wordpress/compose": "3.7.1",
     "@wordpress/date": "3.5.0",
+    "@wordpress/dom": "2.6.0",
     "@wordpress/element": "2.8.1",
     "@wordpress/html-entities": "2.5.0",
     "@wordpress/i18n": "3.6.1",

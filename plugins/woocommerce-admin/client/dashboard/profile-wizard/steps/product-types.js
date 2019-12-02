@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { Button, CheckboxControl } from 'newspack-components';
+import { Button, CheckboxControl } from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch } from '@wordpress/data';
@@ -129,6 +129,7 @@ class ProductTypes extends Component {
 									help={ helpText }
 									onChange={ () => this.onChange( slug ) }
 									checked={ selected.includes( slug ) }
+									className="woocommerce-profile-wizard__checkbox"
 								/>
 							);
 						} ) }

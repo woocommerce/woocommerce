@@ -1,0 +1,38 @@
+.woocommerce-image-upload {
+	button {
+		color: $studio-pink;
+		font-size: 16px;
+		line-height: 24px;
+		padding: 0;
+		vertical-align: middle;
+	}
+
+	.woocommerce-image-upload__image-preview {
+		font-size: 16px;
+		margin-right: 2em;
+
+		img {
+			max-width: 240px;
+			height: auto;
+		}
+	}
+
+	&.no-image {
+		.woocommerce-image-upload__add-image {
+			&::before {
+				content: '';
+				/* stylelint-disable function-url-quotes */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23636d75' d='M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2v9zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4h-3z'/%3E%3C/svg%3E");
+				/* stylelint-enable */
+				width: 24px;
+				height: 24px;
+				margin-right: 12px;
+			}
+		}
+	}
+
+	&.has-image {
+		display: flex;
+		align-items: center;
+	}
+}

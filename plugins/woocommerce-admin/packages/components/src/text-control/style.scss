@@ -3,7 +3,8 @@
 .muriel-input-text {
 	background: $studio-white;
 	border: 1px solid $studio-gray-20;
-	border-radius: 0;
+	border-radius: 3px;
+	height: 56px;
 	box-shadow: none;
 	padding: 12px 12px 4px;
 	position: relative;
@@ -47,10 +48,16 @@
 	&.with-value {
 		.components-base-control__label {
 			display: block;
+			position: relative;
+			top: -8px;
+			width: 100%;
+			font-size: 12px;
 		}
 
 		input {
 			color: $studio-gray-80;
+			position: relative;
+			top: -12px;
 		}
 	}
 

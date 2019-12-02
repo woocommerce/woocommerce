@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { Button, CheckboxControl } from 'newspack-components';
+import { Button, CheckboxControl } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter, get, includes } from 'lodash';
 import { withDispatch } from '@wordpress/data';
@@ -106,6 +106,7 @@ class Industry extends Component {
 									label={ industries[ slug ] }
 									onChange={ () => this.onChange( slug ) }
 									checked={ selected.includes( slug ) }
+									className="woocommerce-profile-wizard__checkbox"
 								/>
 							);
 						} ) }

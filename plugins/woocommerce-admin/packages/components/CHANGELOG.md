@@ -1,3 +1,6 @@
+# 4.1.0 (Unreleased)
+- Added `<ImageUpload />` component.
+
 # 4.0.0
 
 ## Breaking Changes

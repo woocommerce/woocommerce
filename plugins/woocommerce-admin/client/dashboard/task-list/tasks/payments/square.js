@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { Button } from 'newspack-components';
+import { Button } from '@wordpress/components';
 import { getQuery } from '@woocommerce/navigation';
 import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';

@@ -4,13 +4,12 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 import { get } from 'lodash';
 import Gridicon from 'gridicons';
-import { TabPanel, Tooltip } from '@wordpress/components';
+import { Button, TabPanel, Tooltip } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**

@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Button, CheckboxControl } from 'newspack-components';
+import { Button, CheckboxControl } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
@@ -162,10 +162,13 @@ class StoreDetails extends Component {
 									/>
 								) }
 								<StoreAddress getInputProps={ getInputProps } setValue={ setValue } />
-								<CheckboxControl
-									label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
-									{ ...getInputProps( 'isClient' ) }
-								/>
+
+								<div className="woocommerce-profile-wizard__client">
+									<CheckboxControl
+										label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
+										{ ...getInputProps( 'isClient' ) }
+									/>
+								</div>
 
 								<Button isPrimary onClick={ handleSubmit } disabled={ ! isValidForm }>
 									{ __( 'Continue', 'woocommerce-admin' ) }

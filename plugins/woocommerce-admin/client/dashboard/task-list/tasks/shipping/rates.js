@@ -4,10 +4,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Button } from 'newspack-components';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
-import { FormToggle } from '@wordpress/components';
+import { Button, FormToggle } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 /**

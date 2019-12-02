@@ -5,8 +5,7 @@
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { FormToggle } from '@wordpress/components';
-import { Button } from 'newspack-components';
+import { Button, FormToggle } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { keys, get, pickBy } from 'lodash';
 

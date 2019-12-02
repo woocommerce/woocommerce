@@ -8,8 +8,7 @@ import { compose } from '@wordpress/compose';
 import apiFetch from '@wordpress/api-fetch';
 import { withDispatch } from '@wordpress/data';
 import interpolateComponents from 'interpolate-components';
-import { Modal } from '@wordpress/components';
-import { Button } from 'newspack-components';
+import { Button, Modal } from '@wordpress/components';
 import { getQuery } from '@woocommerce/navigation';
 import { get } from 'lodash';
 

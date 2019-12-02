@@ -23,8 +23,5 @@
     "<rootDir>/.*/build/",
     "<rootDir>/.*/build-module/"
   ],
-  "transformIgnorePatterns": [
-    "node_modules/(?!(newspack-components)/)"
-  ],
   "verbose": true
 }

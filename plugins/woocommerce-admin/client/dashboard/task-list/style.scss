@@ -16,12 +16,14 @@
 		margin-right: auto;
 	}
 
-	.muriel-button.components-button,
+	.woocommerce-task-dashboard__container .components-button:not(.components-icon-button),
 	.components-modal__frame .components-button.is-button {
 		height: 40px;
 		min-width: 106px;
 		margin: $gap $gap-smaller 0 0;
 		justify-content: center;
+		font-size: 14px;
+		font-weight: 500;
 
 		&:not(.is-primary) {
 			color: $studio-pink-50;
@@ -182,7 +184,8 @@
 		position: relative;
 
 		.muriel-input-text input {
-			left: $gap * 2;
+			left: $gap;
+			max-width: 90%;
 		}
 
 		.components-base-control {
@@ -194,7 +197,7 @@
 			display: none;
 			position: absolute;
 			left: $gap;
-			top: 28px;
+			top: 25px;
 			z-index: 1;
 			font-size: 16px;
 			line-height: 24px;
@@ -302,9 +305,10 @@
 		margin-left: $gap-larger;
 		padding-top: $gap;
 
-		.components-base-control__field {
-			align-items: center;
-			display: flex;
+		svg.dashicon.components-checkbox-control__checked {
+			display: block;
+			left: -38px;
+			top: -1px;
 		}
 
 		.components-checkbox-control__input {
@@ -367,7 +371,7 @@
 }
 
 .woocommerce-task-appearance {
-	.muriel-image-upload {
+	.woocommerce-image-upload {
 		margin-bottom: $gap-smallest;
 	}
 }

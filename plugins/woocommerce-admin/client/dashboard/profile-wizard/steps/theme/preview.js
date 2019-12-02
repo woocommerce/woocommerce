@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button } from 'newspack-components';
+import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import interpolateComponents from 'interpolate-components';

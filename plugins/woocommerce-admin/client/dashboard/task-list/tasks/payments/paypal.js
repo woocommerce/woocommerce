@@ -5,8 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { Button } from 'newspack-components';
-import { getQuery } from '@woocommerce/navigation';
+import { Button } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
@@ -15,6 +14,7 @@ import interpolateComponents from 'interpolate-components';
  * WooCommerce dependencies
  */
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
+import { getQuery } from '@woocommerce/navigation';
 import { Form, Link, TextControl } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
