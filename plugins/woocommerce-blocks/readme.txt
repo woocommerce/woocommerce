@@ -116,6 +116,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.2 - 2019-12-02 =
+- Fixed a PHP Notice in Featured Category Block when the category is invalid. #1291 👏 @strategio
+- Filter Products by Attribute block now uses the attribute label instead of the slug to set the default title. #1271
+- Fix Filter Products by Price slider being reset to 0-0 when filters were cleared from the Active Filters block. #1278
+- Don't enqueue wcSettings unless the route requires it. #1292
+- Add `getAdminLink()` utility method. #1244
+
 = 2.5.1 - 2019-11-26 =
 - Fix Products by Tag, Products by Attribute and Handpicked products blocks showing an invalid attributes error. #1254
 - Fix the price slider updating instantly even when filter button was enabled. #1228
