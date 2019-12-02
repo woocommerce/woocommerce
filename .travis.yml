@@ -30,10 +30,10 @@ matrix:
   fast_finish: true
   include:
   - name: "Coding standard check"
-    php: 7.2
+    php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "e2e tests"
-    php: 7.2
+    php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
     addons:
       chrome: beta
@@ -41,17 +41,17 @@ matrix:
         packages:
           - nginx
   - name: "Unit tests code coverage"
-    php: 7.3
+    php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   - name: "WooCommerce unit tests using WordPress nightly"
-    php: 7.3
+    php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
   - php: 7.4snapshot
     env: WP_VERSION=nightly WP_MULTISITE=0
   allow_failures:
-  - php: 7.3
+  - php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
-  - php: 7.2
+  - php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
 
 before_script:
