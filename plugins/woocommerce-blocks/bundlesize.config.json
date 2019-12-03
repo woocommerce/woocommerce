@@ -2,7 +2,7 @@
 	"files": [
 		{
 			"path": "./build/*.js",
-			"maxSize": "300 kB"
+			"maxSize": "400 kB"
 		},
 		{
 			"path": "./build/*frontend*.js",
