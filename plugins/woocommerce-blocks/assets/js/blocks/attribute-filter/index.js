@@ -53,6 +53,10 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			type: 'number',
 			default: 3,
 		},
+		displayStyle: {
+			type: 'string',
+			default: 'list',
+		},
 		/**
 		 * Are we previewing?
 		 */
@@ -73,6 +77,7 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			attributeId,
 			heading,
 			headingLevel,
+			displayStyle,
 		} = attributes;
 		const data = {
 			'data-attribute-id': attributeId,
@@ -81,6 +86,9 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			'data-heading': heading,
 			'data-heading-level': headingLevel,
 		};
+		if ( displayStyle !== 'list' ) {
+			data[ 'data-display-style' ] = displayStyle;
+		}
 		return (
 			<div
 				className={ classNames( 'is-loading', className ) }
