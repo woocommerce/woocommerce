@@ -124,13 +124,12 @@ class WC_WCCOM_Site {
 	 * @return bool
 	 */
 	protected static function is_request_to_wccom_site_rest_api() {
-		$route = '/';
 		$rest_prefix = '';
 
-		if ( isset( $_REQUEST['rest_route'] ) ) {
-			$route = esc_url_raw( wp_unslash( $_REQUEST['rest_route'] ) );
+		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$route = wp_unslash( $_REQUEST['rest_route'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		} else {
-			$route = esc_url_raw( wp_unslash( add_query_arg( array() ) ) );
+			$route       = wp_unslash( add_query_arg( array() ) );
 			$rest_prefix = trailingslashit( rest_get_url_prefix() );
 		}
 
