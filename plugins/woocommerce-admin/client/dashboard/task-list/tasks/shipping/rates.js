@@ -13,12 +13,12 @@ import PropTypes from 'prop-types';
  * WooCommerce dependencies
  */
 import { Flag, Form, TextControl } from '@woocommerce/components';
-import { getCurrencyFormatString } from '@woocommerce/currency';
 import { CURRENCY, getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
+import { getCurrencyFormatString } from 'lib/currency-format';
 import { recordEvent } from 'lib/tracks';
 
 const { symbol, symbolPosition } = CURRENCY;
