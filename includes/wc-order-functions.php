@@ -890,7 +890,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
  * @param int $order_id Order ID.
  */
 function wc_release_held_stock( $order_id ) {
-	$order = new WC_Order( $order_id );
+	$order = wc_get_order( $order_id );
 	if ( ! $order ) {
 		return;
 	}
