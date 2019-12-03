@@ -50,6 +50,7 @@ class Library {
 			$blocks[] = 'PriceFilter';
 			$blocks[] = 'AttributeFilter';
 			$blocks[] = 'ActiveFilters';
+			$blocks[] = 'Checkout';
 			$blocks[] = 'Cart';
 		}
 		foreach ( $blocks as $class ) {
