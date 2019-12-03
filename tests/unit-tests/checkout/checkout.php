@@ -77,7 +77,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	 * @throws Exception When unable to create order.
 	 */
 	public function test_create_order_when_out_of_stock_legacy() {
-		add_filter( 'enable_hold_stock_3_9', '__return_false' );
+		add_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
 		$this->test_create_order_when_out_of_stock();
 	}
 

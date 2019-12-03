@@ -2048,11 +2048,19 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Adds a '_held_for_checkout` record for all products in cart.
 	 *
+	 * @since 3.9.0
 	 * @param WC_Cart $cart Cart instance.
 	 * @throws Exception When unable to hold stock for checkout.
 	 */
 	public function hold_stock_for_checkout( $cart ) {
-		if ( ! apply_filters( 'enable_hold_stock_3_9', true ) ) {
+		/**
+		 * Filter: woocommerce_hold_stock_for_checkout
+		 * Allows enable/disable hold stock functionality on checkout.
+		 *
+		 * @since 3.9.0
+		 * @param bool $enabled Default to true.
+		 */
+		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 			return;
 		}
 
@@ -2067,11 +2075,11 @@ class WC_Order extends WC_Abstract_Order {
 
 		$product_qty_in_cart = $cart->get_cart_item_quantities();
 		$stock_held_keys     = array();
-		$error = null;
+		$error               = null;
 
 		try {
 			foreach ( $cart->get_cart() as $cart_item_key => $values ) {
-				$product    = wc_get_product( $values['data'] );
+				$product = wc_get_product( $values['data'] );
 				if ( ! $product ) {
 					// Unsupported product!
 					continue;
@@ -2102,9 +2110,9 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Adds a `_held_for_checkout` record for a product in checkout.
 	 *
+	 * @since 3.9.0
 	 * @param WC_Product $product  Instance of product.
 	 * @param int        $quantity Quantity of product to hold.
-	 *
 	 * @return bool|string|null Returns `false` when unable to hold stock, meta key when stock was held successfully, `null` when holding stock is not needed.
 	 */
 	protected function hold_product_for_checkout( $product, $quantity ) {
@@ -2122,25 +2130,29 @@ class WC_Order extends WC_Abstract_Order {
 		$query_for_held_stock = $product_data_store->get_query_for_held_stock( $product_id );
 		$query_for_stock      = $product_data_store->get_query_for_stock( $product_id );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$insert_statement = $wpdb->prepare(
 			"
-					INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
-					SELECT %d, %s, %d from DUAL
-					WHERE ( $query_for_stock ) - ( $query_for_held_stock ) >= %d
-					",
+				INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
+				SELECT %d, %s, %d from DUAL
+				WHERE ( $query_for_stock ) - ( $query_for_held_stock ) >= %d
+			",
 			$product->get_stock_managed_by_id(),
 			$held_key,
 			$quantity,
 			$quantity
-		); // WPCS: unprepared SQL ok.
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$result = $wpdb->query( $insert_statement ); // WPCS: unprepared SQL ok.
+		$result = $wpdb->query( $insert_statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
 		return $result > 0 ? $held_key : false;
 	}
 
 	/**
 	 * Save keys used to held stock to DB.
 	 *
+	 * @since 3.9.0
 	 * @param array $keys Array of keys to save.
 	 */
 	public function record_held_stock( $keys ) {
@@ -2151,6 +2163,8 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Releases held stock, also deletes keys for the order.
+	 *
+	 * @since 3.9.0
 	 */
 	public function release_held_stock() {
 		$stock_held_keys = $this->get_meta( '_stock_held_keys' );
