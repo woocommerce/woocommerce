@@ -38,6 +38,7 @@ matrix:
     env: RUN_E2E=1
     script:
       - docker-compose up -d
+      - travis_retry bash tests/bin/run-e2e-CI.sh
   - name: "Unit tests code coverage"
     php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
@@ -73,7 +74,6 @@ before_script:
 script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - travis_retry bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after
