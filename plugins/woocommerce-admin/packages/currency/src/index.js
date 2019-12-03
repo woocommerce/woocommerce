@@ -9,29 +9,52 @@ import { sprintf } from '@wordpress/i18n';
  */
 import { numberFormat } from '@woocommerce/number';
 
-const DEFAULTS = {
-	code: 'USD',
-	precision: 2,
-	symbol: '$',
-	symbolPosition: 'left',
-	decimalSeparator: '.',
-	priceFormat: '%1$s%2$s',
-	thousandSeparator: ',',
-};
-
 export default class Currency {
-	constructor( config = {} ) {
-		this.code = ( config.code || DEFAULTS.code ).toString();
-		this.symbol = ( config.symbol || DEFAULTS.symbol ).toString();
-		this.symbolPosition = ( config.symbolPosition || DEFAULTS.symbolPosition ).toString();
-		this.decimalSeparator = ( config.decimalSeparator || DEFAULTS.decimalSeparator ).toString();
-		this.priceFormat = ( config.priceFormat || DEFAULTS.priceFormat ).toString();
-		this.thousandSeparator = ( config.thousandSeparator || DEFAULTS.thousandSeparator ).toString();
+	constructor( currency = null ) {
+		if ( ! this.code ) {
+			this.setCurrency( currency );
+		}
+	}
+
+	/**
+	 * Set the currency configuration to use for the class.
+	 *
+	 * @param {Object} currency An object containing currency configuration settings.
+	 */
+	setCurrency( currency ) {
+		const defaultCurrency = getCurrencyData().US;
+		const config = { ...defaultCurrency, ...currency };
+
+		this.code = config.code.toString();
+		this.symbol = config.symbol.toString();
+		this.symbolPosition = config.symbolPosition.toString();
+		this.decimalSeparator = config.decimalSeparator.toString();
+		this.priceFormat = config.priceFormat ? config.priceFormat.toString() : this.getPriceFormat( config );
+		this.thousandSeparator = config.thousandSeparator.toString();
 
 		const precisionNumber = parseInt( config.precision, 10 );
-		this.precision = isNaN( precisionNumber ) ? DEFAULTS.precision : precisionNumber;
+		this.precision = precisionNumber;
+	}
 
-		Object.freeze( this );
+	/**
+	 * Get the default price format from a currency.
+	 *
+	 * @param {Object} currency Currency configuration.
+	 * @return {String} Price format.
+	 */
+	getPriceFormat( currency ) {
+		switch ( currency.symbolPosition ) {
+			case 'left':
+				return '%1$s%2$s';
+			case 'right':
+				return '%2$s%1$s';
+			case 'left_space':
+				return '%1$s&nbsp;%2$s';
+			case 'right_space':
+				return '%2$s&nbsp;%1$s';
+		}
+
+		return '%1$s%2$s';
 	}
 
 	/**
@@ -102,7 +125,7 @@ export default class Currency {
 }
 
 /**
- * Returns currency data by country/region. Contains code, position, thousands separator, decimal separator, and precision.
+ * Returns currency data by country/region. Contains code, symbol, position, thousands separator, decimal separator, and precision.
  *
  * @format
  * @return {object} Curreny data.
@@ -112,93 +135,106 @@ export function getCurrencyData() {
 	return {
 		US: {
 			code: 'USD',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '$',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 2,
 		},
 		EU: {
 			code: 'EUR',
-			position: 'left',
-			grouping: '.',
-			decimal: ',',
+			symbol: '€',
+			symbolPosition: 'left',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
 			precision: 2,
 		},
 		IN: {
 			code: 'INR',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '₹',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 2,
 		},
 		GB: {
 			code: 'GBP',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '£',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 2,
 		},
 		BR: {
 			code: 'BRL',
-			position: 'left',
-			grouping: '.',
-			decimal: ',',
+			symbol: 'R$',
+			symbolPosition: 'left',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
 			precision: 2,
 		},
 		VN: {
 			code: 'VND',
-			position: 'right',
-			grouping: '.',
-			decimal: ',',
+			symbol: '₫',
+			symbolPosition: 'right',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
 			precision: 1,
 		},
 		ID: {
 			code: 'IDR',
-			position: 'left',
-			grouping: '.',
-			decimal: ',',
+			symbol: 'Rp',
+			symbolPosition: 'left',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
 			precision: 0,
 		},
 		BD: {
 			code: 'BDT',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '৳',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 0,
 		},
 		PK: {
 			code: 'PKR',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '₨',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 2,
 		},
 		RU: {
 			code: 'RUB',
-			position: 'right',
-			grouping: ' ',
-			decimal: ',',
+			symbol: '₽',
+			symbolPosition: 'right',
+			thousandSeparator: ' ',
+			decimalSeparator: ',',
 			precision: 2,
 		},
 		TR: {
 			code: 'TRY',
-			position: 'left',
-			grouping: '.',
-			decimal: ',',
+			symbol: '₺',
+			symbolPosition: 'left',
+			thousandSeparator: '.',
+			decimalSeparator: ',',
 			precision: 2,
 		},
 		MX: {
 			code: 'MXN',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '$',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 2,
 		},
 		CA: {
 			code: 'CAD',
-			position: 'left',
-			grouping: ',',
-			decimal: '.',
+			symbol: '$',
+			symbolPosition: 'left',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
 			precision: 2,
 		},
 	};

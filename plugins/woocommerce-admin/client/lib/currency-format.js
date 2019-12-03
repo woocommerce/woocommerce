@@ -17,6 +17,7 @@ const formatCurrency = storeCurrency.formatCurrency.bind( storeCurrency );
 const formatDecimal = storeCurrency.formatDecimal.bind( storeCurrency );
 const formatDecimalString = storeCurrency.formatDecimalString.bind( storeCurrency );
 const render = storeCurrency.render.bind( storeCurrency );
+const setCurrency = storeCurrency.setCurrency.bind( storeCurrency );
 
 // Export the expected API for the consuming app, along with the instance.
 export {
@@ -25,4 +26,5 @@ export {
 	formatDecimal as getCurrencyFormatDecimal,
 	formatDecimalString as getCurrencyFormatString,
 	render as renderCurrency,
+	setCurrency,
 };
