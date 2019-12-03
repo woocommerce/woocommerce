@@ -37,6 +37,7 @@ matrix:
   - name: "E2E tests"
     env: RUN_E2E=1
     script:
+      - npm install
       - npm run build
       - docker-compose up -d
       - travis_retry bash tests/bin/run-e2e-CI.sh
