@@ -82,10 +82,6 @@ class Appearance extends Component {
 		if ( 'logo' === step && isRequestSuccessful ) {
 			createNotice( 'success', __( 'Store logo updated sucessfully.', 'woocommerce-admin' ) );
 			this.completeStep();
-			setSetting( 'onboarding', {
-				...getSetting( 'onboarding', {} ),
-				customLogo: !! themeMods.custom_logo,
-			} );
 		}
 
 		if ( 'notice' === step && isRequestSuccessful ) {

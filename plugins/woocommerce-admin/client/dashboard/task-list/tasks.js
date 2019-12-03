@@ -26,14 +26,12 @@ import Payments from './tasks/payments';
 
 export function getTasks( { profileItems, options, query } ) {
 	const {
-		customLogo,
 		hasHomepage,
 		hasPhysicalProducts,
 		hasProducts,
 		isTaxComplete,
 		shippingZonesCount,
 	} = getSetting( 'onboarding', {
-		customLogo: '',
 		hasHomepage: false,
 		hasPhysicalProducts: false,
 		hasProducts: false,
@@ -78,7 +76,7 @@ export function getTasks( { profileItems, options, query } ) {
 			content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
 			icon: 'palette',
 			container: <Appearance />,
-			completed: customLogo && hasHomepage,
+			completed: hasHomepage,
 			visible: true,
 		},
 		{
