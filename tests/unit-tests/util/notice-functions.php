@@ -116,14 +116,26 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_print_notices() {
-
 		wc_add_notice( 'One True Notice', 'notice' );
+		wc_add_notice( 'Second True Notice', 'notice', array( 'id' => 'second_notice' ) );
 
-		$this->expectOutputString( '<div class="woocommerce-info">One True Notice</div>' );
+		$this->expectOutputString( '<div class="woocommerce-info">One True Notice</div><div class="woocommerce-info" data-id="second_notice">Second True Notice</div>' );
 
 		wc_print_notices();
 
 		$this->assertEmpty( WC()->session->get( 'wc_notices' ) );
+	}
+
+	/**
+	 * Test wc_print_notices() should return notices
+	 * when first parameter is set to true.
+	 */
+	public function test_wc_print_notices_should_return_notices() {
+		$expected_return = "\n	<div class=\"woocommerce-info\">\n		One True Notice	</div>\n";
+
+		wc_add_notice( 'One True Notice', 'notice' );
+
+		$this->assertEquals( $expected_return, wc_print_notices( true ) );
 	}
 
 	/**
