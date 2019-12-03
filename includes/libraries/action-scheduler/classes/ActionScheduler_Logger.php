@@ -59,44 +59,44 @@ abstract class ActionScheduler_Logger {
 	}
 
 	public function log_stored_action( $action_id ) {
-		$this->log( $action_id, __( 'action created', 'action-scheduler' ) );
+		$this->log( $action_id, __( 'action created', 'woocommerce' ) );
 	}
 
 	public function log_canceled_action( $action_id ) {
-		$this->log( $action_id, __( 'action canceled', 'action-scheduler' ) );
+		$this->log( $action_id, __( 'action canceled', 'woocommerce' ) );
 	}
 
 	public function log_started_action( $action_id ) {
-		$this->log( $action_id, __( 'action started', 'action-scheduler' ) );
+		$this->log( $action_id, __( 'action started', 'woocommerce' ) );
 	}
 
 	public function log_completed_action( $action_id ) {
-		$this->log( $action_id, __( 'action complete', 'action-scheduler' ) );
+		$this->log( $action_id, __( 'action complete', 'woocommerce' ) );
 	}
 
 	public function log_failed_action( $action_id, Exception $exception ) {
-		$this->log( $action_id, sprintf( __( 'action failed: %s', 'action-scheduler' ), $exception->getMessage() ) );
+		$this->log( $action_id, sprintf( __( 'action failed: %s', 'woocommerce' ), $exception->getMessage() ) );
 	}
 
 	public function log_timed_out_action( $action_id, $timeout ) {
-		$this->log( $action_id, sprintf( __( 'action timed out after %s seconds', 'action-scheduler' ), $timeout ) );
+		$this->log( $action_id, sprintf( __( 'action timed out after %s seconds', 'woocommerce' ), $timeout ) );
 	}
 
 	public function log_unexpected_shutdown( $action_id, $error ) {
 		if ( ! empty( $error ) ) {
-			$this->log( $action_id, sprintf( __( 'unexpected shutdown: PHP Fatal error %s in %s on line %s', 'action-scheduler' ), $error['message'], $error['file'], $error['line'] ) );
+			$this->log( $action_id, sprintf( __( 'unexpected shutdown: PHP Fatal error %s in %s on line %s', 'woocommerce' ), $error['message'], $error['file'], $error['line'] ) );
 		}
 	}
 
 	public function log_reset_action( $action_id ) {
-		$this->log( $action_id, __( 'action reset', 'action_scheduler' ) );
+		$this->log( $action_id, __( 'action reset', 'woocommerce' ) );
 	}
 
 	public function log_ignored_action( $action_id ) {
-		$this->log( $action_id, __( 'action ignored', 'action-scheduler' ) );
+		$this->log( $action_id, __( 'action ignored', 'woocommerce' ) );
 	}
 
 	public function log_failed_fetch_action( $action_id ) {
-		$this->log( $action_id, __( 'There was a failure fetching this action', 'action-scheduler' ) );
+		$this->log( $action_id, __( 'There was a failure fetching this action', 'woocommerce' ) );
 	}
 }

@@ -30,7 +30,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 			do_action( 'action_scheduler_stored_action', $post_id );
 			return $post_id;
 		} catch ( Exception $e ) {
-			throw new RuntimeException( sprintf( __('Error saving action: %s', 'action-scheduler'), $e->getMessage() ), 0 );
+			throw new RuntimeException( sprintf( __('Error saving action: %s', 'woocommerce'), $e->getMessage() ), 0 );
 		}
 	}
 
@@ -54,7 +54,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		remove_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10 );
 
 		if ( is_wp_error($post_id) || empty($post_id) ) {
-			throw new RuntimeException(__('Unable to save action.', 'action-scheduler'));
+			throw new RuntimeException(__('Unable to save action.', 'woocommerce'));
 		}
 		return $post_id;
 	}
@@ -275,7 +275,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	protected function get_query_actions_sql( array $query, $select_or_count = 'select' ) {
 
 		if ( ! in_array( $select_or_count, array( 'select', 'count' ) ) ) {
-			throw new InvalidArgumentException(__('Invalid schedule. Cannot save action.', 'action-scheduler'));
+			throw new InvalidArgumentException(__('Invalid schedule. Cannot save action.', 'woocommerce'));
 		}
 
 		$query = wp_parse_args( $query, array(
@@ -448,7 +448,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	public function cancel_action( $action_id ) {
 		$post = get_post($action_id);
 		if ( empty($post) || ($post->post_type != self::POST_TYPE) ) {
-			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'action-scheduler'), $action_id));
+			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'woocommerce'), $action_id));
 		}
 		do_action( 'action_scheduler_canceled_action', $action_id );
 		add_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10, 5 );
@@ -459,7 +459,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	public function delete_action( $action_id ) {
 		$post = get_post($action_id);
 		if ( empty($post) || ($post->post_type != self::POST_TYPE) ) {
-			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'action-scheduler'), $action_id));
+			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'woocommerce'), $action_id));
 		}
 		do_action( 'action_scheduler_deleted_action', $action_id );
 		wp_delete_post($action_id, TRUE);
@@ -485,7 +485,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	public function get_date_gmt( $action_id ) {
 		$post = get_post($action_id);
 		if ( empty($post) || ($post->post_type != self::POST_TYPE) ) {
-			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'action-scheduler'), $action_id));
+			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'woocommerce'), $action_id));
 		}
 		if ( $post->post_status == 'publish' ) {
 			return as_get_datetime_object($post->post_modified_gmt);
@@ -597,7 +597,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		// Run the query and gather results.
 		$rows_affected = $wpdb->query( $wpdb->prepare( "{$update} {$where} {$order}", $params ) );
 		if ( $rows_affected === false ) {
-			throw new RuntimeException( __( 'Unable to claim actions. Database error.', 'action-scheduler' ) );
+			throw new RuntimeException( __( 'Unable to claim actions. Database error.', 'woocommerce' ) );
 		}
 
 		return (int) $rows_affected;
@@ -617,7 +617,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	protected function get_actions_by_group( $group, $limit, DateTime $date ) {
 		// Ensure the group exists before continuing.
 		if ( ! term_exists( $group, self::GROUP_TAXONOMY )) {
-			throw new InvalidArgumentException( sprintf( __( 'The group "%s" does not exist.', 'action-scheduler' ), $group ) );
+			throw new InvalidArgumentException( sprintf( __( 'The group "%s" does not exist.', 'woocommerce' ), $group ) );
 		}
 
 		// Set up a query for post IDs to use later.
@@ -678,7 +678,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$sql = $wpdb->prepare( $sql, array( $claim->get_id() ) );
 		$result = $wpdb->query($sql);
 		if ( $result === false ) {
-			throw new RuntimeException( sprintf( __('Unable to unlock claim %s. Database error.', 'action-scheduler'), $claim->get_id() ) );
+			throw new RuntimeException( sprintf( __('Unable to unlock claim %s. Database error.', 'woocommerce'), $claim->get_id() ) );
 		}
 	}
 
@@ -692,7 +692,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$sql = $wpdb->prepare( $sql, $action_id, self::POST_TYPE );
 		$result = $wpdb->query($sql);
 		if ( $result === false ) {
-			throw new RuntimeException( sprintf( __('Unable to unlock claim on action %s. Database error.', 'action-scheduler'), $action_id ) );
+			throw new RuntimeException( sprintf( __('Unable to unlock claim on action %s. Database error.', 'woocommerce'), $action_id ) );
 		}
 	}
 
@@ -703,7 +703,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$sql = $wpdb->prepare( $sql, self::STATUS_FAILED, $action_id, self::POST_TYPE );
 		$result = $wpdb->query($sql);
 		if ( $result === false ) {
-			throw new RuntimeException( sprintf( __('Unable to mark failure on action %s. Database error.', 'action-scheduler'), $action_id ) );
+			throw new RuntimeException( sprintf( __('Unable to mark failure on action %s. Database error.', 'woocommerce'), $action_id ) );
 		}
 	}
 
@@ -727,7 +727,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$status = $this->get_post_column( $action_id, 'post_status' );
 
 		if ( $status === null ) {
-			throw new InvalidArgumentException( __( 'Invalid action ID. No status found.', 'action-scheduler' ) );
+			throw new InvalidArgumentException( __( 'Invalid action ID. No status found.', 'woocommerce' ) );
 		}
 
 		return $this->get_action_status_by_post_status( $status );
@@ -755,7 +755,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	public function mark_complete( $action_id ) {
 		$post = get_post($action_id);
 		if ( empty($post) || ($post->post_type != self::POST_TYPE) ) {
-			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'action-scheduler'), $action_id));
+			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'woocommerce'), $action_id));
 		}
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10, 1 );
 		add_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10, 5 );

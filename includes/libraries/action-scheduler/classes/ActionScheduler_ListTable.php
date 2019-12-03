@@ -86,20 +86,20 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 		$this->logger = $logger;
 		$this->runner = $runner;
 
-		$this->table_header = __( 'Scheduled Actions', 'action-scheduler' );
+		$this->table_header = __( 'Scheduled Actions', 'woocommerce' );
 
 		$this->bulk_actions = array(
-			'delete' => __( 'Delete', 'action-scheduler' ),
+			'delete' => __( 'Delete', 'woocommerce' ),
 		);
 
 		$this->columns = array(
-			'hook'        => __( 'Hook', 'action-scheduler' ),
-			'status'      => __( 'Status', 'action-scheduler' ),
-			'args'        => __( 'Arguments', 'action-scheduler' ),
-			'group'       => __( 'Group', 'action-scheduler' ),
-			'recurrence'  => __( 'Recurrence', 'action-scheduler' ),
-			'schedule'    => __( 'Scheduled Date', 'action-scheduler' ),
-			'log_entries' => __( 'Log', 'action-scheduler' ),
+			'hook'        => __( 'Hook', 'woocommerce' ),
+			'status'      => __( 'Status', 'woocommerce' ),
+			'args'        => __( 'Arguments', 'woocommerce' ),
+			'group'       => __( 'Group', 'woocommerce' ),
+			'recurrence'  => __( 'Recurrence', 'woocommerce' ),
+			'schedule'    => __( 'Scheduled Date', 'woocommerce' ),
+			'log_entries' => __( 'Log', 'woocommerce' ),
 		);
 
 		$this->sort_by = array(
@@ -119,19 +119,19 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 		if ( empty( $request_status ) ) {
 			$this->sort_by[] = 'status';
 		} elseif ( in_array( $request_status, array( 'in-progress', 'failed' ) ) ) {
-			$this->columns  += array( 'claim_id' => __( 'Claim ID', 'action-scheduler' ) );
+			$this->columns  += array( 'claim_id' => __( 'Claim ID', 'woocommerce' ) );
 			$this->sort_by[] = 'claim_id';
 		}
 
 		$this->row_actions = array(
 			'hook' => array(
 				'run' => array(
-					'name'  => __( 'Run', 'action-scheduler' ),
-					'desc'  => __( 'Process the action now as if it were run as part of a queue', 'action-scheduler' ),
+					'name'  => __( 'Run', 'woocommerce' ),
+					'desc'  => __( 'Process the action now as if it were run as part of a queue', 'woocommerce' ),
 				),
 				'cancel' => array(
-					'name'  => __( 'Cancel', 'action-scheduler' ),
-					'desc'  => __( 'Cancel the action now to avoid it being run in future', 'action-scheduler' ),
+					'name'  => __( 'Cancel', 'woocommerce' ),
+					'desc'  => __( 'Cancel the action now to avoid it being run in future', 'woocommerce' ),
 					'class' => 'cancel trash',
 				),
 			),
@@ -140,31 +140,31 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 		self::$time_periods = array(
 			array(
 				'seconds' => YEAR_IN_SECONDS,
-				'names'   => _n_noop( '%s year', '%s years', 'action-scheduler' ),
+				'names'   => _n_noop( '%s year', '%s years', 'woocommerce' ),
 			),
 			array(
 				'seconds' => MONTH_IN_SECONDS,
-				'names'   => _n_noop( '%s month', '%s months', 'action-scheduler' ),
+				'names'   => _n_noop( '%s month', '%s months', 'woocommerce' ),
 			),
 			array(
 				'seconds' => WEEK_IN_SECONDS,
-				'names'   => _n_noop( '%s week', '%s weeks', 'action-scheduler' ),
+				'names'   => _n_noop( '%s week', '%s weeks', 'woocommerce' ),
 			),
 			array(
 				'seconds' => DAY_IN_SECONDS,
-				'names'   => _n_noop( '%s day', '%s days', 'action-scheduler' ),
+				'names'   => _n_noop( '%s day', '%s days', 'woocommerce' ),
 			),
 			array(
 				'seconds' => HOUR_IN_SECONDS,
-				'names'   => _n_noop( '%s hour', '%s hours', 'action-scheduler' ),
+				'names'   => _n_noop( '%s hour', '%s hours', 'woocommerce' ),
 			),
 			array(
 				'seconds' => MINUTE_IN_SECONDS,
-				'names'   => _n_noop( '%s minute', '%s minutes', 'action-scheduler' ),
+				'names'   => _n_noop( '%s minute', '%s minutes', 'woocommerce' ),
 			),
 			array(
 				'seconds' => 1,
-				'names'   => _n_noop( '%s second', '%s seconds', 'action-scheduler' ),
+				'names'   => _n_noop( '%s second', '%s seconds', 'woocommerce' ),
 			),
 		);
 
@@ -191,7 +191,7 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 	private static function human_interval( $interval, $periods_to_include = 2 ) {
 
 		if ( $interval <= 0 ) {
-			return __( 'Now!', 'action-scheduler' );
+			return __( 'Now!', 'woocommerce' );
 		}
 
 		$output = '';
@@ -204,7 +204,7 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 				if ( ! empty( $output ) ) {
 					$output .= ' ';
 				}
-				$output .= sprintf( _n( self::$time_periods[ $time_period_index ]['names'][0], self::$time_periods[ $time_period_index ]['names'][1], $periods_in_interval, 'action-scheduler' ), $periods_in_interval );
+				$output .= sprintf( _n( self::$time_periods[ $time_period_index ]['names'][0], self::$time_periods[ $time_period_index ]['names'][1], $periods_in_interval, 'woocommerce' ), $periods_in_interval );
 				$seconds_remaining -= $periods_in_interval * self::$time_periods[ $time_period_index ]['seconds'];
 				$periods_included++;
 			}
@@ -224,15 +224,15 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 		$recurrence = $action->get_schedule();
 		if ( $recurrence->is_recurring() ) {
 			if ( method_exists( $recurrence, 'interval_in_seconds' ) ) {
-				return sprintf( __( 'Every %s', 'action-scheduler' ), self::human_interval( $recurrence->interval_in_seconds() ) );
+				return sprintf( __( 'Every %s', 'woocommerce' ), self::human_interval( $recurrence->interval_in_seconds() ) );
 			}
 
 			if ( method_exists( $recurrence, 'get_recurrence' ) ) {
-				return sprintf( __( 'Cron %s', 'action-scheduler' ), $recurrence->get_recurrence() );
+				return sprintf( __( 'Cron %s', 'woocommerce' ), $recurrence->get_recurrence() );
 			}
 		}
 
-		return __( 'Non-repeating', 'action-scheduler' );
+		return __( 'Non-repeating', 'woocommerce' );
 	}
 
 	/**
@@ -318,7 +318,7 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 		if ( $this->store->get_claim_count() >= $this->runner->get_allowed_concurrent_batches() ) {
 			$this->admin_notices[] = array(
 				'class'   => 'updated',
-				'message' => sprintf( __( 'Maximum simultaneous batches already in progress (%s queues). No actions will be processed until the current batches are complete.', 'action-scheduler' ), $this->store->get_claim_count() ),
+				'message' => sprintf( __( 'Maximum simultaneous batches already in progress (%s queues). No actions will be processed until the current batches are complete.', 'woocommerce' ), $this->store->get_claim_count() ),
 			);
 		}
 
@@ -333,18 +333,18 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 				$class = 'updated';
 				switch ( $notification['row_action_type'] ) {
 					case 'run' :
-						$action_message_html = sprintf( __( 'Successfully executed action: %s', 'action-scheduler' ), $action_hook_html );
+						$action_message_html = sprintf( __( 'Successfully executed action: %s', 'woocommerce' ), $action_hook_html );
 						break;
 					case 'cancel' :
-						$action_message_html = sprintf( __( 'Successfully canceled action: %s', 'action-scheduler' ), $action_hook_html );
+						$action_message_html = sprintf( __( 'Successfully canceled action: %s', 'woocommerce' ), $action_hook_html );
 						break;
 					default :
-						$action_message_html = sprintf( __( 'Successfully processed change for action: %s', 'action-scheduler' ), $action_hook_html );
+						$action_message_html = sprintf( __( 'Successfully processed change for action: %s', 'woocommerce' ), $action_hook_html );
 						break;
 				}
 			} else {
 				$class = 'error';
-				$action_message_html = sprintf( __( 'Could not process change for action: "%s" (ID: %d). Error: %s', 'action-scheduler' ), $action_hook_html, esc_html( $notification['action_id'] ), esc_html( $notification['error_message'] ) );
+				$action_message_html = sprintf( __( 'Could not process change for action: "%s" (ID: %d). Error: %s', 'woocommerce' ), $action_hook_html, esc_html( $notification['action_id'] ), esc_html( $notification['error_message'] ) );
 			}
 
 			$action_message_html = apply_filters( 'action_scheduler_admin_notice_html', $action_message_html, $action, $notification );
@@ -389,9 +389,9 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 		$schedule_display_string .= '<br/>';
 
 		if ( gmdate( 'U' ) > $next_timestamp ) {
-			$schedule_display_string .= sprintf( __( ' (%s ago)', 'action-scheduler' ), self::human_interval( gmdate( 'U' ) - $next_timestamp ) );
+			$schedule_display_string .= sprintf( __( ' (%s ago)', 'woocommerce' ), self::human_interval( gmdate( 'U' ) - $next_timestamp ) );
 		} else {
-			$schedule_display_string .= sprintf( __( ' (%s)', 'action-scheduler' ), self::human_interval( $next_timestamp - gmdate( 'U' ) ) );
+			$schedule_display_string .= sprintf( __( ' (%s)', 'woocommerce' ), self::human_interval( $next_timestamp - gmdate( 'U' ) ) );
 		}
 
 		return $schedule_display_string;
@@ -528,6 +528,6 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 	 * Get the text to display in the search box on the list table.
 	 */
 	protected function get_search_box_button_text() {
-		return __( 'Search hook, args and claim ID', 'action-scheduler' );
+		return __( 'Search hook, args and claim ID', 'woocommerce' );
 	}
 }
