@@ -1540,6 +1540,15 @@ class WC_AJAX {
 		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
 		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
 
+		if ( ! empty( $_GET['exclude_type'] ) ) {
+			$exclude_types = array_map( 'strtolower', (array) wp_unslash( $_GET['exclude_type'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			// Sanitize the excluded types against valid product types.
+			$exclude_types = array_intersect( array_keys( wc_get_product_types() ), $exclude_types );
+		} else {
+			$exclude_types = array();
+		}
+
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
@@ -1549,6 +1558,10 @@ class WC_AJAX {
 		foreach ( $product_objects as $product_object ) {
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
+
+			if ( in_array( $product_object->get_type(), $exclude_types, true ) ) {
+				continue;
+			}
 
 			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
 				$stock_amount    = $product_object->get_stock_quantity();
