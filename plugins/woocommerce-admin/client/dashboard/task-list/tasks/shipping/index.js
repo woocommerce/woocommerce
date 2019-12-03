@@ -14,8 +14,8 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Card, Link, Stepper } from '@woocommerce/components';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -231,6 +231,7 @@ class Shipping extends Component {
 				),
 				content: (
 					<Connect
+						redirectUrl={ getAdminLink( 'admin.php?page=wc-admin' ) }
 						completeStep={ this.completeStep }
 						{ ...this.props }
 						onConnect={ () => {
