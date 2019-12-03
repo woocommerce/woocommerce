@@ -20,6 +20,7 @@ none
 
 # Compiled CSS
 /assets/css/*.css
+/assets/css/photoswipe/**/*.min.css
 
 # Minified JS
 /assets/js/admin/*.min.js
