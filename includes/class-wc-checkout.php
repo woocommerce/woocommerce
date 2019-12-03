@@ -323,7 +323,6 @@ class WC_Checkout {
 			return $order_id;
 		}
 
-		$error = null;
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
