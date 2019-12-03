@@ -104,7 +104,7 @@ function wc_delete_order_item( $item_id ) {
 function wc_update_order_item_meta( $item_id, $meta_key, $meta_value, $prev_value = '' ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $data_store->update_metadata( $item_id, $meta_key, $meta_value, $prev_value ) ) {
-		WC_Cache_Helper::incr_cache_prefix( 'object_' . $item_id ); // Invalidate cache.
+		WC_Cache_Helper::invalidate_cache_group( 'object_' . $item_id ); // Invalidate cache.
 		return true;
 	}
 	return false;
@@ -126,7 +126,7 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
 	$meta_id    = $data_store->add_metadata( $item_id, $meta_key, $meta_value, $unique );
 
 	if ( $meta_id ) {
-		WC_Cache_Helper::incr_cache_prefix( 'object_' . $item_id ); // Invalidate cache.
+		WC_Cache_Helper::invalidate_cache_group( 'object_' . $item_id ); // Invalidate cache.
 		return $meta_id;
 	}
 	return 0;
@@ -146,7 +146,7 @@ function wc_add_order_item_meta( $item_id, $meta_key, $meta_value, $unique = fal
 function wc_delete_order_item_meta( $item_id, $meta_key, $meta_value = '', $delete_all = false ) {
 	$data_store = WC_Data_Store::load( 'order-item' );
 	if ( $data_store->delete_metadata( $item_id, $meta_key, $meta_value, $delete_all ) ) {
-		WC_Cache_Helper::incr_cache_prefix( 'object_' . $item_id ); // Invalidate cache.
+		WC_Cache_Helper::invalidate_cache_group( 'object_' . $item_id ); // Invalidate cache.
 		return true;
 	}
 	return false;

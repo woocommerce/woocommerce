@@ -88,7 +88,7 @@ class WC_Widget_Recently_Viewed extends WC_Widget {
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_list', '<ul class="product_list_widget">' ) );
 
 			$template_args = array(
-				'widget_id' => $args['widget_id'],
+				'widget_id' => isset( $args['widget_id'] ) ? $args['widget_id'] : $this->widget_id,
 			);
 
 			while ( $r->have_posts() ) {

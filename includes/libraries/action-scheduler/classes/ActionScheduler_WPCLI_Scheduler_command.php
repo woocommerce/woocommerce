@@ -84,7 +84,7 @@ class ActionScheduler_WPCLI_Scheduler_command extends WP_CLI_Command {
 		WP_CLI::log(
 			sprintf(
 				/* translators: %d refers to how many scheduled taks were found to run */
-				_n( 'Found %d scheduled task', 'Found %d scheduled tasks', $total, 'action-scheduler' ),
+				_n( 'Found %d scheduled task', 'Found %d scheduled tasks', $total, 'woocommerce' ),
 				number_format_i18n( $total )
 			)
 		);
@@ -101,7 +101,7 @@ class ActionScheduler_WPCLI_Scheduler_command extends WP_CLI_Command {
 		WP_CLI::log(
 			sprintf(
 				/* translators: %d refers to the total number of batches executed */
-				_n( '%d batch executed.', '%d batches executed.', $batches_completed, 'action-scheduler' ),
+				_n( '%d batch executed.', '%d batches executed.', $batches_completed, 'woocommerce' ),
 				number_format_i18n( $batches_completed )
 			)
 		);
@@ -120,7 +120,7 @@ class ActionScheduler_WPCLI_Scheduler_command extends WP_CLI_Command {
 		WP_CLI::error(
 			sprintf(
 				/* translators: %s refers to the exception error message. */
-				__( 'There was an error running the action scheduler: %s', 'action-scheduler' ),
+				__( 'There was an error running the action scheduler: %s', 'woocommerce' ),
 				$e->getMessage()
 			)
 		);
@@ -137,7 +137,7 @@ class ActionScheduler_WPCLI_Scheduler_command extends WP_CLI_Command {
 		WP_CLI::success(
 			sprintf(
 				/* translators: %d refers to the total number of taskes completed */
-				_n( '%d scheduled task completed.', '%d scheduled tasks completed.', $actions_completed, 'action-scheduler' ),
+				_n( '%d scheduled task completed.', '%d scheduled tasks completed.', $actions_completed, 'woocommerce' ),
 				number_format_i18n( $actions_completed )
 			)
 		);

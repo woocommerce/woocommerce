@@ -19,7 +19,7 @@ class ActionScheduler_InvalidActionException extends \InvalidArgumentException i
 	 */
 	public static function from_decoding_args( $action_id ) {
 		$message = sprintf(
-			__( 'Action [%s] has invalid arguments. It cannot be JSON decoded to an array.', 'action-scheduler' ),
+			__( 'Action [%s] has invalid arguments. It cannot be JSON decoded to an array.', 'woocommerce' ),
 			$action_id
 		);
 

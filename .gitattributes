@@ -1,4 +1,5 @@
 /.* export-ignore
+bin export-ignore
 CODE_OF_CONDUCT.md export-ignore
 CHANGELOG.txt export-ignore
 composer.* export-ignore
@@ -9,3 +10,4 @@ phpcs.xml export-ignore
 phpunit.* export-ignore
 README.md export-ignore
 tests export-ignore
+renovate.json export-ignore
