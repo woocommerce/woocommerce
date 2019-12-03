@@ -44,13 +44,13 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$order_id = $checkout->create_order(
 			array(
 				'payment_method' => 'cod',
-				'billing_email' => 'a@b.com',
+				'billing_email'  => 'a@b.com',
 			)
 		);
 
 		// Assertions whether the order was created successfully.
 		$this->assertNotWPError( $order_id );
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		return array( $product, $order );
 	}
@@ -119,8 +119,8 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	 */
 	public function test_create_order_for_variation_product() {
 		$parent_product = WC_Helper_Product::create_variation_product();
-		$variation = $parent_product->get_available_variations()[0];
-		$variation = wc_get_product( $variation['variation_id'] );
+		$variation      = $parent_product->get_available_variations()[0];
+		$variation      = wc_get_product( $variation['variation_id'] );
 		$variation->set_manage_stock( true );
 		$variation->set_stock_quantity( 10 );
 		$variation->save();
@@ -131,13 +131,13 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		$order_id = $checkout->create_order(
 			array(
 				'payment_method' => 'cod',
-				'billing_email' => 'a@b.com',
+				'billing_email'  => 'a@b.com',
 			)
 		);
 
 		// Assertions whether the first order was created successfully.
 		$this->assertNotWPError( $order_id );
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		$this->assertEquals( 9, $order->get_item_count() );
 		$this->assertEquals( 'pending', $order->get_status() );
