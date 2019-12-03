@@ -54,7 +54,11 @@ class Appearance extends Component {
 		const step = this.getSteps()[ stepIndex ].key;
 		const isRequestSuccessful = ! isRequesting && prevProps.isRequesting && ! hasErrors;
 
-		if ( themeMods && prevProps.themeMods.custom_logo !== themeMods.custom_logo ) {
+		if (
+			themeMods &&
+			themeMods.custom_logo &&
+			prevProps.themeMods.custom_logo !== themeMods.custom_logo
+		) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( { isPending: true } );
 			wp.media
@@ -164,7 +168,7 @@ class Appearance extends Component {
 	updateLogo() {
 		const { options, themeMods, updateOptions } = this.props;
 		const { logo } = this.state;
-		const updateThemeMods = logo ? { ...themeMods, custom_logo: logo.id } : themeMods;
+		const updateThemeMods = { ...themeMods, custom_logo: logo ? logo.id : null };
 
 		recordEvent( 'tasklist_appearance_upload_logo' );
 
