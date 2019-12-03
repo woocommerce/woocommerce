@@ -113,7 +113,7 @@ class WC_Order extends WC_Abstract_Order {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp', true ) );
+					$this->set_date_paid( time() );
 				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
@@ -292,11 +292,11 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( $this->has_status( $payment_completed_status ) ) {
 				// If payment complete status is reached, set paid now.
-				$this->set_date_paid( current_time( 'timestamp', true ) );
+				$this->set_date_paid( time() );
 
 			} elseif ( 'processing' === $payment_completed_status && $this->has_status( 'completed' ) ) {
 				// If payment complete status was processing, but we've passed that and still have no date, set it now.
-				$this->set_date_paid( current_time( 'timestamp', true ) );
+				$this->set_date_paid( time() );
 			}
 		}
 	}
@@ -310,7 +310,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_completed( current_time( 'timestamp', true ) );
+			$this->set_date_completed( time() );
 		}
 	}
 
@@ -371,6 +371,21 @@ class WC_Order extends WC_Abstract_Order {
 
 					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
+
+					// Work out if this was for a payment, and trigger a payment_status hook instead.
+					if (
+						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ) ), true )
+						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
+					) {
+						/**
+						 * Fires when the order progresses from a pending payment status to a paid one.
+						 *
+						 * @since 3.9.0
+						 * @param int Order ID
+						 * @param WC_Order Order object
+						 */
+						do_action( 'woocommerce_order_payment_status_changed', $this->get_id(), $this );
+					}
 				} else {
 					/* translators: %s: new order status */
 					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
