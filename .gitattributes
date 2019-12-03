@@ -9,3 +9,4 @@ phpcs.xml export-ignore
 phpunit.* export-ignore
 README.md export-ignore
 tests export-ignore
+renovate.json export-ignore
