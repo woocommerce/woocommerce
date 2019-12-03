@@ -1826,7 +1826,7 @@ function wc_print_r( $expression, $return = false ) {
 
 	foreach ( $alternatives as $alternative ) {
 		if ( function_exists( $alternative['func'] ) ) {
-			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			$res = $alternative['func']( ...$alternative['args'] );
 			if ( $return ) {
 				return $res;
 			}

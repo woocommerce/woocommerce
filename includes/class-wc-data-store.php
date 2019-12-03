@@ -202,8 +202,9 @@ class WC_Data_Store {
 	 */
 	public function __call( $method, $parameters ) {
 		if ( is_callable( array( $this->instance, $method ) ) ) {
-			$object = array_shift( $parameters );
-			return call_user_func_array( array( $this->instance, $method ), array_merge( array( &$object ), $parameters ) );
+			$object     = array_shift( $parameters );
+			$parameters = array_merge( array( &$object ), $parameters );
+			return $this->instance->$method( ...$parameters );
 		}
 	}
 }
