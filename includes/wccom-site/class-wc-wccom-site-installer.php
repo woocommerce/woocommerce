@@ -257,7 +257,7 @@ class WC_WCCOM_Site_Installer {
 					break;
 				case 'move_product':
 					$state_steps[ $product_id ]['installed_path'] = $result['destination'];
-					if ( $result[ self::$folder_exists ] ) {
+					if ( isset( $result[ self::$folder_exists ] ) ) {
 						$state_steps[ $product_id ]['warning'] = array(
 							'message'     => self::$folder_exists,
 							'plugin_info' => self::get_plugin_info( $state_steps[ $product_id ]['installed_path'] ),
