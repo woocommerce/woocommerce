@@ -48,8 +48,8 @@ const Label = ( {
 };
 
 Label.propTypes = {
-	label: PropTypes.string,
-	screenReaderLabel: PropTypes.string,
+	label: PropTypes.node,
+	screenReaderLabel: PropTypes.node,
 	wrapperElement: PropTypes.elementType,
 	wrapperProps: PropTypes.object,
 };

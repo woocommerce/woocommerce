@@ -106,6 +106,7 @@
 	"dependencies": {
 		"@woocommerce/components": "4.0.0",
 		"compare-versions": "3.5.1",
+		"downshift": "^3.4.2",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"gridicons": "3.3.1",
 		"react-number-format": "4.3.1",

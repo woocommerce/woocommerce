@@ -47,6 +47,8 @@
 }
 
 .wc-block-price-filter {
+	margin-bottom: $gap-large;
+
 	.wc-block-price-filter__range-input-wrapper {
 		@include reset;
 		height: 9px;
@@ -73,7 +75,6 @@
 		flex-flow: row nowrap;
 		justify-content: flex-start;
 		align-items: center;
-		margin: 0 0 20px;
 
 		.wc-block-price-filter__amount {
 			margin: 0;

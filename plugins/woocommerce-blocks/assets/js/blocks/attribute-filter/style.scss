@@ -1,6 +1,15 @@
 .wc-block-attribute-filter {
+	margin-bottom: $gap-large;
+
+	.wc-block-attribute-filter-list-count::before {
+		content: " (";
+	}
+	.wc-block-attribute-filter-list-count::after {
+		content: ")";
+	}
+
 	.wc-block-attribute-filter-list {
-		margin: 0 0 $gap;
+		margin: 0;
 
 		li {
 			text-decoration: underline;
@@ -14,11 +23,11 @@
 		.wc-block-attribute-filter-list-count {
 			float: right;
 		}
-		.wc-block-attribute-filter-list-count::before {
-			content: " (";
-		}
-		.wc-block-attribute-filter-list-count::after {
-			content: ")";
+	}
+
+	.wc-block-dropdown-selector {
+		.wc-block-dropdown-selector__list .wc-block-attribute-filter-list-count {
+			opacity: 0.6;
 		}
 	}
 }

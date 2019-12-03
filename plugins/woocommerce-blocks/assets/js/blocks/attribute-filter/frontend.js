@@ -17,6 +17,7 @@ const getProps = ( el ) => {
 			queryType: el.dataset.queryType,
 			heading: el.dataset.heading,
 			headingLevel: el.dataset.headingLevel || 3,
+			displayStyle: el.dataset.displayStyle,
 		},
 	};
 };

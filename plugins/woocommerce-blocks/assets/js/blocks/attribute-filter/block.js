@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
 import {
 	useCollection,
 	useQueryStateByKey,
@@ -15,6 +17,8 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
+import DropdownSelector from '@woocommerce/base-components/dropdown-selector';
+import Label from '@woocommerce/base-components/label';
 
 /**
  * Internal dependencies
@@ -39,9 +43,24 @@ const AttributeFilterBlock = ( {
 				<Fragment>
 					{ name }
 					{ blockAttributes.showCounts && count !== null && (
-						<span className="wc-block-attribute-filter-list-count">
-							{ count }
-						</span>
+						<Label
+							label={ count }
+							screenReaderLabel={ sprintf(
+								// translators: %s number of products.
+								_n(
+									'%s product',
+									'%s products',
+									count,
+									'woo-gutenberg-products-block'
+								),
+								count
+							) }
+							wrapperElement="span"
+							wrapperProps={ {
+								className:
+									'wc-block-attribute-filter-list-count',
+							} }
+						/>
 					) }
 				</Fragment>
 			);
@@ -62,15 +81,18 @@ const AttributeFilterBlock = ( {
 		blockAttributes.isPreview && ! blockAttributes.attributeId
 			? [
 					{
-						key: 'preview-1',
+						value: 'preview-1',
+						name: 'Blue',
 						label: getLabel( 'Blue', 3 ),
 					},
 					{
-						key: 'preview-2',
+						value: 'preview-2',
+						name: 'Green',
 						label: getLabel( 'Green', 3 ),
 					},
 					{
-						key: 'preview-3',
+						value: 'preview-3',
+						name: 'Red',
 						label: getLabel( 'Red', 2 ),
 					},
 			  ]
@@ -149,7 +171,8 @@ const AttributeFilterBlock = ( {
 			}
 
 			newOptions.push( {
-				key: term.slug,
+				value: term.slug,
+				name: term.name,
 				label: getLabel( term.name, count ),
 			} );
 		} );
@@ -183,16 +206,37 @@ const AttributeFilterBlock = ( {
 	 * When a checkbox in the list changes, update state.
 	 */
 	const onChange = useCallback(
-		( event ) => {
-			const isChecked = event.target.checked;
-			const checkedValue = event.target.value;
+		( checkedValue ) => {
+			const isChecked = ! checked.includes( checkedValue );
 			const newChecked = checked.filter(
 				( value ) => value !== checkedValue
+			);
+			const checkedOption = displayedOptions.find(
+				( option ) => option.value === checkedValue
 			);
 
 			if ( isChecked ) {
 				newChecked.push( checkedValue );
 				newChecked.sort();
+				speak(
+					sprintf(
+						__(
+							'%s filter added.',
+							'woo-gutenberg-products-block'
+						),
+						checkedOption.name
+					)
+				);
+			} else {
+				speak(
+					sprintf(
+						__(
+							'%s filter removed.',
+							'woo-gutenberg-products-block'
+						),
+						checkedOption.name
+					)
+				);
 			}
 
 			const newSelectedTerms = getSelectedTerms( newChecked );
@@ -212,6 +256,7 @@ const AttributeFilterBlock = ( {
 			setProductAttributesQuery,
 			attributeObject,
 			blockAttributes,
+			displayedOptions,
 		]
 	);
 
@@ -220,6 +265,8 @@ const AttributeFilterBlock = ( {
 	}
 
 	const TagName = `h${ blockAttributes.headingLevel }`;
+	const isLoading = ! blockAttributes.isPreview && attributeTermsLoading;
+	const isDisabled = ! blockAttributes.isPreview && filteredCountsLoading;
 
 	return (
 		<Fragment>
@@ -227,18 +274,26 @@ const AttributeFilterBlock = ( {
 				<TagName>{ blockAttributes.heading }</TagName>
 			) }
 			<div className="wc-block-attribute-filter">
-				<CheckboxList
-					className={ 'wc-block-attribute-filter-list' }
-					options={ displayedOptions }
-					checked={ checked }
-					onChange={ onChange }
-					isLoading={
-						! blockAttributes.isPreview && attributeTermsLoading
-					}
-					isDisabled={
-						! blockAttributes.isPreview && filteredCountsLoading
-					}
-				/>
+				{ blockAttributes.displayStyle === 'dropdown' ? (
+					<DropdownSelector
+						attributeLabel={ attributeObject.label }
+						checked={ checked }
+						className={ 'wc-block-attribute-filter-dropdown' }
+						inputLabel={ blockAttributes.heading }
+						isLoading={ isLoading }
+						onChange={ onChange }
+						options={ displayedOptions }
+					/>
+				) : (
+					<CheckboxList
+						className={ 'wc-block-attribute-filter-list' }
+						options={ displayedOptions }
+						checked={ checked }
+						onChange={ onChange }
+						isLoading={ isLoading }
+						isDisabled={ isDisabled }
+					/>
+				) }
 			</div>
 		</Fragment>
 	);
