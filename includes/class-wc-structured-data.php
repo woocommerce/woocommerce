@@ -29,7 +29,6 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_before_main_content', array( $this, 'generate_website_data' ), 30 );
 		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
-		add_action( 'woocommerce_review_meta', array( $this, 'generate_review_data' ), 20 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
 		// Output structured data.
@@ -279,38 +278,41 @@ class WC_Structured_Data {
 				'reviewCount' => $product->get_review_count(),
 			);
 
-			// Markup most recent rating/review.
+			// Markup 5 most recent rating/review.
 			$comments = get_comments(
 				array(
-					'number'      => 1,
+					'number'      => 5,
 					'post_id'     => $product->get_id(),
 					'status'      => 'approve',
 					'post_status' => 'publish',
 					'post_type'   => 'product',
 					'parent'      => 0,
-					'meta_key'    => 'rating',
-					'orderby'     => 'meta_value_num',
+					'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'rating',
+							'type'    => 'NUMERIC',
+							'compare' => '>',
+							'value'   => 0,
+						),
+					),
 				)
 			);
 
 			if ( $comments ) {
+				$markup['review'] = array();
 				foreach ( $comments as $comment ) {
-					$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
-
-					if ( ! $rating ) {
-						continue;
-					}
-
-					$markup['review'] = array(
-						'@type'        => 'Review',
-						'reviewRating' => array(
+					$markup['review'][] = array(
+						'@type'         => 'Review',
+						'reviewRating'  => array(
 							'@type'       => 'Rating',
-							'ratingValue' => $rating,
+							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
 						),
-						'author'       => array(
+						'author'        => array(
 							'@type' => 'Person',
-							'name'  => get_comment_author( $comment->comment_ID ),
+							'name'  => get_comment_author( $comment ),
 						),
+						'reviewBody'    => get_comment_text( $comment ),
+						'datePublished' => get_comment_date( 'c', $comment ),
 					);
 				}
 			}

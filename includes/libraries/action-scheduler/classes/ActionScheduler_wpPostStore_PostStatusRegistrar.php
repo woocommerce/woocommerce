@@ -33,8 +33,8 @@ class ActionScheduler_wpPostStore_PostStatusRegistrar {
 	 */
 	protected function post_status_failed_labels() {
 		$labels = array(
-			'label'       => _x( 'Failed', 'post' ),
-			'label_count' => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>' ),
+			'label'       => _x( 'Failed', 'post', 'woocommerce' ),
+			'label_count' => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' ),
 		);
 
 		return apply_filters( 'action_scheduler_post_status_failed_labels', $labels );
@@ -47,11 +47,10 @@ class ActionScheduler_wpPostStore_PostStatusRegistrar {
 	 */
 	protected function post_status_running_labels() {
 		$labels = array(
-			'label'       => _x( 'In-Progress', 'post' ),
-			'label_count' => _n_noop( 'In-Progress <span class="count">(%s)</span>', 'In-Progress <span class="count">(%s)</span>' ),
+			'label'       => _x( 'In-Progress', 'post', 'woocommerce' ),
+			'label_count' => _n_noop( 'In-Progress <span class="count">(%s)</span>', 'In-Progress <span class="count">(%s)</span>', 'woocommerce' ),
 		);
 
 		return apply_filters( 'action_scheduler_post_status_running_labels', $labels );
 	}
 }
- 

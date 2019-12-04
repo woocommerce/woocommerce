@@ -544,7 +544,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	WC_Cache_Helper::get_transient_version( 'orders', true );
 
 	// Do the same for regular cache.
-	WC_Cache_Helper::incr_cache_prefix( 'orders' );
+	WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 }
@@ -883,6 +883,8 @@ function wc_order_search( $term ) {
 function wc_update_total_sales_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
+	$order->release_held_stock();
+
 	if ( ! $order || $order->get_data_store()->get_recorded_sales( $order ) ) {
 		return;
 	}
@@ -960,6 +962,23 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		}
 	}
 }
+
+/**
+ * Release held stock if any for an order.
+ *
+ * @since 3.9.0
+ * @param int $order_id Order ID.
+ */
+function wc_release_held_stock( $order_id ) {
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+
+	$order->release_held_stock();
+}
+add_action( 'woocommerce_order_status_cancelled', 'wc_release_held_stock' );
+
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
