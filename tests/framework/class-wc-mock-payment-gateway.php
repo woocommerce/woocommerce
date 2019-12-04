@@ -1,4 +1,13 @@
 <?php
+/**
+ * Class WC_Mock_Payment_Gateway
+ *
+ * @package WooCommerce\Tests\Framework
+ */
+
+/**
+ * Class WC_Mock_Payment_Gateway
+ */
 class WC_Mock_Payment_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Constructor for the gateway.

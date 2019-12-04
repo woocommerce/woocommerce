@@ -4,6 +4,10 @@
  *
  * @package WooCommerce\Tests\Gateways
  */
+
+/**
+ * Unit tests for gateways.
+ */
 class WC_Tests_Gateways extends WC_Unit_Test_Case {
 
 	/**

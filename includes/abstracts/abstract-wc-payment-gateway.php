@@ -456,7 +456,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		);
 
 		wp_localize_script(
-			'woocommerce-tokenization-form', 'wc_tokenization_form_params', array(
+			'woocommerce-tokenization-form',
+			'wc_tokenization_form_params',
+			array(
 				'is_registration_required' => WC()->checkout()->is_registration_required(),
 				'is_logged_in'             => is_user_logged_in(),
 			)
@@ -538,7 +540,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_html__( 'Save to account', 'woocommerce' )
 		);
 
-		echo apply_filters( 'woocommerce_payment_gateway_save_new_payment_method_option_html', $html, $this );
+		echo apply_filters( 'woocommerce_payment_gateway_save_new_payment_method_option_html', $html, $this ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
