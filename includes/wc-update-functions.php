@@ -2052,15 +2052,15 @@ function wc_update_370_db_version() {
  *
  * @return void
  */
-function wc_update_390_order_statuses() {
+function wc_update_400_order_statuses() {
 
 }
 
 /**
- * Update DB version for 3.9.0
+ * Update DB version for 4.0.0
  *
  * @return void
  */
-function wc_update_390_db_version() {
-	WC_Install::update_db_version( '3.9.0' );
+function wc_update_400_db_version() {
+	WC_Install::update_db_version( '4.0.0' );
 }

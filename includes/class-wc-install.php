@@ -135,9 +135,9 @@ class WC_Install {
 			'wc_update_370_mro_std_currency',
 			'wc_update_370_db_version',
 		),
-		'3.9.0' => array(
-			'wc_update_390_order_statuses',
-			'wc_update_390_db_version',
+		'4.0.0' => array(
+			'wc_update_400_order_statuses',
+			'wc_update_400_db_version',
 		),
 	);
 
