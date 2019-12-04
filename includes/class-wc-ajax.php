@@ -707,8 +707,8 @@ class WC_AJAX {
 		$product_id       = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id ); // phpcs:ignore
 		$loop             = intval( $_POST['loop'] );
-		$product_object   = wc_get_product_classname( 'variable', $product_id ); // Forces type to variable in case product is unsaved.
-		$variation_object = wc_get_product_classname( 'variation' );
+		$product_object   = wc_get_product_object( 'variable', $product_id ); // Forces type to variable in case product is unsaved.
+		$variation_object = wc_get_product_object( 'variation' );
 		$variation_object->set_parent_id( $product_id );
 		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
 		$variation_id   = $variation_object->save();
