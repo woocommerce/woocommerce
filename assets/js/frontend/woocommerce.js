@@ -86,10 +86,10 @@ jQuery( function( $ ) {
 	$( '.show-password-input' ).click(
 		function() {
 			$( this ).toggleClass( 'display-password' );
-			if ( $( this ).hasClass('display-password') ) {
-				$( this ).siblings( ['input[name="password"]', 'input[type="password"]'] ).prop('type', 'text');
+			if ( $( this ).hasClass( 'display-password' ) ) {
+				$( this ).siblings( ['input[name="password"]', 'input[type="password"]'] ).prop( 'type', 'text' );
 			} else {
-				$( this ).siblings( 'input[name="password"]' ).prop('type', 'password');
+				$( this ).siblings( 'input[name="password"]' ).prop( 'type', 'password' );
 			}
 		}
 	);
