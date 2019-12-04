@@ -715,7 +715,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 	);
 	$attachment = get_post( $attachment_id );
 
-	if ( $attachment ) {
+	if ( $attachment && 'attachment' === $attachment->post_type ) {
 		$props['title']   = wp_strip_all_tags( $attachment->post_title );
 		$props['caption'] = wp_strip_all_tags( $attachment->post_excerpt );
 		$props['url']     = wp_get_attachment_url( $attachment_id );

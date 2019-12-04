@@ -611,7 +611,7 @@ function wc_create_attribute( $args ) {
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 	delete_transient( 'wc_attribute_taxonomies' );
-	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+	WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 	return $id;
 }
@@ -701,7 +701,7 @@ function wc_delete_attribute( $id ) {
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
-		WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 		return true;
 	}
