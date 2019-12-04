@@ -348,7 +348,8 @@
 .woocommerce-profile-wizard__plugins-card {
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
-		margin-left: 44px;
+		margin-left: $gap-largest + $gap-smallest;
+		margin-top: $gap;
 		min-height: 28px;
 
 		button.is-button {
