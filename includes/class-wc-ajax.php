@@ -1540,13 +1540,22 @@ class WC_AJAX {
 		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
 		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
 
+		$exclude_types = array();
 		if ( ! empty( $_GET['exclude_type'] ) ) {
-			$exclude_types = array_map( 'strtolower', (array) wp_unslash( $_GET['exclude_type'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			// Support both comma-delimited and array format inputs.
+			$exclude_types = wp_unslash( $_GET['exclude_type'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( ! is_array( $exclude_types ) ) {
+				$exclude_types = explode( ',', $exclude_types );
+			}
 
 			// Sanitize the excluded types against valid product types.
-			$exclude_types = array_intersect( array_keys( wc_get_product_types() ), $exclude_types );
-		} else {
-			$exclude_types = array();
+			foreach ( $exclude_types as &$exclude_type ) {
+				$exclude_type = strtolower( trim( $exclude_type ) );
+			}
+			$exclude_types = array_intersect(
+				array_merge( array( 'variation' ), array_keys( wc_get_product_types() ) ),
+				$exclude_types
+			);
 		}
 
 		$data_store = WC_Data_Store::load( 'product' );
