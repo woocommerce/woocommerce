@@ -304,14 +304,18 @@ class TimeInterval {
 	 * @return DateTime
 	 */
 	public static function next_day_start( $datetime, $reversed = false ) {
-		$day_increment      = $reversed ? 0 : 1;
-		$timestamp          = (int) $datetime->format( 'U' );
-		$seconds_into_day   = (int) $datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $datetime->format( 's' );
-		$next_day_timestamp = $timestamp + ( $day_increment * DAY_IN_SECONDS - $seconds_into_day );
+		$seconds_into_day = (int) $datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $datetime->format( 's' );
 
 		// The day boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
 		if ( $reversed ) {
-			$next_day_timestamp --;
+			$timestamp          = (int) $datetime->format( 'U' );
+			$next_day_timestamp = $timestamp - ( $seconds_into_day + 1 );
+		} else {
+			$day_increment = new \DateInterval( 'P1D' ); // Plus 1 Day.
+			$next_datetime = clone $datetime;
+			$next_datetime->add( $day_increment );
+			$timestamp          = (int) $next_datetime->format( 'U' );
+			$next_day_timestamp = $timestamp - $seconds_into_day;
 		}
 
 		$next_day = new \DateTime();
