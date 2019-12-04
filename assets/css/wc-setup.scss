@@ -6,7 +6,7 @@ body {
 	padding: 0;
 }
 
-#wc-logo {
+.wc-logo {
 	border: 0;
 	margin: 0 0 24px;
 	padding: 0;
@@ -1070,6 +1070,31 @@ h3.jetpack-reasons {
 	}
 }
 
+.wc-setup-step__new_onboarding {
+
+	.wc-logo,
+	.wc-setup-steps {
+		display: none;
+	}
+
+	.wc-setup-step__new_onboarding-wrapper {
+
+		.wc-logo {
+			display: block;
+		}
+
+		p {
+			text-align: center;
+		}
+
+		.wc-setup-step__new_onboarding-welcome,
+		.wc-setup-step__new_onboarding-plugin-info {
+			color: #7c7c7c;
+			font-size: 12px;
+		}
+	}
+}
+
 .step {
 	text-align: center;
 }
@@ -1523,7 +1548,7 @@ p.jetpack-terms {
 
 @media only screen and (max-width: 400px) {
 
-	#wc-logo img {
+	.wc-logo img {
 		max-width: 80%;
 	}
 
