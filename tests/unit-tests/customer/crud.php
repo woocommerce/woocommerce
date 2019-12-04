@@ -13,7 +13,7 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	public function test_create_customer() {
 		$username = 'testusername-' . time();
 		$customer = new WC_Customer();
-		$customer->set_username( 'testusername-' . time() );
+		$customer->set_username( $username );
 		$customer->set_password( 'test123' );
 		$customer->set_email( 'test@woo.local' );
 		$customer->save();

@@ -46,6 +46,9 @@ function wc_get_products( $args ) {
 /**
  * Main function for returning products, uses the WC_Product_Factory class.
  *
+ * This function should only be called after 'init' action is finished, as there might be taxonomies that are getting
+ * registered during the init action.
+ *
  * @since 2.2.0
  *
  * @param mixed $the_product Post object or post ID of the product.
@@ -53,9 +56,9 @@ function wc_get_products( $args ) {
  * @return WC_Product|null|false
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
-	if ( ! did_action( 'woocommerce_init' ) ) {
-		/* translators: 1: wc_get_product 2: woocommerce_init */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_get_product', 'woocommerce_init' ), '2.5' );
+	if ( ! did_action( 'woocommerce_init' ) || ! did_action( 'woocommerce_after_register_taxonomy' ) || ! did_action( 'woocommerce_after_register_post_type' ) ) {
+		/* translators: 1: wc_get_product 2: woocommerce_init 3: woocommerce_after_register_taxonomy 4: woocommerce_after_register_post_type */
+		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s, %3$s and %4$s actions have finished.', 'woocommerce' ), 'wc_get_product', 'woocommerce_init', 'woocommerce_after_register_taxonomy', 'woocommerce_after_register_post_type' ), '3.9' );
 		return false;
 	}
 	if ( ! empty( $deprecated ) ) {
@@ -303,26 +306,38 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  *
  * Uses wp_get_attachment_image if using an attachment ID @since 3.6.0 to handle responsiveness.
  *
- * @param string $size Image size.
+ * @param string       $size Image size.
+ * @param string|array $attr Optional. Attributes for the image markup. Default empty.
  * @return string
  */
-function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
+function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 	$dimensions        = wc_get_image_size( $size );
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	$default_attr = array(
+		'class' => 'woocommerce-placeholder wp-post-image',
+		'alt'   => __( 'Placeholder', 'woocommerce' ),
+	);
+
+	$attr = wp_parse_args( $attr, $default_attr );
 
 	if ( wp_attachment_is_image( $placeholder_image ) ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
 			false,
-			array(
-				'alt'   => __( 'Placeholder', 'woocommerce' ),
-				'class' => 'woocommerce-placeholder wp-post-image',
-			)
+			$attr
 		);
 	} else {
 		$image      = wc_placeholder_img_src( $size );
-		$image_html = '<img src="' . esc_attr( $image ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />';
+		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
+		$attributes = array();
+
+		foreach ( $attr as $name => $value ) {
+			$attribute[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+		}
+
+		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attribute ) . '/>';
 	}
 
 	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
@@ -730,7 +745,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 	);
 	$attachment = get_post( $attachment_id );
 
-	if ( $attachment ) {
+	if ( $attachment && 'attachment' === $attachment->post_type ) {
 		$props['title']   = wp_strip_all_tags( $attachment->post_title );
 		$props['caption'] = wp_strip_all_tags( $attachment->post_excerpt );
 		$props['url']     = wp_get_attachment_url( $attachment_id );
@@ -1463,7 +1478,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$meta_key
 				)
 			);
-			// phpcs:enable
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			break;
 		case 'downloadable':
 		case 'virtual':
@@ -1482,11 +1497,12 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$meta_key
 				)
 			);
-			// phpcs:enable
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			break;
 		case 'onsale':
 			$column   = esc_sql( $column );
 			$decimals = absint( wc_get_price_decimals() );
+
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
@@ -1506,7 +1522,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$decimals
 				)
 			);
-			// phpcs:enable
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
 			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
 			break;
 	}

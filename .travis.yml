@@ -51,6 +51,8 @@ matrix:
   allow_failures:
   - php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
