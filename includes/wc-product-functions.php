@@ -316,12 +316,13 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 	} else {
 		$image      = wc_placeholder_img_src( $size );
 		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
-		$attr = array_map( 'esc_attr', $attr );
-		$image_html = rtrim( '<img src="' . esc_attr( $image ) . '" ' . $hwstring );
+		$attributes = array();
+
 		foreach ( $attr as $name => $value ) {
-			$image_html .= " $name=" . '"' . $value . '"';
+			$attribute[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
 		}
-		$image_html .= ' />';
+
+		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attribute ) . '/>';
 	}
 
 	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
