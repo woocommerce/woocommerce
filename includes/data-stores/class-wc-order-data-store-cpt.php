@@ -481,8 +481,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				// @codingStandardsIgnoreStart
 				"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
+				JOIN {$wpdb->prefix}wc_order_statuses AS statuses ON statuses.order_id = posts.ID
 				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
-				AND     posts.post_status = 'wc-pending'
+				AND     statuses.payment_status = 'wc-paid'
 				AND     posts.post_modified < %s",
 				// @codingStandardsIgnoreEnd
 				gmdate( 'Y-m-d H:i:s', absint( $date ) )
