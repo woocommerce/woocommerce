@@ -74,7 +74,7 @@ class WC_AJAX {
 	public static function do_wc_ajax() {
 		global $wp_query;
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['wc-ajax'] ) ) {
 			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
 		}
@@ -396,7 +396,7 @@ class WC_AJAX {
 	public static function add_to_cart() {
 		ob_start();
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['product_id'] ) ) {
 			return;
 		}
@@ -444,7 +444,7 @@ class WC_AJAX {
 	public static function remove_from_cart() {
 		ob_start();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$cart_item_key = wc_clean( isset( $_POST['cart_item_key'] ) ? wp_unslash( $_POST['cart_item_key'] ) : '' );
 
 		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
@@ -469,7 +469,7 @@ class WC_AJAX {
 	public static function get_variation() {
 		ob_start();
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( empty( $_POST['product_id'] ) ) {
 			wp_die();
 		}
@@ -1144,7 +1144,7 @@ class WC_AJAX {
 				$order->set_billing_email( $user_email_arg );
 			}
 
-			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
@@ -1196,7 +1196,7 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 
-			$order->remove_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order->remove_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
 
@@ -1717,7 +1717,7 @@ class WC_AJAX {
 	 * Ajax request handling for categories ordering.
 	 */
 	public static function term_ordering() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -1750,7 +1750,7 @@ class WC_AJAX {
 	public static function product_ordering() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -1791,6 +1791,8 @@ class WC_AJAX {
 		}
 
 		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
+
+		WC_Post_Data::delete_product_query_transients();
 
 		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
@@ -2536,7 +2538,7 @@ class WC_AJAX {
 	 * Handle submissions from assets/js/settings-views-html-settings-tax.js Backbone model.
 	 */
 	public static function tax_rates_save_changes() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			wp_die();
@@ -2603,7 +2605,7 @@ class WC_AJAX {
 			}
 		}
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		wp_send_json_success(

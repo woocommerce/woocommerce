@@ -885,6 +885,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_placeholder_img() {
 		$this->assertTrue( (bool) strstr( wc_placeholder_img(), wc_placeholder_img_src() ) );
+
+		// Test custom class attribute is honoured.
+		$attr = array( 'class' => 'custom-class' );
+		$this->assertContains( 'class="custom-class"', wc_placeholder_img( 'woocommerce_thumbnail', $attr ) );
 	}
 
 	/**

@@ -324,6 +324,10 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product = new WC_Product();
 
 		$this->assertContains( wc_placeholder_img_src(), $product->get_image() );
+
+		// Test custom class attribute is honoured.
+		$image = $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'custom-class' ) );
+		$this->assertContains( 'class="custom-class"', $image );
 	}
 
 	/**

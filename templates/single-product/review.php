@@ -48,7 +48,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * The woocommerce_review_meta hook.
 			 *
 			 * @hooked woocommerce_review_display_meta - 10
-			 * @hooked WC_Structured_Data::generate_review_data() - 20
 			 */
 			do_action( 'woocommerce_review_meta', $comment );
 
