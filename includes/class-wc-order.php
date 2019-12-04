@@ -234,6 +234,7 @@ class WC_Order extends WC_Abstract_Order {
 		parent::save();
 		$this->status_transition();
 		$this->payment_status_transition();
+		$this->fulfillment_status_transition();
 
 		return $this->get_id();
 	}
@@ -471,7 +472,7 @@ class WC_Order extends WC_Abstract_Order {
 
 				if ( ! empty( $payment_status_transition['from'] ) ) {
 					/* translators: 1: old payment status 2: new payment status */
-					$transition_note = sprintf( __( 'Payment status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $payment_status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
+					$transition_note = sprintf( __( 'Payment status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $payment_status_transition['from'] ), wc_get_order_status_name( $payment_status_transition['to'] ) );
 
 					// Note the transition occurred.
 					$this->add_status_transition_note( $transition_note, $payment_status_transition );
@@ -505,6 +506,69 @@ class WC_Order extends WC_Abstract_Order {
 					)
 				);
 				$this->add_order_note( __( 'Error during payment status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * Handle the fulfillment status transition.
+	 *
+	 * @since 4.0.0
+	 */
+	protected function fulfillment_status_transition() {
+		$fulfillment_status_transition = $this->fulfillment_status_transition;
+
+		// Reset fulfillment status transition variable.
+		$this->fulfillment_status_transition = false;
+
+		if ( $fulfillment_status_transition ) {
+			try {
+				do_action( 'woocommerce_order_fulfillment_status_' . $fulfillment_status_transition['to'], $this->get_id(), $this );
+
+				if ( ! empty( $fulfillment_status_transition['from'] ) ) {
+					/* translators: 1: old fulfillment status 2: new fulfillment status */
+					$transition_note = sprintf( __( 'Fulfillment status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $fulfillment_status_transition['from'] ), wc_get_order_status_name( $fulfillment_status_transition['to'] ) );
+
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $fulfillment_status_transition );
+
+					/**
+					 * Fires when the order fulfillment status changes.
+					 *
+					 * @since 4.0.0
+					 * @param int Order ID
+					 * @param WC_Order Order object
+					 */
+					do_action( 'woocommerce_order_fulfillment_status_' . $fulfillment_status_transition['from'] . '_to_' . $fulfillment_status_transition['to'], $this->get_id(), $this );
+
+					/**
+					 * Fires when the order fulfillment status changes.
+					 *
+					 * @since 4.0.0
+					 * @param int Order ID
+					 * @param WC_Order Order object
+					 */
+					do_action( 'woocommerce_order_fulfillment_status_changed', $this->get_id(), $this );
+				} else {
+					/* translators: %s: new fulfillment status */
+					$transition_note = sprintf( __( 'Fulfillment status set to %s.', 'woocommerce' ), wc_get_order_status_name( $fulfillment_status_transition['to'] ) );
+
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $fulfillment_status_transition );
+				}
+			} catch ( Exception $e ) {
+				$logger = wc_get_logger();
+				$logger->error(
+					sprintf(
+						'Fulfillment status transition of order #%d errored!',
+						$this->get_id()
+					),
+					array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
+				$this->add_order_note( __( 'Error during fulfillment status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			}
 		}
 	}
