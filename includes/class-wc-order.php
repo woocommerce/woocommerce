@@ -480,6 +480,114 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Updates payment status of order immediately.
+	 *
+	 * @since 4.0.0
+	 * @uses WC_Order::set_payment_status()
+	 * @param string $new_status    Payment status to change the order to. No internal wc- prefix is required.
+	 * @param string $note          Optional note to add.
+	 * @param bool   $manual        Is this a manual order status change?.
+	 * @return bool
+	 */
+	public function update_payment_status( $new_status, $note = '', $manual = false ) {
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
+
+		try {
+			$this->set_payment_status( $new_status, $note, $manual );
+			$this->save();
+		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error(
+				sprintf(
+					'Error updating payment status for order #%d',
+					$this->get_id()
+				),
+				array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
+			$this->add_order_note( __( 'Update payment status event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Updates fulfillment status of order immediately.
+	 *
+	 * @since 4.0.0
+	 * @uses WC_Order::set_fulfillment_status()
+	 * @param string $new_status    Fulfillment status to change the order to. No internal wc- prefix is required.
+	 * @param string $note          Optional note to add.
+	 * @param bool   $manual        Is this a manual order status change?.
+	 * @return bool
+	 */
+	public function update_fulfillment_status( $new_status, $note = '', $manual = false ) {
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
+
+		try {
+			$this->set_fulfillment_status( $new_status, $note, $manual );
+			$this->save();
+		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error(
+				sprintf(
+					'Error updating fulfillment status for order #%d',
+					$this->get_id()
+				),
+				array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
+			$this->add_order_note( __( 'Update fulfillment status event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Updates delivery status of order immediately.
+	 *
+	 * @since 4.0.0
+	 * @uses WC_Order::set_delivery_status()
+	 * @param string $new_status    Delivery status to change the order to. No internal wc- prefix is required.
+	 * @param string $note          Optional note to add.
+	 * @param bool   $manual        Is this a manual order status change?.
+	 * @return bool
+	 */
+	public function update_delivery_status( $new_status, $note = '', $manual = false ) {
+		if ( ! $this->get_id() ) { // Order must exist.
+			return false;
+		}
+
+		try {
+			$this->set_delivery_status( $new_status, $note, $manual );
+			$this->save();
+		} catch ( Exception $e ) {
+			$logger = wc_get_logger();
+			$logger->error(
+				sprintf(
+					'Error updating delivery status for order #%d',
+					$this->get_id()
+				),
+				array(
+					'order' => $this,
+					'error' => $e,
+				)
+			);
+			$this->add_order_note( __( 'Update delivery status event failed.', 'woocommerce' ) . ' ' . $e->getMessage() );
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Handle the status transition.
 	 */
 	protected function status_transition() {
