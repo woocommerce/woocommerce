@@ -2221,7 +2221,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Checks the order status against a passed in status.
 	 *
-	 * @since 3.8.0
+	 * @since 4.0.0
 	 * @param array|string $status Status to check.
 	 * @return bool
 	 */
@@ -2232,7 +2232,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Checks the order status against a passed in status.
 	 *
-	 * @since 3.8.0
+	 * @since 4.0.0
 	 * @param array|string $status Status to check.
 	 * @return bool
 	 */
@@ -2243,7 +2243,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Checks the order status against a passed in status.
 	 *
-	 * @since 3.8.0
+	 * @since 4.0.0
 	 * @param array|string $status Status to check.
 	 * @return bool
 	 */

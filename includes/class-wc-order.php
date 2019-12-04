@@ -319,6 +319,66 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Set fulfillment status.
+	 *
+	 * @since 4.0.0
+	 * @param string $new_status    Status to change the payment status to. No internal wc- prefix is required.
+	 * @param string $note          Optional note to add.
+	 * @param bool   $manual_update Is this a manual payment status change?.
+	 * @return array
+	 */
+	public function set_fulfillment_status( $new_status, $note = '', $manual_update = false ) {
+		$result = parent::set_fulfillment_status( $new_status );
+
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+			$this->fulfillment_status_transition = array(
+				'from'   => ! empty( $this->fulfillment_status_transition['from'] ) ? $this->fulfillment_status_transition['from'] : $result['from'],
+				'to'     => $result['to'],
+				'note'   => $note,
+				'manual' => (bool) $manual_update,
+			);
+
+			if ( $manual_update ) {
+				do_action( 'woocommerce_order_edit_fulfillment_status', $this->get_id(), $result['to'] );
+			}
+
+			$this->maybe_set_date_fulfilled();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Set delivery status.
+	 *
+	 * @since 4.0.0
+	 * @param string $new_status    Status to change the delivery status to. No internal wc- prefix is required.
+	 * @param string $note          Optional note to add.
+	 * @param bool   $manual_update Is this a manual payment status change?.
+	 * @return array
+	 */
+	public function set_delivery_status( $new_status, $note = '', $manual_update = false ) {
+		$result = parent::set_delivery_status( $new_status );
+
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+			$this->delivery_status_transition = array(
+				'from'   => ! empty( $this->delivery_status_transition['from'] ) ? $this->delivery_status_transition['from'] : $result['from'],
+				'to'     => $result['to'],
+				'note'   => $note,
+				'manual' => (bool) $manual_update,
+			);
+
+			if ( $manual_update ) {
+				do_action( 'woocommerce_order_edit_delivery_status', $this->get_id(), $result['to'] );
+			}
+
+			$this->maybe_set_date_delivered();
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Maybe set date paid.
 	 *
 	 * Sets the date paid variable when transitioning to the payment complete
@@ -357,6 +417,30 @@ class WC_Order extends WC_Abstract_Order {
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
 			$this->set_date_completed( time() );
+		}
+	}
+
+	/**
+	 * Maybe set the date fulfilled.
+	 *
+	 * @since 4.0.0
+	 * @return void
+	 */
+	protected function maybe_set_date_fulfilled() {
+		if ( $this->has_fulfillment_status( 'fulfilled' ) ) {
+			$this->set_date_fulfilled( time() );
+		}
+	}
+
+	/**
+	 * Maybe set the date delivered.
+	 *
+	 * @since 4.0.0
+	 * @return void
+	 */
+	protected function maybe_set_date_delivered() {
+		if ( $this->has_delivery_status( 'delivered' ) ) {
+			$this->set_date_delivered( time() );
 		}
 	}
 
@@ -1547,6 +1631,28 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_date_paid( $date = null ) {
 		$this->set_date_prop( 'date_paid', $date );
+	}
+
+	/**
+	 * Set the date the order was fulfilled.
+	 *
+	 * @since 4.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 */
+	public function set_date_fulfilled( $date = null ) {
+		$this->set_date_prop( 'date_fulfilled', $date );
+	}
+
+	/**
+	 * Set the date the order was delivered.
+	 *
+	 * @since 4.0.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 */
+	public function set_date_delivered( $date = null ) {
+		$this->set_date_prop( 'date_delivered', $date );
 	}
 
 	/**
