@@ -158,7 +158,7 @@ class WC_Shortcode_Checkout {
 							}
 
 							// Check stock based on all items in the cart and consider any held stock within pending orders.
-							$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $order->get_id() ) : 0;
+							$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product ) : 0;
 							$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
 							if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
