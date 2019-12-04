@@ -291,26 +291,38 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  *
  * Uses wp_get_attachment_image if using an attachment ID @since 3.6.0 to handle responsiveness.
  *
- * @param string $size Image size.
+ * @param string       $size Image size.
+ * @param string|array $attr Optional. Attributes for the image markup. Default empty.
  * @return string
  */
-function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
+function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 	$dimensions        = wc_get_image_size( $size );
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	$default_attr = array(
+		'class' => 'woocommerce-placeholder wp-post-image',
+		'alt'   => __( 'Placeholder', 'woocommerce' ),
+	);
+
+	$attr = wp_parse_args( $attr, $default_attr );
 
 	if ( wp_attachment_is_image( $placeholder_image ) ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
 			false,
-			array(
-				'alt'   => __( 'Placeholder', 'woocommerce' ),
-				'class' => 'woocommerce-placeholder wp-post-image',
-			)
+			$attr
 		);
 	} else {
 		$image      = wc_placeholder_img_src( $size );
-		$image_html = '<img src="' . esc_attr( $image ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />';
+		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
+		$attributes = array();
+
+		foreach ( $attr as $name => $value ) {
+			$attribute[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+		}
+
+		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attribute ) . '/>';
 	}
 
 	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
@@ -1438,7 +1450,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 			} else {
 				$meta_key = '_' . $column;
 			}
-			$column   = esc_sql( $column );
+			$column = esc_sql( $column );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
 					"
@@ -1451,11 +1464,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$meta_key
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			break;
 		case 'downloadable':
 		case 'virtual':
-			$column = esc_sql( $column );
+			$column   = esc_sql( $column );
 			$meta_key = '_' . $column;
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
 					"
@@ -1468,11 +1483,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$meta_key
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			break;
 		case 'onsale':
 			$column   = esc_sql( $column );
 			$decimals = absint( wc_get_price_decimals() );
 
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query(
 				$wpdb->prepare(
 					"
@@ -1491,6 +1508,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$decimals
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
 			break;
