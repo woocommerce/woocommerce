@@ -302,28 +302,53 @@ function wc_increase_stock_levels( $order_id ) {
 function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 	global $wpdb;
 
+	/**
+	 * Filter: woocommerce_hold_stock_for_checkout
+	 * Allows enable/disable hold stock functionality on checkout.
+	 *
+	 * @since 3.9.0
+	 * @param bool $enabled Default to true.
+	 */
+	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
+		/**
+		 * DOES NOT SUPPORT `exclude_order_id` param, which was primarily being used to exclude the current order!
+		 * While creating an order during checkout flow, this logic relies on the fact that order is not yet saved and therefore will be excluded.
+		 *
+		 * Query for calculating held stock which uses '_held_for_checkout' records instead of actually querying all orders with wc-pending status.
+		 * This is introduced to handle race conditions.
+		 *
+		 * @since 3.9.0
+		 */
+		$product_data_store = WC_Data_Store::load( 'product' );
+		$product_id         = $product->get_stock_managed_by_id();
+		return $wpdb->get_var( $product_data_store->get_query_for_held_stock( $product_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
 	return $wpdb->get_var(
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->prepare(
 			"
-			SELECT SUM( order_item_meta.meta_value ) AS held_qty
-			FROM {$wpdb->posts} AS posts
-			LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
-			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
-			WHERE 	order_item_meta.meta_key    = '_qty'
-			AND 	order_item_meta2.meta_key   = %s
-			AND 	order_item_meta2.meta_value = %d
-			AND		postmeta.meta_key			= '_created_via'
-			AND		postmeta.meta_value			= 'checkout'
-			AND 	posts.post_type             IN ( '" . implode( "','", wc_get_order_types() ) . "' )
-			AND 	posts.post_status           = 'wc-pending'
-			AND		posts.ID                    != %d;",
+				SELECT SUM( order_item_meta.meta_value ) AS held_qty
+				FROM {$wpdb->posts} AS posts
+				LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
+				LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
+				LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
+				WHERE 	order_item_meta.meta_key    = '_qty'
+				AND 	order_item_meta2.meta_key   = %s
+				AND 	order_item_meta2.meta_value = %d
+				AND		postmeta.meta_key			= '_created_via'
+				AND		postmeta.meta_value			= 'checkout'
+				AND 	posts.post_type             IN ( '" . implode( "','", wc_get_order_types() ) . "' )
+				AND 	posts.post_status           = 'wc-pending'
+				AND		posts.ID                    != %d;
+			",
 			'product_variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
 			$product->get_stock_managed_by_id(),
 			$exclude_order_id
 		)
-	); // WPCS: unprepared SQL ok.
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+	);
 }
 
 /**
