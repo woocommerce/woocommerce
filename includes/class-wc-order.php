@@ -233,6 +233,7 @@ class WC_Order extends WC_Abstract_Order {
 		$this->maybe_set_user_billing_email();
 		parent::save();
 		$this->status_transition();
+		$this->payment_status_transition();
 
 		return $this->get_id();
 	}
@@ -449,6 +450,61 @@ class WC_Order extends WC_Abstract_Order {
 					)
 				);
 				$this->add_order_note( __( 'Error during status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * Handle the payment status transition.
+	 *
+	 * @since 4.0.0
+	 */
+	protected function payment_status_transition() {
+		$payment_status_transition = $this->payment_status_transition;
+
+		// Reset status transition variable.
+		$this->payment_status_transition = false;
+
+		if ( $payment_status_transition ) {
+			try {
+				do_action( 'woocommerce_order_payment_status_' . $payment_status_transition['to'], $this->get_id(), $this );
+
+				if ( ! empty( $payment_status_transition['from'] ) ) {
+					/* translators: 1: old payment status 2: new payment status */
+					$transition_note = sprintf( __( 'Payment status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $payment_status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
+
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $payment_status_transition );
+
+					do_action( 'woocommerce_order_payment_status_' . $payment_status_transition['from'] . '_to_' . $payment_status_transition['to'], $this->get_id(), $this );
+					/**
+					 * Fires when the order progresses from a pending payment status to a paid one.
+					 *
+					 * @since 3.9.0
+					 * @param int Order ID
+					 * @param WC_Order Order object
+					 */
+					do_action( 'woocommerce_order_payment_status_changed', $this->get_id(), $this );
+				} else {
+					/* translators: %s: new payment status */
+					$transition_note = sprintf( __( 'Payment status set to %s.', 'woocommerce' ), wc_get_order_status_name( $payment_status_transition['to'] ) );
+
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $payment_status_transition );
+				}
+			} catch ( Exception $e ) {
+				$logger = wc_get_logger();
+				$logger->error(
+					sprintf(
+						'Payment status transition of order #%d errored!',
+						$this->get_id()
+					),
+					array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
+				$this->add_order_note( __( 'Error during payment status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			}
 		}
 	}
