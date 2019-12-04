@@ -580,7 +580,7 @@ class WC_Admin_Setup_Wizard {
 								printf(
 									wp_kses(
 										/* translators: %1$s: usage tracking help link */
-										__( 'Learn more about how usage tracking works, and how you\'ll be helping <a href="%1$s" target="_blank">here</a>.', 'woocommerce' ),
+										__( 'Learn more about how usage tracking works, and how you\'ll be helping in our <a href="%1$s" target="_blank">usage tracking documentation</a>.', 'woocommerce' ),
 										array(
 											'a'    => array(
 												'href'   => array(),
@@ -700,7 +700,7 @@ class WC_Admin_Setup_Wizard {
 	public function run_deferred_actions() {
 		$this->close_http_connection();
 		foreach ( $this->deferred_actions as $action ) {
-			call_user_func_array( $action['func'], $action['args'] );
+			$action['func']( ...$action['args'] );
 
 			// Clear the background installation flag if this is a plugin.
 			if (

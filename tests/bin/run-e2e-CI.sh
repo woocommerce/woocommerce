@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-if [[ ${RUN_E2E} == 1 ]]; then
-	npm install
-	npm run test:e2e
-fi
+echo "Waiting for 5 minutes for the Docker container to start...";
+sleep 300;
+npm run test:e2e;

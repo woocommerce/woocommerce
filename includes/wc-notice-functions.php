@@ -136,9 +136,12 @@ function wc_print_notices( $return = false ) {
 
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
-			wc_get_template( "notices/{$notice_type}.php", array(
-				'messages' => array_filter( $all_notices[ $notice_type ] ),
-			) );
+			wc_get_template(
+				"notices/{$notice_type}.php",
+				array(
+					'messages' => array_filter( $all_notices[ $notice_type ] ),
+				)
+			);
 		}
 	}
 
@@ -165,9 +168,12 @@ function wc_print_notice( $message, $notice_type = 'success' ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	wc_get_template( "notices/{$notice_type}.php", array(
-		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) ),
-	) );
+	wc_get_template(
+		"notices/{$notice_type}.php",
+		array(
+			'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) ),
+		)
+	);
 }
 
 /**
@@ -217,14 +223,20 @@ function wc_add_wp_error_notices( $errors ) {
  * @return string
  */
 function wc_kses_notice( $message ) {
-	return wp_kses( $message,
-		array_replace_recursive( // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
-			wp_kses_allowed_html( 'post' ),
-			array(
-				'a' => array(
-					'tabindex' => true,
-				),
-			)
+	$allowed_tags = array_replace_recursive(
+		wp_kses_allowed_html( 'post' ),
+		array(
+			'a' => array(
+				'tabindex' => true,
+			),
 		)
 	);
+
+	/**
+	 * Kses notice allowed tags.
+	 *
+	 * @since 3.9.0
+	 * @param array[]|string $allowed_tags An array of allowed HTML elements and attributes, or a context name such as 'post'.
+	 */
+	return wp_kses( $message, apply_filters( 'woocommerce_kses_notice_allowed_tags', $allowed_tags ) );
 }
