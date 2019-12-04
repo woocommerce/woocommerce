@@ -418,6 +418,7 @@ class WC_Order extends WC_Abstract_Order {
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
 
 					// Work out if this was for a payment, and trigger a payment_status hook instead.
+					// @todo: Remove this with some backward compatibility in place to handle legacy statuses. This hook now fires in WC_Order::payment_status_transition().
 					if (
 						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ) ), true )
 						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
