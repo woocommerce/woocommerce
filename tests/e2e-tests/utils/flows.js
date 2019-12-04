@@ -26,8 +26,14 @@ const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=
 const WP_ADMIN_PERMALINK_SETTINGS = baseUrl + 'wp-admin/options-permalink.php';
 
 const SHOP_PAGE = baseUrl + 'shop';
-const SHOP_PRODUCT = baseUrl + '?p=';
+const SHOP_PRODUCT_PAGE = baseUrl + '?p=';
 const SHOP_CART_PAGE = baseUrl + 'cart';
+const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
+
+const MY_ACCOUNT_ORDERS = baseUrl + '/my-account/orders/';
+const MY_ACCOUNT_DOWNLOADS = baseUrl + '/my-account/downloads/';
+const MY_ACCOUNT_ADDRESSES = baseUrl + '/my-account/edit-address/';
+const MY_ACCOUNT_ACCOUNT_DETAILS = baseUrl + '/my-account/edit-account/';
 
 const getProductColumnExpression = ( productTitle ) => (
 	'td[@class="product-name" and ' +
@@ -71,6 +77,12 @@ const CustomerFlow = {
 		] );
 	},
 
+	goToOrders: async () => {
+		await page.goto( MY_ACCOUNT_ORDERS, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
 	addToCartFromShopPage: async ( productTitle ) => {
 		const addToCartXPath = `//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productTitle }")]]` +
 			'//a[contains(@class, "add_to_cart_button") and contains(@class, "ajax_add_to_cart")';
@@ -81,16 +93,26 @@ const CustomerFlow = {
 		await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
 	},
 
-	removeFromCart: async ( productTitle ) => {
-		const cartItemXPath = getCartItemExpression( productTitle );
-		const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
+	goToDownloads: async () => {
+		await page.goto( MY_ACCOUNT_DOWNLOADS, {
+			waitUntil: 'networkidle0',
+		} );
+	},
 
-		const [ removeButton ] = await page.$x( removeItemXPath );
-		await removeButton.click();
+	goToAddresses: async () => {
+		await page.goto( MY_ACCOUNT_ADDRESSES, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	goToAccountDetails: async () => {
+		await page.goto( MY_ACCOUNT_ACCOUNT_DETAILS, {
+			waitUntil: 'networkidle0',
+		} );
 	},
 
 	goToProduct: async ( postID ) => {
-		await page.goto( SHOP_PRODUCT + postID, {
+		await page.goto( SHOP_PRODUCT_PAGE + postID, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -99,6 +121,22 @@ const CustomerFlow = {
 		await page.goto( SHOP_CART_PAGE, {
 			waitUntil: 'networkidle0',
 		} );
+	},
+
+	login: async () => {
+		await page.goto(SHOP_MY_ACCOUNT_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+
+		await expect(page.title()).resolves.toMatch('My account');
+
+		await page.type('#username', config.get('users.customer.username'));
+		await page.type('#password', config.get('users.customer.password'));
+
+		await Promise.all([
+			page.waitForNavigation({ waitUntil: 'networkidle0' }),
+			page.click('button[name="login"]'),
+		] );
 	},
 
 	goToShop: async () => {
@@ -112,6 +150,14 @@ const CustomerFlow = {
 		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
 
 		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
+	},
+
+	removeFromCart: async ( productTitle ) => {
+		const cartItemXPath = getCartItemExpression(productTitle);
+		const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
+
+		const [removeButton] = await page.$x(removeItemXPath);
+		await removeButton.click();
 	},
 
 	setCartQuantity: async ( productTitle, quantityValue ) => {
