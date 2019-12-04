@@ -235,6 +235,7 @@ class WC_Order extends WC_Abstract_Order {
 		$this->status_transition();
 		$this->payment_status_transition();
 		$this->fulfillment_status_transition();
+		$this->delivery_status_transition();
 
 		return $this->get_id();
 	}
@@ -570,6 +571,69 @@ class WC_Order extends WC_Abstract_Order {
 					)
 				);
 				$this->add_order_note( __( 'Error during fulfillment status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * Handle the delivery status transition.
+	 *
+	 * @since 4.0.0
+	 */
+	protected function delivery_status_transition() {
+		$delivery_status_transition = $this->delivery_status_transition;
+
+		// Reset fulfillment status transition variable.
+		$this->fulfillment_statudelivery_status_transitions_transition = false;
+
+		if ( $delivery_status_transition ) {
+			try {
+				do_action( 'woocommerce_order_delivery_status_' . $delivery_status_transition['to'], $this->get_id(), $this );
+
+				if ( ! empty( $delivery_status_transition['from'] ) ) {
+					/* translators: 1: old delivery status 2: new delivery status */
+					$transition_note = sprintf( __( 'Delivery status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $delivery_status_transition['from'] ), wc_get_order_status_name( $delivery_status_transition['to'] ) );
+
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $delivery_status_transition );
+
+					/**
+					 * Fires when the order delivery status changes.
+					 *
+					 * @since 4.0.0
+					 * @param int Order ID
+					 * @param WC_Order Order object
+					 */
+					do_action( 'woocommerce_order_delivery_status_' . $delivery_status_transition['from'] . '_to_' . $delivery_status_transition['to'], $this->get_id(), $this );
+
+					/**
+					 * Fires when the order delivery status changes.
+					 *
+					 * @since 4.0.0
+					 * @param int Order ID
+					 * @param WC_Order Order object
+					 */
+					do_action( 'woocommerce_order_delivery_status_changed', $this->get_id(), $this );
+				} else {
+					/* translators: %s: new fulfillment status */
+					$transition_note = sprintf( __( 'Delivery status set to %s.', 'woocommerce' ), wc_get_order_status_name( $delivery_status_transition['to'] ) );
+
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $delivery_status_transition );
+				}
+			} catch ( Exception $e ) {
+				$logger = wc_get_logger();
+				$logger->error(
+					sprintf(
+						'Delivery status transition of order #%d errored!',
+						$this->get_id()
+					),
+					array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
+				$this->add_order_note( __( 'Error during delivery status transition.', 'woocommerce' ) . ' ' . $e->getMessage() );
 			}
 		}
 	}
