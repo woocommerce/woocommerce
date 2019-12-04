@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"main": "index.js",
 	"devDependencies": {
-		"eslint": "6.7.1"
+		"eslint": "6.7.2"
 	},
 	"engines": {
 		"node": "10.17.0"
