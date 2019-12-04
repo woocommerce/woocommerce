@@ -171,8 +171,8 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$slug              = $plugin;
-		$path              = $allowed_plugins[ $slug ];
+		$path              = $allowed_plugins[ $plugin ];
+		$slug              = sanitize_key( $plugin );
 		$installed_plugins = get_plugins();
 
 		if ( in_array( $path, array_keys( $installed_plugins ), true ) ) {
@@ -192,52 +192,38 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		$api = plugins_api(
 			'plugin_information',
 			array(
-				'slug'   => sanitize_key( $slug ),
+				'slug'   => $slug,
 				'fields' => array(
 					'sections' => false,
 				),
 			)
 		);
 
-		// Log extra debug for plugin installation.
-		$logger        = wc_get_logger();
-		$logger_source = array(
-			'source' => 'woocommerce-admin',
-		);
-
 		if ( is_wp_error( $api ) ) {
-			$logger->info(
-				sprintf( 'The requested plugin `%s` could not be installed. plugins_api call failed.', sanitize_key( $slug ) ),
-				$logger_source
+			return new \WP_Error(
+				'woocommerce_rest_plugin_install',
+				sprintf(
+					/* translators: %s: plugin slug (example: woocommerce-services) */
+					__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
+					$slug
+				),
+				500
 			);
-			$logger->debug(
-				'api: ' . wc_print_r( $api, true ),
-				$logger_source
-			);
-			return new \WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
 		}
 
 		$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
 		$result   = $upgrader->install( $api->download_link );
 
 		if ( is_wp_error( $result ) || is_null( $result ) ) {
-			$logger->info(
-				sprintf( 'The requested plugin `%s` could not be installed. install call failed.', sanitize_key( $slug ) ),
-				$logger_source
+			return new \WP_Error(
+				'woocommerce_rest_plugin_install',
+				sprintf(
+					/* translators: %s: plugin slug (example: woocommerce-services) */
+					__( 'The requested plugin `%s` could not be installed.', 'woocommerce-admin' ),
+					$slug
+				),
+				500
 			);
-			$logger->debug(
-				'upgrader: ' . wc_print_r( $upgrader, true ),
-				$logger_source
-			);
-			$logger->debug(
-				'api: ' . wc_print_r( $api, true ),
-				$logger_source
-			);
-			$logger->debug(
-				'result: ' . wc_print_r( $result, true ),
-				$logger_source
-			);
-			return new \WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
 		}
 
 		return array(
