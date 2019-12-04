@@ -23,6 +23,20 @@ class WC_Order extends WC_Abstract_Order {
 	protected $status_transition = false;
 
 	/**
+	 * Stores data about payment status changes so relevant hooks can be fired.
+	 *
+	 * @var bool|array
+	 */
+	protected $payment_status_transition = false;
+
+	/**
+	 * Stores data about fulfillment status changes so relevant hooks can be fired.
+	 *
+	 * @var bool|array
+	 */
+	protected $fulfillment_status_transition = false;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0
@@ -265,8 +279,37 @@ class WC_Order extends WC_Abstract_Order {
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
-			$this->maybe_set_date_paid();
 			$this->maybe_set_date_completed();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Set payment status.
+	 *
+	 * @since 4.0.0
+	 * @param string $new_status    Status to change the payment status to. No internal wc- prefix is required.
+	 * @param string $note          Optional note to add.
+	 * @param bool   $manual_update Is this a manual payment status change?.
+	 * @return array
+	 */
+	public function set_payment_status( $new_status, $note = '', $manual_update = false ) {
+		$result = parent::set_payment_status( $new_status );
+
+		if ( true === $this->object_read && ! empty( $result['from'] ) && $result['from'] !== $result['to'] ) {
+			$this->payment_status_transition = array(
+				'from'   => ! empty( $this->payment_status_transition['from'] ) ? $this->payment_status_transition['from'] : $result['from'],
+				'to'     => $result['to'],
+				'note'   => $note,
+				'manual' => (bool) $manual_update,
+			);
+
+			if ( $manual_update ) {
+				do_action( 'woocommerce_order_edit_payment_status', $this->get_id(), $result['to'] );
+			}
+
+			$this->maybe_set_date_paid();
 		}
 
 		return $result;
