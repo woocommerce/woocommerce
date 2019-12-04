@@ -68,6 +68,21 @@ function wc_get_product( $the_product = false, $deprecated = array() ) {
 }
 
 /**
+ * Get a product object.
+ *
+ * @see WC_Product_Factory::get_product_classname
+ * @since 3.9.0
+ * @param string $product_type Product type. If used an invalid type a WC_Product_Simple instance will be returned.
+ * @param int    $product_id   Product ID.
+ * @return WC_Product
+ */
+function wc_get_product_object( $product_type, $product_id = 0 ) {
+	$classname = WC_Product_Factory::get_product_classname( $product_id, $product_type );
+
+	return new $classname( $product_id );
+}
+
+/**
  * Returns whether or not SKUS are enabled.
  *
  * @return bool
@@ -1404,7 +1419,6 @@ function wc_update_product_lookup_tables_column( $column ) {
 		return;
 	}
 	global $wpdb;
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	switch ( $column ) {
 		case 'min_max_price':
 			$wpdb->query(
@@ -1513,7 +1527,6 @@ function wc_update_product_lookup_tables_column( $column ) {
 			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
 			break;
 	}
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 }
 add_action( 'wc_update_product_lookup_tables_column', 'wc_update_product_lookup_tables_column' );
 
