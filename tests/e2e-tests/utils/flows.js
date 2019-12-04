@@ -3,6 +3,11 @@
  */
 
 /**
+ * External dependencies
+ */
+import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
+
+/**
  * Internal dependencies
  */
 import { clearAndFillInput } from './index';
@@ -20,8 +25,9 @@ const WP_ADMIN_NEW_PRODUCT = baseUrl + 'wp-admin/post-new.php?post_type=product'
 const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=';
 const WP_ADMIN_PERMALINK_SETTINGS = baseUrl + 'wp-admin/options-permalink.php';
 
+const SHOP_PAGE = baseUrl + 'shop';
 const SHOP_PRODUCT = baseUrl + '?p=';
-const SHOP_CART_PAGE = baseUrl + 'cart/';
+const SHOP_CART_PAGE = baseUrl + 'cart';
 
 const getProductColumnExpression = ( productTitle ) => (
 	'td[@class="product-name" and ' +
@@ -65,6 +71,16 @@ const CustomerFlow = {
 		] );
 	},
 
+	addToCartFromShopPage: async ( productTitle ) => {
+		const addToCartXPath = `//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productTitle }")]]` +
+			'//a[contains(@class, "add_to_cart_button") and contains(@class, "ajax_add_to_cart")';
+
+		const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
+		addToCartButton.click();
+
+		await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
+	},
+
 	removeFromCart: async ( productTitle ) => {
 		const cartItemXPath = getCartItemExpression( productTitle );
 		const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
@@ -85,6 +101,12 @@ const CustomerFlow = {
 		} );
 	},
 
+	goToShop: async () => {
+		await page.goto( SHOP_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
 	productIsInCart: async ( productTitle, quantity = null ) => {
 		const cartItemArgs = quantity ? { qty: quantity } : {};
 		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
@@ -92,7 +114,17 @@ const CustomerFlow = {
 		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
 	},
 
+	setCartQuantity: async ( productTitle, quantityValue ) => {
+		const cartItemXPath = getCartItemExpression( productTitle );
+		const quantityInputXPath = cartItemXPath + '//' + getQtyInputExpression();
+
+		const [ quantityInput ] = await page.$x( quantityInputXPath );
+		await quantityInput.focus();
+		await pressKeyWithModifier( 'primary', 'a' );
+		await quantityInput.type( quantityValue.toString() );
+	},
 };
+
 
 const StoreOwnerFlow = {
 	login: async () => {
