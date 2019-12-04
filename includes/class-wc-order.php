@@ -776,7 +776,7 @@ class WC_Order extends WC_Abstract_Order {
 		$delivery_status_transition = $this->delivery_status_transition;
 
 		// Reset fulfillment status transition variable.
-		$this->fulfillment_statudelivery_status_transitions_transition = false;
+		$this->delivery_status_transition = false;
 
 		if ( $delivery_status_transition ) {
 			try {
