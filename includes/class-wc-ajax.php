@@ -898,6 +898,10 @@ class WC_AJAX {
 				if ( ! $product ) {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
+				if ( 'variable' === $product->get_type() ) {
+					/* translators: %s product name */
+					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
+				}
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
@@ -1536,6 +1540,24 @@ class WC_AJAX {
 		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
 		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
 
+		$exclude_types = array();
+		if ( ! empty( $_GET['exclude_type'] ) ) {
+			// Support both comma-delimited and array format inputs.
+			$exclude_types = wp_unslash( $_GET['exclude_type'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( ! is_array( $exclude_types ) ) {
+				$exclude_types = explode( ',', $exclude_types );
+			}
+
+			// Sanitize the excluded types against valid product types.
+			foreach ( $exclude_types as &$exclude_type ) {
+				$exclude_type = strtolower( trim( $exclude_type ) );
+			}
+			$exclude_types = array_intersect(
+				array_merge( array( 'variation' ), array_keys( wc_get_product_types() ) ),
+				$exclude_types
+			);
+		}
+
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
@@ -1545,6 +1567,10 @@ class WC_AJAX {
 		foreach ( $product_objects as $product_object ) {
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
+
+			if ( in_array( $product_object->get_type(), $exclude_types, true ) ) {
+				continue;
+			}
 
 			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
 				$stock_amount    = $product_object->get_stock_quantity();
