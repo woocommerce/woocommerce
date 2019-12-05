@@ -8,6 +8,7 @@ import { compose } from '@wordpress/compose';
 import { partial, filter, get } from 'lodash';
 import { IconButton, Icon, Dropdown, Button } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * WooCommerce dependencies
@@ -27,6 +28,9 @@ import { getTasks } from './task-list/tasks';
 import { isOnboardingEnabled } from 'dashboard/utils';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
 import ReportFilters from 'analytics/components/report-filters';
+
+const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
+const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
 class CustomizableDashboard extends Component {
 	constructor( props ) {
@@ -233,6 +237,7 @@ class CustomizableDashboard extends Component {
 					path={ path }
 					dateQuery={ dateQuery }
 					isoDateFormat={ isoDateFormat }
+					filters={ filters }
 				/>
 				{ sections.map( ( section, index ) => {
 					if ( section.isVisible ) {

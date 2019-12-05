@@ -10,8 +10,8 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { getCouponLabels } from 'lib/async-requests';
 
-const COUPON_REPORT_CHARTS_FILTER = 'woocommerce_admin_coupon_report_charts';
-const COUPON_REPORT_FILTERS_FILTER = 'woocommerce_admin_coupon_report_filters';
+const COUPON_REPORT_CHARTS_FILTER = 'woocommerce_admin_coupons_report_charts';
+const COUPON_REPORT_FILTERS_FILTER = 'woocommerce_admin_coupons_report_filters';
 const COUPON_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_coupon_report_advanced_filters';
 
 export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [

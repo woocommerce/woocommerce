@@ -10,8 +10,8 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { getCategoryLabels } from 'lib/async-requests';
 
-const CATEGORY_REPORT_CHARTS_FILTER = 'woocommerce_admin_category_report_charts';
-const CATEGORY_REPORT_FILTERS_FILTER = 'woocommerce_admin_category_report_filters';
+const CATEGORY_REPORT_CHARTS_FILTER = 'woocommerce_admin_categories_report_charts';
+const CATEGORY_REPORT_FILTERS_FILTER = 'woocommerce_admin_categories_report_filters';
 const CATEGORY_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_category_report_advanced_filters';
 

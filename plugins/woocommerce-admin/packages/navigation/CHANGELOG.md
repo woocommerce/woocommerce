@@ -1,9 +1,14 @@
+# (unreleased)
+
+- `getPersistedQuery` Add a filter for extensions to add a persisted query, `woocommerce_admin_persisted_queries`.
+
 # 4.0.0
 
 ## Breaking Changes
 
 - decouples `wcSettings` from the package (#3294)
 - `getAdminLink` is no longer available from this package. It is exported on the `wcSettings` global via the woo-blocks plugin (v2.5 or WC 3.9) when enqueued via the `wc-settings` handle.
+
 
 # 3.0.0
 

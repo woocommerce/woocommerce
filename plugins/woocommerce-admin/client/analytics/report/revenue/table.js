@@ -22,6 +22,7 @@ import { formatValue } from 'lib/number-format';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
+import { getReportTableQuery } from 'wc-api/reports/utils';
 
 class RevenueReportTable extends Component {
 	constructor() {
@@ -238,7 +239,7 @@ class RevenueReportTable extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { query } = props;
+		const { query, filters, advancedFilters } = props;
 		const datesFromQuery = getCurrentDates( query );
 		const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 
@@ -252,9 +253,17 @@ export default compose(
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		};
-		const revenueData = getReportStats( 'revenue', tableQuery );
-		const isError = Boolean( getReportStatsError( 'revenue', tableQuery ) );
-		const isRequesting = isReportStatsRequesting( 'revenue', tableQuery );
+		const filteredTableQuery = getReportTableQuery( {
+			endpoint: 'revenue',
+			query,
+			select,
+			tableQuery,
+			filters,
+			advancedFilters,
+		} );
+		const revenueData = getReportStats( 'revenue', filteredTableQuery );
+		const isError = Boolean( getReportStatsError( 'revenue', filteredTableQuery ) );
+		const isRequesting = isReportStatsRequesting( 'revenue', filteredTableQuery );
 
 		return {
 			tableData: {

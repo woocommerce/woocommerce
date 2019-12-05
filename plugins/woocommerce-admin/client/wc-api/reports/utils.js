@@ -126,7 +126,9 @@ export function getQueryFromConfig( config, advancedFilters, query ) {
 		return {};
 	}
 
-	return {};
+	return {
+		[ config.param ]: queryValue,
+	};
 }
 
 /**

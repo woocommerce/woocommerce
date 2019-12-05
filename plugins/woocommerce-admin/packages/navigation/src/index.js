@@ -5,6 +5,7 @@
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick, uniq } from 'lodash';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -37,8 +38,17 @@ export const getPath = () => getHistory().location.pathname;
  * @param {Object} query Query containing the parameters.
  * @return {Object} Object containing the persisted queries.
  */
-export const getPersistedQuery = ( query = navUtils.getQuery() ) =>
-	pick( query, [ 'period', 'compare', 'before', 'after', 'interval', 'type' ] );
+export const getPersistedQuery = ( query = navUtils.getQuery() ) => {
+	const params = applyFilters( 'woocommerce_admin_persisted_queries', [
+		'period',
+		'compare',
+		'before',
+		'after',
+		'interval',
+		'type',
+	] );
+	return pick( query, params );
+};
 
 /**
  * Get an array of IDs from a comma-separated query parameter.
@@ -63,14 +73,18 @@ export function getIdsFromQuery( queryString = '' ) {
  */
 export function getSearchWords( query = navUtils.getQuery() ) {
 	if ( typeof query !== 'object' ) {
-		throw new Error( 'Invalid parameter passed to getSearchWords, it expects an object or no parameters.' );
+		throw new Error(
+			'Invalid parameter passed to getSearchWords, it expects an object or no parameters.'
+		);
 	}
 	const { search } = query;
 	if ( ! search ) {
 		return [];
 	}
 	if ( typeof search !== 'string' ) {
-		throw new Error( 'Invalid \'search\' type. getSearchWords expects query\'s \'search\' property to be a string.' );
+		throw new Error(
+			"Invalid 'search' type. getSearchWords expects query's 'search' property to be a string."
+		);
 	}
 	return search.split( ',' ).map( searchWord => searchWord.replace( '%2C', ',' ) );
 }
@@ -118,11 +132,15 @@ export function onQueryChange( param, path = getPath(), query = getQuery() ) {
 			return ( key, dir ) => updateQueryString( { orderby: key, order: dir }, path, query );
 		case 'compare':
 			return ( key, queryParam, ids ) =>
-				updateQueryString( {
-					[ queryParam ]: `compare-${ key }`,
-					[ key ]: ids,
-					search: undefined,
-				}, path, query );
+				updateQueryString(
+					{
+						[ queryParam ]: `compare-${ key }`,
+						[ key ]: ids,
+						search: undefined,
+					},
+					path,
+					query
+				);
 		default:
 			return value => updateQueryString( { [ param ]: value }, path, query );
 	}

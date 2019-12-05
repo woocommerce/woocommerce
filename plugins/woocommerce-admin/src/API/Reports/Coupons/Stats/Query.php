@@ -41,7 +41,7 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
-		$args = apply_filters( 'woocommerce_reports_coupons_query_args', $this->get_query_vars() );
+		$args = apply_filters( 'woocommerce_reports_coupons_stats_query_args', $this->get_query_vars() );
 
 		$data_store = \WC_Data_Store::load( 'report-coupons-stats' );
 		$results    = $data_store->get_data( $args );
