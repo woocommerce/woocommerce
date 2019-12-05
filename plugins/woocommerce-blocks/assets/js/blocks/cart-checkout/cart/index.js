@@ -10,6 +10,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import Block from './block';
 import { example } from './example';
+
 /**
  * Register and run the Cart block.
  */
