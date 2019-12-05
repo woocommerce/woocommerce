@@ -160,10 +160,7 @@ class Editor extends Component {
 		const onDone = () => {
 			const { block, setAttributes } = this.props;
 			setAttributes( {
-				layoutConfig: getProductLayoutConfig(
-					this.blockMap,
-					block.innerBlocks
-				),
+				layoutConfig: getProductLayoutConfig( block.innerBlocks ),
 			} );
 			this.setState( { innerBlocks: block.innerBlocks } );
 			this.togglePreview();

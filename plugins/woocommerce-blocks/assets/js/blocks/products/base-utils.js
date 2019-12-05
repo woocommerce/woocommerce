@@ -42,10 +42,9 @@ export const DEFAULT_PRODUCT_LIST_LAYOUT = [
 /**
  * Converts innerblocks to a list of layout configs.
  *
- * @param {Object} blockMap Map of blocks as returned by `getBlockMap`.
  * @param {Object[]} innerBlocks Inner block components.
  */
-export const getProductLayoutConfig = ( blockMap, innerBlocks ) => {
+export const getProductLayoutConfig = ( innerBlocks ) => {
 	if ( ! innerBlocks || innerBlocks.length === 0 ) {
 		return [];
 	}
@@ -58,7 +57,7 @@ export const getProductLayoutConfig = ( blockMap, innerBlocks ) => {
 				product: undefined,
 				children:
 					block.innerBlocks.length > 0
-						? getProductLayoutConfig( blockMap, block.innerBlocks )
+						? getProductLayoutConfig( block.innerBlocks )
 						: [],
 			},
 		];
