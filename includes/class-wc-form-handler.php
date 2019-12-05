@@ -340,7 +340,7 @@ class WC_Form_Handler {
 	 * Process the checkout form.
 	 */
 	public static function checkout_action() {
-		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			wc_nocache_headers();
 
 			if ( WC()->cart->is_empty() ) {
