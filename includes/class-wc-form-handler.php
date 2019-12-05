@@ -453,6 +453,26 @@ class WC_Form_Handler {
 		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'] ) ) {
 			wc_nocache_headers();
 
+			// Test rate limit.
+			$current_user_id = get_current_user_id();
+			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
+			$delay           = (int) apply_filters( 'woocommerce_payment_gateway_add_payment_method_delay', 20 );
+
+			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
+				wc_add_notice(
+					/* translators: %d number of seconds */
+					_n(
+						'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
+						'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
+								$delay,
+						'woocommerce' ),
+					'error'
+				);
+				return;
+			}
+			
+			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay);
+
 			$nonce_value = wc_get_var( $_REQUEST['woocommerce-add-payment-method-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
 			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-add-payment-method' ) ) {
