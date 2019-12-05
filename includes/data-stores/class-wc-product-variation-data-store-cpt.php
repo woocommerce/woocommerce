@@ -116,7 +116,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$new_title = $this->generate_product_title( $product );
@@ -186,7 +186,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->save_meta_data();
 
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$new_title = $this->generate_product_title( $product );
