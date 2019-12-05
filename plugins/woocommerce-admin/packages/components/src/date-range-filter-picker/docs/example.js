@@ -7,7 +7,6 @@ import {
 	getDateParamsFromQuery,
 	getCurrentDates,
 	isoDateFormat,
-	loadLocaleData,
 } from '@woocommerce/date';
 
 /**
@@ -16,13 +15,6 @@ import {
 import { partialRight } from 'lodash';
 
 const query = {};
-
-// Fetch locale from store settings and load for date functions.
-const localeSettings = {
-	userLocale: 'fr_FR',
-	weekdaysShort: [ 'dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam' ],
-};
-loadLocaleData( localeSettings );
 
 const defaultDateRange = 'period=month&compare=previous_year';
 const storeGetDateParamsFromQuery = partialRight( getDateParamsFromQuery, defaultDateRange );

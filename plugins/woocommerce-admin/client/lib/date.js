@@ -32,14 +32,9 @@ import {
 	weekTicksThreshold,
 	defaultTableDateFormat,
 	getDateFormatsForInterval,
-	loadLocaleData,
 	dateValidationMessages,
 	validateDateInputForRange,
 } from '@woocommerce/date';
-
-// Load the store's locale.
-const localeSettings = getSetting( 'locale' );
-loadLocaleData( localeSettings );
 
 // Compose methods with store settings.
 const {
@@ -69,7 +64,6 @@ export {
 	weekTicksThreshold,
 	defaultTableDateFormat,
 	getDateFormatsForInterval,
-	loadLocaleData,
 	dateValidationMessages,
 	validateDateInputForRange,
 };

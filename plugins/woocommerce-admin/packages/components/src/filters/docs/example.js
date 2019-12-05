@@ -13,7 +13,6 @@ import {
 	getDateParamsFromQuery,
 	getCurrentDates,
 	isoDateFormat,
-	loadLocaleData,
 } from '@woocommerce/date';
 
 /**
@@ -30,13 +29,6 @@ const ORDER_STATUSES = {
 	processing: 'Processing',
 	refunded: 'Refunded',
 };
-
-// Fetch locale from store settings and load for date functions.
-const localeSettings = {
-	userLocale: 'fr_FR',
-	weekdaysShort: [ 'dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam' ],
-};
-loadLocaleData( localeSettings );
 
 // Fetch store default date range and compose with date utility functions.
 const defaultDateRange = 'period=month&compare=previous_year';
