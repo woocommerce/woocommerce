@@ -185,7 +185,7 @@ class ReportsSync {
 	 */
 	public static function get_import_totals( $days, $skip_existing ) {
 		$orders         = self::get_orders( 1, 1, $days, $skip_existing );
-		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
+		$customer_roles = apply_filters( 'woocommerce_analytics_import_customer_roles', array( 'customer' ) );
 		$customer_query = self::get_user_ids_for_batch(
 			$days,
 			$skip_existing,
@@ -286,7 +286,7 @@ class ReportsSync {
 			return;
 		}
 
-		if ( apply_filters( 'woocommerce_disable_order_scheduling', false ) ) {
+		if ( apply_filters( 'woocommerce_analytics_disable_order_scheduling', false ) ) {
 			self::orders_lookup_import_order( $order_id );
 			return;
 		}
@@ -528,7 +528,7 @@ class ReportsSync {
 		 * @param int    $batch_size Batch size.
 		 * @param string $action Batch action name.
 		 */
-		return apply_filters( 'wc_admin_report_regenerate_batch_size', $batch_size, $action );
+		return apply_filters( 'woocommerce_analytics_regenerate_batch_size', $batch_size, $action );
 	}
 
 	/**
@@ -678,7 +678,7 @@ class ReportsSync {
 	 */
 	public static function customer_lookup_import_batch_init( $days, $skip_existing ) {
 		$batch_size      = self::get_batch_size( self::CUSTOMERS_IMPORT_BATCH_ACTION );
-		$customer_roles  = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
+		$customer_roles  = apply_filters( 'woocommerce_analytics_import_customer_roles', array( 'customer' ) );
 		$customer_query  = self::get_user_ids_for_batch(
 			$days,
 			$skip_existing,
@@ -717,7 +717,7 @@ class ReportsSync {
 		);
 		wc_admin_record_tracks_event( 'import_job_start', $properties );
 
-		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
+		$customer_roles = apply_filters( 'woocommerce_analytics_import_customer_roles', array( 'customer' ) );
 		// When we are skipping already imported customers, the table of customers to import gets smaller in
 		// every batch, so we want to always import the first page.
 		$page           = $skip_existing ? 1 : $batch_number;

@@ -69,7 +69,7 @@ class Install {
 		 */
 		if ( ! $version_option || $requires_update ) {
 			self::install();
-			do_action( 'wc_admin_updated' );
+			do_action( 'woocommerce_admin_updated' );
 		}
 
 		/*
@@ -108,7 +108,7 @@ class Install {
 		// Use add_option() here to avoid overwriting this value with each
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'wc_admin_install_timestamp', time() );
-		do_action( 'wc_admin_installed' );
+		do_action( 'woocommerce_admin_installed' );
 	}
 
 	/**

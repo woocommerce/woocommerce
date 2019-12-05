@@ -82,7 +82,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
-		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15 );
+		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15 );
 	}
 
 	/**
@@ -307,7 +307,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 * @param int $tax_rate_id Tax Rate ID.
 			 * @param int $order_id    Order ID.
 			 */
-			do_action( 'woocommerce_reports_update_tax', $tax_item->get_rate_id(), $order->get_id() );
+			do_action( 'woocommerce_analytics_update_tax', $tax_item->get_rate_id(), $order->get_id() );
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
@@ -332,7 +332,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * @param int $tax_rate_id Tax Rate ID.
 		 * @param int $order_id    Order ID.
 		 */
-		do_action( 'woocommerce_reports_delete_tax', 0, $order_id );
+		do_action( 'woocommerce_analytics_delete_tax', 0, $order_id );
 
 		ReportsCache::invalidate();
 	}

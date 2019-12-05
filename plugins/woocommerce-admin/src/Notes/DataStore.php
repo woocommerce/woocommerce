@@ -19,7 +19,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	 * @param WC_Admin_Note $note Admin note.
 	 */
 	public function create( &$note ) {
-		$date_created = current_time( 'timestamp', 1 );
+		$date_created = time();
 		$note->set_date_created( $date_created );
 
 		global $wpdb;
@@ -52,14 +52,14 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		 *
 		 * @param int $note_id Note ID.
 		 */
-		do_action( 'woocommerce_new_note', $note_id );
+		do_action( 'woocommerce_note_created', $note_id );
 	}
 
 	/**
 	 * Method to read a note.
 	 *
 	 * @param WC_Admin_Note $note Admin note.
-	 * @throws Exception Throws exception when invalid data is found.
+	 * @throws \Exception Throws exception when invalid data is found.
 	 */
 	public function read( &$note ) {
 		global $wpdb;
@@ -87,7 +87,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			 *
 			 * @param int $note_id Note ID.
 			 */
-			do_action( 'woocommerce_admin_note_loaded', $note );
+			do_action( 'woocommerce_note_loaded', $note );
 		} elseif ( $note_row ) {
 			$note->set_name( $note_row->name );
 			$note->set_type( $note_row->type );
@@ -110,7 +110,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			 *
 			 * @param int $note_id Note ID.
 			 */
-			do_action( 'woocommerce_admin_note_loaded', $note );
+			do_action( 'woocommerce_note_loaded', $note );
 		} else {
 			throw new \Exception( __( 'Invalid data store for admin note.', 'woocommerce-admin' ) );
 		}
@@ -166,7 +166,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		 *
 		 * @param int $note_id Note ID.
 		 */
-		do_action( 'woocommerce_update_note', $note->get_id() );
+		do_action( 'woocommerce_note_updated', $note->get_id() );
 	}
 
 	/**
@@ -185,11 +185,11 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		}
 
 		/**
-		 * Fires when an admin note is updated.
+		 * Fires when an admin note is deleted.
 		 *
 		 * @param int $note_id Note ID.
 		 */
-		do_action( 'woocommerce_delete_note', $note_id );
+		do_action( 'woocommerce_note_deleted', $note_id );
 	}
 
 	/**
@@ -257,14 +257,15 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		}
 
 		$clear_actions_query = $wpdb->prepare(
-			"DELETE FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id = %d", $note->get_id()
+			"DELETE FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id = %d",
+			$note->get_id()
 		);
 
 		if ( $actions_to_keep ) {
 			$clear_actions_query .= sprintf( ' AND action_id NOT IN (%s)', implode( ',', $actions_to_keep ) );
 		}
 
-		$wpdb->query( $clear_actions_query );
+		$wpdb->query( $clear_actions_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		// Update/insert the actions in this changeset.
 		foreach ( $changed_actions as $action ) {
@@ -323,10 +324,11 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		$where_clauses = $this->get_notes_where_clauses( $args );
 
 		$query = $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']} LIMIT %d, %d",
 			$offset,
 			$args['per_page']
-		); // WPCS: unprepared SQL ok.
+		);
 
 		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
@@ -349,7 +351,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		);
 
 		if ( ! empty( $where_clauses ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses}" );
 		}
 
@@ -405,7 +407,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		 * @param string $where_clauses The generated WHERE clause.
 		 * @param array  $args          The original arguments for the request.
 		 */
-		return apply_filters( 'wc_admin_notes_where_clauses', $where_clauses, $args );
+		return apply_filters( 'woocommerce_note_where_clauses', $where_clauses, $args );
 	}
 
 	/**

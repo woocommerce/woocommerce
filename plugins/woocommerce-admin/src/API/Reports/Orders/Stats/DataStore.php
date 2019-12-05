@@ -295,7 +295,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
@@ -348,7 +348,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			if ( isset( $intervals[0] ) ) {
@@ -510,7 +510,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $order_id Order ID.
 		 */
-		do_action( 'woocommerce_reports_update_order_stats', $order->get_id() );
+		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
 
 		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
 		return ( 1 === $result || 2 === $result );
@@ -535,7 +535,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 *
 		 * @param int $order_id Order ID.
 		 */
-		do_action( 'woocommerce_reports_delete_order_stats', $order_id );
+		do_action( 'woocommerce_analytics_delete_order_stats', $order_id );
 
 		ReportsCache::invalidate();
 	}

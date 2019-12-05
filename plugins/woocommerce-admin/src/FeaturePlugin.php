@@ -315,7 +315,7 @@ class FeaturePlugin {
 	 * @param array $features Array of feature slugs.
 	 */
 	public function replace_supported_features( $features ) {
-		$feature_config = apply_filters( 'wc_admin_get_feature_config', wc_admin_get_feature_config() );
+		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
 		$features       = array_keys( array_filter( $feature_config ) );
 		return $features;
 	}

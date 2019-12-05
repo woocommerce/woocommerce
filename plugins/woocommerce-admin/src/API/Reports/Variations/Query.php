@@ -42,10 +42,10 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
-		$args = apply_filters( 'woocommerce_reports_variations_query_args', $this->get_query_vars() );
+		$args = apply_filters( 'woocommerce_analytics_variations_query_args', $this->get_query_vars() );
 
 		$data_store = \WC_Data_Store::load( 'report-variations' );
 		$results    = $data_store->get_data( $args );
-		return apply_filters( 'woocommerce_reports_variations_select_query', $results, $args );
+		return apply_filters( 'woocommerce_analytics_variations_select_query', $results, $args );
 	}
 }

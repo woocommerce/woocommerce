@@ -123,7 +123,7 @@ class WC_Admin_Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
 		);
 
-		return apply_filters( 'woocommerce_admin_note_types', $allowed_types );
+		return apply_filters( 'woocommerce_note_types', $allowed_types );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class WC_Admin_Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_SNOOZED,
 		);
 
-		return apply_filters( 'woocommerce_admin_note_statuses', $allowed_statuses );
+		return apply_filters( 'woocommerce_note_statuses', $allowed_statuses );
 	}
 
 

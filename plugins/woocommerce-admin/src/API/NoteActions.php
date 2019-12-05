@@ -92,7 +92,7 @@ class NoteActions extends Notes {
 		 * @param string        $name The triggered action name.
 		 * @param WC_Admin_Note $note The corresponding Note.
 		 */
-		do_action( 'woocommerce_admin_note_action', $triggered_action->name, $note );
+		do_action( 'woocommerce_note_action', $triggered_action->name, $note );
 
 		/**
 		 * Fires when an admin note action is taken.
@@ -100,7 +100,7 @@ class NoteActions extends Notes {
 		 *
 		 * @param WC_Admin_Note $note The corresponding Note.
 		 */
-		do_action( 'woocommerce_admin_note_action_' . $triggered_action->name, $note );
+		do_action( 'woocommerce_note_action_' . $triggered_action->name, $note );
 
 		// Update the note with the status for this action.
 		if ( ! empty( $triggered_action->status ) ) {

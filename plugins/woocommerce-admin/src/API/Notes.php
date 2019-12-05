@@ -159,7 +159,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
 		 */
-		$args = apply_filters( 'woocommerce_rest_admin_notes_object_query', $args, $request );
+		$args = apply_filters( 'woocommerce_rest_notes_object_query', $args, $request );
 
 		return $args;
 	}
@@ -308,7 +308,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		 * @param array            $data The original note.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_admin_note', $response, $data, $request );
+		return apply_filters( 'woocommerce_rest_prepare_note', $response, $data, $request );
 	}
 
 	/**

@@ -127,7 +127,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		}
 
 		if ( 200 !== $response->get_status() ) {
-			return new \WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'woocommerce_analytics_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce-admin' ) );
 		}
 
 		$endpoints     = $response->get_data();
@@ -275,7 +275,7 @@ class Controller extends \WC_REST_Reports_Controller {
 
 		$query_args = $this->prepare_reports_query( $request );
 		if ( empty( $query_args['stats'] ) ) {
-			return new \WP_Error( 'woocommerce_reports_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce-admin' ), 400 );
+			return new \WP_Error( 'woocommerce_analytics_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce-admin' ), 400 );
 		}
 
 		$stats = array();

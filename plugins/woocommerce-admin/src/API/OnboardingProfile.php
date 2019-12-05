@@ -358,7 +358,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 			),
 		);
 
-		return apply_filters( 'woocommerce_admin_onboarding_profile_properties', $properties );
+		return apply_filters( 'woocommerce_rest_onboarding_profile_properties', $properties );
 	}
 
 	/**

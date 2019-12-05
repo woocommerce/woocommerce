@@ -102,7 +102,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
-		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 10 );
+		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 10 );
 	}
 
 	/**
@@ -474,7 +474,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			 * @param int $order_item_id Order Item ID.
 			 * @param int $order_id      Order ID.
 			 */
-			do_action( 'woocommerce_reports_update_product', $order_item_id, $order->get_id() );
+			do_action( 'woocommerce_analytics_update_product', $order_item_id, $order->get_id() );
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
@@ -513,7 +513,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * @param int $product_id Product ID.
 		 * @param int $order_id   Order ID.
 		 */
-		do_action( 'woocommerce_reports_delete_product', 0, $order_id );
+		do_action( 'woocommerce_analytics_delete_product', 0, $order_id );
 
 		ReportsCache::invalidate();
 	}
