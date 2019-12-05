@@ -106,7 +106,7 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( false, WC_Validation::is_postcode( '3852 SA', 'NL' ) ),
 			array( false, WC_Validation::is_postcode( '3852 sa', 'NL' ) ),
 		);
-		
+
 		$si = array(
 			array( true, WC_Validation::is_postcode( '1234', 'SI' ) ),
 			array( true, WC_Validation::is_postcode( '1000', 'SI' ) ),
