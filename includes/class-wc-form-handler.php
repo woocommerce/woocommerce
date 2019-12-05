@@ -464,14 +464,15 @@ class WC_Form_Handler {
 					_n(
 						'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
 						'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
-								$delay,
-						'woocommerce' ),
+						$delay,
+						'woocommerce'
+					),
 					'error'
 				);
 				return;
 			}
-			
-			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay);
+
+			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay );
 
 			$nonce_value = wc_get_var( $_REQUEST['woocommerce-add-payment-method-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 

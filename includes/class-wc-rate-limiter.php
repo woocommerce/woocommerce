@@ -34,7 +34,7 @@ class WC_Rate_Limiter {
 	/**
 	 * Constructs Option name from action identifier.
 	 *
-	 * @param $id
+	 * @param string $id
 	 * @return string
 	 */
 	public static function storage_id( $id ) {
@@ -44,7 +44,7 @@ class WC_Rate_Limiter {
 	/**
 	 * Returns true if the action is not allowed to be run by the rate limiter yet, false otherwise.
 	 *
-	 * @param $id Identifier for the action
+	 * @param string $id Identifier for the action
 	 * @return bool
 	 */
 	public static function retried_too_soon( $id ) {
@@ -67,8 +67,8 @@ class WC_Rate_Limiter {
 	/**
 	 * Sets the rate limit delay in seconds for action with identifier $id.
 	 *
-	 * @param $id Identifier for the action.
-	 * @param $delay Delay in seconds.
+	 * @param string $id Identifier for the action.
+	 * @param int $delay Delay in seconds.
 	 * @return bool True if the option setting was successful, false otherwise.
 	 */
 	public static function set_rate_limit( $id, $delay ) {
