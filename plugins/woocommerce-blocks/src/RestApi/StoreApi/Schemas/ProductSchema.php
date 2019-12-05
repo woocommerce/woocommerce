@@ -31,46 +31,46 @@ class ProductSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
-			'id'             => array(
+			'id'                  => array(
 				'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'name'           => array(
+			'name'                => array(
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 			),
-			'variation'      => array(
+			'variation'           => array(
 				'description' => __( 'Product variation attributes, if applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 			),
-			'permalink'      => array(
+			'permalink'           => array(
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'description'    => array(
+			'description'         => array(
 				'description' => __( 'Short description or excerpt from description.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 			),
-			'on_sale'        => array(
+			'on_sale'             => array(
 				'description' => __( 'Is the product on sale?', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'sku'            => array(
+			'sku'                 => array(
 				'description' => __( 'Unique identifier.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 			),
-			'prices'         => array(
+			'prices'              => array(
 				'description' => __( 'Price data.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
@@ -158,19 +158,19 @@ class ProductSchema extends AbstractSchema {
 					),
 				),
 			),
-			'average_rating' => array(
+			'average_rating'      => array(
 				'description' => __( 'Reviews average rating.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'review_count'   => array(
+			'review_count'        => array(
 				'description' => __( 'Amount of reviews that the product has.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'images'         => array(
+			'images'              => array(
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
@@ -201,25 +201,31 @@ class ProductSchema extends AbstractSchema {
 					),
 				),
 			),
-			'has_options'    => array(
+			'has_options'         => array(
 				'description' => __( 'Does the product have options?', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'is_purchasable' => array(
+			'is_purchasable'      => array(
 				'description' => __( 'Is the product purchasable?', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'is_in_stock'    => array(
+			'is_in_stock'         => array(
 				'description' => __( 'Is the product in stock?', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'add_to_cart'    => array(
+			'low_stock_remaining' => array(
+				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'add_to_cart'         => array(
 				'description' => __( 'Add to cart button parameters.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
@@ -249,26 +255,27 @@ class ProductSchema extends AbstractSchema {
 	/**
 	 * Convert a WooCommerce product into an object suitable for the response.
 	 *
-	 * @param array $product Product object.
+	 * @param \WC_Product $product Product instance.
 	 * @return array
 	 */
-	public function get_item_response( $product ) {
+	public function get_item_response( \WC_Product $product ) {
 		return [
-			'id'             => $product->get_id(),
-			'name'           => $product->get_title(),
-			'variation'      => $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '',
-			'permalink'      => $product->get_permalink(),
-			'sku'            => $product->get_sku(),
-			'description'    => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
-			'on_sale'        => $product->is_on_sale(),
-			'prices'         => $this->get_prices( $product ),
-			'average_rating' => $product->get_average_rating(),
-			'review_count'   => $product->get_review_count(),
-			'images'         => ( new ProductImages() )->images_to_array( $product ),
-			'has_options'    => $product->has_options(),
-			'is_purchasable' => $product->is_purchasable(),
-			'is_in_stock'    => $product->is_in_stock(),
-			'add_to_cart'    => [
+			'id'                  => $product->get_id(),
+			'name'                => $product->get_title(),
+			'variation'           => $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '',
+			'permalink'           => $product->get_permalink(),
+			'sku'                 => $product->get_sku(),
+			'description'         => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
+			'on_sale'             => $product->is_on_sale(),
+			'prices'              => $this->get_prices( $product ),
+			'average_rating'      => $product->get_average_rating(),
+			'review_count'        => $product->get_review_count(),
+			'images'              => ( new ProductImages() )->images_to_array( $product ),
+			'has_options'         => $product->has_options(),
+			'is_purchasable'      => $product->is_purchasable(),
+			'is_in_stock'         => $product->is_in_stock(),
+			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
+			'add_to_cart'         => [
 				'text'        => $product->add_to_cart_text(),
 				'description' => $product->add_to_cart_description(),
 			],
@@ -276,12 +283,25 @@ class ProductSchema extends AbstractSchema {
 	}
 
 	/**
+	 * If a product has low stock, return the remaining stock amount for display.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return integer|null
+	 */
+	protected function get_low_stock_remaining( \WC_Product $product ) {
+		if ( ! is_null( $product->get_stock_quantity() ) && $product->get_stock_quantity() <= wc_get_low_stock_amount( $product ) ) {
+			return $product->get_stock_quantity();
+		}
+		return null;
+	}
+
+	/**
 	 * Get an array of pricing data.
 	 *
-	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
+	 * @param \WC_Product $product Product instance.
 	 * @return array
 	 */
-	protected function get_prices( $product ) {
+	protected function get_prices( \WC_Product $product ) {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$position         = get_option( 'woocommerce_currency_pos' );
 		$symbol           = html_entity_decode( get_woocommerce_currency_symbol() );
@@ -324,10 +344,10 @@ class ProductSchema extends AbstractSchema {
 	/**
 	 * Get price range from certain product types.
 	 *
-	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
+	 * @param \WC_Product $product Product instance.
 	 * @return arary|null
 	 */
-	protected function get_price_range( $product ) {
+	protected function get_price_range( \WC_Product $product ) {
 		if ( $product->is_type( 'variable' ) ) {
 			$prices = $product->get_variation_prices( true );
 
