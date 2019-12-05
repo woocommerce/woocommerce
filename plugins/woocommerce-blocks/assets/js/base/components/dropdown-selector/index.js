@@ -2,9 +2,10 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { useRef } from '@wordpress/element';
+import { useCallback, useRef } from '@wordpress/element';
 import classNames from 'classnames';
 import Downshift from 'downshift';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,32 +14,8 @@ import DropdownSelectorInput from './input';
 import DropdownSelectorInputWrapper from './input-wrapper';
 import DropdownSelectorMenu from './menu';
 import DropdownSelectorSelectedChip from './selected-chip';
+import DropdownSelectorSelectedValue from './selected-value';
 import './style.scss';
-
-/**
- * State reducer for the downshift component.
- * See: https://github.com/downshift-js/downshift#statereducer
- */
-const stateReducer = ( state, changes ) => {
-	switch ( changes.type ) {
-		case Downshift.stateChangeTypes.keyDownEnter:
-		case Downshift.stateChangeTypes.clickItem:
-			return {
-				...changes,
-				highlightedIndex: state.highlightedIndex,
-				isOpen: true,
-				inputValue: '',
-			};
-		case Downshift.stateChangeTypes.blurInput:
-		case Downshift.stateChangeTypes.mouseUp:
-			return {
-				...changes,
-				inputValue: state.inputValue,
-			};
-		default:
-			return changes;
-	}
-};
 
 /**
  * Component used to show an input box with a dropdown with suggestions.
@@ -50,6 +27,7 @@ const DropdownSelector = ( {
 	inputLabel = '',
 	isDisabled = false,
 	isLoading = false,
+	multiple = false,
 	onChange = () => {},
 	options = [],
 } ) => {
@@ -60,11 +38,33 @@ const DropdownSelector = ( {
 		'is-loading': isLoading,
 	} );
 
-	const focusInput = ( isOpen ) => {
-		if ( ! isOpen ) {
-			inputRef.current.focus();
-		}
-	};
+	/**
+	 * State reducer for the downshift component.
+	 * See: https://github.com/downshift-js/downshift#statereducer
+	 */
+	const stateReducer = useCallback(
+		( state, changes ) => {
+			switch ( changes.type ) {
+				case Downshift.stateChangeTypes.keyDownEnter:
+				case Downshift.stateChangeTypes.clickItem:
+					return {
+						...changes,
+						highlightedIndex: state.highlightedIndex,
+						isOpen: multiple,
+						inputValue: '',
+					};
+				case Downshift.stateChangeTypes.blurInput:
+				case Downshift.stateChangeTypes.mouseUp:
+					return {
+						...changes,
+						inputValue: state.inputValue,
+					};
+				default:
+					return changes;
+			}
+		},
+		[ multiple ]
+	);
 
 	return (
 		<Downshift
@@ -82,7 +82,12 @@ const DropdownSelector = ( {
 				isOpen,
 				openMenu,
 			} ) => (
-				<div className={ classes }>
+				<div
+					className={ classNames( classes, {
+						'is-multiple': multiple,
+						'is-single': ! multiple,
+					} ) }
+				>
 					{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }
 					<label
 						{ ...getLabelProps( {
@@ -93,25 +98,32 @@ const DropdownSelector = ( {
 					</label>
 					<DropdownSelectorInputWrapper
 						isOpen={ isOpen }
-						onClick={ () => focusInput( isOpen ) }
+						onClick={ () => inputRef.current.focus() }
 					>
 						{ checked.map( ( value ) => {
 							const option = options.find(
 								( o ) => o.value === value
 							);
-							return (
+							const onRemoveItem = ( val ) => {
+								onChange( val );
+								inputRef.current.focus();
+							};
+							return multiple ? (
 								<DropdownSelectorSelectedChip
 									key={ value }
-									onRemoveItem={ ( val ) => {
-										onChange( val );
-										focusInput( isOpen );
-									} }
+									onRemoveItem={ onRemoveItem }
+									option={ option }
+								/>
+							) : (
+								<DropdownSelectorSelectedValue
+									key={ value }
+									onClick={ () => inputRef.current.focus() }
+									onRemoveItem={ onRemoveItem }
 									option={ option }
 								/>
 							);
 						} ) }
 						<DropdownSelectorInput
-							attributeLabel={ attributeLabel }
 							checked={ checked }
 							getInputProps={ getInputProps }
 							inputRef={ inputRef }
@@ -119,8 +131,20 @@ const DropdownSelector = ( {
 							onFocus={ openMenu }
 							onRemoveItem={ ( val ) => {
 								onChange( val );
-								focusInput( isOpen );
+								inputRef.current.focus();
 							} }
+							placeholder={
+								checked.length > 0 && multiple
+									? null
+									: sprintf(
+											// Translators: %s attribute name.
+											__(
+												'Any %s',
+												'woo-gutenberg-products-block'
+											),
+											attributeLabel
+									  )
+							}
 							value={ inputValue }
 						/>
 					</DropdownSelectorInputWrapper>
