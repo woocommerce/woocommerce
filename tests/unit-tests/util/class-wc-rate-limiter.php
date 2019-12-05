@@ -39,12 +39,13 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 
 		WC_Rate_Limiter::set_rate_limit( $rate_limit_id_1, 1 );
 
-		$this->assertEquals( true, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_1 ), 'retried_too_soon allowed action to run too soon.' );
-		$this->assertEquals( false, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_2 ), 'retried_too_soon did not allow action to run for another user.' );
+		$this->assertEquals( true, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_1 ), 'retried_too_soon allowed action to run too soon before the delay.' );
+		$this->assertEquals( false, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_2 ), 'retried_too_soon did not allow action to run for another user before the delay.' );
 
-		sleep(1);
+        sleep(1);
+        
         $this->assertEquals( true, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_1 ), 'retried_too_soon did not allow action to run after the designated delay.' );
-        $this->assertEquals( true, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_2 ), 'retried_too_soon did not allow action to run for another user.' );
+        $this->assertEquals( true, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_2 ), 'retried_too_soon did not allow action to run for another user after the designated delay.' );
 	}
 
 }
