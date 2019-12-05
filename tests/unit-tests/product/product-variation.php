@@ -77,4 +77,18 @@ class WC_Tests_Product_Variation extends WC_Unit_Test_Case {
 		$this->assertEquals( 'parent', $variation->get_tax_class( 'edit' ) );
 		$this->assertEquals( 'zero-rate', $variation->get_tax_class( 'view' ) );
 	}
+
+	/**
+	 * Test that WC_Product_Variation throws an exception
+	 * when called with a product ID that belongs to a product
+	 * of a different type.
+	 *
+	 * Ticket: https://github.com/woocommerce/woocommerce/issues/24956
+	 */
+	public function test_product_variation_should_throw_exception_when_instantiated_with_invalid_id() {
+		$this->expectExceptionMessage( 'Invalid product type: passed ID does not correspond to a product variation.' );
+
+		$variable_product = WC_Helper_Product::create_variation_product();
+		new WC_Product_Variation( $variable_product->get_id() );
+	}
 }
