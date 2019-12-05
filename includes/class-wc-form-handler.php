@@ -453,6 +453,12 @@ class WC_Form_Handler {
 		if ( isset( $_POST['woocommerce_add_payment_method'], $_POST['payment_method'] ) ) {
 			wc_nocache_headers();
 
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-add-payment-method-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-add-payment-method' ) ) {
+				return;
+			}
+
 			// Test rate limit.
 			$current_user_id = get_current_user_id();
 			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
@@ -473,12 +479,6 @@ class WC_Form_Handler {
 			}
 
 			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay );
-
-			$nonce_value = wc_get_var( $_REQUEST['woocommerce-add-payment-method-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
-
-			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-add-payment-method' ) ) {
-				return;
-			}
 
 			ob_start();
 
