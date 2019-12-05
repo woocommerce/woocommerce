@@ -28,8 +28,6 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 
 	/**
 	 * Test setting the limit and running rate limited actions.
-	 *
-	 * @since 2.6.0
 	 */
 	public function test_rate_limit_limits() {
 		$action_identifier = 'action_1';
