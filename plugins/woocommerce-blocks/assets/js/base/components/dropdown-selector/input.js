@@ -1,16 +1,11 @@
-/**
- * External dependencies
- */
-import { __, sprintf } from '@wordpress/i18n';
-
 const DropdownSelectorInput = ( {
-	attributeLabel,
 	checked,
 	getInputProps,
 	inputRef,
 	isDisabled,
 	onFocus,
 	onRemoveItem,
+	placeholder,
 	value,
 } ) => {
 	return (
@@ -29,14 +24,7 @@ const DropdownSelectorInput = ( {
 						onRemoveItem( checked[ checked.length - 1 ] );
 					}
 				},
-				placeholder:
-					checked.length === 0
-						? sprintf(
-								// Translators: %s attribute name.
-								__( 'Any %s', 'woo-gutenberg-products-block' ),
-								attributeLabel
-						  )
-						: null,
+				placeholder,
 			} ) }
 		/>
 	);

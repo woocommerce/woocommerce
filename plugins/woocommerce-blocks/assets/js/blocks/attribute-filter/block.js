@@ -124,6 +124,9 @@ const AttributeFilterBlock = ( {
 		shouldSelect: blockAttributes.attributeId > 0,
 	} );
 
+	const filterAvailableFilters =
+		blockAttributes.displayStyle !== 'dropdown' &&
+		blockAttributes.queryType === 'and';
 	const {
 		results: filteredCounts,
 		isLoading: filteredCountsLoading,
@@ -132,7 +135,7 @@ const AttributeFilterBlock = ( {
 			taxonomy: attributeObject.taxonomy,
 			queryType: blockAttributes.queryType,
 		},
-		queryState,
+		queryState: filterAvailableFilters ? queryState : null,
 	} );
 
 	/**
@@ -202,41 +205,88 @@ const AttributeFilterBlock = ( {
 		[ attributeTerms ]
 	);
 
+	const multiple =
+		blockAttributes.displayStyle !== 'dropdown' ||
+		blockAttributes.queryType === 'or';
+
 	/**
 	 * When a checkbox in the list changes, update state.
 	 */
 	const onChange = useCallback(
 		( checkedValue ) => {
-			const isChecked = ! checked.includes( checkedValue );
-			const newChecked = checked.filter(
-				( value ) => value !== checkedValue
-			);
-			const checkedOption = displayedOptions.find(
-				( option ) => option.value === checkedValue
-			);
+			const getFilterNameFromValue = ( filterValue ) => {
+				const { name } = displayedOptions.find(
+					( option ) => option.value === filterValue
+				);
 
-			if ( isChecked ) {
-				newChecked.push( checkedValue );
-				newChecked.sort();
-				speak(
-					sprintf(
-						__(
-							'%s filter added.',
-							'woo-gutenberg-products-block'
-						),
-						checkedOption.name
-					)
-				);
+				return name;
+			};
+
+			const announceFilterChange = ( { filterAdded, filterRemoved } ) => {
+				const filterAddedName = filterAdded
+					? getFilterNameFromValue( filterAdded )
+					: null;
+				const filterRemovedName = filterRemoved
+					? getFilterNameFromValue( filterRemoved )
+					: null;
+				if ( filterAddedName && filterRemovedName ) {
+					speak(
+						sprintf(
+							__(
+								// translators: %s attribute terms (for example: 'red', 'blue', 'large'...)
+								'%s filter replaced with %s.',
+								'woo-gutenberg-products-block'
+							),
+							filterAddedName,
+							filterRemovedName
+						)
+					);
+				} else if ( filterAddedName ) {
+					speak(
+						sprintf(
+							// translators: %s attribute term (for example: 'red', 'blue', 'large'...)
+							__(
+								'%s filter added.',
+								'woo-gutenberg-products-block'
+							),
+							filterAddedName
+						)
+					);
+				} else if ( filterRemovedName ) {
+					speak(
+						sprintf(
+							// translators: %s attribute term (for example: 'red', 'blue', 'large'...)
+							__(
+								'%s filter removed.',
+								'woo-gutenberg-products-block'
+							),
+							filterRemovedName
+						)
+					);
+				}
+			};
+
+			const previouslyChecked = checked.includes( checkedValue );
+			let newChecked;
+
+			if ( ! multiple ) {
+				newChecked = previouslyChecked ? [] : [ checkedValue ];
+				const filterAdded = previouslyChecked ? null : checkedValue;
+				const filterRemoved =
+					checked.length === 1 ? checked[ 0 ] : null;
+				announceFilterChange( { filterAdded, filterRemoved } );
 			} else {
-				speak(
-					sprintf(
-						__(
-							'%s filter removed.',
-							'woo-gutenberg-products-block'
-						),
-						checkedOption.name
-					)
+				newChecked = checked.filter(
+					( value ) => value !== checkedValue
 				);
+
+				if ( ! previouslyChecked ) {
+					newChecked.push( checkedValue );
+					newChecked.sort();
+					announceFilterChange( { filterAdded: checkedValue } );
+				} else {
+					announceFilterChange( { filterRemoved: checkedValue } );
+				}
 			}
 
 			const newSelectedTerms = getSelectedTerms( newChecked );
@@ -249,15 +299,7 @@ const AttributeFilterBlock = ( {
 				blockAttributes.queryType === 'or' ? 'in' : 'and'
 			);
 		},
-		[
-			attributeTerms,
-			checked,
-			productAttributesQuery,
-			setProductAttributesQuery,
-			attributeObject,
-			blockAttributes,
-			displayedOptions,
-		]
+		[ displayedOptions, multiple ]
 	);
 
 	if ( displayedOptions.length === 0 && ! attributeTermsLoading ) {
@@ -281,6 +323,7 @@ const AttributeFilterBlock = ( {
 						className={ 'wc-block-attribute-filter-dropdown' }
 						inputLabel={ blockAttributes.heading }
 						isLoading={ isLoading }
+						multiple={ multiple }
 						onChange={ onChange }
 						options={ displayedOptions }
 					/>

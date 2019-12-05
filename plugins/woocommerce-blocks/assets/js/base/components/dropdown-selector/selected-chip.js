@@ -7,8 +7,7 @@ const DropdownSelectorSelectedChip = ( { onRemoveItem, option } ) => {
 	return (
 		<button
 			className="wc-block-dropdown-selector__selected-chip"
-			onClick={ ( e ) => {
-				e.stopPropagation();
+			onClick={ () => {
 				onRemoveItem( option.value );
 			} }
 			onKeyDown={ ( e ) => {
@@ -21,7 +20,9 @@ const DropdownSelectorSelectedChip = ( { onRemoveItem, option } ) => {
 				option.name
 			) }
 		>
-			{ option.label }
+			<span className="wc-block-dropdown-selector__selected-chip__label">
+				{ option.label }
+			</span>
 			<span className="wc-block-dropdown-selector__selected-chip__remove">
 				𝘅
 			</span>
