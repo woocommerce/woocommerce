@@ -59,7 +59,7 @@ class FeaturePlugin {
 		 *
 		 * @param bool $disabled False.
 		 */
-		if ( apply_filters( 'woocommerce_analytics_disabled', false ) ) {
+		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
 			return;
 		}
 
