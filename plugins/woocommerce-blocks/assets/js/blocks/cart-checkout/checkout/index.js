@@ -9,6 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import edit from './edit';
 import { example } from './example';
+import './editor.scss';
 
 registerBlockType( 'woocommerce/checkout', {
 	title: __( 'Checkout', 'woo-gutenberg-products-block' ),
