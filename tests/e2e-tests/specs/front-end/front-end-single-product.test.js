@@ -11,6 +11,8 @@ import { uiUnblocked } from '../../utils';
 
 let simplePostIdValue;
 let variablePostIdValue;
+const config = require( 'config' );
+const simpleProductName = config.get( 'products.simple.name' );
 
 describe( 'Single Product Page', () => {
 	beforeAll( async () => {
@@ -28,10 +30,10 @@ describe( 'Single Product Page', () => {
 
 		// Verify cart contents
 		await CustomerFlow.goToCart();
-		await CustomerFlow.productIsInCart( 'Simple product', 5 );
+		await CustomerFlow.productIsInCart( simpleProductName, 5 );
 
 		// Remove items from cart
-		await CustomerFlow.removeFromCart( 'Simple product' );
+		await CustomerFlow.removeFromCart( simpleProductName );
 		await uiUnblocked();
 		await expect( page ).toMatchElement( '.cart-empty', { text: 'Your cart is currently empty.' } );
 	} );

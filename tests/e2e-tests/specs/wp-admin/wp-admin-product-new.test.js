@@ -8,6 +8,9 @@
 import { StoreOwnerFlow } from '../../utils/flows';
 import { clickTab, uiUnblocked } from '../../utils';
 
+const config = require( 'config' );
+const simpleProductName = config.get( 'products.simple.name' );
+
 const verifyPublishAndTrash = async () => {
 	// Wait for auto save
 	await page.waitFor( 2000 );
@@ -41,7 +44,7 @@ describe( 'Add New Simple Product Page', () => {
 		await expect( page.title() ).resolves.toMatch( 'Add new product' );
 
 		// Set product data
-		await expect( page ).toFill( '#title', 'Simple product' );
+		await expect( page ).toFill( '#title', simpleProductName );
 		await expect( page ).toClick( '#_virtual' );
 		await clickTab( 'General' );
 		await expect( page ).toFill( '#_regular_price',  '9.99' );

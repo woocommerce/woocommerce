@@ -10,7 +10,7 @@ import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 import { setCheckbox, settingsPageSaveChanges, uiUnblocked, verifyCheckboxIsSet } from '../../utils';
 
 const config = require( 'config' );
-
+const simpleProductName = config.get( 'products.simple.name' );
 let orderId;
 
 describe( 'Checkout page', () => {
@@ -66,84 +66,51 @@ describe( 'Checkout page', () => {
 		await StoreOwnerFlow.logout();
 	} );
 
-	it( 'Should display cart items in order review', async () => {
+	it( 'should display cart items in order review', async () => {
 		await CustomerFlow.goToShop();
-		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
+		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( 'Simple product', 1, 9.99, 9.99 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, 1, 9.99, 9.99 );
 	} );
 
-	it( 'Allows customer to choose available payment methods', async () => {
+	it( 'allows customer to choose available payment methods', async () => {
 		await CustomerFlow.goToShop();
-		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
+		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( 'Simple product', 2, 19.98, 19.98 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, 2, 19.98, 19.98 );
 
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'PayPal' } );
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'Direct bank transfer' } );
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'Cash on delivery' } );
 	} );
 
-	it( 'Allows customer to fill billing details', async () => {
+	it( 'allows customer to fill billing details', async () => {
 		await CustomerFlow.goToShop();
-		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
+		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( 'Simple product', 3, 29.97, 29.97 );
-		await CustomerFlow.fillBillingDetails(
-			config.get( 'addresses.customer.billing.firstname' ),
-			config.get( 'addresses.customer.billing.lastname' ),
-			config.get( 'addresses.customer.billing.company' ),
-			config.get( 'addresses.customer.billing.country' ),
-			config.get( 'addresses.customer.billing.addressfirstline' ),
-			config.get( 'addresses.customer.billing.addresssecondline' ),
-			config.get( 'addresses.customer.billing.city' ),
-			config.get( 'addresses.customer.billing.state' ),
-			config.get( 'addresses.customer.billing.postcode' ),
-			config.get( 'addresses.customer.billing.phone' ),
-			config.get( 'addresses.customer.billing.email' )
-		);
+		await CustomerFlow.productIsInCheckout( simpleProductName, 3, 29.97, 29.97 );
+		await CustomerFlow.fillBillingDetails( config.get( 'addresses.customer.billing' ) );
 	} );
 
-	it( 'Allows customer to fill shipping details', async () => {
+	it( 'allows customer to fill shipping details', async () => {
 		await CustomerFlow.goToShop();
-		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
+		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( 'Simple product', 4, 39.96, 39.96 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, 4, 39.96, 39.96 );
 
 		await expect( page ).toClick( '#ship-to-different-address-checkbox' );
 		await uiUnblocked();
 
-		await CustomerFlow.fillShippingDetails(
-			config.get( 'addresses.customer.shipping.firstname' ),
-			config.get( 'addresses.customer.shipping.lastname' ),
-			config.get( 'addresses.customer.shipping.company' ),
-			config.get( 'addresses.customer.shipping.country' ),
-			config.get( 'addresses.customer.shipping.addressfirstline' ),
-			config.get( 'addresses.customer.shipping.addresssecondline' ),
-			config.get( 'addresses.customer.shipping.city' ),
-			config.get( 'addresses.customer.shipping.state' ),
-			config.get( 'addresses.customer.shipping.postcode' )
-		);
+		await CustomerFlow.fillShippingDetails( config.get( 'addresses.customer.shipping' ) );
 	} );
 
-	it( 'Allows guest customer to place order', async () => {
+	it( 'allows guest customer to place order', async () => {
 		await CustomerFlow.goToShop();
-		await CustomerFlow.addToCartFromShopPage( 'Simple product' );
+		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( 'Simple product', 5, 49.95, 49.95 );
-		await CustomerFlow.fillBillingDetails(
-			config.get( 'addresses.customer.billing.firstname' ),
-			config.get( 'addresses.customer.billing.lastname' ),
-			config.get( 'addresses.customer.billing.company' ),
-			config.get( 'addresses.customer.billing.country' ),
-			config.get( 'addresses.customer.billing.addressfirstline' ),
-			config.get( 'addresses.customer.billing.addresssecondline' ),
-			config.get( 'addresses.customer.billing.city' ),
-			config.get( 'addresses.customer.billing.state' ),
-			config.get( 'addresses.customer.billing.postcode' ),
-			config.get( 'addresses.customer.billing.phone' ),
-			config.get( 'addresses.customer.billing.email' )
-		);
+		await CustomerFlow.productIsInCheckout( simpleProductName, 5, 49.95, 49.95 );
+		await CustomerFlow.fillBillingDetails( config.get( 'addresses.customer.billing' ) );
+
 		await uiUnblocked();
 
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'Cash on delivery' } );
@@ -153,13 +120,13 @@ describe( 'Checkout page', () => {
 
 		await expect( page ).toMatch( 'Order received' );
 
-		// Get order ID from the Thank you page URL
-		let reg = /.+?\:\/\/.+?(\/.+?)(?:#|\?|$)/;
-		orderId = reg.exec( page.url() )[1].split( '/' )[3];
-		return orderId;
+		// Get order ID from the order received html element on the page
+		let orderReceivedHtmlElement = await page.$( '.woocommerce-order-overview__order.order' );
+		let orderReceivedText = await page.evaluate( element => element.textContent, orderReceivedHtmlElement );
+		return orderId = orderReceivedText.split( /(\s+)/ )[6].toString();
 	} );
 
-	it( 'Store owner can confirm the order was received', async () => {
+	it( 'store owner can confirm the order was received', async () => {
 		await StoreOwnerFlow.login();
 		await StoreOwnerFlow.openAllOrdersView();
 
@@ -174,7 +141,7 @@ describe( 'Checkout page', () => {
 		await expect( page ).toMatchElement( '.woocommerce-order-data__heading', { text: 'Order #' + orderId + ' details' } );
 
 		// Verify product name
-		await expect( page ).toMatchElement( '.wc-order-item-name', { text: 'Simple product' } );
+		await expect( page ).toMatchElement( '.wc-order-item-name', { text: simpleProductName } );
 
 		// Verify product cost
 		await expect( page ).toMatchElement( '.woocommerce-Price-amount.amount', { text: '9.99' } );

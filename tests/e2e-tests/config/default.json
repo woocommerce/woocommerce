@@ -10,6 +10,14 @@
       "password": "password"
     }
   },
+  "products": {
+    "simple": {
+      "name": "Simple product"
+    },
+    "variable": {
+      "name": "Variable Product with Three Variations"
+    }
+  },
   "addresses": {
     "admin": {
       "store": {
