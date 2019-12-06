@@ -207,7 +207,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 9, count( $properties ) );
+		$this->assertEquals( 10, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
 		$this->assertArrayHasKey( 'database', $properties );
 		$this->assertArrayHasKey( 'active_plugins', $properties );
