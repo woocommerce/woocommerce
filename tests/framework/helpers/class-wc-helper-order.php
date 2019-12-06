@@ -1,4 +1,9 @@
 <?php
+/**
+ * Order helpers.
+ *
+ * @package WooCommerce/Tests
+ */
 
 /**
  * Class WC_Helper_Order.
@@ -33,8 +38,8 @@ class WC_Helper_Order {
 	 * @since   2.4
 	 * @version 3.0 New parameter $product.
 	 *
-	 * @param int        $customer_id
-	 * @param WC_Product $product
+	 * @param int        $customer_id The ID of the customer the order is for.
+	 * @param WC_Product $product The product to add to the order.
 	 *
 	 * @return WC_Order
 	 */
@@ -53,10 +58,10 @@ class WC_Helper_Order {
 			'total'         => '',
 		);
 
-		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; // Required, else wc_create_order throws an exception
+		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; // Required, else wc_create_order throws an exception.
 		$order                  = wc_create_order( $order_data );
 
-		// Add order products
+		// Add order products.
 		$item = new WC_Order_Item_Product();
 		$item->set_props(
 			array(
@@ -69,7 +74,7 @@ class WC_Helper_Order {
 		$item->save();
 		$order->add_item( $item );
 
-		// Set billing address
+		// Set billing address.
 		$order->set_billing_first_name( 'Jeroen' );
 		$order->set_billing_last_name( 'Sormani' );
 		$order->set_billing_company( 'WooCompany' );
@@ -77,12 +82,12 @@ class WC_Helper_Order {
 		$order->set_billing_address_2( '' );
 		$order->set_billing_city( 'WooCity' );
 		$order->set_billing_state( 'NY' );
-		$order->set_billing_postcode( '123456' );
+		$order->set_billing_postcode( '12345' );
 		$order->set_billing_country( 'US' );
 		$order->set_billing_email( 'admin@example.org' );
 		$order->set_billing_phone( '555-32123' );
 
-		// Add shipping costs
+		// Add shipping costs.
 		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
 		$rate           = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
 		$item           = new WC_Order_Item_Shipping();
@@ -99,11 +104,11 @@ class WC_Helper_Order {
 		}
 		$order->add_item( $item );
 
-		// Set payment gateway
+		// Set payment gateway.
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		$order->set_payment_method( $payment_gateways['bacs'] );
 
-		// Set totals
+		// Set totals.
 		$order->set_shipping_total( 10 );
 		$order->set_discount_total( 0 );
 		$order->set_discount_tax( 0 );
