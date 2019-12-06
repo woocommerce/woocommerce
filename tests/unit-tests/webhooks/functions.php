@@ -11,6 +11,8 @@
  */
 class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 
+	protected $delivery_counter = array();
+
 	/**
 	 * Data provider for test_wc_is_webhook_valid_topic.
 	 *
@@ -205,6 +207,45 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 
 		$webhook_one->delete( true );
 		$this->assertFalse( wc_load_webhooks( $status, 1 ) );
+	}
+
+	/**
+	 * Verify that a webhook that has multiple hooks defined (in WC_Webhook::get_topic_hooks()),
+	 * is only delivered once.
+	 *
+	 * This example uses Customer Created (which has 3 hooks defined), to verify that creating a customer
+	 * will only deliver the payload once per webhook.
+	 */
+	public function test_woocommerce_webhook_is_delivered_only_once() {
+		$webhook1 = wc_get_webhook( $this->create_webhook( 'customer.created' )->get_id() );
+		$webhook2 = wc_get_webhook( $this->create_webhook( 'customer.created' )->get_id() );
+		wc_load_webhooks( 'active' );
+		add_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
+		$customer1 = WC_Helper_Customer::create_customer( 'test1', 'pw1', 'user1@example.com' );
+		$customer2 = WC_Helper_Customer::create_customer( 'test2', 'pw2', 'user2@example.com' );
+		$this->assertEquals( 1, $this->delivery_counter[ $webhook1->get_id() . $customer1->get_id() ] );
+		$this->assertEquals( 1, $this->delivery_counter[ $webhook2->get_id() . $customer1->get_id() ] );
+		$this->assertEquals( 1, $this->delivery_counter[ $webhook1->get_id() . $customer2->get_id() ] );
+		$this->assertEquals( 1, $this->delivery_counter[ $webhook2->get_id() . $customer2->get_id() ] );
+		$webhook1->delete( true );
+		$webhook2->delete( true );
+		$customer1->delete( true );
+		$customer2->delete( true );
+		remove_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
+	}
+
+	/**
+	 * Helper function to keep track of which webhook (and corresponding arg) has been delivered
+	 * within the current request.
+	 *
+	 * @param WC_Webhook $webhook Webhook that is processing delivery.
+	 * @param mixed $arg Webhook arg (usually resource ID).
+	 */
+	public function woocommerce_webhook_process_delivery( $webhook, $arg ) {
+		if ( ! isset( $this->delivery_counter[ $webhook->get_id() . $arg ] ) ) {
+			$this->delivery_counter[ $webhook->get_id() . $arg ] = 0;
+		}
+		$this->delivery_counter[ $webhook->get_id() . $arg ] ++;
 	}
 
 	/**
