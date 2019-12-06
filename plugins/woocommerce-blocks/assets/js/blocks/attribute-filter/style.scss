@@ -19,6 +19,7 @@
 			label,
 			input {
 				cursor: pointer;
+				display: inline-block;
 			}
 		}
 
@@ -30,5 +31,9 @@
 	.is-single .wc-block-attribute-filter-list-count,
 	.wc-block-dropdown-selector .wc-block-dropdown-selector__list .wc-block-attribute-filter-list-count {
 		opacity: 0.6;
+	}
+
+	.wc-block-attribute-filter__button {
+		margin-top: $gap-smaller;
 	}
 }
