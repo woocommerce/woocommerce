@@ -293,8 +293,8 @@ class WC_Shipping {
 			return false;
 		}
 
-		$states = array_keys( WC()->countries->get_states( $country ) );
-		if ( is_array( $states ) && ! in_array( $package['destination']['state'], $states, true ) ) {
+		$states = WC()->countries->get_states( $country );
+		if ( is_array( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
 			return false;
 		}
 
