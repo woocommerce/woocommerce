@@ -7,6 +7,7 @@ import { Disabled } from '@wordpress/components';
  * Internal dependencies
  */
 import Block from './block.js';
+import './editor.scss';
 
 const Edit = ( { attributes } ) => {
 	const { className } = attributes;

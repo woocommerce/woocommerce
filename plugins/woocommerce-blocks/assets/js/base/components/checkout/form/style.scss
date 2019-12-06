@@ -1,0 +1,14 @@
+.wc-components-checkout-form {
+	margin-left: $gap-large;
+	margin-right: $gap-large;
+	width: $content-width;
+	max-width: 100%;
+}
+
+// Responsive media styles.
+@include breakpoint( "<480px" ) {
+	.wc-components-checkout-form {
+		margin-left: $gap-smaller;
+		margin-right: $gap;
+	}
+}
