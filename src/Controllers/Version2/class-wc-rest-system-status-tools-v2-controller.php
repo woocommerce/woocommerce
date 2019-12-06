@@ -516,7 +516,12 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			case 'delete_taxes':
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
-				WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+
+				if ( method_exists( 'WC_Cache_Helper', 'invalidate_cache_group' ) ) {
+					WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+				} else {
+					WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+				}
 				$message = __( 'Tax rates successfully deleted', 'woocommerce-rest-api' );
 				break;
 
