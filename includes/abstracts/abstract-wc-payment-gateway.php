@@ -132,6 +132,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $new_method_label = '';
 
 	/**
+	 * Pay button ID if supported.
+	 *
+	 * @var string
+	 */
+	public $pay_button_id = '';
+
+	/**
 	 * Contains a users saved tokens for this gateway.
 	 *
 	 * @var array
@@ -318,6 +325,16 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Return the gateway's pay button ID.
+	 *
+	 * @since 3.9.0
+	 * @return string
+	 */
+	public function get_pay_button_id() {
+		return sanitize_html_class( $this->pay_button_id );
+	}
+
+	/**
 	 * Set as current gateway.
 	 *
 	 * Set this as the current gateway.
@@ -439,7 +456,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		);
 
 		wp_localize_script(
-			'woocommerce-tokenization-form', 'wc_tokenization_form_params', array(
+			'woocommerce-tokenization-form',
+			'wc_tokenization_form_params',
+			array(
 				'is_registration_required' => WC()->checkout()->is_registration_required(),
 				'is_logged_in'             => is_user_logged_in(),
 			)
@@ -521,7 +540,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			esc_html__( 'Save to account', 'woocommerce' )
 		);
 
-		echo apply_filters( 'woocommerce_payment_gateway_save_new_payment_method_option_html', $html, $this );
+		echo apply_filters( 'woocommerce_payment_gateway_save_new_payment_method_option_html', $html, $this ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
