@@ -554,14 +554,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					),
 				),
 				'post_type_counts' => array(
-                    'description' => __('Total post count.', 'woocommerce'),
-                    'type'        => 'array',
-                    'context'     => array( 'view' ),
-                    'readonly'    => true,
-                    'items'       => array(
-                        'type' => 'string',
-                    ),
-                ),
+					'description' => __( 'Total post count.', 'woocommerce-rest-api' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
 			),
 		);
 
