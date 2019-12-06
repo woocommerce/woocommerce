@@ -11,6 +11,10 @@
  */
 class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 
+	/**
+	 * Temporarily store webhook delivery counters.
+	 * @var array
+	 */
 	protected $delivery_counter = array();
 
 	/**
@@ -239,7 +243,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * within the current request.
 	 *
 	 * @param WC_Webhook $webhook Webhook that is processing delivery.
-	 * @param mixed $arg Webhook arg (usually resource ID).
+	 * @param mixed      $arg Webhook arg (usually resource ID).
 	 */
 	public function woocommerce_webhook_process_delivery( $webhook, $arg ) {
 		if ( ! isset( $this->delivery_counter[ $webhook->get_id() . $arg ] ) ) {
