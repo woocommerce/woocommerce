@@ -115,8 +115,8 @@ class WC_Shortcode_Products {
 				'limit'          => '-1',      // Results limit.
 				'columns'        => '',        // Number of columns.
 				'rows'           => '',        // Number of rows. If defined, limit will be ignored.
-				'orderby'        => 'title',   // menu_order, title, date, rand, price, popularity, rating, or id.
-				'order'          => 'ASC',     // ASC or DESC.
+				'orderby'        => '',   	   // menu_order, title, date, rand, price, popularity, rating, or id.
+				'order'          => '',        // ASC or DESC.
 				'ids'            => '',        // Comma separated IDs.
 				'skus'           => '',        // Comma separated SKUs.
 				'category'       => '',        // Comma separated category slugs or ids.
