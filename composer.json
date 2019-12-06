@@ -7,11 +7,11 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "automattic/jetpack-autoloader": "1.2.0"
+    "automattic/jetpack-autoloader": "^1.2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "6.5.14",
-    "woocommerce/woocommerce-sniffs": "0.0.6"
+    "woocommerce/woocommerce-sniffs": "0.0.9"
   },
   "scripts": {
     "post-install-cmd": [
