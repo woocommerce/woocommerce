@@ -19,7 +19,7 @@ import classnames from 'classnames';
 import './style.scss';
 import { constrainRangeSliderValues } from './utils';
 import { formatPrice } from '../../utils/price';
-import SubmitButton from './submit-button';
+import SubmitButton from '../submit-button';
 import PriceLabel from './price-label';
 import PriceInput from './price-input';
 
@@ -307,6 +307,7 @@ const PriceSlider = ( {
 				) }
 				{ showFilterButton && (
 					<SubmitButton
+						className="wc-block-price-filter__button"
 						disabled={ isLoading || ! hasValidConstraints }
 						onClick={ onSubmit }
 					/>

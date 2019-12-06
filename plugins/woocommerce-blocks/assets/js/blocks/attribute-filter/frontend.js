@@ -18,6 +18,7 @@ const getProps = ( el ) => {
 			heading: el.dataset.heading,
 			headingLevel: el.dataset.headingLevel || 3,
 			displayStyle: el.dataset.displayStyle,
+			showFilterButton: el.dataset.showFilterButton === 'true',
 		},
 	};
 };

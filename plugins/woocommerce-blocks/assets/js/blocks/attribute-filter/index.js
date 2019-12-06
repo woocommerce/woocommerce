@@ -57,6 +57,10 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			type: 'string',
 			default: 'list',
 		},
+		showFilterButton: {
+			type: 'boolean',
+			default: false,
+		},
 		/**
 		 * Are we previewing?
 		 */
@@ -78,6 +82,7 @@ registerBlockType( 'woocommerce/attribute-filter', {
 			heading,
 			headingLevel,
 			displayStyle,
+			showFilterButton,
 		} = attributes;
 		const data = {
 			'data-attribute-id': attributeId,
@@ -88,6 +93,9 @@ registerBlockType( 'woocommerce/attribute-filter', {
 		};
 		if ( displayStyle !== 'list' ) {
 			data[ 'data-display-style' ] = displayStyle;
+		}
+		if ( showFilterButton ) {
+			data[ 'data-show-filter-button' ] = showFilterButton;
 		}
 		return (
 			<div

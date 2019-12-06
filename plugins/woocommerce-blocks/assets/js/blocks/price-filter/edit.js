@@ -78,11 +78,11 @@ export default function( { attributes, setAttributes } ) {
 						help={
 							showFilterButton
 								? __(
-										'Results will only update when the button is pressed.',
+										'Products will only update when the button is pressed.',
 										'woo-gutenberg-products-block'
 								  )
 								: __(
-										'Results will update when the slider is moved.',
+										'Products will update when the slider is moved.',
 										'woo-gutenberg-products-block'
 								  )
 						}

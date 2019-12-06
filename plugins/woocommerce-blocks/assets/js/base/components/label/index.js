@@ -18,7 +18,11 @@ const Label = ( {
 } ) => {
 	let Wrapper;
 
-	if ( ! label && screenReaderLabel ) {
+	const hasLabel = typeof label !== 'undefined' && label !== null;
+	const hasScreenReaderLabel =
+		typeof screenReaderLabel !== 'undefined' && screenReaderLabel !== null;
+
+	if ( ! hasLabel && hasScreenReaderLabel ) {
 		Wrapper = wrapperElement || 'span';
 		wrapperProps = {
 			...wrapperProps,
@@ -33,7 +37,7 @@ const Label = ( {
 
 	Wrapper = wrapperElement || Fragment;
 
-	if ( label && screenReaderLabel && label !== screenReaderLabel ) {
+	if ( hasLabel && hasScreenReaderLabel && label !== screenReaderLabel ) {
 		return (
 			<Wrapper { ...wrapperProps }>
 				<span aria-hidden="true">{ label }</span>
