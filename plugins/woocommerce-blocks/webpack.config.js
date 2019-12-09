@@ -112,8 +112,8 @@ const LegacyBlocksConfig = {
 			'price-filter',
 			'attribute-filter',
 			'active-filters',
-			'checkout',
-			'cart',
+			'checkout-block',
+			'cart-block',
 		],
 	} ),
 };
@@ -135,8 +135,8 @@ const LegacyFrontendBlocksConfig = {
 			'price-filter',
 			'attribute-filter',
 			'active-filters',
-			'checkout',
-			'cart',
+			'checkout-block',
+			'cart-block',
 		],
 	} ),
 };

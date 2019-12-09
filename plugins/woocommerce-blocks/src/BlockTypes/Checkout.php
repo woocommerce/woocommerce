@@ -19,7 +19,7 @@ class Checkout extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'checkout';
+	protected $block_name = 'checkout-block';
 
 	/**
 	 * Registers the block type with WordPress.
