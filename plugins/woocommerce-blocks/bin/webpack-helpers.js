@@ -126,8 +126,8 @@ const mainEntry = {
 		'./assets/js/base/components/block-error-boundary/style.scss',
 
 	// cart & checkout blocks
-	'cart-block': './assets/js/blocks/cart-checkout/cart/index.js',
-	'checkout-block': './assets/js/blocks/cart-checkout/checkout/index.js',
+	cart: './assets/js/blocks/cart-checkout/cart/index.js',
+	checkout: './assets/js/blocks/cart-checkout/checkout/index.js',
 };
 
 const frontEndEntry = {
@@ -136,8 +136,8 @@ const frontEndEntry = {
 	'price-filter': './assets/js/blocks/price-filter/frontend.js',
 	'attribute-filter': './assets/js/blocks/attribute-filter/frontend.js',
 	'active-filters': './assets/js/blocks/active-filters/frontend.js',
-	'checkout-block': './assets/js/blocks/cart-checkout/checkout/frontend.js',
-	'cart-block': './assets/js/blocks/cart-checkout/cart/frontend.js',
+	checkout: './assets/js/blocks/cart-checkout/checkout/frontend.js',
+	cart: './assets/js/blocks/cart-checkout/cart/frontend.js',
 };
 
 const getEntryConfig = ( main = true, exclude = [] ) => {
