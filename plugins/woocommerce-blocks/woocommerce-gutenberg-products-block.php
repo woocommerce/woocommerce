@@ -61,8 +61,6 @@ if ( version_compare( $GLOBALS['wp_version'], $minimum_wp_version, '<' ) ) {
 	return;
 }
 
-define( 'WC_BLOCKS_PLUGIN_FILE', __FILE__ );
-
 /**
  * Autoload packages.
  *
