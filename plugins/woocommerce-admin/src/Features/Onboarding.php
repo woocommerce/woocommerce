@@ -611,6 +611,10 @@ class Onboarding {
 	 * Update the existing help tab and add an option to enable the new onboarding experience.
 	 */
 	public static function update_help_tab() {
+		if ( ! function_exists( 'wc_get_screen_ids' ) ) {
+			return;
+		}
+
 		$screen = get_current_screen();
 
 		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
@@ -662,6 +666,10 @@ class Onboarding {
 	 * Update the help tab setup link to reset the onboarding profiler.
 	 */
 	public static function add_help_tab() {
+		if ( ! function_exists( 'wc_get_screen_ids' ) ) {
+			return;
+		}
+
 		$screen = get_current_screen();
 
 		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
