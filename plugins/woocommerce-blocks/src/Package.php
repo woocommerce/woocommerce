@@ -2,6 +2,12 @@
 /**
  * Returns information about the package and handles init.
  *
+ * In the context of this plugin, it handles init and is called from the main
+ * plugin file (woocommerce-gutenberg-products-block.php).
+ *
+ * In the context of WooCommere core, it handles init and is called from
+ * WooCommerce's package loader. The main plugin file is _not_ loaded.
+ *
  * @package Automattic/WooCommerce/Blocks
  */
 
@@ -14,7 +20,7 @@ use Automattic\WooCommerce\Blocks\Registry\Container;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Main package class. (Loader in the WC Core context as well)
+ * Main package class.
  *
  * @since 2.5.0
  */
@@ -81,7 +87,7 @@ class Package {
 					$version = '2.6.0-dev';
 					return new NewPackage(
 						$version,
-						WC_BLOCKS_PLUGIN_FILE
+						dirname( __DIR__ )
 					);
 				}
 			);

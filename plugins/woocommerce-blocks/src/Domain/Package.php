@@ -15,36 +15,28 @@ namespace Automattic\WooCommerce\Blocks\Domain;
 class Package {
 
 	/**
-	 * Holds the current version for the plugin.
+	 * Holds the current version of the blocks plugin.
 	 *
 	 * @var string
 	 */
 	private $version;
 
 	/**
-	 * Holds the main path to the plugin directory.
+	 * Holds the main path to the blocks plugin directory.
 	 *
 	 * @var string
 	 */
 	private $path;
 
 	/**
-	 * Holds the path to the main plugin file (entry)
-	 *
-	 * @var string
-	 */
-	private $plugin_file;
-
-	/**
 	 * Constructor
 	 *
 	 * @param string $version      Version of the plugin.
-	 * @param string $plugin_file  Path to the main plugin file.
+	 * @param string $plugin_path  Path to the main plugin file.
 	 */
-	public function __construct( $version, $plugin_file ) {
-		$this->version     = $version;
-		$this->plugin_file = $plugin_file;
-		$this->path        = dirname( $plugin_file );
+	public function __construct( $version, $plugin_path ) {
+		$this->version = $version;
+		$this->path    = $plugin_path;
 	}
 
 	/**
@@ -57,15 +49,6 @@ class Package {
 	}
 
 	/**
-	 * Returns the path to the main plugin file.
-	 *
-	 * @return string
-	 */
-	public function get_plugin_file() {
-		return $this->plugin_file;
-	}
-
-	/**
 	 * Returns the path to the plugin directory.
 	 *
 	 * @param string $relative_path  If provided, the relative path will be
@@ -74,13 +57,11 @@ class Package {
 	 * @return string
 	 */
 	public function get_path( $relative_path = '' ) {
-		return '' === $relative_path
-			? trailingslashit( $this->path )
-			: trailingslashit( $this->path ) . $relative_path;
+		return trailingslashit( $this->path ) . $relative_path;
 	}
 
 	/**
-	 * Returns the url to the plugin directory.
+	 * Returns the url to the blocks plugin directory.
 	 *
 	 * @param string $relative_url If provided, the relative url will be
 	 *                             appended to the plugin url.
@@ -88,8 +69,7 @@ class Package {
 	 * @return string
 	 */
 	public function get_url( $relative_url = '' ) {
-		return '' === $relative_url
-			? plugin_dir_url( $this->get_plugin_file() )
-			: plugin_dir_url( $this->get_plugin_file() ) . $relative_url;
+		// Append index.php so WP does not return the parent directory.
+		return plugin_dir_url( $this->path . '/index.php' ) . $relative_url;
 	}
 }

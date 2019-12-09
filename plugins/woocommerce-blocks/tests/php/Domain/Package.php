@@ -13,24 +13,20 @@ use Automattic\WooCommerce\Blocks\Domain\Package as TestedPackage;
 class Package extends WP_UnitTestCase {
 
 	private function get_package() {
-		return new TestedPackage( '1.0.0', __FILE__ );
+		return new TestedPackage( '1.0.0', __DIR__ );
 	}
 
 	public function test_get_version() {
 		$this->assertEquals( '1.0.0', $this->get_package()->get_version() );
 	}
 
-	public function test_get_plugin_file() {
-		$this->assertEquals( __FILE__, $this->get_package()->get_plugin_file() );
-	}
-
 	public function test_get_path() {
 		$package = $this->get_package();
 		// test without relative
-		$this->assertEquals( dirname( __FILE__ ) . '/', $package->get_path() );
+		$this->assertEquals( __DIR__ . '/', $package->get_path() );
 
 		//test with relative
-		$expect = dirname( __FILE__ ) . '/build/test';
+		$expect = __DIR__ . '/build/test';
 		$this->assertEquals( $expect, $package->get_path( 'build/test') );
 	}
 
