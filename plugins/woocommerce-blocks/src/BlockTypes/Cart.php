@@ -18,7 +18,7 @@ class Cart extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'cart';
+	protected $block_name = 'cart-block';
 
 	/**
 	 * Registers the block type with WordPress.
