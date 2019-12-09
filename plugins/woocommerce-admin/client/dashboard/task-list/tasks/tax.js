@@ -108,12 +108,12 @@ class Tax extends Component {
 	}
 
 	isTaxJarSupported() {
-		const { countryCode, wc_connect_options } = this.props;
+		const { countryCode, tosAccepted } = this.props;
 		const { automatedTaxSupportedCountries = [], taxJarActivated } = getSetting( 'onboarding', {} );
 
 		return (
 			! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-			wc_connect_options.tos_accepted &&
+			tosAccepted &&
 			automatedTaxSupportedCountries.includes( countryCode )
 		);
 	}
@@ -377,11 +377,10 @@ export default compose(
 		const countryCode = getCountryCode( generalSettings.woocommerce_default_country );
 		const activePlugins = getActivePlugins();
 		const pluginsToActivate = difference( [ 'jetpack', 'woocommerce-services' ], activePlugins );
-		const wc_connect_options = get(
-			getOptions( [ 'wc_connect_options' ] ),
-			'wc_connect_options',
-			{}
-		);
+		const options = getOptions( [ 'wc_connect_options', 'woocommerce_setup_jetpack_opted_in' ] );
+		const wc_connect_options = get( options, 'wc_connect_options', {} );
+		const tosAccepted =
+			wc_connect_options.tos_accepted || options.woocommerce_setup_jetpack_opted_in;
 
 		return {
 			countryCode,
@@ -393,7 +392,7 @@ export default compose(
 			taxSettings,
 			isJetpackConnected: isJetpackConnected(),
 			pluginsToActivate,
-			wc_connect_options,
+			tosAccepted,
 		};
 	} ),
 	withDispatch( dispatch => {
