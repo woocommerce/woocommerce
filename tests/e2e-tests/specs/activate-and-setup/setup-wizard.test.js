@@ -138,8 +138,13 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 			await expect( page ).toSelect( 'select[name="weight_unit"]', 'Pounds' );
 			await expect( page ).toSelect( 'select[name="dimension_unit"]', 'Inches' );
 
-			// Click on "Continue" button to move to the next step
-			await page.click( 'button[name=save_step]', { text: 'Continue' } );
+			await Promise.all( [
+				// Click on "Continue" button to move to the next step
+				page.click( 'button[name=save_step]', { text: 'Continue' } ),
+
+				// Wait for the Recommended section to load
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			] );
 
 			// Fill out recommended section details
 			// Turn off Storefront Theme option
