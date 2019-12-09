@@ -97,7 +97,7 @@ class WC_Validation {
 				$valid = (bool) preg_match( '/^([1-9][0-9]{3})(\s?)(?!SA|SD|SS)[A-Z]{2}$/i', $postcode );
 				break;
 			case 'SI':
-				$valid = (bool) preg_match( '/^([1-9][0-9]{3})$/i', $postcode );
+				$valid = (bool) preg_match( '/^([1-9][0-9]{3})$/', $postcode );
 				break;
 			default:
 				$valid = true;
