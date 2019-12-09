@@ -637,7 +637,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function empty_cart( $clear_persistent_cart = true ) {
 
-		do_action( 'woocommerce_before_cart_emptied' );
+		do_action( 'woocommerce_before_cart_emptied', $clear_persistent_cart );
 
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
@@ -653,7 +653,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		$this->fees_api->remove_all_fees();
 
-		do_action( 'woocommerce_cart_emptied' );
+		do_action( 'woocommerce_cart_emptied', $clear_persistent_cart );
 	}
 
 	/**

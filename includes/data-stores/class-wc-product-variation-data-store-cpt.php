@@ -48,8 +48,12 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$post_object = get_post( $product->get_id() );
 
-		if ( ! $post_object || ! in_array( $post_object->post_type, array( 'product', 'product_variation' ), true ) ) {
+		if ( ! $post_object ) {
 			return;
+		}
+
+		if ( 'product_variation' !== $post_object->post_type ) {
+			throw new Exception( 'Invalid product type: passed ID does not correspond to a product variation.' );
 		}
 
 		$product->set_props(
@@ -116,7 +120,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$new_title = $this->generate_product_title( $product );
@@ -186,7 +190,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->save_meta_data();
 
 		if ( ! $product->get_date_created() ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$new_title = $this->generate_product_title( $product );

@@ -148,11 +148,29 @@ module.exports = function( grunt ) {
 		// Minify all .css files.
 		cssmin: {
 			minify: {
-				expand: true,
-				cwd: '<%= dirs.css %>/',
-				src: ['*.css'],
-				dest: '<%= dirs.css %>/',
-				ext: '.css'
+				files: [
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/',
+						src: ['*.css'],
+						dest: '<%= dirs.css %>/',
+						ext: '.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/photoswipe/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/photoswipe/',
+						ext: '.min.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/photoswipe/default-skin/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/photoswipe/default-skin/',
+						ext: '.min.css'
+					}
+				]
 			}
 		},
 
@@ -229,7 +247,6 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php',               // Include all files
-					'!includes/libraries/**', // Exclude libraries/
 					'!node_modules/**',       // Exclude node_modules/
 					'!tests/**',              // Exclude tests/
 					'!vendor/**',             // Exclude vendor/

@@ -30,9 +30,9 @@ class ActionScheduler_wpPostStore_PostTypeRegistrar {
 				'name' => __( 'Scheduled Actions', 'woocommerce' ),
 				'singular_name' => __( 'Scheduled Action', 'woocommerce' ),
 				'menu_name' => _x( 'Scheduled Actions', 'Admin menu name', 'woocommerce' ),
-				'add_new' => __( 'Add', 'action-scheduler' ),
+				'add_new' => __( 'Add', 'woocommerce' ),
 				'add_new_item' => __( 'Add New Scheduled Action', 'woocommerce' ),
-				'edit' => __( 'Edit', 'action-scheduler' ),
+				'edit' => __( 'Edit', 'woocommerce' ),
 				'edit_item' => __( 'Edit Scheduled Action', 'woocommerce' ),
 				'new_item' => __( 'New Scheduled Action', 'woocommerce' ),
 				'view' => __( 'View Action', 'woocommerce' ),
@@ -47,4 +47,4 @@ class ActionScheduler_wpPostStore_PostTypeRegistrar {
 		return $args;
 	}
 }
- 
+
