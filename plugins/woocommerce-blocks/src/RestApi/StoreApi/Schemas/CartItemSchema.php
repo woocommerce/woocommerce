@@ -79,7 +79,7 @@ class CartItemSchema extends AbstractSchema {
 			),
 			'images'     => array(
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
-				'type'        => 'object',
+				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'items'       => array(

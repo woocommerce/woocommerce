@@ -142,10 +142,11 @@ class CartController {
 	/**
 	 * Returns all cart items.
 	 *
+	 * @param callable $callback Optional callback to apply to the array filter.
 	 * @return array
 	 */
-	public function get_cart_items() {
-		return array_filter( wc()->cart->get_cart() );
+	public function get_cart_items( $callback = null ) {
+		return $callback ? array_filter( wc()->cart->get_cart(), $callback ) : array_filter( wc()->cart->get_cart() );
 	}
 
 	/**

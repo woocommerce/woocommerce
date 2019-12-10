@@ -1,6 +1,6 @@
 <?php
 /**
- * Products collection data controller. Get's aggregate data from a collection of products.
+ * Products collection data controller. Get aggregate data from a collection of products.
  *
  * Supports the same parameters as /products, but returns a different response.
  *
@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WP_REST_Controller as RestContoller;
+use \WP_REST_Controller as RestController;
 use \WP_REST_Server as RestServer;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQueryFilters;
 
@@ -21,7 +21,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQueryFilters
  *
  * @since 2.5.0
  */
-class ProductCollectionData extends RestContoller {
+class ProductCollectionData extends RestController {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -78,8 +78,8 @@ class ProductCollectionData extends RestContoller {
 					'readonly'    => true,
 				),
 				'attribute_counts' => array(
-					'description' => __( 'Returns number of products within attribute terms, indexed by term ID.', 'woo-gutenberg-products-block' ),
-					'type'        => 'object',
+					'description' => __( 'Returns number of products within attribute terms.', 'woo-gutenberg-products-block' ),
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'items'       => array(
@@ -102,7 +102,7 @@ class ProductCollectionData extends RestContoller {
 				),
 				'rating_counts'    => array(
 					'description' => __( 'Returns number of products with each average rating.', 'woo-gutenberg-products-block' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'items'       => array(

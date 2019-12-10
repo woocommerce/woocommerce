@@ -127,7 +127,7 @@ class Cart extends WP_REST_Controller {
 				),
 				'variation'    => array(
 					'description' => __( 'If this cart item represents a variation, chosen attributes are shown here.', 'woo-gutenberg-products-block' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'items'       => array(

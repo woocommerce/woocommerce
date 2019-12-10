@@ -114,7 +114,7 @@ class Products extends WC_REST_Products_Controller {
 	 * @return bool
 	 */
 	public function force_edit_posts_permission( $permission ) {
-		// If user has access already, we can bypass additonal checks.
+		// If user has access already, we can bypass additional checks.
 		if ( $permission ) {
 			return $permission;
 		}
@@ -363,7 +363,7 @@ class Products extends WC_REST_Products_Controller {
 				),
 				'images'         => array(
 					'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'items'       => array(
 						'type'       => 'object',
@@ -431,21 +431,18 @@ class Products extends WC_REST_Products_Controller {
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'text'        => array(
-								'description' => __( 'Button text.', 'woo-gutenberg-products-block' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'description' => array(
-								'description' => __( 'Button description.', 'woo-gutenberg-products-block' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
+					'properties'  => array(
+						'text'        => array(
+							'description' => __( 'Button text.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'description' => array(
+							'description' => __( 'Button description.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
 						),
 					),
 				),

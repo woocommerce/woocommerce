@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \WP_Error as RestError;
 use \WP_REST_Server as RestServer;
-use \WP_REST_Controller as RestContoller;
+use \WP_REST_Controller as RestController;
 use \WP_REST_Response as RestResponse;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartItemSchema;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
@@ -22,7 +22,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
  *
  * @since 2.5.0
  */
-class CartItems extends RestContoller {
+class CartItems extends RestController {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -252,8 +252,29 @@ class CartItems extends RestContoller {
 	 * @return \WP_REST_Response Response object.
 	 */
 	public function prepare_item_for_response( $cart_item, $request ) {
-		$data = $this->schema->get_item_response( $cart_item );
+		$data     = $this->schema->get_item_response( $cart_item );
+		$response = rest_ensure_response( $data );
+		$response->add_links( $this->prepare_links( $cart_item ) );
 
-		return rest_ensure_response( $data );
+		return $response;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param array $cart_item Object to prepare.
+	 * @return array
+	 */
+	protected function prepare_links( $cart_item ) {
+		$base  = $this->namespace . '/' . $this->rest_base;
+		$links = array(
+			'self'       => array(
+				'href' => rest_url( trailingslashit( $base ) . $cart_item['key'] ),
+			),
+			'collection' => array(
+				'href' => rest_url( $base ),
+			),
+		);
+		return $links;
 	}
 }

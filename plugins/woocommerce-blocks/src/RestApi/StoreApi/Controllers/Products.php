@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \WP_Error as RestError;
 use \WP_REST_Server as RestServer;
-use \WP_REST_Controller as RestContoller;
+use \WP_REST_Controller as RestController;
 use \WC_REST_Exception as RestException;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductSchema;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\Pagination;
@@ -23,7 +23,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQuery;
  *
  * @since 2.5.0
  */
-class Products extends RestContoller {
+class Products extends RestController {
 	/**
 	 * Endpoint namespace.
 	 *
