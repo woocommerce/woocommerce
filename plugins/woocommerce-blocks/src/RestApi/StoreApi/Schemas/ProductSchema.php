@@ -75,84 +75,78 @@ class ProductSchema extends AbstractSchema {
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'currency_code'      => array(
-							'description' => __( 'Currency code.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'decimal_separator'  => array(
-							'description' => __( 'Decimal separator.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'thousand_separator' => array(
-							'description' => __( 'Thousand separator.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'decimals'           => array(
-							'description' => __( 'Number of decimal places.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price_prefix'       => array(
-							'description' => __( 'Price prefix, e.g. currency.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price_suffix'       => array(
-							'description' => __( 'Price prefix, e.g. currency.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price'              => array(
-							'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'regular_price'      => array(
-							'description' => __( 'Regular product price', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'sale_price'         => array(
-							'description' => __( 'Sale product price, if applicable.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price_range'        => array(
-							'description' => __( 'Price range, if applicable.', 'woo-gutenberg-products-block' ),
-							'type'        => 'object',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'items'       => array(
-								'type'       => 'object',
-								'properties' => array(
-									'min_amount' => array(
-										'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
-										'type'        => 'string',
-										'context'     => array( 'view', 'edit' ),
-										'readonly'    => true,
-									),
-									'max_amount' => array(
-										'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
-										'type'        => 'string',
-										'context'     => array( 'view', 'edit' ),
-										'readonly'    => true,
-									),
-								),
+				'properties'  => array(
+					'currency_code'      => array(
+						'description' => __( 'Currency code.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'decimal_separator'  => array(
+						'description' => __( 'Decimal separator.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'thousand_separator' => array(
+						'description' => __( 'Thousand separator.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'decimals'           => array(
+						'description' => __( 'Number of decimal places.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'price_prefix'       => array(
+						'description' => __( 'Price prefix, e.g. currency.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'price_suffix'       => array(
+						'description' => __( 'Price prefix, e.g. currency.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'price'              => array(
+						'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'regular_price'      => array(
+						'description' => __( 'Regular product price', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'sale_price'         => array(
+						'description' => __( 'Sale product price, if applicable.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'price_range'        => array(
+						'description' => __( 'Price range, if applicable.', 'woo-gutenberg-products-block' ),
+						'type'        => 'object',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+						'properties'  => array(
+							'min_amount' => array(
+								'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'max_amount' => array(
+								'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
 							),
 						),
 					),
@@ -172,7 +166,7 @@ class ProductSchema extends AbstractSchema {
 			),
 			'images'              => array(
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
-				'type'        => 'object',
+				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
 				'items'       => array(
 					'type'       => 'object',
@@ -230,25 +224,21 @@ class ProductSchema extends AbstractSchema {
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'text'        => array(
-							'description' => __( 'Button text.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'description' => array(
-							'description' => __( 'Button description.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
+				'properties'  => array(
+					'text'        => array(
+						'description' => __( 'Button text.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+					'description' => array(
+						'description' => __( 'Button description.', 'woo-gutenberg-products-block' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
 					),
 				),
 			),
-
 		];
 	}
 
@@ -345,7 +335,7 @@ class ProductSchema extends AbstractSchema {
 	 * Get price range from certain product types.
 	 *
 	 * @param \WC_Product $product Product instance.
-	 * @return arary|null
+	 * @return array|null
 	 */
 	protected function get_price_range( \WC_Product $product ) {
 		if ( $product->is_type( 'variable' ) ) {

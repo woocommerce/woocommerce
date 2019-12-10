@@ -90,6 +90,7 @@ Available resources in the Store API include:
 | [`Products`](#products-api)                                | `/wc/store/products`                    |
 | [`Cart`](#cart-api)                                        | `/wc/store/cart`                        |
 | [`Cart Items`](#cart-items-api)                            | `/wc/store/cart/items`                  |
+| [`Cart Shipping Rates`](#cart-shipping-rates-api)          | `/wc/store/cart/shipping-rates`         |
 | [`Product Attributes`](#product-attributes-api)            | `/wc/store/products/attributes`         |
 | [`Product Attribute Terms`](#product-attribute-terms-api)  | `/wc/store/products/attributes/1/terms` |
 
@@ -552,6 +553,62 @@ Example response:
 
 ```json
 []
+```
+
+## Cart shipping rates API
+
+### Get shipping rates for current cart
+
+```http
+GET /cart/shipping-rates?address_1=&address_2=&city=&state=&postcode=90210&country=US
+```
+
+| Attribute   | Type   | Required | Description                                                                              |
+| :---------- | :----- | :------: | :--------------------------------------------------------------------------------------- |
+| `address_1` | string |    no    | First line of the address being shipped to.                                              |
+| `address_2` | string |    no    | Second line of the address being shipped to.                                             |
+| `city`      | string |    no    | City of the address being shipped to.                                                    |
+| `state`     | string |    no    | ISO code, or name, for the state, province, or district of the address being shipped to. |
+| `postcode`  | string |    no    | Zip or Postcode of the address being shipped to.                                         |
+| `country`   | string |   yes    | ISO code for the country of the address being shipped to.                                |
+
+```http
+curl "https://example-store.com/wp-json/wc/store/cart/shipping-rates?country=US&state=AL"
+```
+
+Example response:
+
+```json
+[
+	{
+		"destination": {
+			"address_1": null,
+			"address_2": null,
+			"city": null,
+			"state": "AL",
+			"postcode": null,
+			"country": "US"
+		},
+		"items": [ "6512bd43d9caa6e02c990b0a82652dca" ],
+		"shipping-rates": [
+			{
+				"name": "International",
+				"description": "",
+				"delivery_time": "",
+				"price": "20.00",
+				"rate_id": "flat_rate:3",
+				"instance_id": 3,
+				"method_id": "flat_rate",
+				"meta_data": [
+					{
+						"key": "Items",
+						"value": "Beanie &times; 1"
+					}
+				]
+			}
+		]
+	}
+]
 ```
 
 ## Product Attributes API
