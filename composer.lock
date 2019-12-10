@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad247b36cab88f0ae1cf1b1388aec95a",
+    "content-hash": "53a42d8b784be158ed63326799141724",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -166,16 +166,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "2.5.2",
+            "version": "v2.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "685fe0a383b8468c14909901f6aa565007d15004"
+                "reference": "0f9220ef14e63447d81c60e68366ddf194e3ab40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/685fe0a383b8468c14909901f6aa565007d15004",
-                "reference": "685fe0a383b8468c14909901f6aa565007d15004",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/0f9220ef14e63447d81c60e68366ddf194e3ab40",
+                "reference": "0f9220ef14e63447d81c60e68366ddf194e3ab40",
                 "shasum": ""
             },
             "require": {
@@ -209,7 +209,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2019-12-02T20:32:05+00:00"
+            "time": "2019-12-09T16:58:15+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
