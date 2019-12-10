@@ -3,20 +3,21 @@
  */
 import { BlockControls } from '@wordpress/block-editor';
 import { Toolbar } from '@wordpress/components';
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import TextToolbarButton from '@woocommerce/block-components/text-toolbar-button';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
-import FullCart from './components/full-cart';
-import EmptyCart from './components/empty-cart';
+import FullCart from './full-cart';
+import EmptyCart from './empty-cart';
 
 /**
  * Component to handle edit mode of "Cart Block".
  */
-const Cart = () => {
+const CartEditor = ( { className } ) => {
 	const [ isFullCartMode, setFullCartMode ] = useState( true );
 
 	const toggleFullCartMode = () => {
@@ -25,39 +26,36 @@ const Cart = () => {
 
 	const getBlockControls = () => {
 		return (
-			<BlockControls className='wc-block-cart-toolbar'>
+			<BlockControls className="wc-block-cart-toolbar">
 				<Toolbar>
 					<TextToolbarButton
 						onClick={ toggleFullCartMode }
-						isToggled={ isFullCartMode }>
-						{  __(
-							'Full Cart',
-							'woo-gutenberg-products-block'
-						) }
+						isToggled={ isFullCartMode }
+					>
+						{ __( 'Full Cart', 'woo-gutenberg-products-block' ) }
 					</TextToolbarButton>
 					<TextToolbarButton
 						onClick={ toggleFullCartMode }
-						isToggled={ ! isFullCartMode }>
-						{  __(
-							'Empty Cart',
-							'woo-gutenberg-products-block'
-						) }
+						isToggled={ ! isFullCartMode }
+					>
+						{ __( 'Empty Cart', 'woo-gutenberg-products-block' ) }
 					</TextToolbarButton>
 				</Toolbar>
 			</BlockControls>
 		);
 	};
 
-	const cart = isFullCartMode ? <FullCart /> : <EmptyCart />;
-
 	return (
-		<Fragment>
+		<div className={ className }>
 			{ getBlockControls() }
-			{ cart }
-		</Fragment>
+			{ isFullCartMode && <FullCart /> }
+			<EmptyCart hidden={ isFullCartMode } />
+		</div>
 	);
 };
 
-Cart.propTypes = {};
+CartEditor.propTypes = {
+	className: PropTypes.string,
+};
 
-export default Cart;
+export default CartEditor;
