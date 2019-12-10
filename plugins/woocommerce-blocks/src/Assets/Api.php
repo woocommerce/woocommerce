@@ -59,32 +59,6 @@ class Api {
 	}
 
 	/**
-	 * Returns the dependency array for the given asset relative path.
-	 *
-	 * @param string $asset_relative_path  Something like 'build/constants.js'
-	 *                                     considered to be relative to the main
-	 *                                     asset path.
-	 * @param array  $extra_dependencies   Extra dependencies to be explicitly
-	 *                                     added to the generated array.
-	 *
-	 * @return array  An array of dependencies
-	 */
-	protected function get_dependencies(
-		$asset_relative_path,
-		$extra_dependencies = []
-	) {
-		$dependency_path = $this->package->get_path(
-			str_replace( '.js', '.deps.json', $asset_relative_path )
-		);
-		// phpcs:ignore WordPress.WP.AlternativeFunctions
-		$dependencies = file_exists( $dependency_path )
-			// phpcs:ignore WordPress.WP.AlternativeFunctions
-			? json_decode( file_get_contents( $dependency_path ) )
-			: [];
-		return array_merge( $dependencies, $extra_dependencies );
-	}
-
-	/**
 	 * Registers a script according to `wp_register_script`, additionally
 	 * loading the translations for the file.
 	 *
@@ -93,27 +67,31 @@ class Api {
 	 * @param string $handle        Name of the script. Should be unique.
 	 * @param string $relative_src  Relative url for the script to the path
 	 *                              from plugin root.
-	 * @param array  $deps          Optional. An array of registered script
+	 * @param array  $dependencies  Optional. An array of registered script
 	 *                              handles this script depends on. Default
 	 *                              empty array.
 	 * @param bool   $has_i18n      Optional. Whether to add a script
 	 *                              translation call to this file. Default:
 	 *                              true.
 	 */
-	public function register_script( $handle, $relative_src, $deps = [], $has_i18n = true ) {
-		wp_register_script(
-			$handle,
-			$this->get_asset_url( $relative_src ),
-			$this->get_dependencies( $relative_src, $deps ),
-			$this->get_file_version( $relative_src ),
-			true
+	public function register_script( $handle, $relative_src, $dependencies = [], $has_i18n = true ) {
+		$src        = $this->get_asset_url( $relative_src );
+		$asset_path = $this->package->get_path(
+			str_replace( '.js', '.asset.php', $relative_src )
 		);
+
+		if ( file_exists( $asset_path ) ) {
+			$asset        = require $asset_path;
+			$dependencies = isset( $asset['dependencies'] ) ? array_merge( $asset['dependencies'], $dependencies ) : $dependencies;
+			$version      = ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src );
+		} else {
+			$version = $this->get_file_version( $relative_src );
+		}
+
+		wp_register_script( $handle, $src, $dependencies, $version, true );
+
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations(
-				$handle,
-				'woo-gutenberg-products-block',
-				$this->package->get_path( 'languages' )
-			);
+			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', $this->package->get_path( 'languages' ) );
 		}
 	}
 

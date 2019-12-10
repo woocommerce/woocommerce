@@ -5,6 +5,7 @@ import { sortBy, map } from 'lodash';
 
 /**
  * Given a query object, removes an attribute filter by a single slug.
+ *
  * @param {Array} query Current query object.
  * @param {Function} setQuery Callback to update the current query object.
  * @param {Object} attribute An attribute object.
@@ -50,6 +51,7 @@ export const removeAttributeFilterBySlug = (
 
 /**
  * Given a query object, sets the query up to filter by a given attribute and attribute terms.
+ *
  * @param {Array} query Current query object.
  * @param {Function} setQuery Callback to update the current query object.
  * @param {Object} attribute An attribute object.

@@ -8,6 +8,8 @@ import { Component } from 'react';
  *
  * This is an alternative for withInstanceId from @wordpress/compose to avoid
  * using that dependency on the frontend.
+ *
+ * @param {Function} OriginalComponent Passed in component.
  */
 const withComponentId = ( OriginalComponent ) => {
 	let instances = 0;

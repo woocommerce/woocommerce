@@ -12,6 +12,11 @@ import { getAttributes, getTerms } from '@woocommerce/block-components/utils';
  */
 import { formatError } from '../base/utils/errors.js';
 
+/**
+ * HOC that queries attributes for a component.
+ *
+ * @param {Function} OriginalComponent Component being wrapped.
+ */
 const withAttributes = createHigherOrderComponent( ( OriginalComponent ) => {
 	class WrappedComponent extends Component {
 		constructor() {

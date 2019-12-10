@@ -44,4 +44,8 @@
     	<exclude name="Generic.Commenting.Todo.TaskFound"/>
 		<exclude name="Generic.Commenting.Todo.CommentFound"/>
 	</rule>
+
+	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
+      <exclude-pattern>src/*</exclude-pattern>
+    </rule>
 </ruleset>

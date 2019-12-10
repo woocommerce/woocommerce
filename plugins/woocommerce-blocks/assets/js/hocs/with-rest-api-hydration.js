@@ -42,6 +42,8 @@ const useRestApiHydration = () => {
 
 /**
  * HOC that calls the useRestApiHydration hook.
+ *
+ * @param {Function} OriginalComponent Component being wrapped.
  */
 const withRestApiHydration = ( OriginalComponent ) => {
 	return ( props ) => {

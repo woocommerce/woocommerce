@@ -44,6 +44,8 @@ registerBlockType( 'woocommerce/all-products', {
 
 	/**
 	 * Renders and manages the block.
+	 *
+	 * @param {Object} props Props to pass to block.
 	 */
 	edit( props ) {
 		return <Editor { ...props } />;
@@ -51,6 +53,8 @@ registerBlockType( 'woocommerce/all-products', {
 
 	/**
 	 * Save the props to post content.
+	 *
+	 * @param {Object} attributes Attributes to save.
 	 */
 	save( { attributes } ) {
 		const data = {

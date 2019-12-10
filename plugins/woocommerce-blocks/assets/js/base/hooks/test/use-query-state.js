@@ -45,10 +45,10 @@ describe( 'Testing Query State Hooks', () => {
 	 * instantiating using the TestRenderer using the current prepared registry
 	 * for the TestRenderer to instantiate with.
 	 *
-	 * @param {React.Component} Component The test component to wrap.
-	 * @param {Object}          props     Props to feed the wrapped component.
+	 * @param {*}      Component The test component to wrap.
+	 * @param {Object} props     Props to feed the wrapped component.
 	 *
-	 * @return {React.Component}
+	 * @return {*} Wrapped component.
 	 */
 	const getWrappedComponent = ( Component, props ) => (
 		<RegistryProvider value={ registry }>
@@ -68,7 +68,7 @@ describe( 'Testing Query State Hooks', () => {
 	 *                                   will have values fed to the tested
 	 *                                   hook.
 	 *
-	 * @return {React.Component}  A component ready for testing with!
+	 * @return {*}  A component ready for testing with!
 	 */
 	const getTestComponent = ( hookTested, propKeysForArgs ) => ( props ) => {
 		const args = propKeysForArgs.map( ( key ) => props[ key ] );

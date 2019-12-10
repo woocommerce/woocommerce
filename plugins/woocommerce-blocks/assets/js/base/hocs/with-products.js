@@ -9,6 +9,11 @@ import { Component } from 'react';
 import { getProducts } from './utils';
 import { formatError } from '../utils/errors.js';
 
+/**
+ * HOC that queries products for a component.
+ *
+ * @param {Function} OriginalComponent Component being wrapped.
+ */
 const withProducts = ( OriginalComponent ) => {
 	class WrappedComponent extends Component {
 		constructor() {

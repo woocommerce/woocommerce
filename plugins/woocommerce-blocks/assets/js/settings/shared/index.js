@@ -21,6 +21,9 @@ export { setSetting } from './set-setting';
  *
  * For the purpose of these comparisons all pre-release versions are normalized
  * to `rc`.
+ *
+ * @param {string} version Version to compare.
+ * @param {string} operator Comparison operator.
  */
 export const compareWithWpVersion = ( version, operator ) => {
 	let replacement = getSetting( 'wpVersion', '' ).replace(
@@ -38,7 +41,7 @@ export { compareVersions, getSetting };
 /**
  * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
  *
- * @param {String} path Relative path.
- * @return {String} Full admin URL.
+ * @param {string} path Relative path.
+ * @return {string} Full admin URL.
  */
 export const getAdminLink = ( path ) => getSetting( 'adminUrl' ) + path;

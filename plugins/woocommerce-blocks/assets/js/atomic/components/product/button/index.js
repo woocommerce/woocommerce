@@ -30,9 +30,9 @@ import { useProductLayoutContext } from '@woocommerce/base-context/product-layou
  * @return {Object} Returns an object with the following properties:
  *    @type {number}   cartQuantity  The quantity of the product currently in
  *                                   the cart.
- *    @type {bool}     addingToCart  Whether the product is currently being
+ *    @type {boolean}     addingToCart  Whether the product is currently being
  *                                   added to the cart (true).
- *    @type {bool}     cartIsLoading Whether the cart is being loaded.
+ *    @type {boolean}     cartIsLoading Whether the cart is being loaded.
  *    @type {Function} addToCart     An action dispatcher for adding a single
  *                                   quantity of the product to the cart.
  *                                   Receives no arguments, it operates on the

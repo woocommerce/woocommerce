@@ -19,7 +19,7 @@ const validationMap = {
  * ProductLayoutContext is an configuration object for layout options shared
  * among all components in a tree.
  *
- * @var {React.Context} ProductLayoutContext A react context object
+ * @member {Object} ProductLayoutContext A react context object
  */
 const ProductLayoutContext = createContext( {
 	layoutStyleClassPrefix: '',

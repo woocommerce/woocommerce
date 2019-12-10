@@ -73,6 +73,11 @@ class ProductByCategoryBlock extends Component {
 		} );
 	};
 
+	/**
+	 * Set changed attributes to state.
+	 *
+	 * @param {Object} attributes List of attributes to set.
+	 */
 	setChangedAttributes = ( attributes ) => {
 		this.setState( ( prevState ) => {
 			return {

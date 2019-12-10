@@ -9,7 +9,7 @@ import { allSettings } from './settings-init';
  * @export
  * @param {string}   name                        The setting property key for the
  *                                               setting being mutated.
- * @param {mixed}    value                       The value to set.
+ * @param {*}    value                       The value to set.
  * @param {Function} [filter=( val ) => val]     Allows for providing a callback
  *                                               to sanitize the setting (eg.
  *                                               ensure it's a number)

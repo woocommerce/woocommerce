@@ -21,6 +21,12 @@ const blockConfig = {
 		src: <Gridicon icon="money" />,
 		foreground: '#96588a',
 	},
+
+	/**
+	 * Renders the edit view for a block.
+	 *
+	 * @param {Object} props Props to pass to block.
+	 */
 	edit( props ) {
 		const { attributes } = props;
 

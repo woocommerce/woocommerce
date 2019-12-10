@@ -16,6 +16,8 @@ import { formatError } from '../base/utils/errors.js';
 /**
  * A higher order component that enhances the provided component with products
  * from a search query.
+ *
+ * @param {Function} OriginalComponent Component being wrapped.
  */
 const withSearchedProducts = createHigherOrderComponent(
 	( OriginalComponent ) => {
@@ -23,7 +25,7 @@ const withSearchedProducts = createHigherOrderComponent(
 		 * A Component wrapping the passed in component.
 		 *
 		 * @class WrappedComponent
-		 * @extends {Component}
+		 * @augments {Component}
 		 */
 		class WrappedComponent extends Component {
 			constructor() {
