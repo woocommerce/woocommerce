@@ -11,7 +11,7 @@ import { get } from 'lodash';
  * WooCommerce dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { updateQueryString } from '@woocommerce/navigation';
+import { getNewPath, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -37,13 +37,14 @@ class Dashboard extends Component {
 		const productIds = [];
 		const profileItems = get( this.props, 'profileItems', {} );
 		const onboarding = getSetting( 'onboarding', {} );
+		const productTypes = profileItems.product_types || [];
 
-		profileItems.product_types.forEach( product_type => {
+		productTypes.forEach( productType => {
 			if (
-				onboarding.productTypes[ product_type ] &&
-				onboarding.productTypes[ product_type ].product
+				onboarding.productTypes[ productType ] &&
+				onboarding.productTypes[ productType ].product
 			) {
-				productIds.push( onboarding.productTypes[ product_type ].product );
+				productIds.push( onboarding.productTypes[ productType ].product );
 			}
 		} );
 
@@ -62,6 +63,9 @@ class Dashboard extends Component {
 		}
 
 		const productIds = this.getProductIds();
+		const backPath = getNewPath( {}, '/', {} );
+		const { connectNonce } = getSetting( 'onboarding', {} );
+
 		if ( ! productIds.length ) {
 			return;
 		}
@@ -69,8 +73,11 @@ class Dashboard extends Component {
 		document.body.classList.add( 'woocommerce-admin-is-loading' );
 
 		const url = addQueryArgs( 'https://woocommerce.com/cart', {
-			'wccom-back': window.location.href,
+			'wccom-site': getSetting( 'siteUrl' ),
+			'wccom-woo-version': getSetting( 'wcVersion' ),
 			'wccom-replace-with': productIds.join( ',' ),
+			'wccom-connect-nonce': connectNonce,
+			'wccom-back': backPath,
 		} );
 		window.location = url;
 	}

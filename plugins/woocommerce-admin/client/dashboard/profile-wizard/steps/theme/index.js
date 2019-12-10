@@ -3,11 +3,9 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
-import { get } from 'lodash';
 import Gridicon from 'gridicons';
 import { Button, TabPanel, Tooltip } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -16,7 +14,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Card, H } from '@woocommerce/components';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -26,7 +24,6 @@ import './style.scss';
 import { recordEvent } from 'lib/tracks';
 import ThemeUploader from './uploader';
 import ThemePreview from './preview';
-import { getNewPath } from '../../../../../packages/navigation/src';
 
 class Theme extends Component {
 	constructor() {
@@ -36,7 +33,6 @@ class Theme extends Component {
 			activeTab: 'all',
 			chosen: null,
 			demo: null,
-			isRedirectingToCart: false,
 			uploadedThemes: [],
 		};
 
@@ -47,13 +43,6 @@ class Theme extends Component {
 		this.openDemo = this.openDemo.bind( this );
 	}
 
-	componentWillUnmount() {
-		const { isRedirectingToCart } = this.state;
-		if ( isRedirectingToCart ) {
-			this.redirectToCart();
-		}
-	}
-
 	componentDidUpdate( prevProps ) {
 		const { isGetProfileItemsRequesting, isError, createNotice, goToNextStep } = this.props;
 		const { chosen } = this.state;
@@ -62,10 +51,6 @@ class Theme extends Component {
 		if ( prevProps.isGetProfileItemsRequesting && ! isGetProfileItemsRequesting && chosen ) {
 			if ( ! isError ) {
 				// @todo This should send profile information to woocommerce.com.
-				const productIds = this.getProductIds();
-				if ( productIds.length ) {
-					this.setState( { isRedirectingToCart: true } );
-				}
 				goToNextStep();
 			} else {
 				this.setState( { chosen: null } );
@@ -76,48 +61,6 @@ class Theme extends Component {
 			}
 		}
 		/* eslint-enable react/no-did-update-set-state */
-	}
-
-	getProductIds() {
-		const productIds = [];
-		const profileItems = get( this.props, 'profileItems', {} );
-
-		profileItems.product_types.forEach( product_type => {
-			if (
-				wcSettings.onboarding.productTypes[ product_type ] &&
-				wcSettings.onboarding.productTypes[ product_type ].product
-			) {
-				productIds.push( wcSettings.onboarding.productTypes[ product_type ].product );
-			}
-		} );
-
-		const theme = wcSettings.onboarding.themes.find(
-			themeData => themeData.slug === profileItems.theme
-		);
-
-		if ( theme && theme.id && ! theme.is_installed ) {
-			productIds.push( theme.id );
-		}
-
-		return productIds;
-	}
-
-	redirectToCart() {
-		document.body.classList.add( 'woocommerce-admin-is-loading' );
-
-		const productIds = this.getProductIds();
-		const backUrl = getAdminLink( getNewPath( {}, '/', {} ) );
-		const { connectNonce } = getSetting( 'onboarding', {} );
-
-		const url = addQueryArgs( 'https://woocommerce.com/cart', {
-			'wccom-site': getSetting( 'siteUrl' ),
-			'wccom-woo-version': getSetting( 'wcVersion' ),
-			'wccom-back': backUrl,
-			'wccom-replace-with': productIds.join( ',' ),
-			'wccom-connect-nonce': connectNonce,
-		} );
-
-		window.location = url;
 	}
 
 	async onChoose( theme, location = '' ) {
