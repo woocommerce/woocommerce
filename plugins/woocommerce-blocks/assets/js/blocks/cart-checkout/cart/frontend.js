@@ -6,17 +6,27 @@ import { withRestApiHydration } from '@woocommerce/block-hocs';
 /**
  * Internal dependencies
  */
-import Block from './block.js';
+import FullCart from './full-cart';
 import renderFrontend from '../../../utils/render-frontend.js';
 
-const getProps = () => {
-	return {
-		attributes: {},
-	};
-};
+const isCartEmpty = false; // @todo check if the cart has some products
+const selector = '.wp-block-woocommerce-cart';
 
-renderFrontend(
-	'.wp-block-woocommerce-cart',
-	withRestApiHydration( Block ),
-	getProps
-);
+if ( ! isCartEmpty ) {
+	const getProps = () => {
+		return {
+			attributes: {},
+		};
+	};
+
+	renderFrontend( selector, withRestApiHydration( FullCart ), getProps );
+} else {
+	const containers = document.querySelectorAll( selector );
+
+	if ( containers.length ) {
+		// Use Array.forEach for IE11 compatibility.
+		Array.prototype.forEach.call( containers, ( el ) => {
+			el.classList.remove( 'is-loading' );
+		} );
+	}
+}
