@@ -64,7 +64,8 @@ class UsageModal extends Component {
 		const { isRequesting } = this.props;
 		const trackingMessage = interpolateComponents( {
 			mixedString: __(
-				"Learn more about how usage tracking works, and how you'll be helping {{link}}here{{/link}}.",
+				'Get improved features and faster fixes by sharing non-sensitive data via {{link}}usage tracking{{/link}} ' +
+					'that shows us how WooCommerce is used. No personal data is tracked or stored.',
 				'woocommerce-admin'
 			),
 			components: {
@@ -76,7 +77,7 @@ class UsageModal extends Component {
 
 		return (
 			<Modal
-				title={ __( 'Help improve WooCommerce with usage tracking', 'woocommerce-admin' ) }
+				title={ __( 'Build a Better WooCommerce', 'woocommerce-admin' ) }
 				onRequestClose={ () => this.props.onClose() }
 				className="woocommerce-profile-wizard__usage-modal"
 			>
@@ -86,10 +87,7 @@ class UsageModal extends Component {
 						<CheckboxControl
 							className="woocommerce-profile-wizard__tracking-checkbox"
 							checked={ allowTracking }
-							label={ __(
-								'Enable usage tracking and help improve WooCommerce',
-								'woocommerce-admin'
-							) }
+							label={ __( 'Yes, count me in!', 'woocommerce-admin' ) }
 							onChange={ this.onTrackingChange }
 						/>
 
