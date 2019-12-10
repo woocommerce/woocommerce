@@ -1171,7 +1171,7 @@ h3.jetpack-reasons {
 	border-color: #ddd;
 	border-radius: 4px;
 	height: 30px;
-	width: 100%;
+	width: calc(100% - 8px - 8px - 2px);
 	padding-left: 8px;
 	padding-right: 8px;
 	font-size: 16px;
@@ -1184,11 +1184,12 @@ h3.jetpack-reasons {
 	}
 }
 
+.branch-5-2,
 .branch-5-3 {
 
 	.location-input {
 		margin: 0;
-
+		width: 100%;
 	}
 }
 
@@ -1413,6 +1414,7 @@ p.jetpack-terms {
 	}
 }
 
+.branch-5-2,
 .branch-5-3 {
 
 	.wc-wizard-service-setting-stripe_create_account,
