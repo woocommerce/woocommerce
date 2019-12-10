@@ -127,6 +127,7 @@ export default class Currency {
 /**
  * Returns currency data by country/region. Contains code, symbol, position, thousands separator, decimal separator, and precision.
  *
+ * Dev Note: When adding new currencies below, the exchange rate array should also be updated in WooCommerce Admin's `business-details.js`.
  * @format
  * @return {object} Curreny data.
  */

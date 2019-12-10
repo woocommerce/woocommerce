@@ -1,8 +1,13 @@
 /** @format */
+
+/**
+ * External dependencies
+ */
+import { without } from 'lodash';
+
 /**
  * Internal dependencies
  */
-
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -19,6 +24,16 @@ export function getCountryCode( countryState ) {
 	}
 
 	return countryState.split( ':' )[ 0 ];
+}
+
+export function getCurrencyRegion( countryState ) {
+	let region = getCountryCode( countryState );
+	const euCountries = without( getSetting( 'onboarding', { euCountries: [] } ).euCountries, 'GB' );
+	if ( euCountries.includes( region ) ) {
+		region = 'EU';
+	}
+
+	return region;
 }
 
 /**

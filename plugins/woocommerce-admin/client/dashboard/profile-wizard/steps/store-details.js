@@ -9,12 +9,11 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import { recordEvent } from 'lib/tracks';
-import { without, get } from 'lodash';
+import { get } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { H, Card, Form } from '@woocommerce/components';
 import { getCurrencyData } from '@woocommerce/currency';
 
@@ -22,7 +21,7 @@ import { getCurrencyData } from '@woocommerce/currency';
  * Internal dependencies
  */
 import { setCurrency } from 'lib/currency-format';
-import { getCountryCode } from 'dashboard/utils';
+import { getCountryCode, getCurrencyRegion } from 'dashboard/utils';
 import {
 	StoreAddress,
 	validateStoreAddress,
@@ -68,15 +67,7 @@ class StoreDetails extends Component {
 			return null;
 		}
 
-		let region = getCountryCode( countryState );
-		const euCountries = without(
-			getSetting( 'onboarding', { euCountries: [] } ).euCountries,
-			'GB'
-		);
-		if ( euCountries.includes( region ) ) {
-			region = 'EU';
-		}
-
+		const region = getCurrencyRegion( countryState );
 		const currencyData = getCurrencyData();
 		return currencyData[ region ] || currencyData.US;
 	}

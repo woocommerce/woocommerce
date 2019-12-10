@@ -24,6 +24,7 @@ import { recordEvent } from 'lib/tracks';
 import { formatCurrency } from 'lib/currency-format';
 import Plugins from 'dashboard/task-list/tasks/steps/plugins';
 import { pluginNames } from 'wc-api/onboarding/constants';
+import { getCurrencyRegion } from 'dashboard/utils';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
@@ -139,18 +140,53 @@ class BusinessDetails extends Component {
 		return keys( pickBy( values ) ).filter( name => this.extensions.includes( name ) );
 	}
 
-	getNumberRangeString( min, max = false ) {
+	convertCurrency( value ) {
+		const region = getCurrencyRegion( this.props.settings.woocommerce_default_country );
+		if ( 'US' === region ) {
+			return value;
+		}
+
+		// These are rough exchange rates from USD.  Precision is not paramount.
+		// The keys here should match the keys in `getCurrencyData`.
+		const exchangeRates = {
+			US: 1,
+			EU: 0.9,
+			IN: 71.24,
+			GB: 0.76,
+			BR: 4.19,
+			VN: 23172.5,
+			ID: 14031.0,
+			BD: 84.87,
+			PK: 154.8,
+			RU: 63.74,
+			TR: 5.75,
+			MX: 19.37,
+			CA: 1.32,
+		};
+
+		const exchangeRate = exchangeRates[ region ] || exchangeRates.US;
+		const digits = exchangeRate.toString().split( '.' )[ 0 ].length;
+		const multiplier = Math.pow( 10, 2 + digits );
+
+		return Math.round( value * exchangeRate / multiplier ) * multiplier;
+	}
+
+	numberFormat( value ) {
+		return formatValue( 'number', value );
+	}
+
+	getNumberRangeString( min, max = false, format = this.numberFormat ) {
 		if ( ! max ) {
 			return sprintf(
 				_x( '%s+', 'store product count or revenue', 'woocommerce-admin' ),
-				formatValue( 'number', min )
+				format( min )
 			);
 		}
 
 		return sprintf(
 			_x( '%1$s - %2$s', 'store product count or revenue range', 'woocommerce-admin' ),
-			formatValue( 'number', min ),
-			formatValue( 'number', max )
+			format( min ),
+			format( max )
 		);
 	}
 
@@ -287,27 +323,39 @@ class BusinessDetails extends Component {
 				label: sprintf(
 					/* translators: %s: A given revenue amount, e.g., $2500 */
 					__( 'Up to %s', 'woocommerce-admin' ),
-					formatCurrency( 2500 )
+					formatCurrency( this.convertCurrency( 2500 ) )
 				),
 			},
 			{
 				key: '2500-10000',
-				label: this.getNumberRangeString( 2500, 10000, formatCurrency ),
+				label: this.getNumberRangeString(
+					this.convertCurrency( 2500 ),
+					this.convertCurrency( 10000 ),
+					formatCurrency
+				),
 			},
 			{
 				key: '10000-50000',
-				label: this.getNumberRangeString( 10000, 50000, formatCurrency ),
+				label: this.getNumberRangeString(
+					this.convertCurrency( 10000 ),
+					this.convertCurrency( 50000 ),
+					formatCurrency
+				),
 			},
 			{
 				key: '50000-250000',
-				label: this.getNumberRangeString( 50000, 250000, formatCurrency ),
+				label: this.getNumberRangeString(
+					this.convertCurrency( 50000 ),
+					this.convertCurrency( 250000 ),
+					formatCurrency
+				),
 			},
 			{
 				key: 'more-than-250000',
 				label: sprintf(
 					/* translators: %s: A given revenue amount, e.g., $250000 */
 					__( 'More than %s', 'woocommerce-admin' ),
-					formatCurrency( 250000 )
+					formatCurrency( this.convertCurrency( 250000 ) )
 				),
 			},
 		];
@@ -440,11 +488,14 @@ class BusinessDetails extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getProfileItemsError, getSettings } = select( 'wc-api' );
+
+		const settings = getSettings( 'general' );
 
 		return {
 			isError: Boolean( getProfileItemsError() ),
 			profileItems: getProfileItems(),
+			settings,
 		};
 	} ),
 	withDispatch( dispatch => {
