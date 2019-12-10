@@ -37,7 +37,7 @@ const subTasks = [
 		after: <i className="material-icons-outlined">chevron_right</i>,
 		onClick: () => recordEvent( 'tasklist_add_product', { method: 'import' } ),
 		href: getAdminLink(
-			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
+			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=product-import'
 		),
 	},
 	{
