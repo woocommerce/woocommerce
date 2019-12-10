@@ -407,6 +407,11 @@
 			input[type="password"] {
 				padding-right: 2.5rem;
 			}
+
+			/* Hide the Edge "reveal password" native button */
+			input::-ms-reveal {
+				display: none;
+			}
 		}
 
 		.show-password-input {
