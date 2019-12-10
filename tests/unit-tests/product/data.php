@@ -101,7 +101,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->set_image_id( $image_id[0] );
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
-		wp_delete_attachment( $image_id, true ); // Remove attachment.
+		wp_delete_attachment( $image_id[0], true ); // Remove attachment.
 	}
 
 	/**
