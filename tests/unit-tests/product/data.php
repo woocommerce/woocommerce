@@ -14,24 +14,6 @@
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
-	 * Run tear down code for unit tests.
-	 */
-	public function tearDown() {
-		parent::tearDown();
-
-		$upload_dir_info = wp_upload_dir();
-		$upload_dir_path = $upload_dir_info['path'];
-		$filename        = 'Dr1Bczxq4q.png';
-
-		// Remove upload test image.
-		$file_path = $upload_dir_path . '/' . $filename;
-
-		if ( file_exists( $file_path ) ) {
-			unlink( $file_path );
-		}
-	}
-
-	/**
 	 * Test product setters and getters
 	 *
 	 * @since 3.0.0
@@ -119,6 +101,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->set_image_id( $image_id[0] );
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
+		wp_delete_attachment( $image_id, true ); // Remove attachment.
 	}
 
 	/**
@@ -291,23 +274,25 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * Test: test_get_image_should_return_product_image.
 	 */
 	public function test_get_image_should_return_product_image() {
-		$product   = new WC_Product();
-		$image_url = $this->set_product_image( $product );
+		$product = new WC_Product();
+		$image   = $this->set_product_image( $product );
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
 			$product->get_image()
 		);
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
+			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-single size-single" alt="" />',
 			$product->get_image( 'single' )
 		);
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="custom-class" alt="" />',
+			'<img width="186" height="144" src="' . $image['url'] . '" class="custom-class" alt="" />',
 			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
+
+		wp_delete_attachment( $image['id'], true ); // Remove attachment.
 	}
 
 	/**
@@ -317,22 +302,24 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$variable_product = WC_Helper_Product::create_variation_product();
 		$variations       = $variable_product->get_children();
 		$variation_1      = wc_get_product( $variations[0] );
-		$image_url        = $this->set_product_image( $variable_product );
+		$image            = $this->set_product_image( $variable_product );
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
 			$variation_1->get_image()
 		);
 
 		$this->assertContains(
-			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
+			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-single size-single" alt="" />',
 			$variation_1->get_image( 'single' )
 		);
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="custom-class" alt="" />',
+			'<img width="186" height="144" src="' . $image['url'] . '" class="custom-class" alt="" />',
 			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
+
+		wp_delete_attachment( $image['id'], true ); // Remove attachment.
 	}
 
 	/**
@@ -360,7 +347,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * Helper method to define a image for a product and return its URL.
 	 *
 	 * @param WC_Product $product Product object.
-	 * @return string image URL.
+	 * @return array Image ID and URL.
 	 */
 	protected function set_product_image( $product ) {
 		global $wpdb;
@@ -374,6 +361,9 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->set_image_id( $image_id );
 		$product->save();
 
-		return $image_url;
+		return array(
+			'id'  => $image_id,
+			'url' => $image_url,
+		);
 	}
 }
