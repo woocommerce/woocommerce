@@ -996,9 +996,10 @@ class WC_Tax {
 	 * @return array
 	 */
 	private static function prepare_tax_rate( $tax_rate ) {
+		$is_us_or_ca = in_array( $tax_rate['tax_rate_country'], array( 'CA', 'US' ) );
 		foreach ( $tax_rate as $key => $value ) {
 			if ( method_exists( __CLASS__, 'format_' . $key ) ) {
-				if ( 'tax_rate_state' === $key ) {
+				if ( 'tax_rate_state' === $key && true === $is_us_or_ca ) {
 					$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), sanitize_key( $value ) );
 				} else {
 					$tax_rate[ $key ] = call_user_func( array( __CLASS__, 'format_' . $key ), $value );
