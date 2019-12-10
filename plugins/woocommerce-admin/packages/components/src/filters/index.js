@@ -183,11 +183,11 @@ ReportFilters.propTypes = {
 			label: PropTypes.string.isRequired,
 			range: PropTypes.string.isRequired,
 		} ).isRequired,
-	} ).isRequired,
+	} ),
 	/**
 	 * ISO date format string.
 	 */
-	isoDateFormat: PropTypes.string.isRequired,
+	isoDateFormat: PropTypes.string,
 };
 
 ReportFilters.defaultProps = {
