@@ -11,6 +11,8 @@ import getShortcode from './get-shortcode';
 
 /**
  * Return a save function using the blockType to generate the correct shortcode.
+ *
+ * @param {*} blockType Block being rendered.
  */
 export const deprecatedConvertToShortcode = ( blockType ) => {
 	return function( props ) {

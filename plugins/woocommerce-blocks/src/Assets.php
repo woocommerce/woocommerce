@@ -147,19 +147,25 @@ class Assets {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $handle    Name of the script. Should be unique.
-	 * @param string $src       Full URL of the script, or path of the script relative to the WordPress root directory.
-	 * @param array  $deps      Optional. An array of registered script handles this script depends on. Default empty array.
-	 * @param bool   $has_i18n  Optional. Whether to add a script translation call to this file. Default 'true'.
+	 * @param string $handle       Name of the script. Should be unique.
+	 * @param string $src          Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param array  $dependencies Optional. An array of registered script handles this script depends on. Default empty array.
+	 * @param bool   $has_i18n     Optional. Whether to add a script translation call to this file. Default 'true'.
 	 */
-	protected static function register_script( $handle, $src, $deps = [], $has_i18n = true ) {
+	protected static function register_script( $handle, $src, $dependencies = [], $has_i18n = true ) {
 		$relative_src = str_replace( plugins_url( '/', __DIR__ ), '', $src );
-		$ver          = self::get_file_version( $relative_src );
-		$deps_path    = dirname( __DIR__ ) . '/' . str_replace( '.js', '.deps.json', $relative_src );
-		$dependencies = file_exists( $deps_path ) ? json_decode( file_get_contents( $deps_path ) ) : []; // phpcs:ignore WordPress.WP.AlternativeFunctions
-		$dependencies = array_merge( $dependencies, $deps );
+		$asset_path   = dirname( __DIR__ ) . '/' . str_replace( '.js', '.asset.php', $relative_src );
 
-		wp_register_script( $handle, $src, $dependencies, $ver, true );
+		if ( file_exists( $asset_path ) ) {
+			$asset        = require $asset_path;
+			$dependencies = isset( $asset['dependencies'] ) ? array_merge( $asset['dependencies'], $dependencies ) : $dependencies;
+			$version      = ! empty( $asset['version'] ) ? $asset['version'] : self::get_file_version( $relative_src );
+		} else {
+			$version = self::get_file_version( $relative_src );
+		}
+
+		wp_register_script( $handle, $src, $dependencies, $version, true );
+
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', dirname( __DIR__ ) . '/languages' );
 		}

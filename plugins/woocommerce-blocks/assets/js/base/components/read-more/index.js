@@ -96,7 +96,7 @@ class ReadMore extends Component {
 	/**
 	 * Handles the click event for the read more/less button.
 	 *
-	 * @param {obj} e event
+	 * @param {Object} e event
 	 */
 	onClick( e ) {
 		e.preventDefault();

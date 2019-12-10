@@ -8,7 +8,7 @@ import { allSettings } from './settings-init';
  *
  * @export
  * @param {string}   name                         The identifier for the setting.
- * @param {mixed}    [fallback=false]             The value to use as a fallback
+ * @param {*}    [fallback=false]             The value to use as a fallback
  *                                                if the setting is not in the
  *                                                state.
  * @param {Function} [filter=( val ) => val]  	  A callback for filtering the
@@ -16,7 +16,7 @@ import { allSettings } from './settings-init';
  *                                                Receives both the found value
  *                                                (if it exists for the key) and
  *                                                the provided fallback arg.
- * @returns {mixed}
+ * @return {*} The setting value.
  */
 export function getSetting( name, fallback = false, filter = ( val ) => val ) {
 	const value = allSettings.hasOwnProperty( name )

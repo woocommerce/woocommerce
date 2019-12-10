@@ -18,7 +18,10 @@ jest.mock( '../../base/utils/errors', () => ( {
 	formatError: jest.fn(),
 } ) );
 
-const mockCategories = [ { id: 1, name: 'Clothing' }, { id: 2, name: 'Food' } ];
+const mockCategories = [
+	{ id: 1, name: 'Clothing' },
+	{ id: 2, name: 'Food' },
+];
 const TestComponent = withCategories( ( props ) => {
 	return (
 		<div
@@ -88,19 +91,17 @@ describe( 'withCategories Component', () => {
 			renderer = render();
 		} );
 
-		it( 'sets the error prop', ( done ) => {
+		test( 'sets the error prop', async () => {
+			await expect( () => getCategoriesPromise() ).toThrow();
+
 			const { formatError } = mockBaseUtils;
-			getCategoriesPromise.catch( () => {
-				const props = renderer.root.findByType( 'div' ).props;
+			const props = renderer.root.findByType( 'div' ).props;
 
-				expect( formatError ).toHaveBeenCalledWith( error );
-				expect( formatError ).toHaveBeenCalledTimes( 1 );
-				expect( props.error ).toEqual( formattedError );
-				expect( props.isLoading ).toBe( false );
-				expect( props.categories ).toBeNull();
-
-				done();
-			} );
+			expect( formatError ).toHaveBeenCalledWith( error );
+			expect( formatError ).toHaveBeenCalledTimes( 1 );
+			expect( props.error ).toEqual( formattedError );
+			expect( props.isLoading ).toBe( false );
+			expect( props.categories ).toBeNull();
 		} );
 	} );
 } );

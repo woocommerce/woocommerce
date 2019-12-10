@@ -7,7 +7,7 @@ import trimHtml from 'trim-html';
  * Truncate some HTML content to a given length.
  *
  * @param {string} html HTML that will be truncated.
- * @param {int} length Legth to truncate the string to.
+ * @param {number} length Length to truncate the string to.
  * @param {string} ellipsis Character to append to truncated content.
  */
 export const truncateHtml = ( html, length, ellipsis = '...' ) => {
@@ -25,7 +25,7 @@ export const truncateHtml = ( html, length, ellipsis = '...' ) => {
  *
  * @param {string} originalContent Content to be clamped.
  * @param {Object} targetElement Element which will contain the clamped content.
- * @param {integer} maxHeight Max height of the clamped content.
+ * @param {number} maxHeight Max height of the clamped content.
  * @param {string} ellipsis Character to append to clamped content.
  * @return {string} clamped content
  */
@@ -45,7 +45,7 @@ export const clampLines = (
  *
  * @param {string} originalContent Content to be clamped.
  * @param {Object} targetElement Element which will contain the clamped content.
- * @param {integer} maxHeight Max height of the clamped content.
+ * @param {number} maxHeight Max height of the clamped content.
  */
 const calculateLength = ( originalContent, targetElement, maxHeight ) => {
 	let markers = {
@@ -73,8 +73,8 @@ const calculateLength = ( originalContent, targetElement, maxHeight ) => {
  * Move string markers. Used by calculateLength.
  *
  * @param {Object} markers Markers for clamped content.
- * @param {integer} currentHeight Current height of clamped content.
- * @param {integer} maxHeight Max height of the clamped content.
+ * @param {number} currentHeight Current height of clamped content.
+ * @param {number} maxHeight Max height of the clamped content.
  */
 const moveMarkers = ( markers, currentHeight, maxHeight ) => {
 	if ( currentHeight <= maxHeight ) {

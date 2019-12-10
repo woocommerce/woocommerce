@@ -8,10 +8,10 @@ import { createContext, useContext } from '@wordpress/element';
  * exposing this via context, it allows for all children blocks to be
  * synchronized to the same query state defined by the parent in the tree.
  *
- * Defaults to 'page' for general global querystate shared among all blocks
+ * Defaults to 'page' for general global query state shared among all blocks
  * in a view.
  *
- * @var  {React.Context}  QueryStateContext A react context object
+ * @member  {Object}  QueryStateContext A react context object
  */
 const QueryStateContext = createContext( 'page' );
 

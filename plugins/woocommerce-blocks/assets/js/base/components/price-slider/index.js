@@ -110,7 +110,7 @@ const PriceSlider = ( {
 	 * Works around an IE issue where only one range selector is visible by changing the display order
 	 * based on the mouse position.
 	 *
-	 * @param {obj} event event data.
+	 * @param {Object} event event data.
 	 */
 	const findClosestRange = useCallback(
 		( event ) => {
@@ -147,7 +147,8 @@ const PriceSlider = ( {
 
 	/**
 	 * Called when the slider is dragged.
-	 * @param {obj} event Event object.
+	 *
+	 * @param {Object} event Event object.
 	 */
 	const rangeInputOnChange = useCallback(
 		( event ) => {
@@ -175,7 +176,8 @@ const PriceSlider = ( {
 
 	/**
 	 * Called when a price input loses focus - commit changes to slider.
-	 * @param {obj} event Event object.
+	 *
+	 * @param {Object} event Event object.
 	 */
 	const priceInputOnBlur = useCallback(
 		( event ) => {
@@ -217,7 +219,8 @@ const PriceSlider = ( {
 
 	/**
 	 * Called when a price input is typed in - store value but don't update slider.
-	 * @param {obj} event Event object.
+	 *
+	 * @param {Object} event Event object.
 	 */
 	const priceInputOnChange = useCallback(
 		( event ) => {

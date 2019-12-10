@@ -29,8 +29,8 @@ Headers = Headers
  *                                    collection request.
  * @param {Array<*>} response.items	An array of items for the given collection.
  * @param {Headers}  response.headers A Headers object from the response
- *                                    @link https://developer.mozilla.org/en-US/docs/Web/API/Headers
- * @param {bool}     [replace=false]  If true, signals to replace the current
+ *                                    link https://developer.mozilla.org/en-US/docs/Web/API/Headers
+ * @param {boolean}     [replace=false]  If true, signals to replace the current
  *                                    items in the state with the provided
  *                                    items.
  * @return {

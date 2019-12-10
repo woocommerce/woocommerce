@@ -6,6 +6,11 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { isNil } from 'lodash';
 
+/**
+ * HOC that transforms a single select to a multiple select.
+ *
+ * @param {Function} OriginalComponent Component being wrapped.
+ */
 const withTransformSingleSelectToMultipleSelect = createHigherOrderComponent(
 	( OriginalComponent ) => {
 		class WrappedComponent extends Component {

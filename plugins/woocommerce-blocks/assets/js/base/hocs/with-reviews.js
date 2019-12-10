@@ -11,6 +11,11 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { getReviews } from '../../blocks/reviews/utils';
 import { formatError } from '../utils/errors.js';
 
+/**
+ * HOC that queries reviews for a component.
+ *
+ * @param {Function} OriginalComponent Component being wrapped.
+ */
 const withReviews = ( OriginalComponent ) => {
 	class WrappedComponent extends Component {
 		static propTypes = {

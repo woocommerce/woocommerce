@@ -10,6 +10,14 @@ import {
 	LIMIT_TAGS,
 } from '@woocommerce/block-settings';
 
+/**
+ * Get product query requests.
+ *
+ * @param {Object} request A query object with the list of selected products and search term.
+ * @param {string} request.selected Currently selected products.
+ * @param {string} request.search Search string.
+ * @param {Array} request.queryArgs Query args to pass in.
+ */
 const getProductsRequests = ( {
 	selected = [],
 	search = '',
@@ -44,7 +52,10 @@ const getProductsRequests = ( {
 /**
  * Get a promise that resolves to a list of products from the API.
  *
- * @param {Object} - A query object with the list of selected products and search term.
+ * @param {Object} request A query object with the list of selected products and search term.
+ * @param {string} request.selected Currently selected products.
+ * @param {string} request.search Search string.
+ * @param {Array} request.queryArgs Query args to pass in.
  */
 export const getProducts = ( {
 	selected = [],
@@ -128,6 +139,8 @@ export const getCategory = ( categoryId ) => {
 
 /**
  * Get a promise that resolves to an array of category objects from the API.
+ *
+ * @param {Object} queryArgs Query args to pass in.
  */
 export const getCategories = ( queryArgs ) => {
 	return apiFetch( {

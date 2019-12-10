@@ -39,6 +39,12 @@ const blockConfig = {
 			default: true,
 		},
 	},
+
+	/**
+	 * Renders the edit view for a block.
+	 *
+	 * @param {Object} props Props to pass to block.
+	 */
 	edit( props ) {
 		const { attributes, setAttributes } = props;
 		const { headingLevel, productLink } = attributes;

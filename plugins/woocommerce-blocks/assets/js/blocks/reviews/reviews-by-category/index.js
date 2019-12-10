@@ -57,6 +57,8 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 
 	/**
 	 * Renders and manages the block.
+	 *
+	 * @param {Object} props Props to pass to block.
 	 */
 	edit( props ) {
 		return <Editor { ...props } />;

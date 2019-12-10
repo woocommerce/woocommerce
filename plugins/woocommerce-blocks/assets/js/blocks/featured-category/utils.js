@@ -6,7 +6,7 @@ import { isObject } from 'lodash';
 /**
  * Get the src from a category object, unless null (no image).
  *
- * @param {object|null} category A product category object from the API.
+ * @param {Object|null} category A product category object from the API.
  * @return {string} The src of the category image.
  */
 function getCategoryImageSrc( category ) {
@@ -19,7 +19,7 @@ function getCategoryImageSrc( category ) {
 /**
  * Get the attachment ID from a category object, unless null (no image).
  *
- * @param {object|null} category A product category object from the API.
+ * @param {Object|null} category A product category object from the API.
  * @return {number} The id of the category image.
  */
 function getCategoryImageId( category ) {

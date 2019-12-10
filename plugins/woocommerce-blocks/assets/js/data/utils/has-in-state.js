@@ -9,7 +9,7 @@ import { has } from 'lodash';
  * @param {Object} state The state being checked
  * @param {Array}  path  The path to check
  *
- * @return {bool} True means this exists in the state.
+ * @return {boolean} True means this exists in the state.
  */
 export default function hasInState( state, path ) {
 	return has( state, path );

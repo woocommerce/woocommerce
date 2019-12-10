@@ -88,20 +88,19 @@ describe( 'withAttributes Component', () => {
 			expect( props.expandedAttribute ).toBe( 1 );
 		} );
 
-		it( 'getTerms is called on mount if there was an attribute selected', ( done ) => {
+		it( 'getTerms is called on mount if there was an attribute selected', async () => {
 			const renderer = TestRenderer.create(
 				<TestComponent selected={ selected } />
 			);
 
-			getAttributesPromise.then( () => {
-				const { getTerms } = mockUtils;
-				const props = renderer.root.findByType( 'div' ).props;
+			await getAttributesPromise;
 
-				expect( getTerms ).toHaveBeenCalledWith( 1 );
-				expect( getTerms ).toHaveBeenCalledTimes( 1 );
-				expect( props.expandedAttribute ).toBe( 1 );
-				done();
-			} );
+			const { getTerms } = mockUtils;
+			const props = renderer.root.findByType( 'div' ).props;
+
+			expect( getTerms ).toHaveBeenCalledWith( 1 );
+			expect( getTerms ).toHaveBeenCalledTimes( 1 );
+			expect( props.expandedAttribute ).toBe( 1 );
 		} );
 	} );
 
@@ -140,18 +139,17 @@ describe( 'withAttributes Component', () => {
 			renderer = TestRenderer.create( <TestComponent /> );
 		} );
 
-		it( 'sets the error prop', ( done ) => {
-			const { formatError } = mockBaseUtils;
-			getAttributesPromise.catch( () => {
-				const props = renderer.root.findByType( 'div' ).props;
+		test( 'sets the error prop', async () => {
+			await expect( () => getAttributesPromise() ).toThrow();
 
-				expect( formatError ).toHaveBeenCalledWith( error );
-				expect( formatError ).toHaveBeenCalledTimes( 1 );
-				expect( props.error ).toEqual( formattedError );
-				expect( props.isLoading ).toBe( false );
-				expect( props.attributes ).toEqual( [] );
-				done();
-			} );
+			const { formatError } = mockBaseUtils;
+			const props = renderer.root.findByType( 'div' ).props;
+
+			expect( formatError ).toHaveBeenCalledWith( error );
+			expect( formatError ).toHaveBeenCalledTimes( 1 );
+			expect( props.error ).toEqual( formattedError );
+			expect( props.isLoading ).toBe( false );
+			expect( props.attributes ).toEqual( [] );
 		} );
 	} );
 } );

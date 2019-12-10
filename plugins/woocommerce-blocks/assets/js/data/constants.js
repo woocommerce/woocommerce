@@ -1,6 +1,6 @@
 /**
  * REST API namespace for rest requests against blocks namespace.
  *
- * @var  {string}
+ * @member  {string}
  */
 export const API_BLOCK_NAMESPACE = 'wc/blocks';
