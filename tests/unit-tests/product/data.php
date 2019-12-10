@@ -14,6 +14,24 @@
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 	/**
+	 * Run tear down code for unit tests.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+
+		$upload_dir_info = wp_upload_dir();
+		$upload_dir_path = $upload_dir_info['path'];
+		$filename        = 'Dr1Bczxq4q.png';
+
+		// Remove upload test image.
+		$file_path = $upload_dir_path . '/' . $filename;
+
+		if ( file_exists( $file_path ) ) {
+			unlink( $file_path );
+		}
+	}
+
+	/**
 	 * Test product setters and getters
 	 *
 	 * @since 3.0.0
