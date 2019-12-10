@@ -83,7 +83,6 @@ class OnboardingTasks {
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.
 		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
-		$settings['onboarding']['customLogo']                     = get_theme_mod( 'custom_logo', false );
 		$settings['onboarding']['hasHomepage']                    = self::check_task_completion( 'homepage' ) || 'classic' === get_option( 'classic-editor-replace' );
 		$settings['onboarding']['hasPhysicalProducts']            = count(
 			wc_get_products(
@@ -96,7 +95,9 @@ class OnboardingTasks {
 		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
 		$settings['onboarding']['isTaxComplete']                  = self::check_task_completion( 'tax' );
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
+		$settings['onboarding']['stylesheet']                     = get_option( 'stylesheet' );
 		$settings['onboarding']['taxJarActivated']                = class_exists( 'WC_Taxjar' );
+		$settings['onboarding']['themeMods']                      = get_theme_mods();
 
 		return $settings;
 	}
