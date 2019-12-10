@@ -161,7 +161,7 @@ class ShippingRates extends Component {
 	}
 
 	render() {
-		const { shippingZones } = this.props;
+		const { buttonText, shippingZones } = this.props;
 
 		if ( ! shippingZones.length ) {
 			return null;
@@ -224,7 +224,7 @@ class ShippingRates extends Component {
 							</div>
 
 							<Button isPrimary onClick={ handleSubmit }>
-								{ __( 'Complete task', 'woocommerce-admin' ) }
+								{ buttonText || __( 'Update', 'woocommerce-admin' ) }
 							</Button>
 						</Fragment>
 					);
@@ -235,6 +235,10 @@ class ShippingRates extends Component {
 }
 
 ShippingRates.propTypes = {
+	/**
+	 * Text displayed on the primary button.
+	 */
+	buttonText: PropTypes.string,
 	/**
 	 * Function used to mark the step complete.
 	 */
