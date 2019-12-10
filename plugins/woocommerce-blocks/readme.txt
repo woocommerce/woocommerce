@@ -116,6 +116,10 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.3 - 2019-12-09 =
+- Prevent Filter Products by Attribute block hiding non-matching options when Query Type is set to OR. #1339
+- Fix price slider layout in narrow columns #1231
+
 = 2.5.2 - 2019-12-02 =
 - Fixed a PHP Notice in Featured Category Block when the category is invalid. #1291 👏 @strategio
 - Filter Products by Attribute block now uses the attribute label instead of the slug to set the default title. #1271
@@ -126,7 +130,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 = 2.5.1 - 2019-11-26 =
 - Fix Products by Tag, Products by Attribute and Handpicked products blocks showing an invalid attributes error. #1254
 - Fix the price slider updating instantly even when filter button was enabled. #1228
-- Fix price slider layout in narrow columns. #1231
 - Honor CSS classes in the editor for blocks added in 2.5. #1227
 - Fix variable products price format in All Products block. #1210
 - Allow the feature plugin to use WooCommerce Core translated strings. #1242
