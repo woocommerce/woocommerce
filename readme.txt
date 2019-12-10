@@ -181,14 +181,40 @@ INTERESTED IN DEVELOPMENT?
 
 = 3.9.0 - 2020-01-07 =
 
+- Enhancement - Added a "Show" button next to the password field on the login fields. #24915
+- Tweak - Updated PayPal standard "Thank you" page message to comply with PayPal Guidelines. #24756
 - Tweak - Cache checkout fragments and update DOM on change only. #24227
 - Tweak - Eliminate extra update order AJAX request on checkout page load. #24271
+- Tweak - Prevent billing address from being updated on shipping update. #24374
+- Tweak - Added a tooltip in the "Coupon expity date" field. #24749
+- Tweak - Make phone numbers clickable in emails. #24786
+- Tweak - Prevent PHP warnings in tracker if order doesn't have a created date yet. #24846
+- Tweak - Capitalize "T" in "Move to Trash" phrase on order page in wp-admin to be consistent with product and coupon pages. #24867
 - Fix - Honor tax rounding preference in edit item and refund flows. #24208
 - Fix - Prevent incorrect number of decimal points in prices. #24281
 - Fix - Fixed initial support for Gutenberg's Experimental Legacy Widget block. #24292
-
-
-
+- Fix - Fix overriding of query when using orderby on archives with a static homepage. #24683
+- Fix - Use of `wp_unslash()` function when escaping admin settings values. #24793
+- Fix - Do not set the tracking cookie when doing ajax requests. #24798
+- Fix - Display button to delete images from product galleries in the admin when using a mobile device. #24840
+- Fix - Fixed order note's date format. #24843
+- Fix - Refactored `WC_Order_Factory::get_order()` to remove function deprecated in PHP 7.0. #24852
+- Fix - Fixed product stock status changes on Bulk Edit save when "Enable stock management" is disabled. #24876
+- Fix - Fixed default country code fallback in wc_get_customer_default_location(). #24884
+- Fix - Fixed misleading message for Shipping options in cart. #24914
+- Dev - Check for max discount to be "-ve" to prevent overwriting refunded fee amount. #24341
+- Dev - Add unload event to the checkout page to prevent reloading during checkout after placing an order. #24609
+- Dev - Only toggle form field description if element exists. #24752
+- Dev - Introduced `woocommerce_{$export_type}_export_delimiter` filter to change separator string while exporting CSV files. #24759
+- Dev - Introduced woocommerce_after_order_refund_item_name action. #24760
+- Dev - Introduced woocommerce_kses_notice_allowed_tags filter. #24849
+- Dev - Introduced woocommerce_shipping_not_enabled_on_cart_html filter. #24914
+- Dev - Included third parameter `$order` to `woocommerce_order_get_formatted_billing_address` and `woocommerce_order_get_formatted_shipping_address` filters. #24870
+- Dev - Made variables in `assets/css/_variables.scss` default. #24822
+- Dev - Refactor to use the same rounding logic in orders and cart. #24828
+- Dev - Add order note immediately after status change before the `woocommerce_order_status_changed action. #24879
+- Localization - Add subdivisions of Laos. #24765
+- Localization - Fixed translatable string in WooCommerce's libraries. #24892 #24894
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
