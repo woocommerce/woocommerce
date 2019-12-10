@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, woo
-Requires at least: 4.9
+Requires at least: 5.0
 Tested up to: 5.3
-Requires PHP: 5.6
-Stable tag: 3.8.0
+Requires PHP: 7.0
+Stable tag: 3.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,7 +179,16 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.9.0 - 2020-01-xx =
+= 3.9.0 - 2020-01-07 =
+
+- Tweak - Cache checkout fragments and update DOM on change only. #24227
+- Tweak - Eliminate extra update order AJAX request on checkout page load. #24271
+- Fix - Honor tax rounding preference in edit item and refund flows. #24208
+- Fix - Prevent incorrect number of decimal points in prices. #24281
+- Fix - Fixed initial support for Gutenberg's Experimental Legacy Widget block. #24292
+
+
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
