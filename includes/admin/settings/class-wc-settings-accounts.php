@@ -33,7 +33,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	public function get_settings() {
 		$erasure_text = esc_html__( 'account erasure request', 'woocommerce' );
 		if ( current_user_can( 'manage_privacy_options' ) ) {
-			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
+			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'erase-personal-data.php' ) ), $erasure_text );
 		}
 
 		$account_settings = array(
