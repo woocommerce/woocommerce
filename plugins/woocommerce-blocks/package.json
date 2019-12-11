@@ -53,7 +53,7 @@
 		"@wordpress/is-shallow-equal": "1.6.1",
 		"@wordpress/jest-preset-default": "5.2.0",
 		"@wordpress/rich-text": "3.8.0",
-		"@wordpress/scripts": "^6.0.0",
+		"@wordpress/scripts": "6.0.0",
 		"autoprefixer": "9.7.3",
 		"babel-core": "7.0.0-bridge.0",
 		"babel-eslint": "10.0.3",
