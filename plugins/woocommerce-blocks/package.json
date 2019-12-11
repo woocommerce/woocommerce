@@ -10,6 +10,7 @@
 		"wordpress",
 		"blocks"
 	],
+	"sideEffects": ["*.css", "*.scss"],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
