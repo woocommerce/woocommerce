@@ -175,12 +175,15 @@ class Assets {
 	 * Queues a block script.
 	 *
 	 * @since 2.3.0
+	 * @since $VID:$ Changed $name to $script_name and added $handle argument.
 	 *
-	 * @param string $name Name of the script used to identify the file inside build folder.
+	 * @param string $script_name Name of the script used to identify the file inside build folder.
+	 * @param string $handle      Provided if the handle should be different than the script name. `wc-` prefix automatically added.
 	 */
-	public static function register_block_script( $name ) {
-		self::register_script( 'wc-' . $name, plugins_url( self::get_block_asset_build_path( $name ), __DIR__ ) );
-		wp_enqueue_script( 'wc-' . $name );
+	public static function register_block_script( $script_name, $handle = '' ) {
+		$handle = '' !== $handle ? $handle : $script_name;
+		self::register_script( 'wc-' . $handle, plugins_url( self::get_block_asset_build_path( $script_name ), __DIR__ ) );
+		wp_enqueue_script( 'wc-' . $handle );
 	}
 
 	/**
