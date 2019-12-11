@@ -478,7 +478,7 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		if ( wc_is_active_theme( array( 'twentytwenty', 'twentynineteen', 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( wc_is_wp_default_theme_active() ) {
 			switch ( get_template() ) {
 				case 'twentyten':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php';
