@@ -37,7 +37,7 @@
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
 		"test:watch": "npm run test -- --watch",
-		"size-check": "bundlecop submit ./build",
+		"size-check": "bundlewatch",
 		"changelog": "node ./bin/changelog.js "
 	},
 	"devDependencies": {
@@ -68,7 +68,7 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"babel-plugin-transform-runtime": "6.23.0",
 		"babel-preset-env": "1.7.0",
-		"bundlecop": "^2.2.0",
+		"bundlewatch": "^0.2.5",
 		"chalk": "3.0.0",
 		"classnames": "2.2.6",
 		"clean-webpack-plugin": "3.0.0",
@@ -121,6 +121,26 @@
 		"hooks": {
 			"pre-commit": "lint-staged"
 		}
+	},
+	"bundlewatch": {
+		"files": [
+			{
+				"path": "./build/*.js",
+				"maxSize": "200 kB"
+			},
+			{
+				"path": "./build/*frontend*.js",
+				"maxSize": "60 kB"
+			},
+			{
+				"path": "./build/*.css",
+				"maxSize": "50kB"
+			},
+			{
+				"path": "./build/vendors*.js",
+				"maxSize": "350 kb"
+			}
+		]
 	},
 	"lint-staged": {
 		"*.scss": [
