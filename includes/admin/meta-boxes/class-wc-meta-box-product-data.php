@@ -453,7 +453,7 @@ class WC_Meta_Box_Product_Data {
 					continue;
 				}
 				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
-				$variation    = new WC_Product_Variation( $variation_id );
+				$variation    = wc_get_product_object( 'variation', $variation_id );
 				$stock        = null;
 
 				// Handle stock changes.

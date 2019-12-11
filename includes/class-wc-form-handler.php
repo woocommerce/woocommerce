@@ -113,7 +113,7 @@ class WC_Form_Handler {
 			// Validation: Required fields.
 			if ( ! empty( $field['required'] ) && empty( $value ) ) {
 				/* translators: %s: Field name. */
-				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error' );
+				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $key ) );
 			}
 
 			if ( ! empty( $value ) ) {
@@ -259,7 +259,7 @@ class WC_Form_Handler {
 		foreach ( $required_fields as $field_key => $field_name ) {
 			if ( empty( $_POST[ $field_key ] ) ) {
 				/* translators: %s: Field name. */
-				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_name ) . '</strong>' ), 'error' );
+				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_name ) . '</strong>' ), 'error', array( 'id' => $field_key ) );
 			}
 		}
 
@@ -340,7 +340,7 @@ class WC_Form_Handler {
 	 * Process the checkout form.
 	 */
 	public static function checkout_action() {
-		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( isset( $_POST['woocommerce_checkout_place_order'] ) || isset( $_POST['woocommerce_checkout_update_totals'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			wc_nocache_headers();
 
 			if ( WC()->cart->is_empty() ) {
@@ -458,6 +458,27 @@ class WC_Form_Handler {
 			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-add-payment-method' ) ) {
 				return;
 			}
+
+			// Test rate limit.
+			$current_user_id = get_current_user_id();
+			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
+			$delay           = (int) apply_filters( 'woocommerce_payment_gateway_add_payment_method_delay', 20 );
+
+			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
+				wc_add_notice(
+					/* translators: %d number of seconds */
+					_n(
+						'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
+						'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
+						$delay,
+						'woocommerce'
+					),
+					'error'
+				);
+				return;
+			}
+
+			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay );
 
 			ob_start();
 

@@ -46,7 +46,7 @@ class WC_Order_Factory {
 		try {
 			return new $classname( $order_id );
 		} catch ( Exception $e ) {
-			wc_caught_exception( $e, __FUNCTION__, func_get_args() );
+			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
 		}
 	}

@@ -201,11 +201,16 @@ class WC_WCCOM_Site {
 	 * @return bool
 	 */
 	protected static function is_request_to_wccom_site_rest_api() {
-		$request_uri = add_query_arg( array() );
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );
-		$request_uri = esc_url_raw( wp_unslash( $request_uri ) );
+		$rest_prefix = '';
 
-		return false !== strpos( $request_uri, $rest_prefix . 'wccom-site/' );
+		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$route = wp_unslash( $_REQUEST['rest_route'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+		} else {
+			$route       = wp_unslash( add_query_arg( array() ) );
+			$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		}
+
+		return false !== strpos( $route, $rest_prefix . 'wccom-site/' );
 	}
 
 	/**

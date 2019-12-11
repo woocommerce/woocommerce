@@ -183,7 +183,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// If we're not updating existing posts, we may need a placeholder product to map to.
 			if ( ! $this->params['update_existing'] ) {
-				$product = new WC_Product_Simple();
+				$product = wc_get_product_object( 'simple' );
 				$product->set_name( 'Import placeholder for ' . $id );
 				$product->set_status( 'importing' );
 				$product->add_meta_data( '_original_id', $id, true );
@@ -200,7 +200,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		try {
-			$product = new WC_Product_Simple();
+			$product = wc_get_product_object( 'simple' );
 			$product->set_name( 'Import placeholder for ' . $value );
 			$product->set_status( 'importing' );
 			$product->set_sku( $value );
@@ -254,7 +254,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				return $id_from_sku;
 			}
 
-			$product = new WC_Product_Simple();
+			$product = wc_get_product_object( 'simple' );
 			$product->set_name( 'Import placeholder for ' . $id );
 			$product->set_status( 'importing' );
 			$product->add_meta_data( '_original_id', $id, true );

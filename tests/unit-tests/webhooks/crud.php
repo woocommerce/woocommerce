@@ -189,4 +189,17 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 		$object = new WC_Webhook();
 		$this->assertEquals( 'GBDo00G55h6IiV+6CxqivQPLbI//KzaOZm747971tPs=', $object->generate_signature( 'secret' ) );
 	}
+
+	/**
+	 * Test: webhook deletion invalidates caches
+	 */
+	public function test_webhook_deletion() {
+		$object = new WC_Webhook();
+		$id     = $object->save();
+		$object = new WC_Webhook( $id );
+		$this->assertEquals( $id, $object->get_id() );
+		$this->assertTrue( $object->delete() );
+		$object = new WC_Webhook( $id );
+		$this->assertNotEquals( $id, $object->get_id() );
+	}
 }

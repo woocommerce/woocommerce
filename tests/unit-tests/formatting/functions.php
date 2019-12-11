@@ -298,6 +298,15 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Given string.
 		$this->assertEquals( '9.99', wc_format_decimal( '9.99' ) );
 
+		// Given string with multiple decimals points.
+		$this->assertEquals( '9.99', wc_format_decimal( '9...99' ) );
+
+		// Given string with multiple decimals points.
+		$this->assertEquals( '99.9', wc_format_decimal( '9...9....9' ) );
+
+		// Negative string.
+		$this->assertEquals( '-9.99', wc_format_decimal( '-9.99' ) );
+
 		// Float.
 		$this->assertEquals( '9.99', wc_format_decimal( 9.99 ) );
 
@@ -324,7 +333,16 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_thousand_sep', '.' );
 
 		// Given string.
-		$this->assertEquals( '9.99', wc_format_decimal( '9.99' ) );
+		$this->assertEquals( '9.99', wc_format_decimal( '9,99' ) );
+
+		// Given string with multiple decimals points.
+		$this->assertEquals( '9.99', wc_format_decimal( '9,,,99' ) );
+
+		// Given string with multiple decimals points.
+		$this->assertEquals( '99.9', wc_format_decimal( '9,,,9,,,,9' ) );
+
+		// Negative string.
+		$this->assertEquals( '-9.99', wc_format_decimal( '-9,99' ) );
 
 		// Float.
 		$this->assertEquals( '9.99', wc_format_decimal( 9.99 ) );

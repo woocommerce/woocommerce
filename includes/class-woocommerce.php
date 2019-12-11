@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.8.0';
+	public $version = '3.9.0';
 
 	/**
 	 * The single instance of the class.
@@ -336,6 +336,11 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
+
+		/**
+		 * Core traits.
+		 */
+		include_once WC_ABSPATH . 'includes/traits/trait-wc-item-totals.php';
 
 		/**
 		 * Abstract classes.

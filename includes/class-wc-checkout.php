@@ -712,11 +712,11 @@ class WC_Checkout {
 				switch ( $fieldset_key ) {
 					case 'shipping':
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Shipping %s', 'woocommerce' ), $field_label );
+						$field_label = sprintf( _x( 'Shipping %s', 'checkout-validation', 'woocommerce' ), $field_label );
 						break;
 					case 'billing':
 						/* translators: %s: field name */
-						$field_label = sprintf( __( 'Billing %s', 'woocommerce' ), $field_label );
+						$field_label = sprintf( _x( 'Billing %s', 'checkout-validation', 'woocommerce' ), $field_label );
 						break;
 				}
 
@@ -734,14 +734,14 @@ class WC_Checkout {
 								/* translators: %s: field name */
 								$postcode_validation_notice = sprintf( __( '%s is not a valid postcode / ZIP.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' );
 						}
-						$errors->add( 'validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ) );
+						$errors->add( 'validation', apply_filters( 'woocommerce_checkout_postcode_validation_notice', $postcode_validation_notice, $country, $data[ $key ] ), array( 'id' => $key ) );
 					}
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 					}
 				}
 
@@ -751,7 +751,7 @@ class WC_Checkout {
 
 					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
-						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
+						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 						continue;
 					}
 				}
@@ -771,14 +771,14 @@ class WC_Checkout {
 
 						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_values, true ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ) );
+							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ), array( 'id' => $key ) );
 						}
 					}
 				}
 
 				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ) );
+					$errors->add( 'required-field', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ), array( 'id' => $key ) );
 				}
 			}
 		}
@@ -1101,8 +1101,11 @@ class WC_Checkout {
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
 
-			foreach ( $errors->get_error_messages() as $message ) {
-				wc_add_notice( $message, 'error' );
+			foreach ( $errors->errors as $code => $messages ) {
+				$data = $errors->get_error_data( $code );
+				foreach ( $messages as $message ) {
+					wc_add_notice( $message, 'error', $data );
+				}
 			}
 
 			if ( empty( $posted_data['woocommerce_checkout_update_totals'] ) && 0 === wc_notice_count( 'error' ) ) {
