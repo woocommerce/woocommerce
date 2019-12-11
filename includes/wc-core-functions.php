@@ -2144,6 +2144,28 @@ function wc_is_active_theme( $theme ) {
 }
 
 /**
+ * Is the user using a default WP theme?
+ *
+ * @return boolean
+ */
+function wc_is_wp_default_theme_active() {
+	return wc_is_active_theme(
+		array(
+			'twentytwenty',
+			'twentynineteen',
+			'twentyseventeen',
+			'twentysixteen',
+			'twentyfifteen',
+			'twentyfourteen',
+			'twentythirteen',
+			'twentyeleven',
+			'twentytwelve',
+			'twentyten',
+		)
+	);
+}
+
+/**
  * Cleans up session data - cron callback.
  *
  * @since 3.3.0
