@@ -98,8 +98,10 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToCheckout();
 		await CustomerFlow.productIsInCheckout( simpleProductName, `4`, `39.96`, `39.96` );
 
-		await page.waitForSelector( '#ship-to-different-address-checkbox', { visible: true } );
-		await setCheckbox( '#ship-to-different-address-checkbox' );
+		// Select checkbox to ship to a different address
+		await page.evaluate( () => {
+			document.querySelector( '#ship-to-different-address-checkbox' ).click();
+		} );
 		await uiUnblocked();
 
 		await CustomerFlow.fillShippingDetails( config.get( 'addresses.customer.shipping' ) );
