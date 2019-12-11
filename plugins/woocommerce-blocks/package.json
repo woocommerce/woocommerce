@@ -10,7 +10,10 @@
 		"wordpress",
 		"blocks"
 	],
-	"sideEffects": ["*.css", "*.scss"],
+	"sideEffects": [
+		"*.css",
+		"*.scss"
+	],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
@@ -34,7 +37,7 @@
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
 		"test:watch": "npm run test -- --watch",
-		"size-check": "bundlesize",
+		"size-check": "bundlecop submit ./build",
 		"changelog": "node ./bin/changelog.js "
 	},
 	"devDependencies": {
@@ -65,7 +68,7 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"babel-plugin-transform-runtime": "6.23.0",
 		"babel-preset-env": "1.7.0",
-		"bundlesize": "0.18.0",
+		"bundlecop": "^2.2.0",
 		"chalk": "3.0.0",
 		"classnames": "2.2.6",
 		"clean-webpack-plugin": "3.0.0",
