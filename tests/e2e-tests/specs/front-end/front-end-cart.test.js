@@ -16,7 +16,7 @@ describe( 'Cart page', () => {
 		await StoreOwnerFlow.logout();
 	} );
 
-	it( 'should displays no item in the cart', async () => {
+	it( 'should display no item in the cart', async () => {
 		await CustomerFlow.goToCart();
 		await expect( page ).toMatchElement( '.cart-empty', { text: 'Your cart is currently empty.' } );
 	} );
