@@ -11,6 +11,11 @@ cache:
     - $HOME/.npm
     - $HOME/.composer/cache
 
+branches:
+  only:
+    - master
+    - /release\/.*/
+
 before_install:
   - timedatectl
   - nvm install
