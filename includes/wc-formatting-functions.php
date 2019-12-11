@@ -292,7 +292,9 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	// Remove locale from string.
 	if ( ! is_float( $number ) ) {
 		$number = str_replace( $decimals, '.', $number );
-		$number = preg_replace( '/[^0-9\.,-]/', '', wc_clean( $number ) );
+
+		// Convert multiple dots to just one.
+		$number = preg_replace( '/\.(?![^.]+$)|[^0-9.-]/', '', wc_clean( $number ) );
 	}
 
 	if ( false !== $dp ) {
@@ -735,7 +737,8 @@ function wc_timezone_string() {
 	// Last try, guess timezone string manually.
 	foreach ( timezone_abbreviations_list() as $abbr ) {
 		foreach ( $abbr as $city ) {
-			if ( (bool) date( 'I' ) === (bool) $city['dst'] && $city['timezone_id'] && intval( $city['offset'] ) === $utc_offset ) {
+			// WordPress restrict the use of date(), since it's affected by timezone settings, but in this case is just what we need to guess the correct timezone.
+			if ( (bool) date( 'I' ) === (bool) $city['dst'] && $city['timezone_id'] && intval( $city['offset'] ) === $utc_offset ) { // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				return $city['timezone_id'];
 			}
 		}

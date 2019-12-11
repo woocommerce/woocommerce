@@ -6818,50 +6818,47 @@ table.bar_chart {
 /**
   * Select2 colors for built-in admin color themes.
   */
-.branch-5-3 {
+.admin-color {
+	$wp_admin_colors: (
+		blue: #096484,
+		coffee: #c7a589,
+		ectoplasm: #a3b745,
+		midnight: #e14d43,
+		ocean: #9ebaa0,
+		sunrise: #dd823b,
+		light: #04a4cc
+	);
 
-	.admin-color {
-		$wp_admin_colors: (
-			blue: #096484,
-			coffee: #c7a589,
-			ectoplasm: #a3b745,
-			midnight: #e14d43,
-			ocean: #9ebaa0,
-			sunrise: #dd823b,
-			light: #04a4cc
-		);
+	@each $name, $color in $wp_admin_colors {
 
-		@each $name, $color in $wp_admin_colors {
+		&-#{$name}.branch-5-3 {
 
-			&-#{$name} {
+			.select2-dropdown {
+				border-color: $color;
+			}
 
-				.select2-dropdown {
-					border-color: $color;
-				}
+			.select2-dropdown--below {
+				box-shadow: 0 0 0 1px $color, 0 2px 1px rgba(0, 0, 0, 0.1);
+			}
 
-				.select2-dropdown--below {
-					box-shadow: 0 0 0 1px $color, 0 2px 1px rgba(0, 0, 0, 0.1);
-				}
+			.select2-dropdown--above {
+				box-shadow: 0 0 0 1px $color, 0 -2px 1px rgba(0, 0, 0, 0.1);
+			}
 
-				.select2-dropdown--above {
-					box-shadow: 0 0 0 1px $color, 0 -2px 1px rgba(0, 0, 0, 0.1);
-				}
+			.select2-selection--single .select2-selection__rendered:hover {
+				color: $color;
+			}
 
-				.select2-selection--single .select2-selection__rendered:hover {
-					color: $color;
-				}
+			.select2-container.select2-container--focus .select2-selection--single,
+			.select2-container.select2-container--open .select2-selection--single,
+			.select2-container.select2-container--open .select2-selection--multiple {
+				border-color: $color;
+				box-shadow: 0 0 0 1px $color;
+			}
 
-				.select2-container.select2-container--focus .select2-selection--single,
-				.select2-container.select2-container--open .select2-selection--single,
-				.select2-container.select2-container--open .select2-selection--multiple {
-					border-color: $color;
-					box-shadow: 0 0 0 1px $color;
-				}
-
-				.select2-container--default .select2-results__option--highlighted[aria-selected],
-				.select2-container--default .select2-results__option--highlighted[data-selected] {
-					background-color: $color;
-				}
+			.select2-container--default .select2-results__option--highlighted[aria-selected],
+			.select2-container--default .select2-results__option--highlighted[data-selected] {
+				background-color: $color;
 			}
 		}
 	}

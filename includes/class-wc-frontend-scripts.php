@@ -307,13 +307,13 @@ class WC_Frontend_Scripts {
 	private static function register_styles() {
 		$register_styles = array(
 			'photoswipe'                  => array(
-				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.css' ),
+				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.min.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
 				'has_rtl' => false,
 			),
 			'photoswipe-default-skin'     => array(
-				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.css' ),
+				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.min.css' ),
 				'deps'    => array( 'photoswipe' ),
 				'version' => WC_VERSION,
 				'has_rtl' => false,
