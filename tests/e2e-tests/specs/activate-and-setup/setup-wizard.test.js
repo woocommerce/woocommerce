@@ -148,20 +148,23 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 			// Fill out recommended section details
 			// Turn off Storefront Theme option
-			await page.evaluate( () => {
-				document.querySelector('#wc_recommended_storefront_theme').click();
-			} );
+			await page.waitForSelector( '#wc_recommended_storefront_theme', { visible: true } );
+			await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
 
 			// Turn off Automated Taxes option
+			await page.waitForSelector( '#wc_recommended_automated_taxes', { visible: true } );
 			await page.$eval( '#wc_recommended_automated_taxes', elem => elem.click() );
 
 			// Turn off WooCommerce Admin option
+			await page.waitForSelector( '#wc_recommended_wc_admin', { visible: true } );
 			await page.$eval( '#wc_recommended_wc_admin', elem => elem.click() );
 
 			// Turn off Mailchimp option
+			await page.waitForSelector( '#wc_recommended_mailchimp', { visible: true } );
 			await page.$eval( '#wc_recommended_mailchimp', elem => elem.click() );
 
 			// Turn off Facebook option
+			await page.waitForSelector( '#wc_recommended_facebook', { visible: true } );
 			await page.$eval( '#wc_recommended_facebook', elem => elem.click() );
 
 			// Click on "Continue" button to move to the next step
