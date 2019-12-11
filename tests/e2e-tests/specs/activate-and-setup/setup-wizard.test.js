@@ -148,7 +148,9 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 
 			// Fill out recommended section details
 			// Turn off Storefront Theme option
-			await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
+			await page.evaluate( () => {
+				document.querySelector('#wc_recommended_storefront_theme').click();
+			} );
 
 			// Turn off Automated Taxes option
 			await page.$eval( '#wc_recommended_automated_taxes', elem => elem.click() );

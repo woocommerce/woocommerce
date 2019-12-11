@@ -70,14 +70,14 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( simpleProductName, 1, 9.99, 9.99 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, `1`, `9.99`, `9.99` );
 	} );
 
 	it( 'allows customer to choose available payment methods', async () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( simpleProductName, 2, 19.98, 19.98 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, `2`, `19.98`, `19.98` );
 
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'PayPal' } );
 		await expect( page ).toClick( '.wc_payment_method label', { text: 'Direct bank transfer' } );
@@ -88,7 +88,7 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( simpleProductName, 3, 29.97, 29.97 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, `3`, `29.97`, `29.97` );
 		await CustomerFlow.fillBillingDetails( config.get( 'addresses.customer.billing' ) );
 	} );
 
@@ -96,9 +96,11 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( simpleProductName, 4, 39.96, 39.96 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, `4`, `39.96`, `39.96` );
 
-		await expect( page ).toClick( '#ship-to-different-address-checkbox' );
+		await page.evaluate( () => {
+			document.querySelector('#ship-to-different-address-checkbox').click();
+		} );
 		await uiUnblocked();
 
 		await CustomerFlow.fillShippingDetails( config.get( 'addresses.customer.shipping' ) );
@@ -108,7 +110,7 @@ describe( 'Checkout page', () => {
 		await CustomerFlow.goToShop();
 		await CustomerFlow.addToCartFromShopPage( simpleProductName );
 		await CustomerFlow.goToCheckout();
-		await CustomerFlow.productIsInCheckout( simpleProductName, 5, 49.95, 49.95 );
+		await CustomerFlow.productIsInCheckout( simpleProductName, `5`, `49.95`, `49.95` );
 		await CustomerFlow.fillBillingDetails( config.get( 'addresses.customer.billing' ) );
 
 		await uiUnblocked();
