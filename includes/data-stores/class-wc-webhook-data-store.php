@@ -184,6 +184,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		); // WPCS: cache ok, DB call ok.
 
 		$this->delete_transients( 'all' );
+		wp_cache_delete( $webhook->get_id(), 'webhooks' );
 		WC_Cache_Helper::invalidate_cache_group( 'webhooks' );
 		do_action( 'woocommerce_webhook_deleted', $webhook->get_id(), $webhook );
 	}
