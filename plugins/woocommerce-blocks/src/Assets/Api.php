@@ -99,12 +99,14 @@ class Api {
 	 * Queues a block script.
 	 *
 	 * @since 2.5.0
+	 * @since $VID:$ Changed $name to $script_name and added $handle argument.
 	 *
-	 * @param string $name Name of the script used to identify the file inside build folder.
+	 * @param string $script_name Name of the script used to identify the file inside build folder .
+	 * @param string $handle      Provided if the handle should be different than the script name . `wc-` prefix automatically added .
 	 */
-	public function register_block_script( $name ) {
-		$src    = 'build/' . $name . '.js';
-		$handle = 'wc-' . $name;
+	public function register_block_script( $script_name, $handle = '' ) {
+		$src    = 'build/' . $script_name . '.js';
+		$handle = '' !== $handle ? 'wc-' . $handle : 'wc-' . $script_name;
 		$this->register_script( $handle, $src );
 		wp_enqueue_script( $handle );
 	}
