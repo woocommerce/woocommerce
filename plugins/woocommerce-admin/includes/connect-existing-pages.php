@@ -5,318 +5,113 @@
  * @package Woocommerce Admin
  */
 
-$admin_page_base    = 'admin.php';
-$posttype_list_base = 'edit.php';
+use Automattic\WooCommerce\Admin\PageController;
 
-// WooCommerce > Settings > General (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-general',
-		'title'     => array(
-			__( 'Settings', 'woocommerce-admin' ),
-			__( 'General', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg( 'page', 'wc-settings', $admin_page_base ),
-	)
-);
+/**
+ * Returns core WC pages to connect to WC-Admin.
+ *
+ * @return array
+ */
+function wc_admin_get_core_pages_to_connect() {
+	$all_reports = WC_Admin_Reports::get_reports();
+	$report_tabs = array();
 
-// WooCommerce > Settings > Products > General (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-products',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-products',
-		'title'     => array(
-			__( 'Products', 'woocommerce-admin' ),
-			__( 'General', 'woocommerce-admin' ),
+	foreach ( $all_reports as $report_id => $report_data ) {
+		$report_tabs[ $report_id ] = $report_data['title'];
+	}
+
+	return array(
+		'wc-addons'   => array(
+			'title' => __( 'Extensions', 'woocommerce-admin' ),
+			'tabs'  => array(),
 		),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'products',
+		'wc-reports'  => array(
+			'title' => __( 'Reports', 'woocommerce-admin' ),
+			'tabs'  => $report_tabs,
+		),
+		'wc-settings' => array(
+			'title' => __( 'Settings', 'woocommerce-admin' ),
+			'tabs'  => apply_filters( 'woocommerce_settings_tabs_array', array() ),
+		),
+		'wc-status'   => array(
+			'title' => __( 'Status', 'woocommerce-admin' ),
+			'tabs'  => apply_filters(
+				'woocommerce_admin_status_tabs',
+				array(
+					'status' => __( 'System status', 'woocommerce-admin' ),
+					'tools'  => __( 'Tools', 'woocommerce-admin' ),
+					'logs'   => __( 'Logs', 'woocommerce-admin' ),
+				)
 			),
-			$admin_page_base
 		),
-	)
-);
-
-// WooCommerce > Settings > Products > Inventory.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-products-inventory',
-		'parent'    => 'woocommerce-settings-products',
-		'screen_id' => 'woocommerce_page_wc-settings-products-inventory',
-		'title'     => __( 'Inventory', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Products > Downloadable products.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-products-downloadable',
-		'parent'    => 'woocommerce-settings-products',
-		'screen_id' => 'woocommerce_page_wc-settings-products-downloadable',
-		'title'     => __( 'Downloadable products', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Tax
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-tax',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-tax',
-		'title'     => array(
-			__( 'Tax', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'tax',
-			),
-			$admin_page_base
-		),
-	)
-);
-
-// WooCommerce > Settings > Shipping > Shipping zones (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-shipping',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-shipping',
-		'title'     => array(
-			__( 'Shipping', 'woocommerce-admin' ),
-			__( 'Shipping zones', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'shipping',
-			),
-			$admin_page_base
-		),
-	)
-);
-
-// WooCommerce > Settings > Shipping > Shipping zones > Edit zone.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-edit-shipping-zone',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-shipping-edit_zone',
-		'title'     => array(
-			__( 'Shipping zones', 'woocommerce-admin' ),
-			__( 'Edit zone', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'shipping',
-			),
-			$admin_page_base
-		),
-	)
-);
-
-// WooCommerce > Settings > Shipping > Shipping options.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-shipping-options',
-		'parent'    => 'woocommerce-settings-shipping',
-		'screen_id' => 'woocommerce_page_wc-settings-shipping-options',
-		'title'     => __( 'Shipping options', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Shipping > Shipping classes.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-shipping-classes',
-		'parent'    => 'woocommerce-settings-shipping',
-		'screen_id' => 'woocommerce_page_wc-settings-shipping-classes',
-		'title'     => __( 'Shipping classes', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Payments.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-payments',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-checkout',
-		'title'     => __( 'Payments', 'woocommerce-admin' ),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'checkout',
-			),
-			$admin_page_base
-		),
-	)
-);
-
-// WooCommerce > Settings > Payments > Direct bank transfer.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-payments-bacs',
-		'parent'    => 'woocommerce-settings-payments',
-		'screen_id' => 'woocommerce_page_wc-settings-checkout-bacs',
-		'title'     => __( 'Direct bank transfer', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Payments > Check payments.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-payments-cheque',
-		'parent'    => 'woocommerce-settings-payments',
-		'screen_id' => 'woocommerce_page_wc-settings-checkout-cheque',
-		'title'     => __( 'Check payments', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Payments > Cash on delivery.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-payments-cod',
-		'parent'    => 'woocommerce-settings-payments',
-		'screen_id' => 'woocommerce_page_wc-settings-checkout-cod',
-		'title'     => __( 'Cash on delivery', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Payments > PayPal.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-payments-paypal',
-		'parent'    => 'woocommerce-settings-payments',
-		'screen_id' => 'woocommerce_page_wc-settings-checkout-paypal',
-		'title'     => __( 'PayPal', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Accounts & Privacy.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-accounts-privacy',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-account',
-		'title'     => __( 'Accounts & Privacy', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Settings > Emails.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-email',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-email',
-		'title'     => __( 'Emails', 'woocommerce-admin' ),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'email',
-			),
-			$admin_page_base
-		),
-	)
-);
-
-// WooCommerce > Settings > Emails > Edit email (all email editing).
-$wc_emails    = WC_Emails::instance();
-$wc_email_ids = array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) );
-
-foreach ( $wc_email_ids as $email_id ) {
-	wc_admin_connect_page(
-		array(
-			'id'        => 'woocommerce-settings-email-' . $email_id,
-			'parent'    => 'woocommerce-settings-email',
-			'screen_id' => 'woocommerce_page_wc-settings-email-' . $email_id,
-			'title'     => __( 'Edit email', 'woocommerce-admin' ),
-		)
 	);
 }
 
-// WooCommerce > Settings > Integration
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-integration',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-integration',
-		'title'     => array(
-			__( 'Integration', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'integration',
-			),
-			$admin_page_base
-		),
-	)
-);
+/**
+ * Filter breadcrumbs for core pages that aren't explicitly connected.
+ *
+ * @param array $breadcrumbs Breadcrumb pieces.
+ * @return array Filtered breadcrumb pieces.
+ */
+function wc_admin_filter_core_page_breadcrumbs( $breadcrumbs ) {
+	$screen_id        = PageController::get_instance()->get_current_screen_id();
+	$pages_to_connect = wc_admin_get_core_pages_to_connect();
 
-// WooCommerce > Settings > Advanced > Page setup (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-advanced',
-		'parent'    => 'woocommerce-settings',
-		'screen_id' => 'woocommerce_page_wc-settings-advanced',
-		'title'     => array(
-			__( 'Advanced', 'woocommerce-admin' ),
-			__( 'Page setup', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg(
-			array(
-				'page' => 'wc-settings',
-				'tab'  => 'advanced',
-			),
-			$admin_page_base
-		),
-	)
-);
+	foreach ( $pages_to_connect as $page_id => $page_data ) {
+		if ( preg_match( "/^woocommerce_page_{$page_id}\-/", $screen_id ) ) {
+			if ( empty( $page_data['tabs'] ) ) {
+				$new_breadcrumbs = array( $page_data['title'] );
+			} else {
+				$new_breadcrumbs = array(
+					array(
+						add_query_arg( 'page', $page_id, 'admin.php' ),
+						$page_data['title'],
+					),
+				);
 
-// WooCommerce > Settings > Advanced > REST API.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-advanced-rest-api',
-		'parent'    => 'woocommerce-settings-advanced',
-		'screen_id' => 'woocommerce_page_wc-settings-advanced-keys',
-		'title'     => __( 'REST API', 'woocommerce-admin' ),
-	)
-);
+				if ( isset( $_GET['tab'] ) ) {
+					$current_tab = wc_clean( wp_unslash( $_GET['tab'] ) );
+				} else {
+					$current_tab = key( $page_data['tabs'] );
+				}
 
-// WooCommerce > Settings > Advanced > Webhooks.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-advanced-webhooks',
-		'parent'    => 'woocommerce-settings-advanced',
-		'screen_id' => 'woocommerce_page_wc-settings-advanced-webhooks',
-		'title'     => __( 'Webhooks', 'woocommerce-admin' ),
-	)
-);
+				$new_breadcrumbs[] = $page_data['tabs'][ $current_tab ];
+			}
 
-// WooCommerce > Settings > Advanced > Legacy API.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-advanced-legacy-api',
-		'parent'    => 'woocommerce-settings-advanced',
-		'screen_id' => 'woocommerce_page_wc-settings-advanced-legacy_api',
-		'title'     => __( 'Legacy API', 'woocommerce-admin' ),
-	)
-);
+			return $new_breadcrumbs;
+		}
+	}
 
-// WooCommerce > Settings > Advanced > WooCommerce.com.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-settings-advanced-woocommerce-com',
-		'parent'    => 'woocommerce-settings-advanced',
-		'screen_id' => 'woocommerce_page_wc-settings-advanced-woocommerce_com',
-		'title'     => __( 'WooCommerce.com', 'woocommerce-admin' ),
-	)
-);
+	return $breadcrumbs;
+}
+
+/**
+ * Render the WC-Admin header bar on all WooCommerce core pages.
+ *
+ * @param bool $is_connected Whether the current page is connected.
+ * @param bool $current_page The current page, if connected.
+ * @return bool Whether to connect the page.
+ */
+function wc_admin_connect_core_pages( $is_connected, $current_page ) {
+	if ( false === $is_connected && false === $current_page ) {
+		$screen_id        = PageController::get_instance()->get_current_screen_id();
+		$pages_to_connect = wc_admin_get_core_pages_to_connect();
+
+		foreach ( $pages_to_connect as $page_id => $page_data ) {
+			if ( preg_match( "/^woocommerce_page_{$page_id}\-/", $screen_id ) ) {
+				add_filter( 'woocommerce_navigation_get_breadcrumbs', 'wc_admin_filter_core_page_breadcrumbs' );
+
+				return true;
+			}
+		}
+	}
+
+	return $is_connected;
+}
+
+add_filter( 'woocommerce_navigation_is_connected_page', 'wc_admin_connect_core_pages', 10, 2 );
+
+$posttype_list_base = 'edit.php';
 
 // WooCommerce > Orders.
 wc_admin_connect_page(
@@ -375,115 +170,6 @@ wc_admin_connect_page(
 		'parent'    => 'woocommerce-coupons',
 		'screen_id' => 'shop_coupon',
 		'title'     => __( 'Edit Coupon', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Reports > Orders (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-reports',
-		'screen_id' => 'woocommerce_page_wc-reports-orders',
-		'title'     => array(
-			__( 'Reports', 'woocommerce-admin' ),
-			__( 'Orders', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg( 'page', 'wc-reports', $admin_page_base ),
-	)
-);
-
-// WooCommerce > Reports > Customers.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-reports-customers',
-		'parent'    => 'woocommerce-reports',
-		'screen_id' => 'woocommerce_page_wc-reports-customers',
-		'title'     => __( 'Customers', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Reports > Stock.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-reports-stock',
-		'parent'    => 'woocommerce-reports',
-		'screen_id' => 'woocommerce_page_wc-reports-stock',
-		'title'     => __( 'Stock', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Reports > Taxes.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-reports-taxes',
-		'parent'    => 'woocommerce-reports',
-		'screen_id' => 'woocommerce_page_wc-reports-taxes',
-		'title'     => __( 'Taxes', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Status > System status (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-status',
-		'screen_id' => 'woocommerce_page_wc-status-status',
-		'title'     => array(
-			__( 'Status', 'woocommerce-admin' ),
-			__( 'System status', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg( 'page', 'wc-status', $admin_page_base ),
-	)
-);
-
-// WooCommerce > Status > Tools.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-status-tools',
-		'parent'    => 'woocommerce-status',
-		'screen_id' => 'woocommerce_page_wc-status-tools',
-		'title'     => __( 'Tools', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Status > Logs.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-status-logs',
-		'parent'    => 'woocommerce-status',
-		'screen_id' => 'woocommerce_page_wc-status-tools',
-		'title'     => __( 'Tools', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Status > Scheduled Actions.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-status-action-scheduler',
-		'parent'    => 'woocommerce-status',
-		'screen_id' => 'woocommerce_page_wc-status-action-scheduler',
-		'title'     => __( 'Scheduled Actions', 'woocommerce-admin' ),
-	)
-);
-
-// WooCommerce > Extensions > Browse Extensions (default tab).
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-addons',
-		'screen_id' => 'woocommerce_page_wc-addons-browse-extensions',
-		'title'     => array(
-			__( 'Extensions', 'woocommerce-admin' ),
-			__( 'Browse Extensions', 'woocommerce-admin' ),
-		),
-		'path'      => add_query_arg( 'page', 'wc-addons', $admin_page_base ),
-	)
-);
-
-// WooCommerce > Extensions > WooCommerce.com Subscriptions.
-wc_admin_connect_page(
-	array(
-		'id'        => 'woocommerce-addons-subscriptions',
-		'parent'    => 'woocommerce-addons',
-		'screen_id' => 'woocommerce_page_wc-addons-browse-extensions-helper',
-		'title'     => __( 'WooCommerce.com Subscriptions', 'woocommerce-admin' ),
 	)
 );
 
