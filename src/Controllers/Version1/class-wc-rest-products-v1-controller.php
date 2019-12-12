@@ -2146,7 +2146,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'images' => array(
 					'description' => __( 'List of images.', 'woocommerce-rest-api' ),
-					'type'        => 'object',
+					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
