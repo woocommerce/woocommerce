@@ -79,8 +79,9 @@ class CartItems extends TestCase {
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( 2, $data['quantity'] );
-		$this->assertEquals( '10.00', $data['price'] );
-		$this->assertEquals( '20.00', $data['line_price'] );
+		$this->assertEquals( '10.00', $data['product_price'] );
+		$this->assertEquals( '20.00', $data['line_subtotal'] );
+		$this->assertEquals( '20.00', $data['line_total'] );
 
 		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/items/XXX815416f775098fe977004015c6193' );
 		$response = $this->server->dispatch( $request );
@@ -207,8 +208,9 @@ class CartItems extends TestCase {
 		$this->assertArrayHasKey( 'sku', $schema['properties'] );
 		$this->assertArrayHasKey( 'permalink', $schema['properties'] );
 		$this->assertArrayHasKey( 'images', $schema['properties'] );
-		$this->assertArrayHasKey( 'price', $schema['properties'] );
-		$this->assertArrayHasKey( 'line_price', $schema['properties'] );
+		$this->assertArrayHasKey( 'product_price', $schema['properties'] );
+		$this->assertArrayHasKey( 'line_subtotal', $schema['properties'] );
+		$this->assertArrayHasKey( 'line_total', $schema['properties'] );
 		$this->assertArrayHasKey( 'variation', $schema['properties'] );
 	}
 
@@ -227,8 +229,9 @@ class CartItems extends TestCase {
 		$this->assertArrayHasKey( 'sku', $response->get_data() );
 		$this->assertArrayHasKey( 'permalink', $response->get_data() );
 		$this->assertArrayHasKey( 'images', $response->get_data() );
-		$this->assertArrayHasKey( 'price', $response->get_data() );
-		$this->assertArrayHasKey( 'line_price', $response->get_data() );
+		$this->assertArrayHasKey( 'product_price', $response->get_data() );
+		$this->assertArrayHasKey( 'line_subtotal', $response->get_data() );
+		$this->assertArrayHasKey( 'line_total', $response->get_data() );
 		$this->assertArrayHasKey( 'variation', $response->get_data() );
 	}
 }
