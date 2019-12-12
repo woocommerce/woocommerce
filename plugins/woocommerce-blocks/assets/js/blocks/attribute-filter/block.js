@@ -19,7 +19,7 @@ import {
 } from '@wordpress/element';
 import CheckboxList from '@woocommerce/base-components/checkbox-list';
 import DropdownSelector from '@woocommerce/base-components/dropdown-selector';
-import SubmitButton from '@woocommerce/base-components/submit-button';
+import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
@@ -346,7 +346,7 @@ const AttributeFilterBlock = ( {
 					/>
 				) }
 				{ blockAttributes.showFilterButton && (
-					<SubmitButton
+					<FilterSubmitButton
 						className="wc-block-attribute-filter__button"
 						disabled={ isLoading || isDisabled }
 						onClick={ onSubmit }
