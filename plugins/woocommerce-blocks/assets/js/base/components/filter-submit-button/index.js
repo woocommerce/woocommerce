@@ -10,11 +10,14 @@ import classNames from 'classnames';
  */
 import './style.scss';
 
-const SubmitButton = ( { className, disabled, onClick } ) => {
+const FilterSubmitButton = ( { className, disabled, onClick } ) => {
 	return (
 		<button
 			type="submit"
-			className={ classNames( 'wc-block-submit-button', className ) }
+			className={ classNames(
+				'wc-block-filter-submit-button',
+				className
+			) }
 			disabled={ disabled }
 			onClick={ onClick }
 		>
@@ -24,7 +27,8 @@ const SubmitButton = ( { className, disabled, onClick } ) => {
 	);
 };
 
-SubmitButton.propTypes = {
+FilterSubmitButton.propTypes = {
+	className: PropTypes.string,
 	/**
 	 * Is the button disabled?
 	 */
@@ -35,8 +39,8 @@ SubmitButton.propTypes = {
 	onClick: PropTypes.func.isRequired,
 };
 
-SubmitButton.defaultProps = {
+FilterSubmitButton.defaultProps = {
 	disabled: false,
 };
 
-export default SubmitButton;
+export default FilterSubmitButton;
