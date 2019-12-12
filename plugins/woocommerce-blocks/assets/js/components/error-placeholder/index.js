@@ -12,7 +12,7 @@ import { Button, Placeholder, Spinner } from '@wordpress/components';
  * Internal dependencies
  */
 import ErrorMessage from './error-message.js';
-import './style.scss';
+import './editor.scss';
 
 const ErrorPlaceholder = ( { className, error, isLoading, onRetry } ) => (
 	<Placeholder
