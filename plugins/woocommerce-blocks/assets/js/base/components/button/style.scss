@@ -1,0 +1,19 @@
+// Extra classes are added for specificity.
+.button.wc-block-button,
+.editor-styles-wrapper .button.wc-block-button {
+	background-color: #000;
+	color: #fff;
+	display: block;
+	font-weight: bold;
+	padding: $gap-small;
+	text-align: center;
+	text-decoration: none;
+	text-transform: none;
+
+	&:hover,
+	&:focus,
+	&:active {
+		background-color: $black;
+		color: #fff;
+	}
+}

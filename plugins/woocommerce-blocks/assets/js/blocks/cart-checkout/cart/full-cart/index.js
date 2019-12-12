@@ -1,18 +1,24 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { Placeholder } from '@wordpress/components';
+import CheckoutButton from './checkout-button';
+import './style.scss';
 
 /**
- * Component to handle edit mode for the Cart block when user has something in cart aka "full".
+ * Component that renders the Cart block when user has something in cart aka "full".
  */
 const Cart = () => {
 	return (
-		<Placeholder>
-			<span>
-				Cart block <b>full state</b> coming soon…
-			</span>
-		</Placeholder>
+		<div className="wc-block-cart">
+			<div className="wc-block-cart__main">
+				<span>
+					Cart block <b>full state</b> coming soon…
+				</span>
+			</div>
+			<div className="wc-block-cart__sidebar">
+				<CheckoutButton />
+			</div>
+		</div>
 	);
 };
 
