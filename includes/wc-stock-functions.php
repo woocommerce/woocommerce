@@ -309,7 +309,7 @@ function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 	 * @since 3.9.0
 	 * @param bool $enabled Default to true.
 	 */
-	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
+	if ( apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 		/**
 		 * DOES NOT SUPPORT `exclude_order_id` param, which was primarily being used to exclude the current order!
 		 * While creating an order during checkout flow, this logic relies on the fact that order is not yet saved and therefore will be excluded.
