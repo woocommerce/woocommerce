@@ -8,7 +8,7 @@
 /**
  * Class WC_Tests_Order.
  */
-class WC_Tests_Order extends WC_Unit_Test_Case {
+class WC_Tests_Orders extends WC_Unit_Test_Case {
 
 	/**
 	 * Test for total when round at subtotal is enabled.
