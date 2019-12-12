@@ -117,6 +117,7 @@ class Assets {
 				'hasTags'            => $tag_count > 0,
 				'homeUrl'            => esc_url( home_url( '/' ) ),
 				'shopUrl'            => get_permalink( wc_get_page_id( 'shop' ) ),
+				'checkoutUrl'        => get_permalink( wc_get_page_id( 'checkout' ) ),
 				'showAvatars'        => '1' === get_option( 'show_avatars' ),
 				'enableReviewRating' => 'yes' === get_option( 'woocommerce_enable_review_rating' ),
 				'productCount'       => array_sum( (array) $product_counts ),
