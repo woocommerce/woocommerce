@@ -81,16 +81,21 @@ const PriceSlider = ( {
 			};
 		}
 
+		// Normalize to whatever is the closest step (because range input will
+		// only jump to the closest step in the range).
+		const min = Math.round( minPrice / step ) * step;
+		const max = Math.round( maxPrice / step ) * step;
+
 		const low =
 			Math.round(
 				100 *
-					( ( minPrice - minConstraint ) /
+					( ( min - minConstraint ) /
 						( maxConstraint - minConstraint ) )
 			) - 0.5;
 		const high =
 			Math.round(
 				100 *
-					( ( maxPrice - minConstraint ) /
+					( ( max - minConstraint ) /
 						( maxConstraint - minConstraint ) )
 			) + 0.5;
 
@@ -104,6 +109,7 @@ const PriceSlider = ( {
 		minConstraint,
 		maxConstraint,
 		hasValidConstraints,
+		step,
 	] );
 
 	/**
