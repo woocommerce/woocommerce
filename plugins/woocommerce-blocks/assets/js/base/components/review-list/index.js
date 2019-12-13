@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import {
-	ENABLE_REVIEW_RATING,
+	REVIEW_RATINGS_ENABLED,
 	SHOW_AVATARS,
 } from '@woocommerce/block-settings';
 import ReviewListItem from '@woocommerce/base-components/review-list-item';
@@ -18,7 +18,7 @@ const ReviewList = ( { attributes, reviews } ) => {
 		( SHOW_AVATARS || attributes.imageType === 'product' ) &&
 		attributes.showReviewImage;
 	const showReviewRating =
-		ENABLE_REVIEW_RATING && attributes.showReviewRating;
+		REVIEW_RATINGS_ENABLED && attributes.showReviewRating;
 	const attrs = {
 		...attributes,
 		showReviewImage,
