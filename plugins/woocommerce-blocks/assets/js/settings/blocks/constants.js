@@ -3,7 +3,10 @@
  */
 import { getSetting } from '@woocommerce/settings';
 
-export const ENABLE_REVIEW_RATING = getSetting( 'enableReviewRating', true );
+export const REVIEW_RATINGS_ENABLED = getSetting(
+	'reviewRatingsEnabled',
+	true
+);
 export const SHOW_AVATARS = getSetting( 'showAvatars', true );
 export const MAX_COLUMNS = getSetting( 'max_columns', 6 );
 export const MIN_COLUMNS = getSetting( 'min_columns', 1 );

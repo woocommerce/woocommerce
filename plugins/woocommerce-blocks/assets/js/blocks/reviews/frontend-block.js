@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { ENABLE_REVIEW_RATING } from '@woocommerce/block-settings';
+import { REVIEW_RATINGS_ENABLED } from '@woocommerce/block-settings';
 import LoadMoreButton from '@woocommerce/base-components/load-more-button';
 import ReviewSortSelect from '@woocommerce/base-components/review-sort-select';
 import ReviewList from '@woocommerce/base-components/review-list';
@@ -28,7 +28,7 @@ const FrontendBlock = ( {
 
 	return (
 		<Fragment>
-			{ attributes.showOrderby !== 'false' && ENABLE_REVIEW_RATING && (
+			{ attributes.showOrderby !== 'false' && REVIEW_RATINGS_ENABLED && (
 				<ReviewSortSelect
 					defaultValue={ orderby }
 					onChange={ onChangeOrderby }

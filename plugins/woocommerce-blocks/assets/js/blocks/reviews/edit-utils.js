@@ -14,7 +14,7 @@ import {
 import { BlockControls } from '@wordpress/editor';
 import { getAdminLink } from '@woocommerce/settings';
 import {
-	ENABLE_REVIEW_RATING,
+	REVIEW_RATINGS_ENABLED,
 	SHOW_AVATARS,
 } from '@woocommerce/block-settings';
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
@@ -46,7 +46,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					} )
 				}
 			/>
-			{ attributes.showReviewRating && ! ENABLE_REVIEW_RATING && (
+			{ attributes.showReviewRating && ! REVIEW_RATINGS_ENABLED && (
 				<Notice
 					className="wc-block-reviews__notice"
 					isDismissible={ false }
