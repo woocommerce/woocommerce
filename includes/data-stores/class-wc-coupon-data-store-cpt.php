@@ -513,8 +513,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		);
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query( $coupon->get_id() );
+		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
 
-		$coupon_usage_key = '_coupon_held_' . ( time() + $held_time ) . '_' . wp_generate_password( 6, false );
+		$coupon_usage_key = '_coupon_held_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
 
 		$insert_statement = $wpdb->prepare(
 			"
@@ -607,8 +608,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		); // WPCS: unprepared SQL ok.
 
 		$query_for_tentative_usages = $this->get_tentative_usage_query_for_user( $coupon->get_id(), $user_aliases );
+		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM DUAL' );
 
-		$coupon_used_by_meta_key    = '_maybe_used_by_' . ( time() + $held_time ) . '_' . wp_generate_password( 6, false );
+		$coupon_used_by_meta_key    = '_maybe_used_by_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
 		$insert_statement           = $wpdb->prepare(
 			"
 			INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
