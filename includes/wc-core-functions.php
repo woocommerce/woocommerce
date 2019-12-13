@@ -2144,7 +2144,7 @@ function wc_is_active_theme( $theme ) {
 }
 
 /**
- * Is the user using a default WP theme?
+ * Is the site using a default WP theme?
  *
  * @return boolean
  */
