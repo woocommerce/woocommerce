@@ -10,17 +10,23 @@
  */
 class WC_Tests_Checkout extends WC_Unit_Test_Case {
 
+	/**
+	 * TearDown for tests.
+	 */
 	public function tearDown() {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 	}
 
+	/**
+	 * Setup for tests.
+	 */
 	public function setUp() {
 		parent::setUp();
 		WC()->cart->empty_cart();
 	}
 
-	/*
+	/**
 	 * Test if order can be created when a coupon with usage limit is applied.
 	 *
 	 * @throws Exception When unable to create order.
