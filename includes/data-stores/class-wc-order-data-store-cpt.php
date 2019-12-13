@@ -622,7 +622,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function get_coupon_held_keys( $order, $coupon_id = null ) {
 		$held_keys = $order->get_meta( '_coupon_held_keys' );
 		if ( $coupon_id ) {
-			return $held_keys[ $coupon_id ];
+			return $held_keys[ $coupon_id ] ?? null;
 		}
 		return $held_keys;
 	}
@@ -637,8 +637,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_coupon_held_keys_for_users( $order, $coupon_id = null ) {
 		$held_keys_for_user = $order->get_meta( '_coupon_held_keys_for_users' );
-		if ( $coupon_id && is_array( $held_keys_for_user ) ) {
-			return $held_keys_for_user[ $coupon_id ];
+		if ( $coupon_id ) {
+			return $held_keys_for_user[ $coupon_id ] ?? null;
 		}
 		return $held_keys_for_user;
 	}
