@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { IconButton } from '@wordpress/components';
+import { CheckboxControl, IconButton } from '@wordpress/components';
 import { applyFilters } from '@wordpress/hooks';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -231,22 +231,16 @@ class ReportTable extends Component {
 		this.trackTableSearch();
 	}
 
-	selectAllRows( event ) {
+	selectAllRows( checked ) {
 		const { ids } = this.props;
-		if ( event.target.checked ) {
-			this.setState( {
-				selectedRows: ids,
-			} );
-		} else {
-			this.setState( {
-				selectedRows: [],
-			} );
-		}
+		this.setState( {
+			selectedRows: checked ? ids : [],
+		} );
 	}
 
-	selectRow( i, event ) {
+	selectRow( i, checked ) {
 		const { ids } = this.props;
-		if ( event.target.checked ) {
+		if ( checked ) {
 			this.setState( ( { selectedRows } ) => ( {
 				selectedRows: uniq( [ ids[ i ], ...selectedRows ] ),
 			} ) );
@@ -265,9 +259,7 @@ class ReportTable extends Component {
 		const { selectedRows } = this.state;
 		const isChecked = -1 !== selectedRows.indexOf( ids[ i ] );
 		return {
-			display: (
-				<input type="checkbox" onChange={ partial( this.selectRow, i ) } checked={ isChecked } />
-			),
+			display: <CheckboxControl onChange={ partial( this.selectRow, i ) } checked={ isChecked } />,
 			value: false,
 		};
 	}
@@ -281,8 +273,7 @@ class ReportTable extends Component {
 			cellClassName: 'is-checkbox-column',
 			key: 'compare',
 			label: (
-				<input
-					type="checkbox"
+				<CheckboxControl
 					onChange={ this.selectAllRows }
 					aria-label={ __( 'Select All' ) }
 					checked={ isAllChecked }

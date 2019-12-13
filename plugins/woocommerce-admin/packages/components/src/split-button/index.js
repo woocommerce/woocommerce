@@ -49,7 +49,7 @@ const SplitButton = ( {
 				renderToggle={ ( { isOpen, onToggle } ) => {
 					return (
 						<IconButton
-							icon={ isOpen ? 'arrow-up' : 'arrow-down' }
+							icon={ isOpen ? 'arrow-up-alt2' : 'arrow-down-alt2' }
 							className={ classnames( 'woocommerce-split-button__menu-toggle', {
 								'is-active': isOpen,
 							} ) }

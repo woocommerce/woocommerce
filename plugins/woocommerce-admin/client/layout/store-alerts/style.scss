@@ -39,6 +39,13 @@
 		min-height: 36px;
 		padding: 4px 16px;
 
+		@include breakpoint( '<782px' ) {
+			min-height: 36px;
+			font-size: 16px;
+			line-height: 1.625;
+			padding: 5px 16px;
+		}
+
 		+ .components-button {
 			margin-left: 10px;
 		}
@@ -105,7 +112,6 @@
 	display: inline-flex;
 	align-items: center;
 	border: 1px solid $button-border;
-	border-bottom: 2px solid $button-border;
 	border-radius: 4px;
 	background: $button;
 	margin-left: 16px;
@@ -130,6 +136,16 @@
 		.woocommerce-store-alerts__pagination-label {
 			text-align: center;
 		}
+	}
+
+	button:first-child {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	button:last-child {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
 	}
 }
 
@@ -195,9 +211,9 @@
 .woocommerce-store-alerts__snooze {
 	display: inline-flex;
 	margin-left: 10px;
-	min-height: 34px;
 
-	.woocommerce-dropdown-button__labels {
-		min-height: 34px;
+	.components-select-control__input {
+		vertical-align: initial;
+		min-height: 36px;
 	}
 }

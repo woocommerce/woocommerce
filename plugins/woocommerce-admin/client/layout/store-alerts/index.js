@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { IconButton, Button, Dashicon, Dropdown, NavigableMenu } from '@wordpress/components';
+import { IconButton, Button, Dashicon, SelectControl } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
@@ -14,7 +14,7 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { Card, DropdownButton } from '@woocommerce/components';
+import { Card } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -83,83 +83,81 @@ class StoreAlerts extends Component {
 		// TODO: should "next X" be the start, or exactly 1X from the current date?
 		const snoozeOptions = [
 			{
-				newDate: moment()
+				value: moment()
 					.add( 4, 'hours' )
-					.unix(),
+					.unix()
+					.toString(),
 				label: __( 'Later Today', 'woocommerce-admin' ),
 			},
 			{
-				newDate: moment()
+				value: moment()
 					.add( 1, 'day' )
 					.hour( 9 )
 					.minute( 0 )
 					.second( 0 )
 					.millisecond( 0 )
-					.unix(),
+					.unix()
+					.toString(),
 				label: __( 'Tomorrow', 'woocommerce-admin' ),
 			},
 			{
-				newDate: moment()
+				value: moment()
 					.add( 1, 'week' )
 					.hour( 9 )
 					.minute( 0 )
 					.second( 0 )
 					.millisecond( 0 )
-					.unix(),
+					.unix()
+					.toString(),
 				label: __( 'Next Week', 'woocommerce-admin' ),
 			},
 			{
-				newDate: moment()
+				value: moment()
 					.add( 1, 'month' )
 					.hour( 9 )
 					.minute( 0 )
 					.second( 0 )
 					.millisecond( 0 )
-					.unix(),
+					.unix()
+					.toString(),
 				label: __( 'Next Month', 'woocommerce-admin' ),
 			},
 		];
 
-		const setReminderDate = ( snoozeOption, onClose ) => {
-			return () => {
-				onClose();
-				updateNote( alert.id, { status: 'snoozed', date_reminder: snoozeOption.newDate } );
+		const setReminderDate = snoozeOption => {
+			updateNote( alert.id, { status: 'snoozed', date_reminder: snoozeOption.value } );
 
-				const eventProps = {
-					alert_name: alert.name,
-					alert_title: alert.title,
-					snooze_duration: snoozeOption.newDate,
-					snooze_label: snoozeOption.label,
-				};
-				recordEvent( 'store_alert_snooze', eventProps );
+			const eventProps = {
+				alert_name: alert.name,
+				alert_title: alert.title,
+				snooze_duration: snoozeOption.value,
+				snooze_label: snoozeOption.label,
 			};
+			recordEvent( 'store_alert_snooze', eventProps );
 		};
 
 		const snooze = alert.is_snoozable && (
-			<Dropdown
+			<SelectControl
 				className="woocommerce-store-alerts__snooze"
-				position="bottom"
-				expandOnMobile
-				renderToggle={ ( { isOpen, onToggle } ) => (
-					<DropdownButton
-						onClick={ onToggle }
-						isOpen={ isOpen }
-						labels={ [ __( 'Remind Me Later', 'woocommerce-admin' ) ] }
-					/>
-				) }
-				renderContent={ ( { onClose } ) => (
-					<NavigableMenu className="components-dropdown-menu__menu">
-						{ snoozeOptions.map( ( option, idx ) => (
-							<Button
-								className="components-dropdown-menu__menu-item"
-								key={ idx }
-								onClick={ setReminderDate( option, onClose ) }
-							>
-								{ option.label }
-							</Button>
-						) ) }
-					</NavigableMenu>
-				) }
+				options={ [
+					{
+						label: __( 'Remind Me Later', 'woocommerce-admin' ),
+						value: '0',
+					},
+					...snoozeOptions,
+				] }
+				onChange={ value => {
+					if ( '0' === value ) {
+						return;
+					}
+
+					const reminderOption = snoozeOptions.find( option => option.value === value );
+					const reminderDate = {
+						value,
+						label: reminderOption && reminderOption.label,
+					};
+					setReminderDate( reminderDate );
+				} }
 			/>
 		);
 

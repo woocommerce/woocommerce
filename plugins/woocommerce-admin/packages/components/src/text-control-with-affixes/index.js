@@ -6,6 +6,7 @@ import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { BaseControl } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
+import classnames from 'classnames';
 
 /**
  * This component is essentially a wrapper (really a reimplementation) around the
@@ -24,6 +25,7 @@ class TextControlWithAffixes extends Component {
 			prefix,
 			suffix,
 			type,
+			disabled,
 			...props
 		} = this.props;
 
@@ -40,9 +42,15 @@ class TextControlWithAffixes extends Component {
 			describedby.push( `${ id }__suffix` );
 		}
 
+		const affixesClasses = classnames( 'text-control-with-affixes', {
+			'text-control-with-prefix': prefix,
+			'text-control-with-suffix': suffix,
+			disabled,
+		} );
+
 		return (
 			<BaseControl label={ label } id={ id } help={ help } className={ className }>
-				<div className="text-control-with-affixes">
+				<div className={ affixesClasses }>
 					{ prefix && (
 						<span
 							id={ `${ id }__prefix` }
@@ -59,6 +67,7 @@ class TextControlWithAffixes extends Component {
 						value={ value }
 						onChange={ onChangeValue }
 						aria-describedby={ describedby.join( ' ' ) }
+						disabled={ disabled }
 						{ ...props }
 					/>
 
@@ -114,6 +123,10 @@ TextControlWithAffixes.propTypes = {
 	 * Markup to be appended at the end of the input.
 	 */
 	suffix: PropTypes.node,
+	/**
+	 * Whether or not the input is disabled.
+	 */
+	disabled: PropTypes.bool,
 };
 
 export default withInstanceId( TextControlWithAffixes );

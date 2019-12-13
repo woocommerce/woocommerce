@@ -25,7 +25,6 @@
 	display: inline-flex;
 	align-items: baseline;
 	border: 1px solid $button-border;
-	border-bottom: 2px solid $button-border;
 	border-radius: 4px;
 	background: $button;
 
@@ -41,7 +40,14 @@
 	}
 
 	button:first-child {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
 		border-right: 2px solid darken($button, 10%);
+	}
+
+	button:last-child {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
 	}
 
 	.woocommerce-pagination__link {
@@ -76,24 +82,26 @@
 		margin-top: $gap;
 		margin-left: 0;
 	}
+
 	.components-base-control {
 		margin-bottom: 0;
-	}
-	.components-base-control__field {
-		display: flex;
-		flex-direction: row;
-		align-items: baseline;
-		margin-bottom: 0;
-	}
 
-	.components-select-control__input {
-		width: 60px;
-		height: 34px;
-		box-shadow: none;
-	}
+		.components-base-control__field {
+			display: flex;
+			flex-direction: row;
+			align-items: baseline;
+			margin-bottom: 0;
+		}
 
-	.components-base-control__label {
-		margin-right: $spacing / 2;
+		.components-select-control__input {
+			width: 60px;
+			height: 34px;
+			box-shadow: none;
+		}
+
+		.components-base-control__label {
+			margin-right: $spacing / 2;
+		}
 	}
 }
 

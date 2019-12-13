@@ -11,21 +11,17 @@
 
 	&::after {
 		content: '';
+		background: transparent url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E) no-repeat right 0 top 55%;
 		position: absolute;
 		right: 14px;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 0;
-		height: 0;
-		border-style: solid;
-		border-width: 6px 6px 0 6px;
-		border-color: $core-grey-dark-500 transparent transparent transparent;
+		width: 32px;
+		height: 48px;
 		@include animate-transform;
 	}
 
 	&.is-open {
 		&::after {
-			transform: translateY(-50%) rotate(180deg);
+			transform: translateX(12px) translateY(2px) rotate(180deg);
 		}
 	}
 
@@ -35,8 +31,17 @@
 		background-color: $core-grey-light-100;
 	}
 
+	&.components-button:focus:not(:disabled) {
+		border-color: $studio-woocommerce-purple-60;
+		box-shadow: 0 0 2px rgba($studio-woocommerce-purple-60, 0.8);
+	}
+
 	&.is-multi-line .woocommerce-dropdown-button__labels {
 		flex-direction: column;
+	}
+
+	&:not(:focus):not(.is-open) {
+		border-color: $core-form-grey;
 	}
 }
 

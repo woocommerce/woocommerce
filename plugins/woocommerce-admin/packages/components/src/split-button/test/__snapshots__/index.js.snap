@@ -21,7 +21,7 @@ exports[`SplitButton it should render a simple split button 1`] = `
     >
       <svg
         aria-hidden="true"
-        className="dashicon dashicons-arrow-down"
+        className="dashicon dashicons-arrow-down-alt2"
         focusable="false"
         height={20}
         role="img"
@@ -30,7 +30,7 @@ exports[`SplitButton it should render a simple split button 1`] = `
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M15 8l-4.03 6L7 8h8z"
+          d="M5 6l5 5 5-5 2 1-7 7-7-7z"
         />
       </svg>
     </button>
@@ -61,7 +61,7 @@ exports[`SplitButton it should render a split button with Foo as main label 1`] 
     >
       <svg
         aria-hidden="true"
-        className="dashicon dashicons-arrow-down"
+        className="dashicon dashicons-arrow-down-alt2"
         focusable="false"
         height={20}
         role="img"
@@ -70,7 +70,7 @@ exports[`SplitButton it should render a split button with Foo as main label 1`] 
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M15 8l-4.03 6L7 8h8z"
+          d="M5 6l5 5 5-5 2 1-7 7-7-7z"
         />
       </svg>
     </button>
@@ -105,7 +105,7 @@ exports[`SplitButton it should render a split button with a menu label 1`] = `
     >
       <svg
         aria-hidden="true"
-        className="dashicon dashicons-arrow-down"
+        className="dashicon dashicons-arrow-down-alt2"
         focusable="false"
         height={20}
         role="img"
@@ -114,7 +114,7 @@ exports[`SplitButton it should render a split button with a menu label 1`] = `
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M15 8l-4.03 6L7 8h8z"
+          d="M5 6l5 5 5-5 2 1-7 7-7-7z"
         />
       </svg>
     </button>
@@ -143,7 +143,7 @@ exports[`SplitButton it should render a split button with isPrimary theme 1`] = 
     >
       <svg
         aria-hidden="true"
-        className="dashicon dashicons-arrow-down"
+        className="dashicon dashicons-arrow-down-alt2"
         focusable="false"
         height={20}
         role="img"
@@ -152,7 +152,7 @@ exports[`SplitButton it should render a split button with isPrimary theme 1`] = 
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M15 8l-4.03 6L7 8h8z"
+          d="M5 6l5 5 5-5 2 1-7 7-7-7z"
         />
       </svg>
     </button>
@@ -195,7 +195,7 @@ exports[`SplitButton it should render a split button with pencil as main button 
     >
       <svg
         aria-hidden="true"
-        className="dashicon dashicons-arrow-down"
+        className="dashicon dashicons-arrow-down-alt2"
         focusable="false"
         height={20}
         role="img"
@@ -204,7 +204,7 @@ exports[`SplitButton it should render a split button with pencil as main button 
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M15 8l-4.03 6L7 8h8z"
+          d="M5 6l5 5 5-5 2 1-7 7-7-7z"
         />
       </svg>
     </button>

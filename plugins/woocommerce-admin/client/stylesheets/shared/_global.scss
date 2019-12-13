@@ -101,8 +101,13 @@
 	input:focus,
 	select:focus,
 	button:focus {
+		color: $core-grey-dark-700;
 		border-color: $studio-woocommerce-purple-60;
 		box-shadow: 0 0 2px rgba($studio-woocommerce-purple-60, 0.8);
+	}
+
+	select:hover {
+		color: $core-grey-dark-700;
 	}
 
 	input[type='checkbox'] {
@@ -135,9 +140,11 @@
 
 	input[type='radio']:checked::before {
 		font-size: 18px;
-		margin-left: 4px;
-		margin-top: 4px;
 		background-color: $studio-white;
+	}
+
+	select.components-select-control__input {
+		max-width: 100%;
 	}
 }
 

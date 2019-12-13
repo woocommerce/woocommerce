@@ -138,6 +138,10 @@
 				display: flex;
 				align-items: center;
 			}
+
+			.components-base-control__field {
+				margin-bottom: 0;
+			}
 		}
 
 		@include breakpoint( '<782px' ) {

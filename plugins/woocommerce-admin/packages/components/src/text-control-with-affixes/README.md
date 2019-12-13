@@ -35,3 +35,4 @@ Name | Type | Default | Description
 `onChange` | Function | `null` | (required) A function that receives the value of the input
 `prefix` | ReactNode | `null` | Markup to be inserted at the beginning of the input
 `suffix` | ReactNode | `null` | Markup to be appended at the end of the input
+`disabled` | Boolean | `null` | Disables the field

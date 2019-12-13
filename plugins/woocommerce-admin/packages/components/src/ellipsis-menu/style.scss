@@ -48,6 +48,10 @@
 			outline: 2px solid transparent;
 			outline-offset: -2px;
 		}
+
+		.components-form-toggle {
+			margin-right: $gap-smaller;
+		}
 	}
 
 	.components-base-control__label,
