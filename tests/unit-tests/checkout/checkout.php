@@ -121,13 +121,13 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test if held coupon is released automatically after specified time.
+	 * NOTE:: Commenting out this test because its flaky.
 	 *
-	 * TODO: This test will take atleast 1s to run. Consider making this optional?
-	 * TODO: This test is flaky, please re-run if this fails at first.
+	 * Test if held coupon is released automatically after specified time.
 	 *
 	 * @throws Exception When unable to create order.
 	 */
+	/*
 	public function test_create_order_after_coupon_expired() {
 		$coupon_code = 'coupon4one';
 		$coupon_data_store = WC_Data_Store::load( 'coupon' );
@@ -165,6 +165,7 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_coupon_hold_minutes', array( $this, '__return_0_01' ) );
 
 	}
+	*/
 
 	/**
 	 * Helper function to return 0.01.
