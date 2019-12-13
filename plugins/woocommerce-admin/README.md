@@ -10,7 +10,7 @@ This is a feature plugin for a modern, javascript-driven WooCommerce Admin exper
 
 ## Prerequisites
 
-[WordPress 5.2 or greater](https://wordpress.org/download/) and [WooCommerce 3.6.0 or greater](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin.
+[WordPress 5.3 or greater](https://wordpress.org/download/) and [WooCommerce 3.6.0 or greater](https://wordpress.org/plugins/woocommerce/) should be installed prior to activating the WooCommerce Admin feature plugin.
 
 For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', true );` to your wp-config. This will load the unminified version of all libraries, and specifically the development build of React.
 
