@@ -531,7 +531,7 @@ class WC_Meta_Box_Product_Data {
 				 * Set variation props before save.
 				 *
 				 * @param object $variation WC_Product_Variation object.
-	 			 * @param int $i
+				 * @param int $i
 				 * @since 3.8.0
 				 */
 				do_action( 'woocommerce_admin_process_variation_object', $variation, $i );
