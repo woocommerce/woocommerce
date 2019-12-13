@@ -33,13 +33,13 @@ class CartItemSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
-			'key'           => array(
+			'key'               => array(
 				'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'id'            => array(
+			'id'                => array(
 				'description' => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
@@ -49,7 +49,7 @@ class CartItemSchema extends AbstractSchema {
 					'validate_callback' => array( $this, 'product_id_exists' ),
 				),
 			),
-			'quantity'      => array(
+			'quantity'          => array(
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
@@ -58,26 +58,26 @@ class CartItemSchema extends AbstractSchema {
 					'sanitize_callback' => 'wc_stock_amount',
 				),
 			),
-			'name'          => array(
+			'name'              => array(
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'sku'           => array(
+			'sku'               => array(
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'permalink'     => array(
+			'permalink'         => array(
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'images'        => array(
+			'images'            => array(
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
@@ -113,25 +113,37 @@ class CartItemSchema extends AbstractSchema {
 					),
 				),
 			),
-			'product_price' => array(
+			'product_price'     => array(
 				'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'line_subtotal' => array(
-				'description' => __( 'Line price subtotal (excluding coupons and discounts).', 'woo-gutenberg-products-block' ),
+			'line_subtotal'     => array(
+				'description' => __( 'Line price subtotal (excluding coupons and discounts). Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'line_total'    => array(
-				'description' => __( 'Line price total (including coupons and discounts).', 'woo-gutenberg-products-block' ),
+			'line_subtotal_tax' => array(
+				'description' => __( 'Line price subtotal tax. Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'variation'     => array(
+			'line_total'        => array(
+				'description' => __( 'Line price total (including coupons and discounts). Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'line_total_tax'    => array(
+				'description' => __( 'Line price total tax. Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'variation'         => array(
 				'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
@@ -172,22 +184,22 @@ class CartItemSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $cart_item ) {
-		$product                 = $cart_item['data'];
-		$line_subtotal           = $product->get_price() * wc_stock_amount( $cart_item['quantity'] );
-		$line_total_incl_coupons = isset( $cart_item['line_total'] ) ? $cart_item['line_total'] : $line_subtotal;
+		$product = $cart_item['data'];
 
 		return [
-			'key'           => $cart_item['key'],
-			'id'            => $product->get_id(),
-			'quantity'      => wc_stock_amount( $cart_item['quantity'] ),
-			'name'          => $product->get_title(),
-			'sku'           => $product->get_sku(),
-			'permalink'     => $product->get_permalink(),
-			'images'        => ( new ProductImages() )->images_to_array( $product ),
-			'product_price' => wc_format_decimal( $product->get_price() ),
-			'line_total'    => wc_format_decimal( $line_total_incl_coupons ),
-			'line_subtotal' => wc_format_decimal( $line_subtotal ),
-			'variation'     => $this->format_variation_data( $cart_item['variation'], $product ),
+			'key'               => $cart_item['key'],
+			'id'                => $product->get_id(),
+			'quantity'          => wc_stock_amount( $cart_item['quantity'] ),
+			'name'              => $product->get_title(),
+			'sku'               => $product->get_sku(),
+			'permalink'         => $product->get_permalink(),
+			'images'            => ( new ProductImages() )->images_to_array( $product ),
+			'product_price'     => $this->prepare_money_response( $product->get_price(), wc_get_price_decimals() ),
+			'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
+			'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], wc_get_price_decimals() ),
+			'line_total'        => $this->prepare_money_response( $cart_item['line_total'], wc_get_price_decimals() ),
+			'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], wc_get_price_decimals() ),
+			'variation'         => $this->format_variation_data( $cart_item['variation'], $product ),
 		];
 	}
 

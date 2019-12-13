@@ -79,9 +79,9 @@ class CartItems extends TestCase {
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( 2, $data['quantity'] );
-		$this->assertEquals( '10.00', $data['product_price'] );
-		$this->assertEquals( '20.00', $data['line_subtotal'] );
-		$this->assertEquals( '20.00', $data['line_total'] );
+		$this->assertEquals( '1000', $data['product_price'] );
+		$this->assertEquals( '2000', $data['line_subtotal'] );
+		$this->assertEquals( '2000', $data['line_total'] );
 
 		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/items/XXX815416f775098fe977004015c6193' );
 		$response = $this->server->dispatch( $request );
