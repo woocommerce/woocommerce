@@ -62,12 +62,13 @@ class Cart extends TestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'GBP', $data['currency'] );
+		$this->assertEquals( 2, $data['currency_minor_unit'] );
 		$this->assertEquals( 3, $data['items_count'] );
 		$this->assertEquals( 2, count( $data['items'] ) );
 		$this->assertEquals( false, $data['needs_shipping'] );
 		$this->assertEquals( '30', $data['items_weight'] );
 
-		$this->assertEquals( '30.00', $data['total_items'] );
+		$this->assertEquals( '3000', $data['total_items'] );
 		$this->assertEquals( '0', $data['total_items_tax'] );
 		$this->assertEquals( '0', $data['total_fees'] );
 		$this->assertEquals( '0', $data['total_fees_tax'] );
@@ -76,7 +77,7 @@ class Cart extends TestCase {
 		$this->assertEquals( '0', $data['total_shipping'] );
 		$this->assertEquals( '0', $data['total_shipping_tax'] );
 		$this->assertEquals( '0', $data['total_tax'] );
-		$this->assertEquals( '30.00', $data['total_price'] );
+		$this->assertEquals( '3000', $data['total_price'] );
 	}
 
 	/**
