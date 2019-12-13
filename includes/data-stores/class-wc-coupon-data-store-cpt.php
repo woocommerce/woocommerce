@@ -497,7 +497,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			return null;
 		}
 
-		if ( ! apply_filters( 'woocommerce_coupon_hold_enabled', true ) ) {
+		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 			return null;
 		}
 
@@ -586,7 +586,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			return null;
 		}
 
-		if ( ! apply_filters( 'woocommerce_coupon_hold_enabled', true ) ) {
+		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 			return null;
 		}
 

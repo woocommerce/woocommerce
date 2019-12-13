@@ -1494,7 +1494,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		WC()->cart->add_discount( $coupon_code );
 		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
 
-		add_filter( 'woocommerce_coupon_hold_enabled', '__return_false' );
+		add_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
 
 		$order_id = WC_Checkout::instance()->create_order(
 			array(
@@ -1516,6 +1516,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
 
-		remove_filter( 'woocommerce_coupon_hold_enabled', '__return_false' );
+		remove_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
 	}
 }
