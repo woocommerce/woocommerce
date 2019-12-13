@@ -527,6 +527,15 @@ class WC_Meta_Box_Product_Data {
 					WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 				}
 
+				/**
+				 * Set variation props before save.
+				 *
+				 * @param object $variation WC_Product_Variation object.
+	 			 * @param int $i
+				 * @since 3.8.0
+				 */
+				do_action( 'woocommerce_admin_process_variation_object', $variation, $i );
+
 				$variation->save();
 
 				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
