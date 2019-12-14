@@ -2042,6 +2042,7 @@ function wc_enable_wc_plugin_headers( $headers ) {
 }
 add_filter( 'extra_theme_headers', 'wc_enable_wc_plugin_headers' );
 add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
+wp_cache_delete( 'plugins', 'plugins' );
 
 /**
  * Prevent auto-updating the WooCommerce plugin on major releases if there are untested extensions active.
