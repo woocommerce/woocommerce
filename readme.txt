@@ -1,6 +1,6 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain
-Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, woo
+Tags: woocommerce, ecommerce, e-commerce, store, shop
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
