@@ -35,7 +35,6 @@ matrix:
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "E2E tests"
-    env: RUN_E2E=1
     script:
       - npm install
       - npm run build
