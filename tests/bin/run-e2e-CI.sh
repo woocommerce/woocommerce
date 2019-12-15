@@ -5,4 +5,5 @@ do
   sleep 10;
 done
 echo "$(date) - Docker container had been built successfully";
+sleep 120;
 npm run test:e2e;
