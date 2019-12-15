@@ -187,8 +187,13 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 				await page.waitForSelector( '#wc_recommended_facebook', { visible: true } );
 				await page.$eval( '#wc_recommended_facebook', elem => elem.click() );
 
-				// Click on "Continue" button to move to the next step
-				await page.click( 'button[name=save_step]', { text: 'Continue' } );
+				await Promise.all( [
+					// Click on "Continue" button to move to the next step
+					page.click( 'button[name=save_step]', { text: 'Continue' } ),
+
+					// Wait for the Jetpack section to load
+					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+				] );
 
 				// Skip activate Jetpack section
 				// Click on "Skip this step" in order to skip Jetpack installation

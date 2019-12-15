@@ -39,7 +39,7 @@ matrix:
       - npm install
       - npm run build
       - docker-compose up --build -d
-      - travis_retry bash tests/bin/run-e2e-CI.sh
+      - bash tests/bin/run-e2e-CI.sh
     after_script:
       - docker-compose down -v
   - name: "Unit tests code coverage"
