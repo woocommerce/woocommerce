@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { spawn } = require( 'child_process' );
+const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 
 program
@@ -20,7 +20,7 @@ if ( program.dev ) {
 
 const envVars = Object.assign( {}, process.env, testEnvVars );
 
-spawn(
+let jestProcess = spawnSync(
 	'jest',
 	[
 		'--maxWorkers=1',
@@ -34,3 +34,8 @@ spawn(
 		env: envVars,
 	}
 );
+
+console.log( 'Jest exit code: ' +  jestProcess.status );
+
+// Pass Jest exit code to npm
+process.exit( jestProcess.status );
