@@ -56,7 +56,8 @@
     "test:watch": "npm run test -- --watch",
     "example": "webpack --config docs/examples/extensions/examples.config.js --watch",
     "changelog": "node ./bin/changelog.js ",
-    "pre-release": "./bin/pre-release.sh"
+    "pre-release": "./bin/pre-release.sh",
+    "create-wc-extension": "node ./bin/starter-pack/starter-pack.js"
   },
   "husky": {
     "hooks": {
@@ -146,6 +147,7 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.17.0",
     "eslint-plugin-wpcalypso": "4.1.0",
+    "fs-extra": "^8.1.0",
     "grunt": "1.0.4",
     "grunt-checktextdomain": "1.0.1",
     "grunt-wp-i18n": "1.0.3",

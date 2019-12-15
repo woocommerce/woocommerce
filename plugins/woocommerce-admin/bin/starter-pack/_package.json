@@ -1,0 +1,25 @@
+{
+  "name": "{{extension_slug}}",
+  "title": "{{extension_name}}",
+  "license": "GPL-3.0-or-later",
+  "version": "0.1.0",
+  "description": "{{extension_name}}",
+  "scripts": {
+    "build": "wp-scripts build",
+    "check-engines": "wp-scripts check-engines",
+    "check-licenses": "wp-scripts check-licenses",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js",
+    "lint:pkg-json": "wp-scripts lint-pkg-json",
+    "start": "wp-scripts start",
+    "test:e2e": "wp-scripts test-e2e",
+    "test:unit": "wp-scripts test-unit-js"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^6.0.0",
+    "mini-css-extract-plugin": "^0.8.0",
+    "sass-loader": "7.3.1",
+    "css-loader": "3.3.0",
+    "node-sass": "4.13.0"
+  }
+}
