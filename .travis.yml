@@ -39,7 +39,7 @@ matrix:
     script:
       - npm install
       - npm run build
-      - docker-compose up -d
+      - docker-compose up --build -d
       - travis_retry bash tests/bin/run-e2e-CI.sh
   - name: "Unit tests code coverage"
     php: 7.3
