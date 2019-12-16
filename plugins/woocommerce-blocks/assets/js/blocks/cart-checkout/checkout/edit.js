@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Disabled } from '@wordpress/components';
 import { withFeedbackPrompt } from '@woocommerce/block-hocs';
 
 /**
@@ -13,12 +12,10 @@ import './editor.scss';
 
 const CheckoutEditor = ( { attributes } ) => {
 	const { className } = attributes;
-
+	// @todo: wrap Block with Disabled once you finish building the form
 	return (
 		<div className={ className }>
-			<Disabled>
-				<Block attributes={ attributes } />
-			</Disabled>
+			<Block attributes={ attributes } isEditor={ true } />
 		</div>
 	);
 };

@@ -1,0 +1,40 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { Placeholder, Button } from '@wordpress/components';
+import ShippingIcon from 'gridicons/dist/shipping';
+import { ADMIN_URL } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
+const NoShipping = () => {
+	return (
+		<Placeholder
+			icon={ <ShippingIcon /> }
+			label={ __( 'Shipping options', 'woo-gutenberg-products-block' ) }
+			className="wc-blocks-checkout__no-shipping"
+		>
+			<span className="wc-blocks-checkout__no-shipping-description">
+				{ __(
+					'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
+					'woo-gutenberg-products-block'
+				) }
+			</span>
+			<Button
+				isDefault
+				href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+			>
+				{ __(
+					'Configure Shipping Options',
+					'woo-gutenberg-products-block'
+				) }
+			</Button>
+		</Placeholder>
+	);
+};
+
+export default NoShipping;

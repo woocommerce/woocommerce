@@ -1,0 +1,36 @@
+.wc-blocks-text-input {
+	position: relative;
+	margin-top: $gap;
+}
+
+.wc-blocks-text-input label {
+	position: absolute;
+	transform: translateX(#{$gap}) translateY(#{$gap-small});
+	font-size: 16px;
+	line-height: 22px;
+	transition: all 200ms ease;
+	color: $gray-50;
+}
+
+.wc-blocks-text-input.is-active label {
+	transform: translateX(#{$gap - $gap-small}) translateY(#{$gap-smallest}) scale(0.75);
+	transition: all 200ms ease;
+}
+
+.wc-blocks-text-input input[type="text"] {
+	padding: $gap-small $gap;
+	border-radius: 4px;
+	border: 1px solid $input-border-gray;
+	width: 100%;
+	font-size: 16px;
+	line-height: 22px;
+	font-family: inherit;
+	margin: 0;
+	box-sizing: border-box;
+	height: 48px;
+	color: $input-text-active;
+}
+
+.wc-blocks-text-input.is-active input[type="text"] {
+	padding: $gap-large $gap $gap-smallest;
+}
