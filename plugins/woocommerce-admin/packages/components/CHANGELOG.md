@@ -1,6 +1,7 @@
 # 4.1.0 (Unreleased)
 - Added `<ImageUpload />` component.
 - Style form components for WordPress 5.3.
+- Fix CompareFilter options format (key prop vs. id).
 
 # 4.0.0
 

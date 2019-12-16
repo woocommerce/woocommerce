@@ -73,7 +73,7 @@ export class CompareFilter extends Component {
 	updateQuery() {
 		const { param, path, query } = this.props;
 		const { selected } = this.state;
-		const idList = selected.map( p => p.id );
+		const idList = selected.map( p => p.key );
 		updateQueryString( { [ param ]: idList.join( ',' ) }, path, query );
 	}
 
