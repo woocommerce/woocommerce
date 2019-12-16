@@ -25,7 +25,11 @@ registerBlockType( 'woocommerce/checkout', {
 		'Display the checkout experience for customers.',
 		'woo-gutenberg-products-block'
 	),
-	supports: {},
+	supports: {
+		align: [ 'wide', 'full' ],
+		html: false,
+		multiple: false,
+	},
 	example,
 	attributes: {
 		/**
