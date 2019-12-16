@@ -66,7 +66,7 @@ const AttributeFilterBlock = ( {
 		shouldSelect: blockAttributes.attributeId > 0,
 	} );
 
-	const filterAvailableFilters =
+	const filterAvailableTerms =
 		blockAttributes.displayStyle !== 'dropdown' &&
 		blockAttributes.queryType === 'and';
 	const {
@@ -77,7 +77,10 @@ const AttributeFilterBlock = ( {
 			taxonomy: attributeObject.taxonomy,
 			queryType: blockAttributes.queryType,
 		},
-		queryState: filterAvailableFilters ? queryState : null,
+		queryState: {
+			...queryState,
+			attributes: filterAvailableTerms ? queryState.attributes : null,
+		},
 	} );
 
 	/**
