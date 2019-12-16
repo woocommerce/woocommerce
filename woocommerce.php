@@ -39,7 +39,7 @@ if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
 
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
-	include_once dirname( __FILE__ ) . '/includes/class-woocommerce.php';
+	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
 }
 
 /**

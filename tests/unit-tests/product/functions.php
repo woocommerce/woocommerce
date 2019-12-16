@@ -741,6 +741,22 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_product_object().
+	 *
+	 * @since 3.9.0
+	 */
+	public function test_wc_get_product_object() {
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( 'simple' ) );
+		$this->assertInstanceOf( 'WC_Product_Grouped', wc_get_product_object( 'grouped' ) );
+		$this->assertInstanceOf( 'WC_Product_External', wc_get_product_object( 'external' ) );
+		$this->assertInstanceOf( 'WC_Product_Variable', wc_get_product_object( 'variable' ) );
+		$this->assertInstanceOf( 'WC_Product_Variation', wc_get_product_object( 'variation' ) );
+
+		// Test incorrect type.
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( 'foo+bar' ) );
+	}
+
+	/**
 	 * Test wc_update_product_stock().
 	 *
 	 * @since 2.3
@@ -885,6 +901,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_placeholder_img() {
 		$this->assertTrue( (bool) strstr( wc_placeholder_img(), wc_placeholder_img_src() ) );
+
+		// Test custom class attribute is honoured.
+		$attr = array( 'class' => 'custom-class' );
+		$this->assertContains( 'class="custom-class"', wc_placeholder_img( 'woocommerce_thumbnail', $attr ) );
 	}
 
 	/**
