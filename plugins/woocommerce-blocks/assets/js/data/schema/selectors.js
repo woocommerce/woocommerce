@@ -33,9 +33,10 @@ import { STORE_KEY } from './constants';
  */
 export const getRoute = createRegistrySelector(
 	( select ) => ( state, namespace, resourceName, ids = [] ) => {
-		const hasResolved = select(
-			STORE_KEY
-		).hasFinishedResolution( 'getRoutes', [ namespace ] );
+		const hasResolved = select( STORE_KEY ).hasFinishedResolution(
+			'getRoutes',
+			[ namespace ]
+		);
 		state = state.routes;
 		let error = '';
 		if ( ! state[ namespace ] ) {
@@ -85,9 +86,10 @@ export const getRoute = createRegistrySelector(
  */
 export const getRoutes = createRegistrySelector(
 	( select ) => ( state, namespace ) => {
-		const hasResolved = select(
-			STORE_KEY
-		).hasFinishedResolution( 'getRoutes', [ namespace ] );
+		const hasResolved = select( STORE_KEY ).hasFinishedResolution(
+			'getRoutes',
+			[ namespace ]
+		);
 		const routes = state.routes[ namespace ];
 		if ( ! routes ) {
 			if ( hasResolved ) {

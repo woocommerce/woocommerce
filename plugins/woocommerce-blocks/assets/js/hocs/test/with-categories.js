@@ -18,10 +18,7 @@ jest.mock( '../../base/utils/errors', () => ( {
 	formatError: jest.fn(),
 } ) );
 
-const mockCategories = [
-	{ id: 1, name: 'Clothing' },
-	{ id: 2, name: 'Food' },
-];
+const mockCategories = [ { id: 1, name: 'Clothing' }, { id: 2, name: 'Food' } ];
 const TestComponent = withCategories( ( props ) => {
 	return (
 		<div
