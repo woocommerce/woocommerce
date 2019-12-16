@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { BlockControls } from '@wordpress/block-editor';
 import { Toolbar } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import TextToolbarButton from '@woocommerce/block-components/text-toolbar-button';
 import PropTypes from 'prop-types';
+import { withFeedbackPrompt } from '@woocommerce/block-hocs';
 
 /**
  * Internal dependencies
@@ -58,4 +59,9 @@ CartEditor.propTypes = {
 	className: PropTypes.string,
 };
 
-export default CartEditor;
+export default withFeedbackPrompt(
+	__(
+		'We are currently working on improving our cart and providing merchants with tools and options to customize their cart to their stores needs.',
+		'woo-gutenberg-products-block'
+	)
+)( CartEditor );

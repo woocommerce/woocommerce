@@ -16,7 +16,7 @@ const validationMap = {
 };
 
 /**
- * ProductLayoutContext is an configuration object for layout options shared
+ * ProductLayoutContext is a configuration object for layout options shared
  * among all components in a tree.
  *
  * @member {Object} ProductLayoutContext A react context object
