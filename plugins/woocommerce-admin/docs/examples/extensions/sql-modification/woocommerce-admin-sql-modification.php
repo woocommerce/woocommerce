@@ -6,12 +6,43 @@
  */
 
 /**
- * Get the currencies available.
+ * Make the currency settings available to the javascript client using
+ * AssetDataRegistry, available in WooCommerce 3.9.
  *
- * @return array
+ * The add_currency_settings function is a most basic example, but below is
+ * a more elaborate example of how one might use AssetDataRegistry in classes.
+ *
+	```php
+	<?php
+
+	class MyClassWithAssetData {
+		private $asset_data_registry;
+		public function __construct( Automattic\WooCommerce\Blocks\AssetDataRegistry $asset_data_registry ) {
+			$this->asset_data_registry = $asset_data_registry;
+		}
+
+		protected function some_method_adding_assets() {
+			$this->asset_data_registry->add( 'myData', [ 'foo' => 'bar' ] );
+		}
+	}
+
+	// somewhere in the extensions bootstrap
+	class Bootstrap {
+		protected $container;
+		public function __construct( Automattic\WooCommerce\Blocks\Container $container ) {
+			$this->container = $container;
+			$this->container->register( MyClassWithAssetData::class, function( $blocks_container ) => {
+				return new MyClassWithAssetData( $blocks_container->get( Automattic\WooCommerce\Blocks\AssetDataRegistry::class ) );
+			} );
+		}
+	}
+
+	// now anywhere MyClassWithAssetData is instantiated it will automatically be
+	// constructed with the AssetDataRegistry
+	```
  */
-function get_currencies() {
-	return array(
+function add_currency_settings() {
+	$currencies = array(
 		array(
 			'label' => __( 'United States Dollar', 'woocommerce-admin' ),
 			'value' => 'USD',
@@ -25,6 +56,12 @@ function get_currencies() {
 			'value' => 'ZAR',
 		),
 	);
+
+	$data_registry = Automattic\WooCommerce\Blocks\Package::container()->get(
+		Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
+	);
+
+	$data_registry->add( 'multiCurrency', $currencies );
 }
 
 /**
@@ -36,6 +73,8 @@ function add_report_register_script() {
 		return;
 	}
 
+	add_currency_settings();
+
 	wp_register_script(
 		'sql-modification',
 		plugins_url( '/dist/index.js', __FILE__ ),
@@ -45,21 +84,13 @@ function add_report_register_script() {
 			'wp-i18n',
 			'wp-plugins',
 			'wc-components',
+			'wc-settings',
 		),
 		filemtime( dirname( __FILE__ ) . '/dist/index.js' ),
 		true
 	);
 
 	wp_enqueue_script( 'sql-modification' );
-
-	// todo: This is not the right way to interact with wcSettings. Update once WooCommerce 3.9 is available.
-	wp_add_inline_script(
-		'sql-modification',
-		"wcSettings.multiCurrency = JSON.parse( decodeURIComponent( '"
-		. esc_js( rawurlencode( wp_json_encode( get_currencies() ) ) )
-		. "' ) );",
-		'before'
-	);
 }
 add_action( 'admin_enqueue_scripts', 'add_report_register_script' );
 
