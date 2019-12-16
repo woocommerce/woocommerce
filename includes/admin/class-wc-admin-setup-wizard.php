@@ -73,34 +73,13 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_theme() {
-		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! $this->is_default_theme();
+		$support_woocommerce = current_theme_supports( 'woocommerce' ) && ! wc_is_wp_default_theme_active();
 
 		return (
 			current_user_can( 'install_themes' ) &&
 			current_user_can( 'switch_themes' ) &&
 			! is_multisite() &&
 			! $support_woocommerce
-		);
-	}
-
-	/**
-	 * Is the user using a default WP theme?
-	 *
-	 * @return boolean
-	 */
-	protected function is_default_theme() {
-		return wc_is_active_theme(
-			array(
-				'twentynineteen',
-				'twentyseventeen',
-				'twentysixteen',
-				'twentyfifteen',
-				'twentyfourteen',
-				'twentythirteen',
-				'twentyeleven',
-				'twentytwelve',
-				'twentyten',
-			)
 		);
 	}
 
@@ -377,6 +356,9 @@ class WC_Admin_Setup_Wizard {
 	 * Setup Wizard Header.
 	 */
 	public function setup_wizard_header() {
+		// same as default WP from wp-admin/admin-header.php.
+		$wp_version_class = 'branch-' . str_replace( array( '.', ',' ), '-', floatval( get_bloginfo( 'version' ) ) );
+
 		set_current_screen();
 		?>
 		<!DOCTYPE html>
@@ -390,7 +372,7 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_print_styles' ); ?>
 			<?php do_action( 'admin_head' ); ?>
 		</head>
-		<body class="wc-setup wp-core-ui <?php echo esc_attr( 'wc-setup-step__' . $this->step ); ?>">
+		<body class="wc-setup wp-core-ui <?php echo esc_attr( 'wc-setup-step__' . $this->step ); ?> <?php echo esc_attr( $wp_version_class ); ?>">
 		<h1 class="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 		<?php
 	}

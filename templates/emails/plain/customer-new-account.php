@@ -21,13 +21,13 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-/* translators: %s Customer first name */
+/* translators: %s: Customer username */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_login ) ) . "\n\n";
 /* translators: %1$s: Site title, %2$s: Username, %3$s: My account link */
 echo sprintf( esc_html__( 'Thanks for creating an account on %1$s. Your username is %2$s. You can access your account area to view orders, change your password, and more at: %3$s', 'woocommerce' ), esc_html( $blogname ), '<strong>' . esc_html( $user_login ) . '</strong>', esc_html( wc_get_page_permalink( 'myaccount' ) ) ) . "\n\n";
 
 if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $password_generated ) {
-	/* translators: %s Auto generated password */
+	/* translators: %s: Auto generated password */
 	echo sprintf( esc_html__( 'Your password has been automatically generated: %s.', 'woocommerce' ), esc_html( $user_pass ) ) . "\n\n";
 }
 
