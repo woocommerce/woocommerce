@@ -13,6 +13,11 @@ import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
 
 /**
+ * Internal dependencies
+ */
+import usePriceConstraints from './use-price-constraints.js';
+
+/**
  * Component displaying a price filter.
  */
 const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
@@ -31,12 +36,10 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	const [ minPrice, setMinPrice ] = useState();
 	const [ maxPrice, setMaxPrice ] = useState();
 
-	const minConstraint = isNaN( results.min_price )
-		? null
-		: Math.floor( parseInt( results.min_price, 10 ) / 10 ) * 10;
-	const maxConstraint = isNaN( results.max_price )
-		? null
-		: Math.ceil( parseInt( results.max_price, 10 ) / 10 ) * 10;
+	const { minConstraint, maxConstraint } = usePriceConstraints( {
+		minPrice: results.min_price,
+		maxPrice: results.max_price,
+	} );
 
 	// Updates the query after a short delay.
 	const [ debouncedUpdateQuery ] = useDebouncedCallback( () => {
