@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
@@ -12,6 +12,10 @@ import ProductList from './index';
 const ProductListContainer = ( { attributes } ) => {
 	const [ currentPage, setPage ] = useState( 1 );
 	const [ currentSort, setSort ] = useState( attributes.orderby );
+	useEffect( () => {
+		// if default sort is changed in editor
+		setSort( attributes.orderby );
+	}, [ attributes.orderby ] );
 	const onPageChange = ( newPage ) => {
 		setPage( newPage );
 	};
