@@ -23,7 +23,9 @@ registerBlockType( 'woocommerce/price-filter', {
 		'Display a slider to filter products in your store by price.',
 		'woo-gutenberg-products-block'
 	),
-	supports: {},
+	supports: {
+		multiple: false,
+	},
 	example: {},
 	attributes: {
 		showInputFields: {

@@ -32,6 +32,7 @@ registerBlockType( 'woocommerce/all-products', {
 	supports: {
 		align: [ 'wide', 'full' ],
 		html: false,
+		multiple: false,
 	},
 	example: {
 		attributes: {

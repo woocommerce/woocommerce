@@ -23,7 +23,9 @@ registerBlockType( 'woocommerce/active-filters', {
 		'Display a list of active product filters.',
 		'woo-gutenberg-products-block'
 	),
-	supports: {},
+	supports: {
+		multiple: false,
+	},
 	example: {
 		attributes: {},
 	},
