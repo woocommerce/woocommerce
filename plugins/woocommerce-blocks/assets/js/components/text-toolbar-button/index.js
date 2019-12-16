@@ -10,13 +10,8 @@ import classnames from 'classnames';
 import './style.scss';
 
 function TextToolbarButton( { className, ...props } ) {
-	const classes = classnames(
-		'wc-block-text-toolbar-button',
-		className
-	);
-	return (
-		<Button className={ classes } { ...props } />
-	);
+	const classes = classnames( 'wc-block-text-toolbar-button', className );
+	return <Button className={ classes } { ...props } />;
 }
 
 export default TextToolbarButton;

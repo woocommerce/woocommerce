@@ -22,10 +22,7 @@ const mockProducts = [
 	{ id: 1, name: 'Hoodie', variations: [ 3, 4 ] },
 	{ id: 2, name: 'Backpack' },
 ];
-const mockVariations = [
-	{ id: 3, name: 'Blue' },
-	{ id: 4, name: 'Red' },
-];
+const mockVariations = [ { id: 3, name: 'Blue' }, { id: 4, name: 'Red' } ];
 const TestComponent = withProductVariations( ( props ) => {
 	return (
 		<div
