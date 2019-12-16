@@ -1,0 +1,21 @@
+.wc-blocks-input-row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+
+	& > .wc-blocks-text-input {
+		margin-right: $gap-small;
+		flex-grow: 1;
+		margin-top: $gap;
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+
+	// Responsive media styles.
+	@include breakpoint( "<480px" ) {
+		.wc-blocks-text-input {
+			margin-right: 0;
+		}
+	}
+}

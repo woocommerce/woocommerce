@@ -1,0 +1,36 @@
+.wc-blocks-radio-control__option {
+	display: flex;
+	position: relative;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding: $gap-small $gap-small $gap-small ($gap-larger * 2);
+	border-bottom: 1px solid $core-grey-light-600;
+}
+
+.wc-blocks-radio-control__input {
+	position: absolute;
+	left: $gap-large;
+	top: $gap-large;
+}
+
+.wc-blocks-radio-control__label,
+.wc-blocks-radio-control__secondary-label {
+	font-size: 16px;
+	line-height: 24px;
+	color: $core-grey-dark-600;
+	flex-basis: 50%;
+}
+
+.wc-blocks-radio-control__description,
+.wc-blocks-radio-control__secondary-description {
+	font-size: 14px;
+	line-height: 20px;
+	color: $core-grey-dark-400;
+	flex-basis: 50%;
+}
+
+.wc-blocks-radio-control__secondary-label,
+.wc-blocks-radio-control__secondary-description {
+	text-align: right;
+}
+

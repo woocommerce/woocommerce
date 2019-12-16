@@ -11,7 +11,9 @@ import renderFrontend from '../../../utils/render-frontend.js';
 
 const getProps = () => {
 	return {
-		attributes: {},
+		attributes: {
+			isEditor: false,
+		},
 	};
 };
 
