@@ -233,7 +233,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		>
 			<p>
 				{ __(
-					"Attributes are needed for filtering your products. You haven't created any products yet.",
+					"Attributes are needed for filtering your products. You haven't created any attributes yet yet.",
 					'woo-gutenberg-products-block'
 				) }
 			</p>
