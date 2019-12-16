@@ -16,7 +16,10 @@
 		li {
 			text-decoration: underline;
 
-			label,
+			label {
+				cursor: pointer;
+			}
+
 			input {
 				cursor: pointer;
 				display: inline-block;
