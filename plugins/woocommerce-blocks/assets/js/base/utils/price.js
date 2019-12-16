@@ -9,17 +9,17 @@ import { CURRENCY } from '@woocommerce/settings';
  *
  * @param {number} value Number to format.
  * @param {string} priceFormat  Price format string.
- * @param {string} currencySymbol Curency symbol.
+ * @param {string} currencySymbol Currency symbol.
  */
 export const formatPrice = (
 	value,
 	priceFormat = CURRENCY.price_format,
 	currencySymbol = CURRENCY.symbol
 ) => {
-	if ( value === '' || undefined === value ) {
+	const formattedNumber = parseInt( value, 10 );
+	if ( ! isFinite( formattedNumber ) ) {
 		return '';
 	}
-	const formattedNumber = parseInt( value, 10 );
 	const formattedValue = sprintf(
 		priceFormat,
 		currencySymbol,
