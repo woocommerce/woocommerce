@@ -116,6 +116,9 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.6 - 2019-12-17 =
+- Fix broken build resulting in blocks not working.
+
 = 2.5.5 - 2019-12-17 =
 - bug: Fix broken atomic blocks in the All Products Block #1402
 - bug: Only allow one instance of the All Products block per page/post. #1383
