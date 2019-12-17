@@ -29,6 +29,9 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 		'Show product reviews from specific categories.',
 		'woo-gutenberg-products-block'
 	),
+	supports: {
+		html: false,
+	},
 	example: {
 		...example,
 		attributes: {

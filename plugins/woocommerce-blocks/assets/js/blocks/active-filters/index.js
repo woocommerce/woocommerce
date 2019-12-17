@@ -24,6 +24,7 @@ registerBlockType( 'woocommerce/active-filters', {
 		'woo-gutenberg-products-block'
 	),
 	supports: {
+		html: false,
 		multiple: false,
 	},
 	example: {

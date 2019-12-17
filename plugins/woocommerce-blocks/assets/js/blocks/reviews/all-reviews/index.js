@@ -30,6 +30,9 @@ registerBlockType( 'woocommerce/all-reviews', {
 		'Shows a list of all product reviews.',
 		'woo-gutenberg-products-block'
 	),
+	supports: {
+		html: false,
+	},
 	example: {
 		...example,
 		attributes: {
