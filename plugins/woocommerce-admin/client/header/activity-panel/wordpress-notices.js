@@ -176,6 +176,9 @@ class WordPressNotices extends Component {
 		notices.classList.remove( 'woocommerce-layout__notice-list-hide' );
 		screenMeta && screenMeta.classList.add( 'is-hidden-by-notices' );
 		screenLinks && screenLinks.classList.add( 'is-hidden-by-notices' );
+
+		window.scrollBy( 0, window.scrollY * -1 );
+		this.setState( { noticesOpen: true } );
 	}
 
 	hideNotices() {
@@ -184,6 +187,8 @@ class WordPressNotices extends Component {
 		notices.classList.remove( 'woocommerce-layout__notice-list-show' );
 		screenMeta && screenMeta.classList.remove( 'is-hidden-by-notices' );
 		screenLinks && screenLinks.classList.remove( 'is-hidden-by-notices' );
+
+		this.setState( { noticesOpen: false } );
 	}
 
 	render() {
