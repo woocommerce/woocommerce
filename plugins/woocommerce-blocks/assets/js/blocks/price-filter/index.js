@@ -24,6 +24,7 @@ registerBlockType( 'woocommerce/price-filter', {
 		'woo-gutenberg-products-block'
 	),
 	supports: {
+		html: false,
 		multiple: false,
 	},
 	example: {},

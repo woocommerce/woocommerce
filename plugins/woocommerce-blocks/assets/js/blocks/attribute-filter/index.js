@@ -23,7 +23,9 @@ registerBlockType( 'woocommerce/attribute-filter', {
 		'Display a list of filters based on a chosen product attribute.',
 		'woo-gutenberg-products-block'
 	),
-	supports: {},
+	supports: {
+		html: false,
+	},
 	example: {
 		attributes: {
 			isPreview: true,

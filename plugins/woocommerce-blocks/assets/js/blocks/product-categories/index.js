@@ -26,6 +26,7 @@ registerBlockType( 'woocommerce/product-categories', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	example: {
 		attributes: {

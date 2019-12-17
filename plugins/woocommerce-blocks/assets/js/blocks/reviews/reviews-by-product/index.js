@@ -29,6 +29,9 @@ registerBlockType( 'woocommerce/reviews-by-product', {
 		'Show reviews of your product to build trust.',
 		'woo-gutenberg-products-block'
 	),
+	supports: {
+		html: false,
+	},
 	example: {
 		...example,
 		attributes: {
