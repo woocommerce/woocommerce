@@ -36,10 +36,10 @@ class ActivityPanels {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		add_filter( 'wc_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
+		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		// Run after Automattic\WooCommerce\Admin\Loader.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
-		// new settings injection
+		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
 		add_action( 'woocommerce_updated', array( $this, 'woocommerce_updated_note' ) );
 	}
