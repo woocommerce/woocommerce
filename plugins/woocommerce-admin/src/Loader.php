@@ -288,7 +288,7 @@ class Loader {
 		wp_register_script(
 			'wc-csv',
 			self::get_url( 'csv-export/index.js' ),
-			array(),
+			array( 'moment' ),
 			self::get_file_version( 'csv-export/index.js' ),
 			true
 		);
@@ -322,7 +322,7 @@ class Loader {
 		wp_register_script(
 			'wc-date',
 			self::get_url( 'date/index.js' ),
-			array( 'wp-date', 'wp-i18n' ),
+			array( 'moment', 'wp-date', 'wp-i18n' ),
 			self::get_file_version( 'date/index.js' ),
 			true
 		);
@@ -333,6 +333,7 @@ class Loader {
 			'wc-components',
 			self::get_url( 'components/index.js' ),
 			array(
+				'moment',
 				'wp-api-fetch',
 				'wp-data',
 				'wp-element',
@@ -371,7 +372,7 @@ class Loader {
 		wp_register_script(
 			WC_ADMIN_APP,
 			self::get_url( 'app/index.js' ),
-			array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n' ),
+			array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n', 'moment' ),
 			self::get_file_version( 'app/index.js' ),
 			true
 		);
