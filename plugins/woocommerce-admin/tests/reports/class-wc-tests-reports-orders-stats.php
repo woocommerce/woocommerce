@@ -13,6 +13,19 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * Class WC_Tests_Reports_Orders_Stats
  */
 class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
+	/**
+	 * Don't cache report data during these tests.
+	 */
+	public static function setUpBeforeClass() {
+		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+	}
+
+	/**
+	 * Restore cache for other tests.
+	 */
+	public static function tearDownAfterClass() {
+		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+	}
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 order.
