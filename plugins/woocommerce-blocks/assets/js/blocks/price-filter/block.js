@@ -118,7 +118,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 					maxPrice={ max }
 					step={ 10 }
 					currencySymbol={ CURRENCY.symbol }
-					priceFormat={ CURRENCY.price_format }
+					priceFormat={ CURRENCY.priceFormat }
 					showInputFields={ attributes.showInputFields }
 					showFilterButton={ attributes.showFilterButton }
 					onChange={ onChange }

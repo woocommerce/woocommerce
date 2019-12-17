@@ -13,7 +13,7 @@ import { CURRENCY } from '@woocommerce/settings';
  */
 export const formatPrice = (
 	value,
-	priceFormat = CURRENCY.price_format,
+	priceFormat = CURRENCY.priceFormat,
 	currencySymbol = CURRENCY.symbol
 ) => {
 	const formattedNumber = parseInt( value, 10 );
