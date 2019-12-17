@@ -374,7 +374,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		if ( isset( $request['customer'] ) ) {
 			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array(); // WPCS: slow query ok.
+				$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			}
 
 			$args['meta_query'][] = array(
@@ -590,16 +590,19 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Gets the product ID from the SKU or posted ID.
 	 *
 	 * @throws WC_REST_Exception When SKU or ID is not valid.
-	 * @param array $posted Request data.
+	 * @param array           $posted Request data.
+	 * @param WC_Product|bool $product Product data.
 	 * @return int
 	 */
-	protected function get_product_id( $posted ) {
+	protected function get_product_id( $posted, $product ) {
 		if ( ! empty( $posted['sku'] ) ) {
 			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
 		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
+		} elseif ( $product && 0 < $product->get_id() ) {
+			return $product->get_id();
 		} else {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce-rest-api' ), 400 );
 		}
@@ -660,7 +663,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
 		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id( $posted ) );
+		$product = wc_get_product( $this->get_product_id( $posted, $item->get_product() ) );
 
 		if ( $product !== $item->get_product() ) {
 			$item->set_product( $product );
