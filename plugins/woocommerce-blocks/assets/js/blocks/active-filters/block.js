@@ -34,7 +34,7 @@ const ActiveFiltersBlock = ( {
 			return null;
 		}
 		return renderRemovableListItem(
-			__( 'Price:', 'woo-gutenberg-products-block' ),
+			__( 'Price', 'woo-gutenberg-products-block' ),
 			formatPriceRange( minPrice, maxPrice ),
 			() => {
 				setMinPrice( null );
