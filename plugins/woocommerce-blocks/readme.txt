@@ -116,6 +116,20 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.5 - 2019-12-17 =
+- bug: Fix broken atomic blocks in the All Products Block #1402
+- bug: Only allow one instance of the All Products block per page/post. #1383
+- bug: All Products Block: Fix default sort order changes not updating block in editor. #1385
+- bug: Normalize set minPrice and maxPrice values by step #1379
+- bug: Fix messaging when there are no attributes #1382
+- Price Filter: fix NaN values shown in some occasions while loading . #1386
+- bug: Fix incorrect property name for price format #1397
+- Remove double colon on active filter block price label. #1399
+- Fix: Attribute filters were not updating based on changes in the Price filter when query type was set to OR. #1390
+
+= 2.5.4 - 2019-12-11 =
+- bug: Fix increase in some bundle sizes #1363
+
 = 2.5.3 - 2019-12-09 =
 - Prevent Filter Products by Attribute block hiding non-matching options when Query Type is set to OR. #1339
 - Fix price slider layout in narrow columns #1231
