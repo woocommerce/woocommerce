@@ -30,6 +30,14 @@
 		}
 	}
 
+	.woocommerce-task-dashboard__container {
+		.woocommerce-task-card__prompt-actions {
+			.components-button:not(.components-icon-button) {
+				color: $studio-white;
+			}
+		}
+	}
+
 	.woocommerce-list {
 		margin: 0;
 
@@ -383,8 +391,13 @@
 	margin-top: -$gap-smallest;
 	cursor: default;
 
-	.components-snackbar__content span {
-		margin-left: -$gap-large;
+	.components-snackbar__content {
+		display: block;
+		align-items: unset;
+		justify-content: unset;
+		span {
+			margin-left: -$gap-large;
+		}
 	}
 
 	.woocommerce-task-card__prompt-actions {
@@ -410,6 +423,20 @@
 		height: 0;
 		display: inline-block;
 		top: -30px;
+	}
+
+	.woocommerce-task-card__prompt-content {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		max-height: 10px;
+		margin-left: $gap-large;
+		position: relative;
+		top: -40px;
+	}
+
+	.woocommerce-task-card__prompt-actions {
+		margin-right: -$gap;
 	}
 
 	&:hover {

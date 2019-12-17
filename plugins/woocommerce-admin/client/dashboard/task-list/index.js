@@ -123,18 +123,18 @@ class TaskDashboard extends Component {
 
 		return (
 			<Snackbar className="woocommerce-task-card__prompt">
-				<div>
-					<div className="woocommerce-task-card__prompt-pointer" />
+				<div className="woocommerce-task-card__prompt-pointer" />
+				<div className="woocommerce-task-card__prompt-content">
 					<span>{ __( 'Is this card useful?', 'woocommerce-admin' ) }</span>
-				</div>
-				<div className="woocommerce-task-card__prompt-actions">
-					<Button isLink onClick={ () => this.hideTaskCard( 'hide_card' ) }>
-						{ __( 'No, hide it', 'woocommerce-admin' ) }
-					</Button>
+					<div className="woocommerce-task-card__prompt-actions">
+						<Button isLink onClick={ () => this.hideTaskCard( 'hide_card' ) }>
+							{ __( 'No, hide it', 'woocommerce-admin' ) }
+						</Button>
 
-					<Button isLink onClick={ () => this.keepTaskCard() }>
-						{ __( 'Yes, keep it', 'woocommerce-admin' ) }
-					</Button>
+						<Button isLink onClick={ () => this.keepTaskCard() }>
+							{ __( 'Yes, keep it', 'woocommerce-admin' ) }
+						</Button>
+					</div>
 				</div>
 			</Snackbar>
 		);
