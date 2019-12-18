@@ -660,7 +660,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
 		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
-		$product = wc_get_product( $this->get_product_id( $posted, $item->get_product() ) );
+		$product = wc_get_product( $this->get_product_id( $posted, $action ) );
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
