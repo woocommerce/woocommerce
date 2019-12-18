@@ -344,7 +344,31 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Tests create an order with an invalid product.
+	 *
+	 * @since 3.9.0
+	 */
+	public function test_create_order_with_invalid_product() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'quantity' => 2,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_required_product_reference', $data['code'] );
 		$this->assertEquals( 400, $response->get_status() );
 	}
 
@@ -413,6 +437,55 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( empty( $data['fee_lines'] ) );
+	}
+
+	/**
+	 * Tests updating an order after deleting a product.
+	 *
+	 * @since 3.9.0
+	 */
+	public function test_update_order_after_delete_product() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
+		$product->delete( true );
+
+		$request    = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
+		$line_items = $order->get_items( 'line_item' );
+		$item       = current( $line_items );
+
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id' => $item->get_id(),
+						'quantity'   => 10,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$expected = array(
+			'id'           => 1,
+			'name'         => 'Dummy Product',
+			'product_id'   => 0,
+			'variation_id' => 0,
+			'quantity'     => 10,
+			'tax_class'    => '',
+			'subtotal'     => '40.00',
+			'subtotal_tax' => '0.00',
+			'total'        => '40.00',
+			'total_tax'    => '0.00',
+			'taxes'        => array(),
+			'meta_data'    => array(),
+			'sku'          => null,
+			'price'        => 4,
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected, $data['line_items'][0] );
 	}
 
 	/**
