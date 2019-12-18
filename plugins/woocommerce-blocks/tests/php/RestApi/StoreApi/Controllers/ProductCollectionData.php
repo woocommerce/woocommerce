@@ -78,8 +78,7 @@ class ProductCollectionData extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( null, $data['min_price'] );
-		$this->assertEquals( null, $data['max_price'] );
+		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['attribute_counts'] );
 		$this->assertEquals( null, $data['rating_counts'] );
 	}
@@ -94,8 +93,9 @@ class ProductCollectionData extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( '10.00', $data['min_price'] );
-		$this->assertEquals( '100.00', $data['max_price'] );
+		$this->assertEquals( 2, $data['price_range']['currency_minor_unit'] );
+		$this->assertEquals( '1000', $data['price_range']['min_price'] );
+		$this->assertEquals( '10000', $data['price_range']['max_price'] );
 		$this->assertEquals( null, $data['attribute_counts'] );
 		$this->assertEquals( null, $data['rating_counts'] );
 	}
@@ -120,8 +120,7 @@ class ProductCollectionData extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( null, $data['min_price'] );
-		$this->assertEquals( null, $data['max_price'] );
+		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['rating_counts'] );
 
 		$this->assertArrayHasKey( 'term', $data['attribute_counts'][0] );
@@ -138,8 +137,7 @@ class ProductCollectionData extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( null, $data['min_price'] );
-		$this->assertEquals( null, $data['max_price'] );
+		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['attribute_counts'] );
 		$this->assertEquals( [
 			[
@@ -160,8 +158,10 @@ class ProductCollectionData extends TestCase {
 		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductCollectionData();
 		$schema     = $controller->get_item_schema();
 
-		$this->assertArrayHasKey( 'min_price', $schema['properties'] );
-		$this->assertArrayHasKey( 'max_price', $schema['properties'] );
+		$this->assertArrayHasKey( 'price_range', $schema['properties'] );
+		$this->assertArrayHasKey( 'currency_minor_unit', $schema['properties']['price_range']['properties'] );
+		$this->assertArrayHasKey( 'min_price', $schema['properties']['price_range']['properties'] );
+		$this->assertArrayHasKey( 'max_price', $schema['properties']['price_range']['properties'] );
 		$this->assertArrayHasKey( 'attribute_counts', $schema['properties'] );
 		$this->assertArrayHasKey( 'rating_counts', $schema['properties'] );
 	}

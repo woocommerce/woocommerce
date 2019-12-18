@@ -33,136 +33,141 @@ class CartItemSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
-			'key'               => array(
+			'key'       => [
 				'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-			),
-			'id'                => array(
+			],
+			'id'        => [
 				'description' => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
-				'arg_options' => array(
+				'arg_options' => [
 					'sanitize_callback' => 'absint',
-					'validate_callback' => array( $this, 'product_id_exists' ),
-				),
-			),
-			'quantity'          => array(
+					'validate_callback' => [ $this, 'product_id_exists' ],
+				],
+			],
+			'quantity'  => [
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
-				'arg_options' => array(
+				'arg_options' => [
 					'sanitize_callback' => 'wc_stock_amount',
-				),
-			),
-			'name'              => array(
+				],
+			],
+			'name'      => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-			),
-			'sku'               => array(
+			],
+			'sku'       => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-			),
-			'permalink'         => array(
+			],
+			'permalink' => [
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'format'      => 'uri',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-			),
-			'images'            => array(
+			],
+			'images'    => [
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-				'items'       => array(
+				'items'       => [
 					'type'       => 'object',
-					'properties' => array(
-						'id'   => array(
+					'properties' => [
+						'id'   => [
 							'description' => __( 'Image ID.', 'woo-gutenberg-products-block' ),
 							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
+							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
-						),
-						'src'  => array(
+						],
+						'src'  => [
 							'description' => __( 'Image URL.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'format'      => 'uri',
-							'context'     => array( 'view', 'edit' ),
+							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
-						),
-						'name' => array(
+						],
+						'name' => [
 							'description' => __( 'Image name.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
-						),
-						'alt'  => array(
+						],
+						'alt'  => [
 							'description' => __( 'Image alternative text.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
+							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
-						),
-					),
-				),
-			),
-			'product_price'     => array(
-				'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'line_subtotal'     => array(
-				'description' => __( 'Line price subtotal (excluding coupons and discounts). Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'line_subtotal_tax' => array(
-				'description' => __( 'Line price subtotal tax. Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'line_total'        => array(
-				'description' => __( 'Line price total (including coupons and discounts). Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'line_total_tax'    => array(
-				'description' => __( 'Line price total tax. Amount provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'variation'         => array(
+						],
+					],
+				],
+			],
+			'variation' => [
 				'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
-				'items'       => array(
+				'context'     => [ 'view', 'edit' ],
+				'items'       => [
 					'type'       => 'object',
-					'properties' => array(
-						'attribute' => array(
+					'properties' => [
+						'attribute' => [
 							'description' => __( 'Variation attribute name.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'value'     => array(
+							'context'     => [ 'view', 'edit' ],
+						],
+						'value'     => [
 							'description' => __( 'Variation attribute value.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-					),
+							'context'     => [ 'view', 'edit' ],
+						],
+					],
+				],
+			],
+			'totals'    => [
+				'description' => __( 'Item total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'type'        => 'object',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'properties'  => array_merge(
+					$this->get_store_currency_properties(),
+					[
+						'line_subtotal'     => [
+							'description' => __( 'Line price subtotal (excluding coupons and discounts).', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'line_subtotal_tax' => [
+							'description' => __( 'Line price subtotal tax.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'line_total'        => [
+							'description' => __( 'Line price total (including coupons and discounts).', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'line_total_tax'    => [
+							'description' => __( 'Line price total tax.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					]
 				),
-			),
+			],
 		];
 	}
 
@@ -187,19 +192,23 @@ class CartItemSchema extends AbstractSchema {
 		$product = $cart_item['data'];
 
 		return [
-			'key'               => $cart_item['key'],
-			'id'                => $product->get_id(),
-			'quantity'          => wc_stock_amount( $cart_item['quantity'] ),
-			'name'              => $product->get_title(),
-			'sku'               => $product->get_sku(),
-			'permalink'         => $product->get_permalink(),
-			'images'            => ( new ProductImages() )->images_to_array( $product ),
-			'product_price'     => $this->prepare_money_response( $product->get_price(), wc_get_price_decimals() ),
-			'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
-			'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], wc_get_price_decimals() ),
-			'line_total'        => $this->prepare_money_response( $cart_item['line_total'], wc_get_price_decimals() ),
-			'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], wc_get_price_decimals() ),
-			'variation'         => $this->format_variation_data( $cart_item['variation'], $product ),
+			'key'       => $cart_item['key'],
+			'id'        => $product->get_id(),
+			'quantity'  => wc_stock_amount( $cart_item['quantity'] ),
+			'name'      => $product->get_title(),
+			'sku'       => $product->get_sku(),
+			'permalink' => $product->get_permalink(),
+			'images'    => ( new ProductImages() )->images_to_array( $product ),
+			'variation' => $this->format_variation_data( $cart_item['variation'], $product ),
+			'totals'    => array_merge(
+				$this->get_store_currency_response(),
+				[
+					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
+					'line_subtotal_tax' => $this->prepare_money_response( $cart_item['line_subtotal_tax'], wc_get_price_decimals() ),
+					'line_total'        => $this->prepare_money_response( $cart_item['line_total'], wc_get_price_decimals() ),
+					'line_total_tax'    => $this->prepare_money_response( $cart_item['line_tax'], wc_get_price_decimals() ),
+				]
+			),
 		];
 	}
 

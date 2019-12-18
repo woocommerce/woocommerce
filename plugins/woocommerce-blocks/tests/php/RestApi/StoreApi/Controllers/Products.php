@@ -49,7 +49,7 @@ class Products extends TestCase {
 		$this->assertEquals( $this->products[0]->get_title(), $data['name'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
-		$this->assertEquals( $this->products[0]->get_price(), $data['prices']['price'] );
+		$this->assertEquals( $this->products[0]->get_price(), $data['prices']['price'] / ( 10 ** $data['prices']['currency_minor_unit'] ) );
 		$this->assertEquals( $this->products[0]->get_average_rating(), $data['average_rating'] );
 		$this->assertEquals( $this->products[0]->get_review_count(), $data['review_count'] );
 		$this->assertEquals( $this->products[0]->has_options(), $data['has_options'] );

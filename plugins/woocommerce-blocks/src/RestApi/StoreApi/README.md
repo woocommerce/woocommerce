@@ -121,8 +121,11 @@ Example response:
 
 ```json
 {
-	"min_price": "0.00",
-	"max_price": "90.00",
+	"price_range": [
+		"currency_minor_unit": 2,
+		"min_price": "0",
+		"max_price": "9000",
+	],
 	"attribute_counts": [
 		{
 			"term": 22,
@@ -172,8 +175,8 @@ GET /products?category=t-shirts
 GET /products?tag=special-items
 GET /products?attributes[0][attribute]=pa_color&attributes[0][slug]=red
 GET /products?on_sale=true
-GET /products?min_price=50
-GET /products?max_price=100
+GET /products?min_price=5000
+GET /products?max_price=10000
 GET /products?stock_status=outofstock
 GET /products?catalog_visibility=search
 GET /products?rating=4,5
@@ -204,8 +207,8 @@ GET /products?return_rating_counts=true
 | `tag_operator`       | string  |    no    | Operator to compare product tags. Allowed values: `in`, `not_in`, `and`                                                                                                   |
 | `attributes`         | array   |    no    | Limit result set to specific attribute terms. Expects an array of objects containing `attribute` (taxonomy), `term_id` or `slug`, and optional `operator` for comparison. |
 | `on_sale`            | boolean |    no    | Limit result set to products on sale.                                                                                                                                     |
-| `min_price`          | string  |    no    | Limit result set to products based on a minimum price.                                                                                                                    |
-| `max_price`          | string  |    no    | Limit result set to products based on a maximum price.                                                                                                                    |
+| `min_price`          | string  |    no    | Limit result set to products based on a minimum price, provided using the smallest unit of the currency.                                                                  |
+| `max_price`          | string  |    no    | Limit result set to products based on a maximum price, provided using the smallest unit of the currency.                                                                  |
 | `stock_status`       | string  |    no    | Limit result set to products with specified stock status.                                                                                                                 |
 | `catalog_visibility` | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                               |
 | `rating`             | boolean |    no    | Limit result set to products with a certain average rating.                                                                                                               |
@@ -318,35 +321,135 @@ Example response:
 
 ```json
 {
-	"currency": "GBP",
-	"item_count": 2,
 	"items": [
 		{
-			"key": "11a7ec12ea1071fdecd917d6da5c87ae",
-			"id": 88,
-			"quantity": 2,
-			"name": "V-Neck T-Shirt",
-			"sku": "woo-vneck-tee-blue",
-			"permalink": "http://local.wordpress.test/product/v-neck-t-shirt/?attribute_pa_color=blue",
+			"key": "6512bd43d9caa6e02c990b0a82652dca",
+			"id": 11,
+			"quantity": 1,
+			"name": "Beanie",
+			"sku": "woo-beanie",
+			"permalink": "http://local.wordpress.test/product/beanie/",
 			"images": [
 				{
-					"id": 41,
-					"src": "http://local.wordpress.test/wp-content/uploads/2019/07/vnech-tee-blue-1.jpg",
-					"name": "vnech-tee-blue-1.jpg",
+					"id": "40",
+					"src": "http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg",
+					"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-450x450.jpg",
+					"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-100x100.jpg 100w",
+					"sizes": "(max-width: 801px) 100vw, 801px",
+					"name": "beanie-2.jpg",
 					"alt": ""
 				}
 			],
-			"price": "15.00",
-			"line_price": "30.00",
-			"variation": {
-				"Color": "Blue",
-				"Size": "Small"
+			"variation": [],
+			"totals": {
+				"currency_code": "GBP",
+				"currency_symbol": "£",
+				"currency_minor_unit": 2,
+				"currency_decimal_separator": ".",
+				"currency_thousand_separator": ",",
+				"currency_prefix": "£",
+				"currency_suffix": "",
+				"line_subtotal": "1500",
+				"line_subtotal_tax": "300",
+				"line_total": "1500",
+				"line_total_tax": "300"
+			}
+		},
+		{
+			"key": "1f0e3dad99908345f7439f8ffabdffc4",
+			"id": 19,
+			"quantity": 1,
+			"name": "Album",
+			"sku": "woo-album",
+			"permalink": "http://local.wordpress.test/product/album/",
+			"images": [
+				{
+					"id": "48",
+					"src": "http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg",
+					"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/album-1-450x450.jpg",
+					"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg 800w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-100x100.jpg 100w",
+					"sizes": "(max-width: 800px) 100vw, 800px",
+					"name": "album-1.jpg",
+					"alt": ""
+				}
+			],
+			"variation": [],
+			"totals": {
+				"currency_code": "GBP",
+				"currency_symbol": "£",
+				"currency_minor_unit": 2,
+				"currency_decimal_separator": ".",
+				"currency_thousand_separator": ",",
+				"currency_prefix": "£",
+				"currency_suffix": "",
+				"line_subtotal": "1250",
+				"line_subtotal_tax": "250",
+				"line_total": "1250",
+				"line_total_tax": "250"
+			}
+		},
+		{
+			"key": "c20ad4d76fe97759aa27a0c99bff6710",
+			"id": 12,
+			"quantity": 1,
+			"name": "Belt",
+			"sku": "woo-belt",
+			"permalink": "http://local.wordpress.test/product/belt/",
+			"images": [
+				{
+					"id": "41",
+					"src": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg",
+					"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg",
+					"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-100x100.jpg 100w",
+					"sizes": "(max-width: 801px) 100vw, 801px",
+					"name": "belt-2.jpg",
+					"alt": ""
+				}
+			],
+			"variation": [],
+			"totals": {
+				"currency_code": "GBP",
+				"currency_symbol": "£",
+				"currency_minor_unit": 2,
+				"currency_decimal_separator": ".",
+				"currency_thousand_separator": ",",
+				"currency_prefix": "£",
+				"currency_suffix": "",
+				"line_subtotal": "4583",
+				"line_subtotal_tax": "917",
+				"line_total": "4583",
+				"line_total_tax": "917"
 			}
 		}
 	],
+	"items_count": 3,
+	"items_weight": 0,
 	"needs_shipping": true,
-	"total_price": "30.00",
-	"total_weight": 0
+	"totals": {
+		"currency_code": "GBP",
+		"currency_symbol": "£",
+		"currency_minor_unit": 2,
+		"currency_decimal_separator": ".",
+		"currency_thousand_separator": ",",
+		"currency_prefix": "£",
+		"currency_suffix": "",
+		"total_items": "7333",
+		"total_items_tax": "1467",
+		"total_fees": "0",
+		"total_fees_tax": "0",
+		"total_discount": "0",
+		"total_discount_tax": "0",
+		"total_shipping": "998",
+		"total_shipping_tax": "200",
+		"total_tax": "1667",
+		"total_price": "9998",
+		"tax_lines": [
+			{
+				"name": "Tax",
+				"price": "1667"
+			}
+		]
+	}
 }
 ```
 
@@ -369,25 +472,138 @@ Example response:
 ```json
 [
 	{
-		"key": "11a7ec12ea1071fdecd917d6da5c87ae",
-		"id": 88,
-		"quantity": 2,
-		"name": "V-Neck T-Shirt",
-		"sku": "woo-vneck-tee-blue",
-		"permalink": "http://local.wordpress.test/product/v-neck-t-shirt/?attribute_pa_color=blue",
+		"key": "6512bd43d9caa6e02c990b0a82652dca",
+		"id": 11,
+		"quantity": 1,
+		"name": "Beanie",
+		"sku": "woo-beanie",
+		"permalink": "http://local.wordpress.test/product/beanie/",
 		"images": [
 			{
-				"id": 41,
-				"src": "http://local.wordpress.test/wp-content/uploads/2019/07/vnech-tee-blue-1.jpg",
-				"name": "vnech-tee-blue-1.jpg",
+				"id": "40",
+				"src": "http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg",
+				"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-450x450.jpg",
+				"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/beanie-2-100x100.jpg 100w",
+				"sizes": "(max-width: 801px) 100vw, 801px",
+				"name": "beanie-2.jpg",
 				"alt": ""
 			}
 		],
-		"price": "15.00",
-		"line_price": "30.00",
-		"variation": {
-			"Color": "Blue",
-			"Size": "Small"
+		"variation": [],
+		"totals": {
+			"currency_code": "GBP",
+			"currency_symbol": "£",
+			"currency_minor_unit": 2,
+			"currency_decimal_separator": ".",
+			"currency_thousand_separator": ",",
+			"currency_prefix": "£",
+			"currency_suffix": "",
+			"line_subtotal": "1500",
+			"line_subtotal_tax": "300",
+			"line_total": "1500",
+			"line_total_tax": "300"
+		},
+		"_links": {
+			"self": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/items/6512bd43d9caa6e02c990b0a82652dca"
+				}
+			],
+			"collection": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/items"
+				}
+			]
+		}
+	},
+	{
+		"key": "1f0e3dad99908345f7439f8ffabdffc4",
+		"id": 19,
+		"quantity": 1,
+		"name": "Album",
+		"sku": "woo-album",
+		"permalink": "http://local.wordpress.test/product/album/",
+		"images": [
+			{
+				"id": "48",
+				"src": "http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg",
+				"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/album-1-450x450.jpg",
+				"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/album-1.jpg 800w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/album-1-100x100.jpg 100w",
+				"sizes": "(max-width: 800px) 100vw, 800px",
+				"name": "album-1.jpg",
+				"alt": ""
+			}
+		],
+		"variation": [],
+		"totals": {
+			"currency_code": "GBP",
+			"currency_symbol": "£",
+			"currency_minor_unit": 2,
+			"currency_decimal_separator": ".",
+			"currency_thousand_separator": ",",
+			"currency_prefix": "£",
+			"currency_suffix": "",
+			"line_subtotal": "1250",
+			"line_subtotal_tax": "250",
+			"line_total": "1250",
+			"line_total_tax": "250"
+		},
+		"_links": {
+			"self": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/items/1f0e3dad99908345f7439f8ffabdffc4"
+				}
+			],
+			"collection": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/items"
+				}
+			]
+		}
+	},
+	{
+		"key": "c20ad4d76fe97759aa27a0c99bff6710",
+		"id": 12,
+		"quantity": 1,
+		"name": "Belt",
+		"sku": "woo-belt",
+		"permalink": "http://local.wordpress.test/product/belt/",
+		"images": [
+			{
+				"id": "41",
+				"src": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg",
+				"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg",
+				"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-100x100.jpg 100w",
+				"sizes": "(max-width: 801px) 100vw, 801px",
+				"name": "belt-2.jpg",
+				"alt": ""
+			}
+		],
+		"variation": [],
+		"totals": {
+			"currency_code": "GBP",
+			"currency_symbol": "£",
+			"currency_minor_unit": 2,
+			"currency_decimal_separator": ".",
+			"currency_thousand_separator": ",",
+			"currency_prefix": "£",
+			"currency_suffix": "",
+			"line_subtotal": "4583",
+			"line_subtotal_tax": "917",
+			"line_total": "4583",
+			"line_total_tax": "917"
+		},
+		"_links": {
+			"self": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/items/c20ad4d76fe97759aa27a0c99bff6710"
+				}
+			],
+			"collection": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/items"
+				}
+			]
 		}
 	}
 ]
@@ -413,25 +629,48 @@ Example response:
 
 ```json
 {
-	"key": "11a7ec12ea1071fdecd917d6da5c87ae",
-	"id": 88,
-	"quantity": 2,
-	"name": "V-Neck T-Shirt",
-	"sku": "woo-vneck-tee-blue",
-	"permalink": "http://local.wordpress.test/product/v-neck-t-shirt/?attribute_pa_color=blue",
+	"key": "c20ad4d76fe97759aa27a0c99bff6710",
+	"id": 12,
+	"quantity": 1,
+	"name": "Belt",
+	"sku": "woo-belt",
+	"permalink": "http://local.wordpress.test/product/belt/",
 	"images": [
 		{
-			"id": 41,
-			"src": "http://local.wordpress.test/wp-content/uploads/2019/07/vnech-tee-blue-1.jpg",
-			"name": "vnech-tee-blue-1.jpg",
+			"id": "41",
+			"src": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg",
+			"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg",
+			"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-768x768.jpg 768w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-600x600.jpg 600w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-100x100.jpg 100w",
+			"sizes": "(max-width: 801px) 100vw, 801px",
+			"name": "belt-2.jpg",
 			"alt": ""
 		}
 	],
-	"price": "15.00",
-	"line_price": "30.00",
-	"variation": {
-		"Color": "Blue",
-		"Size": "Small"
+	"variation": [],
+	"totals": {
+		"currency_code": "GBP",
+		"currency_symbol": "£",
+		"currency_minor_unit": 2,
+		"currency_decimal_separator": ".",
+		"currency_thousand_separator": ",",
+		"currency_prefix": "£",
+		"currency_suffix": "",
+		"line_subtotal": "4583",
+		"line_subtotal_tax": "917",
+		"line_total": "4583",
+		"line_total_tax": "917"
+	},
+	"_links": {
+		"self": [
+			{
+				"href": "http://local.wordpress.test/wp-json/wc/store/cart/items/c20ad4d76fe97759aa27a0c99bff6710"
+			}
+		],
+		"collection": [
+			{
+				"href": "http://local.wordpress.test/wp-json/wc/store/cart/items"
+			}
+		]
 	}
 }
 ```
@@ -472,8 +711,11 @@ Example response:
 			"alt": ""
 		}
 	],
-	"price": "2.00",
-	"line_price": "2.00",
+	"product_price": "5500",
+	"line_subtotal": "4583",
+	"line_subtotal_tax": "917",
+	"line_total": "4583",
+	"line_total_tax": "917",
 	"variation": []
 }
 ```
@@ -513,8 +755,11 @@ Example response:
 			"alt": ""
 		}
 	],
-	"price": "2.00",
-	"line_price": "20.00",
+	"product_price": "5500",
+	"line_subtotal": "4583",
+	"line_subtotal_tax": "917",
+	"line_total": "4583",
+	"line_total_tax": "917",
 	"variation": []
 }
 ```

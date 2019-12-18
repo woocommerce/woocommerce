@@ -1,26 +1,25 @@
 /**
  * Internal dependencies
  */
-import { formatPrice } from '../price';
+import { formatPrice, getCurrency } from '../price';
 
 describe( 'formatPrice', () => {
 	test.each`
-		value        | priceFormat   | currencySymbol | expected
-		${10}        | ${'%1$s%2$s'} | ${'€'}         | ${'€10'}
-		${10}        | ${'%2$s%1$s'} | ${'€'}         | ${'10€'}
-		${10}        | ${'%2$s%1$s'} | ${'$'}         | ${'10$'}
-		${'10'}      | ${'%1$s%2$s'} | ${'€'}         | ${'€10'}
-		${0}         | ${'%1$s%2$s'} | ${'€'}         | ${'€0'}
-		${''}        | ${'%1$s%2$s'} | ${'€'}         | ${''}
-		${null}      | ${'%1$s%2$s'} | ${'€'}         | ${''}
-		${undefined} | ${'%1$s%2$s'} | ${'€'}         | ${''}
+		value        | prefix | suffix | expected
+		${1000}      | ${'€'} | ${''}  | ${'€10'}
+		${1000}      | ${''}  | ${'€'} | ${'10€'}
+		${1000}      | ${''}  | ${'$'} | ${'10$'}
+		${'1000'}    | ${'€'} | ${''}  | ${'€10'}
+		${0}         | ${'€'} | ${''}  | ${'€0'}
+		${''}        | ${'€'} | ${''}  | ${''}
+		${null}      | ${'€'} | ${''}  | ${''}
+		${undefined} | ${'€'} | ${''}  | ${''}
 	`(
-		'correctly formats price given "$value", "$priceFormat", and "$currencySymbol"',
-		( { value, priceFormat, currencySymbol, expected } ) => {
+		'correctly formats price given "$value", "$prefix" prefix, and "$suffix" suffix',
+		( { value, prefix, suffix, expected } ) => {
 			const formattedPrice = formatPrice(
 				value,
-				priceFormat,
-				currencySymbol
+				getCurrency( { prefix, suffix } )
 			);
 
 			expect( formattedPrice ).toEqual( expected );
