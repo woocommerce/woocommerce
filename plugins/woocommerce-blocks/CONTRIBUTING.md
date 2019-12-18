@@ -56,7 +56,12 @@ These instructions cover new releases of the blocks plugin for those with commit
 
 -   The `readme.txt` file supported versions, changelog and list of blocks if the release includes new blocks.
 
-> Note: version numbers will automatically be updated in files via the deploy script (see `bin/version-changes.sh`).
+**Before a minor release** ensure you update:
+
+-   The release last major release branch you're basing this release from (e.g `release/2.5`), chances are you aren’t the last person who released and this branch will be outdated.
+
+-   `git checkout release/2.x` (e.g release/2.5).
+-   `git pull origin release/2.5`
 
 ### Creating release branches
 
