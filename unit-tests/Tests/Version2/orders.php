@@ -464,7 +464,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$expected = array(
-			'id'           => 1,
+			'id'           => $item->get_id(),
 			'name'         => 'Dummy Product',
 			'product_id'   => 0,
 			'variation_id' => 0,
