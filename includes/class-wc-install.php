@@ -135,6 +135,10 @@ class WC_Install {
 			'wc_update_370_mro_std_currency',
 			'wc_update_370_db_version',
 		),
+		'3.10.0' => array(
+			'wc_update_3100_increase_size_of_column',
+			'wc_update_3100_db_version',
+		),
 	);
 
 	/**
