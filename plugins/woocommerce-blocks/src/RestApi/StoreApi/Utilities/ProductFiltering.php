@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Query fllters helper.
+ * Product Query filters helper.
  *
  * @package Automattic/WooCommerce/RestApi
  */
@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQuery;
 
 /**
- * Product Query fllters class.
+ * Product Query filters class.
  *
  * @since 2.5.0
  */

@@ -53,7 +53,7 @@ class ProductQuery {
 			$args['date_query'][0]['after'] = $request['after'];
 		}
 
-		// Set date query colummn. Defaults to post_date.
+		// Set date query column. Defaults to post_date.
 		if ( isset( $request['date_column'] ) && ! empty( $args['date_query'][0] ) ) {
 			$args['date_query'][0]['column'] = 'post_' . $request['date_column'];
 		}
@@ -82,7 +82,7 @@ class ProductQuery {
 			'and'    => 'AND',
 		);
 
-		// Map between taxonomy name and arg's key.
+		// Map between taxonomy name and arg key.
 		$taxonomies = array(
 			'product_cat' => 'category',
 			'product_tag' => 'tag',
@@ -289,13 +289,17 @@ class ProductQuery {
 		}
 
 		if ( $wp_query->get( 'min_price' ) ) {
+			// Convert from subunit to decimal.
+			$query_price    = floatval( $wp_query->get( 'min_price' ) / ( 10 ** wc_get_price_decimals() ) );
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', floatval( $wp_query->get( 'min_price' ) ) );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $query_price );
 		}
 
 		if ( $wp_query->get( 'max_price' ) ) {
+			// Convert from subunit to decimal.
+			$query_price    = floatval( $wp_query->get( 'max_price' ) / ( 10 ** wc_get_price_decimals() ) );
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', floatval( $wp_query->get( 'max_price' ) ) );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $query_price );
 		}
 
 		if ( $wp_query->get( 'stock_status' ) ) {

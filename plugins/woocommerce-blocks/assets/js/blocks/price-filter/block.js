@@ -8,9 +8,9 @@ import {
 } from '@woocommerce/base-hooks';
 import { Fragment, useCallback, useState, useEffect } from '@wordpress/element';
 import PriceSlider from '@woocommerce/base-components/price-slider';
-import { CURRENCY } from '@woocommerce/settings';
 import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
+import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -19,6 +19,8 @@ import usePriceConstraints from './use-price-constraints.js';
 
 /**
  * Component displaying a price filter.
+ *
+ * @param {Object} props Component props.
  */
 const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(
@@ -36,9 +38,16 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	const [ minPrice, setMinPrice ] = useState();
 	const [ maxPrice, setMaxPrice ] = useState();
 
+	const currency = getCurrencyFromPriceResponse( results.price_range );
+
 	const { minConstraint, maxConstraint } = usePriceConstraints( {
-		minPrice: results.min_price,
-		maxPrice: results.max_price,
+		minPrice: results.price_range
+			? results.price_range.min_price
+			: undefined,
+		maxPrice: results.price_range
+			? results.price_range.max_price
+			: undefined,
+		minorUnit: currency.minorUnit,
 	} );
 
 	// Updates the query after a short delay.
@@ -116,9 +125,7 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 					maxConstraint={ maxConstraint }
 					minPrice={ min }
 					maxPrice={ max }
-					step={ 10 }
-					currencySymbol={ CURRENCY.symbol }
-					priceFormat={ CURRENCY.priceFormat }
+					currency={ currency }
 					showInputFields={ attributes.showInputFields }
 					showFilterButton={ attributes.showFilterButton }
 					onChange={ onChange }

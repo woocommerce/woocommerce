@@ -61,23 +61,23 @@ class Cart extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'GBP', $data['currency'] );
-		$this->assertEquals( 2, $data['currency_minor_unit'] );
 		$this->assertEquals( 3, $data['items_count'] );
 		$this->assertEquals( 2, count( $data['items'] ) );
 		$this->assertEquals( false, $data['needs_shipping'] );
 		$this->assertEquals( '30', $data['items_weight'] );
 
-		$this->assertEquals( '3000', $data['total_items'] );
-		$this->assertEquals( '0', $data['total_items_tax'] );
-		$this->assertEquals( '0', $data['total_fees'] );
-		$this->assertEquals( '0', $data['total_fees_tax'] );
-		$this->assertEquals( '0', $data['total_discount'] );
-		$this->assertEquals( '0', $data['total_discount_tax'] );
-		$this->assertEquals( '0', $data['total_shipping'] );
-		$this->assertEquals( '0', $data['total_shipping_tax'] );
-		$this->assertEquals( '0', $data['total_tax'] );
-		$this->assertEquals( '3000', $data['total_price'] );
+		$this->assertEquals( 'GBP', $data['totals']['currency_code'] );
+		$this->assertEquals( 2, $data['totals']['currency_minor_unit'] );
+		$this->assertEquals( '3000', $data['totals']['total_items'] );
+		$this->assertEquals( '0', $data['totals']['total_items_tax'] );
+		$this->assertEquals( '0', $data['totals']['total_fees'] );
+		$this->assertEquals( '0', $data['totals']['total_fees_tax'] );
+		$this->assertEquals( '0', $data['totals']['total_discount'] );
+		$this->assertEquals( '0', $data['totals']['total_discount_tax'] );
+		$this->assertEquals( '0', $data['totals']['total_shipping'] );
+		$this->assertEquals( '0', $data['totals']['total_shipping_tax'] );
+		$this->assertEquals( '0', $data['totals']['total_tax'] );
+		$this->assertEquals( '3000', $data['totals']['total_price'] );
 	}
 
 	/**
@@ -87,22 +87,11 @@ class Cart extends TestCase {
 		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Cart();
 		$schema     = $controller->get_item_schema();
 
-		$this->assertArrayHasKey( 'currency', $schema['properties'] );
 		$this->assertArrayHasKey( 'items_count', $schema['properties'] );
 		$this->assertArrayHasKey( 'items', $schema['properties'] );
 		$this->assertArrayHasKey( 'needs_shipping', $schema['properties'] );
 		$this->assertArrayHasKey( 'items_weight', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_items', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_items_tax', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_fees', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_fees_tax', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_discount', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_discount_tax', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_shipping', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_shipping_tax', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_tax', $schema['properties'] );
-		$this->assertArrayHasKey( 'total_price', $schema['properties'] );
-		$this->assertArrayHasKey( 'tax_lines', $schema['properties'] );
+		$this->assertArrayHasKey( 'totals', $schema['properties'] );
 	}
 
 	/**
@@ -113,21 +102,10 @@ class Cart extends TestCase {
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, [] );
 
-		$this->assertArrayHasKey( 'currency', $response->get_data() );
 		$this->assertArrayHasKey( 'items_count', $response->get_data() );
 		$this->assertArrayHasKey( 'items', $response->get_data() );
 		$this->assertArrayHasKey( 'needs_shipping', $response->get_data() );
 		$this->assertArrayHasKey( 'items_weight', $response->get_data() );
-		$this->assertArrayHasKey( 'total_items', $response->get_data() );
-		$this->assertArrayHasKey( 'total_items_tax', $response->get_data() );
-		$this->assertArrayHasKey( 'total_fees', $response->get_data() );
-		$this->assertArrayHasKey( 'total_fees_tax', $response->get_data() );
-		$this->assertArrayHasKey( 'total_discount', $response->get_data() );
-		$this->assertArrayHasKey( 'total_discount_tax', $response->get_data() );
-		$this->assertArrayHasKey( 'total_shipping', $response->get_data() );
-		$this->assertArrayHasKey( 'total_shipping_tax', $response->get_data() );
-		$this->assertArrayHasKey( 'total_tax', $response->get_data() );
-		$this->assertArrayHasKey( 'total_price', $response->get_data() );
-		$this->assertArrayHasKey( 'tax_lines', $response->get_data() );
+		$this->assertArrayHasKey( 'totals', $response->get_data() );
 	}
 }

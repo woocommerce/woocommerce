@@ -391,14 +391,14 @@ class Products extends RestController {
 		);
 
 		$params['min_price'] = array(
-			'description'       => __( 'Limit result set to products based on a minimum price.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products based on a minimum price, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['max_price'] = array(
-			'description'       => __( 'Limit result set to products based on a maximum price.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Limit result set to products based on a maximum price, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
