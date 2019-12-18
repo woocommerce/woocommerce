@@ -40,6 +40,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 								value: 'list',
 							},
 							{
+								/* translators: "Chips" is a tag-like display style for chosen attributes. */
 								label: __(
 									'Chips',
 									'woo-gutenberg-products-block'
