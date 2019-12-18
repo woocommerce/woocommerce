@@ -693,7 +693,7 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
 		$qty_to_refund      = $refunded_line_items[ $item_id ]['qty'];
 
-		if ( ! $item_stock_reduced || ! $qty_to_refund || ! $product || ! $product->managing_stock() ) {
+		if ( ! $item_stock_reduced || ! $qty_to_refund || ! $product || ! $product->managing_stock() || ! apply_filters('woocommerce_can_restock_refunded_items', true, $order, $refunded_line_items ) ) {
 			continue;
 		}
 
