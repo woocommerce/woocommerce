@@ -2104,6 +2104,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
+		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'menu_order' ) );
+
 		$params['slug']           = array(
 			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
