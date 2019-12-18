@@ -605,18 +605,20 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Gets the product ID from the SKU or posted ID.
 	 *
-	 * @param array $posted Request data
-	 *
+	 * @throws WC_REST_Exception When SKU or ID is not valid.
+	 * @param array           $posted Request data.
+	 * @param string          $action 'create' to add line item or 'update' to update it.
 	 * @return int
-	 * @throws WC_REST_Exception
 	 */
-	protected function get_product_id( $posted ) {
+	protected function get_product_id( $posted, $action = 'create' ) {
 		if ( ! empty( $posted['sku'] ) ) {
 			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
 		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
+		} elseif ( 'update' === $action ) {
+			$product_id = 0;
 		} else {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce-rest-api' ), 400 );
 		}
@@ -658,9 +660,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
 		$item    = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
-		$product = wc_get_product( $this->get_product_id( $posted ) );
+		$product = wc_get_product( $this->get_product_id( $posted, $item->get_product() ) );
 
-		if ( $product !== $item->get_product() ) {
+		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
