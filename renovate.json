@@ -6,10 +6,6 @@
     {
       "packageNames": ["automattic/jetpack-autoloader"],
       "rangeStrategy": "bump"
-    },
-    {
-      "depTypeList": ["devDependencies"],
-      "schedule": "every month"
     }
   ]
 }
