@@ -49,6 +49,13 @@ class WC_Admin_Setup_Wizard {
 	);
 
 	/**
+	 * The version of WordPress required to run the WooCommerce Admin plugin
+	 *
+	 * @var string
+	 */
+	private $wc_admin_plugin_minimum_wordpress_version = '5.3';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
@@ -126,12 +133,15 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Should we show the WooCommerce Admin install option?
 	 * True only if the user can install plugins,
-	 * and up until the end date of the recommendation.
+	 * and is running the correct version of WordPress.
+	 *
+	 * @see WC_Admin_Setup_Wizard::$wc_admin_plugin_minimum_wordpress_version
 	 *
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin() {
-		return current_user_can( 'install_plugins' );
+		$wordpress_minimum_met = version_compare( get_bloginfo( 'version' ), $this->wc_admin_plugin_minimum_wordpress_version, '>=' );
+		return current_user_can( 'install_plugins' ) && $wordpress_minimum_met;
 	}
 
 	/**
@@ -140,7 +150,7 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin_onboarding() {
-		if ( ! current_user_can( 'install_plugins' ) ) {
+		if ( ! $this->should_show_wc_admin() ) {
 			return false;
 		}
 
