@@ -9,6 +9,7 @@ import Gridicon from 'gridicons';
 import { IconButton } from '@wordpress/components';
 import { intersection, noop, partial } from 'lodash';
 import PropTypes from 'prop-types';
+import { applyFilters } from '@wordpress/hooks';
 
 class WordPressNotices extends Component {
 	constructor() {
@@ -80,11 +81,9 @@ class WordPressNotices extends Component {
 			document.getElementById( 'woocommerce-layout__notice-list' );
 
 		let count = 0;
-		for ( let i = 0; i <= notices.children.length; i++ ) {
-			const notice = notices.children[ i ];
-			if ( ! notice ) {
-				continue;
-			} else if ( 0 === notice.innerHTML.length ) {
+
+		for ( const notice of Array.from( notices.children ) ) {
+			if ( 0 === notice.innerHTML.length ) {
 				// Ignore empty elements in this part of the DOM.
 				continue;
 			} else if ( ! this.shouldCollapseNotice( notice ) ) {
@@ -117,16 +116,19 @@ class WordPressNotices extends Component {
 
 	// Some messages should not be displayed in the toggle, like Jetpack JITM messages or update/success messages
 	shouldCollapseNotice( element ) {
-		// element id, [ classes to include ], [ classes to exclude ]
-		const noticesToHide = [
-			[ null, [ 'jetpack-jitm-message' ] ],
-			[ 'woocommerce_errors', null ],
-			[ null, [ 'hidden' ] ],
-			[ 'message', [ 'notice', 'updated' ], [ 'woocommerce-message' ] ],
-		];
+		const noticesToShow = applyFilters(
+			'woocommerce_admin_notices_to_show',
+			// element id, [ classes to include ], [ classes to exclude ]
+			[
+				[ null, [ 'jetpack-jitm-message' ] ],
+				[ 'woocommerce_errors', null ],
+				[ null, [ 'hidden' ] ],
+				[ 'message', [ 'notice', 'updated' ], [ 'woocommerce-message' ] ],
+			]
+		);
 
-		for ( let i = 0; i < noticesToHide.length; i++ ) {
-			const [ id, includeClasses, excludeClasses ] = noticesToHide[ i ];
+		for ( let i = 0; i < noticesToShow.length; i++ ) {
+			const [ id, includeClasses, excludeClasses ] = noticesToShow[ i ];
 
 			const idMatch = null === id || id === element.id;
 			let classMatch = true;
@@ -140,11 +142,11 @@ class WordPressNotices extends Component {
 			}
 
 			if ( idMatch && classMatch ) {
-				return false;
+				return applyFilters( 'woocommerce_admin_should_hide_notice', false, element );
 			}
 		}
 
-		return true;
+		return applyFilters( 'woocommerce_admin_should_hide_notice', true, element );
 	}
 
 	updateCount() {
