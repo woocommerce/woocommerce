@@ -12,8 +12,8 @@ import { formatPrice } from '@woocommerce/base-utils';
  */
 export const formatPriceRange = ( minPrice, maxPrice ) => {
 	if ( Number.isFinite( minPrice ) && Number.isFinite( maxPrice ) ) {
-		/* translators: %s min price, %s max price */
 		return sprintf(
+			/* translators: %s min price, %s max price */
 			__( 'Between %s and %s', 'woo-gutenberg-products-block' ),
 			formatPrice( minPrice ),
 			formatPrice( maxPrice )
@@ -21,15 +21,15 @@ export const formatPriceRange = ( minPrice, maxPrice ) => {
 	}
 
 	if ( Number.isFinite( minPrice ) ) {
-		/* translators: %s min price */
 		return sprintf(
+			/* translators: %s min price */
 			__( 'From %s', 'woo-gutenberg-products-block' ),
 			formatPrice( minPrice )
 		);
 	}
 
-	/* translators: %s max price */
 	return sprintf(
+		/* translators: %s max price */
 		__( 'Up to %s', 'woo-gutenberg-products-block' ),
 		formatPrice( maxPrice )
 	);
