@@ -1455,9 +1455,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Calculate fees for all line items.
+	 * 
+	 * @return float Fee total.
 	 */
-	public function calculate_fees() {
-		// Sum fee costs.
+	public function get_total_fees() {
 		$fees_total = 0;
 
 		foreach ( $this->get_fees() as $item ) {

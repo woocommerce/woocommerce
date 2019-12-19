@@ -145,7 +145,7 @@ if ( wc_tax_enabled() ) {
 	<table class="wc-order-totals">
 		<?php?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Item(s) Subtotal:', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Items Subtotal:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
 					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
@@ -154,19 +154,19 @@ if ( wc_tax_enabled() ) {
 		<?php?>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Coupon(s):', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Coupons:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
 					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
 		<?php endif; ?>
-		<?php if ( 0 < $order->get_fees() ) : ?>
+		<?php if ( 0 < $order->get_total_fees() ) : ?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Fee(s):', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Fees:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_fees(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+					<?php echo wc_price( $order->get_total_fees(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
 		<?php endif; ?>
