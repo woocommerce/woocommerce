@@ -19,7 +19,7 @@ const StepNumber = ( { stepNumber } ) => {
 				screenReaderLabel={ sprintf(
 					__(
 						// translators: %s is a step number (1, 2, 3...)
-						'Step %s',
+						'Step %d',
 						'woo-gutenberg-products-block'
 					),
 					stepNumber

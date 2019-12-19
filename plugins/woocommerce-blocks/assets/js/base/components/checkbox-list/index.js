@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { Fragment, useMemo, useState } from '@wordpress/element';
 import classNames from 'classnames';
@@ -39,6 +39,7 @@ const CheckboxList = ( {
 
 	const renderedShowMore = useMemo( () => {
 		const optionCount = options.length;
+		const remainingOptionsCount = optionCount - limit;
 		return (
 			! showExpanded && (
 				<li key="show-more" className="show-more">
@@ -48,20 +49,24 @@ const CheckboxList = ( {
 						} }
 						aria-expanded={ false }
 						aria-label={ sprintf(
-							__(
+							_n(
+								'Show %s more option',
 								'Show %s more options',
+								remainingOptionsCount,
 								'woo-gutenberg-products-block'
 							),
-							optionCount - limit
+							remainingOptionsCount
 						) }
 					>
-						{ // translators: %s number of options to reveal.
-						sprintf(
-							__(
+						{ sprintf(
+							// translators: %s number of options to reveal.
+							_n(
 								'Show %s more',
+								'Show %s more',
+								remainingOptionsCount,
 								'woo-gutenberg-products-block'
 							),
-							optionCount - limit
+							remainingOptionsCount
 						) }
 					</button>
 				</li>
@@ -99,9 +104,9 @@ const CheckboxList = ( {
 				{ options.map( ( option, index ) => (
 					<Fragment key={ option.value }>
 						<li
-							{ ...shouldTruncateOptions &&
+							{ ...( shouldTruncateOptions &&
 								! showExpanded &&
-								index >= limit && { hidden: true } }
+								index >= limit && { hidden: true } ) }
 						>
 							<input
 								type="checkbox"
