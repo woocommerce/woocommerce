@@ -94,6 +94,7 @@ class RestApi {
 			'product-reviews'               => __NAMESPACE__ . '\RestApi\Controllers\ProductReviews',
 			'store-cart'                    => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Cart',
 			'store-cart-items'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
+			'store-cart-coupons'            => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartCoupons',
 			'store-products'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Products',
 			'store-product-collection-data' => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductCollectionData',
 			'store-product-attributes'      => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductAttributes',

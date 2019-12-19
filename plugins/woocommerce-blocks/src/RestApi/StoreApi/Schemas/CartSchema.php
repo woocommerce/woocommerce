@@ -29,6 +29,16 @@ class CartSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
+			'coupons'        => [
+				'description' => __( 'List of applied cart coupons.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( ( new CartCouponSchema() )->get_properties() ),
+				],
+			],
 			'items'          => [
 				'description' => __( 'List of cart items.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
@@ -161,8 +171,10 @@ class CartSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $cart ) {
-		$cart_item_schema = new CartItemSchema();
+		$cart_coupon_schema = new CartCouponSchema();
+		$cart_item_schema   = new CartItemSchema();
 		return [
+			'coupons'        => array_values( array_map( [ $cart_coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
 			'items'          => array_values( array_map( [ $cart_item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
 			'items_count'    => $cart->get_cart_contents_count(),
 			'items_weight'   => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
