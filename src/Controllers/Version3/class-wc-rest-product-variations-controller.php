@@ -441,18 +441,18 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 				'price'                 => array(
 					'description' => __( 'Current variation price.', 'woocommerce-rest-api' ),
-					'type'        => 'string',
+					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'regular_price'         => array(
 					'description' => __( 'Variation regular price.', 'woocommerce-rest-api' ),
-					'type'        => 'string',
+					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sale_price'            => array(
 					'description' => __( 'Variation sale price.', 'woocommerce-rest-api' ),
-					'type'        => 'string',
+					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from'     => array(
@@ -595,7 +595,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				'weight'                => array(
 					/* translators: %s: weight unit */
 					'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce-rest-api' ), $weight_unit ),
-					'type'        => 'string',
+					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'dimensions'            => array(
@@ -606,19 +606,19 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'length' => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Variation length (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
-							'type'        => 'string',
+							'type'        => 'number',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Variation width (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
-							'type'        => 'string',
+							'type'        => 'number',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Variation height (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
-							'type'        => 'string',
+							'type'        => 'number',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
