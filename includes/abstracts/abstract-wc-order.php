@@ -1458,7 +1458,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @return float Fee total.
 	 */
-	public function calculate_fees() {
+	public function get_total_fees() {
 		return array_reduce($this->get_fees(), function($carry, $item) {
 			return $carry + $item->get_total();
 		});
