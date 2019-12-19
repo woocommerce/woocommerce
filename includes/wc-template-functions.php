@@ -80,7 +80,8 @@ add_action( 'template_redirect', 'wc_template_redirect' );
  * @since  2.3.10
  */
 function wc_send_frame_options_header() {
-	if ( is_checkout() || is_account_page() ) {
+
+	if ( ( is_checkout() || is_account_page() ) && ! is_customize_preview() ) {
 		send_frame_options_header();
 	}
 }
@@ -1948,6 +1949,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			array(
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
+				'order'			 => $order,
 				'columns'        => $columns,
 			)
 		);
@@ -1955,6 +1957,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_upsells_columns', isset( $args['columns'] ) ? $args['columns'] : $columns ) );
 
 		$orderby = apply_filters( 'woocommerce_upsells_orderby', isset( $args['orderby'] ) ? $args['orderby'] : $orderby );
+		$order   = apply_filters( 'woocommerce_upsells_order', isset( $args['order'] ) ? $args['order'] : $order );
 		$limit   = apply_filters( 'woocommerce_upsells_total', isset( $args['posts_per_page'] ) ? $args['posts_per_page'] : $limit );
 
 		// Get visible upsells then sort them at random, then limit result set.
@@ -3663,4 +3666,30 @@ if ( ! function_exists( 'woocommerce_product_reviews_tab' ) ) {
 	function woocommerce_product_reviews_tab() {
 		wc_deprecated_function( 'woocommerce_product_reviews_tab', '2.4' );
 	}
+}
+
+/**
+ * Display pay buttons HTML.
+ *
+ * @since 3.9.0
+ */
+function wc_get_pay_buttons() {
+	$supported_gateways = array();
+	$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+	foreach ( $available_gateways as $gateway ) {
+		if ( $gateway->supports( 'pay_button' ) ) {
+			$supported_gateways[] = $gateway->get_pay_button_id();
+		}
+	}
+
+	if ( ! $supported_gateways ) {
+		return;
+	}
+
+	echo '<div class="woocommerce-pay-buttons">';
+	foreach ( $supported_gateways as $pay_button_id ) {
+		echo sprintf( '<div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div>', esc_attr( $pay_button_id ) );
+	}
+	echo '</div>';
 }

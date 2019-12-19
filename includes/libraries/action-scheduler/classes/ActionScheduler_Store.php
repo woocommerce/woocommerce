@@ -149,7 +149,7 @@ abstract class ActionScheduler_Store {
 	protected function get_scheduled_date_string( ActionScheduler_Action $action, DateTime $scheduled_date = NULL ) {
 		$next = null === $scheduled_date ? $action->get_schedule()->next() : $scheduled_date;
 		if ( ! $next ) {
-			throw new InvalidArgumentException( __( 'Invalid schedule. Cannot save action.', 'action-scheduler' ) );
+			throw new InvalidArgumentException( __( 'Invalid schedule. Cannot save action.', 'woocommerce' ) );
 		}
 		$next->setTimezone( new DateTimeZone( 'UTC' ) );
 
@@ -166,7 +166,7 @@ abstract class ActionScheduler_Store {
 	protected function get_scheduled_date_string_local( ActionScheduler_Action $action, DateTime $scheduled_date = NULL ) {
 		$next = null === $scheduled_date ? $action->get_schedule()->next() : $scheduled_date;
 		if ( ! $next ) {
-			throw new InvalidArgumentException( __( 'Invalid schedule. Cannot save action.', 'action-scheduler' ) );
+			throw new InvalidArgumentException( __( 'Invalid schedule. Cannot save action.', 'woocommerce' ) );
 		}
 
 		ActionScheduler_TimezoneHelper::set_local_timezone( $next );
@@ -178,11 +178,11 @@ abstract class ActionScheduler_Store {
 	 */
 	public function get_status_labels() {
 		return array(
-			self::STATUS_COMPLETE => __( 'Complete', 'action-scheduler' ),
-			self::STATUS_PENDING  => __( 'Pending', 'action-scheduler' ),
-			self::STATUS_RUNNING  => __( 'In-progress', 'action-scheduler' ),
-			self::STATUS_FAILED   => __( 'Failed', 'action-scheduler' ),
-			self::STATUS_CANCELED => __( 'Canceled', 'action-scheduler' ),
+			self::STATUS_COMPLETE => __( 'Complete', 'woocommerce' ),
+			self::STATUS_PENDING  => __( 'Pending', 'woocommerce' ),
+			self::STATUS_RUNNING  => __( 'In-progress', 'woocommerce' ),
+			self::STATUS_FAILED   => __( 'Failed', 'woocommerce' ),
+			self::STATUS_CANCELED => __( 'Canceled', 'woocommerce' ),
 		);
 	}
 

@@ -71,7 +71,7 @@ jQuery( function( $ ) {
 
 			var data = {};
 
-			$.each( $thisbutton.data(), function( key, value ) {
+			$.each( $thisbutton[0].dataset, function( key, value ) {
 				data[ key ] = value;
 			});
 

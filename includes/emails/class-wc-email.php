@@ -261,7 +261,7 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function handle_multipart( $mailer ) {
 		if ( $this->sending && 'multipart' === $this->get_email_type() ) {
-			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
 			);
 			$this->sending   = false;
@@ -634,7 +634,7 @@ class WC_Email extends WC_Settings_API {
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, $subject, $message, $headers, $attachments ), $this );
-		$return               = call_user_func_array( $mail_callback, $mail_callback_params );
+		$return               = $mail_callback( ...$mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );

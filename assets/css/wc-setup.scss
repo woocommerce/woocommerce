@@ -6,7 +6,7 @@ body {
 	padding: 0;
 }
 
-#wc-logo {
+.wc-logo {
 	border: 0;
 	margin: 0 0 24px;
 	padding: 0;
@@ -1070,6 +1070,31 @@ h3.jetpack-reasons {
 	}
 }
 
+.wc-setup-step__new_onboarding {
+
+	.wc-logo,
+	.wc-setup-steps {
+		display: none;
+	}
+
+	.wc-setup-step__new_onboarding-wrapper {
+
+		.wc-logo {
+			display: block;
+		}
+
+		p {
+			text-align: center;
+		}
+
+		.wc-setup-step__new_onboarding-welcome,
+		.wc-setup-step__new_onboarding-plugin-info {
+			color: #7c7c7c;
+			font-size: 12px;
+		}
+	}
+}
+
 .step {
 	text-align: center;
 }
@@ -1146,7 +1171,7 @@ h3.jetpack-reasons {
 	border-color: #ddd;
 	border-radius: 4px;
 	height: 30px;
-	width: 100%;
+	width: calc(100% - 8px - 8px - 2px);
 	padding-left: 8px;
 	padding-right: 8px;
 	font-size: 16px;
@@ -1155,6 +1180,15 @@ h3.jetpack-reasons {
 	display: block;
 
 	&.dropdown {
+		width: 100%;
+	}
+}
+
+.branch-5-2,
+.branch-5-3 {
+
+	.location-input {
+		margin: 0;
 		width: 100%;
 	}
 }
@@ -1380,6 +1414,18 @@ p.jetpack-terms {
 	}
 }
 
+.branch-5-2,
+.branch-5-3 {
+
+	.wc-wizard-service-setting-stripe_create_account,
+	.wc-wizard-service-setting-ppec_paypal_reroute_requests {
+
+		.payment-checkbox-input {
+			margin-top: 3px;
+		}
+	}
+}
+
 .wc-wizard-service-setting-stripe_email,
 .wc-wizard-service-setting-ppec_paypal_email {
 	margin-top: 0.75em;
@@ -1504,7 +1550,7 @@ p.jetpack-terms {
 
 @media only screen and (max-width: 400px) {
 
-	#wc-logo img {
+	.wc-logo img {
 		max-width: 80%;
 	}
 
