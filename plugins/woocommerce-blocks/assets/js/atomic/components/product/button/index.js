@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { __, sprintf } from '@wordpress/i18n';
+import { _n, sprintf } from '@wordpress/i18n';
 import {
 	useMemo,
 	useCallback,
@@ -103,7 +103,13 @@ const ProductButton = ( { product, className } ) => {
 	const getButtonText = () => {
 		if ( Number.isFinite( cartQuantity ) && addedToCart ) {
 			return sprintf(
-				__( '%d in cart', 'woo-gutenberg-products-block' ),
+				// translators: %s number of products in cart.
+				_n(
+					'%d in cart',
+					'%d in cart',
+					cartQuantity,
+					'woo-gutenberg-products-block'
+				),
 				cartQuantity
 			);
 		}
