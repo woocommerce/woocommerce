@@ -1,8 +1,6 @@
 <?php
 /**
- * Abstract Schema.
- *
- * Rest API schema class.
+ * Cart Item Schema.
  *
  * @package WooCommerce/Blocks
  */
@@ -14,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
 
 /**
- * AbstractBlock class.
+ * CartItemSchema class.
  *
  * @since 2.5.0
  */

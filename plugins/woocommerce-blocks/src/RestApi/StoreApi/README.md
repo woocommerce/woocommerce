@@ -90,6 +90,7 @@ Available resources in the Store API include:
 | [`Products`](#products-api)                                | `/wc/store/products`                    |
 | [`Cart`](#cart-api)                                        | `/wc/store/cart`                        |
 | [`Cart Items`](#cart-items-api)                            | `/wc/store/cart/items`                  |
+| [`Cart Coupons`](#cart-coupons-api)                        | `/wc/store/cart/coupons`                |
 | [`Cart Shipping Rates`](#cart-shipping-rates-api)          | `/wc/store/cart/shipping-rates`         |
 | [`Product Attributes`](#product-attributes-api)            | `/wc/store/products/attributes`         |
 | [`Product Attribute Terms`](#product-attribute-terms-api)  | `/wc/store/products/attributes/1/terms` |
@@ -321,6 +322,7 @@ Example response:
 
 ```json
 {
+	"coupons": [],
 	"items": [
 		{
 			"key": "6512bd43d9caa6e02c990b0a82652dca",
@@ -792,6 +794,159 @@ There are no parameters required for this endpoint.
 
 ```http
 curl --request DELETE https://example-store.com/wp-json/wc/store/cart/items
+```
+
+Example response:
+
+```json
+[]
+```
+
+## Cart coupons API
+
+### List cart coupons
+
+```http
+GET /cart/coupons
+```
+
+There are no parameters required for this endpoint.
+
+```http
+curl "https://example-store.com/wp-json/wc/store/cart/items"
+```
+
+Example response:
+
+```json
+[
+  {
+    "code": "20off",
+    "totals": {
+      "currency_code": "GBP",
+      "currency_symbol": "£",
+      "currency_minor_unit": 2,
+      "currency_decimal_separator": ".",
+      "currency_thousand_separator": ",",
+      "currency_prefix": "£",
+      "currency_suffix": "",
+      "total_discount": "1667",
+      "total_discount_tax": "333"
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "http:\/\/local.wordpress.test\/wp-json\/wc\/store\/cart\/coupons\/20off"
+        }
+      ],
+      "collection": [
+        {
+          "href": "http:\/\/local.wordpress.test\/wp-json\/wc\/store\/cart\/coupons"
+        }
+      ]
+    }
+  }
+]
+```
+
+### Single cart coupon
+
+Get a single cart coupon.
+
+```http
+GET /cart/coupons/:code
+```
+
+| Attribute | Type   | Required | Description                                     |
+| :-------- | :----- | :------: | :---------------------------------------------- |
+| `code`    | string |   Yes    | The coupon code of the cart coupon to retrieve. |
+
+```http
+curl "https://example-store.com/wp-json/wc/store/cart/coupons/20off"
+```
+
+Example response:
+
+```json
+{
+  "code": "20off",
+  "totals": {
+    "currency_code": "GBP",
+    "currency_symbol": "£",
+    "currency_minor_unit": 2,
+    "currency_decimal_separator": ".",
+    "currency_thousand_separator": ",",
+    "currency_prefix": "£",
+    "currency_suffix": "",
+    "total_discount": "1667",
+    "total_discount_tax": "333"
+  }
+}
+```
+
+### New cart coupon
+
+Apply a coupon to the cart.
+
+```http
+POST /cart/coupons/
+```
+
+| Attribute | Type   | Required | Description                                    |
+| :-------- | :----- | :------: | :--------------------------------------------- |
+| `code`    | string |   Yes    | The coupon code you wish to apply to the cart. |
+
+```http
+curl --request POST https://example-store.com/wp-json/wc/store/cart/coupons?code=20off
+```
+
+Example response:
+
+```json
+{
+  "code": "20off",
+  "totals": {
+    "currency_code": "GBP",
+    "currency_symbol": "£",
+    "currency_minor_unit": 2,
+    "currency_decimal_separator": ".",
+    "currency_thousand_separator": ",",
+    "currency_prefix": "£",
+    "currency_suffix": "",
+    "total_discount": "1667",
+    "total_discount_tax": "333"
+  }
+}
+```
+
+### Delete single cart coupon
+
+Delete/remove a coupon from the cart.
+
+```http
+DELETE /cart/coupons/:code
+```
+
+| Attribute | Type   | Required | Description                                       |
+| :-------- | :----- | :------: | :------------------------------------------------ |
+| `code`    | string |   Yes    | The coupon code you wish to remove from the cart. |
+
+```http
+curl --request DELETE https://example-store.com/wp-json/wc/store/cart/coupons/20off
+```
+
+### Delete all cart coupons
+
+Delete/remove all coupons from the cart.
+
+```http
+DELETE /cart/coupons/
+```
+
+There are no parameters required for this endpoint.
+
+```http
+curl --request DELETE https://example-store.com/wp-json/wc/store/cart/coupons
 ```
 
 Example response:
