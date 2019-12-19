@@ -67,7 +67,7 @@ Display a slider to filter products in your store by price. Works in combination
 Display a list of filters based on a chosen product attribute. Works in combination with the _All Products_ block. Requires WordPress 5.3.
 
 **Active Product Filters**
-Display a list of active product filters. Works in combination with the _Filter Products by Price_ and _Filter Products by Attribute_ block. Requires WordPress 5.3.
+Display a list of active product filters. Works in combination with the _Filter Products by Price_ and _Filter Products by Attribute_ blocks. Requires WordPress 5.3.
 
 We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories.
 
