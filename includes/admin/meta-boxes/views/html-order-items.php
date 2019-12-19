@@ -173,19 +173,12 @@ if ( wc_tax_enabled() ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
 
-		<?php if ( $order->get_shipping_methods() ) : ?>
+		<?php if ( 0 < $order->get_total_shipping() ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Shipping:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php
-					$refunded = $order->get_total_shipping_refunded();
-					if ( $refunded > 0 ) {
-						echo '<del>' . wp_strip_all_tags( wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ) ) . '</del> <ins>' . wc_price( $order->get_shipping_total() - $refunded, array( 'currency' => $order->get_currency() ) ) . '</ins>'; // WPCS: XSS ok.
-					} else {
-						echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok.
-					}
-					?>
+					<?php echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
 		<?php endif; ?>
@@ -198,14 +191,7 @@ if ( wc_tax_enabled() ) {
 					<td class="label"><?php echo esc_html( $tax_total->label ); ?>:</td>
 					<td width="1%"></td>
 					<td class="total">
-						<?php
-						$refunded = $order->get_total_tax_refunded_by_rate_id( $tax_total->rate_id );
-						if ( $refunded > 0 ) {
-							echo '<del>' . wp_strip_all_tags( $tax_total->formatted_amount ) . '</del> <ins>' . wc_price( WC_Tax::round( $tax_total->amount, wc_get_price_decimals() ) - WC_Tax::round( $refunded, wc_get_price_decimals() ), array( 'currency' => $order->get_currency() ) ) . '</ins>'; // WPCS: XSS ok.
-						} else {
-							echo wp_kses_post( $tax_total->formatted_amount );
-						}
-						?>
+						<?php echo wc_price( $order->get_total_tax(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 					</td>
 				</tr>
 			<?php endforeach; ?>
@@ -217,7 +203,7 @@ if ( wc_tax_enabled() ) {
 			<td class="label"><?php esc_html_e( 'Total', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total">
-				<?php echo $order->get_formatted_order_total(); // WPCS: XSS ok. ?>
+				<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 			</td>
 		</tr>
 
