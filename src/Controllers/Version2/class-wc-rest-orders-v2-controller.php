@@ -700,7 +700,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
-		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
+		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total', 'instance_id' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
