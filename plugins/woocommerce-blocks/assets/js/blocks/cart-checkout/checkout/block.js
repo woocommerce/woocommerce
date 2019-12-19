@@ -51,6 +51,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 			>
 				<TextInput
 					id="email-field"
+					type="email"
 					label={ __(
 						'Email address',
 						'woo-gutenberg-products-block'
@@ -230,6 +231,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 						</InputRow>
 						<TextInput
 							id="shipping-phone"
+							type="tel"
 							label={ __(
 								'Phone',
 								'woo-gutenberg-products-block'
