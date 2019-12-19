@@ -355,7 +355,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_create_order_with_invalid_product() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_body_params(
 			array(
 				'line_items' => array(
@@ -450,7 +450,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
 		$product->delete( true );
 
-		$request    = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
+		$request    = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$line_items = $order->get_items( 'line_item' );
 		$item       = current( $line_items );
 
