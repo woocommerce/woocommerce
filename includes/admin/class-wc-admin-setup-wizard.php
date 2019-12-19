@@ -1279,13 +1279,19 @@ class WC_Admin_Setup_Wizard {
 
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) { // WPCS: input var ok.
+
+				// Sanitize the cost field.
+				$domestic_cost = wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) );
+				$domestic_cost = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $domestic_cost );
+
+				// Build and make a REST request to save the shipping zone and method set.
 				$request = new WP_REST_Request( 'POST', "/wc/v3/shipping/zones/{$zone_id}/methods" );
 				$request->add_header( 'Content-Type', 'application/json' );
 				$request->set_body(
 					wp_json_encode(
 						array(
 							'method_id' => $domestic_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ),
+							'settings'  => $domestic_cost,
 						)
 					)
 				);
@@ -1297,13 +1303,19 @@ class WC_Admin_Setup_Wizard {
 		if ( $setup_intl ) {
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
+
+				// Sanitize the cost field.
+				$intl_cost = wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) );
+				$intl_cost = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $intl_cost );
+
+				// Build and make a REST request to save the shipping zone and method set.
 				$request = new WP_REST_Request( 'POST', '/wc/v3/shipping/zones/0/methods' );
 				$request->add_header( 'Content-Type', 'application/json' );
 				$request->set_body(
 					wp_json_encode(
 						array(
 							'method_id' => $intl_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) ),
+							'settings'  => $intl_cost,
 						)
 					)
 				);
