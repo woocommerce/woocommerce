@@ -162,7 +162,7 @@ class ReviewsPanel extends Component {
 					</Fragment>
 				);
 			} else {
-				buttonUrl = getAdminLink( 'edit-comments.php' );
+				buttonUrl = getAdminLink( 'edit-comments.php?comment_type=review' );
 				buttonText = __( 'View all Reviews', 'woocommerce-admin' );
 				content = (
 					<p>

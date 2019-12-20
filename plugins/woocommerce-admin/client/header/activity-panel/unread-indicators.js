@@ -67,8 +67,7 @@ export function getUnreadOrders( select ) {
 export function getUnapprovedReviews( select ) {
 	const { getReviewsTotalCount, getReviewsError, isGetReviewsRequesting } = select( 'wc-api' );
 	const reviewsEnabled = getSetting( 'reviewsEnabled' );
-	const commentModeration = getSetting( 'commentModeration' );
-	if ( 'yes' === reviewsEnabled && '1' === commentModeration ) {
+	if ( 'yes' === reviewsEnabled ) {
 		const actionableReviewsQuery = {
 			page: 1,
 			// @todo we are not using this review, so when the endpoint supports it,
