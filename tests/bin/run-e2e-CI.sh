@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Setting max amount of time to wait for the Docker container to be built - 5 minutes
+# Max amount of time to wait for the Docker container to be built
+# Allowing 30 polling attempts, 10 seconds delay between each attempt
 MAX_ATTEMPTS=30
 
-# Setting the period in seconds after which to check if the Docker container had been built
+# Delay (in seconds) between each polling attempt
 DELAY_SEC=10
 
 # Counter for the loop that checks if the Docker container had been built
