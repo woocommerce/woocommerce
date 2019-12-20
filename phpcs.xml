@@ -16,13 +16,13 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 
 	<!-- Show progress, show the error codes for each message (source). -->
-	<arg value="ps"/>
+	<arg value="ps" />
 
 	<!-- Strip the filepaths in reports down to the relevant bit. -->
-	<arg name="basepath" value="./"/>
+	<arg name="basepath" value="./" />
 
 	<!-- Check up to 8 files simultaneously. -->
-	<arg name="parallel" value="8"/>
+	<arg name="parallel" value="8" />
 
 	<!-- Configs -->
 	<config name="minimum_supported_wp_version" value="5.0" />
