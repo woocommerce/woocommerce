@@ -430,9 +430,32 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 
 				$order = wc_get_order( $order_id );
 
-				if ( $order && ( $user_id === $order->get_user_id() || ! $order->get_user_id() ) ) {
-					$allcaps['pay_for_order'] = true;
+				// This order does not exist anymore.
+				if ( ! $order ) {
+					break;
 				}
+
+				if ( $order->get_user_id() === $user_id ) {
+					$allcaps['pay_for_order'] = true;
+					break;
+				}
+
+				// Guest user paying for guest order.
+				if ( ! $order->get_user_id() && ! $user_id ) {
+					$allcaps['pay_for_order'] = true;
+					break;
+				}
+
+				// If order is for guest customer, but a customer is logged in, check if their email addresses are same.
+				// This is for when customer account is created after order was already made in name of a guest customer.
+				if ( ! $order->get_user_id() && $user_id ) {
+					$customer = get_user_by( 'id', $user_id );
+					if ( $customer && $order->get_billing_email() === $customer->user_email ) {
+						$allcaps['pay_for_order'] = true;
+						break;
+					}
+				}
+
 				break;
 			case 'order_again':
 				$user_id = intval( $args[1] );
@@ -897,7 +920,7 @@ function wc_update_user_last_active( $user_id ) {
 	if ( ! $user_id ) {
 		return;
 	}
-	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
+	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( gmdate( 'Y-m-d', time() ) ) );
 }
 
 /**
