@@ -30,11 +30,12 @@ if ( $upsells ) : ?>
 			<?php foreach ( $upsells as $upsell ) : ?>
 
 				<?php
-					$post_object = get_post( $upsell->get_id() );
+				$post_object = get_post( $upsell->get_id() );
 
-					setup_postdata( $GLOBALS['post'] =& $post_object );
+				setup_postdata( $GLOBALS['post'] =& $post_object );
 
-					wc_get_template_part( 'content', 'product' ); ?>
+				wc_get_template_part( 'content', 'product' );
+				?>
 
 			<?php endforeach; ?>
 
@@ -42,6 +43,7 @@ if ( $upsells ) : ?>
 
 	</section>
 
-<?php endif;
+	<?php
+endif;
 
 wp_reset_postdata();
