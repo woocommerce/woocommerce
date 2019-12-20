@@ -20,7 +20,7 @@ class WC_WCCOM_Site_Installer_Requirements_Check {
 	 * @return bool|WP_Error Does the site met the requirements?
 	 */
 	public static function met_requirements() {
-		$errs = [];
+		$errs = array();
 
 		if ( ! self::met_wp_cron_requirement() ) {
 			$errs[] = 'wp-cron';
