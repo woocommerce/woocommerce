@@ -156,7 +156,7 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<td class="label"><?php esc_html_e( 'Discounts:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
-				<td class="total">
+				<td class="total">-
 					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
@@ -219,7 +219,18 @@ if ( wc_tax_enabled() ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
+		<?php if ( $order->get_subtotal() ) : ?>
+			<tr>
+				<td class="label"><?php esc_html_e( 'Net Payment', 'woocommerce' ); ?>:</td>
+				<td width="1%"></td>
+				<td class="total">
+					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+				</td>
+			</tr>
+		<?php endif; ?>
+
 	</table>
+
 	<div class="clear"></div>
 </div>
 <div class="wc-order-data-row wc-order-bulk-actions wc-order-data-row-toggle">
