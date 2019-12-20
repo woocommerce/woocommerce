@@ -41,7 +41,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'order'         => $download->get_order_key(),
 							'email'         => urlencode( $download->get_user_email() ),
 							'key'           => $download->get_download_id(),
-						), trailingslashit( home_url() )
+						),
+						trailingslashit( home_url() )
 					);
 					?>
 					<a id="copy-download-link" class="button" href="<?php echo esc_url( $download_link ); ?>" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. You should be able to right-click the button and copy.', 'woocommerce' ); ?>"><?php esc_html_e( 'Copy link', 'woocommerce' ); ?></a>

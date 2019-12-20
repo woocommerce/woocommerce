@@ -39,7 +39,8 @@ class WC_Meta_Box_Order_Data {
 	public static function init_address_fields() {
 
 		self::$billing_fields = apply_filters(
-			'woocommerce_admin_billing_fields', array(
+			'woocommerce_admin_billing_fields',
+			array(
 				'first_name' => array(
 					'label' => __( 'First name', 'woocommerce' ),
 					'show'  => false,
@@ -90,7 +91,8 @@ class WC_Meta_Box_Order_Data {
 		);
 
 		self::$shipping_fields = apply_filters(
-			'woocommerce_admin_shipping_fields', array(
+			'woocommerce_admin_shipping_fields',
+			array(
 				'first_name' => array(
 					'label' => __( 'First name', 'woocommerce' ),
 					'show'  => false,

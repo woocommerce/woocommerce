@@ -157,16 +157,19 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 	public function get_download_logs( $args = array() ) {
 		global $wpdb;
 
-		$args = wp_parse_args( $args, array(
-			'permission_id'   => '',
-			'user_id'         => '',
-			'user_ip_address' => '',
-			'orderby'         => 'download_log_id',
-			'order'           => 'ASC',
-			'limit'           => -1,
-			'page'            => 1,
-			'return'          => 'objects',
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'permission_id'   => '',
+				'user_id'         => '',
+				'user_ip_address' => '',
+				'orderby'         => 'download_log_id',
+				'order'           => 'ASC',
+				'limit'           => -1,
+				'page'            => 1,
+				'return'          => 'objects',
+			)
+		);
 
 		$query   = array();
 		$table   = $wpdb->prefix . self::get_table_name();

@@ -39,13 +39,18 @@ foreach ( $items as $item_id => $item ) :
 
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
-		echo strip_tags( wc_display_item_meta( $item, array(
-			'before'    => "\n- ",
-			'separator' => "\n- ",
-			'after'     => '',
-			'echo'      => false,
-			'autop'     => false,
-		) ) );
+		echo strip_tags(
+			wc_display_item_meta(
+				$item,
+				array(
+					'before'    => "\n- ",
+					'separator' => "\n- ",
+					'after'     => '',
+					'echo'      => false,
+					'autop'     => false,
+				)
+			)
+		);
 
 		// allow other plugins to add additional product information here
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );

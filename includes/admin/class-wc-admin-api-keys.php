@@ -81,7 +81,8 @@ class WC_Admin_API_Keys {
 
 			// Add screen option.
 			add_screen_option(
-				'per_page', array(
+				'per_page',
+				array(
 					'default' => 10,
 					'option'  => 'woocommerce_keys_per_page',
 				)
@@ -148,7 +149,8 @@ class WC_Admin_API_Keys {
 				FROM {$wpdb->prefix}woocommerce_api_keys
 				WHERE key_id = %d",
 				$key_id
-			), ARRAY_A
+			),
+			ARRAY_A
 		);
 
 		if ( is_null( $key ) ) {
