@@ -937,6 +937,7 @@ class WC_Admin_Setup_Wizard {
 						'default_value' => __( 'Cost', 'woocommerce' ),
 						'description'   => __( 'What would you like to charge for flat rate shipping?', 'woocommerce' ),
 						'required'      => true,
+						'pattern'       => '^[+-]?[0-9]{1,3}(?:[0-9]*(?:[.,][0-9]{2})?|(?:,[0-9]{3})*(?:\.[0-9]{2})?|(?:\.[0-9]{3})*(?:,[0-9]{2})?)$',
 					),
 				),
 			),
@@ -999,6 +1000,7 @@ class WC_Admin_Setup_Wizard {
 					name="<?php echo esc_attr( $method_setting_id ); ?>"
 					class="<?php echo esc_attr( $setting['required'] ? 'shipping-method-required-field' : '' ); ?>"
 					<?php echo ( $method_id === $selected && $setting['required'] ) ? 'required' : ''; ?>
+					pattern=<?php echo esc_attr( $method_id === $selected && $setting['pattern'] ? $setting['pattern'] : '' ); ?>
 				/>
 				<p class="description">
 					<?php echo esc_html( $setting['description'] ); ?>
