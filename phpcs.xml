@@ -18,7 +18,7 @@
 	<!-- Show progress, show the error codes for each message (source). -->
 	<arg value="ps"/>
 
-	<!-- Strip the filepaths down to the relevant bit. -->
+	<!-- Strip the filepaths in reports down to the relevant bit. -->
 	<arg name="basepath" value="./"/>
 
 	<!-- Check up to 8 files simultaneously. -->
