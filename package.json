@@ -56,7 +56,7 @@
     "husky": "3.1.0",
     "istanbul": "1.0.0-alpha.2",
     "jest": "24.9.0",
-    "jest-puppeteer": "4.3.0",
+    "jest-puppeteer": "4.4.0",
     "lint-staged": "9.5.0",
     "mocha": "6.2.2",
     "node-sass": "4.13.0",
