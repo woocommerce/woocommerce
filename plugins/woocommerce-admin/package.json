@@ -135,7 +135,7 @@
     "concurrently": "4.1.2",
     "copy-webpack-plugin": "5.1.1",
     "cross-env": "6.0.3",
-    "css-loader": "3.3.0",
+    "css-loader": "3.4.0",
     "deasync": "0.1.16",
     "deep-freeze": "0.0.1",
     "docsify-cli": "4.4.0",
