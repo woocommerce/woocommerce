@@ -74,6 +74,15 @@ if ( wc_tax_enabled() ) {
 			do_action( 'woocommerce_admin_order_items_after_fees', $order->get_id() );
 			?>
 		</tbody>
+		<tbody id="order_shipping_line_items">
+			<?php
+			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+			foreach ( $line_items_shipping as $item_id => $item ) {
+				include 'html-order-shipping.php';
+			}
+			do_action( 'woocommerce_admin_order_items_after_shipping', $order->get_id() );
+			?>
+		</tbody>
 		<tbody id="order_refunds">
 			<?php
 			$refunds = $order->get_refunds();
@@ -84,15 +93,6 @@ if ( wc_tax_enabled() ) {
 				}
 				do_action( 'woocommerce_admin_order_items_after_refunds', $order->get_id() );
 			}
-			?>
-		</tbody>
-		<tbody id="order_shipping_line_items">
-			<?php
-			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
-			foreach ( $line_items_shipping as $item_id => $item ) {
-				include 'html-order-shipping.php';
-			}
-			do_action( 'woocommerce_admin_order_items_after_shipping', $order->get_id() );
 			?>
 		</tbody>
 	</table>
@@ -200,7 +200,7 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_tax', $order->get_id() ); ?>
 
 		<tr>
-			<td class="label"><?php esc_html_e( 'Total', 'woocommerce' ); ?>:</td>
+			<td class="label"><?php esc_html_e( 'Order Total', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total">
 				<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
@@ -219,13 +219,15 @@ if ( wc_tax_enabled() ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
+		<?php if ( $order->get_total_refunded() ) : ?>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Net Payment', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
 			<td class="total">
-				<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+			<?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 			</td>
 		</tr>
+		<?php endif; ?>
 
 	</table>
 
