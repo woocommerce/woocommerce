@@ -1011,6 +1011,101 @@ Example response:
 ]
 ```
 
+## Customer API
+
+### Get data for the current customer
+
+```http
+GET /cart/customer
+```
+
+There are no parameters required for this endpoint.
+
+```http
+curl "https://example-store.com/wp-json/wc/store/customer"
+```
+
+Example response:
+
+```json
+{
+  "id": 0,
+  "billing": {
+    "first_name": "Margaret",
+    "last_name": "Thatchcroft",
+    "company": "",
+    "address_1": "123 South Street",
+    "address_2": "Apt 1",
+    "city": "Philadelphia",
+    "state": "PA",
+    "postcode": "19123",
+    "country": "US",
+    "email": "test@test.com",
+    "phone": ""
+  },
+  "shipping": {
+    "first_name": "Margaret",
+    "last_name": "Thatchcroft",
+    "company": "",
+    "address_1": "123 South Street",
+    "address_2": "Apt 1",
+    "city": "Philadelphia",
+    "state": "PA",
+    "postcode": "19123",
+    "country": "US"
+  }
+}
+```
+
+### Edit data for the current customer
+
+Edit current customer data, such as billing and shipping addresses.
+
+```http
+PUT /cart/customer
+```
+
+| Attribute  | Type    | Required | Description                        |
+| :--------- | :------ | :------: | :--------------------------------- |
+| `billing`  | object  |   No     | Billing address properties.        |
+| `shipping` | object  |   No     | Shipping address properties.       |
+
+```http
+curl --request PUT https://example-store.com/wp-json/wc/store/cart/customer?billing[company]=Test
+```
+
+Example response:
+
+```json
+{
+  "id": 0,
+  "billing": {
+    "first_name": "Margaret",
+    "last_name": "Thatchcroft",
+    "company": "Test",
+    "address_1": "123 South Street",
+    "address_2": "Apt 1",
+    "city": "Philadelphia",
+    "state": "PA",
+    "postcode": "19123",
+    "country": "US",
+    "email": "test@test.com",
+    "phone": ""
+  },
+  "shipping": {
+    "first_name": "Margaret",
+    "last_name": "Thatchcroft",
+    "company": "",
+    "address_1": "123 South Street",
+    "address_2": "Apt 1",
+    "city": "Philadelphia",
+    "state": "PA",
+    "postcode": "19123",
+    "country": "US"
+  }
+}
+```
+
 ## Product Attributes API
 
 ```http
