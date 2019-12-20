@@ -372,7 +372,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	protected function get_webhook_count( $status = 'active' ) {
 		global $wpdb;
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . $status . '_count';
-		$count = wp_cache_get( $cache_key, 'webhooks' );
+		$count     = wp_cache_get( $cache_key, 'webhooks' );
 
 		if ( false === $count ) {
 			$count = absint( $wpdb->get_var( $wpdb->prepare( "SELECT count( webhook_id ) FROM {$wpdb->prefix}wc_webhooks WHERE `status` = %s;", $status ) ) );

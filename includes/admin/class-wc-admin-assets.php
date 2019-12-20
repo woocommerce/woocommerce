@@ -295,7 +295,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 					$order = wc_get_order( $post_id );
 					if ( $order ) {
-						$currency           = $order->get_currency();
+						$currency = $order->get_currency();
 
 						if ( ! $order->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
 							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );

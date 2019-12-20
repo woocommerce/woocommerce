@@ -1676,7 +1676,7 @@ class WC_Admin_Setup_Wizard {
 			if ( in_array( $klarna_or_square, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
 				$gateways[ $klarna_or_square ]['enabled']  = true;
 				$gateways[ $klarna_or_square ]['featured'] = false;
-				$offered_gateways                          += array(
+				$offered_gateways                         += array(
 					$klarna_or_square => $gateways[ $klarna_or_square ],
 				);
 			} else {

@@ -20,7 +20,7 @@ class WC_Tests_Order extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
-		$tax_rate    = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '7.0000',

@@ -116,7 +116,7 @@ class WC_Helper_Product {
 			)
 		);
 
-		$attributes     = array();
+		$attributes = array();
 
 		$attribute      = new WC_Product_Attribute();
 		$attribute_data = self::create_attribute( 'size', array( 'small', 'large', 'huge' ) );

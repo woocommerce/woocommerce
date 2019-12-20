@@ -564,7 +564,7 @@ class WC_WCCOM_Site_Installer {
 		);
 
 		if ( 1 === count( $related_plugins ) ) {
-			$plugin_key = array_keys( $related_plugins )[0];
+			$plugin_key  = array_keys( $related_plugins )[0];
 			$plugin_data = $plugins[ $plugin_key ];
 			return array(
 				'name'    => $plugin_data['Name'],
