@@ -30,7 +30,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "commander": "^3.0.0",
-    "eslint-plugin-jest": "22.13.6",
+    "eslint-plugin-jest": "22.21.0",
     "config": "3.2.4",
     "cross-env": "6.0.3",
     "eslint": "6.7.2",
