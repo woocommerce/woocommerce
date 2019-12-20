@@ -35,11 +35,17 @@ fi
 
 status "Lets release WooCommerce Admin 🎉"
 
-git checkout master || { error "ERROR: Unable to checkout master branch." ; exit 1; }
+status "What branch/commit would you like to base this release on?"
 
-success "Checked out master branch"
+echo -n "Branch/commit: "
 
-git pull origin master
+read refspec
+
+git checkout $refspec || { error "ERROR: Unable to checkout ${refspec}." ; exit 1; }
+
+success "Checked out ${refspec}"
+
+git pull origin ${refspec}
 
 success "Pulled latest commits"
 
