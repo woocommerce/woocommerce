@@ -35,7 +35,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 
 		// Always set a timestamp.
 		if ( is_null( $download_log->get_timestamp( 'edit' ) ) ) {
-			$download_log->set_timestamp( current_time( 'timestamp', true ) );
+			$download_log->set_timestamp( time() );
 		}
 
 		$data = array(

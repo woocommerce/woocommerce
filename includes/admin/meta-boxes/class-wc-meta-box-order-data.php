@@ -602,7 +602,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Update date.
 		if ( empty( $_POST['order_date'] ) ) {
-			$date = current_time( 'timestamp', true );
+			$date = time();
 		} else {
 			$date = gmdate( 'Y-m-d H:i:s', strtotime( $_POST['order_date'] . ' ' . (int) $_POST['order_date_hour'] . ':' . (int) $_POST['order_date_minute'] . ':' . (int) $_POST['order_date_second'] ) );
 		}
