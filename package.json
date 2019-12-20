@@ -33,7 +33,7 @@
     "eslint-plugin-jest": "23.1.1",
     "config": "3.2.4",
     "cross-env": "6.0.3",
-    "eslint": "6.7.2",
+    "eslint": "6.8.0",
     "eslint-config-wpcalypso": "5.0.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master",
     "grunt": "1.0.4",
