@@ -3,7 +3,7 @@
  * The template for displaying product widget entries.
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/content-widget-reviews.php
- * 
+ *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
  * maintain compatibility. We try to do this as little as possible, but it does

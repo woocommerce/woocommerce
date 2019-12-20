@@ -24,7 +24,7 @@ foreach ( $items as $item_id => $item ) :
 		$product       = $item->get_product();
 		$sku           = '';
 		$purchase_note = '';
-		
+
 		if ( is_object( $product ) ) {
 			$sku           = $product->get_sku();
 			$purchase_note = $product->get_purchase_note();
