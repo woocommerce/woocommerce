@@ -71,6 +71,19 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.23.2 2019-12-19 =
+
+- Enhancement: allow filtering of hidden WP notices. #3391 (Activity Panel, Extensibility)
+- Fix: error when trying to download report data. #3429 (Analytics)
+- Bug: Fix user data fields filter name. #3428 (Dashboard)
+- Fix: `CompareFilter` functionality regression. #3421 (Analytics, Components, Packages)
+- Fix: Time zone offset calculation on customer last active date. #3388 (Analytics)
+- Fix: remove the header when user doesn't have required permissions #3386 (Activity Panel)
+
+= 0.23.1 2019-12-08 =
+
+- Fix: undefined function error.
+
 = 0.23.0 2019-12-06 =
 
 - Dev: Add currency extension #3328 (Packages)
