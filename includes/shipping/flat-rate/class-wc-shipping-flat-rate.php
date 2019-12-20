@@ -264,7 +264,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
 		// Thrown an error on the front end if the evaluate_cost will fail.
-		if ( ! $this->evaluate_cost( $value ) ) {
+		if ( false === $this->evaluate_cost( $value ) ) {
 			throw new Exception( WC_Eval_Math::$last_error );
 		}
 		return $value;
