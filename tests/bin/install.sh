@@ -221,7 +221,7 @@ PHP
 		cd $WC_PLUGIN_DIR
 		npm install
 		composer install
-		grunt e2e-build
+		npm run build
 
 		echo "ACTIVATING WooCommerce PLUGIN"
 		php wp-cli.phar plugin activate woocommerce

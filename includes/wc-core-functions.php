@@ -1826,7 +1826,7 @@ function wc_print_r( $expression, $return = false ) {
 
 	foreach ( $alternatives as $alternative ) {
 		if ( function_exists( $alternative['func'] ) ) {
-			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			$res = $alternative['func']( ...$alternative['args'] );
 			if ( $return ) {
 				return $res;
 			}
@@ -2141,6 +2141,28 @@ function wc_is_external_resource( $url ) {
  */
 function wc_is_active_theme( $theme ) {
 	return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
+}
+
+/**
+ * Is the site using a default WP theme?
+ *
+ * @return boolean
+ */
+function wc_is_wp_default_theme_active() {
+	return wc_is_active_theme(
+		array(
+			'twentytwenty',
+			'twentynineteen',
+			'twentyseventeen',
+			'twentysixteen',
+			'twentyfifteen',
+			'twentyfourteen',
+			'twentythirteen',
+			'twentyeleven',
+			'twentytwelve',
+			'twentyten',
+		)
+	);
 }
 
 /**

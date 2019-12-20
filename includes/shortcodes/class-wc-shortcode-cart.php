@@ -40,7 +40,9 @@ class WC_Shortcode_Cart {
 			}
 
 			if ( $address['country'] ) {
-				WC()->customer->set_billing_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+				if ( ! WC()->customer->get_billing_first_name() ) {
+					WC()->customer->set_billing_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+				}
 				WC()->customer->set_shipping_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
 			} else {
 				WC()->customer->set_billing_address_to_base();
