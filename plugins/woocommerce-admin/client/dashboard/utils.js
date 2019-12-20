@@ -37,6 +37,36 @@ export function getCurrencyRegion( countryState ) {
 }
 
 /**
+ * Gets the product IDs for items based on the product types and theme selected in the onboarding profiler.
+ *
+ * @param {object} profileItems Onboarding profile.
+ * @return {array} Product Ids.
+ */
+export function getProductIdsForCart( profileItems ) {
+	const productIds = [];
+	const onboarding = getSetting( 'onboarding', {} );
+	const productTypes = profileItems.product_types || [];
+
+	productTypes.forEach( productType => {
+		if (
+			onboarding.productTypes[ productType ] &&
+			onboarding.productTypes[ productType ].product
+		) {
+			productIds.push( onboarding.productTypes[ productType ].product );
+		}
+	} );
+
+	const theme = onboarding.themes.find( themeData => themeData.slug === profileItems.theme );
+
+	// @todo -- Split out free themes so that they are not considered for purchase, and install those from WordPress.org on the theme step.
+	if ( theme && theme.id && ! theme.is_installed ) {
+		productIds.push( theme.id );
+	}
+
+	return productIds;
+}
+
+/**
  * Returns if the onboarding feature of WooCommerce Admin should be enabled.
  *
  * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build,

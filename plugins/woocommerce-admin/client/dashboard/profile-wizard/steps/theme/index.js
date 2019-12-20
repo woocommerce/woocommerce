@@ -44,23 +44,28 @@ class Theme extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { isGetProfileItemsRequesting, isError, createNotice, goToNextStep } = this.props;
+		const { isError, isGetProfileItemsRequesting, createNotice } = this.props;
 		const { chosen } = this.state;
+		const isRequestSuccessful =
+			! isGetProfileItemsRequesting && prevProps.isGetProfileItemsRequesting && ! isError && chosen;
+		const isRequestError = ! isGetProfileItemsRequesting && prevProps.isRequesting && isError;
 
-		/* eslint-disable react/no-did-update-set-state */
-		if ( prevProps.isGetProfileItemsRequesting && ! isGetProfileItemsRequesting && chosen ) {
-			if ( ! isError ) {
-				// @todo This should send profile information to woocommerce.com.
-				goToNextStep();
-			} else {
-				this.setState( { chosen: null } );
-				createNotice(
-					'error',
-					__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
-				);
-			}
+		if ( isRequestSuccessful ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( { chosen: null } );
+			/* eslint-enable react/no-did-update-set-state */
+			this.props.goToNextStep();
 		}
-		/* eslint-enable react/no-did-update-set-state */
+
+		if ( isRequestError ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( { chosen: null } );
+			/* eslint-enable react/no-did-update-set-state */
+			createNotice(
+				'error',
+				__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
+			);
+		}
 	}
 
 	async onChoose( theme, location = '' ) {

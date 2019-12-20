@@ -360,9 +360,7 @@ class Onboarding {
 
 		// Only fetch if the onboarding wizard is incomplete.
 		if ( self::should_show_profiler() ) {
-			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
-			$settings['onboarding']['themes']       = self::get_themes();
-			$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
+			$settings['onboarding']['activeTheme'] = get_option( 'stylesheet' );
 		}
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
@@ -373,6 +371,8 @@ class Onboarding {
 			$settings['onboarding']['connectNonce']             = wp_create_nonce( 'connect' );
 			$current_user                                       = wp_get_current_user();
 			$settings['onboarding']['userEmail']                = esc_html( $current_user->user_email );
+			$settings['onboarding']['productTypes']             = self::get_allowed_product_types();
+			$settings['onboarding']['themes']                   = self::get_themes();
 		}
 
 		return $settings;

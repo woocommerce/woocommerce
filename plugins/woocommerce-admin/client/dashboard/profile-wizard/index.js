@@ -17,6 +17,7 @@ import { updateQueryString } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import BusinessDetails from './steps/business-details';
+import CartModal from './cart-modal';
 import Industry from './steps/industry';
 import Plugins from './steps/plugins';
 import ProductTypes from './steps/product-types';
@@ -25,17 +26,31 @@ import Start from './steps/start';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
 import withSelect from 'wc-api/with-select';
+import { getProductIdsForCart } from 'dashboard/utils';
 import './style.scss';
 
 class ProfileWizard extends Component {
 	constructor() {
 		super( ...arguments );
+		this.state = {
+			showCartModal: false,
+			cartRedirectUrl: null,
+		};
 		this.goToNextStep = this.goToNextStep.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { step: prevStep } = prevProps.query;
 		const { step } = this.props.query;
+		const { isError, isGetProfileItemsRequesting, createNotice } = this.props;
+
+		const isRequestError = ! isGetProfileItemsRequesting && prevProps.isRequesting && isError;
+		if ( isRequestError ) {
+			createNotice(
+				'error',
+				__( 'There was a problem finishing the profile wizard.', 'woocommerce-admin' )
+			);
+		}
 
 		if ( prevStep !== step ) {
 			window.document.documentElement.scrollTop = 0;
@@ -50,6 +65,13 @@ class ProfileWizard extends Component {
 	}
 
 	componentWillUnmount() {
+		const { cartRedirectUrl } = this.state;
+
+		if ( cartRedirectUrl ) {
+			document.body.classList.add( 'woocommerce-admin-is-loading' );
+			window.location = cartRedirectUrl;
+		}
+
 		document.documentElement.classList.add( 'wp-toolbar' );
 		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-profile-wizard__body' );
@@ -117,28 +139,40 @@ class ProfileWizard extends Component {
 	}
 
 	async goToNextStep() {
-		const { createNotice, isError, updateProfileItems } = this.props;
 		const currentStep = this.getCurrentStep();
 		const currentStepIndex = this.getSteps().findIndex( s => s.key === currentStep.key );
 		const nextStep = this.getSteps()[ currentStepIndex + 1 ];
 
 		if ( 'undefined' === typeof nextStep ) {
-			await updateProfileItems( { completed: true } );
-
-			if ( isError ) {
-				createNotice(
-					'error',
-					__( 'There was a problem completing the profiler.', 'woocommerce-admin' )
-				);
-			}
+			this.finishWizard();
 			return;
 		}
 
 		return updateQueryString( { step: nextStep.key } );
 	}
 
+	finishWizard() {
+		const { profileItems, updateProfileItems } = this.props;
+
+		// @todo This should also send profile information to woocommerce.com.
+
+		const productIds = getProductIdsForCart( profileItems );
+		if ( productIds.length ) {
+			this.setState( { showCartModal: true } );
+		} else {
+			updateProfileItems( { completed: true } );
+		}
+	}
+
+	markCompleteAndPurchase( cartRedirectUrl ) {
+		const { updateProfileItems } = this.props;
+		this.setState( { cartRedirectUrl } );
+		updateProfileItems( { completed: true } );
+	}
+
 	render() {
 		const { query } = this.props;
+		const { showCartModal } = this.state;
 		const step = this.getCurrentStep();
 
 		const container = createElement( step.container, {
@@ -150,6 +184,15 @@ class ProfileWizard extends Component {
 
 		return (
 			<Fragment>
+				{ showCartModal && (
+					<CartModal
+						onClose={ () => this.setState( { showCartModal: false } ) }
+						onClickPurchaseNow={ cartRedirectUrl =>
+							this.markCompleteAndPurchase( cartRedirectUrl )
+						}
+						onClickPurchaseLater={ () => this.props.updateProfileItems( { completed: true } ) }
+					/>
+				) }
 				<ProfileWizardHeader currentStep={ step.key } steps={ steps } />
 				<div className="woocommerce-profile-wizard__container">{ container }</div>
 			</Fragment>

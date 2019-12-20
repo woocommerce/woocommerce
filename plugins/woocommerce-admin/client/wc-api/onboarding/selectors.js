@@ -24,7 +24,11 @@ const getProfileItems = ( getResource, requireResource ) => (
 	const { profile } = getSetting( 'onboarding', {} );
 
 	if ( ! ids.length ) {
-		return profile;
+		const data = {};
+		Object.keys( profile ).forEach( id => {
+			data[ id ] = getResource( getResourceName( resourceName, id ) ).data || profile[ id ];
+		} );
+		return data;
 	}
 
 	const items = {};
