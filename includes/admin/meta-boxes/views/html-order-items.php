@@ -219,15 +219,13 @@ if ( wc_tax_enabled() ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
-		<?php if ( $order->get_subtotal() ) : ?>
-			<tr>
-				<td class="label"><?php esc_html_e( 'Net Payment', 'woocommerce' ); ?>:</td>
-				<td width="1%"></td>
-				<td class="total">
-					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
-				</td>
-			</tr>
-		<?php endif; ?>
+		<tr>
+			<td class="label"><?php esc_html_e( 'Net Payment', 'woocommerce' ); ?>:</td>
+			<td width="1%"></td>
+			<td class="total">
+				<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+			</td>
+		</tr>
 
 	</table>
 
