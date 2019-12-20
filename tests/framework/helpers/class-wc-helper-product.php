@@ -183,7 +183,7 @@ class WC_Helper_Product {
 		);
 		$variation_3->set_attributes(
 			array(
-				'pa_size' => 'huge',
+				'pa_size'   => 'huge',
 				'pa_colour' => 'red',
 				'pa_number' => '0',
 			)
@@ -200,7 +200,7 @@ class WC_Helper_Product {
 		);
 		$variation_4->set_attributes(
 			array(
-				'pa_size' => 'huge',
+				'pa_size'   => 'huge',
 				'pa_colour' => 'red',
 				'pa_number' => '2',
 			)

@@ -122,13 +122,13 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 		// We exclude on-hold orders as they are still pending payment.
 		$tax_rows_orders = $this->get_order_report_data(
 			array(
-				'data'                => $query_data,
-				'where'               => $query_where,
-				'order_by'            => 'posts.post_date ASC',
-				'query_type'          => 'get_results',
-				'filter_range'        => true,
-				'order_types'         => wc_get_order_types( 'sales-reports' ),
-				'order_status'        => array( 'completed', 'processing', 'refunded' ),
+				'data'         => $query_data,
+				'where'        => $query_where,
+				'order_by'     => 'posts.post_date ASC',
+				'query_type'   => 'get_results',
+				'filter_range' => true,
+				'order_types'  => wc_get_order_types( 'sales-reports' ),
+				'order_status' => array( 'completed', 'processing', 'refunded' ),
 			)
 		);
 

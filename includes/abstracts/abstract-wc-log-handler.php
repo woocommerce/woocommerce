@@ -45,9 +45,9 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 
 		return apply_filters( 'woocommerce_format_log_entry', $entry, array(
 			'timestamp' => $timestamp,
-			'level' => $level,
-			'message' => $message,
-			'context' => $context,
+			'level'     => $level,
+			'message'   => $message,
+			'context'   => $context,
 		) );
 	}
 }

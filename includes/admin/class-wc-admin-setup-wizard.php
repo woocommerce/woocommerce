@@ -262,39 +262,39 @@ class WC_Admin_Setup_Wizard {
 		}
 		$default_steps = array(
 			'new_onboarding' => array(
-				'name'       => '',
-				'view'       => array( $this, 'wc_setup_new_onboarding' ),
-				'handler'    => array( $this, 'wc_setup_new_onboarding_save' ),
+				'name'    => '',
+				'view'    => array( $this, 'wc_setup_new_onboarding' ),
+				'handler' => array( $this, 'wc_setup_new_onboarding_save' ),
 			),
 			'store_setup'    => array(
-				'name'       => __( 'Store setup', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_store_setup' ),
-				'handler'    => array( $this, 'wc_setup_store_setup_save' ),
+				'name'    => __( 'Store setup', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_store_setup' ),
+				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
 			'payment'        => array(
-				'name'       => __( 'Payment', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_payment' ),
-				'handler'    => array( $this, 'wc_setup_payment_save' ),
+				'name'    => __( 'Payment', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_payment' ),
+				'handler' => array( $this, 'wc_setup_payment_save' ),
 			),
 			'shipping'       => array(
-				'name'       => __( 'Shipping', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_shipping' ),
-				'handler'    => array( $this, 'wc_setup_shipping_save' ),
+				'name'    => __( 'Shipping', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_shipping' ),
+				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
 			'recommended'    => array(
-				'name'       => __( 'Recommended', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_recommended' ),
-				'handler'    => array( $this, 'wc_setup_recommended_save' ),
+				'name'    => __( 'Recommended', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_recommended' ),
+				'handler' => array( $this, 'wc_setup_recommended_save' ),
 			),
 			'activate'       => array(
-				'name'       => __( 'Activate', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_activate' ),
-				'handler'    => array( $this, 'wc_setup_activate_save' ),
+				'name'    => __( 'Activate', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_activate' ),
+				'handler' => array( $this, 'wc_setup_activate_save' ),
 			),
 			'next_steps'     => array(
-				'name'       => __( 'Ready!', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_ready' ),
-				'handler'    => '',
+				'name'    => __( 'Ready!', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_ready' ),
+				'handler' => '',
 			),
 		);
 
@@ -675,7 +675,7 @@ class WC_Admin_Setup_Wizard {
 										/* translators: %1$s: usage tracking help link */
 										__( 'Learn more about how usage tracking works, and how you\'ll be helping in our <a href="%1$s" target="_blank">usage tracking documentation</a>.', 'woocommerce' ),
 										array(
-											'a'    => array(
+											'a' => array(
 												'href'   => array(),
 												'target' => array(),
 											),
