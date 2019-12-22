@@ -5,6 +5,8 @@ dist: xenial
 services:
   - xvfb
   - mysql
+  - docker
+  - docker-compose
 
 sudo: false
 
@@ -20,6 +22,7 @@ php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -32,27 +35,25 @@ matrix:
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "e2e tests"
-    php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
-    addons:
-      chrome: beta
-      apt:
-        packages:
-          - nginx
+  - name: "E2E tests"
+    script:
+      - npm install
+      - npm run build
+      - docker-compose up --build -d
+      - bash tests/bin/run-e2e-CI.sh
+    after_script:
+      - docker-compose down -v
   - name: "Unit tests code coverage"
     php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   - name: "WooCommerce unit tests using WordPress nightly"
     php: 7.3
     env: WP_VERSION=nightly WP_MULTISITE=0
-  - php: 7.4snapshot
-    env: WP_VERSION=nightly WP_MULTISITE=0
   allow_failures:
   - php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   - php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    env: WP_VERSION=latest WP_MULTISITE=0 
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
@@ -75,7 +76,6 @@ before_script:
 script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - travis_retry bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after

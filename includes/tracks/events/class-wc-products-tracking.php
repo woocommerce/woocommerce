@@ -67,7 +67,7 @@ class WC_Products_Tracking {
 	 * @param int $category_id Category ID.
 	 */
 	public function track_product_category_created( $category_id ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		// Only track category creation from the edit product screen or the
 		// category management screen (which both occur via AJAX).
 		if (

@@ -24,6 +24,7 @@ If you have questions about the process to contribute code or want to discuss de
 - [How to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment)
 - [Git Flow](https://github.com/woocommerce/woocommerce/wiki/WooCommerce-Git-Flow)
 - [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)
+- [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
 - [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/master/tests/README.md)
 - [Running e2e tests](https://github.com/woocommerce/woocommerce/wiki/End-to-end-Testing)
