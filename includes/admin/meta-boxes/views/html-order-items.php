@@ -207,19 +207,37 @@ if ( wc_tax_enabled() ) {
 			</td>
 		</tr>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_id() ); ?>
+	</table>
 
-		<?php if ( $order->get_total_refunded() ) : ?>
+	<div class="clear"></div>
+
+	<?php if ( in_array( $order->get_status(), array( 'processing', 'completed', 'refunded' ) ) ) : ?>
+
+		<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
+			<tr>
+				<td class="label"><?php esc_html_e( 'Paid By Customer', 'woocommerce' ); ?>:</td>
+				<td width="1%"></td>
+				<td class="total">
+					<?php echo wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+				</td>
+			</tr>
+		</table>
+
+	<div class="clear"></div>
+	
+	<?php endif; ?>
+
+	<?php if ( $order->get_total_refunded() ) : ?>
+	
+	<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
 			<tr>
 				<td class="label refunded-total"><?php esc_html_e( 'Refunded', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?></td>
 			</tr>
-		<?php endif; ?>
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
-		<?php if ( $order->get_total_refunded() ) : ?>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Net Payment', 'woocommerce' ); ?>:</td>
 			<td width="1%"></td>
@@ -227,7 +245,14 @@ if ( wc_tax_enabled() ) {
 			<?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 			</td>
 		</tr>
-		<?php endif; ?>
+	<?php endif; ?>
+	
+	</table>
+
+	<div class="clear"></div>
+
+	<table class="wc-order-totals">
+		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_id() ); ?>
 
 	</table>
 
