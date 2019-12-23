@@ -105,7 +105,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$id = wp_insert_post(
@@ -1019,7 +1019,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				current_time( 'timestamp', true )
+				time()
 			)
 		);
 	}
@@ -1045,7 +1045,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				current_time( 'timestamp', true )
+				time()
 			)
 		);
 	}

@@ -30,7 +30,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	 */
 	public function test_get_timestamp() {
 		$object = new WC_Customer_Download_Log();
-		$set_to = current_time( 'timestamp', true );
+		$set_to = time();
 
 		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
 		$dt_str       = date( 'c', $set_to );
@@ -84,7 +84,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$download_1->save();
 
 		// Create download log.
-		$timestamp = current_time( 'timestamp', true );
+		$timestamp = time();
 
 		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
 		$dt_str       = date( 'c', $timestamp );

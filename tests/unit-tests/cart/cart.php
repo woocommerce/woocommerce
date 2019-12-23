@@ -260,7 +260,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
-		$tax_rate    = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '24.0000',
@@ -273,7 +273,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rate   = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '24.0000',

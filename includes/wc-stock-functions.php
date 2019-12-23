@@ -120,7 +120,7 @@ function wc_maybe_increase_stock_levels( $order_id ) {
 		return;
 	}
 
-	$stock_reduced  = $order->get_data_store()->get_stock_reduced( $order_id );
+	$stock_reduced    = $order->get_data_store()->get_stock_reduced( $order_id );
 	$trigger_increase = (bool) $stock_reduced;
 
 	// Only continue if we're increasing stock.
@@ -207,8 +207,8 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 		return;
 	}
 
-	$order_notes      = array();
-	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+	$order_notes     = array();
+	$no_stock_amount = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
 
 	foreach ( $changes as $change ) {
 		$order_notes[]    = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];

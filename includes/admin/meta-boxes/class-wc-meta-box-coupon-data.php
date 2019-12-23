@@ -42,7 +42,8 @@ class WC_Meta_Box_Coupon_Data {
 			<ul class="coupon_data_tabs wc-tabs" style="display:none;">
 				<?php
 				$coupon_data_tabs = apply_filters(
-					'woocommerce_coupon_data_tabs', array(
+					'woocommerce_coupon_data_tabs',
+					array(
 						'general'           => array(
 							'label'  => __( 'General', 'woocommerce' ),
 							'target' => 'general_coupon_data',
