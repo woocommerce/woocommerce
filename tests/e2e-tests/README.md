@@ -105,7 +105,7 @@ woocommerce_wordpress-cli_1 exited with code 0
 
 - Run the following command to make sure the containers were built and running: `docker ps`. You should see the 2 following containers: 
 
-- `woocommerce_wordpress-woocomerce-dev`
+- `woocommerce_wordpress-woocommerce-dev`
 - `mariadb:10.4`
 
 - Navigate to `http://localhost:8084/`. If everything went well, you should be able to access the site.  
