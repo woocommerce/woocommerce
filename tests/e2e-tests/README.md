@@ -84,7 +84,7 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 
 - Checkout the branch to test and stay on this branch. 
 
-- Run `nmp install`
+- Run `npm install`
 
 - Run `composer install --no-dev`
 
