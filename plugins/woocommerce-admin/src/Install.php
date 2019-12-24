@@ -308,7 +308,7 @@ class Install {
 	 * @return boolean
 	 */
 	public static function needs_db_update() {
-		$current_db_version = get_option( self::VERSION_OPTION );
+		$current_db_version = get_option( self::VERSION_OPTION, null );
 		$updates            = self::get_db_update_callbacks();
 		$update_versions    = array_keys( $updates );
 		usort( $update_versions, 'version_compare' );
