@@ -549,45 +549,31 @@ jQuery( function ( $ ) {
 		},
 
 		add_fee: function() {
-			window.wcTracks.recordEvent( 'order_edit_add_fee_click', {
+			wc_meta_boxes_order_items.block();
+
+			var data = {
+				action  : 'woocommerce_add_order_fee',
+				dataType: 'json',
 				order_id: woocommerce_admin_meta_boxes.post_id,
-				status: $( '#order_status' ).val()
-			} );
+				security: woocommerce_admin_meta_boxes.order_item_nonce
+			};
 
-			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_add_fee );
+			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+				if ( response.success ) {
+					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+						wc_meta_boxes_order_items.reloaded_items();
+						wc_meta_boxes_order_items.unblock();
+						window.wcTracks.recordEvent( 'order_edit_added_fee', {
+							order_id: data.post_id,
+							status: $( '#order_status' ).val()
+						} );
+				} else {
+					window.alert( response.data.error );
+				}
+				wc_meta_boxes_order_items.unblock();
+			});
 
-			if ( null == value ) {
-				window.wcTracks.recordEvent( 'order_edit_add_fee_cancel', {
-					order_id: woocommerce_admin_meta_boxes.post_id,
-					status: $( '#order_status' ).val()
-				} );
-			} else {
-				wc_meta_boxes_order_items.block();
-
-				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
-					action  : 'woocommerce_add_order_fee',
-					dataType: 'json',
-					order_id: woocommerce_admin_meta_boxes.post_id,
-					security: woocommerce_admin_meta_boxes.order_item_nonce,
-					amount  : value
-				} );
-
-				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-					if ( response.success ) {
-						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
-							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
-							wc_meta_boxes_order_items.reloaded_items();
-							wc_meta_boxes_order_items.unblock();
-							window.wcTracks.recordEvent( 'order_edit_added_fee', {
-								order_id: data.post_id,
-								status: $( '#order_status' ).val()
-							} );
-					} else {
-						window.alert( response.data.error );
-					}
-					wc_meta_boxes_order_items.unblock();
-				});
-			}
 			return false;
 		},
 
