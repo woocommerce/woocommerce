@@ -44,7 +44,7 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'coupon_stats';
+	protected $context = 'coupons_stats';
 
 	/**
 	 * Cache identifier.

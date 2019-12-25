@@ -40,7 +40,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'download_stats';
+	protected $context = 'downloads_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.

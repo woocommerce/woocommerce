@@ -68,7 +68,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'order_stats';
+	protected $context = 'orders_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.

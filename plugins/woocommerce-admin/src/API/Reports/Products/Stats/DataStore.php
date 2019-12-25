@@ -40,7 +40,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'product_stats';
+	protected $context = 'products_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.

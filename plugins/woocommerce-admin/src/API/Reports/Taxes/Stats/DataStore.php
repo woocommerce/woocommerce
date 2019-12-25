@@ -51,7 +51,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @var string
 	 */
-	protected $context = 'tax_stats';
+	protected $context = 'taxes_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
