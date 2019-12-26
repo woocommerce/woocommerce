@@ -62,6 +62,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		// Set an address so that shipping can be calculated.
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_discount( $coupon->get_code() );
