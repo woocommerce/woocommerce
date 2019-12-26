@@ -917,7 +917,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Helper that can be hooked to a filter to force the customer's shipping postal code to be ANN NAA.
 	 *
-	 * @since 3.9.0
+	 * @since 3.10.0
 	 * @param string $postcode Postal code..
 	 * @return string
 	 */
@@ -939,7 +939,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Helper that can be hooked to a filter to force the customer's shipping state to be NY.
 	 *
-	 * @since 3.9.0
+	 * @since 3.10.0
 	 * @param string $state State code.
 	 * @return string
 	 */
@@ -950,7 +950,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * Helper that can be hooked to a filter to force the customer's shipping postal code to be 12345.
 	 *
-	 * @since 3.9.0
+	 * @since 3.10.0
 	 * @param string $postcode Postal code.
 	 * @return string
 	 */

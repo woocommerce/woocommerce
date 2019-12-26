@@ -9,14 +9,14 @@
  * WC_Tests_Shipping tests.
  *
  * @package WooCommerce\Tests\Shipping
- * @since 3.9.0
+ * @since 3.10.0
  */
 class WC_Tests_Shipping extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests that whether or not a package is shippable is evaluated correctly.
 	 *
-	 * @since 3.9.0
+	 * @since 3.10.0
 	 */
 	public function test_is_package_shippable() {
 		$shipping = new WC_Shipping();
