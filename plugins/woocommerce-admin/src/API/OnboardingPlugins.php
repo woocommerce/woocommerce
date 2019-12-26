@@ -200,6 +200,14 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		);
 
 		if ( is_wp_error( $api ) ) {
+			$properties = array(
+				/* translators: %s: plugin slug (example: woocommerce-services) */
+				'error_message' => __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
+				'api'           => $api,
+				'slug'          => $slug,
+			);
+			wc_admin_record_tracks_event( 'install_plugin_error', $properties );
+
 			return new \WP_Error(
 				'woocommerce_rest_plugin_install',
 				sprintf(
@@ -215,6 +223,16 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		$result   = $upgrader->install( $api->download_link );
 
 		if ( is_wp_error( $result ) || is_null( $result ) ) {
+			$properties = array(
+				/* translators: %s: plugin slug (example: woocommerce-services) */
+				'error_message' => __( 'The requested plugin `%s` could not be installed.', 'woocommerce-admin' ),
+				'slug'          => $slug,
+				'api'           => $api,
+				'upgrader'      => $upgrader,
+				'result'        => $result,
+			);
+			wc_admin_record_tracks_event( 'install_plugin_error', $properties );
+
 			return new \WP_Error(
 				'woocommerce_rest_plugin_install',
 				sprintf(
