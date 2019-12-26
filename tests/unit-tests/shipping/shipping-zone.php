@@ -1,12 +1,13 @@
 <?php
 /**
- * Tests for the WC_Shopping_Zones class.
+ * Tests for the WC_Shopping_Zone class.
  *
- * @package WooCommerce\Tests\Shipping_Zone
+ * @package WooCommerce\Tests\Shipping
  */
 
 /**
  * Class Shipping_Zone.
+ * @package WooCommerce\Tests\Shipping
  */
 class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 

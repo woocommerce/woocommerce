@@ -30,6 +30,11 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
+		// Set a valid address for the customer so shipping rates will calculate.
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_state( 'NY' );
+		WC()->customer->set_shipping_postcode( '12345' );
+
 		$this->ids = array();
 
 		$tax_rate    = array(
