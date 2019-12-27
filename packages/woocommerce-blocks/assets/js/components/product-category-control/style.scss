@@ -1,0 +1,16 @@
+.woocommerce-product-categories__operator {
+	.components-base-control__help {
+		@include visually-hidden;
+	}
+}
+
+.components-panel {
+	.woocommerce-product-categories__operator.components-base-control {
+		margin-top: $gap;
+
+		.components-select-control__input {
+			margin-left: 0;
+			min-width: 100%;
+		}
+	}
+}
