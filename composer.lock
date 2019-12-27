@@ -170,12 +170,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "a65d34c9368283fb27a5f1eefefef15c8acc57ac"
+                "reference": "24b6552d38204fbbdd87ec5ba76f3ec391b042d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/a65d34c9368283fb27a5f1eefefef15c8acc57ac",
-                "reference": "a65d34c9368283fb27a5f1eefefef15c8acc57ac",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/24b6552d38204fbbdd87ec5ba76f3ec391b042d0",
+                "reference": "24b6552d38204fbbdd87ec5ba76f3ec391b042d0",
                 "shasum": ""
             },
             "require": {
