@@ -143,12 +143,16 @@ class Shipping extends Component {
 	}
 
 	getSteps() {
-		const { countryCode } = this.props;
+		const { countryCode, isJetpackConnected } = this.props;
 		let plugins = [];
 		if ( [ 'GB', 'CA', 'AU' ].includes( countryCode ) ) {
 			plugins = [ 'woocommerce-shipstation-integration' ];
 		} else if ( 'US' === countryCode ) {
-			plugins = [ 'jetpack', 'woocommerce-services' ];
+			plugins = [ 'woocommerce-services' ];
+
+			if ( ! isJetpackConnected ) {
+				plugins.push( 'jetpack' );
+			}
 		}
 
 		const steps = [
@@ -275,7 +279,9 @@ class Shipping extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting } = select( 'wc-api' );
+		const { getSettings, getSettingsError, isGetSettingsRequesting, isJetpackConnected } = select(
+			'wc-api'
+		);
 
 		const settings = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
@@ -287,7 +293,14 @@ export default compose(
 		const country = countryCode ? countries.find( c => c.code === countryCode ) : null;
 		const countryName = country ? country.name : null;
 
-		return { countryCode, countryName, isSettingsError, isSettingsRequesting, settings };
+		return {
+			countryCode,
+			countryName,
+			isJetpackConnected: isJetpackConnected(),
+			isSettingsError,
+			isSettingsRequesting,
+			settings,
+		};
 	} ),
 	withDispatch( dispatch => {
 		const { createNotice } = dispatch( 'core/notices' );
