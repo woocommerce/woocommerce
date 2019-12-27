@@ -284,6 +284,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 					'other',
 					'brick-mortar',
 					'brick-mortar-other',
+					'other-woocommerce',
 				),
 			),
 			'revenue'             => array(
