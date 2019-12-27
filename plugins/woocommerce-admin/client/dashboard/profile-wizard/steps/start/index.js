@@ -269,15 +269,17 @@ class Start extends Component {
 					</Button>
 				</Card>
 
-				<p>
-					<Button
-						isLink
-						className="woocommerce-profile-wizard__skip"
-						onClick={ () => this.setState( { showUsageModal: true, continueAction: 'skip' } ) }
-					>
-						{ sprintf( __( 'Proceed without %s', 'woocommerce-admin' ), pluginNamesString ) }
-					</Button>
-				</p>
+				{ 0 !== pluginsToInstall.length && (
+					<p>
+						<Button
+							isLink
+							className="woocommerce-profile-wizard__skip"
+							onClick={ () => this.setState( { showUsageModal: true, continueAction: 'skip' } ) }
+						>
+							{ sprintf( __( 'Proceed without %s', 'woocommerce-admin' ), pluginNamesString ) }
+						</Button>
+					</p>
+				) }
 			</Fragment>
 		);
 	}
