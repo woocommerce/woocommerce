@@ -462,7 +462,7 @@ class WC_Shop_Customizer {
 		$wp_customize->add_setting(
 			'woocommerce_catalog_columns',
 			array(
-				'default'              => 4,
+				'default'              => wc_get_theme_support( 'product_grid::default_columns', 4 ),
 				'type'                 => 'option',
 				'capability'           => 'manage_woocommerce',
 				'sanitize_callback'    => 'absint',
@@ -491,7 +491,7 @@ class WC_Shop_Customizer {
 			$wp_customize->add_setting(
 				'woocommerce_catalog_rows',
 				array(
-					'default'              => 4,
+					'default'              => wc_get_theme_support( 'product_grid::default_rows', 4 ),
 					'type'                 => 'option',
 					'capability'           => 'manage_woocommerce',
 					'sanitize_callback'    => 'absint',
