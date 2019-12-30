@@ -182,6 +182,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 
 		return( array(
 			'slug'   => $theme,
+			'name'   => $installed_themes[ $theme ]->get( 'Name' ),
 			'status' => 'success',
 		) );
 	}

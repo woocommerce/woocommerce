@@ -3,6 +3,7 @@
 /**
  * External dependencies
  */
+import { decodeEntities } from '@wordpress/html-entities';
 import { without } from 'lodash';
 
 /**
@@ -58,12 +59,21 @@ export function getProductIdsForCart( profileItems ) {
 
 	const theme = onboarding.themes.find( themeData => themeData.slug === profileItems.theme );
 
-	// @todo -- Split out free themes so that they are not considered for purchase, and install those from WordPress.org on the theme step.
-	if ( theme && theme.id && ! theme.is_installed ) {
+	if ( theme && theme.id && ! theme.is_installed && getPriceValue( theme.price ) > 0 ) {
 		productIds.push( theme.id );
 	}
 
 	return productIds;
+}
+
+/**
+ * Get the value of a price from a string, removing any non-numeric characters.
+ *
+ * @param {string} string Price string.
+ * @return {number} Number value.
+ */
+export function getPriceValue( string ) {
+	return Number( decodeEntities( string ).replace( /[^0-9.-]+/g, '' ) );
 }
 
 /**

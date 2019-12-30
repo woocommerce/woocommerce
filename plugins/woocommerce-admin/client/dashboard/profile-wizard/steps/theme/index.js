@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -14,7 +15,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { Card, H } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -24,6 +25,7 @@ import './style.scss';
 import { recordEvent } from 'lib/tracks';
 import ThemeUploader from './uploader';
 import ThemePreview from './preview';
+import { getPriceValue } from 'dashboard/utils';
 
 class Theme extends Component {
 	constructor() {
@@ -68,12 +70,56 @@ class Theme extends Component {
 		}
 	}
 
-	async onChoose( theme, location = '' ) {
+	onChoose( theme, location = '' ) {
 		const { updateProfileItems } = this.props;
+		const { price, slug } = theme;
+		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 
-		this.setState( { chosen: theme } );
-		recordEvent( 'storeprofiler_store_theme_choose', { theme, location } );
-		updateProfileItems( { theme } );
+		this.setState( { chosen: slug } );
+		recordEvent( 'storeprofiler_store_theme_choose', { theme: slug, location } );
+
+		if ( theme !== activeTheme && getPriceValue( price ) <= 0 ) {
+			this.installTheme( slug );
+		} else {
+			updateProfileItems( { theme: slug } );
+		}
+	}
+
+	installTheme( slug ) {
+		const { createNotice } = this.props;
+
+		apiFetch( { path: '/wc-admin/onboarding/themes/install?theme=' + slug, method: 'POST' } )
+			.then( () => {
+				this.activateTheme( slug );
+			} )
+			.catch( response => {
+				this.setState( { chosen: null } );
+				createNotice( 'error', response.message );
+			} );
+	}
+
+	activateTheme( slug ) {
+		const { createNotice, updateProfileItems } = this.props;
+
+		apiFetch( { path: '/wc-admin/onboarding/themes/activate?theme=' + slug, method: 'POST' } )
+			.then( response => {
+				createNotice(
+					'success',
+					sprintf(
+						__( '%s was installed and activated on your site.', 'woocommerce-admin' ),
+						response.name
+					)
+				);
+				setSetting( 'onboarding', {
+					...getSetting( 'onboarding', {} ),
+					activeTheme: response.slug,
+				} );
+				updateProfileItems( { theme: slug } );
+			} )
+			.catch( response => {
+				this.setState( { chosen: null } );
+				createNotice( 'error', response.message );
+			} );
 	}
 
 	onClosePreview() {
@@ -123,7 +169,7 @@ class Theme extends Component {
 						<Button
 							isPrimary={ Boolean( demo_url ) }
 							isDefault={ ! Boolean( demo_url ) }
-							onClick={ () => this.onChoose( slug, 'card' ) }
+							onClick={ () => this.onChoose( theme, 'card' ) }
 							isBusy={ chosen === slug }
 						>
 							{ __( 'Choose', 'woocommerce-admin' ) }
@@ -148,7 +194,7 @@ class Theme extends Component {
 		}
 		if ( is_installed ) {
 			return __( 'Installed', 'woocommerce-admin' );
-		} else if ( this.getPriceValue( price ) <= 0 ) {
+		} else if ( getPriceValue( price ) <= 0 ) {
 			return __( 'Free', 'woocommerce-admin' );
 		}
 
@@ -172,9 +218,9 @@ class Theme extends Component {
 
 		switch ( activeTab ) {
 			case 'paid':
-				return allThemes.filter( theme => this.getPriceValue( theme.price ) > 0 );
+				return allThemes.filter( theme => getPriceValue( theme.price ) > 0 );
 			case 'free':
-				return allThemes.filter( theme => this.getPriceValue( theme.price ) <= 0 );
+				return allThemes.filter( theme => getPriceValue( theme.price ) <= 0 );
 			case 'all':
 			default:
 				return allThemes;
