@@ -107,7 +107,7 @@
     "react-router-dom": "5.1.2",
     "react-transition-group": "2.9.0",
     "react-visibility-sensor": "5.1.1",
-    "redux": "4.0.4"
+    "redux": "4.0.5"
   },
   "devDependencies": {
     "@automattic/color-studio": "2.2.0",
