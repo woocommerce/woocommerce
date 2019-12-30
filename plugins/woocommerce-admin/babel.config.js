@@ -24,7 +24,7 @@ module.exports = function( api ) {
 					[
 						'@wordpress/babel-plugin-makepot',
 						{
-							output: 'languages/woocommerce-admin.pot',
+							output: 'languages/woocommerce-admin.po',
 						},
 					],
 				],

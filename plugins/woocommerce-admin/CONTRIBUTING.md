@@ -20,10 +20,11 @@ Language packs are automatically generated once 95% of the plugin's strings are 
 
 ### Testing translations in development without language packs
 
-1. Export the translations strings as a `.po` file from the [translate.wordpress.org project](https://translate.wordpress.org/projects/wp-plugins/woocommerce-admin).
-1. Rename `.po` file to the following format: `woocommerce-admin-xx_YY.po` (Where xx_YY is your locale, like it_IT)
-1. Use WP-CLI to generate needed JSON files for JavaScript-based strings: `wp i18n make-json [.po file here] --no-purge`
-1. Move `.po` and `.json` files to `/wp-content/languages/plugins`.
+1. Requires `WP-CLI` version 2.1.0 or greater.
+1. Generate a translation file with `npm run i18n xx_YY` (Where xx_YY is your locale, like it_IT).
+1. Generate needed JSON files for JavaScript-based strings: `npm run i18n:json`.
+1. Generate needed `woocommerce-admin-xx_YY.mo` file using your translation tool.
+1. Move `.mo` and `.json` files to `/wp-content/languages/plugins`.
 
 ## We're Here To Help
 
