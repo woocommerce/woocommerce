@@ -167,7 +167,7 @@ class Theme extends Component {
 					</p>
 					<div className="woocommerce-profile-wizard__theme-actions">
 						<Button
-							isPrimary={ Boolean( demo_url ) }
+							isPrimary
 							isDefault={ ! Boolean( demo_url ) }
 							onClick={ () => this.onChoose( theme, 'card' ) }
 							isBusy={ chosen === slug }

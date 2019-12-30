@@ -116,6 +116,10 @@
 				border-color: $studio-pink-50;
 				color: $studio-pink-50;
 			}
+
+			&.is-primary {
+				color: $studio-white;
+			}
 		}
 	}
 }
