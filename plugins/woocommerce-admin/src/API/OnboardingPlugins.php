@@ -254,10 +254,9 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of active plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array Active plugins
 	 */
-	public function active_plugins( $request ) {
+	public function active_plugins() {
 		$plugins = Onboarding::get_active_plugins();
 		return( array(
 			'plugins' => array_values( $plugins ),

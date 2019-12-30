@@ -81,6 +81,7 @@ class Init {
 					'Automattic\WooCommerce\Admin\API\OnboardingProfile',
 					'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 					'Automattic\WooCommerce\Admin\API\OnboardingTasks',
+					'Automattic\WooCommerce\Admin\API\OnboardingThemes',
 				)
 			);
 		}
