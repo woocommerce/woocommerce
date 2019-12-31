@@ -9,7 +9,7 @@
     },
     {
       "depTypeList": ["devDependencies"],
-      "schedule": "every month"
+      "extends": ["schedule:monthly"]
     }
   ]
 }
