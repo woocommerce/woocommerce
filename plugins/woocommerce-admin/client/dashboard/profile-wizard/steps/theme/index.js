@@ -43,6 +43,7 @@ class Theme extends Component {
 		this.onClosePreview = this.onClosePreview.bind( this );
 		this.onSelectTab = this.onSelectTab.bind( this );
 		this.openDemo = this.openDemo.bind( this );
+		this.skipStep = this.skipStep.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -135,6 +136,12 @@ class Theme extends Component {
 		this.setState( { demo: theme } );
 	}
 
+	skipStep() {
+		const { activeTheme = '' } = getSetting( 'onboarding', {} );
+		recordEvent( 'storeprofiler_store_theme_skip_step', { activeTheme } );
+		this.props.goToNextStep();
+	}
+
 	renderTheme( theme ) {
 		const { demo_url, has_woocommerce_support, image, slug, title } = theme;
 		const { chosen } = this.state;
@@ -201,6 +208,13 @@ class Theme extends Component {
 		return sprintf( __( '%s per year', 'woocommerce-admin' ), decodeEntities( price ) );
 	}
 
+	doesActiveThemeSupportWooCommerce() {
+		const { activeTheme = '' } = getSetting( 'onboarding', {} );
+		const allThemes = this.getThemes();
+		const currentTheme = allThemes.find( theme => theme.slug === activeTheme );
+		return currentTheme && currentTheme.has_woocommerce_support;
+	}
+
 	onSelectTab( tab ) {
 		recordEvent( 'storeprofiler_store_theme_navigate', { navigation: tab } );
 		this.setState( { activeTab: tab } );
@@ -210,8 +224,8 @@ class Theme extends Component {
 		return Number( decodeEntities( string ).replace( /[^0-9.-]+/g, '' ) );
 	}
 
-	getThemes() {
-		const { activeTab, uploadedThemes } = this.state;
+	getThemes( activeTab = 'all' ) {
+		const { uploadedThemes } = this.state;
 		const { themes = [] } = getSetting( 'onboarding', {} );
 		themes.concat( uploadedThemes );
 		const allThemes = [ ...themes, ...uploadedThemes ];
@@ -238,8 +252,9 @@ class Theme extends Component {
 	}
 
 	render() {
-		const themes = this.getThemes();
-		const { chosen, demo } = this.state;
+		const { activeTab, chosen, demo } = this.state;
+		const themes = this.getThemes( activeTab );
+		const activeThemeSupportsWooCommerce = this.doesActiveThemeSupportWooCommerce();
 
 		return (
 			<Fragment>
@@ -285,6 +300,17 @@ class Theme extends Component {
 						onClose={ this.onClosePreview }
 						isBusy={ chosen === demo.slug }
 					/>
+				) }
+				{ activeThemeSupportsWooCommerce && (
+					<p>
+						<Button
+							isLink
+							className="woocommerce-profile-wizard__skip"
+							onClick={ () => this.skipStep() }
+						>
+							{ __( 'Skip this step', 'woocommerce-admin' ) }
+						</Button>
+					</p>
 				) }
 			</Fragment>
 		);
