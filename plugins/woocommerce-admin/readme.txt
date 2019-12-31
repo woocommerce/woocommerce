@@ -71,6 +71,10 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.23.3 2019-12-26 =
+
+- Fix: don't run database migrations on new installs. #3473
+
 = 0.23.2 2019-12-19 =
 
 - Enhancement: allow filtering of hidden WP notices. #3391 (Activity Panel, Extensibility)
