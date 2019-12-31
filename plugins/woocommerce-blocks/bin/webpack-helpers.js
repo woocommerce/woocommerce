@@ -226,7 +226,6 @@ const getMainConfig = ( options = {} ) => {
 				{
 					test: /\.s[c|a]ss$/,
 					use: [
-						'style-loader',
 						MiniCssExtractPlugin.loader,
 						{ loader: 'css-loader', options: { importLoaders: 1 } },
 						'postcss-loader',
