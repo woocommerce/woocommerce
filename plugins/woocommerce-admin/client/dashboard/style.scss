@@ -179,6 +179,10 @@
 		) !important; // Gutenberg & PostCSS Add the gradient late in output, based on the 'primary' color, which in our case is purple. Our busy state should be pink.
 		/* stylelint-enable */
 	}
+
+	&:disabled {
+		cursor: not-allowed;
+	}
 }
 
 .components-modal__frame.woocommerce-cart-modal {
