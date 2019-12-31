@@ -17,7 +17,7 @@ import { updateQueryString } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import BusinessDetails from './steps/business-details';
-import CartModal from './cart-modal';
+import CartModal from '../components/cart-modal';
 import Industry from './steps/industry';
 import Plugins from './steps/plugins';
 import ProductTypes from './steps/product-types';

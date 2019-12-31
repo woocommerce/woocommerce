@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { filter, get } from 'lodash';
+import { get } from 'lodash';
 import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
 import { Snackbar, Icon, Button, Modal } from '@wordpress/components';
@@ -20,14 +20,16 @@ import { updateQueryString } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './style.scss';
-import withSelect from 'wc-api/with-select';
+import CartModal from '../components/cart-modal';
+import { getAllTasks } from './tasks';
 import { recordEvent } from 'lib/tracks';
-import { getTasks } from './tasks';
+import withSelect from 'wc-api/with-select';
 
 class TaskDashboard extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
+			isCartModalOpen: false,
 			isWelcomeModalOpen: ! props.modalDismissed,
 		};
 	}
@@ -61,6 +63,17 @@ class TaskDashboard extends Component {
 		document.body.classList.remove( 'woocommerce-task-dashboard__body' );
 	}
 
+	getTasks() {
+		const { profileItems, query, taskListPayments } = this.props;
+
+		return getAllTasks( {
+			profileItems,
+			options: taskListPayments,
+			query: query,
+			toggleCartModal: this.toggleCartModal.bind( this ),
+		} ).filter( task => task.visible );
+	}
+
 	recordTaskView() {
 		const { task } = this.props.query;
 
@@ -78,7 +91,7 @@ class TaskDashboard extends Component {
 			return;
 		}
 		const { profileItems } = this.props;
-		const tasks = filter( this.props.tasks, task => task.visible );
+		const tasks = this.getTasks();
 		recordEvent( 'tasklist_view', {
 			number_tasks: tasks.length,
 			store_connected: profileItems.wccom_connected,
@@ -107,7 +120,7 @@ class TaskDashboard extends Component {
 
 	getCurrentTask() {
 		const { task } = this.props.query;
-		const currentTask = this.props.tasks.find( s => s.key === task );
+		const currentTask = this.getTasks().find( s => s.key === task );
 
 		if ( ! currentTask ) {
 			return null;
@@ -154,6 +167,10 @@ class TaskDashboard extends Component {
 				) }
 			/>
 		);
+	}
+
+	toggleCartModal() {
+		this.setState( { isCartModalOpen: ! this.state.isCartModalOpen } );
 	}
 
 	closeWelcomeModal() {
@@ -211,10 +228,10 @@ class TaskDashboard extends Component {
 	}
 
 	render() {
-		const { inline, tasks } = this.props;
-		const { isWelcomeModalOpen } = this.state;
+		const { inline } = this.props;
+		const { isCartModalOpen, isWelcomeModalOpen } = this.state;
 		const currentTask = this.getCurrentTask();
-		const listTasks = filter( tasks, task => task.visible ).map( task => {
+		const listTasks = this.getTasks().map( task => {
 			task.className = classNames( task.completed ? 'is-complete' : null, task.className );
 			task.before = task.completed ? (
 				<i className="material-icons-outlined">check_circle</i>
@@ -253,13 +270,19 @@ class TaskDashboard extends Component {
 						</Fragment>
 					) }
 				</div>
+				{ isCartModalOpen && (
+					<CartModal
+						onClose={ () => this.toggleCartModal() }
+						onClickPurchaseLater={ () => this.toggleCartModal() }
+					/>
+				) }
 			</Fragment>
 		);
 	}
 }
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect( select => {
 		const { getProfileItems, getOptions } = select( 'wc-api' );
 		const profileItems = getProfileItems();
 
@@ -273,18 +296,13 @@ export default compose(
 			[ 'woocommerce_task_list_welcome_modal_dismissed' ],
 			false
 		);
-
-		const tasks = getTasks( {
-			profileItems,
-			options: getOptions( [ 'woocommerce_task_list_payments' ] ),
-			query: props.query,
-		} );
+		const taskListPayments = getOptions( [ 'woocommerce_task_list_payments' ] );
 
 		return {
 			modalDismissed,
 			profileItems,
 			promptShown,
-			tasks,
+			taskListPayments,
 		};
 	} ),
 	withDispatch( dispatch => {

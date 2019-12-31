@@ -24,7 +24,7 @@ import Section from './section';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import TaskList from './task-list';
-import { getTasks } from './task-list/tasks';
+import { getAllTasks } from './task-list/tasks';
 import { isOnboardingEnabled } from 'dashboard/utils';
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
 import ReportFilters from 'analytics/components/report-filters';
@@ -277,7 +277,7 @@ export default compose(
 
 		if ( isOnboardingEnabled() ) {
 			const profileItems = getProfileItems();
-			const tasks = getTasks( {
+			const tasks = getAllTasks( {
 				profileItems,
 				options: getOptions( [ 'woocommerce_task_list_payments' ] ),
 				query: props.query,

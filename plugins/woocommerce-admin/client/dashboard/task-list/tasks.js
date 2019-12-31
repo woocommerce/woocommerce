@@ -19,12 +19,13 @@ import { updateQueryString } from '@woocommerce/navigation';
  */
 import Appearance from './tasks/appearance';
 import Connect from './tasks/connect';
+import { getProductIdsForCart } from 'dashboard/utils';
 import Products from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 
-export function getTasks( { profileItems, options, query } ) {
+export function getAllTasks( { profileItems, options, query, toggleCartModal } ) {
 	const {
 		hasHomepage,
 		hasPhysicalProducts,
@@ -39,6 +40,9 @@ export function getTasks( { profileItems, options, query } ) {
 		shippingZonesCount: 0,
 	} );
 
+	const productIds = getProductIdsForCart( profileItems, true );
+	const remainingProductIds = getProductIdsForCart( profileItems );
+
 	const paymentsCompleted = get(
 		options,
 		[ 'woocommerce_task_list_payments', 'completed' ],
@@ -46,6 +50,19 @@ export function getTasks( { profileItems, options, query } ) {
 	);
 
 	const tasks = [
+		{
+			key: 'purchase',
+			title: __( 'Purchase & install extensions', 'woocommerce-admin' ),
+			content: __(
+				'Purchase, install, and manage your extensions directly from your dashboard',
+				'wooocommerce-admin'
+			),
+			icon: 'extension',
+			container: null,
+			onClick: () => ( remainingProductIds.length ? toggleCartModal() : null ),
+			visible: productIds.length,
+			completed: ! remainingProductIds.length,
+		},
 		{
 			key: 'connect',
 			title: __( 'Connect your store to WooCommerce.com', 'woocommerce-admin' ),
