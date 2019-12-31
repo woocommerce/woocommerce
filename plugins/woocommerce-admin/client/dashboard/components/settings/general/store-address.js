@@ -179,6 +179,7 @@ export function StoreAddress( props ) {
 				options={ countryStateOptions }
 				isSearchable
 				{ ...getInputProps( 'countryState' ) }
+				controlClassName={ getInputProps( 'countryState' ).className }
 			>
 				{ getCountryStateAutofill(
 					countryStateOptions,
