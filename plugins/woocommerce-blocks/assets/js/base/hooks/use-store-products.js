@@ -6,7 +6,7 @@ import { useCollectionHeader } from './use-collection-header';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data
- * store for the `'wc/store/products'` route. Given a query object, this
+ * store for the `wc/store/products` route. Given a query object, this
  * will ensure a component is kept up to date with the products matching that
  * query in the store state.
  *
@@ -22,8 +22,6 @@ import { useCollectionHeader } from './use-collection-header';
  *                                    are still loading or not.
  */
 export const useStoreProducts = ( query ) => {
-	// @todo see @https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1097
-	// where the namespace is going to be changed. Not doing in this pull.
 	const collectionOptions = {
 		namespace: '/wc/store',
 		resourceName: 'products',
