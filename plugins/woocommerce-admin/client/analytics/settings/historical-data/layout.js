@@ -139,13 +139,13 @@ export default withSelect( ( select, props ) => {
 
 	// Use timestamp to invalidate previous status when a new import starts
 	const {
-		customers_count: customersProgress,
-		customers_total: customersTotal,
+		customers: customersStatus,
 		imported_from: importDate,
 		is_importing: isImporting,
-		orders_count: ordersProgress,
-		orders_total: ordersTotal,
+		orders: ordersStatus,
 	} = getImportStatus( lastImportStartTimestamp, requirement );
+	const { imported: customersProgress, total: customersTotal } = customersStatus || {};
+	const { imported: ordersProgress, total: ordersTotal } = ordersStatus || {};
 	const isStatusLoading = isGetImportStatusRequesting( lastImportStartTimestamp );
 
 	const hasImportStarted = Boolean(

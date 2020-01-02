@@ -363,10 +363,10 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( true, $report['is_importing'] );
-		$this->assertEquals( 0, $report['customers_count'] );
-		$this->assertEquals( 1, $report['customers_total'] );
-		$this->assertEquals( 0, $report['orders_count'] );
-		$this->assertEquals( 4, $report['orders_total'] );
+		$this->assertEquals( 0, $report['customers']['imported'] );
+		$this->assertEquals( 1, $report['customers']['total'] );
+		$this->assertEquals( 0, $report['orders']['imported'] );
+		$this->assertEquals( 4, $report['orders']['total'] );
 
 		WC_Helper_Queue::run_all_pending();
 
@@ -377,10 +377,10 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( false, $report['is_importing'] );
-		$this->assertEquals( 1, $report['customers_count'] );
-		$this->assertEquals( 1, $report['customers_total'] );
-		$this->assertEquals( 4, $report['orders_count'] );
-		$this->assertEquals( 4, $report['orders_total'] );
+		$this->assertEquals( 1, $report['customers']['imported'] );
+		$this->assertEquals( 1, $report['customers']['total'] );
+		$this->assertEquals( 4, $report['orders']['imported'] );
+		$this->assertEquals( 4, $report['orders']['total'] );
 
 		// Test totals with skip existing param.
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );

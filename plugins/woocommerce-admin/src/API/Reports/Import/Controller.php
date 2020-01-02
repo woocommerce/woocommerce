@@ -286,15 +286,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_import_status( $request ) {
-		$result = array(
-			'is_importing'    => ReportsSync::is_importing(),
-			'customers_total' => (int) get_option( 'wc_admin_import_customers_total', 0 ),
-			'customers_count' => (int) get_option( 'wc_admin_import_customers_count', 0 ),
-			'orders_total'    => (int) get_option( 'wc_admin_import_orders_total', 0 ),
-			'orders_count'    => (int) get_option( 'wc_admin_import_orders_count', 0 ),
-			'imported_from'   => get_option( 'wc_admin_imported_from_date', false ),
-		);
-
+		$result   = ReportsSync::get_import_stats();
 		$response = $this->prepare_item_for_response( $result, $request );
 		$data     = $this->prepare_response_for_collection( $response );
 

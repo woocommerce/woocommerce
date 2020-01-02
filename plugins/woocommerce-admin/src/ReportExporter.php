@@ -11,19 +11,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use \Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
+
 /**
  * ReportExporter Class.
  */
 class ReportExporter {
 	/**
-	 * Action hook for generating a report export.
+	 * Slug to identify the scheduler.
+	 *
+	 * @var string
 	 */
-	const REPORT_EXPORT_ACTION = 'wc-admin_report_export';
+	public static $name = 'report_exporter';
 
 	/**
-	 * Action scheduler group.
+	 * Scheduler traits.
 	 */
-	const QUEUE_GROUP = 'wc-admin-data';
+	use SchedulerTraits {
+		init as scheduler_init;
+	}
 
 	/**
 	 * Export status option name.
@@ -36,37 +42,27 @@ class ReportExporter {
 	const DOWNLOAD_EXPORT_ACTION = 'woocommerce_admin_download_report_csv';
 
 	/**
-	 * Email export file download link action.
-	 */
-	const REPORT_EXPORT_EMAIL_ACTION = 'woocommerce_admin_email_report_download_link';
-
-	/**
-	 * Queue instance.
+	 * Get all available scheduling actions.
+	 * Used to determine action hook names and clear events.
 	 *
-	 * @var WC_Queue_Interface
+	 * @return array
 	 */
-	protected static $queue = null;
-
-	/**
-	 * Get queue instance.
-	 *
-	 * @return WC_Queue_Interface
-	 */
-	public static function queue() {
-		if ( is_null( self::$queue ) ) {
-			self::$queue = WC()->queue();
-		}
-
-		return self::$queue;
+	public static function get_scheduler_actions() {
+		return array(
+			'export_report'              => 'woocommerce_admin_report_export',
+			'email_report_download_link' => 'woocommerce_admin_email_report_download_link',
+		);
 	}
 
 	/**
-	 * Set queue instance.
+	 * Add action dependencies.
 	 *
-	 * @param WC_Queue_Interface $queue Queue instance.
+	 * @return array
 	 */
-	public static function set_queue( $queue ) {
-		self::$queue = $queue;
+	public static function get_dependencies() {
+		return array(
+			'email_report_download_link' => self::get_action( 'export_report' ),
+		);
 	}
 
 	/**
@@ -74,8 +70,7 @@ class ReportExporter {
 	 */
 	public static function init() {
 		// Initialize scheduled action handlers.
-		add_action( self::REPORT_EXPORT_ACTION, array( __CLASS__, 'report_export_action' ), 10, 4 );
-		add_action( self::REPORT_EXPORT_EMAIL_ACTION, array( __CLASS__, 'report_export_email_action' ), 10, 3 );
+		self::scheduler_init();
 
 		// Report download handler.
 		add_action( 'admin_init', array( __CLASS__, 'download_export_file' ) );
@@ -97,18 +92,16 @@ class ReportExporter {
 		$total_rows  = $exporter->get_total_rows();
 		$batch_size  = $exporter->get_limit();
 		$num_batches = (int) ceil( $total_rows / $batch_size );
-		$start_time  = time() + 5;
 
 		// Create batches, like initial import.
 		$report_batch_args = array( $export_id, $report_type, $report_args );
 
 		if ( 0 < $num_batches ) {
-			ReportsSync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
+			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
 
 			if ( $send_email ) {
 				$email_action_args = array( get_current_user_id(), $export_id, $report_type );
-
-				ReportsSync::queue_dependent_action( self::REPORT_EXPORT_EMAIL_ACTION, $email_action_args, self::REPORT_EXPORT_ACTION );
+				self::schedule_action( 'email_report_download_link', $email_action_args );
 			}
 		}
 
@@ -124,7 +117,7 @@ class ReportExporter {
 	 * @param array  $report_args Report parameters, passed to data query.
 	 * @return void
 	 */
-	public static function report_export_action( $page_number, $export_id, $report_type, $report_args ) {
+	public static function export_report( $page_number, $export_id, $report_type, $report_args ) {
 		$report_args['page'] = $page_number;
 
 		$exporter = new ReportCSVExporter( $report_type, $report_args );
@@ -205,7 +198,7 @@ class ReportExporter {
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @return void
 	 */
-	public static function report_export_email_action( $user_id, $export_id, $report_type ) {
+	public static function email_report_download_link( $user_id, $export_id, $report_type ) {
 		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
 
 		if ( 100 === $percent_complete ) {

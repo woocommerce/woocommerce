@@ -24,7 +24,7 @@ function HistoricalDataStatus( { importDate, status } ) {
 		finalizing: [ __( 'Finalizing', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		finished: sprintf(
 			__( 'Historical data from %s onward imported', 'woocommerce-admin' ),
-			importDate !== '-1' ? moment( importDate ).format( 'll' ) : ''
+			importDate !== -1 ? moment( importDate ).format( 'll' ) : ''
 		),
 	} );
 

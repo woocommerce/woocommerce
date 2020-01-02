@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Admin\Overrides\WPPostStore;
+use Automattic\WooCommerce\Admin\Schedulers\OrdersScheduler;
 
 /**
  * Reports Generation Batch Queue Prioritizaion Test Class
@@ -40,13 +41,13 @@ class WC_Tests_Reports_Queue_Prioritization extends WC_REST_Unit_Test_Case {
 	 * Test that we're setting a priority on our actions.
 	 */
 	public function test_queue_action_sets_priority() {
-		ReportsSync::queue()->schedule_single( time(), ReportsSync::SINGLE_ORDER_IMPORT_ACTION );
+		OrdersScheduler::schedule_action( 'import' );
 
-		$actions = ReportsSync::queue()->search(
+		$actions = OrdersScheduler::queue()->search(
 			array(
 				'status'  => 'pending',
 				'claimed' => false,
-				'hook'    => ReportsSync::SINGLE_ORDER_IMPORT_ACTION,
+				'hook'    => OrdersScheduler::get_action( 'import' ),
 			)
 		);
 
@@ -58,7 +59,7 @@ class WC_Tests_Reports_Queue_Prioritization extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( WPPostStore::JOB_PRIORITY, $action->menu_order );
 
-		ReportsSync::queue()->cancel_all( ReportsSync::SINGLE_ORDER_IMPORT_ACTION );
+		OrdersScheduler::clear_queued_actions();
 	}
 }
 
