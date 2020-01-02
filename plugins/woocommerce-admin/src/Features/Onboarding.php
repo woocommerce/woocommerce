@@ -86,6 +86,7 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
+		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
 	}
@@ -897,5 +898,22 @@ class Onboarding {
 		}
 
 		return $show;
+	}
+
+	/**
+	 * Redirects the user to the task list if the task list is enabled and finishing a wccom checkout.
+	 *
+	 * @todo Once URL params are added to the redirect, we can check those instead of the referer.
+	 */
+	public static function redirect_wccom_install() {
+		if (
+			! self::should_show_tasks() ||
+			! isset( $_SERVER['HTTP_REFERER'] ) ||
+			0 !== strpos( $_SERVER['HTTP_REFERER'], 'https://woocommerce.com/checkout' ) // phpcs:ignore sanitization ok.
+		) {
+			return;
+		}
+
+		wp_safe_redirect( wc_admin_url() );
 	}
 }
