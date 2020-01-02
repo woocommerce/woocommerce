@@ -78,21 +78,16 @@ const PriceSlider = ( {
 			};
 		}
 
-		// Normalize to whatever is the closest step (because range input will
-		// only jump to the closest step in the range).
-		const min = Math.round( minPrice / stepValue ) * stepValue;
-		const max = Math.round( maxPrice / stepValue ) * stepValue;
-
 		const low =
 			Math.round(
 				100 *
-					( ( min - minConstraint ) /
+					( ( minPrice - minConstraint ) /
 						( maxConstraint - minConstraint ) )
 			) - 0.5;
 		const high =
 			Math.round(
 				100 *
-					( ( max - minConstraint ) /
+					( ( maxPrice - minConstraint ) /
 						( maxConstraint - minConstraint ) )
 			) + 0.5;
 
@@ -160,8 +155,14 @@ const PriceSlider = ( {
 			);
 			const targetValue = event.target.value;
 			const currentValues = isMin
-				? [ targetValue, maxPrice ]
-				: [ minPrice, targetValue ];
+				? [
+						Math.round( targetValue / stepValue ) * stepValue,
+						maxPrice,
+				  ]
+				: [
+						minPrice,
+						Math.round( targetValue / stepValue ) * stepValue,
+				  ];
 			const values = constrainRangeSliderValues(
 				currentValues,
 				minConstraint,
@@ -227,6 +228,11 @@ const PriceSlider = ( {
 		! hasValidConstraints && 'is-disabled'
 	);
 
+	const minRangeStep =
+		minRange && document.activeElement === minRange.current ? stepValue : 1;
+	const maxRangeStep =
+		maxRange && document.activeElement === maxRange.current ? stepValue : 1;
+
 	return (
 		<div className={ classes }>
 			<div
@@ -249,7 +255,7 @@ const PriceSlider = ( {
 							) }
 							value={ minPrice || 0 }
 							onChange={ rangeInputOnChange }
-							step={ stepValue }
+							step={ minRangeStep }
 							min={ minConstraint }
 							max={ maxConstraint }
 							ref={ minRange }
@@ -264,7 +270,7 @@ const PriceSlider = ( {
 							) }
 							value={ maxPrice || 0 }
 							onChange={ rangeInputOnChange }
-							step={ stepValue }
+							step={ maxRangeStep }
 							min={ minConstraint }
 							max={ maxConstraint }
 							ref={ maxRange }
