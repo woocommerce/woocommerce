@@ -116,6 +116,15 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.8 = 2020-01-02 =
+- Fixed a bug where Filter by Price didn't show up. #1450
+- Price filter now allows entering any number in the input fields, even if it's out of constrains. #1457 
+- Make price slider accurately represent the selected price #1453 
+
+= 2.5.7 = 2019-12-20 =
+- Add translation comments and use correct functions #1412, #1415
+- bug: Fix Price Filter constraints when price is decimal #1419
+
 = 2.5.6 - 2019-12-17 =
 - Fix broken build resulting in blocks not working.
 
