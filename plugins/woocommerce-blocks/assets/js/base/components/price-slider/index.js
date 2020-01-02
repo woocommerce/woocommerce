@@ -18,7 +18,7 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
  * Internal dependencies
  */
 import './style.scss';
-import { constrainRangeSliderValues } from './utils';
+import { constrainRangeSliderValues } from './constrain-range-slider-values';
 import FilterSubmitButton from '../filter-submit-button';
 
 /**
@@ -200,8 +200,8 @@ const PriceSlider = ( {
 			);
 			const values = constrainRangeSliderValues(
 				[ minPriceInput, maxPriceInput ],
-				minConstraint,
-				maxConstraint,
+				null,
+				null,
 				stepValue,
 				isMin
 			);
@@ -253,7 +253,11 @@ const PriceSlider = ( {
 								'Filter products by minimum price',
 								'woo-gutenberg-products-block'
 							) }
-							value={ minPrice || 0 }
+							value={
+								Number.isFinite( minPrice )
+									? minPrice
+									: minConstraint
+							}
 							onChange={ rangeInputOnChange }
 							step={ minRangeStep }
 							min={ minConstraint }
@@ -268,7 +272,11 @@ const PriceSlider = ( {
 								'Filter products by maximum price',
 								'woo-gutenberg-products-block'
 							) }
-							value={ maxPrice || 0 }
+							value={
+								Number.isFinite( maxPrice )
+									? maxPrice
+									: maxConstraint
+							}
 							onChange={ rangeInputOnChange }
 							step={ maxRangeStep }
 							min={ minConstraint }
