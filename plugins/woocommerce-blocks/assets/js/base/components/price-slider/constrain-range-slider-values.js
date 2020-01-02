@@ -8,23 +8,37 @@
  * @param {boolean} isMin Whether we're currently interacting with the min range slider or not, so we update the correct values.
  * @return {Array} Validated and updated min/max values that fit within the range slider constraints.
  */
-export const constrainRangeSliderValues = ( values, min, max, step, isMin ) => {
-	let minValue = parseInt( values[ 0 ], 10 ) || min;
-	let maxValue = parseInt( values[ 1 ], 10 ) || step; // Max should be one step above min if invalid or 0.
+export const constrainRangeSliderValues = (
+	values,
+	min,
+	max,
+	step = 1,
+	isMin = false
+) => {
+	let minValue = parseInt( values[ 0 ], 10 );
+	let maxValue = parseInt( values[ 1 ], 10 );
 
-	if ( min > minValue ) {
+	if ( ! Number.isFinite( minValue ) ) {
+		minValue = min || 0;
+	}
+
+	if ( ! Number.isFinite( maxValue ) ) {
+		maxValue = max || step;
+	}
+
+	if ( Number.isFinite( min ) && min > minValue ) {
 		minValue = min;
 	}
 
-	if ( max <= minValue ) {
+	if ( Number.isFinite( max ) && max <= minValue ) {
 		minValue = max - step;
 	}
 
-	if ( min >= maxValue ) {
+	if ( Number.isFinite( min ) && min >= maxValue ) {
 		maxValue = min + step;
 	}
 
-	if ( max < maxValue ) {
+	if ( Number.isFinite( max ) && max < maxValue ) {
 		maxValue = max;
 	}
 
