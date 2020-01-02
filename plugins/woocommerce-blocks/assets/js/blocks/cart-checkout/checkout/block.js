@@ -190,11 +190,11 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 									'City',
 									'woo-gutenberg-products-block'
 								) }
-								value={ shippingFields.country }
+								value={ shippingFields.city }
 								onChange={ ( newValue ) =>
 									setShippingFields( {
 										...shippingFields,
-										country: newValue,
+										city: newValue,
 									} )
 								}
 							/>
