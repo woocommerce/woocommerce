@@ -1,9 +1,9 @@
-.wc-blocks-input-row {
+.wc-block-input-row {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
 
-	& > .wc-blocks-text-input {
+	& > .wc-block-text-input {
 		margin-right: $gap-small;
 		flex-grow: 1;
 		margin-top: $gap;
@@ -14,7 +14,7 @@
 
 	// Responsive media styles.
 	@include breakpoint( "<480px" ) {
-		.wc-blocks-text-input {
+		.wc-block-text-input {
 			margin-right: 0;
 		}
 	}

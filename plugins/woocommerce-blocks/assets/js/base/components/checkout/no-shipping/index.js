@@ -16,9 +16,9 @@ const NoShipping = () => {
 		<Placeholder
 			icon={ <ShippingIcon /> }
 			label={ __( 'Shipping options', 'woo-gutenberg-products-block' ) }
-			className="wc-blocks-checkout__no-shipping"
+			className="wc-block-checkout__no-shipping"
 		>
-			<span className="wc-blocks-checkout__no-shipping-description">
+			<span className="wc-block-checkout__no-shipping-description">
 				{ __(
 					'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
 					'woo-gutenberg-products-block'

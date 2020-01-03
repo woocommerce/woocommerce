@@ -1,7 +1,7 @@
 $circle-size: 24px;
 $line-offset-from-circle-size: 8px;
 
-.wc-components-checkout-step {
+.wc-block-checkout-step {
 	position: relative;
 	padding-left: $gap-large;
 	padding-bottom: $gap-larger;
@@ -11,7 +11,7 @@ $line-offset-from-circle-size: 8px;
 	}
 }
 
-.wc-components-checkout-step__heading {
+.wc-block-checkout-step__heading {
 	display: flex;
 	justify-content: space-between;
 	align-content: center;
@@ -20,7 +20,7 @@ $line-offset-from-circle-size: 8px;
 }
 
 // @todo: remove the parent class once we dial the specification down.
-.wc-components-checkout-step__heading .wc-components-checkout-step__title {
+.wc-block-checkout-step__heading .wc-block-checkout-step__title {
 	font-size: 16px;
 	line-height: 24px;
 	color: $gray-80;
@@ -29,7 +29,7 @@ $line-offset-from-circle-size: 8px;
 }
 
 // @todo: remove the parent class once we dial the specification down.
-.wc-components-checkout-step .wc-components-checkout-step__heading-content {
+.wc-block-checkout-step .wc-block-checkout-step__heading-content {
 	font-size: 12px;
 	line-height: 24px;
 	color: $gray-80;
@@ -39,7 +39,7 @@ $line-offset-from-circle-size: 8px;
 		color: $gray-80;
 	}
 }
-.wc-components-checkout-step__description {
+.wc-block-checkout-step__description {
 	font-size: 14px;
 	line-height: 20px;
 	color: $gray-60;
@@ -48,7 +48,7 @@ $line-offset-from-circle-size: 8px;
 	margin-bottom: $gap-large;
 }
 
-.wc-components-checkout-step__number {
+.wc-block-checkout-step__number {
 	position: absolute;
 	width: $circle-size;
 	height: $circle-size;
@@ -65,7 +65,7 @@ $line-offset-from-circle-size: 8px;
 
 // because themes can register different background colors, we can't always
 // relay on using white border to offest the step left line,
-.wc-components-checkout-step::before {
+.wc-block-checkout-step::before {
 	content: "";
 	// 1 Circle size + offset of the first circle and next circle.
 	height: calc(100% - #{$circle-size + $line-offset-from-circle-size * 2});
