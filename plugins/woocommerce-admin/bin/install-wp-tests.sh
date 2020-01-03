@@ -191,7 +191,7 @@ install_deps() {
 		BRANCH="$(sed 's/#/%23/' <<<$BRANCH)"
 		# Checkout plugin via Git so all files are gathered.
 		cd "$WP_CORE_DIR/wp-content/plugins"
-		git clone https://github.com/woocommerce/woocommerce-admin.git
+		git clone https://github.com/$REPO.git
 		cd woocommerce-admin
 		git fetch origin $BRANCH
 		git checkout -B $BRANCH origin/$BRANCH
