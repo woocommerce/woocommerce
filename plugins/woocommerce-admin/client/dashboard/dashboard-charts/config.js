@@ -54,7 +54,7 @@ const defaultCharts = [
 		key: 'items_sold',
 	},
 	{
-		label: __( 'Refunds', 'woocommerce-admin' ),
+		label: __( 'Returns', 'woocommerce-admin' ),
 		report: 'revenue',
 		key: 'refunds',
 	},
