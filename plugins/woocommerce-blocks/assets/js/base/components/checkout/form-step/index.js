@@ -13,7 +13,7 @@ import './style.scss';
 
 const StepNumber = ( { stepNumber } ) => {
 	return (
-		<div className="wc-components-checkout-step__number">
+		<div className="wc-block-checkout-step__number">
 			<Label
 				label={ stepNumber }
 				screenReaderLabel={ sprintf(
@@ -30,9 +30,9 @@ const StepNumber = ( { stepNumber } ) => {
 };
 
 const StepHeading = ( { title, stepHeadingContent } ) => (
-	<div className="wc-components-checkout-step__heading">
-		<h4 className="wc-components-checkout-step__title">{ title }</h4>
-		<span className="wc-components-checkout-step__heading-content">
+	<div className="wc-block-checkout-step__heading">
+		<h4 className="wc-block-checkout-step__title">{ title }</h4>
+		<span className="wc-block-checkout-step__heading-content">
 			{ stepHeadingContent }
 		</span>
 	</div>
@@ -49,7 +49,7 @@ const FormStep = ( {
 } ) => {
 	return (
 		<div
-			className={ classnames( className, 'wc-components-checkout-step' ) }
+			className={ classnames( className, 'wc-block-checkout-step' ) }
 			id={ id }
 		>
 			<StepNumber stepNumber={ stepNumber } />
@@ -57,12 +57,10 @@ const FormStep = ( {
 				title={ title }
 				stepHeadingContent={ stepHeadingContent() }
 			/>
-			<span className="wc-components-checkout-step__description">
+			<span className="wc-block-checkout-step__description">
 				{ description }
 			</span>
-			<div className="wc-components-checkout-step__content">
-				{ children }
-			</div>
+			<div className="wc-block-checkout-step__content">{ children }</div>
 		</div>
 	);
 };

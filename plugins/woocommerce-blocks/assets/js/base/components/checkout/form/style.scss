@@ -1,4 +1,4 @@
-.wc-components-checkout-form {
+.wc-block-checkout-form {
 	margin-left: $gap-large;
 	margin-right: $gap-large;
 	width: $content-width;
@@ -7,7 +7,7 @@
 
 // Responsive media styles.
 @include breakpoint( "<480px" ) {
-	.wc-components-checkout-form {
+	.wc-block-checkout-form {
 		margin-left: $gap-smaller;
 		margin-right: $gap;
 	}

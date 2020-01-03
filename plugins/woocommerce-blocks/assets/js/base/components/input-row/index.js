@@ -10,7 +10,7 @@ import './style.scss';
 
 const InputRow = ( { className, children } ) => {
 	return (
-		<div className={ classnames( 'wc-blocks-input-row', className ) }>
+		<div className={ classnames( 'wc-block-input-row', className ) }>
 			{ children }
 		</div>
 	);

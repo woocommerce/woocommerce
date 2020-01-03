@@ -27,7 +27,7 @@ const TextInput = ( {
 	const onChangeValue = ( event ) => onChange( event.target.value );
 	return (
 		<div
-			className={ classnames( 'wc-blocks-text-input', className, {
+			className={ classnames( 'wc-block-text-input', className, {
 				'is-active': isActive || value,
 			} ) }
 		>
@@ -52,7 +52,7 @@ const TextInput = ( {
 				aria-describedby={ !! help ? id + '__help' : undefined }
 			/>
 			{ !! help && (
-				<p id={ id + '__help' } className="wc-blocks-text-input__help">
+				<p id={ id + '__help' } className="wc-block-text-input__help">
 					{ help }
 				</p>
 			) }

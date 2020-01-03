@@ -1,9 +1,9 @@
-.wc-blocks-text-input {
+.wc-block-text-input {
 	position: relative;
 	margin-top: $gap;
 }
 
-.wc-blocks-text-input label {
+.wc-block-text-input label {
 	position: absolute;
 	transform: translateX(#{$gap}) translateY(#{$gap-small});
 	font-size: 16px;
@@ -12,14 +12,14 @@
 	color: $gray-50;
 }
 
-.wc-blocks-text-input.is-active label {
+.wc-block-text-input.is-active label {
 	transform: translateX(#{$gap - $gap-small}) translateY(#{$gap-smallest}) scale(0.75);
 	transition: all 200ms ease;
 }
-.wc-blocks-text-input input[type="tel"],
-.wc-blocks-text-input input[type="url"],
-.wc-blocks-text-input input[type="text"],
-.wc-blocks-text-input input[type="email"] {
+.wc-block-text-input input[type="tel"],
+.wc-block-text-input input[type="url"],
+.wc-block-text-input input[type="text"],
+.wc-block-text-input input[type="email"] {
 	padding: $gap-small $gap;
 	border-radius: 4px;
 	border: 1px solid $input-border-gray;
@@ -32,9 +32,9 @@
 	height: 48px;
 	color: $input-text-active;
 }
-.wc-blocks-text-input.is-active input[type="tel"],
-.wc-blocks-text-input.is-active input[type="url"],
-.wc-blocks-text-input.is-active input[type="text"],
-.wc-blocks-text-input.is-active input[type="email"] {
+.wc-block-text-input.is-active input[type="tel"],
+.wc-block-text-input.is-active input[type="url"],
+.wc-block-text-input.is-active input[type="text"],
+.wc-block-text-input.is-active input[type="email"] {
 	padding: $gap-large $gap $gap-smallest;
 }

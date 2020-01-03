@@ -27,7 +27,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 		<CheckoutForm>
 			<FormStep
 				id="billing-fields"
-				className="wc-blocks-checkout__billing-fields"
+				className="wc-block-checkout__billing-fields"
 				title={ __(
 					'Contact information',
 					'woo-gutenberg-products-block'
@@ -65,7 +65,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 					}
 				/>
 				<CheckboxControl
-					className="wc-blocks-checkout__keep-updated"
+					className="wc-block-checkout__keep-updated"
 					label={ __(
 						'Keep me up to date on news and exclusive offers',
 						'woo-gutenberg-products-block'
@@ -82,7 +82,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 			{ shippingMethods.length === 0 && (
 				<FormStep
 					id="shipping-fields"
-					className="wc-blocks-checkout__shipping-fields"
+					className="wc-block-checkout__shipping-fields"
 					title={ __(
 						'Shipping address',
 						'woo-gutenberg-products-block'
@@ -100,7 +100,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 				<Fragment>
 					<FormStep
 						id="shipping-fields"
-						className="wc-blocks-checkout__shipping-fields"
+						className="wc-block-checkout__shipping-fields"
 						title={ __(
 							'Shipping address',
 							'woo-gutenberg-products-block'
@@ -245,7 +245,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 							}
 						/>
 						<CheckboxControl
-							className="wc-blocks-checkout__use-address-for-billing"
+							className="wc-block-checkout__use-address-for-billing"
 							label={ __(
 								'Use same address for billing',
 								'woo-gutenberg-products-block'
@@ -261,7 +261,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 					</FormStep>
 					<FormStep
 						id="shipping-option"
-						className="wc-blocks-checkout__shipping-option"
+						className="wc-block-checkout__shipping-option"
 						title={ __(
 							'Shipping options',
 							'woo-gutenberg-products-block'
@@ -306,7 +306,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 							] }
 						/>
 						<CheckboxControl
-							className="wc-blocks-checkout__add-note"
+							className="wc-block-checkout__add-note"
 							label="Add order notes?"
 							checked={ shippingMethod.orderNote }
 							onChange={ () =>
@@ -321,7 +321,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 			) }
 			<FormStep
 				id="payment-method"
-				className="wc-blocks-checkout__payment-method"
+				className="wc-block-checkout__payment-method"
 				title={ __( 'Payment method', 'woo-gutenberg-products-block' ) }
 				description={ __(
 					'Select a payment method below.',
@@ -331,7 +331,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 			>
 				<Placeholder>Payment methods, coming soon</Placeholder>
 				<CheckboxControl
-					className="wc-blocks-checkout__save-card-info"
+					className="wc-block-checkout__save-card-info"
 					label={ __(
 						'Save payment information to my account for future purchases.',
 						'woo-gutenberg-products-block'
