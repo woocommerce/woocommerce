@@ -55,6 +55,14 @@ const webpackConfig = {
 						plugins: [ 'transform-es2015-template-literals' ],
 					},
 				},
+				include: new RegExp( '/node_modules\/(' +
+					'|acorn-jsx' +
+					'|d3-array' +
+					'|debug' +
+					'|regexpu-core' +
+					'|unicode-match-property-ecmascript' +
+					'|unicode-match-property-value-ecmascript)/'
+				),
 			},
 			{
 				test: /\.s?css$/,
