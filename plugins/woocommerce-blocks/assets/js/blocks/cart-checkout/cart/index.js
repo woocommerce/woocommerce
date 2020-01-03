@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -39,11 +38,7 @@ registerBlockType( 'woocommerce/cart', {
 	 * @param {Object} props Props to pass to block.
 	 */
 	edit( props ) {
-		return (
-			<Disabled>
-				<Editor { ...props } />
-			</Disabled>
-		);
+		return <Editor { ...props } />;
 	},
 
 	/**
