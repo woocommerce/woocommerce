@@ -672,6 +672,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					case 'html':
+						echo $value['html']; // WPCS: XSS ok.
+						break;
+
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
