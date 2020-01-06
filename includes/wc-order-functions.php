@@ -874,10 +874,11 @@ function wc_update_coupon_usage_counts( $order_id ) {
 					$coupon->decrease_usage_count( $used_by );
 					break;
 				case 'increase':
-					$coupon->increase_usage_count( $used_by );
+					$coupon->increase_usage_count( $used_by, $order );
 					break;
 			}
 		}
+		$order->get_data_store()->release_held_coupons( $order, true );
 	}
 }
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );

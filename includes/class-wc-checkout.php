@@ -366,6 +366,7 @@ class WC_Checkout {
 				}
 			}
 
+			$order->hold_applied_coupons( $data['billing_email'] );
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
@@ -403,6 +404,9 @@ class WC_Checkout {
 
 			return $order_id;
 		} catch ( Exception $e ) {
+			if ( $order && $order instanceof WC_Order ) {
+				$order->get_data_store()->release_held_coupons( $order );
+			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
 	}
