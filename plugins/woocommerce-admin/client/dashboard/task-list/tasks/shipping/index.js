@@ -130,6 +130,7 @@ class Shipping extends Component {
 	}
 
 	completeStep() {
+		const { createNotice } = this.props;
 		const { step } = this.state;
 		const steps = this.getSteps();
 		const currentStepIndex = steps.findIndex( s => s.key === step );
@@ -138,6 +139,13 @@ class Shipping extends Component {
 		if ( nextStep ) {
 			this.setState( { step: nextStep.key } );
 		} else {
+			createNotice(
+				'success',
+				__(
+					"📦 Shipping is done! Don't worry, you can always change it later.",
+					'woocommerce-admin'
+				)
+			);
 			getHistory().push( getNewPath( {}, '/', {} ) );
 		}
 	}

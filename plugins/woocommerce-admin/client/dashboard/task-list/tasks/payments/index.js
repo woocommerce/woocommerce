@@ -92,11 +92,19 @@ class Payments extends Component {
 	}
 
 	completeTask() {
-		this.props.updateOptions( {
+		const { createNotice, updateOptions } = this.props;
+
+		updateOptions( {
 			[ 'woocommerce_task_list_payments' ]: {
 				completed: 1,
 			},
 		} );
+
+		createNotice(
+			'success',
+			__( '💰 Ka-ching! Your store can now accept payments 💳', 'woocommerce-admin' )
+		);
+
 		getHistory().push( getNewPath( {}, '/', {} ) );
 	}
 

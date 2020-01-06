@@ -164,7 +164,10 @@ class Tax extends Component {
 				...getSetting( 'onboarding', {} ),
 				isTaxComplete: true,
 			} );
-			createNotice( 'success', __( 'Your tax settings have been updated.', 'woocommerce-admin' ) );
+			createNotice(
+				'success',
+				__( "You're awesome! One less item on your to-do list ✅", 'woocommerce-admin' )
+			);
 			if ( automatedTaxEnabled ) {
 				getHistory().push( getNewPath( {}, '/', {} ) );
 			} else {

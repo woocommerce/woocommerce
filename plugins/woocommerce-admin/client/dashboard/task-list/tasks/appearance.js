@@ -95,7 +95,13 @@ class Appearance extends Component {
 		}
 
 		if ( 'notice' === step && isRequestSuccessful ) {
-			createNotice( 'success', __( 'Store notice updated sucessfully.', 'woocommerce-admin' ) );
+			createNotice(
+				'success',
+				__(
+					"🎨 Your store is looking great! Don't forget to continue personalizing it.",
+					'woocommerce-admin'
+				)
+			);
 			this.completeStep();
 		}
 
