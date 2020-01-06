@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, _x, sprintf } from '@wordpress/i18n';
+import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { Button, FormToggle } from '@wordpress/components';
@@ -207,12 +207,32 @@ class BusinessDetails extends Component {
 			.join( ', ' );
 
 		if ( isInstallingExtensions ) {
-			return <p>{ sprintf( __( 'Installing the following plugins: %s' ), extensionsList ) }</p>;
+			return (
+				<p>
+					{ sprintf(
+						_n(
+							'Installing the following plugin: %s',
+							'Installing the following plugins: %s',
+							extensions.length,
+							'woocommerce-admin'
+						),
+						extensionsList
+					) }
+				</p>
+			);
 		}
 
 		return (
 			<p>
-				{ sprintf( __( 'The following plugins will be installed for free: %s' ), extensionsList ) }
+				{ sprintf(
+					_n(
+						'The following plugin will be installed for free: %s',
+						'The following plugins will be installed for free: %s',
+						extensions.length,
+						'woocommerce-admin'
+					),
+					extensionsList
+				) }
 			</p>
 		);
 	}
