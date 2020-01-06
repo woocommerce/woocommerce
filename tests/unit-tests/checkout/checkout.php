@@ -121,53 +121,6 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * NOTE:: Commenting out this test because its flaky.
-	 *
-	 * Test if held coupon is released automatically after specified time.
-	 *
-	 * @throws Exception When unable to create order.
-	 */
-	/*
-	public function test_create_order_after_coupon_expired() {
-		$coupon_code = 'coupon4one';
-		$coupon_data_store = WC_Data_Store::load( 'coupon' );
-		$coupon = WC_Helper_Coupon::create_coupon(
-			$coupon_code,
-			array(
-				'usage_limit' => 1,
-				'usage_limit_per_user' => 1,
-			)
-		);
-		$product = WC_Helper_Product::create_simple_product( true );
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->add_discount( $coupon->get_code() );
-		$checkout = WC_Checkout::instance();
-
-		add_filter( 'woocommerce_coupon_hold_minutes', array( $this, '__return_0_01' ) );
-
-		$order_id = $checkout->create_order(
-			array(
-				'billing_email' => 'a@b.com',
-				'payment_method' => 'dummy_payment_gateway',
-			)
-		);
-
-		$this->assertNotWPError( $order_id );
-
-		$this->assertEquals( 1, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
-		$this->assertEquals( 1, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
-
-		sleep( 1 );
-
-		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
-		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
-
-		remove_filter( 'woocommerce_coupon_hold_minutes', array( $this, '__return_0_01' ) );
-
-	}
-	*/
-
-	/**
 	 * Helper function to return 0.01.
 	 *
 	 * @return float
