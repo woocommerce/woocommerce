@@ -774,11 +774,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @param string $used_by Either user ID or billing email.
+	 * @param string   $used_by  Either user ID or billing email.
+	 * @param WC_Order $order  If provided, will clear the coupons held by this order.
 	 */
-	public function increase_usage_count( $used_by = '' ) {
+	public function increase_usage_count( $used_by = '', $order = null ) {
 		if ( $this->get_id() && $this->data_store ) {
-			$new_count = $this->data_store->increase_usage_count( $this, $used_by );
+			$new_count = $this->data_store->increase_usage_count( $this, $used_by, $order );
 
 			// Bypass set_prop and remove pending changes since the data store saves the count already.
 			$this->data['usage_count'] = $new_count;
@@ -813,8 +814,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 	/**
 	 * Returns the error_message string.
-	 *
-	 * @access public
+
 	 * @return string
 	 */
 	public function get_error_message() {
