@@ -149,7 +149,7 @@ class Control extends Component {
 		}
 
 		// Show the search query when focused on searchable controls.
-		if ( isSearchable && isFocused ) {
+		if ( isSearchable && isFocused && query ) {
 			return query;
 		}
 
@@ -169,7 +169,7 @@ class Control extends Component {
 			/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 			<div
 				className={ classnames( 'components-base-control', 'woocommerce-select-control__control', className, {
-					empty: ! query.length,
+					empty: ! query || 0 === query.length,
 					'is-active': isActive,
 					'has-tags': inlineTags && hasTags,
 					'with-value': this.getInputValue().length,

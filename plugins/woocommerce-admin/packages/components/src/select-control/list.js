@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
 import { isEqual } from 'lodash';
-import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT } from '@wordpress/keycodes';
+import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT, TAB } from '@wordpress/keycodes';
 import PropTypes from 'prop-types';
 
 /**
@@ -112,6 +112,12 @@ class List extends Component {
 				break;
 
 			case ESCAPE:
+				setExpanded( false );
+				onSearch( null );
+				return;
+
+			case TAB:
+				this.select( options[ selectedIndex ] );
 				setExpanded( false );
 				onSearch( null );
 				return;
