@@ -1,4 +1,6 @@
 .wc-block-text-toolbar-button {
+	align-items: center;
+
 	&.is-toggled,
 	&.is-toggled:focus {
 		background: $core-grey-dark-500;
