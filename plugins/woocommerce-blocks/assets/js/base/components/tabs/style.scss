@@ -1,0 +1,35 @@
+.wc-component__tabs {
+	.wc-component__tab-list {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		width: 100%;
+		> .wc-component__tab-item {
+			border: none;
+			flex: auto;
+			background: transparent;
+			padding: $gap-small $gap;
+			color: $black;
+			outline-offset: -1px;
+			transition: box-shadow 0.1s linear;
+			&.is-active {
+				box-shadow: inset 0 -3px $black;
+				font-weight: 600;
+				position: relative;
+			}
+			&:focus {
+				color: $black;
+				outline-offset: -1px;
+				outline: 1px dotted $gray-60;
+			}
+			.wc-component__tab-item-content {
+				width: fit-content;
+				display: block;
+				margin: auto;
+			}
+		}
+	}
+	.wc-component__tab-content {
+		padding: $gap;
+	}
+}

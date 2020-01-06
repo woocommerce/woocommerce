@@ -1,0 +1,38 @@
+.wc-component__container-with-border {
+	margin: auto;
+	border: 2px solid $black;
+	border-radius: 5px;
+	padding: 10px;
+	margin-bottom: $gap-large;
+
+	.wc-component__text-overlay-on-border {
+		position: relative;
+		top: -24px;
+		background-color: $white;
+		padding-left: $gap-small;
+		padding-right: $gap-small;
+		width: fit-content;
+		color: $black;
+	}
+
+	.wc-component__container-content {
+		margin-top: -15px;
+		padding-left: $gap-large;
+		padding-right: $gap-large;
+		padding-bottom: $gap;
+	}
+
+	.wc-component__express-payment-event-buttons {
+		list-style: none;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+		> li {
+			display: inline-block;
+			width: 50%;
+		}
+	}
+}
