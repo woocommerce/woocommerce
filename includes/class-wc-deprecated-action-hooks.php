@@ -156,7 +156,7 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 				$item     = $new_callback_args[1];
 				$order_id = $new_callback_args[2];
 				if ( is_a( $item, 'WC_Order_Item_Product' ) ) {
-					do_action( $old_hook, $item_id, $item->legacy_values, $item->legacy_cart_item_key );
+					do_action( $old_hook, $item_id, isset( $item->legacy_values ) ? $item->legacy_values : array(), isset( $item->legacy_cart_item_key ) ? $item->legacy_cart_item_key : '' );
 				}
 				break;
 			case 'woocommerce_add_order_fee_meta':
