@@ -434,30 +434,43 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 	/**
 	 * Gets an array of fields to be included on the response.
+	 *
 	 * Included fields are based on item schema and `_fields=` request argument.
-	 * Introduced to support WordPress 4.9.6 changes.
+	 * Updated from WordPress 5.3, included into this class to support old versions.
 	 *
 	 * @since 3.5.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array Fields to be included in the response.
 	 */
 	public function get_fields_for_response( $request ) {
-		$schema = $this->get_item_schema();
-		$fields = isset( $schema['properties'] ) ? array_keys( $schema['properties'] ) : array();
+		$schema     = $this->get_item_schema();
+		$properties = isset( $schema['properties'] ) ? $schema['properties'] : array();
 
 		$additional_fields = $this->get_additional_fields();
 		foreach ( $additional_fields as $field_name => $field_options ) {
 			// For back-compat, include any field with an empty schema
 			// because it won't be present in $this->get_item_schema().
 			if ( is_null( $field_options['schema'] ) ) {
-				$fields[] = $field_name;
+				$properties[ $field_name ] = $field_options;
 			}
 		}
+
+		// Exclude fields that specify a different context than the request context.
+		$context = $request['context'];
+		if ( $context ) {
+			foreach ( $properties as $name => $options ) {
+				if ( ! empty( $options['context'] ) && ! in_array( $context, $options['context'], true ) ) {
+					unset( $properties[ $name ] );
+				}
+			}
+		}
+
+		$fields = array_keys( $properties );
 
 		if ( ! isset( $request['_fields'] ) ) {
 			return $fields;
 		}
-		$requested_fields = is_array( $request['_fields'] ) ? $request['_fields'] : preg_split( '/[\s,]+/', $request['_fields'] );
+		$requested_fields = wp_parse_list( $request['_fields'] );
 		if ( 0 === count( $requested_fields ) ) {
 			return $fields;
 		}
@@ -467,6 +480,24 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( in_array( 'id', $fields, true ) ) {
 			$requested_fields[] = 'id';
 		}
-		return array_intersect( $fields, $requested_fields );
+		// Return the list of all requested fields which appear in the schema.
+		return array_reduce(
+			$requested_fields,
+			function( $response_fields, $field ) use ( $fields ) {
+				if ( in_array( $field, $fields, true ) ) {
+					$response_fields[] = $field;
+					return $response_fields;
+				}
+				// Check for nested fields if $field is not a direct match.
+				$nested_fields = explode( '.', $field );
+				// A nested field is included so long as its top-level property is
+				// present in the schema.
+				if ( in_array( $nested_fields[0], $fields, true ) ) {
+					$response_fields[] = $field;
+				}
+				return $response_fields;
+			},
+			array()
+		);
 	}
 }
