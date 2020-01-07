@@ -302,8 +302,8 @@ class ProductSchema extends AbstractSchema {
 
 			if ( ! empty( $child_prices ) ) {
 				return [
-					'min_amount' => $this->prepare_money_response( $price_function( $product, [ 'price' => min( $child_prices ) ] ), wc_get_price_decimals() ),
-					'max_amount' => $this->prepare_money_response( $price_function( $product, [ 'price' => max( $child_prices ) ] ), wc_get_price_decimals() ),
+					'min_amount' => $this->prepare_money_response( min( $child_prices ), wc_get_price_decimals() ),
+					'max_amount' => $this->prepare_money_response( max( $child_prices ), wc_get_price_decimals() ),
 				];
 			}
 		}
