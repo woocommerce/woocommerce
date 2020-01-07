@@ -278,21 +278,21 @@ class ProductSchema extends AbstractSchema {
 	 */
 	protected function get_price_range( \WC_Product $product ) {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-		$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 		if ( $product->is_type( 'variable' ) ) {
 			$prices = $product->get_variation_prices( true );
 
 			if ( min( $prices['price'] ) !== max( $prices['price'] ) ) {
 				return [
-					'min_amount' => $this->prepare_money_response( $price_function( $product, [ 'price' => min( $prices['price'] ) ] ), wc_get_price_decimals() ),
-					'max_amount' => $this->prepare_money_response( $price_function( $product, [ 'price' => max( $prices['price'] ) ] ), wc_get_price_decimals() ),
+					'min_amount' => $this->prepare_money_response( min( $prices['price'] ), wc_get_price_decimals() ),
+					'max_amount' => $this->prepare_money_response( max( $prices['price'] ), wc_get_price_decimals() ),
 				];
 			}
 		}
 
 		if ( $product->is_type( 'grouped' ) ) {
-			$children = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+			$children       = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+			$price_function = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 			foreach ( $children as $child ) {
 				if ( '' !== $child->get_price() ) {
