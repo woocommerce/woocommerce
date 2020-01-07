@@ -22,10 +22,15 @@ function HistoricalDataStatus( { importDate, status } ) {
 		customers: [ __( 'Importing Customers', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		orders: [ __( 'Importing Orders', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		finalizing: [ __( 'Finalizing', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
-		finished: sprintf(
-			__( 'Historical data from %s onward imported', 'woocommerce-admin' ),
-			importDate !== -1 ? moment( importDate ).format( 'll' ) : ''
-		),
+		finished:
+			importDate === -1
+				? __( 'All historical data imported', 'woocommerce-admin' )
+				: sprintf(
+						__( 'Historical data from %s onward imported', 'woocommerce-admin' ),
+						// @todo The date formatting should be localized ( 'll' ), but this is currently broken in Gutenberg.
+						// See https://github.com/WordPress/gutenberg/issues/12626 for details.
+						moment( importDate ).format( 'YYYY-MM-DD' )
+					),
 	} );
 
 	return (
