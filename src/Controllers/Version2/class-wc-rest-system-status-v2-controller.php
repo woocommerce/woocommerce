@@ -594,15 +594,22 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	public function get_environment_info( $fields ) {
 		global $wpdb;
 
-		$exclude = array();
-		foreach ( $fields as $field ) {
-			$values = explode( '.', $field );
+		$enable_remote_post = false;
+		$enable_remote_get  = false;
+		if ( in_array( 'environment', $fields, true ) ) {
+			$exclude = array();
+			foreach ( $fields as $field ) {
+				$values = explode( '.', $field );
 
-			if ( 'environment' !== $values[0] || empty( $values[1] ) ) {
-				continue;
+				if ( 'environment' !== $values[0] || empty( $values[1] ) ) {
+					continue;
+				}
+
+				$exclude[] = $values[1];
 			}
 
-			$exclude[] = $values[1];
+			$enable_remote_post = 0 <= count( array_intersect( array( 'remote_post_successful', 'remote_post_response' ), $exclude ) );
+			$enable_remote_get  = 0 <= count( array_intersect( array( 'remote_get_successful', 'remote_get_response' ), $exclude ) );
 		}
 
 		// Figure out cURL version, if installed.
@@ -623,7 +630,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		// Test POST requests.
 		$post_response_successful = null;
 		$post_response_code       = null;
-		if ( empty( $exclude ) || 0 < count( array_intersect( array( 'remote_post_successful', 'remote_post_response' ), $exclude ) ) ) {
+		if ( $enable_remote_post ) {
 			$post_response_code = get_transient( 'woocommerce_test_remote_post' );
 
 			if ( false === $post_response_code || is_wp_error( $post_response_code ) ) {
@@ -650,7 +657,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		// Test GET requests.
 		$get_response_successful = null;
 		$get_response_code       = null;
-		if ( empty( $exclude ) || 0 < count( array_intersect( array( 'remote_get_successful', 'remote_get_response' ), $exclude ) ) ) {
+		if ( $enable_remote_get ) {
 			$get_response_code = get_transient( 'woocommerce_test_remote_get' );
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
