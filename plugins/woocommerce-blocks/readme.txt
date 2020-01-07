@@ -116,9 +116,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.9 - 2020-01-07 =
+- Fix issue in All Products block that was causing Variable products price to exclude taxes in some cases. #1503
+
 = 2.5.8 - 2020-01-02 =
 - Fixed a bug where Filter by Price didn't show up. #1450
-- Price filter now allows entering any number in the input fields, even if it's out of constrains. #1457 
+- Price filter now allows entering any number in the input fields, even if it's out of constrains. #1457
 - Make price slider accurately represent the selected price. #1453
 
 = 2.5.7 - 2019-12-20 =
