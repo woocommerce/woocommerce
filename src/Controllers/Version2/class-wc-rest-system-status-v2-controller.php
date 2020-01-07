@@ -72,16 +72,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$schema   = $this->get_item_schema();
-		$mappings = $this->get_item_mappings();
+		$fields   = $this->get_fields_for_response( $request );
+		$mappings = $this->get_item_mappings( $fields );
 		$response = array();
 
 		foreach ( $mappings as $section => $values ) {
-			foreach ( $values as $key => $value ) {
-				if ( isset( $schema['properties'][ $section ]['properties'][ $key ]['type'] ) ) {
-					settype( $values[ $key ], $schema['properties'][ $section ]['properties'][ $key ]['type'] );
-				}
-			}
-			settype( $values, $schema['properties'][ $section ]['type'] );
 			$response[ $section ] = $values;
 		}
 
@@ -571,11 +566,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Return an array of sections and the data associated with each.
 	 *
+	 * @param array $fields List of fields to be included on the response.
 	 * @return array
 	 */
-	public function get_item_mappings() {
+	public function get_item_mappings( $fields ) {
 		return array(
-			'environment'        => $this->get_environment_info(),
+			'environment'        => $this->get_environment_info( $fields ),
 			'database'           => $this->get_database_info(),
 			'active_plugins'     => $this->get_active_plugins(),
 			'inactive_plugins'   => $this->get_inactive_plugins(),
@@ -592,10 +588,22 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * Get array of environment information. Includes thing like software
 	 * versions, and various server settings.
 	 *
+	 * @param array $fields List of fields to be included on the response.
 	 * @return array
 	 */
-	public function get_environment_info() {
+	public function get_environment_info( $fields ) {
 		global $wpdb;
+
+		$exclude = array();
+		foreach ( $fields as $field ) {
+			$values = explode( '.', $field );
+
+			if ( 'environment' !== $values[0] || empty( $values[1] ) ) {
+				continue;
+			}
+
+			$exclude[] = $values[1];
+		}
 
 		// Figure out cURL version, if installed.
 		$curl_version = '';
@@ -613,40 +621,48 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Test POST requests.
-		$post_response_code = get_transient( 'woocommerce_test_remote_post' );
+		$post_response_successful = null;
+		$post_response_code       = null;
+		if ( empty( $exclude ) || 0 < count( array_intersect( array( 'remote_post_successful', 'remote_post_response' ), $exclude ) ) ) {
+			$post_response_code = get_transient( 'woocommerce_test_remote_post' );
 
-		if ( false === $post_response_code || is_wp_error( $post_response_code ) ) {
-			$response = wp_safe_remote_post(
-				'https://www.paypal.com/cgi-bin/webscr',
-				array(
-					'timeout'     => 10,
-					'user-agent'  => 'WooCommerce/' . WC()->version,
-					'httpversion' => '1.1',
-					'body'        => array(
-						'cmd' => '_notify-validate',
-					),
-				)
-			);
-			if ( ! is_wp_error( $response ) ) {
-				$post_response_code = $response['response']['code'];
+			if ( false === $post_response_code || is_wp_error( $post_response_code ) ) {
+				$response = wp_safe_remote_post(
+					'https://www.paypal.com/cgi-bin/webscr',
+					array(
+						'timeout'     => 10,
+						'user-agent'  => 'WooCommerce/' . WC()->version,
+						'httpversion' => '1.1',
+						'body'        => array(
+							'cmd' => '_notify-validate',
+						),
+					)
+				);
+				if ( ! is_wp_error( $response ) ) {
+					$post_response_code = $response['response']['code'];
+				}
+				set_transient( 'woocommerce_test_remote_post', $post_response_code, HOUR_IN_SECONDS );
 			}
-			set_transient( 'woocommerce_test_remote_post', $post_response_code, HOUR_IN_SECONDS );
-		}
 
-		$post_response_successful = ! is_wp_error( $post_response_code ) && $post_response_code >= 200 && $post_response_code < 300;
+			$post_response_successful = ! is_wp_error( $post_response_code ) && $post_response_code >= 200 && $post_response_code < 300;
+		}
 
 		// Test GET requests.
-		$get_response_code = get_transient( 'woocommerce_test_remote_get' );
+		$get_response_successful = null;
+		$get_response_code       = null;
+		if ( empty( $exclude ) || 0 < count( array_intersect( array( 'remote_get_successful', 'remote_get_response' ), $exclude ) ) ) {
+			$get_response_code = get_transient( 'woocommerce_test_remote_get' );
 
-		if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
-			$response = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
-			if ( ! is_wp_error( $response ) ) {
-				$get_response_code = $response['response']['code'];
+			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
+				$response = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+				if ( ! is_wp_error( $response ) ) {
+					$get_response_code = $response['response']['code'];
+				}
+				set_transient( 'woocommerce_test_remote_get', $get_response_code, HOUR_IN_SECONDS );
 			}
-			set_transient( 'woocommerce_test_remote_get', $get_response_code, HOUR_IN_SECONDS );
-		}
 
-		$get_response_successful = ! is_wp_error( $get_response_code ) && $get_response_code >= 200 && $get_response_code < 300;
+			$get_response_successful = ! is_wp_error( $get_response_code ) && $get_response_code >= 200 && $get_response_code < 300;
+		}
 
 		$database_version = wc_get_server_database_version();
 
