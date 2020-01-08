@@ -101,7 +101,7 @@
 		"webpack": "4.41.5",
 		"webpack-cli": "3.3.10",
 		"webpack-rtl-plugin": "2.0.0",
-		"yargs": "15.0.2"
+		"yargs": "15.1.0"
 	},
 	"engines": {
 		"node": "12.14.1",
