@@ -83,7 +83,7 @@ const ProductList = ( {
 	);
 	const results = useStoreProducts( queryState );
 	const { products, productsLoading } = results;
-	const totalProducts = parseInt( results.totalProducts );
+	const totalProducts = parseInt( results.totalProducts, 10 );
 
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );

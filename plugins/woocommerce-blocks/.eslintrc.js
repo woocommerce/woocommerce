@@ -11,6 +11,7 @@ module.exports = {
 		'@wordpress/dependency-group': 'off',
 		'woocommerce/dependency-group': 'error',
 		'valid-jsdoc': 'off',
+		radix: 'error',
 		yoda: [ 'error', 'never' ],
 	},
 };
