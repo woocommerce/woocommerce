@@ -226,7 +226,7 @@ class OrdersPanel extends Component {
 		const title =
 			isRequesting || orders.length
 				? __( 'Orders', 'woocommerce-admin' )
-				: __( 'No orders to ship', 'woocommerce-admin' );
+				: __( 'No orders to fulfill', 'woocommerce-admin' );
 
 		return (
 			<Fragment>
