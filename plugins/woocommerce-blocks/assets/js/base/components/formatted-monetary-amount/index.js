@@ -14,6 +14,7 @@ const currencyToNumberFormat = ( currency ) => {
 		thousandSeparator: currency.thousandSeparator,
 		decimalSeparator: currency.decimalSeparator,
 		decimalScale: currency.minorUnit,
+		fixedDecimalScale: true,
 		prefix: currency.prefix,
 		suffix: currency.suffix,
 		isNumericString: true,
