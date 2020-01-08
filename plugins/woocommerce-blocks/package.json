@@ -104,7 +104,7 @@
 		"yargs": "15.0.2"
 	},
 	"engines": {
-		"node": "12.13.0",
+		"node": "12.14.1",
 		"npm": "6.13.4"
 	},
 	"dependencies": {
