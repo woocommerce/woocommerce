@@ -234,7 +234,11 @@ trait SchedulerTraits {
 		if ( is_array( $blocking_jobs ) ) {
 			foreach ( $blocking_jobs as $blocking_job ) {
 				$blocking_job_hook = $blocking_job->get_hook();
-				$next_job_schedule = $blocking_job->get_schedule()->next();
+				if ( method_exists( $blocking_job->get_schedule(), 'get_date' ) ) {
+					$next_job_schedule = $blocking_job->get_schedule()->get_date();
+				} else {
+					$next_job_schedule = $blocking_job->get_schedule()->next();
+				}
 
 				// Ensure that the next schedule is a DateTime (it can be null).
 				if ( is_a( $next_job_schedule, 'DateTime' ) ) {
