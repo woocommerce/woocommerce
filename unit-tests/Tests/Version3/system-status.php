@@ -107,6 +107,26 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test to make sure that it is possible to filter
+	 * the environment fields returned in the response.
+	 */
+	public function test_get_system_status_info_environment_filtered_by_field() {
+		$expected_data = array(
+			'environment' => array(
+				'version' => WC()->version
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
+		$request->set_query_params( array( '_fields' => 'environment.version' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( $expected_data, $data );
+	}
+
+	/**
 	 * Test to make sure database response is correct.
 	 *
 	 * @since 3.5.0
