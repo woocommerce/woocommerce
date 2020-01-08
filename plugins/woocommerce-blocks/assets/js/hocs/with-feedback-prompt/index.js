@@ -11,13 +11,20 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import FeedbackPrompt from './feedback-prompt.js';
 
 /**
- * Adds a feedback prompt to the editor sidebar.
+ * Adds a feedback prompt with custom text to the editor sidebar.
  *
- * @param {WPComponent} BlockEdit Original component.
+ * @param {string} content Text to display in the feedback prompt.
  *
- * @return {WPComponent} Wrapped component.
+ * @return {Function} Function that returns the wrapped component.
  */
 const withFeedbackPrompt = ( content ) =>
+	/**
+	 * Adds a feedback prompt to the provided component.
+	 *
+	 * @param {WPComponent} BlockEdit Original component.
+	 *
+	 * @return {WPComponent} Wrapped component.
+	 */
 	createHigherOrderComponent( ( BlockEdit ) => {
 		return ( props ) => (
 			<Fragment>
