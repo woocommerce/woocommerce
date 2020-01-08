@@ -299,7 +299,7 @@ const FeaturedCategory = ( {
 		}
 
 		const onResizeStop = ( event, direction, elt ) => {
-			setAttributes( { height: parseInt( elt.style.height ) } );
+			setAttributes( { height: parseInt( elt.style.height, 10 ) } );
 		};
 
 		return (
