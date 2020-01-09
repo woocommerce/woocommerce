@@ -56,6 +56,10 @@ class WC_Integrations {
 	 */
 	private function get_default_integrations() {
 		$default_integrations = array();
+
+		include_once WC_ABSPATH . 'includes/integrations/maxmind-geolocation/class-wc-maxmind-geolocation-integration.php';
+		$default_integrations[] = 'WC_MaxMind_Geolocation_Integration';
+
 		return $default_integrations;
 	}
 }
