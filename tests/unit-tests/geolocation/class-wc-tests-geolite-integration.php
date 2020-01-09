@@ -26,7 +26,7 @@ class WC_Tests_Geolite_Integration extends WC_Unit_Test_Case {
 		$ipv6 = '2620:0:ccc::2';
 
 		// Init GeoLite.
-		$geolite = new WC_Geolite_Integration( WC_Geolocation::get_local_database_path() );
+		$geolite = new WC_Geolite_Integration( WC_MaxMind_Geolocation_Database::get_database_path() );
 
 		// Check for IPv4.
 		$this->assertEquals( 'US', $geolite->get_country_iso( $ipv4 ) );
