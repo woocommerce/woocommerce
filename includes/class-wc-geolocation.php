@@ -231,6 +231,16 @@ class WC_Geolocation {
 	}
 
 	/**
+	 * Path to our local db.
+	 *
+	 * @param  string $deprecated Deprecated since 3.4.0.
+	 * @return string
+	 */
+	public static function get_local_database_path( $deprecated = '2' ) {
+		return WC_MaxMind_Geolocation_Database::get_database_path();
+	}
+
+	/**
 	 * Update geoip database.
 	 *
 	 * Extract files with PharData. Tool built into PHP since 5.3.
