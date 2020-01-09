@@ -90,7 +90,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'title'      => 'system_status',
 			'type'       => 'object',
 			'properties' => array(
-				'environment'    => array(
+				'environment'        => array(
 					'description' => __( 'Environment.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
@@ -110,7 +110,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'version'                => array(
+						'version'                   => array(
 							'description' => __( 'WooCommerce version.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
@@ -218,7 +218,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'mysql_version_string'             => array(
+						'mysql_version_string'      => array(
 							'description' => __( 'MySQL version string.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
@@ -286,7 +286,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'database'       => array(
+				'database'           => array(
 					'description' => __( 'Database.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
@@ -321,7 +321,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'active_plugins' => array(
+				'active_plugins'     => array(
 					'description' => __( 'Active plugins.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
@@ -330,7 +330,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
-				'inactive_plugins' => array(
+				'inactive_plugins'   => array(
 					'description' => __( 'Inactive plugins.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
@@ -348,7 +348,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
-				'theme'          => array(
+				'theme'              => array(
 					'description' => __( 'Theme.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
@@ -433,7 +433,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'settings'       => array(
+				'settings'           => array(
 					'description' => __( 'Settings.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
@@ -513,7 +513,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'security'       => array(
+				'security'           => array(
 					'description' => __( 'Security.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
@@ -533,7 +533,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'pages'          => array(
+				'pages'              => array(
 					'description' => __( 'WooCommerce pages.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
@@ -542,7 +542,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
-				'post_type_counts' => array(
+				'post_type_counts'   => array(
 					'description' => __( 'Total post count.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view' ),
@@ -561,7 +561,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * Return an array of sections and the data associated with each.
 	 *
 	 * @deprecated 3.9.0
-	 * @param array $fields List of fields to be included on the response.
 	 * @return array
 	 */
 	public function get_item_mappings() {
@@ -665,7 +664,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		// WP memory limit.
 		$wp_memory_limit = wc_let_to_num( WP_MEMORY_LIMIT );
 		if ( function_exists( 'memory_get_usage' ) ) {
-			$wp_memory_limit = max( $wp_memory_limit, wc_let_to_num( @ini_get( 'memory_limit' ) ) );
+			$wp_memory_limit = max( $wp_memory_limit, wc_let_to_num( @ini_get( 'memory_limit' ) ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		}
 
 		// Test POST requests.
@@ -720,7 +719,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'site_url'                  => get_option( 'siteurl' ),
 			'version'                   => WC()->version,
 			'log_directory'             => WC_LOG_DIR,
-			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ),
+			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 			'wp_version'                => get_bloginfo( 'version' ),
 			'wp_multisite'              => is_multisite(),
 			'wp_memory_limit'           => $wp_memory_limit,
@@ -840,7 +839,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 					continue;
 				}
-				$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
+				$table_type = in_array( $table->name, $core_tables, true ) ? 'woocommerce' : 'other';
 
 				$tables[ $table_type ][ $table->name ] = array(
 					'data'   => $table->data,
@@ -1129,7 +1128,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'thousand_separator'        => wc_get_price_thousand_separator(),
 			'decimal_separator'         => wc_get_price_decimal_separator(),
 			'number_of_decimals'        => wc_get_price_decimals(),
-			'geolocation_enabled'       => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
+			'geolocation_enabled'       => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ), true ),
 			'taxonomies'                => $term_response,
 			'product_visibility_terms'  => $product_visibility_terms,
 			'woocommerce_com_connected' => $woo_com_connected,
