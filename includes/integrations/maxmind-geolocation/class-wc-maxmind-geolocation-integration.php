@@ -61,6 +61,22 @@ class WC_MaxMind_Geolocation_Integration extends WC_Integration {
 			return $value;
 		}
 
+		// Check the license key by attempting to download the Geolocation database.
+		$database = new WC_MaxMind_Geolocation_Database( $value );
+
+		$file = $database->download_database();
+		if ( is_wp_error( $file ) ) {
+			WC_Admin_Settings::add_error( $file->get_error_message() );
+
+			// Throw an exception to keep from changing this value. This will prevent
+			// users from accidentally losing their license key, which cannot
+			// be viewed again after generating.
+			throw new Exception( $file->get_error_message() );
+		} else {
+			// We don't need the file that we've downloaded.
+			unlink( $file );
+		}
+
 		return $value;
 	}
 }
