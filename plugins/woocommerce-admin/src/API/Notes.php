@@ -90,7 +90,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		if ( ! $note ) {
 			return new \WP_Error(
-				'woocommerce_admin_notes_invalid_id',
+				'woocommerce_note_invalid_id',
 				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
 			);
@@ -203,7 +203,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		if ( ! $note ) {
 			return new \WP_Error(
-				'woocommerce_admin_notes_invalid_id',
+				'woocommerce_note_invalid_id',
 				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
 			);

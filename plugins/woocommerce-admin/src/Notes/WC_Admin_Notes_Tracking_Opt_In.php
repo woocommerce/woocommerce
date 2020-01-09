@@ -29,7 +29,7 @@ class WC_Admin_Notes_Tracking_Opt_In {
 	 * Attach hooks.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_admin_note_action_tracking-opt-in', array( $this, 'opt_in_to_tracking' ) );
+		add_action( 'woocommerce_note_action_tracking-opt-in', array( $this, 'opt_in_to_tracking' ) );
 	}
 
 	/**

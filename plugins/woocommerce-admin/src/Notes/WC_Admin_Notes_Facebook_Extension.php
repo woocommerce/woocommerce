@@ -29,7 +29,7 @@ class WC_Admin_Notes_Facebook_Extension {
 	 * Attach hooks.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_admin_note_action_install-now', array( $this, 'install_facebook_extension' ) );
+		add_action( 'woocommerce_note_action_install-now', array( $this, 'install_facebook_extension' ) );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class WC_Admin_Notes_Facebook_Extension {
 					),
 					admin_url( 'admin.php' )
 				),
-				WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED	
+				WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED
 			);
 		}
 	}

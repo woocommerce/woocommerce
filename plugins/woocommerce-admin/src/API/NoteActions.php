@@ -61,7 +61,7 @@ class NoteActions extends Notes {
 
 		if ( ! $note ) {
 			return new \WP_Error(
-				'woocommerce_admin_notes_invalid_id',
+				'woocommerce_note_invalid_id',
 				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
 			);
@@ -80,7 +80,7 @@ class NoteActions extends Notes {
 
 		if ( ! $triggered_action ) {
 			return new \WP_Error(
-				'woocommerce_admin_note_action_invalid_id',
+				'woocommerce_note_action_invalid_id',
 				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
 			);
