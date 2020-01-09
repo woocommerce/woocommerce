@@ -11,6 +11,13 @@
 class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 
 	/**
+	 * The database used by the tests.
+	 *
+	 * @var WC_MaxMind_Geolocation_Database
+	 */
+	private $database_service;
+
+	/**
 	 * Run setup code for unit tests.
 	 */
 	public function setUp() {
@@ -18,14 +25,37 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
+
+		$this->database_service = new WC_MaxMind_Geolocation_Database();
+	}
+
+	/**
+	 * Tests that the database path filters work as intended.
+	 *
+	 * @expectedDeprecated woocommerce_geolocation_local_database_path
+	 */
+	public function test_database_path_filters() {
+		$path = $this->database_service->get_database_path();
+		$this->assertEquals( WP_CONTENT_DIR . '/uploads/' . WC_MaxMind_Geolocation_Database::DATABASE . WC_MaxMind_Geolocation_Database::DATABASE_EXTENSION, $path );
+
+		add_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path_deprecated' ), 1, 2 );
+		$path = $this->database_service->get_database_path();
+		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
+
+		$this->assertEquals( '/deprecated_filter', $path );
+
+		add_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
+		$path = $this->database_service->get_database_path();
+		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
+
+		$this->assertEquals( '/filter', $path );
 	}
 
 	/**
 	 * Tests that the database download works as expected.
 	 */
 	public function test_download_database_works() {
-		$service = new WC_MaxMind_Geolocation_Database( 'testing_license' );
-		$result  = $service->download_database();
+		$result = $this->database_service->download_database( 'testing_license' );
 
 		$this->assertEquals( '/tmp/GeoLite2-Country_20200107/GeoLite2-Country.mmdb', $result );
 	}
@@ -34,23 +64,41 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	 * Tests the that database download wraps the download and extraction errors.
 	 */
 	public function test_download_database_wraps_errors() {
-		$service = new WC_MaxMind_Geolocation_Database( 'invalid_license' );
-		$result  = $service->download_database();
+		$result = $this->database_service->download_database( 'invalid_license' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_maxmind_geolocation_database_license_key', $result->get_error_code() );
 
-		$service = new WC_MaxMind_Geolocation_Database( 'generic_error' );
-		$result  = $service->download_database();
+		$result = $this->database_service->download_database( 'generic_error' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_maxmind_geolocation_database_download', $result->get_error_code() );
 
-		$service = new WC_MaxMind_Geolocation_Database( 'archive_error' );
-		$result  = $service->download_database();
+		$result = $this->database_service->download_database( 'archive_error' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_maxmind_geolocation_database_archive', $result->get_error_code() );
+	}
+
+	/**
+	 * Hook for the deprecated database path filter.
+	 *
+	 * @param string $database_path The path to the database file.
+	 * @param string $deprecated Deprecated since 3.4.0.
+	 * @return string
+	 */
+	public function filter_database_path_deprecated( $database_path, $deprecated ) {
+		return '/deprecated_filter';
+	}
+
+	/**
+	 * Hook for the database path filter.
+	 *
+	 * @param string $database_path The path to the database file.
+	 * @return string
+	 */
+	public function filter_database_path( $database_path ) {
+		return '/filter';
 	}
 
 	/**
