@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Integrations
  */
 
+require_once WC_ABSPATH . 'includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation-database.php';
+
 /**
  * Class WC_Tests_MaxMind_Database
  */
@@ -26,17 +28,17 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	 * @expectedDeprecated woocommerce_geolocation_local_database_path
 	 */
 	public function test_database_path_filters() {
-		$path = WC_MaxMind_Geolocation_Database::get_database_path();
-		$this->assertEquals( WP_CONTENT_DIR . '/uploads/' . WC_MaxMind_Geolocation_Database::DATABASE . WC_MaxMind_Geolocation_Database::DATABASE_EXTENSION, $path );
+		$path = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
+		$this->assertEquals( WP_CONTENT_DIR . '/uploads/' . WC_Integration_MaxMind_Geolocation_Database::DATABASE . WC_Integration_MaxMind_Geolocation_Database::DATABASE_EXTENSION, $path );
 
 		add_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path_deprecated' ), 1, 2 );
-		$path = WC_MaxMind_Geolocation_Database::get_database_path();
+		$path = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
 
 		$this->assertEquals( '/deprecated_filter', $path );
 
 		add_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
-		$path = WC_MaxMind_Geolocation_Database::get_database_path();
+		$path = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
 
 		$this->assertEquals( '/filter', $path );
@@ -48,7 +50,7 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	public function test_download_database_works() {
 		$expected_database = '/tmp/GeoLite2-Country_20200100/GeoLite2-Country.mmdb';
 
-		$result = WC_MaxMind_Geolocation_Database::download_database( 'testing_license' );
+		$result = WC_Integration_MaxMind_Geolocation_Database::download_database( 'testing_license' );
 
 		$this->assertEquals( $expected_database, $result );
 
@@ -61,17 +63,17 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	 * Tests the that database download wraps the download and extraction errors.
 	 */
 	public function test_download_database_wraps_errors() {
-		$result = WC_MaxMind_Geolocation_Database::download_database( 'invalid_license' );
+		$result = WC_Integration_MaxMind_Geolocation_Database::download_database( 'invalid_license' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_maxmind_geolocation_database_license_key', $result->get_error_code() );
 
-		$result = WC_MaxMind_Geolocation_Database::download_database( 'generic_error' );
+		$result = WC_Integration_MaxMind_Geolocation_Database::download_database( 'generic_error' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_maxmind_geolocation_database_download', $result->get_error_code() );
 
-		$result = WC_MaxMind_Geolocation_Database::download_database( 'archive_error' );
+		$result = WC_Integration_MaxMind_Geolocation_Database::download_database( 'archive_error' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( 'woocommerce_maxmind_geolocation_database_archive', $result->get_error_code() );

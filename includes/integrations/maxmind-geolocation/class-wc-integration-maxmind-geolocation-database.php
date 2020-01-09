@@ -1,6 +1,6 @@
 <?php
 /**
- * MaxMind Geolocation Database
+ * WC Integration MaxMind Geolocation Database
  *
  * @version 3.9.0
  * @package WooCommerce/Integrations
@@ -9,11 +9,11 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC MaxMind Geolocation Database
+ * WC Integration MaxMind Geolocation Database
  *
  * @version 3.9.0
  */
-class WC_MaxMind_Geolocation_Database {
+class WC_Integration_MaxMind_Geolocation_Database {
 
 	/**
 	 * The name of the MaxMind database to utilize.

@@ -207,7 +207,7 @@ class WC_Geolocation {
 				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
-				$database   = WC_MaxMind_Geolocation_Database::get_database_path();
+				$database   = self::get_local_database_path();
 
 				if ( self::supports_geolite2() && file_exists( $database ) ) {
 					$country_code = self::geolocate_via_db( $ip_address, $database );
@@ -238,6 +238,8 @@ class WC_Geolocation {
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
 		return WC_MaxMind_Geolocation_Database::get_database_path();
+		require_once WC_ABSPATH . 'includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation-database.php';
+		return WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 	}
 
 	/**
@@ -254,7 +256,7 @@ class WC_Geolocation {
 		}
 
 		// There's no need to update the database with no geolocation configured.
-		$license_key = ( new WC_MaxMind_Geolocation_Integration() )->get_option( 'license_key' );
+		$license_key = ( new WC_Integration_MaxMind_Geolocation() )->get_option( 'license_key' );
 		if ( empty( $license_key ) ) {
 			return;
 		}
@@ -264,13 +266,15 @@ class WC_Geolocation {
 		WP_Filesystem();
 		global $wp_filesystem;
 
+		require_once 'class-wc-integration-maxmind-geolocation-database.php';
+
 		// Remove any existing archives to comply with the MaxMind TOS.
-		$target_database_path = WC_MaxMind_Geolocation_Database::get_database_path();
+		$target_database_path = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 		if ( $wp_filesystem->exists( $target_database_path ) ) {
 			$wp_filesystem->delete( $target_database_path );
 		}
 
-		$tmp_database_path = WC_MaxMind_Geolocation_Database::download_database( $license_key );
+		$tmp_database_path = WC_Integration_MaxMind_Geolocation_Database::download_database( $license_key );
 		if ( is_wp_error( $tmp_database_path ) ) {
 			$logger->notice( $tmp_database_path->get_error_message(), array( 'source' => 'geolocation' ) );
 			return;

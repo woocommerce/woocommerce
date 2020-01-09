@@ -8,14 +8,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'class-wc-maxmind-geolocation-database.php';
-
 /**
- * WC MaxMind Geolocation Integration
+ * WC Integration MaxMind Geolocation
  *
  * @version 3.9.0
  */
-class WC_MaxMind_Geolocation_Integration extends WC_Integration {
+class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 
 	/**
 	 * Initialize the integration.
@@ -61,8 +59,10 @@ class WC_MaxMind_Geolocation_Integration extends WC_Integration {
 			return $value;
 		}
 
+		require_once 'class-wc-integration-maxmind-geolocation-database.php';
+
 		// Check the license key by attempting to download the Geolocation database.
-		$file = WC_MaxMind_Geolocation_Database::download_database( $value );
+		$file = WC_Integration_MaxMind_Geolocation_Database::download_database( $value );
 		if ( is_wp_error( $file ) ) {
 			WC_Admin_Settings::add_error( $file->get_error_message() );
 
