@@ -29,7 +29,7 @@ class WC_Integrations {
 
 		do_action( 'woocommerce_integrations_init' );
 
-		$load_integrations = apply_filters( 'woocommerce_integrations', array() );
+		$load_integrations = apply_filters( 'woocommerce_integrations', $this->get_default_integrations() );
 
 		// Load integration classes.
 		foreach ( $load_integrations as $integration ) {
@@ -47,5 +47,15 @@ class WC_Integrations {
 	 */
 	public function get_integrations() {
 		return $this->integrations;
+	}
+
+	/**
+	 * Fetches all of the default integrations.
+	 *
+	 * @return array
+	 */
+	private function get_default_integrations() {
+		$default_integrations = array();
+		return $default_integrations;
 	}
 }
