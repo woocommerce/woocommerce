@@ -35,6 +35,7 @@ class Appearance extends Component {
 		};
 
 		this.state = {
+			isDirty: false,
 			isPending: false,
 			logo: null,
 			stepIndex: 0,
@@ -203,14 +204,20 @@ class Appearance extends Component {
 			added_text: Boolean( storeNoticeText.length ),
 		} );
 
+		setSetting( 'onboarding', {
+			...getSetting( 'onboarding', {} ),
+			isAppearanceComplete: true,
+		} );
+
 		updateOptions( {
+			woocommerce_task_list_appearance_complete: true,
 			woocommerce_demo_store: storeNoticeText.length ? 'yes' : 'no',
 			woocommerce_demo_store_notice: storeNoticeText,
 		} );
 	}
 
 	getSteps() {
-		const { isPending, logo, storeNoticeText } = this.state;
+		const { isDirty, isPending, logo, storeNoticeText } = this.state;
 		const { isRequesting } = this.props;
 
 		const steps = [
@@ -263,8 +270,16 @@ class Appearance extends Component {
 				description: __( 'Ensure your store is on-brand by adding your logo', 'woocommerce-admin' ),
 				content: isPending ? null : (
 					<Fragment>
-						<ImageUpload image={ logo } onChange={ image => this.setState( { logo: image } ) } />
-						<Button onClick={ this.updateLogo } isBusy={ isRequesting } isPrimary>
+						<ImageUpload
+							image={ logo }
+							onChange={ image => this.setState( { isDirty: true, logo: image } ) }
+						/>
+						<Button
+							disabled={ ! logo && ! isDirty }
+							onClick={ this.updateLogo }
+							isBusy={ isRequesting }
+							isPrimary
+						>
 							{ __( 'Proceed', 'woocommerce-admin' ) }
 						</Button>
 						<Button onClick={ () => this.completeStep() }>
@@ -343,7 +358,11 @@ export default compose(
 		const isRequesting =
 			Boolean( isUpdateOptionsRequesting( [ `theme_mods_${ stylesheet }` ] ) ) ||
 			Boolean(
-				isUpdateOptionsRequesting( [ 'woocommerce_demo_store', 'woocommerce_demo_store_notice' ] )
+				isUpdateOptionsRequesting( [
+					'woocommerce_task_list_appearance_complete',
+					'woocommerce_demo_store',
+					'woocommerce_demo_store_notice',
+				] )
 			);
 
 		return { errors, getOptionsError, hasErrors, isRequesting, options };

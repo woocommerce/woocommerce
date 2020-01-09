@@ -94,6 +94,7 @@ class OnboardingTasks {
 			)
 		) > 0;
 		$settings['onboarding']['hasProducts']                    = self::check_task_completion( 'products' );
+		$settings['onboarding']['isAppearanceComplete']           = get_option( 'woocommerce_task_list_appearance_complete' );
 		$settings['onboarding']['isTaxComplete']                  = self::check_task_completion( 'tax' );
 		$settings['onboarding']['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 		$settings['onboarding']['stylesheet']                     = get_option( 'stylesheet' );

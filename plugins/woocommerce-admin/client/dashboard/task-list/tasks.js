@@ -27,15 +27,15 @@ import Payments from './tasks/payments';
 
 export function getAllTasks( { profileItems, options, query, toggleCartModal } ) {
 	const {
-		hasHomepage,
 		hasPhysicalProducts,
 		hasProducts,
+		isAppearanceComplete,
 		isTaxComplete,
 		shippingZonesCount,
 	} = getSetting( 'onboarding', {
-		hasHomepage: false,
 		hasPhysicalProducts: false,
 		hasProducts: false,
+		isAppearanceComplete: false,
 		isTaxComplete: false,
 		shippingZonesCount: 0,
 	} );
@@ -93,7 +93,7 @@ export function getAllTasks( { profileItems, options, query, toggleCartModal } )
 			content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
 			icon: 'palette',
 			container: <Appearance />,
-			completed: hasHomepage,
+			completed: isAppearanceComplete,
 			visible: true,
 		},
 		{
