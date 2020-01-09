@@ -16,32 +16,58 @@ defined( 'ABSPATH' ) || exit;
 class WC_MaxMind_Geolocation_Database {
 
 	/**
-	 * The license key for interacting with the MaxMind service.
-	 *
-	 * @var string
+	 * The name of the MaxMind database to utilize.
 	 */
-	private $license_key;
+	const DATABASE = 'GeoLite2-Country';
 
 	/**
-	 * Initialize the database.
-	 *
-	 * @param string $license_key The license key to interact with the MaxMind service.
+	 * The extension for the MaxMind database.
 	 */
-	public function __construct( $license_key ) {
-		$this->license_key = $license_key;
+	const DATABASE_EXTENSION = '.mmdb';
+
+	/**
+	 * Fetches the path that the database should be stored.
+	 *
+	 * @return string The local database path.
+	 */
+	public function get_database_path() {
+		$database_path = WP_CONTENT_DIR . '/uploads/' . self::DATABASE . self::DATABASE_EXTENSION;
+
+		/**
+		 * Filter the geolocation database storage path.
+		 *
+		 * @param string $database_path The path to the database.
+		 * @param int $version Deprecated since 3.4.0.
+		 * @deprecated 3.9.0
+		 */
+		$database_path = apply_filters_deprecated(
+			'woocommerce_geolocation_local_database_path',
+			array( $database_path, 2 ),
+			'3.9.0',
+			'woocommerce_maxmind_geolocation_database_path'
+		);
+
+		/**
+		 * Filter the geolocation database storage path.
+		 *
+		 * @since 3.9.0
+		 * @param string $database_path The path to the database.
+		 */
+		return apply_filters( 'woocommerce_maxmind_geolocation_database_path', $database_path );
 	}
 
 	/**
 	 * Fetches the database from the MaxMind service.
 	 *
+	 * @param string $license_key The license key to be used when downloading the database.
 	 * @return string|WP_Error The path to the database file or an error if invalid.
 	 */
-	public function download_database() {
+	public function download_database( $license_key ) {
 		$download_uri  = 'https://download.maxmind.com/app/geoip_download?';
 		$download_uri .= http_build_query(
 			array(
-				'edition_id'  => 'GeoLite2-Country',
-				'license_key' => $this->license_key,
+				'edition_id'  => self::DATABASE,
+				'license_key' => $license_key,
 				'suffix'      => 'tar.gz',
 			)
 		);
@@ -70,11 +96,11 @@ class WC_MaxMind_Geolocation_Database {
 		try {
 			$file = new PharData( $tmp_archive_path );
 
-			$tmp_database_path = trailingslashit( dirname( $tmp_archive_path ) ) . trailingslashit( $file->current()->getFilename() ) . 'GeoLite2-Country.mmdb';
+			$tmp_database_path = trailingslashit( dirname( $tmp_archive_path ) ) . trailingslashit( $file->current()->getFilename() ) . self::DATABASE . self::DATABASE_EXTENSION;
 
 			$file->extractTo(
 				dirname( $tmp_database_path ),
-				trailingslashit( $file->current()->getFilename() ) . 'GeoLite2-Country.mmdb',
+				trailingslashit( $file->current()->getFilename() ) . self::DATABASE . self::DATABASE_EXTENSION,
 				true
 			);
 		} catch ( Exception $exception ) {
