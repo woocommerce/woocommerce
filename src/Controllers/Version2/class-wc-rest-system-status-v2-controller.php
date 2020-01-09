@@ -74,13 +74,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$schema   = $this->get_item_schema();
 		$fields   = $this->get_fields_for_response( $request );
 		$mappings = $this->get_item_mappings( $fields );
-		$response = array();
-
-		foreach ( $mappings as $section => $values ) {
-			$response[ $section ] = $values;
-		}
-
-		$response = $this->prepare_item_for_response( $response, $request );
+		$response = $this->prepare_item_for_response( $mappings, $request );
 
 		return rest_ensure_response( $response );
 	}
