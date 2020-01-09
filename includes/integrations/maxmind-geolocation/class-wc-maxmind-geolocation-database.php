@@ -99,7 +99,7 @@ class WC_MaxMind_Geolocation_Database {
 			$tmp_database_path = trailingslashit( dirname( $tmp_archive_path ) ) . trailingslashit( $file->current()->getFilename() ) . self::DATABASE . self::DATABASE_EXTENSION;
 
 			$file->extractTo(
-				dirname( $tmp_database_path ),
+				dirname( $tmp_archive_path ),
 				trailingslashit( $file->current()->getFilename() ) . self::DATABASE . self::DATABASE_EXTENSION,
 				true
 			);
