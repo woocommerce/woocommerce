@@ -85,6 +85,14 @@ class ReportsSync {
 			$scheduler::schedule_action( 'import_batch_init', array( $days, $skip_existing ) );
 		}
 
+		/**
+		 * Fires when report data regeneration begins.
+		 *
+		 * @param int|bool $days Number of days to import.
+		 * @param bool     $skip_existing Skip exisiting records.
+		 */
+		do_action( 'woocommerce_analytics_regenerate_init', $days, $skip_existing );
+
 		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'woocommerce-admin' );
 	}
 

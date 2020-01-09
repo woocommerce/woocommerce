@@ -6,7 +6,9 @@ import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import moment from 'moment';
+import { withDispatch } from '@wordpress/data';
 import { withSpokenMessages } from '@wordpress/components';
 
 /**
@@ -14,7 +16,9 @@ import { withSpokenMessages } from '@wordpress/components';
  */
 import { formatParams } from './utils';
 import HistoricalDataLayout from './layout';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 import { recordEvent } from 'lib/tracks';
+import withSelect from 'wc-api/with-select';
 
 class HistoricalData extends Component {
 	constructor() {
@@ -81,6 +85,13 @@ class HistoricalData extends Component {
 	}
 
 	onImportStarted() {
+		const { notes, updateNote } = this.props;
+
+		const historicalDataNote = notes.find( note => 'wc-admin-historical-data' === note.name );
+		if ( historicalDataNote ) {
+			updateNote( historicalDataNote.id, { status: 'actioned' } );
+		}
+
 		this.setState( {
 			activeImport: true,
 			lastImportStartTimestamp: Date.now(),
@@ -190,4 +201,24 @@ class HistoricalData extends Component {
 	}
 }
 
-export default withSpokenMessages( HistoricalData );
+export default compose( [
+	withSelect( select => {
+		const { getNotes } = select( 'wc-api' );
+
+		const notesQuery = {
+			page: 1,
+			per_page: QUERY_DEFAULTS.pageSize,
+			type: 'update',
+			status: 'unactioned',
+		};
+		const notes = getNotes( notesQuery );
+
+		return { notes };
+	} ),
+	withDispatch( dispatch => {
+		const { updateNote } = dispatch( 'wc-api' );
+
+		return { updateNote };
+	} ),
+	withSpokenMessages,
+] )( HistoricalData );

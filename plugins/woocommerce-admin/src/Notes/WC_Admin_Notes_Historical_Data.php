@@ -20,6 +20,28 @@ class WC_Admin_Notes_Historical_Data {
 	const NOTE_NAME = 'wc-admin-historical-data';
 
 	/**
+	 * Attach hooks.
+	 */
+	public function __construct() {
+		add_action( 'woocommerce_analytics_regenerate_init', array( $this, 'update_status_to_actioned' ) );
+	}
+
+	/**
+	 * Update status of note to actioned on data import trigger.
+	 */
+	public static function update_status_to_actioned() {
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
+		if ( empty( $note_ids ) ) {
+			return;
+		}
+
+		$note = new WC_Admin_Note( $note_ids[0] );
+		$note->set_status( 'actioned' );
+		$note->save();
+	}
+
+	/**
 	 * Creates a note for regenerating historical data.
 	 */
 	public static function add_note() {
