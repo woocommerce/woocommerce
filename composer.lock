@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "84e367f04bc0b0a8c6a58d4cf074bd8f",
+    "content-hash": "ef9529dad0c827d0d2e737d1f001235d",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -2246,7 +2246,14 @@
             "time": "2019-11-11T12:34:03+00:00"
         }
     ],
-    "aliases": [],
+    "aliases": [
+        {
+            "alias": "0.24.0",
+            "alias_normalized": "0.24.0.0",
+            "version": "dev-try/downgrade-autoloader",
+            "package": "woocommerce/woocommerce-admin"
+        }
+    ],
     "minimum-stability": "dev",
     "stability-flags": {
         "woocommerce/woocommerce-admin": 20
