@@ -207,7 +207,7 @@ class WC_Geolocation {
 				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
-				$database   = self::get_local_database_path();
+				$database   = WC_MaxMind_Geolocation_Database::get_database_path();
 
 				if ( self::supports_geolite2() && file_exists( $database ) ) {
 					$country_code = self::geolocate_via_db( $ip_address, $database );
@@ -231,16 +231,6 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Path to our local db.
-	 *
-	 * @param  string $deprecated Deprecated since 3.4.0.
-	 * @return string
-	 */
-	public static function get_local_database_path( $deprecated = '2' ) {
-		return apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', $deprecated );
-	}
-
-	/**
 	 * Update geoip database.
 	 *
 	 * Extract files with PharData. Tool built into PHP since 5.3.
@@ -253,44 +243,32 @@ class WC_Geolocation {
 			return;
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-
-		$database             = 'GeoLite2-Country.mmdb';
-		$target_database_path = self::get_local_database_path();
-		$tmp_database_path    = download_url( self::GEOLITE2_DB );
-
-		if ( ! is_wp_error( $tmp_database_path ) ) {
-			WP_Filesystem();
-
-			global $wp_filesystem;
-
-			try {
-				// Make sure target dir exists.
-				$wp_filesystem->mkdir( dirname( $target_database_path ) );
-
-				// Extract files with PharData. Tool built into PHP since 5.3.
-				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.Classes.NewClasses.phardataFound
-				$file_path = trailingslashit( $file->current()->getFileName() ) . $database;
-				$file->extractTo( dirname( $tmp_database_path ), $file_path, true );
-
-				// Move file and delete temp.
-				$wp_filesystem->move( trailingslashit( dirname( $tmp_database_path ) ) . $file_path, $target_database_path, true );
-				$wp_filesystem->delete( trailingslashit( dirname( $tmp_database_path ) ) . $file->current()->getFileName() );
-			} catch ( Exception $e ) {
-				$logger->notice( $e->getMessage(), array( 'source' => 'geolocation' ) );
-
-				// Reschedule download of DB.
-				wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
-				wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
-			}
-			// Delete temp file regardless of success.
-			$wp_filesystem->delete( $tmp_database_path );
-		} else {
-			$logger->notice(
-				'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
-				array( 'source' => 'geolocation' )
-			);
+		// There's no need to update the database with no geolocation configured.
+		$license_key = ( new WC_MaxMind_Geolocation_Integration() )->get_option( 'license_key' );
+		if ( empty( $license_key ) ) {
+			return;
 		}
+
+		// Allow us to easily interact with the filesystem.
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		WP_Filesystem();
+		global $wp_filesystem;
+
+		// Remove any existing archives to comply with the MaxMind TOS.
+		$target_database_path = WC_MaxMind_Geolocation_Database::get_database_path();
+		if ( $wp_filesystem->exists( $target_database_path ) ) {
+			$wp_filesystem->delete( $target_database_path );
+		}
+
+		$tmp_database_path = WC_MaxMind_Geolocation_Database::download_database( $license_key );
+		if ( is_wp_error( $tmp_database_path ) ) {
+			$logger->notice( $tmp_database_path->get_error_message(), array( 'source' => 'geolocation' ) );
+			return;
+		}
+
+		// Move the new database into position.
+		$wp_filesystem->move( $tmp_database_path, $target_database_path, true );
+		$wp_filesystem->delete( dirname( $tmp_database_path ) );
 	}
 
 	/**
