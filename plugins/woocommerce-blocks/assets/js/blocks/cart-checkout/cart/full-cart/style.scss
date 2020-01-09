@@ -1,6 +1,72 @@
 .wc-block-cart__sidebar {
 	border: 1px solid $core-grey-light-600;
 	border-width: 1px 0;
+	min-width: 15rem;
+}
+
+.wc-block-cart__item-count {
+	float: right;
+}
+
+table.wc-block-cart-items th,
+table.wc-block-cart-items td {
+	// Override Storefront theme gray table background.
+	background: none !important;
+}
+
+table.wc-block-cart-items th {
+	padding: 0.5rem 0;
+}
+
+table.wc-block-cart-items td {
+	border-top: 1px solid $core-grey-light-600;
+	padding: $gap 0;
+}
+table.wc-block-cart-items {
+	border-bottom: 1px solid $core-grey-light-600;
+}
+
+.wc-block-cart-items__header {
+	display: none;
+	text-transform: uppercase;
+}
+
+.wc-block-cart-items__header-total,
+.wc-block-cart-item__total {
+	text-align: right;
+}
+
+.wc-block-cart-item__product-wrapper {
+	display: flex;
+	flex-direction: row;
+
+	// Fixes a Safari-specific issue - product images display stretched vertically (full image height).
+	// https://stackoverflow.com/questions/57516373/image-stretching-in-flexbox-in-safari
+	align-items: flex-start;
+}
+
+.wc-block-cart-item__product img {
+	max-width: $cart-image-width;
+}
+
+.wc-block-cart-item__product-details {
+	margin-left: $gap;
+}
+
+.wc-block-cart-item__quantity {
+	display: none;
+}
+.wc-block-cart-item__quantity-stacked {
+	display: block;
+}
+
+.wc-block-cart-item__total {
+	vertical-align: bottom;
+}
+
+.wc-block-cart-item__full-price {
+	color: $core-grey-light-800;
+	text-decoration: line-through;
 }
 
 @include breakpoint( ">782px" ) {
@@ -10,6 +76,7 @@
 
 	.wc-block-cart__main {
 		flex-grow: 4;
+		margin-right: 3em;
 	}
 
 	.wc-block-cart__sidebar {
@@ -18,5 +85,33 @@
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.14);
 		flex-grow: 1;
 		padding: $gap $gap-large $gap-largest;
+	}
+
+	.wc-block-cart-items {
+		table-layout: fixed;
+	}
+
+	.wc-block-cart-items__header {
+		display: table-row;
+	}
+
+	.wc-block-cart-items__header-product {
+		width: 60%;
+	}
+
+	.wc-block-cart-item__quantity {
+		display: block;
+	}
+
+	.wc-block-cart-item__quantity-stacked {
+		display: none;
+	}
+
+	.wc-block-cart-item__product img {
+		margin-left: $gap;
+	}
+
+	.wc-block-cart-item__total {
+		vertical-align: top;
 	}
 }
