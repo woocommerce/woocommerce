@@ -30,7 +30,7 @@ class WC_MaxMind_Geolocation_Database {
 	 *
 	 * @return string The local database path.
 	 */
-	public function get_database_path() {
+	public static function get_database_path() {
 		$database_path = WP_CONTENT_DIR . '/uploads/' . self::DATABASE . self::DATABASE_EXTENSION;
 
 		/**
@@ -62,7 +62,7 @@ class WC_MaxMind_Geolocation_Database {
 	 * @param string $license_key The license key to be used when downloading the database.
 	 * @return string|WP_Error The path to the database file or an error if invalid.
 	 */
-	public function download_database( $license_key ) {
+	public static function download_database( $license_key ) {
 		$download_uri  = 'https://download.maxmind.com/app/geoip_download?';
 		$download_uri .= http_build_query(
 			array(
