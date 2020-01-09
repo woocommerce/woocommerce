@@ -116,6 +116,9 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.10 - 2020-01-09 =
+- All Products block: fix wrong price format for variable products with certain currency settings. #1518
+
 = 2.5.9 - 2020-01-07 =
 - Fix issue in All Products block that was causing Variable products price to exclude taxes in some cases. #1503
 
