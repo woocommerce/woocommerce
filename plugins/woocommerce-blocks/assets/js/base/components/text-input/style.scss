@@ -6,6 +6,7 @@
 .wc-block-text-input label {
 	position: absolute;
 	transform: translateX(#{$gap}) translateY(#{$gap-small});
+	transform-origin: top left;
 	font-size: 16px;
 	line-height: 22px;
 	transition: all 200ms ease;
@@ -13,7 +14,7 @@
 }
 
 .wc-block-text-input.is-active label {
-	transform: translateX(#{$gap - $gap-small}) translateY(#{$gap-smallest}) scale(0.75);
+	transform: translateX(#{$gap}) translateY(#{$gap-smallest}) scale(0.75);
 	transition: all 200ms ease;
 }
 .wc-block-text-input input[type="tel"],

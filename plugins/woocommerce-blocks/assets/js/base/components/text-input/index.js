@@ -20,7 +20,7 @@ const TextInput = ( {
 	screenReaderLabel,
 	disabled,
 	help,
-	value,
+	value = '',
 	onChange,
 } ) => {
 	const [ isActive, setIsActive ] = useState( false );
@@ -61,9 +61,9 @@ const TextInput = ( {
 };
 
 TextInput.propTypes = {
+	onChange: PropTypes.func.isRequired,
 	id: PropTypes.string,
 	value: PropTypes.string,
-	onChangeValue: PropTypes.func,
 	ariaLabel: PropTypes.string,
 	label: PropTypes.string,
 	screenReaderLabel: PropTypes.string,
