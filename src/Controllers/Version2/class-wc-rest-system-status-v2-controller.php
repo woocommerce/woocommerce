@@ -110,7 +110,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'wc_version'                => array(
+						'version'                => array(
 							'description' => __( 'WooCommerce version.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
