@@ -73,7 +73,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	public function get_items( $request ) {
 		$schema   = $this->get_item_schema();
 		$fields   = $this->get_fields_for_response( $request );
-		$mappings = $this->get_item_mappings( $fields );
+		$mappings = $this->get_item_mappings_per_fields( $fields );
 		$response = $this->prepare_item_for_response( $mappings, $request );
 
 		return rest_ensure_response( $response );
@@ -560,12 +560,35 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Return an array of sections and the data associated with each.
 	 *
+	 * @deprecated 3.9.0
 	 * @param array $fields List of fields to be included on the response.
 	 * @return array
 	 */
-	public function get_item_mappings( $fields ) {
+	public function get_item_mappings() {
 		return array(
-			'environment'        => $this->get_environment_info( $fields ),
+			'environment'        => $this->get_environment_info(),
+			'database'           => $this->get_database_info(),
+			'active_plugins'     => $this->get_active_plugins(),
+			'inactive_plugins'   => $this->get_inactive_plugins(),
+			'dropins_mu_plugins' => $this->get_dropins_mu_plugins(),
+			'theme'              => $this->get_theme_info(),
+			'settings'           => $this->get_settings(),
+			'security'           => $this->get_security_info(),
+			'pages'              => $this->get_pages(),
+			'post_type_counts'   => $this->get_post_type_counts(),
+		);
+	}
+
+	/**
+	 * Return an array of sections and the data associated with each.
+	 *
+	 * @since 3.9.0
+	 * @param array $fields List of fields to be included on the response.
+	 * @return array
+	 */
+	public function get_item_mappings_per_fields( $fields ) {
+		return array(
+			'environment'        => $this->get_environment_info_per_fields( $fields ),
 			'database'           => $this->get_database_info(),
 			'active_plugins'     => $this->get_active_plugins(),
 			'inactive_plugins'   => $this->get_inactive_plugins(),
@@ -582,29 +605,53 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * Get array of environment information. Includes thing like software
 	 * versions, and various server settings.
 	 *
+	 * @deprecated 3.9.0
+	 * @return array
+	 */
+	public function get_environment_info() {
+		return $this->get_environment_info_per_fields( array( 'environment' ) );
+	}
+
+	/**
+	 * Check if field item exists.
+	 *
+	 * @since 3.9.0
+	 * @param string $section Fields section.
+	 * @param array  $items List of items to check for.
+	 * @param array  $fields List of fields to be included on the response.
+	 * @return bool
+	 */
+	private function check_if_field_item_exists( $section, $items, $fields ) {
+		if ( ! in_array( $section, $fields, true ) ) {
+			return false;
+		}
+
+		$exclude = array();
+		foreach ( $fields as $field ) {
+			$values = explode( '.', $field );
+
+			if ( $section !== $values[0] || empty( $values[1] ) ) {
+				continue;
+			}
+
+			$exclude[] = $values[1];
+		}
+
+		return 0 <= count( array_intersect( $items, $exclude ) );
+	}
+
+	/**
+	 * Get array of environment information. Includes thing like software
+	 * versions, and various server settings.
+	 *
 	 * @param array $fields List of fields to be included on the response.
 	 * @return array
 	 */
-	public function get_environment_info( $fields ) {
+	public function get_environment_info_per_fields( $fields ) {
 		global $wpdb;
 
-		$enable_remote_post = false;
-		$enable_remote_get  = false;
-		if ( in_array( 'environment', $fields, true ) ) {
-			$exclude = array();
-			foreach ( $fields as $field ) {
-				$values = explode( '.', $field );
-
-				if ( 'environment' !== $values[0] || empty( $values[1] ) ) {
-					continue;
-				}
-
-				$exclude[] = $values[1];
-			}
-
-			$enable_remote_post = 0 <= count( array_intersect( array( 'remote_post_successful', 'remote_post_response' ), $exclude ) );
-			$enable_remote_get  = 0 <= count( array_intersect( array( 'remote_get_successful', 'remote_get_response' ), $exclude ) );
-		}
+		$enable_remote_post = $this->check_if_field_item_exists( 'environment', array( 'remote_post_successful', 'remote_post_response' ), $fields );
+		$enable_remote_get  = $this->check_if_field_item_exists( 'environment', array( 'remote_post_successful', 'remote_post_response' ), $fields );
 
 		// Figure out cURL version, if installed.
 		$curl_version = '';
