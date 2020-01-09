@@ -46,9 +46,15 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	 * Tests that the database download works as expected.
 	 */
 	public function test_download_database_works() {
+		$expected_database = '/tmp/GeoLite2-Country_20200100/GeoLite2-Country.mmdb';
+
 		$result = WC_MaxMind_Geolocation_Database::download_database( 'testing_license' );
 
-		$this->assertEquals( '/tmp/GeoLite2-Country_20200107/GeoLite2-Country.mmdb', $result );
+		$this->assertEquals( $expected_database, $result );
+
+		// Remove the downloaded file and folder.
+		unlink( $expected_database );
+		rmdir( dirname( $expected_database ) );
 	}
 
 	/**
