@@ -66,7 +66,7 @@ class WC_Integration_MaxMind_Geolocation_Database {
 		$download_uri = add_query_arg(
 			array(
 				'edition_id'  => self::DATABASE,
-				'license_key' => $license_key,
+				'license_key' => wc_clean( $license_key ),
 				'suffix'      => 'tar.gz',
 			),
 			'https://download.maxmind.com/app/geoip_download'
