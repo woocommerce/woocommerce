@@ -347,7 +347,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 					<PaymentMethods />
 					{ /*@todo this should be something the payment method controls*/ }
 					<CheckboxControl
-						className="wc-blocks-checkout__save-card-info"
+						className="wc-block-checkout__save-card-info"
 						label={ __(
 							'Save payment information to my account for future purchases.',
 							'woo-gutenberg-products-block'
