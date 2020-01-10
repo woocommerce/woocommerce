@@ -39,17 +39,6 @@ class WC_Settings_General extends WC_Settings_Page {
 			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
 		}
 
-		$woocommerce_default_customer_address_options = array(
-			''                 => __( 'No location by default', 'woocommerce' ),
-			'base'             => __( 'Shop base address', 'woocommerce' ),
-			'geolocation'      => __( 'Geolocate', 'woocommerce' ),
-			'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
-		);
-
-		if ( version_compare( PHP_VERSION, '5.4', '<' ) ) {
-			unset( $woocommerce_default_customer_address_options['geolocation'], $woocommerce_default_customer_address_options['geolocation_ajax'] );
-		}
-
 		$settings = apply_filters(
 			'woocommerce_general_settings',
 			array(
@@ -185,7 +174,12 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => 'geolocation',
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
-					'options'  => $woocommerce_default_customer_address_options,
+					'options'  => array(
+						''                 => __( 'No location by default', 'woocommerce' ),
+						'base'             => __( 'Shop base address', 'woocommerce' ),
+						'geolocation'      => __( 'Geolocate', 'woocommerce' ),
+						'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
+					),
 				),
 
 				array(
