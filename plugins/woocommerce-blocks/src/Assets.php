@@ -45,7 +45,6 @@ class Assets {
 		self::register_script( 'wc-blocks-data-store', plugins_url( 'build/wc-blocks-data.js', __DIR__ ), [], false );
 		self::register_script( 'wc-blocks', plugins_url( self::get_block_asset_build_path( 'blocks' ), __DIR__ ), [], false );
 		self::register_script( 'wc-vendors', plugins_url( self::get_block_asset_build_path( 'vendors' ), __DIR__ ), [], false );
-		self::register_script( 'wc-vendors-frontend', plugins_url( self::get_block_asset_build_path( 'vendors-frontend' ), __DIR__ ), [], false );
 
 		self::register_script( 'wc-blocks-registry', plugins_url( 'build/wc-blocks-registry.js', __DIR__ ), [], false );
 
