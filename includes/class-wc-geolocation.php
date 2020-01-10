@@ -73,49 +73,6 @@ class WC_Geolocation {
 	}
 
 	/**
-	 * Prevent geolocation via MaxMind when using legacy versions of php.
-	 *
-	 * @since 3.4.0
-	 * @param string $default_customer_address current value.
-	 * @return string
-	 */
-	public static function disable_geolocation_on_legacy_php( $default_customer_address ) {
-		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
-			$default_customer_address = 'base';
-		}
-
-		return $default_customer_address;
-	}
-
-	/**
-	 * Hook in geolocation functionality.
-	 */
-	public static function init() {
-		// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
-		if ( self::is_geolocation_enabled( get_option( 'woocommerce_default_customer_address' ) ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
-			add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
-		}
-
-		// Trigger database update when settings are changed to enable geolocation.
-		add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
-	}
-
-	/**
-	 * Maybe trigger a DB update for the first time.
-	 *
-	 * @param  string $new_value New value.
-	 * @param  string $old_value Old value.
-	 * @return string
-	 */
-	public static function maybe_update_database( $new_value, $old_value ) {
-		if ( $new_value !== $old_value && self::is_geolocation_enabled( $new_value ) ) {
-			self::update_database();
-		}
-
-		return $new_value;
-	}
-
-	/**
 	 * Get current user IP Address.
 	 *
 	 * @return string
@@ -232,37 +189,12 @@ class WC_Geolocation {
 	/**
 	 * Update geoip database.
 	 *
+	 * @deprecated 3.9.0
 	 * Extract files with PharData. Tool built into PHP since 5.3.
 	 */
 	public static function update_database() {
-		$logger = wc_get_logger();
-
-		// There's no need to update the database with no geolocation configured.
-		$license_key = ( new WC_Integration_MaxMind_Geolocation() )->get_option( 'license_key' );
-		if ( empty( $license_key ) ) {
-			return;
-		}
-
-		// Allow us to easily interact with the filesystem.
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		WP_Filesystem();
-		global $wp_filesystem;
-
-		// Remove any existing archives to comply with the MaxMind TOS.
-		$target_database_path = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
-		if ( $wp_filesystem->exists( $target_database_path ) ) {
-			$wp_filesystem->delete( $target_database_path );
-		}
-
-		$tmp_database_path = WC_Integration_MaxMind_Geolocation_Database::download_database( $license_key );
-		if ( is_wp_error( $tmp_database_path ) ) {
-			$logger->notice( $tmp_database_path->get_error_message(), array( 'source' => 'geolocation' ) );
-			return;
-		}
-
-		// Move the new database into position.
-		$wp_filesystem->move( $tmp_database_path, $target_database_path, true );
-		$wp_filesystem->delete( dirname( $tmp_database_path ) );
+		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0' );
+		WC_Integration_MaxMind_Geolocation::update_database();
 	}
 
 	/**
@@ -341,5 +273,3 @@ class WC_Geolocation {
 		return $country_code;
 	}
 }
-
-WC_Geolocation::init();
