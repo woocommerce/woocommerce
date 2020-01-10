@@ -4,7 +4,7 @@
  *
  * Loads Integrations into WooCommerce.
  *
- * @version 2.3.0
+ * @version 3.9.0
  * @package WooCommerce/Classes/Integrations
  */
 
@@ -56,8 +56,8 @@ class WC_Integrations {
 	/**
 	 * Return a desired integration.
 	 *
+	 * @since 3.9.0
 	 * @param string $id The id of the integration to get.
-	 *
 	 * @return mixed|null The integration if one is found, otherwise null.
 	 */
 	public function get_integration( $id ) {

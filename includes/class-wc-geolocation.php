@@ -7,7 +7,7 @@
  * This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com.
  *
  * @package WooCommerce/Classes
- * @version 3.4.0
+ * @version 3.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -78,14 +78,14 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_ip_address() {
-		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) { // WPCS: input var ok, CSRF ok.
-			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );  // WPCS: input var ok, CSRF ok.
-		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
+		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			return (string) rest_is_ip_address( trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) ) ); // WPCS: input var ok, CSRF ok.
-		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) { // @codingStandardsIgnoreLine
-			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ); // @codingStandardsIgnoreLine
+			return (string) rest_is_ip_address( trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) ) );
+		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 		return '';
 	}
@@ -177,7 +177,7 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		wc_deprecated_function( 'WC_Geolocation::get_local_database_path', '3.9.0' );
+		wc_deprecated_function( 'WC_Geolocation::get_local_database_path', '3.9.0', 'WC_Integration_MaxMind_Geolocation::get_database_path' );
 		$integration = wc()->integrations->get_integration( 'woocommerce_maxmind_geolocation' );
 		return $integration->get_database_path();
 	}
@@ -189,7 +189,7 @@ class WC_Geolocation {
 	 * Extract files with PharData. Tool built into PHP since 5.3.
 	 */
 	public static function update_database() {
-		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0' );
+		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0', 'WC_Integration_MaxMind_Geolocation::update_database' );
 		$integration = wc()->integrations->get_integration( 'woocommerce_maxmind_geolocation' );
 		$integration->update_database();
 	}
@@ -197,6 +197,7 @@ class WC_Geolocation {
 	/**
 	 * Fetches the country code from the request headers, if one is available.
 	 *
+	 * @since 3.9.0
 	 * @return string|false The country code pulled from the headers, or false if one was not found.
 	 */
 	private static function get_country_code_from_headers() {
@@ -278,5 +279,51 @@ class WC_Geolocation {
 		}
 
 		return $country_code;
+	}
+
+	/**
+	 * Hook in geolocation functionality.
+	 *
+	 * @deprecated 3.9.0
+	 * @return null
+	 */
+	public static function init() {
+		wc_deprecated_function( 'WC_Geolocation::init', '3.9.0' );
+		return null;
+	}
+
+	/**
+	 * Prevent geolocation via MaxMind when using legacy versions of php.
+	 *
+	 * @deprecated 3.9.0
+	 * @since 3.4.0
+	 * @param string $default_customer_address current value.
+	 * @return string
+	 */
+	public static function disable_geolocation_on_legacy_php( $default_customer_address ) {
+		wc_deprecated_function( 'WC_Geolocation::disable_geolocation_on_legacy_php', '3.9.0' );
+
+		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
+			$default_customer_address = 'base';
+		}
+
+		return $default_customer_address;
+	}
+
+	/**
+	 * Maybe trigger a DB update for the first time.
+	 *
+	 * @deprecated 3.9.0
+	 * @param  string $new_value New value.
+	 * @param  string $old_value Old value.
+	 * @return string
+	 */
+	public static function maybe_update_database( $new_value, $old_value ) {
+		wc_deprecated_function( 'WC_Geolocation::maybe_update_database', '3.9.0' );
+		if ( $new_value !== $old_value && self::is_geolocation_enabled( $new_value ) ) {
+			self::update_database();
+		}
+
+		return $new_value;
 	}
 }
