@@ -447,8 +447,13 @@ jQuery( function( $ ) {
 		 * @return {Object}
 		 */
 		get_variations_fields: function( fields ) {
-			var data = $( ':input', fields ).serializeJSON();
-
+			
+			var data = {};
+			
+			$( ':input', fields ).each( function(index, elem) {
+				data[elem.name] = elem.value;
+			});
+			
 			$( '.variations-defaults select' ).each( function( index, element ) {
 				var select = $( element );
 				data[ select.attr( 'name' ) ] = select.val();
