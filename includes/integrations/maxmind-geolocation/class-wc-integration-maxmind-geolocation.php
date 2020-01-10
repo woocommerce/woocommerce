@@ -13,7 +13,7 @@ require_once 'class-wc-integration-maxmind-geolocation-database.php';
 /**
  * WC Integration MaxMind Geolocation
  *
- * @version 3.9.0
+ * @since 3.9.0
  */
 class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 
@@ -49,6 +49,9 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		if ( $bind_updater ) {
 			add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
 		}
+
+		// Bind to the geolocation filter for MaxMind database lookups.
+		add_filter( 'woocommerce_geolocate_ip', array( $this, 'geolocate_ip' ), 10, 2 );
 	}
 
 	/**
@@ -110,8 +113,6 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	 * @param string|null $new_database_path The path to the new database file. Null will fetch a new archive.
 	 */
 	public static function update_database( $new_database_path = null ) {
-		$logger = wc_get_logger();
-
 		// Allow us to easily interact with the filesystem.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		WP_Filesystem();
@@ -134,7 +135,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 
 			$tmp_database_path = WC_Integration_MaxMind_Geolocation_Database::download_database( $license_key );
 			if ( is_wp_error( $tmp_database_path ) ) {
-				$logger->notice( $tmp_database_path->get_error_message(), array( 'source' => 'geolocation' ) );
+				wc_get_logger()->notice( $tmp_database_path->get_error_message(), array( 'source' => 'maxmind-geolocation' ) );
 				return;
 			}
 		}
@@ -142,5 +143,20 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		// Move the new database into position.
 		$wp_filesystem->move( $tmp_database_path, $target_database_path, true );
 		$wp_filesystem->delete( dirname( $tmp_database_path ) );
+	}
+
+	/**
+	 * Performs a geolocation lookup against the MaxMind database for the given IP address.
+	 *
+	 * @param string $country_code The country code for the IP address.
+	 * @param string $ip_address The IP address to geolocate.
+	 * @return string The country code for the IP address.
+	 */
+	public function geolocate_ip( $country_code, $ip_address ) {
+		if ( false !== $country_code ) {
+			return $country_code;
+		}
+
+		return WC_Integration_MaxMind_Geolocation_Database::get_iso_country_code_for_ip( $ip_address );
 	}
 }

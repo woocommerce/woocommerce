@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC Integration MaxMind Geolocation Database
  *
- * @version 3.9.0
+ * @since 3.9.0
  */
 class WC_Integration_MaxMind_Geolocation_Database {
 
@@ -111,5 +111,30 @@ class WC_Integration_MaxMind_Geolocation_Database {
 		}
 
 		return $tmp_database_path;
+	}
+
+	/**
+	 * Fetches the ISO country code associated with an IP address.
+	 *
+	 * @param string $ip_address The IP address to find the country code for.
+	 * @return string|null The country code for the IP address, or null if none was found.
+	 */
+	public static function get_iso_country_code_for_ip( $ip_address ) {
+		$country_code = null;
+
+		try {
+			$reader = new MaxMind\Db\Reader( self::get_database_path() );
+			$data   = $reader->get( $ip_address );
+
+			if ( isset( $data['country']['iso_code'] ) ) {
+				$country_code = $data['country']['iso_code'];
+			}
+
+			$reader->close();
+		} catch ( Exception $e ) {
+			wc_get_logger()->notice( $e->getMessage(), array( 'source' => 'maxmind-geolocation' ) );
+		}
+
+		return $country_code;
 	}
 }
