@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'maxmind_license_key' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
 
 	<p>
-		<strong><?php esc_html_e( 'Geolocation requires configuration.', 'woocommerce' ); ?></strong>
+		<strong><?php esc_html_e( 'Geolocation has not been configured.', 'woocommerce' ); ?></strong>
 	</p>
 
 	<p>
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 		echo wp_kses_post(
 			sprintf(
 				/* translators: %s: integration page */
-				__( 'Missing MaxMind License Key to enable proper geolocation. <a href="%s">Entre your License Key in the integration settings.</a>', 'woocommerce' ),
+				__( 'You must enter a valid license key on the <a href="%s">MaxMind integration settings page</a> in order to use the geolocation service.', 'woocommerce' ),
 				admin_url( 'admin.php?page=wc-settings&tab=integration&section=maxmind_geolocation' )
 			)
 		);
