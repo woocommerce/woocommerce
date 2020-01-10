@@ -158,11 +158,12 @@ class Plugins extends Component {
 							</Button>
 						) }
 
-						{ ! ( hasErrors && 'activate' === step ) && (
-							<Button isPrimary isBusy={ activateButtonBusy } onClick={ this.activatePlugins }>
-								{ __( 'Activate & continue', 'woocommerce-admin' ) }
-							</Button>
-						) }
+						{ ! hasErrors &&
+							'activate' === step && (
+								<Button isPrimary isBusy={ activateButtonBusy } onClick={ this.activatePlugins }>
+									{ __( 'Activate & continue', 'woocommerce-admin' ) }
+								</Button>
+							) }
 					</div>
 				</Card>
 			</Fragment>
