@@ -62,16 +62,6 @@ class WC_Geolocation {
 	);
 
 	/**
-	 * Check if server supports MaxMind GeoLite2 Reader.
-	 *
-	 * @since 3.4.0
-	 * @return bool
-	 */
-	private static function supports_geolite2() {
-		return version_compare( PHP_VERSION, '5.4.0', '>=' );
-	}
-
-	/**
 	 * Check if geolocation is enabled.
 	 *
 	 * @since 3.4.0
@@ -101,17 +91,13 @@ class WC_Geolocation {
 	 * Hook in geolocation functionality.
 	 */
 	public static function init() {
-		if ( self::supports_geolite2() ) {
-			// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
-			if ( self::is_geolocation_enabled( get_option( 'woocommerce_default_customer_address' ) ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
-				add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
-			}
-
-			// Trigger database update when settings are changed to enable geolocation.
-			add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
-		} else {
-			add_filter( 'pre_option_woocommerce_default_customer_address', array( __CLASS__, 'disable_geolocation_on_legacy_php' ) );
+		// Only download the database from MaxMind if the geolocation function is enabled, or a plugin specifically requests it.
+		if ( self::is_geolocation_enabled( get_option( 'woocommerce_default_customer_address' ) ) || apply_filters( 'woocommerce_geolocation_update_database_periodically', false ) ) {
+			add_action( 'woocommerce_geoip_updater', array( __CLASS__, 'update_database' ) );
 		}
+
+		// Trigger database update when settings are changed to enable geolocation.
+		add_filter( 'pre_update_option_woocommerce_default_customer_address', array( __CLASS__, 'maybe_update_database' ), 10, 2 );
 	}
 
 	/**
@@ -210,7 +196,7 @@ class WC_Geolocation {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
 				$database   = self::get_local_database_path();
 
-				if ( self::supports_geolite2() && file_exists( $database ) ) {
+				if ( file_exists( $database ) ) {
 					$country_code = self::geolocate_via_db( $ip_address, $database );
 				} elseif ( $api_fallback ) {
 					$country_code = self::geolocate_via_api( $ip_address );
@@ -249,11 +235,6 @@ class WC_Geolocation {
 	 */
 	public static function update_database() {
 		$logger = wc_get_logger();
-
-		if ( ! self::supports_geolite2() ) {
-			$logger->notice( 'Requires PHP 5.4 to be able to download MaxMind GeoLite2 database', array( 'source' => 'geolocation' ) );
-			return;
-		}
 
 		// There's no need to update the database with no geolocation configured.
 		$license_key = ( new WC_Integration_MaxMind_Geolocation() )->get_option( 'license_key' );
