@@ -97,6 +97,15 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	}
 
 	/**
+	 * Get database service.
+	 *
+	 * @return WC_Integration_MaxMind_Database_Service|null
+	 */
+	public function get_database_service() {
+		return $this->database_service;
+	}
+
+	/**
 	 * Checks to make sure that the license key is valid.
 	 *
 	 * @param string $key The key of the field.
