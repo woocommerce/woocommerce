@@ -82,7 +82,7 @@ class CartShippingRateSchema extends AbstractSchema {
 					'type' => 'string',
 				],
 			],
-			'shipping-rates' => [
+			'shipping_rates' => [
 				'description' => __( 'List of shipping rates.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -186,7 +186,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				'country'   => $package['destination']['country'],
 			],
 			'items'          => array_values( wp_list_pluck( $package['contents'], 'key' ) ),
-			'shipping-rates' => array_values( array_map( [ $this, 'get_rate_response' ], $package['rates'] ) ),
+			'shipping_rates' => array_values( array_map( [ $this, 'get_rate_response' ], $package['rates'] ) ),
 		];
 	}
 

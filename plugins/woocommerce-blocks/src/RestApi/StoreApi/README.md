@@ -820,32 +820,32 @@ Example response:
 
 ```json
 [
-  {
-    "code": "20off",
-    "totals": {
-      "currency_code": "GBP",
-      "currency_symbol": "£",
-      "currency_minor_unit": 2,
-      "currency_decimal_separator": ".",
-      "currency_thousand_separator": ",",
-      "currency_prefix": "£",
-      "currency_suffix": "",
-      "total_discount": "1667",
-      "total_discount_tax": "333"
-    },
-    "_links": {
-      "self": [
-        {
-          "href": "http:\/\/local.wordpress.test\/wp-json\/wc\/store\/cart\/coupons\/20off"
-        }
-      ],
-      "collection": [
-        {
-          "href": "http:\/\/local.wordpress.test\/wp-json\/wc\/store\/cart\/coupons"
-        }
-      ]
-    }
-  }
+	{
+		"code": "20off",
+		"totals": {
+			"currency_code": "GBP",
+			"currency_symbol": "£",
+			"currency_minor_unit": 2,
+			"currency_decimal_separator": ".",
+			"currency_thousand_separator": ",",
+			"currency_prefix": "£",
+			"currency_suffix": "",
+			"total_discount": "1667",
+			"total_discount_tax": "333"
+		},
+		"_links": {
+			"self": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/coupons/20off"
+				}
+			],
+			"collection": [
+				{
+					"href": "http://local.wordpress.test/wp-json/wc/store/cart/coupons"
+				}
+			]
+		}
+	}
 ]
 ```
 
@@ -869,18 +869,18 @@ Example response:
 
 ```json
 {
-  "code": "20off",
-  "totals": {
-    "currency_code": "GBP",
-    "currency_symbol": "£",
-    "currency_minor_unit": 2,
-    "currency_decimal_separator": ".",
-    "currency_thousand_separator": ",",
-    "currency_prefix": "£",
-    "currency_suffix": "",
-    "total_discount": "1667",
-    "total_discount_tax": "333"
-  }
+	"code": "20off",
+	"totals": {
+		"currency_code": "GBP",
+		"currency_symbol": "£",
+		"currency_minor_unit": 2,
+		"currency_decimal_separator": ".",
+		"currency_thousand_separator": ",",
+		"currency_prefix": "£",
+		"currency_suffix": "",
+		"total_discount": "1667",
+		"total_discount_tax": "333"
+	}
 }
 ```
 
@@ -904,18 +904,18 @@ Example response:
 
 ```json
 {
-  "code": "20off",
-  "totals": {
-    "currency_code": "GBP",
-    "currency_symbol": "£",
-    "currency_minor_unit": 2,
-    "currency_decimal_separator": ".",
-    "currency_thousand_separator": ",",
-    "currency_prefix": "£",
-    "currency_suffix": "",
-    "total_discount": "1667",
-    "total_discount_tax": "333"
-  }
+	"code": "20off",
+	"totals": {
+		"currency_code": "GBP",
+		"currency_symbol": "£",
+		"currency_minor_unit": 2,
+		"currency_decimal_separator": ".",
+		"currency_thousand_separator": ",",
+		"currency_prefix": "£",
+		"currency_suffix": "",
+		"total_discount": "1667",
+		"total_discount_tax": "333"
+	}
 }
 ```
 
@@ -990,7 +990,7 @@ Example response:
 			"country": "US"
 		},
 		"items": [ "6512bd43d9caa6e02c990b0a82652dca" ],
-		"shipping-rates": [
+		"shipping_rates": [
 			{
 				"name": "International",
 				"description": "",
@@ -1011,6 +1011,137 @@ Example response:
 ]
 ```
 
+## Cart Order API
+
+Create a new order from the items in the cart.
+
+```http
+POST /cart/order/
+```
+
+| Attribute          | Type   | Required | Description                                                                             |
+| :----------------- | :----- | :------: | :-------------------------------------------------------------------------------------- |
+| `billing_address`  | array  |    No    | Billing address data to store to the new order.                                         |
+| `shipping_address` | array  |    No    | Shipping address data to store to the new order.                                        |
+| `customer_note`    | string |    No    | Customer note to store to the new order.                                                |
+| `shipping_rates`   | array  |    No    | Array of objects containing `rate_id` of selected shipping methods to add to the order. |
+
+```http
+curl --request POST https://example-store.com/wp-json/wc/store/cart/order
+```
+
+Example response:
+
+```json
+{
+	"id": 149,
+	"number": "149",
+	"status": "draft",
+	"order_key": "wc_order_9falc306dOkWb",
+	"created_via": "store-api",
+	"prices_include_tax": true,
+	"events": {
+		"date_created": "2020-01-07T12:33:23",
+		"date_created_gmt": "2020-01-07T12:33:23",
+		"date_modified": "2020-01-07T12:33:23",
+		"date_modified_gmt": "2020-01-07T12:33:23",
+		"date_completed": null,
+		"date_completed_gmt": null,
+		"date_paid": null,
+		"date_paid_gmt": null
+	},
+	"customer": {
+		"customer_id": 1,
+		"customer_ip_address": "192.168.50.1",
+		"customer_user_agent": "insomnia/7.0.5"
+	},
+	"customer_note": "This is a customer note.",
+	"billing_address": {
+		"first_name": "Margaret",
+		"last_name": "Thatchcroft",
+		"company": "",
+		"address_1": "123 South Street",
+		"address_2": "Apt 1",
+		"city": "Philadelphia",
+		"state": "PA",
+		"postcode": "19123",
+		"country": "US",
+		"email": "test@test.com",
+		"phone": ""
+	},
+	"shipping_address": {
+		"first_name": "Margaret",
+		"last_name": "Thatchcroft",
+		"company": "",
+		"address_1": "123 South Street",
+		"address_2": "Apt 1",
+		"city": "Philadelphia",
+		"state": "PA",
+		"postcode": "19123",
+		"country": "US"
+	},
+	"items": [
+		{
+			"id": 12,
+			"quantity": 1,
+			"name": "Belt",
+			"sku": "woo-belt",
+			"permalink": "http://local.wordpress.test/product/belt/",
+			"images": [
+				{
+					"id": "41",
+					"src": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg",
+					"thumbnail": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-300x300.jpg",
+					"srcset": "http://local.wordpress.test/wp-content/uploads/2019/12/belt-2.jpg 801w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-300x300.jpg 300w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-100x100.jpg 100w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-450x450.jpg 450w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-150x150.jpg 150w, http://local.wordpress.test/wp-content/uploads/2019/12/belt-2-768x768.jpg 768w",
+					"sizes": "(max-width: 801px) 100vw, 801px",
+					"name": "belt-2.jpg",
+					"alt": ""
+				}
+			],
+			"variation": [],
+			"totals": {
+				"currency_code": "GBP",
+				"currency_symbol": "£",
+				"currency_minor_unit": 2,
+				"currency_decimal_separator": ".",
+				"currency_thousand_separator": ",",
+				"currency_prefix": "£",
+				"currency_suffix": "",
+				"line_subtotal": "4583",
+				"line_subtotal_tax": "917",
+				"line_total": "4583",
+				"line_total_tax": "917"
+			}
+		}
+	],
+	"totals": {
+		"currency_code": "GBP",
+		"currency_symbol": "£",
+		"currency_minor_unit": 2,
+		"currency_decimal_separator": ".",
+		"currency_thousand_separator": ",",
+		"currency_prefix": "£",
+		"currency_suffix": "",
+		"total_items": "4583",
+		"total_items_tax": "917",
+		"total_fees": "0",
+		"total_fees_tax": "0",
+		"total_discount": "0",
+		"total_discount_tax": "0",
+		"total_shipping": "499",
+		"total_shipping_tax": "100",
+		"total_price": "6099",
+		"total_tax": "1017",
+		"tax_lines": [
+			{
+				"name": "Tax",
+				"price": "1017"
+			}
+		]
+	}
+}
+```
+
 ## Customer API
 
 ### Get data for the current customer
@@ -1029,31 +1160,31 @@ Example response:
 
 ```json
 {
-  "id": 0,
-  "billing": {
-    "first_name": "Margaret",
-    "last_name": "Thatchcroft",
-    "company": "",
-    "address_1": "123 South Street",
-    "address_2": "Apt 1",
-    "city": "Philadelphia",
-    "state": "PA",
-    "postcode": "19123",
-    "country": "US",
-    "email": "test@test.com",
-    "phone": ""
-  },
-  "shipping": {
-    "first_name": "Margaret",
-    "last_name": "Thatchcroft",
-    "company": "",
-    "address_1": "123 South Street",
-    "address_2": "Apt 1",
-    "city": "Philadelphia",
-    "state": "PA",
-    "postcode": "19123",
-    "country": "US"
-  }
+	"id": 0,
+	"billing_address": {
+		"first_name": "Margaret",
+		"last_name": "Thatchcroft",
+		"company": "",
+		"address_1": "123 South Street",
+		"address_2": "Apt 1",
+		"city": "Philadelphia",
+		"state": "PA",
+		"postcode": "19123",
+		"country": "US",
+		"email": "test@test.com",
+		"phone": ""
+	},
+	"shipping_address": {
+		"first_name": "Margaret",
+		"last_name": "Thatchcroft",
+		"company": "",
+		"address_1": "123 South Street",
+		"address_2": "Apt 1",
+		"city": "Philadelphia",
+		"state": "PA",
+		"postcode": "19123",
+		"country": "US"
+	}
 }
 ```
 
@@ -1065,10 +1196,10 @@ Edit current customer data, such as billing and shipping addresses.
 PUT /cart/customer
 ```
 
-| Attribute  | Type    | Required | Description                        |
-| :--------- | :------ | :------: | :--------------------------------- |
-| `billing`  | object  |   No     | Billing address properties.        |
-| `shipping` | object  |   No     | Shipping address properties.       |
+| Attribute  | Type   | Required | Description                  |
+| :--------- | :----- | :------: | :--------------------------- |
+| `billing`  | object |    No    | Billing address properties.  |
+| `shipping` | object |    No    | Shipping address properties. |
 
 ```http
 curl --request PUT https://example-store.com/wp-json/wc/store/cart/customer?billing[company]=Test
@@ -1078,31 +1209,31 @@ Example response:
 
 ```json
 {
-  "id": 0,
-  "billing": {
-    "first_name": "Margaret",
-    "last_name": "Thatchcroft",
-    "company": "Test",
-    "address_1": "123 South Street",
-    "address_2": "Apt 1",
-    "city": "Philadelphia",
-    "state": "PA",
-    "postcode": "19123",
-    "country": "US",
-    "email": "test@test.com",
-    "phone": ""
-  },
-  "shipping": {
-    "first_name": "Margaret",
-    "last_name": "Thatchcroft",
-    "company": "",
-    "address_1": "123 South Street",
-    "address_2": "Apt 1",
-    "city": "Philadelphia",
-    "state": "PA",
-    "postcode": "19123",
-    "country": "US"
-  }
+	"id": 0,
+	"billing_address": {
+		"first_name": "Margaret",
+		"last_name": "Thatchcroft",
+		"company": "Test",
+		"address_1": "123 South Street",
+		"address_2": "Apt 1",
+		"city": "Philadelphia",
+		"state": "PA",
+		"postcode": "19123",
+		"country": "US",
+		"email": "test@test.com",
+		"phone": ""
+	},
+	"shipping_address": {
+		"first_name": "Margaret",
+		"last_name": "Thatchcroft",
+		"company": "",
+		"address_1": "123 South Street",
+		"address_2": "Apt 1",
+		"city": "Philadelphia",
+		"state": "PA",
+		"postcode": "19123",
+		"country": "US"
+	}
 }
 ```
 

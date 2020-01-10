@@ -114,15 +114,15 @@ class Customer extends RestController {
 		}
 
 		try {
-			if ( isset( $request['billing'] ) ) {
-				$allowed_billing_values = array_intersect_key( $request['billing'], $schema['properties']['billing']['properties'] );
+			if ( isset( $request['billing_address'] ) ) {
+				$allowed_billing_values = array_intersect_key( $request['billing_address'], $schema['properties']['billing_address']['properties'] );
 				foreach ( $allowed_billing_values as $key => $value ) {
 					$customer->{"set_billing_$key"}( $value );
 				}
 			}
 
-			if ( isset( $request['shipping'] ) ) {
-				$allowed_shipping_values = array_intersect_key( $request['shipping'], $schema['properties']['shipping']['properties'] );
+			if ( isset( $request['shipping_address'] ) ) {
+				$allowed_shipping_values = array_intersect_key( $request['shipping_address'], $schema['properties']['shipping_address']['properties'] );
 				foreach ( $allowed_shipping_values as $key => $value ) {
 					$customer->{"set_shipping_$key"}( $value );
 				}
