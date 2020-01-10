@@ -52,4 +52,19 @@ class WC_Integrations {
 	public function get_integrations() {
 		return $this->integrations;
 	}
+
+	/**
+	 * Return a desired integration.
+	 *
+	 * @param string $id The id of the integration to get.
+	 *
+	 * @return mixed|null The integration if one is found, otherwise null.
+	 */
+	public function get_integration( $id ) {
+		if ( isset( $this->integrations[ $id ] ) ) {
+			return $this->integrations[ $id ];
+		}
+
+		return null;
+	}
 }
