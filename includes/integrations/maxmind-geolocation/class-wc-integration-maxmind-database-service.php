@@ -122,6 +122,11 @@ class WC_Integration_MaxMind_Database_Service {
 	public function get_iso_country_code_for_ip( $ip_address ) {
 		$country_code = null;
 
+		if ( ! class_exists( 'MaxMind\Db\Reader' ) ) {
+			wc_get_logger()->notice( __( 'Missing MaxMind Reader library!', 'woocommerce' ), array( 'source' => 'maxmind-geolocation' ) );
+			return $country_code;
+		}
+
 		try {
 			$reader = new MaxMind\Db\Reader( $this->get_database_path() );
 			$data   = $reader->get( $ip_address );
