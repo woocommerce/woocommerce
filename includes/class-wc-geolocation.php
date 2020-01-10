@@ -136,37 +136,35 @@ class WC_Geolocation {
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
-		// Filter to allow custom geolocation of the IP address.
-		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
+		if ( empty( $ip_address ) ) {
+			$ip_address = self::get_ip_address();
+		}
+
+		$country_code = self::get_country_code_from_headers();
 
 		if ( false === $country_code ) {
-			// If GEOIP is enabled in CloudFlare, we can use that (Settings -> CloudFlare Settings -> Settings Overview).
-			if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) { // WPCS: input var ok, CSRF ok.
-				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) ); // WPCS: input var ok, CSRF ok.
-			} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
-				// WP.com VIP has a variable available.
-				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
-			} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
-				// VIP Go has a variable available also.
-				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
-			} else {
-				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
+			// Filter to allow custom geolocation of the IP address.
+			$country_code = apply_filters( 'woocommerce_geolocate_ip', $country_code, $ip_address, $fallback, $api_fallback );
+		}
 
-				if ( $api_fallback ) {
-					$country_code = self::geolocate_via_api( $ip_address );
-				} else {
-					$country_code = '';
-				}
+		// If we still haven't found a country code, let's consider doing an API lookup.
+		if ( false === $country_code && $api_fallback ) {
+			$country_code = self::geolocate_via_api( $ip_address );
+		}
 
-				if ( ! $country_code && $fallback ) {
-					// May be a local environment - find external IP.
-					return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
-				}
+		// It's possible that we're in a local environment, in which case the geolocation needs to be done from the
+		// external address.
+		if ( false === $country_code && $fallback ) {
+			$external_ip_address = self::get_external_ip_address();
+
+			// Only bother with this if the external IP differs.
+			if ( '0.0.0.0' !== $external_ip_address && $external_ip_address !== $ip_address ) {
+				return self::geolocate_ip( $external_ip_address, false, $api_fallback );
 			}
 		}
 
 		return array(
-			'country' => $country_code,
+			'country' => $country_code ? $country_code : '',
 			'state'   => '',
 		);
 	}
@@ -192,6 +190,27 @@ class WC_Geolocation {
 	public static function update_database() {
 		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0' );
 		WC_Integration_MaxMind_Geolocation::update_database();
+	}
+
+	/**
+	 * Fetches the country code from the request headers, if one is available.
+	 *
+	 * @return string|false The country code pulled from the headers, or false if one was not found.
+	 */
+	private static function get_country_code_from_headers() {
+		$country_code = false;
+
+		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) { // WPCS: input var ok, CSRF ok.
+			$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( ! empty( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
+			// WP.com VIP has a variable available.
+			$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['GEOIP_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( ! empty( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) { // WPCS: input var ok, CSRF ok.
+			// VIP Go has a variable available also.
+			$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
+		}
+
+		return $country_code;
 	}
 
 	/**
