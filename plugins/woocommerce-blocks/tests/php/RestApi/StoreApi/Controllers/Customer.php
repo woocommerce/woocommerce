@@ -32,8 +32,8 @@ class Customer extends TestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'id', $data );
-		$this->assertArrayHasKey( 'billing', $data );
-		$this->assertArrayHasKey( 'shipping', $data );
+		$this->assertArrayHasKey( 'billing_address', $data );
+		$this->assertArrayHasKey( 'shipping_address', $data );
 	}
 
 	/**
@@ -43,7 +43,7 @@ class Customer extends TestCase {
 		$request = new WP_REST_Request( 'POST', '/wc/store/customer' );
 		$request->set_body_params(
 			[
-				'billing' => [
+				'billing_address' => [
 					'address_1' => '123 South Street',
 					'address_2' => 'Apt 1',
 					'city'      => 'Philadelphia',
@@ -57,18 +57,18 @@ class Customer extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( '123 South Street', $data['billing']['address_1'] );
-		$this->assertEquals( 'Apt 1', $data['billing']['address_2'] );
-		$this->assertEquals( 'Philadelphia', $data['billing']['city'] );
-		$this->assertEquals( 'PA', $data['billing']['state'] );
-		$this->assertEquals( '19123', $data['billing']['postcode'] );
-		$this->assertEquals( 'US', $data['billing']['country'] );
+		$this->assertEquals( '123 South Street', $data['billing_address']['address_1'] );
+		$this->assertEquals( 'Apt 1', $data['billing_address']['address_2'] );
+		$this->assertEquals( 'Philadelphia', $data['billing_address']['city'] );
+		$this->assertEquals( 'PA', $data['billing_address']['state'] );
+		$this->assertEquals( '19123', $data['billing_address']['postcode'] );
+		$this->assertEquals( 'US', $data['billing_address']['country'] );
 
 		// Invalid email.
 		$request = new WP_REST_Request( 'POST', '/wc/store/customer' );
 		$request->set_body_params(
 			[
-				'billing' => [
+				'billing_address' => [
 					'email' => 'not-an-email',
 				],
 			]
@@ -87,8 +87,8 @@ class Customer extends TestCase {
 		$schema     = $controller->get_item_schema();
 
 		$this->assertArrayHasKey( 'id', $schema['properties'] );
-		$this->assertArrayHasKey( 'billing', $schema['properties'] );
-		$this->assertArrayHasKey( 'shipping', $schema['properties'] );
+		$this->assertArrayHasKey( 'billing_address', $schema['properties'] );
+		$this->assertArrayHasKey( 'shipping_address', $schema['properties'] );
 	}
 
 	/**
@@ -121,22 +121,22 @@ class Customer extends TestCase {
 		$response = $controller->prepare_item_for_response( $customer, [] );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 'Name', $data['billing']['first_name'] );
-		$this->assertEquals( 'Surname', $data['billing']['last_name'] );
-		$this->assertEquals( '123 South Street', $data['billing']['address_1'] );
-		$this->assertEquals( 'Apt 1', $data['billing']['address_2'] );
-		$this->assertEquals( 'Philadelphia', $data['billing']['city'] );
-		$this->assertEquals( 'PA', $data['billing']['state'] );
-		$this->assertEquals( '19123', $data['billing']['postcode'] );
-		$this->assertEquals( 'US', $data['billing']['country'] );
+		$this->assertEquals( 'Name', $data['billing_address']['first_name'] );
+		$this->assertEquals( 'Surname', $data['billing_address']['last_name'] );
+		$this->assertEquals( '123 South Street', $data['billing_address']['address_1'] );
+		$this->assertEquals( 'Apt 1', $data['billing_address']['address_2'] );
+		$this->assertEquals( 'Philadelphia', $data['billing_address']['city'] );
+		$this->assertEquals( 'PA', $data['billing_address']['state'] );
+		$this->assertEquals( '19123', $data['billing_address']['postcode'] );
+		$this->assertEquals( 'US', $data['billing_address']['country'] );
 
-		$this->assertEquals( 'Name', $data['shipping']['first_name'] );
-		$this->assertEquals( 'Surname', $data['shipping']['last_name'] );
-		$this->assertEquals( '123 South Street', $data['shipping']['address_1'] );
-		$this->assertEquals( 'Apt 1', $data['shipping']['address_2'] );
-		$this->assertEquals( 'Philadelphia', $data['shipping']['city'] );
-		$this->assertEquals( 'PA', $data['shipping']['state'] );
-		$this->assertEquals( '19123', $data['shipping']['postcode'] );
-		$this->assertEquals( 'US', $data['shipping']['country'] );
+		$this->assertEquals( 'Name', $data['shipping_address']['first_name'] );
+		$this->assertEquals( 'Surname', $data['shipping_address']['last_name'] );
+		$this->assertEquals( '123 South Street', $data['shipping_address']['address_1'] );
+		$this->assertEquals( 'Apt 1', $data['shipping_address']['address_2'] );
+		$this->assertEquals( 'Philadelphia', $data['shipping_address']['city'] );
+		$this->assertEquals( 'PA', $data['shipping_address']['state'] );
+		$this->assertEquals( '19123', $data['shipping_address']['postcode'] );
+		$this->assertEquals( 'US', $data['shipping_address']['country'] );
 	}
 }

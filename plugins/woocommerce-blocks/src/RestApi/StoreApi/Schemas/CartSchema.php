@@ -123,14 +123,14 @@ class CartSchema extends AbstractSchema {
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
-						'total_tax'          => [
-							'description' => __( 'Total tax applied to items and shipping.', 'woo-gutenberg-products-block' ),
+						'total_price'        => [
+							'description' => __( 'Total price the customer will pay.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
-						'total_price'        => [
-							'description' => __( 'Total price the customer will pay.', 'woo-gutenberg-products-block' ),
+						'total_tax'          => [
+							'description' => __( 'Total tax applied to items and shipping.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -190,8 +190,8 @@ class CartSchema extends AbstractSchema {
 					'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), wc_get_price_decimals() ),
 					'total_shipping'     => $this->prepare_money_response( $cart->get_shipping_total(), wc_get_price_decimals() ),
 					'total_shipping_tax' => $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ),
-					'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), wc_get_price_decimals() ),
 					'total_price'        => $this->prepare_money_response( $cart->get_total(), wc_get_price_decimals() ),
+					'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), wc_get_price_decimals() ),
 					'tax_lines'          => $this->get_tax_lines( $cart ),
 				]
 			),

@@ -59,7 +59,7 @@ class CartShippingRates extends TestCase {
 
 		$this->assertArrayHasKey( 'destination', $data[0] );
 		$this->assertArrayHasKey( 'items', $data[0] );
-		$this->assertArrayHasKey( 'shipping-rates', $data[0] );
+		$this->assertArrayHasKey( 'shipping_rates', $data[0] );
 
 		$this->assertEquals( null, $data[0]['destination']['address_1'] );
 		$this->assertEquals( null, $data[0]['destination']['address_2'] );
@@ -73,7 +73,7 @@ class CartShippingRates extends TestCase {
 	 * Test getting shipping.
 	 */
 	public function test_get_items_missing_address() {
-		$request = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
+		$request  = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -131,15 +131,15 @@ class CartShippingRates extends TestCase {
 
 		$this->assertArrayHasKey( 'destination', $schema['properties'] );
 		$this->assertArrayHasKey( 'items', $schema['properties'] );
-		$this->assertArrayHasKey( 'shipping-rates', $schema['properties'] );
-		$this->assertArrayHasKey( 'name', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'description', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'delivery_time', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'price', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'rate_id', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'instance_id', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'method_id', $schema['properties']['shipping-rates']['items']['properties'] );
-		$this->assertArrayHasKey( 'meta_data', $schema['properties']['shipping-rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'shipping_rates', $schema['properties'] );
+		$this->assertArrayHasKey( 'name', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'description', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'delivery_time', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'price', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'rate_id', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'instance_id', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'method_id', $schema['properties']['shipping_rates']['items']['properties'] );
+		$this->assertArrayHasKey( 'meta_data', $schema['properties']['shipping_rates']['items']['properties'] );
 	}
 
 	/**
@@ -152,7 +152,7 @@ class CartShippingRates extends TestCase {
 
 		$this->assertArrayHasKey( 'destination', $response->get_data() );
 		$this->assertArrayHasKey( 'items', $response->get_data() );
-		$this->assertArrayHasKey( 'shipping-rates', $response->get_data() );
+		$this->assertArrayHasKey( 'shipping_rates', $response->get_data() );
 	}
 
 	/**

@@ -55,7 +55,7 @@ class RestApi {
 	}
 
 	/**
-	 * If we're making a cart request, we may need to load some additonal classes from WC Core so we're ready to deal with requests.
+	 * If we're making a cart request, we may need to load some additional classes from WC Core so we're ready to deal with requests.
 	 *
 	 * Note: We load the session here early so guest nonces are in place.
 	 *
@@ -96,6 +96,7 @@ class RestApi {
 			'store-cart-items'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
 			'store-cart-coupons'            => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartCoupons',
 			'store-cart-shipping-rates'     => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartShippingRates',
+			'store-cart-order'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartOrder',
 			'store-customer'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Customer',
 			'store-products'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Products',
 			'store-product-collection-data' => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductCollectionData',
