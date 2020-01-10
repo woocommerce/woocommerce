@@ -28,7 +28,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	 * Initialize the integration.
 	 */
 	public function __construct() {
-		$this->id                 = 'woocommerce_maxmind_geolocation';
+		$this->id                 = 'maxmind_geolocation';
 		$this->method_title       = __( 'WooCommerce MaxMind Geolocation', 'woocommerce' );
 		$this->method_description = __( 'An integration for utilizing MaxMind to do Geolocation lookups.', 'woocommerce' );
 
@@ -50,6 +50,9 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 
 		// Bind to the save action for the settings.
 		add_action( 'woocommerce_update_options_integration_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		// Trigger notice if license key is missing.
+		add_action( 'update_option_woocommerce_default_customer_address', array( $this, 'display_missing_license_key_notice' ), 1000, 2 );
 
 		/**
 		 * Allows for the automatic database update to be disabled.
@@ -199,5 +202,49 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		$country_code = $this->database_service->get_iso_country_code_for_ip( $ip_address );
 
 		return $country_code ? $country_code : false;
+	}
+
+	/**
+	 * Add missing license key notice.
+	 */
+	private function add_missing_license_key_notice() {
+		if ( ! class_exists( 'WC_Admin_Notices' ) ) {
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-notices.php';
+		}
+		WC_Admin_Notices::add_notice( 'maxmind_license_key' );
+	}
+
+	/**
+	 * Remove missing license key notice.
+	 */
+	private function remove_missing_license_key_notice() {
+		if ( ! class_exists( 'WC_Admin_Notices' ) ) {
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-notices.php';
+		}
+		WC_Admin_Notices::remove_notice( 'maxmind_license_key' );
+	}
+
+	/**
+	 * Display notice if license key is missing.
+	 *
+	 * @param mixed $old_value Option old value.
+	 * @param mixed $new_value Current value.
+	 */
+	public function display_missing_license_key_notice( $old_value, $new_value ) {
+		if ( ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true ) ) {
+			return;
+		}
+
+		if ( ! in_array( $new_value, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+			$this->remove_missing_license_key_notice();
+			return;
+		}
+
+		$license_key = $this->get_option( 'license_key' );
+		if ( ! empty( $license_key ) ) {
+			return;
+		}
+
+		$this->add_missing_license_key_notice();
 	}
 }
