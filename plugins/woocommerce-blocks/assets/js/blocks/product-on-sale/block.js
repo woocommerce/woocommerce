@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { Disabled, PanelBody } from '@wordpress/components';
+import { Disabled, PanelBody, Placeholder } from '@wordpress/components';
 import { InspectorControls, ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
@@ -11,6 +11,20 @@ import GridLayoutControl from '@woocommerce/block-components/grid-layout-control
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
 import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
+import { IconProductOnSale } from '@woocommerce/block-components/icons';
+
+const EmptyPlaceholder = () => (
+	<Placeholder
+		icon={ <IconProductOnSale /> }
+		label={ __( 'On Sale Products', 'woo-gutenberg-products-block' ) }
+		className="wc-block-product-on-sale"
+	>
+		{ __(
+			'This block shows on-sale products. There are currently no discounted products in your store.',
+			'woo-gutenberg-products-block'
+		) }
+	</Placeholder>
+);
 
 /**
  * Component to handle edit mode of "On Sale Products".
@@ -98,6 +112,7 @@ class ProductOnSaleBlock extends Component {
 					<ServerSideRender
 						block={ name }
 						attributes={ attributes }
+						EmptyResponsePlaceholder={ EmptyPlaceholder }
 					/>
 				</Disabled>
 			</Fragment>
