@@ -178,7 +178,7 @@ class WC_Geolocation {
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
 		wc_deprecated_function( 'WC_Geolocation::get_local_database_path', '3.9.0', 'WC_Integration_MaxMind_Database_Service::get_database_path' );
-		$integration = wc()->integrations->get_integration( 'woocommerce_maxmind_geolocation' );
+		$integration = wc()->integrations->get_integration( 'maxmind_geolocation' );
 		return $integration->get_database_service()->get_database_path();
 	}
 
@@ -190,7 +190,7 @@ class WC_Geolocation {
 	 */
 	public static function update_database() {
 		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0', 'WC_Integration_MaxMind_Geolocation::update_database' );
-		$integration = wc()->integrations->get_integration( 'woocommerce_maxmind_geolocation' );
+		$integration = wc()->integrations->get_integration( 'maxmind_geolocation' );
 		$integration->update_database();
 	}
 
