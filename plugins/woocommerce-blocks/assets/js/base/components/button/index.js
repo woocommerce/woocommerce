@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button as WPButton } from '@wordpress/components';
+import { Button as WPButton } from 'wordpress-components';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 

@@ -1,7 +1,11 @@
+.wc-block-cart__submit-button {
+	width: 100%;
+}
+
 .wc-block-cart__payment-methods {
 	align-items: center;
 	display: flex;
 	justify-content: space-around;
-	margin: $gap auto;
+	margin: $gap auto 0;
 	max-width: 150px;
 }

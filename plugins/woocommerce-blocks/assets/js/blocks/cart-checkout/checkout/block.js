@@ -19,6 +19,7 @@ import {
 /**
  * Internal dependencies
  */
+import placeholderShippingMethods from '../placeholder-shipping-methods';
 import './style.scss';
 import '../../../payment-methods-demo';
 
@@ -293,29 +294,15 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 										method: option,
 									} )
 								}
-								options={ [
-									{
-										label: 'Click & Collect',
-										value: 'collect',
-										description:
-											'Pickup between 12:00 - 16:00 (Mon-Fri)',
-										secondaryLabel: 'FREE',
-									},
-									{
-										label: 'Regular shipping',
-										value: 'usps-normal',
-										description: 'Dispatched via USPS',
-										secondaryLabel: '€10.00',
-										secondaryDescription: '5 business days',
-									},
-									{
-										label: 'Express shipping',
-										value: 'ups-express',
-										description: 'Dispatched via USPS',
-										secondaryLabel: '€50.00',
-										secondaryDescription: '2 business days',
-									},
-								] }
+								options={ placeholderShippingMethods.map(
+									( option ) => ( {
+										label: option.label,
+										value: option.value,
+										description: option.dispatcher,
+										secondaryLabel: option.price,
+										secondaryDescription: option.schedule,
+									} )
+								) }
 							/>
 							<CheckboxControl
 								className="wc-block-checkout__add-note"

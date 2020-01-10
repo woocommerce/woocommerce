@@ -1,0 +1,47 @@
+.wc-block-coupon-code {
+	// Extra class for specificity
+	&.components-panel__body {
+		&.is-opened {
+			padding-left: 0;
+			padding-right: 0;
+
+			> .components-panel__body-title {
+				margin-left: 0;
+				margin-right: 0;
+			}
+		}
+
+		> .components-panel__body-title,
+		.components-panel__body-toggle {
+			&,
+			&:hover,
+			&:focus,
+			&:active {
+				background-color: transparent;
+			}
+		}
+
+		.components-panel__body-toggle {
+			font-weight: normal;
+			font-size: inherit;
+			padding-left: 0;
+			padding-right: 0;
+		}
+	}
+
+	.wc-block-coupon-code__row {
+		display: flex;
+	}
+
+	.wc-block-coupon-code__input {
+		margin-top: 0;
+		flex-grow: 1;
+	}
+
+	.wc-block-coupon-code__button {
+		margin-left: $gap;
+		padding-left: $gap-large;
+		padding-right: $gap-large;
+		white-space: nowrap;
+	}
+}
