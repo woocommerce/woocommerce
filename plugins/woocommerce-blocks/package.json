@@ -136,7 +136,7 @@
 			},
 			{
 				"path": "./build/cart-frontend.js",
-				"maxSize": "100 kB"
+				"maxSize": "120 kB"
 			},
 			{
 				"path": "./build/*.css",
