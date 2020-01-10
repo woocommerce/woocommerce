@@ -58,14 +58,27 @@ export const getCurrencyFromPriceResponse = ( currencyData ) => {
 	if ( ! currencyData || typeof currencyData !== 'object' ) {
 		return siteCurrencySettings;
 	}
+
+	const {
+		currency_code: code,
+		currency_symbol: symbol,
+		currency_thousand_separator: thousandSeparator,
+		currency_decimal_separator: decimalSeparator,
+		currency_minor_unit: minorUnit,
+		currency_prefix: prefix,
+		currency_suffix: suffix,
+	} = currencyData;
+
 	return {
-		code: currencyData.currency_code || 'USD',
-		symbol: currencyData.currency_symbol || '$',
-		thousandSeparator: currencyData.currency_thousand_separator || ',',
-		decimalSeparator: currencyData.currency_decimal_separator || '.',
-		minorUnit: currencyData.currency_minor_unit || 2,
-		prefix: currencyData.currency_prefix || '$',
-		suffix: currencyData.currency_suffix || '',
+		code: code || 'USD',
+		symbol: symbol || '$',
+		thousandSeparator:
+			typeof thousandSeparator === 'string' ? thousandSeparator : ',',
+		decimalSeparator:
+			typeof decimalSeparator === 'string' ? decimalSeparator : '.',
+		minorUnit: Number.isFinite( minorUnit ) ? minorUnit : 2,
+		prefix: typeof prefix === 'string' ? prefix : '$',
+		suffix: typeof suffix === 'string' ? suffix : '',
 	};
 };
 
