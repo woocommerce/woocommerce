@@ -1,6 +1,6 @@
 <?php
 /**
- * WC Integration MaxMind Geolocation Database
+ * The database service class file.
  *
  * @version 3.9.0
  * @package WooCommerce/Integrations
@@ -9,11 +9,11 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WC Integration MaxMind Geolocation Database
+ * The service class responsible for interacting with MaxMind databases.
  *
  * @since 3.9.0
  */
-class WC_Integration_MaxMind_Geolocation_Database {
+class WC_Integration_MaxMind_Database_Service {
 
 	/**
 	 * The name of the MaxMind database to utilize.
@@ -30,7 +30,7 @@ class WC_Integration_MaxMind_Geolocation_Database {
 	 *
 	 * @return string The local database path.
 	 */
-	public static function get_database_path() {
+	public function get_database_path() {
 		$database_path = WP_CONTENT_DIR . '/uploads/' . self::DATABASE . self::DATABASE_EXTENSION;
 
 		/**
@@ -62,7 +62,7 @@ class WC_Integration_MaxMind_Geolocation_Database {
 	 * @param string $license_key The license key to be used when downloading the database.
 	 * @return string|WP_Error The path to the database file or an error if invalid.
 	 */
-	public static function download_database( $license_key ) {
+	public function download_database( $license_key ) {
 		$download_uri = add_query_arg(
 			array(
 				'edition_id'  => self::DATABASE,
@@ -119,11 +119,11 @@ class WC_Integration_MaxMind_Geolocation_Database {
 	 * @param string $ip_address The IP address to find the country code for.
 	 * @return string|null The country code for the IP address, or null if none was found.
 	 */
-	public static function get_iso_country_code_for_ip( $ip_address ) {
+	public function get_iso_country_code_for_ip( $ip_address ) {
 		$country_code = null;
 
 		try {
-			$reader = new MaxMind\Db\Reader( self::get_database_path() );
+			$reader = new MaxMind\Db\Reader( $this->get_database_path() );
 			$data   = $reader->get( $ip_address );
 
 			if ( isset( $data['country']['iso_code'] ) ) {
