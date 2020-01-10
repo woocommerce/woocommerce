@@ -35,6 +35,7 @@ class WC_Geolocation {
 	 * GeoLite2 DB.
 	 *
 	 * @since 3.4.0
+	 * @deprecated 3.9.0
 	 */
 	const GEOLITE2_DB = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz';
 
