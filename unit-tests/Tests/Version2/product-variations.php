@@ -214,6 +214,8 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'], print_r( $variation, true ) );
 		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'], print_r( $variation, true ) );
 		$this->assertContains( 'test upload image', $variation['image']['alt'], print_r( $variation, true ) );
+
+		wp_delete_attachment( $variation['image']['id'], true );
 	}
 
 	/**
@@ -376,6 +378,8 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 2, count( $data ) );
+
+		wp_delete_attachment( $data[1]['image']['id'], true );
 	}
 
 	/**

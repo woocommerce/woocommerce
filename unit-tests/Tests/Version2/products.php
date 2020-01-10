@@ -196,6 +196,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertContains( 'Dr1Bczxq4q', $data['images'][0]['src'] );
 		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
 		$product->delete( true );
+		wp_delete_attachment( $data['images'][0]['id'], true );
 
 		// test variable product (variations are tested in product-variations.php).
 		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
