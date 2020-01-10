@@ -177,9 +177,9 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		wc_deprecated_function( 'WC_Geolocation::get_local_database_path', '3.9.0', 'WC_Integration_MaxMind_Geolocation::get_database_path' );
+		wc_deprecated_function( 'WC_Geolocation::get_local_database_path', '3.9.0', 'WC_Integration_MaxMind_Database_Service::get_database_path' );
 		$integration = wc()->integrations->get_integration( 'woocommerce_maxmind_geolocation' );
-		return $integration->get_database_path();
+		return $integration->get_database_service()->get_database_path();
 	}
 
 	/**
