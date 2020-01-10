@@ -140,6 +140,12 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 
 		// Remove any existing archives to comply with the MaxMind TOS.
 		$target_database_path = $this->database_service->get_database_path();
+
+		// If there's no database path, we can't store the database.
+		if ( empty( $target_database_path ) ) {
+			return;
+		}
+
 		if ( $wp_filesystem->exists( $target_database_path ) ) {
 			$wp_filesystem->delete( $target_database_path );
 		}
