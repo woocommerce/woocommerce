@@ -9,7 +9,7 @@ import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
 import { IconFolder } from '@woocommerce/block-components/icons';
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 
-const EmptyPlaceHolder = () => (
+const EmptyPlaceholder = () => (
 	<Placeholder
 		icon={ <IconFolder /> }
 		label={ __(
@@ -150,7 +150,7 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 			<ServerSideRender
 				block={ name }
 				attributes={ attributes }
-				EmptyResponsePlaceholder={ EmptyPlaceHolder }
+				EmptyResponsePlaceholder={ EmptyPlaceholder }
 			/>
 		</Fragment>
 	);

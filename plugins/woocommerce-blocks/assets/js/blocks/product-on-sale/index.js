@@ -10,6 +10,7 @@ import { IconProductOnSale } from '@woocommerce/block-components/icons';
  * Internal dependencies
  */
 import Block from './block';
+import './editor.scss';
 import { deprecatedConvertToShortcode } from '../../utils/deprecations';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
