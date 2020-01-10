@@ -237,7 +237,6 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		return WC_MaxMind_Geolocation_Database::get_database_path();
 		require_once WC_ABSPATH . 'includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation-database.php';
 		return WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 	}
