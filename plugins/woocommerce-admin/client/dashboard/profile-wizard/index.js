@@ -22,6 +22,7 @@ import Industry from './steps/industry';
 import Plugins from './steps/plugins';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 import Start from './steps/start';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
@@ -144,15 +145,15 @@ class ProfileWizard extends Component {
 		const nextStep = this.getSteps()[ currentStepIndex + 1 ];
 
 		if ( 'undefined' === typeof nextStep ) {
-			this.finishWizard();
+			this.possiblyShowCart();
 			return;
 		}
 
 		return updateQueryString( { step: nextStep.key } );
 	}
 
-	finishWizard() {
-		const { profileItems, updateProfileItems } = this.props;
+	possiblyShowCart() {
+		const { profileItems } = this.props;
 
 		// @todo This should also send profile information to woocommerce.com.
 
@@ -160,14 +161,25 @@ class ProfileWizard extends Component {
 		if ( productIds.length ) {
 			this.setState( { showCartModal: true } );
 		} else {
-			updateProfileItems( { completed: true } );
+			this.completeProfiler();
+		}
+	}
+
+	completeProfiler() {
+		const { notes, updateNote, updateProfileItems } = this.props;
+		updateProfileItems( { completed: true } );
+
+		const profilerNote = notes.find(
+			note => 'wc-admin-onboarding-profiler-reminder' === note.name
+		);
+		if ( profilerNote ) {
+			updateNote( profilerNote.id, { status: 'actioned' } );
 		}
 	}
 
 	markCompleteAndPurchase( cartRedirectUrl ) {
-		const { updateProfileItems } = this.props;
 		this.setState( { cartRedirectUrl } );
-		updateProfileItems( { completed: true } );
+		this.completeProfiler();
 	}
 
 	render() {
@@ -190,7 +202,7 @@ class ProfileWizard extends Component {
 						onClickPurchaseNow={ cartRedirectUrl =>
 							this.markCompleteAndPurchase( cartRedirectUrl )
 						}
-						onClickPurchaseLater={ () => this.props.updateProfileItems( { completed: true } ) }
+						onClickPurchaseLater={ () => this.completeProfiler() }
 					/>
 				) }
 				<ProfileWizardHeader currentStep={ step.key } steps={ steps } />
@@ -202,19 +214,29 @@ class ProfileWizard extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getNotes, getProfileItems, getProfileItemsError } = select( 'wc-api' );
+
+		const notesQuery = {
+			page: 1,
+			per_page: QUERY_DEFAULTS.pageSize,
+			type: 'update',
+			status: 'unactioned',
+		};
+		const notes = getNotes( notesQuery );
 
 		return {
 			isError: Boolean( getProfileItemsError() ),
+			notes,
 			profileItems: getProfileItems(),
 		};
 	} ),
 	withDispatch( dispatch => {
-		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { updateNote, updateProfileItems } = dispatch( 'wc-api' );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
+			updateNote,
 			updateProfileItems,
 		};
 	} )

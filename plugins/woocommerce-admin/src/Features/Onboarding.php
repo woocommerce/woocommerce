@@ -9,6 +9,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding_Profiler;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -65,6 +66,9 @@ class Onboarding {
 
 		// Rest API hooks need to run before is_admin() checks.
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
+
+		// Add onboarding notes.
+		new WC_Admin_Notes_Onboarding_Profiler();
 
 		if ( ! is_admin() ) {
 			return;
