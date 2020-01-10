@@ -60,19 +60,6 @@ class WC_Tests_Shipping extends WC_Unit_Test_Case {
 		);
 		$this->assertFalse( $result );
 
-		// Failure for invalid postcode.
-		$result = $shipping->is_package_shippable(
-			array(
-				'destination' => array(
-					'country'  => 'US',
-					'state'    => 'CA',
-					'postcode' => 'test',
-					'address'  => '',
-				),
-			)
-		);
-		$this->assertFalse( $result );
-
 		// Success for correct address.
 		$result = $shipping->is_package_shippable(
 			array(
