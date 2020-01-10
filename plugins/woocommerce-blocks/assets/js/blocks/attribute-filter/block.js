@@ -174,6 +174,14 @@ const AttributeFilterBlock = ( {
 		[ checked, onSubmit ]
 	);
 
+	const checkedQuery = useMemo( () => {
+		return productAttributesQuery
+			.filter(
+				( { attribute } ) => attribute === attributeObject.taxonomy
+			)
+			.flatMap( ( { slug } ) => slug );
+	}, [ productAttributesQuery, attributeObject.taxonomy ] );
+
 	const currentCheckedQuery = useShallowEqual( checkedQuery );
 
 	// Track ATTRIBUTES QUERY changes so the block reflects current filters.
@@ -215,14 +223,6 @@ const AttributeFilterBlock = ( {
 			blockAttributes.queryType === 'or' ? 'in' : 'and'
 		);
 	};
-
-	const checkedQuery = useMemo( () => {
-		return productAttributesQuery
-			.filter(
-				( { attribute } ) => attribute === attributeObject.taxonomy
-			)
-			.flatMap( ( { slug } ) => slug );
-	}, [ productAttributesQuery, attributeObject.taxonomy ] );
 
 	const multiple =
 		blockAttributes.displayStyle !== 'dropdown' ||
