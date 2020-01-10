@@ -151,11 +151,8 @@ class WC_Geolocation {
 				$country_code = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_COUNTRY_CODE'] ) ) ); // WPCS: input var ok, CSRF ok.
 			} else {
 				$ip_address = $ip_address ? $ip_address : self::get_ip_address();
-				$database   = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 
-				if ( file_exists( $database ) ) {
-					$country_code = self::geolocate_via_db( $ip_address, $database );
-				} elseif ( $api_fallback ) {
+				if ( $api_fallback ) {
 					$country_code = self::geolocate_via_api( $ip_address );
 				} else {
 					$country_code = '';
@@ -195,23 +192,6 @@ class WC_Geolocation {
 	public static function update_database() {
 		wc_deprecated_function( 'WC_Geolocation::update_database', '3.9.0' );
 		WC_Integration_MaxMind_Geolocation::update_database();
-	}
-
-	/**
-	 * Use MAXMIND GeoLite database to geolocation the user.
-	 *
-	 * @param  string $ip_address IP address.
-	 * @param  string $database   Database path.
-	 * @return string
-	 */
-	private static function geolocate_via_db( $ip_address, $database ) {
-		if ( ! class_exists( 'WC_Geolite_Integration', false ) ) {
-			require_once WC_ABSPATH . 'includes/class-wc-geolite-integration.php';
-		}
-
-		$geolite = new WC_Geolite_Integration( $database );
-
-		return $geolite->get_country_iso( $ip_address );
 	}
 
 	/**
