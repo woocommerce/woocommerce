@@ -5,8 +5,6 @@
  * @package WooCommerce\Tests\Integrations
  */
 
-require_once WC_ABSPATH . 'includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation-database.php';
-
 /**
  * Class WC_Tests_MaxMind_Database
  */

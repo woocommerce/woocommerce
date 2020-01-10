@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+require_once 'class-wc-integration-maxmind-geolocation-database.php';
+
 /**
  * WC Integration MaxMind Geolocation
  *
@@ -58,8 +60,6 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		if ( empty( $value ) ) {
 			return $value;
 		}
-
-		require_once 'class-wc-integration-maxmind-geolocation-database.php';
 
 		// Check the license key by attempting to download the Geolocation database.
 		$file = WC_Integration_MaxMind_Geolocation_Database::download_database( $value );

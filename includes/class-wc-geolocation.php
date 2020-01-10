@@ -247,8 +247,6 @@ class WC_Geolocation {
 		WP_Filesystem();
 		global $wp_filesystem;
 
-		require_once 'class-wc-integration-maxmind-geolocation-database.php';
-
 		// Remove any existing archives to comply with the MaxMind TOS.
 		$target_database_path = WC_Integration_MaxMind_Geolocation_Database::get_database_path();
 		if ( $wp_filesystem->exists( $target_database_path ) ) {
