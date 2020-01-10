@@ -2,6 +2,7 @@
 	border: 1px solid $core-grey-light-600;
 	border-width: 1px 0;
 	min-width: 15rem;
+	padding-bottom: $gap-largest;
 }
 
 .wc-block-cart__item-count {
@@ -69,7 +70,57 @@ table.wc-block-cart-items {
 	text-decoration: line-through;
 }
 
+.wc-block-cart__totals-footer {
+	color: #000;
+	font-size: 1.25em;
+
+	> .wc-block-totals-table-item__label {
+		font-weight: normal;
+	}
+}
+
+// Added extra class and label for specificity.
+.wc-block-cart fieldset.wc-block-cart__shipping-options-fieldset {
+	background-color: transparent;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-cart__shipping-options {
+	.wc-block-radio-control__label {
+		flex-basis: 100%;
+		line-height: 16px;
+	}
+
+	.wc-block-radio-control__description {
+		flex-basis: 100%;
+	}
+
+	.wc-block-radio-control__option {
+		padding-left: $gap-large;
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	.wc-block-radio-control__input {
+		left: 0;
+		top: $gap;
+	}
+}
+
+@include breakpoint( "<782px" ) {
+	.wc-block-cart__totals-title {
+		display: none;
+	}
+}
+
 @include breakpoint( ">782px" ) {
+	.wc-block-cart__sidebar {
+		max-width: 374px;
+	}
+
 	.wc-block-cart {
 		display: flex;
 	}
@@ -80,11 +131,7 @@ table.wc-block-cart-items {
 	}
 
 	.wc-block-cart__sidebar {
-		border: 0;
-		border-radius: 3px;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.14);
 		flex-grow: 1;
-		padding: $gap $gap-large $gap-largest;
 	}
 
 	.wc-block-cart-items {

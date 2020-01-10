@@ -124,6 +124,7 @@ const mainEntry = {
 	'active-filters': './assets/js/blocks/active-filters/index.js',
 	'block-error-boundary':
 		'./assets/js/base/components/block-error-boundary/style.scss',
+	'panel-style': './node_modules/@wordpress/components/src/panel/style.scss',
 
 	// cart & checkout blocks
 	cart: './assets/js/blocks/cart-checkout/cart/index.js',
@@ -172,6 +173,7 @@ const getMainConfig = ( options = {} ) => {
 		},
 		optimization: {
 			splitChunks: {
+				minSize: 0,
 				cacheGroups: {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
@@ -191,6 +193,12 @@ const getMainConfig = ( options = {} ) => {
 						name: 'editor',
 						chunks: 'all',
 						priority: 10,
+					},
+					'vendors-style': {
+						test: /\/node_modules\/.*?style\.s?css$/,
+						name: 'vendors-style',
+						chunks: 'all',
+						priority: 7,
 					},
 					style: {
 						test: /style\.scss$/,
@@ -224,7 +232,29 @@ const getMainConfig = ( options = {} ) => {
 					},
 				},
 				{
-					test: /\.s[c|a]ss$/,
+					test: /\/node_modules\/.*?style\.s?css$/,
+					use: [
+						MiniCssExtractPlugin.loader,
+						{ loader: 'css-loader', options: { importLoaders: 1 } },
+						'postcss-loader',
+						{
+							loader: 'sass-loader',
+							query: {
+								includePaths: [ 'node_modules' ],
+								data:
+									'@import "~@wordpress/base-styles/colors"; ' +
+									'@import "~@wordpress/base-styles/variables"; ' +
+									'@import "~@wordpress/base-styles/mixins"; ' +
+									'@import "~@wordpress/base-styles/breakpoints"; ' +
+									'@import "~@wordpress/base-styles/animations"; ' +
+									'@import "~@wordpress/base-styles/z-index"; ',
+							},
+						},
+					],
+				},
+				{
+					test: /\.s?css$/,
+					exclude: /node_modules/,
 					use: [
 						MiniCssExtractPlugin.loader,
 						{ loader: 'css-loader', options: { importLoaders: 1 } },
@@ -300,6 +330,19 @@ const getFrontConfig = ( options = {} ) => {
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksJsonp',
+		},
+		optimization: {
+			splitChunks: {
+				minSize: 0,
+				cacheGroups: {
+					vendors: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'vendors',
+						chunks: 'all',
+						enforce: true,
+					},
+				},
+			},
 		},
 		module: {
 			rules: [

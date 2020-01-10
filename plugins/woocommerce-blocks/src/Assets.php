@@ -38,12 +38,14 @@ class Assets {
 		self::register_style( 'wc-block-editor', plugins_url( self::get_block_asset_build_path( 'editor', 'css' ), __DIR__ ), array( 'wp-edit-blocks' ) );
 		wp_style_add_data( 'wc-block-editor', 'rtl', 'replace' );
 		self::register_style( 'wc-block-style', plugins_url( self::get_block_asset_build_path( 'style', 'css' ), __DIR__ ), [] );
+		self::register_style( 'wc-block-vendors-style', plugins_url( self::get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), [] );
 		wp_style_add_data( 'wc-block-style', 'rtl', 'replace' );
 
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-blocks-data-store', plugins_url( 'build/wc-blocks-data.js', __DIR__ ), [], false );
 		self::register_script( 'wc-blocks', plugins_url( self::get_block_asset_build_path( 'blocks' ), __DIR__ ), [], false );
 		self::register_script( 'wc-vendors', plugins_url( self::get_block_asset_build_path( 'vendors' ), __DIR__ ), [], false );
+		self::register_script( 'wc-vendors-frontend', plugins_url( self::get_block_asset_build_path( 'vendors-frontend' ), __DIR__ ), [], false );
 
 		self::register_script( 'wc-blocks-registry', plugins_url( 'build/wc-blocks-registry.js', __DIR__ ), [], false );
 
@@ -102,28 +104,30 @@ class Assets {
 		return array_merge(
 			$settings,
 			[
-				'min_columns'          => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
-				'max_columns'          => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
-				'default_columns'      => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
-				'min_rows'             => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
-				'max_rows'             => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
-				'default_rows'         => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
-				'thumbnail_size'       => wc_get_theme_support( 'thumbnail_image_width', 300 ),
-				'placeholderImgSrc'    => wc_placeholder_img_src(),
-				'min_height'           => wc_get_theme_support( 'featured_block::min_height', 500 ),
-				'default_height'       => wc_get_theme_support( 'featured_block::default_height', 500 ),
-				'isLargeCatalog'       => $product_counts->publish > 100,
-				'limitTags'            => $tag_count > 100,
-				'hasTags'              => $tag_count > 0,
-				'homeUrl'              => esc_url( home_url( '/' ) ),
-				'shopUrl'              => get_permalink( wc_get_page_id( 'shop' ) ),
-				'checkoutUrl'          => get_permalink( wc_get_page_id( 'checkout' ) ),
-				'showAvatars'          => '1' === get_option( 'show_avatars' ),
-				'reviewRatingsEnabled' => wc_review_ratings_enabled(),
-				'productCount'         => array_sum( (array) $product_counts ),
-				'attributes'           => array_values( wc_get_attribute_taxonomies() ),
-				'wcBlocksAssetUrl'     => plugins_url( 'assets/', __DIR__ ),
-				'restApiRoutes'        => [
+				'min_columns'                 => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
+				'max_columns'                 => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
+				'default_columns'             => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
+				'min_rows'                    => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
+				'max_rows'                    => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
+				'default_rows'                => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+				'thumbnail_size'              => wc_get_theme_support( 'thumbnail_image_width', 300 ),
+				'placeholderImgSrc'           => wc_placeholder_img_src(),
+				'min_height'                  => wc_get_theme_support( 'featured_block::min_height', 500 ),
+				'default_height'              => wc_get_theme_support( 'featured_block::default_height', 500 ),
+				'isLargeCatalog'              => $product_counts->publish > 100,
+				'limitTags'                   => $tag_count > 100,
+				'hasTags'                     => $tag_count > 0,
+				'homeUrl'                     => esc_url( home_url( '/' ) ),
+				'shopUrl'                     => get_permalink( wc_get_page_id( 'shop' ) ),
+				'checkoutUrl'                 => get_permalink( wc_get_page_id( 'checkout' ) ),
+				'couponsEnabled'              => wc_coupons_enabled(),
+				'displayPricesIncludingTaxes' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
+				'showAvatars'                 => '1' === get_option( 'show_avatars' ),
+				'reviewRatingsEnabled'        => wc_review_ratings_enabled(),
+				'productCount'                => array_sum( (array) $product_counts ),
+				'attributes'                  => array_values( wc_get_attribute_taxonomies() ),
+				'wcBlocksAssetUrl'            => plugins_url( 'assets/', __DIR__ ),
+				'restApiRoutes'               => [
 					'/wc/store' => array_keys( \Automattic\WooCommerce\Blocks\RestApi::get_routes_from_namespace( 'wc/store' ) ),
 				],
 			]
@@ -178,12 +182,13 @@ class Assets {
 	 * @since 2.3.0
 	 * @since $VID:$ Changed $name to $script_name and added $handle argument.
 	 *
-	 * @param string $script_name Name of the script used to identify the file inside build folder.
-	 * @param string $handle      Provided if the handle should be different than the script name. `wc-` prefix automatically added.
+	 * @param string $script_name  Name of the script used to identify the file inside build folder.
+	 * @param string $handle       Optional. Provided if the handle should be different than the script name. `wc-` prefix automatically added.
+	 * @param array  $dependencies Optional. An array of registered script handles this script depends on. Default empty array.
 	 */
-	public static function register_block_script( $script_name, $handle = '' ) {
+	public static function register_block_script( $script_name, $handle = '', $dependencies = [] ) {
 		$handle = '' !== $handle ? $handle : $script_name;
-		self::register_script( 'wc-' . $handle, plugins_url( self::get_block_asset_build_path( $script_name ), __DIR__ ) );
+		self::register_script( 'wc-' . $handle, plugins_url( self::get_block_asset_build_path( $script_name ), __DIR__ ), $dependencies );
 		wp_enqueue_script( 'wc-' . $handle );
 	}
 

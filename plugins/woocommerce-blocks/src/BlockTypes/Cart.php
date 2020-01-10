@@ -30,7 +30,7 @@ class Cart extends AbstractBlock {
 				'render_callback' => array( $this, 'render' ),
 				'editor_script'   => 'wc-' . $this->block_name . '-block',
 				'editor_style'    => 'wc-block-editor',
-				'style'           => 'wc-block-style',
+				'style'           => [ 'wc-block-style', 'wc-block-vendors-style' ],
 				'script'          => 'wc-' . $this->block_name . '-block-frontend',
 			)
 		);
@@ -46,7 +46,8 @@ class Cart extends AbstractBlock {
 	public function render( $attributes = array(), $content = '' ) {
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
 			$this->block_name . '-frontend',
-			$this->block_name . '-block-frontend'
+			$this->block_name . '-block-frontend',
+			[ 'wc-vendors-frontend' ]
 		);
 		return $content;
 	}

@@ -46,9 +46,9 @@
 		"@babel/plugin-proposal-class-properties": "7.7.4",
 		"@octokit/rest": "16.36.0",
 		"@wordpress/babel-preset-default": "4.8.0",
+		"@wordpress/base-styles": "^1.1.0",
 		"@wordpress/blocks": "6.9.0",
 		"@wordpress/browserslist-config": "2.6.0",
-		"@wordpress/components": "8.5.0",
 		"@wordpress/data-controls": "1.5.0",
 		"@wordpress/date": "3.7.0",
 		"@wordpress/dependency-extraction-webpack-plugin": "2.1.0",
@@ -108,6 +108,8 @@
 		"npm": "6.13.4"
 	},
 	"dependencies": {
+		"@wordpress/components": "8.5.0",
+		"wordpress-components": "npm:@wordpress/components@8.5.0",
 		"@woocommerce/components": "4.0.0",
 		"compare-versions": "3.5.1",
 		"downshift": "4.0.4",
