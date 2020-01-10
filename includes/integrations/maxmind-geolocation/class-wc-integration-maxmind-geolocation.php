@@ -157,6 +157,12 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 			return $country_code;
 		}
 
-		return WC_Integration_MaxMind_Geolocation_Database::get_iso_country_code_for_ip( $ip_address );
+		if ( empty( $ip_address ) ) {
+			return $country_code;
+		}
+
+		$country_code = WC_Integration_MaxMind_Geolocation_Database::get_iso_country_code_for_ip( $ip_address );
+
+		return $country_code ? $country_code : false;
 	}
 }
