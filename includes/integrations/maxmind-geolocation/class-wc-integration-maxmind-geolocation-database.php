@@ -63,13 +63,13 @@ class WC_Integration_MaxMind_Geolocation_Database {
 	 * @return string|WP_Error The path to the database file or an error if invalid.
 	 */
 	public static function download_database( $license_key ) {
-		$download_uri  = 'https://download.maxmind.com/app/geoip_download?';
-		$download_uri .= http_build_query(
+		$download_uri = add_query_arg(
 			array(
 				'edition_id'  => self::DATABASE,
 				'license_key' => $license_key,
 				'suffix'      => 'tar.gz',
-			)
+			),
+			'https://download.maxmind.com/app/geoip_download'
 		);
 
 		// Needed for the download_url call right below.
