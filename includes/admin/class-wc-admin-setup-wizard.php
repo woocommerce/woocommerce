@@ -1271,44 +1271,53 @@ class WC_Admin_Setup_Wizard {
 		 * If enabled, create a shipping zone containing the country the
 		 * store is located in, with the selected method preconfigured.
 		 */
+
+		ob_start();
+		var_dump( $_POST['shipping_zones'] );
+		$imp_to_file = ob_get_clean();
+		file_put_contents('/var/www/html/test.html', $imp_to_file, FILE_APPEND);
+
 		if ( $setup_domestic ) {
 			$zone = new WC_Shipping_Zone( null );
 			$zone->set_zone_order( 0 );
 			$zone->add_location( WC()->countries->get_base_country(), 'country' );
 			$zone_id = $zone->save();
-
-			// Save chosen shipping method settings (using REST controller for convenience).
+			$settings =  array();
 			if ( ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) { // WPCS: input var ok.
-				$request = new WP_REST_Request( 'POST', "/wc/v3/shipping/zones/{$zone_id}/methods" );
-				$request->add_header( 'Content-Type', 'application/json' );
-				$request->set_body(
-					wp_json_encode(
-						array(
-							'method_id' => $domestic_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ),
-						)
-					)
-				);
-				rest_do_request( $request );
+				$settings = $_POST['shipping_zones']['domestic'][ $domestic_method ];
 			}
+			// Save chosen shipping method settings (using REST controller for convenience).
+			$request = new WP_REST_Request( 'POST', "/wc/v3/shipping/zones/{$zone_id}/methods" );
+			$request->add_header( 'Content-Type', 'application/json' );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'method_id' => $domestic_method,
+						'settings'  => $settings,
+					)
+				)
+			);
+			rest_do_request( $request );
 		}
 
 		// If enabled, set the selected method for the "rest of world" zone.
 		if ( $setup_intl ) {
-			// Save chosen shipping method settings (using REST controller for convenience).
+			$settings =  array();
 			if ( ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
-				$request = new WP_REST_Request( 'POST', '/wc/v3/shipping/zones/0/methods' );
-				$request->add_header( 'Content-Type', 'application/json' );
-				$request->set_body(
-					wp_json_encode(
-						array(
-							'method_id' => $intl_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) ),
-						)
-					)
-				);
-				rest_do_request( $request );
+				$settings = $_POST['shipping_zones']['intl'][ $intl_method ];
 			}
+			// Save chosen shipping method settings (using REST controller for convenience).
+			$request = new WP_REST_Request( 'POST', '/wc/v3/shipping/zones/0/methods' );
+			$request->add_header( 'Content-Type', 'application/json' );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'method_id' => $intl_method,
+						'settings'  => $settings,
+					)
+				)
+			);
+			rest_do_request( $request );
 		}
 
 		// Notify the user that no shipping methods are configured.
