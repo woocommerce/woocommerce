@@ -1271,12 +1271,6 @@ class WC_Admin_Setup_Wizard {
 		 * If enabled, create a shipping zone containing the country the
 		 * store is located in, with the selected method preconfigured.
 		 */
-
-		ob_start();
-		var_dump( $_POST['shipping_zones'] );
-		$imp_to_file = ob_get_clean();
-		file_put_contents('/var/www/html/test.html', $imp_to_file, FILE_APPEND);
-
 		if ( $setup_domestic ) {
 			$zone = new WC_Shipping_Zone( null );
 			$zone->set_zone_order( 0 );
