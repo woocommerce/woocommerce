@@ -47,7 +47,9 @@ class WC_Integration_MaxMind_Database_Service {
 	 * @return string The local database path.
 	 */
 	public function get_database_path() {
-		$database_path = WP_CONTENT_DIR . '/uploads/woocommerce_uploads/';
+		$uploads_dir = wp_upload_dir();
+
+		$database_path = trailingslashit( $uploads_dir['basedir'] ) . 'woocommerce_uploads/';
 		if ( ! empty( $this->database_prefix ) ) {
 			$database_path .= $this->database_prefix . '-';
 		}
