@@ -32,8 +32,6 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		$this->method_title       = __( 'WooCommerce MaxMind Geolocation', 'woocommerce' );
 		$this->method_description = __( 'An integration for utilizing MaxMind to do Geolocation lookups.', 'woocommerce' );
 
-		// We will need a service for interacting with the MaxMind database.
-
 		/**
 		 * Supports overriding the database service to be used.
 		 *
@@ -42,7 +40,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		 */
 		$this->database_service = apply_filters( 'woocommerce_maxmind_geolocation_database_service', null );
 		if ( null === $this->database_service ) {
-			$this->database_service = new WC_Integration_MaxMind_Database_Service();
+			$this->database_service = new WC_Integration_MaxMind_Database_Service( $this->get_database_prefix() );
 		}
 
 		$this->init_form_fields();
@@ -202,6 +200,21 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		$country_code = $this->database_service->get_iso_country_code_for_ip( $ip_address );
 
 		return $country_code ? $country_code : false;
+	}
+
+	/**
+	 * Fetches the prefix for the MaxMind database file.
+	 *
+	 * @return string
+	 */
+	private function get_database_prefix() {
+		$prefix = $this->get_option( 'database_prefix' );
+		if ( empty( $prefix ) ) {
+			$prefix = wp_generate_password( 32, false );
+			$this->update_option( 'database_prefix', $prefix );
+		}
+
+		return $prefix;
 	}
 
 	/**

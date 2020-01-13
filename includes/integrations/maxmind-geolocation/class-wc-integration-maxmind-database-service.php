@@ -26,12 +26,32 @@ class WC_Integration_MaxMind_Database_Service {
 	const DATABASE_EXTENSION = '.mmdb';
 
 	/**
+	 * A prefix for the MaxMind database filename.
+	 *
+	 * @var string
+	 */
+	private $database_prefix;
+
+	/**
+	 * WC_Integration_MaxMind_Database_Service constructor.
+	 *
+	 * @param string|null $database_prefix A prefix for the MaxMind database filename.
+	 */
+	public function __construct( $database_prefix ) {
+		$this->database_prefix = $database_prefix;
+	}
+
+	/**
 	 * Fetches the path that the database should be stored.
 	 *
 	 * @return string The local database path.
 	 */
 	public function get_database_path() {
-		$database_path = WP_CONTENT_DIR . '/uploads/' . self::DATABASE . self::DATABASE_EXTENSION;
+		$database_path = WP_CONTENT_DIR . '/uploads/';
+		if ( ! empty( $this->database_prefix ) ) {
+			$database_path .= $this->database_prefix . '-';
+		}
+		$database_path .= self::DATABASE . self::DATABASE_EXTENSION;
 
 		/**
 		 * Filter the geolocation database storage path.
