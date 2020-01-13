@@ -9,6 +9,7 @@
  * Class WC_Tests_MaxMind_Database
  */
 class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
+
 	/**
 	 * Run setup code for unit tests.
 	 */
@@ -25,17 +26,14 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	 * @expectedDeprecated woocommerce_geolocation_local_database_path
 	 */
 	public function test_database_path_filters() {
-		$database_service = $this->getMockBuilder( 'WC_Integration_MaxMind_Database_Service' )
-			->setMethods( null )
-			->disableOriginalConstructor()
-			->getMock();
+		$database_service = new WC_Integration_MaxMind_Database_Service( '' );
 
 		$path = $database_service->get_database_path();
 		$this->assertEquals( WP_CONTENT_DIR . '/uploads/' . WC_Integration_MaxMind_Database_Service::DATABASE . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION, $path );
 
 		add_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path_deprecated' ), 1, 2 );
 		$path = $database_service->get_database_path();
-		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
+		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path_deprecated' ), 1 );
 
 		$this->assertEquals( '/deprecated_filter', $path );
 
@@ -44,16 +42,19 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path' ) );
 
 		$this->assertEquals( '/filter', $path );
+
+		// Now perform any tests with a database file prefix.
+		$database_service = new WC_Integration_MaxMind_Database_Service( 'testing' );
+
+		$path = $database_service->get_database_path();
+		$this->assertEquals( WP_CONTENT_DIR . '/uploads/testing-' . WC_Integration_MaxMind_Database_Service::DATABASE . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION, $path );
 	}
 
 	/**
 	 * Tests that the database download works as expected.
 	 */
 	public function test_download_database_works() {
-		$database_service  = $this->getMockBuilder( 'WC_Integration_MaxMind_Database_Service' )
-			->setMethods( null )
-			->disableOriginalConstructor()
-			->getMock();
+		$database_service  = new WC_Integration_MaxMind_Database_Service( '' );
 		$expected_database = '/tmp/GeoLite2-Country_20200100/GeoLite2-Country.mmdb';
 
 		$result = $database_service->download_database( 'testing_license' );
@@ -69,10 +70,7 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 	 * Tests the that database download wraps the download and extraction errors.
 	 */
 	public function test_download_database_wraps_errors() {
-		$database_service = $this->getMockBuilder( 'WC_Integration_MaxMind_Database_Service' )
-			->setMethods( null )
-			->disableOriginalConstructor()
-			->getMock();
+		$database_service = new WC_Integration_MaxMind_Database_Service( '' );
 
 		$result = $database_service->download_database( 'invalid_license' );
 

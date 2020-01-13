@@ -27,7 +27,9 @@ class WC_Tests_MaxMind_Integration extends WC_Unit_Test_Case {
 		add_filter( 'filesystem_method', array( $this, 'override_filesystem_method' ) );
 
 		// Have a mock service be used by all integrations.
-		$this->database_service = $this->getMockBuilder( 'WC_Integration_maxMind_Database_Service' )->getMock();
+		$this->database_service = $this->getMockBuilder( 'WC_Integration_maxMind_Database_Service' )
+			->disableOriginalConstructor()
+			->getMock();
 		add_filter( 'woocommerce_maxmind_geolocation_database_service', array( $this, 'override_integration_service' ) );
 	}
 
