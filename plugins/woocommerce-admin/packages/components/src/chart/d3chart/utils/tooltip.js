@@ -45,10 +45,10 @@ class ChartTooltip {
 			return Math.max(
 				this.margin,
 				elementCoords.left +
-					elementCoords.width * ( 1 - elementWidthRatio ) -
-					tooltipSize.width -
-					this.margin -
-					leftMargin
+				elementCoords.width * ( 1 - elementWidthRatio ) -
+				tooltipSize.width -
+				this.margin -
+				leftMargin
 			);
 		}
 
