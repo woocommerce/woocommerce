@@ -54,6 +54,16 @@ table.wc-block-cart-items {
 	margin-left: $gap;
 }
 
+.wc-block-cart-item__product-name {
+	color: $core-grey-dark-600;
+	font-size: 16px;
+}
+
+.wc-block-cart-item__product-metadata {
+	color: $core-grey-dark-400;
+	font-size: 12px;
+}
+
 .wc-block-cart-item__quantity {
 	display: none;
 }
