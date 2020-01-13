@@ -14,6 +14,12 @@ defined( 'ABSPATH' ) || exit;
  * @since 3.9.0
  */
 class WC_Integration_MaxMind_Database_Service {
+
+	/**
+	 * The name of the MaxMind database to utilize.
+	 */
+	const DATABASE = 'GeoLite2-Country';
+
 	/**
 	 * The extension for the MaxMind database.
 	 */
@@ -27,30 +33,12 @@ class WC_Integration_MaxMind_Database_Service {
 	private $database_prefix;
 
 	/**
-	 * The MaxMind database to download.
-	 *
-	 * @var string
-	 */
-	private $database;
-
-	/**
 	 * WC_Integration_MaxMind_Database_Service constructor.
 	 *
 	 * @param string|null $database_prefix A prefix for the MaxMind database filename.
-	 * @param string      $database The MaxMind database to download.
 	 */
-	public function __construct( $database_prefix, $database ) {
+	public function __construct( $database_prefix ) {
 		$this->database_prefix = $database_prefix;
-		$this->database        = $database;
-	}
-
-	/**
-	 * Changes the MaxMind database to download.
-	 *
-	 * @param string $database The new MaxMind database to download.
-	 */
-	public function set_database( $database ) {
-		$this->database = $database;
 	}
 
 	/**
@@ -65,7 +53,7 @@ class WC_Integration_MaxMind_Database_Service {
 		if ( ! empty( $this->database_prefix ) ) {
 			$database_path .= $this->database_prefix . '-';
 		}
-		$database_path .= 'MaxMind-Geolocation-Database' . self::DATABASE_EXTENSION;
+		$database_path .= self::DATABASE . self::DATABASE_EXTENSION;
 
 		/**
 		 * Filter the geolocation database storage path.
@@ -99,7 +87,7 @@ class WC_Integration_MaxMind_Database_Service {
 	public function download_database( $license_key ) {
 		$download_uri = add_query_arg(
 			array(
-				'edition_id'  => $this->database,
+				'edition_id'  => self::DATABASE,
 				'license_key' => wc_clean( $license_key ),
 				'suffix'      => 'tar.gz',
 			),
@@ -130,11 +118,11 @@ class WC_Integration_MaxMind_Database_Service {
 		try {
 			$file = new PharData( $tmp_archive_path );
 
-			$tmp_database_path = trailingslashit( dirname( $tmp_archive_path ) ) . trailingslashit( $file->current()->getFilename() ) . $this->database . self::DATABASE_EXTENSION;
+			$tmp_database_path = trailingslashit( dirname( $tmp_archive_path ) ) . trailingslashit( $file->current()->getFilename() ) . self::DATABASE . self::DATABASE_EXTENSION;
 
 			$file->extractTo(
 				dirname( $tmp_archive_path ),
-				trailingslashit( $file->current()->getFilename() ) . $this->database . self::DATABASE_EXTENSION,
+				trailingslashit( $file->current()->getFilename() ) . self::DATABASE . self::DATABASE_EXTENSION,
 				true
 			);
 		} catch ( Exception $exception ) {
