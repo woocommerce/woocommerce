@@ -1839,7 +1839,7 @@ function wc_update_343_cleanup_foreign_keys() {
 
 	if ( $results ) {
 		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 }
@@ -2045,4 +2045,13 @@ function wc_update_370_mro_std_currency() {
  */
 function wc_update_370_db_version() {
 	WC_Install::update_db_version( '3.7.0' );
+}
+
+/**
+ * The TOS for MaxMind's databases require that they be deleted. Since we're making significant changes to
+ * the location and function of the database downloads, let's remove the legacy database altogether.
+ */
+function wc_update_390_remove_maxmind_database() {
+	// Make sure to remove the file using the path as it was previously defined in WC_Geolocation!
+	@unlink( WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 }
