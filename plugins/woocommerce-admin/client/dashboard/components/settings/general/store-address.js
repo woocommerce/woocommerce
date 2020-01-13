@@ -177,6 +177,7 @@ export function StoreAddress( props ) {
 				label={ __( 'Country / State', 'woocommerce-admin' ) }
 				required
 				options={ countryStateOptions }
+				excludeSelectedOptions={ false }
 				isSearchable
 				{ ...getInputProps( 'countryState' ) }
 				controlClassName={ getInputProps( 'countryState' ).className }
