@@ -454,6 +454,11 @@ jQuery( function( $ ) {
 				
 				var $input = $(elem);
 				
+				// Bypass inputs without name att
+				if (!elem.name) {
+					return;
+				}
+				
 				// Bypass non-checked checkboxes and radio buttons.
 				if (($input.is(':radio') || $input.is(':checkbox')) && !$input.is(':checked')) {
 					return;
