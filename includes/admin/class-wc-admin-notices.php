@@ -365,7 +365,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function wc_admin_feature_plugin_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_wc_admin_notice', true ) || self::is_plugin_active( 'woocommerce-admin/woocommerce-admin.php' ) ) {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_wc_admin_notice', true ) || class_exists( 'Automattic\WooCommerce\Admin\FeaturePlugin' ) ) {
 			self::remove_notice( 'wc_admin' );
 			return;
 		}
