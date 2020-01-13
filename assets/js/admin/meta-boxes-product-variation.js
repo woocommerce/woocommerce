@@ -451,7 +451,21 @@ jQuery( function( $ ) {
 			var data = {};
 			
 			$( ':input', fields ).each( function(index, elem) {
+				
+				var $input = $(elem);
+				
+				// Bypass non-checked checkboxes and radio buttons.
+				if (($input.is(':radio') || $input.is(':checkbox')) && !$input.is(':checked')) {
+					return;
+				}
+				
+				// Bypass disabled fields.
+				if (true === $input.prop('disabled')) {
+					return;
+				}
+				
 				data[elem.name] = elem.value;
+				
 			});
 			
 			$( '.variations-defaults select' ).each( function( index, element ) {
