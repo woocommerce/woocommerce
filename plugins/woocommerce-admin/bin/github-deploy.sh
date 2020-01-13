@@ -100,7 +100,6 @@ git commit -m "Adding feature-config.php directory to release" --no-verify
 
 # Force add language files
 git add languages/woocommerce-admin.pot --force
-git add languages/woocommerce-admin.php --force
 git add .
 git commit -m "Adding translations to release" --no-verify
 
@@ -128,7 +127,6 @@ zip -r ${ZIP_FILE} \
 	images/ \
 	$build_files \
 	languages/woocommerce-admin.pot \
-	languages/woocommerce-admin.php \
 	readme.txt \
 	src/ \
 	vendor/
