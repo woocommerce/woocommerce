@@ -1,10 +1,12 @@
 $circle-size: 24px;
 $line-offset-from-circle-size: 8px;
 
-.wc-block-checkout-step {
+.wc-block-checkout-form fieldset.wc-block-checkout-step {
 	position: relative;
-	padding-left: $gap-large;
-	padding-bottom: $gap-larger;
+	border: none;
+	padding: 0 0 $gap-larger $gap-large;
+	background: none;
+	margin: 0;
 
 	&:last-child::before {
 		content: none;
