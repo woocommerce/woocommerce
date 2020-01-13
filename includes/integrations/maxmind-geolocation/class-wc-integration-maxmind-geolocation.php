@@ -134,6 +134,9 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		// We may as well put this archive to good use, now that we've downloaded one.
 		self::update_database( $tmp_database_path );
 
+		// Remove missing license key notice.
+		$this->remove_missing_license_key_notice();
+
 		return $value;
 	}
 
