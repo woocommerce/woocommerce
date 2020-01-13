@@ -135,6 +135,9 @@ class WC_Install {
 			'wc_update_370_mro_std_currency',
 			'wc_update_370_db_version',
 		),
+		'3.9.0' => array(
+			'wc_update_390_remove_maxmind_database',
+		),
 	);
 
 	/**
@@ -970,7 +973,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
