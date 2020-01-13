@@ -8,8 +8,20 @@ import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrency } from '@woocommerce/base-utils';
 
+const ProductVariationDetails = ( { variation } ) => {
+	const variationsText = variation
+		.map( ( v ) => `${ v.attribute }: ${ v.value }` )
+		.join( ' / ' );
+
+	return (
+		<div className="wc-block-cart-item__product-attributes">
+			{ variationsText }
+		</div>
+	);
+};
+
 const CartLineItemRow = ( { lineItem } ) => {
-	const { name, images, quantity, totals } = lineItem;
+	const { name, description, images, variation, quantity, totals } = lineItem;
 	const { line_total: total, line_subtotal: subtotal } = totals;
 
 	const imageProps = {};
@@ -48,7 +60,13 @@ const CartLineItemRow = ( { lineItem } ) => {
 				<div className="wc-block-cart-item__product-wrapper">
 					<img { ...imageProps } alt={ imageProps.alt } />
 					<div className="wc-block-cart-item__product-details">
-						{ name }
+						<div className="wc-block-cart-item__product-name">
+							{ name }
+						</div>
+						<div className="wc-block-cart-item__product-metadata">
+							{ description }
+							<ProductVariationDetails variation={ variation } />
+						</div>
 						{ quantitySelector(
 							'wc-block-cart-item__quantity-stacked'
 						) }
@@ -77,8 +95,15 @@ const CartLineItemRow = ( { lineItem } ) => {
 CartLineItemRow.propTypes = {
 	lineItem: PropTypes.shape( {
 		name: PropTypes.string.isRequired,
+		description: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
 		quantity: PropTypes.number.isRequired,
+		variation: PropTypes.arrayOf(
+			PropTypes.shape( {
+				attribute: PropTypes.string.isRequired,
+				value: PropTypes.string.isRequired,
+			} )
+		).isRequired,
 		totals: PropTypes.shape( {
 			line_subtotal: PropTypes.string.isRequired,
 			line_total: PropTypes.string.isRequired,
