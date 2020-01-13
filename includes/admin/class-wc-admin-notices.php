@@ -38,6 +38,7 @@ class WC_Admin_Notices {
 		'no_secure_connection'         => 'secure_connection_notice',
 		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
+		'wc_redirect_download_method'  => 'wc_redirect_download_method_notice',
 	);
 
 	/**
@@ -48,6 +49,7 @@ class WC_Admin_Notices {
 
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
+		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'hide_notices' ) );
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -422,6 +424,18 @@ class WC_Admin_Notices {
 		$integration_options = get_option( 'woocommerce_maxmind_geolocation_settings' );
 		if ( empty( $integration_options['license_key'] ) ) {
 			self::add_notice( 'maxmind_license_key' );
+
+		}
+	}
+
+	/**
+	 *  Add notice about Redirect-only download method, nudging user to switch to a different method instead.
+	 */
+	public static function add_redirect_download_method_notice() {
+		if ( 'redirect' === get_option( 'woocommerce_file_download_method' ) ) {
+			self::add_notice( 'wc_redirect_download_method' );
+		} else {
+			self::remove_notice( 'wc_redirect_download_method' );
 		}
 	}
 
@@ -440,6 +454,20 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-maxmind-license-key.php';
+	}
+
+	/**
+	 * Notice about Redirect-Only download method.
+	 *
+	 * @since 3.10.0
+	 */
+	public static function wc_redirect_download_method_notice() {
+		if ( apply_filters( 'woocommerce_hide_redirect_method_nag', get_user_meta( get_current_user_id(), 'dismissed_wc_redirect_download_method_notice', true ) ) ) {
+			self::remove_notice( 'wc_redirect_download_method' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-redirect-only-download.php';
 	}
 
 	/**
