@@ -1,6 +1,8 @@
 /** @format */
 
 .woocommerce-search.woocommerce-select-control {
+	position: relative;
+
 	i.material-icons-outlined {
 		position: absolute;
 		top: 9px;
@@ -33,6 +35,7 @@
 	.components-base-control .woocommerce-select-control__control-input {
 		margin: 0;
 		font-size: 13px;
+		min-height: auto;
 
 		&[type='number']::-webkit-outer-spin-button,
 		&[type='number']::-webkit-inner-spin-button {
@@ -44,10 +47,10 @@
 	.components-base-control .components-base-control__label {
 		font-size: 13px;
 		color: #72777c;
-		position: static;
-		transform: none;
 		margin: 0;
-		width: 100%;
+		width: calc(100% - 36px);
+		top: 50%;
+		left: 36px;
 	}
 
 	.is-active.components-base-control .components-base-control__label,
