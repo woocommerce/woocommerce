@@ -65,7 +65,7 @@ class WC_Tests_MaxMind_Integration extends WC_Unit_Test_Case {
 		$this->database_service->expects( $this->once() )
 			->method( 'download_database' )
 			->with( 'test_license' )
-			->willReturn( '/tmp/' . WC_Integration_MaxMind_Database_Service::DATABASE . '.' . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION );
+			->willReturn( '/tmp/MaxMind-Geolocation-Database.' . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION );
 
 		$integration = new WC_Integration_MaxMind_Geolocation();
 		$integration->update_option( 'license_key', 'test_license' );

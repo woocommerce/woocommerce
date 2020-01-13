@@ -40,7 +40,10 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		 */
 		$this->database_service = apply_filters( 'woocommerce_maxmind_geolocation_database_service', null );
 		if ( null === $this->database_service ) {
-			$this->database_service = new WC_Integration_MaxMind_Database_Service( $this->get_database_prefix() );
+			$this->database_service = new WC_Integration_MaxMind_Database_Service(
+				$this->get_database_prefix(),
+				$this->get_option( 'database' )
+			);
 		}
 
 		$this->init_form_fields();
@@ -80,11 +83,23 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = array(
+			// Note: The database field MUST be first, as the license_key validation relies on the value of it!
+			'database'    => array(
+				'title'       => __( 'Database', 'woocommerce' ),
+				'type'        => 'select',
+				'description' => __( 'The database chosen decides the precision of the geolocation search. You should note that higher precision database are larger in size.', 'woocommerce' ),
+				'options'     => array(
+					'GeoLite2-Country' => __( 'GeoLite2 - Country', 'woocommerce' ),
+					'GeoLite2-City'    => __( 'GeoLite2 - City', 'woocommerce' ),
+				),
+				'desc_tip'    => false,
+				'default'     => 'GeoLite2-Country',
+			),
 			'license_key' => array(
 				'title'       => __( 'MaxMind License Key', 'woocommerce' ),
 				'type'        => 'password',
 				'description' => sprintf(
-					/* translators: %1$s: Documentation URL */
+				/* translators: %1$s: Documentation URL */
 					__(
 						'The key that will be used when dealing with MaxMind Geolocation services. You can read how to generate one in <a href="%1$s">MaxMind\'s License Key Documentation</a>.',
 						'woocommerce'
