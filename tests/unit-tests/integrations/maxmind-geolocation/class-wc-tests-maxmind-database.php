@@ -29,7 +29,7 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 		$database_service = new WC_Integration_MaxMind_Database_Service( '' );
 
 		$path = $database_service->get_database_path();
-		$this->assertEquals( WP_CONTENT_DIR . '/uploads/' . WC_Integration_MaxMind_Database_Service::DATABASE . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION, $path );
+		$this->assertEquals( WP_CONTENT_DIR . '/uploads/woocommerce_uploads/' . WC_Integration_MaxMind_Database_Service::DATABASE . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION, $path );
 
 		add_filter( 'woocommerce_geolocation_local_database_path', array( $this, 'filter_database_path_deprecated' ), 1, 2 );
 		$path = $database_service->get_database_path();
@@ -47,7 +47,7 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 		$database_service = new WC_Integration_MaxMind_Database_Service( 'testing' );
 
 		$path = $database_service->get_database_path();
-		$this->assertEquals( WP_CONTENT_DIR . '/uploads/testing-' . WC_Integration_MaxMind_Database_Service::DATABASE . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION, $path );
+		$this->assertEquals( WP_CONTENT_DIR . '/uploads/woocommerce_uploads/testing-' . WC_Integration_MaxMind_Database_Service::DATABASE . WC_Integration_MaxMind_Database_Service::DATABASE_EXTENSION, $path );
 	}
 
 	/**
