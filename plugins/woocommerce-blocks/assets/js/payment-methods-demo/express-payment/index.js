@@ -4,6 +4,6 @@
 import { applePayImage } from './apple-pay';
 import { paypalImage } from './paypal';
 
-export const expressApplePay = <img src={ applePayImage } alt="" />;
+export const ExpressApplePay = () => <img src={ applePayImage } alt="" />;
 
-export const expressPaypal = <img src={ paypalImage } alt="" />;
+export const ExpressPaypal = () => <img src={ paypalImage } alt="" />;
