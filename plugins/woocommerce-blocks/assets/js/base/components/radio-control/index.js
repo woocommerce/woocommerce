@@ -13,10 +13,13 @@ import './style.scss';
 const RadioControl = ( {
 	className,
 	componentId,
+	id,
 	selected,
 	onChange,
 	options = [],
 } ) => {
+	const radioControlId = id || componentId;
+
 	return (
 		options.length && (
 			<div
@@ -25,7 +28,7 @@ const RadioControl = ( {
 				{ options.map( ( option ) => (
 					<RadioControlOption
 						key={ option.value }
-						name={ `radio-control-${ componentId }` }
+						name={ `radio-control-${ radioControlId }` }
 						checked={ option.value === selected }
 						option={ option }
 						onChange={ onChange }
