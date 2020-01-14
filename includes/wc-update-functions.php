@@ -2055,3 +2055,11 @@ function wc_update_390_remove_maxmind_database() {
 	// Make sure to remove the file using the path as it was previously defined in WC_Geolocation!
 	@unlink( WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 }
+
+/**
+ * So that we can best meet MaxMind's TOS, the geolocation database update cron should run once per 15 days.
+ */
+function wc_update_390_change_geolocation_database_update_cron() {
+	wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+	wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', ' woocommerce_geoip_updater' );
+}
