@@ -86,11 +86,28 @@ table.wc-block-cart-items {
 
 .wc-block-cart-item__total {
 	vertical-align: bottom;
+	font-size: 16px;
+	line-height: 19px;
 }
 
 .wc-block-cart-item__full-price {
-	color: $core-grey-light-800;
+	color: $core-grey-dark-400;
 	text-decoration: line-through;
+}
+
+.wc-block-cart-item__line-total {
+	color: $black;
+	margin-left: 0.5em;
+}
+
+.wc-block-cart-item__discount-badge {
+	background-color: $core-grey-dark-600;
+	border-radius: 3px;
+	color: $white;
+	font-size: 12px;
+	padding: 0 1em;
+	text-transform: uppercase;
+	white-space: nowrap;
 }
 
 .wc-block-cart__totals-footer {
@@ -135,6 +152,16 @@ table.wc-block-cart-items {
 
 @include breakpoint( "<782px" ) {
 	.wc-block-cart__totals-title {
+		display: none;
+	}
+
+	.wc-block-cart-item__line-total,
+	.wc-block-cart-item__full-price {
+		// inline on mobile, so line prices are aligned vertically
+		display: inline-block;
+	}
+
+	.wc-block-cart-item__discount-badge {
 		display: none;
 	}
 }
@@ -183,5 +210,18 @@ table.wc-block-cart-items {
 
 	.wc-block-cart-item__total {
 		vertical-align: top;
+	}
+
+	.wc-block-cart-item__line-total,
+	.wc-block-cart-item__full-price {
+		display: block;
+	}
+
+	.wc-block-cart-item__full-price {
+		margin-right: 0;
+	}
+
+	.wc-block-cart-item__discount-badge {
+		display: inline-block;
 	}
 }
