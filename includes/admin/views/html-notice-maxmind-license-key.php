@@ -20,9 +20,10 @@ defined( 'ABSPATH' ) || exit;
 		<?php
 		echo wp_kses_post(
 			sprintf(
-				/* translators: %s: integration page */
-				__( 'You must enter a valid license key on the <a href="%s">MaxMind integration settings page</a> in order to use the geolocation service.', 'woocommerce' ),
-				admin_url( 'admin.php?page=wc-settings&tab=integration&section=maxmind_geolocation' )
+				/* translators: %1%s: integration page %2$s: general settings page */
+				__( 'You must enter a valid license key on the <a href="%1$s">MaxMind integration settings page</a> in order to use the geolocation service. If you do not need geolocation for shipping or taxes, you should change the default customer location on the <a href="%2$s">general settings page</a>.', 'woocommerce' ),
+				admin_url( 'admin.php?page=wc-settings&tab=integration&section=maxmind_geolocation' ),
+				admin_url( 'admin.php?page=wc-settings&tab=general' )
 			)
 		);
 		?>
