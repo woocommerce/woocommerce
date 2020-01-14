@@ -855,7 +855,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		return array(
 			'wc_database_version'    => get_option( 'woocommerce_db_version' ),
 			'database_prefix'        => $wpdb->prefix,
-			'maxmind_geoip_database' => WC_Geolocation::get_local_database_path(),
+			'maxmind_geoip_database' => '',
 			'database_tables'        => $tables,
 			'database_size'          => $database_size,
 		);
