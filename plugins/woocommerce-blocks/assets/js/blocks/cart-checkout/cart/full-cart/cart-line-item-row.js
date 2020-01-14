@@ -41,7 +41,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 		images,
 		variation,
 		quantity,
-		lowStockRemaining,
+		low_stock_remaining: lowStockRemaining,
 		totals,
 	} = lineItem;
 	const { line_total: total, line_subtotal: subtotal } = totals;
@@ -94,13 +94,11 @@ const CartLineItemRow = ( { lineItem } ) => {
 
 	const lowStockBadge = lowStockRemaining ? (
 		<div className="wc-block-cart-item__low-stock-badge">
-			<span>
-				{ sprintf(
-					/* translators: %s stock amount (number of items in stock for product) */
-					__( '%s left in stock', 'woo-gutenberg-products-block' ),
-					lowStockRemaining
-				) }
-			</span>
+			{ sprintf(
+				/* translators: %s stock amount (number of items in stock for product) */
+				__( '%s left in stock', 'woo-gutenberg-products-block' ),
+				lowStockRemaining
+			) }
 		</div>
 	) : null;
 
@@ -152,7 +150,7 @@ CartLineItemRow.propTypes = {
 		description: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
 		quantity: PropTypes.number.isRequired,
-		lowStockRemaining: PropTypes.number,
+		low_stock_remaining: PropTypes.number,
 		variation: PropTypes.arrayOf(
 			PropTypes.shape( {
 				attribute: PropTypes.string.isRequired,
