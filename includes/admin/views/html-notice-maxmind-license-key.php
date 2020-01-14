@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin View: Notice - Missing license key
+ * Admin View: Notice - Missing MaxMind license key
  *
  * @package WooCommerce\Admin
  */
