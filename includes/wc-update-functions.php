@@ -2061,5 +2061,5 @@ function wc_update_390_remove_maxmind_database() {
  */
 function wc_update_390_change_geolocation_database_update_cron() {
 	wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
-	wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', ' woocommerce_geoip_updater' );
+	wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 }
