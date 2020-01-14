@@ -2063,3 +2063,10 @@ function wc_update_390_change_geolocation_database_update_cron() {
 	wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 	wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 }
+
+/**
+ * Update DB version.
+ */
+function wc_update_390_db_version() {
+	WC_Install::update_db_version( '3.9.0' );
+}
