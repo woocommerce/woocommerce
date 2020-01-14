@@ -137,6 +137,7 @@ class WC_Install {
 		),
 		'3.9.0' => array(
 			'wc_update_390_remove_maxmind_database',
+			'wc_update_390_change_geolocation_database_update_cron',
 		),
 	);
 
@@ -424,6 +425,10 @@ class WC_Install {
 			'interval' => 2635200,
 			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
+		$schedules['fifteendays'] = array(
+			'interval' => 1296000,
+			'display'  => __( 'Every 15 Days', 'woocommerce' ),
+		);
 		return $schedules;
 	}
 
@@ -452,11 +457,8 @@ class WC_Install {
 		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
-		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', ' woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
-
-		// Trigger GeoIP updater action after 1 minute.
-		wp_schedule_single_event( time() + ( MINUTE_IN_SECONDS * 1 ), 'woocommerce_geoip_updater' );
 	}
 
 	/**
