@@ -454,6 +454,11 @@ class WC_Admin_Notices {
 	 * @since 3.9.0
 	 */
 	public static function maxmind_missing_license_key_notice() {
+		if ( ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true ) ) {
+			self::remove_notice( 'maxmind_license_key' );
+			return;
+		}
+
 		if ( get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true ) ) {
 			self::remove_notice( 'maxmind_license_key' );
 			return;
