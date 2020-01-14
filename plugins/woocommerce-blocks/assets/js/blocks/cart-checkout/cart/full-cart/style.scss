@@ -60,16 +60,16 @@ table.wc-block-cart-items {
 }
 
 .wc-block-cart-item__low-stock-badge {
-	span {
-		background-color: $white;
-		border-radius: 3px;
-		border: 1px solid $black;
-		color: $black;
-		font-size: 12px;
-		padding: 0 1em;
-		text-transform: uppercase;
-		white-space: nowrap;
-	}
+	display: inline-block;
+
+	background-color: $white;
+	border-radius: 3px;
+	border: 1px solid $black;
+	color: $black;
+	font-size: 12px;
+	padding: 0 1em;
+	text-transform: uppercase;
+	white-space: nowrap;
 }
 
 .wc-block-cart-item__product-metadata {
