@@ -164,7 +164,7 @@ class WC_Geolocation {
 		$geolocation  = apply_filters(
 			'woocommerce_get_geolocation',
 			array(
-				'country'  => $country_code ? $country_code : '',
+				'country'  => $country_code,
 				'state'    => '',
 				'city'     => '',
 				'postcode' => '',
@@ -173,13 +173,13 @@ class WC_Geolocation {
 		);
 
 		// If we still haven't found a country code, let's consider doing an API lookup.
-		if ( false === $geolocation['country'] && $api_fallback ) {
+		if ( '' === $geolocation['country'] && $api_fallback ) {
 			$geolocation['country'] = self::geolocate_via_api( $ip_address );
 		}
 
 		// It's possible that we're in a local environment, in which case the geolocation needs to be done from the
 		// external address.
-		if ( false === $geolocation['country'] && $fallback ) {
+		if ( '' === $geolocation['country'] && $fallback ) {
 			$external_ip_address = self::get_external_ip_address();
 
 			// Only bother with this if the external IP differs.
