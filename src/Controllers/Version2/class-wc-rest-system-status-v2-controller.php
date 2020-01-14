@@ -71,7 +71,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$schema   = $this->get_item_schema();
 		$fields   = $this->get_fields_for_response( $request );
 		$mappings = $this->get_item_mappings_per_fields( $fields );
 		$response = $this->prepare_item_for_response( $mappings, $request );
@@ -650,7 +649,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		global $wpdb;
 
 		$enable_remote_post = $this->check_if_field_item_exists( 'environment', array( 'remote_post_successful', 'remote_post_response' ), $fields );
-		$enable_remote_get  = $this->check_if_field_item_exists( 'environment', array( 'remote_post_successful', 'remote_post_response' ), $fields );
+		$enable_remote_get  = $this->check_if_field_item_exists( 'environment', array( 'remote_get_successful', 'remote_get_response' ), $fields );
 
 		// Figure out cURL version, if installed.
 		$curl_version = '';
