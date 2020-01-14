@@ -171,7 +171,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'    => __( 'Default customer location', 'woocommerce' ),
 					'id'       => 'woocommerce_default_customer_address',
 					'desc_tip' => __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
-					'default'  => 'geolocation',
+					'default'  => 'base',
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
 					'options'  => array(
