@@ -435,25 +435,6 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			</td>
 		</tr>
 
-		<?php if ( $settings['geolocation_enabled'] ) { ?>
-			<tr>
-				<td data-export-label="MaxMind GeoIP Database"><?php esc_html_e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-				<td>
-					<?php
-					if ( version_compare( $environment['php_version'], '5.4', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( __( 'MaxMind GeoIP database requires at least PHP 5.4.', 'woocommerce' ) ) . '</mark>';
-					} elseif ( file_exists( $database['maxmind_geoip_database'] ) ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
-					} else {
-						/* Translators: %1$s: Library url, %2$s: install path. */
-						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "MaxMind DB binary, gzipped" file next to "GeoLite2 Country". Please remember to uncompress GeoLite2-Country_xxxxxxxx.tar.gz and upload the GeoLite2-Country.mmdb file only.', 'woocommerce' ), '<a href="https://dev.maxmind.com/geoip/geoip2/geolite2/">https://dev.maxmind.com/geoip/geoip2/geolite2/</a>', '<code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code>' ) . '</mark>', esc_html( WC_LOG_DIR ) );
-					}
-					?>
-				</td>
-			</tr>
-		<?php } ?>
-
 		<?php if ( ! empty( $database['database_size'] ) && ! empty( $database['database_tables'] ) ) : ?>
 			<tr>
 				<td><?php esc_html_e( 'Total Database Size', 'woocommerce' ); ?></td>
