@@ -79,7 +79,11 @@ const webpackConfig = {
 			'node_modules',
 		],
 		alias: {
-			'gutenberg-components': path.resolve( __dirname, 'node_modules/@wordpress/components/src' ),
+			'gutenberg-components': path.resolve( __dirname, '../../../node_modules/@wordpress/components/src' ),
+			'@woocommerce/wc-admin-settings': path.resolve(
+				__dirname,
+				'../../../client/settings/index.js'
+			),
 		},
 	},
 	plugins: [
