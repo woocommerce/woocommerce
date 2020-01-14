@@ -136,25 +136,50 @@ class WC_Geolocation {
 	 * @return array
 	 */
 	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
+		// Filter to allow custom geolocation of the IP address.
+		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
+
+		if ( false !== $country_code ) {
+			return array(
+				'country'  => $country_code,
+				'state'    => '',
+				'city'     => '',
+				'postcode' => '',
+			);
+		}
+
 		if ( empty( $ip_address ) ) {
 			$ip_address = self::get_ip_address();
 		}
 
 		$country_code = self::get_country_code_from_headers();
 
-		if ( false === $country_code ) {
-			// Filter to allow custom geolocation of the IP address.
-			$country_code = apply_filters( 'woocommerce_geolocate_ip', $country_code, $ip_address, $fallback, $api_fallback );
-		}
+		/**
+		 * Get geolocation filter.
+		 *
+		 * @since 3.9.0
+		 * @param array  $geolocation Geolocation data, including country, state, city, and postcode.
+		 * @param string $ip_address  IP Address.
+		 */
+		$geolocation  = apply_filters(
+			'woocommerce_get_geolocation',
+			array(
+				'country'  => $country_code,
+				'state'    => '',
+				'city'     => '',
+				'postcode' => '',
+			),
+			$ip_address
+		);
 
 		// If we still haven't found a country code, let's consider doing an API lookup.
-		if ( false === $country_code && $api_fallback ) {
-			$country_code = self::geolocate_via_api( $ip_address );
+		if ( false === $geolocation['country'] && $api_fallback ) {
+			$geolocation['country'] = self::geolocate_via_api( $ip_address );
 		}
 
 		// It's possible that we're in a local environment, in which case the geolocation needs to be done from the
 		// external address.
-		if ( false === $country_code && $fallback ) {
+		if ( false === $geolocation['country'] && $fallback ) {
 			$external_ip_address = self::get_external_ip_address();
 
 			// Only bother with this if the external IP differs.
@@ -164,8 +189,10 @@ class WC_Geolocation {
 		}
 
 		return array(
-			'country' => $country_code ? $country_code : '',
-			'state'   => '',
+			'country'  => $geolocation['country'],
+			'state'    => $geolocation['state'],
+			'city'     => $geolocation['city'],
+			'postcode' => $geolocation['postcode'],
 		);
 	}
 
