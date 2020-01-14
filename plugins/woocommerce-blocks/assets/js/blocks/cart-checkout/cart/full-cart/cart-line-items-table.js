@@ -10,9 +10,19 @@ import PropTypes from 'prop-types';
 import CartLineItemRow from './cart-line-item-row';
 
 const CartLineItemsTable = ( { lineItems = [] } ) => {
-	const products = lineItems.map( ( lineItem ) => (
-		<CartLineItemRow key={ lineItem.key } lineItem={ lineItem } />
-	) );
+	const products = lineItems.map( ( lineItemRaw ) => {
+		// convert low stock prop into camelCase
+		const {
+			low_stock_remaining: lowStockRemaining,
+			...lineItem
+		} = lineItemRaw;
+		return (
+			<CartLineItemRow
+				key={ lineItem.key }
+				lineItem={ { lowStockRemaining, ...lineItem } }
+			/>
+		);
+	} );
 
 	return (
 		<table className="wc-block-cart-items">
