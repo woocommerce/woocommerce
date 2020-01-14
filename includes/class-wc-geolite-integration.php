@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Geolite integration class.
+ *
+ * @deprecated 3.9.0
  */
 class WC_Geolite_Integration {
 
@@ -47,8 +49,11 @@ class WC_Geolite_Integration {
 	 *
 	 * @param string $ip_address User IP address.
 	 * @return string
+	 * @deprecated 3.9.0
 	 */
 	public function get_country_iso( $ip_address ) {
+		wc_deprecated_function( 'get_country_iso', '3.9.0' );
+
 		$iso_code = '';
 
 		try {
