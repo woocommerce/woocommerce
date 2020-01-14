@@ -42,7 +42,7 @@ export class SelectControl extends Component {
 		this.decrementSelectedIndex = this.decrementSelectedIndex.bind( this );
 		this.incrementSelectedIndex = this.incrementSelectedIndex.bind( this );
 		this.onAutofillChange = this.onAutofillChange.bind( this );
-		this.updateFilteredOptions = debounce( this.updateFilteredOptions, props.searchDebounceTime );
+		this.updateFilteredOptions = debounce( this.updateFilteredOptions.bind( this ), props.searchDebounceTime );
 		this.search = this.search.bind( this );
 		this.selectOption = this.selectOption.bind( this );
 		this.setExpanded = this.setExpanded.bind( this );
@@ -292,6 +292,7 @@ export class SelectControl extends Component {
 					onSearch={ this.search }
 					selected={ this.getSelected() }
 					setExpanded={ this.setExpanded }
+					updateFilteredOptions={ this.updateFilteredOptions }
 					decrementSelectedIndex={ this.decrementSelectedIndex }
 					incrementSelectedIndex={ this.incrementSelectedIndex }
 				/>
@@ -427,6 +428,10 @@ SelectControl.propTypes = {
 	 */
 	hideBeforeSearch: PropTypes.bool,
 	/**
+	 * Show all options on focusing, even if a query exists.
+	 */
+	showAllOnFocus: PropTypes.bool,
+	/**
 	 * Render results list positioned statically instead of absolutely.
 	 */
 	staticList: PropTypes.bool,
@@ -446,6 +451,7 @@ SelectControl.defaultProps = {
 	searchDebounceTime: 0,
 	searchInputType: 'search',
 	selected: [],
+	showAllOnFocus: false,
 	showClearButton: false,
 	hideBeforeSearch: false,
 	staticList: false,

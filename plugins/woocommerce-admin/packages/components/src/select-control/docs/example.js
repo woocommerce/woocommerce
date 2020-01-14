@@ -56,6 +56,7 @@ export default withState( {
 	simpleSelected: [],
 	simpleMultipleSelected: [],
 	singleSelected: [],
+	singleSelectedShowAll: [],
 	multipleSelected: [],
 	inlineSelected: [],
 } )(
@@ -63,6 +64,7 @@ export default withState( {
 		simpleSelected,
 		simpleMultipleSelected,
 		singleSelected,
+		singleSelectedShowAll,
 		multipleSelected,
 		inlineSelected,
 		setState,
@@ -92,6 +94,16 @@ export default withState( {
 				options={ options }
 				placeholder="Start typing to filter options..."
 				selected={ singleSelected }
+			/>
+			<br />
+			<SelectControl
+				label="Single value searchable with options on refocus"
+				isSearchable
+				onChange={ selected => setState( { singleSelectedShowAll: selected } ) }
+				options={ options }
+				placeholder="Start typing to filter options..."
+				selected={ singleSelectedShowAll }
+				showAllOnFocus
 			/>
 			<br />
 			<SelectControl

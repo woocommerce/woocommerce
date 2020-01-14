@@ -178,6 +178,7 @@ export function StoreAddress( props ) {
 				required
 				options={ countryStateOptions }
 				excludeSelectedOptions={ false }
+				showAllOnFocus
 				isSearchable
 				{ ...getInputProps( 'countryState' ) }
 				controlClassName={ getInputProps( 'countryState' ).className }
