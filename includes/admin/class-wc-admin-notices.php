@@ -431,7 +431,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Add MaxMind MIssing license key notice.
+	 * Add MaxMind missing license key notice.
 	 *
 	 * @since 3.9.0
 	 */
@@ -449,7 +449,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Display MaxMind Missing license key notice.
+	 * Display MaxMind missing license key notice.
 	 *
 	 * @since 3.9.0
 	 */
