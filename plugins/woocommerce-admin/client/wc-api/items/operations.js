@@ -117,8 +117,19 @@ function updateLocally( resourceNames, data ) {
 		return updateableTypes.includes( getResourcePrefix( name ) );
 	} );
 
+	const lowStockResourceName = getResourceName( 'items-query-products', {
+		page: 1,
+		per_page: 1,
+		low_in_stock: true,
+		status: 'publish',
+	} );
+
 	return filteredNames.map( async resourceName => {
-		return { [ resourceName ]: { data: data[ resourceName ] } };
+		return {
+			[ resourceName ]: { data: data[ resourceName ] },
+			// Force low stock products to be re-fetched after updating an item.
+			[ lowStockResourceName ]: { lastReceived: null },
+		};
 	} );
 }
 

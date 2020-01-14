@@ -88,7 +88,7 @@ export function getUnapprovedReviews( select ) {
 }
 
 export function getUnreadStock( select ) {
-	const { getItems, getItemsError, getItemsTotalCount, isGetItemsRequesting } = select( 'wc-api' );
+	const { getItems, getItemsError, getItemsTotalCount } = select( 'wc-api' );
 	const productsQuery = {
 		page: 1,
 		per_page: 1,
@@ -98,9 +98,8 @@ export function getUnreadStock( select ) {
 	getItems( 'products', productsQuery );
 	const lowInStockCount = getItemsTotalCount( 'products', productsQuery );
 	const isError = Boolean( getItemsError( 'products', productsQuery ) );
-	const isRequesting = isGetItemsRequesting( 'products', productsQuery );
 
-	if ( isError || isRequesting ) {
+	if ( isError ) {
 		return null;
 	}
 
