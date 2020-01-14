@@ -20,6 +20,7 @@ export const previewCartItems = [
 		description: __( 'Warm hat for winter' ),
 		sku: 'woo-beanie',
 		permalink: 'https://example.org',
+		low_stock_remaining: 2,
 		images: [
 			{
 				id: 10,

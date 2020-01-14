@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
@@ -21,7 +21,15 @@ const ProductVariationDetails = ( { variation } ) => {
 };
 
 const CartLineItemRow = ( { lineItem } ) => {
-	const { name, description, images, variation, quantity, totals } = lineItem;
+	const {
+		name,
+		description,
+		images,
+		variation,
+		quantity,
+		lowStockRemaining,
+		totals,
+	} = lineItem;
 	const { line_total: total, line_subtotal: subtotal } = totals;
 
 	const imageProps = {};
@@ -54,6 +62,18 @@ const CartLineItemRow = ( { lineItem } ) => {
 		);
 	};
 
+	const lowStockBadge = lowStockRemaining ? (
+		<div className="wc-block-cart-item__low-stock-badge">
+			<span>
+				{ sprintf(
+					/* translators: %s stock amount (number of items in stock for product) */
+					__( '%s left in stock', 'woo-gutenberg-products-block' ),
+					lowStockRemaining
+				) }
+			</span>
+		</div>
+	) : null;
+
 	return (
 		<tr>
 			<td className="wc-block-cart-item__product">
@@ -63,6 +83,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 						<div className="wc-block-cart-item__product-name">
 							{ name }
 						</div>
+						{ lowStockBadge }
 						<div className="wc-block-cart-item__product-metadata">
 							{ description }
 							<ProductVariationDetails variation={ variation } />
@@ -98,6 +119,7 @@ CartLineItemRow.propTypes = {
 		description: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
 		quantity: PropTypes.number.isRequired,
+		lowStockRemaining: PropTypes.number,
 		variation: PropTypes.arrayOf(
 			PropTypes.shape( {
 				attribute: PropTypes.string.isRequired,
