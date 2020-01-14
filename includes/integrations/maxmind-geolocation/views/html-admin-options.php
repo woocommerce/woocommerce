@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 			<fieldset>
 				<legend class="screen-reader-text"><span><?php esc_html_e( 'Database File Path', 'woocommerce' ); ?></span></legend>
 				<input class="input-text regular-input" type="text" value="<?php echo esc_attr( $this->database_service->get_database_path() ); ?>" readonly>
-				<p class="description"><?php esc_html_e( 'The path to the MaxMind database file that was downloaded by the integration.', 'woocommerce' ); ?></p>
+				<p class="description"><?php esc_html_e( 'The location that the MaxMind database should be stored. By default, the integration will automatically save the database here.', 'woocommerce' ); ?></p>
 			</fieldset>
 		</td>
 	</tr>
