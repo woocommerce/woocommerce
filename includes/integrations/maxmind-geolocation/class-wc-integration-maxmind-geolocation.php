@@ -62,9 +62,17 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 			'woocommerce_geolocation_update_database_periodically',
 			array( true ),
 			'3.9.0',
-			false,
-			'MaxMind\'s TOS requires that the databases be updated or removed periodically.'
+			'woocommerce_maxmind_geolocation_update_database_periodically'
 		);
+
+		/**
+		 * Allows for the automatic database update to be disabled.
+		 * Note that MaxMind's TOS requires that the databases be updated or removed periodically.
+		 *
+		 * @since 3.9.0
+		 * @param bool $bind_updater Whether or not the database should be updated periodically.
+		 */
+		$bind_updater = apply_filters( 'woocommerce_maxmind_geolocation_update_database_periodically', $bind_updater );
 
 		// Bind to the scheduled updater action.
 		if ( $bind_updater ) {
