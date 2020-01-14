@@ -76,6 +76,35 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	}
 
 	/**
+	 * Override the normal options so we can print the database file path to the admin,
+	 */
+	public function admin_options() {
+		parent::admin_options();
+
+		$database_path = esc_attr( $this->database_service->get_database_path() );
+		$label         = esc_html__( 'Database File Path', 'woocommerce' );
+		$description   = esc_html__( 'The path to the MaxMind database file that was downloaded by the integration.', 'woocommerce' );
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo <<<INPUT
+<table class="form-table">
+	<tr valign="top">
+		<th scope="row" class="titledesc">
+			<label>{$label}</label>
+		</th>
+		<td class="forminp">
+			<fieldset>
+				<legend class="screen-reader-text"><span>{$label}</span></legend>
+				<input class="input-text regular-input" type="text" value="{$database_path}" readonly>
+				<p class="description">{$description}</p>
+			</fieldset>
+		</td>
+	</tr>
+</table>
+INPUT;
+	}
+
+	/**
 	 * Initializes the settings fields.
 	 */
 	public function init_form_fields() {
