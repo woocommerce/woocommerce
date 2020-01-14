@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useState } from '@wordpress/element';
+import withComponentId from '@woocommerce/base-hocs/with-component-id';
 
 /**
  * Internal dependencies
@@ -13,6 +14,7 @@ import './style.scss';
 
 const TextInput = ( {
 	className,
+	componentId,
 	id,
 	type = 'text',
 	ariaLabel,
@@ -25,6 +27,8 @@ const TextInput = ( {
 } ) => {
 	const [ isActive, setIsActive ] = useState( false );
 	const onChangeValue = ( event ) => onChange( event.target.value );
+	const textInputId = id || componentId;
+
 	return (
 		<div
 			className={ classnames( 'wc-block-text-input', className, {
@@ -36,23 +40,28 @@ const TextInput = ( {
 				screenReaderLabel={ screenReaderLabel || label }
 				wrapperElement="label"
 				wrapperProps={ {
-					htmlFor: id,
+					htmlFor: textInputId,
 				} }
-				htmlFor={ id }
+				htmlFor={ textInputId }
 			/>
 			<input
 				type={ type }
-				id={ id }
+				id={ textInputId }
 				value={ value }
 				onChange={ onChangeValue }
 				onFocus={ () => setIsActive( true ) }
 				onBlur={ () => setIsActive( false ) }
 				aria-label={ ariaLabel || label }
 				disabled={ disabled }
-				aria-describedby={ !! help ? id + '__help' : undefined }
+				aria-describedby={
+					!! help ? textInputId + '__help' : undefined
+				}
 			/>
 			{ !! help && (
-				<p id={ id + '__help' } className="wc-block-text-input__help">
+				<p
+					id={ textInputId + '__help' }
+					className="wc-block-text-input__help"
+				>
 					{ help }
 				</p>
 			) }
@@ -71,4 +80,4 @@ TextInput.propTypes = {
 	help: PropTypes.string,
 };
 
-export default TextInput;
+export default withComponentId( TextInput );

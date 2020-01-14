@@ -126,7 +126,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 						>
 							<InputRow>
 								<TextInput
-									id="shipping-first-name"
 									label={ __(
 										'First name',
 										'woo-gutenberg-products-block'
@@ -140,7 +139,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 									}
 								/>
 								<TextInput
-									id="shipping-last-name"
 									label={ __(
 										'Surname',
 										'woo-gutenberg-products-block'
@@ -155,7 +153,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 								/>
 							</InputRow>
 							<TextInput
-								id="shipping-street-address"
 								label={ __(
 									'Street address',
 									'woo-gutenberg-products-block'
@@ -169,7 +166,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 								}
 							/>
 							<TextInput
-								id="shipping-apartment"
 								label={ __(
 									'Apartment, suite, etc.',
 									'woo-gutenberg-products-block'
@@ -184,7 +180,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 							/>
 							<InputRow>
 								<TextInput
-									id="shipping-country"
 									label={ __(
 										'Country',
 										'woo-gutenberg-products-block'
@@ -198,7 +193,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 									}
 								/>
 								<TextInput
-									id="shipping-city"
 									label={ __(
 										'City',
 										'woo-gutenberg-products-block'
@@ -214,7 +208,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 							</InputRow>
 							<InputRow>
 								<TextInput
-									id="shipping-county"
 									label={ __(
 										'County',
 										'woo-gutenberg-products-block'
@@ -228,7 +221,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 									}
 								/>
 								<TextInput
-									id="shipping-postal-code"
 									label={ __(
 										'Postal code',
 										'woo-gutenberg-products-block'
@@ -243,7 +235,6 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 								/>
 							</InputRow>
 							<TextInput
-								id="shipping-phone"
 								type="tel"
 								label={ __(
 									'Phone',
