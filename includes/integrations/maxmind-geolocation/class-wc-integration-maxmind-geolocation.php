@@ -72,7 +72,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		}
 
 		// Bind to the geolocation filter for MaxMind database lookups.
-		add_filter( 'woocommerce_geolocate_ip', array( $this, 'geolocate_ip' ), 10, 2 );
+		add_filter( 'woocommerce_get_geolocation', array( $this, 'get_geolocation' ), 10, 2 );
 	}
 
 	/**
@@ -196,22 +196,28 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	/**
 	 * Performs a geolocation lookup against the MaxMind database for the given IP address.
 	 *
-	 * @param string $country_code The country code for the IP address.
+	 * @param array  $data       Geolocation data.
 	 * @param string $ip_address The IP address to geolocate.
-	 * @return string The country code for the IP address.
+	 * @return array Geolocation including country code, state, city and postcode based on an IP address.
 	 */
-	public function geolocate_ip( $country_code, $ip_address ) {
-		if ( false !== $country_code ) {
-			return $country_code;
+	public function get_geolocation( $data, $ip_address ) {
+		// WooCommerce look for headers first, and at this moment could be just enough.
+		if ( ! empty( $data['country'] ) ) {
+			return $data;
 		}
 
 		if ( empty( $ip_address ) ) {
-			return $country_code;
+			return $data;
 		}
 
 		$country_code = $this->database_service->get_iso_country_code_for_ip( $ip_address );
 
-		return $country_code ? $country_code : false;
+		return array(
+			'country'  => $country_code ? $country_code : '',
+			'state'    => '',
+			'city'     => '',
+			'postcode' => '',
+		);
 	}
 
 	/**

@@ -77,18 +77,18 @@ class WC_Tests_MaxMind_Integration extends WC_Unit_Test_Case {
 	 * Make sure that the geolocate_ip method does not squash existing country codes.
 	 */
 	public function test_geolocate_ip_returns_existing_country_code() {
-		$country_code = ( new WC_Integration_MaxMind_Geolocation() )->geolocate_ip( 'US', '192.168.1.1' );
+		$data = ( new WC_Integration_MaxMind_Geolocation() )->get_geolocation( array( 'country' => 'US' ), '192.168.1.1' );
 
-		$this->assertEquals( 'US', $country_code );
+		$this->assertEquals( 'US', $data['country'] );
 	}
 
 	/**
 	 * Make sure that the geolocate_ip method does nothing if IP is not set.
 	 */
 	public function test_geolocate_ip_returns_empty_without_ip_address() {
-		$country_code = ( new WC_Integration_MaxMind_Geolocation() )->geolocate_ip( false, '' );
+		$data = ( new WC_Integration_MaxMind_Geolocation() )->get_geolocation( array(), '' );
 
-		$this->assertFalse( $country_code );
+		$this->assertEmpty( $data );
 	}
 
 	/**
@@ -100,9 +100,9 @@ class WC_Tests_MaxMind_Integration extends WC_Unit_Test_Case {
 			->with( '192.168.1.1' )
 			->willReturn( 'US' );
 
-		$country_code = ( new WC_Integration_MaxMind_Geolocation() )->geolocate_ip( false, '192.168.1.1' );
+		$data = ( new WC_Integration_MaxMind_Geolocation() )->get_geolocation( array(), '192.168.1.1' );
 
-		$this->assertEquals( 'US', $country_code );
+		$this->assertEquals( 'US', $data['country'] );
 	}
 
 	/**

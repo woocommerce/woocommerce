@@ -164,7 +164,7 @@ class WC_Geolocation {
 		$geolocation  = apply_filters(
 			'woocommerce_get_geolocation',
 			array(
-				'country'  => $country_code,
+				'country'  => $country_code ? $country_code : '',
 				'state'    => '',
 				'city'     => '',
 				'postcode' => '',
@@ -225,10 +225,10 @@ class WC_Geolocation {
 	 * Fetches the country code from the request headers, if one is available.
 	 *
 	 * @since 3.9.0
-	 * @return string|false The country code pulled from the headers, or false if one was not found.
+	 * @return string The country code pulled from the headers, or empty string if one was not found.
 	 */
 	private static function get_country_code_from_headers() {
-		$country_code = false;
+		$country_code = '';
 
 		$headers = array(
 			'MM_COUNTRY_CODE',
