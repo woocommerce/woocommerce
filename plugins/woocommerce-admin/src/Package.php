@@ -31,6 +31,12 @@ class Package {
 		if ( ! $wordpress_minimum_met ) {
 			return;
 		}
+
+		// Avoid double initialization when the feature plugin is in use.
+		if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+			return;
+		}
+
 		FeaturePlugin::instance()->init();
 	}
 
