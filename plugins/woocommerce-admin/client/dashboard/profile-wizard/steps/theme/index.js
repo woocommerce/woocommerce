@@ -145,6 +145,7 @@ class Theme extends Component {
 	renderTheme( theme ) {
 		const { demo_url, has_woocommerce_support, image, slug, title } = theme;
 		const { chosen } = this.state;
+		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 
 		return (
 			<Card className="woocommerce-profile-wizard__theme" key={ theme.slug }>
@@ -173,17 +174,26 @@ class Theme extends Component {
 						{ this.getThemeStatus( theme ) }
 					</p>
 					<div className="woocommerce-profile-wizard__theme-actions">
-						<Button
-							isPrimary
-							isDefault={ ! Boolean( demo_url ) }
-							onClick={ () => this.onChoose( theme, 'card' ) }
-							isBusy={ chosen === slug }
-						>
-							{ __( 'Choose', 'woocommerce-admin' ) }
-						</Button>
+						{ slug === activeTheme ? (
+							<Button
+								isPrimary
+								onClick={ () => this.onChoose( theme, 'card' ) }
+								isBusy={ chosen === slug }
+							>
+								{ __( 'Continue with my active theme', 'woocommerce-admin' ) }
+							</Button>
+						) : (
+							<Button
+								isDefault
+								onClick={ () => this.onChoose( theme, 'card' ) }
+								isBusy={ chosen === slug }
+							>
+								{ __( 'Choose', 'woocommerce-admin' ) }
+							</Button>
+						) }
 						{ demo_url && (
-							<Button isDefault onClick={ () => this.openDemo( theme ) }>
-								{ __( 'Live Demo', 'woocommerce-admin' ) }
+							<Button isTertiary onClick={ () => this.openDemo( theme ) }>
+								{ __( 'Live demo', 'woocommerce-admin' ) }
 							</Button>
 						) }
 					</div>

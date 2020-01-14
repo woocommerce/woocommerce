@@ -102,23 +102,27 @@
 
 	.woocommerce-profile-wizard__theme-actions {
 		button.components-button {
-			margin-top: 13px;
+			margin: 13px auto 0 auto;
 			display: block;
-			float: left;
 			width: auto;
 			min-width: 106px;
 			height: 40px;
 			line-height: 1;
-			margin-right: $gap-smaller;
 			box-shadow: none;
 
 			&.is-default {
 				border-color: $studio-pink-50;
 				color: $studio-pink-50;
+				background: transparent;
 			}
 
 			&.is-primary {
 				color: $studio-white;
+			}
+
+			&.is-tertiary {
+				font-size: 14px;
+				font-weight: 500;
 			}
 		}
 	}
