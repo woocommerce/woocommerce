@@ -565,7 +565,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 	</thead>
 	<tbody>
 		<?php
-		foreach ( $active_plugins as $plugin ) {
+		foreach ( $active_plugins as $plugin ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			if ( ! empty( $plugin['name'] ) ) {
 				$dirname = dirname( $plugin['plugin'] );
 
@@ -617,7 +617,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 	</thead>
 	<tbody>
 		<?php
-		foreach ( $inactive_plugins as $plugin ) {
+		foreach ( $inactive_plugins as $plugin ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			if ( ! empty( $plugin['name'] ) ) {
 				$dirname = dirname( $plugin['plugin'] );
 
@@ -696,7 +696,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		</thead>
 		<tbody>
 			<?php
-			foreach ( $dropins_mu_plugins['mu_plugins'] as $mu_plugin ) {
+			foreach ( $dropins_mu_plugins['mu_plugins'] as $mu_plugin ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				$plugin_name = esc_html( $mu_plugin['name'] );
 				if ( ! empty( $mu_plugin['url'] ) ) {
 					$plugin_name = '<a href="' . esc_url( $mu_plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
