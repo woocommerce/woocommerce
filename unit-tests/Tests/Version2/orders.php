@@ -175,7 +175,8 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 					array(
 						'method_id'    => 'flat_rate',
 						'method_title' => 'Flat rate',
-						'total'        => '10',
+						'total'        => '10.00',
+						'instance_id'  => '1',
 					),
 				),
 			)
@@ -208,6 +209,18 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
+		$shipping = current( $order->get_items( 'shipping' ) );
+		$expected = array(
+			'id'           => $shipping->get_id(),
+			'method_title' => $shipping->get_method_title(),
+			'method_id'    => $shipping->get_method_id(),
+			'instance_id'  => $shipping->get_instance_id(),
+			'total'        => wc_format_decimal( $shipping->get_total(), '' ),
+			'total_tax'    => wc_format_decimal( $shipping->get_total_tax(), '' ),
+			'taxes'        => array(),
+			'meta_data'    => $shipping->get_meta_data(),
+		);
+		$this->assertEquals( $expected, $data['shipping_lines'][0] );
 	}
 
 	/**
