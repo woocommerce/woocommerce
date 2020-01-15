@@ -36,7 +36,7 @@ This package is [hosted on Packagist](https://packagist.org/packages/woocommerce
 
 ```json
 "require": {
-    "woocommerce/woocommerce-rest-api": "1.0.0"
+    "woocommerce/woocommerce-rest-api": "1.0"
 },
 ```
 
