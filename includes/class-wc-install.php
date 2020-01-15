@@ -136,7 +136,7 @@ class WC_Install {
 			'wc_update_370_db_version',
 		),
 		'3.9.0' => array(
-			'wc_update_390_remove_maxmind_database',
+			'wc_update_390_move_maxmind_database',
 			'wc_update_390_change_geolocation_database_update_cron',
 			'wc_update_390_db_version',
 		),
