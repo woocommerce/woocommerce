@@ -153,7 +153,7 @@
     "grunt-checktextdomain": "1.0.1",
     "grunt-wp-i18n": "1.0.3",
     "husky": "2.7.0",
-    "lerna": "3.19.0",
+    "lerna": "3.20.2",
     "locutus": "2.0.11",
     "mini-css-extract-plugin": "0.9.0",
     "node-sass": "4.13.0",
