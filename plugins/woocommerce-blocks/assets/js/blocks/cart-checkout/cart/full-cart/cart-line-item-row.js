@@ -88,6 +88,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 				className={ className }
 				quantity={ lineQuantity }
 				onChange={ setLineQuantity }
+				itemName={ name }
 			/>
 		);
 	};
