@@ -2048,12 +2048,23 @@ function wc_update_370_db_version() {
 }
 
 /**
- * The TOS for MaxMind's databases require that they be deleted. Since we're making significant changes to
- * the location and function of the database downloads, let's remove the legacy database altogether.
+ * We've moved the MaxMind database to a new location, as per the TOS' requirement that the database not
+ * be publicly accessible.
  */
-function wc_update_390_remove_maxmind_database() {
-	// Make sure to remove the file using the path as it was previously defined in WC_Geolocation!
-	@unlink( WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+function wc_update_390_move_maxmind_database() {
+	// Make sure to use all of the correct filters to pull the local database path.
+	$old_path = apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', 2 );
+
+	// Generate a prefix for the old file and store it in the integration as it would expect it.
+	$prefix = wp_generate_password( 32, false );
+	update_option( 'woocommerce_maxmind_geolocation_settings', array( 'database_prefix' => $prefix ) );
+
+	// Generate the new path in the same way that the integration will.
+	$uploads_dir = wp_upload_dir();
+	$new_path    = trailingslashit( $uploads_dir['basedir'] ) . 'woocommerce_uploads/' . $prefix . '-GeoLite2-Country.mmdb';
+	$new_path    = apply_filters( 'woocommerce_geolocation_local_database_path', $new_path, 2 );
+
+	@rename( $old_path, $new_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 }
 
 /**
