@@ -44,9 +44,9 @@
 	"devDependencies": {
 		"@babel/core": "7.8.3",
 		"@babel/plugin-proposal-class-properties": "7.8.3",
-		"@octokit/graphql": "^4.3.1",
+		"@octokit/graphql": "4.3.1",
 		"@wordpress/babel-preset-default": "4.8.0",
-		"@wordpress/base-styles": "^1.1.0",
+		"@wordpress/base-styles": "1.1.0",
 		"@wordpress/blocks": "6.9.0",
 		"@wordpress/browserslist-config": "2.6.0",
 		"@wordpress/data-controls": "1.5.0",
@@ -102,7 +102,7 @@
 		"webpack-cli": "3.3.10",
 		"webpack-rtl-plugin": "2.0.0",
 		"yargs": "15.1.0",
-		"zenhub-api": "^0.2.0"
+		"zenhub-api": "0.2.0"
 	},
 	"engines": {
 		"node": "12.14.1",
