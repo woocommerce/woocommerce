@@ -454,12 +454,10 @@ class WC_Admin_Notices {
 	 * @since 3.9.0
 	 */
 	public static function maxmind_missing_license_key_notice() {
-		if ( ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true ) ) {
-			self::remove_notice( 'maxmind_license_key' );
-			return;
-		}
+		$user_dismissed_notice   = get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true );
+		$filter_dismissed_notice = ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true );
 
-		if ( get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true ) ) {
+		if ( $user_dismissed_notice || $filter_dismissed_notice ) {
 			self::remove_notice( 'maxmind_license_key' );
 			return;
 		}
