@@ -48,7 +48,7 @@ class WC_REST_Shipping_Zones_V2_Controller extends WC_REST_Shipping_Zones_Contro
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d-]+)', array(
+			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique ID for the resource.', 'woocommerce-rest-api' ),
