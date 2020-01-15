@@ -462,7 +462,11 @@ class WC_Install {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
-		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
+		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
+		// so it doesn't occur in the same request. WooCommerce Admin also schedules
+		// a daily cron that gets lost due to a race condition. WC_Privacy's background
+		// processing instance updates the cron schedule from within a cron job.
+		wp_schedule_event( time() + 10, 'daily', 'woocommerce_cleanup_personal_data' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
