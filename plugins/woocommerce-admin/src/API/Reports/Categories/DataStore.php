@@ -133,7 +133,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( false !== strpos( $order_by_clause, '_terms' ) ) {
 			$join = "JOIN {$wpdb->terms} AS _terms ON {$id_cell} = _terms.term_id";
 			if ( 'inner' === $from_arg ) {
-				$this->subquery->add_sql_clause( 'join', $join );
+				// Even though this is an (inner) JOIN, we're adding it as a `left_join` to
+				// affect its order in the query statement. The SqlQuery::$sql_filters variable
+				// determines the order in which joins are concatenated.
+				// See: https://github.com/woocommerce/woocommerce-admin/blob/1f261998e7287b77bc13c3d4ee2e84b717da7957/src/API/Reports/SqlQuery.php#L46-L50.
+				$this->subquery->add_sql_clause( 'left_join', $join );
 			} else {
 				$this->add_sql_clause( 'join', $join );
 			}
