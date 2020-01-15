@@ -73,7 +73,7 @@
 		"chalk": "3.0.0",
 		"classnames": "2.2.6",
 		"clean-webpack-plugin": "3.0.0",
-		"core-js": "3.6.2",
+		"core-js": "3.6.4",
 		"cross-env": "6.0.3",
 		"css-loader": "3.4.1",
 		"cssnano": "4.1.10",
