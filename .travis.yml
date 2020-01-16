@@ -39,7 +39,7 @@ matrix:
     php: 7.4
     script:
       - composer require wp-cli/i18n-command
-      - nvm install
+      - nvm install 10
       - npm install
       - npm run build
       - docker-compose up --build -d
