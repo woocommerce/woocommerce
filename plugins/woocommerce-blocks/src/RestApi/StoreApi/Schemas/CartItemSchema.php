@@ -31,13 +31,13 @@ class CartItemSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
-			'key'       => [
+			'key'               => [
 				'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'id'        => [
+			'id'                => [
 				'description' => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
@@ -47,7 +47,7 @@ class CartItemSchema extends AbstractSchema {
 					'validate_callback' => [ $this, 'product_id_exists' ],
 				],
 			],
-			'quantity'  => [
+			'quantity'          => [
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
@@ -56,26 +56,32 @@ class CartItemSchema extends AbstractSchema {
 					'sanitize_callback' => 'wc_stock_amount',
 				],
 			],
-			'name'      => [
+			'name'              => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'sku'       => [
+			'short_description' => [
+				'description' => __( 'Product short description or excerpt from full description.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'sku'               => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'permalink' => [
+			'permalink'         => [
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'images'    => [
+			'images'            => [
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -111,7 +117,7 @@ class CartItemSchema extends AbstractSchema {
 					],
 				],
 			],
-			'variation' => [
+			'variation'         => [
 				'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -131,7 +137,7 @@ class CartItemSchema extends AbstractSchema {
 					],
 				],
 			],
-			'totals'    => [
+			'totals'            => [
 				'description' => __( 'Item total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -189,16 +195,22 @@ class CartItemSchema extends AbstractSchema {
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'];
 
+		$short_description = apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : $product->get_description(), 400 );
+		$short_description = wp_filter_nohtml_kses( $short_description );
+		$short_description = strip_shortcodes( $short_description );
+		$short_description = normalize_whitespace( $short_description );
+
 		return [
-			'key'       => $cart_item['key'],
-			'id'        => $product->get_id(),
-			'quantity'  => wc_stock_amount( $cart_item['quantity'] ),
-			'name'      => $product->get_title(),
-			'sku'       => $product->get_sku(),
-			'permalink' => $product->get_permalink(),
-			'images'    => ( new ProductImages() )->images_to_array( $product ),
-			'variation' => $this->format_variation_data( $cart_item['variation'], $product ),
-			'totals'    => array_merge(
+			'key'               => $cart_item['key'],
+			'id'                => $product->get_id(),
+			'quantity'          => wc_stock_amount( $cart_item['quantity'] ),
+			'name'              => $product->get_title(),
+			'short_description' => $short_description,
+			'sku'               => $product->get_sku(),
+			'permalink'         => $product->get_permalink(),
+			'images'            => ( new ProductImages() )->images_to_array( $product ),
+			'variation'         => $this->format_variation_data( $cart_item['variation'], $product ),
+			'totals'            => array_merge(
 				$this->get_store_currency_response(),
 				[
 					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
