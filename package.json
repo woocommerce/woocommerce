@@ -29,7 +29,7 @@
     "babel-eslint": "10.0.3",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "commander": "3.0.2",
+    "commander": "4.1.0",
     "eslint-plugin-jest": "23.1.1",
     "config": "3.2.4",
     "cross-env": "6.0.3",
