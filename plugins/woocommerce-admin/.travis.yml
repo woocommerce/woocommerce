@@ -9,6 +9,9 @@ matrix:
   - name: "PHP 7.2 unit tests, PHP Coding standards check and JS tests"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_PHPCS=1 RUN_JS=1
+  - name: "PHP 7.2 unit tests, run in random order"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1
   - name: "PHP 7.1 unit tests"
     php: 7.1
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
@@ -18,6 +21,9 @@ matrix:
   - name: "PHP 5.6 unit tests"
     php: 5.6
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
+  allow_failures:
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1
 
 
 before_install:
