@@ -100,7 +100,7 @@
     "interpolate-components": "1.1.1",
     "marked": "0.8.0",
     "memoize-one": "5.1.1",
-    "prismjs": "1.17.1",
+    "prismjs": "1.19.0",
     "qs": "6.9.1",
     "react-click-outside": "3.0.1",
     "react-dates": "17.2.0",
