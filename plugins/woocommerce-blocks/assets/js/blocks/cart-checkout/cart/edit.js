@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockControls } from '@wordpress/block-editor';
-import { Disabled, Toolbar } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-import TextToolbarButton from '@woocommerce/block-components/text-toolbar-button';
+import { Disabled } from '@wordpress/components';
+import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { withFeedbackPrompt } from '@woocommerce/block-hocs';
+import ViewSwitcher from '@woocommerce/block-components/view-switcher';
 
 /**
  * Internal dependencies
@@ -19,42 +18,35 @@ import EmptyCart from './empty-cart';
  * Component to handle edit mode of "Cart Block".
  */
 const CartEditor = ( { className } ) => {
-	const [ isFullCartMode, setFullCartMode ] = useState( true );
-
-	const toggleFullCartMode = () => {
-		setFullCartMode( ! isFullCartMode );
-	};
-
-	const getBlockControls = () => {
-		return (
-			<BlockControls className="wc-block-cart-toolbar">
-				<Toolbar>
-					<TextToolbarButton
-						onClick={ toggleFullCartMode }
-						isToggled={ isFullCartMode }
-					>
-						{ __( 'Full Cart', 'woo-gutenberg-products-block' ) }
-					</TextToolbarButton>
-					<TextToolbarButton
-						onClick={ toggleFullCartMode }
-						isToggled={ ! isFullCartMode }
-					>
-						{ __( 'Empty Cart', 'woo-gutenberg-products-block' ) }
-					</TextToolbarButton>
-				</Toolbar>
-			</BlockControls>
-		);
-	};
-
 	return (
 		<div className={ className }>
-			{ getBlockControls() }
-			{ isFullCartMode && (
-				<Disabled>
-					<FullCart />
-				</Disabled>
-			) }
-			<EmptyCart hidden={ isFullCartMode } />
+			<ViewSwitcher
+				label={ __( 'Edit', 'woo-gutenberg-products-block' ) }
+				views={ [
+					{
+						value: 'full',
+						name: __( 'Full Cart', 'woo-gutenberg-products-block' ),
+					},
+					{
+						value: 'empty',
+						name: __(
+							'Empty Cart',
+							'woo-gutenberg-products-block'
+						),
+					},
+				] }
+				defaultView={ 'full' }
+				render={ ( currentView ) => (
+					<Fragment>
+						{ currentView === 'full' && (
+							<Disabled>
+								<FullCart />
+							</Disabled>
+						) }
+						<EmptyCart hidden={ currentView === 'full' } />
+					</Fragment>
+				) }
+			/>
 		</div>
 	);
 };
