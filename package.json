@@ -61,7 +61,7 @@
     "node-sass": "4.13.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "puppeteer": "2.0.0",
-    "puppeteer-utils": "github:Automattic/puppeteer-utils#5eca65b",
+    "puppeteer-utils": "github:Automattic/puppeteer-utils#cb825db",
     "stylelint": "12.0.1",
     "stylelint-config-wordpress": "16.0.0",
     "wp-textdomain": "^1.0.1"
