@@ -9,7 +9,7 @@
 class WC_Tests_Payment_Gateway extends WC_Unit_Test_Case {
 
 	/**
-	 * Setup, enable payment gatewars Cash on delivery and direct bank deposit.
+	 * Setup, enable payment gateways Cash on delivery and direct bank deposit.
 	 */
 	public function setUp() {
 		parent::setUp();
