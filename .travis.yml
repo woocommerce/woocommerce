@@ -39,6 +39,8 @@ matrix:
     php: 7.4
     script:
       - composer require wp-cli/i18n-command
+      - nvm install
+      - npm install
       - npm run build
       - docker-compose up --build -d
       - bash tests/bin/run-e2e-CI.sh
