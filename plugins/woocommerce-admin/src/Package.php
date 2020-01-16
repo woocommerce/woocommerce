@@ -32,6 +32,11 @@ class Package {
 			return;
 		}
 
+		// Indicate to the feature plugin that the core package exists.
+		if ( ! defined( 'WC_ADMIN_PACKAGE_EXISTS' ) ) {
+			define( 'WC_ADMIN_PACKAGE_EXISTS', true );
+		}
+
 		// Avoid double initialization when the feature plugin is in use.
 		if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 			return;

@@ -96,6 +96,12 @@ class FeaturePlugin {
 	 * @return void
 	 */
 	public function on_deactivation() {
+		// Don't clean up if the WooCommerce Admin package is in core.
+		// NOTE: Any future divergence from the core package will need to be accounted for here.
+		if ( defined( 'WC_ADMIN_PACKAGE_EXISTS' ) && WC_ADMIN_PACKAGE_EXISTS ) {
+			return;
+		}
+
 		// Check if we are deactivating due to dependencies not being satisfied.
 		// If WooCommerce is disabled we can't include files that depend upon it.
 		if ( ! $this->has_satisfied_dependencies() ) {
