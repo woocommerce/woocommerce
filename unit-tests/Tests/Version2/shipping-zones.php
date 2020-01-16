@@ -55,7 +55,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones', $routes );
-		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<id>[\d-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<id>[\d]+)', $routes );
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<id>[\d]+)/locations', $routes );
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<zone_id>[\d]+)/methods', $routes );
 		$this->assertArrayHasKey( '/wc/v2/shipping/zones/(?P<zone_id>[\d]+)/methods/(?P<instance_id>[\d]+)', $routes );
