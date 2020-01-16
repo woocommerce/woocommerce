@@ -88,7 +88,7 @@ const ProductImage = ( {
 					{ renderedSalesAndImage }
 				</a>
 			) : (
-				{ renderedSalesAndImage }
+				renderedSalesAndImage
 			) }
 		</div>
 	);
