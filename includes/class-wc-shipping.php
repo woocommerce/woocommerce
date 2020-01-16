@@ -294,12 +294,7 @@ class WC_Shipping {
 		}
 
 		$states = WC()->countries->get_states( $country );
-		if ( is_array( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
-			return false;
-		}
-
-		$postcode = wc_format_postcode( $package['destination']['postcode'], $country );
-		if ( ! WC_Validation::is_postcode( $postcode, $country ) ) {
+		if ( is_array( $states ) && ! empty( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
 			return false;
 		}
 

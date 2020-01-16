@@ -36,6 +36,7 @@ class WC_Admin_Notices {
 		'no_secure_connection'         => 'secure_connection_notice',
 		'wc_admin'                     => 'wc_admin_feature_plugin_notice',
 		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
 	);
 
 	/**
@@ -87,6 +88,7 @@ class WC_Admin_Notices {
 		self::add_wc_admin_feature_plugin_notice();
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
+		self::add_maxmind_missing_license_key_notice();
 	}
 
 	/**
@@ -426,6 +428,41 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
+	}
+
+	/**
+	 * Add MaxMind missing license key notice.
+	 *
+	 * @since 3.9.0
+	 */
+	public static function add_maxmind_missing_license_key_notice() {
+		$default_address = get_option( 'woocommerce_default_customer_address' );
+
+		if ( ! in_array( $default_address, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+			return;
+		}
+
+		$integration_options = get_option( 'woocommerce_maxmind_geolocation_settings' );
+		if ( empty( $integration_options['license_key'] ) ) {
+			self::add_notice( 'maxmind_license_key' );
+		}
+	}
+
+	/**
+	 * Display MaxMind missing license key notice.
+	 *
+	 * @since 3.9.0
+	 */
+	public static function maxmind_missing_license_key_notice() {
+		$user_dismissed_notice   = get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true );
+		$filter_dismissed_notice = ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true );
+
+		if ( $user_dismissed_notice || $filter_dismissed_notice ) {
+			self::remove_notice( 'maxmind_license_key' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-maxmind-license-key.php';
 	}
 
 	/**
