@@ -374,7 +374,7 @@ class WC_Order extends WC_Abstract_Order {
 
 					// Work out if this was for a payment, and trigger a payment_status hook instead.
 					if (
-						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ) ), true )
+						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this ), true )
 						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
 					) {
 						/**
