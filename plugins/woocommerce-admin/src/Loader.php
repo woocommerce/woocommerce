@@ -633,6 +633,7 @@ class Loader {
 			global $wp_locale;
 			// inject data not available via older versions of wc_blocks/woo.
 			$settings['orderStatuses'] = self::get_order_statuses( wc_get_order_statuses() );
+			$settings['stockStatuses'] = self::get_order_statuses( wc_get_product_stock_status_options() );
 			$settings['currency']      = self::get_currency_settings();
 			$settings['locale']        = [
 				'siteLocale'    => isset( $settings['siteLocale'] )
