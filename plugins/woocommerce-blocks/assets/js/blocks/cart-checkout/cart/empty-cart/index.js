@@ -25,6 +25,7 @@ const EmptyCart = ( { hidden } ) => {
 	return (
 		<div hidden={ hidden }>
 			<InnerBlocks
+				templateInsertUpdatesSelection={ false }
 				template={ [
 					[
 						'core/image',
