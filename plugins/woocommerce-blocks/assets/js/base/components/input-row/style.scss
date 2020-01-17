@@ -3,8 +3,10 @@
 	flex-wrap: wrap;
 	justify-content: space-between;
 
-	& > .wc-block-text-input {
+	> .wc-block-country-input,
+	> .wc-block-text-input {
 		margin-right: $gap-small;
+		flex-basis: 0;
 		flex-grow: 1;
 		margin-top: $gap;
 		&:last-child {
