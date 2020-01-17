@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { filter } from 'lodash';
+import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch } from '@wordpress/data';
 
@@ -38,8 +38,10 @@ class Shipping extends Component {
 			shippingZones: [],
 		};
 
+		// Cache active plugins to prevent removal mid-step.
+		const { activePlugins = [] } = getSetting( 'onboarding', {} );
+		this.activePlugins = activePlugins;
 		this.state = this.initialState;
-
 		this.completeStep = this.completeStep.bind( this );
 	}
 
@@ -150,18 +152,24 @@ class Shipping extends Component {
 		}
 	}
 
-	getSteps() {
+	getPluginsToActivate() {
 		const { countryCode, isJetpackConnected } = this.props;
-		let plugins = [];
+
+		const plugins = [];
 		if ( [ 'GB', 'CA', 'AU' ].includes( countryCode ) ) {
-			plugins = [ 'woocommerce-shipstation-integration' ];
+			plugins.push( 'woocommerce-shipstation-integration' );
 		} else if ( 'US' === countryCode ) {
-			plugins = [ 'woocommerce-services' ];
+			plugins.push( 'woocommerce-services' );
 
 			if ( ! isJetpackConnected ) {
 				plugins.push( 'jetpack' );
 			}
 		}
+		return difference( plugins, this.activePlugins );
+	}
+
+	getSteps() {
+		const pluginsToActivate = this.getPluginsToActivate();
 
 		const steps = [
 			{
@@ -190,7 +198,7 @@ class Shipping extends Component {
 				content: (
 					<ShippingRates
 						buttonText={
-							plugins.length
+							pluginsToActivate.length
 								? __( 'Proceed', 'woocommerce-admin' )
 								: __( 'Complete task', 'woocommerce-admin' )
 						}
@@ -204,7 +212,7 @@ class Shipping extends Component {
 			{
 				key: 'label_printing',
 				label: __( 'Enable shipping label printing', 'woocommerce-admin' ),
-				description: plugins.includes( 'woocommerce-shipstation-integration' )
+				description: pluginsToActivate.includes( 'woocommerce-shipstation-integration' )
 					? interpolateComponents( {
 							mixedString: __(
 								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
@@ -229,18 +237,24 @@ class Shipping extends Component {
 				content: (
 					<Plugins
 						onComplete={ () => {
-							recordEvent( 'tasklist_shipping_label_printing', { install: true, plugins } );
+							recordEvent( 'tasklist_shipping_label_printing', {
+								install: true,
+								pluginsToActivate,
+							} );
 							this.completeStep();
 						} }
 						onSkip={ () => {
-							recordEvent( 'tasklist_shipping_label_printing', { install: false, plugins } );
+							recordEvent( 'tasklist_shipping_label_printing', {
+								install: false,
+								pluginsToActivate,
+							} );
 							getHistory().push( getNewPath( {}, '/', {} ) );
 						} }
-						pluginSlugs={ plugins }
+						pluginSlugs={ pluginsToActivate }
 						{ ...this.props }
 					/>
 				),
-				visible: plugins.length,
+				visible: pluginsToActivate.length,
 			},
 			{
 				key: 'connect',
@@ -259,7 +273,7 @@ class Shipping extends Component {
 						} }
 					/>
 				),
-				visible: plugins.includes( 'jetpack' ),
+				visible: pluginsToActivate.includes( 'jetpack' ),
 			},
 		];
 

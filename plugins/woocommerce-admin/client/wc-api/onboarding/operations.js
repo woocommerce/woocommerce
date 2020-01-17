@@ -6,11 +6,13 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
+import { uniq } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { getResourceIdentifier, getResourceName } from '../utils';
+import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 import { JETPACK_NAMESPACE, WC_ADMIN_NAMESPACE } from '../constants';
 import { pluginNames } from './constants';
 
@@ -166,6 +168,11 @@ function activatePlugins( resourceNames, data, fetch ) {
 
 function activatePluginToResource( response, items ) {
 	const resourceName = 'plugin-activate';
+	const { activePlugins = [] } = getSetting( 'onboarding', {} );
+	setSetting( 'onboarding', {
+		...getSetting( 'onboarding', {} ),
+		activePlugins: uniq( [ ...activePlugins, ...items ] ),
+	} );
 
 	const resources = {
 		[ resourceName ]: { data: items },
@@ -258,6 +265,12 @@ function installPlugins( resourceNames, data, fetch ) {
 				},
 			} )
 				.then( response => {
+					const { installedPlugins = [] } = getSetting( 'onboarding', {} );
+					setSetting( 'onboarding', {
+						...getSetting( 'onboarding', {} ),
+						installedPlugins: uniq( [ ...installedPlugins, ...plugins ] ),
+					} );
+
 					return {
 						[ resourceName ]: { data: plugins },
 						[ getResourceName( resourceName, plugin ) ]: { data: response },
