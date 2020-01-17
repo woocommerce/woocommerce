@@ -76,7 +76,7 @@ const onboardingHomepageNotice = () => {
 
 		dispatch( 'core/notices' ).removeNotice( 'SAVE_POST_NOTICE_ID' );
 		dispatch( 'core/notices' ).createSuccessNotice(
-			__( 'Your homepage was published.', 'woocommerce-admin' ),
+			__( "🏠 Nice work creating your store's homepage!", 'woocommerce-admin' ),
 			{
 				id: 'WOOCOMMERCE_ONBOARDING_HOME_PAGE_NOTICE',
 				type: notificationType,
