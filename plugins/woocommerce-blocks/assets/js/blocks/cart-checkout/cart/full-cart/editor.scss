@@ -2,3 +2,22 @@
 	max-width: $cart-image-width;
 }
 
+.editor-styles-wrapper table.wc-block-cart-items th {
+	padding-bottom: 0.5rem;
+	padding-top: 0.5rem;
+}
+
+.editor-styles-wrapper table.wc-block-cart-items td {
+	border-top: 1px solid $core-grey-light-600;
+}
+
+.editor-styles-wrapper table th.wc-block-cart-items__header-total,
+.editor-styles-wrapper table td.wc-block-cart-item__total {
+	text-align: right;
+}
+
+@include breakpoint( "<782px" ) {
+	.editor-styles-wrapper table td.wc-block-cart-item__total {
+		vertical-align: bottom;
+	}
+}

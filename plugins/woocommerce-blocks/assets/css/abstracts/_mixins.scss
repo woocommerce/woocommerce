@@ -75,3 +75,18 @@
 	margin: unset;
 	overflow: hidden;
 }
+
+// Reset <button> style so we can use link style for action buttons.
+@mixin link-button() {
+	margin: 0;
+	padding: 0;
+	border: 0;
+
+	font-size: inherit;
+	font-weight: normal;
+
+	background: transparent;
+	&:hover {
+		background: transparent;
+	}
+}
