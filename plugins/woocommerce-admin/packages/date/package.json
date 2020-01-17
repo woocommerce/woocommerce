@@ -22,8 +22,8 @@
   "react-native": "src/index",
   "dependencies": {
     "@babel/runtime-corejs2": "7.8.3",
-    "@wordpress/date": "3.5.0",
-    "@wordpress/i18n": "3.6.1",
+    "@wordpress/date": "3.7.0",
+    "@wordpress/i18n": "3.8.0",
     "lodash": "4.17.15",
     "moment": "2.22.2"
   },

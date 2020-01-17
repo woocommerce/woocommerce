@@ -10,7 +10,7 @@ exports[`SplitButton it should render a simple split button 1`] = `
     type="button"
   />
   <div
-    className="woocommerce-split-button__menu"
+    className="components-dropdown woocommerce-split-button__menu"
   >
     <button
       aria-expanded={false}
@@ -50,7 +50,7 @@ exports[`SplitButton it should render a split button with Foo as main label 1`] 
     Foo
   </button>
   <div
-    className="woocommerce-split-button__menu"
+    className="components-dropdown woocommerce-split-button__menu"
   >
     <button
       aria-expanded={false}
@@ -88,7 +88,7 @@ exports[`SplitButton it should render a split button with a menu label 1`] = `
     type="button"
   />
   <div
-    className="woocommerce-split-button__menu"
+    className="components-dropdown woocommerce-split-button__menu"
   >
     <button
       aria-expanded={false}
@@ -132,7 +132,7 @@ exports[`SplitButton it should render a split button with isPrimary theme 1`] = 
     type="button"
   />
   <div
-    className="woocommerce-split-button__menu"
+    className="components-dropdown woocommerce-split-button__menu"
   >
     <button
       aria-expanded={false}
@@ -184,7 +184,7 @@ exports[`SplitButton it should render a split button with pencil as main button 
     </svg>
   </button>
   <div
-    className="woocommerce-split-button__menu"
+    className="components-dropdown woocommerce-split-button__menu"
   >
     <button
       aria-expanded={false}
