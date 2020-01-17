@@ -79,10 +79,10 @@ class ProductCategories extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/categories' );
 
-		$response   = $this->server->dispatch( $request );
-		$categories = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 4, count( $categories ) ); // Three created and `uncategorized`.
+		$this->assertEquals( 4, count( $data ) ); // Three created and `uncategorized`.
 	}
 
 	/**
@@ -120,10 +120,10 @@ class ProductCategories extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/categories/' . $this->categories['parent']['term_id'] );
 
 		$response = $this->server->dispatch( $request );
-		$category = $response->get_data();
+		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( $category['name'], 'Parent Category' );
-		$this->assertEquals( $category['parent'], 0 );
-		$this->assertEquals( $category['count'], 2 );
+		$this->assertEquals( $data['name'], 'Parent Category' );
+		$this->assertEquals( $data['parent'], 0 );
+		$this->assertEquals( $data['count'], 2 );
 	}
 }

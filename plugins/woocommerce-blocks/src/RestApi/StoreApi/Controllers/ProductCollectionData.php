@@ -140,7 +140,7 @@ class ProductCollectionData extends RestController {
 					$counts = $filters->get_attribute_counts( $filter_request, [ $taxonomy ] );
 
 					foreach ( $counts as $key => $value ) {
-						$data['attribute_counts'][] = [
+						$data['attribute_counts'][] = (object) [
 							'term'  => $key,
 							'count' => $value,
 						];
@@ -152,7 +152,7 @@ class ProductCollectionData extends RestController {
 				$counts = $filters->get_attribute_counts( $request, $taxonomy__and_queries );
 
 				foreach ( $counts as $key => $value ) {
-					$data['attribute_counts'][] = [
+					$data['attribute_counts'][] = (object) [
 						'term'  => $key,
 						'count' => $value,
 					];
@@ -166,7 +166,7 @@ class ProductCollectionData extends RestController {
 			$data['rating_counts'] = [];
 
 			foreach ( $counts as $key => $value ) {
-				$data['rating_counts'][] = [
+				$data['rating_counts'][] = (object) [
 					'rating' => $key,
 					'count'  => $value,
 				];

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\RestApi\StoreApi\Controllers;
 use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
 /**
  * Products Controller Tests.
@@ -19,13 +20,25 @@ class Products extends TestCase {
 	 * Setup test products data. Called before every test.
 	 */
 	public function setUp() {
+		global $wpdb;
+
 		parent::setUp();
 
 		wp_set_current_user( 0 );
 
-		$this->products = [];
+		$this->products    = [];
 		$this->products[0] = ProductHelper::create_simple_product( true );
 		$this->products[1] = ProductHelper::create_simple_product( true );
+
+		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $this->products[0]->get_id(), '', 'src' );
+		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
+		$this->products[0]->set_image_id( $image_id[0] );
+		$this->products[0]->save();
+
+		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $this->products[1]->get_id(), '', 'src' );
+		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
+		$this->products[1]->set_image_id( $image_id[0] );
+		$this->products[1]->save();
 	}
 
 	/**
@@ -49,14 +62,14 @@ class Products extends TestCase {
 		$this->assertEquals( $this->products[0]->get_title(), $data['name'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
-		$this->assertEquals( $this->products[0]->get_price(), $data['prices']['price'] / ( 10 ** $data['prices']['currency_minor_unit'] ) );
+		$this->assertEquals( $this->products[0]->get_price(), $data['prices']->price / ( 10 ** $data['prices']->currency_minor_unit ) );
 		$this->assertEquals( $this->products[0]->get_average_rating(), $data['average_rating'] );
 		$this->assertEquals( $this->products[0]->get_review_count(), $data['review_count'] );
 		$this->assertEquals( $this->products[0]->has_options(), $data['has_options'] );
 		$this->assertEquals( $this->products[0]->is_purchasable(), $data['is_purchasable'] );
 		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
-		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']['text'] );
-		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']['description'] );
+		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']->text );
+		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
 	}
 
@@ -116,22 +129,23 @@ class Products extends TestCase {
 	public function test_prepare_item_for_response() {
 		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Products();
 		$response   = $controller->prepare_item_for_response( $this->products[0], [] );
+		$data       = $response->get_data();
 
-		$this->assertArrayHasKey( 'id', $response->get_data() );
-		$this->assertArrayHasKey( 'name', $response->get_data() );
-		$this->assertArrayHasKey( 'variation', $response->get_data() );
-		$this->assertArrayHasKey( 'permalink', $response->get_data() );
-		$this->assertArrayHasKey( 'description', $response->get_data() );
-		$this->assertArrayHasKey( 'on_sale', $response->get_data() );
-		$this->assertArrayHasKey( 'sku', $response->get_data() );
-		$this->assertArrayHasKey( 'prices', $response->get_data() );
-		$this->assertArrayHasKey( 'average_rating', $response->get_data() );
-		$this->assertArrayHasKey( 'review_count', $response->get_data() );
-		$this->assertArrayHasKey( 'images', $response->get_data() );
-		$this->assertArrayHasKey( 'has_options', $response->get_data() );
-		$this->assertArrayHasKey( 'is_purchasable', $response->get_data() );
-		$this->assertArrayHasKey( 'is_in_stock', $response->get_data() );
-		$this->assertArrayHasKey( 'add_to_cart', $response->get_data() );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'name', $data );
+		$this->assertArrayHasKey( 'variation', $data );
+		$this->assertArrayHasKey( 'permalink', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'on_sale', $data );
+		$this->assertArrayHasKey( 'sku', $data );
+		$this->assertArrayHasKey( 'prices', $data );
+		$this->assertArrayHasKey( 'average_rating', $data );
+		$this->assertArrayHasKey( 'review_count', $data );
+		$this->assertArrayHasKey( 'images', $data );
+		$this->assertArrayHasKey( 'has_options', $data );
+		$this->assertArrayHasKey( 'is_purchasable', $data );
+		$this->assertArrayHasKey( 'is_in_stock', $data );
+		$this->assertArrayHasKey( 'add_to_cart', $data );
 	}
 
 	/**
@@ -169,5 +183,18 @@ class Products extends TestCase {
 		$this->assertArrayHasKey( 'attributes', $params );
 		$this->assertArrayHasKey( 'catalog_visibility', $params );
 		$this->assertArrayHasKey( 'rating', $params );
+	}
+
+	/**
+	 * Test schema matches responses.
+	 */
+	public function test_schema_matches_response() {
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Products();
+		$response   = $controller->prepare_item_for_response( $this->products[0], [] );
+		$schema     = $controller->get_item_schema();
+		$validate   = new ValidateSchema( $schema );
+
+		$diff = $validate->get_diff_from_object( $response->get_data() );
+		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}
 }

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\RestApi\StoreApi\Controllers;
 use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
 /**
  * Controller Tests.
@@ -23,7 +24,7 @@ class ProductCollectionData extends TestCase {
 
 		wp_set_current_user( 0 );
 
-		$this->products = [];
+		$this->products    = [];
 		$this->products[0] = ProductHelper::create_simple_product( false );
 		$this->products[0]->set_regular_price( 10 );
 		$this->products[0]->save();
@@ -32,31 +33,35 @@ class ProductCollectionData extends TestCase {
 		$this->products[1]->set_regular_price( 100 );
 		$this->products[1]->save();
 
-		wp_insert_comment( [
-			'comment_post_ID'      => $this->products[0]->get_id(),
-			'comment_author'       => 'admin',
-			'comment_author_email' => 'woo@woo.local',
-			'comment_author_url'   => '',
-			'comment_content'      => 'Good product.',
-			'comment_approved'     => 1,
-			'comment_type'         => 'review',
-			'comment_meta' => [
-				'rating' => 5,
+		wp_insert_comment(
+			[
+				'comment_post_ID'      => $this->products[0]->get_id(),
+				'comment_author'       => 'admin',
+				'comment_author_email' => 'woo@woo.local',
+				'comment_author_url'   => '',
+				'comment_content'      => 'Good product.',
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+				'comment_meta'         => [
+					'rating' => 5,
+				],
 			]
-		] );
+		);
 
-		wp_insert_comment( [
-			'comment_post_ID'      => $this->products[1]->get_id(),
-			'comment_author'       => 'admin',
-			'comment_author_email' => 'woo@woo.local',
-			'comment_author_url'   => '',
-			'comment_content'      => 'Another very good product.',
-			'comment_approved'     => 1,
-			'comment_type'         => 'review',
-			'comment_meta' => [
-				'rating' => 4,
+		wp_insert_comment(
+			[
+				'comment_post_ID'      => $this->products[1]->get_id(),
+				'comment_author'       => 'admin',
+				'comment_author_email' => 'woo@woo.local',
+				'comment_author_url'   => '',
+				'comment_content'      => 'Another very good product.',
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+				'comment_meta'         => [
+					'rating' => 4,
+				],
 			]
-		] );
+		);
 
 		\WC_Comments::clear_transients( $this->products[0]->get_id() );
 		\WC_Comments::clear_transients( $this->products[1]->get_id() );
@@ -93,9 +98,9 @@ class ProductCollectionData extends TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, $data['price_range']['currency_minor_unit'] );
-		$this->assertEquals( '1000', $data['price_range']['min_price'] );
-		$this->assertEquals( '10000', $data['price_range']['max_price'] );
+		$this->assertEquals( 2, $data['price_range']->currency_minor_unit );
+		$this->assertEquals( '1000', $data['price_range']->min_price );
+		$this->assertEquals( '10000', $data['price_range']->max_price );
 		$this->assertEquals( null, $data['attribute_counts'] );
 		$this->assertEquals( null, $data['rating_counts'] );
 	}
@@ -113,7 +118,7 @@ class ProductCollectionData extends TestCase {
 				[
 					'taxonomy'   => 'pa_size',
 					'query_type' => 'and',
-				]
+				],
 			]
 		);
 		$response = $this->server->dispatch( $request );
@@ -123,8 +128,8 @@ class ProductCollectionData extends TestCase {
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['rating_counts'] );
 
-		$this->assertArrayHasKey( 'term', $data['attribute_counts'][0] );
-		$this->assertArrayHasKey( 'count', $data['attribute_counts'][0] );
+		$this->assertObjectHasAttribute( 'term', $data['attribute_counts'][0] );
+		$this->assertObjectHasAttribute( 'count', $data['attribute_counts'][0] );
 	}
 
 	/**
@@ -139,16 +144,19 @@ class ProductCollectionData extends TestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['attribute_counts'] );
-		$this->assertEquals( [
+		$this->assertEquals(
 			[
-				'rating' => 4,
-				'count'  => 1,
+				(object) [
+					'rating' => 4,
+					'count'  => 1,
+				],
+				(object) [
+					'rating' => 5,
+					'count'  => 1,
+				],
 			],
-			[
-				'rating' => 5,
-				'count'  => 1,
-			]
-		], $data['rating_counts'] );
+			$data['rating_counts']
+		);
 	}
 
 	/**
@@ -176,5 +184,31 @@ class ProductCollectionData extends TestCase {
 		$this->assertArrayHasKey( 'calculate_price_range', $params );
 		$this->assertArrayHasKey( 'calculate_attribute_counts', $params );
 		$this->assertArrayHasKey( 'calculate_rating_counts', $params );
+	}
+
+	/**
+	 * Test schema matches responses.
+	 */
+	public function test_schema_matches_response() {
+		ProductHelper::create_variation_product();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductCollectionData();
+		$request    = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
+		$request->set_param( 'calculate_price_range', true );
+		$request->set_param(
+			'calculate_attribute_counts',
+			[
+				[
+					'taxonomy'   => 'pa_size',
+					'query_type' => 'and',
+				],
+			]
+		);
+		$request->set_param( 'calculate_rating_counts', true );
+		$response = $this->server->dispatch( $request );
+		$schema   = $controller->get_item_schema();
+		$validate = new ValidateSchema( $schema );
+
+		$diff = $validate->get_diff_from_object( $response->get_data() );
+		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}
 }

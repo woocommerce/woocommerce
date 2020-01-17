@@ -11,6 +11,8 @@ use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
 use \WC_Helper_Order as OrderHelper;
+use \WC_Helper_Coupon as CouponHelper;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
 /**
  * Cart Order Controller Tests.
@@ -95,16 +97,16 @@ class CartOrder extends TestCase {
 		$this->assertArrayHasKey( 'items', $data );
 		$this->assertArrayHasKey( 'totals', $data );
 
-		$this->assertEquals( 'Margaret', $data['billing_address']['first_name'] );
-		$this->assertEquals( 'Thatchcroft', $data['billing_address']['last_name'] );
-		$this->assertEquals( '123 South Street', $data['billing_address']['address_1'] );
-		$this->assertEquals( 'Apt 1', $data['billing_address']['address_2'] );
-		$this->assertEquals( 'Philadelphia', $data['billing_address']['city'] );
-		$this->assertEquals( 'PA', $data['billing_address']['state'] );
-		$this->assertEquals( '19123', $data['billing_address']['postcode'] );
-		$this->assertEquals( 'US', $data['billing_address']['country'] );
-		$this->assertEquals( 'test@test.com', $data['billing_address']['email'] );
-		$this->assertEquals( '', $data['billing_address']['phone'] );
+		$this->assertEquals( 'Margaret', $data['billing_address']->first_name );
+		$this->assertEquals( 'Thatchcroft', $data['billing_address']->last_name );
+		$this->assertEquals( '123 South Street', $data['billing_address']->address_1 );
+		$this->assertEquals( 'Apt 1', $data['billing_address']->address_2 );
+		$this->assertEquals( 'Philadelphia', $data['billing_address']->city );
+		$this->assertEquals( 'PA', $data['billing_address']->state );
+		$this->assertEquals( '19123', $data['billing_address']->postcode );
+		$this->assertEquals( 'US', $data['billing_address']->country );
+		$this->assertEquals( 'test@test.com', $data['billing_address']->email );
+		$this->assertEquals( '', $data['billing_address']->phone );
 
 		$this->assertEquals( 'checkout-draft', $data['status'] );
 		$this->assertEquals( 2, count( $data['items'] ) );
@@ -139,19 +141,38 @@ class CartOrder extends TestCase {
 		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartOrder();
 		$order      = OrderHelper::create_order();
 		$response   = $controller->prepare_item_for_response( $order, [] );
+		$data       = $response->get_data();
 
-		$this->assertArrayHasKey( 'id', $response->get_data() );
-		$this->assertArrayHasKey( 'number', $response->get_data() );
-		$this->assertArrayHasKey( 'status', $response->get_data() );
-		$this->assertArrayHasKey( 'order_key', $response->get_data() );
-		$this->assertArrayHasKey( 'created_via', $response->get_data() );
-		$this->assertArrayHasKey( 'prices_include_tax', $response->get_data() );
-		$this->assertArrayHasKey( 'events', $response->get_data() );
-		$this->assertArrayHasKey( 'customer', $response->get_data() );
-		$this->assertArrayHasKey( 'billing_address', $response->get_data() );
-		$this->assertArrayHasKey( 'shipping_address', $response->get_data() );
-		$this->assertArrayHasKey( 'customer_note', $response->get_data() );
-		$this->assertArrayHasKey( 'items', $response->get_data() );
-		$this->assertArrayHasKey( 'totals', $response->get_data() );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'number', $data );
+		$this->assertArrayHasKey( 'status', $data );
+		$this->assertArrayHasKey( 'order_key', $data );
+		$this->assertArrayHasKey( 'created_via', $data );
+		$this->assertArrayHasKey( 'prices_include_tax', $data );
+		$this->assertArrayHasKey( 'events', $data );
+		$this->assertArrayHasKey( 'customer', $data );
+		$this->assertArrayHasKey( 'billing_address', $data );
+		$this->assertArrayHasKey( 'shipping_address', $data );
+		$this->assertArrayHasKey( 'customer_note', $data );
+		$this->assertArrayHasKey( 'items', $data );
+		$this->assertArrayHasKey( 'totals', $data );
+	}
+
+	/**
+	 * Test schema matches responses.
+	 */
+	public function test_schema_matches_response() {
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartOrder();
+
+		$order  = OrderHelper::create_order();
+		$coupon = CouponHelper::create_coupon();
+		$order->apply_coupon( $coupon );
+
+		$response = $controller->prepare_item_for_response( $order, [] );
+		$schema   = $controller->get_item_schema();
+		$validate = new ValidateSchema( $schema );
+
+		$diff = $validate->get_diff_from_object( $response->get_data() );
+		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}
 }

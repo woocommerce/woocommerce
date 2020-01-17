@@ -97,25 +97,25 @@ class OrderSchema extends AbstractSchema {
 					],
 					'date_paid'          => [
 						'description' => __( "The date the order was paid, in the site's timezone.", 'woo-gutenberg-products-block' ),
-						'type'        => 'date-time',
+						'type'        => [ 'date-time', 'null' ],
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'date_paid_gmt'      => [
 						'description' => __( 'The date the order was paid, as GMT.', 'woo-gutenberg-products-block' ),
-						'type'        => 'date-time',
+						'type'        => [ 'date-time', 'null' ],
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'date_completed'     => [
 						'description' => __( "The date the order was completed, in the site's timezone.", 'woo-gutenberg-products-block' ),
-						'type'        => 'date-time',
+						'type'        => [ 'date-time', 'null' ],
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'date_completed_gmt' => [
 						'description' => __( 'The date the order was completed, as GMT.', 'woo-gutenberg-products-block' ),
-						'type'        => 'date-time',
+						'type'        => [ 'date-time', 'null' ],
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
@@ -268,7 +268,7 @@ class OrderSchema extends AbstractSchema {
 				],
 			],
 			'coupons'            => [
-				'description' => __( 'List of applied cart coupons.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'List of applied coupons.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -285,76 +285,6 @@ class OrderSchema extends AbstractSchema {
 				'items'       => [
 					'type'       => 'object',
 					'properties' => $this->force_schema_readonly( ( new OrderItemSchema() )->get_properties() ),
-				],
-			],
-			'shipping_lines'     => [
-				'description' => __( 'Shipping lines data.', 'woo-gutenberg-products-block' ),
-				'type'        => 'array',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-				'items'       => [
-					'type'       => 'object',
-					'properties' => [
-						'id'           => [
-							'description' => __( 'Item ID.', 'woo-gutenberg-products-block' ),
-							'type'        => 'integer',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'method_title' => [
-							'description' => __( 'Shipping method name.', 'woo-gutenberg-products-block' ),
-							'type'        => 'mixed',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'method_id'    => [
-							'description' => __( 'Shipping method ID.', 'woo-gutenberg-products-block' ),
-							'type'        => 'mixed',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'instance_id'  => [
-							'description' => __( 'Shipping instance ID.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'total'        => [
-							'description' => __( 'Line total (after discounts).', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'total_tax'    => [
-							'description' => __( 'Line total tax (after discounts).', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'taxes'        => [
-							'description' => __( 'Line taxes.', 'woo-gutenberg-products-block' ),
-							'type'        => 'array',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-							'items'       => [
-								'type'       => 'object',
-								'properties' => [
-									'id'    => [
-										'description' => __( 'Tax rate ID.', 'woo-gutenberg-products-block' ),
-										'type'        => 'integer',
-										'context'     => [ 'view', 'edit' ],
-										'readonly'    => true,
-									],
-									'total' => [
-										'description' => __( 'Tax total.', 'woo-gutenberg-products-block' ),
-										'type'        => 'string',
-										'context'     => [ 'view', 'edit' ],
-										'readonly'    => true,
-									],
-								],
-							],
-						],
-					],
 				],
 			],
 			'totals'             => [
@@ -461,8 +391,8 @@ class OrderSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( \WC_Order $order ) {
-		$order_item_schema = new OrderItemSchema();
-
+		$order_item_schema   = new OrderItemSchema();
+		$order_coupon_schema = new OrderCouponSchema();
 		return [
 			'id'                 => $order->get_id(),
 			'number'             => $order->get_order_number(),
@@ -470,14 +400,14 @@ class OrderSchema extends AbstractSchema {
 			'order_key'          => $order->get_order_key(),
 			'created_via'        => $order->get_created_via(),
 			'prices_include_tax' => $order->get_prices_include_tax(),
-			'events'             => $this->get_events( $order ),
-			'customer'           => [
+			'events'             => (object) $this->get_events( $order ),
+			'customer'           => (object) [
 				'customer_id'         => $order->get_customer_id(),
 				'customer_ip_address' => $order->get_customer_ip_address(),
 				'customer_user_agent' => $order->get_customer_user_agent(),
 			],
 			'customer_note'      => $order->get_customer_note(),
-			'billing_address'    => [
+			'billing_address'    => (object) [
 				'first_name' => $order->get_billing_first_name(),
 				'last_name'  => $order->get_billing_last_name(),
 				'company'    => $order->get_billing_company(),
@@ -490,7 +420,7 @@ class OrderSchema extends AbstractSchema {
 				'email'      => $order->get_billing_email(),
 				'phone'      => $order->get_billing_phone(),
 			],
-			'shipping_address'   => [
+			'shipping_address'   => (object) [
 				'first_name' => $order->get_shipping_first_name(),
 				'last_name'  => $order->get_shipping_last_name(),
 				'company'    => $order->get_shipping_company(),
@@ -501,8 +431,9 @@ class OrderSchema extends AbstractSchema {
 				'postcode'   => $order->get_shipping_postcode(),
 				'country'    => $order->get_shipping_country(),
 			],
+			'coupons'            => array_values( array_map( [ $order_coupon_schema, 'get_item_response' ], $order->get_items( 'coupon' ) ) ),
 			'items'              => array_values( array_map( [ $order_item_schema, 'get_item_response' ], $order->get_items( 'line_item' ) ) ),
-			'totals'             => array_merge(
+			'totals'             => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'total_items'        => $this->prepare_money_response( $order->get_subtotal(), wc_get_price_decimals() ),

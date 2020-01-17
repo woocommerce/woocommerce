@@ -98,7 +98,7 @@ class ProductSchema extends AbstractSchema {
 						],
 						'price_range'   => [
 							'description' => __( 'Price range, if applicable.', 'woo-gutenberg-products-block' ),
-							'type'        => 'object',
+							'type'        => [ 'object', 'null' ],
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 							'properties'  => [
@@ -138,23 +138,39 @@ class ProductSchema extends AbstractSchema {
 				'items'       => [
 					'type'       => 'object',
 					'properties' => [
-						'id'   => [
+						'id'        => [
 							'description' => __( 'Image ID.', 'woo-gutenberg-products-block' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
 						],
-						'src'  => [
-							'description' => __( 'Image URL.', 'woo-gutenberg-products-block' ),
+						'src'       => [
+							'description' => __( 'Full size image URL.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => [ 'view', 'edit' ],
 						],
-						'name' => [
+						'thumbnail' => [
+							'description' => __( 'Thumbnail URL.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'format'      => 'uri',
+							'context'     => [ 'view', 'edit' ],
+						],
+						'srcset'    => [
+							'description' => __( 'Thumbnail srcset for responsive images.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+						],
+						'sizes'     => [
+							'description' => __( 'Thumbnail sizes for responsive images.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+						],
+						'name'      => [
 							'description' => __( 'Image name.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 						],
-						'alt'  => [
+						'alt'       => [
 							'description' => __( 'Image alternative text.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
@@ -182,7 +198,7 @@ class ProductSchema extends AbstractSchema {
 			],
 			'low_stock_remaining' => [
 				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woo-gutenberg-products-block' ),
-				'type'        => 'integer',
+				'type'        => [ 'integer', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
@@ -224,7 +240,7 @@ class ProductSchema extends AbstractSchema {
 			'sku'                 => $product->get_sku(),
 			'description'         => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
 			'on_sale'             => $product->is_on_sale(),
-			'prices'              => $this->get_prices( $product ),
+			'prices'              => (object) $this->get_prices( $product ),
 			'average_rating'      => $product->get_average_rating(),
 			'review_count'        => $product->get_review_count(),
 			'images'              => ( new ProductImages() )->images_to_array( $product ),
@@ -232,7 +248,7 @@ class ProductSchema extends AbstractSchema {
 			'is_purchasable'      => $product->is_purchasable(),
 			'is_in_stock'         => $product->is_in_stock(),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
-			'add_to_cart'         => [
+			'add_to_cart'         => (object) [
 				'text'        => $product->add_to_cart_text(),
 				'description' => $product->add_to_cart_description(),
 			],
@@ -274,7 +290,7 @@ class ProductSchema extends AbstractSchema {
 	 * Get price range from certain product types.
 	 *
 	 * @param \WC_Product $product Product instance.
-	 * @return array|null
+	 * @return object|null
 	 */
 	protected function get_price_range( \WC_Product $product ) {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
@@ -283,7 +299,7 @@ class ProductSchema extends AbstractSchema {
 			$prices = $product->get_variation_prices( true );
 
 			if ( min( $prices['price'] ) !== max( $prices['price'] ) ) {
-				return [
+				return (object) [
 					'min_amount' => $this->prepare_money_response( min( $prices['price'] ), wc_get_price_decimals() ),
 					'max_amount' => $this->prepare_money_response( max( $prices['price'] ), wc_get_price_decimals() ),
 				];
@@ -301,7 +317,7 @@ class ProductSchema extends AbstractSchema {
 			}
 
 			if ( ! empty( $child_prices ) ) {
-				return [
+				return (object) [
 					'min_amount' => $this->prepare_money_response( min( $child_prices ), wc_get_price_decimals() ),
 					'max_amount' => $this->prepare_money_response( max( $child_prices ), wc_get_price_decimals() ),
 				];

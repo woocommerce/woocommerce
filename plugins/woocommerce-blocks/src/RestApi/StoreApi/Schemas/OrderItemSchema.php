@@ -50,19 +50,19 @@ class OrderItemSchema extends AbstractSchema {
 			],
 			'name'      => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
+				'type'        => [ 'string', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'sku'       => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
+				'type'        => [ 'string', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
 			'permalink' => [
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
+				'type'        => [ 'string', 'null' ],
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -75,30 +75,42 @@ class OrderItemSchema extends AbstractSchema {
 				'items'       => [
 					'type'       => 'object',
 					'properties' => [
-						'id'   => [
+						'id'        => [
 							'description' => __( 'Image ID.', 'woo-gutenberg-products-block' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
 						],
-						'src'  => [
-							'description' => __( 'Image URL.', 'woo-gutenberg-products-block' ),
+						'src'       => [
+							'description' => __( 'Full size image URL.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
 						],
-						'name' => [
+						'thumbnail' => [
+							'description' => __( 'Thumbnail URL.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'format'      => 'uri',
+							'context'     => [ 'view', 'edit' ],
+						],
+						'srcset'    => [
+							'description' => __( 'Thumbnail srcset for responsive images.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+						],
+						'sizes'     => [
+							'description' => __( 'Thumbnail sizes for responsive images.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+						],
+						'name'      => [
 							'description' => __( 'Image name.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
 						],
-						'alt'  => [
+						'alt'       => [
 							'description' => __( 'Image alternative text.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
 						],
 					],
 				],
@@ -173,9 +185,7 @@ class OrderItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Convert a WooCommerce cart item to an object suitable for the response.
-	 *
-	 * @todo Variation is stored to meta - how can we gather for response?
+	 * Convert an order item to an object suitable for the response.
 	 *
 	 * @param \WC_Order_Item_Product $line_item Order line item array.
 	 * @return array
@@ -190,9 +200,9 @@ class OrderItemSchema extends AbstractSchema {
 			'name'      => $has_product ? $product->get_title() : null,
 			'sku'       => $has_product ? $product->get_sku() : null,
 			'permalink' => $has_product ? $product->get_permalink() : null,
-			'images'    => $has_product ? ( new ProductImages() )->images_to_array( $product ) : null,
+			'images'    => $has_product ? ( new ProductImages() )->images_to_array( $product ) : [],
 			'variation' => $has_product ? $this->format_variation_data( $line_item, $product ) : [],
-			'totals'    => array_merge(
+			'totals'    => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'line_subtotal'     => $this->prepare_money_response( $line_item->get_subtotal(), wc_get_price_decimals() ),
@@ -239,7 +249,10 @@ class OrderItemSchema extends AbstractSchema {
 				$label = wc_attribute_label( $name, $product );
 			}
 
-			$return[ $label ] = $value;
+			$return[] = [
+				'attribute' => $label,
+				'value'     => $value,
+			];
 		}
 
 		return $return;

@@ -122,7 +122,7 @@ class CartShippingRateSchema extends AbstractSchema {
 			],
 			'price'         => [
 				'description' => __( 'Price of this shipping rate.', 'woo-gutenberg-products-block' ),
-				'type'        => 'boolean',
+				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
@@ -177,7 +177,7 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $package ) {
 		return [
-			'destination'    => [
+			'destination'    => (object) [
 				'address_1' => $package['destination']['address_1'],
 				'address_2' => $package['destination']['address_2'],
 				'city'      => $package['destination']['city'],
