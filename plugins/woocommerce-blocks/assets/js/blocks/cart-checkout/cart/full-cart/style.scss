@@ -28,6 +28,15 @@ table.wc-block-cart-items {
 	border-bottom: 1px solid $core-grey-light-600;
 }
 
+table.wc-block-cart-items th:first-child,
+table.wc-block-cart-items td:first-child {
+	padding-left: 0;
+}
+table.wc-block-cart-items th:last-child,
+table.wc-block-cart-items td:last-child {
+	padding-right: 0;
+}
+
 .wc-block-cart-items__header {
 	display: none;
 	text-transform: uppercase;
@@ -36,6 +45,25 @@ table.wc-block-cart-items {
 .wc-block-cart-items__header-quantity,
 .wc-block-cart-item__quantity {
 	width: 132px;
+}
+
+.wc-block-cart-item__remove-link {
+	@include link-button;
+
+	color: $core-grey-dark-400;
+	font-size: 14px;
+	line-height: 12px;
+	margin-top: 0.5em;
+	// Temporary - this is not yet a link or "link button".
+	// May not be needed when remove is hooked up to API properly.
+	text-decoration: underline;
+}
+
+.wc-block-cart-item__remove-icon {
+	@include link-button;
+
+	color: $core-grey-dark-400;
+	fill: currentColor;
 }
 
 .wc-block-cart-items__header-total,
@@ -91,7 +119,6 @@ table.wc-block-cart-items {
 }
 
 .wc-block-cart-item__total {
-	vertical-align: bottom;
 	font-size: 16px;
 	line-height: 19px;
 }
@@ -157,6 +184,31 @@ table.wc-block-cart-items {
 }
 
 @include breakpoint( "<782px" ) {
+	.wc-block-cart-items td {
+		&:first-child {
+			padding-left: 0;
+		}
+		&:last-child {
+			padding-right: 0;
+		}
+	}
+
+	.wc-block-cart-item__remove-link {
+		display: none;
+	}
+
+	.wc-block-cart-item__total {
+		// We position this td cell relative so we can use position: absolute for trash icon at top.
+		position: relative;
+	}
+
+	.wc-block-cart-item__remove-icon {
+		display: inline-block;
+		position: absolute;
+		top: $gap;
+		right: 0;
+	}
+
 	.wc-block-cart__totals-title {
 		display: none;
 	}
@@ -165,6 +217,10 @@ table.wc-block-cart-items {
 	.wc-block-cart-item__full-price {
 		// inline on mobile, so line prices are aligned vertically
 		display: inline-block;
+	}
+
+	.wc-block-cart-item__total {
+		vertical-align: bottom;
 	}
 
 	.wc-block-cart-item__discount-badge {
@@ -207,6 +263,14 @@ table.wc-block-cart-items {
 	}
 
 	.wc-block-cart-item__quantity-stacked {
+		display: none;
+	}
+
+	.wc-block-cart-item__remove-link {
+		display: block;
+	}
+
+	.wc-block-cart-item__remove-icon {
 		display: none;
 	}
 
