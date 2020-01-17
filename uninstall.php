@@ -32,10 +32,12 @@ if ( Constants::is_true( 'WC_REMOVE_ALL_DATA' ) ) {
 	 * Load core packages autoloader.
 	 */
 	if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
-		require __DIR__ . '/src/Autoloader.php';
+		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Install' ) ) {
+			require __DIR__ . '/src/Autoloader.php';
 
-		if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
-			return;
+			if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
+				return;
+			}
 		}
 
 		// Hook in WooCommerce Admin installation code.
