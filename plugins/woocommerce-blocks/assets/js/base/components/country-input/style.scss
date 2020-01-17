@@ -1,0 +1,52 @@
+.wc-block-country-input {
+	position: relative;
+	margin-top: $gap;
+
+	label {
+		position: absolute;
+		transform: translateX(#{$gap}) translateY(#{$gap-small});
+		transform-origin: top left;
+		transition: all 200ms ease;
+		font-size: 16px;
+		line-height: 22px;
+		color: $gray-50;
+		z-index: 1;
+
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	&.is-active label {
+		transform: translateX(#{$gap}) translateY(#{$gap-smallest}) scale(0.75);
+	}
+
+	.components-custom-select-control__button {
+		background-color: #fff;
+		font-size: 16px;
+		font-weight: normal;
+		height: 100%;
+		line-height: 1;
+		padding: $gap-large $gap $gap-smallest;
+		width: 100%;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: #fff;
+		}
+	}
+
+	.components-custom-select-control__menu {
+		background-color: #fff;
+		margin: 0;
+		max-height: 300px;
+		overflow: auto;
+	}
+
+	.components-custom-select-control__item {
+		font-size: 16px;
+		margin-left: 0;
+		padding-left: $gap;
+	}
+}

@@ -21,6 +21,7 @@
 .wc-block-text-input input[type="url"],
 .wc-block-text-input input[type="text"],
 .wc-block-text-input input[type="email"] {
+	background-color: #fff;
 	padding: $gap-small $gap;
 	border-radius: 4px;
 	border: 1px solid $input-border-gray;
@@ -32,6 +33,10 @@
 	box-sizing: border-box;
 	height: 48px;
 	color: $input-text-active;
+
+	&:focus {
+		background-color: #fff;
+	}
 }
 .wc-block-text-input.is-active input[type="tel"],
 .wc-block-text-input.is-active input[type="url"],

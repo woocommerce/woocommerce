@@ -125,6 +125,8 @@ const mainEntry = {
 	'block-error-boundary':
 		'./assets/js/base/components/block-error-boundary/style.scss',
 	'panel-style': './node_modules/@wordpress/components/src/panel/style.scss',
+	'custom-select-control-style':
+		'./node_modules/@wordpress/components/src/custom-select-control/style.scss',
 
 	// cart & checkout blocks
 	cart: './assets/js/blocks/cart-checkout/cart/index.js',

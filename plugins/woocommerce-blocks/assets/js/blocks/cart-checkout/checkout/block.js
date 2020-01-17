@@ -7,6 +7,7 @@ import FormStep from '@woocommerce/base-components/checkout/form-step';
 import CheckoutForm from '@woocommerce/base-components/checkout/form';
 import NoShipping from '@woocommerce/base-components/checkout/no-shipping';
 import TextInput from '@woocommerce/base-components/text-input';
+import { ShippingCountryInput } from '@woocommerce/base-components/country-input';
 import RadioControl from '@woocommerce/base-components/radio-control';
 import InputRow from '@woocommerce/base-components/input-row';
 import { CheckboxControl } from '@wordpress/components';
@@ -179,7 +180,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 								}
 							/>
 							<InputRow>
-								<TextInput
+								<ShippingCountryInput
 									label={ __(
 										'Country',
 										'woo-gutenberg-products-block'
