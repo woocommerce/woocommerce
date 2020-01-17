@@ -31,7 +31,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 		return [
 			'price_range'      => [
 				'description' => __( 'Min and max prices found in collection of products, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
-				'type'        => 'object',
+				'type'        => [ 'object', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'properties'  => array_merge(
@@ -54,7 +54,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 			],
 			'attribute_counts' => [
 				'description' => __( 'Returns number of products within attribute terms.', 'woo-gutenberg-products-block' ),
-				'type'        => 'array',
+				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'items'       => [
@@ -77,7 +77,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 			],
 			'rating_counts'    => [
 				'description' => __( 'Returns number of products with each average rating.', 'woo-gutenberg-products-block' ),
-				'type'        => 'array',
+				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'items'       => [
@@ -109,7 +109,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $data ) {
 		return [
-			'price_range'      => ! is_null( $data['min_price'] ) && ! is_null( $data['max_price'] ) ? array_merge(
+			'price_range'      => ! is_null( $data['min_price'] ) && ! is_null( $data['max_price'] ) ? (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'min_price' => $this->prepare_money_response( $data['min_price'], wc_get_price_decimals() ),

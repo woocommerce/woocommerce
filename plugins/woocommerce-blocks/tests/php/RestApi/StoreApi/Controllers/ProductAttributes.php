@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\RestApi\StoreApi\Controllers;
 use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
 /**
  * Product Attributes Controller Tests.
@@ -24,7 +25,7 @@ class ProductAttributes extends TestCase {
 		wp_set_current_user( 0 );
 
 		$color_attribute = ProductHelper::create_attribute( 'color', [ 'red', 'green', 'blue' ] );
-		$size_attribute = ProductHelper::create_attribute( 'size', [ 'small', 'medium', 'large' ] );
+		$size_attribute  = ProductHelper::create_attribute( 'size', [ 'small', 'medium', 'large' ] );
 
 		$this->attributes   = [];
 		$this->attributes[] = wc_get_attribute( $color_attribute['attribute_id'] );
@@ -94,12 +95,26 @@ class ProductAttributes extends TestCase {
 	public function test_prepare_item_for_response() {
 		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductAttributes();
 		$response   = $controller->prepare_item_for_response( $this->attributes[0], [] );
+		$data       = $response->get_data();
 
-		$this->assertArrayHasKey( 'id', $response->get_data() );
-		$this->assertArrayHasKey( 'name', $response->get_data() );
-		$this->assertArrayHasKey( 'slug', $response->get_data() );
-		$this->assertArrayHasKey( 'type', $response->get_data() );
-		$this->assertArrayHasKey( 'order', $response->get_data() );
-		$this->assertArrayHasKey( 'has_archives', $response->get_data() );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'name', $data );
+		$this->assertArrayHasKey( 'slug', $data );
+		$this->assertArrayHasKey( 'type', $data );
+		$this->assertArrayHasKey( 'order', $data );
+		$this->assertArrayHasKey( 'has_archives', $data );
+	}
+
+	/**
+	 * Test schema matches responses.
+	 */
+	public function test_schema_matches_response() {
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductAttributes();
+		$response   = $controller->prepare_item_for_response( $this->attributes[0], [] );
+		$schema     = $controller->get_item_schema();
+		$validate   = new ValidateSchema( $schema );
+
+		$diff = $validate->get_diff_from_object( $response->get_data() );
+		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}
 }

@@ -59,11 +59,11 @@ class ProductAttributes extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes' );
 
-		$response            = $this->server->dispatch( $request );
-		$response_attributes = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $response_attributes ) );
-		$attribute = $response_attributes[0];
+		$this->assertEquals( 2, count( $data ) );
+		$attribute = $data[0];
 		$this->assertArrayHasKey( 'id', $attribute );
 		$this->assertArrayHasKey( 'name', $attribute );
 		$this->assertArrayHasKey( 'slug', $attribute );
@@ -104,10 +104,10 @@ class ProductAttributes extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->contributor );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] );
 
-		$response  = $this->server->dispatch( $request );
-		$attribute = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( $this->attr_size['attribute_id'], $attribute['id'] );
-		$this->assertEquals( $this->attr_size['attribute_name'], $attribute['name'] );
+		$this->assertEquals( $this->attr_size['attribute_id'], $data['id'] );
+		$this->assertEquals( $this->attr_size['attribute_name'], $data['name'] );
 	}
 }

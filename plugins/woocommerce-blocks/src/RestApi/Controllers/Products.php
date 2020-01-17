@@ -219,7 +219,7 @@ class Products extends WC_REST_Products_Controller {
 			'has_options'    => $product->has_options(),
 			'is_purchasable' => $product->is_purchasable(),
 			'is_in_stock'    => $product->is_in_stock(),
-			'add_to_cart'    => [
+			'add_to_cart'    => (object) [
 				'text'        => $product->add_to_cart_text(),
 				'description' => $product->add_to_cart_description(),
 			],

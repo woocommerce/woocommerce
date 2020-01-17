@@ -106,11 +106,10 @@ class Products extends WC_REST_Unit_Test_Case {
 		sleep( 1 ); // So both products have different timestamps.
 		$product  = ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/blocks/products' ) );
-		$products = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-
-		$this->assertEquals( 6, count( $products ) );
+		$this->assertEquals( 6, count( $data ) );
 	}
 
 	/**
@@ -160,13 +159,13 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'orderby', 'price' );
 		$request->set_param( 'order', 'asc' );
 		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 6, count( $products ) );
+		$this->assertEquals( 6, count( $data ) );
 
-		$this->assertEquals( 'Dummy Product', $products[1]['name'] );
-		$this->assertEquals( '10', $products[1]['price'] );
+		$this->assertEquals( 'Dummy Product', $data[1]['name'] );
+		$this->assertEquals( '10', $data[1]['price'] );
 	}
 
 	/**
@@ -202,11 +201,11 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request      = new WP_REST_REQUEST( 'GET', '/wc/blocks/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 5, count( $products ) );
-		$this->assertEquals( 'Visible Product', $products[0]['name'] );
+		$this->assertEquals( 5, count( $data ) );
+		$this->assertEquals( 'Visible Product', $data[0]['name'] );
 
 		$query_params = array(
 			'catalog_visibility' => 'catalog',
@@ -216,11 +215,11 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request      = new WP_REST_REQUEST( 'GET', '/wc/blocks/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 6, count( $products ) );
-		$this->assertEquals( 'Dummy Product', $products[0]['name'] );
+		$this->assertEquals( 6, count( $data ) );
+		$this->assertEquals( 'Dummy Product', $data[0]['name'] );
 
 		$query_params = array(
 			'catalog_visibility' => 'search',
@@ -230,11 +229,11 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request      = new WP_REST_REQUEST( 'GET', '/wc/blocks/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 6, count( $products ) );
-		$this->assertEquals( 'Dummy Product', $products[0]['name'] );
+		$this->assertEquals( 6, count( $data ) );
+		$this->assertEquals( 'Dummy Product', $data[0]['name'] );
 
 		$query_params = array(
 			'catalog_visibility' => 'hidden',
@@ -242,11 +241,11 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request      = new WP_REST_REQUEST( 'GET', '/wc/blocks/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
-		$products = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $products ) );
-		$this->assertEquals( 'Hidden Product', $products[0]['name'] );
+		$this->assertEquals( 1, count( $data ) );
+		$this->assertEquals( 'Hidden Product', $data[0]['name'] );
 	}
 
 	/**
@@ -263,11 +262,11 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'category_operator', 'in' );
 
-		$response          = $this->server->dispatch( $request );
-		$response_products = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 3, count( $response_products ) );
+		$this->assertEquals( 3, count( $data ) );
 	}
 
 	/**
@@ -284,11 +283,11 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'category_operator', 'and' );
 
-		$response          = $this->server->dispatch( $request );
-		$response_products = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 1, count( $data ) );
 	}
 
 	/**
@@ -305,10 +304,10 @@ class Products extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'category_operator', 'and' );
 
-		$response          = $this->server->dispatch( $request );
-		$response_products = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 1, count( $data ) );
 	}
 }
