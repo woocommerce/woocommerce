@@ -136,7 +136,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'MMK' => 'Burmese kyat',
 			'MNT' => 'Mongolian t&ouml;gr&ouml;g',
 			'MOP' => 'Macanese pataca',
-			'MRO' => 'Mauritanian ouguiya',
+			'MRU' => 'Mauritanian ouguiya',
 			'MUR' => 'Mauritian rupee',
 			'MVR' => 'Maldivian rufiyaa',
 			'MWK' => 'Malawian kwacha',
@@ -174,7 +174,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'SOS' => 'Somali shilling',
 			'SRD' => 'Surinamese dollar',
 			'SSP' => 'South Sudanese pound',
-			'STD' => 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra',
+			'STN' => 'S&atilde;o Tom&eacute; and Pr&iacute;ncipe dobra',
 			'SYP' => 'Syrian pound',
 			'SZL' => 'Swazi lilangeni',
 			'THB' => 'Thai baht',
@@ -281,7 +281,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_log_file_path() {
 		$log_dir     = trailingslashit( WC_LOG_DIR );
 		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
-		$date_suffix = date( 'Y-m-d', current_time( 'timestamp', true ) );
+		$date_suffix = date( 'Y-m-d', time() );
 
 		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
 	}

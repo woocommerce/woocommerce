@@ -216,20 +216,30 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$product = new WC_Product_Variable( $product->get_id() );
 
-		$this->assertEquals( 2, count( $product->get_children() ) );
+		$this->assertEquals( 4, count( $product->get_children() ) );
 
 		$expected_prices['price'][ $children[0] ] = 8.00;
 		$expected_prices['price'][ $children[1] ] = 15.00;
+		$expected_prices['price'][ $children[2] ] = 16.00;
+		$expected_prices['price'][ $children[3] ] = 17.00;
 
 		$expected_prices['regular_price'][ $children[0] ] = 10.00;
 		$expected_prices['regular_price'][ $children[1] ] = 15.00;
+		$expected_prices['regular_price'][ $children[2] ] = 16.00;
+		$expected_prices['regular_price'][ $children[3] ] = 17.00;
 
 		$expected_prices['sale_price'][ $children[0] ] = 8.00;
 		$expected_prices['sale_price'][ $children[1] ] = 15.00;
+		$expected_prices['sale_price'][ $children[2] ] = 16.00;
+		$expected_prices['sale_price'][ $children[3] ] = 17.00;
 
 		$this->assertEquals( $expected_prices, $product->get_variation_prices() );
 
-		$expected_attributes = array( 'pa_size' => array( 'small', 'large' ) );
+		$expected_attributes = array(
+			'pa_size'   => array( 'small', 'large', 'huge' ),
+			'pa_colour' => array( 'red' ),
+			'pa_number' => array( '0', '2' ),
+		);
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
 	}
 
@@ -787,6 +797,12 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $product3->get_id(), $results );
 		$this->assertContains( $product4->get_id(), $results );
 
+		$results = $data_store->search_products( 'blue-widget-1     OR       green-widget', '', true, true );
+		$this->assertContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertContains( $product3->get_id(), $results );
+		$this->assertContains( $product4->get_id(), $results );
+
 		$results = $data_store->search_products( '"green widget"', '', true, true );
 		$this->assertNotContains( $product->get_id(), $results );
 		$this->assertNotContains( $product2->get_id(), $results );
@@ -909,5 +925,152 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
 		$this->assertEquals( 7, $count );
+	}
+
+	/**
+	 * Test find_matching_product_variation.
+	 *
+	 * @return void
+	 */
+	public function test_find_matching_product_variation() {
+		$product    = WC_Helper_Product::create_variation_product();
+		$data_store = WC_Data_Store::load( 'product' );
+		$children   = $product->get_children();
+
+		$match = $data_store->find_matching_product_variation( $product, array() );
+		$this->assertEquals( 0, $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size' => 'small',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size' => 'large',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => '',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => '',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
+
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'blue',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		// Test against non matching colour, should still return first attribute.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'small',
+				'attribute_pa_colour' => 'pink',
+			)
+		);
+		$this->assertEquals( $children[0], $match );
+
+		// Test against non matching colour, should still return first attribute.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'pink',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+
+		// Test non expected matches.
+		// If second attribute in variation is any and you omit the first attribute it should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_colour' => 'blue',
+			)
+		);
+		$this->assertEquals( 0, $match );
+
+		// If second attribute in variation is any and you pass a blank in the first attribute it should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => '',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$this->assertEquals( 0, $match );
+
+		// Passing blanks as both attributes should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => '',
+				'attribute_pa_colour' => '',
+			)
+		);
+		$this->assertEquals( 0, $match );
+
+		// Passing an empty array should not match anything.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array()
+		);
+		$this->assertEquals( 0, $match );
+
+		// Test numeric attribute values.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
+
+		$this->assertEquals( $children[3], $match );
+
+		// Test numeric attribute value 0.
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '0',
+			)
+		);
+
+		$this->assertEquals( $children[2], $match );
 	}
 }

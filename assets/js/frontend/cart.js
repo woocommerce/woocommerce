@@ -270,7 +270,7 @@ jQuery( function( $ ) {
 			this.update_cart           = this.update_cart.bind( this );
 
 			$( document ).on(
-				'wc_update_cart',
+				'wc_update_cart added_to_cart',
 				function() { cart.update_cart.apply( cart, [].slice.call( arguments, 1 ) ); } );
 			$( document ).on(
 				'click',

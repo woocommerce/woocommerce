@@ -43,7 +43,9 @@ if ( wc_tax_enabled() ) {
 						<th class="line_tax tips" data-tip="<?php echo esc_attr( $column_tip ); ?>">
 							<?php echo esc_attr( $column_label ); ?>
 							<input type="hidden" class="order-tax-id" name="order_taxes[<?php echo esc_attr( $tax_id ); ?>]" value="<?php echo esc_attr( $tax_item['rate_id'] ); ?>">
-							<a class="delete-order-tax" href="#" data-rate_id="<?php echo esc_attr( $tax_id ); ?>"></a>
+							<?php if ( $order->is_editable() ) : ?>
+								<a class="delete-order-tax" href="#" data-rate_id="<?php echo esc_attr( $tax_id ); ?>"></a>
+							<?php endif; ?>
 						</th>
 						<?php
 					endforeach;
@@ -343,7 +345,7 @@ if ( wc_tax_enabled() ) {
 							</thead>
 							<?php
 								$row = '
-									<td><select class="wc-product-search" name="item_id" data-allow_clear="true" data-display_stock="true" data-placeholder="' . esc_attr__( 'Search for a product&hellip;', 'woocommerce' ) . '"></select></td>
+									<td><select class="wc-product-search" name="item_id" data-allow_clear="true" data-display_stock="true" data-exclude_type="variable" data-placeholder="' . esc_attr__( 'Search for a product&hellip;', 'woocommerce' ) . '"></select></td>
 									<td><input type="number" step="1" min="0" max="9999" autocomplete="off" name="item_qty" placeholder="1" size="4" class="quantity" /></td>';
 							?>
 							<tbody data-row="<?php echo esc_attr( $row ); ?>">

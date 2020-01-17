@@ -234,7 +234,7 @@ class WC_Admin_Attributes {
 									<td>
 										<select name="attribute_type" id="attribute_type">
 											<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
-												<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_attr( $value ); ?></option>
+												<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $att_type, $key ); ?>><?php echo esc_html( $value ); ?></option>
 											<?php endforeach; ?>
 											<?php
 												/**
@@ -311,7 +311,7 @@ class WC_Admin_Attributes {
 										?>
 										<tr>
 												<td>
-													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
+													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
 
 													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></span></div>
 												</td>
@@ -353,7 +353,7 @@ class WC_Admin_Attributes {
 															echo '<span class="na">&ndash;</span>';
 													}
 													?>
-													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_html( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
+													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
 												</td>
 											</tr>
 											<?php
@@ -410,7 +410,7 @@ class WC_Admin_Attributes {
 										<label for="attribute_type"><?php esc_html_e( 'Type', 'woocommerce' ); ?></label>
 										<select name="attribute_type" id="attribute_type">
 											<?php foreach ( wc_get_attribute_types() as $key => $value ) : ?>
-												<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_attr( $value ); ?></option>
+												<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $value ); ?></option>
 											<?php endforeach; ?>
 											<?php
 												/**

@@ -674,7 +674,7 @@ function wc_update_220_attributes() {
 	}
 
 	delete_transient( 'wc_attribute_taxonomies' );
-	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+	WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 }
 
 /**
@@ -1004,6 +1004,7 @@ function wc_update_250_currency() {
 			'meta_value' => 'KIP',
 		)
 	);
+
 }
 
 /**
@@ -1838,7 +1839,7 @@ function wc_update_343_cleanup_foreign_keys() {
 
 	if ( $results ) {
 		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 }
@@ -1972,4 +1973,111 @@ function wc_update_360_downloadable_product_permissions_index() {
  */
 function wc_update_360_db_version() {
 	WC_Install::update_db_version( '3.6.0' );
+}
+
+/**
+ * Put tax classes into a DB table.
+ *
+ * @return void
+ */
+function wc_update_370_tax_rate_classes() {
+	global $wpdb;
+
+	$classes = array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) );
+
+	if ( $classes ) {
+		foreach ( $classes as $class ) {
+			if ( empty( $class ) ) {
+				continue;
+			}
+			WC_Tax::create_tax_class( $class );
+		}
+	}
+	delete_option( 'woocommerce_tax_classes' );
+}
+
+/**
+ * Update currency settings for 3.7.0
+ *
+ * @return void
+ */
+function wc_update_370_mro_std_currency() {
+	global $wpdb;
+
+	// Fix currency settings for MRU and STN currency.
+	$current_currency = get_option( 'woocommerce_currency' );
+
+	if ( 'MRO' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'MRU' );
+	}
+
+	if ( 'STD' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'STN' );
+	}
+
+	// Update MRU currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'MRU', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		),
+		array(
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'MRO', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		)
+	);
+
+	// Update STN currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'STN', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		),
+		array(
+			'meta_key'   => '_order_currency', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => 'STD', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		)
+	);
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_370_db_version() {
+	WC_Install::update_db_version( '3.7.0' );
+}
+
+/**
+ * We've moved the MaxMind database to a new location, as per the TOS' requirement that the database not
+ * be publicly accessible.
+ */
+function wc_update_390_move_maxmind_database() {
+	// Make sure to use all of the correct filters to pull the local database path.
+	$old_path = apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', 2 );
+
+	// Generate a prefix for the old file and store it in the integration as it would expect it.
+	$prefix = wp_generate_password( 32, false );
+	update_option( 'woocommerce_maxmind_geolocation_settings', array( 'database_prefix' => $prefix ) );
+
+	// Generate the new path in the same way that the integration will.
+	$uploads_dir = wp_upload_dir();
+	$new_path    = trailingslashit( $uploads_dir['basedir'] ) . 'woocommerce_uploads/' . $prefix . '-GeoLite2-Country.mmdb';
+	$new_path    = apply_filters( 'woocommerce_geolocation_local_database_path', $new_path, 2 );
+
+	@rename( $old_path, $new_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+}
+
+/**
+ * So that we can best meet MaxMind's TOS, the geolocation database update cron should run once per 15 days.
+ */
+function wc_update_390_change_geolocation_database_update_cron() {
+	wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
+	wp_schedule_event( time() + ( DAY_IN_SECONDS * 15 ), 'fifteendays', 'woocommerce_geoip_updater' );
+}
+
+/**
+ * Update DB version.
+ */
+function wc_update_390_db_version() {
+	WC_Install::update_db_version( '3.9.0' );
 }

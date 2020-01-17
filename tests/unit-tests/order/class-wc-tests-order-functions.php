@@ -1273,6 +1273,61 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test create refund when additional fee is also refunded.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/24238
+	 */
+	public function test_wc_create_refund_24238() {
+		$order = new WC_Order();
+		$order->add_product( WC_Helper_Product::create_simple_product(), 10 );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Some Fee',
+				'tax_status' => 'taxable',
+				'total'      => '10',
+				'tax_class'  => '',
+			)
+		);
+		$order->add_item( $fee );
+		$order->calculate_totals( true );
+		$order->save();
+		$this->assertEquals( 110, $order->get_total() );
+
+		$products = $order->get_items( 'line_item' );
+		$this->assertCount( 1, $products );
+		$product_id = array_keys( $products )[0];
+
+		$fee_items = $order->get_items( 'fee' );
+		$this->assertCount( 1, $fee_items );
+
+		$fee_id = array_keys( $fee_items )[0];
+
+		$args = array(
+			'amount'     => 55,
+			'order_id'   => $order->get_id(),
+			'line_items' => array(
+				$fee_id     => array(
+					'refund_total' => 5,
+				),
+				$product_id => array(
+					'qty'          => 5,
+					'refund_total' => 50,
+				),
+			),
+		);
+
+		$refund_obj = wc_create_refund( $args );
+
+		$refunded_fee_items = $refund_obj->get_items( 'fee' );
+		$this->assertCount( 1, $refunded_fee_items );
+
+		$refunded_fee = array_values( $refunded_fee_items )[0];
+		$this->assertEquals( -5, $refunded_fee->get_total() );
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {
@@ -1374,5 +1429,93 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		// Should return nothing when searching for nonexistent term.
 		$this->assertEmpty( wc_order_search( 'Nonexistent term' ) );
+	}
+
+	/**
+	 * Checks if hold coupons are released when increasing usage count.
+	 *
+	 * @throws Exception When unable to create an order.
+	 */
+	public function test_wc_update_coupon_usage_counts() {
+		$coupon_code       = 'coupon1';
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			$coupon_code,
+			array(
+				'usage_limit' => 2,
+				'usage_limit_per_user' => 2,
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon_code );
+		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 0, $coupon->get_usage_count() );
+		$this->assertEquals( 1, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertEquals( 1, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
+		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+
+		$order = new WC_Order( $order_id );
+		$order->update_status( 'processing' );
+
+		$this->assertEquals( 1, get_post_meta( $coupon->get_id(), 'usage_count', true ) );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
+	}
+
+	/**
+	 * Test if everything works as expected when coupon hold is disabled using filter.
+	 */
+	public function test_wc_update_usage_count_without_coupon_hold() {
+		$coupon_code       = 'coupon1';
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+
+		$coupon = WC_Helper_Coupon::create_coupon(
+			$coupon_code,
+			array(
+				'usage_limit' => 2,
+				'usage_limit_per_user' => 2,
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon_code );
+		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+
+		add_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 0, $coupon->get_usage_count() );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
+		$this->assertEquals( 0, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+
+		$order = new WC_Order( $order_id );
+		$order->update_status( 'processing' );
+
+		$this->assertEquals( 1, get_post_meta( $coupon->get_id(), 'usage_count', true ) );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
+		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
+		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
+
+		remove_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
 	}
 }

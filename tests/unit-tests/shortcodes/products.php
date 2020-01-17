@@ -1,9 +1,12 @@
 <?php
-
 /**
- * Class WC_Shortcode_Products.
+ * Test WC_Shortcode_Products
  *
  * @package WooCommerce\Tests\Shortcodes
+ */
+
+/**
+ * Class WC_Test_Shortcode_Products.
  */
 class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 
@@ -14,9 +17,9 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		$shortcode = new WC_Shortcode_Products();
 		$expected  = array(
 			'limit'          => '-1',
-			'columns'        => '4',
-			'orderby'        => 'title',
-			'order'          => 'ASC',
+			'columns'        => 4,
+			'orderby'        => '',
+			'order'          => '',
 			'ids'            => '',
 			'skus'           => '',
 			'category'       => '',
@@ -24,6 +27,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'attribute'      => '',
 			'terms'          => '',
 			'terms_operator' => 'IN',
+			'tag'            => '',
+			'tag_operator'   => 'IN',
 			'visibility'     => 'visible',
 			'class'          => '',
 			'rows'           => '',
@@ -52,6 +57,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'attribute'      => '',
 			'terms'          => '',
 			'terms_operator' => 'IN',
+			'tag'            => '',
+			'tag_operator'   => 'IN',
 			'visibility'     => 'visible',
 			'class'          => '',
 			'rows'           => '',
@@ -77,11 +84,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
-			'posts_per_page'      => '-1',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'posts_per_page'      => -1,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'fields'              => 'ids',
 		);
 		$this->assertEquals( $expected, $shortcode->get_query_args() );
@@ -101,8 +108,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'ID',
 			'order'               => 'DESC',
 			'posts_per_page'      => '-1',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'fields'              => 'ids',
 		);
 		$this->assertEquals( $expected2, $shortcode2->get_query_args() );
@@ -118,11 +125,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
-			'posts_per_page'      => '-1',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'posts_per_page'      => -1,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'post__in'            => array( '1', '2', '3' ),
 			'fields'              => 'ids',
 		);
@@ -154,8 +161,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'title',
 			'order'               => 'ASC',
 			'posts_per_page'      => '12',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'fields'              => 'ids',
 		);
 		$expected4['tax_query'][] = array(
@@ -188,8 +195,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'title',
 			'order'               => 'ASC',
 			'posts_per_page'      => '12',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'fields'              => 'ids',
 		);
 		$expected4_id['tax_query'][] = array(
@@ -222,8 +229,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'date ID',
 			'order'               => 'DESC',
 			'posts_per_page'      => '12',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'fields'              => 'ids',
 		);
 
@@ -242,11 +249,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
-			'posts_per_page'      => '1',
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'posts_per_page'      => 1,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'p'                   => '1',
 			'fields'              => 'ids',
 		);
@@ -273,8 +280,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'title',
 			'order'               => 'ASC',
 			'posts_per_page'      => 12,
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'post__in'            => array_merge( array( 0 ), wc_get_product_ids_on_sale() ),
 			'fields'              => 'ids',
 		);
@@ -299,9 +306,9 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'meta_value_num',
 			'order'               => 'DESC',
 			'posts_per_page'      => 12,
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
-			'meta_key'            => 'total_sales',
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'meta_key'            => 'total_sales', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'fields'              => 'ids',
 		);
 
@@ -324,12 +331,13 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
-			'order'               => 'ASC',
+			'orderby'             => 'meta_value_num',
+			'order'               => 'DESC',
 			'posts_per_page'      => 12,
-			'meta_query'          => $meta_query,
-			'tax_query'           => $tax_query,
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'fields'              => 'ids',
+			'meta_key'            => '_wc_average_rating', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		);
 
 		$this->assertEquals( $expected9, $shortcode9->get_query_args() );
@@ -354,8 +362,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'date ID',
 			'order'               => 'DESC',
 			'posts_per_page'      => 12,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array_merge(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array_merge( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				$tax_query,
 				array(
 					array(
@@ -392,8 +400,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'title',
 			'order'               => 'ASC',
 			'posts_per_page'      => 12,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array_merge(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array_merge( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				$tax_query,
 				array(
 					array(
@@ -429,8 +437,8 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'orderby'             => 'title',
 			'order'               => 'ASC',
 			'posts_per_page'      => 12,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array_merge(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array_merge( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				$tax_query,
 				array(
 					array(
@@ -457,11 +465,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
 			'posts_per_page'      => -1,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				array(
 					'taxonomy'         => 'product_visibility',
 					'terms'            => array( 'exclude-from-catalog', 'exclude-from-search' ),
@@ -485,11 +493,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
 			'posts_per_page'      => -1,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				array(
 					'taxonomy'         => 'product_visibility',
 					'terms'            => 'exclude-from-search',
@@ -520,11 +528,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
 			'posts_per_page'      => -1,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				array(
 					'taxonomy'         => 'product_visibility',
 					'terms'            => 'exclude-from-catalog',
@@ -557,11 +565,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
 			'posts_per_page'      => -1,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array_merge(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array_merge( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				$tax_query,
 				array(
 					array(
@@ -590,11 +598,11 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => true,
-			'orderby'             => 'title',
+			'orderby'             => 'menu_order title',
 			'order'               => 'ASC',
 			'posts_per_page'      => -1,
-			'meta_query'          => $meta_query,
-			'tax_query'           => array_merge(
+			'meta_query'          => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'tax_query'           => array_merge( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				$tax_query,
 				array(
 					array(

@@ -200,16 +200,32 @@ abstract class WC_Data {
 	 * @return int
 	 */
 	public function save() {
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
-
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
-			}
+		if ( ! $this->data_store ) {
+			return $this->get_id();
 		}
+
+		/**
+		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		if ( $this->get_id() ) {
+			$this->data_store->update( $this );
+		} else {
+			$this->data_store->create( $this );
+		}
+
+		/**
+		 * Trigger action after saving to the DB.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
 		return $this->get_id();
 	}
 

@@ -2,8 +2,8 @@
 /**
  * Load assets
  *
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @package WooCommerce/Admin
+ * @version 3.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -169,9 +169,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$params = array(
 					/* translators: %s: decimal */
-					'i18n_decimal_error'                => sprintf( __( 'Please enter in decimal (%s) format without thousand separators.', 'woocommerce' ), $decimal ),
+					'i18n_decimal_error'                => sprintf( __( 'Please enter with one decimal point (%s) without thousand separators.', 'woocommerce' ), $decimal ),
 					/* translators: %s: price decimal separator */
-					'i18n_mon_decimal_error'            => sprintf( __( 'Please enter in monetary decimal (%s) format without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
+					'i18n_mon_decimal_error'            => sprintf( __( 'Please enter with one monetary decimal point (%s) without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
 					'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 					'i18n_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
@@ -275,6 +275,17 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 			if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
 				wp_enqueue_script( 'wc-admin-coupon-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-coupon' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), WC_VERSION );
+				wp_localize_script(
+					'wc-admin-coupon-meta-boxes',
+					'woocommerce_admin_meta_boxes_coupon',
+					array(
+						'generate_button_text' => esc_html__( 'Generate coupon code', 'woocommerce' ),
+						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHJKMNPQRSTUVWXYZ23456789' ),
+						'char_length'          => apply_filters( 'woocommerce_coupon_code_generator_character_length', 8 ),
+						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
+						'suffix'               => apply_filters( 'woocommerce_coupon_code_generator_suffix', '' ),
+					)
+				);
 			}
 			if ( in_array( str_replace( 'edit-', '', $screen_id ), array_merge( array( 'shop_coupon', 'product' ), wc_get_order_types( 'order-meta-boxes' ) ) ) ) {
 				$post_id            = isset( $post->ID ) ? $post->ID : '';
@@ -284,7 +295,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				if ( $post_id && in_array( get_post_type( $post_id ), wc_get_order_types( 'order-meta-boxes' ) ) ) {
 					$order = wc_get_order( $post_id );
 					if ( $order ) {
-						$currency           = $order->get_currency();
+						$currency = $order->get_currency();
 
 						if ( ! $order->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
 							$remove_item_notice = $remove_item_notice . ' ' . __( "You may need to manually restore the item's stock.", 'woocommerce' );
@@ -443,6 +454,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'dismissed_suggestions'    => WC_Marketplace_Suggestions::get_dismissed_suggestions(),
 						'suggestions_data'         => WC_Marketplace_Suggestions::get_suggestions_api_data(),
 						'manage_suggestions_url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ),
+						'in_app_purchase_params'   => WC_Admin_Addons::get_in_app_purchase_url_params(),
 						'i18n_marketplace_suggestions_default_cta'
 							=> esc_html__( 'Learn More', 'woocommerce' ),
 						'i18n_marketplace_suggestions_dismiss_tooltip'

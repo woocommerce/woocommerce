@@ -22,6 +22,35 @@ jQuery( function( $ ) {
 		return true;
 	} );
 
+	$( 'form.address-step' ).on( 'submit', function( e ) {
+		var form = $( this );
+		if ( ( 'function' !== typeof form.checkValidity ) || form.checkValidity() ) {
+			blockWizardUI();
+		}
+
+		e.preventDefault();
+		$('.wc-setup-content').unblock();
+
+		$( this ).WCBackboneModal( {
+			template: 'wc-modal-tracking-setup'
+		} );
+
+		$( document.body ).on( 'wc_backbone_modal_response', function() {
+			form.unbind( 'submit' ).submit();
+		} );
+
+		$( '#wc_tracker_checkbox_dialog' ).on( 'change', function( e ) {
+			var eventTarget = $( e.target );
+			$( '#wc_tracker_checkbox' ).prop( 'checked', eventTarget.prop( 'checked' ) );
+		} );
+
+		$( '#wc_tracker_submit' ).on( 'click', function () {
+			form.unbind( 'submit' ).submit();
+		} );
+
+		return true;
+	} );
+
 	$( '#store_country' ).on( 'change', function() {
 		// Prevent if we don't have the metabox data
 		if ( wc_setup_params.states === null ){
@@ -49,6 +78,25 @@ jQuery( function( $ ) {
 		}
 
 		$( '#currency_code' ).val( wc_setup_currencies[ country ] ).change();
+	} );
+
+	/* Setup postcode field and validations */
+	$( '#store_country' ).on( 'change', function() {
+		if ( ! wc_setup_params.postcodes ) {
+			return;
+		}
+
+		var $this                 = $( this ),
+			country               = $this.val(),
+			$store_postcode_input = $( '#store_postcode' ),
+			country_postcode_obj  = wc_setup_params.postcodes[ country ];
+
+		// Default to required, if its unknown whether postcode is required or not.
+		if ( $.isEmptyObject( country_postcode_obj ) || country_postcode_obj.required  ) {
+			$store_postcode_input.attr( 'required', 'true' );
+		} else {
+			$store_postcode_input.removeAttr( 'required' );
+		}
 	} );
 
 	$( '#store_country' ).change();
@@ -166,6 +214,11 @@ jQuery( function( $ ) {
 
 		e.preventDefault();
 		waitForJetpackInstall();
+	} );
+
+	$( '.activate-new-onboarding' ).on( 'click', '.button-primary', function() {
+		// Show pending spinner while activate happens.
+		blockWizardUI();
 	} );
 
 	$( '.wc-wizard-services' ).on( 'change', 'input#stripe_create_account, input#ppec_paypal_reroute_requests', function() {

@@ -448,3 +448,47 @@ function wc_review_ratings_enabled() {
 function wc_review_ratings_required() {
 	return 'yes' === get_option( 'woocommerce_review_rating_required' );
 }
+
+/**
+ * Check if a CSV file is valid.
+ *
+ * @since 3.6.5
+ * @param string $file       File name.
+ * @param bool   $check_path If should check for the path.
+ * @return bool
+ */
+function wc_is_file_valid_csv( $file, $check_path = true ) {
+	/**
+	 * Filter check for CSV file path.
+	 *
+	 * @since 3.6.4
+	 * @param bool $check_import_file_path If requires file path check. Defaults to true.
+	 */
+	$check_import_file_path = apply_filters( 'woocommerce_csv_importer_check_import_file_path', true );
+
+	if ( $check_path && $check_import_file_path && false !== stripos( $file, '://' ) ) {
+		return false;
+	}
+
+	/**
+	 * Filter CSV valid file types.
+	 *
+	 * @since 3.6.5
+	 * @param array $valid_filetypes List of valid file types.
+	 */
+	$valid_filetypes = apply_filters(
+		'woocommerce_csv_import_valid_filetypes',
+		array(
+			'csv' => 'text/csv',
+			'txt' => 'text/plain',
+		)
+	);
+
+	$filetype = wp_check_filetype( $file, $valid_filetypes );
+
+	if ( in_array( $filetype['type'], $valid_filetypes, true ) ) {
+		return true;
+	}
+
+	return false;
+}

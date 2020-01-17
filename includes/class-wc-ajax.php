@@ -74,7 +74,7 @@ class WC_AJAX {
 	public static function do_wc_ajax() {
 		global $wp_query;
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['wc-ajax'] ) ) {
 			$wp_query->set( 'wc-ajax', sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) );
 		}
@@ -396,7 +396,7 @@ class WC_AJAX {
 	public static function add_to_cart() {
 		ob_start();
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['product_id'] ) ) {
 			return;
 		}
@@ -444,7 +444,7 @@ class WC_AJAX {
 	public static function remove_from_cart() {
 		ob_start();
 
-		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$cart_item_key = wc_clean( isset( $_POST['cart_item_key'] ) ? wp_unslash( $_POST['cart_item_key'] ) : '' );
 
 		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
@@ -469,7 +469,7 @@ class WC_AJAX {
 	public static function get_variation() {
 		ob_start();
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( empty( $_POST['product_id'] ) ) {
 			wp_die();
 		}
@@ -707,8 +707,8 @@ class WC_AJAX {
 		$product_id       = intval( $_POST['post_id'] );
 		$post             = get_post( $product_id ); // phpcs:ignore
 		$loop             = intval( $_POST['loop'] );
-		$product_object   = new WC_Product_Variable( $product_id ); // Forces type to variable in case product is unsaved.
-		$variation_object = new WC_Product_Variation();
+		$product_object   = wc_get_product_object( 'variable', $product_id ); // Forces type to variable in case product is unsaved.
+		$variation_object = wc_get_product_object( 'variation' );
 		$variation_object->set_parent_id( $product_id );
 		$variation_object->set_attributes( array_fill_keys( array_map( 'sanitize_title', array_keys( $product_object->get_variation_attributes() ) ), '' ) );
 		$variation_id   = $variation_object->save();
@@ -898,9 +898,18 @@ class WC_AJAX {
 				if ( ! $product ) {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
+				if ( 'variable' === $product->get_type() ) {
+					/* translators: %s product name */
+					throw new Exception( sprintf( __( '%s is a variable product parent and cannot be added.', 'woocommerce' ), $product->get_name() ) );
+				}
+				$validation_error = new WP_Error();
+				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
 
+				if ( $validation_error->get_error_code() ) {
+					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $validation_error->get_error_message() );
+				}
 				$item_id                 = $order->add_product( $product, $qty );
-				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
+				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
 
@@ -1139,7 +1148,7 @@ class WC_AJAX {
 				$order->set_billing_email( $user_email_arg );
 			}
 
-			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
@@ -1191,7 +1200,7 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 
-			$order->remove_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$order->remove_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
 
@@ -1322,8 +1331,14 @@ class WC_AJAX {
 			$order_id = absint( $_POST['order_id'] );
 			$rate_id  = absint( $_POST['rate_id'] );
 
+			$order = wc_get_order( $order_id );
+			if ( ! $order->is_editable() ) {
+				throw new Exception( __( 'Order not editable', 'woocommerce' ) );
+			}
+
 			wc_delete_order_item( $rate_id );
 
+			// Need to load order again after deleting to have latest items before calculating.
 			$order = wc_get_order( $order_id );
 			$order->calculate_totals( false );
 
@@ -1525,6 +1540,24 @@ class WC_AJAX {
 		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
 		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
 
+		$exclude_types = array();
+		if ( ! empty( $_GET['exclude_type'] ) ) {
+			// Support both comma-delimited and array format inputs.
+			$exclude_types = wp_unslash( $_GET['exclude_type'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( ! is_array( $exclude_types ) ) {
+				$exclude_types = explode( ',', $exclude_types );
+			}
+
+			// Sanitize the excluded types against valid product types.
+			foreach ( $exclude_types as &$exclude_type ) {
+				$exclude_type = strtolower( trim( $exclude_type ) );
+			}
+			$exclude_types = array_intersect(
+				array_merge( array( 'variation' ), array_keys( wc_get_product_types() ) ),
+				$exclude_types
+			);
+		}
+
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
@@ -1534,6 +1567,10 @@ class WC_AJAX {
 		foreach ( $product_objects as $product_object ) {
 			$formatted_name = $product_object->get_formatted_name();
 			$managing_stock = $product_object->managing_stock();
+
+			if ( in_array( $product_object->get_type(), $exclude_types, true ) ) {
+				continue;
+			}
 
 			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
 				$stock_amount    = $product_object->get_stock_quantity();
@@ -1706,7 +1743,7 @@ class WC_AJAX {
 	 * Ajax request handling for categories ordering.
 	 */
 	public static function term_ordering() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -1739,7 +1776,7 @@ class WC_AJAX {
 	public static function product_ordering() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -1781,6 +1818,8 @@ class WC_AJAX {
 
 		$wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) );
 
+		WC_Post_Data::delete_product_query_transients();
+
 		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
 		// phpcs:enable
@@ -1814,7 +1853,6 @@ class WC_AJAX {
 
 		try {
 			$order       = wc_get_order( $order_id );
-			$order_items = $order->get_items();
 			$max_refund  = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ! $refund_amount || $max_refund < $refund_amount || 0 > $refund_amount ) {
@@ -2048,6 +2086,8 @@ class WC_AJAX {
 		);
 
 		if ( $variations ) {
+			wc_render_invalid_variation_notice( $product_object );
+
 			foreach ( $variations as $variation_object ) {
 				$variation_id   = $variation_object->get_id();
 				$variation      = get_post( $variation_id );
@@ -2524,7 +2564,7 @@ class WC_AJAX {
 	 * Handle submissions from assets/js/settings-views-html-settings-tax.js Backbone model.
 	 */
 	public static function tax_rates_save_changes() {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( ! isset( $_POST['wc_tax_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			wp_die();
@@ -2591,7 +2631,7 @@ class WC_AJAX {
 			}
 		}
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		wp_send_json_success(

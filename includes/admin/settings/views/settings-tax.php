@@ -63,13 +63,14 @@ $settings = array(
 	),
 
 	array(
-		'title'    => __( 'Additional tax classes', 'woocommerce' ),
-		'desc_tip' => __( 'List additional tax classes below (1 per line). This is in addition to the default "Standard rate".', 'woocommerce' ),
-		'id'       => 'woocommerce_tax_classes',
-		'css'      => 'width:100%; height: 65px;',
-		'type'     => 'textarea',
-		/* Translators: %s New line char. */
-		'default'  => sprintf( __( 'Reduced rate%sZero rate', 'woocommerce' ), PHP_EOL ),
+		'title'     => __( 'Additional tax classes', 'woocommerce' ),
+		'desc_tip'  => __( 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.', 'woocommerce' ),
+		'id'        => 'woocommerce_tax_classes',
+		'css'       => 'height: 65px;',
+		'type'      => 'textarea',
+		'default'   => '',
+		'is_option' => false,
+		'value'     => implode( "\n", WC_Tax::get_tax_classes() ),
 	),
 
 	array(

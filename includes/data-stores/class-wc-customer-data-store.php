@@ -132,7 +132,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
-		do_action( 'woocommerce_new_customer', $customer->get_id() );
+		do_action( 'woocommerce_new_customer', $customer->get_id(), $customer );
 	}
 
 	/**
@@ -209,7 +209,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
-		do_action( 'woocommerce_update_customer', $customer->get_id() );
+		do_action( 'woocommerce_update_customer', $customer->get_id(), $customer );
 	}
 
 	/**
@@ -484,5 +484,29 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Get all user ids who have `billing_email` set to any of the email passed in array.
+	 *
+	 * @param array $emails List of emails to check against.
+	 *
+	 * @return array
+	 */
+	public function get_user_ids_for_billing_email( $emails ) {
+		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$users_query = new WP_User_Query(
+			array(
+				'fields'     => 'ID',
+				'meta_query' => array(
+					array(
+						'key'     => 'billing_email',
+						'value'   => $emails,
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+		return array_unique( $users_query->get_results() );
 	}
 }

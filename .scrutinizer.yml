@@ -23,7 +23,6 @@ checks:
     verify_property_names: false
 filter:
   excluded_paths:
-    - apigen/
     - sample-data/
     - i18n/
     - includes/api/legacy/

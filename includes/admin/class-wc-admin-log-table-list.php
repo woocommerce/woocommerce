@@ -75,9 +75,9 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$selected_level = isset( $_REQUEST['level'] ) ? $_REQUEST['level'] : '';
 		?>
-			<label for="filter-by-level" class="screen-reader-text"><?php _e( 'Filter by level', 'woocommerce' ); ?></label>
+			<label for="filter-by-level" class="screen-reader-text"><?php esc_html_e( 'Filter by level', 'woocommerce' ); ?></label>
 			<select name="level" id="filter-by-level">
-				<option<?php selected( $selected_level, '' ); ?> value=""><?php _e( 'All levels', 'woocommerce' ); ?></option>
+				<option<?php selected( $selected_level, '' ); ?> value=""><?php esc_html_e( 'All levels', 'woocommerce' ); ?></option>
 				<?php
 				foreach ( $levels as $l ) {
 					printf(
@@ -237,9 +237,9 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		if ( ! empty( $sources ) ) {
 			$selected_source = isset( $_REQUEST['source'] ) ? $_REQUEST['source'] : '';
 			?>
-				<label for="filter-by-source" class="screen-reader-text"><?php _e( 'Filter by source', 'woocommerce' ); ?></label>
+				<label for="filter-by-source" class="screen-reader-text"><?php esc_html_e( 'Filter by source', 'woocommerce' ); ?></label>
 				<select name="source" id="filter-by-source">
-					<option<?php selected( $selected_source, '' ); ?> value=""><?php _e( 'All sources', 'woocommerce' ); ?></option>
+					<option<?php selected( $selected_source, '' ); ?> value=""><?php esc_html_e( 'All sources', 'woocommerce' ); ?></option>
 					<?php
 					foreach ( $sources as $s ) {
 						printf(

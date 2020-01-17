@@ -12,12 +12,10 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
- * @version 3.3.1
+ * @version 3.7.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $text_align = is_rtl() ? 'right' : 'left';
 
@@ -48,22 +46,25 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		</thead>
 		<tbody>
 			<?php
-			echo wc_get_email_order_items( $order, array( // WPCS: XSS ok.
-				'show_sku'      => $sent_to_admin,
-				'show_image'    => false,
-				'image_size'    => array( 32, 32 ),
-				'plain_text'    => $plain_text,
-				'sent_to_admin' => $sent_to_admin,
-			) );
+			echo wc_get_email_order_items( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$order,
+				array(
+					'show_sku'      => $sent_to_admin,
+					'show_image'    => false,
+					'image_size'    => array( 32, 32 ),
+					'plain_text'    => $plain_text,
+					'sent_to_admin' => $sent_to_admin,
+				)
+			);
 			?>
 		</tbody>
 		<tfoot>
 			<?php
-			$totals = $order->get_order_item_totals();
+			$item_totals = $order->get_order_item_totals();
 
-			if ( $totals ) {
+			if ( $item_totals ) {
 				$i = 0;
-				foreach ( $totals as $total ) {
+				foreach ( $item_totals as $total ) {
 					$i++;
 					?>
 					<tr>
@@ -77,7 +78,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				?>
 				<tr>
 					<th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo wp_kses_post( wptexturize( $order->get_customer_note() ) ); ?></td>
+					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
 				</tr>
 				<?php
 			}

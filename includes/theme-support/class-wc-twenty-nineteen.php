@@ -35,10 +35,13 @@ class WC_Twenty_Nineteen {
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );
-		add_theme_support( 'woocommerce', array(
-			'thumbnail_image_width' => 300,
-			'single_image_width'    => 450,
-		) );
+		add_theme_support(
+			'woocommerce',
+			array(
+				'thumbnail_image_width' => 300,
+				'single_image_width'    => 450,
+			)
+		);
 
 		// Tweak Twenty Nineteen features.
 		add_action( 'wp', array( __CLASS__, 'tweak_theme_features' ) );

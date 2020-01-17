@@ -27,6 +27,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		'compound'           => false,
 		'tax_total'          => 0,
 		'shipping_tax_total' => 0,
+		'rate_percent'       => null,
 	);
 
 	/*
@@ -99,6 +100,15 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	}
 
 	/**
+	 * Set rate value.
+	 *
+	 * @param float $value tax rate value.
+	 */
+	public function set_rate_percent( $value ) {
+		$this->set_prop( 'rate_percent', (float) $value );
+	}
+
+	/**
 	 * Set properties based on passed in tax rate by ID.
 	 *
 	 * @param int $tax_rate_id Tax rate ID.
@@ -110,6 +120,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 		$this->set_rate_code( WC_Tax::get_rate_code( $tax_rate ) );
 		$this->set_label( WC_Tax::get_rate_label( $tax_rate ) );
 		$this->set_compound( WC_Tax::is_compound( $tax_rate ) );
+		$this->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate ) );
 	}
 
 	/*
@@ -209,6 +220,16 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	 */
 	public function is_compound() {
 		return $this->get_compound();
+	}
+
+	/**
+	 * Get rate value
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return float
+	 */
+	public function get_rate_percent( $context = 'view' ) {
+		return $this->get_prop( 'rate_percent', $context );
 	}
 
 	/*

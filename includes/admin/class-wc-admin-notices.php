@@ -26,15 +26,17 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                   => 'install_notice',
-		'update'                    => 'update_notice',
-		'template_files'            => 'template_file_check_notice',
-		'legacy_shipping'           => 'legacy_shipping_notice',
-		'no_shipping_methods'       => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'   => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
-		'no_secure_connection'      => 'secure_connection_notice',
-		'wc_admin'                  => 'wc_admin_feature_plugin_notice',
+		'install'                      => 'install_notice',
+		'update'                       => 'update_notice',
+		'template_files'               => 'template_file_check_notice',
+		'legacy_shipping'              => 'legacy_shipping_notice',
+		'no_shipping_methods'          => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'      => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'    => 'regenerating_lookup_table_notice',
+		'no_secure_connection'         => 'secure_connection_notice',
+		'wc_admin'                     => 'wc_admin_feature_plugin_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
 	);
 
 	/**
@@ -85,6 +87,8 @@ class WC_Admin_Notices {
 		}
 		self::add_wc_admin_feature_plugin_notice();
 		self::add_notice( 'template_files' );
+		self::add_min_version_notice();
+		self::add_maxmind_missing_license_key_notice();
 	}
 
 	/**
@@ -351,9 +355,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wc_admin_feature_plugin_notice() {
-		$wordpress_version            = get_bloginfo( 'version' );
-
-		if ( version_compare( $wordpress_version, '5.0', '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) {
 			self::add_notice( 'wc_admin' );
 		}
 	}
@@ -371,6 +373,96 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-wc-admin.php';
+	}
+
+	/**
+	 * Add notice about minimum PHP and WordPress requirement.
+	 *
+	 * @since 3.6.5
+	 */
+	public static function add_min_version_notice() {
+		if ( version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' ) ) {
+			self::add_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
+		}
+	}
+
+	/**
+	 * Notice about WordPress and PHP minimum requirements.
+	 *
+	 * @since 3.6.5
+	 * @return void
+	 */
+	public static function wp_php_min_requirements_notice() {
+		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_' . WC_PHP_MIN_REQUIREMENTS_NOTICE . '_notice', true ) ) ) {
+			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
+			return;
+		}
+
+		$old_php = version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' );
+		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' );
+
+		// Both PHP and WordPress up to date version => no notice.
+		if ( ! $old_php && ! $old_wp ) {
+			return;
+		}
+
+		if ( $old_php && $old_wp ) {
+			$msg = sprintf(
+				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
+				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
+				WC_NOTICE_MIN_PHP_VERSION,
+				WC_NOTICE_MIN_WP_VERSION
+			);
+		} elseif ( $old_php ) {
+			$msg = sprintf(
+				/* translators: %s: Minimum PHP version */
+				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
+				WC_NOTICE_MIN_PHP_VERSION
+			);
+		} elseif ( $old_wp ) {
+			$msg = sprintf(
+				/* translators: %s: Minimum WordPress version */
+				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
+				WC_NOTICE_MIN_WP_VERSION
+			);
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
+	}
+
+	/**
+	 * Add MaxMind missing license key notice.
+	 *
+	 * @since 3.9.0
+	 */
+	public static function add_maxmind_missing_license_key_notice() {
+		$default_address = get_option( 'woocommerce_default_customer_address' );
+
+		if ( ! in_array( $default_address, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+			return;
+		}
+
+		$integration_options = get_option( 'woocommerce_maxmind_geolocation_settings' );
+		if ( empty( $integration_options['license_key'] ) ) {
+			self::add_notice( 'maxmind_license_key' );
+		}
+	}
+
+	/**
+	 * Display MaxMind missing license key notice.
+	 *
+	 * @since 3.9.0
+	 */
+	public static function maxmind_missing_license_key_notice() {
+		$user_dismissed_notice   = get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true );
+		$filter_dismissed_notice = ! apply_filters( 'woocommerce_maxmind_geolocation_display_notices', true );
+
+		if ( $user_dismissed_notice || $filter_dismissed_notice ) {
+			self::remove_notice( 'maxmind_license_key' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-maxmind-license-key.php';
 	}
 
 	/**

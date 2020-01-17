@@ -799,6 +799,13 @@ class WC_Helper {
 			WC_Tracker::send_tracking_data( true );
 		}
 
+		// If connecting through in-app purchase, redirects back to WooCommerce.com
+		// for product installation.
+		if ( ! empty( $_GET['wccom-install-url'] ) ) {
+			wp_redirect( wp_unslash( $_GET['wccom-install-url'] ) );
+			exit;
+		}
+
 		wp_safe_redirect(
 			add_query_arg(
 				array(
@@ -1096,6 +1103,20 @@ class WC_Helper {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks whether current site has product subscription of a given ID.
+	 *
+	 * @since 3.7.0
+	 *
+	 * @param int $product_id The product id.
+	 *
+	 * @return bool Returns true if product subscription exists, false otherwise.
+	 */
+	public static function has_product_subscription( $product_id ) {
+		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+		return ! empty( $subscription );
 	}
 
 	/**
@@ -1571,7 +1592,7 @@ class WC_Helper {
 	/**
 	 * Flush subscriptions cache.
 	 */
-	private static function _flush_subscriptions_cache() {
+	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
 	}
 

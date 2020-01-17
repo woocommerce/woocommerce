@@ -591,6 +591,7 @@ jQuery( function( $ ) {
 				var variation = $( response );
 				variation.addClass( 'variation-needs-update' );
 
+				$( '.woocommerce-notice-invalid-variation' ).remove();
 				$( '#variable_product_options' ).find( '.woocommerce_variations' ).prepend( variation );
 				$( 'button.cancel-variation-changes, button.save-variation-changes' ).removeAttr( 'disabled' );
 				$( '#variable_product_options' ).trigger( 'woocommerce_variations_added', 1 );

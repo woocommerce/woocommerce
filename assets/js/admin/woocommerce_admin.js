@@ -61,16 +61,18 @@
 			})
 
 			.on( 'change', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc-order-totals #refund_amount[type=text]', function() {
-				var regex;
+				var regex, decimalRegex,
+					decimailPoint = woocommerce_admin.decimal_point;
 
 				if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
-				} else {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+					decimailPoint = woocommerce_admin.mon_decimal_point;
 				}
 
+				regex        = new RegExp( '[^\-0-9\%\\' + decimailPoint + ']+', 'gi' );
+				decimalRegex = new RegExp( '\\' + decimailPoint + '+', 'gi' );
+
 				var value    = $( this ).val();
-				var newvalue = value.replace( regex, '' );
+				var newvalue = value.replace( regex, '' ).replace( decimalRegex, decimailPoint );
 
 				if ( value !== newvalue ) {
 					$( this ).val( newvalue );
@@ -78,21 +80,31 @@
 			})
 
 			.on( 'keyup', '.wc_input_price[type=text], .wc_input_decimal[type=text], .wc_input_country_iso[type=text], .wc-order-totals #refund_amount[type=text]', function() {
-				var regex, error;
+				var regex, error, decimalRegex;
+				var checkDecimalNumbers = false;
 
 				if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
+					checkDecimalNumbers = true;
 					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+					decimalRegex = new RegExp( '[^\\' + woocommerce_admin.mon_decimal_point + ']', 'gi' );
 					error = 'i18n_mon_decimal_error';
 				} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
 					regex = new RegExp( '([^A-Z])+|(.){3,}', 'im' );
 					error = 'i18n_country_iso_error';
 				} else {
+					checkDecimalNumbers = true;
 					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+					decimalRegex = new RegExp( '[^\\' + woocommerce_admin.decimal_point + ']', 'gi' );
 					error = 'i18n_decimal_error';
 				}
 
 				var value    = $( this ).val();
 				var newvalue = value.replace( regex, '' );
+
+				// Check if newvalue have more than one decimal point.
+				if ( checkDecimalNumbers && 1 < newvalue.replace( decimalRegex, '' ).length ) {
+					newvalue = newvalue.replace( decimalRegex, '' );
+				}
 
 				if ( value !== newvalue ) {
 					$( document.body ).triggerHandler( 'wc_add_error_tip', [ $( this ), error ] );
@@ -104,7 +116,7 @@
 			.on( 'change', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
 				var sale_price_field = $( this ), regular_price_field;
 
-				if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
+				if ( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
 					regular_price_field = sale_price_field.parents( '.variable_pricing' ).find( '.wc_input_price[name^=variable_regular_price]' );
 				} else {
 					regular_price_field = $( '#_regular_price' );
@@ -121,7 +133,7 @@
 			.on( 'keyup', '#_sale_price.wc_input_price[type=text], .wc_input_price[name^=variable_sale_price]', function() {
 				var sale_price_field = $( this ), regular_price_field;
 
-				if( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
+				if ( sale_price_field.attr( 'name' ).indexOf( 'variable' ) !== -1 ) {
 					regular_price_field = sale_price_field.parents( '.variable_pricing' ).find( '.wc_input_price[name^=variable_regular_price]' );
 				} else {
 					regular_price_field = $( '#_regular_price' );

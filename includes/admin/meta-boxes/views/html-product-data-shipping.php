@@ -50,6 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'id'               => 'product_shipping_class',
 			'selected'         => $product_object->get_shipping_class_id( 'edit' ),
 			'class'            => 'select short',
+			'orderby'          => 'name',
 		);
 		?>
 		<p class="form-field shipping_class_field">

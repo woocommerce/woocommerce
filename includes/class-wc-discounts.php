@@ -359,7 +359,7 @@ class WC_Discounts {
 			$discounted_price = $this->get_discounted_price_in_cents( $item );
 
 			// Get the price we actually want to discount, based on settings.
-			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
+			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : round( $item->price );
 
 			// See how many and what price to apply to.
 			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
@@ -629,8 +629,8 @@ class WC_Discounts {
 		}
 
 		if ( $coupon && $user_id && apply_filters( 'woocommerce_coupon_validate_user_usage_limit', $coupon->get_usage_limit_per_user() > 0, $user_id, $coupon, $this ) && $coupon->get_id() && $coupon->get_data_store() ) {
-			$date_store  = $coupon->get_data_store();
-			$usage_count = $date_store->get_usage_by_user_id( $coupon, $user_id );
+			$data_store  = $coupon->get_data_store();
+			$usage_count = $data_store->get_usage_by_user_id( $coupon, $user_id );
 			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
 				throw new Exception( __( 'Coupon usage limit has been reached.', 'woocommerce' ), 106 );
 			}
@@ -648,7 +648,7 @@ class WC_Discounts {
 	 * @return bool
 	 */
 	protected function validate_coupon_expiry_date( $coupon ) {
-		if ( $coupon->get_date_expires() && apply_filters( 'woocommerce_coupon_validate_expiry_date', current_time( 'timestamp', true ) > $coupon->get_date_expires()->getTimestamp(), $coupon, $this ) ) {
+		if ( $coupon->get_date_expires() && apply_filters( 'woocommerce_coupon_validate_expiry_date', time() > $coupon->get_date_expires()->getTimestamp(), $coupon, $this ) ) {
 			throw new Exception( __( 'This coupon has expired.', 'woocommerce' ), 107 );
 		}
 

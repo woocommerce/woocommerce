@@ -30,6 +30,7 @@ class WC_Post_Data {
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_type_changed', array( __CLASS__, 'product_type_changed' ), 10, 3 );
@@ -461,7 +462,7 @@ class WC_Post_Data {
 	 * @param  string $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
-		WC_Cache_Helper::incr_cache_prefix( 'object_' . $object_id );
+		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
 	}
 
 	/**

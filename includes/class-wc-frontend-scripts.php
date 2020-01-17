@@ -307,13 +307,13 @@ class WC_Frontend_Scripts {
 	private static function register_styles() {
 		$register_styles = array(
 			'photoswipe'                  => array(
-				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.css' ),
+				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.min.css' ),
 				'deps'    => array(),
 				'version' => WC_VERSION,
 				'has_rtl' => false,
 			),
 			'photoswipe-default-skin'     => array(
-				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.css' ),
+				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.min.css' ),
 				'deps'    => array( 'photoswipe' ),
 				'version' => WC_VERSION,
 				'has_rtl' => false,
@@ -464,7 +464,7 @@ class WC_Frontend_Scripts {
 			case 'wc-geolocation':
 				$params = array(
 					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'home_url'     => home_url(),
+					'home_url'     => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
 					'is_available' => ! ( is_cart() || is_account_page() || is_checkout() || is_customize_preview() ) ? '1' : '0',
 					'hash'         => isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : '', // WPCS: input var ok, CSRF ok.
 				);
@@ -583,6 +583,7 @@ class WC_Frontend_Scripts {
 			case 'wc-password-strength-meter':
 				$params = array(
 					'min_password_strength' => apply_filters( 'woocommerce_min_password_strength', 3 ),
+					'stop_checkout'         => apply_filters( 'woocommerce_enforce_password_strength_meter_on_checkout', false ),
 					'i18n_password_error'   => esc_attr__( 'Please enter a stronger password.', 'woocommerce' ),
 					'i18n_password_hint'    => esc_attr( wp_get_password_hint() ),
 				);

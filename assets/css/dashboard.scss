@@ -6,9 +6,9 @@
 /**
  * Imports
  */
-@import 'mixins';
-@import 'variables';
-@import 'fonts';
+@import "mixins";
+@import "variables";
+@import "fonts";
 
 /**
  * Styling begins
@@ -37,7 +37,7 @@ ul.woocommerce_stats {
 	}
 
 	strong {
-		font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif;
+		font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
 		font-size: 4em;
 		line-height: 1.2em;
 		font-weight: normal;
@@ -47,13 +47,16 @@ ul.woocommerce_stats {
 }
 
 #woocommerce_dashboard_status {
+
 	.inside {
 		padding: 0;
 		margin: 0;
 	}
 
 	.best-seller-this-month {
+
 		a {
+
 			strong {
 				margin-right: 48px;
 			}
@@ -111,6 +114,7 @@ ul.woocommerce_stats {
 				}
 
 				&::before {
+
 					@include icon();
 					font-size: 2em;
 					position: relative;
@@ -132,8 +136,8 @@ ul.woocommerce_stats {
 			width: 100%;
 
 			a::before {
-				font-family: 'Dashicons';
-				content: '\f185';
+				font-family: "Dashicons";
+				content: "\f185";
 			}
 		}
 
@@ -141,7 +145,7 @@ ul.woocommerce_stats {
 			width: 100%;
 
 			a::before {
-				content: '\e006';
+				content: "\e006";
 			}
 		}
 
@@ -149,14 +153,15 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 
 			a::before {
-				content: '\e011';
+				content: "\e011";
 				color: $green;
 			}
 		}
 
 		li.on-hold-orders {
+
 			a::before {
-				content: '\e033';
+				content: "\e033";
 				color: #999;
 			}
 		}
@@ -165,14 +170,15 @@ ul.woocommerce_stats {
 			border-right: 1px solid #ececec;
 
 			a::before {
-				content: '\e016';
+				content: "\e016";
 				color: $orange;
 			}
 		}
 
 		li.out-of-stock {
+
 			a::before {
-				content: '\e013';
+				content: "\e013";
 				color: $red;
 			}
 		}
@@ -180,6 +186,7 @@ ul.woocommerce_stats {
 }
 
 #woocommerce_dashboard_recent_reviews {
+
 	li {
 		line-height: 1.5em;
 		margin-bottom: 12px;
@@ -210,11 +217,11 @@ ul.woocommerce_stats {
 		line-height: 1.5;
 		margin-left: 0.5em;
 		width: 5.4em;
-		font-family: 'WooCommerce' !important;
+		font-family: "WooCommerce" !important;
 
 		&::before {
-			content: '\e021\e021\e021\e021\e021';
-			color: darken( #ccc, 10% );
+			content: "\e021\e021\e021\e021\e021";
+			color: darken(#ccc, 10%);
 			float: left;
 			top: 0;
 			left: 0;
@@ -233,7 +240,7 @@ ul.woocommerce_stats {
 		}
 
 		span::before {
-			content: '\e020\e020\e020\e020\e020';
+			content: "\e020\e020\e020\e020\e020";
 			top: 0;
 			position: absolute;
 			left: 0;
@@ -245,6 +252,6 @@ ul.woocommerce_stats {
 }
 
 #dash-right-now li.product-count a::before {
-	font-family: 'WooCommerce';
-	content: '\e01d';
+	font-family: "WooCommerce";
+	content: "\e01d";
 }

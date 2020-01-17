@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce API class loader.
+ * WC-API endpoint handler.
  *
- * This handles APIs in WooCommerce. These include:
+ * This handles API related functionality in WooCommerce.
  * - wc-api endpoint - Commonly used by Payment gateways for callbacks.
  * - Legacy REST API - Deprecated in 2.6.0. @see class-wc-legacy-api.php
  * - WP REST API - The main REST API in WooCommerce which is built on top of the WP REST API.
@@ -19,37 +19,72 @@ defined( 'ABSPATH' ) || exit;
 class WC_API extends WC_Legacy_API {
 
 	/**
-	 * Setup class.
-	 *
-	 * @since 2.0
+	 * Init the API by setting up action and filter hooks.
 	 */
-	public function __construct() {
-		parent::__construct();
-
-		$this->wc_api_init();
-		$this->rest_api_init();
-	}
-
-	/**
-	 * Init the WC API by adding endpoints for those requests.
-	 */
-	private function wc_api_init() {
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+	public function init() {
+		parent::init();
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
+		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 	}
 
 	/**
-	 * Init WP REST API by hooking into `rest_api_init`.
+	 * Get the version of the REST API package being ran.
 	 *
-	 * @since 2.6.0
+	 * @since 3.7.0
+	 * @return string|null
 	 */
-	private function rest_api_init() {
-		// Authentication needs to run early to handle basic auth.
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-authentication.php';
+	public function get_rest_api_package_version() {
+		if ( ! $this->is_rest_api_loaded() ) {
+			return null;
+		}
+		return \Automattic\WooCommerce\RestApi\Package::get_version();
+	}
 
-		add_action( 'rest_api_init', array( $this, 'rest_api_includes' ), 5 );
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
+	/**
+	 * Get the version of the REST API package being ran.
+	 *
+	 * @since 3.7.0
+	 * @return string
+	 */
+	public function get_rest_api_package_path() {
+		if ( ! $this->is_rest_api_loaded() ) {
+			return null;
+		}
+		return \Automattic\WooCommerce\RestApi\Package::get_path();
+	}
+
+	/**
+	 * Return if the rest API classes were already loaded.
+	 *
+	 * @since 3.7.0
+	 * @return boolean
+	 */
+	protected function is_rest_api_loaded() {
+		return class_exists( '\Automattic\WooCommerce\RestApi\Package', false );
+	}
+
+	/**
+	 * Get data from a WooCommerce API endpoint.
+	 *
+	 * @since 3.7.0
+	 * @param string $endpoint Endpoint.
+	 * @param array  $params Params to passwith request.
+	 * @return array|\WP_Error
+	 */
+	public function get_endpoint_data( $endpoint, $params = array() ) {
+		if ( ! $this->is_rest_api_loaded() ) {
+			return new WP_Error( 'rest_api_unavailable', __( 'The Rest API is unavailable.', 'woocommerce' ) );
+		}
+		$request = new \WP_REST_Request( 'GET', $endpoint );
+		if ( $params ) {
+			$request->set_query_params( $params );
+		}
+		$response = rest_do_request( $request );
+		$server   = rest_get_server();
+		$json     = wp_json_encode( $server->response_to_data( $response, false ) );
+		return json_decode( $json, true );
 	}
 
 	/**
@@ -115,250 +150,6 @@ class WC_API extends WC_Legacy_API {
 			// Done, clear buffer and exit.
 			ob_end_clean();
 			die( '-1' );
-		}
-	}
-
-	/**
-	 * Include REST API classes.
-	 *
-	 * @since 2.6.0
-	 */
-	public function rest_api_includes() {
-		// Exception handler.
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-exception.php';
-
-		// Abstract controllers.
-		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php';
-		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-posts-controller.php';
-		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-crud-controller.php';
-		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-terms-controller.php';
-		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-shipping-zones-controller.php';
-		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-settings-api.php';
-
-		// REST API v1 controllers.
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-coupons-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-customer-downloads-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-customers-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-orders-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-order-notes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-order-refunds-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-attribute-terms-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-attributes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-categories-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-reviews-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-shipping-classes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-product-tags-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-products-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-report-sales-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-report-top-sellers-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-reports-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-tax-classes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-taxes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhook-deliveries-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v1/class-wc-rest-webhooks-controller.php';
-
-		// Legacy v2 code.
-		include_once dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-coupons-controller.php';
-		include_once dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-orders-controller.php';
-		include_once dirname( __FILE__ ) . '/api/legacy/class-wc-rest-legacy-products-controller.php';
-
-		// REST API v2 controllers.
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-coupons-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-customer-downloads-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-customers-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-orders-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-network-orders-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-order-notes-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-order-refunds-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-attribute-terms-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-attributes-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-categories-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-reviews-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-shipping-classes-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-tags-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-products-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-product-variations-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-report-sales-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-report-top-sellers-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-reports-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-settings-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-setting-options-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-shipping-zones-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-shipping-zone-locations-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-shipping-zone-methods-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-tax-classes-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-taxes-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-webhook-deliveries-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-webhooks-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-system-status-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-system-status-tools-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-shipping-methods-v2-controller.php';
-		include_once dirname( __FILE__ ) . '/api/v2/class-wc-rest-payment-gateways-v2-controller.php';
-
-		// REST API v3 controllers.
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-coupons-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-customer-downloads-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-customers-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-orders-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-network-orders-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-order-notes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-order-refunds-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-attribute-terms-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-attributes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-categories-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-reviews-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-shipping-classes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-tags-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-products-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-variations-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-reports-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-sales-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-top-sellers-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-orders-totals-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-products-totals-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-customers-totals-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-coupons-totals-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-report-reviews-totals-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-settings-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-setting-options-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zones-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-locations-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-shipping-zone-methods-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-tax-classes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-taxes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-webhooks-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-system-status-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-system-status-tools-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-shipping-methods-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-payment-gateways-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-continents-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-countries-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-currencies-controller.php';
-
-		// Blocks REST API V1 controllers.
-		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attributes-controller.php';
-		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attribute-terms-controller.php';
-		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-categories-controller.php';
-		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-products-controller.php';
-	}
-
-	/**
-	 * Register REST API routes.
-	 *
-	 * @since 2.6.0
-	 */
-	public function register_rest_routes() {
-		// Register settings to the REST API.
-		$this->register_wp_admin_settings();
-
-		$controllers = array(
-			// REST API v1 controllers.
-			'WC_REST_Coupons_V1_Controller',
-			'WC_REST_Customer_Downloads_V1_Controller',
-			'WC_REST_Customers_V1_Controller',
-			'WC_REST_Order_Notes_V1_Controller',
-			'WC_REST_Order_Refunds_V1_Controller',
-			'WC_REST_Orders_V1_Controller',
-			'WC_REST_Product_Attribute_Terms_V1_Controller',
-			'WC_REST_Product_Attributes_V1_Controller',
-			'WC_REST_Product_Categories_V1_Controller',
-			'WC_REST_Product_Reviews_V1_Controller',
-			'WC_REST_Product_Shipping_Classes_V1_Controller',
-			'WC_REST_Product_Tags_V1_Controller',
-			'WC_REST_Products_V1_Controller',
-			'WC_REST_Report_Sales_V1_Controller',
-			'WC_REST_Report_Top_Sellers_V1_Controller',
-			'WC_REST_Reports_V1_Controller',
-			'WC_REST_Tax_Classes_V1_Controller',
-			'WC_REST_Taxes_V1_Controller',
-			'WC_REST_Webhook_Deliveries_V1_Controller',
-			'WC_REST_Webhooks_V1_Controller',
-
-			// REST API v2 controllers.
-			'WC_REST_Coupons_V2_Controller',
-			'WC_REST_Customer_Downloads_V2_Controller',
-			'WC_REST_Customers_V2_Controller',
-			'WC_REST_Network_Orders_V2_Controller',
-			'WC_REST_Order_Notes_V2_Controller',
-			'WC_REST_Order_Refunds_V2_Controller',
-			'WC_REST_Orders_V2_Controller',
-			'WC_REST_Product_Attribute_Terms_V2_Controller',
-			'WC_REST_Product_Attributes_V2_Controller',
-			'WC_REST_Product_Categories_V2_Controller',
-			'WC_REST_Product_Reviews_V2_Controller',
-			'WC_REST_Product_Shipping_Classes_V2_Controller',
-			'WC_REST_Product_Tags_V2_Controller',
-			'WC_REST_Products_V2_Controller',
-			'WC_REST_Product_Variations_V2_Controller',
-			'WC_REST_Report_Sales_V2_Controller',
-			'WC_REST_Report_Top_Sellers_V2_Controller',
-			'WC_REST_Reports_V2_Controller',
-			'WC_REST_Settings_V2_Controller',
-			'WC_REST_Setting_Options_V2_Controller',
-			'WC_REST_Shipping_Zones_V2_Controller',
-			'WC_REST_Shipping_Zone_Locations_V2_Controller',
-			'WC_REST_Shipping_Zone_Methods_V2_Controller',
-			'WC_REST_Tax_Classes_V2_Controller',
-			'WC_REST_Taxes_V2_Controller',
-			'WC_REST_Webhook_Deliveries_V2_Controller',
-			'WC_REST_Webhooks_V2_Controller',
-			'WC_REST_System_Status_V2_Controller',
-			'WC_REST_System_Status_Tools_V2_Controller',
-			'WC_REST_Shipping_Methods_V2_Controller',
-			'WC_REST_Payment_Gateways_V2_Controller',
-
-			// REST API v3 controllers.
-			'WC_REST_Coupons_Controller',
-			'WC_REST_Customer_Downloads_Controller',
-			'WC_REST_Customers_Controller',
-			'WC_REST_Network_Orders_Controller',
-			'WC_REST_Order_Notes_Controller',
-			'WC_REST_Order_Refunds_Controller',
-			'WC_REST_Orders_Controller',
-			'WC_REST_Product_Attribute_Terms_Controller',
-			'WC_REST_Product_Attributes_Controller',
-			'WC_REST_Product_Categories_Controller',
-			'WC_REST_Product_Reviews_Controller',
-			'WC_REST_Product_Shipping_Classes_Controller',
-			'WC_REST_Product_Tags_Controller',
-			'WC_REST_Products_Controller',
-			'WC_REST_Product_Variations_Controller',
-			'WC_REST_Report_Sales_Controller',
-			'WC_REST_Report_Top_Sellers_Controller',
-			'WC_REST_Report_Orders_Totals_Controller',
-			'WC_REST_Report_Products_Totals_Controller',
-			'WC_REST_Report_Customers_Totals_Controller',
-			'WC_REST_Report_Coupons_Totals_Controller',
-			'WC_REST_Report_Reviews_Totals_Controller',
-			'WC_REST_Reports_Controller',
-			'WC_REST_Settings_Controller',
-			'WC_REST_Setting_Options_Controller',
-			'WC_REST_Shipping_Zones_Controller',
-			'WC_REST_Shipping_Zone_Locations_Controller',
-			'WC_REST_Shipping_Zone_Methods_Controller',
-			'WC_REST_Tax_Classes_Controller',
-			'WC_REST_Taxes_Controller',
-			'WC_REST_Webhooks_Controller',
-			'WC_REST_System_Status_Controller',
-			'WC_REST_System_Status_Tools_Controller',
-			'WC_REST_Shipping_Methods_Controller',
-			'WC_REST_Payment_Gateways_Controller',
-			'WC_REST_Data_Controller',
-			'WC_REST_Data_Continents_Controller',
-			'WC_REST_Data_Countries_Controller',
-			'WC_REST_Data_Currencies_Controller',
-
-			// Blocks REST API v1 Controllers.
-			'WC_REST_Blocks_Product_Attributes_Controller',
-			'WC_REST_Blocks_Product_Attribute_Terms_Controller',
-			'WC_REST_Blocks_Product_Categories_Controller',
-			'WC_REST_Blocks_Products_Controller',
-		);
-
-		foreach ( $controllers as $controller ) {
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
 		}
 	}
 

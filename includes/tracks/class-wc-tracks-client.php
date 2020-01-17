@@ -43,6 +43,11 @@ class WC_Tracks_Client {
 	 * @return void
 	 */
 	public static function maybe_set_identity_cookie() {
+		// Do not set on AJAX requests.
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			return;
+		}
+
 		// Bail if cookie already set.
 		if ( isset( $_COOKIE['tk_ai'] ) ) {
 			return;
@@ -139,11 +144,17 @@ class WC_Tracks_Client {
 	public static function get_identity( $user_id ) {
 		$jetpack_lib = '/tracks/client.php';
 
-		if ( class_exists( 'Jetpack' ) && file_exists( jetpack_require_lib_dir() . $jetpack_lib ) ) {
-			include_once jetpack_require_lib_dir() . $jetpack_lib;
-
-			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
-				return jetpack_tracks_get_identity( $user_id );
+		if ( class_exists( 'Jetpack' ) && defined( 'JETPACK__VERSION' ) ) {
+			if ( version_compare( JETPACK__VERSION, '7.5', '<' ) ) {
+				if ( file_exists( jetpack_require_lib_dir() . $jetpack_lib ) ) {
+					include_once jetpack_require_lib_dir() . $jetpack_lib;
+					if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
+						return jetpack_tracks_get_identity( $user_id );
+					}
+				}
+			} else {
+				$tracking = new Automattic\Jetpack\Tracking();
+				return $tracking->tracks_get_identity( $user_id );
 			}
 		}
 

@@ -27,7 +27,7 @@ class WC_Site_Tracking {
 		}
 
 		// Check if tracking is actively being opted into.
-		$is_obw_opting_in = isset( $_POST['wc_tracker_checkbox'] ) && 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$is_obw_opting_in = isset( $_POST['wc_tracker_checkbox'] ) && 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 
 		/**
 		 * Don't track users who haven't opted-in to tracking or aren't in
@@ -111,6 +111,8 @@ class WC_Site_Tracking {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-orders-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-settings-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-status-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupons-tracking.php';
 
 		$tracking_classes = array(
 			'WC_Admin_Setup_Wizard_Tracking',
@@ -119,6 +121,8 @@ class WC_Site_Tracking {
 			'WC_Products_Tracking',
 			'WC_Orders_Tracking',
 			'WC_Settings_Tracking',
+			'WC_Status_Tracking',
+			'WC_Coupons_Tracking',
 		);
 
 		foreach ( $tracking_classes as $tracking_class ) {

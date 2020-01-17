@@ -159,9 +159,12 @@ class WC_Shipping {
 			$shipping_zone          = WC_Shipping_Zones::get_zone_matching_package( $package );
 			$this->shipping_methods = $shipping_zone->get_shipping_methods( true );
 
+			// translators: %s: shipping zone name.
+			$matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
+
 			// Debug output.
-			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' ) ) {
-				wc_add_notice( 'Customer matched zone "' . $shipping_zone->get_zone_name() . '"' );
+			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
+				wc_add_notice( $matched_zone_notice );
 			}
 		} else {
 			$this->shipping_methods = array();
@@ -259,7 +262,7 @@ class WC_Shipping {
 		 * Allow packages to be reorganized after calculating the shipping.
 		 *
 		 * This filter can be used to apply some extra manipulation after the shipping costs are calculated for the packages
-		 * but before Woocommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
+		 * but before WooCommerce does anything with them. A good example of usage is to merge the shipping methods for multiple
 		 * packages for marketplaces.
 		 *
 		 * @since 2.6.0
@@ -274,20 +277,28 @@ class WC_Shipping {
 	/**
 	 * See if package is shippable.
 	 *
-	 * Packages are shippable until proven otherwise e.g. after getting a shipping country.
+	 * Packages must have a valid destination to be shipped.
 	 *
 	 * @param  array $package Package of cart items.
 	 * @return bool
 	 */
-	protected function is_package_shippable( $package ) {
-
-		// Packages are shippable until proven otherwise.
+	public function is_package_shippable( $package ) {
 		if ( empty( $package['destination']['country'] ) ) {
-			return true;
+			return false;
+		}
+		$country = $package['destination']['country'];
+
+		$countries = array_keys( WC()->countries->get_shipping_countries() );
+		if ( ! in_array( $country, $countries, true ) ) {
+			return false;
 		}
 
-		$allowed = array_keys( WC()->countries->get_shipping_countries() );
-		return in_array( $package['destination']['country'], $allowed, true );
+		$states = WC()->countries->get_states( $country );
+		if ( is_array( $states ) && ! empty( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

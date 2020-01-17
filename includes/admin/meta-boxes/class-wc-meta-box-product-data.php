@@ -214,7 +214,7 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function prepare_children() {
-		return isset( $_POST['grouped_products'] ) ? array_filter( array_map( 'intval', (array) $_POST['grouped_products'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		return isset( $_POST['grouped_products'] ) ? array_filter( array_map( 'intval', (array) $_POST['grouped_products'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -228,7 +228,7 @@ class WC_Meta_Box_Product_Data {
 		$attributes = array();
 
 		if ( ! $data ) {
-			$data = stripslashes_deep( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$data = stripslashes_deep( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 
 		if ( isset( $data['attribute_names'], $data['attribute_values'] ) ) {
@@ -295,9 +295,9 @@ class WC_Meta_Box_Product_Data {
 					$attribute_key = sanitize_title( $attribute->get_name() );
 
 					if ( ! is_null( $index ) ) {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						$value = isset( $_POST[ $key_prefix . $attribute_key ][ $index ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ][ $index ] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					} else {
-						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						$value = isset( $_POST[ $key_prefix . $attribute_key ] ) ? wp_unslash( $_POST[ $key_prefix . $attribute_key ] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					}
 
 					if ( $attribute->is_taxonomy() ) {
@@ -322,7 +322,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post Post object.
 	 */
 	public static function save( $post_id, $post ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		// Process product type first so we have the correct class to run setters.
 		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) );
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
@@ -427,7 +427,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
-		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -437,7 +437,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post Post object.
 	 */
 	public static function save_variations( $post_id, $post ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['variable_post_id'] ) ) {
 			$parent = wc_get_product( $post_id );
 			$parent->set_default_attributes( self::prepare_set_attributes( $parent->get_attributes(), 'default_attribute_' ) );
@@ -453,7 +453,7 @@ class WC_Meta_Box_Product_Data {
 					continue;
 				}
 				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
-				$variation    = new WC_Product_Variation( $variation_id );
+				$variation    = wc_get_product_object( 'variation', $variation_id );
 				$stock        = null;
 
 				// Handle stock changes.
@@ -527,11 +527,20 @@ class WC_Meta_Box_Product_Data {
 					WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 				}
 
+				/**
+				 * Set variation props before save.
+				 *
+				 * @param object $variation WC_Product_Variation object.
+				 * @param int $i
+				 * @since 3.8.0
+				 */
+				do_action( 'woocommerce_admin_process_variation_object', $variation, $i );
+
 				$variation->save();
 
 				do_action( 'woocommerce_save_product_variation', $variation_id, $i );
 			}
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 }

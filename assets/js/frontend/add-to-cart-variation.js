@@ -88,6 +88,18 @@
 			event.data.variationForm.$form.find( '.single_add_to_cart_button' ).removeClass( 'wc-variation-selection-needed' ).addClass( 'disabled wc-variation-is-unavailable' );
 			event.data.variationForm.$form.find( '.woocommerce-variation-add-to-cart' ).removeClass( 'woocommerce-variation-add-to-cart-enabled' ).addClass( 'woocommerce-variation-add-to-cart-disabled' );
 		}
+
+		// If present, the media element library needs initialized on the variation description.
+		if ( wp.mediaelement ) {
+			event.data.variationForm.$form.find( '.wp-audio-shortcode, .wp-video-shortcode' )
+				.not( '.mejs-container' )
+				.filter(
+					function () {
+						return ! $( this ).parent().hasClass( 'mejs-mediaelement' );
+					}
+				)
+				.mediaelementplayer( wp.mediaelement.settings );
+		}
 	};
 
 	/**
@@ -275,7 +287,6 @@
 		} else {
 			form.$form.trigger( 'woocommerce_variation_select_change' );
 			form.$form.trigger( 'check_variations' );
-			$( this ).blur();
 		}
 
 		// Custom event for when variation selection has been changed

@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3>
 		<a href="#" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
+		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop to set admin attribute order', 'woocommerce' ); ?>"></div>			
 		<strong class="attribute_name"><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content hidden">

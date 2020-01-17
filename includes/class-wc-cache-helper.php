@@ -34,14 +34,14 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Set additonal nocache headers.
+	 * Set additional nocache headers.
 	 *
 	 * @param array $headers Header names and field values.
 	 * @since 3.6.0
 	 */
 	public static function additional_nocache_headers( $headers ) {
-		// Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
-		$headers['Cache-Control'] = 'no-transform, no-cache, must-revalidate, max-age=0';
+		// no-transform: Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
+		$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
 		return $headers;
 	}
 
@@ -94,7 +94,7 @@ class WC_Cache_Helper {
 		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
 
 		if ( false === $prefix ) {
-			$prefix = 1;
+			$prefix = microtime();
 			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
 		}
 
@@ -107,7 +107,18 @@ class WC_Cache_Helper {
 	 * @param string $group Group of cache to clear.
 	 */
 	public static function incr_cache_prefix( $group ) {
-		wp_cache_incr( 'wc_' . $group . '_cache_prefix', 1, $group );
+		wc_deprecated_function( 'WC_Cache_Helper::incr_cache_prefix', '3.9.0', 'WC_Cache_Helper::invalidate_cache_group' );
+		self::invalidate_cache_group( $group );
+	}
+
+	/**
+	 * Invalidate cache group.
+	 *
+	 * @param string $group Group of cache to clear.
+	 * @since 3.9.0
+	 */
+	public static function invalidate_cache_group( $group ) {
+		wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
 	}
 
 	/**

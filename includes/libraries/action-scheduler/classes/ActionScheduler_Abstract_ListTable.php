@@ -107,7 +107,7 @@ abstract class ActionScheduler_Abstract_ListTable extends WP_List_Table {
 	 * `_x` with some default (the package name)
 	 */
 	protected function translate( $text, $context = '' ) {
-		return _x( $text, $context, $this->package );
+		return $text;
 	}
 
 	/**
@@ -462,13 +462,13 @@ abstract class ActionScheduler_Abstract_ListTable extends WP_List_Table {
 			echo '</select>';
 		}
 
-		submit_button( $this->translate( 'Filter' ), '', 'filter_action', false, array( 'id' => 'post-query-submit' ) );
+		submit_button( __( 'Filter', 'woocommerce' ), '', 'filter_action', false, array( 'id' => 'post-query-submit' ) );
 		echo '</div>';
 	}
 
 	/**
 	 * Set the data for displaying. It will attempt to unserialize (There is a chance that some columns
-	 * are serialized). This can be override in child classes for futher data transformation.
+	 * are serialized). This can be override in child classes for further data transformation.
 	 */
 	protected function set_items( array $items ) {
 		$this->items = array();
@@ -547,7 +547,7 @@ abstract class ActionScheduler_Abstract_ListTable extends WP_List_Table {
 	}
 
 	/**
-	 * Default column formatting, it will escape everythig for security.
+	 * Default column formatting, it will escape everything for security.
 	 */
 	public function column_default( $item, $column_name ) {
 		$column_html = esc_html( $item[ $column_name ] );
@@ -561,7 +561,8 @@ abstract class ActionScheduler_Abstract_ListTable extends WP_List_Table {
 	protected function display_header() {
 		echo '<h1 class="wp-heading-inline">' . esc_attr( $this->table_header ) . '</h1>';
 		if ( $this->get_request_search_query() ) {
-			echo '<span class="subtitle">' . esc_attr( $this->translate( sprintf( 'Search results for "%s"', $this->get_request_search_query() ) ) ) . '</span>';
+			/* translators: %s: search query */
+			echo '<span class="subtitle">' . esc_attr( sprintf( __( 'Search results for "%s"', 'woocommerce' ), $this->get_request_search_query() ) ) . '</span>';
 		}
 		echo '<hr class="wp-header-end">';
 	}
@@ -651,6 +652,6 @@ abstract class ActionScheduler_Abstract_ListTable extends WP_List_Table {
 	 * Get the text to display in the search box on the list table.
 	 */
 	protected function get_search_box_placeholder() {
-		return $this->translate( 'Search' );
+		return __( 'Search', 'woocommerce' );
 	}
 }

@@ -194,6 +194,18 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
+	/**
+	 * Prevent adjust line item product stock.
+	 *
+	 * @since 3.7.1
+	 * @param bool $prevent If should prevent.
+	 * @param WC_Order_Item $item Item object.
+	 * @param int           $item_quantity Optional quantity to check against.
+	 */
+	if ( apply_filters( 'woocommerce_prevent_adjust_line_item_product_stock', false, $item, $item_quantity ) ) {
+		return false;
+	}
+
 	$product               = $item->get_product();
 	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
@@ -202,19 +214,23 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
-	$diff = $item_quantity - $already_reduced_stock;
+	$order                  = $item->get_order();
+	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
+	$diff                   = $item_quantity + $refunded_item_quantity - $already_reduced_stock;
 
 	if ( $diff < 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff * -1, 'increase' );
-	} else {
+	} elseif ( $diff > 0 ) {
 		$new_stock = wc_update_product_stock( $product, $diff, 'decrease' );
+	} else {
+		return false;
 	}
 
 	if ( is_wp_error( $new_stock ) ) {
 		return $new_stock;
 	}
 
-	$item->update_meta_data( '_reduced_stock', $item_quantity );
+	$item->update_meta_data( '_reduced_stock', $item_quantity + $refunded_item_quantity );
 	$item->save();
 
 	return array(
@@ -402,4 +418,59 @@ function wc_render_action_buttons( $actions ) {
 	}
 
 	return $actions_html;
+}
+
+/**
+ * Shows a notice if variations are missing prices.
+ *
+ * @since 3.6.0
+ * @param WC_Product $product_object Product object.
+ */
+function wc_render_invalid_variation_notice( $product_object ) {
+	global $wpdb;
+
+	// Give ability for extensions to hide this notice.
+	if ( ! apply_filters( 'woocommerce_show_invalid_variations_notice', true, $product_object ) ) {
+		return;
+	}
+
+	$variation_ids = $product_object ? $product_object->get_children() : array();
+
+	if ( empty( $variation_ids ) ) {
+		return;
+	}
+
+	$variation_count = count( $variation_ids );
+
+	// Check if a variation exists without pricing data.
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$invalid_variation_count = $wpdb->get_var(
+		"
+		SELECT count(post_id) FROM {$wpdb->postmeta}
+		WHERE post_id in (" . implode( ',', array_map( 'absint', $variation_ids ) ) . ")
+		AND meta_key='_price'
+		AND meta_value >= 0
+		AND meta_value != ''
+		"
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	if ( 0 < ( $variation_count - $invalid_variation_count ) ) {
+		?>
+		<div id="message" class="inline notice woocommerce-message woocommerce-notice-invalid-variation">
+			<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* Translators: %d variation count. */
+					_n( '%d variation does not have a price.', '%d variations do not have prices.', ( $variation_count - $invalid_variation_count ), 'woocommerce' ),
+					( $variation_count - $invalid_variation_count )
+				) . '&nbsp;' .
+				__( 'Variations (and their attributes) that do not have prices will not be shown in your store.', 'woocommerce' )
+			);
+			?>
+			</p>
+		</div>
+		<?php
+	}
 }

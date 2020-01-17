@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</label>
 				</th>
 				<td class="forminp">
-					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_html_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
+					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_attr_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
 						<?php
 						foreach ( $shipping_continents as $continent_code => $continent ) {
 							echo '<option value="continent:' . esc_attr( $continent_code ) . '"' . wc_selected( "continent:$continent_code", $locations ) . '>' . esc_html( $continent['name'] ) . '</option>';

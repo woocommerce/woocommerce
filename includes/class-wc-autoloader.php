@@ -88,12 +88,8 @@ class WC_Autoloader {
 			$path = $this->include_path . 'payment-tokens/';
 		} elseif ( 0 === strpos( $class, 'wc_log_handler_' ) ) {
 			$path = $this->include_path . 'log-handlers/';
-		}
-
-		// Prevent plugins from breaking if they extend the rest API early.
-		if ( 0 === strpos( $class, 'wc_rest_' ) && ! class_exists( $class, false ) && ! did_action( 'rest_api_init' ) ) {
-			wc_doing_it_wrong( $class, __( 'Classes that extend the WooCommerce/WordPress REST API should only be loaded during the rest_api_init action, or should call WC()->api->rest_api_includes() manually.', 'woocommerce' ), '3.6' );
-			WC()->api->rest_api_includes();
+		} elseif ( 0 === strpos( $class, 'wc_integration' ) ) {
+			$path = $this->include_path . 'integrations/' . substr( str_replace( '_', '-', $class ), 15 ) . '/';
 		}
 
 		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {

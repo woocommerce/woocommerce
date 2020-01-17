@@ -35,7 +35,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
 		$zone->apply_changes();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
@@ -60,7 +60,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		$zone->save_meta_data();
 		$this->save_locations( $zone );
 		$zone->apply_changes();
-		WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
@@ -132,7 +132,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 
 			$zone->set_id( null );
 
-			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
+			WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 			do_action( 'woocommerce_delete_shipping_zone', $zone_id );
@@ -266,6 +266,16 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 				$criteria[] = 'AND zones.zone_id NOT IN (' . implode( ',', $do_not_match ) . ')';
 			}
 		}
+
+		/**
+		 * Get shipping zone criteria
+		 *
+		 * @since 3.6.6
+		 * @param array $criteria Get zone criteria.
+		 * @param array $package Package information.
+		 * @param array $postcode_locations Postcode range and wildcard matching.
+		 */
+		$criteria = apply_filters( 'woocommerce_get_zone_criteria', $criteria, $package, $postcode_locations );
 
 		// Get matching zones.
 		return $wpdb->get_var(

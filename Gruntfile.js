@@ -148,11 +148,29 @@ module.exports = function( grunt ) {
 		// Minify all .css files.
 		cssmin: {
 			minify: {
-				expand: true,
-				cwd: '<%= dirs.css %>/',
-				src: ['*.css'],
-				dest: '<%= dirs.css %>/',
-				ext: '.css'
+				files: [
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/',
+						src: ['*.css'],
+						dest: '<%= dirs.css %>/',
+						ext: '.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/photoswipe/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/photoswipe/',
+						ext: '.min.css'
+					},
+					{
+						expand: true,
+						cwd: '<%= dirs.css %>/photoswipe/default-skin/',
+						src: ['*.css', '!*.min.css'],
+						dest: '<%= dirs.css %>/photoswipe/default-skin/',
+						ext: '.min.css'
+					}
+				]
 			}
 		},
 
@@ -197,7 +215,6 @@ module.exports = function( grunt ) {
 				options: {
 					potFilename: 'woocommerce.pot',
 					exclude: [
-						'apigen/.*',
 						'vendor/.*',
 						'tests/.*',
 						'tmp/.*'
@@ -230,12 +247,11 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php',               // Include all files
-					'!apigen/**',             // Exclude apigen/
-					'!includes/libraries/**', // Exclude libraries/
 					'!node_modules/**',       // Exclude node_modules/
 					'!tests/**',              // Exclude tests/
 					'!vendor/**',             // Exclude vendor/
-					'!tmp/**'                 // Exclude tmp/
+					'!tmp/**',                // Exclude tmp/
+					'!packages/*/vendor/**'   // Exclude packages/*/vendor
 				],
 				expand: true
 			}
@@ -246,13 +262,6 @@ module.exports = function( grunt ) {
 			options: {
 				stdout: true,
 				stderr: true
-			},
-			apidocs: {
-				command: [
-					'vendor/bin/apigen generate -q',
-					'cd apigen',
-					'php hook-docs.php'
-				].join( '&&' )
 			},
 			e2e_test: {
 				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
@@ -268,7 +277,7 @@ module.exports = function( grunt ) {
 					'echo "Generating contributor list since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
-					' --showlogin true > contributors.md'
+					' --showlogin true --sha <%= sha %> --filter renovate-bot > contributors.md'
 				].join( '&&' )
 			}
 		},
@@ -283,6 +292,11 @@ module.exports = function( grunt ) {
 							message: 'What date (YYYY-MM-DD) should we get contributions since?'
 						},
 						{
+							config: 'sha',
+							type: 'input',
+							message: 'What branch should we get contributors from?'
+						},
+						{
 							config: 'authToken',
 							type: 'input',
 							message: '(optional) Provide a personal access token.' +
@@ -292,21 +306,6 @@ module.exports = function( grunt ) {
 				}
 			}
 		},
-
-		// Clean the directory.
-		clean: {
-			apidocs: {
-				src: [ 'wc-apidocs' ]
-			},
-			blocks: {
-				src: [
-					'<%= dirs.js %>/blocks',
-					'<%= dirs.css %>/blocks',
-					'<%= dirs.php %>/blocks'
-				]
-			}
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -315,7 +314,6 @@ module.exports = function( grunt ) {
 			dist: {
 				src:  [
 					'**/*.php', // Include all php files.
-					'!apigen/**',
 					'!includes/api/legacy/**',
 					'!includes/libraries/**',
 					'!node_modules/**',
@@ -330,65 +328,13 @@ module.exports = function( grunt ) {
 		postcss: {
 			options: {
 				processors: [
-					require( 'autoprefixer' )({
-						browsers: [
-							'> 0.1%',
-							'ie 8',
-							'ie 9'
-						]
-					})
+					require( 'autoprefixer' )
 				]
 			},
 			dist: {
 				src: [
 					'<%= dirs.css %>/*.css'
 				]
-			}
-		},
-
-		// Copy block files from npm package.
-		copy: {
-			js: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/build',
-				src: '*.js',
-				dest: '<%= dirs.js %>/blocks/',
-				options: {
-					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
-				}
-			},
-			css: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/build',
-				src: '*.css',
-				dest: '<%= dirs.css %>/blocks/'
-			},
-			php: {
-				expand: true,
-				cwd: 'node_modules/@woocommerce/block-library/assets/php',
-				src: '*.php',
-				dest: '<%= dirs.php %>/blocks/',
-				rename: ( dest, src ) => dest + '/' + src.replace( '-wgpb-', '-wc-' ),
-				options: {
-					process: ( content ) => content
-						// Replace textdomain.
-						.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
-						// Replace source for JS files.
-						.replace(
-							/plugins_url\( 'build\/([\w-]*)\.js', WGPB_PLUGIN_FILE \)/g,
-							"WC()->plugin_url() . '/assets/js/blocks/$1.js'"
-						)
-						// Replace source for CSS files.
-						.replace(
-							/plugins_url\( 'build\/([\w-]*)\.css', WGPB_PLUGIN_FILE \)/g,
-							"WC()->plugin_url() . '/assets/css/blocks/$1.css'"
-						)
-						// Replace class & constant prefixes.
-						.replace( /WGPB_/g, 'WC_' )
-						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
-						// Replace file imports
-						.replace( /-wgpb-/g, '-wc-' )
-				}
 			}
 		}
 	});
@@ -415,15 +361,13 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
-		'blocks',
 		'i18n'
 	]);
 
 	grunt.registerTask( 'js', [
 		'jshint',
 		'uglify:admin',
-		'uglify:frontend',
-		'uglify:flexslider'
+		'uglify:frontend'
 	]);
 
 	grunt.registerTask( 'css', [
@@ -434,14 +378,16 @@ module.exports = function( grunt ) {
 		'concat'
 	]);
 
-	grunt.registerTask( 'blocks', [
-		'clean:blocks',
-		'copy'
+	grunt.registerTask( 'assets', [
+		'js',
+		'css'
 	]);
 
-	grunt.registerTask( 'docs', [
-		'clean:apidocs',
-		'shell:apidocs'
+	grunt.registerTask( 'e2e-build', [
+		'uglify:admin',
+		'uglify:frontend',
+		'uglify:flexslider',
+		'css'
 	]);
 
 	grunt.registerTask( 'contributors', [
