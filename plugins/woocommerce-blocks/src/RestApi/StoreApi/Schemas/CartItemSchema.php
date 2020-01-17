@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
+use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock;
 
 /**
  * CartItemSchema class.
@@ -31,13 +32,13 @@ class CartItemSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
-			'key'               => [
+			'key'                 => [
 				'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'id'                => [
+			'id'                  => [
 				'description' => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
@@ -47,7 +48,7 @@ class CartItemSchema extends AbstractSchema {
 					'validate_callback' => [ $this, 'product_id_exists' ],
 				],
 			],
-			'quantity'          => [
+			'quantity'            => [
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
@@ -56,32 +57,38 @@ class CartItemSchema extends AbstractSchema {
 					'sanitize_callback' => 'wc_stock_amount',
 				],
 			],
-			'name'              => [
+			'name'                => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'short_description' => [
+			'short_description'   => [
 				'description' => __( 'Product short description or excerpt from full description.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'sku'               => [
+			'sku'                 => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'permalink'         => [
+			'low_stock_remaining' => [
+				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woo-gutenberg-products-block' ),
+				'type'        => [ 'integer', 'null' ],
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'permalink'           => [
 				'description' => __( 'Product URL.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'images'            => [
+			'images'              => [
 				'description' => __( 'List of images.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -129,7 +136,7 @@ class CartItemSchema extends AbstractSchema {
 					],
 				],
 			],
-			'variation'         => [
+			'variation'           => [
 				'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -149,7 +156,7 @@ class CartItemSchema extends AbstractSchema {
 					],
 				],
 			],
-			'totals'            => [
+			'totals'              => [
 				'description' => __( 'Item total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -213,16 +220,17 @@ class CartItemSchema extends AbstractSchema {
 		$short_description = normalize_whitespace( $short_description );
 
 		return [
-			'key'               => $cart_item['key'],
-			'id'                => $product->get_id(),
-			'quantity'          => wc_stock_amount( $cart_item['quantity'] ),
-			'name'              => $product->get_title(),
-			'sku'               => $product->get_sku(),
-			'short_description' => $short_description,
-			'permalink'         => $product->get_permalink(),
-			'images'            => ( new ProductImages() )->images_to_array( $product ),
-			'variation'         => $this->format_variation_data( $cart_item['variation'], $product ),
-			'totals'            => (object) array_merge(
+			'key'                 => $cart_item['key'],
+			'id'                  => $product->get_id(),
+			'quantity'            => wc_stock_amount( $cart_item['quantity'] ),
+			'name'                => $product->get_title(),
+			'short_description'   => $short_description,
+			'sku'                 => $product->get_sku(),
+			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
+			'permalink'           => $product->get_permalink(),
+			'images'              => ( new ProductImages() )->images_to_array( $product ),
+			'variation'           => $this->format_variation_data( $cart_item['variation'], $product ),
+			'totals'              => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
 					'line_subtotal'     => $this->prepare_money_response( $cart_item['line_subtotal'], wc_get_price_decimals() ),
@@ -232,6 +240,31 @@ class CartItemSchema extends AbstractSchema {
 				]
 			),
 		];
+	}
+
+	/**
+	 * If a product has low stock, return the remaining stock amount for display.
+	 *
+	 * Note; unlike the products API, this also factors in draft orders so the results are more up to date.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return integer|null
+	 */
+	protected function get_low_stock_remaining( \WC_Product $product ) {
+		if ( is_null( $product->get_stock_quantity() ) ) {
+			return null;
+		}
+
+		$draft_order     = WC()->session->get( 'store_api_draft_order' );
+		$reserve_stock   = new ReserveStock();
+		$reserved_stock  = $reserve_stock->get_reserved_stock( $product, isset( $draft_order['id'] ) ? $draft_order['id'] : 0 );
+		$remaining_stock = $product->get_stock_quantity() - $reserved_stock;
+
+		if ( $remaining_stock <= wc_get_low_stock_amount( $product ) ) {
+			return $remaining_stock;
+		}
+
+		return null;
 	}
 
 	/**
