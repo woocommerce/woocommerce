@@ -34,7 +34,7 @@ class ReportExporter {
 	/**
 	 * Export status option name.
 	 */
-	const EXPORT_STATUS_OPTION = 'wc_admin_report_export_status';
+	const EXPORT_STATUS_OPTION = 'woocommerce_admin_report_export_status';
 
 	/**
 	 * Export file download action.

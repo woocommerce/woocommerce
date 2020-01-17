@@ -336,7 +336,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return array An array of images that have been attached to the post.
 	 */
 	private static function sideload_homepage_images( $post_id, $number_of_images ) {
-		$profile            = get_option( 'wc_onboarding_profile', array() );
+		$profile            = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
 		$images_to_sideload = array();
 		$available_images   = self::get_available_homepage_images();
 

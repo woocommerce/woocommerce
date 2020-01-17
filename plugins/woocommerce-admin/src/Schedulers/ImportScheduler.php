@@ -17,6 +17,11 @@ use \Automattic\WooCommerce\Admin\Schedulers\SchedulerTraits;
  */
 abstract class ImportScheduler {
 	/**
+	 * Import stats option name.
+	 */
+	const IMPORT_STATS_OPTION = 'woocommerce_admin_import_stats';
+
+	/**
 	 * Scheduler traits.
 	 */
 	use SchedulerTraits {
@@ -148,10 +153,10 @@ abstract class ImportScheduler {
 			static::import( $id );
 		}
 
-		$import_stats                              = get_option( 'wc_admin_import_stats', array() );
+		$import_stats                              = get_option( self::IMPORT_STATS_OPTION, array() );
 		$imported_count                            = absint( $import_stats[ static::$name ]['imported'] ) + count( $items->ids );
 		$import_stats[ static::$name ]['imported'] = $imported_count;
-		update_option( 'wc_admin_import_stats', $import_stats );
+		update_option( self::IMPORT_STATS_OPTION, $import_stats );
 
 		$properties['imported_count'] = $imported_count;
 

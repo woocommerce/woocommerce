@@ -23,7 +23,7 @@ class WC_Admin_Notes_Order_Milestones {
 	/**
 	 * Option key name to store last order milestone.
 	 */
-	const LAST_ORDER_MILESTONE_OPTION_KEY = 'wc_admin_last_orders_milestone';
+	const LAST_ORDER_MILESTONE_OPTION_KEY = 'woocommerce_admin_last_orders_milestone';
 
 	/**
 	 * Hook to process order milestones.
