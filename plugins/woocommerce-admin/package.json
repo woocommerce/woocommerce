@@ -141,7 +141,7 @@
     "deep-freeze": "0.0.1",
     "docsify-cli": "4.4.0",
     "enzyme-adapter-react-16": "1.15.2",
-    "eslint": "5.16.0",
+    "eslint": "6.8.0",
     "eslint-config-wpcalypso": "4.0.1",
     "eslint-loader": "2.2.1",
     "eslint-plugin-jest": "22.21.0",
