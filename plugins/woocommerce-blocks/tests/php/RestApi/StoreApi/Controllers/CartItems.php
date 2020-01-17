@@ -212,7 +212,9 @@ class CartItems extends TestCase {
 		$this->assertArrayHasKey( 'id', $schema['properties'] );
 		$this->assertArrayHasKey( 'quantity', $schema['properties'] );
 		$this->assertArrayHasKey( 'name', $schema['properties'] );
+		$this->assertArrayHasKey( 'short_description', $schema['properties'] );
 		$this->assertArrayHasKey( 'sku', $schema['properties'] );
+		$this->assertArrayHasKey( 'low_stock_remaining', $schema['properties'] );
 		$this->assertArrayHasKey( 'permalink', $schema['properties'] );
 		$this->assertArrayHasKey( 'images', $schema['properties'] );
 		$this->assertArrayHasKey( 'totals', $schema['properties'] );
@@ -237,6 +239,8 @@ class CartItems extends TestCase {
 		$this->assertArrayHasKey( 'images', $data );
 		$this->assertArrayHasKey( 'totals', $data );
 		$this->assertArrayHasKey( 'variation', $data );
+		$this->assertArrayHasKey( 'low_stock_remaining', $data );
+		$this->assertArrayHasKey( 'short_description', $data );
 	}
 
 	/**
