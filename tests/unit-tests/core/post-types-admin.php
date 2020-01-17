@@ -33,7 +33,7 @@ class WC_Test_Admin_Post_Types extends WC_Unit_Test_Case {
 		$ext = '.csv';
 
 		$unique_filename = $this->wc_cpt->unique_filename( $full_filename, $ext );
-		$this->assertEquals( strlen( $full_filename ) + 32 + 1, strlen( $unique_filename ) );
+		$this->assertEquals( strlen( $full_filename ) + 6 + 1, strlen( $unique_filename ) );
 		$this->assertEquals( $ext, substr( $unique_filename, -4 ) );
 	}
 

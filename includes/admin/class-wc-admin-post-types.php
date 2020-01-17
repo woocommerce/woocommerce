@@ -838,6 +838,10 @@ class WC_Admin_Post_Types {
 			return $full_filename;
 		}
 
+		if ( 'no' === get_option( 'woocommerce_downloads_add_hash_to_filename' ) ) {
+			return $full_filename;
+		}
+
 		return $this->unique_filename( $full_filename, $ext );
 	}
 
@@ -850,7 +854,7 @@ class WC_Admin_Post_Types {
 	 * @return string Modified filename.
 	 */
 	public function unique_filename( $full_filename, $ext ) {
-		$ideal_random_char_length = 32;
+		$ideal_random_char_length = 6;   // Not going with a larger length because then downloaded filename will not be pretty.
 		$max_filename_length      = 255; // Max file name length for most file systems.
 		$length_to_prepend        = min( $ideal_random_char_length, $max_filename_length - strlen( $full_filename ) - 1 );
 

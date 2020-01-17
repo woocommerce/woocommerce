@@ -261,6 +261,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 					),
 
 					array(
+						'title' => __( 'Filename', 'woocommerce' ),
+						'desc' => __( 'Append a unique string to filename for security', 'woocommerce' ),
+						'id' => 'woocommerce_downloads_add_hash_to_filename',
+						'type' => 'checkbox',
+						'default' => 'yes',
+						'desc_tip' => sprintf(
+							// translators: Link to WooCommerce Docs.
+							__( "Not required if you download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
+							'link to woocommerce docs' // TODO: Change this after updating docs.
+						),
+					),
+
+					array(
 						'type' => 'sectionend',
 						'id'   => 'digital_download_options',
 					),
