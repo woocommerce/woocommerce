@@ -206,31 +206,13 @@ class FeaturePlugin {
 	}
 
 	/**
-	 * Removes core hooks in favor of our local feature plugin handlers.
-	 *
-	 * @see WC_Admin_Library::__construct()
+	 * Set up our admin hooks and plugin loader.
 	 */
 	protected function hooks() {
-		remove_action( 'init', array( 'WC_Admin_Library', 'load_features' ) );
-		remove_action( 'admin_enqueue_scripts', array( 'WC_Admin_Library', 'register_scripts' ) );
-		remove_action( 'admin_enqueue_scripts', array( 'WC_Admin_Library', 'load_scripts' ), 15 );
-		remove_action( 'woocommerce_components_settings', array( 'WC_Admin_Library', 'add_component_settings' ) );
-		remove_filter( 'admin_body_class', array( 'WC_Admin_Library', 'add_admin_body_classes' ) );
-		remove_action( 'admin_menu', array( 'WC_Admin_Library', 'register_page_handler' ) );
-		remove_filter( 'admin_title', array( 'WC_Admin_Library', 'update_admin_title' ) );
-
-		remove_action( 'rest_api_init', array( 'WC_Admin_Library', 'register_user_data' ) );
-		remove_action( 'in_admin_header', array( 'WC_Admin_Library', 'embed_page_header' ) );
-		remove_filter( 'woocommerce_settings_groups', array( 'WC_Admin_Library', 'add_settings_group' ) );
-		remove_filter( 'woocommerce_settings-wc_admin', array( 'WC_Admin_Library', 'add_settings' ) );
-
-		remove_action( 'admin_head', array( 'WC_Admin_Library', 'update_link_structure' ), 20 );
-
-		new Loader();
-
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ) );
 		add_action( 'admin_menu', array( $this, 'register_devdocs_page' ) );
 
+		new Loader();
 	}
 
 	/**
