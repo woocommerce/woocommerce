@@ -31,7 +31,6 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 			case 'menu_order':
 			case 'popularity':
 			case 'rating':
-			case 'date':
 			case 'price':
 				return {
 					orderby: orderName,
@@ -40,6 +39,11 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 			case 'price-desc':
 				return {
 					orderby: 'price',
+					order: 'desc',
+				};
+			case 'date':
+				return {
+					orderby: 'date',
 					order: 'desc',
 				};
 		}
