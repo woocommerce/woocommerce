@@ -1,293 +1,256 @@
-.wc-block-cart__sidebar {
-	border: 1px solid $core-grey-light-600;
-	border-width: 1px 0;
-	min-width: 15rem;
-	padding-bottom: $gap-largest;
+.wc-block-cart {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 (-$gap) $gap;
+
+	.wc-block-cart__main {
+		flex: 1 0 65%;
+		margin: 0;
+		padding: 0 $gap;
+		min-width: 500px;
+	}
+	.wc-block-cart__sidebar {
+		flex: 1 1 35%;
+		margin: 0;
+		padding: 0 $gap;
+	}
+	.wc-block-cart__item-count {
+		float: right;
+	}
+	.wc-block-cart__totals-footer {
+		color: #000;
+		font-size: 1.25em;
+
+		> .wc-block-totals-table-item__label {
+			font-weight: normal;
+		}
+	}
+	// Added extra class and label for specificity.
+	fieldset.wc-block-cart__shipping-options-fieldset {
+		background-color: transparent;
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+	.wc-block-cart__shipping-options {
+		.wc-block-radio-control__label {
+			flex-basis: 100%;
+			line-height: 16px;
+		}
+
+		.wc-block-radio-control__description {
+			flex-basis: 100%;
+		}
+
+		.wc-block-radio-control__option {
+			padding-left: $gap-large;
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+
+		.wc-block-radio-control__input {
+			left: 0;
+			top: $gap;
+		}
+	}
 }
 
-.wc-block-cart__item-count {
-	float: right;
-}
-
+table.wc-block-cart-items,
 table.wc-block-cart-items th,
 table.wc-block-cart-items td {
 	// Override Storefront theme gray table background.
 	background: none !important;
+	// Remove borders on default themes.
+	border: 0;
 }
 
-table.wc-block-cart-items th {
-	padding: 0.5rem $gap;
-	white-space: nowrap;
-}
-
-table.wc-block-cart-items td {
-	border-top: 1px solid $core-grey-light-600;
-	padding: $gap;
-}
 table.wc-block-cart-items {
+	table-layout: fixed;
+	width: 100%;
 	border-bottom: 1px solid $core-grey-light-600;
-}
 
-table.wc-block-cart-items th:first-child,
-table.wc-block-cart-items td:first-child {
-	padding-left: 0;
-}
-table.wc-block-cart-items th:last-child,
-table.wc-block-cart-items td:last-child {
-	padding-right: 0;
-}
-
-.wc-block-cart-items__header {
-	display: none;
-	text-transform: uppercase;
-}
-
-.wc-block-cart-items__header-quantity,
-.wc-block-cart-item__quantity {
-	width: 132px;
-}
-
-.wc-block-cart-item__remove-link {
-	@include link-button;
-
-	color: $core-grey-dark-400;
-	font-size: 14px;
-	line-height: 12px;
-	margin-top: 0.5em;
-	// Temporary - this is not yet a link or "link button".
-	// May not be needed when remove is hooked up to API properly.
-	text-decoration: underline;
-}
-
-.wc-block-cart-item__remove-icon {
-	@include link-button;
-
-	color: $core-grey-dark-400;
-	fill: currentColor;
-}
-
-.wc-block-cart-items__header-total,
-.wc-block-cart-item__total {
-	text-align: right;
-}
-
-.wc-block-cart-item__product-wrapper {
-	display: flex;
-	flex-direction: row;
-
-	// Fixes a Safari-specific issue - product images display stretched vertically (full image height).
-	// https://stackoverflow.com/questions/57516373/image-stretching-in-flexbox-in-safari
-	align-items: flex-start;
-}
-
-.wc-block-cart-item__product img {
-	max-width: $cart-image-width;
-}
-
-.wc-block-cart-item__product-details {
-	margin-left: $gap;
-}
-
-.wc-block-cart-item__product-name {
-	color: $core-grey-dark-600;
-	font-size: 16px;
-}
-
-.wc-block-cart-item__low-stock-badge {
-	display: inline-block;
-
-	background-color: $white;
-	border-radius: 3px;
-	border: 1px solid $black;
-	color: $black;
-	font-size: 12px;
-	padding: 0 1em;
-	text-transform: uppercase;
-	white-space: nowrap;
-}
-
-.wc-block-cart-item__product-metadata {
-	color: $core-grey-dark-400;
-	font-size: 12px;
-}
-
-.wc-block-cart-item__quantity {
-	display: none;
-}
-.wc-block-cart-item__quantity-stacked {
-	display: block;
-}
-
-.wc-block-cart-item__total {
-	font-size: 16px;
-	line-height: 19px;
-}
-
-.wc-block-cart-item__full-price {
-	color: $core-grey-dark-400;
-	text-decoration: line-through;
-}
-
-.wc-block-cart-item__line-total {
-	color: $black;
-	margin-left: 0.5em;
-}
-
-.wc-block-cart-item__discount-badge {
-	background-color: $core-grey-dark-600;
-	border-radius: 3px;
-	color: $white;
-	font-size: 12px;
-	padding: 0 1em;
-	text-transform: uppercase;
-	white-space: nowrap;
-}
-
-.wc-block-cart__totals-footer {
-	color: #000;
-	font-size: 1.25em;
-
-	> .wc-block-totals-table-item__label {
-		font-weight: normal;
+	th {
+		padding: 0.5rem $gap 0.5rem 0;
+		white-space: nowrap;
+		border-collapse: collapse;
 	}
-}
-
-// Added extra class and label for specificity.
-.wc-block-cart fieldset.wc-block-cart__shipping-options-fieldset {
-	background-color: transparent;
-	margin: 0;
-	padding: 0;
-}
-
-.wc-block-cart__shipping-options {
-	.wc-block-radio-control__label {
-		flex-basis: 100%;
-		line-height: 16px;
-	}
-
-	.wc-block-radio-control__description {
-		flex-basis: 100%;
-	}
-
-	.wc-block-radio-control__option {
-		padding-left: $gap-large;
-
-		&:last-child {
-			border-bottom: none;
-		}
-	}
-
-	.wc-block-radio-control__input {
-		left: 0;
-		top: $gap;
-	}
-}
-
-@include breakpoint( "<782px" ) {
-	.wc-block-cart-items td {
-		&:first-child {
-			padding-left: 0;
-		}
-		&:last-child {
-			padding-right: 0;
-		}
-	}
-
-	.wc-block-cart-item__remove-link {
-		display: none;
-	}
-
-	.wc-block-cart-item__total {
-		// We position this td cell relative so we can use position: absolute for trash icon at top.
-		position: relative;
-	}
-
-	.wc-block-cart-item__remove-icon {
-		display: inline-block;
-		position: absolute;
-		top: $gap;
-		right: 0;
-	}
-
-	.wc-block-cart__totals-title {
-		display: none;
-	}
-
-	.wc-block-cart-item__line-total,
-	.wc-block-cart-item__full-price {
-		// inline on mobile, so line prices are aligned vertically
-		display: inline-block;
-	}
-
-	.wc-block-cart-item__total {
-		vertical-align: bottom;
-	}
-
-	.wc-block-cart-item__discount-badge {
-		display: none;
-	}
-}
-
-@include breakpoint( ">782px" ) {
-	.wc-block-cart__sidebar {
-		max-width: 374px;
-	}
-
-	.wc-block-cart {
-		display: flex;
-	}
-
-	.wc-block-cart__main {
-		flex-grow: 4;
-		margin-right: 3em;
-	}
-
-	.wc-block-cart__sidebar {
-		flex-grow: 1;
-	}
-
-	.wc-block-cart-items {
-		table-layout: fixed;
-	}
-
-	.wc-block-cart-items__header {
-		display: table-row;
-	}
-
-	.wc-block-cart-items__header-product {
-		width: 60%;
-	}
-
-	.wc-block-cart-item__quantity {
-		display: table-cell;
-	}
-
-	.wc-block-cart-item__quantity-stacked {
-		display: none;
-	}
-
-	.wc-block-cart-item__remove-link {
-		display: block;
-	}
-
-	.wc-block-cart-item__remove-icon {
-		display: none;
-	}
-
-	.wc-block-cart-item__total {
+	td {
+		border-top: 1px solid $core-grey-light-600;
+		padding: $gap $gap $gap 0;
 		vertical-align: top;
+		border-collapse: collapse;
 	}
+	th:last-child,
+	td:last-child {
+		padding-right: 0;
+	}
+	.wc-block-cart-items__header {
+		text-transform: uppercase;
+		.wc-block-cart-items__header-image {
+			width: 100px;
+		}
+		.wc-block-cart-items__header-product {
+			visibility: hidden;
+			min-width: 300px;
+		}
+		.wc-block-cart-items__header-quantity {
+			width: 116px;
+		}
+		.wc-block-cart-items__header-total {
+			width: 100px;
+			text-align: right;
+		}
+	}
+	.wc-block-cart-items__row {
+		.wc-block-cart-item__image img {
+			width: 100%;
+		}
+		.wc-block-cart-item__product {
+			.wc-block-cart-item__product-name {
+				color: $core-grey-dark-600;
+				font-size: 16px;
+			}
 
-	.wc-block-cart-item__line-total,
-	.wc-block-cart-item__full-price {
+			.wc-block-cart-item__low-stock-badge {
+				display: inline-block;
+
+				background-color: $white;
+				border-radius: 3px;
+				border: 1px solid $black;
+				color: $black;
+				font-size: 12px;
+				padding: 0 1em;
+				text-transform: uppercase;
+				white-space: nowrap;
+			}
+
+			.wc-block-cart-item__product-metadata {
+				color: $core-grey-dark-400;
+				font-size: 12px;
+			}
+		}
+		.wc-block-cart-item__quantity {
+			.wc-block-cart-item__remove-link {
+				@include link-button;
+
+				color: $core-grey-dark-400;
+				font-size: 12px;
+				line-height: 12px;
+				margin-top: 0.5em;
+				text-transform: none;
+				white-space: nowrap;
+				// Temporary - this is not yet a link or "link button".
+				// May not be needed when remove is hooked up to API properly.
+				text-decoration: underline;
+			}
+			.wc-block-cart-item__remove-icon {
+				@include link-button;
+
+				color: $core-grey-dark-400;
+				fill: currentColor;
+				position: absolute;
+				top: $gap;
+				right: 0;
+				display: none;
+			}
+		}
+		.wc-block-cart-item__total {
+			text-align: right;
+			font-size: 16px;
+			line-height: 19px;
+
+			.wc-block-cart-item__full-price {
+				color: $core-grey-dark-400;
+				text-decoration: line-through;
+			}
+
+			.wc-block-cart-item__line-total {
+				color: $black;
+				margin-left: 0.5em;
+			}
+
+			.wc-block-cart-item__discount-badge {
+				background-color: $core-grey-dark-600;
+				border-radius: 3px;
+				color: $white;
+				font-size: 12px;
+				padding: 0 1em;
+				text-transform: uppercase;
+				white-space: nowrap;
+				display: inline-block;
+			}
+		}
+	}
+}
+
+// Mobile styles.
+@include breakpoint( "<782px" ) {
+	.wc-block-cart {
 		display: block;
+		margin: 0 0 $gap;
+		.wc-block-cart__main {
+			padding: 0;
+			flex: none;
+		}
+		.wc-block-cart__sidebar {
+			padding: 0;
+			flex: none;
+		}
 	}
+	table.wc-block-cart-items {
+		td {
+			padding: 0;
+			border: 0;
+		}
+		.wc-block-cart-items__header {
+			display: none;
+		}
+		.wc-block-cart-item__remove-link {
+			display: none;
+		}
+		.wc-block-cart-items__row {
+			display: grid;
+			grid-template-columns: 80px 132px;
+			border-top: 1px solid $core-grey-light-600;
+			padding: $gap 0;
+			position: relative;
 
-	.wc-block-cart-item__full-price {
-		margin-right: 0;
-	}
+			.wc-block-cart-item__image {
+				grid-column-start: 1;
+				grid-row-start: 1;
+				padding-right: $gap;
+			}
+			.wc-block-cart-item__product {
+				grid-column-start: 2;
+				grid-column-end: 4;
+				grid-row-start: 1;
+				justify-self: stretch;
+				padding-bottom: $gap;
+			}
+			.wc-block-cart-item__quantity {
+				grid-column-start: 2;
+				grid-row-start: 2;
+				vertical-align: bottom;
+				padding-right: $gap;
 
-	.wc-block-cart-item__discount-badge {
-		display: inline-block;
+				.wc-block-cart-item__remove-link {
+					display: none;
+				}
+				.wc-block-cart-item__remove-icon {
+					display: block;
+				}
+			}
+			.wc-block-cart-item__total {
+				grid-column-start: 3;
+				grid-row-start: 2;
+				align-self: center;
+
+				.wc-block-cart-item__discount-badge {
+					display: none;
+				}
+			}
+		}
 	}
 }

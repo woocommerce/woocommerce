@@ -124,63 +124,73 @@ const Cart = () => {
 				<CartLineItemsTitle itemCount={ previewCartItems.length } />
 				<CartLineItemsTable lineItems={ previewCartItems } />
 			</div>
-			<Card className="wc-block-cart__sidebar" isElevated={ true }>
-				<CardBody>
-					<h2 className="wc-block-cart__totals-title">
-						{ __( 'Cart totals', 'woo-gutenberg-products-block' ) }
-					</h2>
-					{ totalRowsConfig.map(
-						( { label, value, description } ) => (
-							<TotalsItem
-								key={ label }
-								currency={ currency }
-								label={ label }
-								value={ value }
-								description={ description }
-							/>
-						)
-					) }
-					<fieldset className="wc-block-cart__shipping-options-fieldset">
-						<legend className="screen-reader-text">
+			<div className="wc-block-cart__sidebar">
+				<Card isElevated={ true }>
+					<CardBody>
+						<h2 className="wc-block-cart__totals-title">
 							{ __(
-								'Choose the shipping method.',
+								'Cart totals',
 								'woo-gutenberg-products-block'
 							) }
-						</legend>
-						<RadioControl
-							className="wc-block-cart__shipping-options"
-							selected={ selectedShippingOption }
-							options={ placeholderShippingMethods.map(
-								( option ) => ( {
-									label: option.label,
-									value: option.value,
-									description: [
-										option.price,
-										option.schedule,
-									]
-										.filter( Boolean )
-										.join( ' — ' ),
-								} )
+						</h2>
+						{ totalRowsConfig.map(
+							( { label, value, description } ) => (
+								<TotalsItem
+									key={ label }
+									currency={ currency }
+									label={ label }
+									value={ value }
+									description={ description }
+								/>
+							)
+						) }
+						<fieldset className="wc-block-cart__shipping-options-fieldset">
+							<legend className="screen-reader-text">
+								{ __(
+									'Choose the shipping method.',
+									'woo-gutenberg-products-block'
+								) }
+							</legend>
+							<RadioControl
+								className="wc-block-cart__shipping-options"
+								selected={ selectedShippingOption }
+								options={ placeholderShippingMethods.map(
+									( option ) => ( {
+										label: option.label,
+										value: option.value,
+										description: [
+											option.price,
+											option.schedule,
+										]
+											.filter( Boolean )
+											.join( ' — ' ),
+									} )
+								) }
+								onChange={ ( newSelectedShippingOption ) =>
+									setSelectedShippingOption(
+										newSelectedShippingOption
+									)
+								}
+							/>
+						</fieldset>
+						{ COUPONS_ENABLED && (
+							<TotalsCouponCodeInput
+								onSubmit={ onActivateCoupon }
+							/>
+						) }
+						<TotalsItem
+							className="wc-block-cart__totals-footer"
+							currency={ currency }
+							label={ __(
+								'Total',
+								'woo-gutenberg-products-block'
 							) }
-							onChange={ ( newSelectedShippingOption ) =>
-								setSelectedShippingOption(
-									newSelectedShippingOption
-								)
-							}
+							value={ parseInt( cartTotals.total_price, 10 ) }
 						/>
-					</fieldset>
-					{ COUPONS_ENABLED && (
-						<TotalsCouponCodeInput onSubmit={ onActivateCoupon } />
-					) }
-					<TotalsItem
-						className="wc-block-cart__totals-footer"
-						currency={ currency }
-						label={ __( 'Total', 'woo-gutenberg-products-block' ) }
-						value={ parseInt( cartTotals.total_price, 10 ) }
-					/>
-					<CheckoutButton />
-				</CardBody>
-			</Card>
+						<CheckoutButton />
+					</CardBody>
+				</Card>
+			</div>
 		</div>
 	);
 };
