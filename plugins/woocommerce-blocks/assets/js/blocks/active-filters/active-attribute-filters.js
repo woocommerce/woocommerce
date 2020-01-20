@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useCollection, useQueryStateByKey } from '@woocommerce/base-hooks';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -39,7 +40,7 @@ const ActiveAttributeFilters = ( { attributeObject = {}, slugs = [] } ) => {
 			termObject &&
 			renderRemovableListItem(
 				attributeLabel,
-				termObject.name || slug,
+				decodeEntities( termObject.name || slug ),
 				() => {
 					removeAttributeFilterBySlug(
 						productAttributes,
