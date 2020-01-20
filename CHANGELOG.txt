@@ -61,6 +61,7 @@
 * Dev - Allow WC_Product_Query sort products by include order. #24294
 * Dev - Removed duplicated include of WC_Admin_Importers. #24751
 * Dev - Refactor minimum requirement notice to use constant for easier changes in the future. #24830
+* Dev - Fixed number of arguments in filters on WC_Emails class. #25312
 * Fix - Clean products transients when term is removed. #23991
 * Fix - Only add the image node to structured data if product has image. #24191
 * Fix - Product attribute terms endpoint in legacy REST API v3 by converting `attribute_id` to int. #24203
@@ -106,6 +107,7 @@
 * Fix - Handle 0 attribute value for variations correctly. #24750
 * Fix - Fixed spaces in form fields of External Products. #24295
 * Fix - Removed links to downloadable products from refund emails. #24952
+* Fix - Fixed button HTML element in the OBW. #25056
 * Localization - Add Zambia's Provinces to the list of states. #24307
 * Localization - Adaptation of the order of last name and first name and addresses in Japan. #24336
 * Localization - Fixed Namibian dollar symbol. #24438
