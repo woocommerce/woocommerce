@@ -74,7 +74,9 @@ trait SchedulerTraits {
 	 *
 	 * @return array
 	 */
-	abstract public static function get_scheduler_actions();
+	public static function get_scheduler_actions() {
+		return array();
+	}
 
 	/**
 	 * Get all available scheduling actions.
