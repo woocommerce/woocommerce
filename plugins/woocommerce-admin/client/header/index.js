@@ -32,6 +32,7 @@ class Header extends Component {
 		this.onWindowScroll = this.onWindowScroll.bind( this );
 		this.updateIsScrolled = this.updateIsScrolled.bind( this );
 		this.trackLinkClick = this.trackLinkClick.bind( this );
+		this.updateDocumentTitle = this.updateDocumentTitle.bind( this );
 	}
 
 	componentDidMount() {
@@ -64,9 +65,14 @@ class Header extends Component {
 		recordEvent( 'navbar_breadcrumb_click', { href, text: event.target.innerText } );
 	}
 
-	render() {
+	updateDocumentTitle() {
 		const { sections, isEmbedded } = this.props;
-		const { isScrolled } = this.state;
+
+		// Don't modify the document title on existing WooCommerce pages.
+		if ( isEmbedded ) {
+			return;
+		}
+
 		const _sections = Array.isArray( sections ) ? sections : [ sections ];
 
 		const documentTitle = _sections
@@ -83,6 +89,14 @@ class Header extends Component {
 				getSetting( 'siteTitle', '' )
 			)
 		);
+	}
+
+	render() {
+		const { sections, isEmbedded } = this.props;
+		const { isScrolled } = this.state;
+		const _sections = Array.isArray( sections ) ? sections : [ sections ];
+
+		this.updateDocumentTitle();
 
 		const className = classnames( 'woocommerce-layout__header', {
 			'is-scrolled': isScrolled,

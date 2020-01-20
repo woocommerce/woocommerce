@@ -585,10 +585,7 @@ class Loader {
 	public static function update_admin_title( $admin_title ) {
 		if (
 			! did_action( 'current_screen' ) ||
-			(
-				! self::is_admin_page() &&
-				! self::is_embed_page()
-			)
+			! self::is_admin_page()
 		) {
 			return $admin_title;
 		}
