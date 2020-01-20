@@ -5,6 +5,7 @@ import { QUERY_STATE_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useRef, useEffect, useCallback } from '@wordpress/element';
 import { useQueryStateContext } from '@woocommerce/base-context/query-state-context';
+import { assign } from 'lodash';
 
 /**
  * Internal dependencies
@@ -122,10 +123,7 @@ export const useSynchronizedQueryState = ( synchronizedQuery, context ) => {
 	const isInitialized = useRef( false );
 	// update queryState anytime incoming synchronizedQuery changes
 	useEffect( () => {
-		setQueryState( {
-			...queryState,
-			...currentSynchronizedQuery,
-		} );
+		setQueryState( assign( {}, queryState, currentSynchronizedQuery ) );
 		isInitialized.current = true;
 	}, [ currentSynchronizedQuery ] );
 	return isInitialized.current
