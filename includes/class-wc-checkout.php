@@ -371,7 +371,7 @@ class WC_Checkout {
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
 			$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
-			$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt );
+			$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
