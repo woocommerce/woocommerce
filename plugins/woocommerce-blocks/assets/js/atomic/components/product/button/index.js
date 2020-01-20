@@ -16,6 +16,7 @@ import { find } from 'lodash';
 import { useCollection } from '@woocommerce/base-hooks';
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * A custom hook for exposing cart related data for a given product id and an
@@ -113,7 +114,7 @@ const ProductButton = ( { product, className } ) => {
 				cartQuantity
 			);
 		}
-		return productCartDetails.text;
+		return decodeEntities( productCartDetails.text );
 	};
 
 	// This is a hack to trigger cart updates till we migrate to block based card
@@ -166,7 +167,9 @@ const ProductButton = ( { product, className } ) => {
 			{ allowAddToCart ? (
 				<button
 					onClick={ addToCart }
-					aria-label={ productCartDetails.description }
+					aria-label={ decodeEntities(
+						productCartDetails.description
+					) }
 					className={ buttonClasses }
 					disabled={ addingToCart }
 				>
@@ -175,7 +178,9 @@ const ProductButton = ( { product, className } ) => {
 			) : (
 				<a
 					href={ permalink }
-					aria-label={ productCartDetails.description }
+					aria-label={ decodeEntities(
+						productCartDetails.description
+					) }
 					className={ buttonClasses }
 					rel="nofollow"
 				>

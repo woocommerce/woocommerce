@@ -197,8 +197,8 @@ class OrderItemSchema extends AbstractSchema {
 		return [
 			'id'        => $line_item->get_variation_id() ? $line_item->get_variation_id() : $line_item->get_product_id(),
 			'quantity'  => $line_item->get_quantity(),
-			'name'      => $has_product ? $product->get_title() : null,
-			'sku'       => $has_product ? $product->get_sku() : null,
+			'name'      => $has_product ? $this->prepare_html_response( $product->get_title() ) : null,
+			'sku'       => $has_product ? $this->prepare_html_response( $product->get_sku() ) : null,
 			'permalink' => $has_product ? $product->get_permalink() : null,
 			'images'    => $has_product ? ( new ProductImages() )->images_to_array( $product ) : [],
 			'variation' => $has_product ? $this->format_variation_data( $line_item, $product ) : [],
@@ -250,8 +250,8 @@ class OrderItemSchema extends AbstractSchema {
 			}
 
 			$return[] = [
-				'attribute' => $label,
-				'value'     => $value,
+				'attribute' => $this->prepare_html_response( $label ),
+				'value'     => $this->prepare_html_response( $value ),
 			];
 		}
 

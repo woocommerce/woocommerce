@@ -234,11 +234,11 @@ class ProductSchema extends AbstractSchema {
 	public function get_item_response( \WC_Product $product ) {
 		return [
 			'id'                  => $product->get_id(),
-			'name'                => $product->get_title(),
-			'variation'           => $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '',
+			'name'                => $this->prepare_html_response( $product->get_title() ),
+			'variation'           => $this->prepare_html_response( $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '' ),
 			'permalink'           => $product->get_permalink(),
-			'sku'                 => $product->get_sku(),
-			'description'         => apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ),
+			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
+			'description'         => $this->prepare_html_response( apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) ),
 			'on_sale'             => $product->is_on_sale(),
 			'prices'              => (object) $this->get_prices( $product ),
 			'average_rating'      => $product->get_average_rating(),
@@ -248,10 +248,12 @@ class ProductSchema extends AbstractSchema {
 			'is_purchasable'      => $product->is_purchasable(),
 			'is_in_stock'         => $product->is_in_stock(),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
-			'add_to_cart'         => (object) [
-				'text'        => $product->add_to_cart_text(),
-				'description' => $product->add_to_cart_description(),
-			],
+			'add_to_cart'         => (object) $this->prepare_html_response(
+				[
+					'text'        => $product->add_to_cart_text(),
+					'description' => $product->add_to_cart_description(),
+				]
+			),
 		];
 	}
 

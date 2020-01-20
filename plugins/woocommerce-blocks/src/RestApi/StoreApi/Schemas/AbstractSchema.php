@@ -176,4 +176,20 @@ abstract class AbstractSchema {
 			)
 		);
 	}
+
+	/**
+	 * Prepares HTML based content, such as post titles and content, for the API response.
+	 *
+	 * The wptexturize, convert_chars, and trim functions are also used in the `the_title` filter.
+	 * The function wp_kses_post removes disallowed HTML tags.
+	 *
+	 * @param string|array $response Data to format.
+	 * @return string|array Formatted data.
+	 */
+	protected function prepare_html_response( $response ) {
+		if ( is_array( $response ) ) {
+			return array_map( [ $this, 'prepare_html_response' ], $response );
+		}
+		return is_scalar( $response ) ? wp_kses_post( trim( convert_chars( wptexturize( $response ) ) ) ) : $response;
+	}
 }

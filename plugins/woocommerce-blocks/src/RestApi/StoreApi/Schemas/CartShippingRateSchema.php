@@ -177,14 +177,16 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $package ) {
 		return [
-			'destination'    => (object) [
-				'address_1' => $package['destination']['address_1'],
-				'address_2' => $package['destination']['address_2'],
-				'city'      => $package['destination']['city'],
-				'state'     => $package['destination']['state'],
-				'postcode'  => $package['destination']['postcode'],
-				'country'   => $package['destination']['country'],
-			],
+			'destination'    => (object) $this->prepare_html_response(
+				[
+					'address_1' => $package['destination']['address_1'],
+					'address_2' => $package['destination']['address_2'],
+					'city'      => $package['destination']['city'],
+					'state'     => $package['destination']['state'],
+					'postcode'  => $package['destination']['postcode'],
+					'country'   => $package['destination']['country'],
+				]
+			),
 			'items'          => array_values( wp_list_pluck( $package['contents'], 'key' ) ),
 			'shipping_rates' => array_values( array_map( [ $this, 'get_rate_response' ], $package['rates'] ) ),
 		];
@@ -198,9 +200,9 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	protected function get_rate_response( $rate ) {
 		return [
-			'name'          => $this->get_rate_prop( $rate, 'label' ),
-			'description'   => $this->get_rate_prop( $rate, 'description' ),
-			'delivery_time' => $this->get_rate_prop( $rate, 'delivery_time' ),
+			'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
+			'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
+			'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
 			'price'         => $this->get_rate_prop( $rate, 'cost' ),
 			'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
 			'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),

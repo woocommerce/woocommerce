@@ -4,6 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { decodeEntities } from '@wordpress/html-entities';
 
 const ProductTitle = ( {
 	className,
@@ -16,7 +17,7 @@ const ProductTitle = ( {
 		return null;
 	}
 
-	const productName = product.name;
+	const productName = decodeEntities( product.name );
 	const TagName = `h${ headingLevel }`;
 
 	return (

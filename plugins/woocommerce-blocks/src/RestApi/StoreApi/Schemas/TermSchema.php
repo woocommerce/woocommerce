@@ -71,8 +71,8 @@ class TermSchema extends AbstractSchema {
 	public function get_item_response( $term ) {
 		return [
 			'id'          => (int) $term->term_id,
-			'name'        => $term->name,
-			'description' => $term->description,
+			'name'        => $this->prepare_html_response( $term->name ),
+			'description' => $this->prepare_html_response( $term->description ),
 			'slug'        => $term->slug,
 			'count'       => (int) $term->count,
 		];

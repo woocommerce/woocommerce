@@ -21,6 +21,7 @@ import CheckboxList from '@woocommerce/base-components/checkbox-list';
 import DropdownSelector from '@woocommerce/base-components/dropdown-selector';
 import FilterSubmitButton from '@woocommerce/base-components/filter-submit-button';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -139,10 +140,10 @@ const AttributeFilterBlock = ( {
 
 				return {
 					value: term.slug,
-					name: term.name,
+					name: decodeEntities( term.name ),
 					label: (
 						<Label
-							name={ term.name }
+							name={ decodeEntities( term.name ) }
 							count={ blockAttributes.showCounts ? count : null }
 						/>
 					),

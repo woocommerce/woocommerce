@@ -77,7 +77,7 @@ class ProductAttributeSchema extends AbstractSchema {
 	public function get_item_response( $attribute ) {
 		return [
 			'id'           => (int) $attribute->id,
-			'name'         => $attribute->name,
+			'name'         => $this->prepare_html_response( $attribute->name ),
 			'slug'         => $attribute->slug,
 			'type'         => $attribute->type,
 			'order'        => $attribute->order_by,

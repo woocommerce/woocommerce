@@ -166,30 +166,34 @@ class CustomerSchema extends AbstractSchema {
 	public function get_item_response( $object ) {
 		return [
 			'id'               => $object->get_id(),
-			'billing_address'  => (object) [
-				'first_name' => $object->get_billing_first_name(),
-				'last_name'  => $object->get_billing_last_name(),
-				'company'    => $object->get_billing_company(),
-				'address_1'  => $object->get_billing_address_1(),
-				'address_2'  => $object->get_billing_address_2(),
-				'city'       => $object->get_billing_city(),
-				'state'      => $object->get_billing_state(),
-				'postcode'   => $object->get_billing_postcode(),
-				'country'    => $object->get_billing_country(),
-				'email'      => $object->get_billing_email(),
-				'phone'      => $object->get_billing_phone(),
-			],
-			'shipping_address' => (object) [
-				'first_name' => $object->get_shipping_first_name(),
-				'last_name'  => $object->get_shipping_last_name(),
-				'company'    => $object->get_shipping_company(),
-				'address_1'  => $object->get_shipping_address_1(),
-				'address_2'  => $object->get_shipping_address_2(),
-				'city'       => $object->get_shipping_city(),
-				'state'      => $object->get_shipping_state(),
-				'postcode'   => $object->get_shipping_postcode(),
-				'country'    => $object->get_shipping_country(),
-			],
+			'billing_address'  => (object) $this->prepare_html_response(
+				[
+					'first_name' => $object->get_billing_first_name(),
+					'last_name'  => $object->get_billing_last_name(),
+					'company'    => $object->get_billing_company(),
+					'address_1'  => $object->get_billing_address_1(),
+					'address_2'  => $object->get_billing_address_2(),
+					'city'       => $object->get_billing_city(),
+					'state'      => $object->get_billing_state(),
+					'postcode'   => $object->get_billing_postcode(),
+					'country'    => $object->get_billing_country(),
+					'email'      => $object->get_billing_email(),
+					'phone'      => $object->get_billing_phone(),
+				]
+			),
+			'shipping_address' => (object) $this->prepare_html_response(
+				[
+					'first_name' => $object->get_shipping_first_name(),
+					'last_name'  => $object->get_shipping_last_name(),
+					'company'    => $object->get_shipping_company(),
+					'address_1'  => $object->get_shipping_address_1(),
+					'address_2'  => $object->get_shipping_address_2(),
+					'city'       => $object->get_shipping_city(),
+					'state'      => $object->get_shipping_state(),
+					'postcode'   => $object->get_shipping_postcode(),
+					'country'    => $object->get_shipping_country(),
+				]
+			),
 		];
 	}
 }
