@@ -2081,3 +2081,10 @@ function wc_update_390_change_geolocation_database_update_cron() {
 function wc_update_390_db_version() {
 	WC_Install::update_db_version( '3.9.0' );
 }
+
+/**
+ * Update DB version.
+ */
+function wc_update_3100_db_version() {
+	WC_Install::update_db_version( '3.10.0' );
+}
