@@ -106,7 +106,7 @@ class WC_Integration_MaxMind_Database_Service {
 					case 401:
 						return new WP_Error(
 							'woocommerce_maxmind_geolocation_database_license_key',
-							__( 'The MaxMind license key is invalid.', 'woocommerce' )
+							__( 'The MaxMind license key is invalid. If you have recently created this key, you may need to wait for it to become active.', 'woocommerce' )
 						);
 				}
 			}
