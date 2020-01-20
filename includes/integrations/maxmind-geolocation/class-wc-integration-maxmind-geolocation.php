@@ -103,10 +103,10 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 				'description' => sprintf(
 					/* translators: %1$s: Documentation URL */
 					__(
-						'The key that will be used when dealing with MaxMind Geolocation services. You can read how to generate one in <a href="%1$s">MaxMind\'s License Key Documentation</a>.',
+						'The key that will be used when dealing with MaxMind Geolocation services. You can read how to generate one in <a href="%1$s">MaxMind Geolocation Integration documentation</a>.',
 						'woocommerce'
 					),
-					'https://support.maxmind.com/account-faq/account-related/how-do-i-generate-a-license-key/'
+					'https://docs.woocommerce.com/document/maxmind-geolocation-integration/'
 				),
 				'desc_tip'    => false,
 				'default'     => '',
