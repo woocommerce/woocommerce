@@ -8,6 +8,7 @@ import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrency, formatPrice } from '@woocommerce/base-utils';
 import { IconTrash } from '@woocommerce/block-components/icons';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Return the difference between two price amounts, e.g. a discount.
@@ -105,37 +106,31 @@ const CartLineItemRow = ( { lineItem } ) => {
 	) : null;
 
 	return (
-		<tr>
+		<tr className="wc-block-cart-items__row">
+			<td className="wc-block-cart-item__image">
+				<img
+					{ ...imageProps }
+					alt={ decodeEntities( imageProps.alt ) }
+				/>
+			</td>
 			<td className="wc-block-cart-item__product">
-				<div className="wc-block-cart-item__product-wrapper">
-					<img { ...imageProps } alt={ imageProps.alt } />
-					<div className="wc-block-cart-item__product-details">
-						<div className="wc-block-cart-item__product-name">
-							{ name }
-						</div>
-						{ lowStockBadge }
-						<div className="wc-block-cart-item__product-metadata">
-							{ description }
-							<ProductVariationDetails variation={ variation } />
-						</div>
-						{ quantitySelector(
-							'wc-block-cart-item__quantity-stacked'
-						) }
-					</div>
+				<div className="wc-block-cart-item__product-name">{ name }</div>
+				{ lowStockBadge }
+				<div className="wc-block-cart-item__product-metadata">
+					{ description }
+					<ProductVariationDetails variation={ variation } />
 				</div>
 			</td>
 			<td className="wc-block-cart-item__quantity">
-				<div>
-					{ quantitySelector() }
-					<button className="wc-block-cart-item__remove-link">
-						{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
-					</button>
-				</div>
-			</td>
-			<td className="wc-block-cart-item__total">
+				{ quantitySelector() }
+				<button className="wc-block-cart-item__remove-link">
+					{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
+				</button>
 				<button className="wc-block-cart-item__remove-icon">
 					<IconTrash />
 				</button>
+			</td>
+			<td className="wc-block-cart-item__total">
 				{ fullPrice }
 				<div className="wc-block-cart-item__line-total">
 					<FormattedMonetaryAmount
