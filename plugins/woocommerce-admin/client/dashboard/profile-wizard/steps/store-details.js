@@ -9,7 +9,6 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import { recordEvent } from 'lib/tracks';
-import { get } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -32,8 +31,7 @@ import withSelect from 'wc-api/with-select';
 class StoreDetails extends Component {
 	constructor( props ) {
 		super( ...arguments );
-		const settings = get( props, 'settings', false );
-		const profileItems = get( props, 'profileItems', {} );
+		const { profileItems, settings } = props;
 
 		this.state = {
 			showUsageModal: false,
