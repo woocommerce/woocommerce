@@ -101,8 +101,21 @@ class Onboarding {
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
 		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
 		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
+		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
+	}
+
+	/**
+	 * Redirect the old onboarding wizard to the profiler.
+	 */
+	public static function redirect_old_onboarding() {
+		$current_page = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore csrf okay.
+
+		if ( 'wc-setup' === $current_page ) {
+			delete_transient( '_wc_activation_redirect' );
+			wp_safe_redirect( wc_admin_url() );
+		}
 	}
 
 	/**
