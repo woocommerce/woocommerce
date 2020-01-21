@@ -1118,7 +1118,7 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
-	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'geolocation' );
+	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
 	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', '' );
 	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
