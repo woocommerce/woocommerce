@@ -58,7 +58,8 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 
 		$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
 
-		$query_args = apply_filters( 'woocommerce_top_rated_products_widget_args',
+		$query_args = apply_filters(
+			'woocommerce_top_rated_products_widget_args',
 			array(
 				'posts_per_page' => $number,
 				'no_found_rows'  => 1,
@@ -69,7 +70,8 @@ class WC_Widget_Top_Rated_Products extends WC_Widget {
 				'order'          => 'DESC',
 				'meta_query'     => WC()->query->get_meta_query(),
 				'tax_query'      => WC()->query->get_tax_query(),
-			) ); // WPCS: slow query ok.
+			)
+		); // WPCS: slow query ok.
 
 		$r = new WP_Query( $query_args );
 
