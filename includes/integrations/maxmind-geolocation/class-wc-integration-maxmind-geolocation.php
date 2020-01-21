@@ -221,7 +221,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		$country_code = $this->database_service->get_iso_country_code_for_ip( $ip_address );
 
 		return array(
-			'country'  => $country_code ? $country_code : '',
+			'country'  => $country_code,
 			'state'    => '',
 			'city'     => '',
 			'postcode' => '',
