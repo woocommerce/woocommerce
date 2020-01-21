@@ -349,11 +349,9 @@
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
 		margin-left: $gap-largest + $gap-smallest;
-		margin-top: $gap;
-		min-height: 28px;
 
 		button.is-button {
-			margin: 0;
+			margin: $gap 0 0;
 			height: 40px;
 			min-width: auto;
 			display: initial;
