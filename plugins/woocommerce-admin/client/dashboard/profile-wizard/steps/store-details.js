@@ -39,11 +39,10 @@ class StoreDetails extends Component {
 			showUsageModal: false,
 		};
 
+		// Check if a store address is set so that we don't default
+		// to WooCommerce's default country of the UK.
 		const countryState =
-			( profileItems.hasOwnProperty( 'setup_client' ) &&
-				null !== profileItems.setup_client &&
-				settings.woocommerce_default_country ) ||
-			'';
+			( settings.woocommerce_store_address && settings.woocommerce_default_country ) || '';
 
 		this.initialValues = {
 			addressLine1: settings.woocommerce_store_address || '',
