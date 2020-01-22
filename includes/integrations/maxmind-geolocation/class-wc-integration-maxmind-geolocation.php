@@ -137,6 +137,9 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 			return $value;
 		}
 
+		// Trim whitespaces and strip slashes.
+		$value = $this->validate_password_field( $key, $value );
+
 		// Check the license key by attempting to download the Geolocation database.
 		$tmp_database_path = $this->database_service->download_database( $value );
 		if ( is_wp_error( $tmp_database_path ) ) {
