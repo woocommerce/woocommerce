@@ -113,7 +113,7 @@
 		"@wordpress/components": "8.5.0",
 		"@wordpress/html-entities": "2.5.0",
 		"compare-versions": "3.5.1",
-		"downshift": "4.0.5",
+		"downshift": "4.0.7",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"gridicons": "3.3.1",
 		"react-number-format": "4.3.1",
