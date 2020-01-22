@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WC_Tax;
+
 /**
  * Product Query class.
  *
@@ -22,26 +24,27 @@ class ProductQuery {
 	 * @return array
 	 */
 	public function prepare_objects_query( $request ) {
-		$args                        = array();
-		$args['offset']              = $request['offset'];
-		$args['order']               = $request['order'];
-		$args['orderby']             = $request['orderby'];
-		$args['paged']               = $request['page'];
-		$args['post__in']            = $request['include'];
-		$args['post__not_in']        = $request['exclude'];
-		$args['posts_per_page']      = $request['per_page'];
-		$args['post_parent__in']     = $request['parent'];
-		$args['post_parent__not_in'] = $request['parent_exclude'];
-		$args['s']                   = $request['search'];
-		$args['fields']              = 'ids';
-		$args['ignore_sticky_posts'] = true;
-		$args['post_status']         = 'publish';
+		$args = [
+			'offset'              => $request['offset'],
+			'order'               => $request['order'],
+			'orderby'             => $request['orderby'],
+			'paged'               => $request['page'],
+			'post__in'            => $request['include'],
+			'post__not_in'        => $request['exclude'],
+			'posts_per_page'      => $request['per_page'],
+			'post_parent__in'     => $request['parent'],
+			'post_parent__not_in' => $request['parent_exclude'],
+			's'                   => $request['search'],
+			'fields'              => 'ids',
+			'ignore_sticky_posts' => true,
+			'post_status'         => 'publish',
+			'date_query'          => [],
+			'post_type'           => empty( $request['sku'] ) ? 'product' : [ 'product', 'product_variation' ],
+		];
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
 		}
-
-		$args['date_query'] = array();
 
 		// Set before into date query. Date query must be specified as an array of an array.
 		if ( isset( $request['before'] ) ) {
@@ -59,12 +62,12 @@ class ProductQuery {
 		}
 
 		// Set custom args to handle later during clauses.
-		$custom_keys = array(
+		$custom_keys = [
 			'sku',
 			'min_price',
 			'max_price',
 			'stock_status',
-		);
+		];
 
 		foreach ( $custom_keys as $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
@@ -72,42 +75,41 @@ class ProductQuery {
 			}
 		}
 
-		// Taxonomy query to filter products by type, category,
-		// tag, shipping class, and attribute.
-		$tax_query = array();
+		// Taxonomy query to filter products by type, category, tag, shipping class, and attribute.
+		$tax_query = [];
 
-		$operator_mapping = array(
+		$operator_mapping = [
 			'in'     => 'IN',
 			'not_in' => 'NOT IN',
 			'and'    => 'AND',
-		);
+		];
 
 		// Map between taxonomy name and arg key.
-		$taxonomies = array(
+		$taxonomies = [
 			'product_cat' => 'category',
 			'product_tag' => 'tag',
-		);
+		];
 
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
 				$operator    = $request->get_param( $key . '_operator' ) && isset( $operator_mapping[ $request->get_param( $key . '_operator' ) ] ) ? $operator_mapping[ $request->get_param( $key . '_operator' ) ] : 'IN';
-				$tax_query[] = array(
+				$tax_query[] = [
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
 					'terms'    => $request[ $key ],
 					'operator' => $operator,
-				);
+				];
 			}
 		}
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$tax_query[] = array(
+			$tax_query[] = [
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
 				'terms'    => $request['type'],
-			);
+			];
 		}
 
 		// Filter by attributes.
@@ -120,22 +122,22 @@ class ProductQuery {
 				}
 				if ( in_array( $attribute['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
 					$operator      = isset( $attribute['operator'], $operator_mapping[ $attribute['operator'] ] ) ? $operator_mapping[ $attribute['operator'] ] : 'IN';
-					$att_queries[] = array(
+					$att_queries[] = [
 						'taxonomy' => $attribute['attribute'],
 						'field'    => ! empty( $attribute['term_id'] ) ? 'term_id' : 'slug',
 						'terms'    => ! empty( $attribute['term_id'] ) ? $attribute['term_id'] : $attribute['slug'],
 						'operator' => $operator,
-					);
+					];
 				}
 			}
 
 			if ( 1 < count( $att_queries ) ) {
 				// Add relation arg when using multiple attributes.
 				$relation    = $request->get_param( 'attribute_relation' ) && isset( $operator_mapping[ $request->get_param( 'attribute_relation' ) ] ) ? $operator_mapping[ $request->get_param( 'attribute_relation' ) ] : 'IN';
-				$tax_query[] = array(
+				$tax_query[] = [
 					'relation' => $relation,
 					$att_queries,
-				);
+				];
 			} else {
 				$tax_query = array_merge( $tax_query, $att_queries );
 			}
@@ -152,12 +154,12 @@ class ProductQuery {
 
 		// Filter featured.
 		if ( is_bool( $request['featured'] ) ) {
-			$args['tax_query'][] = array(
+			$args['tax_query'][] = [
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
 				'terms'    => 'featured',
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
-			);
+			];
 		}
 
 		// Filter by on sale products.
@@ -166,7 +168,7 @@ class ProductQuery {
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
-			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
+			$on_sale_ids = empty( $on_sale_ids ) ? [ 0 ] : $on_sale_ids;
 
 			$args[ $on_sale_key ] += $on_sale_ids;
 		}
@@ -179,13 +181,13 @@ class ProductQuery {
 			$exclude_from_catalog = 'search' === $catalog_visibility ? '' : 'exclude-from-catalog';
 			$exclude_from_search  = 'catalog' === $catalog_visibility ? '' : 'exclude-from-search';
 
-			$args['tax_query'][] = array(
+			$args['tax_query'][] = [
 				'taxonomy'      => 'product_visibility',
 				'field'         => 'name',
-				'terms'         => array( $exclude_from_catalog, $exclude_from_search ),
+				'terms'         => [ $exclude_from_catalog, $exclude_from_search ],
 				'operator'      => 'hidden' === $catalog_visibility ? 'AND' : 'NOT IN',
 				'rating_filter' => true,
-			);
+			];
 		}
 
 		if ( $rating ) {
@@ -193,18 +195,11 @@ class ProductQuery {
 			foreach ( $rating as $value ) {
 				$rating_terms[] = 'rated-' . $value;
 			}
-			$args['tax_query'][] = array(
+			$args['tax_query'][] = [
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
 				'terms'    => $rating_terms,
-			);
-		}
-
-		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) ) {
-			$args['post_type'] = array( 'product', 'product_variation' );
-		} else {
-			$args['post_type'] = 'product';
+			];
 		}
 
 		$orderby = $request->get_param( 'orderby' );
@@ -238,7 +233,7 @@ class ProductQuery {
 	public function get_objects( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
 
-		add_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_clauses', [ $this, 'add_query_clauses' ], 10, 2 );
 
 		$query       = new \WP_Query();
 		$result      = $query->query( $query_args );
@@ -252,13 +247,13 @@ class ProductQuery {
 			$total_posts = $count_query->found_posts;
 		}
 
-		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_clauses', [ $this, 'add_query_clauses' ], 10 );
 
-		return array(
+		return [
 			'objects' => array_map( 'wc_get_product', $result ),
 			'total'   => (int) $total_posts,
 			'pages'   => (int) ceil( $total_posts / (int) $query->query_vars['posts_per_page'] ),
-		);
+		];
 	}
 
 	/**
@@ -288,43 +283,149 @@ class ProductQuery {
 			$args['where'] .= ' AND wc_product_meta_lookup.sku IN ("' . implode( '","', array_map( 'esc_sql', $skus ) ) . '")';
 		}
 
-		if ( $wp_query->get( 'min_price' ) ) {
-			// Convert from subunit to decimal.
-			$query_price    = floatval( $wp_query->get( 'min_price' ) / ( 10 ** wc_get_price_decimals() ) );
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $query_price );
-		}
-
-		if ( $wp_query->get( 'max_price' ) ) {
-			// Convert from subunit to decimal.
-			$query_price    = floatval( $wp_query->get( 'max_price' ) / ( 10 ** wc_get_price_decimals() ) );
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $query_price );
-		}
-
 		if ( $wp_query->get( 'stock_status' ) ) {
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
 			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status = %s ', $wp_query->get( 'stock_status' ) );
+		}
+
+		if ( $wp_query->get( 'min_price' ) || $wp_query->get( 'max_price' ) ) {
+			$args = $this->add_price_filter_clauses( $args, $wp_query );
 		}
 
 		return $args;
 	}
 
 	/**
-	 * Add meta query.
+	 * Add in conditional price filters.
 	 *
-	 * @param array $args       Query args.
-	 * @param array $meta_query Meta query.
+	 * @param array     $args Query args.
+	 * @param \WC_Query $wp_query WC_Query object.
 	 * @return array
 	 */
-	protected function add_meta_query( $args, $meta_query ) {
-		if ( empty( $args['meta_query'] ) ) {
-			$args['meta_query'] = []; // phpcs:ignore
+	protected function add_price_filter_clauses( $args, $wp_query ) {
+		global $wpdb;
+
+		$adjust_for_taxes = $this->adjust_price_filters_for_displayed_taxes();
+		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
+
+		if ( $wp_query->get( 'min_price' ) ) {
+			$min_price_filter = $this->prepare_price_filter( $wp_query->get( 'min_price' ) );
+
+			if ( $adjust_for_taxes ) {
+				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'min_price', '>=' );
+			} else {
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', $min_price_filter );
+			}
 		}
 
-		$args['meta_query'][] = $meta_query;
+		if ( $wp_query->get( 'max_price' ) ) {
+			$max_price_filter = $this->prepare_price_filter( $wp_query->get( 'max_price' ) );
 
-		return $args['meta_query'];
+			if ( $adjust_for_taxes ) {
+				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'max_price', '<=' );
+			} else {
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', $max_price_filter );
+			}
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Get query for price filters when dealing with displayed taxes.
+	 *
+	 * @param float  $price_filter Price filter to apply.
+	 * @param string $column Price being filtered (min or max).
+	 * @param string $operator Comparison operator for column.
+	 * @return string Constructed query.
+	 */
+	protected function get_price_filter_query_for_displayed_taxes( $price_filter, $column = 'min_price', $operator = '>=' ) {
+		global $wpdb;
+
+		// Select only used tax classes to avoid unwanted calculations.
+		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+
+		if ( empty( $product_tax_classes ) ) {
+			return '';
+		}
+
+		$or_queries = [];
+
+		// We need to adjust the filter for each possible tax class and combine the queries into one.
+		foreach ( $product_tax_classes as $tax_class ) {
+			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
+			$or_queries[]          = $wpdb->prepare(
+				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
+				$tax_class,
+				$adjusted_price_filter
+			);
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->prepare(
+			' AND (
+				wc_product_meta_lookup.tax_status = "taxable" AND ( 0=1 OR ' . implode( ' OR ', $or_queries ) . ')
+				OR ( wc_product_meta_lookup.tax_status != "taxable" AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )
+			) ',
+			$price_filter
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * If price filters need adjustment to work with displayed taxes, this returns true.
+	 *
+	 * This logic is used when prices are stored in the database differently to how they are being displayed, with regards
+	 * to taxes.
+	 *
+	 * @return boolean
+	 */
+	protected function adjust_price_filters_for_displayed_taxes() {
+		// Requires lookup table data. @todo Update this with the correct version once core patch is accepted.
+		if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.10', '<' ) ) {
+			return false;
+		}
+
+		$display  = get_option( 'woocommerce_tax_display_shop' );
+		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+
+		return $display !== $database;
+	}
+
+	/**
+	 * Converts price filter from subunits to decimal.
+	 *
+	 * @param string|int $price_filter Raw price filter in subunit format.
+	 * @return float Price filter in decimal format.
+	 */
+	protected function prepare_price_filter( $price_filter ) {
+		return floatval( $price_filter / ( 10 ** wc_get_price_decimals() ) );
+	}
+
+	/**
+	 * Adjusts a price filter based on a tax class and whether or not the amount includes or excludes taxes.
+	 *
+	 * This calculation logic is based on `wc_get_price_excluding_tax` and `wc_get_price_including_tax` in core.
+	 *
+	 * @param float  $price_filter Price filter amount as entered.
+	 * @param string $tax_class Tax class for adjustment.
+	 * @return float
+	 */
+	protected function adjust_price_filter_for_tax_class( $price_filter, $tax_class ) {
+		$tax_display    = get_option( 'woocommerce_tax_display_shop' );
+		$tax_rates      = WC_Tax::get_rates( $tax_class );
+		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
+
+		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
+		if ( 'incl' === $tax_display ) {
+			$taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $price_filter, $base_tax_rates, true ) : WC_Tax::calc_tax( $price_filter, $tax_rates, true );
+			return $price_filter - array_sum( $taxes );
+		}
+
+		// If prices are shown excl. tax, add taxes to match the prices stored in the DB.
+		$taxes = WC_Tax::calc_tax( $price_filter, $tax_rates, false );
+
+		return $price_filter + array_sum( $taxes );
 	}
 
 	/**
