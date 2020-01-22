@@ -156,6 +156,12 @@
 
 .woocommerce-filters-advanced__input {
 	width: 100%;
+
+	&.woocommerce-search.woocommerce-select-control {
+		.woocommerce-select-control__control {
+			height: 38px;
+		}
+	}
 }
 
 .woocommerce-filters-advanced__add-filter-dropdown {
