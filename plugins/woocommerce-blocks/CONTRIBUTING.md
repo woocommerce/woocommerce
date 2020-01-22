@@ -2,11 +2,28 @@
 
 Thanks for your interest in contributing to WooCommerce Blocks! Below are some developer docs for working with the project.
 
-To get started you need to install all required dependencies by running the following command in the plugin directory.
+## Get started
 
-```bash
-npm install && composer install
-```
+### Required developer tools
+
+-   [`git`](https://git-scm.com)
+-   [`npm` and `node.js`](https://nodejs.org)
+-   [`composer`](https://getcomposer.org)
+-   A WordPress development environment - e.g. [`VVV`](https://varyingvagrantvagrants.org) or [`docker`](https://www.docker.com).
+
+See [`package.json` `engines`](package.json) for details of required versions.
+
+### Clone repo & install code dependencies
+
+-   Clone this repository locally - `git clone https://github.com/woocommerce/woocommerce-gutenberg-products-block.git`.
+-   Change directory to your repo folder, e.g. `cd woocommerce-gutenberg-products-block`.
+-   Install javascript and php dependencies - `npm install && composer install`.
+
+### Run the plugin
+
+-   Ensure the repo folder is in the `wp-content/plugins` folder of your WordPress environment.
+-   Activate the `WooCommerce Blocks` plugin (should be dev version, e.g. `2.6.0-dev`).
+-   Edit a page or post in block editor - you should see WooCommerce blocks in the block inserter!
 
 ## NPM commands
 
@@ -44,105 +61,9 @@ The test scripts use [wp-scripts](https://github.com/WordPress/gutenberg/tree/ma
 
 Run `$ npm run package-plugin` to trigger install and build, and then create a zip file which you can use to install WooCommerce Blocks in WordPress admin.
 
-## Releasing new versions of blocks
+## Releases
 
-These instructions cover new releases of the blocks plugin for those with commit access.
-
-### Prerequisites
-
--   Have [Github Hub](https://github.com/github/hub) cli installed and authenticated.
-
-**Before any release** ensure you update:
-
--   The `readme.txt` file supported versions, changelog and list of blocks if the release includes new blocks.
-
-**Before a minor release** ensure you update:
-
--   The release last major release branch you're basing this release from (e.g `release/2.5`), chances are you aren’t the last person who released and this branch will be outdated.
-
--   `git checkout release/2.x` (e.g release/2.5).
--   `git pull origin release/2.5`
-
-### Creating release branches
-
-When releasing a major or minor feature frozen version of Blocks (e.g. release candidate), create a new release branch from master named `release/X.X`. **This release branch is where you should create tags and releases from.**
-
-If post-release fixes or changes are needed, create Pull Requests against **master**, but label the PR with the correct milestone. For example, if fixing an issue in Blocks 2.5, create a PR against master with a `2.5.x` milestone. Once approved and merged to master the same changes will be cherry picked to the release branch.
-
-To do this:
-
--   Switch to the release branch
--   Run the command ([using HUB command line helper](https://hub.github.com/hub-am.1.html)): `hub am -3 http://URL-TO-PR`
--   The command will tell you if the merge was successful. If not, you can cherry pick individual commits using [git cherry pick](https://git-scm.com/docs/git-cherry-pick) which is more time consuming.
--   Push the changes to origin.
--   After success, label the PR as `status: cherry-picked`. This lets everyone know the cherry picking has been completed.
-
-You'll also need to manually update the changelog and version numbers in the release branch before tagging. There is a changelog helper script which can list changelog entries from merged PRs in a milestone:
-
-`npm run changelog`
-
-Follow the instructions, then add the changelog entries to the readme.txt file before committing to the release branch. Once all of this is done, you are safe to run the deploy scripts explained below.
-
-If you're using the GitHub deploy script you no longer need to worry about version bumps; it's automated. The `$ npm run deploy` (explained below) will update version strings in `package.json`, `readme.text`, `src/Package.php`, and `woocommerce-gutenberg-products-block.php` for you, committing the changes to the current branch.
-
-### Tagging new releases on GitHub
-
-Tagging a new version on GitHub can be done by running the following script:
-
-```shell
-$ npm run deploy
-```
-
-This will trigger a build and then run the release script (found in `/bin/github-deploy.sh`). This tags a new version and creates the GitHub release from your current branch.
-
-**Important:** Before running the deploy script ensure you have committed all changes to GitHub and that you have the correct branch checked out that you wish to release.
-
-If you want to add additional details or a binary file to the release after deployment, [you can edit the release here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases).
-
-### Bumping the version in MASTER after releasing a tag
-
-After you release a new version from a release branch there are some other steps to do to keep `master` up to date.
-
--   If you released an update with a changelog, create a commit/PR to master with the new changelog entries.
--   Create a commit to master that updates the version to the next minor with a `-dev` suffix. For example, if you just released `2.5.0`, you'd do an update changing the version to `2.6.0-dev`. See an [example here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158).
-
-### Pushing new releases to WordPress.org
-
-If you have SVN commit access to the WordPress.org plugin repository you can run the following script to prepare a new version:
-
-```shell
-$ npm run release
-```
-
-This will ask for a tagged version number, check it out from GitHub, check out the SVN repository, and prepare all files. It will give you a command when it's finished to do the actual commit; you have a chance to test/check the files before pushing to WordPress.org.
-
-**Important:** Before running the release script ensure you have already pushed a new release to GitHub.
-
-## Updating a single file in WordPress.org
-
-Sometimes, we need to update a single file in WordPress.org without wanting to do a full release, for example, updating the `readme.txt` versions or descriptions. In order to do that, refer to the _[Editing Existing Files](https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/#editing-existing-files)_ section of the Subversion guide in developer.wordpress.org or follow these steps:
-
-1. Checkout the plugin repo:
-
-```
-svn co "http://plugins.svn.wordpress.org/woo-gutenberg-products-block/"
-cd woo-gutenberg-products-block
-```
-
-2. Modify the files you want to change in `trunk` or `tags/x.y.z`.
-
-3. Check your changes with:
-
-```
-svn stat
-svn diff
-```
-
-4. Commit the changes to the server:
-
-```
-svn ci -m "Updated readme.txt description"
-```
+See [RELEASE.md](RELEASE.md).
 
 ## Publishing `@woocommerce/block-library`
 
