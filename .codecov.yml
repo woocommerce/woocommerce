@@ -20,7 +20,4 @@ parsers:
       method: no
       macro: no
 
-comment:
-  layout: "files"
-  behavior: default
-  require_changes: yes
+comment: false
