@@ -4,5 +4,8 @@
   ],
   "lockFileMaintenance": { "enabled": true },
   "ignoreDeps": ["phpunit/phpunit"],
-  "schedule": ["before 3am on wednesday"]
+  "schedule": ["before 3am on wednesday"],
+  "composer": {
+    "enabled": false
+  }
 }
