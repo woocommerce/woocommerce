@@ -94,6 +94,7 @@ describe( 'Add New Variable Product Page', () => {
 
 		// Wait for attribute form to save (triggers 2 UI blocks)
 		await uiUnblocked();
+		await page.waitFor( 1000 );
 		await uiUnblocked();
 
 		// Create variations from attributes
