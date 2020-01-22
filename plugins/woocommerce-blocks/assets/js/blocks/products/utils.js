@@ -11,11 +11,11 @@ export const getBlockClassName = ( blockClassName, attributes ) => {
 	const { className, contentVisibility } = attributes;
 
 	return classNames( blockClassName, className, {
-		'has-image': contentVisibility.image,
-		'has-title': contentVisibility.title,
-		'has-rating': contentVisibility.rating,
-		'has-price': contentVisibility.price,
-		'has-button': contentVisibility.button,
+		'has-image': contentVisibility && contentVisibility.image,
+		'has-title': contentVisibility && contentVisibility.title,
+		'has-rating': contentVisibility && contentVisibility.rating,
+		'has-price': contentVisibility && contentVisibility.price,
+		'has-button': contentVisibility && contentVisibility.button,
 	} );
 };
 

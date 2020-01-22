@@ -45,7 +45,7 @@ class ProductTag extends AbstractProductGrid {
 		return array(
 			'className'         => $this->get_schema_string(),
 			'columns'           => $this->get_schema_number( wc_get_theme_support( 'product_blocks::default_columns', 3 ) ),
-			'rows'              => $this->get_schema_number( wc_get_theme_support( 'product_blocks::default_rows', 1 ) ),
+			'rows'              => $this->get_schema_number( wc_get_theme_support( 'product_blocks::default_rows', 3 ) ),
 			'contentVisibility' => $this->get_schema_content_visibility(),
 			'align'             => $this->get_schema_align(),
 			'alignButtons'      => $this->get_schema_boolean( false ),

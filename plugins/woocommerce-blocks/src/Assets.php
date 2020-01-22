@@ -108,7 +108,7 @@ class Assets {
 				'default_columns'             => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
 				'min_rows'                    => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
 				'max_rows'                    => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
-				'default_rows'                => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+				'default_rows'                => wc_get_theme_support( 'product_blocks::default_rows', 3 ),
 				'thumbnail_size'              => wc_get_theme_support( 'thumbnail_image_width', 300 ),
 				'placeholderImgSrc'           => wc_placeholder_img_src(),
 				'min_height'                  => wc_get_theme_support( 'featured_block::min_height', 500 ),

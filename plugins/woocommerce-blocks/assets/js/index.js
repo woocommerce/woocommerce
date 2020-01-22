@@ -9,6 +9,8 @@ import { __ } from '@wordpress/i18n';
  */
 import '../css/editor.scss';
 import '../css/style.scss';
+import './filters/block-list-block';
+import './filters/get-block-attributes';
 import { IconWoo } from './components/icons';
 
 setCategories( [
