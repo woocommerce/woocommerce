@@ -38,17 +38,22 @@ class Connect extends Component {
 	}
 
 	render() {
-		const { hasErrors, isRequesting } = this.props;
+		const { hasErrors, isRequesting, onSkip, skipText } = this.props;
 
-		return hasErrors ? (
-			<Button isPrimary onClick={ () => location.reload() }>
-				{ __( 'Retry', 'woocommerce-admin' ) }
-			</Button>
-		) : (
+		return (
 			<Fragment>
-				<Button isBusy={ isRequesting } isPrimary onClick={ this.connectJetpack }>
-					{ __( 'Connect', 'woocommerce-admin' ) }
-				</Button>
+				{ hasErrors ? (
+					<Button isPrimary onClick={ () => location.reload() }>
+						{ __( 'Retry', 'woocommerce-admin' ) }
+					</Button>
+				) : (
+					<Button isBusy={ isRequesting } isPrimary onClick={ this.connectJetpack }>
+						{ __( 'Connect', 'woocommerce-admin' ) }
+					</Button>
+				) }
+				{ onSkip && (
+					<Button onClick={ onSkip }>{ skipText || __( 'No thanks', 'woocommerce-admin' ) }</Button>
+				) }
 			</Fragment>
 		);
 	}
@@ -76,9 +81,17 @@ Connect.propTypes = {
 	 */
 	jetpackConnectUrl: PropTypes.string,
 	/**
+	 * Called when the plugin connection is skipped.
+	 */
+	onSkip: PropTypes.func,
+	/**
 	 * Redirect URL to encode as a URL param for the connection path.
 	 */
 	redirectUrl: PropTypes.string,
+	/**
+	 * Text used for the skip connection button.
+	 */
+	skipText: PropTypes.string,
 };
 
 export default compose(
