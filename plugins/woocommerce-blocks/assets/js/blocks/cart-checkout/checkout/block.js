@@ -298,7 +298,10 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 							/>
 							<CheckboxControl
 								className="wc-block-checkout__add-note"
-								label="Add order notes?"
+								label={ __(
+									'Add order notes?',
+									'woo-gutenberg-products-block'
+								) }
 								checked={ shippingMethod.orderNote }
 								onChange={ () =>
 									setShippingMethod( {
