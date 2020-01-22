@@ -10,14 +10,11 @@ import Gridicon from 'gridicons';
  * Internal dependencies
  */
 import Editor from './edit';
-import sharedAttributes from '../attributes';
+import { attributes as sharedAttributes, defaults } from '../attributes';
 import { getBlockClassName } from '../utils.js';
 import '../../../atomic/blocks/product';
 
-/**
- * Register and run the "All Products" block.
- */
-registerBlockType( 'woocommerce/all-products', {
+const blockSettings = {
 	title: __( 'All Products', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: <Gridicon icon="grid" />,
@@ -39,10 +36,8 @@ registerBlockType( 'woocommerce/all-products', {
 			isPreview: true,
 		},
 	},
-	attributes: {
-		...sharedAttributes,
-	},
-
+	attributes: sharedAttributes,
+	defaults,
 	/**
 	 * Renders and manages the block.
 	 *
@@ -51,7 +46,6 @@ registerBlockType( 'woocommerce/all-products', {
 	edit( props ) {
 		return <Editor { ...props } />;
 	},
-
 	/**
 	 * Save the props to post content.
 	 *
@@ -59,9 +53,11 @@ registerBlockType( 'woocommerce/all-products', {
 	 */
 	save( { attributes } ) {
 		const data = {
-			'data-attributes': JSON.stringify( attributes ),
+			'data-attributes': JSON.stringify(
+				attributes,
+				Object.keys( attributes ).sort()
+			),
 		};
-
 		return (
 			<div
 				className={ getBlockClassName(
@@ -74,4 +70,37 @@ registerBlockType( 'woocommerce/all-products', {
 			</div>
 		);
 	},
+};
+
+/**
+ * Register and run the "All Products" block.
+ */
+registerBlockType( 'woocommerce/all-products', {
+	...blockSettings,
+	/**
+	 * Deprecation rule to handle the previous default rows which was 1 instead of 3.
+	 */
+	deprecated: [
+		{
+			attributes: Object.assign( {}, blockSettings.attributes, {
+				rows: { type: 'number', default: 1 },
+			} ),
+			save( { attributes } ) {
+				const data = {
+					'data-attributes': JSON.stringify( attributes ),
+				};
+				return (
+					<div
+						className={ getBlockClassName(
+							'wc-block-all-products',
+							attributes
+						) }
+						{ ...data }
+					>
+						<InnerBlocks.Content />
+					</div>
+				);
+			},
+		},
+	],
 } );

@@ -13,7 +13,8 @@
 	"sideEffects": [
 		"*.css",
 		"*.scss",
-		"./assets/js/atomic/blocks/product/**"
+		"./assets/js/atomic/blocks/product/**",
+		"./assets/js/filters/**"
 	],
 	"repository": {
 		"type": "git",
