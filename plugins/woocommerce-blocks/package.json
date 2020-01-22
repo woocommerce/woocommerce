@@ -111,7 +111,7 @@
 	"dependencies": {
 		"@woocommerce/components": "4.0.0",
 		"@wordpress/components": "8.5.0",
-		"@wordpress/html-entities": "^2.5.0",
+		"@wordpress/html-entities": "2.5.0",
 		"compare-versions": "3.5.1",
 		"downshift": "4.0.5",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
