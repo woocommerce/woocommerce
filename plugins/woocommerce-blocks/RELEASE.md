@@ -150,12 +150,4 @@ svn diff
 
 ```
 svn ci -m "Updated readme.txt description"
-
-## `@todo` Missing info to link to / document
-- Release milestones
-- Relationship to Woo core release
-- Testing blocks plugin as included in Woo core (do we do this?)
-- Policy for inclusion in major / minor / fix releases - i.e. how we use versioning 
-- ["Legacy"](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/add/release-process/assets/js/legacy/README.md) stuff - is this relevant to releases?
-- `jetpack-autoloader` versions in this plugin vs. wc-admin vs. WooCommerce core
 ```
