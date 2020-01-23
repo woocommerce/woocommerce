@@ -317,8 +317,9 @@ class ReportTable extends Component {
 		const totals = get( primaryData, [ 'data', 'totals' ], {} );
 		const totalResults = items.totalResults;
 		const downloadable = 0 < totalResults;
-		const searchWords = getSearchWords( query );
-		const searchedLabels = searchWords.map( v => ( { id: v, label: v } ) );
+		// Search words are in the query string, not the table query.
+		const searchWords = getSearchWords( this.props.query );
+		const searchedLabels = searchWords.map( v => ( { key: v, label: v } ) );
 
 		/**
 		 * Filter report table.
