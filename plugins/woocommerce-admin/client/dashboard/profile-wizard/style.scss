@@ -36,6 +36,14 @@
 		}
 	}
 
+	.woocommerce-profile-wizard__card-actions {
+		text-align: center;
+
+		.components-button {
+			margin-top: $gap-small;
+		}
+	}
+
 	.woocommerce-profile-wizard__container {
 		.woocommerce-profile-wizard__tos {
 			font-size: 12px;
@@ -172,6 +180,7 @@
 
 		&:last-child p {
 			border-bottom: 0;
+			margin-bottom: 0;
 		}
 	}
 

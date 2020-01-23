@@ -285,22 +285,24 @@ class BusinessDetails extends Component {
 				</div>
 
 				{ installExtensions && (
-					<Plugins
-						onComplete={ () => {
-							goToNextStep();
-						} }
-						onSkip={ () => {
-							goToNextStep();
-						} }
-						onError={ () => {
-							this.setState( {
-								extensionInstallError: true,
-								isInstallingExtensions: false,
-							} );
-						} }
-						autoInstall
-						pluginSlugs={ extensionsToInstall }
-					/>
+					<div className="woocommerce-profile-wizard__card-actions">
+						<Plugins
+							onComplete={ () => {
+								goToNextStep();
+							} }
+							onSkip={ () => {
+								goToNextStep();
+							} }
+							onError={ () => {
+								this.setState( {
+									extensionInstallError: true,
+									isInstallingExtensions: false,
+								} );
+							} }
+							autoInstall
+							pluginSlugs={ extensionsToInstall }
+						/>
+					</div>
 				) }
 			</Fragment>
 		);
