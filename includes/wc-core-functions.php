@@ -17,6 +17,7 @@ require WC_ABSPATH . 'includes/wc-conditional-functions.php';
 require WC_ABSPATH . 'includes/wc-coupon-functions.php';
 require WC_ABSPATH . 'includes/wc-user-functions.php';
 require WC_ABSPATH . 'includes/wc-deprecated-functions.php';
+require WC_ABSPATH . 'includes/wc-deprecation-functions.php';
 require WC_ABSPATH . 'includes/wc-formatting-functions.php';
 require WC_ABSPATH . 'includes/wc-order-functions.php';
 require WC_ABSPATH . 'includes/wc-order-item-functions.php';
@@ -2298,4 +2299,22 @@ function wc_load_cart() {
 
 	WC()->initialize_session();
 	WC()->initialize_cart();
+}
+
+/**
+ * When catching an exception, this allows us to log it if unexpected.
+ *
+ * @since 3.3.0
+ * @param Exception $exception_object The exception object.
+ * @param string    $function The function which threw exception.
+ * @param array     $args The args passed to the function.
+ */
+function wc_caught_exception( $exception_object, $function = '', $args = array() ) {
+	// @codingStandardsIgnoreStart
+	$message  = $exception_object->getMessage();
+	$message .= '. Args: ' . print_r( $args, true ) . '.';
+
+	do_action( 'woocommerce_caught_exception', $exception_object, $function, $args );
+	error_log( "Exception caught in {$function}. {$message}." );
+	// @codingStandardsIgnoreEnd
 }
