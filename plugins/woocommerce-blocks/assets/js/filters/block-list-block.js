@@ -17,6 +17,20 @@ const withDefaultAttributes = createHigherOrderComponent(
 			constructor() {
 				super( ...arguments );
 
+				this.getAttributesWithDefaults = this.getAttributesWithDefaults.bind(
+					this
+				);
+			}
+
+			componentDidMount() {
+				const { block, setAttributes } = this.props;
+
+				if ( block.name.startsWith( 'woocommerce/' ) ) {
+					setAttributes( this.getAttributesWithDefaults() );
+				}
+			}
+
+			getAttributesWithDefaults() {
 				const blockType = getBlockType( this.props.block.name );
 				const attributes = Object.assign(
 					{},
@@ -39,22 +53,14 @@ const withDefaultAttributes = createHigherOrderComponent(
 					} );
 				}
 
-				this.attributesWithDefaults = attributes;
-			}
-
-			componentDidMount() {
-				const { block, setAttributes } = this.props;
-
-				if ( block.name.startsWith( 'woocommerce/' ) ) {
-					setAttributes( this.attributesWithDefaults );
-				}
+				return attributes;
 			}
 
 			render() {
 				return (
 					<BlockListBlock
 						{ ...this.props }
-						attributes={ this.attributesWithDefaults }
+						attributes={ this.getAttributesWithDefaults() }
 					/>
 				);
 			}
