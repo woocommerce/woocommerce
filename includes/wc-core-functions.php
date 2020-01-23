@@ -2310,11 +2310,9 @@ function wc_load_cart() {
  * @param array     $args The args passed to the function.
  */
 function wc_caught_exception( $exception_object, $function = '', $args = array() ) {
-	// @codingStandardsIgnoreStart
 	$message  = $exception_object->getMessage();
 	$message .= '. Args: ' . print_r( $args, true ) . '.';
 
 	do_action( 'woocommerce_caught_exception', $exception_object, $function, $args );
 	error_log( "Exception caught in {$function}. {$message}." );
-	// @codingStandardsIgnoreEnd
 }

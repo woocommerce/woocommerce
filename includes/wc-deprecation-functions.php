@@ -38,16 +38,14 @@ function wc_do_deprecated_action( $tag, $args, $version, $replacement = null, $m
  * @param string $replacement Replacement for the called function.
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
-	// @codingStandardsIgnoreStart
 	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_function_run', $function, $replacement, $version );
 		$log_string  = "The {$function} function is deprecated since version {$version}.";
 		$log_string .= $replacement ? " Replace with {$replacement}." : '';
 		error_log( $log_string );
 	} else {
-		_deprecated_function( $function, $version, $replacement );
+		_deprecated_function( esc_html( $function ), esc_html( $version ), esc_html( $replacement ) );
 	}
-	// @codingStandardsIgnoreEnd
 }
 
 /**
@@ -60,19 +58,17 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  * @param string $message     A message regarding the change.
  */
 function wc_deprecated_hook( $hook, $version, $replacement = null, $message = null ) {
-	// @codingStandardsIgnoreStart
 	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
 
-		$message    = empty( $message ) ? '' : ' ' . $message;
-		$log_string = "{$hook} is deprecated since version {$version}";
+		$message     = empty( $message ) ? '' : ' ' . $message;
+		$log_string  = "{$hook} is deprecated since version {$version}";
 		$log_string .= $replacement ? "! Use {$replacement} instead." : ' with no alternative available.';
 
 		error_log( $log_string . $message );
 	} else {
-		_deprecated_hook( $hook, $version, $replacement, $message );
+		_deprecated_hook( esc_html( $hook ), esc_html( $version ), esc_html( $replacement ), esc_html( $message ) );
 	}
-	// @codingStandardsIgnoreEnd
 }
 
 /**
@@ -84,31 +80,29 @@ function wc_deprecated_hook( $hook, $version, $replacement = null, $message = nu
  * @param string $version Version the message was added in.
  */
 function wc_doing_it_wrong( $function, $message, $version ) {
-	// @codingStandardsIgnoreStart
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
 
 	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
 	} else {
-		_doing_it_wrong( $function, $message, $version );
+		_doing_it_wrong( esc_html( $function ), esc_html( $message ), esc_html( $version ) );
 	}
-	// @codingStandardsIgnoreEnd
 }
 
 /**
  * Wrapper for deprecated arguments so we can apply some extra logic.
  *
- * @since  3.0.0
- * @param  string $argument
- * @param  string $version
- * @param  string $replacement
+ * @since 3.0.0
+ * @param string $argument The name of the deprecated argument.
+ * @param string $version In which WooCommerce version the argument was deprecated.
+ * @param string $message Optional. A message regarding the change. Default null.
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
 	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
-		_deprecated_argument( $argument, $version, $message );
+		_deprecated_argument( esc_html( $argument ), esc_html( $version ), esc_html( $message ) );
 	}
 }
