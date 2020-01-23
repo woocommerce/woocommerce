@@ -23,7 +23,7 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
   - name: "PHP 5.6 unit tests"
     php: 5.6
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
+    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress WC_VERSION=3.8.1
   allow_failures:
     php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_RANDOM=1 COMPOSER_DEV=1

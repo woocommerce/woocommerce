@@ -170,7 +170,11 @@ install_deps() {
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
 	# Install WooCommerce (latest non-hyphenated (beta, RC) tag)
-	LATEST_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
+	if [[ "$WC_VERSION" == "" ]]; then
+		LATEST_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
+	else
+		LATEST_WC_TAG="$WC_VERSION"
+	fi
 	cd "wp-content/plugins/"
 	# As zip file does not include tests, we have to get it from git repo.
 	git clone --depth 1 --branch $LATEST_WC_TAG https://github.com/woocommerce/woocommerce.git
