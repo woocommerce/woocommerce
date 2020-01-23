@@ -31,9 +31,9 @@ import { decodeEntities } from '@wordpress/html-entities';
  * @return {Object} Returns an object with the following properties:
  *    @type {number}   cartQuantity  The quantity of the product currently in
  *                                   the cart.
- *    @type {boolean}     addingToCart  Whether the product is currently being
+ *    @type {boolean}  addingToCart  Whether the product is currently being
  *                                   added to the cart (true).
- *    @type {boolean}     cartIsLoading Whether the cart is being loaded.
+ *    @type {boolean}  cartIsLoading Whether the cart is being loaded.
  *    @type {Function} addToCart     An action dispatcher for adding a single
  *                                   quantity of the product to the cart.
  *                                   Receives no arguments, it operates on the
@@ -81,7 +81,7 @@ const useAddToCart = ( productId ) => {
 	};
 };
 
-const Event = window.Event || {};
+const Event = window.Event || null;
 
 const ProductButton = ( { product, className } ) => {
 	const {
@@ -125,8 +125,8 @@ const ProductButton = ( { product, className } ) => {
 			firstMount.current = false;
 			return;
 		}
-		// Test if we have our Event defined
-		if ( Object.entries( Event ).length !== 0 ) {
+		// In IE, Event is an object and can't be instantiated with `new Event()`.
+		if ( typeof Event === 'function' ) {
 			const event = new Event( 'wc_fragment_refresh', {
 				bubbles: true,
 				cancelable: true,
