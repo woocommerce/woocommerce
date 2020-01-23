@@ -786,18 +786,18 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'price'                 => array(
 					'description' => __( 'Current product price.', 'woocommerce-rest-api' ),
-					'type'        => 'number',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'regular_price'         => array(
 					'description' => __( 'Product regular price.', 'woocommerce-rest-api' ),
-					'type'        => 'number',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sale_price'            => array(
 					'description' => __( 'Product sale price.', 'woocommerce-rest-api' ),
-					'type'        => 'number',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from'     => array(
@@ -962,7 +962,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'weight'                => array(
 					/* translators: %s: weight unit */
 					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce-rest-api' ), $weight_unit ),
-					'type'        => 'number',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'dimensions'            => array(
@@ -973,19 +973,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 						'length' => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product length (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
-							'type'        => 'number',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product width (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
-							'type'        => 'number',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product height (%s).', 'woocommerce-rest-api' ), $dimension_unit ),
-							'type'        => 'number',
+							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
