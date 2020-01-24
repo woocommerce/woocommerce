@@ -236,9 +236,11 @@ class Theme extends Component {
 
 	getThemes( activeTab = 'all' ) {
 		const { uploadedThemes } = this.state;
-		const { themes = [] } = getSetting( 'onboarding', {} );
-		themes.concat( uploadedThemes );
-		const allThemes = [ ...themes, ...uploadedThemes ];
+		const { activeTheme = '', themes = [] } = getSetting( 'onboarding', {} );
+		const allThemes = [
+			...themes.filter( theme => theme.has_woocommerce_support || theme.slug === activeTheme ),
+			...uploadedThemes,
+		];
 
 		switch ( activeTab ) {
 			case 'paid':

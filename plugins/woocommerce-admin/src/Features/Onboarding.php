@@ -76,6 +76,8 @@ class Onboarding {
 
 		// Rest API hooks need to run before is_admin() checks.
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
+		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
+		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 
 		// Add onboarding notes.
 		new WC_Admin_Notes_Onboarding_Profiler();
@@ -92,8 +94,6 @@ class Onboarding {
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
-		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
-		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
 		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
 		add_action( 'current_screen', array( $this, 'finish_square_connect' ) );
 		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
@@ -236,12 +236,7 @@ class Onboarding {
 			$active_theme     = get_option( 'stylesheet' );
 
 			foreach ( $installed_themes as $slug => $theme ) {
-				$theme_data = self::get_theme_data( $theme );
-
-				if ( ! $theme_data['has_woocommerce_support'] && $active_theme !== $slug ) {
-					continue;
-				}
-
+				$theme_data       = self::get_theme_data( $theme );
 				$installed_themes = wp_get_themes();
 				$themes[ $slug ]  = $theme_data;
 			}
