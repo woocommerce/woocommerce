@@ -31,7 +31,7 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
-		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated
+		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$product    = wc_get_product( $product_id );
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
@@ -44,12 +44,13 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
+		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
+		$order    = wc_get_order( $order_id );
+
 		if ( isset( $_GET['email'] ) ) { // WPCS: input var ok, CSRF ok.
 			$email_address = wp_unslash( $_GET['email'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		} else {
 			// Get email address from order to verify hash.
-			$order_id      = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
-			$order         = wc_get_order( $order_id );
 			$email_address = is_a( $order, 'WC_Order' ) ? $order->get_billing_email() : null;
 
 			// Prepare email address hash.
@@ -79,7 +80,25 @@ class WC_Download_Handler {
 
 		$download = new WC_Customer_Download( current( $download_ids ) );
 
-		$file_path        = $product->get_file_download_path( $download->get_download_id() );
+		/**
+		 * Filter download filepath.
+		 *
+		 * @since 4.0.0
+		 * @param string $file_path File path.
+		 * @param string $email_address Email address.
+		 * @param WC_Order|bool $order Order object or false.
+		 * @param WC_Product $product Product object.
+		 * @param WC_Customer_Download $download Download data.
+		 */
+		$file_path = apply_filters(
+			'woocommerce_download_product_filepath',
+			$product->get_file_download_path( $download->get_download_id() ),
+			$email_address,
+			$order,
+			$product,
+			$download
+		);
+
 		$parsed_file_path = self::parse_file_path( $file_path );
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) );  // @codingStandardsIgnoreLine.
 
