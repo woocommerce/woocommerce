@@ -275,8 +275,9 @@ class Tax extends Component {
 							{ 'yes' !== generalSettings.woocommerce_calc_taxes &&
 								interpolateComponents( {
 									mixedString: __(
-										'By clicking "Configure" you\'re enabling tax rates and calculations.' +
-											'More info {{link}}here{{/link}}.',
+										/*eslint-disable max-len*/
+										'By clicking "Configure" you\'re enabling tax rates and calculations. More info {{link}}here{{/link}}.',
+										/*eslint-enable max-len*/
 										'woocommerce-admin'
 									),
 									components: {
