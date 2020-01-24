@@ -84,10 +84,14 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	$notices[ $notice_type ][] = array(
-		'notice' => apply_filters( 'woocommerce_add_' . $notice_type, $message ),
-		'data'   => $data,
-	);
+	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+
+	if ( ! empty( $message ) ) {
+		$notices[ $notice_type ][] = array(
+			'notice' => apply_filters( 'woocommerce_add_' . $notice_type, $message ),
+			'data'   => $data,
+		);
+	}
 
 	WC()->session->set( 'wc_notices', $notices );
 }
