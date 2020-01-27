@@ -62,7 +62,13 @@ abstract class WC_Settings_API {
 	 * @return array of options
 	 */
 	public function get_form_fields() {
-		return apply_filters( 'woocommerce_settings_api_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->form_fields ) );
+		// Make sure that the defaults have been set for all fields.
+		$form_fields = array_map( array( $this, 'set_defaults' ), $this->form_fields );
+
+		// Allow for an options_callback to be used to set the options lazily.
+		$form_fields = array_map( array( $this, 'set_options_from_callback' ), $form_fields );
+
+		return apply_filters( 'woocommerce_settings_api_form_fields_' . $this->id, $form_fields );
 	}
 
 	/**
@@ -75,6 +81,26 @@ abstract class WC_Settings_API {
 		if ( ! isset( $field['default'] ) ) {
 			$field['default'] = '';
 		}
+		return $field;
+	}
+
+	/**
+	 * Set the options from the callback if desired. We can use this in order to support lazy-loading expensive
+	 * options.
+	 *
+	 * @param array $field The field to set.
+	 * @return array The field that was set.
+	 */
+	protected function set_options_from_callback( $field ) {
+		if ( ! isset( $field['options_callback'] ) || ! is_callable( $field['options_callback'] ) ) {
+			return $field;
+		}
+
+		// We want to support fetching the options from a callback for lazy loading.
+		if ( ! isset( $field['options'] ) && empty( $field['options'] ) ) {
+			$field['options'] = call_user_func( $field['options_callback'] );
+		}
+
 		return $field;
 	}
 
