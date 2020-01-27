@@ -475,7 +475,8 @@ class WC_Countries {
 							echo ' selected="selected"';
 						}
 
-						echo '>' . esc_html( $value ) . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>'; // WPCS: XSS ok.
+						echo '>' . esc_html( $value ) . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 					}
 					echo '</optgroup>';
 				} else {
@@ -483,7 +484,7 @@ class WC_Countries {
 					if ( $selected_country === $key && '*' === $selected_state ) {
 						echo ' selected="selected"';
 					}
-					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>'; // WPCS: XSS ok.
+					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 			}
 		}
@@ -865,7 +866,7 @@ class WC_Countries {
 						'postcode' => array(
 							'label' => __( 'Postal code', 'woocommerce' ),
 						),
-						'state' => array(
+						'state'    => array(
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
@@ -1020,7 +1021,7 @@ class WC_Countries {
 						),
 					),
 					'JP' => array(
-						'last_name' => array(
+						'last_name'  => array(
 							'class'    => array( 'form-row-first' ),
 							'priority' => 10,
 						),
@@ -1028,22 +1029,22 @@ class WC_Countries {
 							'class'    => array( 'form-row-last' ),
 							'priority' => 20,
 						),
-						'postcode'  => array(
+						'postcode'   => array(
 							'class'    => array( 'form-row-first' ),
 							'priority' => 65,
 						),
-						'state'     => array(
+						'state'      => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
 							'class'    => array( 'form-row-last' ),
 							'priority' => 66,
 						),
-						'city'      => array(
+						'city'       => array(
 							'priority' => 67,
 						),
-						'address_1' => array(
+						'address_1'  => array(
 							'priority' => 68,
 						),
-						'address_2' => array(
+						'address_2'  => array(
 							'priority' => 69,
 						),
 					),
@@ -1282,7 +1283,7 @@ class WC_Countries {
 					'VN' => array(
 						'state'     => array(
 							'required' => false,
-							'hidden' => true,
+							'hidden'   => true,
 						),
 						'postcode'  => array(
 							'priority' => 65,
