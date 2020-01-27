@@ -365,9 +365,21 @@ class WC_Countries {
 	}
 
 	/**
-	 * Gets an array of countries using VAT.
+	 * Gets an array of Non-EU countries that use VAT as the Local name for their taxes based on this list - https://en.wikipedia.org/wiki/Value-added_tax#Non-European_Union_countries
 	 *
 	 * @since 3.9.0
+	 * @return string[]
+	 */
+	public function countries_using_vat() {
+		$countries = array( 'AL', 'AR', 'AZ', 'BS', 'BH', 'BY', 'BB', 'BO', 'EG', 'ET', 'CL', 'CO', 'EC', 'SV', 'FJ', 'GM', 'GH', 'GT', 'IN', 'IR', 'IL', 'KZ', 'MU', 'MK', 'MX', 'MD', 'MN', 'ME', 'NA', 'NP', 'NG', 'PS', 'PY', 'RU', 'RW', 'KN', 'SA', 'RS', 'ZA', 'KR', 'LK', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'AE' );
+
+		return apply_filters( 'woocommerce_countries_using_vat', $countries );
+	}
+
+	/**
+	 * Gets an array of countries using VAT.
+	 *
+	 * @since 4.0.0
 	 * @return array of country codes.
 	 */
 	public function get_vat_countries() {
@@ -383,16 +395,6 @@ class WC_Countries {
 		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $vat_countries, $countries ) );
 	}
 
-	/**
-	 * Gets an array of Non-EU countries that use VAT as the Local name for their taxes based on this list - https://en.wikipedia.org/wiki/Value-added_tax#Non-European_Union_countries
-	 *
-	 * @return string[]
-	 */
-	public function countries_using_vat() {
-		$countries = array( 'AL', 'AR', 'AZ', 'BS', 'BH', 'BY', 'BB', 'BO', 'EG', 'ET', 'CL', 'CO', 'EC', 'SV', 'FJ', 'GM', 'GH', 'GT', 'IN', 'IR', 'IL', 'KZ', 'MU', 'MK', 'MX', 'MD', 'MN', 'ME', 'NA', 'NP', 'NG', 'PS', 'PY', 'RU', 'RW', 'KN', 'SA', 'RS', 'ZA', 'KR', 'LK', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'AE' );
-
-		return apply_filters( 'woocommerce_countries_using_vat', $countries );
-	}
 
 	/**
 	 * Gets the correct string for shipping - either 'to the' or 'to'.
