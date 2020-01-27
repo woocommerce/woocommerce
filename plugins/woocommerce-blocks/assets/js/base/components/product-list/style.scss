@@ -173,7 +173,8 @@
 .wc-block-grid__product-rating {
 	display: block;
 
-	.wc-block-grid__product-rating__stars {
+	.wc-block-grid__product-rating__stars,
+	.star-rating {
 		overflow: hidden;
 		position: relative;
 		width: 5.3em;
