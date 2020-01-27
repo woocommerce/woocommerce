@@ -158,7 +158,7 @@ class WC_Admin_Setup_Wizard {
 
 		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
 		if ( ! $ab_test ) {
-			$ab_test = 1 !== rand( 1, 10 ) ? 'a' : 'b'; // 10% of users. b gets the new experience.
+			$ab_test = 1 !== rand( 1, 2 ) ? 'a' : 'b'; // 50% of users. b gets the new experience.
 			update_option( 'woocommerce_setup_ab_wc_admin_onboarding', $ab_test );
 		}
 
