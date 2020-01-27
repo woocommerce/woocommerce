@@ -113,7 +113,7 @@ class WC_Order extends WC_Abstract_Order {
 					$this->set_transaction_id( $transaction_id );
 				}
 				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( current_time( 'timestamp', true ) );
+					$this->set_date_paid( time() );
 				}
 				$this->set_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) );
 				$this->save();
@@ -292,11 +292,11 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( $this->has_status( $payment_completed_status ) ) {
 				// If payment complete status is reached, set paid now.
-				$this->set_date_paid( current_time( 'timestamp', true ) );
+				$this->set_date_paid( time() );
 
 			} elseif ( 'processing' === $payment_completed_status && $this->has_status( 'completed' ) ) {
 				// If payment complete status was processing, but we've passed that and still have no date, set it now.
-				$this->set_date_paid( current_time( 'timestamp', true ) );
+				$this->set_date_paid( time() );
 			}
 		}
 	}
@@ -310,7 +310,7 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( 'completed' ) ) {
-			$this->set_date_completed( current_time( 'timestamp', true ) );
+			$this->set_date_completed( time() );
 		}
 	}
 
@@ -366,15 +366,33 @@ class WC_Order extends WC_Abstract_Order {
 					/* translators: 1: old order status 2: new order status */
 					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );
 
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $status_transition );
+
 					do_action( 'woocommerce_order_status_' . $status_transition['from'] . '_to_' . $status_transition['to'], $this->get_id(), $this );
 					do_action( 'woocommerce_order_status_changed', $this->get_id(), $status_transition['from'], $status_transition['to'], $this );
+
+					// Work out if this was for a payment, and trigger a payment_status hook instead.
+					if (
+						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this ), true )
+						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
+					) {
+						/**
+						 * Fires when the order progresses from a pending payment status to a paid one.
+						 *
+						 * @since 3.9.0
+						 * @param int Order ID
+						 * @param WC_Order Order object
+						 */
+						do_action( 'woocommerce_order_payment_status_changed', $this->get_id(), $this );
+					}
 				} else {
 					/* translators: %s: new order status */
 					$transition_note = sprintf( __( 'Order status set to %s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['to'] ) );
-				}
 
-				// Note the transition occurred.
-				$this->add_order_note( trim( $status_transition['note'] . ' ' . $transition_note ), 0, $status_transition['manual'] );
+					// Note the transition occurred.
+					$this->add_status_transition_note( $transition_note, $status_transition );
+				}
 			} catch ( Exception $e ) {
 				$logger = wc_get_logger();
 				$logger->error(
@@ -883,10 +901,11 @@ class WC_Order extends WC_Abstract_Order {
 		 * Filter orders formatterd billing address.
 		 *
 		 * @since 3.8.0
-		 * @param string $address     Formatted billing address string.
-		 * @param array  $raw_address Raw billing address.
+		 * @param string   $address     Formatted billing address string.
+		 * @param array    $raw_address Raw billing address.
+		 * @param WC_Order $order       Order data. @since 3.9.0
 		 */
-		return apply_filters( 'woocommerce_order_get_formatted_billing_address', $address ? $address : $empty_content, $raw_address );
+		return apply_filters( 'woocommerce_order_get_formatted_billing_address', $address ? $address : $empty_content, $raw_address, $this );
 	}
 
 	/**
@@ -908,10 +927,11 @@ class WC_Order extends WC_Abstract_Order {
 		 * Filter orders formatterd shipping address.
 		 *
 		 * @since 3.8.0
-		 * @param string $address     Formatted shipping address string.
-		 * @param array  $raw_address Raw shipping address.
+		 * @param string   $address     Formatted billing address string.
+		 * @param array    $raw_address Raw billing address.
+		 * @param WC_Order $order       Order data. @since 3.9.0
 		 */
-		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address );
+		return apply_filters( 'woocommerce_order_get_formatted_shipping_address', $address ? $address : $empty_content, $raw_address, $this );
 	}
 
 	/**
@@ -1426,6 +1446,12 @@ class WC_Order extends WC_Abstract_Order {
 				continue;
 			}
 
+			// Check item refunds.
+			$refunded_qty = abs( $this->get_qty_refunded_for_item( $item->get_id() ) );
+			if ( $refunded_qty && $item->get_quantity() === $refunded_qty ) {
+				continue;
+			}
+
 			if ( $item->is_type( 'line_item' ) ) {
 				$item_downloads = $item->get_item_downloads();
 				$product        = $item->get_product();
@@ -1697,6 +1723,19 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		return $comment_id;
+	}
+
+	/**
+	 * Add an order note for status transition
+	 *
+	 * @since 3.9.0
+	 * @uses WC_Order::add_order_note()
+	 * @param string $note          Note to be added giving status transition from and to details.
+	 * @param bool   $transition    Details of the status transition.
+	 * @return int                  Comment ID.
+	 */
+	private function add_status_transition_note( $note, $transition ) {
+		return $this->add_order_note( trim( $transition['note'] . ' ' . $note ), 0, $transition['manual'] );
 	}
 
 	/**

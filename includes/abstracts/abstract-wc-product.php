@@ -1517,11 +1517,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( '' !== (string) $this->get_sale_price( $context ) && $this->get_regular_price( $context ) > $this->get_sale_price( $context ) ) {
 			$on_sale = true;
 
-			if ( $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context )->getTimestamp() > current_time( 'timestamp', true ) ) {
+			if ( $this->get_date_on_sale_from( $context ) && $this->get_date_on_sale_from( $context )->getTimestamp() > time() ) {
 				$on_sale = false;
 			}
 
-			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < current_time( 'timestamp', true ) ) {
+			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < time() ) {
 				$on_sale = false;
 			}
 		} else {
@@ -1859,7 +1859,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		if ( ! $image && $placeholder ) {
-			$image = wc_placeholder_img( $size );
+			$image = wc_placeholder_img( $size, $attr );
 		}
 
 		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder, $image );

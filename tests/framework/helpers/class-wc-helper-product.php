@@ -116,7 +116,7 @@ class WC_Helper_Product {
 			)
 		);
 
-		$attributes     = array();
+		$attributes = array();
 
 		$attribute      = new WC_Product_Attribute();
 		$attribute_data = self::create_attribute( 'size', array( 'small', 'large', 'huge' ) );
@@ -183,7 +183,7 @@ class WC_Helper_Product {
 		);
 		$variation_3->set_attributes(
 			array(
-				'pa_size' => 'huge',
+				'pa_size'   => 'huge',
 				'pa_colour' => 'red',
 				'pa_number' => '0',
 			)
@@ -200,7 +200,7 @@ class WC_Helper_Product {
 		);
 		$variation_4->set_attributes(
 			array(
-				'pa_size' => 'huge',
+				'pa_size'   => 'huge',
 				'pa_colour' => 'red',
 				'pa_number' => '2',
 			)
@@ -224,7 +224,7 @@ class WC_Helper_Product {
 
 		// Make sure caches are clean.
 		delete_transient( 'wc_attribute_taxonomies' );
-		WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 		// These are exported as labels, so convert the label to a name if possible first.
 		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );

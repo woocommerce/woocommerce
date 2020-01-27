@@ -105,7 +105,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
-			$product->set_date_created( current_time( 'timestamp', true ) );
+			$product->set_date_created( time() );
 		}
 
 		$id = wp_insert_post(
@@ -842,10 +842,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		wc_delete_product_transients( $product->get_id() );
 		if ( $product->get_parent_id( 'edit' ) ) {
 			wc_delete_product_transients( $product->get_parent_id( 'edit' ) );
-			WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_parent_id( 'edit' ) );
+			WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_parent_id( 'edit' ) );
 		}
 		WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
-		WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_id() );
+		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );
 	}
 
 	/*
@@ -880,7 +880,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		return $wpdb->get_results(
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"
 			SELECT posts.ID as id, posts.post_parent as parent_id
 			FROM {$wpdb->posts} AS posts
@@ -898,7 +898,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 			GROUP BY posts.ID
 			"
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
 
@@ -1019,7 +1019,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				current_time( 'timestamp', true )
+				time()
 			)
 		);
 	}
@@ -1045,7 +1045,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
-				current_time( 'timestamp', true )
+				time()
 			)
 		);
 	}
@@ -1178,7 +1178,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( in_array( $possible_attribute, $existing_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				continue;
 			}
-			$variation = new WC_Product_Variation();
+			$variation = wc_get_product_object( 'variation' );
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
@@ -1553,7 +1553,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$type_where   = '';
 		$status_where = '';
 		$limit_query  = '';
-		$term         = wc_strtolower( $term );
 
 		/**
 		 * Hook woocommerce_search_products_post_statuses.
@@ -1567,8 +1566,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		// See if search term contains OR keywords.
-		if ( strstr( $term, ' or ' ) ) {
-			$term_groups = explode( ' or ', $term );
+		if ( stristr( $term, ' or ' ) ) {
+			$term_groups = preg_split( '/\s+or\s+/i', $term );
 		} else {
 			$term_groups = array( $term );
 		}

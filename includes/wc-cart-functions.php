@@ -203,8 +203,8 @@ function wc_cart_totals_subtotal_html() {
  * Get shipping methods.
  */
 function wc_cart_totals_shipping_html() {
-	$packages           = WC()->shipping()->get_packages();
-	$first              = true;
+	$packages = WC()->shipping()->get_packages();
+	$first    = true;
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';

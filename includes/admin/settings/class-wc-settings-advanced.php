@@ -153,7 +153,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'id'    => 'checkout_process_options',
 					),
 
-					'force_ssl_checkout' => array(
+					'force_ssl_checkout'   => array(
 						'title'           => __( 'Secure checkout', 'woocommerce' ),
 						'desc'            => __( 'Force secure checkout', 'woocommerce' ),
 						'id'              => 'woocommerce_force_ssl_checkout',

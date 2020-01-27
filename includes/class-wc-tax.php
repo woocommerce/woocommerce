@@ -674,7 +674,7 @@ class WC_Tax {
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
-		$tax_rate_id = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 
@@ -907,7 +907,7 @@ class WC_Tax {
 		}
 
 		wp_cache_delete( 'tax-rate-classes', 'taxes' );
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
 		return (bool) $delete;
 	}
@@ -1025,7 +1025,7 @@ class WC_Tax {
 
 		$tax_rate_id = $wpdb->insert_id;
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
 		do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $tax_rate );
 
@@ -1082,7 +1082,7 @@ class WC_Tax {
 			)
 		);
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
 		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id, $tax_rate );
 	}
@@ -1101,7 +1101,7 @@ class WC_Tax {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d;", $tax_rate_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $tax_rate_id ) );
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 
 		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
 	}
@@ -1176,7 +1176,7 @@ class WC_Tax {
 			$wpdb->query( "INSERT INTO {$wpdb->prefix}woocommerce_tax_rate_locations ( location_code, tax_rate_id, location_type ) VALUES $sql;" ); // @codingStandardsIgnoreLine.
 		}
 
-		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 	}
 
 	/**

@@ -371,16 +371,27 @@ class WC_Countries {
 	 * @return array of country codes.
 	 */
 	public function get_vat_countries() {
-		$eu_countries = $this->get_european_union_countries();
-
-		$countries = array(
+		$eu_countries  = $this->get_european_union_countries();
+		$vat_countries = $this->countries_using_vat();
+		$countries     = array(
 			'GB',
 			'IM',
 			'MC',
 			'NO',
 		);
 
-		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $countries ) );
+		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $vat_countries, $countries ) );
+	}
+
+	/**
+	 * Gets an array of Non-EU countries that use VAT as the Local name for their taxes based on this list - https://en.wikipedia.org/wiki/Value-added_tax#Non-European_Union_countries
+	 *
+	 * @return string[]
+	 */
+	public function countries_using_vat() {
+		$countries = array( 'AL', 'AR', 'AZ', 'BS', 'BH', 'BY', 'BB', 'BO', 'EG', 'ET', 'CL', 'CO', 'EC', 'SV', 'FJ', 'GM', 'GH', 'GT', 'IN', 'IR', 'IL', 'KZ', 'MU', 'MK', 'MX', 'MD', 'MN', 'ME', 'NA', 'NP', 'NG', 'PS', 'PY', 'RU', 'RW', 'KN', 'SA', 'RS', 'ZA', 'KR', 'LK', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'AE' );
+
+		return apply_filters( 'woocommerce_countries_using_vat', $countries );
 	}
 
 	/**
@@ -494,7 +505,7 @@ class WC_Countries {
 					'AU'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 					'AT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'BE'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
-					'CA'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code}&nbsp;&nbsp;{postcode}\n{country}",
+					'CA'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}",
 					'CH'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'CL'      => "{company}\n{name}\n{address_1}\n{address_2}\n{state}\n{postcode} {city}\n{country}",
 					'CN'      => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",

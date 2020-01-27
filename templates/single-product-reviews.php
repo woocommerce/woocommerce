@@ -91,7 +91,7 @@ if ( ! comments_open() ) {
 						'value'    => $commenter['comment_author'],
 						'required' => $name_email_required,
 					),
-					'email' => array(
+					'email'  => array(
 						'label'    => __( 'Email', 'woocommerce' ),
 						'type'     => 'email',
 						'value'    => $commenter['comment_author_email'],

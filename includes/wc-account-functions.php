@@ -151,6 +151,8 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$current = true; // Dashboard is not an endpoint, so needs a custom check.
 	} elseif ( 'orders' === $endpoint && isset( $wp->query_vars['view-order'] ) ) {
 		$current = true; // When looking at individual order, highlight Orders list item (to signify where in the menu the user currently is).
+	} elseif ( 'payment-methods' === $endpoint && isset( $wp->query_vars['add-payment-method'] ) ) {
+		$current = true;
 	}
 
 	if ( $current ) {

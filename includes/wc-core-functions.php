@@ -1118,7 +1118,7 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
-	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'geolocation' );
+	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
 	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', '' );
 	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
@@ -1140,7 +1140,7 @@ function wc_get_customer_default_location() {
 	$allowed_country_codes = WC()->countries->get_allowed_countries();
 
 	if ( ! empty( $location['country'] ) && ! array_key_exists( $location['country'], $allowed_country_codes ) ) {
-		$location['country'] = current( $allowed_country_codes );
+		$location['country'] = current( array_keys( $allowed_country_codes ) );
 		$location['state']   = '';
 	}
 
@@ -1826,7 +1826,7 @@ function wc_print_r( $expression, $return = false ) {
 
 	foreach ( $alternatives as $alternative ) {
 		if ( function_exists( $alternative['func'] ) ) {
-			$res = call_user_func_array( $alternative['func'], $alternative['args'] );
+			$res = $alternative['func']( ...$alternative['args'] );
 			if ( $return ) {
 				return $res;
 			}
@@ -2141,6 +2141,28 @@ function wc_is_external_resource( $url ) {
  */
 function wc_is_active_theme( $theme ) {
 	return is_array( $theme ) ? in_array( get_template(), $theme, true ) : get_template() === $theme;
+}
+
+/**
+ * Is the site using a default WP theme?
+ *
+ * @return boolean
+ */
+function wc_is_wp_default_theme_active() {
+	return wc_is_active_theme(
+		array(
+			'twentytwenty',
+			'twentynineteen',
+			'twentyseventeen',
+			'twentysixteen',
+			'twentyfifteen',
+			'twentyfourteen',
+			'twentythirteen',
+			'twentyeleven',
+			'twentytwelve',
+			'twentyten',
+		)
+	);
 }
 
 /**

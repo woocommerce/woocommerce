@@ -18,6 +18,7 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-order.php';
  * WC_Abstract_Order class.
  */
 abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
+	use WC_Item_Totals;
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
@@ -770,6 +771,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Return array of values for calculations.
+	 *
+	 * @param string $field Field name to return.
+	 *
+	 * @return array Array of values.
+	 */
+	protected function get_values_for_total( $field ) {
+		$items = array_map(
+			function ( $item ) use ( $field ) {
+				return wc_add_number_precision( $item[ $field ], false );
+			},
+			array_values( $this->get_items() )
+		);
+		return $items;
+	}
+
+	/**
 	 * Return an array of coupons within this order.
 	 *
 	 * @since  3.7.0
@@ -962,6 +980,128 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Check and records coupon usage tentatively so that counts validation is correct. Display an error if coupon usage limit has been reached.
+	 *
+	 * If you are using this method, make sure to `release_held_coupons` in case an Exception is thrown.
+	 *
+	 * @throws Exception When not able to apply coupon.
+	 *
+	 * @param string $billing_email Billing email of order.
+	 */
+	public function hold_applied_coupons( $billing_email ) {
+		$held_keys          = array();
+		$held_keys_for_user = array();
+		$error              = null;
+
+		try {
+			foreach ( WC()->cart->get_applied_coupons() as $code ) {
+				$coupon = new WC_Coupon( $code );
+				if ( ! $coupon->get_data_store() ) {
+					continue;
+				}
+
+				// Hold coupon for when global coupon usage limit is present.
+				if ( 0 < $coupon->get_usage_limit() ) {
+					$held_key = $this->hold_coupon( $coupon );
+					if ( $held_key ) {
+						$held_keys[ $coupon->get_id() ] = $held_key;
+					}
+				}
+
+				// Hold coupon for when usage limit per customer is enabled.
+				if ( 0 < $coupon->get_usage_limit_per_user() ) {
+
+					if ( ! isset( $user_ids_and_emails ) ) {
+						$user_alias          = get_current_user_id() ? wp_get_current_user()->ID : sanitize_email( $billing_email );
+						$user_ids_and_emails = $this->get_billing_and_current_user_aliases( $billing_email );
+					}
+
+					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
+
+					if ( $held_key_for_user ) {
+						$held_keys_for_user[ $coupon->get_id() ] = $held_key_for_user;
+					}
+				}
+			}
+		} catch ( Exception $e ) {
+			$error = $e;
+		} finally {
+			// Even in case of error, we will save keys for whatever coupons that were held so our data remains accurate.
+			// We save them in bulk instead of one by one for performance reasons.
+			if ( 0 < count( $held_keys_for_user ) || 0 < count( $held_keys ) ) {
+				$this->get_data_store()->set_coupon_held_keys( $this, $held_keys, $held_keys_for_user );
+			}
+			if ( $error instanceof Exception ) {
+				throw $error;
+			}
+		}
+	}
+
+
+	/**
+	 * Hold coupon if a global usage limit is defined.
+	 *
+	 * @param WC_Coupon $coupon Coupon object.
+	 *
+	 * @return string    Meta key which indicates held coupon.
+	 * @throws Exception When can't be held.
+	 */
+	private function hold_coupon( $coupon ) {
+		$result = $coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		if ( false === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'An unexpected error happened while applying the Coupon %s.', 'woocommerce' ), $coupon->get_code() ) );
+		} elseif ( 0 === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'Coupon %s was used in another transaction during this checkout, and coupon usage limit is reached. Please remove the coupon and try again.', 'woocommerce' ), $coupon->get_code() ) );
+		}
+		return $result;
+	}
+
+	/**
+	 * Hold coupon if usage limit per customer is defined.
+	 *
+	 * @param WC_Coupon $coupon              Coupon object.
+	 * @param array     $user_ids_and_emails Array of user Id and emails to check for usage limit.
+	 * @param string    $user_alias          User ID or email to use to record current usage.
+	 *
+	 * @return string    Meta key which indicates held coupon.
+	 * @throws Exception When coupon can't be held.
+	 */
+	private function hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias ) {
+		$result = $coupon->get_data_store()->check_and_hold_coupon_for_user( $coupon, $user_ids_and_emails, $user_alias );
+		if ( false === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'An unexpected error happened while applying the Coupon %s.', 'woocommerce' ), $coupon->get_code() ) );
+		} elseif ( 0 === $result ) {
+			// translators: Actual coupon code.
+			throw new Exception( sprintf( __( 'You have used this coupon %s in another transaction during this checkout, and coupon usage limit is reached. Please remove the coupon and try again.', 'woocommerce' ), $coupon->get_code() ) );
+		}
+		return $result;
+	}
+
+	/**
+	 * Helper method to get all aliases for current user and provide billing email.
+	 *
+	 * @param string $billing_email Billing email provided in form.
+	 *
+	 * @return array     Array of all aliases.
+	 * @throws Exception When validation fails.
+	 */
+	private function get_billing_and_current_user_aliases( $billing_email ) {
+		$emails = array( $billing_email );
+		if ( get_current_user_id() ) {
+			$emails[]   = wp_get_current_user()->user_email;
+		}
+		$emails = array_unique(
+			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
+		);
+		$customer_data_store = WC_Data_Store::load( 'customer' );
+		$user_ids = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		return array_merge( $user_ids, $emails );
+	}
+
+	/**
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
@@ -977,13 +1117,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			if ( $coupon->get_code() !== $code ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
-			}
-
-			$discounts = new WC_Discounts( $this );
-			$valid     = $discounts->is_coupon_valid( $coupon );
-
-			if ( is_wp_error( $valid ) ) {
-				return $valid;
 			}
 		} else {
 			return new WP_Error( 'invalid_coupon', __( 'Invalid coupon', 'woocommerce' ) );
@@ -1499,6 +1632,34 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart subtotal (assuming all other settings are same).
+	 *
+	 * @return float Cart subtotal.
+	 */
+	protected function get_cart_subtotal_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'subtotal' )
+			)
+		);
+	}
+
+	/**
+	 * Helper function.
+	 * If you add all items in this order in cart again, this would be the cart total (assuming all other settings are same).
+	 *
+	 * @return float Cart total.
+	 */
+	protected function get_cart_total_for_order() {
+		return wc_remove_number_precision(
+			$this->get_rounded_items_total(
+				$this->get_values_for_total( 'total' )
+			)
+		);
+	}
+
+	/**
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
@@ -1508,18 +1669,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
-		$fees_total         = 0;
+		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		// Sum line item costs.
-		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += round( $item->get_subtotal(), wc_get_price_decimals() );
-			$cart_total    += round( $item->get_total(), wc_get_price_decimals() );
-		}
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
@@ -1740,15 +1896,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$subtotal    = 0;
+		$subtotal    = $this->get_cart_subtotal_for_order();
 
 		if ( ! $compound ) {
-			foreach ( $this->get_items() as $item ) {
-				$subtotal += $item->get_subtotal();
 
-				if ( 'incl' === $tax_display ) {
-					$subtotal += $item->get_subtotal_tax();
+			if ( 'incl' === $tax_display ) {
+				$subtotal_taxes = 0;
+				foreach ( $this->get_items() as $item ) {
+					$subtotal_taxes += self::round_line_tax( $item->get_subtotal_tax(), false );
 				}
+				$subtotal += wc_round_tax_total( $subtotal_taxes );
 			}
 
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
@@ -1759,10 +1916,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			if ( 'incl' === $tax_display ) {
 				return '';
-			}
-
-			foreach ( $this->get_items() as $item ) {
-				$subtotal += $item->get_subtotal();
 			}
 
 			// Add Shipping Costs.

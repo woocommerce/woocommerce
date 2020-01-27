@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	https://docs.woocommerce.com/document/template-structure/
+ * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
  * @version 2.4.0
  */
@@ -33,9 +33,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td align="center" valign="top">
 						<div id="template_header_image">
 							<?php
-								if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
-									echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name', 'display' ) . '" /></p>';
-								}
+							if ( $img = get_option( 'woocommerce_email_header_image' ) ) {
+								echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . get_bloginfo( 'name', 'display' ) . '" /></p>';
+							}
 							?>
 						</div>
 						<table border="0" cellpadding="0" cellspacing="0" width="600" id="template_container">
