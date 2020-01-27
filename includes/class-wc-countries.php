@@ -358,7 +358,7 @@ class WC_Countries {
 
 		if ( ! empty( $deprecated ) ) {
 			wc_deprecated_argument( 'type', '3.9.0', 'Use the WC_Countries::get_vat_countries method instead.' );
-			$countries = get_vat_countries();
+			$countries = $this->get_vat_countries();
 		}
 
 		return apply_filters( 'woocommerce_european_union_countries', $countries, $deprecated );
