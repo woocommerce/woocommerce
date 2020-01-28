@@ -30,6 +30,7 @@
 .woocommerce-admin-is-loading {
 	#adminmenumain,
 	#wpfooter,
+	#wpcontent,
 	#wpadminbar,
 	#wpbody-content,
 	.woocommerce-layout__header,
@@ -50,11 +51,16 @@
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
 
+	#wpwrap {
+		top: 0;
+	}
+
 	#wpbody-content {
 		min-height: 100vh;
 	}
 
 	/* Hide wp-admin and WooCommerce elements when the dashboard body class is present */
+	#wpcontent > *,
 	#adminmenumain,
 	.woocommerce-layout__header,
 	.update-nag,
@@ -68,5 +74,9 @@
 
 	#wpcontent {
 		margin-left: 0;
+
+		> #wpbody {
+			display: block;
+		}
 	}
 }
