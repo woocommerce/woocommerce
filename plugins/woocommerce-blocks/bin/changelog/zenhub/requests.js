@@ -3,11 +3,11 @@
 /* eslint no-console: 0 */
 
 const ZenHub = require( 'zenhub-api' );
-const { REPO } = require( '../config' );
+const { REPO, pkg } = require( '../config' );
 const { authedGraphql } = require( '../common' );
 const { pull } = require( 'lodash' );
 
-const api = new ZenHub( process.env.ZH_API_KEY );
+const api = new ZenHub( pkg.changelog.zhApiToken );
 
 const getQuery = ( before ) => {
 	const [ owner, repo ] = REPO.split( '/' );

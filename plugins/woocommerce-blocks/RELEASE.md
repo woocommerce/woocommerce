@@ -7,7 +7,7 @@ This document outlines the process of releasing new versions of the blocks plugi
 - Install & set up [GitHub hub](https://hub.github.com) tools.
 - Configure a GitHub token for release scripts to use.
   - https://github.com/settings/tokens
-  - Select the following permissions: 
+  - Select the following permissions:
     - `admin:org`
     - `public_repo`
     - `read:user`
@@ -42,7 +42,7 @@ _Outcome_: __Team is aware of release and in agreement about what fixes & featur
 - Ensure your local checkout is updated to the tip of the release branch.
 - For _patch_ releases, cherry pick relevant PRs into the release branch:
   - If PR is already labelled `status: cherry-picked 🍒` then continue to next PR.
-  - Ideally, use GitHub Hub to cherry pick the PR - `hub am -3 {http://URL-TO-PR}`. 
+  - Ideally, use GitHub Hub to cherry pick the PR - `hub am -3 {http://URL-TO-PR}`.
   - If there are serious conflicts or extensive differences between `master` and release branch, you may need to take more care:
     - Manually cherry pick individual commits using git - `git cherry-pick {COMMIT-HASH}`.
     - Or in some cases, manually craft a new PR with appropriate changes, targeting release branch.
@@ -54,9 +54,11 @@ _Outcome_: __Release branch has all relevant changes merged & pushed.__
 ### Prepare release
 #### Ensure release branch readme is up to date
 - Run changelog script `npm run changelog` to get changelog txt for readme. Changelog content will be output to screen by script.
+  - The above script will automatically generate changelog entries from a milestone (you will be asked about the milestone name in the script).
+  - If you want to pull changelog entries from a Zenhub release instead, use `npm run changelog:zenhub` and follow instructions.
 - Add changelog section for release, e.g. [`= 2.5.11 - 2020-01-20 =`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/74a41881bfa456a2167a52aaeb4871352255e328).
 - Copy-paste the changelog content into `readme.txt`.
-- Make any other changes to readme as needed - e.g. support versions changing, new blocks. 
+- Make any other changes to readme as needed - e.g. support versions changing, new blocks.
 - Push readme changes to release branch on origin repo.
   - Note: you can push your readme changes directly to branch – no need for a PR & review process.
 
@@ -80,7 +82,7 @@ _Outcome_: __Confident that source code is ready for release: intended fixes are
 
 ### Release!
 #### Tag release on GitHub
-- Prepare tagged release on github `npm run deploy`. 
+- Prepare tagged release on github `npm run deploy`.
   - Note: the script automatically updates version numbers (commits on your behalf).
 - Edit release, add changelog info to Github release notes.
 - Check release repo tag is correct - checkout, smoke test/confidence check.
@@ -112,7 +114,7 @@ _Outcome_: __Customers can install/update via WPORG; WPORG plugin page is up to 
 - For _major_ & _minor_ releases - tbc
 
 ## Appendix: Versions
-We have _major_, _minor_ and _patch_ releases. 
+We have _major_, _minor_ and _patch_ releases.
 
 For example:
 
@@ -126,7 +128,7 @@ For example:
 
 There are some differences to our release process for each kind of release - these are detailed in the steps above.
 
-## Appendix: updating a specific file on WPORG 
+## Appendix: updating a specific file on WPORG
 
 Sometimes, we need to update a single file in WordPress.org without wanting to do a full release, for example, updating the `readme.txt` versions or descriptions. In order to do that, refer to the _[Editing Existing Files](https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/#editing-existing-files)_ section of the Subversion guide in developer.wordpress.org or follow these steps:
 
