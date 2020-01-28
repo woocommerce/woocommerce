@@ -83,7 +83,7 @@ class OnboardingTasks {
 			return;
 		}
 
-		self::maybe_update_payments_cache();
+		self::mark_payment_method_configured( 'square' );
 	}
 
 
@@ -105,7 +105,7 @@ class OnboardingTasks {
 			return;
 		}
 
-		self::maybe_update_payments_cache();
+		self::mark_payment_method_configured( 'paypal' );
 	}
 
 	/**
@@ -126,19 +126,28 @@ class OnboardingTasks {
 			return;
 		}
 
-		self::maybe_update_payments_cache();
+		self::mark_payment_method_configured( 'stripe' );
 	}
 
 	/**
 	 * Update the payments cache to complete if not already.
+	 *
+	 * @param string $payment_method Payment method slug.
 	 */
-	public static function maybe_update_payments_cache() {
-		$task_list_payments = get_option( 'woocommerce_task_list_payments', array() );
-		if ( isset( $task_list_payments['completed'] ) && $task_list_payments['completed'] ) {
-			return;
+	public static function mark_payment_method_configured( $payment_method ) {
+		$task_list_payments         = get_option( 'woocommerce_task_list_payments', array() );
+		$payment_methods            = isset( $task_list_payments['methods'] ) ? $task_list_payments['methods'] : array();
+		$configured_payment_methods = isset( $task_list_payments['configured'] ) ? $task_list_payments['configured'] : array();
+
+		if ( ! in_array( $payment_method, $configured_payment_methods, true ) ) {
+			$configured_payment_methods[]     = $payment_method;
+			$task_list_payments['configured'] = $configured_payment_methods;
 		}
 
-		$task_list_payments['completed'] = 1;
+		if ( 0 === count( array_diff( $payment_methods, $configured_payment_methods ) ) ) {
+			$task_list_payments['completed'] = 1;
+		}
+
 		update_option( 'woocommerce_task_list_payments', $task_list_payments );
 	}
 
