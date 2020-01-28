@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 3.9.0
+Stable tag: 3.9.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -178,6 +178,14 @@ INTERESTED IN DEVELOPMENT?
 [Browse the code](https://plugins.trac.wordpress.org/browser/woocommerce/), check out the [SVN repository](https://plugins.svn.wordpress.org/woocommerce/), or subscribe to the [development log](https://plugins.trac.wordpress.org/log/woocommerce/) by [RSS](https://plugins.trac.wordpress.org/log/woocommerce/?limit=100&mode=stop_on_copy&format=rss).
 
 == Changelog ==
+
+= 3.9.1 - 2020-01-28 =
+
+* Tweak - Trim whitespaces and strip slashes from MaxMind License Key.
+* Dev - Prevent empty notices to get displayed on frontend.
+* Fix - Show "-" instead of "0" when tax isn't applicable to a product.
+* Fix - Fixed fatal error on the thank you page if order is not specified.
+* REST API - Fixed - Product and variations schema to allow remove sale prices, dimensions and weight.
 
 = 3.9.0 - 2020-01-21 =
 
