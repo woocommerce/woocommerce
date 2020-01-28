@@ -41,6 +41,7 @@ copy_dest_files() {
 		--exclude=bin/ \
 		--exclude=node_modules/ \
 		--exclude=tests/ \
+		--exclude=docs/ \
 		--exclude=phpcs.xml \
 		--exclude=phpunit.xml.dist \
 		--exclude=CODEOWNERS \
