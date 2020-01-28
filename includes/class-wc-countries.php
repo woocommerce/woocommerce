@@ -882,6 +882,11 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'CY' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
 					'CZ' => array(
 						'state' => array(
 							'required' => false,
@@ -951,6 +956,11 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'label' => __( 'Region', 'woocommerce' ),
+						),
+					),
+					'HR' => array(
+						'state' => array(
+							'required' => false,
 						),
 					),
 					'HU' => array(
@@ -1036,6 +1046,11 @@ class WC_Countries {
 						),
 					),
 					'KW' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
+					'LT' => array(
 						'state' => array(
 							'required' => false,
 						),
