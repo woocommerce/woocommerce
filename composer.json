@@ -19,6 +19,18 @@
     ],
     "post-update-cmd": [
       "composer dump-autoload"
+    ],
+    "test": [
+      "phpunit"
+    ],
+    "phpcs": [
+      "phpcs -s -p"
+    ],
+    "phpcs-pre-commit": [
+      "phpcs -s -p -n"
+    ],
+    "phpcbf": [
+      "phpcbf -p"
     ]
   },
   "autoload": {
