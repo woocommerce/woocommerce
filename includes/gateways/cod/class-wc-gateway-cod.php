@@ -63,42 +63,46 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 
-		$options    = array();
-		$data_store = WC_Data_Store::load( 'shipping-zone' );
-		$raw_zones  = $data_store->get_zones();
+		$options = array();
 
-		foreach ( $raw_zones as $raw_zone ) {
-			$zones[] = new WC_Shipping_Zone( $raw_zone );
-		}
+		// We only want to load the options if they'll be shown to the user.
+		if ( $this->is_accessing_settings() ) {
+			$data_store = WC_Data_Store::load( 'shipping-zone' );
+			$raw_zones  = $data_store->get_zones();
 
-		$zones[] = new WC_Shipping_Zone( 0 );
+			foreach ( $raw_zones as $raw_zone ) {
+				$zones[] = new WC_Shipping_Zone( $raw_zone );
+			}
 
-		foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
+			$zones[] = new WC_Shipping_Zone( 0 );
 
-			$options[ $method->get_method_title() ] = array();
+			foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
 
-			// Translators: %1$s shipping method name.
-			$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
+				$options[ $method->get_method_title() ] = array();
 
-			foreach ( $zones as $zone ) {
+				// Translators: %1$s shipping method name.
+				$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
 
-				$shipping_method_instances = $zone->get_shipping_methods();
+				foreach ( $zones as $zone ) {
 
-				foreach ( $shipping_method_instances as $shipping_method_instance_id => $shipping_method_instance ) {
+					$shipping_method_instances = $zone->get_shipping_methods();
 
-					if ( $shipping_method_instance->id !== $method->id ) {
-						continue;
+					foreach ( $shipping_method_instances as $shipping_method_instance_id => $shipping_method_instance ) {
+
+						if ( $shipping_method_instance->id !== $method->id ) {
+							continue;
+						}
+
+						$option_id = $shipping_method_instance->get_rate_id();
+
+						// Translators: %1$s shipping method title, %2$s shipping method id.
+						$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
+
+						// Translators: %1$s zone name, %2$s shipping method instance name.
+						$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce' ), $option_instance_title );
+
+						$options[ $method->get_method_title() ][ $option_id ] = $option_title;
 					}
-
-					$option_id = $shipping_method_instance->get_rate_id();
-
-					// Translators: %1$s shipping method title, %2$s shipping method id.
-					$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
-
-					// Translators: %1$s zone name, %2$s shipping method instance name.
-					$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce' ), $option_instance_title );
-
-					$options[ $method->get_method_title() ][ $option_id ] = $option_title;
 				}
 			}
 		}
@@ -206,6 +210,37 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		}
 
 		return parent::is_available();
+	}
+
+	/**
+	 * Checks to see whether or not the admin settings are being accessed by the current request.
+	 *
+	 * @return bool
+	 */
+	private function is_accessing_settings() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$is_admin = is_admin();
+		if ( $is_admin && ( ! isset( $_REQUEST['page'] ) || 'wc-settings' !== $_REQUEST['page'] ) ) {
+			$is_admin = false;
+		}
+		if ( $is_admin && ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) ) {
+			$is_admin = false;
+		}
+		if ( $is_admin && ( ! isset( $_REQUEST['section'] ) || 'cod' !== $_REQUEST['section'] ) ) {
+			$is_admin = false;
+		}
+
+		$is_rest = ( defined( 'REST_REQUEST' ) && true === REST_REQUEST );
+		if ( $is_rest ) {
+			global $wp;
+			if ( ! isset( $wp->query_vars['rest_route'] ) || false === strpos( $wp->query_vars['rest_route'], '/payment_gateways' ) ) {
+				$is_rest = false;
+			}
+		}
+
+		// phpcs:enable
+
+		return $is_admin || $is_rest;
 	}
 
 	/**
