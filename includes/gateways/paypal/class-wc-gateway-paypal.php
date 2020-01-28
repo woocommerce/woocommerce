@@ -253,7 +253,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if this gateway is enabled and available in the user's country.
+	 * Check if this gateway is available in the user's country based on currency.
 	 *
 	 * @return bool
 	 */
