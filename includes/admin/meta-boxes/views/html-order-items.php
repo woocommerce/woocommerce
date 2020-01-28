@@ -173,7 +173,7 @@ if ( wc_tax_enabled() ) {
 
 		<?php do_action( 'woocommerce_admin_order_totals_after_discount', $order->get_id() ); ?>
 
-		<?php if ( 0 < $order->get_total_shipping() ) : ?>
+		<?php if ( $order->get_shipping_methods() ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Shipping:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
