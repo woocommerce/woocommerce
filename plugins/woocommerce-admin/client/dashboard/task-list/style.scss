@@ -189,39 +189,41 @@
 	}
 
 	.woocommerce-shipping-rate__control-wrapper {
-		position: relative;
-
-		.muriel-input-text input {
-			left: $gap;
-			max-width: 90%;
-		}
-
 		.components-base-control {
 			margin-bottom: 0;
 		}
 
-		.woocommerce-shipping-rate__control-prefix,
-		.woocommerce-shipping-rate__control-suffix {
-			display: none;
-			position: absolute;
-			left: $gap;
-			top: 25px;
-			z-index: 1;
+		.components-base-control__label {
+			display: block;
+			position: relative;
+			top: -8px;
+			width: 100%;
+			font-size: 12px;
+		}
+
+		.text-control-with-affixes__prefix,
+		.text-control-with-affixes__suffix {
 			font-size: 16px;
 			line-height: 24px;
 			color: $studio-gray-50;
+			border: 0;
+			padding: 0;
+			align-items: center;
+			display: flex;
+			top: -12px;
 		}
 
-		&.has-value {
-			.woocommerce-shipping-rate__control-prefix,
-			.woocommerce-shipping-rate__control-suffix {
-				display: block;
-			}
+		.components-text-control__input {
+			position: relative;
+			top: -12px;
 		}
 
-		.woocommerce-shipping-rate__control-suffix {
-			left: auto;
-			right: $gap;
+		.text-control-with-affixes__prefix {
+			margin-right: $gap-smallest;
+		}
+
+		.text-control-with-affixes__suffix {
+			margin-left: $gap-smallest;
 		}
 	}
 }

@@ -3,6 +3,7 @@
 - Style form components for WordPress 5.3.
 - Fix CompareFilter options format (key prop vs. id).
 - Fix styling of `<Search />` component "clear all" button.
+- Add state classes to `<TextControlWithAffixes />` component.
 
 # 4.0.0
 
