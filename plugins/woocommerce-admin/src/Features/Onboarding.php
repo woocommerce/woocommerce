@@ -63,6 +63,7 @@ class Onboarding {
 		// Adds the ability to toggle the new onboarding experience on or off.
 		// @todo This option should be removed when merging the onboarding feature to core.
 		add_action( 'current_screen', array( $this, 'enable_onboarding' ) );
+		add_action( 'woocommerce_updated', array( $this, 'maybe_mark_complete' ) );
 
 		if ( ! Loader::is_onboarding_enabled() ) {
 			add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
@@ -937,5 +938,28 @@ class Onboarding {
 		}
 
 		wp_safe_redirect( wc_admin_url() );
+	}
+
+	/**
+	 * When updating WooCommerce, mark the profiler and task list complete.
+	 *
+	 * @todo The `maybe_enable_setup_wizard()` method should be revamped on onboarding enable in core.
+	 * See https://github.com/woocommerce/woocommerce/blob/1ca791f8f2325fe2ee0947b9c47e6a4627366374/includes/class-wc-install.php#L341
+	 */
+	public static function maybe_mark_complete() {
+		// The install notice still exists so don't complete the profiler.
+		if ( ! class_exists( 'WC_Admin_Notices' ) || \WC_Admin_Notices::has_notice( 'install' ) ) {
+			return;
+		}
+
+		$onboarding_data = get_option( self::PROFILE_DATA_OPTION, array() );
+		// Don't make updates if the profiler is completed, but task list is potentially incomplete.
+		if ( isset( $onboarding_data['completed'] ) && $onboarding_data['completed'] ) {
+			return;
+		}
+
+		$onboarding_data['completed'] = true;
+		update_option( self::PROFILE_DATA_OPTION, $onboarding_data );
+		update_option( 'woocommerce_task_list_hidden', 'yes' );
 	}
 }

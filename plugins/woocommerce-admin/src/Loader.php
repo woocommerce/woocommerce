@@ -57,7 +57,8 @@ class Loader {
 	 */
 	public function __construct() {
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
-		add_action( 'init', array( __CLASS__, 'load_features' ) );
+		// Load feature before WooCommerce update hooks.
+		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
