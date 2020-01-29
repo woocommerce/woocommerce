@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e6dfd8d640c9fc3f21795ddb41a23477",
+    "content-hash": "41bbf9384ba5827f6d298881bcd1b86e",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -41,6 +41,36 @@
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
             "time": "2019-09-24T06:39:29+00:00"
+        },
+        {
+            "name": "automattic/jetpack-constants",
+            "version": "v1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/jetpack-constants.git",
+                "reference": "5fdd94dec1151e7defd684a97e0b64fe6ff1bd3a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/jetpack-constants/zipball/5fdd94dec1151e7defd684a97e0b64fe6ff1bd3a",
+                "reference": "5fdd94dec1151e7defd684a97e0b64fe6ff1bd3a",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "A wrapper for defining constants in a more testable way.",
+            "time": "2019-11-08T21:16:05+00:00"
         },
         {
             "name": "composer/installers",
