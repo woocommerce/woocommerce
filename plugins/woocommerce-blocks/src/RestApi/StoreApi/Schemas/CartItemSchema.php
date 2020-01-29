@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
+use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductSummary;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock;
 
 /**
@@ -63,11 +64,20 @@ class CartItemSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'short_description'   => [
-				'description' => __( 'Product short description or excerpt from full description.', 'woo-gutenberg-products-block' ),
+			'summary'             => [
+				'description' => __( 'A short summary (or excerpt from the full description) for the product in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
+			],
+			'short_description'   => [
+				'description' => __( 'Product short description in HTML format.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'description'         => [
+				'description' => __( 'Product full description in HTML format.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
 			],
 			'sku'                 => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
@@ -214,17 +224,14 @@ class CartItemSchema extends AbstractSchema {
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'];
 
-		$short_description = apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : $product->get_description(), 400 );
-		$short_description = wp_filter_nohtml_kses( $short_description );
-		$short_description = strip_shortcodes( $short_description );
-		$short_description = normalize_whitespace( $short_description );
-
 		return [
 			'key'                 => $cart_item['key'],
 			'id'                  => $product->get_id(),
 			'quantity'            => wc_stock_amount( $cart_item['quantity'] ),
 			'name'                => $this->prepare_html_response( $product->get_title() ),
-			'short_description'   => $this->prepare_html_response( $short_description ),
+			'summary'             => $this->prepare_html_response( ( new ProductSummary( $product ) )->get_summary( 150 ) ),
+			'short_description'   => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
+			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
 			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
 			'permalink'           => $product->get_permalink(),

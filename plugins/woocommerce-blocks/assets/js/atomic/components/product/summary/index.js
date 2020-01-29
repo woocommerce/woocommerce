@@ -7,7 +7,7 @@ import { useProductLayoutContext } from '@woocommerce/base-context/product-layou
 
 const ProductSummary = ( { className, product } ) => {
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
-	if ( ! product.description ) {
+	if ( ! product.summary ) {
 		return null;
 	}
 
@@ -18,7 +18,7 @@ const ProductSummary = ( { className, product } ) => {
 				`${ layoutStyleClassPrefix }__product-summary`
 			) }
 			dangerouslySetInnerHTML={ {
-				__html: product.description,
+				__html: product.summary,
 			} }
 		/>
 	);
