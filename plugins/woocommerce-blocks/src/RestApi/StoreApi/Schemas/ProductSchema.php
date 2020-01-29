@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
+use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductSummary;
 
 /**
  * ProductSchema class.
@@ -54,8 +55,18 @@ class ProductSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'summary'             => [
+				'description' => __( 'A short summary (or excerpt from the full description) for the product in HTML format.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'short_description'   => [
+				'description' => __( 'Product short description in HTML format.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+			],
 			'description'         => [
-				'description' => __( 'Short description or excerpt from description.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Product full description in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
@@ -238,7 +249,9 @@ class ProductSchema extends AbstractSchema {
 			'variation'           => $this->prepare_html_response( $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '' ),
 			'permalink'           => $product->get_permalink(),
 			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
-			'description'         => $this->prepare_html_response( apply_filters( 'woocommerce_short_description', $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) ),
+			'summary'             => $this->prepare_html_response( ( new ProductSummary( $product ) )->get_summary( 150 ) ),
+			'short_description'   => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
+			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
 			'on_sale'             => $product->is_on_sale(),
 			'prices'              => (object) $this->get_prices( $product ),
 			'average_rating'      => $product->get_average_rating(),

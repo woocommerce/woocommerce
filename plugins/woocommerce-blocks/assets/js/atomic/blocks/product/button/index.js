@@ -13,7 +13,7 @@ import { ProductButton } from '@woocommerce/atomic-components/product';
 import sharedConfig from '../shared-config';
 
 const blockConfig = {
-	title: __( 'Product Button', 'woo-gutenberg-products-block' ),
+	title: __( 'Add to Cart Button', 'woo-gutenberg-products-block' ),
 	description: __(
 		'Display a call to action button which either adds the product to the cart, or links to the product page.',
 		'woo-gutenberg-products-block'

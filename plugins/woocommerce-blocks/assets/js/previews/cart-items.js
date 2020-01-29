@@ -17,7 +17,13 @@ export const previewCartItems = [
 		id: 1,
 		quantity: 2,
 		name: __( 'Beanie', 'woo-gutenberg-products-block' ),
-		description: __( 'Warm hat for winter' ),
+		summary: __( 'Warm hat for winter', 'woo-gutenberg-products-block' ),
+		short_description: __(
+			'Warm hat for winter',
+			'woo-gutenberg-products-block'
+		),
+		description:
+			'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 		sku: 'woo-beanie',
 		permalink: 'https://example.org',
 		low_stock_remaining: 2,
@@ -61,7 +67,16 @@ export const previewCartItems = [
 		id: 2,
 		quantity: 1,
 		name: __( 'Cap', 'woo-gutenberg-products-block' ),
-		description: __( 'Lightweight baseball cap' ),
+		summary: __(
+			'Lightweight baseball cap',
+			'woo-gutenberg-products-block'
+		),
+		short_description: __(
+			'Lightweight baseball cap',
+			'woo-gutenberg-products-block'
+		),
+		description:
+			'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 		sku: 'woo-cap',
 		permalink: 'https://example.org',
 		images: [

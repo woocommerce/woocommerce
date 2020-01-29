@@ -14,7 +14,7 @@ import sharedConfig from '../shared-config';
 const blockConfig = {
 	title: __( 'Product Summary', 'woo-gutenberg-products-block' ),
 	description: __(
-		'Display the short description of a product.',
+		'Display a short description about a product.',
 		'woo-gutenberg-products-block'
 	),
 	icon: {
