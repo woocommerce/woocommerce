@@ -548,6 +548,7 @@ class WC_Email extends WC_Settings_API {
 	 *
 	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
 	 *
+	 * @version 4.0.0
 	 * @param string|null $content Content that will receive inline styles.
 	 * @return string
 	 */
@@ -560,7 +561,7 @@ class WC_Email extends WC_Settings_API {
 			if ( $this->supports_emogrifier() ) {
 				$emogrifier_class = '\\Pelago\\Emogrifier';
 				if ( ! class_exists( $emogrifier_class ) ) {
-					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
+					return '<style type="text/css">' . $css . '</style>' . $content;
 				}
 				try {
 					$emogrifier = new $emogrifier_class( $content, $css );
@@ -579,11 +580,12 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Return if emogrifier library is supported.
 	 *
+	 * @version 4.0.0
 	 * @since 3.5.0
 	 * @return bool
 	 */
 	protected function supports_emogrifier() {
-		return class_exists( 'DOMDocument' ) && version_compare( PHP_VERSION, '5.5', '>=' );
+		return class_exists( 'DOMDocument' );
 	}
 
 	/**
