@@ -537,7 +537,27 @@ function wc_create_refund( $args = array() ) {
 
 				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
-				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
+
+				// Workaround for https://github.com/woocommerce/woocommerce-rest-api/issues/99 .
+				if ( isset( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+					if ( ! is_array( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+						$data = $item->get_data();
+						if ( isset( $data['taxes'] ) && count( $data['taxes'] ) > 0 ) {
+							$tax_obj                    = $data['taxes']['total'];
+							$refund_tax_amount          = $args['line_items'][ $item_id ]['refund_tax'];
+							$refund_tax                 = array();
+							$tax_rate_id                = array_keys( $tax_obj )[0];
+							$refund_tax[ $tax_rate_id ] = $refund_tax_amount;
+						} else {
+							// If, for whatever reason, the order item doesn't have any taxes, it is not possible to refund the tax.
+							$refund_tax = array();
+						}
+					} else {
+						$refund_tax = $args['line_items'][ $item_id ]['refund_tax'];
+					}
+				} else {
+					$refund_tax = array();
+				}
 
 				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
 					continue;
