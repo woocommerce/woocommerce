@@ -5,12 +5,14 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 $pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_run_update&status=pending' );
-$cron_disabled       = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+$cron_disabled       = Constants::is_true( 'DISABLE_WP_CRON' );
 $cron_cta            = $cron_disabled ? __( 'You can manually run queued updates here.', 'woocommerce' ) : __( 'View progress &rarr;', 'woocommerce' );
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">

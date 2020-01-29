@@ -6,6 +6,8 @@
  * @version 2.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -163,7 +165,7 @@ class WC_Frontend_Scripts {
 	 * Register all WC scripts.
 	 */
 	private static function register_scripts() {
-		$suffix           = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix           = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$register_scripts = array(
 			'flexslider'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
@@ -513,7 +515,7 @@ class WC_Frontend_Scripts {
 					'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
 					'checkout_url'              => WC_AJAX::get_endpoint( 'checkout' ),
 					'is_checkout'               => is_checkout() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
-					'debug_mode'                => defined( 'WP_DEBUG' ) && WP_DEBUG,
+					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					'i18n_checkout_error'       => esc_attr__( 'Error processing checkout. Please try again.', 'woocommerce' ),
 				);
 				break;

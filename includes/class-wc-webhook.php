@@ -11,6 +11,8 @@
  * @since    2.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 require_once 'legacy/class-wc-legacy-webhook.php';
@@ -531,7 +533,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'Body'    => $response_body,
 		);
 
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+		if ( ! Constants::is_true( 'WP_DEBUG' ) ) {
 			$message['Webhook Delivery']['Body']             = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}

@@ -6,6 +6,8 @@
  * @version 3.7.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -88,7 +90,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
 			$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
-			$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
 			// Register scripts.
 			wp_register_script( 'woocommerce_admin', WC()->plugin_url() . '/assets/js/admin/woocommerce_admin' . $suffix . '.js', array( 'jquery', 'jquery-blockui', 'jquery-ui-sortable', 'jquery-ui-widget', 'jquery-ui-core', 'jquery-tiptip' ), WC_VERSION );
@@ -234,7 +236,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'save_variations_nonce'               => wp_create_nonce( 'save-variations' ),
 					'bulk_edit_variations_nonce'          => wp_create_nonce( 'bulk-edit-variations' ),
 					/* translators: %d: Number of variations */
-					'i18n_link_all_variations'            => esc_js( sprintf( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max %d per run).', 'woocommerce' ), defined( 'WC_MAX_LINKED_VARIATIONS' ) ? WC_MAX_LINKED_VARIATIONS : 50 ) ),
+					'i18n_link_all_variations'            => esc_js( sprintf( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max %d per run).', 'woocommerce' ), Constants::is_defined( 'WC_MAX_LINKED_VARIATIONS' ) ? Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) : 50 ) ),
 					'i18n_enter_a_value'                  => esc_js( __( 'Enter a value', 'woocommerce' ) ),
 					'i18n_enter_menu_order'               => esc_js( __( 'Variation menu order (determines position in the list of variations)', 'woocommerce' ) ),
 					'i18n_enter_a_value_fixed_or_percent' => esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ),

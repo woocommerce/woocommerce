@@ -6,6 +6,8 @@
  * @version     2.1.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -322,7 +324,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Network orders widget.
 		 */
 		public function network_orders() {
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
 			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), WC_VERSION );
 

@@ -6,6 +6,8 @@
  * @version  3.4.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -128,7 +130,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function output() {
 			global $current_section, $current_tab;
 
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
 			do_action( 'woocommerce_settings_start' );
 

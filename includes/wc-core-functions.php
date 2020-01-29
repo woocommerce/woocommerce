@@ -8,6 +8,8 @@
  * @version 3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -887,7 +889,7 @@ function wc_print_js() {
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
 	if ( ! headers_sent() ) {
 		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
-	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 	}
@@ -901,7 +903,11 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
  * @return string the URL.
  */
 function get_woocommerce_api_url( $path ) {
-	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
+	if ( Constants::is_defined( 'WC_API_REQUEST_VERSION' ) ) {
+		$version = Constants::get_constant( 'WC_API_REQUEST_VERSION' );
+	} else {
+		$version = substr( WC_API::VERSION, 0, 1 );
+	}
 
 	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
@@ -1847,14 +1853,12 @@ function wc_print_r( $expression, $return = false ) {
  * @return array
  */
 function wc_register_default_log_handler( $handlers ) {
-	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
-		$handler_class   = WC_LOG_HANDLER;
-		$default_handler = new $handler_class();
-	} else {
-		$default_handler = new WC_Log_Handler_File();
+	$handler_class = Constants::get_constant( 'WC_LOG_HANDLER' );
+	if ( ! class_exists( $handler_class ) ) {
+		$handler_class = WC_Log_Handler_File::class;
 	}
 
-	array_push( $handlers, $default_handler );
+	array_push( $handlers, new $handler_class() );
 
 	return $handlers;
 }

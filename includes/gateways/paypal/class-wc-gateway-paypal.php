@@ -10,6 +10,8 @@
  * @package     WooCommerce/Classes/Payment
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -450,7 +452,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
 		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), WC_VERSION, true );
 	}

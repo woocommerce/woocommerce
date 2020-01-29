@@ -6,6 +6,8 @@
  * @version 2.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -95,7 +97,9 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
-		if ( defined( 'WC_LOG_HANDLER' ) && 'WC_Log_Handler_DB' === WC_LOG_HANDLER ) {
+		$log_handler = Constants::get_constant( 'WC_LOG_HANDLER' );
+
+		if ( 'WC_Log_Handler_DB' === $log_handler ) {
 			self::status_logs_db();
 		} else {
 			self::status_logs_file();
