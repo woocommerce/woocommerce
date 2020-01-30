@@ -70,11 +70,11 @@ class WC_Meta_Box_Order_Data {
 					'show'  => false,
 				),
 				'country'    => array(
-					'label'   => __( 'Country', 'woocommerce' ),
+					'label'   => __( 'Country / Region', 'woocommerce' ),
 					'show'    => false,
 					'class'   => 'js_field-country select short',
 					'type'    => 'select',
-					'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
+					'options' => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_allowed_countries(),
 				),
 				'state'      => array(
 					'label' => __( 'State / County', 'woocommerce' ),
@@ -122,11 +122,11 @@ class WC_Meta_Box_Order_Data {
 					'show'  => false,
 				),
 				'country'    => array(
-					'label'   => __( 'Country', 'woocommerce' ),
+					'label'   => __( 'Country / Region', 'woocommerce' ),
 					'show'    => false,
 					'type'    => 'select',
 					'class'   => 'js_field-country select short',
-					'options' => array( '' => __( 'Select a country&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
+					'options' => array( '' => __( 'Select a country / region&hellip;', 'woocommerce' ) ) + WC()->countries->get_shipping_countries(),
 				),
 				'state'      => array(
 					'label' => __( 'State / County', 'woocommerce' ),
