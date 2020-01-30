@@ -21,6 +21,7 @@ const DropdownSelectorSelectedValue = ( { onClick, onRemoveItem, option } ) => {
 					onClick( option.value );
 				} }
 				aria-label={ sprintf(
+					/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
 					__(
 						'Replace current %s filter',
 						'woo-gutenberg-products-block'
@@ -41,6 +42,7 @@ const DropdownSelectorSelectedValue = ( { onClick, onRemoveItem, option } ) => {
 					}
 				} }
 				aria-label={ sprintf(
+					/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
 					__( 'Remove %s filter', 'woo-gutenberg-products-block' ),
 					option.name
 				) }

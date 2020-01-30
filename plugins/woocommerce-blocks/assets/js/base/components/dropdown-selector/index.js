@@ -145,6 +145,13 @@ const DropdownSelector = ( {
 											attributeLabel
 									  )
 							}
+							tabIndex={
+								// When it's a single selector and there is one element selected,
+								// we make the input non-focusable with the keyboard because it's
+								// visually hidden. The input is still rendered, though, because it
+								// must be possible to focus it when pressing the select value chip.
+								! multiple && checked.length > 0 ? '-1' : '0'
+							}
 							value={ inputValue }
 						/>
 					</DropdownSelectorInputWrapper>

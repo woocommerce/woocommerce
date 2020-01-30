@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Label from '@woocommerce/base-components/label';
@@ -83,7 +83,14 @@ const Pagination = ( {
 					onClick={ () => onPageChange( 1 ) }
 					disabled={ currentPage === 1 }
 				>
-					1
+					<Label
+						label={ 1 }
+						screenReaderLabel={ sprintf(
+							/* translators: %d is the page number (1, 2, 3...). */
+							__( 'Page %d', 'woo-gutenberg-products-block' ),
+							1
+						) }
+					/>
 				</button>
 			) }
 			{ showFirstPageEllipsis && (
@@ -109,7 +116,14 @@ const Pagination = ( {
 						}
 						disabled={ currentPage === page }
 					>
-						{ page }
+						<Label
+							label={ page }
+							screenReaderLabel={ sprintf(
+								/* translators: %d is the page number (1, 2, 3...). */
+								__( 'Page %d', 'woo-gutenberg-products-block' ),
+								page
+							) }
+						/>
 					</button>
 				);
 			} ) }
@@ -130,7 +144,14 @@ const Pagination = ( {
 					onClick={ () => onPageChange( totalPages ) }
 					disabled={ currentPage === totalPages }
 				>
-					{ totalPages }
+					<Label
+						label={ totalPages }
+						screenReaderLabel={ sprintf(
+							/* translators: %d is the page number (1, 2, 3...). */
+							__( 'Page %d', 'woo-gutenberg-products-block' ),
+							totalPages
+						) }
+					/>
 				</button>
 			) }
 			{ displayNextAndPreviousArrows && (

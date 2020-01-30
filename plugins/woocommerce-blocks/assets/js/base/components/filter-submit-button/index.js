@@ -4,13 +4,21 @@
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Label from '@woocommerce/base-components/label';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const FilterSubmitButton = ( { className, disabled, onClick } ) => {
+const FilterSubmitButton = ( {
+	className,
+	disabled,
+	// translators: Submit button text for filters.
+	label = __( 'Go', 'woo-gutenberg-products-block' ),
+	onClick,
+	screenReaderLabel = __( 'Apply filter', 'woo-gutenberg-products-block' ),
+} ) => {
 	return (
 		<button
 			type="submit"
@@ -21,8 +29,7 @@ const FilterSubmitButton = ( { className, disabled, onClick } ) => {
 			disabled={ disabled }
 			onClick={ onClick }
 		>
-			{ // translators: Submit button text for filters.
-			__( 'Go', 'woo-gutenberg-products-block' ) }
+			<Label label={ label } screenReaderLabel={ screenReaderLabel } />
 		</button>
 	);
 };
@@ -37,6 +44,8 @@ FilterSubmitButton.propTypes = {
 	 * On click callback.
 	 */
 	onClick: PropTypes.func.isRequired,
+	label: PropTypes.string,
+	screenReaderLabel: PropTypes.string,
 };
 
 FilterSubmitButton.defaultProps = {

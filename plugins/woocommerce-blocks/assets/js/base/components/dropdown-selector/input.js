@@ -6,6 +6,7 @@ const DropdownSelectorInput = ( {
 	onFocus,
 	onRemoveItem,
 	placeholder,
+	tabIndex,
 	value,
 } ) => {
 	return (
@@ -25,6 +26,7 @@ const DropdownSelectorInput = ( {
 					}
 				},
 				placeholder,
+				tabIndex,
 			} ) }
 		/>
 	);
