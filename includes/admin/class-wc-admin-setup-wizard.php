@@ -487,8 +487,6 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_new_onboarding_save() {
 		check_admin_referer( 'wc-setup' );
 
-		update_option( 'wc_onboarding_opt_in', 'yes' );
-
 		if ( function_exists( 'wc_admin_url' ) ) {
 			$this->wc_setup_redirect_to_wc_admin_onboarding();
 			exit;
@@ -521,7 +519,7 @@ class WC_Admin_Setup_Wizard {
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
 		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
 
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		wp_safe_redirect( wc_admin_url( '&enable_onboarding=1' ) );
 	}
 
 	/**
