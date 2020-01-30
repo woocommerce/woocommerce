@@ -29,9 +29,5 @@ output 2 "Done"
 output 3 "Updating package textdomains..."
 
 # Replace text domains within packages with woocommerce
-find ./packages/woocommerce-blocks \( -iname '*.php' -o -iname '*.js' \) -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" -e "s/\"woo-gutenberg-products-block\"/'woocommerce'/g" {} \;
-find ./packages/woocommerce-rest-api -iname '*.php' -exec sed -i.bak -e "s/, 'woocommerce-rest-api'/, 'woocommerce'/g" {} \;
-
-# Cleanup backup files
-find ./packages -name "*.bak" -type f -delete
+npm run packages:fix:textdomain
 output 2 "Done!"
