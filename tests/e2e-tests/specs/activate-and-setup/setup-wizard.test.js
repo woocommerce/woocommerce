@@ -65,9 +65,8 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 				] );
 				await completeOldSetupWizard();
-			} else {
-				await completeOldSetupWizard();
 			}
+			await completeOldSetupWizard();
 		}
 	} );
 } );
