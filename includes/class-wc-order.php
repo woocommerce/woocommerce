@@ -2048,7 +2048,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Check if order has been created via admin, checkout, or in another way.
 	 *
-	 * @since 3.10.0
+	 * @since 4.0.0
 	 * @param string $modus Way of creating the order to test for.
 	 * @return bool
 	 */
