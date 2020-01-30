@@ -241,7 +241,7 @@ const PriceSlider = ( {
 				onFocus={ findClosestRange }
 			>
 				{ hasValidConstraints && (
-					<Fragment>
+					<div aria-hidden={ showInputFields }>
 						<div
 							className="wc-block-price-filter__range-input-progress"
 							style={ progressStyles }
@@ -264,6 +264,7 @@ const PriceSlider = ( {
 							max={ maxConstraint }
 							ref={ minRange }
 							disabled={ isLoading }
+							tabIndex={ showInputFields ? '-1' : '0' }
 						/>
 						<input
 							type="range"
@@ -283,8 +284,9 @@ const PriceSlider = ( {
 							max={ maxConstraint }
 							ref={ maxRange }
 							disabled={ isLoading }
+							tabIndex={ showInputFields ? '-1' : '0' }
 						/>
-					</Fragment>
+					</div>
 				) }
 			</div>
 			<div className="wc-block-price-filter__controls">
@@ -333,8 +335,8 @@ const PriceSlider = ( {
 					Number.isFinite( minPrice ) &&
 					Number.isFinite( maxPrice ) && (
 						<div className="wc-block-price-filter__range-text">
-							{ __( 'Price', 'woo-gutenberg-products-block' ) }:
-							&nbsp;
+							{ __( 'Price', 'woo-gutenberg-products-block' ) }
+							: &nbsp;
 							<FormattedMonetaryAmount
 								currency={ currency }
 								displayType="text"
@@ -353,6 +355,10 @@ const PriceSlider = ( {
 						className="wc-block-price-filter__button"
 						disabled={ isLoading || ! hasValidConstraints }
 						onClick={ onSubmit }
+						screenReaderLabel={ __(
+							'Apply price filter',
+							'woo-gutenberg-products-block'
+						) }
 					/>
 				) }
 			</div>

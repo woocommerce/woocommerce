@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import Label from '@woocommerce/base-components/label';
 
 const ProductSaleBadge = ( { className, product, align } ) => {
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
@@ -21,7 +22,13 @@ const ProductSaleBadge = ( { className, product, align } ) => {
 					`${ layoutStyleClassPrefix }__product-onsale`
 				) }
 			>
-				{ __( 'Sale', 'woo-gutenberg-products-block' ) }
+				<Label
+					label={ __( 'Sale', 'woo-gutenberg-products-block' ) }
+					screenReaderLabel={ __(
+						'Product on sale',
+						'woo-gutenberg-products-block'
+					) }
+				/>
 			</div>
 		);
 	}

@@ -18,6 +18,11 @@ const ProductRating = ( { className, product } ) => {
 		width: ( rating / 5 ) * 100 + '%',
 	};
 
+	const ratingText = sprintf(
+		__( 'Rated %d out of 5', 'woo-gutenberg-products-block' ),
+		rating
+	);
+
 	return (
 		<div
 			className={ classnames(
@@ -28,16 +33,9 @@ const ProductRating = ( { className, product } ) => {
 			<div
 				className={ `${ layoutStyleClassPrefix }__product-rating__stars` }
 				role="img"
+				aria-label={ ratingText }
 			>
-				<span style={ starStyle }>
-					{ sprintf(
-						__(
-							'Rated %d out of 5',
-							'woo-gutenberg-products-block'
-						),
-						rating
-					) }
-				</span>
+				<span style={ starStyle }>{ ratingText }</span>
 			</div>
 		</div>
 	);

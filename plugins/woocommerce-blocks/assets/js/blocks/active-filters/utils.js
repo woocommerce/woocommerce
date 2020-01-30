@@ -59,7 +59,11 @@ export const renderRemovableListItem = (
 				{ name }
 			</strong>
 			<button onClick={ removeCallback }>
-				{ __( 'Remove', 'woo-gutenberg-products-block' ) }
+				{ sprintf(
+					/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
+					__( 'Remove %s filter', 'woo-gutenberg-products-block' ),
+					name
+				) }
 			</button>
 		</li>
 	);
