@@ -62,6 +62,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		// Set an address so that shipping can be calculated.
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -172,6 +176,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
+		// Set an address so that shipping can be calculated.
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
+
 		$tax_rate    = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -260,7 +269,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
-		$tax_rate    = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '24.0000',
@@ -273,7 +282,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rate   = array(
+		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '24.0000',
@@ -567,7 +576,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$full_coupon->set_amount( 100 );
 		$full_coupon->save();
 
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_shipping' ) );
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test in store location with no coupon.
@@ -604,8 +614,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 
 		WC()->cart->empty_cart();
-		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_shipping' ) );
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
+		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
+		remove_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -710,7 +723,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$full_coupon->set_amount( 100 );
 		$full_coupon->save();
 
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_shipping' ) );
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test in store location with no coupon.
@@ -747,8 +761,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->remove_coupons();
 
 		WC()->cart->empty_cart();
-		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_shipping' ) );
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
+		remove_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_gb_country' ) );
+		remove_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_gb_postcode' ) );
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -851,7 +868,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$full_coupon->set_amount( 100 );
 		$full_coupon->save();
 
-		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_shipping' ) );
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Test out of store location with no coupon.
@@ -895,8 +914,19 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @param string $country Country code.
 	 * @return string
 	 */
-	public function force_customer_gb_shipping( $country ) {
+	public function force_customer_gb_country( $country ) {
 		return 'GB';
+	}
+
+	/**
+	 * Helper that can be hooked to a filter to force the customer's shipping postal code to be ANN NAA.
+	 *
+	 * @since 3.10.0
+	 * @param string $postcode Postal code..
+	 * @return string
+	 */
+	public function force_customer_gb_postcode( $postcode ) {
+		return 'ANN NAA';
 	}
 
 	/**
@@ -906,8 +936,30 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 * @param string $country Country code.
 	 * @return string
 	 */
-	public function force_customer_us_shipping( $country ) {
+	public function force_customer_us_country( $country ) {
 		return 'US';
+	}
+
+	/**
+	 * Helper that can be hooked to a filter to force the customer's shipping state to be NY.
+	 *
+	 * @since 3.10.0
+	 * @param string $state State code.
+	 * @return string
+	 */
+	public function force_customer_us_state( $state ) {
+		return 'NY';
+	}
+
+	/**
+	 * Helper that can be hooked to a filter to force the customer's shipping postal code to be 12345.
+	 *
+	 * @since 3.10.0
+	 * @param string $postcode Postal code.
+	 * @return string
+	 */
+	public function force_customer_us_postcode( $postcode ) {
+		return '12345';
 	}
 
 	/**
@@ -931,6 +983,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Store is set to enter product prices inclusive tax.
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Set an address so that shipping can be calculated.
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 
 		// 19% tax.
 		$tax_rate = array(
@@ -1486,6 +1543,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		// Add product to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Set an address so that shipping can be calculated.
+		add_filter( 'woocommerce_customer_get_shipping_country', array( $this, 'force_customer_us_country' ) );
+		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
+		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 
 		// Set the flat_rate shipping method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );

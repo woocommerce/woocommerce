@@ -216,7 +216,7 @@ class WC_Structured_Data {
 
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
-			$price_valid_until = date( 'Y-12-31', current_time( 'timestamp', true ) + YEAR_IN_SECONDS );
+			$price_valid_until = date( 'Y-12-31', time() + YEAR_IN_SECONDS );
 
 			if ( $product->is_type( 'variable' ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );

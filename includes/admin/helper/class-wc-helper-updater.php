@@ -178,7 +178,8 @@ class WC_Helper_Updater {
 		);
 
 		$request = WC_Helper_API::post(
-			'update-check', array(
+			'update-check',
+			array(
 				'body'          => wp_json_encode( array( 'products' => $payload ) ),
 				'authenticated' => true,
 			)

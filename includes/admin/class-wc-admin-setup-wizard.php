@@ -262,39 +262,39 @@ class WC_Admin_Setup_Wizard {
 		}
 		$default_steps = array(
 			'new_onboarding' => array(
-				'name'       => '',
-				'view'       => array( $this, 'wc_setup_new_onboarding' ),
-				'handler'    => array( $this, 'wc_setup_new_onboarding_save' ),
+				'name'    => '',
+				'view'    => array( $this, 'wc_setup_new_onboarding' ),
+				'handler' => array( $this, 'wc_setup_new_onboarding_save' ),
 			),
 			'store_setup'    => array(
-				'name'       => __( 'Store setup', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_store_setup' ),
-				'handler'    => array( $this, 'wc_setup_store_setup_save' ),
+				'name'    => __( 'Store setup', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_store_setup' ),
+				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
 			'payment'        => array(
-				'name'       => __( 'Payment', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_payment' ),
-				'handler'    => array( $this, 'wc_setup_payment_save' ),
+				'name'    => __( 'Payment', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_payment' ),
+				'handler' => array( $this, 'wc_setup_payment_save' ),
 			),
 			'shipping'       => array(
-				'name'       => __( 'Shipping', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_shipping' ),
-				'handler'    => array( $this, 'wc_setup_shipping_save' ),
+				'name'    => __( 'Shipping', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_shipping' ),
+				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
 			'recommended'    => array(
-				'name'       => __( 'Recommended', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_recommended' ),
-				'handler'    => array( $this, 'wc_setup_recommended_save' ),
+				'name'    => __( 'Recommended', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_recommended' ),
+				'handler' => array( $this, 'wc_setup_recommended_save' ),
 			),
 			'activate'       => array(
-				'name'       => __( 'Activate', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_activate' ),
-				'handler'    => array( $this, 'wc_setup_activate_save' ),
+				'name'    => __( 'Activate', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_activate' ),
+				'handler' => array( $this, 'wc_setup_activate_save' ),
 			),
 			'next_steps'     => array(
-				'name'       => __( 'Ready!', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_ready' ),
-				'handler'    => '',
+				'name'    => __( 'Ready!', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_ready' ),
+				'handler' => '',
 			),
 		);
 
@@ -675,7 +675,7 @@ class WC_Admin_Setup_Wizard {
 										/* translators: %1$s: usage tracking help link */
 										__( 'Learn more about how usage tracking works, and how you\'ll be helping in our <a href="%1$s" target="_blank">usage tracking documentation</a>.', 'woocommerce' ),
 										array(
-											'a'    => array(
+											'a' => array(
 												'href'   => array(),
 												'target' => array(),
 											),
@@ -1279,13 +1279,19 @@ class WC_Admin_Setup_Wizard {
 
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) { // WPCS: input var ok.
+
+				// Sanitize the cost field.
+				$domestic_cost = wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) );
+				$domestic_cost = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $domestic_cost );
+
+				// Build and make a REST request to save the shipping zone and method set.
 				$request = new WP_REST_Request( 'POST', "/wc/v3/shipping/zones/{$zone_id}/methods" );
 				$request->add_header( 'Content-Type', 'application/json' );
 				$request->set_body(
 					wp_json_encode(
 						array(
 							'method_id' => $domestic_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ),
+							'settings'  => $domestic_cost,
 						)
 					)
 				);
@@ -1297,13 +1303,19 @@ class WC_Admin_Setup_Wizard {
 		if ( $setup_intl ) {
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
+
+				// Sanitize the cost field.
+				$intl_cost = wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) );
+				$intl_cost = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $intl_cost );
+
+				// Build and make a REST request to save the shipping zone and method set.
 				$request = new WP_REST_Request( 'POST', '/wc/v3/shipping/zones/0/methods' );
 				$request->add_header( 'Content-Type', 'application/json' );
 				$request->set_body(
 					wp_json_encode(
 						array(
 							'method_id' => $intl_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) ),
+							'settings'  => $intl_cost,
 						)
 					)
 				);
@@ -1676,7 +1688,7 @@ class WC_Admin_Setup_Wizard {
 			if ( in_array( $klarna_or_square, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
 				$gateways[ $klarna_or_square ]['enabled']  = true;
 				$gateways[ $klarna_or_square ]['featured'] = false;
-				$offered_gateways                          += array(
+				$offered_gateways                         += array(
 					$klarna_or_square => $gateways[ $klarna_or_square ],
 				);
 			} else {

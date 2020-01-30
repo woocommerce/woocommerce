@@ -31,8 +31,8 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 	 */
 	public function test_rate_limit_limits() {
 		$action_identifier = 'action_1';
-		$user_1_id = 10;
-		$user_2_id = 15;
+		$user_1_id         = 10;
+		$user_2_id         = 15;
 
 		$rate_limit_id_1 = $action_identifier . $user_1_id;
 		$rate_limit_id_2 = $action_identifier . $user_2_id;

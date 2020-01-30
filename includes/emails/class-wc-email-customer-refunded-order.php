@@ -237,13 +237,13 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			/* translators: %s: list of placeholders */
 			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 			$this->form_fields = array(
-				'enabled'         => array(
+				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
 					'default' => 'yes',
 				),
-				'subject_full'    => array(
+				'subject_full'       => array(
 					'title'       => __( 'Full refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -251,7 +251,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'placeholder' => $this->get_default_subject(),
 					'default'     => '',
 				),
-				'subject_partial' => array(
+				'subject_partial'    => array(
 					'title'       => __( 'Partial refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -259,7 +259,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'placeholder' => $this->get_default_subject( true ),
 					'default'     => '',
 				),
-				'heading_full'    => array(
+				'heading_full'       => array(
 					'title'       => __( 'Full refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -267,7 +267,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'placeholder' => $this->get_default_heading(),
 					'default'     => '',
 				),
-				'heading_partial' => array(
+				'heading_partial'    => array(
 					'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -284,7 +284,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'default'     => $this->get_default_additional_content(),
 					'desc_tip'    => true,
 				),
-				'email_type'      => array(
+				'email_type'         => array(
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

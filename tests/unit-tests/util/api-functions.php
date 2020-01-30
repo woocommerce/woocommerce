@@ -82,8 +82,12 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_rest_upload_image_from_url_should_return_error_when_invalid_image_is_passed() {
 		// empty file.
-		$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
-		$result                 = wc_rest_upload_image_from_url( 'http://somedomain.com/invalid-image-1.png' );
+		if ( version_compare( get_bloginfo( 'version' ), '5.4-alpha', '>=' ) ) {
+			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini file or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
+		} else {
+			$expected_error_message = 'Invalid image: File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.';
+		}
+		$result = wc_rest_upload_image_from_url( 'http://somedomain.com/invalid-image-1.png' );
 
 		$this->assertWPError( $result );
 		$this->assertEquals( $expected_error_message, $result->get_error_message() );

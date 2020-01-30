@@ -197,7 +197,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function init_settings() {
 		parent::init_settings();
-		$this->enabled  = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
+		$this->enabled = ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'] ? 'yes' : 'no';
 	}
 
 	/**
@@ -237,7 +237,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function get_transaction_url( $order ) {
 
-		$return_url = '';
+		$return_url     = '';
 		$transaction_id = $order->get_transaction_id();
 
 		if ( ! empty( $this->view_transaction_url ) && ! empty( $transaction_id ) ) {
@@ -254,7 +254,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	protected function get_order_total() {
 
-		$total = 0;
+		$total    = 0;
 		$order_id = absint( get_query_var( 'order-pay' ) );
 
 		// Gets order total from "pay for order" page.
@@ -429,7 +429,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Core credit card form which gateways can used if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
+	 * Core credit card form which gateways can use if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
 	 *
 	 * @param  array $args Arguments.
 	 * @param  array $fields Fields.

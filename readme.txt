@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 3.8.1
+Stable tag: 3.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.9.0 - 2020-01-07 =
+= 3.9.0 - 2020-01-21 =
 
 * Enhancement - Added a "Show" button next to the password field on the login fields. #24915
 * Enhancement - New WooCommerce Onboarding experience (shows to only 10% of new users). #24991
@@ -201,6 +201,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Include processing orders in tracker data when opted in. #25071
 * Tweak - Centralize check for default themes to fix Storefront appearance in the Setup Wizard. #25216
 * Tweak - Adds a WordPress version check before recommending the WooCommerce Admin plugin during setup. #25260
+* Fix - Added license key support recent changes from MaxMind GeoLite2. #25378
 * Fix - Honor tax rounding preference in edit item and refund flows. #24208
 * Fix - Prevent incorrect number of decimal points in prices. #24281
 * Fix - Fixed initial support for Gutenberg's Experimental Legacy Widget block. #24292

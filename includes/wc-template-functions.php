@@ -1949,7 +1949,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			array(
 				'posts_per_page' => $limit,
 				'orderby'        => $orderby,
-				'order'			 => $order,
+				'order'          => $order,
 				'columns'        => $columns,
 			)
 		);

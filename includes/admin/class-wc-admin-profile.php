@@ -37,7 +37,8 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 */
 		public function get_customer_meta_fields() {
 			$show_fields = apply_filters(
-				'woocommerce_customer_meta_fields', array(
+				'woocommerce_customer_meta_fields',
+				array(
 					'billing'  => array(
 						'title'  => __( 'Customer billing address', 'woocommerce' ),
 						'fields' => array(

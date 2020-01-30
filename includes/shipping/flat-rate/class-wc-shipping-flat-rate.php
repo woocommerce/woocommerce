@@ -256,12 +256,17 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @since 3.4.0
 	 * @param string $value Unsanitized value.
+	 * @throws Exception Last error triggered.
 	 * @return string
 	 */
 	public function sanitize_cost( $value ) {
 		$value = is_null( $value ) ? '' : $value;
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
+		// Thrown an error on the front end if the evaluate_cost will fail.
+		if ( false === $this->evaluate_cost( $value ) ) {
+			throw new Exception( WC_Eval_Math::$last_error );
+		}
 		return $value;
 	}
 }
