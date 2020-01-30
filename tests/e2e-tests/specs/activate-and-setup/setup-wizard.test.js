@@ -64,7 +64,6 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 					// Wait for the store setup section to load
 					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 				] );
-				await completeOldSetupWizard();
 			}
 			await completeOldSetupWizard();
 		}
