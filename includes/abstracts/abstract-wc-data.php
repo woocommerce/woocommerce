@@ -346,10 +346,10 @@ abstract class WC_Data {
 			} else {
 				$value = array_intersect_key( $meta_data, array_flip( $array_keys ) );
 			}
+		}
 
-			if ( 'view' === $context ) {
-				$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
-			}
+		if ( 'view' === $context ) {
+			$value = apply_filters( $this->get_hook_prefix() . $key, $value, $this );
 		}
 
 		return $value;

@@ -106,7 +106,7 @@ class WC_Integration_MaxMind_Database_Service {
 					case 401:
 						return new WP_Error(
 							'woocommerce_maxmind_geolocation_database_license_key',
-							__( 'The MaxMind license key is invalid.', 'woocommerce' )
+							__( 'The MaxMind license key is invalid. If you have recently created this key, you may need to wait for it to become active.', 'woocommerce' )
 						);
 				}
 			}
@@ -139,18 +139,23 @@ class WC_Integration_MaxMind_Database_Service {
 	 * Fetches the ISO country code associated with an IP address.
 	 *
 	 * @param string $ip_address The IP address to find the country code for.
-	 * @return string|null The country code for the IP address, or null if none was found.
+	 * @return string The country code for the IP address, or empty if not found.
 	 */
 	public function get_iso_country_code_for_ip( $ip_address ) {
-		$country_code = null;
+		$country_code = '';
 
 		if ( ! class_exists( 'MaxMind\Db\Reader' ) ) {
 			wc_get_logger()->notice( __( 'Missing MaxMind Reader library!', 'woocommerce' ), array( 'source' => 'maxmind-geolocation' ) );
 			return $country_code;
 		}
 
+		$database_path = $this->get_database_path();
+		if ( ! file_exists( $database_path ) ) {
+			return $country_code;
+		}
+
 		try {
-			$reader = new MaxMind\Db\Reader( $this->get_database_path() );
+			$reader = new MaxMind\Db\Reader( $database_path );
 			$data   = $reader->get( $ip_address );
 
 			if ( isset( $data['country']['iso_code'] ) ) {

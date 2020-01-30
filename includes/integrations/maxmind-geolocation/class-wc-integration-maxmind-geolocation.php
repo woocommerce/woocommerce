@@ -103,10 +103,10 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 				'description' => sprintf(
 					/* translators: %1$s: Documentation URL */
 					__(
-						'The key that will be used when dealing with MaxMind Geolocation services. You can read how to generate one in <a href="%1$s">MaxMind\'s License Key Documentation</a>.',
+						'The key that will be used when dealing with MaxMind Geolocation services. You can read how to generate one in <a href="%1$s">MaxMind Geolocation Integration documentation</a>.',
 						'woocommerce'
 					),
-					'https://support.maxmind.com/account-faq/account-related/how-do-i-generate-a-license-key/'
+					'https://docs.woocommerce.com/document/maxmind-geolocation-integration/'
 				),
 				'desc_tip'    => false,
 				'default'     => '',
@@ -132,7 +132,10 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	 * @throws Exception When the license key is invalid.
 	 */
 	public function validate_license_key_field( $key, $value ) {
-		// Empty license keys have no need to validate the data.
+		// Trim whitespaces and strip slashes.
+		$value = $this->validate_password_field( $key, $value );
+
+		// Empty license keys have no need test downloading a database.
 		if ( empty( $value ) ) {
 			return $value;
 		}
@@ -221,7 +224,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 		$country_code = $this->database_service->get_iso_country_code_for_ip( $ip_address );
 
 		return array(
-			'country'  => $country_code ? $country_code : '',
+			'country'  => $country_code,
 			'state'    => '',
 			'city'     => '',
 			'postcode' => '',
