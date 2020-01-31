@@ -180,3 +180,27 @@ JS;
 }
 
 add_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
+
+/**
+ * Filter translations so we can retrieve translations from Core when the original and the translated
+ * texts are the same (which happens when translations are missing).
+ *
+ * @param string $translation Translated text based on WC Blocks translations.
+ * @param string $text        Text to translate.
+ * @param string $domain      The text domain.
+ * @return string WC Blocks translation. In case it's the same as $text, Core translation.
+ */
+function woocommerce_blocks_get_php_translation_from_core( $translation, $text, $domain ) {
+	if ( 'woo-gutenberg-products-block' !== $domain ) {
+		return $translation;
+	}
+
+	// When translation is the same, that could mean the string is not translated.
+	// In that case, load it from core.
+	if ( $translation === $text ) {
+		return translate( $text, 'woocommerce' ); // phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction, WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.TextDomainMismatch
+	}
+	return $translation;
+}
+
+add_filter( 'gettext', 'woocommerce_blocks_get_php_translation_from_core', 10, 3 );
