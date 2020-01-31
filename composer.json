@@ -24,7 +24,7 @@
       "php": "7.1"
     },
     "preferred-install": {
-        "woocommerce/action-scheduler": "source",
+        "woocommerce/action-scheduler": "dist",
         "woocommerce/woocommerce-rest-api": "dist",
         "woocommerce/woocommerce-blocks": "dist"
     },
