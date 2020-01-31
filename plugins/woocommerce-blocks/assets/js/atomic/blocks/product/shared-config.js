@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import Gridicon from 'gridicons';
+import { Icon, grid } from '@woocommerce/icons';
 import { previewProducts } from '@woocommerce/resource-previews';
 
 /**
@@ -12,7 +12,7 @@ export default {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	icon: {
-		src: <Gridicon icon="grid" />,
+		src: <Icon srcElement={ grid } />,
 		foreground: '#96588a',
 	},
 	supports: {

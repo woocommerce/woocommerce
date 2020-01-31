@@ -14,7 +14,7 @@ import { SearchListItem } from '@woocommerce/components';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
-import { IconReviewsByCategory } from '@woocommerce/block-components/icons';
+import { Icon, review } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -132,7 +132,10 @@ const ReviewsByCategoryEditor = ( {
 		return (
 			<Placeholder
 				icon={
-					<IconReviewsByCategory className="block-editor-block-icon" />
+					<Icon
+						srcElement={ review }
+						className="block-editor-block-icon"
+					/>
 				}
 				label={ __(
 					'Reviews by Category',
@@ -172,7 +175,10 @@ const ReviewsByCategoryEditor = ( {
 				attributes={ attributes }
 				className="wc-block-reviews-by-category"
 				icon={
-					<IconReviewsByCategory className="block-editor-block-icon" />
+					<Icon
+						srcElement={ review }
+						className="block-editor-block-icon"
+					/>
 				}
 				name={ __(
 					'Reviews by Category',

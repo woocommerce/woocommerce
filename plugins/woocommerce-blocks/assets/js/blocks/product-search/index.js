@@ -6,8 +6,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { IconProductSearch } from '@woocommerce/block-components/icons';
-
+import { Icon, search } from '@woocommerce/icons';
 /**
  * Internal dependencies
  */
@@ -18,7 +17,7 @@ import Block from './block.js';
 registerBlockType( 'woocommerce/product-search', {
 	title: __( 'Product Search', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconProductSearch />,
+		src: <Icon srcElement={ search } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

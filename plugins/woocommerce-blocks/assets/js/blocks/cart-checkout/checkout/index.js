@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
+import { Icon, card } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -14,10 +15,8 @@ import './editor.scss';
 registerBlockType( 'woocommerce/checkout', {
 	title: __( 'Checkout', 'woo-gutenberg-products-block' ),
 	icon: {
-		// @todo: Replace this once we have an icon for the checkout
-		src: 'cart',
-		// @todo: Revert this to #96588a once we have an icon for the checkout
-		foreground: '#555d66',
+		src: <Icon srcElement={ card } />,
+		foreground: '#96588a',
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

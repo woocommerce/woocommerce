@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { IconFolder } from '@woocommerce/block-components/icons';
+import { Icon, list } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -15,7 +15,7 @@ import Block from './block.js';
 registerBlockType( 'woocommerce/product-categories', {
 	title: __( 'Product Categories List', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconFolder />,
+		src: <Icon srcElement={ list } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

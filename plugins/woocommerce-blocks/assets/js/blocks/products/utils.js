@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Placeholder } from '@wordpress/components';
 import classNames from 'classnames';
 import { adminUrl } from '@woocommerce/settings';
-import { IconExternal } from '@woocommerce/block-components/icons';
+import { Icon, external } from '@woocommerce/icons';
 
 export const getBlockClassName = ( blockClassName, attributes ) => {
 	const { className, contentVisibility } = attributes;
@@ -38,7 +38,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 			href={ adminUrl + 'post-new.php?post_type=product' }
 		>
 			{ __( 'Add new product', 'woo-gutenberg-products-block' ) + ' ' }
-			<IconExternal />
+			<Icon srcElement={ external } />
 		</Button>
 		<Button
 			className="wc-block-products__read_more_button"

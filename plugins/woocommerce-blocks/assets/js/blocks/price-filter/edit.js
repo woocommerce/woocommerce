@@ -15,13 +15,13 @@ import { PRODUCT_COUNT } from '@woocommerce/block-settings';
 import { getAdminLink } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/block-components/heading-toolbar';
 import BlockTitle from '@woocommerce/block-components/block-title';
+import { Icon, bill, external } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
  */
 import Block from './block.js';
 import './editor.scss';
-import { IconMoney, IconExternal } from '../../components/icons';
 import ToggleButtonControl from '../../components/toggle-button-control';
 
 export default function( { attributes, setAttributes } ) {
@@ -116,7 +116,7 @@ export default function( { attributes, setAttributes } ) {
 	const noProductsPlaceholder = () => (
 		<Placeholder
 			className="wc-block-price-slider"
-			icon={ <IconMoney /> }
+			icon={ <Icon srcElement={ bill } /> }
 			label={ __(
 				'Filter Products by Price',
 				'woo-gutenberg-products-block'
@@ -140,7 +140,7 @@ export default function( { attributes, setAttributes } ) {
 			>
 				{ __( 'Add new product', 'woo-gutenberg-products-block' ) +
 					' ' }
-				<IconExternal />
+				<Icon srcElement={ external } />
 			</Button>
 			<Button
 				className="wc-block-price-slider__read_more_button"

@@ -22,7 +22,7 @@ import {
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import Gridicon from 'gridicons';
+import { Icon, grid } from '@woocommerce/icons';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import { HAS_PRODUCTS } from '@woocommerce/block-settings';
 import { InnerBlockConfigurationProvider } from '@woocommerce/base-context/inner-block-configuration-context';
@@ -86,7 +86,7 @@ class Editor extends Component {
 	};
 
 	getIcon = () => {
-		return <Gridicon icon="grid" />;
+		return <Icon srcElement={ grid } />;
 	};
 
 	togglePreview = () => {
@@ -232,7 +232,7 @@ class Editor extends Component {
 						</Button>
 						<IconButton
 							className="wc-block-all-products__reset-button"
-							icon={ <Gridicon icon="grid" /> }
+							icon={ <Icon srcElement={ grid } /> }
 							label={ __(
 								'Reset layout to default',
 								'woo-gutenberg-products-block'

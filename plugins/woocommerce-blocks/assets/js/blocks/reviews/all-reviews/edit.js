@@ -6,7 +6,7 @@ import { InspectorControls } from '@wordpress/editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { IconAllReviews } from '@woocommerce/block-components/icons';
+import { Icon, discussion } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -63,7 +63,12 @@ const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 			<EditorContainerBlock
 				attributes={ attributes }
 				className="wc-block-all-reviews"
-				icon={ <IconAllReviews className="block-editor-block-icon" /> }
+				icon={
+					<Icon
+						icon={ discussion }
+						className="block-editor-block-icon"
+					/>
+				}
 				name={ __( 'All Reviews', 'woo-gutenberg-products-block' ) }
 				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>

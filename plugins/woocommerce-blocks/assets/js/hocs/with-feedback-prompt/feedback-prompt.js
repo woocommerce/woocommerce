@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import Gridicon from 'gridicons';
+import { Icon, comment, external } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ import './style.scss';
 const FeedbackPrompt = ( { text } ) => {
 	return (
 		<div className="wc-block-feedback-prompt">
-			<Gridicon icon="comment" />
+			<Icon srcElement={ comment } />
 			<h2 className="wc-block-feedback-prompt__title">
 				{ __( 'Feedback?', 'woo-gutenberg-products-block' ) }
 			</h2>
@@ -32,7 +32,7 @@ const FeedbackPrompt = ( { text } ) => {
 					'Give us your feedback.',
 					'woo-gutenberg-products-block'
 				) }
-				<Gridicon icon="external" size={ 16 } />
+				<Icon srcElement={ external } size={ 16 } />
 			</a>
 		</div>
 	);

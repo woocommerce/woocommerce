@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrency, formatPrice } from '@woocommerce/base-utils';
-import { IconTrash } from '@woocommerce/block-components/icons';
+import { Icon, trash } from '@woocommerce/icons';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -127,7 +127,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 					{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
 				</button>
 				<button className="wc-block-cart-item__remove-icon">
-					<IconTrash />
+					<Icon srcElement={ trash } />
 				</button>
 			</td>
 			<td className="wc-block-cart-item__total">

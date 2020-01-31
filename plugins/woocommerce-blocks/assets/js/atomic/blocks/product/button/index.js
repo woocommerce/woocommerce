@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import { Icon, cart } from '@woocommerce/icons';
 import { ProductButton } from '@woocommerce/atomic-components/product';
 
 /**
@@ -19,7 +19,7 @@ const blockConfig = {
 		'woo-gutenberg-products-block'
 	),
 	icon: {
-		src: <Gridicon icon="cart" />,
+		src: <Icon srcElement={ cart } />,
 		foreground: '#96588a',
 	},
 	edit( props ) {

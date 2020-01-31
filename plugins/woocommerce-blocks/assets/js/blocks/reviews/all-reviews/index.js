@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { IconAllReviews } from '@woocommerce/block-components/icons';
+import { Icon, discussion } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ import { example } from '../example';
 registerBlockType( 'woocommerce/all-reviews', {
 	title: __( 'All Reviews', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconAllReviews />,
+		src: <Icon srcElement={ discussion } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

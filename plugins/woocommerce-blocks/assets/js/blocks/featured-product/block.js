@@ -35,6 +35,7 @@ import { MIN_HEIGHT } from '@woocommerce/block-settings';
 import ProductControl from '@woocommerce/block-components/product-control';
 import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 import { withProduct } from '@woocommerce/block-hocs';
+import { Icon, star } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -84,7 +85,7 @@ const FeaturedProduct = ( {
 			<Fragment>
 				{ getBlockControls() }
 				<Placeholder
-					icon="star-filled"
+					icon={ <Icon srcElement={ star } /> }
 					label={ __(
 						'Featured Product',
 						'woo-gutenberg-products-block'
@@ -382,7 +383,7 @@ const FeaturedProduct = ( {
 	const renderNoProduct = () => (
 		<Placeholder
 			className="wc-block-featured-product"
-			icon="star-filled"
+			icon={ <Icon srcElement={ star } /> }
 			label={ __( 'Featured Product', 'woo-gutenberg-products-block' ) }
 		>
 			{ isLoading ? (

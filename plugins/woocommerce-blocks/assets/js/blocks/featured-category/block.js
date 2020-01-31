@@ -31,7 +31,7 @@ import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { MIN_HEIGHT } from '@woocommerce/block-settings';
-import { IconFolderStar } from '@woocommerce/block-components/icons';
+import { Icon, folderStarred } from '@woocommerce/icons';
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
 import ErrorPlaceholder from '@woocommerce/block-components/error-placeholder';
 
@@ -190,7 +190,7 @@ const FeaturedCategory = ( {
 
 		return (
 			<Placeholder
-				icon={ <IconFolderStar /> }
+				icon={ <Icon srcElement={ folderStarred } /> }
 				label={ __(
 					'Featured Category',
 					'woo-gutenberg-products-block'
@@ -337,7 +337,7 @@ const FeaturedCategory = ( {
 	const renderNoCategory = () => (
 		<Placeholder
 			className="wc-block-featured-category"
-			icon={ <IconFolderStar /> }
+			icon={ <Icon srcElement={ folderStarred } /> }
 			label={ __( 'Featured Category', 'woo-gutenberg-products-block' ) }
 		>
 			{ isLoading ? (

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import Gridicon from 'gridicons';
+import { Icon, toggle } from '@woocommerce/icons';
 import classNames from 'classnames';
 
 /**
@@ -14,7 +14,7 @@ import edit from './edit.js';
 registerBlockType( 'woocommerce/active-filters', {
 	title: __( 'Active Product Filters', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Gridicon icon="list-checkmark" />,
+		src: <Icon srcElement={ toggle } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

@@ -3,14 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Placeholder } from '@wordpress/components';
-import { IconReviewsByCategory } from '@woocommerce/block-components/icons';
-
+import { Icon, review } from '@woocommerce/icons';
 const NoReviewsPlaceholder = () => {
 	return (
 		<Placeholder
 			className="wc-block-reviews-by-category"
 			icon={
-				<IconReviewsByCategory className="block-editor-block-icon" />
+				<Icon
+					srcElement={ review }
+					className="block-editor-block-icon"
+				/>
 			}
 			label={ __(
 				'Reviews by Category',
