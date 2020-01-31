@@ -1,10 +1,10 @@
-# Releasing New Versions
+# Releases
 
 This document outlines the process of releasing new versions of the blocks plugin.
 
 ## Prerequisites - what you need to release WooCommerce Blocks
 
--   You should be set up for development - for more info see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+-   You should be set up for development - for more info see [this doc](../contributors/getting-started.md).
 -   Install & set up [GitHub hub](https://hub.github.com) tools.
 -   Configure a GitHub token for release scripts to use.
     -   https://github.com/settings/tokens
@@ -60,9 +60,9 @@ _Outcome_: **Release branch has all relevant changes merged & pushed.**
 
 #### Ensure release branch readme is up to date
 
--   Run changelog script `npm run changelog` to get changelog txt for readme. Changelog content will be output to screen by script.
+-   Run changelog script `$ npm run changelog` to get changelog txt for readme. Changelog content will be output to screen by script.
     -   The above script will automatically generate changelog entries from a milestone (you will be asked about the milestone name in the script).
-    -   If you want to pull changelog entries from a Zenhub release instead, use `npm run changelog:zenhub` and follow instructions.
+    -   If you want to pull changelog entries from a Zenhub release instead, use `$ npm run changelog:zenhub` and follow instructions.
 -   Add changelog section for release, e.g. [`= 2.5.11 - 2020-01-20 =`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/74a41881bfa456a2167a52aaeb4871352255e328).
 -   Copy-paste the changelog content into `readme.txt`.
 -   Make any other changes to readme as needed - e.g. support versions changing, new blocks.
@@ -74,9 +74,9 @@ _Outcome_: **Release branch has `readme.txt` is updated with release details.**
 #### Build zip & smoke test
 
 -   Ensure you are on the tip of the release branch, e.g. `git pull origin release/2.5`
--   Update dependencies – `npm ci`.
--   Run a production build - `npm run build`.
--   Run package script to get a zip to test `npm run package-plugin`.
+-   Update dependencies – `$ npm ci`.
+-   Run a production build - `$ npm run build`.
+-   Run package script to get a zip to test `$ npm run package-plugin`.
 -   Smoke test built release zip:
     -   At least one other person should test the built zip - ask a teammate to help out.
     -   Test in a clean environment, e.g. Jurassic.Ninja site.
@@ -92,7 +92,7 @@ _Outcome_: **Confident that source code is ready for release: intended fixes are
 
 #### Tag release on GitHub
 
--   Prepare tagged release on github `npm run deploy`.
+-   Prepare tagged release on github `$ npm run deploy`.
     -   Note: the script automatically updates version numbers (commits on your behalf).
 -   Edit release, add changelog info to Github release notes.
 -   Check release repo tag is correct - checkout, smoke test/confidence check.
@@ -101,7 +101,7 @@ _Outcomes_: **Version numbers updated in source code & developers can test tagge
 
 #### Release to WPORG
 
--   Run `npm run release`. This script clones a copy of the source code to your home folder, and outputs an `svn` command to push release up to WPORG.
+-   Run `$ npm run release`. This script clones a copy of the source code to your home folder, and outputs an `svn` command to push release up to WPORG.
 -   Push release to WPORG using `svn`.
     -   Run generated svn command to commit to WPORG svn repo.
         -   The command should look like this: `cd /Users/{YOU}/blocks-deployment/woo-gutenberg-products-block-svn && svn ci -m "Release 2.5.11, see readme.txt for changelog."`
@@ -150,8 +150,8 @@ Sometimes, we need to update a single file in WordPress.org without wanting to d
 1. Checkout the plugin repo:
 
 ```
-svn co "http://plugins.svn.wordpress.org/woo-gutenberg-products-block/"
-cd woo-gutenberg-products-block
+$ svn co "http://plugins.svn.wordpress.org/woo-gutenberg-products-block/"
+$ cd woo-gutenberg-products-block
 ```
 
 2. Modify the files you want to change in `trunk` or `tags/x.y.z`.
@@ -159,12 +159,12 @@ cd woo-gutenberg-products-block
 3. Check your changes with:
 
 ```
-svn stat
-svn diff
+$ svn stat
+$ svn diff
 ```
 
 4. Commit the changes to the server:
 
 ```
-svn ci -m "Updated readme.txt description"
+$ svn ci -m "Updated readme.txt description"
 ```
