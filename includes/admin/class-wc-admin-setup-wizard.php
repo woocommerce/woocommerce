@@ -489,7 +489,6 @@ class WC_Admin_Setup_Wizard {
 
 		if ( function_exists( 'wc_admin_url' ) ) {
 			$this->wc_setup_redirect_to_wc_admin_onboarding();
-			exit;
 		}
 
 		WC_Install::background_installer(
@@ -507,7 +506,6 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$this->wc_setup_redirect_to_wc_admin_onboarding();
-		exit;
 	}
 
 	/**
@@ -516,10 +514,11 @@ class WC_Admin_Setup_Wizard {
 	private function wc_setup_redirect_to_wc_admin_onboarding() {
 		// Renables the wizard.
 		$profile_updates = array( 'completed' => false );
-		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
-		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
+		$onboarding_data = get_option( 'woocommerce_onboarding_profile', array() );
+		update_option( 'woocommerce_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
 
 		wp_safe_redirect( wc_admin_url( '&enable_onboarding=1' ) );
+		exit;
 	}
 
 	/**
