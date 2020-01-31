@@ -14,9 +14,15 @@
 	margin: 0;
 }
 
+.wc-block-error__image {
+	max-width: 25%;
+}
 .wc-block-error__text,
 .wc-block-error__message {
 	margin: 0;
+}
+.wc-block-error__message {
+	font-style: italic;
 }
 
 @include breakpoint( ">480px" ) {
@@ -25,6 +31,6 @@
 	}
 
 	.wc-block-error__image + .wc-block-error__content {
-		margin-left: $gap;
+		margin-left: $gap-large;
 	}
 }

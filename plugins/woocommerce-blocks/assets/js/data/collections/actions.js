@@ -99,3 +99,24 @@ export function* __experimentalPersistItemToCollection(
 		);
 	}
 }
+
+export function receiveCollectionError(
+	namespace,
+	resourceName,
+	queryString,
+	ids,
+	error
+) {
+	return {
+		type: 'ERROR',
+		namespace,
+		resourceName,
+		queryString,
+		ids,
+		response: {
+			items: [],
+			headers: Headers,
+			error,
+		},
+	};
+}

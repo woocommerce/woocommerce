@@ -110,10 +110,9 @@ const ProductList = ( {
 			currentPage,
 		} )
 	);
-	const results = useStoreProducts( queryState );
-	const { products, productsLoading } = results;
-	const totalProducts = parseInt( results.totalProducts, 10 );
-
+	const { products, totalProducts, productsLoading } = useStoreProducts(
+		queryState
+	);
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
 

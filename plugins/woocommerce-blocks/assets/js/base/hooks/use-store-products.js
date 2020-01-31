@@ -36,7 +36,7 @@ export const useStoreProducts = ( query ) => {
 	} );
 	return {
 		products,
-		totalProducts,
+		totalProducts: parseInt( totalProducts, 10 ),
 		productsLoading,
 	};
 };
