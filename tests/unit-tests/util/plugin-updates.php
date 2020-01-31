@@ -1,4 +1,9 @@
 <?php
+/**
+ * File for the WC_Tests_Plugin_Updates class.
+ *
+ * @package WooCommerce\Tests\Util
+ */
 
 /**
  * Class WC_Plugin_Updates.
@@ -127,15 +132,22 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		);
 		$plugin_keys   = array_keys( $this->plugins );
 
-		$new_version = '4.0.0';
+		// current: X.Y.Z, new: (X+1).0.
+		// as current < new, all plugins are untested.
+		$current_version_parts = explode( '.', WC_VERSION );
+		$new_version = ( $current_version_parts[0] + 1 ) . '.0.0';
 		$untested    = $this->updates->get_untested_plugins( $new_version, $release );
 		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
-		$new_version = '4.3.0';
+		// current: X.Y.Z, new: (X+1).3.0.
+		// as current < new, all plugins are untested.
+		$new_version = ( $current_version_parts[0] + 1 ) . '.3.0';
 		$untested    = $this->updates->get_untested_plugins( $new_version, $release );
 		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
-		$new_version = '4.0.2';
+		// current: X.Y.Z, new: (X+1).0.2.
+		// as current < new, all plugins are untested.
+		$new_version = ( $current_version_parts[0] + 1 ) . '.0.2';
 		$untested    = $this->updates->get_untested_plugins( $new_version, $release );
 		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 	}
