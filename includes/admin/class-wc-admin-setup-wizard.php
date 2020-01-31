@@ -512,6 +512,10 @@ class WC_Admin_Setup_Wizard {
 	 * Redirects to the onboarding wizard in WooCommerce Admin.
 	 */
 	private function wc_setup_redirect_to_wc_admin_onboarding() {
+		if ( ! function_exists( 'wc_admin_url' ) ) {
+			return;
+		}
+
 		// Renables the wizard.
 		$profile_updates = array( 'completed' => false );
 		$onboarding_data = get_option( 'woocommerce_onboarding_profile', array() );
