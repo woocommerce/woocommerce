@@ -65,6 +65,8 @@ class Bootstrap {
 			$this->add_build_notice();
 		}
 
+		$this->define_feature_flag();
+
 		// register core dependencies with the container.
 		$this->container->register(
 			AssetApi::class,
@@ -147,5 +149,18 @@ class Bootstrap {
 		remove_filter( 'block_categories', array( 'WC_Block_Library', 'add_block_category' ) );
 		remove_action( 'admin_print_footer_scripts', array( 'WC_Block_Library', 'print_script_settings' ), 1 );
 		remove_action( 'init', array( 'WGPB_Block_Library', 'init' ) );
+	}
+
+	/**
+	 * Define the global feature flag
+	 */
+	protected function define_feature_flag() {
+		$allowed_flags = [ 'experimental', 'stable' ];
+		$flag          = getenv( 'WOOCOMMERCE_BLOCKS_PHASE' );
+		if ( ! in_array( $flag, $allowed_flags, true ) ) {
+				$woo_options = parse_ini_file( __DIR__ . '/../../blocks.ini' );
+				$flag        = is_array( $woo_options ) && 'experimental' === $woo_options['woocommerce_blocks_phase'] ? 'experimental' : 'stable';
+		}
+		define( 'WOOCOMMERCE_BLOCKS_PHASE', $flag );
 	}
 }

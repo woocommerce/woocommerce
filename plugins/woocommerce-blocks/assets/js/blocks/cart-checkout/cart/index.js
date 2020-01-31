@@ -16,7 +16,7 @@ import './style.scss';
 /**
  * Register and run the Cart block.
  */
-registerBlockType( 'woocommerce/cart', {
+const settings = {
 	title: __( 'Cart', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: <Icon srcElement={ cart } />,
@@ -52,4 +52,8 @@ registerBlockType( 'woocommerce/cart', {
 			</div>
 		);
 	},
-} );
+};
+
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
+	registerBlockType( 'woocommerce/cart', settings );
+}
