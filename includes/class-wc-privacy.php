@@ -344,7 +344,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 						'Subscriber',
 					)
 				),
-				'meta_query' => array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'AND',
 					array(
 						'key'     => 'wc_last_active',
@@ -365,6 +365,10 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		$user_ids = $user_query->get_results();
 
 		if ( $user_ids ) {
+			if ( ! function_exists( 'wp_delete_user' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/user.php';
+			}
+
 			foreach ( $user_ids as $user_id ) {
 				wp_delete_user( $user_id );
 				$count ++;

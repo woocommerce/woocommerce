@@ -441,17 +441,23 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get email content type.
 	 *
+	 * @param string $default_content_type Default wp_mail() content type.
 	 * @return string
 	 */
-	public function get_content_type() {
+	public function get_content_type( $default_content_type = '' ) {
 		switch ( $this->get_email_type() ) {
 			case 'html':
-				return 'text/html';
+				$content_type = 'text/html';
+				break;
 			case 'multipart':
-				return 'multipart/alternative';
+				$content_type = 'multipart/alternative';
+				break;
 			default:
-				return 'text/plain';
+				$content_type = 'text/plain';
+				break;
 		}
+
+		return apply_filters( 'woocommerce_email_content_type', $content_type, $this, $default_content_type );
 	}
 
 	/**
@@ -599,21 +605,23 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get the from name for outgoing emails.
 	 *
+	 * @param string $from_name Default wp_mail() name associated with the "from" email address.
 	 * @return string
 	 */
-	public function get_from_name() {
-		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this );
+	public function get_from_name( $from_name = '' ) {
+		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this, $from_name );
 		return wp_specialchars_decode( esc_html( $from_name ), ENT_QUOTES );
 	}
 
 	/**
 	 * Get the from address for outgoing emails.
 	 *
+	 * @param string $from_email Default wp_mail() email address to send from.
 	 * @return string
 	 */
-	public function get_from_address() {
-		$from_address = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this );
-		return sanitize_email( $from_address );
+	public function get_from_address( $from_email = '' ) {
+		$from_email = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this, $from_email );
+		return sanitize_email( $from_email );
 	}
 
 	/**

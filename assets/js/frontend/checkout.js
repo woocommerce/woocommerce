@@ -381,7 +381,7 @@ jQuery( function( $ ) {
 							}
 						}
 					});
-					
+
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
@@ -538,7 +538,7 @@ jQuery( function( $ ) {
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
 						try {
-							if ( 'success' === result.result ) {
+							if ( 'success' === result.result && $form.triggerHandler( 'checkout_place_order_success' ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {

@@ -797,6 +797,12 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $product3->get_id(), $results );
 		$this->assertContains( $product4->get_id(), $results );
 
+		$results = $data_store->search_products( 'blue-widget-1     OR       green-widget', '', true, true );
+		$this->assertContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertContains( $product3->get_id(), $results );
+		$this->assertContains( $product4->get_id(), $results );
+
 		$results = $data_store->search_products( '"green widget"', '', true, true );
 		$this->assertNotContains( $product->get_id(), $results );
 		$this->assertNotContains( $product2->get_id(), $results );
