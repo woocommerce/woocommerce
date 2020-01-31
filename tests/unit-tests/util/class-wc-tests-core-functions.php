@@ -619,7 +619,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		}
 		ob_end_clean();
 
-		remove_filter( 'woocommerce_locatsdae_template', array( $this, 'force_template_path' ) );
+		remove_filter( 'woocommerce_locate_template', array( $this, 'force_template_path' ) );
 
 		$file_path = wp_cache_get( sanitize_key( 'template-global/wrapper-start.php---' . WC_VERSION ), 'woocommerce' );
 
