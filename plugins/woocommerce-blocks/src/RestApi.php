@@ -84,7 +84,7 @@ class RestApi {
 	 * @return array
 	 */
 	protected static function get_controllers() {
-		return [
+		$controllers = [
 			'product-attributes'            => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributes',
 			'product-attribute-terms'       => __NAMESPACE__ . '\RestApi\Controllers\ProductAttributeTerms',
 			'product-categories'            => __NAMESPACE__ . '\RestApi\Controllers\ProductCategories',
@@ -92,16 +92,25 @@ class RestApi {
 			'products'                      => __NAMESPACE__ . '\RestApi\Controllers\Products',
 			'variations'                    => __NAMESPACE__ . '\RestApi\Controllers\Variations',
 			'product-reviews'               => __NAMESPACE__ . '\RestApi\Controllers\ProductReviews',
-			'store-cart'                    => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Cart',
-			'store-cart-items'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
-			'store-cart-coupons'            => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartCoupons',
-			'store-cart-shipping-rates'     => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartShippingRates',
-			'store-cart-order'              => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartOrder',
-			'store-customer'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Customer',
 			'store-products'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Products',
 			'store-product-collection-data' => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductCollectionData',
 			'store-product-attributes'      => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductAttributes',
 			'store-product-attribute-terms' => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\ProductAttributeTerms',
 		];
+
+		$experimental_controllers = [
+			'store-cart'                => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Cart',
+			'store-cart-order'          => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartOrder',
+			'store-cart-items'          => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartItems',
+			'store-cart-coupons'        => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartCoupons',
+			'store-cart-shipping-rates' => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\CartShippingRates',
+			'store-customer'            => __NAMESPACE__ . '\RestApi\StoreApi\Controllers\Customer',
+		];
+
+		if ( WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
+			$controllers = array_merge( $controllers, $experimental_controllers );
+		}
+
+		return $controllers;
 	}
 }

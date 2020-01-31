@@ -12,7 +12,7 @@ import edit from './edit';
 import { example } from './example';
 import './editor.scss';
 
-registerBlockType( 'woocommerce/checkout', {
+const settings = {
 	title: __( 'Checkout', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: <Icon srcElement={ card } />,
@@ -51,4 +51,8 @@ registerBlockType( 'woocommerce/checkout', {
 			</div>
 		);
 	},
-} );
+};
+
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
+	registerBlockType( 'woocommerce/checkout', settings );
+}
