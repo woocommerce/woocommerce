@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { DEFAULT_COLUMNS } from '@woocommerce/block-settings';
-import { IconWidgets } from '@woocommerce/block-components/icons';
+import { Icon, widgets } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ import { deprecatedConvertToShortcode } from '../../utils/deprecations';
 registerBlockType( 'woocommerce/handpicked-products', {
 	title: __( 'Hand-picked Products', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconWidgets />,
+		src: <Icon srcElement={ widgets } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

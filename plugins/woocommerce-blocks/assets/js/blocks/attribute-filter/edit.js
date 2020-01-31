@@ -13,7 +13,7 @@ import {
 	Toolbar,
 	withSpokenMessages,
 } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import { Icon, server, external } from '@woocommerce/icons';
 import { SearchListControl } from '@woocommerce/components';
 import { mapValues, toArray, sortBy, find } from 'lodash';
 import { ATTRIBUTES } from '@woocommerce/block-settings';
@@ -26,7 +26,6 @@ import BlockTitle from '@woocommerce/block-components/block-title';
  */
 import Block from './block.js';
 import './editor.scss';
-import { IconExternal } from '../../components/icons';
 import ToggleButtonControl from '../../components/toggle-button-control';
 
 const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
@@ -221,7 +220,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	const noAttributesPlaceholder = () => (
 		<Placeholder
 			className="wc-block-attribute-filter"
-			icon={ <Gridicon icon="menus" /> }
+			icon={ <Icon srcElement={ server } /> }
 			label={ __(
 				'Filter Products by Attribute',
 				'woo-gutenberg-products-block'
@@ -247,7 +246,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			>
 				{ __( 'Add new attribute', 'woo-gutenberg-products-block' ) +
 					' ' }
-				<IconExternal />
+				<Icon srcElement={ external } />
 			</Button>
 			<Button
 				className="wc-block-attribute-filter__read_more_button"
@@ -358,7 +357,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		return (
 			<Placeholder
 				className="wc-block-attribute-filter"
-				icon={ <Gridicon icon="menus" /> }
+				icon={ <Icon srcElement={ server } /> }
 				label={ __(
 					'Filter Products by Attribute',
 					'woo-gutenberg-products-block'

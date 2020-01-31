@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
-import Gridicon from 'gridicons';
+import { Icon, grid } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ import '../../../atomic/blocks/product';
 const blockSettings = {
 	title: __( 'All Products', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Gridicon icon="grid" />,
+		src: <Icon srcElement={ grid } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

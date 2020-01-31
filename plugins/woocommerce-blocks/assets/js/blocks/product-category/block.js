@@ -22,6 +22,7 @@ import GridLayoutControl from '@woocommerce/block-components/grid-layout-control
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
 import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
+import { Icon, folder } from '@woocommerce/icons';
 
 /**
  * Component to handle edit mode of "Products by Category".
@@ -198,7 +199,7 @@ class ProductByCategoryBlock extends Component {
 
 		return (
 			<Placeholder
-				icon="category"
+				icon={ <Icon srcElement={ folder } /> }
 				label={ __(
 					'Products by Category',
 					'woo-gutenberg-products-block'
@@ -248,7 +249,7 @@ class ProductByCategoryBlock extends Component {
 						attributes={ attributes }
 						EmptyResponsePlaceholder={ () => (
 							<Placeholder
-								icon="category"
+								icon={ <Icon srcElement={ folder } /> }
 								label={ __(
 									'Products by Category',
 									'woo-gutenberg-products-block'

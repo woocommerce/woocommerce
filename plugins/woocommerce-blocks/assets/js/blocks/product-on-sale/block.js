@@ -11,11 +11,11 @@ import GridLayoutControl from '@woocommerce/block-components/grid-layout-control
 import ProductCategoryControl from '@woocommerce/block-components/product-category-control';
 import ProductOrderbyControl from '@woocommerce/block-components/product-orderby-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
-import { IconProductOnSale } from '@woocommerce/block-components/icons';
+import { Icon, tag } from '@woocommerce/icons';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
-		icon={ <IconProductOnSale /> }
+		icon={ <Icon srcElement={ tag } /> }
 		label={ __( 'On Sale Products', 'woo-gutenberg-products-block' ) }
 		className="wc-block-product-on-sale"
 	>

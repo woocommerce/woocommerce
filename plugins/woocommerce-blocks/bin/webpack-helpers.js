@@ -48,13 +48,9 @@ const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
-		'@woocommerce/blocks-registry': path.resolve(
+		'@woocommerce/atomic-components': path.resolve(
 			__dirname,
-			'../assets/js/blocks-registry'
-		),
-		'@woocommerce/block-settings': path.resolve(
-			__dirname,
-			'../assets/js/settings/blocks'
+			`../assets/js/${ pathPart }atomic/components/`
 		),
 		'@woocommerce/base-components': path.resolve(
 			__dirname,
@@ -84,10 +80,15 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }hocs`
 		),
-		'@woocommerce/atomic-components': path.resolve(
+		'@woocommerce/blocks-registry': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }atomic/components/`
+			'../assets/js/blocks-registry'
 		),
+		'@woocommerce/block-settings': path.resolve(
+			__dirname,
+			'../assets/js/settings/blocks'
+		),
+		'@woocommerce/icons': path.resolve( __dirname, `../assets/js/icons` ),
 		'@woocommerce/resource-previews': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }previews/`

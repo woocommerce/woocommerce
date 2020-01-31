@@ -4,8 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { without } from 'lodash';
-import { IconProductOnSale } from '@woocommerce/block-components/icons';
-
+import { Icon, tag } from '@woocommerce/icons';
 /**
  * Internal dependencies
  */
@@ -19,7 +18,7 @@ import sharedAttributes, {
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconProductOnSale />,
+		src: <Icon srcElement={ tag } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

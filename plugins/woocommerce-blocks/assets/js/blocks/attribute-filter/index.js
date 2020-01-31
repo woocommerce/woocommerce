@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import Gridicon from 'gridicons';
+import { Icon, server } from '@woocommerce/icons';
 import classNames from 'classnames';
 
 /**
@@ -14,7 +14,7 @@ import edit from './edit.js';
 registerBlockType( 'woocommerce/attribute-filter', {
 	title: __( 'Filter Products by Attribute', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Gridicon icon="menus" />,
+		src: <Icon srcElement={ server } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

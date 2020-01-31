@@ -4,17 +4,17 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import classNames from 'classnames';
+import { Icon, bill } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
  */
 import edit from './edit.js';
-import { IconMoney } from '../../components/icons';
 
 registerBlockType( 'woocommerce/price-filter', {
 	title: __( 'Filter Products by Price', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconMoney />,
+		src: <Icon srcElement={ bill } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

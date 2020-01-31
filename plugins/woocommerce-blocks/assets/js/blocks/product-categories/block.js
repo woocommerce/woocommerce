@@ -6,12 +6,12 @@ import { Fragment } from 'react';
 import { InspectorControls, ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
 import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
-import { IconFolder } from '@woocommerce/block-components/icons';
+import { Icon, list } from '@woocommerce/icons';
 import ToggleButtonControl from '@woocommerce/block-components/toggle-button-control';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
-		icon={ <IconFolder /> }
+		icon={ <Icon srcElement={ list } /> }
 		label={ __(
 			'Product Categories List',
 			'woo-gutenberg-products-block'

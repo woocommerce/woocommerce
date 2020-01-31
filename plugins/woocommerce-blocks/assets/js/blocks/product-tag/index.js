@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { DEFAULT_COLUMNS, DEFAULT_ROWS } from '@woocommerce/block-settings';
-import { IconProductTag } from '@woocommerce/block-components/icons';
+import { Icon, more } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ import Block from './block';
 registerBlockType( 'woocommerce/product-tag', {
 	title: __( 'Products by Tag', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <IconProductTag />,
+		src: <Icon srcElement={ more } />,
 		foreground: '#96588a',
 	},
 	category: 'woocommerce',

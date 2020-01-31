@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import Gridicon from 'gridicons';
+import { Icon, image } from '@woocommerce/icons';
 import { Fragment } from '@wordpress/element';
 import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -23,7 +23,7 @@ const blockConfig = {
 		'woo-gutenberg-products-block'
 	),
 	icon: {
-		src: <Gridicon icon="image" />,
+		src: <Icon srcElement={ image } />,
 		foreground: '#96588a',
 	},
 	attributes: {

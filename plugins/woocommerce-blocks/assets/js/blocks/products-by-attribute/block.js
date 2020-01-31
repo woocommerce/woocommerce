@@ -16,7 +16,7 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
-import Gridicon from 'gridicons';
+import { Icon, tags } from '@woocommerce/icons';
 import PropTypes from 'prop-types';
 import GridContentControl from '@woocommerce/block-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
@@ -118,7 +118,7 @@ class ProductsByAttributeBlock extends Component {
 
 		return (
 			<Placeholder
-				icon={ <Gridicon icon="custom-post-type" /> }
+				icon={ <Icon srcElement={ tags } /> }
 				label={ __(
 					'Products by Attribute',
 					'woo-gutenberg-products-block'

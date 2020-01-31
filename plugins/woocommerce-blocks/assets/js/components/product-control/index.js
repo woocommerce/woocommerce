@@ -12,10 +12,7 @@ import {
 	withSearchedProducts,
 	withTransformSingleSelectToMultipleSelect,
 } from '@woocommerce/block-hocs';
-import {
-	IconRadioSelected,
-	IconRadioUnselected,
-} from '@woocommerce/block-components/icons';
+import { Icon, radioSelected, radioUnselected } from '@woocommerce/icons';
 import ErrorMessage from '@woocommerce/block-components/error-placeholder/error-message.js';
 
 /**
@@ -32,7 +29,11 @@ function getHighlightedName( name, search ) {
 }
 
 const getInteractionIcon = ( isSelected = false ) => {
-	return isSelected ? <IconRadioSelected /> : <IconRadioUnselected />;
+	return isSelected ? (
+		<Icon srcElement={ radioSelected } />
+	) : (
+		<Icon srcElement={ radioUnselected } />
+	);
 };
 
 const messages = {
@@ -89,9 +90,9 @@ const ProductControl = ( {
 		};
 
 		if ( item.breadcrumbs.length ) {
-			a11yProps[ 'aria-label' ] = `${ item.breadcrumbs[ 0 ] }: ${
-				item.name
-			}`;
+			a11yProps[
+				'aria-label'
+			] = `${ item.breadcrumbs[ 0 ] }: ${ item.name }`;
 		}
 
 		if ( variationsCount ) {
