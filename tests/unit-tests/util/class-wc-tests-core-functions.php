@@ -605,6 +605,28 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * This test ensures that the absolute path to template files is replaced with a token. We do this so
+	 * that the path can be made relative to each installation, and the cache can be shared.
+	 */
+	public function test_wc_get_template_cleans_absolute_path() {
+		add_filter( 'woocommerce_locate_template', array( $this, 'force_template_path' ), 10, 2 );
+
+		ob_start();
+		try {
+			wc_get_template( 'global/wrapper-start.php' );
+		} catch ( \Exception $exception ) {
+			// Since the file doesn't really exist this is going to throw an exception (which is fine for our test).
+		}
+		ob_end_clean();
+
+		remove_filter( 'woocommerce_locatsdae_template', array( $this, 'force_template_path' ) );
+
+		$file_path = wp_cache_get( sanitize_key( 'template-global/wrapper-start.php---' . WC_VERSION ), 'woocommerce' );
+
+		$this->assertEquals( '{{ABSPATH}}global/wrapper-start.php', $file_path );
+	}
+
+	/**
 	 * Test wc_get_image_size function.
 	 *
 	 * @return void
@@ -964,5 +986,17 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
 
+	}
+
+	/**
+	 * Allows us to force the template path. Since the ABSPATH is to /tmp/wordpress in tests, we need to do this
+	 * in order to keep the paths consistent for testing purposes.
+	 *
+	 * @param string $template The path to the template file.
+	 * @param string $template_name The name of the template file.
+	 * @return string The path to be used instead.
+	 */
+	public function force_template_path( $template, $template_name ) {
+		return ABSPATH . $template_name;
 	}
 }
