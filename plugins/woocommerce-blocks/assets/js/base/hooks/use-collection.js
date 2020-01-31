@@ -3,7 +3,7 @@
  */
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { useRef } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,6 +14,9 @@ import { useShallowEqual } from './use-shallow-equal';
  * This is a custom hook that is wired up to the `wc/store/collections` data
  * store. Given a collections option object, this will ensure a component is
  * kept up to date with the collection matching that query in the store state.
+ *
+ * @throws {Object} Throws an exception object if there was a problem with the
+ * 					API request, to be picked up by BlockErrorBoundry.
  *
  * @param {Object} options                An object declaring the various
  *                                        collection arguments.
@@ -57,6 +60,7 @@ export const useCollection = ( options ) => {
 	// ensure we feed the previous reference if it's equivalent
 	const currentQuery = useShallowEqual( query );
 	const currentResourceValues = useShallowEqual( resourceValues );
+	const [ , setState ] = useState();
 	const results = useSelect(
 		( select ) => {
 			if ( ! shouldSelect ) {
@@ -70,6 +74,17 @@ export const useCollection = ( options ) => {
 				currentQuery,
 				currentResourceValues,
 			];
+
+			// is there an error? if so return it.
+			const error = store.getCollectionError( ...args );
+			if ( error ) {
+				// Throw an exception within setState - this is needed because
+				// this is a hook (https://github.com/facebook/react/issues/14981).
+				setState( () => {
+					throw error;
+				} );
+			}
+
 			return {
 				results: store.getCollection( ...args ),
 				isLoading: ! store.hasFinishedResolution(

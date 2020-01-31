@@ -67,6 +67,24 @@ export const getCollection = (
 	return getFromState( { state, namespace, resourceName, query, ids } );
 };
 
+export const getCollectionError = (
+	state,
+	namespace,
+	resourceName,
+	query = null,
+	ids = DEFAULT_EMPTY_ARRAY
+) => {
+	return getFromState( {
+		state,
+		namespace,
+		resourceName,
+		query,
+		ids,
+		type: 'error',
+		fallback: null,
+	} );
+};
+
 /**
  * This selector enables retrieving a specific header value from a given
  * collection request.

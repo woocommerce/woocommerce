@@ -9,7 +9,7 @@ const BlockError = ( {
 	imageUrl = `${ WC_BLOCKS_ASSET_URL }img/block-error.svg`,
 	header = __( 'Oops!', 'woo-gutenberg-products-block' ),
 	text = __(
-		'There was an error with loading this content.',
+		'There was an error loading the content.',
 		'woo-gutenberg-products-block'
 	),
 	errorMessage,
@@ -40,7 +40,7 @@ BlockError.propTypes = {
 	/**
 	 * Error message to display below the content.
 	 */
-	errorMessage: PropTypes.string,
+	errorMessage: PropTypes.node,
 	/**
 	 * Text to display as the heading of the error block.
 	 * If it's `null` or an empty string, no header will be displayed.

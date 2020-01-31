@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Component, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,6 +14,21 @@ class BlockErrorBoundary extends Component {
 	state = { hasError: false };
 
 	static getDerivedStateFromError( error ) {
+		if (
+			typeof error.statusText !== 'undefined' &&
+			typeof error.status !== 'undefined'
+		) {
+			return {
+				errorMessage: (
+					<Fragment>
+						<strong>{ error.status }</strong>:&nbsp;
+						{ error.statusText }
+					</Fragment>
+				),
+				hasError: true,
+			};
+		}
+
 		return { errorMessage: error.message, hasError: true };
 	}
 
@@ -62,7 +77,7 @@ BlockErrorBoundary.propTypes = {
 };
 
 BlockErrorBoundary.defaultProps = {
-	showErrorMessage: false,
+	showErrorMessage: true,
 };
 
 export default BlockErrorBoundary;
