@@ -84,7 +84,7 @@ class WC_Admin_Importers {
 	 */
 	public function admin_scripts() {
 		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
-		wp_register_script( 'wc-product-import', WC()->plugin_url() . '/assets/js/admin/wc-product-import' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+		wp_register_script( 'wc-product-import', WC()->plugin_url() . '/assets/js/admin/wc-product-import' . $suffix . '.js', array( 'jquery' ), Constants::get_constant( 'WC_VERSION' ), true );
 	}
 
 	/**

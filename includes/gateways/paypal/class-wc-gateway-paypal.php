@@ -454,7 +454,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
-		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), WC_VERSION, true );
+		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), Constants::get_constant( 'WC_VERSION' ), true );
 	}
 
 	/**

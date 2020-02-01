@@ -746,7 +746,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		echo esc_html( $data_store->create_all_product_variations( $product, WC_MAX_LINKED_VARIATIONS ) );
+		echo esc_html( $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) ) );
 
 		$data_store->sort_all_product_variations( $product->get_id() );
 		wp_die();

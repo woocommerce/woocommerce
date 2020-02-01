@@ -87,7 +87,7 @@ class WC_Admin_Exporters {
 	 */
 	public function admin_scripts() {
 		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
-		wp_register_script( 'wc-product-export', WC()->plugin_url() . '/assets/js/admin/wc-product-export' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+		wp_register_script( 'wc-product-export', WC()->plugin_url() . '/assets/js/admin/wc-product-export' . $suffix . '.js', array( 'jquery' ), Constants::get_constant( 'WC_VERSION' ) );
 		wp_localize_script(
 			'wc-product-export',
 			'wc_product_export_params',

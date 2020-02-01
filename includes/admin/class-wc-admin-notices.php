@@ -6,6 +6,8 @@
  * @version 3.4.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -166,7 +168,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
+		wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), Constants::get_constant( 'WC_VERSION' ) );
 
 		// Add RTL support.
 		wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );

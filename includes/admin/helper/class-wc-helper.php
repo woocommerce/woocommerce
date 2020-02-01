@@ -470,7 +470,7 @@ class WC_Helper {
 		$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 
 		if ( $wc_screen_id . '_page_wc-addons' === $screen_id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
-			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), WC_VERSION );
+			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), Constants::get_constant( 'WC_VERSION' ) );
 		}
 	}
 
@@ -1584,7 +1584,7 @@ class WC_Helper {
 		}
 
 		$data = $updates->response['woocommerce/woocommerce.php'];
-		if ( version_compare( WC_VERSION, $data->new_version, '>=' ) ) {
+		if ( version_compare( Constants::get_constant( 'WC_VERSION' ), $data->new_version, '>=' ) ) {
 			return false;
 		}
 

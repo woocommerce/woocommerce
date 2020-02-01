@@ -159,7 +159,7 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, WC_VERSION ) ) );
+	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, Constants::get_constant( 'WC_VERSION' ) ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -207,7 +207,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, WC_VERSION ) ) );
+	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, Constants::get_constant( 'WC_VERSION' ) ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -1298,7 +1298,7 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
-	if ( WC_USE_TRANSACTIONS || $force ) {
+	if ( Constants::is_true( 'WC_USE_TRANSACTIONS' ) || $force ) {
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );

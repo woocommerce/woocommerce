@@ -299,7 +299,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'redirection' => 0,
 			'httpversion' => '1.0',
 			'blocking'    => true,
-			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'        => trim( wp_json_encode( $payload ) ),
 			'headers'     => array(
 				'Content-Type' => 'application/json',
@@ -612,7 +612,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	public function deliver_ping() {
 		$args = array(
-			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
 		);
 

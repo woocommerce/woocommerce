@@ -8,6 +8,8 @@
  * @version  2.5.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -252,10 +254,10 @@ function woocommerce_product_loop() {
 function wc_generator_tag( $gen, $type ) {
 	switch ( $type ) {
 		case 'html':
-			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '">';
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( Constants::get_constant( 'WC_VERSION' ) ) . '">';
 			break;
 		case 'xhtml':
-			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '" />';
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( Constants::get_constant( 'WC_VERSION' ) ) . '" />';
 			break;
 	}
 	return $gen;
