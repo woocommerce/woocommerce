@@ -58,7 +58,7 @@
     "jest": "25.1.0",
     "jest-puppeteer": "4.4.0",
     "lint-staged": "9.5.0",
-    "mocha": "7.0.0",
+    "mocha": "7.0.1",
     "node-sass": "4.13.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "puppeteer": "2.0.0",
