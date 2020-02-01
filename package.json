@@ -25,7 +25,7 @@
     "@babel/preset-env": "7.7.7",
     "@babel/register": "7.7.7",
     "@wordpress/e2e-test-utils": "4.0.0",
-    "autoprefixer": "9.7.3",
+    "autoprefixer": "9.7.4",
     "babel-eslint": "10.0.3",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
