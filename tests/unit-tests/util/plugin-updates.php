@@ -115,39 +115,40 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 	 */
 	public function test_get_untested_plugins_major_bad() {
 		$release = 'major';
+		$current_version_parts = explode( '.', WC_VERSION );
+		$current_major_version = $current_version_parts[0];
 
 		$this->plugins = array(
 			'test/test.php'   => array(
 				'Name'                                   => 'Test plugin',
-				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.0.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => $current_major_version . '.0.0',
 			),
 			'test2/test2.php' => array(
 				'Name'                                   => 'Test plugin 2',
-				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.9.9',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => $current_major_version . '.9.9',
 			),
 			'test3/test3.php' => array(
 				'Name'                                   => 'Test plugin 3',
-				WC_Plugin_Updates::VERSION_TESTED_HEADER => '3.0',
+				WC_Plugin_Updates::VERSION_TESTED_HEADER => $current_major_version . '.0',
 			),
 		);
 		$plugin_keys   = array_keys( $this->plugins );
 
 		// current: X.Y.Z, new: (X+1).0.
 		// as current < new, all plugins are untested.
-		$current_version_parts = explode( '.', WC_VERSION );
-		$new_version = ( $current_version_parts[0] + 1 ) . '.0.0';
+		$new_version = ( $current_major_version + 1 ) . '.0.0';
 		$untested    = $this->updates->get_untested_plugins( $new_version, $release );
 		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
 		// current: X.Y.Z, new: (X+1).3.0.
 		// as current < new, all plugins are untested.
-		$new_version = ( $current_version_parts[0] + 1 ) . '.3.0';
+		$new_version = ( $current_major_version + 1 ) . '.3.0';
 		$untested    = $this->updates->get_untested_plugins( $new_version, $release );
 		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 
 		// current: X.Y.Z, new: (X+1).0.2.
 		// as current < new, all plugins are untested.
-		$new_version = ( $current_version_parts[0] + 1 ) . '.0.2';
+		$new_version = ( $current_major_version + 1 ) . '.0.2';
 		$untested    = $this->updates->get_untested_plugins( $new_version, $release );
 		$this->assertEquals( $plugin_keys, array_intersect( $plugin_keys, array_keys( $untested ) ) );
 	}
