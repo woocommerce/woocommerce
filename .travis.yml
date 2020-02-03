@@ -37,25 +37,6 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "E2E tests"
     php: 7.4
-    before_script:
-      - export PATH="$HOME/.composer/vendor/bin:$PATH"
-      - |
-        # Remove Xdebug for a huge performance increase:
-        if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
-          phpenv config-rm xdebug.ini
-        else
-          echo "xdebug.ini does not exist"
-        fi
-      - npm install
-      - composer install --no-dev
-      - |
-        # Install WP Test suite, install PHPUnit globally:
-        if [[ ! -z "$WP_VERSION" ]]; then
-          bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-          composer global require "phpunit/phpunit=5.7.*|7.5.*"
-        fi
-      - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
-
     script:
       - npm run build
       - docker-compose up --build -d
@@ -81,6 +62,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - npm install
   - composer install --no-dev
   - |
     # Install WP Test suite, install PHPUnit globally:
