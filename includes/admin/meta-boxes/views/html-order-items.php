@@ -191,7 +191,7 @@ if ( wc_tax_enabled() ) {
 					<td class="label"><?php echo esc_html( $tax_total->label ); ?>:</td>
 					<td width="1%"></td>
 					<td class="total">
-						<?php echo wc_price( $order->get_total_tax(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+						<?php echo wc_price( $tax_total->amount, array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 					</td>
 				</tr>
 			<?php endforeach; ?>
