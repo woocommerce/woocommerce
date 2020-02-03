@@ -178,7 +178,7 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Shipping:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_total_shipping(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+					<?php echo wc_price( $order->get_shipping_total(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
 		<?php endif; ?>
