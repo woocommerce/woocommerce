@@ -53,7 +53,7 @@
     "grunt-shell": "3.0.1",
     "grunt-stylelint": "0.13.0",
     "grunt-wp-i18n": "1.0.3",
-    "husky": "4.0.10",
+    "husky": "4.2.1",
     "istanbul": "1.0.0-alpha.2",
     "jest": "25.1.0",
     "jest-puppeteer": "4.4.0",
