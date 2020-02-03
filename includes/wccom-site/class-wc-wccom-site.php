@@ -217,7 +217,7 @@ class WC_WCCOM_Site {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
-			'request_uri' => urldecode( remove_query_arg( array( 'token', 'signature' ) ) ),
+			'request_uri' => urldecode( remove_query_arg( array( 'token', 'signature' ), $_SERVER['REQUEST_URI'] ) ),
 			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
 		);
 		// phpcs:enable
