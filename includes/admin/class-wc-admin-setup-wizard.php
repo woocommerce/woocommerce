@@ -216,6 +216,7 @@ class WC_Admin_Setup_Wizard {
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), Constants::get_constant( 'WC_VERSION' ) );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), Constants::get_constant( 'WC_VERSION' ) );
 
+		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util', 'jquery-tiptip', 'backbone', 'wc-backbone-modal' ), Constants::get_constant( 'WC_VERSION' ) );
 		wp_localize_script(
 			'wc-setup',
 			'wc_setup_params',
