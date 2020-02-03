@@ -144,7 +144,7 @@
     "eslint": "6.8.0",
     "eslint-config-wpcalypso": "4.0.1",
     "eslint-loader": "3.0.3",
-    "eslint-plugin-jest": "22.21.0",
+    "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.18.0",
     "eslint-plugin-wpcalypso": "4.1.0",
