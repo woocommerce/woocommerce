@@ -2085,6 +2085,6 @@ function wc_update_390_db_version() {
 /**
  * Update DB version.
  */
-function wc_update_3100_db_version() {
-	WC_Install::update_db_version( '3.10.0' );
+function wc_update_400_db_version() {
+	WC_Install::update_db_version( '4.0.0' );
 }

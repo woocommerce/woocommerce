@@ -140,9 +140,9 @@ class WC_Install {
 			'wc_update_390_change_geolocation_database_update_cron',
 			'wc_update_390_db_version',
 		),
-		'3.10.0' => array(
+		'4.0.0' => array(
 			'wc_update_product_lookup_tables',
-			'wc_update_3100_db_version',
+			'wc_update_400_db_version',
 		),
 	);
 
