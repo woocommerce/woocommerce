@@ -133,7 +133,7 @@
     "babel-plugin-transform-class-properties": "6.24.1",
     "babel-plugin-transform-es2015-template-literals": "6.22.0",
     "chalk": "3.0.0",
-    "concurrently": "5.0.2",
+    "concurrently": "5.1.0",
     "copy-webpack-plugin": "5.1.1",
     "cross-env": "6.0.3",
     "css-loader": "3.4.2",
