@@ -1,4 +1,11 @@
 <?php
+/**
+ * WooCommerce Admin
+ *
+ * @class    WC_Helper_API
+ * @package  WooCommerce/Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -9,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Provides a communication interface with the WooCommerce.com Helper API.
  */
 class WC_Helper_API {
+	/**
+	 * Base path for API routes.
+	 *
+	 * @var $api_base
+	 */
 	public static $api_base;
 
 	/**
