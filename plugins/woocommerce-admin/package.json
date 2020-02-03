@@ -156,7 +156,7 @@
     "lerna": "3.20.2",
     "locutus": "2.0.11",
     "mini-css-extract-plugin": "0.9.0",
-    "node-sass": "4.13.0",
+    "node-sass": "4.13.1",
     "node-watch": "0.6.3",
     "postcss-color-function": "4.1.0",
     "postcss-loader": "3.0.0",
