@@ -135,7 +135,7 @@
     "chalk": "3.0.0",
     "concurrently": "5.1.0",
     "copy-webpack-plugin": "5.1.1",
-    "cross-env": "6.0.3",
+    "cross-env": "7.0.0",
     "css-loader": "3.4.2",
     "deasync": "0.1.19",
     "deep-freeze": "0.0.1",
