@@ -523,7 +523,7 @@ class WC_Admin_Setup_Wizard {
 	 * Redirects to the onboarding wizard in WooCommerce Admin.
 	 */
 	private function wc_setup_redirect_to_wc_admin_onboarding() {
-		if ( ! function_exists( 'wc_admin_url' ) ) {
+		if ( ! $this->is_wc_admin_included_in_wc() ) {
 			return;
 		}
 
