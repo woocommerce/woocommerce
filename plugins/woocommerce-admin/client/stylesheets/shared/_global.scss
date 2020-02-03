@@ -99,6 +99,7 @@
 	}
 
 	input:focus,
+	textarea:focus,
 	select:focus,
 	button:focus {
 		color: $core-grey-dark-700;
