@@ -19,11 +19,11 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "@babel/cli": "7.7.7",
-    "@babel/core": "7.7.7",
-    "@babel/polyfill": "7.7.0",
-    "@babel/preset-env": "7.7.7",
-    "@babel/register": "7.7.7",
+    "@babel/cli": "7.8.4",
+    "@babel/core": "7.8.4",
+    "@babel/polyfill": "7.8.3",
+    "@babel/preset-env": "7.8.4",
+    "@babel/register": "7.8.3",
     "@wordpress/e2e-test-utils": "4.0.0",
     "autoprefixer": "9.7.3",
     "babel-eslint": "10.0.3",
