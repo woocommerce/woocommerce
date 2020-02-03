@@ -2053,6 +2053,7 @@ function wc_update_370_db_version() {
 function wc_update_3100_increase_size_of_column() {
 	global $wpdb;
 	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_product_meta_lookup MODIFY COLUMN `min_price` decimal(19,4) NULL default NULL" );
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_product_meta_lookup MODIFY COLUMN `max_price` decimal(19,4) NULL default NULL" );
 }
 
 /**
