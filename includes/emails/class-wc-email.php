@@ -558,11 +558,9 @@ class WC_Email extends WC_Settings_API {
 			wc_get_template( 'emails/email-styles.php' );
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
-			if ( $this->supports_emogrifier() ) {
-				$emogrifier_class = '\\Pelago\\Emogrifier';
-				if ( ! class_exists( $emogrifier_class ) ) {
-					return '<style type="text/css">' . $css . '</style>' . $content;
-				}
+			$emogrifier_class = 'Pelago\\Emogrifier';
+
+			if ( $this->supports_emogrifier() && class_exists( $emogrifier_class ) ) {
 				try {
 					$emogrifier = new $emogrifier_class( $content, $css );
 					$content    = $emogrifier->emogrify();
@@ -574,6 +572,7 @@ class WC_Email extends WC_Settings_API {
 				$content = '<style type="text/css">' . $css . '</style>' . $content;
 			}
 		}
+
 		return $content;
 	}
 
