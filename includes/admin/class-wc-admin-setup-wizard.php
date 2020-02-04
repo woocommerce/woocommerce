@@ -131,6 +131,16 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Is the WooCommerce Admin actively included in the WooCommerce core?
+	 * Based on presence of a basic WC Admin function.
+	 *
+	 * @return boolean
+	 */
+	protected function is_wc_admin_active() {
+		return function_exists( 'wc_admin_url' );
+	}
+
+	/**
 	 * Should we show the WooCommerce Admin install option?
 	 * True only if the user can install plugins,
 	 * and is running the correct version of WordPress.
@@ -141,7 +151,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	protected function should_show_wc_admin() {
 		$wordpress_minimum_met = version_compare( get_bloginfo( 'version' ), $this->wc_admin_plugin_minimum_wordpress_version, '>=' );
-		return current_user_can( 'install_plugins' ) && $wordpress_minimum_met;
+		return current_user_can( 'install_plugins' ) && $wordpress_minimum_met && ! $this->is_wc_admin_active();
 	}
 
 	/**
@@ -150,7 +160,7 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin_onboarding() {
-		if ( ! $this->should_show_wc_admin() ) {
+		if ( ! $this->should_show_wc_admin() && ! $this->is_wc_admin_active() ) {
 			return false;
 		}
 
@@ -475,8 +485,9 @@ class WC_Admin_Setup_Wizard {
 						<button class="button-primary button button-large" value="<?php esc_attr_e( 'Yes please', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Yes please', 'woocommerce' ); ?></button>
 					</p>
 				</form>
-
-				<p class="wc-setup-step__new_onboarding-plugin-info"><?php esc_html_e( 'The "WooCommerce Admin" plugin will be installed and activated', 'woocommerce' ); ?></p>
+				<?php if ( ! $this->is_wc_admin_active() ) : ?>
+					<p class="wc-setup-step__new_onboarding-plugin-info"><?php esc_html_e( 'The "WooCommerce Admin" plugin will be installed and activated', 'woocommerce' ); ?></p>
+				<?php endif; ?>
 			</div>
 		<?php
 	}
@@ -487,7 +498,7 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_new_onboarding_save() {
 		check_admin_referer( 'wc-setup' );
 
-		if ( function_exists( 'wc_admin_url' ) ) {
+		if ( $this->is_wc_admin_active() ) {
 			$this->wc_setup_redirect_to_wc_admin_onboarding();
 		}
 
@@ -500,7 +511,7 @@ class WC_Admin_Setup_Wizard {
 		);
 
 		// The plugin was not successfully installed, so continue with normal setup.
-		if ( ! function_exists( 'wc_admin_url' ) ) {
+		if ( ! $this->is_wc_admin_active() ) {
 			wp_safe_redirect( esc_url_raw( $this->get_next_step_link() ) );
 			exit;
 		}
@@ -512,7 +523,7 @@ class WC_Admin_Setup_Wizard {
 	 * Redirects to the onboarding wizard in WooCommerce Admin.
 	 */
 	private function wc_setup_redirect_to_wc_admin_onboarding() {
-		if ( ! function_exists( 'wc_admin_url' ) ) {
+		if ( ! $this->is_wc_admin_active() ) {
 			return;
 		}
 
