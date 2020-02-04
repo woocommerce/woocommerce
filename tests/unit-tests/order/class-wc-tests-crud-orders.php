@@ -779,8 +779,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		}
 		$object->add_item( $item );
 
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'total' => 10,
+			)
+		);
+		$object->add_item( $fee );
+
 		$object->calculate_totals();
-		$this->assertEquals( 55, $object->get_total() );
+		$this->assertEquals( 66, $object->get_total() );
 	}
 
 	/**
