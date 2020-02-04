@@ -674,7 +674,7 @@ class WC_Tax {
 	 */
 	public static function get_rate_percent( $key_or_rate ) {
 		$rate_percent_value = self::get_rate_percent_value( $key_or_rate );
-		$tax_rate_id = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
+		$tax_rate_id        = is_object( $key_or_rate ) ? $key_or_rate->tax_rate_id : $key_or_rate;
 		return apply_filters( 'woocommerce_rate_percent', $rate_percent_value . '%', $tax_rate_id );
 	}
 

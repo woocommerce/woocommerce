@@ -1,10 +1,10 @@
 === WooCommerce ===
-Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain
+Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, woo
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 3.8.1
+Stable tag: 3.9.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.9.0 - 2020-01-07 =
+= 3.9.0 - 2020-01-21 =
 
 * Enhancement - Added a "Show" button next to the password field on the login fields. #24915
 * Enhancement - New WooCommerce Onboarding experience (shows to only 10% of new users). #24991
@@ -199,6 +199,9 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Fixed menu highlight of My Account page when browsing "Add payment method" page. #25041
 * Tweak - Prevent creating products before registering related post types and taxonomies. #25049
 * Tweak - Include processing orders in tracker data when opted in. #25071
+* Tweak - Centralize check for default themes to fix Storefront appearance in the Setup Wizard. #25216
+* Tweak - Adds a WordPress version check before recommending the WooCommerce Admin plugin during setup. #25260
+* Fix - Added license key support recent changes from MaxMind GeoLite2. #25378
 * Fix - Honor tax rounding preference in edit item and refund flows. #24208
 * Fix - Prevent incorrect number of decimal points in prices. #24281
 * Fix - Fixed initial support for Gutenberg's Experimental Legacy Widget block. #24292
@@ -227,6 +230,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Applied setup wizard CSS fixes to the respective WP versions. #25197
 * Fix - Fixed "account erasure request" URL in WordPress 5.3. #25208
 * Fix - Ensure all cache get removed on webhook deletion. #25164
+* Fix - Adjusted the checkout email validation regex to be more accurate. #25251
 * Template - Introduced `woocommerce_product_related_products_heading` filter. #25059
 * Template - Introduced `woocommerce_before_lost_password_confirmation_message` and `woocommerce_after_lost_password_confirmation_message` hooks. #25096
 * REST API - Fixed `date_created` and `date_created_gmt` for customers v2. #25181

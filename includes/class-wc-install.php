@@ -135,9 +135,15 @@ class WC_Install {
 			'wc_update_370_mro_std_currency',
 			'wc_update_370_db_version',
 		),
-		'3.10.0' => array(
-			'wc_update_3100_increase_size_of_column',
-			'wc_update_3100_db_version',
+		'3.9.0' => array(
+			'wc_update_390_move_maxmind_database',
+			'wc_update_390_change_geolocation_database_update_cron',
+			'wc_update_390_db_version',
+		),
+		'4.0.0' => array(
+			'wc_update_product_lookup_tables',
+      'wc_update_400_increase_size_of_column',
+			'wc_update_400_db_version',
 		),
 	);
 
@@ -421,9 +427,13 @@ class WC_Install {
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
-		$schedules['monthly'] = array(
+		$schedules['monthly']     = array(
 			'interval' => 2635200,
 			'display'  => __( 'Monthly', 'woocommerce' ),
+		);
+		$schedules['fifteendays'] = array(
+			'interval' => 1296000,
+			'display'  => __( 'Every 15 Days', 'woocommerce' ),
 		);
 		return $schedules;
 	}
@@ -453,11 +463,8 @@ class WC_Install {
 		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
-		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
-
-		// Trigger GeoLite2 database download after 1 minute.
-		wp_schedule_single_event( time() + ( MINUTE_IN_SECONDS * 1 ), 'woocommerce_geoip_updater' );
 	}
 
 	/**
@@ -901,6 +908,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `rating_count` bigint(20) NULL default 0,
   `average_rating` decimal(3,2) NULL default 0.00,
   `total_sales` bigint(20) NULL default 0,
+  `tax_status` varchar(100) NULL default 'taxable',
+  `tax_class` varchar(100) NULL default '',
   PRIMARY KEY  (`product_id`),
   KEY `virtual` (`virtual`),
   KEY `downloadable` (`downloadable`),
@@ -974,7 +983,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 

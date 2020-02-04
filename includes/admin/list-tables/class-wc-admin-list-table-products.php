@@ -124,11 +124,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['is_in_stock'] = __( 'Stock', 'woocommerce' );
 		}
 
-		$show_columns['price']        = __( 'Price', 'woocommerce' );
-		$show_columns['product_cat']  = __( 'Categories', 'woocommerce' );
-		$show_columns['product_tag']  = __( 'Tags', 'woocommerce' );
-		$show_columns['featured']     = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$show_columns['date']         = __( 'Date', 'woocommerce' );
+		$show_columns['price']       = __( 'Price', 'woocommerce' );
+		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
+		$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
+		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$show_columns['date']        = __( 'Date', 'woocommerce' );
 
 		return array_merge( $show_columns, $columns );
 	}
@@ -479,12 +479,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		// Stock status filter.
-		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
 		}
 
 		// Shipping class taxonomy.
-		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$query_vars['tax_query'][] = array(
 				'taxonomy' => 'product_shipping_class',
 				'field'    => 'slug',
@@ -614,9 +614,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function filter_stock_status_post_clauses( $args ) {
 		global $wpdb;
-		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		return $args;
 	}

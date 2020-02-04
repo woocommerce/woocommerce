@@ -10,8 +10,8 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @package 	WooCommerce/Templates
+ * @see         https://docs.woocommerce.com/document/template-structure/
+ * @package     WooCommerce/Templates
  * @version     1.6.4
  */
 
@@ -26,6 +26,7 @@ global $post, $product;
 
 	<?php echo apply_filters( 'woocommerce_sale_flash', '<span class="onsale">' . esc_html__( 'Sale!', 'woocommerce' ) . '</span>', $post, $product ); ?>
 
-<?php endif;
+	<?php
+endif;
 
 /* Omit closing PHP tag at the end of PHP files to avoid "headers already sent" issues. */

@@ -205,7 +205,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 					);
 
 					if ( ! empty( $used_coupons ) && is_array( $used_coupons ) ) :
-					?>
+						?>
 						<select id="coupon_codes" name="coupon_codes" class="wc-enhanced-select" data-placeholder="<?php esc_attr_e( 'Choose coupons&hellip;', 'woocommerce' ); ?>" style="width:100%;">
 							<option value=""><?php esc_html_e( 'All coupons', 'woocommerce' ); ?></option>
 							<?php

@@ -874,7 +874,8 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_textarea_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses( trim( stripslashes( $value ) ),
+		return wp_kses(
+			trim( stripslashes( $value ) ),
 			array_merge(
 				array(
 					'iframe' => array(

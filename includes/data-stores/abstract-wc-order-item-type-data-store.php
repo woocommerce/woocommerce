@@ -44,7 +44,8 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		global $wpdb;
 
 		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_order_items', array(
+			$wpdb->prefix . 'woocommerce_order_items',
+			array(
 				'order_item_name' => $item->get_name(),
 				'order_item_type' => $item->get_type(),
 				'order_id'        => $item->get_order_id(),
@@ -72,11 +73,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		if ( array_intersect( array( 'name', 'order_id' ), array_keys( $changes ) ) ) {
 			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_order_items', array(
+				$wpdb->prefix . 'woocommerce_order_items',
+				array(
 					'order_item_name' => $item->get_name(),
 					'order_item_type' => $item->get_type(),
 					'order_id'        => $item->get_order_id(),
-				), array( 'order_item_id' => $item->get_id() )
+				),
+				array( 'order_item_id' => $item->get_id() )
 			);
 		}
 

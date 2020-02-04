@@ -49,6 +49,13 @@ class WC_Admin_Setup_Wizard {
 	);
 
 	/**
+	 * The version of WordPress required to run the WooCommerce Admin plugin
+	 *
+	 * @var string
+	 */
+	private $wc_admin_plugin_minimum_wordpress_version = '5.3';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
@@ -126,12 +133,15 @@ class WC_Admin_Setup_Wizard {
 	/**
 	 * Should we show the WooCommerce Admin install option?
 	 * True only if the user can install plugins,
-	 * and up until the end date of the recommendation.
+	 * and is running the correct version of WordPress.
+	 *
+	 * @see WC_Admin_Setup_Wizard::$wc_admin_plugin_minimum_wordpress_version
 	 *
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin() {
-		return current_user_can( 'install_plugins' );
+		$wordpress_minimum_met = version_compare( get_bloginfo( 'version' ), $this->wc_admin_plugin_minimum_wordpress_version, '>=' );
+		return current_user_can( 'install_plugins' ) && $wordpress_minimum_met;
 	}
 
 	/**
@@ -140,7 +150,7 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin_onboarding() {
-		if ( ! current_user_can( 'install_plugins' ) ) {
+		if ( ! $this->should_show_wc_admin() ) {
 			return false;
 		}
 
@@ -148,7 +158,7 @@ class WC_Admin_Setup_Wizard {
 
 		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
 		if ( ! $ab_test ) {
-			$ab_test = 1 !== rand( 1, 10 ) ? 'a' : 'b'; // 10% of users. b gets the new experience.
+			$ab_test = 1 !== rand( 1, 2 ) ? 'a' : 'b'; // 50% of users. b gets the new experience.
 			update_option( 'woocommerce_setup_ab_wc_admin_onboarding', $ab_test );
 		}
 
@@ -252,39 +262,39 @@ class WC_Admin_Setup_Wizard {
 		}
 		$default_steps = array(
 			'new_onboarding' => array(
-				'name'       => '',
-				'view'       => array( $this, 'wc_setup_new_onboarding' ),
-				'handler'    => array( $this, 'wc_setup_new_onboarding_save' ),
+				'name'    => '',
+				'view'    => array( $this, 'wc_setup_new_onboarding' ),
+				'handler' => array( $this, 'wc_setup_new_onboarding_save' ),
 			),
 			'store_setup'    => array(
-				'name'       => __( 'Store setup', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_store_setup' ),
-				'handler'    => array( $this, 'wc_setup_store_setup_save' ),
+				'name'    => __( 'Store setup', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_store_setup' ),
+				'handler' => array( $this, 'wc_setup_store_setup_save' ),
 			),
 			'payment'        => array(
-				'name'       => __( 'Payment', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_payment' ),
-				'handler'    => array( $this, 'wc_setup_payment_save' ),
+				'name'    => __( 'Payment', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_payment' ),
+				'handler' => array( $this, 'wc_setup_payment_save' ),
 			),
 			'shipping'       => array(
-				'name'       => __( 'Shipping', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_shipping' ),
-				'handler'    => array( $this, 'wc_setup_shipping_save' ),
+				'name'    => __( 'Shipping', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_shipping' ),
+				'handler' => array( $this, 'wc_setup_shipping_save' ),
 			),
 			'recommended'    => array(
-				'name'       => __( 'Recommended', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_recommended' ),
-				'handler'    => array( $this, 'wc_setup_recommended_save' ),
+				'name'    => __( 'Recommended', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_recommended' ),
+				'handler' => array( $this, 'wc_setup_recommended_save' ),
 			),
 			'activate'       => array(
-				'name'       => __( 'Activate', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_activate' ),
-				'handler'    => array( $this, 'wc_setup_activate_save' ),
+				'name'    => __( 'Activate', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_activate' ),
+				'handler' => array( $this, 'wc_setup_activate_save' ),
 			),
 			'next_steps'     => array(
-				'name'       => __( 'Ready!', 'woocommerce' ),
-				'view'       => array( $this, 'wc_setup_ready' ),
-				'handler'    => '',
+				'name'    => __( 'Ready!', 'woocommerce' ),
+				'view'    => array( $this, 'wc_setup_ready' ),
+				'handler' => '',
 			),
 		);
 
@@ -477,11 +487,8 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_new_onboarding_save() {
 		check_admin_referer( 'wc-setup' );
 
-		update_option( 'wc_onboarding_opt_in', 'yes' );
-
 		if ( function_exists( 'wc_admin_url' ) ) {
 			$this->wc_setup_redirect_to_wc_admin_onboarding();
-			exit;
 		}
 
 		WC_Install::background_installer(
@@ -499,19 +506,23 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$this->wc_setup_redirect_to_wc_admin_onboarding();
-		exit;
 	}
 
 	/**
 	 * Redirects to the onboarding wizard in WooCommerce Admin.
 	 */
 	private function wc_setup_redirect_to_wc_admin_onboarding() {
+		if ( ! function_exists( 'wc_admin_url' ) ) {
+			return;
+		}
+
 		// Renables the wizard.
 		$profile_updates = array( 'completed' => false );
-		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
-		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
+		$onboarding_data = get_option( 'woocommerce_onboarding_profile', array() );
+		update_option( 'woocommerce_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
 
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		wp_safe_redirect( wc_admin_url( '&enable_onboarding=1' ) );
+		exit;
 	}
 
 	/**
@@ -546,7 +557,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="store-address-container">
 
 				<label for="store_country" class="location-prompt"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
-				<select id="store_country" name="store_country" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown">
+				<select id="store_country" name="store_country" required data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown">
 					<?php foreach ( WC()->countries->get_countries() as $code => $label ) : ?>
 						<option <?php selected( $code, $country ); ?> value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( $label ); ?></option>
 					<?php endforeach; ?>
@@ -665,7 +676,7 @@ class WC_Admin_Setup_Wizard {
 										/* translators: %1$s: usage tracking help link */
 										__( 'Learn more about how usage tracking works, and how you\'ll be helping in our <a href="%1$s" target="_blank">usage tracking documentation</a>.', 'woocommerce' ),
 										array(
-											'a'    => array(
+											'a' => array(
 												'href'   => array(),
 												'target' => array(),
 											),
@@ -1269,13 +1280,19 @@ class WC_Admin_Setup_Wizard {
 
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) { // WPCS: input var ok.
+
+				// Sanitize the cost field.
+				$domestic_cost = wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) );
+				$domestic_cost = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $domestic_cost );
+
+				// Build and make a REST request to save the shipping zone and method set.
 				$request = new WP_REST_Request( 'POST', "/wc/v3/shipping/zones/{$zone_id}/methods" );
 				$request->add_header( 'Content-Type', 'application/json' );
 				$request->set_body(
 					wp_json_encode(
 						array(
 							'method_id' => $domestic_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ),
+							'settings'  => $domestic_cost,
 						)
 					)
 				);
@@ -1287,13 +1304,19 @@ class WC_Admin_Setup_Wizard {
 		if ( $setup_intl ) {
 			// Save chosen shipping method settings (using REST controller for convenience).
 			if ( ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
+
+				// Sanitize the cost field.
+				$intl_cost = wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) );
+				$intl_cost = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $intl_cost );
+
+				// Build and make a REST request to save the shipping zone and method set.
 				$request = new WP_REST_Request( 'POST', '/wc/v3/shipping/zones/0/methods' );
 				$request->add_header( 'Content-Type', 'application/json' );
 				$request->set_body(
 					wp_json_encode(
 						array(
 							'method_id' => $intl_method,
-							'settings'  => wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) ),
+							'settings'  => $intl_cost,
 						)
 					)
 				);
@@ -1666,7 +1689,7 @@ class WC_Admin_Setup_Wizard {
 			if ( in_array( $klarna_or_square, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
 				$gateways[ $klarna_or_square ]['enabled']  = true;
 				$gateways[ $klarna_or_square ]['featured'] = false;
-				$offered_gateways                          += array(
+				$offered_gateways                         += array(
 					$klarna_or_square => $gateways[ $klarna_or_square ],
 				);
 			} else {
