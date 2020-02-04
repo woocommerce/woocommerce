@@ -140,6 +140,10 @@ class WC_Install {
 			'wc_update_390_change_geolocation_database_update_cron',
 			'wc_update_390_db_version',
 		),
+		'4.0.0' => array(
+			'wc_update_product_lookup_tables',
+			'wc_update_400_db_version',
+		),
 	);
 
 	/**
@@ -422,7 +426,7 @@ class WC_Install {
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
-		$schedules['monthly'] = array(
+		$schedules['monthly']     = array(
 			'interval' => 2635200,
 			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
@@ -903,6 +907,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `rating_count` bigint(20) NULL default 0,
   `average_rating` decimal(3,2) NULL default 0.00,
   `total_sales` bigint(20) NULL default 0,
+  `tax_status` varchar(100) NULL default 'taxable',
+  `tax_class` varchar(100) NULL default '',
   PRIMARY KEY  (`product_id`),
   KEY `virtual` (`virtual`),
   KEY `downloadable` (`downloadable`),
