@@ -154,7 +154,7 @@ if ( wc_tax_enabled() ) {
 		<?php?>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Discounts:', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Coupon(s):', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">-
 					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
