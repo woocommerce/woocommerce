@@ -6,6 +6,8 @@
  * @version 3.4.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -34,7 +36,6 @@ class WC_Admin_Notices {
 		'regenerating_thumbnails'      => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table'    => 'regenerating_lookup_table_notice',
 		'no_secure_connection'         => 'secure_connection_notice',
-		'wc_admin'                     => 'wc_admin_feature_plugin_notice',
 		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
 	);
@@ -85,7 +86,6 @@ class WC_Admin_Notices {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
-		self::add_wc_admin_feature_plugin_notice();
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
@@ -166,7 +166,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
+		wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), Constants::get_constant( 'WC_VERSION' ) );
 
 		// Add RTL support.
 		wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );
@@ -345,34 +345,6 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
-	}
-
-
-	/**
-	 * If on WordPress 5.0 or greater, inform users of WooCommerce Admin feature plugin.
-	 *
-	 * @since 3.6.4
-	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
-	 */
-	public static function add_wc_admin_feature_plugin_notice() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) {
-			self::add_notice( 'wc_admin' );
-		}
-	}
-
-	/**
-	 * Notice to try WooCommerce Admin
-	 *
-	 * @since 3.6.4
-	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
-	 */
-	public static function wc_admin_feature_plugin_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_wc_admin_notice', true ) || class_exists( 'Automattic\WooCommerce\Admin\FeaturePlugin' ) ) {
-			self::remove_notice( 'wc_admin' );
-			return;
-		}
-
-		include dirname( __FILE__ ) . '/views/html-notice-wc-admin.php';
 	}
 
 	/**

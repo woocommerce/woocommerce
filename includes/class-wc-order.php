@@ -2059,4 +2059,15 @@ class WC_Order extends WC_Abstract_Order {
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
 	}
+
+	/**
+	 * Check if order has been created via admin, checkout, or in another way.
+	 *
+	 * @since 4.0.0
+	 * @param string $modus Way of creating the order to test for.
+	 * @return bool
+	 */
+	public function is_created_via( $modus ) {
+		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
+	}
 }

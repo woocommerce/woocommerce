@@ -5,6 +5,8 @@
  * @package WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -644,7 +646,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual' ) ) ) {
+		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -823,7 +825,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$new_type = $product->get_type();
 
 		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {
@@ -2033,6 +2035,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
 				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
+				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
 		}
 		return array();
