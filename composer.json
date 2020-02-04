@@ -75,7 +75,9 @@
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
-      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+      "makepot-audit": "Generate i18n/langauges/woocommerce.pot file and run audit",
+      "makepot": "Generate i18n/langauges/woocommerce.pot file"
     }
   }
 }
