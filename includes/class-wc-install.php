@@ -142,6 +142,7 @@ class WC_Install {
 		),
 		'4.0.0' => array(
 			'wc_update_product_lookup_tables',
+			'wc_update_400_increase_size_of_column',
 			'wc_update_400_db_version',
 		),
 	);
@@ -899,8 +900,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `sku` varchar(100) NULL default '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
-  `min_price` decimal(10,2) NULL default NULL,
-  `max_price` decimal(10,2) NULL default NULL,
+  `min_price` decimal(19,4) NULL default NULL,
+  `max_price` decimal(19,4) NULL default NULL,
   `onsale` tinyint(1) NULL default 0,
   `stock_quantity` double NULL default NULL,
   `stock_status` varchar(100) NULL default 'instock',
