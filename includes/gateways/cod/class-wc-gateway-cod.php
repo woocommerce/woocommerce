@@ -5,6 +5,8 @@
  * @package WooCommerce\Gateways
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -218,29 +220,19 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	private function is_accessing_settings() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$is_admin = is_admin();
-		if ( $is_admin && ( ! isset( $_REQUEST['page'] ) || 'wc-settings' !== $_REQUEST['page'] ) ) {
-			$is_admin = false;
-		}
-		if ( $is_admin && ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) ) {
-			$is_admin = false;
-		}
-		if ( $is_admin && ( ! isset( $_REQUEST['section'] ) || 'cod' !== $_REQUEST['section'] ) ) {
-			$is_admin = false;
+		$screen = get_current_screen();
+		if ( $screen && $screen->in_admin() && 'woocommerce_page_wc-settings' === $screen->id ) {
+			return true;
 		}
 
-		$is_rest = ( defined( 'REST_REQUEST' ) && true === REST_REQUEST );
-		if ( $is_rest ) {
+		if ( Constants::is_true( 'REST_REQUEST' ) ) {
 			global $wp;
-			if ( ! isset( $wp->query_vars['rest_route'] ) || false === strpos( $wp->query_vars['rest_route'], '/payment_gateways' ) ) {
-				$is_rest = false;
+			if ( isset( $wp->query_vars['rest_route'] ) && false !== strpos( $wp->query_vars['rest_route'], '/payment_gateways' ) ) {
+				return true;
 			}
 		}
 
-		// phpcs:enable
-
-		return $is_admin || $is_rest;
+		return false;
 	}
 
 	/**
@@ -354,7 +346,6 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	/**
 	 * Add content to the WC emails.
 	 *
-	 * @access public
 	 * @param WC_Order $order Order object.
 	 * @param bool     $sent_to_admin  Sent to admin.
 	 * @param bool     $plain_text Email format: plain text or HTML.
