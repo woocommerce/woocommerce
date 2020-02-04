@@ -452,9 +452,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version = Constants::get_constant( 'WC_VERSION' );
 
-		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), Constants::get_constant( 'WC_VERSION' ), true );
+		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
 	}
 
 	/**

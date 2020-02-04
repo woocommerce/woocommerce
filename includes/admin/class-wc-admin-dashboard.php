@@ -324,11 +324,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Network orders widget.
 		 */
 		public function network_orders() {
-			$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
 
-			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), Constants::get_constant( 'WC_VERSION' ) );
+			wp_enqueue_style( 'wc-network-orders', WC()->plugin_url() . '/assets/css/network-order-widget.css', array(), $version );
 
-			wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), Constants::get_constant( 'WC_VERSION' ), true );
+			wp_enqueue_script( 'wc-network-orders', WC()->plugin_url() . '/assets/js/admin/network-orders' . $suffix . '.js', array( 'jquery', 'underscore' ), $version, true );
 
 			$user     = wp_get_current_user();
 			$blogs    = get_blogs_of_user( $user->ID );

@@ -53,27 +53,29 @@ class WC_Frontend_Scripts {
 	 * @return array
 	 */
 	public static function get_styles() {
+		$version = Constants::get_constant( 'WC_VERSION' );
+
 		return apply_filters(
 			'woocommerce_enqueue_styles',
 			array(
 				'woocommerce-layout'      => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
 					'deps'    => '',
-					'version' => Constants::get_constant( 'WC_VERSION' ),
+					'version' => $version,
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
 				'woocommerce-smallscreen' => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
 					'deps'    => 'woocommerce-layout',
-					'version' => Constants::get_constant( 'WC_VERSION' ),
+					'version' => $version,
 					'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
 					'has_rtl' => true,
 				),
 				'woocommerce-general'     => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
 					'deps'    => '',
-					'version' => Constants::get_constant( 'WC_VERSION' ),
+					'version' => $version,
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
@@ -165,7 +167,9 @@ class WC_Frontend_Scripts {
 	 * Register all WC scripts.
 	 */
 	private static function register_scripts() {
-		$suffix           = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version = Constants::get_constant( 'WC_VERSION' );
+
 		$register_scripts = array(
 			'flexslider'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
@@ -210,7 +214,7 @@ class WC_Frontend_Scripts {
 			'prettyPhoto-init'           => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'prettyPhoto' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'select2'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
@@ -225,72 +229,72 @@ class WC_Frontend_Scripts {
 			'wc-address-i18n'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-country-select' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-add-payment-method'      => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-payment-method' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-cart'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-cart-fragments'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart-fragments' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'js-cookie' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-checkout'                => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/checkout' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-country-select'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-credit-card-form'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/credit-card-form' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'jquery-payment' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-add-to-cart'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'jquery-blockui' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-add-to-cart-variation'   => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wp-util', 'jquery-blockui' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-geolocation'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/geolocation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-lost-password'           => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/lost-password' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-password-strength-meter' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/password-strength-meter' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'password-strength-meter' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'wc-single-product'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/single-product' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'woocommerce'                => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/woocommerce' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'jquery-blockui', 'js-cookie' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 			),
 			'zoom'                       => array(
 				'src'     => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
@@ -307,29 +311,31 @@ class WC_Frontend_Scripts {
 	 * Register all WC sty;es.
 	 */
 	private static function register_styles() {
+		$version = Constants::get_constant( 'WC_VERSION' );
+
 		$register_styles = array(
 			'photoswipe'                  => array(
 				'src'     => self::get_asset_url( 'assets/css/photoswipe/photoswipe.min.css' ),
 				'deps'    => array(),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 				'has_rtl' => false,
 			),
 			'photoswipe-default-skin'     => array(
 				'src'     => self::get_asset_url( 'assets/css/photoswipe/default-skin/default-skin.min.css' ),
 				'deps'    => array( 'photoswipe' ),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 				'has_rtl' => false,
 			),
 			'select2'                     => array(
 				'src'     => self::get_asset_url( 'assets/css/select2.css' ),
 				'deps'    => array(),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 				'has_rtl' => false,
 			),
 			'woocommerce_prettyPhoto_css' => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/css/prettyPhoto.css' ),
 				'deps'    => array(),
-				'version' => Constants::get_constant( 'WC_VERSION' ),
+				'version' => $version,
 				'has_rtl' => true,
 			),
 		);

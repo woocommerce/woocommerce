@@ -252,12 +252,14 @@ function woocommerce_product_loop() {
  * @return string
  */
 function wc_generator_tag( $gen, $type ) {
+	$version = Constants::get_constant( 'WC_VERSION' );
+
 	switch ( $type ) {
 		case 'html':
-			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( Constants::get_constant( 'WC_VERSION' ) ) . '">';
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $version ) . '">';
 			break;
 		case 'xhtml':
-			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( Constants::get_constant( 'WC_VERSION' ) ) . '" />';
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $version ) . '" />';
 			break;
 	}
 	return $gen;
