@@ -792,6 +792,26 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: calculate_totals negative fees should not make order total negative.
+	 *
+	 * See: https://github.com/woocommerce/woocommerce/commit/804feb93333a8f00d0f93a163c6de58204f31f14
+	 */
+	public function test_calculate_totals_negative_fees_should_not_make_order_total_negative() {
+		$order = WC_Helper_Order::create_order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'total' => -60,
+			)
+		);
+		$order->add_item( $fee );
+
+		$order->calculate_totals();
+		$this->assertEquals( 0, $order->get_total() );
+	}
+
+	/**
 	 * Test: has_status
 	 */
 	public function test_has_status() {
