@@ -17,7 +17,8 @@
   },
   "require-dev": {
     "phpunit/phpunit": "7.5.20",
-    "woocommerce/woocommerce-sniffs": "0.0.9"
+    "woocommerce/woocommerce-sniffs": "0.0.9",
+    "wp-cli/i18n-command": "^2.2"
   },
   "config": {
     "platform": {
@@ -57,6 +58,12 @@
     ],
     "phpcbf": [
       "phpcbf -p"
+    ],
+    "makepot-audit": [
+      "wp i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\""
+    ],
+    "makepot": [
+      "@makepot-audit --skip-audit"
     ]
   },
   "extra": {
