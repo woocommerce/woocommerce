@@ -1942,4 +1942,27 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
 	}
+
+	/**
+	 * Basic test for WC_Order::get_total_fees().
+	 */
+	public function test_get_total_fees_should_return_total_fees() {
+		$order      = WC_Helper_Order::create_order();
+		$fee_totals = array( 25, 50.50, 34.56 );
+
+		foreach ( $fee_totals as $total ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_props(
+				array(
+					'name'       => 'Some Fee',
+					'tax_status' => 'taxable',
+					'total'      => $total,
+					'tax_class'  => '',
+				)
+			);
+			$order->add_item( $fee );
+		}
+
+		$this->assertEquals( 110.06, $order->get_total_fees() );
+	}
 }
