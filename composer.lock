@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef9529dad0c827d0d2e737d1f001235d",
+    "content-hash": "db5596d8455abc6213cd72c4d988cbf4",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -281,17 +281,11 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "dev-try/downgrade-autoloader",
+            "version": "v0.25.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "26ee4d87d772d250a760453f0b422e300fb3abdc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/26ee4d87d772d250a760453f0b422e300fb3abdc",
-                "reference": "26ee4d87d772d250a760453f0b422e300fb3abdc",
-                "shasum": ""
+                "reference": "3543ad7073522da5bc0782c0728db6c956695fc3"
             },
             "require": {
                 "automattic/jetpack-autoloader": "^1.2.0",
@@ -299,7 +293,7 @@
                 "php": ">=5.6|>=7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "7.5.18",
+                "phpunit/phpunit": "7.5.20",
                 "woocommerce/woocommerce-sniffs": "0.0.9"
             },
             "type": "wordpress-plugin",
@@ -318,13 +312,23 @@
                     "Automattic\\WooCommerce\\Admin\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "phpcs": [
+                    "phpcs -s -p"
+                ],
+                "phpcbf": [
+                    "phpcbf -p"
+                ]
+            },
             "license": [
                 "GPL-3.0-or-later"
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-01-20T19:08:51+00:00"
+            "time": "2020-02-04T23:56:22+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2246,18 +2250,9 @@
             "time": "2019-11-11T12:34:03+00:00"
         }
     ],
-    "aliases": [
-        {
-            "alias": "0.24.0",
-            "alias_normalized": "0.24.0.0",
-            "version": "dev-try/downgrade-autoloader",
-            "package": "woocommerce/woocommerce-admin"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "woocommerce/woocommerce-admin": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
