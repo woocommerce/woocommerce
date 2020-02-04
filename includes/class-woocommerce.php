@@ -22,7 +22,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.9.0';
+	public $version = '4.0.0-dev';
 
 	/**
 	 * The single instance of the class.
@@ -448,9 +448,9 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
 		/**
-		 * Libraries
+		 * Libraries and packages.
 		 */
-		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
+		include_once WC_ABSPATH . 'packages/action-scheduler/action-scheduler.php';
 
 		if ( Constants::is_true( 'WP_CLI' ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
