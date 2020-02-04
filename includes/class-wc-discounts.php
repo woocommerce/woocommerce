@@ -159,7 +159,7 @@ class WC_Discounts {
 	 * @since  3.2.0
 	 * @param  string $key name of discount row to return.
 	 * @param  bool   $in_cents Should the totals be returned in cents, or without precision.
-	 * @return array
+	 * @return float
 	 */
 	public function get_discount( $key, $in_cents = false ) {
 		$item_discount_totals = $this->get_discounts_by_item( $in_cents );
