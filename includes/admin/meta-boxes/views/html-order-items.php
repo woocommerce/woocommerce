@@ -143,7 +143,6 @@ if ( wc_tax_enabled() ) {
 		</div>
 	<?php endif; ?>
 	<table class="wc-order-totals">
-		<?php?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Items Subtotal:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
@@ -151,7 +150,6 @@ if ( wc_tax_enabled() ) {
 					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
 				</td>
 			</tr>
-		<?php?>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Coupon(s):', 'woocommerce' ); ?></td>
@@ -224,36 +222,34 @@ if ( wc_tax_enabled() ) {
 		</table>
 
 	<div class="clear"></div>
-	
+
 	<?php endif; ?>
 
 	<?php if ( $order->get_total_refunded() ) : ?>
-	
-	<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
+		<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
 			<tr>
 				<td class="label refunded-total"><?php esc_html_e( 'Refunded', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?></td>
 			</tr>
 
-		<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
+			<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
 
-		<tr>
-			<td class="label"><?php esc_html_e( 'Net Total', 'woocommerce' ); ?>:</td>
-			<td width="1%"></td>
-			<td class="total">
-			<?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
-			</td>
-		</tr>
+			<tr>
+				<td class="label"><?php esc_html_e( 'Net Total', 'woocommerce' ); ?>:</td>
+				<td width="1%"></td>
+				<td class="total">
+				<?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?>
+				</td>
+			</tr>
+
+		</table>
 	<?php endif; ?>
-	
-	</table>
 
 	<div class="clear"></div>
 
 	<table class="wc-order-totals">
 		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_id() ); ?>
-
 	</table>
 
 	<div class="clear"></div>
