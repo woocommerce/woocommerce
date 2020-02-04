@@ -2047,7 +2047,7 @@ function wc_update_370_db_version() {
 	WC_Install::update_db_version( '3.7.0' );
 }
 
-/*
+/**
  * We've moved the MaxMind database to a new location, as per the TOS' requirement that the database not
  * be publicly accessible.
  */
