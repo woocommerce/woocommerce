@@ -158,7 +158,7 @@ class WC_Admin_Setup_Wizard {
 
 		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
 		if ( ! $ab_test ) {
-			$ab_test = 1 !== rand( 1, 10 ) ? 'a' : 'b'; // 10% of users. b gets the new experience.
+			$ab_test = 1 !== rand( 1, 2 ) ? 'a' : 'b'; // 50% of users. b gets the new experience.
 			update_option( 'woocommerce_setup_ab_wc_admin_onboarding', $ab_test );
 		}
 
@@ -487,11 +487,8 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_new_onboarding_save() {
 		check_admin_referer( 'wc-setup' );
 
-		update_option( 'wc_onboarding_opt_in', 'yes' );
-
 		if ( function_exists( 'wc_admin_url' ) ) {
 			$this->wc_setup_redirect_to_wc_admin_onboarding();
-			exit;
 		}
 
 		WC_Install::background_installer(
@@ -509,19 +506,23 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		$this->wc_setup_redirect_to_wc_admin_onboarding();
-		exit;
 	}
 
 	/**
 	 * Redirects to the onboarding wizard in WooCommerce Admin.
 	 */
 	private function wc_setup_redirect_to_wc_admin_onboarding() {
+		if ( ! function_exists( 'wc_admin_url' ) ) {
+			return;
+		}
+
 		// Renables the wizard.
 		$profile_updates = array( 'completed' => false );
-		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
-		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
+		$onboarding_data = get_option( 'woocommerce_onboarding_profile', array() );
+		update_option( 'woocommerce_onboarding_profile', array_merge( $onboarding_data, $profile_updates ) );
 
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		wp_safe_redirect( wc_admin_url( '&enable_onboarding=1' ) );
+		exit;
 	}
 
 	/**
@@ -556,7 +557,7 @@ class WC_Admin_Setup_Wizard {
 			<div class="store-address-container">
 
 				<label for="store_country" class="location-prompt"><?php esc_html_e( 'Where is your store based?', 'woocommerce' ); ?></label>
-				<select id="store_country" name="store_country" required data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown">
+				<select id="store_country" name="store_country" required data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="location-input wc-enhanced-select dropdown">
 					<?php foreach ( WC()->countries->get_countries() as $code => $label ) : ?>
 						<option <?php selected( $code, $country ); ?> value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( $label ); ?></option>
 					<?php endforeach; ?>

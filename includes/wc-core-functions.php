@@ -1157,36 +1157,6 @@ function wc_get_user_agent() {
 	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : ''; // @codingStandardsIgnoreLine
 }
 
-// This function can be removed when WP 3.9.2 or greater is required.
-if ( ! function_exists( 'hash_equals' ) ) :
-	/**
-	 * Compare two strings in constant time.
-	 *
-	 * This function was added in PHP 5.6.
-	 * It can leak the length of a string.
-	 *
-	 * @since 3.9.2
-	 *
-	 * @param string $a Expected string.
-	 * @param string $b Actual string.
-	 * @return bool Whether strings are equal.
-	 */
-	function hash_equals( $a, $b ) {
-		$a_length = strlen( $a );
-		if ( strlen( $b ) !== $a_length ) {
-			return false;
-		}
-		$result = 0;
-
-		// Do not attempt to "optimize" this.
-		for ( $i = 0; $i < $a_length; $i++ ) {
-			$result |= ord( $a[ $i ] ) ^ ord( $b[ $i ] );
-		}
-
-		return 0 === $result;
-	}
-endif;
-
 /**
  * Generate a rand hash.
  *
