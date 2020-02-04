@@ -185,6 +185,22 @@ jQuery( function( $ ) {
 		},
 		init_ship_to_different_address: function() {
 			var $checkbox = $( '#ship-to-different-address input' );
+
+			if ( ! $checkbox.prop( 'checked' ) ) {
+				var $billing = $( 'div.woocommerce-billing-fields' );
+
+				// Find shipping field values that diverge from billing.
+				var $differentFields = $( 'div.shipping_address' ).find( 'input, select' ).filter( function() {
+					$( this ).attr( 'id' ).replace( 'shipping', 'billing' );
+					var id = $( this ).attr( 'id' ).replace( 'shipping', 'billing' );
+					return $( this ).val() !== $billing.find( '#' + id ).val();
+				} );
+
+				if ( $differentFields.length > 0 ) {
+					$checkbox.prop( 'checked', true );
+				}
+			}
+
 			$( 'div.shipping_address' ).toggle( $checkbox.prop( 'checked' ) );
 		},
 		ship_to_different_address: function() {
