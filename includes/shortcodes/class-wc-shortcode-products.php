@@ -593,7 +593,7 @@ class WC_Shortcode_Products {
 		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
 		WC()->query->remove_ordering_args();
 
-		return $results;
+		return apply_filters( 'woocommerce_shortcode_products_query_results', $results );
 	}
 
 	/**
