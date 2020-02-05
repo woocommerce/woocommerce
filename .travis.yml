@@ -38,7 +38,6 @@ matrix:
   - name: "E2E tests"
     php: 7.4
     script:
-      - npm install
       - npm run build
       - docker-compose up --build -d
       - bash tests/bin/run-e2e-CI.sh
@@ -63,6 +62,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - npm install
   - composer install --no-dev
   - |
     # Install WP Test suite, install PHPUnit globally:
