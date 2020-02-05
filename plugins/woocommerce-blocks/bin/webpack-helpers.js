@@ -136,9 +136,9 @@ const experimentalMainEntry = {
 };
 
 const mainEntry =
-	process.env.WOOCOMMERCE_BLOCKS_PHASE === 'experimental'
-		? { ...stableMainEntry, ...experimentalMainEntry }
-		: stableMainEntry;
+	process.env.WOOCOMMERCE_BLOCKS_PHASE === 'stable'
+		? stableMainEntry
+		: { ...stableMainEntry, ...experimentalMainEntry };
 
 const stableFrontEndEntry = {
 	reviews: './assets/js/blocks/reviews/frontend.js',
@@ -154,9 +154,9 @@ const experimentalFrontEndEntry = {
 };
 
 const frontEndEntry =
-	process.env.WOOCOMMERCE_BLOCKS_PHASE === 'experimental'
-		? { ...stableFrontEndEntry, ...experimentalFrontEndEntry }
-		: stableFrontEndEntry;
+	process.env.WOOCOMMERCE_BLOCKS_PHASE === 'stable'
+		? stableFrontEndEntry
+		: { ...stableFrontEndEntry, ...experimentalFrontEndEntry };
 
 const getEntryConfig = ( main = true, exclude = [] ) => {
 	const entryConfig = main ? mainEntry : frontEndEntry;
