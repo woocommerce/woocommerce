@@ -10,7 +10,7 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
-    "build": "grunt",
+    "build": "grunt && npm run makepot",
     "build-watch": "grunt watch",
     "lint:js": "eslint assets/js --ext=js",
     "test:e2e": "./tests/bin/e2e-test-integration.js",

@@ -303,8 +303,7 @@ module.exports = function( grunt ) {
 	// Register tasks.
 	grunt.registerTask( 'default', [
 		'js',
-		'css',
-		'i18n'
+		'css'
 	]);
 
 	grunt.registerTask( 'js', [
