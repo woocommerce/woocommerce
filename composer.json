@@ -9,10 +9,11 @@
   "require": {
     "php": ">=5.6|>=7.0",
     "automattic/jetpack-autoloader": "^1.2.0",
+    "automattic/jetpack-constants": "^1.1",
     "composer/installers": "1.7.0",
     "maxmind-db/reader": "1.6.0",
     "pelago/emogrifier": "^3.1",
-    "woocommerce/action-scheduler": "2.2.5",
+    "woocommerce/action-scheduler": "3.0.1",
     "woocommerce/woocommerce-blocks": "2.5.11",
     "woocommerce/woocommerce-rest-api": "1.0.7"
   },

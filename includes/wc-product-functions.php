@@ -8,6 +8,8 @@
  * @version 3.0.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -1334,7 +1336,7 @@ function wc_update_product_lookup_tables_is_running() {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
-	$is_cli = defined( 'WP_CLI' ) && WP_CLI;
+	$is_cli = Constants::is_true( 'WP_CLI' );
 
 	if ( ! $is_cli ) {
 		WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );

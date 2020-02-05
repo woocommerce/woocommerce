@@ -6,6 +6,8 @@
  * @version     3.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -192,7 +194,7 @@ class WC_Plugin_Updates {
 		}
 
 		if ( 'major' === $release ) {
-			$current_version_parts = explode( '.', WC_VERSION );
+			$current_version_parts = explode( '.', Constants::get_constant( 'WC_VERSION' ) );
 
 			// If user has already moved to the major version, we don't need to flag up anything.
 			if ( version_compare( $current_version_parts[0] . '.' . $current_version_parts[1], $new_version_parts[0] . '.0', '>=' ) ) {
