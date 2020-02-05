@@ -19,7 +19,8 @@
   },
   "require-dev": {
     "phpunit/phpunit": "7.5.20",
-    "woocommerce/woocommerce-sniffs": "0.0.9"
+    "woocommerce/woocommerce-sniffs": "0.0.9",
+    "wp-cli/i18n-command": "^2.2"
   },
   "config": {
     "platform": {
@@ -59,6 +60,12 @@
     ],
     "phpcbf": [
       "phpcbf -p"
+    ],
+    "makepot-audit": [
+      "wp i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\""
+    ],
+    "makepot": [
+      "@makepot-audit --skip-audit"
     ]
   },
   "extra": {
@@ -70,7 +77,9 @@
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
-      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+      "makepot-audit": "Generate i18n/langauges/woocommerce.pot file and run audit",
+      "makepot": "Generate i18n/langauges/woocommerce.pot file"
     }
   }
 }
