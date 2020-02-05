@@ -5,6 +5,8 @@
  * @package WooCommerce\Tracks
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -71,7 +73,7 @@ class WC_Products_Tracking {
 		// Only track category creation from the edit product screen or the
 		// category management screen (which both occur via AJAX).
 		if (
-			! defined( 'DOING_AJAX' ) ||
+			! Constants::is_defined( 'DOING_AJAX' ) ||
 			empty( $_POST['action'] ) ||
 			(
 				// Product Categories screen.

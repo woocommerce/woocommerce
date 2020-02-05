@@ -5,6 +5,8 @@
  * @package WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -823,7 +825,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$new_type = $product->get_type();
 
 		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
 		if ( $old_type !== $new_type ) {

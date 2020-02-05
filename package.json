@@ -16,6 +16,7 @@
     "test:e2e": "./tests/bin/e2e-test-integration.js",
     "test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
     "makepot": "composer run-script makepot",
+    "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
@@ -61,7 +62,8 @@
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "puppeteer": "2.0.0",
     "stylelint": "12.0.1",
-    "stylelint-config-wordpress": "16.0.0"
+    "stylelint-config-wordpress": "16.0.0",
+    "wp-textdomain": "^1.0.1"
   },
   "engines": {
     "node": ">=10.15.0",

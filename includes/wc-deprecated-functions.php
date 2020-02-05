@@ -10,6 +10,8 @@
  * @version  3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -897,7 +899,7 @@ function woocommerce_compile_less_styles() {
  * @return string
  */
 function woocommerce_calc_shipping_backwards_compatibility( $value ) {
-	if ( defined( 'WC_UPDATING' ) ) {
+	if ( Constants::is_defined( 'WC_UPDATING' ) ) {
 		return $value;
 	}
 	return 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ? 'no' : 'yes';

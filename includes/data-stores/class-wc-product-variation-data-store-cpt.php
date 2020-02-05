@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -333,7 +335,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 */
 	protected function update_version_and_type( &$product ) {
 		wp_set_object_terms( $product->get_id(), '', 'product_type' );
-		update_post_meta( $product->get_id(), '_product_version', WC_VERSION );
+		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 	}
 
 	/**

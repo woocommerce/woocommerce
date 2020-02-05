@@ -6,6 +6,8 @@
  * @package WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -62,7 +64,7 @@ class WC_AJAX {
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 			header( 'X-Robots-Tag: noindex' );
 			status_header( 200 );
-		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 			headers_sent( $file, $line );
 			trigger_error( "wc_ajax_headers cannot set headers - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 		}
@@ -744,7 +746,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		echo esc_html( $data_store->create_all_product_variations( $product, WC_MAX_LINKED_VARIATIONS ) );
+		echo esc_html( $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) ) );
 
 		$data_store->sort_all_product_variations( $product->get_id() );
 		wp_die();
