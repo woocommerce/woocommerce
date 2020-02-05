@@ -209,25 +209,4 @@ class WC_Tests_Countries extends WC_Unit_Test_Case {
 		$countries = new WC_Countries();
 		$this->assertCount( 27, $countries->get_european_union_countries() );
 	}
-
-	/**
-	 * Test get_vat_countries.
-	 *
-	 * @return void
-	 */
-	public function test_get_vat_countries() {
-		$countries = new WC_Countries();
-		// All EU countries use VAT.
-		$eu_countries = $countries->get_european_union_countries();
-
-		// Additional countries using VAT.
-		$vat_countries = array(
-			'GB',
-			'IM',
-			'MC',
-			'NO',
-		);
-
-		$this->assertEquals( array_merge( $eu_countries, $vat_countries ), $countries->get_vat_countries() );
-	}
 }
