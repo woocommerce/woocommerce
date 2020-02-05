@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d2f5085db8a002bfb5349dca8dc82878",
+    "content-hash": "885227f1f2ba9f77f94c516b300d159d",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -256,28 +256,38 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "2.2.5",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "fd7c6b76a7af27d6403ffe39b0963dbd8ce50488"
+                "reference": "3847b7c97032ca92abed6c6f154e548437dc5803"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/fd7c6b76a7af27d6403ffe39b0963dbd8ce50488",
-                "reference": "fd7c6b76a7af27d6403ffe39b0963dbd8ce50488",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3847b7c97032ca92abed6c6f154e548437dc5803",
+                "reference": "3847b7c97032ca92abed6c6f154e548437dc5803",
                 "shasum": ""
             },
             "require-dev": {
-                "wp-cli/wp-cli": "1.5.1"
+                "phpunit/phpunit": "^5.6",
+                "woocommerce/woocommerce-sniffs": "0.0.8",
+                "wp-cli/wp-cli": "~1.5.1"
             },
             "type": "wordpress-plugin",
+            "extra": {
+                "scripts-description": {
+                    "test": "Run unit tests",
+                    "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                }
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "GPL-3.0"
+                "GPL-3.0-or-later"
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
-            "time": "2019-04-24T12:45:40+00:00"
+            "homepage": "https://actionscheduler.org/",
+            "time": "2020-01-14T01:30:08+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
