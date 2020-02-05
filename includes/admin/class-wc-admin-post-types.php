@@ -54,7 +54,7 @@ class WC_Admin_Post_Types {
 
 		// Uploads.
 		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
-		add_filter( 'wp_unique_filename', array( $this, 'wc_unique_filename' ), 10, 3 );
+		add_filter( 'wp_unique_filename', array( $this, 'update_filename' ), 10, 3 );
 		add_action( 'media_upload_downloadable_product', array( $this, 'media_upload_downloadable_product' ) );
 
 		// Hide template for CPT archive.
@@ -829,7 +829,7 @@ class WC_Admin_Post_Types {
 	 * @return string New filename with unique hash.
 	 * @since 3.10.0
 	 */
-	public function wc_unique_filename( $full_filename, $ext, $dir ) {
+	public function update_filename( $full_filename, $ext, $dir ) {
 		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) { // WPCS: CSRF ok, input var ok.
 			return $full_filename;
 		}

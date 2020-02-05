@@ -38,7 +38,7 @@ class WC_Admin_Notices {
 		'no_secure_connection'         => 'secure_connection_notice',
 		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
-		'wc_redirect_download_method'  => 'wc_redirect_download_method_notice',
+		'redirect_download_method'     => 'redirect_download_method_notice',
 	);
 
 	/**
@@ -433,9 +433,9 @@ class WC_Admin_Notices {
 	 */
 	public static function add_redirect_download_method_notice() {
 		if ( 'redirect' === get_option( 'woocommerce_file_download_method' ) ) {
-			self::add_notice( 'wc_redirect_download_method' );
+			self::add_notice( 'redirect_download_method' );
 		} else {
-			self::remove_notice( 'wc_redirect_download_method' );
+			self::remove_notice( 'redirect_download_method' );
 		}
 	}
 
@@ -461,9 +461,9 @@ class WC_Admin_Notices {
 	 *
 	 * @since 3.10.0
 	 */
-	public static function wc_redirect_download_method_notice() {
-		if ( apply_filters( 'woocommerce_hide_redirect_method_nag', get_user_meta( get_current_user_id(), 'dismissed_wc_redirect_download_method_notice', true ) ) ) {
-			self::remove_notice( 'wc_redirect_download_method' );
+	public static function redirect_download_method_notice() {
+		if ( apply_filters( 'woocommerce_hide_redirect_method_nag', get_user_meta( get_current_user_id(), 'dismissed_redirect_download_method_notice', true ) ) ) {
+			self::remove_notice( 'redirect_download_method' );
 			return;
 		}
 

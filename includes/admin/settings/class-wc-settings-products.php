@@ -234,7 +234,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'options'  => array(
 							'force'     => __( 'Force downloads', 'woocommerce' ),
 							'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
-							'redirect'  => __( 'Redirect only', 'woocommerce' ) . apply_filters( 'woocommerce_redirect_only_method_suffix', __( ' (Insecure)', 'woocommerce' ) ),
+							'redirect'  => apply_filters( 'woocommerce_redirect_only_method_name', __( 'Redirect only (Insecure)', 'woocommerce' ) ),
 						),
 						'autoload' => false,
 					),
