@@ -38,6 +38,7 @@ matrix:
   - name: "E2E tests"
     php: 7.4
     script:
+      - composer require wp-cli/i18n-command
       - npm run build
       - docker-compose up --build -d
       - bash tests/bin/run-e2e-CI.sh
