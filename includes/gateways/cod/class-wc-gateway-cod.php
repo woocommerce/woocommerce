@@ -221,7 +221,8 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	private function is_accessing_settings() {
 		$screen = get_current_screen();
-		if ( $screen && $screen->in_admin() && 'woocommerce_page_wc-settings' === $screen->id ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( $screen && $screen->in_admin() && 'woocommerce_page_wc-settings' === $screen->id && isset( $_REQUEST['tab'] ) && 'checkout' === $_REQUEST['tab'] ) {
 			return true;
 		}
 

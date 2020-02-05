@@ -37,6 +37,7 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 	 */
 	public function test_method_options_loaded_for_admin_page() {
 		set_current_screen( 'woocommerce_page_wc-settings' );
+		$_REQUEST['tab'] = 'checkout';
 
 		$gateway = new WC_Gateway_COD();
 
