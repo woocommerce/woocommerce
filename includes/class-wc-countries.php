@@ -391,7 +391,6 @@ class WC_Countries {
 		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $vat_countries ) );
 	}
 
-
 	/**
 	 * Gets the correct string for shipping - either 'to the' or 'to'.
 	 *
