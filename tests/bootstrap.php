@@ -30,10 +30,8 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function __construct() {
 
-		// phpcs:disable
-		ini_set( 'display_errors', 'on' );
-		error_reporting( E_ALL );
-		// phpcs:enable
+		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
+		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
 
 		// Ensure server variable is set for WP email functions.
 		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
@@ -95,7 +93,7 @@ class WC_Unit_Tests_Bootstrap {
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
 		} else {
-			$GLOBALS['wp_roles'] = null; // WPCS: override ok.
+			$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			wp_roles();
 		}
 
