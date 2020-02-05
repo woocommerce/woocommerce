@@ -130,7 +130,7 @@ class Header extends Component {
 						) : (
 							section
 						);
-						return <span key={ i }>{ sectionPiece }</span>;
+						return <span key={ i }>{ decodeEntities( sectionPiece ) }</span>;
 					} ) }
 				</h1>
 				{ window.wcAdminFeatures[ 'activity-panels' ] && <ActivityPanel /> }
