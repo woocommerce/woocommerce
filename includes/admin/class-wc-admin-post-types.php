@@ -6,6 +6,8 @@
  * @version  3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -294,7 +296,7 @@ class WC_Admin_Post_Types {
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
 		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		if ( Constants::is_true( 'DOING_AUTOSAVE' ) ) {
 			return $post_id;
 		}
 

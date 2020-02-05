@@ -183,10 +183,13 @@ class WC_Payment_Gateways {
 		}
 
 		$current_gateway = false;
-		$current         = WC()->session->get( 'chosen_payment_method' );
 
-		if ( $current && isset( $gateways[ $current ] ) ) {
-			$current_gateway = $gateways[ $current ];
+		if ( WC()->session ) {
+			$current = WC()->session->get( 'chosen_payment_method' );
+
+			if ( $current && isset( $gateways[ $current ] ) ) {
+				$current_gateway = $gateways[ $current ];
+			}
 		}
 
 		if ( ! $current_gateway ) {

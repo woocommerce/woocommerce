@@ -8,6 +8,8 @@
  * @version 3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -157,7 +159,7 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, WC_VERSION ) ) );
+	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, Constants::get_constant( 'WC_VERSION' ) ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -205,7 +207,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, WC_VERSION ) ) );
+	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, Constants::get_constant( 'WC_VERSION' ) ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -887,7 +889,7 @@ function wc_print_js() {
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
 	if ( ! headers_sent() ) {
 		setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'woocommerce_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
-	} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+	} elseif ( Constants::is_true( 'WP_DEBUG' ) ) {
 		headers_sent( $file, $line );
 		trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 	}
@@ -901,7 +903,11 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
  * @return string the URL.
  */
 function get_woocommerce_api_url( $path ) {
-	$version = defined( 'WC_API_REQUEST_VERSION' ) ? WC_API_REQUEST_VERSION : substr( WC_API::VERSION, 0, 1 );
+	if ( Constants::is_defined( 'WC_API_REQUEST_VERSION' ) ) {
+		$version = Constants::get_constant( 'WC_API_REQUEST_VERSION' );
+	} else {
+		$version = substr( WC_API::VERSION, 0, 1 );
+	}
 
 	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
 
@@ -1118,7 +1124,7 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
-	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'geolocation' );
+	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'base' );
 	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', '' );
 	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
@@ -1156,36 +1162,6 @@ function wc_get_customer_default_location() {
 function wc_get_user_agent() {
 	return isset( $_SERVER['HTTP_USER_AGENT'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : ''; // @codingStandardsIgnoreLine
 }
-
-// This function can be removed when WP 3.9.2 or greater is required.
-if ( ! function_exists( 'hash_equals' ) ) :
-	/**
-	 * Compare two strings in constant time.
-	 *
-	 * This function was added in PHP 5.6.
-	 * It can leak the length of a string.
-	 *
-	 * @since 3.9.2
-	 *
-	 * @param string $a Expected string.
-	 * @param string $b Actual string.
-	 * @return bool Whether strings are equal.
-	 */
-	function hash_equals( $a, $b ) {
-		$a_length = strlen( $a );
-		if ( strlen( $b ) !== $a_length ) {
-			return false;
-		}
-		$result = 0;
-
-		// Do not attempt to "optimize" this.
-		for ( $i = 0; $i < $a_length; $i++ ) {
-			$result |= ord( $a[ $i ] ) ^ ord( $b[ $i ] );
-		}
-
-		return 0 === $result;
-	}
-endif;
 
 /**
  * Generate a rand hash.
@@ -1292,7 +1268,7 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
-	if ( WC_USE_TRANSACTIONS || $force ) {
+	if ( Constants::is_true( 'WC_USE_TRANSACTIONS' ) || $force ) {
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );
@@ -1847,14 +1823,12 @@ function wc_print_r( $expression, $return = false ) {
  * @return array
  */
 function wc_register_default_log_handler( $handlers ) {
-	if ( defined( 'WC_LOG_HANDLER' ) && class_exists( WC_LOG_HANDLER ) ) {
-		$handler_class   = WC_LOG_HANDLER;
-		$default_handler = new $handler_class();
-	} else {
-		$default_handler = new WC_Log_Handler_File();
+	$handler_class = Constants::get_constant( 'WC_LOG_HANDLER' );
+	if ( ! class_exists( $handler_class ) ) {
+		$handler_class = WC_Log_Handler_File::class;
 	}
 
-	array_push( $handlers, $default_handler );
+	array_push( $handlers, new $handler_class() );
 
 	return $handlers;
 }

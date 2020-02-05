@@ -8,6 +8,8 @@
  * @version 2.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -175,7 +177,7 @@ class WC_Emails {
 					'source' => 'transactional-emails',
 				)
 			);
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			if ( Constants::is_true( 'WP_DEBUG' ) ) {
 				trigger_error( $error, E_USER_WARNING ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}

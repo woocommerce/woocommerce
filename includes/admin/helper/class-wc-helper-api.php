@@ -1,4 +1,11 @@
 <?php
+/**
+ * WooCommerce Admin
+ *
+ * @class    WC_Helper_API
+ * @package  WooCommerce/Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -9,6 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Provides a communication interface with the WooCommerce.com Helper API.
  */
 class WC_Helper_API {
+	/**
+	 * Base path for API routes.
+	 *
+	 * @var $api_base
+	 */
 	public static $api_base;
 
 	/**
@@ -56,7 +68,7 @@ class WC_Helper_API {
 	 * @param array  $args By-ref, the args that will be passed to wp_remote_request().
 	 * @return bool Were the headers added?
 	 */
-	private static function _authenticate( $url, &$args ) {
+	private static function _authenticate( &$url, &$args ) {
 		$auth = WC_Helper_Options::get( 'auth' );
 
 		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
@@ -88,6 +100,14 @@ class WC_Helper_API {
 		$args['headers'] = array(
 			'Authorization'   => 'Bearer ' . $auth['access_token'],
 			'X-Woo-Signature' => $signature,
+		);
+
+		$url = add_query_arg(
+			array(
+				'token'     => $auth['access_token'],
+				'signature' => $signature,
+			),
+			$url
 		);
 
 		return true;

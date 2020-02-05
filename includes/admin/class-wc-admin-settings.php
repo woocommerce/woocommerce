@@ -6,6 +6,8 @@
  * @version  3.4.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -128,7 +130,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function output() {
 			global $current_section, $current_tab;
 
-			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 
 			do_action( 'woocommerce_settings_start' );
 
@@ -141,7 +143,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					'i18n_nav_warning'                    => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
 					'i18n_moved_up'                       => __( 'Item moved up', 'woocommerce' ),
 					'i18n_moved_down'                     => __( 'Item moved down', 'woocommerce' ),
-					'i18n_no_specific_countries_selected' => __( 'Selecting no country to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
+					'i18n_no_specific_countries_selected' => __( 'Selecting no country / region to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
 				)
 			);
 
@@ -594,7 +596,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
-							<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
+							<td class="forminp"><select name="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
 							</select> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
@@ -619,7 +621,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp">
-								<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country', 'woocommerce' ); ?>" class="wc-enhanced-select">
+								<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px" data-placeholder="<?php esc_attr_e( 'Choose countries / regions&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
 									<?php
 									if ( ! empty( $countries ) ) {
 										foreach ( $countries as $key => $val ) {

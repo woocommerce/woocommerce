@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Class WC_Helper_Fee.
  *
@@ -13,7 +15,7 @@ class WC_Helper_Fee {
 	 * @since 2.3
 	 */
 	public static function create_simple_fee() {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		if ( is_admin() && ! Constants::is_defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -26,7 +28,7 @@ class WC_Helper_Fee {
 	 * @since 3.2
 	 */
 	public static function create_taxed_fee() {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		if ( is_admin() && ! Constants::is_defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -39,7 +41,7 @@ class WC_Helper_Fee {
 	 * @since 3.2
 	 */
 	public static function create_negative_fee() {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		if ( is_admin() && ! Constants::is_defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -53,7 +55,7 @@ class WC_Helper_Fee {
 	 * @since 3.2
 	 */
 	public static function create_negative_taxed_fee() {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		if ( is_admin() && ! Constants::is_defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 

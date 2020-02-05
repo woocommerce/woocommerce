@@ -10,6 +10,8 @@
  * @version  3.3.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -98,7 +100,7 @@ function wc_caught_exception( $exception_object, $function = '', $args = array()
 }
 
 /**
- * Wrapper for wc_doing_it_wrong.
+ * Wrapper for _doing_it_wrong().
  *
  * @since  3.0.0
  * @param string $function Function used.
@@ -897,7 +899,7 @@ function woocommerce_compile_less_styles() {
  * @return string
  */
 function woocommerce_calc_shipping_backwards_compatibility( $value ) {
-	if ( defined( 'WC_UPDATING' ) ) {
+	if ( Constants::is_defined( 'WC_UPDATING' ) ) {
 		return $value;
 	}
 	return 'disabled' === get_option( 'woocommerce_ship_to_countries' ) ? 'no' : 'yes';
