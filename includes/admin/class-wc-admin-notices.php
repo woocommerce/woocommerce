@@ -459,7 +459,7 @@ class WC_Admin_Notices {
 	/**
 	 * Notice about Redirect-Only download method.
 	 *
-	 * @since 3.10.0
+	 * @since 4.0
 	 */
 	public static function redirect_download_method_notice() {
 		if ( apply_filters( 'woocommerce_hide_redirect_method_nag', get_user_meta( get_current_user_id(), 'dismissed_redirect_download_method_notice', true ) ) ) {

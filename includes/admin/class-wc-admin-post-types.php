@@ -827,7 +827,7 @@ class WC_Admin_Post_Types {
 	 * @param string $dir           Directory path.
 	 *
 	 * @return string New filename with unique hash.
-	 * @since 3.10.0
+	 * @since 4.0
 	 */
 	public function update_filename( $full_filename, $ext, $dir ) {
 		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) { // WPCS: CSRF ok, input var ok.
