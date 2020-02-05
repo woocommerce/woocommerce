@@ -372,7 +372,7 @@ class WC_Countries {
 	 * @return string[]
 	 */
 	public function countries_using_vat() {
-		wc_deprecated_function( 'countries_using_vat', '2.6', 'WC_Countries::get_vat_countries' );
+		wc_deprecated_function( 'countries_using_vat', '4.0', 'WC_Countries::get_vat_countries' );
 		$countries = array( 'AL', 'AR', 'AZ', 'BS', 'BH', 'BY', 'BB', 'BO', 'EG', 'ET', 'CL', 'CO', 'EC', 'SV', 'FJ', 'GM', 'GH', 'GT', 'IN', 'IR', 'IL', 'KZ', 'MU', 'MK', 'MX', 'MD', 'MN', 'ME', 'NA', 'NP', 'NG', 'PS', 'PY', 'RU', 'RW', 'KN', 'SA', 'RS', 'ZA', 'KR', 'LK', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'AE' );
 
 		return apply_filters( 'woocommerce_countries_using_vat', $countries );
