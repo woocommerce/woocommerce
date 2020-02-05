@@ -71,6 +71,64 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.25.0 2020-01-29 =
+
+- Fix: Onboarding: Mark profiler complete on WC update #3590 (On Merge to WC Core, Onboarding) 
+- Dev: fix strict standards in Scheduler classes #3583  
+- Task: Avoid redundant/unnecessary cleanup. #3580 (On Merge to WC Core) 
+- Fix: Fix styling of search control in report table header and filters. #3603 (Analytics, Components, Packages) 
+- Fix: report table search component. #3618 (Analytics, Components, Packages) 
+- Performance: Remove unnecessary use of lodash get #3598 (Onboarding) 
+- Tweak: don't modify page titles for existing WooCommerce pages. #3585 (On Merge to WC Core) 
+- Dev: Handle custom currency formats #3349 (Components, Packages) 
+- Fix: Update broken note action hooks #3535 (Activity Panel, Inbox) 
+- Dev: Onboarding: Only Show Retry Button on Plugin install failure #3545  
+- Dev: SelectControl: Add an option to show all options on refocus #3551 (Components, Packages) 
+- Fix: SQL error in category table sort. #3521 (Analytics) 
+- Dev: Onboarding: Add option to track appearance completion #3503 (Onboarding) 
+- Enhancement: add customer privacy erasure support. #3511 (Analytics) 
+- Fix: handle uninstallation when in feature plugin mode. #3546 (On Merge to WC Core) 
+- Fix: Exception on dashboard once Onboarding tasks are complete #3513  
+- Tweak: Onboarding - Add Skip Step link on Themes Step. #3490 (Onboarding) 
+- Bug: Add SelectControl debouncing and keyboard fixes #3507 (Components, Packages) 
+- Tweak: Included RegExp for JS files in examples.config.js #3510 (Build, Extensibility) 👏 @yash-webkul
+- Bug: Onboarding: Don't show skip link if no plugins exist to skip #3485 (Onboarding) 
+- Fix: Make package-based load inert when plugin is active. #3555 (On Merge to WC Core) 
+- Dev: Onboarding: Add purchase products task list item #3472 (Onboarding) 
+- Fix: Properly style theme selection button in Site Profiler #3489  
+- Dev: Onboarding: Add tracks to extension purchase task and modal #3493 (Onboarding) 
+- Tweak: Change Refunds to Returns on the dashboard. #3514  
+- Dev: Update translation scripts and instructions for creating `.json` files. #3433 (Build) 
+- Bug: Onboarding: Add in tracks for failed plugin installation #3483 (Onboarding) 
+- Dev: Onboarding: Add theme install and activation endpoints #3482 (Onboarding, REST API) 
+- Fix: component styles for WordPress 5.3. #3357 (Build, Components, Design, Packages) 
+- Dev: Onboarding: Add another option to platforms. #3471 (Onboarding) 
+- Fix: `CompareFilter` functionality regression. #3421 (Analytics, Components, Packages) 
+- Fix: don't run database migrations on new installs. #3473  
+- Fix: WC-Admin header on settings and status pages. #3389 (Activity Panel) 
+- Enhancement: allow filtering of hidden WP notices. #3391 (Activity Panel, Extensibility) 
+- Fix: show pending product reviews when comment moderation is disabled. #3459 (Activity Panel) 
+- Dev: AssetDataRegistry: update SQL example #3418  
+- Tweak: Scroll to notices when displayed while the notice area is scrolled out of view. #3390 (Activity Panel) 
+- Dev: DataStores: normalize contexts to plural #3419  
+- Enhancement: allow report cache layer to be turned off. #3434  
+- Bug: Fix user data fields filter name. #3428 (Dashboard) 
+- Fix: error when trying to download report data. #3429 (Analytics) 
+- Dev: Update to latest PHPUnit 7 #3571 (Build) 
+- Fix: invalidate Reports cache when changing Analytics settings. #3465 (Analytics, REST API, Settings) 
+- Bug: Onboarding: Skip Shipping connect step if Jetpack is already connected #3486 (Onboarding) 
+- Fix: Time zone offset calculation on customer last active date. #3388 (Analytics) 
+- Dev: Default the Calypso environment to production #3347 (Onboarding) 
+- Bug: Onboarding: Update shipping task button text #3400 (Onboarding) 
+- Bug: Onboarding: Update check for TOS accepted in tax step #3245 (Onboarding) 
+- Fix: remove the header when user doesn't have required permissions #3386 (Activity Panel) 
+- Dev: Add autocomplete props to address fields in onboarding and adjust country/state matching #3338 (Onboarding) 
+- Dev: Add purchase modal at the end of the profile wizard #3444 (Onboarding) 
+- Dev: Standardize hook and filter prefixes. #3339 (On Merge to WC Core) 
+- Fix: make report filter date props optional #3359 (Components, Extensibility, Packages) 
+- Tweak: Add/disable plugin filter #3361  
+- Dev: Onboarding -  Add button to continue setup after importing products #3402 (Build, Onboarding)
+
 = 0.24.0 2020-01-06 =
 
 - Bug: Add SelectControl debouncing and keyboard fixes #3507 (Components, Packages)
