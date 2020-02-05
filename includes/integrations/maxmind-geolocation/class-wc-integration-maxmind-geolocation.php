@@ -29,7 +29,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	 */
 	public function __construct() {
 		$this->id                 = 'maxmind_geolocation';
-		$this->method_title       = __( 'WooCommerce MaxMind Geolocation', 'woocommerce' );
+		$this->method_title       = __( 'MaxMind Geolocation', 'woocommerce' );
 		$this->method_description = __( 'An integration for utilizing MaxMind to do Geolocation lookups. Please note that this integration will only do country lookups.', 'woocommerce' );
 
 		/**
