@@ -127,6 +127,10 @@ class WC_Admin {
 	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
+		if ( wc_is_running_from_async_action_scheduler() ) {
+			return;
+		}
+
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Nonced plugin install redirects (whitelisted).
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {

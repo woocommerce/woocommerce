@@ -2273,3 +2273,13 @@ function wc_load_cart() {
 	WC()->initialize_session();
 	WC()->initialize_cart();
 }
+
+/**
+ * Test whether the context of execution comes from async action scheduler.
+ *
+ * @since 4.0.0
+ * @return bool
+ */
+function wc_is_running_from_async_action_scheduler() {
+	return isset( $_REQUEST['action'] ) && 'as_async_request_queue_runner' === $_REQUEST['action'];
+}
