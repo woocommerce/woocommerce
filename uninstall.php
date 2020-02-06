@@ -31,19 +31,15 @@ if ( Constants::is_true( 'WC_REMOVE_ALL_DATA' ) ) {
 	/**
 	 * Load core packages autoloader.
 	 */
-	if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
-		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Install' ) ) {
-			require __DIR__ . '/src/Autoloader.php';
+	if ( ! class_exists( 'Automattic\WooCommerce\Admin\Install' ) ) {
+		require __DIR__ . '/src/Autoloader.php';
 
-			if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
-				return;
-			}
+		if ( \Automattic\WooCommerce\Autoloader::init() ) {
+			// Hook in WooCommerce Admin installation code.
+			// @todo an alternate way to do this is allow FeaturePlugin::has_satisfied_dependencies()
+			// to work during uninstall - (no WooCommerce instance).
+			\Automattic\WooCommerce\Admin\Install::drop_tables();
 		}
-
-		// Hook in WooCommerce Admin installation code.
-		// @todo an alternate way to do this is allow FeaturePlugin::has_satisfied_dependencies()
-		// to work during uninstall - (no WooCommerce instance).
-		\Automattic\WooCommerce\Admin\Install::init();
 	}
 
 	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
