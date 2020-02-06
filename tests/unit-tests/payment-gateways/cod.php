@@ -37,14 +37,19 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 	 */
 	public function test_method_options_loaded_for_admin_page() {
 		set_current_screen( 'woocommerce_page_wc-settings' );
-		$_REQUEST['tab'] = 'checkout';
+		$_REQUEST['page']    = 'wc-settings';
+		$_REQUEST['tab']     = 'checkout';
+		$_REQUEST['section'] = 'cod';
 
 		$gateway = new WC_Gateway_COD();
 
 		$form_fields = $gateway->get_form_fields();
 
-		// Clear the screen!
+		// Clean up!
 		$GLOBALS['current_screen'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		unset( $_REQUEST['page'] );
+		unset( $_REQUEST['tab'] );
+		unset( $_REQUEST['section'] );
 
 		$this->assertArrayHasKey( 'enable_for_methods', $form_fields );
 		$this->assertNotEmpty( $form_fields['enable_for_methods']['options'] );
