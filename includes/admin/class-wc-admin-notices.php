@@ -49,7 +49,9 @@ class WC_Admin_Notices {
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'hide_notices' ) );
-		add_action( 'shutdown', array( __CLASS__, 'store_notices' ) );
+		if ( ! wc_is_running_from_async_action_scheduler() ) {
+			add_action( 'shutdown', array( __CLASS__, 'store_notices' ) );
+		}
 
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			add_action( 'admin_print_styles', array( __CLASS__, 'add_notices' ) );
