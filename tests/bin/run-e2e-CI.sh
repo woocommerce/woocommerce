@@ -25,4 +25,4 @@ done
 
 echo "$(date) - Docker container had been built successfully"
 
-npm run test:e2e
+npm run test:e2e  --no-warnings
