@@ -25,7 +25,7 @@ wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
  * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
  * and to ensure only the site owner can perform this action.
  */
-if ( defined( 'WC_REMOVE_ALL_DATA' ) ) {
+if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Drop WC Admin tables.
 	include_once dirname( __FILE__ ) . '/packages/woocommerce-admin/src/Install.php';
 	\Automattic\WooCommerce\Admin\Install::drop_tables();
