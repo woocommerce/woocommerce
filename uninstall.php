@@ -26,19 +26,9 @@ wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
  * and to ensure only the site owner can perform this action.
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) ) {
-	/**
-	 * Load core packages autoloader.
-	 */
-	if ( ! class_exists( 'Automattic\WooCommerce\Admin\Install' ) ) {
-		require __DIR__ . '/src/Autoloader.php';
-
-		if ( \Automattic\WooCommerce\Autoloader::init() ) {
-			// Hook in WooCommerce Admin installation code.
-			// @todo an alternate way to do this is allow FeaturePlugin::has_satisfied_dependencies()
-			// to work during uninstall - (no WooCommerce instance).
-			\Automattic\WooCommerce\Admin\Install::drop_tables();
-		}
-	}
+	// Drop WC Admin tables.
+	include_once dirname( __FILE__ ) . '/packages/woocommerce-admin/src/Install.php';
+	\Automattic\WooCommerce\Admin\Install::drop_tables();
 
 	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
 
