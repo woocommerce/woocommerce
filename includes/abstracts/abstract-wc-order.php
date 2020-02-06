@@ -1569,6 +1569,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Calculate fees for all line items.
+	 *
+	 * @return float Fee total.
+	 */
+	public function get_total_fees() {
+		return array_reduce(
+			$this->get_fees(),
+			function( $carry, $item ) {
+				return $carry + $item->get_total();
+			}
+		);
+	}
+
+	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
 	 */
 	public function update_taxes() {
@@ -1695,7 +1709,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$item->set_total( $max_discount );
 				}
 			}
-
 			$fees_total += $item->get_total();
 		}
 
