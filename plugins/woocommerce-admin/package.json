@@ -110,7 +110,7 @@
     "redux": "4.0.5"
   },
   "devDependencies": {
-    "@automattic/color-studio": "2.2.0",
+    "@automattic/color-studio": "2.2.1",
     "@babel/cli": "7.8.4",
     "@babel/core": "7.8.4",
     "@babel/plugin-transform-async-to-generator": "7.8.3",
