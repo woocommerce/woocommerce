@@ -8,8 +8,6 @@
  * @version 2.3.0
  */
 
-use Automattic\Jetpack\Constants;
-
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 global $wpdb, $wp_version;
@@ -27,7 +25,7 @@ wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
  * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
  * and to ensure only the site owner can perform this action.
  */
-if ( Constants::is_true( 'WC_REMOVE_ALL_DATA' ) ) {
+if ( defined( 'WC_REMOVE_ALL_DATA' ) ) {
 	/**
 	 * Load core packages autoloader.
 	 */
