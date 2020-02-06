@@ -175,10 +175,12 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	private function is_accessing_settings() {
-		$screen = get_current_screen();
-		// phpcs:ignore WordPress.Security.NonceVerification
-		if ( $screen && $screen->in_admin() && 'woocommerce_page_wc-settings' === $screen->id && isset( $_REQUEST['tab'] ) && 'checkout' === $_REQUEST['tab'] ) {
-			return true;
+		if ( function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			// phpcs:ignore WordPress.Security.NonceVerification
+			if ( $screen && $screen->in_admin() && 'woocommerce_page_wc-settings' === $screen->id && isset( $_REQUEST['tab'] ) && 'checkout' === $_REQUEST['tab'] ) {
+				return true;
+			}
 		}
 
 		if ( Constants::is_true( 'REST_REQUEST' ) ) {
