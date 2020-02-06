@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3f7510fcb2dbb7503513ffaf674c4200",
+    "content-hash": "ae3bf0d9840be88a437c9415ef00c8e2",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -415,6 +415,53 @@
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
             "time": "2020-01-14T01:30:08+00:00"
+        },
+        {
+            "name": "woocommerce/woocommerce-admin",
+            "version": "v0.25.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/woocommerce/woocommerce-admin.git",
+                "reference": "3543ad7073522da5bc0782c0728db6c956695fc3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/3543ad7073522da5bc0782c0728db6c956695fc3",
+                "reference": "3543ad7073522da5bc0782c0728db6c956695fc3",
+                "shasum": ""
+            },
+            "require": {
+                "automattic/jetpack-autoloader": "^1.2.0",
+                "composer/installers": "1.7.0",
+                "php": ">=5.6|>=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "7.5.20",
+                "woocommerce/woocommerce-sniffs": "0.0.9"
+            },
+            "type": "wordpress-plugin",
+            "extra": {
+                "scripts-description": {
+                    "test": "Run unit tests",
+                    "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "includes/"
+                ],
+                "psr-4": {
+                    "Automattic\\WooCommerce\\Admin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "description": "A modern, javascript-driven WooCommerce Admin experience.",
+            "homepage": "https://github.com/woocommerce/woocommerce-admin",
+            "time": "2020-02-04T23:56:22+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
