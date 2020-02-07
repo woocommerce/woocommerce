@@ -130,8 +130,8 @@ const completeOldSetupWizard = async () => {
 
 	// Fill out recommended section details
 	// Turn off Storefront Theme option
-	// await page.waitForSelector( '#wc_recommended_storefront_theme', { visible: true } );
-	// await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
+	await page.waitForSelector( '#wc_recommended_storefront_theme', { visible: true } );
+	await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
 
 	// Turn off Automated Taxes option
 	await page.waitForSelector( '#wc_recommended_automated_taxes', { visible: true } );
