@@ -49,7 +49,7 @@ class WC_Admin_Notices {
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'hide_notices' ) );
-		if ( ! wc_is_running_from_async_action_scheduler() ) {
+		if ( ! WC_Install::is_new_install() || ! wc_is_running_from_async_action_scheduler() ) {
 			add_action( 'shutdown', array( __CLASS__, 'store_notices' ) );
 		}
 
