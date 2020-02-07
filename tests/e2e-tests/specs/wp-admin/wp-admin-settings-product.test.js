@@ -29,7 +29,7 @@ describe( 'WooCommerce Products > Downloadable Products Settings', () => {
 		// Verify that settings have been saved
 		await Promise.all( [
 			expect( page ).toMatchElement( '#message', { text: 'Your settings have been saved.' } ),
-			expect( page ).toMatchElement( '#woocommerce_file_download_method', { text: 'Redirect only' } ),
+			expect( page ).toMatchElement( '#woocommerce_file_download_method', { text: 'Redirect only (Insecure)' } ),
 			verifyCheckboxIsSet( '#woocommerce_downloads_require_login' ),
 			verifyCheckboxIsSet( '#woocommerce_downloads_grant_access_after_payment' ),
 		] );
