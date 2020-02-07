@@ -137,10 +137,6 @@ const completeOldSetupWizard = async () => {
 	await page.waitForSelector( '#wc_recommended_automated_taxes', { visible: true } );
 	await page.$eval( '#wc_recommended_automated_taxes', elem => elem.click() );
 
-	// Turn off WooCommerce Admin option
-	await page.waitForSelector( '#wc_recommended_wc_admin', { visible: true } );
-	await page.$eval( '#wc_recommended_wc_admin', elem => elem.click() );
-
 	// Turn off Mailchimp option
 	await page.waitForSelector( '#wc_recommended_mailchimp', { visible: true } );
 	await page.$eval( '#wc_recommended_mailchimp', elem => elem.click() );
