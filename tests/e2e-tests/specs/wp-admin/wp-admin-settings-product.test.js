@@ -21,7 +21,7 @@ describe( 'WooCommerce Products > Downloadable Products Settings', () => {
 		await expect( page ).toMatchElement( 'a.nav-tab-active', { text: 'Products' } );
 		await expect( page ).toMatchElement( 'ul.subsubsub > li > a.current', { text: 'Downloadable products' } );
 
-		await expect( page ).toSelect( '#woocommerce_file_download_method', 'Redirect only' );
+		await expect( page ).toSelect( '#woocommerce_file_download_method', 'Redirect only (Insecure)' );
 		await setCheckbox( '#woocommerce_downloads_require_login' );
 		await setCheckbox( '#woocommerce_downloads_grant_access_after_payment' );
 		await settingsPageSaveChanges();
