@@ -61,9 +61,6 @@ describe( 'Add New Simple Product Page', () => {
 } );
 
 describe( 'Add New Variable Product Page', () => {
-	beforeAll( async () => {
-		await StoreOwnerFlow.login();
-	} );
 	it( 'can create product with variations', async () => {
 		// Go to "add product" page
 		await StoreOwnerFlow.openNewProduct();
