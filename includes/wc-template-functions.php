@@ -1162,7 +1162,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
 
 if ( ! function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
 	/**
-	 * Insert the opening anchor tag for products in the loop.
+	 * Insert the closing anchor tag for products in the loop.
 	 */
 	function woocommerce_template_loop_product_link_close() {
 		echo '</a>';
