@@ -319,7 +319,7 @@ class WC_Install {
 	 * @since  3.2.0
 	 * @return boolean
 	 */
-	private static function is_new_install() {
+	public static function is_new_install() {
 		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
 
 		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
