@@ -978,33 +978,8 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
-			$amount = isset( $_POST['amount'] ) ? wc_clean( wp_unslash( $_POST['amount'] ) ) : 0;
-
-			$calculate_tax_args = array(
-				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
-			);
-
-			if ( strstr( $amount, '%' ) ) {
-				$formatted_amount = $amount;
-				$percent          = floatval( trim( $amount, '%' ) );
-				$amount           = $order->get_total() * ( $percent / 100 );
-			} else {
-				$amount           = floatval( $amount );
-				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
-			}
-
 			$fee = new WC_Order_Item_Fee();
-			$fee->set_amount( $amount );
-			$fee->set_total( $amount );
-			/* translators: %s fee amount */
-			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), wc_clean( $formatted_amount ) ) );
-
 			$order->add_item( $fee );
-			$order->calculate_taxes( $calculate_tax_args );
-			$order->calculate_totals( false );
 			$order->save();
 
 			ob_start();
