@@ -271,7 +271,7 @@ class WC_Checkout {
 			// Add accessibility labels to fields that have placeholders.
 			foreach ( $fields as $single_field_type => $field ) {
 				if ( empty( $field['label'] ) && ! empty( $field['placeholder'] ) ) {
-					$this->fields[ $field_type ][ $single_field_type ]['label']       = $field['placeholder'];
+					$this->fields[ $field_type ][ $single_field_type ]['label'] = ( 'billing_address_2' === $single_field_type && 'optional' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) ? __( 'Apartment, suite, unit etc.', 'woocommerce' ) : $field['placeholder'];
 					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = 'screen-reader-text';
 				}
 			}
