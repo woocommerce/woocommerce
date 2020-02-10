@@ -46,7 +46,7 @@
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'"
 	},
 	"devDependencies": {
-		"@babel/core": "7.8.3",
+		"@babel/core": "7.8.4",
 		"@babel/plugin-proposal-class-properties": "7.8.3",
 		"@octokit/graphql": "4.3.1",
 		"@storybook/addon-a11y": "5.3.9",
