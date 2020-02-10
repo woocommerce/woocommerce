@@ -1,0 +1,28 @@
+From 5ac38db49fcdd73acda36192fff03b03d5454b0e Mon Sep 17 00:00:00 2001
+From: Ron Rennick <ron@ronandandrea.com>
+Date: Thu, 6 Feb 2020 09:32:13 -0800
+Subject: [PATCH] ensure plugin is initialized on activation
+
+---
+ classes/abstracts/ActionScheduler.php | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/classes/abstracts/ActionScheduler.php b/classes/abstracts/ActionScheduler.php
+index 0aec2a3..bd60208 100644
+--- a/classes/abstracts/ActionScheduler.php
++++ b/classes/abstracts/ActionScheduler.php
+@@ -154,6 +154,14 @@ public static function init( $plugin_file ) {
+ 		$admin_view = self::admin_view();
+ 		add_action( 'init', array( $admin_view, 'init' ), 0, 0 ); // run before $store::init()
+ 
++		// Ensure initialization on plugin activation.
++		if ( did_action( 'init' ) ) {
++			$store->init();
++			$logger->init();
++			$runner->init();
++			$admin_view->init();
++		}
++
+ 		if ( apply_filters( 'action_scheduler_load_deprecated_functions', true ) ) {
+ 			require_once( self::plugin_path('deprecated/functions.php') );
+ 		}
