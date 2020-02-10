@@ -86,7 +86,7 @@
 		"bundlewatch": "0.2.5",
 		"chalk": "3.0.0",
 		"clean-webpack-plugin": "3.0.0",
-		"create-file-webpack": "^1.0.2",
+		"create-file-webpack": "1.0.2",
 		"cross-env": "6.0.3",
 		"css-loader": "3.4.2",
 		"cssnano": "4.1.10",
