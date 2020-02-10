@@ -16,7 +16,7 @@ function Icon( { srcElement, size = 24, ...props } ) {
 	);
 }
 
-Icon.PropTypes = {
+Icon.propTypes = {
 	srcElement: PropTypes.oneOfType( [
 		PropTypes.instanceOf( SVG ),
 		// HTMLImageElement is a global interface

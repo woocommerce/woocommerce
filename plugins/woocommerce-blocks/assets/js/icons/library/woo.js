@@ -2,9 +2,15 @@
  * External dependencies
  */
 import { SVG } from '@wordpress/components';
-
-const woo = (
-	<SVG xmlns="http://www.w3.org/2000/svg" viewBox="0 0 245 145">
+import classnames from 'classnames';
+const woo = ( { className, size } ) => (
+	<SVG
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 245 145"
+		className={ classnames( 'woo-icon', className ) }
+		width={ Math.floor( size * 1.67 ) }
+		height={ size }
+	>
 		<path
 			fill="#96588A"
 			d="M22.76 0h199.1a22.77 22.77 0 0 1 22.8 22.76v75.92a22.77 22.77 0 0 1-22.78 22.78h-71.41l9.77 24-43.13-24H22.76C10.1946 121.449.011 111.2654 0 98.7V22.76C.011 10.1946 10.1946.011 22.76 0z"
