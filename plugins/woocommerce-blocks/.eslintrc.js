@@ -4,7 +4,7 @@ module.exports = {
 		'jest/globals': true,
 	},
 	globals: {
-		wcSettings: true,
+		wcSettings: 'readonly',
 	},
 	plugins: [ 'jest', 'woocommerce' ],
 	rules: {
