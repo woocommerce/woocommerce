@@ -289,7 +289,7 @@ class WC_Emails {
 		return str_replace(
 			array(
 				'{site_title}',
-				'{site_address}',
+				'{site_url}',
 				'{woocommerce}',
 				'{WooCommerce}',
 			),

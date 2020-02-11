@@ -112,7 +112,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_additional_content() {
-			return __( 'Thanks for using {site_address}!', 'woocommerce' );
+			return __( 'Thanks for using {site_url}!', 'woocommerce' );
 		}
 
 		/**

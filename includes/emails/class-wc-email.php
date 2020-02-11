@@ -232,7 +232,7 @@ class WC_Email extends WC_Settings_API {
 		$this->placeholders = array_merge(
 			array(
 				'{site_title}'   => $this->get_blogname(),
-				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'{site_url}' => wp_parse_url( home_url(), PHP_URL_HOST ),
 			),
 			$this->placeholders
 		);
