@@ -193,7 +193,10 @@ jQuery( function( $ ) {
 				var $differentFields = $( 'div.shipping_address' ).find( 'input, select' ).filter( function() {
 					$( this ).attr( 'id' ).replace( 'shipping', 'billing' );
 					var id = $( this ).attr( 'id' ).replace( 'shipping', 'billing' );
-					return $( this ).val() !== $billing.find( '#' + id ).val();
+					
+					if ($billing.find( '#' + id ).length) {
+						return $( this ).val() !== $billing.find( '#' + id ).val();
+					}
 				} );
 
 				if ( $differentFields.length > 0 ) {
