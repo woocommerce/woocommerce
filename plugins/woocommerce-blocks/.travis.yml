@@ -31,7 +31,6 @@ before_script:
     - |
         if [[ ! -z "$WP_VERSION" ]] ; then
           composer install --no-dev
-          # also installs woocommerce plugin
           bash tests/bin/install-wp-tests.sh wgpb_admin root '' localhost $WP_VERSION
           composer global require "phpunit/phpunit=4.8.*|5.7.*"
         fi
@@ -39,6 +38,7 @@ before_script:
         if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
           composer install
         fi
+
 jobs:
     fast_finish: true
     include:
@@ -74,5 +74,14 @@ jobs:
           script:
               - npm install
               - npm run build:ci
+          env:
+            - WOOCOMMERCE_BLOCKS_PHASE=experimental
+        - name: E2E Tests
+          script:
+            - npm install
+            - npm run docker:up
+            - composer install
+            - npm run build:ci
+            - npm run test:e2e
           env:
             - WOOCOMMERCE_BLOCKS_PHASE=experimental

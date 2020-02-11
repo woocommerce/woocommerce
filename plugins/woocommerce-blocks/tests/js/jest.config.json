@@ -23,6 +23,9 @@
 		"<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
 		"<rootDir>/tests/js/setup-globals"
 	],
+	"testPathIgnorePatterns": [
+		"<rootDir>/tests/e2e-tests"
+	],
 	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
