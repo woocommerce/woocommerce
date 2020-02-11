@@ -76,11 +76,11 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 						help={
 							showCounts
 								? __(
-										'Product counts are visible.',
+										'Product count is visible.',
 										'woo-gutenberg-products-block'
 								  )
 								: __(
-										'Product counts are hidden.',
+										'Product count is hidden.',
 										'woo-gutenberg-products-block'
 								  )
 						}
@@ -262,7 +262,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 		setIsEditing( false );
 		debouncedSpeak(
 			__(
-				'Showing attribute filter block preview.',
+				'Showing Filter Products by Attribute block preview.',
 				'woo-gutenberg-products-block'
 			)
 		);
