@@ -194,7 +194,7 @@ jQuery( function( $ ) {
 					$( this ).attr( 'id' ).replace( 'shipping', 'billing' );
 					var id = $( this ).attr( 'id' ).replace( 'shipping', 'billing' );
 					
-					if ($billing.find( '#' + id ).length) {
+					if ( $billing.find( '#' + id ).length ) {
 						return $( this ).val() !== $billing.find( '#' + id ).val();
 					}
 				} );
