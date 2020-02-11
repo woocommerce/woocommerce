@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { Component, Fragment } from '@wordpress/element';
+import { Component, Fragment } from 'react';
 
 /**
  * Internal dependencies
