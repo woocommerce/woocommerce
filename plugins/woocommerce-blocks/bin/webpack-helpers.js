@@ -93,6 +93,10 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }previews/`
 		),
+		'@woocommerce/e2e-tests': path.resolve(
+			__dirname,
+			'node_modules/woocommerce/tests/e2e-tests'
+		),
 	};
 };
 
