@@ -81,7 +81,7 @@ jobs:
             - npm install
             - npm run docker:up
             - composer install
-            - npm run build:ci
+            - npm run build:e2e-test
             - npm run test:e2e
           env:
             - WOOCOMMERCE_BLOCKS_PHASE=experimental

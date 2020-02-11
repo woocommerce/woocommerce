@@ -51,3 +51,4 @@ bin/languages
 woocommerce-gutenberg-products-block.zip
 storybook-static/
 blocks.ini
+/wp-content/
