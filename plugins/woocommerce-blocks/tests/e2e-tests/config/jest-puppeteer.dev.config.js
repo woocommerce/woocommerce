@@ -1,5 +1,3 @@
-/** @format */
-
 module.exports = {
 	launch: {
 		slowMo: process.env.PUPPETEER_SLOWMO ? false : 50,

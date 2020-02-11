@@ -26,6 +26,7 @@
 		"release": "sh ./bin/wordpress-deploy.sh",
 		"build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
 		"build:ci": "npm run build && npm run size-check && npm run lint:js && npm run lint:css",
+		"build:e2e-test": "npm run build",
 		"docker:up": "docker-compose up -d",
 		"docker:up:build": "docker-compose up --build -d",
 		"docker:down": "docker-compose down",
