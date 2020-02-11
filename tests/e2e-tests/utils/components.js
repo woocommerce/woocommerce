@@ -315,4 +315,9 @@ const createVariableProduct = async () => {
 	return variablePostIdValue;
 };
 
-export { completeOldSetupWizard, createSimpleProduct, createVariableProduct };
+export {
+	completeOldSetupWizard,
+	createSimpleProduct,
+	createVariableProduct,
+	verifyAndPublish,
+};
