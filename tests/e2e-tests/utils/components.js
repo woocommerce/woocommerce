@@ -18,6 +18,8 @@ const verifyAndPublish = async () => {
 	// Publish product
 	await expect( page ).toClick( '#publish' );
 	await page.waitForSelector( '.updated.notice' );
+	// waitForSelector is not enough here...To-Do: think of a better solution
+	await page.waitFor( 2000 );
 
 	// Verify
 	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
@@ -217,7 +219,6 @@ const createVariableProduct = async () => {
 
 	// Wait for attribute form to save (triggers 2 UI blocks)
 	await uiUnblocked();
-	await page.waitFor( 1000 );
 	await uiUnblocked();
 
 	// Create variations from attributes
@@ -226,27 +227,24 @@ const createVariableProduct = async () => {
 	await page.focus( 'select.variation_actions' );
 	await expect( page ).toSelect( 'select.variation_actions', 'Create variations from all attributes' );
 
-	const firstDialog = await expect( page ).toDisplayDialog( async () => {
-		// Using this technique since toClick() isn't working.
-		// See: https://github.com/GoogleChrome/puppeteer/issues/1805#issuecomment-464802876
-		page.$eval( 'a.do_variation_action', elem => elem.click() );
-
+	// Close all dialogues that pop up
+	page.on( 'dialog', async dialog => {
+		await dialog.accept();
 	} );
 
-	expect( firstDialog.message() ).toMatch( 'Are you sure you want to link all variations?' );
+	// Normally clicking a link would be like this:
+	// 		await page.waitForSelector('a.do_variation_action');
+	// 		await page.click('a.do_variation_action');
+	// However this doesn't work. Using another technique:
+	// See: https://github.com/GoogleChrome/puppeteer/issues/1805#issuecomment-464802876
+	await page.$eval( 'a.do_variation_action', elem => elem.click() );
 
-	const secondDialog = await expect( page ).toDisplayDialog( async () => {
-		await firstDialog.accept();
-	} );
-
-	expect( secondDialog.message() ).toMatch( '8 variations added' );
-	await secondDialog.dismiss();
-
-	// Set some variation data
+	// Set variation data (2 UI blocks)
 	await uiUnblocked();
 	await uiUnblocked();
 
-	await page.waitForSelector( '.woocommerce_variation .handlediv' );
+	// 'Variations price is not set...' notice should be displayed
+	await page.waitForSelector( '.woocommerce-notice-invalid-variation' );
 
 	// Verify that variations were created
 	await Promise.all( [
@@ -283,21 +281,22 @@ const createVariableProduct = async () => {
 		expect( page ).toMatchElement( 'select[name="attribute_attr-3[7]"]', { text: 'val2' } ),
 	] );
 
+	await page.waitFor( 2000 ); // waitForSelector fails here...To-Do
 	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(2) .handlediv' );
-	await page.waitFor( 2000 );
-	await page.focus( 'input[name="variable_is_virtual[0]"]' );
+
+	await page.waitFor( 2000 ); // wait for dropdown details to load...To-Do
 	await expect( page ).toClick( 'input[name="variable_is_virtual[0]"]' );
 	await expect( page ).toFill( 'input[name="variable_regular_price[0]"]', '9.99' );
 
 	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(3) .handlediv' );
-	await page.waitFor( 2000 );
-	await page.focus( 'input[name="variable_is_virtual[1]"]' );
+
+	await page.waitFor( 2000 ); // wait for dropdown details to load...To-Do
 	await expect( page ).toClick( 'input[name="variable_is_virtual[1]"]' );
 	await expect( page ).toFill( 'input[name="variable_regular_price[1]"]', '11.99' );
 
 	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(4) .handlediv' );
-	await page.waitFor( 2000 );
-	await page.focus( 'input[name="variable_manage_stock[2]"]' );
+
+	await page.waitFor( 2000 ); // wait for dropdown details to load...To-Do
 	await expect( page ).toClick( 'input[name="variable_manage_stock[2]"]' );
 	await expect( page ).toFill( 'input[name="variable_regular_price[2]"]', '20' );
 	await expect( page ).toFill( 'input[name="variable_weight[2]"]', '200' );

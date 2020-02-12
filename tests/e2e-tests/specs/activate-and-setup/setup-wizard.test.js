@@ -17,7 +17,7 @@ import {
 
 const config = require( 'config' );
 
-describe( 'Store owner can login and make sure WooCommerce is activated', () => {
+describe( 'Login', () => {
 
 	it( 'can login', async () => {
 		await StoreOwnerFlow.login();
@@ -36,7 +36,7 @@ describe( 'Store owner can login and make sure WooCommerce is activated', () => 
 
 } );
 
-describe( 'Store owner can go through store Setup Wizard', () => {
+describe( 'Setup Wizard', () => {
 
 	it( 'can start Setup Wizard when visiting the site for the first time. Skip all other times.', async () => {
 		// Check if Setup Wizard Notice is visible on the screen.
@@ -70,7 +70,7 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 	} );
 } );
 
-describe( 'Store owner can finish initial store setup', () => {
+describe( 'Initial Store Setup', () => {
 
 	it( 'can enable tax rates and calculations', async () => {
 		// Go to general settings page

@@ -9,7 +9,7 @@ import { createSimpleProduct } from '../../utils/components';
 import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 import { uiUnblocked } from '../../utils';
 
-describe( 'Cart page', () => {
+describe( 'Cart Page', () => {
 	beforeAll( async () => {
 		await StoreOwnerFlow.login();
 		await createSimpleProduct();

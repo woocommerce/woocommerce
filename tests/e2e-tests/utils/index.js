@@ -30,6 +30,18 @@ const clickTab = async ( tabName ) => {
 };
 
 /**
+ * Delete product from wp-admin product page.
+ */
+const deleteProduct = async () => {
+	await page.waitForSelector( 'a', { text: 'Move to Trash' } );
+	// Trash product
+	await expect( page ).toClick( 'a', { text: 'Move to Trash' } );
+	await page.waitForSelector( '.updated.notice', { text: '1 product moved to the Trash.' } );
+	// Verify
+	await expect( page ).toMatchElement( '.updated.notice', { text: '1 product moved to the Trash.' } );
+};
+
+/**
  * Save changes on a WooCommerce settings page.
  */
 const settingsPageSaveChanges = async () => {
@@ -83,7 +95,7 @@ const unsetCheckbox = async( selector ) => {
  * Wait for UI blocking to end.
  */
 const uiUnblocked = async () => {
-	await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ) );
+	await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ), { polling: 100 } );
 };
 
 /**
@@ -163,6 +175,7 @@ module.exports = {
 	...flows,
 	clearAndFillInput,
 	clickTab,
+	deleteProduct,
 	settingsPageSaveChanges,
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,

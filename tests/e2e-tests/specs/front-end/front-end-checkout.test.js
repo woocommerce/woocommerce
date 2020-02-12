@@ -13,11 +13,13 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 let orderId;
 
-describe( 'Checkout page', () => {
-	beforeAll( async () => {
+describe( 'Checkout Page', () => {
+	it( 'should login and create simple product', async () => {
 		await StoreOwnerFlow.login();
 		await createSimpleProduct();
+	} );
 
+	it( 'should configure general settings', async () => {
 		// Go to general settings page
 		await StoreOwnerFlow.openSettings( 'general' );
 
@@ -38,7 +40,9 @@ describe( 'Checkout page', () => {
 			expect( page ).toMatchElement( '#woocommerce_allowed_countries', { text: 'Sell to all countries' } ),
 			expect( page ).toMatchElement( '#woocommerce_currency', { text: 'United States (US) dollar ($)' } ),
 		] );
+	} );
 
+	it( 'should configure payments settings', async () => {
 		// Enable BACS payment method
 		await StoreOwnerFlow.openSettings( 'checkout', 'bacs' );
 		await setCheckbox( '#woocommerce_bacs_enabled' );

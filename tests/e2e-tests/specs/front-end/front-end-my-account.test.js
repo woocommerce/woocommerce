@@ -7,7 +7,7 @@
  */
 import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 
-describe( 'My account page', () => {
+describe( 'My Account Page', () => {
 	it( 'allows customer to login', async () => {
 		await StoreOwnerFlow.logout();
 		await CustomerFlow.login();

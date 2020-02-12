@@ -133,7 +133,7 @@ The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operation
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npm run test:e2e ./tests/e2e-tests/specs/wp-admin/wp-admin-product-new.test.js
+npm run test:e2e ./tests/e2e-tests/specs/wp-admin/wp-admin-product-simple-new.test.js
 ``` 
 
 ### How to skip tests
