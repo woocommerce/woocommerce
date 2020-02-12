@@ -171,8 +171,8 @@ const createSimpleProduct = async () => {
 	// Go to "add product" page
 	await StoreOwnerFlow.openNewProduct();
 
-	// Make sure we're on the add order page
-	await expect( page.title() ).resolves.toMatch( 'Add new product' );
+	// Make sure we're on the add product page
+	await expect( page ).toMatchElement( '.wp-heading-inline', { text: 'Add new product' } );
 
 	// Set product data
 	await expect( page ).toFill( '#title', simpleProductName );
@@ -193,8 +193,8 @@ const createVariableProduct = async () => {
 	// Go to "add product" page
 	await StoreOwnerFlow.openNewProduct();
 
-	// Make sure we're on the add order page
-	await expect( page.title() ).resolves.toMatch( 'Add new product' );
+	// Make sure we're on the add product page
+	await expect( page ).toMatchElement( '.wp-heading-inline', { text: 'Add new product' } );
 
 	// Set product data
 	await expect( page ).toFill( '#title', 'Variable Product with Three Variations' );

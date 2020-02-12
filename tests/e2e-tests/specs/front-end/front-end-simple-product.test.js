@@ -13,7 +13,7 @@ let simplePostIdValue;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
-describe( 'Single Product Page', () => {
+describe( 'Simple Product Page', () => {
 	it( 'should be able to create simple product', async () => {
 		await StoreOwnerFlow.login();
 		simplePostIdValue = await createSimpleProduct();
