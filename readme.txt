@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 3.9.1
+Stable tag: 3.9.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -178,6 +178,13 @@ INTERESTED IN DEVELOPMENT?
 [Browse the code](https://plugins.trac.wordpress.org/browser/woocommerce/), check out the [SVN repository](https://plugins.svn.wordpress.org/woocommerce/), or subscribe to the [development log](https://plugins.trac.wordpress.org/log/woocommerce/) by [RSS](https://plugins.trac.wordpress.org/log/woocommerce/?limit=100&mode=stop_on_copy&format=rss).
 
 == Changelog ==
+
+= 3.9.2 - 2020-02-12 =
+
+* Security - Show notice when a logged-in customer pays for a guest order.
+* Security - Don't allow links in coupon error message.
+* Security - Guest orders can only be paid anonymously to improve security.
+* Fix - Restored the default behavior of "Shipping destination" option. #25571
 
 = 3.9.1 - 2020-01-28 =
 

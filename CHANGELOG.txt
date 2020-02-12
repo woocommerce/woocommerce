@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 3.9.2 - 2020-02-12 =
+
+* Security - Show notice when a logged-in customer pays for a guest order.
+* Security - Don't allow links in coupon error message.
+* Security - Guest orders can only be paid anonymously to improve security.
+* Fix - Restored the default behavior of "Shipping destination" option. #25571
+
 = 3.9.1 - 2020-01-28 =
 
 * Tweak - Trim whitespaces and strip slashes from MaxMind License Key.
