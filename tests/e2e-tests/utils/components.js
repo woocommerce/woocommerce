@@ -13,13 +13,13 @@ const simpleProductName = config.get( 'products.simple.name' );
 
 const verifyAndPublish = async () => {
 	// Wait for auto save
-	await page.waitFor( 2000 );
+	await page.waitFor( 3000 );
 
 	// Publish product
 	await expect( page ).toClick( '#publish' );
 	await page.waitForSelector( '.updated.notice' );
 	// waitForSelector is not enough here...To-Do: think of a better solution
-	await page.waitFor( 2000 );
+	await page.waitFor( 3000 );
 
 	// Verify
 	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
