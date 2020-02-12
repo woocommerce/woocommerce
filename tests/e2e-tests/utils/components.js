@@ -279,7 +279,9 @@ const createVariableProduct = async () => {
 		expect( page ).toMatchElement( 'select[name="attribute_attr-1[7]"]', { text: 'val2' } ),
 		expect( page ).toMatchElement( 'select[name="attribute_attr-2[7]"]', { text: 'val2' } ),
 		expect( page ).toMatchElement( 'select[name="attribute_attr-3[7]"]', { text: 'val2' } ),
-	] );
+	] )
+		.catch( e => console.error( e ) )
+		.finally( () => console.log( 'Promise executed: variations were created' ) );
 
 	await page.waitFor( 2000 ); // waitForSelector fails here...To-Do
 	await expect( page ).toClick( '.woocommerce_variation:nth-of-type(2) .handlediv' );
