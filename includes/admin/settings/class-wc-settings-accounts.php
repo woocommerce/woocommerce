@@ -121,7 +121,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			array(
 				'title'         => __( 'Personal data removal', 'woocommerce' ),
 				'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
-				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
+				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal data in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
 				'id'            => 'woocommerce_allow_bulk_remove_personal_data',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
