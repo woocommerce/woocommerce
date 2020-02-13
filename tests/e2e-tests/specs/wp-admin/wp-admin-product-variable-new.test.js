@@ -74,6 +74,7 @@ describe( 'Add New Variable Product Page', () => {
 	} );
 
 	it( 'should make sure that variations were created', async () => {
+		await page.waitFor( 2000 ); // waitForSelector fails here...To-Do
 		// 'Variations price is not set...' notice should be displayed
 		await page.waitForSelector( '.woocommerce-notice-invalid-variation' );
 
