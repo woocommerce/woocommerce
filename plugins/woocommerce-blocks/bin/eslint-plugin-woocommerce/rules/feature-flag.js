@@ -154,17 +154,19 @@ function testIsUsedInStrictBinaryExpression( node, context ) {
 		}
 	}
 
-	context.report( {
-		node,
-		loc: providedFlag.loc,
-		messageId: 'whiteListedFlag',
-		data: {
-			flags: flags.join( ', ' ),
-		},
-		fix( fixer ) {
-			return fixer.replaceText( providedFlag, "'experimental'" );
-		},
-	} );
+	if ( providedFlag && providedFlag.loc ) {
+		context.report( {
+			node,
+			loc: providedFlag.loc,
+			messageId: 'whiteListedFlag',
+			data: {
+				flags: flags.join( ', ' ),
+			},
+			fix( fixer ) {
+				return fixer.replaceText( providedFlag, "'experimental'" );
+			},
+		} );
+	}
 }
 
 /**

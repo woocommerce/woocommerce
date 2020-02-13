@@ -38,7 +38,7 @@
 		"lint:php": "composer run-script phpcs ./src",
 		"lint:css": "stylelint 'assets/**/*.scss'",
 		"lint:css-fix": "stylelint 'assets/**/*.scss' --fix",
-		"lint:js": "eslint assets/js --ext=js,jsx",
+		"lint:js": "eslint assets/js bin --ext=js,jsx",
 		"lint:js-fix": "eslint assets/js --ext=js,jsx --fix",
 		"package-plugin": "./bin/build-plugin-zip.sh",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",

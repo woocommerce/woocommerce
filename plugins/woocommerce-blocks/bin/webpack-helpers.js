@@ -327,6 +327,7 @@ const getMainConfig = ( options = {} ) => {
 			new DefinePlugin( {
 				// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
 				'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
+					// eslint-disable-next-line woocommerce/feature-flag
 					process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
 				),
 			} ),
@@ -428,6 +429,7 @@ const getFrontConfig = ( options = {} ) => {
 			new DefinePlugin( {
 				// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
 				'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
+					// eslint-disable-next-line woocommerce/feature-flag
 					process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
 				),
 			} ),
