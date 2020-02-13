@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Package;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,6 +46,10 @@ class Cart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
+		$data_registry = Package::container()->get(
+			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
+		);
+		$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
 			$this->block_name . '-frontend',
 			$this->block_name . '-block-frontend'
