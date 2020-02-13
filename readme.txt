@@ -183,7 +183,6 @@ INTERESTED IN DEVELOPMENT?
 
 * Security - Show a notice when a logged-in customer pays for a guest order.
 * Security - Disallow links in coupon error messages.
-* Security - Guest orders can only be paid anonymously.
 * Fix - Restored the default behavior of the "Shipping destination" option. #25571
 
 = 3.9.1 - 2020-01-28 =
