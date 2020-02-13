@@ -21,10 +21,12 @@
 	},
 	"setupFiles": [
 		"<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
-		"<rootDir>/tests/js/setup-globals"
+		"<rootDir>/tests/js/setup-globals.js"
 	],
 	"testPathIgnorePatterns": [
-		"<rootDir>/tests/e2e-tests"
+		"<rootDir>/tests/",
+		"<rootDir>/node_modules/",
+		"<rootDir>/vendor/"
 	],
 	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
 	"preset": "@wordpress/jest-preset-default",
