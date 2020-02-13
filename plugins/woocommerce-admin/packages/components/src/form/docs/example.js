@@ -77,8 +77,11 @@ export default () => (
 				</Button>
 				<br />
 				<br />
-				Values: { JSON.stringify( values ) }<br />
-				Errors: { JSON.stringify( errors ) }<br />
+				<h3>Return data:</h3>
+				<pre>
+					Values: { JSON.stringify( values ) }<br />
+					Errors: { JSON.stringify( errors ) }
+				</pre>
 			</div>
 		) }
 	</Form>
