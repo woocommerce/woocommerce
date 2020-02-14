@@ -111,9 +111,22 @@ class WC_Tracker {
 		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
 
 		// Jetpack & WooCommerce Connect.
+		// Test if the site if a staging site based on the Jetpack criteria.
+		$is_jp_staging = false;
+		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
+			// Preferred way of checking with Jetpack 8.1+.
+			$jp_status = new \Automattic\Jetpack\Status();
+			if ( is_callable( '$jp_status->is_staging_site()' ) && $jp_status->is_staging_site() ) {
+				$is_jp_staging = true;
+			}
+		} else {
+			// Fallback for older Jetpack.
+			$is_jp_staging = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
+		}
+
 		$data['jetpack_version']    = Constants::is_defined( 'JETPACK__VERSION' ) ? Constants::get_constant( 'JETPACK__VERSION' ) : 'none';
 		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
-		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
+		$data['jetpack_is_staging'] = $is_jp_staging ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
 		$data['helper_connected']   = self::get_helper_connected();
