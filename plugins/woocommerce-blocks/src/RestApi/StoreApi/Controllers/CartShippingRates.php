@@ -82,8 +82,24 @@ class CartShippingRates extends RestController {
 			return new RestError( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woo-gutenberg-products-block' ), array( 'status' => 500 ) );
 		}
 
-		if ( empty( $request['country'] ) ) {
-			return new RestError( 'woocommerce_rest_cart_shipping_rates_missing_country', __( 'Shipping destination country is required.', 'woo-gutenberg-products-block' ), array( 'status' => 400 ) );
+		if ( ! empty( $request['country'] ) ) {
+			$valid_countries = WC()->countries->get_shipping_countries();
+
+			if (
+				is_array( $valid_countries ) &&
+				count( $valid_countries ) > 0 &&
+				! array_key_exists( $request['country'], $valid_countries )
+			) {
+				return new RestError(
+					'woocommerce_rest_cart_shipping_rates_invalid_country',
+					sprintf(
+						/* translators: 1: valid country codes */
+						__( 'Destination country code is not valid. Please enter one of the following: %s', 'woo-gutenberg-products-block' ),
+						implode( ', ', array_keys( $valid_countries ) )
+					),
+					[ 'status' => 400 ]
+				);
+			}
 		}
 
 		$request = $this->validate_shipping_address( $request );
@@ -245,15 +261,17 @@ class CartShippingRates extends RestController {
 	protected function get_shipping_packages( $request ) {
 		$packages = WC()->cart->get_shipping_packages();
 
-		foreach ( $packages as $key => $package ) {
-			$packages[ $key ]['destination'] = [
-				'address_1' => $request['address_1'],
-				'address_2' => $request['address_2'],
-				'city'      => $request['city'],
-				'state'     => $request['state'],
-				'postcode'  => $request['postcode'],
-				'country'   => $request['country'],
-			];
+		if ( $request['country'] ) {
+			foreach ( $packages as $key => $package ) {
+				$packages[ $key ]['destination'] = [
+					'address_1' => $request['address_1'],
+					'address_2' => $request['address_2'],
+					'city'      => $request['city'],
+					'state'     => $request['state'],
+					'postcode'  => $request['postcode'],
+					'country'   => $request['country'],
+				];
+			}
 		}
 
 		$packages = WC()->shipping()->calculate_shipping( $packages );

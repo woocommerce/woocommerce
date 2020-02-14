@@ -40,3 +40,5 @@ const RadioControl = ( {
 };
 
 export default withComponentId( RadioControl );
+export { RadioControlOption };
+export { default as RadioControlOptionLayout } from './option-layout';

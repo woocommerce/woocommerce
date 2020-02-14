@@ -101,72 +101,75 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_rate_properties() {
-		return [
-			'name'          => [
-				'description' => __( 'Name of the shipping rate, e.g. Express shipping.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'description'   => [
-				'description' => __( 'Description of the shipping rate, e.g. Dispatched via USPS.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'delivery_time' => [
-				'description' => __( 'Delivery time estimate text, e.g. 3-5 business days.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'price'         => [
-				'description' => __( 'Price of this shipping rate.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'rate_id'       => [
-				'description' => __( 'ID of the shipping rate.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'method_id'     => [
-				'description' => __( 'ID of the shipping method that provided the rate.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'instance_id'   => [
-				'description' => __( 'Instance ID of the shipping method that provided the rate.', 'woo-gutenberg-products-block' ),
-				'type'        => 'integer',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'meta_data'     => [
-				'description' => __( 'Meta data attached to the shipping rate.', 'woo-gutenberg-products-block' ),
-				'type'        => 'array',
-				'context'     => [ 'view', 'edit' ],
-				'items'       => [
-					'type'       => 'object',
-					'properties' => [
-						'key'   => [
-							'description' => __( 'Meta key.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'value' => [
-							'description' => __( 'Meta value.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
+		return array_merge(
+			$this->get_store_currency_properties(),
+			[
+				'name'          => [
+					'description' => __( 'Name of the shipping rate, e.g. Express shipping.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'description'   => [
+					'description' => __( 'Description of the shipping rate, e.g. Dispatched via USPS.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'delivery_time' => [
+					'description' => __( 'Delivery time estimate text, e.g. 3-5 business days.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'price'         => [
+					'description' => __( 'Price of this shipping rate.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'rate_id'       => [
+					'description' => __( 'ID of the shipping rate.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'method_id'     => [
+					'description' => __( 'ID of the shipping method that provided the rate.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'instance_id'   => [
+					'description' => __( 'Instance ID of the shipping method that provided the rate.', 'woo-gutenberg-products-block' ),
+					'type'        => 'integer',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'meta_data'     => [
+					'description' => __( 'Meta data attached to the shipping rate.', 'woo-gutenberg-products-block' ),
+					'type'        => 'array',
+					'context'     => [ 'view', 'edit' ],
+					'items'       => [
+						'type'       => 'object',
+						'properties' => [
+							'key'   => [
+								'description' => __( 'Meta key.', 'woo-gutenberg-products-block' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'value' => [
+								'description' => __( 'Meta value.', 'woo-gutenberg-products-block' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
 						],
 					],
 				],
-			],
-		];
+			]
+		);
 	}
 
 	/**
@@ -199,16 +202,19 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_rate_response( $rate ) {
-		return [
-			'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
-			'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
-			'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
-			'price'         => $this->get_rate_prop( $rate, 'cost' ),
-			'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
-			'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
-			'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
-			'meta_data'     => $this->get_rate_meta_data( $rate ),
-		];
+		return array_merge(
+			$this->get_store_currency_response(),
+			[
+				'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
+				'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
+				'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
+				'price'         => $this->get_rate_prop( $rate, 'cost' ),
+				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
+				'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
+				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
+				'meta_data'     => $this->get_rate_meta_data( $rate ),
+			]
+		);
 	}
 
 	/**

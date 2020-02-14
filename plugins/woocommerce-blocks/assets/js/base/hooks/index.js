@@ -7,3 +7,4 @@ export * from './use-collection-data';
 export * from './use-previous';
 export * from './checkout';
 export * from './payment-methods';
+export * from './use-shipping-rates';
