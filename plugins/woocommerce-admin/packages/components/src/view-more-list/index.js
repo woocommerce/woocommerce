@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -13,17 +12,23 @@ import Tag from '../tag';
 /**
  * This component displays a 'X more' button that displays a list of items on a popover when clicked.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const ViewMoreList = ( { items } ) => {
 	return (
 		<Tag
 			className="woocommerce-view-more-list"
-			label={ sprintf( __( '+%d more', 'woocommerce-admin' ), items.length - 1 ) }
+			label={ sprintf(
+				__( '+%d more', 'woocommerce-admin' ),
+				items.length - 1
+			) }
 			popoverContents={
 				<ul className="woocommerce-view-more-list__popover">
 					{ items.map( ( item, i ) => (
-						<li key={ i } className="woocommerce-view-more-list__popover__item">
+						<li
+							key={ i }
+							className="woocommerce-view-more-list__popover__item"
+						>
 							{ item }
 						</li>
 					) ) }

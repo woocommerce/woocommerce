@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -33,7 +32,14 @@ class SectionControls extends Component {
 	}
 
 	render() {
-		const { onRemove, isFirst, isLast, onTitleBlur, onTitleChange, titleInput } = this.props;
+		const {
+			onRemove,
+			isFirst,
+			isLast,
+			onTitleBlur,
+			onTitleChange,
+			titleInput,
+		} = this.props;
 
 		return (
 			<Fragment>
@@ -49,13 +55,19 @@ class SectionControls extends Component {
 				<div className="woocommerce-dashboard-section-controls">
 					{ ! isFirst && (
 						<MenuItem isClickable onInvoke={ this.onMoveUp }>
-							<Icon icon={ 'arrow-up-alt2' } label={ __( 'Move up' ) } />
+							<Icon
+								icon={ 'arrow-up-alt2' }
+								label={ __( 'Move up' ) }
+							/>
 							{ __( 'Move up', 'woocommerce-admin' ) }
 						</MenuItem>
 					) }
 					{ ! isLast && (
 						<MenuItem isClickable onInvoke={ this.onMoveDown }>
-							<Icon icon={ 'arrow-down-alt2' } label={ __( 'Move Down' ) } />
+							<Icon
+								icon={ 'arrow-down-alt2' }
+								label={ __( 'Move Down' ) }
+							/>
 							{ __( 'Move Down', 'woocommerce-admin' ) }
 						</MenuItem>
 					) }

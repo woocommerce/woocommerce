@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -17,7 +16,7 @@ export default withState( {
 			<TextControl
 				name="text-control"
 				label="Enter text here"
-				onChange={ newValue => setState( { value: newValue } ) }
+				onChange={ ( newValue ) => setState( { value: newValue } ) }
 				value={ value }
 			/>
 			<br />

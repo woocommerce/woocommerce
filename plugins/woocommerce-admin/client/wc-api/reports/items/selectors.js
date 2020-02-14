@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -16,17 +14,26 @@ const getReportItems = ( getResource, requireResource ) => (
 	query = {},
 	requirement = DEFAULT_REQUIREMENT
 ) => {
-	const resourceName = getResourceName( `report-items-query-${ type }`, query );
+	const resourceName = getResourceName(
+		`report-items-query-${ type }`,
+		query
+	);
 	return requireResource( requirement, resourceName ) || {};
 };
 
-const getReportItemsError = getResource => ( type, query = {} ) => {
-	const resourceName = getResourceName( `report-items-query-${ type }`, query );
+const getReportItemsError = ( getResource ) => ( type, query = {} ) => {
+	const resourceName = getResourceName(
+		`report-items-query-${ type }`,
+		query
+	);
 	return getResource( resourceName ).error;
 };
 
-const isReportItemsRequesting = getResource => ( type, query = {} ) => {
-	const resourceName = getResourceName( `report-items-query-${ type }`, query );
+const isReportItemsRequesting = ( getResource ) => ( type, query = {} ) => {
+	const resourceName = getResourceName(
+		`report-items-query-${ type }`,
+		query
+	);
 	const { lastRequested, lastReceived } = getResource( resourceName );
 
 	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {

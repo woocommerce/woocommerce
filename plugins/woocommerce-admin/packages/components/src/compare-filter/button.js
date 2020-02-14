@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -10,13 +8,24 @@ import { Button, Tooltip } from '@wordpress/components';
 /**
  * A button used when comparing items, if `count` is less than 2 a hoverable tooltip is added with `helpText`.
  *
- * @return { object } -
+ * @return {Object} -
  */
-const CompareButton = ( { className, count, children, disabled, helpText, onClick } ) =>
+const CompareButton = ( {
+	className,
+	count,
+	children,
+	disabled,
+	helpText,
+	onClick,
+} ) =>
 	! disabled && count < 2 ? (
 		<Tooltip text={ helpText }>
 			<span className={ className }>
-				<Button className="woocommerce-compare-button" isDefault disabled={ true }>
+				<Button
+					className="woocommerce-compare-button"
+					isDefault
+					disabled={ true }
+				>
 					{ children }
 				</Button>
 			</span>

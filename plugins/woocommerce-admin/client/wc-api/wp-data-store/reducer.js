@@ -1,11 +1,10 @@
-/** @format */
-
 const defaultState = {
 	resources: {},
 };
 
 /**
  * Primary reducer for fresh-data apiclient data.
+ *
  * @param {Object} state The base state for fresh-data.
  * @param {Object} action Action object to be processed.
  * @return {Object} The new state, or the previous state if this action doesn't belong to fresh-data.
@@ -30,17 +29,20 @@ export function reduceRequested( state, action ) {
 }
 
 export function reduceReceived( state, action ) {
-	const newResources = Object.keys( action.resources ).reduce( ( resources, name ) => {
-		const resource = { ...action.resources[ name ] };
-		if ( resource.data ) {
-			resource.lastReceived = action.time;
-		}
-		if ( resource.error ) {
-			resource.lastError = action.time;
-		}
-		resources[ name ] = resource;
-		return resources;
-	}, {} );
+	const newResources = Object.keys( action.resources ).reduce(
+		( resources, name ) => {
+			const resource = { ...action.resources[ name ] };
+			if ( resource.data ) {
+				resource.lastReceived = action.time;
+			}
+			if ( resource.error ) {
+				resource.lastError = action.time;
+			}
+			resources[ name ] = resource;
+			return resources;
+		},
+		{}
+	);
 	return reduceResources( state, newResources );
 }
 

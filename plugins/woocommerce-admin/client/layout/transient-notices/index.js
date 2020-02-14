@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -24,7 +23,13 @@ class TransientNotices extends Component {
 			className
 		);
 
-		return <SnackbarList notices={ notices } className={ classes } onRemove={ onRemove } />;
+		return (
+			<SnackbarList
+				notices={ notices }
+				className={ classes }
+				onRemove={ onRemove }
+			/>
+		);
 	}
 }
 
@@ -40,12 +45,12 @@ TransientNotices.propTypes = {
 };
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const notices = select( 'core/notices' ).getNotices();
 
 		return { notices };
 	} ),
-	withDispatch( dispatch => ( {
+	withDispatch( ( dispatch ) => ( {
 		onRemove: dispatch( 'core/notices' ).removeNotice,
 	} ) )
 )( TransientNotices );

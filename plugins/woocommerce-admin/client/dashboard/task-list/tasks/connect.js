@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -25,7 +24,7 @@ class Connect extends Component {
 		document.body.classList.add( 'woocommerce-admin-is-loading' );
 		const { query } = this.props;
 
-		if ( '1' === query.deny ) {
+		if ( query.deny === '1' ) {
 			this.errorMessage(
 				__(
 					'You must click approve to install your extensions and connect to WooCommerce.com.',
@@ -91,7 +90,9 @@ class Connect extends Component {
 				},
 			} );
 			if ( connectResponse && connectResponse.success ) {
-				await this.props.updateProfileItems( { wccom_connected: true } );
+				await this.props.updateProfileItems( {
+					wccom_connected: true,
+				} );
 				if ( ! this.props.isProfileItemsError ) {
 					this.props.createNotice(
 						'success',
@@ -103,7 +104,9 @@ class Connect extends Component {
 
 					// @todo Show a notice for when extensions are correctly installed.
 
-					document.body.classList.remove( 'woocommerce-admin-is-loading' );
+					document.body.classList.remove(
+						'woocommerce-admin-is-loading'
+					);
 					getHistory().push( this.baseQuery() );
 				} else {
 					this.errorMessage();
@@ -123,14 +126,14 @@ class Connect extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const { getProfileItemsError } = select( 'wc-api' );
 
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 
 		return { isProfileItemsError };
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateProfileItems } = dispatch( 'wc-api' );
 		return {

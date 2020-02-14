@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,7 +7,7 @@ import PropTypes from 'prop-types';
  * `MenuTitle` is another valid Menu child, but this does not have any accessibility attributes associated
  * (so this should not be used in place of the `EllipsisMenu` prop `label`).
  *
- * @return { object } -
+ * @return {Object} -
  */
 const MenuTitle = ( { children } ) => {
 	return <div className="woocommerce-ellipsis-menu__title">{ children }</div>;

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -14,7 +13,11 @@ class ChartPlaceholder extends Component {
 		const { height } = this.props;
 
 		return (
-			<div aria-hidden="true" className="woocommerce-chart-placeholder" style={ { height } }>
+			<div
+				aria-hidden="true"
+				className="woocommerce-chart-placeholder"
+				style={ { height } }
+			>
 				<Spinner />
 			</div>
 		);

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,10 +9,13 @@ import { dispatch } from '@wordpress/data';
  */
 import { getResourceName } from '../utils';
 
-const updateProductStock = operations => async ( product, newStock ) => {
+const updateProductStock = ( operations ) => async ( product, newStock ) => {
 	const { createNotice } = dispatch( 'core/notices' );
 	const oldStockQuantity = product.stock_quantity;
-	const resourceName = getResourceName( 'items-query-products-item', product.id );
+	const resourceName = getResourceName(
+		'items-query-products-item',
+		product.id
+	);
 
 	// Optimistically update product stock
 	operations.updateLocally( [ resourceName ], {
@@ -32,13 +34,19 @@ const updateProductStock = operations => async ( product, newStock ) => {
 	if ( response && response.data ) {
 		createNotice(
 			'success',
-			sprintf( __( '%s stock updated.', 'woocommerce-admin' ), product.name )
+			sprintf(
+				__( '%s stock updated.', 'woocommerce-admin' ),
+				product.name
+			)
 		);
 	}
 	if ( response && response.error ) {
 		createNotice(
 			'error',
-			sprintf( __( '%s stock could not be updated.', 'woocommerce-admin' ), product.name )
+			sprintf(
+				__( '%s stock could not be updated.', 'woocommerce-admin' ),
+				product.name
+			)
 		);
 		// Revert local changes if the operation failed in the server
 		operations.updateLocally( [ resourceName ], {

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -15,13 +14,19 @@ import { Card, Link } from '@woocommerce/components';
 import examples from './examples.json';
 import './style.scss';
 
-const camelCaseToSlug = name => {
-	return name.replace( /\.?([A-Z])/g, ( x, y ) => '-' + y.toLowerCase() ).replace( /^-/, '' );
+const camelCaseToSlug = ( name ) => {
+	return name
+		.replace( /\.?([A-Z])/g, ( x, y ) => '-' + y.toLowerCase() )
+		.replace( /^-/, '' );
 };
 
-const getExampleData = example => {
+const getExampleData = ( example ) => {
 	const componentName = get( example, 'component' );
-	const filePath = get( example, 'filePath', camelCaseToSlug( componentName ) );
+	const filePath = get(
+		example,
+		'filePath',
+		camelCaseToSlug( componentName )
+	);
 
 	return {
 		componentName,
@@ -31,7 +36,9 @@ const getExampleData = example => {
 
 export default class extends Component {
 	render() {
-		const { query: { component } } = this.props;
+		const {
+			query: { component },
+		} = this.props;
 		const className = classnames( 'woocommerce_devdocs', {
 			'is-single': component,
 			'is-list': ! component,
@@ -39,14 +46,19 @@ export default class extends Component {
 
 		let exampleList = examples;
 		if ( component ) {
-			const example = find( examples, ex => component === camelCaseToSlug( ex.component ) );
+			const example = find(
+				examples,
+				( ex ) => component === camelCaseToSlug( ex.component )
+			);
 			exampleList = [ example ];
 		}
 
 		return (
 			<div className={ className }>
-				{ exampleList.map( example => {
-					const { componentName, filePath } = getExampleData( example );
+				{ exampleList.map( ( example ) => {
+					const { componentName, filePath } = getExampleData(
+						example
+					);
 					const cardClasses = classnames(
 						'woocommerce-devdocs__card',
 						`woocommerce-devdocs__card--${ filePath }`,
@@ -71,7 +83,12 @@ export default class extends Component {
 								}
 								action={
 									component ? (
-										<Link href={ '?page=wc-admin&path=/devdocs' } type="wc-admin">
+										<Link
+											href={
+												'?page=wc-admin&path=/devdocs'
+											}
+											type="wc-admin"
+										>
 											Full list
 										</Link>
 									) : null

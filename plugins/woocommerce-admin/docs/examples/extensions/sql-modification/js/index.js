@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -9,10 +8,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Add a dropdown to a report.
  *
- * @param {array} filters - set of filters in a report.
- * @return {array} amended set of filters.
+ * @param {Array} filters - set of filters in a report.
+ * @return {Array} amended set of filters.
  */
-const addCurrencyFilters = filters => {
+const addCurrencyFilters = ( filters ) => {
 	return [
 		{
 			label: __( 'Currency', 'plugin-domain' ),
@@ -26,22 +25,50 @@ const addCurrencyFilters = filters => {
 	];
 };
 
-addFilter( 'woocommerce_admin_revenue_report_filters', 'plugin-domain', addCurrencyFilters );
-addFilter( 'woocommerce_admin_orders_report_filters', 'plugin-domain', addCurrencyFilters );
-addFilter( 'woocommerce_admin_products_report_filters', 'plugin-domain', addCurrencyFilters );
-addFilter( 'woocommerce_admin_categories_report_filters', 'plugin-domain', addCurrencyFilters );
-addFilter( 'woocommerce_admin_coupons_report_filters', 'plugin-domain', addCurrencyFilters );
-addFilter( 'woocommerce_admin_taxes_report_filters', 'plugin-domain', addCurrencyFilters );
-addFilter( 'woocommerce_admin_dashboard_filters', 'plugin-domain', addCurrencyFilters );
+addFilter(
+	'woocommerce_admin_revenue_report_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_orders_report_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_products_report_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_categories_report_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_coupons_report_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_taxes_report_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_dashboard_filters',
+	'plugin-domain',
+	addCurrencyFilters
+);
 
 /**
  * Add a column to a report table. Include a header and
  * manipulate each row to handle the added parameter.
  *
- * @param {object} reportTableData - table data.
- * @return {object} - table data.
+ * @param {Object} reportTableData - table data.
+ * @return {Object} - table data.
  */
-const addTableColumn = reportTableData => {
+const addTableColumn = ( reportTableData ) => {
 	const includedReports = [
 		'revenue',
 		'products',
@@ -86,12 +113,16 @@ addFilter( 'woocommerce_admin_report_table', 'plugin-domain', addTableColumn );
  * Add 'currency' to the list of persisted queries so that the parameter remains
  * when navigating from report to report.
  *
- * @param {array} params - array of report slugs.
- * @return {array} - array of report slugs including 'currency'.
+ * @param {Array} params - array of report slugs.
+ * @return {Array} - array of report slugs including 'currency'.
  */
-const persistQueries = params => {
+const persistQueries = ( params ) => {
 	params.push( 'currency' );
 	return params;
 };
 
-addFilter( 'woocommerce_admin_persisted_queries', 'plugin-domain', persistQueries );
+addFilter(
+	'woocommerce_admin_persisted_queries',
+	'plugin-domain',
+	persistQueries
+);

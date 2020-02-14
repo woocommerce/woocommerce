@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -14,7 +12,6 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 /**
  * Gets the country code from a country:state value string.
  *
- * @format
  * @param {string} countryState Country state string, e.g. US:GA.
  * @return {string} Country string.
  */
@@ -29,7 +26,10 @@ export function getCountryCode( countryState ) {
 
 export function getCurrencyRegion( countryState ) {
 	let region = getCountryCode( countryState );
-	const euCountries = without( getSetting( 'onboarding', { euCountries: [] } ).euCountries, 'GB' );
+	const euCountries = without(
+		getSetting( 'onboarding', { euCountries: [] } ).euCountries,
+		'GB'
+	);
 	if ( euCountries.includes( region ) ) {
 		region = 'EU';
 	}
@@ -40,11 +40,14 @@ export function getCurrencyRegion( countryState ) {
 /**
  * Gets the product IDs for items based on the product types and theme selected in the onboarding profiler.
  *
- * @param {object} profileItems Onboarding profile.
- * @param {bool} includeInstalledItems Include installed items in returned product IDs.
- * @return {array} Product Ids.
+ * @param {Object} profileItems Onboarding profile.
+ * @param {boolean} includeInstalledItems Include installed items in returned product IDs.
+ * @return {Array} Product Ids.
  */
-export function getProductIdsForCart( profileItems, includeInstalledItems = false ) {
+export function getProductIdsForCart(
+	profileItems,
+	includeInstalledItems = false
+) {
 	const productIds = [];
 	const onboarding = getSetting( 'onboarding', {} );
 	const productTypes = profileItems.product_types || [];
@@ -55,18 +58,22 @@ export function getProductIdsForCart( profileItems, includeInstalledItems = fals
 		return productIds;
 	}
 
-	productTypes.forEach( productType => {
+	productTypes.forEach( ( productType ) => {
 		if (
 			onboarding.productTypes[ productType ] &&
 			onboarding.productTypes[ productType ].product &&
 			( includeInstalledItems ||
-				! onboarding.installedPlugins.includes( onboarding.productTypes[ productType ].slug ) )
+				! onboarding.installedPlugins.includes(
+					onboarding.productTypes[ productType ].slug
+				) )
 		) {
 			productIds.push( onboarding.productTypes[ productType ].product );
 		}
 	} );
 
-	const theme = onboarding.themes.find( themeData => themeData.slug === profileItems.theme );
+	const theme = onboarding.themes.find(
+		( themeData ) => themeData.slug === profileItems.theme
+	);
 
 	if (
 		theme &&
@@ -96,7 +103,7 @@ export function getPriceValue( string ) {
  * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build,
  * but only if the user recieved the test/opted in.
  *
- * @return {bool} True if the onboarding is enabled.
+ * @return {boolean} True if the onboarding is enabled.
  */
 export function isOnboardingEnabled() {
 	if ( ! window.wcAdminFeatures.onboarding ) {

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -32,7 +31,10 @@ class Tags extends Component {
 		return () => {
 			const { selected, onChange } = this.props;
 			const i = findIndex( selected, { key } );
-			onChange( [ ...selected.slice( 0, i ), ...selected.slice( i + 1 ) ] );
+			onChange( [
+				...selected.slice( 0, i ),
+				...selected.slice( i + 1 ),
+			] );
 		};
 	}
 
@@ -67,9 +69,15 @@ class Tags extends Component {
 					} ) }
 				</div>
 				{ showClearButton && (
-					<Button className="woocommerce-select-control__clear" isLink onClick={ this.removeAll }>
+					<Button
+						className="woocommerce-select-control__clear"
+						isLink
+						onClick={ this.removeAll }
+					>
 						<Icon icon="dismiss" />
-						<span className="screen-reader-text">{ __( 'Clear all', 'woocommerce-admin' ) }</span>
+						<span className="screen-reader-text">
+							{ __( 'Clear all', 'woocommerce-admin' ) }
+						</span>
 					</Button>
 				) }
 			</Fragment>
@@ -93,7 +101,8 @@ Tags.propTypes = {
 	 */
 	selected: PropTypes.arrayOf(
 		PropTypes.shape( {
-			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
+			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] )
+				.isRequired,
 			label: PropTypes.string,
 		} )
 	),

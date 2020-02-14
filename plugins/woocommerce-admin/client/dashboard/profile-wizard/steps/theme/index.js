@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -47,11 +46,19 @@ class Theme extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { isError, isGetProfileItemsRequesting, createNotice } = this.props;
+		const {
+			isError,
+			isGetProfileItemsRequesting,
+			createNotice,
+		} = this.props;
 		const { chosen } = this.state;
 		const isRequestSuccessful =
-			! isGetProfileItemsRequesting && prevProps.isGetProfileItemsRequesting && ! isError && chosen;
-		const isRequestError = ! isGetProfileItemsRequesting && prevProps.isRequesting && isError;
+			! isGetProfileItemsRequesting &&
+			prevProps.isGetProfileItemsRequesting &&
+			! isError &&
+			chosen;
+		const isRequestError =
+			! isGetProfileItemsRequesting && prevProps.isRequesting && isError;
 
 		if ( isRequestSuccessful ) {
 			/* eslint-disable react/no-did-update-set-state */
@@ -66,7 +73,10 @@ class Theme extends Component {
 			/* eslint-enable react/no-did-update-set-state */
 			createNotice(
 				'error',
-				__( 'There was a problem selecting your store theme.', 'woocommerce-admin' )
+				__(
+					'There was a problem selecting your store theme.',
+					'woocommerce-admin'
+				)
 			);
 		}
 	}
@@ -77,7 +87,10 @@ class Theme extends Component {
 		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 
 		this.setState( { chosen: slug } );
-		recordEvent( 'storeprofiler_store_theme_choose', { theme: slug, location } );
+		recordEvent( 'storeprofiler_store_theme_choose', {
+			theme: slug,
+			location,
+		} );
 
 		if ( theme !== activeTheme && getPriceValue( price ) <= 0 ) {
 			this.installTheme( slug );
@@ -89,11 +102,14 @@ class Theme extends Component {
 	installTheme( slug ) {
 		const { createNotice } = this.props;
 
-		apiFetch( { path: '/wc-admin/onboarding/themes/install?theme=' + slug, method: 'POST' } )
+		apiFetch( {
+			path: '/wc-admin/onboarding/themes/install?theme=' + slug,
+			method: 'POST',
+		} )
 			.then( () => {
 				this.activateTheme( slug );
 			} )
-			.catch( response => {
+			.catch( ( response ) => {
 				this.setState( { chosen: null } );
 				createNotice( 'error', response.message );
 			} );
@@ -102,12 +118,18 @@ class Theme extends Component {
 	activateTheme( slug ) {
 		const { createNotice, updateProfileItems } = this.props;
 
-		apiFetch( { path: '/wc-admin/onboarding/themes/activate?theme=' + slug, method: 'POST' } )
-			.then( response => {
+		apiFetch( {
+			path: '/wc-admin/onboarding/themes/activate?theme=' + slug,
+			method: 'POST',
+		} )
+			.then( ( response ) => {
 				createNotice(
 					'success',
 					sprintf(
-						__( '%s was installed and activated on your site.', 'woocommerce-admin' ),
+						__(
+							'%s was installed and activated on your site.',
+							'woocommerce-admin'
+						),
 						response.name
 					)
 				);
@@ -117,7 +139,7 @@ class Theme extends Component {
 				} );
 				updateProfileItems( { theme: slug } );
 			} )
-			.catch( response => {
+			.catch( ( response ) => {
 				this.setState( { chosen: null } );
 				createNotice( 'error', response.message );
 			} );
@@ -125,13 +147,17 @@ class Theme extends Component {
 
 	onClosePreview() {
 		const { demo } = this.state;
-		recordEvent( 'storeprofiler_store_theme_demo_close', { theme: demo.slug } );
+		recordEvent( 'storeprofiler_store_theme_demo_close', {
+			theme: demo.slug,
+		} );
 		document.body.classList.remove( 'woocommerce-theme-preview-active' );
 		this.setState( { demo: null } );
 	}
 
 	openDemo( theme ) {
-		recordEvent( 'storeprofiler_store_theme_live_demo', { theme: theme.slug } );
+		recordEvent( 'storeprofiler_store_theme_live_demo', {
+			theme: theme.slug,
+		} );
 		document.body.classList.add( 'woocommerce-theme-preview-active' );
 		this.setState( { demo: theme } );
 	}
@@ -143,12 +169,15 @@ class Theme extends Component {
 	}
 
 	renderTheme( theme ) {
-		const { demo_url, has_woocommerce_support, image, slug, title } = theme;
+		const { demo_url: demoUrl, has_woocommerce_support: hasSupport, image, slug, title } = theme;
 		const { chosen } = this.state;
 		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 
 		return (
-			<Card className="woocommerce-profile-wizard__theme" key={ theme.slug }>
+			<Card
+				className="woocommerce-profile-wizard__theme"
+				key={ theme.slug }
+			>
 				{ image && (
 					<div
 						className="woocommerce-profile-wizard__theme-image"
@@ -160,12 +189,20 @@ class Theme extends Component {
 				<div className="woocommerce-profile-wizard__theme-details">
 					<H className="woocommerce-profile-wizard__theme-name">
 						{ title }
-						{ ! has_woocommerce_support && (
+						{ ! hasSupport && (
 							<Tooltip
-								text={ __( 'This theme does not support WooCommerce.', 'woocommerce-admin' ) }
+								text={ __(
+									'This theme does not support WooCommerce.',
+									'woocommerce-admin'
+								) }
 							>
 								<span>
-									<Gridicon icon="info" role="img" aria-hidden="true" focusable="false" />
+									<Gridicon
+										icon="info"
+										role="img"
+										aria-hidden="true"
+										focusable="false"
+									/>
 								</span>
 							</Tooltip>
 						) }
@@ -180,7 +217,10 @@ class Theme extends Component {
 								onClick={ () => this.onChoose( theme, 'card' ) }
 								isBusy={ chosen === slug }
 							>
-								{ __( 'Continue with my active theme', 'woocommerce-admin' ) }
+								{ __(
+									'Continue with my active theme',
+									'woocommerce-admin'
+								) }
 							</Button>
 						) : (
 							<Button
@@ -191,8 +231,11 @@ class Theme extends Component {
 								{ __( 'Choose', 'woocommerce-admin' ) }
 							</Button>
 						) }
-						{ demo_url && (
-							<Button isTertiary onClick={ () => this.openDemo( theme ) }>
+						{ demoUrl && (
+							<Button
+								isTertiary
+								onClick={ () => this.openDemo( theme ) }
+							>
 								{ __( 'Live demo', 'woocommerce-admin' ) }
 							</Button>
 						) }
@@ -203,30 +246,37 @@ class Theme extends Component {
 	}
 
 	getThemeStatus( theme ) {
-		const { is_installed, price, slug } = theme;
+		const { is_installed: isInstalled, price, slug } = theme;
 		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 
 		if ( activeTheme === slug ) {
 			return __( 'Currently active theme', 'woocommerce-admin' );
 		}
-		if ( is_installed ) {
+		if ( isInstalled ) {
 			return __( 'Installed', 'woocommerce-admin' );
 		} else if ( getPriceValue( price ) <= 0 ) {
 			return __( 'Free', 'woocommerce-admin' );
 		}
 
-		return sprintf( __( '%s per year', 'woocommerce-admin' ), decodeEntities( price ) );
+		return sprintf(
+			__( '%s per year', 'woocommerce-admin' ),
+			decodeEntities( price )
+		);
 	}
 
 	doesActiveThemeSupportWooCommerce() {
 		const { activeTheme = '' } = getSetting( 'onboarding', {} );
 		const allThemes = this.getThemes();
-		const currentTheme = allThemes.find( theme => theme.slug === activeTheme );
+		const currentTheme = allThemes.find(
+			( theme ) => theme.slug === activeTheme
+		);
 		return currentTheme && currentTheme.has_woocommerce_support;
 	}
 
 	onSelectTab( tab ) {
-		recordEvent( 'storeprofiler_store_theme_navigate', { navigation: tab } );
+		recordEvent( 'storeprofiler_store_theme_navigate', {
+			navigation: tab,
+		} );
 		this.setState( { activeTab: tab } );
 	}
 
@@ -236,17 +286,27 @@ class Theme extends Component {
 
 	getThemes( activeTab = 'all' ) {
 		const { uploadedThemes } = this.state;
-		const { activeTheme = '', themes = [] } = getSetting( 'onboarding', {} );
+		const { activeTheme = '', themes = [] } = getSetting(
+			'onboarding',
+			{}
+		);
 		const allThemes = [
-			...themes.filter( theme => theme.has_woocommerce_support || theme.slug === activeTheme ),
+			...themes.filter(
+				( theme ) =>
+					theme.has_woocommerce_support || theme.slug === activeTheme
+			),
 			...uploadedThemes,
 		];
 
 		switch ( activeTab ) {
 			case 'paid':
-				return allThemes.filter( theme => getPriceValue( theme.price ) > 0 );
+				return allThemes.filter(
+					( theme ) => getPriceValue( theme.price ) > 0
+				);
 			case 'free':
-				return allThemes.filter( theme => getPriceValue( theme.price ) <= 0 );
+				return allThemes.filter(
+					( theme ) => getPriceValue( theme.price ) <= 0
+				);
 			case 'all':
 			default:
 				return allThemes;
@@ -254,12 +314,17 @@ class Theme extends Component {
 	}
 
 	handleUploadComplete( upload ) {
-		if ( 'success' === upload.status && upload.theme_data ) {
+		if ( upload.status === 'success' && upload.theme_data ) {
 			this.setState( {
-				uploadedThemes: [ ...this.state.uploadedThemes, upload.theme_data ],
+				uploadedThemes: [
+					...this.state.uploadedThemes,
+					upload.theme_data,
+				],
 			} );
 
-			recordEvent( 'storeprofiler_store_theme_upload', { theme: upload.theme_data.slug } );
+			recordEvent( 'storeprofiler_store_theme_upload', {
+				theme: upload.theme_data.slug,
+			} );
 		}
 	}
 
@@ -300,8 +365,13 @@ class Theme extends Component {
 				>
 					{ () => (
 						<div className="woocommerce-profile-wizard__themes">
-							{ themes && themes.map( theme => this.renderTheme( theme ) ) }
-							<ThemeUploader onUploadComplete={ this.handleUploadComplete } />
+							{ themes &&
+								themes.map( ( theme ) =>
+									this.renderTheme( theme )
+								) }
+							<ThemeUploader
+								onUploadComplete={ this.handleUploadComplete }
+							/>
 						</div>
 					) }
 				</TabPanel>
@@ -330,10 +400,12 @@ class Theme extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getProfileItems, getProfileItemsError, isGetProfileItemsRequesting } = select(
-			'wc-api'
-		);
+	withSelect( ( select ) => {
+		const {
+			getProfileItems,
+			getProfileItemsError,
+			isGetProfileItemsRequesting,
+		} = select( 'wc-api' );
 
 		return {
 			isError: Boolean( getProfileItemsError() ),
@@ -341,7 +413,7 @@ export default compose(
 			profileItems: getProfileItems(),
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateProfileItems } = dispatch( 'wc-api' );
 		const { createNotice } = dispatch( 'core/notices' );
 

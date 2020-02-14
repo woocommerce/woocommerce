@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -105,24 +104,24 @@ export default class OrdersReportTable extends Component {
 	getRowsContent( tableData ) {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
-		return map( tableData, row => {
+		return map( tableData, ( row ) => {
 			const {
 				currency,
-				customer_type,
-				date_created,
-				net_total,
-				num_items_sold,
-				order_id,
-				order_number,
-				parent_id,
+				customer_type: customerType,
+				date_created: dateCreated,
+				net_total: netTotal,
+				num_items_sold: numItemsSold,
+				order_id: orderId,
+				order_number: orderNumber,
+				parent_id: parentId,
 				status,
 			} = row;
-			const extended_info = row.extended_info || {};
-			const { coupons, products } = extended_info;
+			const extendedInfo = row.extended_info || {};
+			const { coupons, products } = extendedInfo;
 
 			const formattedProducts = products
 				.sort( ( itemA, itemB ) => itemB.quantity - itemA.quantity )
-				.map( item => ( {
+				.map( ( item ) => ( {
 					label: item.name,
 					quantity: item.quantity,
 					href: getNewPath( persistedQuery, '/analytics/products', {
@@ -131,7 +130,7 @@ export default class OrdersReportTable extends Component {
 					} ),
 				} ) );
 
-			const formattedCoupons = coupons.map( coupon => ( {
+			const formattedCoupons = coupons.map( ( coupon ) => ( {
 				label: coupon.code,
 				href: getNewPath( persistedQuery, '/analytics/coupons', {
 					filter: 'single_coupon',
@@ -141,24 +140,29 @@ export default class OrdersReportTable extends Component {
 
 			return [
 				{
-					display: <Date date={ date_created } visibleFormat={ defaultTableDateFormat } />,
-					value: date_created,
+					display: (
+						<Date
+							date={ dateCreated }
+							visibleFormat={ defaultTableDateFormat }
+						/>
+					),
+					value: dateCreated,
 				},
 				{
 					display: (
 						<Link
 							href={
 								'post.php?post=' +
-								( parent_id ? parent_id : order_id ) +
+								( parentId ? parentId : orderId ) +
 								'&action=edit' +
-								( parent_id ? '#order_refunds' : '' )
+								( parentId ? '#order_refunds' : '' )
 							}
 							type="wp-admin"
 						>
-							{ order_number }
+							{ orderNumber }
 						</Link>
 					),
-					value: order_number,
+					value: orderNumber,
 				},
 				{
 					display: (
@@ -171,13 +175,15 @@ export default class OrdersReportTable extends Component {
 					value: status,
 				},
 				{
-					display: this.getCustomerType( customer_type ),
-					value: customer_type,
+					display: this.getCustomerType( customerType ),
+					value: customerType,
 				},
 				{
 					display: this.renderList(
-						formattedProducts.length ? [ formattedProducts[ 0 ] ] : [],
-						formattedProducts.map( product => ( {
+						formattedProducts.length
+							? [ formattedProducts[ 0 ] ]
+							: [],
+						formattedProducts.map( ( product ) => ( {
 							label: sprintf(
 								__( '%s× %s', 'woocommerce-admin' ),
 								product.quantity,
@@ -188,24 +194,32 @@ export default class OrdersReportTable extends Component {
 					),
 					value: formattedProducts
 						.map( ( { quantity, label } ) =>
-							sprintf( __( '%s× %s', 'woocommerce-admin' ), quantity, label )
+							sprintf(
+								__( '%s× %s', 'woocommerce-admin' ),
+								quantity,
+								label
+							)
 						)
 						.join( ', ' ),
 				},
 				{
-					display: formatValue( 'number', num_items_sold ),
-					value: num_items_sold,
+					display: formatValue( 'number', numItemsSold ),
+					value: numItemsSold,
 				},
 				{
 					display: this.renderList(
-						formattedCoupons.length ? [ formattedCoupons[ 0 ] ] : [],
+						formattedCoupons.length
+							? [ formattedCoupons[ 0 ] ]
+							: [],
 						formattedCoupons
 					),
-					value: formattedCoupons.map( coupon => coupon.label ).join( ', ' ),
+					value: formattedCoupons
+						.map( ( coupon ) => coupon.label )
+						.join( ', ' ),
 				},
 				{
-					display: renderCurrency( net_total, currency ),
-					value: net_total,
+					display: renderCurrency( netTotal, currency ),
+					value: netTotal,
 				},
 			];
 		} );
@@ -213,47 +227,72 @@ export default class OrdersReportTable extends Component {
 
 	getSummary( totals ) {
 		const {
-			orders_count = 0,
-			num_new_customers = 0,
-			num_returning_customers = 0,
+			orders_count: ordersCount = 0,
+			num_new_customers: numNewCustomers = 0,
+			num_returning_customers: numReturningCustomers = 0,
 			products = 0,
-			num_items_sold = 0,
-			coupons_count = 0,
-			net_revenue = 0,
+			num_items_sold: numItemsSold = 0,
+			coupons_count: couponsCount = 0,
+			net_revenue: netRevenue = 0,
 		} = totals;
 		return [
 			{
-				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: formatValue( 'number', orders_count ),
+				label: _n(
+					'order',
+					'orders',
+					ordersCount,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', ordersCount ),
 			},
 			{
-				label: _n( 'new customer', 'new customers', num_new_customers, 'woocommerce-admin' ),
-				value: formatValue( 'number', num_new_customers ),
+				label: _n(
+					'new customer',
+					'new customers',
+					numNewCustomers,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', numNewCustomers ),
 			},
 			{
 				label: _n(
 					'returning customer',
 					'returning customers',
-					num_returning_customers,
+					numReturningCustomers,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', num_returning_customers ),
+				value: formatValue( 'number', numReturningCustomers ),
 			},
 			{
-				label: _n( 'product', 'products', products, 'woocommerce-admin' ),
+				label: _n(
+					'product',
+					'products',
+					products,
+					'woocommerce-admin'
+				),
 				value: formatValue( 'number', products ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', num_items_sold, 'woocommerce-admin' ),
-				value: formatValue( 'number', num_items_sold ),
+				label: _n(
+					'item sold',
+					'items sold',
+					numItemsSold,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', numItemsSold ),
 			},
 			{
-				label: _n( 'coupon', 'coupons', coupons_count, 'woocommerce-admin' ),
-				value: formatValue( 'number', coupons_count ),
+				label: _n(
+					'coupon',
+					'coupons',
+					couponsCount,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', couponsCount ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
-				value: formatCurrency( net_revenue ),
+				value: formatCurrency( netRevenue ),
 			},
 		];
 	}
@@ -270,7 +309,9 @@ export default class OrdersReportTable extends Component {
 		return (
 			<Fragment>
 				{ this.renderLinks( visibleItems ) }
-				{ popoverItems.length > 1 && <ViewMoreList items={ this.renderLinks( popoverItems ) } /> }
+				{ popoverItems.length > 1 && (
+					<ViewMoreList items={ this.renderLinks( popoverItems ) } />
+				) }
 			</Fragment>
 		);
 	}

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,7 +11,8 @@ import { getCouponLabels } from 'lib/async-requests';
 
 const COUPON_REPORT_CHARTS_FILTER = 'woocommerce_admin_coupons_report_charts';
 const COUPON_REPORT_FILTERS_FILTER = 'woocommerce_admin_coupons_report_filters';
-const COUPON_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_coupon_report_advanced_filters';
+const COUPON_REPORT_ADVANCED_FILTERS_FILTER =
+	'woocommerce_admin_coupon_report_advanced_filters';
 
 export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 	{
@@ -54,8 +54,14 @@ export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 							param: 'coupons',
 							getLabels: getCouponLabels,
 							labels: {
-								placeholder: __( 'Type to search for a coupon', 'woocommerce-admin' ),
-								button: __( 'Single Coupon', 'woocommerce-admin' ),
+								placeholder: __(
+									'Type to search for a coupon',
+									'woocommerce-admin'
+								),
+								button: __(
+									'Single Coupon',
+									'woocommerce-admin'
+								),
 							},
 						},
 					},
@@ -69,9 +75,15 @@ export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 					param: 'coupons',
 					getLabels: getCouponLabels,
 					labels: {
-						title: __( 'Compare Coupon Codes', 'woocommerce-admin' ),
+						title: __(
+							'Compare Coupon Codes',
+							'woocommerce-admin'
+						),
 						update: __( 'Compare', 'woocommerce-admin' ),
-						helpText: __( 'Check at least two coupon codes below to compare', 'woocommerce-admin' ),
+						helpText: __(
+							'Check at least two coupon codes below to compare',
+							'woocommerce-admin'
+						),
 					},
 				},
 			},
@@ -79,4 +91,7 @@ export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 	},
 ] );
 
-export const advancedFilters = applyFilters( COUPON_REPORT_ADVANCED_FILTERS_FILTER, {} );
+export const advancedFilters = applyFilters(
+	COUPON_REPORT_ADVANCED_FILTERS_FILTER,
+	{}
+);

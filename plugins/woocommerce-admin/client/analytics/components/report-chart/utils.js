@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -22,7 +20,10 @@ export function getSelectedFilter( filters, query, selectedFilterArgs = {} ) {
 
 	if ( filterConfig.showFilters( query, selectedFilterArgs ) ) {
 		const allFilters = flattenFilters( filterConfig.filters );
-		const value = query[ filterConfig.param ] || filterConfig.defaultValue || DEFAULT_FILTER;
+		const value =
+			query[ filterConfig.param ] ||
+			filterConfig.defaultValue ||
+			DEFAULT_FILTER;
 		return find( allFilters, { value } );
 	}
 
@@ -31,9 +32,15 @@ export function getSelectedFilter( filters, query, selectedFilterArgs = {} ) {
 
 export function getChartMode( selectedFilter, query ) {
 	if ( selectedFilter && query ) {
-		const selectedFilterParam = get( selectedFilter, [ 'settings', 'param' ] );
+		const selectedFilterParam = get( selectedFilter, [
+			'settings',
+			'param',
+		] );
 
-		if ( ! selectedFilterParam || Object.keys( query ).includes( selectedFilterParam ) ) {
+		if (
+			! selectedFilterParam ||
+			Object.keys( query ).includes( selectedFilterParam )
+		) {
 			return get( selectedFilter, [ 'chartMode' ] );
 		}
 	}

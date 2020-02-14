@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -59,18 +58,21 @@ describe( 'getActiveFiltersFromQuery', () => {
 		expect( activeFilters.length ).toBe( 3 );
 
 		// with_select
+		// eslint-disable-next-line camelcase
 		const with_select = activeFilters[ 0 ];
 		expect( with_select.key ).toBe( 'with_select' );
 		expect( with_select.rule ).toBe( 'is' );
 		expect( with_select.value ).toBe( 'pending' );
 
 		// with_search
+		// eslint-disable-next-line camelcase
 		const with_search = activeFilters[ 1 ];
 		expect( with_search.key ).toBe( 'with_search' );
 		expect( with_search.rule ).toBe( 'includes' );
 		expect( with_search.value ).toEqual( '1,2,3' );
 
 		// with_search
+		// eslint-disable-next-line camelcase
 		const with_no_rules = activeFilters[ 2 ];
 		expect( with_no_rules.key ).toBe( 'with_no_rules' );
 		expect( with_no_rules.rule ).toBeUndefined();
@@ -109,7 +111,11 @@ describe( 'getQueryFromActiveFilters', () => {
 		];
 
 		const query = {};
-		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
+		const nextQuery = getQueryFromActiveFilters(
+			activeFilters,
+			query,
+			config
+		);
 		expect( nextQuery.status_is ).toBe( 'open' );
 		expect( nextQuery.things_includes ).toBe( '1,2,3' );
 		expect( nextQuery.customer ).toBe( 'new' );
@@ -122,19 +128,35 @@ describe( 'getQueryFromActiveFilters', () => {
 			with_search_includes: '45',
 		};
 
-		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
+		const nextQuery = getQueryFromActiveFilters(
+			activeFilters,
+			query,
+			config
+		);
 		expect( nextQuery.with_select_is ).toBeUndefined();
 		expect( nextQuery.with_search_includes ).toBeUndefined();
 	} );
 
 	it( 'should only reflect complete filters with multiple values', () => {
 		const activeFilters = [
-			{ key: 'valid_date', rule: 'between', value: [ '2018-04-04', '2018-04-10' ] },
-			{ key: 'invalid_date_1', rule: 'between', value: [ '2018-04-04', undefined ] },
+			{
+				key: 'valid_date',
+				rule: 'between',
+				value: [ '2018-04-04', '2018-04-10' ],
+			},
+			{
+				key: 'invalid_date_1',
+				rule: 'between',
+				value: [ '2018-04-04', undefined ],
+			},
 			{ key: 'invalid_date_2', rule: 'between', value: '2018-04-04' },
 		];
 		const query = {};
-		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
+		const nextQuery = getQueryFromActiveFilters(
+			activeFilters,
+			query,
+			config
+		);
 
 		expect( nextQuery.valid_date_between ).toBeDefined();
 		expect( nextQuery.invalid_date_1_between ).toBeUndefined();

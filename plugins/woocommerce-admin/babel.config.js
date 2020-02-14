@@ -6,9 +6,12 @@ module.exports = function( api ) {
 		plugins: [
 			'@babel/plugin-transform-async-to-generator',
 			'transform-class-properties',
-			[ '@babel/transform-react-jsx', {
-				pragma: 'createElement',
-			} ],
+			[
+				'@babel/transform-react-jsx',
+				{
+					pragma: 'createElement',
+				},
+			],
 			[
 				'@wordpress/babel-plugin-import-jsx-pragma',
 				{

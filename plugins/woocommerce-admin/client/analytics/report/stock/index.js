@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -25,7 +24,11 @@ export default class StockReport extends Component {
 					advancedFilters={ advancedFilters }
 					report="stock"
 				/>
-				<StockReportTable query={ query } filters={ filters } advancedFilters={ advancedFilters } />
+				<StockReportTable
+					query={ query }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}

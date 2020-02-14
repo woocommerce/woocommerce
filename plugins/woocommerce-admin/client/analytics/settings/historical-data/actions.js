@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,7 +17,11 @@ function HistoricalDataActions( {
 		const importDisabled = status !== 'ready';
 
 		// An import is currently in progress
-		if ( [ 'initializing', 'customers', 'orders', 'finalizing' ].includes( status ) ) {
+		if (
+			[ 'initializing', 'customers', 'orders', 'finalizing' ].includes(
+				status
+			)
+		) {
 			return (
 				<Fragment>
 					<Button
@@ -47,11 +50,18 @@ function HistoricalDataActions( {
 			if ( importDate ) {
 				return (
 					<Fragment>
-						<Button isPrimary onClick={ onStartImport } disabled={ importDisabled }>
+						<Button
+							isPrimary
+							onClick={ onStartImport }
+							disabled={ importDisabled }
+						>
 							{ __( 'Start', 'woocommerce-admin' ) }
 						</Button>
 						<Button isDefault onClick={ onDeletePreviousData }>
-							{ __( 'Delete Previously Imported Data', 'woocommerce-admin' ) }
+							{ __(
+								'Delete Previously Imported Data',
+								'woocommerce-admin'
+							) }
 						</Button>
 					</Fragment>
 				);
@@ -59,7 +69,11 @@ function HistoricalDataActions( {
 
 			return (
 				<Fragment>
-					<Button isPrimary onClick={ onStartImport } disabled={ importDisabled }>
+					<Button
+						isPrimary
+						onClick={ onStartImport }
+						disabled={ importDisabled }
+					>
 						{ __( 'Start', 'woocommerce-admin' ) }
 					</Button>
 				</Fragment>
@@ -73,7 +87,10 @@ function HistoricalDataActions( {
 					{ __( 'Re-import Data', 'woocommerce-admin' ) }
 				</Button>
 				<Button isDefault onClick={ onDeletePreviousData }>
-					{ __( 'Delete Previously Imported Data', 'woocommerce-admin' ) }
+					{ __(
+						'Delete Previously Imported Data',
+						'woocommerce-admin'
+					) }
 				</Button>
 			</Fragment>
 		);

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -14,7 +13,13 @@ import { keyBy, map, merge } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { EmptyContent, Flag, Link, OrderStatus, Section } from '@woocommerce/components';
+import {
+	EmptyContent,
+	Flag,
+	Link,
+	OrderStatus,
+	Section,
+} from '@woocommerce/components';
 import { formatCurrency } from 'lib/currency-format';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
@@ -35,10 +40,16 @@ class OrdersPanel extends Component {
 			return (
 				<ActivityCard
 					className="woocommerce-empty-activity-card"
-					title={ __( 'You have no orders to fulfill', 'woocommerce-admin' ) }
+					title={ __(
+						'You have no orders to fulfill',
+						'woocommerce-admin'
+					) }
 					icon={ <Gridicon icon="checkmark" size={ 48 } /> }
 				>
-					{ __( "Good job, you've fulfilled all of your new orders!", 'woocommerce-admin' ) }
+					{ __(
+						"Good job, you've fulfilled all of your new orders!",
+						'woocommerce-admin'
+					) }
 				</ActivityCard>
 			);
 		}
@@ -46,7 +57,10 @@ class OrdersPanel extends Component {
 		return (
 			<ActivityCard
 				className="woocommerce-empty-activity-card"
-				title={ __( 'You have no orders to fulfill', 'woocommerce-admin' ) }
+				title={ __(
+					'You have no orders to fulfill',
+					'woocommerce-admin'
+				) }
 				icon={ <Gridicon icon="time" size={ 48 } /> }
 				actions={
 					<Button
@@ -74,15 +88,15 @@ class OrdersPanel extends Component {
 			return this.renderEmptyCard();
 		}
 
-		const getCustomerString = order => {
-			const extended_info = order.extended_info || {};
-			const { first_name, last_name } = extended_info.customer || {};
+		const getCustomerString = ( order ) => {
+			const extendedInfo = order.extended_info || {};
+			const { first_name: firstName, last_name: lastName } = extendedInfo.customer || {};
 
-			if ( ! first_name && ! last_name ) {
+			if ( ! firstName && ! lastName ) {
 				return '';
 			}
 
-			const name = [ first_name, last_name ].join( ' ' );
+			const name = [ firstName, lastName ].join( ' ' );
 			return sprintf(
 				__(
 					/* translators: describes who placed an order, e.g. Order #123 placed by John Doe */
@@ -95,14 +109,14 @@ class OrdersPanel extends Component {
 			);
 		};
 
-		const orderCardTitle = order => {
-			const { extended_info, order_id, order_number } = order;
-			const { customer } = extended_info || {};
+		const orderCardTitle = ( order ) => {
+			const { extended_info: extendedInfo, order_id: orderId, orderNumber } = order;
+			const { customer } = extendedInfo || {};
 			const customerUrl = customer.customer_id
 				? getNewPath( {}, '/analytics/customers', {
 						filter: 'single_customer',
 						customers: customer.customer_id,
-					} )
+				  } )
 				: null;
 
 			return (
@@ -114,21 +128,30 @@ class OrdersPanel extends Component {
 								'woocommerce-admin'
 							),
 							{
-								orderNumber: order_number,
+								orderNumber,
 								customerString: getCustomerString( order ),
 							}
 						),
 						components: {
 							orderLink: (
 								<Link
-									href={ getAdminLink( 'post.php?action=edit&post=' + order_id ) }
+									href={ getAdminLink(
+										'post.php?action=edit&post=' + orderId
+									) }
 									type="wp-admin"
 								/>
 							),
 							destinationFlag: customer.country ? (
-								<Flag code={ customer.country } round={ false } />
+								<Flag
+									code={ customer.country }
+									round={ false }
+								/>
 							) : null,
-							customerLink: customerUrl ? <Link href={ customerUrl } type="wc-admin" /> : <span />,
+							customerLink: customerUrl ? (
+								<Link href={ customerUrl } type="wc-admin" />
+							) : (
+								<span />
+							),
 						},
 					} ) }
 				</Fragment>
@@ -136,10 +159,12 @@ class OrdersPanel extends Component {
 		};
 
 		const cards = [];
-		orders.forEach( order => {
-			const extended_info = order.extended_info || {};
+		orders.forEach( ( order ) => {
+			const extendedInfo = order.extended_info || {};
 			const productsCount =
-				extended_info && extended_info.products ? extended_info.products.length : 0;
+				extendedInfo && extendedInfo.products
+					? extendedInfo.products.length
+					: 0;
 
 			const total = order.total_sales;
 
@@ -153,7 +178,12 @@ class OrdersPanel extends Component {
 						<div>
 							<span>
 								{ sprintf(
-									_n( '%d product', '%d products', productsCount, 'woocommerce-admin' ),
+									_n(
+										'%d product',
+										'%d products',
+										productsCount,
+										'woocommerce-admin'
+									),
 									productsCount
 								) }
 							</span>
@@ -163,13 +193,18 @@ class OrdersPanel extends Component {
 					actions={
 						<Button
 							isDefault
-							href={ getAdminLink( 'post.php?action=edit&post=' + order.order_id ) }
+							href={ getAdminLink(
+								'post.php?action=edit&post=' + order.order_id
+							) }
 						>
 							{ __( 'Begin fulfillment' ) }
 						</Button>
 					}
 				>
-					<OrderStatus order={ order } orderStatusMap={ getSetting( 'orderStatuses', {} ) } />
+					<OrderStatus
+						order={ order }
+						orderStatusMap={ getSetting( 'orderStatuses', {} ) }
+					/>
 				</ActivityCard>
 			);
 		} );
@@ -196,7 +231,9 @@ class OrdersPanel extends Component {
 							'woocommerce-admin'
 						) }
 						actionLabel={ __( 'Settings', 'woocommerce-admin' ) }
-						actionURL={ getAdminLink( 'admin.php?page=wc-admin&path=/analytics/settings' ) }
+						actionURL={ getAdminLink(
+							'admin.php?page=wc-admin&path=/analytics/settings'
+						) }
 					/>
 				);
 			}
@@ -276,7 +313,12 @@ export default compose(
 			woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
 		} = getSetting( 'wcAdminSettings', {} );
 		if ( ! orderStatuses.length ) {
-			return { orders: [], isError: true, isRequesting: false, orderStatuses };
+			return {
+				orders: [],
+				isError: true,
+				isRequesting: false,
+				orderStatuses,
+			};
 		}
 
 		if ( hasActionableOrders ) {
@@ -287,12 +329,19 @@ export default compose(
 				status: orderStatuses,
 				_fields: [ 'id', 'date_created_gmt', 'status' ],
 			};
-			const actionableOrders = Array.from( getItems( 'orders', actionableOrdersQuery ).values() );
-			const isRequestingActionable = isGetItemsRequesting( 'orders', actionableOrdersQuery );
+			const actionableOrders = Array.from(
+				getItems( 'orders', actionableOrdersQuery ).values()
+			);
+			const isRequestingActionable = isGetItemsRequesting(
+				'orders',
+				actionableOrdersQuery
+			);
 
 			if ( isRequestingActionable ) {
 				return {
-					isError: Boolean( getItemsError( 'orders', actionableOrdersQuery ) ),
+					isError: Boolean(
+						getItemsError( 'orders', actionableOrdersQuery )
+					),
 					isRequesting: isRequestingActionable,
 					orderStatuses,
 				};
@@ -307,15 +356,24 @@ export default compose(
 			};
 
 			const reportOrders = getReportItems( 'orders', ordersQuery ).data;
-			const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
-			const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
+			const isError = Boolean(
+				getReportItemsError( 'orders', ordersQuery )
+			);
+			const isRequesting = isReportItemsRequesting(
+				'orders',
+				ordersQuery
+			);
 			let orders = [];
 
 			if ( reportOrders && reportOrders.length ) {
 				// Merge the core endpoint data with our reporting table.
 				const actionableOrdersById = keyBy( actionableOrders, 'id' );
-				orders = reportOrders.map( order =>
-					merge( {}, order, actionableOrdersById[ order.order_id ] || {} )
+				orders = reportOrders.map( ( order ) =>
+					merge(
+						{},
+						order,
+						actionableOrdersById[ order.order_id ] || {}
+					)
 				);
 			}
 
@@ -331,7 +389,10 @@ export default compose(
 		};
 
 		getItems( 'orders', allOrdersQuery );
-		const totalNonActionableOrders = getItemsTotalCount( 'orders', allOrdersQuery );
+		const totalNonActionableOrders = getItemsTotalCount(
+			'orders',
+			allOrdersQuery
+		);
 		const isError = Boolean( getItemsError( 'orders', allOrdersQuery ) );
 		const isRequesting = isGetItemsRequesting( 'orders', allOrdersQuery );
 

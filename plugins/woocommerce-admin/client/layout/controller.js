@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -11,7 +10,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * WooCommerce dependencies
  */
-import { getNewPath, getPersistedQuery, getHistory } from '@woocommerce/navigation';
+import {
+	getNewPath,
+	getPersistedQuery,
+	getHistory,
+} from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -60,7 +63,10 @@ export const getPages = () => {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
 			breadcrumbs: [
-				[ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ],
+				[
+					'/analytics/revenue',
+					__( 'Analytics', 'woocommerce-admin' ),
+				],
 				__( 'Settings', 'woocommerce-admin' ),
 			],
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
@@ -69,11 +75,19 @@ export const getPages = () => {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
 			breadcrumbs: ( { match } ) => {
-				const report = find( getReports(), { report: match.params.report } );
+				const report = find( getReports(), {
+					report: match.params.report,
+				} );
 				if ( ! report ) {
 					return [];
 				}
-				return [ [ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ], report.title ];
+				return [
+					[
+						'/analytics/revenue',
+						__( 'Analytics', 'woocommerce-admin' ),
+					],
+					report.title,
+				];
 			},
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
@@ -89,8 +103,14 @@ export class Controller extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const prevQuery = this.getQuery( prevProps.location.search );
-		const prevBaseQuery = omit( this.getQuery( prevProps.location.search ), 'paged' );
-		const baseQuery = omit( this.getQuery( this.props.location.search ), 'paged' );
+		const prevBaseQuery = omit(
+			this.getQuery( prevProps.location.search ),
+			'paged'
+		);
+		const baseQuery = omit(
+			this.getQuery( this.props.location.search ),
+			'paged'
+		);
 
 		if ( prevQuery.paged > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
 			getHistory().replace( getNewPath( { paged: 1 } ) );
@@ -117,7 +137,12 @@ export class Controller extends Component {
 
 		window.wpNavMenuUrlUpdate( query );
 		window.wpNavMenuClassChange( page, url );
-		return createElement( page.container, { params, path: url, pathMatch: page.path, query } );
+		return createElement( page.container, {
+			params,
+			path: url,
+			pathMatch: page.path,
+			query,
+		} );
 	}
 }
 
@@ -126,7 +151,7 @@ export class Controller extends Component {
  * as is.
  *
  * @param {HTMLElement} item - Sidebar anchor link.
- * @param {object} nextQuery - A query object to be added to updated hrefs.
+ * @param {Object} nextQuery - A query object to be added to updated hrefs.
  * @param {Array} excludedScreens - wc-admin screens to avoid updating.
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
@@ -141,12 +166,15 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		const isExcludedScreen = excludedScreens.includes( screen );
 
 		const href =
-			'admin.php?' + stringify( Object.assign( query, isExcludedScreen ? {} : nextQuery ) );
+			'admin.php?' +
+			stringify(
+				Object.assign( query, isExcludedScreen ? {} : nextQuery )
+			);
 
 		// Replace the href so you can see the url on hover.
 		item.href = href;
 
-		item.onclick = e => {
+		item.onclick = ( e ) => {
 			e.preventDefault();
 			getHistory().push( href );
 		};
@@ -163,18 +191,22 @@ window.wpNavMenuUrlUpdate = function( query ) {
 	] );
 	const nextQuery = getPersistedQuery( query );
 
-	Array.from( document.querySelectorAll( '#adminmenu a' ) ).forEach( item =>
-		updateLinkHref( item, nextQuery, excludedScreens )
-	);
+	Array.from(
+		document.querySelectorAll( '#adminmenu a' )
+	).forEach( ( item ) => updateLinkHref( item, nextQuery, excludedScreens ) );
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
 window.wpNavMenuClassChange = function( page, url ) {
-	Array.from( document.getElementsByClassName( 'current' ) ).forEach( function( item ) {
-		item.classList.remove( 'current' );
-	} );
+	Array.from( document.getElementsByClassName( 'current' ) ).forEach(
+		function( item ) {
+			item.classList.remove( 'current' );
+		}
+	);
 
-	const submenu = Array.from( document.querySelectorAll( '.wp-has-current-submenu' ) );
+	const submenu = Array.from(
+		document.querySelectorAll( '.wp-has-current-submenu' )
+	);
 	submenu.forEach( function( element ) {
 		element.classList.remove( 'wp-has-current-submenu' );
 		element.classList.remove( 'wp-menu-open' );
@@ -184,7 +216,7 @@ window.wpNavMenuClassChange = function( page, url ) {
 	} );
 
 	const pageUrl =
-		'/' === url
+		url === '/'
 			? 'admin.php?page=wc-admin'
 			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
 	const currentItemsSelector =

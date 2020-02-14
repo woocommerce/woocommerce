@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -13,7 +12,12 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, Stepper, TextControl, ImageUpload } from '@woocommerce/components';
+import {
+	Card,
+	Stepper,
+	TextControl,
+	ImageUpload,
+} from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
@@ -61,9 +65,16 @@ class Appearance extends Component {
 
 	async componentDidUpdate( prevProps ) {
 		const { isPending, logo, stepIndex } = this.state;
-		const { createNotice, errors, hasErrors, isRequesting, options } = this.props;
+		const {
+			createNotice,
+			errors,
+			hasErrors,
+			isRequesting,
+			options,
+		} = this.props;
 		const step = this.getSteps()[ stepIndex ].key;
-		const isRequestSuccessful = ! isRequesting && prevProps.isRequesting && ! hasErrors;
+		const isRequestSuccessful =
+			! isRequesting && prevProps.isRequesting && ! hasErrors;
 
 		if ( logo && ! logo.url && ! isPending ) {
 			/* eslint-disable react/no-did-update-set-state */
@@ -83,19 +94,25 @@ class Appearance extends Component {
 
 		if (
 			options.woocommerce_demo_store_notice &&
-			prevProps.options.woocommerce_demo_store_notice !== options.woocommerce_demo_store_notice
+			prevProps.options.woocommerce_demo_store_notice !==
+				options.woocommerce_demo_store_notice
 		) {
 			/* eslint-disable react/no-did-update-set-state */
-			this.setState( { storeNoticeText: options.woocommerce_demo_store_notice } );
+			this.setState( {
+				storeNoticeText: options.woocommerce_demo_store_notice,
+			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
 
-		if ( 'logo' === step && isRequestSuccessful ) {
-			createNotice( 'success', __( 'Store logo updated sucessfully.', 'woocommerce-admin' ) );
+		if ( step === 'logo' && isRequestSuccessful ) {
+			createNotice(
+				'success',
+				__( 'Store logo updated sucessfully.', 'woocommerce-admin' )
+			);
 			this.completeStep();
 		}
 
-		if ( 'notice' === step && isRequestSuccessful ) {
+		if ( step === 'notice' && isRequestSuccessful ) {
 			createNotice(
 				'success',
 				__(
@@ -107,7 +124,7 @@ class Appearance extends Component {
 		}
 
 		const newErrors = difference( errors, prevProps.errors );
-		newErrors.map( error => createNotice( 'error', error ) );
+		newErrors.map( ( error ) => createNotice( 'error', error ) );
 	}
 
 	completeStep() {
@@ -131,16 +148,22 @@ class Appearance extends Component {
 			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/import_sample_products`,
 			method: 'POST',
 		} )
-			.then( result => {
+			.then( ( result ) => {
 				if ( result.failed && result.failed.length ) {
 					createNotice(
 						'error',
-						__( 'There was an error importing some of the demo products.', 'woocommerce-admin' )
+						__(
+							'There was an error importing some of the demo products.',
+							'woocommerce-admin'
+						)
 					);
 				} else {
 					createNotice(
 						'success',
-						__( 'All demo products have been imported.', 'woocommerce-admin' )
+						__(
+							'All demo products have been imported.',
+							'woocommerce-admin'
+						)
 					);
 					setSetting( 'onboarding', {
 						...getSetting( 'onboarding', {} ),
@@ -151,7 +174,7 @@ class Appearance extends Component {
 				this.setState( { isPending: false } );
 				this.completeStep();
 			} )
-			.catch( error => {
+			.catch( ( error ) => {
 				createNotice( 'error', error.message );
 				this.setState( { isPending: false } );
 			} );
@@ -161,10 +184,15 @@ class Appearance extends Component {
 		const { createNotice } = this.props;
 		this.setState( { isPending: true } );
 
-		recordEvent( 'tasklist_appearance_create_homepage', { create_homepage: true } );
+		recordEvent( 'tasklist_appearance_create_homepage', {
+			create_homepage: true,
+		} );
 
-		apiFetch( { path: '/wc-admin/onboarding/tasks/create_homepage', method: 'POST' } )
-			.then( response => {
+		apiFetch( {
+			path: '/wc-admin/onboarding/tasks/create_homepage',
+			method: 'POST',
+		} )
+			.then( ( response ) => {
 				createNotice( response.status, response.message );
 
 				this.setState( { isPending: false } );
@@ -172,7 +200,7 @@ class Appearance extends Component {
 					window.location = `${ response.edit_post_link }&wc_onboarding_active_task=homepage`;
 				}
 			} )
-			.catch( error => {
+			.catch( ( error ) => {
 				createNotice( 'error', error.message );
 				this.setState( { isPending: false } );
 			} );
@@ -182,7 +210,10 @@ class Appearance extends Component {
 		const { updateOptions } = this.props;
 		const { logo } = this.state;
 		const { stylesheet, themeMods } = getSetting( 'onboarding', {} );
-		const updatedThemeMods = { ...themeMods, custom_logo: logo ? logo.id : null };
+		const updatedThemeMods = {
+			...themeMods,
+			custom_logo: logo ? logo.id : null,
+		};
 
 		recordEvent( 'tasklist_appearance_upload_logo' );
 
@@ -230,7 +261,11 @@ class Appearance extends Component {
 				),
 				content: (
 					<Fragment>
-						<Button onClick={ this.importProducts } isBusy={ isPending } isPrimary>
+						<Button
+							onClick={ this.importProducts }
+							isBusy={ isPending }
+							isPrimary
+						>
 							{ __( 'Import products', 'woocommerce-admin' ) }
 						</Button>
 						<Button onClick={ () => this.completeStep() }>
@@ -254,7 +289,10 @@ class Appearance extends Component {
 						</Button>
 						<Button
 							onClick={ () => {
-								recordEvent( 'tasklist_appearance_create_homepage', { create_homepage: false } );
+								recordEvent(
+									'tasklist_appearance_create_homepage',
+									{ create_homepage: false }
+								);
 								this.completeStep();
 							} }
 						>
@@ -267,12 +305,17 @@ class Appearance extends Component {
 			{
 				key: 'logo',
 				label: __( 'Upload a logo', 'woocommerce-admin' ),
-				description: __( 'Ensure your store is on-brand by adding your logo', 'woocommerce-admin' ),
+				description: __(
+					'Ensure your store is on-brand by adding your logo',
+					'woocommerce-admin'
+				),
 				content: isPending ? null : (
 					<Fragment>
 						<ImageUpload
 							image={ logo }
-							onChange={ image => this.setState( { isDirty: true, logo: image } ) }
+							onChange={ ( image ) =>
+								this.setState( { isDirty: true, logo: image } )
+							}
 						/>
 						<Button
 							disabled={ ! logo && ! isDirty }
@@ -299,10 +342,18 @@ class Appearance extends Component {
 				content: (
 					<Fragment>
 						<TextControl
-							label={ __( 'Store notice text', 'woocommerce-admin' ) }
-							placeholder={ __( 'Store notice text', 'woocommerce-admin' ) }
+							label={ __(
+								'Store notice text',
+								'woocommerce-admin'
+							) }
+							placeholder={ __(
+								'Store notice text',
+								'woocommerce-admin'
+							) }
 							value={ storeNoticeText }
-							onChange={ value => this.setState( { storeNoticeText: value } ) }
+							onChange={ ( value ) =>
+								this.setState( { storeNoticeText: value } )
+							}
 						/>
 						<Button onClick={ this.updateNotice } isPrimary>
 							{ __( 'Complete task', 'woocommerce-admin' ) }
@@ -313,7 +364,7 @@ class Appearance extends Component {
 			},
 		];
 
-		return filter( steps, step => step.visible );
+		return filter( steps, ( step ) => step.visible );
 	}
 
 	render() {
@@ -325,7 +376,9 @@ class Appearance extends Component {
 			<div className="woocommerce-task-appearance">
 				<Card className="is-narrow">
 					<Stepper
-						isPending={ ( isRequesting && ! hasErrors ) || isPending }
+						isPending={
+							( isRequesting && ! hasErrors ) || isPending
+						}
 						isVertical
 						currentStep={ currentStep }
 						steps={ this.getSteps() }
@@ -337,13 +390,22 @@ class Appearance extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getOptions, getOptionsError, isUpdateOptionsRequesting } = select( 'wc-api' );
+	withSelect( ( select ) => {
+		const {
+			getOptions,
+			getOptionsError,
+			isUpdateOptionsRequesting,
+		} = select( 'wc-api' );
 		const { stylesheet } = getSetting( 'onboarding', {} );
 
-		const options = getOptions( [ 'woocommerce_demo_store', 'woocommerce_demo_store_notice' ] );
+		const options = getOptions( [
+			'woocommerce_demo_store',
+			'woocommerce_demo_store_notice',
+		] );
 		const errors = [];
-		const uploadLogoError = getOptionsError( [ `theme_mods_${ stylesheet }` ] );
+		const uploadLogoError = getOptionsError( [
+			`theme_mods_${ stylesheet }`,
+		] );
 		const storeNoticeError = getOptionsError( [
 			'woocommerce_demo_store',
 			'woocommerce_demo_store_notice',
@@ -356,7 +418,9 @@ export default compose(
 		}
 		const hasErrors = Boolean( errors.length );
 		const isRequesting =
-			Boolean( isUpdateOptionsRequesting( [ `theme_mods_${ stylesheet }` ] ) ) ||
+			Boolean(
+				isUpdateOptionsRequesting( [ `theme_mods_${ stylesheet }` ] )
+			) ||
 			Boolean(
 				isUpdateOptionsRequesting( [
 					'woocommerce_task_list_appearance_complete',
@@ -367,7 +431,7 @@ export default compose(
 
 		return { errors, getOptionsError, hasErrors, isRequesting, options };
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateOptions } = dispatch( 'wc-api' );
 

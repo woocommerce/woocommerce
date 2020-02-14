@@ -1,9 +1,4 @@
 /**
- * @format
- * @jest-environment jsdom
- */
-
-/**
  * External dependencies
  */
 import dompurify from 'dompurify';
@@ -28,6 +23,9 @@ describe( 'sanitizeHtml', () => {
 		const sanitizeMock = jest.spyOn( dompurify, 'sanitize' );
 
 		sanitizeHtml( html );
-		expect( sanitizeMock ).toHaveBeenCalledWith( html, { ALLOWED_ATTR, ALLOWED_TAGS } );
+		expect( sanitizeMock ).toHaveBeenCalledWith( html, {
+			ALLOWED_ATTR,
+			ALLOWED_TAGS,
+		} );
 	} );
 } );

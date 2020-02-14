@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -27,10 +26,16 @@ class StockPanel extends Component {
 		return (
 			<ActivityCard
 				className="woocommerce-empty-activity-card"
-				title={ __( 'Your stock is in good shape.', 'woocommerce-admin' ) }
+				title={ __(
+					'Your stock is in good shape.',
+					'woocommerce-admin'
+				) }
 				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
 			>
-				{ __( 'You currently have no products running low on stock.', 'woocommerce-admin' ) }
+				{ __(
+					'You currently have no products running low on stock.',
+					'woocommerce-admin'
+				) }
 			</ActivityCard>
 		);
 	}
@@ -42,7 +47,9 @@ class StockPanel extends Component {
 			return this.renderEmptyCard();
 		}
 
-		return products.map( product => <ProductStockCard key={ product.id } product={ product } /> );
+		return products.map( ( product ) => (
+			<ProductStockCard key={ product.id } product={ product } />
+		) );
 	}
 
 	render() {
@@ -107,8 +114,10 @@ StockPanel.defaultProps = {
 };
 
 export default compose(
-	withSelect( select => {
-		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
+	withSelect( ( select ) => {
+		const { getItems, getItemsError, isGetItemsRequesting } = select(
+			'wc-api'
+		);
 
 		const productsQuery = {
 			page: 1,
@@ -117,7 +126,9 @@ export default compose(
 			status: 'publish',
 		};
 
-		const products = Array.from( getItems( 'products', productsQuery ).values() );
+		const products = Array.from(
+			getItems( 'products', productsQuery ).values()
+		);
 		const isError = Boolean( getItemsError( 'products', productsQuery ) );
 		const isRequesting = isGetItemsRequesting( 'products', productsQuery );
 

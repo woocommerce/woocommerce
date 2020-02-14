@@ -1,11 +1,10 @@
-/** @format */
 /**
  * External dependencies
  */
 
 /**
-* Internal dependencies
-*/
+ * Internal dependencies
+ */
 import { compareStrings, getXTicks } from '../axis-x';
 
 describe( 'getXTicks', () => {
@@ -143,7 +142,12 @@ describe( 'getXTicks', () => {
 				'2018-04-01T00:00:00',
 			];
 
-			const xTicks = getXTicks( uniqueDates.concat( extendedUniqueDates ), width, mode, interval );
+			const xTicks = getXTicks(
+				uniqueDates.concat( extendedUniqueDates ),
+				width,
+				mode,
+				interval
+			);
 
 			expect( xTicks ).toEqual( expectedXTicks );
 		} );
@@ -177,7 +181,7 @@ describe( 'getXTicks', () => {
 			'2018-01-02T23:00:00',
 		];
 
-		it( 'doesn\'t return a tick for each unique date when width is not big enough', () => {
+		it( "doesn't return a tick for each unique date when width is not big enough", () => {
 			const width = 0;
 			const mode = 'item-comparison';
 			const interval = 'hour';
@@ -192,7 +196,7 @@ describe( 'getXTicks', () => {
 			expect( xTicks ).toEqual( expectedXTicks );
 		} );
 
-		it( 'doesn\'t return a tick for each unique date when all dates don\'t belong to the same day', () => {
+		it( "doesn't return a tick for each unique date when all dates don't belong to the same day", () => {
 			const width = 9999;
 			const mode = 'item-comparison';
 			const interval = 'hour';
@@ -212,7 +216,12 @@ describe( 'getXTicks', () => {
 				'2018-01-02T23:00:00',
 			];
 
-			const xTicks = getXTicks( [ '2018-01-01T23:00:00' ].concat( uniqueDates ), width, mode, interval );
+			const xTicks = getXTicks(
+				[ '2018-01-01T23:00:00' ].concat( uniqueDates ),
+				width,
+				mode,
+				interval
+			);
 
 			expect( xTicks ).toEqual( expectedXTicks );
 		} );
@@ -232,9 +241,17 @@ describe( 'getXTicks', () => {
 
 describe( 'compareStrings', () => {
 	it( 'return an array of unique words from s2 that dont appear in base string', () => {
-		expect( compareStrings( 'Jul 2018', 'Aug 2018' ).join( ' ' ) ).toEqual( 'Aug' );
-		expect( compareStrings( 'Jul 2017', 'Aug 2018' ).join( ' ' ) ).toEqual( 'Aug 2018' );
-		expect( compareStrings( 'Jul 2017', 'Jul 2018' ).join( ' ' ) ).toEqual( '2018' );
-		expect( compareStrings( 'Jul, 2018', 'Aug, 2018' ).join( ' ' ) ).toEqual( 'Aug' );
+		expect( compareStrings( 'Jul 2018', 'Aug 2018' ).join( ' ' ) ).toEqual(
+			'Aug'
+		);
+		expect( compareStrings( 'Jul 2017', 'Aug 2018' ).join( ' ' ) ).toEqual(
+			'Aug 2018'
+		);
+		expect( compareStrings( 'Jul 2017', 'Jul 2018' ).join( ' ' ) ).toEqual(
+			'2018'
+		);
+		expect(
+			compareStrings( 'Jul, 2018', 'Aug, 2018' ).join( ' ' )
+		).toEqual( 'Aug' );
 	} );
 } );

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -68,18 +67,18 @@ export default class VariationsReportTable extends Component {
 				isSortable: true,
 				isNumeric: true,
 			},
-			'yes' === manageStock
+			manageStock === 'yes'
 				? {
 						label: __( 'Status', 'woocommerce-admin' ),
 						key: 'stock_status',
-					}
+				  }
 				: null,
-			'yes' === manageStock
+			manageStock === 'yes'
 				? {
 						label: __( 'Stock', 'woocommerce-admin' ),
 						key: 'stock',
 						isNumeric: true,
-					}
+				  }
 				: null,
 		].filter( Boolean );
 	}
@@ -88,16 +87,27 @@ export default class VariationsReportTable extends Component {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 
-		return map( data, row => {
-			const { items_sold, net_revenue, orders_count, product_id } = row;
-			const extended_info = row.extended_info || {};
-			const { stock_status, stock_quantity, low_stock_amount, sku } = extended_info;
+		return map( data, ( row ) => {
+			const { items_sold: itemsSold, net_revenue: netRevenue, orders_count: ordersCount, product_id: productId } = row;
+			const extendedInfo = row.extended_info || {};
+			const {
+				stock_status: stockStatus,
+				stock_quantity: stockQuantity,
+				low_stock_amount: lowStockAmount,
+				sku,
+			} = extendedInfo;
 			const name = get( row, [ 'extended_info', 'name' ], '' );
-			const ordersLink = getNewPath( persistedQuery, '/analytics/orders', {
-				filter: 'advanced',
-				product_includes: query.products,
-			} );
-			const editPostLink = getAdminLink( `post.php?post=${ product_id }&action=edit` );
+			const ordersLink = getNewPath(
+				persistedQuery,
+				'/analytics/orders',
+				{
+					filter: 'advanced',
+					product_includes: query.products,
+				}
+			);
+			const editPostLink = getAdminLink(
+				`post.php?post=${ productId }&action=edit`
+			);
 
 			return [
 				{
@@ -113,71 +123,111 @@ export default class VariationsReportTable extends Component {
 					value: sku,
 				},
 				{
-					display: formatValue( 'number', items_sold ),
-					value: items_sold,
+					display: formatValue( 'number', itemsSold ),
+					value: itemsSold,
 				},
 				{
-					display: formatCurrency( net_revenue ),
-					value: getCurrencyFormatDecimal( net_revenue ),
+					display: formatCurrency( netRevenue ),
+					value: getCurrencyFormatDecimal( netRevenue ),
 				},
 				{
 					display: (
 						<Link href={ ordersLink } type="wc-admin">
-							{ orders_count }
+							{ ordersCount }
 						</Link>
 					),
-					value: orders_count,
+					value: ordersCount,
 				},
-				'yes' === manageStock
+				manageStock === 'yes'
 					? {
-							display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
+							display: isLowStock(
+								stockStatus,
+								stockQuantity,
+								lowStockAmount
+							) ? (
 								<Link href={ editPostLink } type="wp-admin">
-									{ _x( 'Low', 'Indication of a low quantity', 'woocommerce-admin' ) }
+									{ _x(
+										'Low',
+										'Indication of a low quantity',
+										'woocommerce-admin'
+									) }
 								</Link>
 							) : (
-								stockStatuses[ stock_status ]
+								stockStatuses[ stockStatus ]
 							),
-							value: stockStatuses[ stock_status ],
-						}
+							value: stockStatuses[ stockStatus ],
+					  }
 					: null,
-				'yes' === manageStock
+				manageStock === 'yes'
 					? {
-							display: stock_quantity,
-							value: stock_quantity,
-						}
+							display: stockQuantity,
+							value: stockQuantity,
+					  }
 					: null,
 			].filter( Boolean );
 		} );
 	}
 
 	getSummary( totals ) {
-		const { variations_count = 0, items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
+		const {
+			variations_count: variationsCount = 0,
+			items_sold: itemsSold = 0,
+			net_revenue: netRevenue = 0,
+			orders_count: ordersCount = 0,
+		} = totals;
 		return [
 			{
-				label: _n( 'variation sold', 'variations sold', variations_count, 'woocommerce-admin' ),
-				value: formatValue( 'number', variations_count ),
+				label: _n(
+					'variation sold',
+					'variations sold',
+					variationsCount,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', variationsCount ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', items_sold, 'woocommerce-admin' ),
-				value: formatValue( 'number', items_sold ),
+				label: _n(
+					'item sold',
+					'items sold',
+					itemsSold,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', itemsSold ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
-				value: formatCurrency( net_revenue ),
+				value: formatCurrency( netRevenue ),
 			},
 			{
-				label: _n( 'orders', 'orders', orders_count, 'woocommerce-admin' ),
-				value: formatValue( 'number', orders_count ),
+				label: _n(
+					'orders',
+					'orders',
+					ordersCount,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', ordersCount ),
 			},
 		];
 	}
 
 	render() {
-		const { advancedFilters, baseSearchQuery, filters, isRequesting, query } = this.props;
+		const {
+			advancedFilters,
+			baseSearchQuery,
+			filters,
+			isRequesting,
+			query,
+		} = this.props;
 
 		const labels = {
-			helpText: __( 'Check at least two variations below to compare', 'woocommerce-admin' ),
-			placeholder: __( 'Search by variation name or SKU', 'woocommerce-admin' ),
+			helpText: __(
+				'Check at least two variations below to compare',
+				'woocommerce-admin'
+			),
+			placeholder: __(
+				'Search by variation name or SKU',
+				'woocommerce-admin'
+			),
 		};
 
 		return (

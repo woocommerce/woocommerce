@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,32 +9,39 @@ import { getCurrencyFormatDecimal } from 'lib/currency-format';
 import { getOrderRefundTotal } from 'lib/order-values';
 
 export function formatTableOrders( orders ) {
-	return orders.map( order => {
+	return orders.map( ( order ) => {
 		const {
-			date_created,
+			date_created: date,
 			id,
 			status,
-			customer_id,
-			line_items,
-			coupon_lines,
+			customer_id: customerId,
+			line_items: lineItems,
+			coupon_lines: couponLines,
 			currency,
 			total,
-			total_tax,
-			shipping_total,
-			discount_total,
+			total_tax: totalTax,
+			shipping_total: shippingTotal,
+			discount_total: discountTotal,
 		} = order;
 
 		return {
-			date: date_created,
+			date,
 			id,
 			status,
-			customer_id,
-			line_items,
-			items_sold: line_items.reduce( ( acc, item ) => item.quantity + acc, 0 ),
-			coupon_lines,
+			customer_id: customerId,
+			line_items: lineItems,
+			items_sold: lineItems.reduce(
+				( acc, item ) => item.quantity + acc,
+				0
+			),
+			coupon_lines: couponLines,
 			currency,
 			net_revenue: getCurrencyFormatDecimal(
-				total - total_tax - shipping_total - discount_total + getOrderRefundTotal( order )
+				total -
+				totalTax -
+				shippingTotal -
+				discountTotal +
+				getOrderRefundTotal( order )
 			),
 		};
 	} );

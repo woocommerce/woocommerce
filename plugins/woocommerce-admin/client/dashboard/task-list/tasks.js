@@ -1,7 +1,5 @@
 /**
  * External dependencies
- *
- * @format
  */
 
 import { __ } from '@wordpress/i18n';
@@ -25,7 +23,12 @@ import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
 import Payments from './tasks/payments';
 
-export function getAllTasks( { profileItems, options, query, toggleCartModal } ) {
+export function getAllTasks( {
+	profileItems,
+	options,
+	query,
+	toggleCartModal,
+} ) {
 	const {
 		hasPhysicalProducts,
 		hasProducts,
@@ -59,20 +62,25 @@ export function getAllTasks( { profileItems, options, query, toggleCartModal } )
 			),
 			icon: 'extension',
 			container: null,
-			onClick: () => ( remainingProductIds.length ? toggleCartModal() : null ),
+			onClick: () =>
+				remainingProductIds.length ? toggleCartModal() : null,
 			visible: productIds.length,
 			completed: ! remainingProductIds.length,
 		},
 		{
 			key: 'connect',
-			title: __( 'Connect your store to WooCommerce.com', 'woocommerce-admin' ),
+			title: __(
+				'Connect your store to WooCommerce.com',
+				'woocommerce-admin'
+			),
 			content: __(
 				'Install and manage your extensions directly from your Dashboard',
 				'wooocommerce-admin'
 			),
 			icon: 'extension',
 			container: <Connect query={ query } />,
-			visible: profileItems.items_purchased && ! profileItems.wccom_connected,
+			visible:
+				profileItems.items_purchased && ! profileItems.wccom_connected,
 			completed: profileItems.wccom_connected,
 		},
 		{
@@ -90,7 +98,10 @@ export function getAllTasks( { profileItems, options, query, toggleCartModal } )
 		{
 			key: 'appearance',
 			title: __( 'Personalize your store', 'woocommerce-admin' ),
-			content: __( 'Create a custom homepage and upload your logo', 'wooocommerce-admin' ),
+			content: __(
+				'Create a custom homepage and upload your logo',
+				'wooocommerce-admin'
+			),
 			icon: 'palette',
 			container: <Appearance />,
 			completed: isAppearanceComplete,
@@ -99,12 +110,16 @@ export function getAllTasks( { profileItems, options, query, toggleCartModal } )
 		{
 			key: 'shipping',
 			title: __( 'Set up shipping', 'woocommerce-admin' ),
-			content: __( 'Configure some basic shipping rates to get started', 'wooocommerce-admin' ),
+			content: __(
+				'Configure some basic shipping rates to get started',
+				'wooocommerce-admin'
+			),
 			icon: 'local_shipping',
 			container: <Shipping />,
 			completed: shippingZonesCount > 0,
 			visible:
-				( profileItems.product_types && profileItems.product_types.includes( 'physical' ) ) ||
+				( profileItems.product_types &&
+					profileItems.product_types.includes( 'physical' ) ) ||
 				hasPhysicalProducts,
 		},
 		{
@@ -131,7 +146,9 @@ export function getAllTasks( { profileItems, options, query, toggleCartModal } )
 			completed: paymentsCompleted,
 			onClick: () => {
 				if ( paymentsCompleted ) {
-					window.location = getAdminLink( 'admin.php?page=wc-settings&tab=checkout' );
+					window.location = getAdminLink(
+						'admin.php?page=wc-settings&tab=checkout'
+					);
 					return;
 				}
 				updateQueryString( { task: 'payments' } );
@@ -140,5 +157,9 @@ export function getAllTasks( { profileItems, options, query, toggleCartModal } )
 		},
 	];
 
-	return applyFilters( 'woocommerce_admin_onboarding_task_list', tasks, query );
+	return applyFilters(
+		'woocommerce_admin_onboarding_task_list',
+		tasks,
+		query
+	);
 }

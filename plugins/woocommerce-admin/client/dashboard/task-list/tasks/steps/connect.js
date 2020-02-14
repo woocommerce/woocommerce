@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -43,16 +42,22 @@ class Connect extends Component {
 		return (
 			<Fragment>
 				{ hasErrors ? (
-					<Button isPrimary onClick={ () => location.reload() }>
+					<Button isPrimary onClick={ () => window.location.reload() }>
 						{ __( 'Retry', 'woocommerce-admin' ) }
 					</Button>
 				) : (
-					<Button isBusy={ isRequesting } isPrimary onClick={ this.connectJetpack }>
+					<Button
+						isBusy={ isRequesting }
+						isPrimary
+						onClick={ this.connectJetpack }
+					>
 						{ __( 'Connect', 'woocommerce-admin' ) }
 					</Button>
 				) }
 				{ onSkip && (
-					<Button onClick={ onSkip }>{ skipText || __( 'No thanks', 'woocommerce-admin' ) }</Button>
+					<Button onClick={ onSkip }>
+						{ skipText || __( 'No thanks', 'woocommerce-admin' ) }
+					</Button>
 				) }
 			</Fragment>
 		);
@@ -115,7 +120,7 @@ export default compose(
 			jetpackConnectUrl,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

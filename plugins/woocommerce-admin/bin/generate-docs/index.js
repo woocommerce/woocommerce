@@ -1,4 +1,3 @@
-/** @format */
 /* eslint-disable no-console */
 /**
  * External dependencies
@@ -36,15 +35,22 @@ const fileCollections = [
 
 const tocSections = [];
 
-fileCollections.forEach( fileCollection => {
+fileCollections.forEach( ( fileCollection ) => {
 	// Read components file to get a list of exported files, convert that to a list of absolute paths to public components.
-	const files = getRealFilePaths( getExportedFileList( path.resolve( fileCollection.folder, 'index.js' ) ), fileCollection.folder );
+	const files = getRealFilePaths(
+		getExportedFileList(
+			path.resolve( fileCollection.folder, 'index.js' )
+		),
+		fileCollection.folder
+	);
 
 	// Build documentation for components missing them
 	buildComponentDocs( files, fileCollection.route );
 
 	// Concatenate TOC contents
-	tocSections.push( ...getTocSection( files, fileCollection.route, fileCollection.title ) );
+	tocSections.push(
+		...getTocSection( files, fileCollection.route, fileCollection.title )
+	);
 } );
 
 // Write TOC file
@@ -64,7 +70,7 @@ console.log( `Wrote docs for ${ numberOfFiles } files.` );
  */
 function buildComponentDocs( files, route ) {
 	// Build the documentation by reading each file.
-	files.forEach( file => {
+	files.forEach( ( file ) => {
 		try {
 			const content = fs.readFileSync( file );
 			buildDocs( file, route, content );
@@ -86,8 +92,11 @@ function buildDocs( fileName, route, content, multiple = false ) {
 	let mdFileName = getMdFileName( fileName, route );
 
 	// We symlink our package docs.
-	if ( 'packages' === route ) {
-		mdFileName = mdFileName.replace( 'docs/components/packages', 'packages/components/src' );
+	if ( route === 'packages' ) {
+		mdFileName = mdFileName.replace(
+			'docs/components/packages',
+			'packages/components/src'
+		);
 	}
 
 	if ( fs.existsSync( mdFileName ) ) {
@@ -99,8 +108,13 @@ function buildDocs( fileName, route, content, multiple = false ) {
 
 	try {
 		if ( multiple ) {
-			const docObject = parse( content, resolver.findAllExportedComponentDefinitions );
-			markdown = docObject.map( doc => generateMarkdown( doc ) ).join( '\n\n' );
+			const docObject = parse(
+				content,
+				resolver.findAllExportedComponentDefinitions
+			);
+			markdown = docObject
+				.map( ( doc ) => generateMarkdown( doc ) )
+				.join( '\n\n' );
 		} else {
 			const docObject = parse( content );
 			markdown = generateMarkdown( docObject );
@@ -119,7 +133,7 @@ function buildDocs( fileName, route, content, multiple = false ) {
 /**
  * Convert documentation object to a markdown string.
  *
- * @param { object } docObject The parsed documentation object.
+ * @param {Object} docObject The parsed documentation object.
  * @return { string } Generated markdown.
  */
 function generateMarkdown( docObject ) {

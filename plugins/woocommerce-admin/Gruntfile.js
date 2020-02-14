@@ -1,6 +1,5 @@
 /* eslint-disable */
 module.exports = function( grunt ) {
-
 	'use strict';
 
 	// Project configuration
@@ -9,21 +8,21 @@ module.exports = function( grunt ) {
 			target: {
 				options: {
 					domainPath: '/languages',
-					exclude: [ '\.git/*', 'bin/*', 'node_modules/*', 'tests/*' ],
+					exclude: [ '.git/*', 'bin/*', 'node_modules/*', 'tests/*' ],
 					mainFile: 'woocommerce-admin.php',
 					potFilename: 'woocommerce-admin.pot',
 					potHeaders: {
 						poedit: true,
-						'x-poedit-keywordslist': true
+						'x-poedit-keywordslist': true,
 					},
 					type: 'wp-plugin',
-					updateTimestamp: true
-				}
-			}
+					updateTimestamp: true,
+				},
+			},
 		},
 
 		checktextdomain: {
-			options:{
+			options: {
 				text_domain: 'woocommerce-admin',
 				keywords: [
 					'__:1,2d',
@@ -39,20 +38,20 @@ module.exports = function( grunt ) {
 					'_n:1,2,4d',
 					'_nx:1,2,4c,5d',
 					'_n_noop:1,2,3d',
-					'_nx_noop:1,2,3c,4d'
-				]
+					'_nx_noop:1,2,3c,4d',
+				],
 			},
 			files: {
-				src:  [
-					'**/*.php',               // Include all files/
-					'!node_modules/**',       // Exclude node_modules/
-					'!tests/**',              // Exclude tests/
-					'!vendor/**',             // Exclude vendor/
-					'!tmp/**'                 // Exclude tmp/
+				src: [
+					'**/*.php', // Include all files/
+					'!node_modules/**', // Exclude node_modules/
+					'!tests/**', // Exclude tests/
+					'!vendor/**', // Exclude vendor/
+					'!tmp/**', // Exclude tmp/
 				],
-				expand: true
-			}
-		}
+				expand: true,
+			},
+		},
 	} );
 
 	// Load NPM tasks to be used here.
@@ -60,5 +59,4 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-checktextdomain' );
 
 	grunt.util.linefeed = '\n';
-
 };

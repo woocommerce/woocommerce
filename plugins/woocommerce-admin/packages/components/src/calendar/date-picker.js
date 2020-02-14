@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -68,7 +67,14 @@ class DatePicker extends Component {
 	}
 
 	render() {
-		const { date, disabled, text, dateFormat, error, isInvalidDate } = this.props;
+		const {
+			date,
+			disabled,
+			text,
+			dateFormat,
+			error,
+			isInvalidDate,
+		} = this.props;
 
 		return (
 			<Dropdown
@@ -83,13 +89,24 @@ class DatePicker extends Component {
 						label={ __( 'Choose a date', 'woocommerce-admin' ) }
 						error={ error }
 						describedBy={ sprintf(
-							__( 'Date input describing a selected date in format %s', 'woocommerce-admin' ),
+							__(
+								'Date input describing a selected date in format %s',
+								'woocommerce-admin'
+							),
 							dateFormat
 						) }
-						onFocus={ partial( this.handleFocus, isOpen, onToggle ) }
+						onFocus={ partial(
+							this.handleFocus,
+							isOpen,
+							onToggle
+						) }
 						aria-expanded={ isOpen }
 						focusOnMount={ false }
-						onKeyDown={ partial( this.handleKeyDown, isOpen, onToggle ) }
+						onKeyDown={ partial(
+							this.handleKeyDown,
+							isOpen,
+							onToggle
+						) }
 						errorPosition="top center"
 					/>
 				) }
@@ -101,7 +118,10 @@ class DatePicker extends Component {
 						<div className="woocommerce-calendar__react-dates is-core-datepicker">
 							<WpDatePicker
 								currentDate={ date }
-								onChange={ partial( this.onDateChange, onToggle ) }
+								onChange={ partial(
+									this.onDateChange,
+									onToggle
+								) }
 								isInvalidDate={ isInvalidDate }
 							/>
 						</div>

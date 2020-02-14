@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -38,7 +37,9 @@ class InboxNoteAction extends Component {
 			window.open( href, '_blank' );
 		}
 
-		this.setState( { inAction }, () => triggerNoteAction( noteId, action.id ) );
+		this.setState( { inAction }, () =>
+			triggerNoteAction( noteId, action.id )
+		);
 	}
 
 	render() {
@@ -69,7 +70,7 @@ InboxNoteAction.propTypes = {
 };
 
 export default compose(
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { triggerNoteAction } = dispatch( 'wc-api' );
 
 		return {

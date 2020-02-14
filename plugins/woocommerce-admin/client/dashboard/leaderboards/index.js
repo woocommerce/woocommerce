@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,7 +11,12 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/components';
+import {
+	EllipsisMenu,
+	MenuItem,
+	MenuTitle,
+	SectionHeader,
+} from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -28,14 +32,14 @@ class Leaderboards extends Component {
 		super( ...arguments );
 
 		this.state = {
-			rowsPerTable: parseInt( props.userPrefLeaderboardRows ) || 5,
+			rowsPerTable: parseInt( props.userPrefLeaderboardRows, 10 ) || 5,
 		};
 	}
 
-	setRowsPerTable = rows => {
-		this.setState( { rowsPerTable: parseInt( rows ) } );
+	setRowsPerTable = ( rows ) => {
+		this.setState( { rowsPerTable: parseInt( rows, 10 ) } );
 		const userDataFields = {
-			[ 'dashboard_leaderboard_rows' ]: parseInt( rows ),
+			dashboard_leaderboard_rows: parseInt( rows, 10 ),
 		};
 		this.props.updateCurrentUserData( userDataFields );
 	};
@@ -64,9 +68,13 @@ class Leaderboards extends Component {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						<MenuTitle>{ __( 'Leaderboards', 'woocommerce-admin' ) }</MenuTitle>
-						{ allLeaderboards.map( leaderboard => {
-							const checked = ! hiddenBlocks.includes( leaderboard.id );
+						<MenuTitle>
+							{ __( 'Leaderboards', 'woocommerce-admin' ) }
+						</MenuTitle>
+						{ allLeaderboards.map( ( leaderboard ) => {
+							const checked = ! hiddenBlocks.includes(
+								leaderboard.id
+							);
 							return (
 								<MenuItem
 									checked={ checked }
@@ -75,10 +83,13 @@ class Leaderboards extends Component {
 									key={ leaderboard.id }
 									onInvoke={ () => {
 										onToggleHiddenBlock( leaderboard.id )();
-										recordEvent( 'dash_leaderboards_toggle', {
-											status: checked ? 'off' : 'on',
-											key: leaderboard.id,
-										} );
+										recordEvent(
+											'dash_leaderboards_toggle',
+											{
+												status: checked ? 'off' : 'on',
+												key: leaderboard.id,
+											}
+										);
 									} }
 								>
 									{ leaderboard.label }
@@ -87,15 +98,23 @@ class Leaderboards extends Component {
 						} ) }
 						<SelectControl
 							className="woocommerce-dashboard__dashboard-leaderboards__select"
-							label={ __( 'Rows Per Table', 'woocommerce-admin' ) }
+							label={ __(
+								'Rows Per Table',
+								'woocommerce-admin'
+							) }
 							value={ rowsPerTable }
-							options={ Array.from( { length: 20 }, ( v, key ) => ( {
-								v: key + 1,
-								label: key + 1,
-							} ) ) }
+							options={ Array.from(
+								{ length: 20 },
+								( v, key ) => ( {
+									v: key + 1,
+									label: key + 1,
+								} )
+							) }
 							onChange={ this.setRowsPerTable }
 						/>
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+						{ window.wcAdminFeatures[
+							'analytics-dashboard/customizable'
+						] && (
 							<Controls
 								onToggle={ onToggle }
 								onMove={ onMove }
@@ -117,9 +136,9 @@ class Leaderboards extends Component {
 		const { rowsPerTable } = this.state;
 		const { allLeaderboards, hiddenBlocks, query } = this.props;
 
-		return allLeaderboards.map( leaderboard => {
+		return allLeaderboards.map( ( leaderboard ) => {
 			if ( hiddenBlocks.includes( leaderboard.id ) ) {
-				return;
+				return undefined;
 			}
 
 			return (
@@ -142,10 +161,14 @@ class Leaderboards extends Component {
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-leaderboards">
 					<SectionHeader
-						title={ title || __( 'Leaderboards', 'woocommerce-admin' ) }
+						title={
+							title || __( 'Leaderboards', 'woocommerce-admin' )
+						}
 						menu={ this.renderMenu() }
 					/>
-					<div className="woocommerce-dashboard__columns">{ this.renderLeaderboards() }</div>
+					<div className="woocommerce-dashboard__columns">
+						{ this.renderLeaderboards() }
+					</div>
 				</div>
 			</Fragment>
 		);
@@ -157,12 +180,17 @@ Leaderboards.propTypes = {
 };
 
 export default compose(
-	withSelect( select => {
-		const { getCurrentUserData, getItems, getItemsError, isGetItemsRequesting } = select(
-			'wc-api'
-		);
+	withSelect( ( select ) => {
+		const {
+			getCurrentUserData,
+			getItems,
+			getItemsError,
+			isGetItemsRequesting,
+		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
-		const { leaderboards: allLeaderboards } = getSetting( 'dataEndpoints', { leaderboards: [] } );
+		const { leaderboards: allLeaderboards } = getSetting( 'dataEndpoints', {
+			leaderboards: [],
+		} );
 
 		return {
 			allLeaderboards,
@@ -172,7 +200,7 @@ export default compose(
 			userPrefLeaderboardRows: userData.dashboard_leaderboard_rows,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateCurrentUserData } = dispatch( 'wc-api' );
 
 		return {

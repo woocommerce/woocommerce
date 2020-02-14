@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -9,8 +8,17 @@ import { range } from 'lodash';
 
 class ActivityCardPlaceholder extends Component {
 	render() {
-		const { className, hasAction, hasDate, hasSubtitle, lines } = this.props;
-		const cardClassName = classnames( 'woocommerce-activity-card is-loading', className );
+		const {
+			className,
+			hasAction,
+			hasDate,
+			hasSubtitle,
+			lines,
+		} = this.props;
+		const cardClassName = classnames(
+			'woocommerce-activity-card is-loading',
+			className
+		);
 
 		return (
 			<div className={ cardClassName } aria-hidden>
@@ -19,7 +27,9 @@ class ActivityCardPlaceholder extends Component {
 				</span>
 				<div className="woocommerce-activity-card__header">
 					<div className="woocommerce-activity-card__title is-placeholder" />
-					{ hasSubtitle && <div className="woocommerce-activity-card__subtitle is-placeholder" /> }
+					{ hasSubtitle && (
+						<div className="woocommerce-activity-card__subtitle is-placeholder" />
+					) }
 					{ hasDate && (
 						<div className="woocommerce-activity-card__date">
 							<span className="is-placeholder" />
@@ -27,7 +37,9 @@ class ActivityCardPlaceholder extends Component {
 					) }
 				</div>
 				<div className="woocommerce-activity-card__body">
-					{ range( lines ).map( i => <span className="is-placeholder" key={ i } /> ) }
+					{ range( lines ).map( ( i ) => (
+						<span className="is-placeholder" key={ i } />
+					) ) }
 				</div>
 				{ hasAction && (
 					<div className="woocommerce-activity-card__actions">

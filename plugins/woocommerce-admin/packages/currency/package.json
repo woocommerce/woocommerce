@@ -1,30 +1,30 @@
 {
-  "name": "@woocommerce/currency",
-  "version": "2.0.0",
-  "description": "WooCommerce currency utilities.",
-  "author": "Automattic",
-  "license": "GPL-3.0-or-later",
-  "keywords": [
-    "wordpress",
-    "woocommerce",
-    "currency"
-  ],
-  "homepage": "https://github.com/woocommerce/woocommerce-admin/tree/master/packages/currency/README.md",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/woocommerce/woocommerce-admin.git"
-  },
-  "bugs": {
-    "url": "https://github.com/woocommerce/woocommerce-admin/issues"
-  },
-  "main": "build/index.js",
-  "module": "build-module/index.js",
-  "react-native": "src/index",
-  "dependencies": {
-    "@babel/runtime-corejs2": "7.8.4",
-    "@woocommerce/number": "2.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@woocommerce/currency",
+	"version": "2.0.0",
+	"description": "WooCommerce currency utilities.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"currency"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/master/packages/currency/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce-admin.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
+	"dependencies": {
+		"@babel/runtime-corejs2": "7.8.4",
+		"@woocommerce/number": "2.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

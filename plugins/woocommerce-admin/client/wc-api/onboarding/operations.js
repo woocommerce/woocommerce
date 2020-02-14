@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -42,8 +40,10 @@ function readProfileItems( resourceNames, fetch ) {
 		return [
 			fetch( { path: url } )
 				.then( profileItemsToResources )
-				.catch( error => {
-					return { [ resourceName ]: { error: String( error.message ) } };
+				.catch( ( error ) => {
+					return {
+						[ resourceName ]: { error: String( error.message ) },
+					};
 				} ),
 		];
 	}
@@ -63,8 +63,10 @@ function updateProfileItems( resourceNames, data, fetch ) {
 				method: 'POST',
 				data: data[ resourceName ],
 			} )
-				.then( profileItemToResource.bind( null, data[ resourceName ] ) )
-				.catch( error => {
+				.then(
+					profileItemToResource.bind( null, data[ resourceName ] )
+				)
+				.catch( ( error ) => {
 					return { [ resourceName ]: { error } };
 				} ),
 		];
@@ -79,7 +81,7 @@ function profileItemsToResources( items ) {
 	const itemKeys = Object.keys( items );
 
 	const resources = {};
-	itemKeys.forEach( key => {
+	itemKeys.forEach( ( key ) => {
 		const item = items[ key ];
 		resources[ getResourceName( resourceName, key ) ] = { data: item };
 	} );
@@ -96,7 +98,7 @@ function profileItemToResource( items ) {
 	const resourceName = 'onboarding-profile';
 
 	const resources = {};
-	Object.keys( items ).forEach( key => {
+	Object.keys( items ).forEach( ( key ) => {
 		const item = items[ key ];
 		resources[ getResourceName( resourceName, key ) ] = { data: item };
 	} );
@@ -117,8 +119,10 @@ function readActivePlugins( resourceNames, fetch ) {
 		return [
 			fetch( { path: url } )
 				.then( activePluginsToResources )
-				.catch( error => {
-					return { [ resourceName ]: { error: String( error.message ) } };
+				.catch( ( error ) => {
+					return {
+						[ resourceName ]: { error: String( error.message ) },
+					};
 				} ),
 		];
 	}
@@ -149,14 +153,21 @@ function activatePlugins( resourceNames, data, fetch ) {
 					plugins: plugins.join( ',' ),
 				},
 			} )
-				.then( response => activatePluginToResource( response, plugins ) )
-				.catch( error => {
+				.then( ( response ) =>
+					activatePluginToResource( response, plugins )
+				)
+				.catch( ( error ) => {
 					const resources = { [ resourceName ]: { error } };
-					Object.keys( plugins ).forEach( key => {
+					Object.keys( plugins ).forEach( ( key ) => {
 						const pluginError = { ...error };
 						const item = plugins[ key ];
-						pluginError.message = getPluginErrorMessage( 'activate', item );
-						resources[ getResourceName( resourceName, item ) ] = { error: pluginError };
+						pluginError.message = getPluginErrorMessage(
+							'activate',
+							item
+						);
+						resources[ getResourceName( resourceName, item ) ] = {
+							error: pluginError,
+						};
 					} );
 					return resources;
 				} ),
@@ -176,9 +187,9 @@ function activatePluginToResource( response, items ) {
 
 	const resources = {
 		[ resourceName ]: { data: items },
-		[ 'active-plugins' ]: { data: response.active },
+		'active-plugins': { data: response.active },
 	};
-	Object.keys( items ).forEach( key => {
+	Object.keys( items ).forEach( ( key ) => {
 		const item = items[ key ];
 		resources[ getResourceName( resourceName, item ) ] = { data: item };
 	} );
@@ -195,11 +206,13 @@ function readJetpackStatus( resourceNames, fetch ) {
 			fetch( {
 				path: url,
 			} )
-				.then( response => {
+				.then( ( response ) => {
 					return { [ resourceName ]: { data: response } };
 				} )
-				.catch( error => {
-					return { [ resourceName ]: { error: String( error.message ) } };
+				.catch( ( error ) => {
+					return {
+						[ resourceName ]: { error: String( error.message ) },
+					};
 				} ),
 		];
 	}
@@ -208,21 +221,24 @@ function readJetpackStatus( resourceNames, fetch ) {
 }
 
 function readJetpackConnectUrl( resourceNames, fetch ) {
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		return name.startsWith( 'jetpack-connect-url' );
 	} );
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const query = getResourceIdentifier( resourceName );
-		const url = addQueryArgs( WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-jetpack', query );
+		const url = addQueryArgs(
+			WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-jetpack',
+			query
+		);
 
 		return fetch( {
 			path: url,
 		} )
-			.then( response => {
+			.then( ( response ) => {
 				return { [ resourceName ]: { data: response.connectAction } };
 			} )
-			.catch( error => {
+			.catch( ( error ) => {
 				error.message = getPluginErrorMessage( 'connect', 'jetpack' );
 				return { [ resourceName ]: { error } };
 			} );
@@ -234,18 +250,27 @@ function getPluginErrorMessage( action, plugin ) {
 	switch ( action ) {
 		case 'install':
 			return sprintf(
-				__( 'There was an error installing %s. Please try again.', 'woocommerce-admin' ),
+				__(
+					'There was an error installing %s. Please try again.',
+					'woocommerce-admin'
+				),
 				pluginName
 			);
 		case 'connect':
 			return sprintf(
-				__( 'There was an error connecting to %s. Please try again.', 'woocommerce-admin' ),
+				__(
+					'There was an error connecting to %s. Please try again.',
+					'woocommerce-admin'
+				),
 				pluginName
 			);
 		case 'activate':
 		default:
 			return sprintf(
-				__( 'There was an error activating %s. Please try again.', 'woocommerce-admin' ),
+				__(
+					'There was an error activating %s. Please try again.',
+					'woocommerce-admin'
+				),
 				pluginName
 			);
 	}
@@ -256,7 +281,7 @@ function installPlugins( resourceNames, data, fetch ) {
 	if ( resourceNames.includes( resourceName ) ) {
 		const plugins = data[ resourceName ];
 
-		return plugins.map( async plugin => {
+		return plugins.map( async ( plugin ) => {
 			return fetch( {
 				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/install`,
 				method: 'POST',
@@ -264,20 +289,31 @@ function installPlugins( resourceNames, data, fetch ) {
 					plugin,
 				},
 			} )
-				.then( response => {
-					const { installedPlugins = [] } = getSetting( 'onboarding', {} );
+				.then( ( response ) => {
+					const { installedPlugins = [] } = getSetting(
+						'onboarding',
+						{}
+					);
 					setSetting( 'onboarding', {
 						...getSetting( 'onboarding', {} ),
-						installedPlugins: uniq( [ ...installedPlugins, ...plugins ] ),
+						installedPlugins: uniq( [
+							...installedPlugins,
+							...plugins,
+						] ),
 					} );
 
 					return {
 						[ resourceName ]: { data: plugins },
-						[ getResourceName( resourceName, plugin ) ]: { data: response },
+						[ getResourceName( resourceName, plugin ) ]: {
+							data: response,
+						},
 					};
 				} )
-				.catch( error => {
-					error.message = getPluginErrorMessage( 'install', pluginNames[ plugin ] || plugin );
+				.catch( ( error ) => {
+					error.message = getPluginErrorMessage(
+						'install',
+						pluginNames[ plugin ] || plugin
+					);
 					return {
 						[ resourceName ]: { data: plugins },
 						[ getResourceName( resourceName, plugin ) ]: { error },

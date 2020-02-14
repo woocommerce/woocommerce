@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,11 +7,18 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { isResourcePrefix, getResourceIdentifier, getResourceName } from '../utils';
+import {
+	isResourcePrefix,
+	getResourceIdentifier,
+	getResourceName,
+} from '../utils';
 import { NAMESPACE } from '../constants';
 
 function read( resourceNames, fetch = apiFetch ) {
-	return [ ...readNotes( resourceNames, fetch ), ...readNoteQueries( resourceNames, fetch ) ];
+	return [
+		...readNotes( resourceNames, fetch ),
+		...readNoteQueries( resourceNames, fetch ),
+	];
 }
 
 function update( resourceNames, data, fetch = apiFetch ) {
@@ -23,9 +29,11 @@ function update( resourceNames, data, fetch = apiFetch ) {
 }
 
 function readNoteQueries( resourceNames, fetch ) {
-	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'note-query' ) );
+	const filteredNames = resourceNames.filter( ( name ) =>
+		isResourcePrefix( name, 'note-query' )
+	);
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const query = getResourceIdentifier( resourceName );
 		const url = addQueryArgs( `${ NAMESPACE }/admin/notes`, query );
 
@@ -36,10 +44,12 @@ function readNoteQueries( resourceNames, fetch ) {
 			} );
 
 			const notes = await response.json();
-			const totalCount = parseInt( response.headers.get( 'x-wp-total' ) );
-			const ids = notes.map( note => note.id );
+			const totalCount = parseInt( response.headers.get( 'x-wp-total' ), 10 );
+			const ids = notes.map( ( note ) => note.id );
 			const noteResources = notes.reduce( ( resources, note ) => {
-				resources[ getResourceName( 'note', note.id ) ] = { data: note };
+				resources[ getResourceName( 'note', note.id ) ] = {
+					data: note,
+				};
 				return resources;
 			}, {} );
 
@@ -57,8 +67,12 @@ function readNoteQueries( resourceNames, fetch ) {
 }
 
 function readNotes( resourceNames, fetch ) {
-	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'note' ) );
-	return filteredNames.map( resourceName => readNote( resourceName, fetch ) );
+	const filteredNames = resourceNames.filter( ( name ) =>
+		isResourcePrefix( name, 'note' )
+	);
+	return filteredNames.map( ( resourceName ) =>
+		readNote( resourceName, fetch )
+	);
 }
 
 function readNote( resourceName, fetch ) {
@@ -66,10 +80,10 @@ function readNote( resourceName, fetch ) {
 	const url = `${ NAMESPACE }/admin/notes/${ id }`;
 
 	return fetch( { path: url } )
-		.then( note => {
+		.then( ( note ) => {
 			return { [ resourceName ]: { data: note } };
 		} )
-		.catch( error => {
+		.catch( ( error ) => {
 			return { [ resourceName ]: { error } };
 		} );
 }
@@ -81,10 +95,10 @@ function updateNote( resourceNames, data, fetch ) {
 		const url = `${ NAMESPACE }/admin/notes/${ noteId }`;
 		return [
 			fetch( { path: url, method: 'PUT', data: noteFields } )
-				.then( note => {
+				.then( ( note ) => {
 					return { [ resourceName + ':' + noteId ]: { data: note } };
 				} )
-				.catch( error => {
+				.catch( ( error ) => {
 					return { [ resourceName + ':' + noteId ]: { error } };
 				} ),
 		];
@@ -99,10 +113,10 @@ function triggerAction( resourceNames, data, fetch ) {
 		const url = `${ NAMESPACE }/admin/notes/${ noteId }/action/${ actionId }`;
 		return [
 			fetch( { path: url, method: 'POST' } )
-				.then( note => {
+				.then( ( note ) => {
 					return { [ 'note:' + noteId ]: { data: note } };
 				} )
-				.catch( error => {
+				.catch( ( error ) => {
 					return { [ 'note:' + noteId ]: { error } };
 				} ),
 		];

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -29,11 +28,15 @@ describe( 'numberFormat', () => {
 	} );
 
 	it( 'maintains all decimals if invalid precision specified', () => {
-		expect( numberFormat( { precision: 'not a number' }, '10000.123456' ) ).toBe( '10,000.123456' );
+		expect(
+			numberFormat( { precision: 'not a number' }, '10000.123456' )
+		).toBe( '10,000.123456' );
 	} );
 
 	it( 'calculates the correct decimals based on precision passed in', () => {
-		expect( numberFormat( { precision: 2 }, '1337.4498' ) ).toBe( '1,337.45' );
+		expect( numberFormat( { precision: 2 }, '1337.4498' ) ).toBe(
+			'1,337.45'
+		);
 	} );
 
 	it( 'uses store currency settings, not locale', () => {

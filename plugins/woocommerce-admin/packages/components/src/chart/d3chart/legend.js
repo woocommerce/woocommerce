@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -43,7 +42,8 @@ class D3Legend extends Component {
 			return;
 		}
 		const list = this.listRef.current;
-		const scrolledToEnd = list.scrollHeight - list.scrollTop <= list.offsetHeight;
+		const scrolledToEnd =
+			list.scrollHeight - list.scrollTop <= list.offsetHeight;
 		this.setState( {
 			isScrollable: ! scrolledToEnd,
 		} );
@@ -62,9 +62,12 @@ class D3Legend extends Component {
 			totalLabel,
 		} = this.props;
 		const { isScrollable } = this.state;
-		const visibleData = data.filter( key => key.visible );
+		const visibleData = data.filter( ( key ) => key.visible );
 		const numberOfRowsVisible = visibleData.length;
-		const showTotalLabel = legendDirection === 'column' && data.length > selectionLimit && totalLabel;
+		const showTotalLabel =
+			legendDirection === 'column' &&
+			data.length > selectionLimit &&
+			totalLabel;
 
 		const keys = data.length > selectionLimit ? visibleData : data;
 
@@ -85,11 +88,15 @@ class D3Legend extends Component {
 					ref={ this.listRef }
 					onScroll={ showTotalLabel ? this.updateListScroll : null }
 				>
-					{ data.map( row => (
+					{ data.map( ( row ) => (
 						<li
-							className={ classNames( 'woocommerce-legend__item', {
-								'woocommerce-legend__item-checked': row.visible,
-							} ) }
+							className={ classNames(
+								'woocommerce-legend__item',
+								{
+									'woocommerce-legend__item-checked':
+										row.visible,
+								}
+							) }
 							key={ row.key }
 							id={ `woocommerce-legend-${ instanceId }__item__${ row.key }` }
 							onMouseEnter={ handleLegendHover }
@@ -101,27 +108,52 @@ class D3Legend extends Component {
 								onClick={ handleLegendToggle }
 								id={ `woocommerce-legend-${ instanceId }__item-button__${ row.key }` }
 								disabled={
-									( row.visible && numberOfRowsVisible <= 1 ) ||
-									( ! row.visible && numberOfRowsVisible >= selectionLimit ) ||
+									( row.visible &&
+										numberOfRowsVisible <= 1 ) ||
+									( ! row.visible &&
+										numberOfRowsVisible >=
+											selectionLimit ) ||
 									! interactive
 								}
-								title={ numberOfRowsVisible >= selectionLimit
-									? sprintf( __( 'You may select up to %d items.', 'woocommerce-admin' ), selectionLimit )
-									: ''
+								title={
+									numberOfRowsVisible >= selectionLimit
+										? sprintf(
+												__(
+													'You may select up to %d items.',
+													'woocommerce-admin'
+												),
+												selectionLimit
+										  )
+										: ''
 								}
 							>
 								<div className="woocommerce-legend__item-container">
 									<span
-										className={ classNames( 'woocommerce-legend__item-checkmark', {
-											'woocommerce-legend__item-checkmark-checked': row.visible,
-										} ) }
-										style={ row.visible ? { color: getColor( keys, colorScheme )( row.key ) } : null }
+										className={ classNames(
+											'woocommerce-legend__item-checkmark',
+											{
+												'woocommerce-legend__item-checkmark-checked':
+													row.visible,
+											}
+										) }
+										style={
+											row.visible
+												? {
+														color: getColor(
+															keys,
+															colorScheme
+														)( row.key ),
+												  }
+												: null
+										}
 									/>
 									<span className="woocommerce-legend__item-title">
 										{ row.label }
 									</span>
 									<span className="woocommerce-legend__item-total">
-										{ getFormatter( legendValueFormat )( row.total ) }
+										{ getFormatter( legendValueFormat )(
+											row.total
+										) }
 									</span>
 								</div>
 							</button>
@@ -129,7 +161,9 @@ class D3Legend extends Component {
 					) ) }
 				</ul>
 				{ showTotalLabel && (
-					<div className="woocommerce-legend__total">{ totalLabel }</div>
+					<div className="woocommerce-legend__total">
+						{ totalLabel }
+					</div>
 				) }
 			</div>
 		);
@@ -168,7 +202,10 @@ D3Legend.propTypes = {
 	/**
 	 * A number formatting string or function to format the value displayed in the legend.
 	 */
-	legendValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	legendValueFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * Label to describe the legend items. It will be displayed in the legend of
 	 * comparison charts when there are many.

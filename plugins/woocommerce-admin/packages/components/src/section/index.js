@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -17,13 +16,13 @@ const Level = createContext( 2 );
  * (`h2`, `h3`, …) you can use `<H />` to create "section headings", which look to the parent `<Section />`s for the appropriate
  * heading level.
  *
- * @param { object } props -
- * @return { object } -
+ * @param {Object} props -
+ * @return {Object} -
  */
 export function H( props ) {
 	return (
 		<Level.Consumer>
-			{ level => {
+			{ ( level ) => {
 				const Heading = 'h' + Math.min( level, 6 );
 				return <Heading { ...props } />;
 			} }
@@ -34,15 +33,19 @@ export function H( props ) {
 /**
  * The section wrapper, used to indicate a sub-section (and change the header level context).
  *
- * @return { object } -
+ * @return {Object} -
  */
 export function Section( { component, children, ...props } ) {
 	const Component = component || 'div';
 	return (
 		<Level.Consumer>
-			{ level => (
+			{ ( level ) => (
 				<Level.Provider value={ level + 1 }>
-					{ false === component ? children : <Component { ...props }>{ children }</Component> }
+					{ component === false ? (
+						children
+					) : (
+						<Component { ...props }>{ children }</Component>
+					) }
 				</Level.Provider>
 			) }
 		</Level.Consumer>
@@ -54,7 +57,11 @@ Section.propTypes = {
 	 * The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props
 	 * passed to Section are passed on to the component.
 	 */
-	component: PropTypes.oneOfType( [ PropTypes.func, PropTypes.string, PropTypes.bool ] ),
+	component: PropTypes.oneOfType( [
+		PropTypes.func,
+		PropTypes.string,
+		PropTypes.bool,
+	] ),
 	/**
 	 * The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
 	 */

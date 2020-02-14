@@ -1,5 +1,3 @@
-/** @format */
-
 const defaults = {
 	adminUrl: '',
 	countries: [],
@@ -58,20 +56,22 @@ export const DEFAULT_DATE_RANGE = allSettings.defaultDateRange;
  *
  * @export
  * @param {string}   name                         The identifier for the setting.
- * @param {mixed}    [fallback=false]             The value to use as a fallback
+ * @param {*}    [fallback=false]             The value to use as a fallback
  *                                                if the setting is not in the
  *                                                state.
- * @param {function} [filter=( val ) => val]  	  A callback for filtering the
+ * @param {Function} [filter=( val ) => val]  	  A callback for filtering the
  *                                                value before it's returned.
  *                                                Receives both the found value
  *                                                (if it exists for the key) and
  *                                                the provided fallback arg.
  *
- * @returns {mixed}  The value present in the settings state for the given
+ * @return {*}  The value present in the settings state for the given
  *                   name.
  */
-export function getSetting( name, fallback = false, filter = val => val ) {
-	const value = allSettings.hasOwnProperty( name ) ? allSettings[ name ] : fallback;
+export function getSetting( name, fallback = false, filter = ( val ) => val ) {
+	const value = allSettings.hasOwnProperty( name )
+		? allSettings[ name ]
+		: fallback;
 	return filter( value, fallback );
 }
 
@@ -81,20 +81,20 @@ export function getSetting( name, fallback = false, filter = val => val ) {
  * @export
  * @param {string}   name                        The setting property key for the
  *                                               setting being mutated.
- * @param {mixed}    value                       The value to set.
- * @param {function} [filter=( val ) => val]     Allows for providing a callback
+ * @param {*}    value                       The value to set.
+ * @param {Function} [filter=( val ) => val]     Allows for providing a callback
  *                                               to sanitize the setting (eg.
  *                                               ensure it's a number)
  */
-export function setSetting( name, value, filter = val => val ) {
+export function setSetting( name, value, filter = ( val ) => val ) {
 	allSettings[ name ] = filter( value );
 }
 
 /**
  * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
  *
- * @param {String} path Relative path.
- * @return {String} Full admin URL.
+ * @param {string} path Relative path.
+ * @return {string} Full admin URL.
  */
 export function getAdminLink( path ) {
 	return ( ADMIN_URL || '' ) + path;

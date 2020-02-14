@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -13,7 +12,11 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { flattenFilters, getPersistedQuery, updateQueryString } from '@woocommerce/navigation';
+import {
+	flattenFilters,
+	getPersistedQuery,
+	updateQueryString,
+} from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -49,7 +52,9 @@ class FilterPicker extends Component {
 		if ( selectedFilter.settings && selectedFilter.settings.getLabels ) {
 			const { query } = this.props;
 			const { param: filterParam, getLabels } = selectedFilter.settings;
-			getLabels( query[ filterParam ], query ).then( this.updateSelectedTag );
+			getLabels( query[ filterParam ], query ).then(
+				this.updateSelectedTag
+			);
 		}
 	}
 
@@ -57,12 +62,17 @@ class FilterPicker extends Component {
 		const { query: nextQuery, config } = this.props;
 		if ( prevQuery[ config.param ] !== nextQuery[ [ config.param ] ] ) {
 			const selectedFilter = this.getFilter();
-			if ( selectedFilter && 'Search' === selectedFilter.component ) {
+			if ( selectedFilter && selectedFilter.component === 'Search' ) {
 				/* eslint-disable react/no-did-update-set-state */
 				this.setState( { nav: selectedFilter.path || [] } );
 				/* eslint-enable react/no-did-update-set-state */
-				const { param: filterParam, getLabels } = selectedFilter.settings;
-				getLabels( nextQuery[ filterParam ], nextQuery ).then( this.updateSelectedTag );
+				const {
+					param: filterParam,
+					getLabels,
+				} = selectedFilter.settings;
+				getLabels( nextQuery[ filterParam ], nextQuery ).then(
+					this.updateSelectedTag
+				);
 			}
 		}
 	}
@@ -74,14 +84,21 @@ class FilterPicker extends Component {
 	getFilter( value ) {
 		const { config, query } = this.props;
 		const allFilters = flattenFilters( config.filters );
-		value = value || query[ config.param ] || config.defaultValue || DEFAULT_FILTER;
+		value =
+			value ||
+			query[ config.param ] ||
+			config.defaultValue ||
+			DEFAULT_FILTER;
 		return find( allFilters, { value } ) || {};
 	}
 
 	getButtonLabel( selectedFilter ) {
-		if ( 'Search' === selectedFilter.component ) {
+		if ( selectedFilter.component === 'Search' ) {
 			const { selectedTag } = this.state;
-			return [ selectedTag && selectedTag.label, get( selectedFilter, 'settings.labels.button' ) ];
+			return [
+				selectedTag && selectedTag.label,
+				get( selectedFilter, 'settings.labels.button' ),
+			];
 		}
 		return selectedFilter ? [ selectedFilter.label ] : [];
 	}
@@ -92,17 +109,26 @@ class FilterPicker extends Component {
 		}
 		const value = nav[ 0 ];
 		const nextFilters = find( filters, { value } );
-		return this.getVisibleFilters( nextFilters && nextFilters.subFilters, nav.slice( 1 ) );
+		return this.getVisibleFilters(
+			nextFilters && nextFilters.subFilters,
+			nav.slice( 1 )
+		);
 	}
 
 	selectSubFilter( value ) {
 		// Add the value onto the nav path
-		this.setState( prevState => ( { nav: [ ...prevState.nav, value ], animate: 'left' } ) );
+		this.setState( ( prevState ) => ( {
+			nav: [ ...prevState.nav, value ],
+			animate: 'left',
+		} ) );
 	}
 
 	goBack() {
 		// Remove the last item from the nav path
-		this.setState( prevState => ( { nav: prevState.nav.slice( 0, -1 ), animate: 'right' } ) );
+		this.setState( ( prevState ) => ( {
+			nav: prevState.nav.slice( 0, -1 ),
+			animate: 'right',
+		} ) );
 	}
 
 	update( value, additionalQueries = {} ) {
@@ -110,11 +136,14 @@ class FilterPicker extends Component {
 		// Keep only time related queries when updating to a new filter
 		const persistedQuery = getPersistedQuery( query );
 		const update = {
-			[ config.param ]: ( config.defaultValue || DEFAULT_FILTER ) === value ? undefined : value,
+			[ config.param ]:
+				( config.defaultValue || DEFAULT_FILTER ) === value
+					? undefined
+					: value,
 			...additionalQueries,
 		};
 		// Keep any url parameters as designated by the config
-		config.staticParams.forEach( param => {
+		config.staticParams.forEach( ( param ) => {
 			update[ param ] = query[ param ];
 		} );
 		updateQueryString( update, path, persistedQuery );
@@ -138,7 +167,10 @@ class FilterPicker extends Component {
 		if ( filter.component ) {
 			const { type, labels } = filter.settings;
 			const persistedFilter = this.getFilter();
-			const selectedTag = persistedFilter.value === filter.value ? this.state.selectedTag : null;
+			const selectedTag =
+				persistedFilter.value === filter.value
+					? this.state.selectedTag
+					: null;
 
 			return (
 				<Search
@@ -146,14 +178,19 @@ class FilterPicker extends Component {
 					type={ type }
 					placeholder={ labels.placeholder }
 					selected={ selectedTag ? [ selectedTag ] : [] }
-					onChange={ partial( this.onTagChange, filter, onClose, config ) }
+					onChange={ partial(
+						this.onTagChange,
+						filter,
+						onClose,
+						config
+					) }
 					inlineTags
 					staticResults
 				/>
 			);
 		}
 
-		const selectFilter = event => {
+		const selectFilter = ( event ) => {
 			onClose( event );
 			this.update( filter.value, filter.query || {} );
 			this.setState( { selectedTag: null } );
@@ -173,7 +210,9 @@ class FilterPicker extends Component {
 
 	onContentMount( content ) {
 		const { nav } = this.state;
-		const parentFilter = nav.length ? this.getFilter( nav[ nav.length - 1 ] ) : false;
+		const parentFilter = nav.length
+			? this.getFilter( nav[ nav.length - 1 ] )
+			: false;
 		const focusableIndex = parentFilter ? 1 : 0;
 		const focusable = focus.tabbable.find( content )[ focusableIndex ];
 		setTimeout( () => {
@@ -185,16 +224,25 @@ class FilterPicker extends Component {
 		const { config } = this.props;
 		const { nav, animate } = this.state;
 		const visibleFilters = this.getVisibleFilters( config.filters, nav );
-		const parentFilter = nav.length ? this.getFilter( nav[ nav.length - 1 ] ) : false;
+		const parentFilter = nav.length
+			? this.getFilter( nav[ nav.length - 1 ] )
+			: false;
 		const selectedFilter = this.getFilter();
 		return (
 			<div className="woocommerce-filters-filter">
-				{ config.label && <span className="woocommerce-filters-label">{ config.label }:</span> }
+				{ config.label && (
+					<span className="woocommerce-filters-label">
+						{ config.label }:
+					</span>
+				) }
 				<Dropdown
 					contentClassName="woocommerce-filters-filter__content"
 					position="bottom"
 					expandOnMobile
-					headerTitle={ __( 'filter report to show:', 'woocommerce-admin' ) }
+					headerTitle={ __(
+						'filter report to show:',
+						'woocommerce-admin'
+					) }
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<DropdownButton
 							onClick={ onToggle }
@@ -221,16 +269,28 @@ class FilterPicker extends Component {
 											</IconButton>
 										</li>
 									) }
-									{ visibleFilters.map( filter => (
+									{ visibleFilters.map( ( filter ) => (
 										<li
 											key={ filter.value }
-											className={ classnames( 'woocommerce-filters-filter__content-list-item', {
-												'is-selected':
-													selectedFilter.value === filter.value ||
-													( selectedFilter.path && includes( selectedFilter.path, filter.value ) ),
-											} ) }
+											className={ classnames(
+												'woocommerce-filters-filter__content-list-item',
+												{
+													'is-selected':
+														selectedFilter.value ===
+															filter.value ||
+														( selectedFilter.path &&
+															includes(
+																selectedFilter.path,
+																filter.value
+															) ),
+												}
+											) }
 										>
-											{ this.renderButton( filter, onClose, config ) }
+											{ this.renderButton(
+												filter,
+												onClose,
+												config
+											) }
 										</li>
 									) ) }
 								</ul>
@@ -276,7 +336,10 @@ FilterPicker.propTypes = {
 				/**
 				 * The chart display mode to use for charts displayed when this filter is active.
 				 */
-				chartMode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
+				chartMode: PropTypes.oneOf( [
+					'item-comparison',
+					'time-comparison',
+				] ),
 				/**
 				 * A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
 				 */

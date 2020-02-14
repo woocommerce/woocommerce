@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * Internal dependencies
  */
@@ -16,7 +14,8 @@ const getCurrentUserData = ( getResource, requireResource ) => (
 	return getSetting(
 		'currentUserData',
 		{},
-		cud => requireResource( requirement, 'current-user-data' ).data || cud
+		( cud ) =>
+			requireResource( requirement, 'current-user-data' ).data || cud
 	);
 };
 

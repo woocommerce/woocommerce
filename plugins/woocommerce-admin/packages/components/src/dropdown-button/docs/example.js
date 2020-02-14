@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -18,8 +17,6 @@ export default () => (
 				labels={ [ 'All Products Sold' ] }
 			/>
 		) }
-		renderContent={ () => (
-			<p>Dropdown content here</p>
-		) }
+		renderContent={ () => <p>Dropdown content here</p> }
 	/>
 );

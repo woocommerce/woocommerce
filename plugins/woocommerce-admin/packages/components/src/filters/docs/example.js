@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -32,7 +31,10 @@ const ORDER_STATUSES = {
 
 // Fetch store default date range and compose with date utility functions.
 const defaultDateRange = 'period=month&compare=previous_year';
-const storeGetDateParamsFromQuery = partialRight( getDateParamsFromQuery, defaultDateRange );
+const storeGetDateParamsFromQuery = partialRight(
+	getDateParamsFromQuery,
+	defaultDateRange
+);
 const storeGetCurrentDates = partialRight( getCurrentDates, defaultDateRange );
 
 // Package date utilities for filter picker component.
@@ -82,7 +84,7 @@ const advancedFilters = {
 			],
 			input: {
 				component: 'SelectControl',
-				options: Object.keys( ORDER_STATUSES ).map( key => ( {
+				options: Object.keys( ORDER_STATUSES ).map( ( key ) => ( {
 					value: key,
 					label: ORDER_STATUSES[ key ],
 				} ) ),
@@ -187,7 +189,7 @@ const advancedFilters = {
 const compareFilter = {
 	type: 'products',
 	param: 'product',
-	getLabels: function() {
+	getLabels() {
 		return Promise.resolve( [] );
 	},
 	labels: {
@@ -202,7 +204,11 @@ export default () => (
 	<div>
 		<H>Date picker only</H>
 		<Section component={ false }>
-			<ReportFilters path={ path } query={ query } storeDate={ storeDate } />
+			<ReportFilters
+				path={ path }
+				query={ query }
+				storeDate={ storeDate }
+			/>
 		</Section>
 
 		<H>Date picker & more filters</H>

@@ -25,15 +25,33 @@ describe( 'buildTermsTree', () => {
 			{ id: 2, name: 'Clementine', parent: 0 },
 		] );
 		expect( tree ).toEqual( [
-			{ id: 1, name: 'Apricots', parent: 0, breadcrumbs: [], children: [] },
-			{ id: 2, name: 'Clementine', parent: 0, breadcrumbs: [], children: [] },
+			{
+				id: 1,
+				name: 'Apricots',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
+			{
+				id: 2,
+				name: 'Clementine',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
 		] );
 	} );
 
 	test( 'should return a tree of items', () => {
 		const tree = buildTermsTree( list );
 		expect( tree ).toEqual( [
-			{ id: 1, name: 'Apricots', parent: 0, breadcrumbs: [], children: [] },
+			{
+				id: 1,
+				name: 'Apricots',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
 			{
 				id: 2,
 				name: 'Clementine',
@@ -56,7 +74,11 @@ describe( 'buildTermsTree', () => {
 										id: 7,
 										name: 'Tamarind',
 										parent: 5,
-										breadcrumbs: [ 'Clementine', 'Elderberry', 'Lychee' ],
+										breadcrumbs: [
+											'Clementine',
+											'Elderberry',
+											'Lychee',
+										],
 										children: [],
 									},
 								],
@@ -72,7 +94,13 @@ describe( 'buildTermsTree', () => {
 					},
 				],
 			},
-			{ id: 6, name: 'Mulberry', parent: 0, breadcrumbs: [], children: [] },
+			{
+				id: 6,
+				name: 'Mulberry',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
 		] );
 	} );
 
@@ -86,7 +114,13 @@ describe( 'buildTermsTree', () => {
 		];
 		const tree = buildTermsTree( filteredList, list );
 		expect( tree ).toEqual( [
-			{ id: 1, name: 'Apricots', parent: 0, breadcrumbs: [], children: [] },
+			{
+				id: 1,
+				name: 'Apricots',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
 			{
 				id: 2,
 				name: 'Clementine',
@@ -102,7 +136,13 @@ describe( 'buildTermsTree', () => {
 					},
 				],
 			},
-			{ id: 6, name: 'Mulberry', parent: 0, breadcrumbs: [], children: [] },
+			{
+				id: 6,
+				name: 'Mulberry',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
 			{
 				id: 5,
 				name: 'Lychee',
@@ -123,8 +163,20 @@ describe( 'buildTermsTree', () => {
 		];
 		const tree = buildTermsTree( filteredList, list );
 		expect( tree ).toEqual( [
-			{ id: 1, name: 'Apricots', parent: 0, breadcrumbs: [], children: [] },
-			{ id: 6, name: 'Mulberry', parent: 0, breadcrumbs: [], children: [] },
+			{
+				id: 1,
+				name: 'Apricots',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
+			{
+				id: 6,
+				name: 'Mulberry',
+				parent: 0,
+				breadcrumbs: [],
+				children: [],
+			},
 			{
 				id: 3,
 				name: 'Elderberry',

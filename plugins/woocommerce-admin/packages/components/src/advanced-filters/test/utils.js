@@ -35,7 +35,7 @@ describe( 'textContent()', () => {
 	} );
 
 	test( 'should output empty string', () => {
-		const component = ( <div /> );
+		const component = <div />;
 
 		expect( textContent( component ) ).toBe( '' );
 	} );
@@ -44,9 +44,7 @@ describe( 'textContent()', () => {
 		const component = (
 			<div>
 				<h1>Hello</h1> World
-				{
-					[ 'a', <h2 key="b">b</h2> ]
-				}
+				{ [ 'a', <h2 key="b">b</h2> ] }
 			</div>
 		);
 
@@ -57,9 +55,7 @@ describe( 'textContent()', () => {
 		const component = (
 			<div>
 				<h1>Hello</h1> World
-				{
-					[ 'a', null ]
-				}
+				{ [ 'a', null ] }
 			</div>
 		);
 
@@ -67,16 +63,14 @@ describe( 'textContent()', () => {
 	} );
 
 	test( 'array component', () => {
-		const component = ( [
-			<h1>a</h1>,
+		const component = [
+			<h1 key="1">a</h1>,
 			'b',
 			'c',
-			(
-				<div>
-					<h2>x</h2>y
-				</div>
-			),
-		] );
+			<div key="2">
+				<h2>x</h2>y
+			</div>,
+		];
 
 		expect( textContent( component ) ).toBe( 'abcxy' );
 	} );

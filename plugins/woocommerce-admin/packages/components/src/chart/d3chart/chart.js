@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -46,10 +44,19 @@ class D3Chart extends Component {
 	}
 
 	getFormatParams() {
-		const { screenReaderFormat, xFormat, x2Format, yFormat, yBelow1Format } = this.props;
+		const {
+			screenReaderFormat,
+			xFormat,
+			x2Format,
+			yFormat,
+			yBelow1Format,
+		} = this.props;
 
 		return {
-			screenReaderFormat: getFormatter( screenReaderFormat, d3TimeFormat ),
+			screenReaderFormat: getFormatter(
+				screenReaderFormat,
+				d3TimeFormat
+			),
 			xFormat: getFormatter( xFormat, d3TimeFormat ),
 			x2Format: getFormatter( x2Format, d3TimeFormat ),
 			yBelow1Format: getFormatter( yBelow1Format ),
@@ -90,10 +97,20 @@ class D3Chart extends Component {
 	}
 
 	getParams( uniqueDates ) {
-		const { chartType, colorScheme, data, interval, mode, orderedKeys } = this.props;
+		const {
+			chartType,
+			colorScheme,
+			data,
+			interval,
+			mode,
+			orderedKeys,
+		} = this.props;
 		const newOrderedKeys = orderedKeys || getOrderedKeys( data );
-		const visibleKeys = newOrderedKeys.filter( key => key.visible );
-		const colorKeys = newOrderedKeys.length > selectionLimit ? visibleKeys : newOrderedKeys;
+		const visibleKeys = newOrderedKeys.filter( ( key ) => key.visible );
+		const colorKeys =
+			newOrderedKeys.length > selectionLimit
+				? visibleKeys
+				: newOrderedKeys;
 
 		return {
 			getColor: getColor( colorKeys, colorScheme ),
@@ -106,7 +123,12 @@ class D3Chart extends Component {
 	}
 
 	createTooltip( chart, getColorFunction, visibleKeys ) {
-		const { tooltipLabelFormat, tooltipPosition, tooltipTitle, tooltipValueFormat } = this.props;
+		const {
+			tooltipLabelFormat,
+			tooltipPosition,
+			tooltipTitle,
+			tooltipValueFormat,
+		} = this.props;
 
 		const tooltip = new ChartTooltip();
 		tooltip.ref = this.tooltipRef.current;
@@ -131,23 +153,32 @@ class D3Chart extends Component {
 		const g = node
 			.attr( 'id', 'chart' )
 			.append( 'g' )
-			.attr( 'transform', `translate(${ margin.left }, ${ margin.top })` );
+			.attr(
+				'transform',
+				`translate(${ margin.left }, ${ margin.top })`
+			);
 
 		this.createTooltip( g.node(), params.getColor, params.visibleKeys );
 
 		drawAxis( g, params, scales, formats, margin, isRTL() );
-		chartType === 'line' && drawLines( g, data, params, scales, formats, this.tooltip );
-		chartType === 'bar' && drawBars( g, data, params, scales, formats, this.tooltip );
+		// eslint-disable-next-line no-unused-expressions
+		chartType === 'line' &&
+			drawLines( g, data, params, scales, formats, this.tooltip );
+		// eslint-disable-next-line no-unused-expressions
+		chartType === 'bar' &&
+			drawBars( g, data, params, scales, formats, this.tooltip );
 	}
 
 	shouldBeCompact() {
-		const {	data, chartType, width } = this.props;
-		const margin = this.getMargin();
+		const { data, chartType, width } = this.props;
+
 		if ( chartType !== 'bar' ) {
 			return false;
 		}
+		const margin = this.getMargin();
 		const widthWithoutMargins = width - margin.left - margin.right;
-		const columnsPerDate = data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
+		const columnsPerDate =
+			data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
 		const minimumWideWidth = data.length * ( columnsPerDate + 1 );
 
 		return widthWithoutMargins < minimumWideWidth;
@@ -169,13 +200,16 @@ class D3Chart extends Component {
 	}
 
 	getWidth() {
-		const {	data, chartType, width } = this.props;
-		const margin = this.getMargin();
+		const { data, chartType, width } = this.props;
 		if ( chartType !== 'bar' ) {
 			return width;
 		}
-		const columnsPerDate = data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
-		const minimumWidth = this.shouldBeCompact() ? data.length * columnsPerDate : data.length * ( columnsPerDate + 1 );
+		const margin = this.getMargin();
+		const columnsPerDate =
+			data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
+		const minimumWidth = this.shouldBeCompact()
+			? data.length * columnsPerDate
+			: data.length * ( columnsPerDate + 1 );
 
 		return Math.max( width, minimumWidth + margin.left + margin.right );
 	}
@@ -249,7 +283,14 @@ D3Chart.propTypes = {
 	/**
 	 * Interval specification (hourly, daily, weekly etc.)
 	 */
-	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
+	interval: PropTypes.oneOf( [
+		'hour',
+		'day',
+		'week',
+		'month',
+		'quarter',
+		'year',
+	] ),
 	/**
 	 * Margins for axis and chart padding.
 	 */
@@ -267,7 +308,10 @@ D3Chart.propTypes = {
 	/**
 	 * A datetime formatting string or overriding function to format the screen reader labels.
 	 */
-	screenReaderFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	screenReaderFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * The list of labels for this chart.
 	 */
@@ -275,11 +319,17 @@ D3Chart.propTypes = {
 	/**
 	 * A datetime formatting string or overriding function to format the tooltip label.
 	 */
-	tooltipLabelFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	tooltipLabelFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * A number formatting string or function to format the value displayed in the tooltips.
 	 */
-	tooltipValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	tooltipValueFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * The position where to render the tooltip can be `over` the chart or `below` the chart.
 	 */

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -74,7 +73,10 @@ describe( 'ProductImage', () => {
 	} );
 
 	test( 'should render a placeholder image if no product images are found', () => {
-		setSetting( 'wcAssetUrl', 'https://woocommerce.com/wp-content/plugins/woocommerce/assets/' );
+		setSetting(
+			'wcAssetUrl',
+			'https://woocommerce.com/wp-content/plugins/woocommerce/assets/'
+		);
 		const product = {
 			name: 'Test Product',
 		};

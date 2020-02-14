@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -25,10 +24,16 @@ export function validateStoreAddress( values ) {
 	const errors = {};
 
 	if ( ! values.addressLine1.length ) {
-		errors.addressLine1 = __( 'Please add an address', 'woocommerce-admin' );
+		errors.addressLine1 = __(
+			'Please add an address',
+			'woocommerce-admin'
+		);
 	}
 	if ( ! values.countryState.length ) {
-		errors.countryState = __( 'Please select a country and state', 'woocommerce-admin' );
+		errors.countryState = __(
+			'Please select a country and state',
+			'woocommerce-admin'
+		);
 	}
 	if ( ! values.city.length ) {
 		errors.city = __( 'Please add a city', 'woocommerce-admin' );
@@ -56,10 +61,13 @@ export function getCountryStateOptions() {
 			return acc;
 		}
 
-		const countryStates = country.states.map( state => {
+		const countryStates = country.states.map( ( state ) => {
 			return {
 				key: country.code + ':' + state.code,
-				label: decodeEntities( country.name ) + ' -- ' + decodeEntities( state.name ),
+				label:
+					decodeEntities( country.name ) +
+					' -- ' +
+					decodeEntities( state.name ),
 			};
 		} );
 
@@ -75,57 +83,73 @@ export function getCountryStateOptions() {
  * Get the autofill countryState fields and set value from filtered options.
  *
  * @param {Array} options Array of filterable options.
- * @param {String} countryState The value of the countryState field.
+ * @param {string} countryState The value of the countryState field.
  * @param {Function} setValue Set value of the countryState input.
  * @return {Object} React component.
  */
-export function getCountryStateAutofill( options, countryState, setValue ) {
+export function useGetCountryStateAutofill( options, countryState, setValue ) {
 	const [ autofillCountry, setAutofillCountry ] = useState( '' );
 	const [ autofillState, setAutofillState ] = useState( '' );
 
-	useEffect(
-		() => {
-			let filteredOptions = [];
-			const countrySearch = new RegExp( escapeRegExp( autofillCountry ), 'i' );
-			if ( autofillState.length || autofillCountry.length ) {
-				filteredOptions = options.filter( option => countrySearch.test( option.label ) );
-			}
-			if ( autofillCountry.length && autofillState.length ) {
-				const stateSearch = new RegExp( escapeRegExp( autofillState.replace( /\s/g, '' ) ), 'i' );
-				filteredOptions = filteredOptions.filter( option =>
-					stateSearch.test( option.label.replace( '-', '' ).replace( /\s/g, '' ) )
+	useEffect( () => {
+		let filteredOptions = [];
+		const countrySearch = new RegExp(
+			escapeRegExp( autofillCountry ),
+			'i'
+		);
+		if ( autofillState.length || autofillCountry.length ) {
+			filteredOptions = options.filter( ( option ) =>
+				countrySearch.test( option.label )
+			);
+		}
+		if ( autofillCountry.length && autofillState.length ) {
+			const stateSearch = new RegExp(
+				escapeRegExp( autofillState.replace( /\s/g, '' ) ),
+				'i'
+			);
+			filteredOptions = filteredOptions.filter( ( option ) =>
+				stateSearch.test(
+					option.label.replace( '-', '' ).replace( /\s/g, '' )
+				)
+			);
+
+			if ( filteredOptions.length > 1 ) {
+				let countryKeyOptions = [];
+				countryKeyOptions = filteredOptions.filter( ( option ) =>
+					countrySearch.test( option.key )
 				);
 
-				if ( filteredOptions.length > 1 ) {
-					let countryKeyOptions = [];
-					countryKeyOptions = filteredOptions.filter( option => countrySearch.test( option.key ) );
-
-					if ( countryKeyOptions.length > 0 ) {
-						filteredOptions = countryKeyOptions;
-					}
-				}
-
-				if ( filteredOptions.length > 1 ) {
-					let stateKeyOptions = [];
-					stateKeyOptions = filteredOptions.filter( option => stateSearch.test( option.key ) );
-
-					if ( 1 === stateKeyOptions.length ) {
-						filteredOptions = stateKeyOptions;
-					}
+				if ( countryKeyOptions.length > 0 ) {
+					filteredOptions = countryKeyOptions;
 				}
 			}
 
-			if ( 1 === filteredOptions.length && countryState !== filteredOptions[ 0 ].key ) {
-				setValue( 'countryState', filteredOptions[ 0 ].key );
+			if ( filteredOptions.length > 1 ) {
+				let stateKeyOptions = [];
+				stateKeyOptions = filteredOptions.filter( ( option ) =>
+					stateSearch.test( option.key )
+				);
+
+				if ( stateKeyOptions.length === 1 ) {
+					filteredOptions = stateKeyOptions;
+				}
 			}
-		},
-		[ autofillCountry, autofillState ]
-	);
+		}
+
+		if (
+			filteredOptions.length === 1 &&
+			countryState !== filteredOptions[ 0 ].key
+		) {
+			setValue( 'countryState', filteredOptions[ 0 ].key );
+		}
+	}, [ autofillCountry, autofillState ] );
 
 	return (
 		<Fragment>
 			<input
-				onChange={ event => setAutofillCountry( event.target.value ) }
+				onChange={ ( event ) =>
+					setAutofillCountry( event.target.value )
+				}
 				value={ autofillCountry }
 				name="country"
 				type="text"
@@ -135,7 +159,7 @@ export function getCountryStateAutofill( options, countryState, setValue ) {
 			/>
 
 			<input
-				onChange={ event => setAutofillState( event.target.value ) }
+				onChange={ ( event ) => setAutofillState( event.target.value ) }
 				value={ autofillState }
 				name="state"
 				type="text"
@@ -156,6 +180,11 @@ export function getCountryStateAutofill( options, countryState, setValue ) {
 export function StoreAddress( props ) {
 	const { getInputProps, setValue } = props;
 	const countryStateOptions = useMemo( () => getCountryStateOptions(), [] );
+	const countryStateAutofill = useGetCountryStateAutofill(
+		countryStateOptions,
+		getInputProps( 'countryState' ).value,
+		setValue
+	);
 
 	return (
 		<div className="woocommerce-store-address-fields">
@@ -183,11 +212,7 @@ export function StoreAddress( props ) {
 				{ ...getInputProps( 'countryState' ) }
 				controlClassName={ getInputProps( 'countryState' ).className }
 			>
-				{ getCountryStateAutofill(
-					countryStateOptions,
-					getInputProps( 'countryState' ).value,
-					setValue
-				) }
+				{ countryStateAutofill }
 			</SelectControl>
 
 			<TextControl

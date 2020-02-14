@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -25,25 +23,27 @@ const getProfileItems = ( getResource, requireResource ) => (
 
 	if ( ! ids.length ) {
 		const data = {};
-		Object.keys( profile ).forEach( id => {
-			data[ id ] = getResource( getResourceName( resourceName, id ) ).data || profile[ id ];
+		Object.keys( profile ).forEach( ( id ) => {
+			data[ id ] =
+				getResource( getResourceName( resourceName, id ) ).data ||
+				profile[ id ];
 		} );
 		return data;
 	}
 
 	const items = {};
-	ids.forEach( id => {
+	ids.forEach( ( id ) => {
 		items[ id ] = getResource( getResourceName( resourceName, id ) ).data;
 	} );
 
 	return items;
 };
 
-const getProfileItemsError = getResource => () => {
+const getProfileItemsError = ( getResource ) => () => {
 	return getResource( 'onboarding-profile' ).error;
 };
 
-const isGetProfileItemsRequesting = getResource => () => {
+const isGetProfileItemsRequesting = ( getResource ) => () => {
 	const { lastReceived, lastRequested } = getResource( 'onboarding-profile' );
 
 	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
@@ -61,12 +61,12 @@ const getJetpackConnectUrl = ( getResource, requireResource ) => (
 	return requireResource( requirement, resourceName ).data;
 };
 
-const getJetpackConnectUrlError = getResource => ( query = {} ) => {
+const getJetpackConnectUrlError = ( getResource ) => ( query = {} ) => {
 	const resourceName = getResourceName( 'jetpack-connect-url', query );
 	return getResource( resourceName ).error;
 };
 
-const isGetJetpackConnectUrlRequesting = getResource => ( query = {} ) => {
+const isGetJetpackConnectUrlRequesting = ( getResource ) => ( query = {} ) => {
 	const resourceName = getResourceName( 'jetpack-connect-url', query );
 	const { lastReceived, lastRequested } = getResource( resourceName );
 
@@ -77,12 +77,13 @@ const isGetJetpackConnectUrlRequesting = getResource => ( query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const getPluginInstallations = getResource => plugins => {
+const getPluginInstallations = ( getResource ) => ( plugins ) => {
 	const resourceName = 'plugin-install';
 
 	const installations = {};
-	plugins.forEach( plugin => {
-		const data = getResource( getResourceName( resourceName, plugin ) ).data;
+	plugins.forEach( ( plugin ) => {
+		const data = getResource( getResourceName( resourceName, plugin ) )
+			.data;
 		if ( data ) {
 			installations[ plugin ] = data;
 		}
@@ -97,7 +98,9 @@ const isJetpackConnected = ( getResource, requireResource ) => (
 	const activePlugins = getSetting(
 		'onboarding',
 		{},
-		ob => requireResource( requirement, 'active-plugins' ).data || ob.activePlugins
+		( ob ) =>
+			requireResource( requirement, 'active-plugins' ).data ||
+			ob.activePlugins
 	);
 
 	// Avoid issuing API calls, since Jetpack is obviously not connected.
@@ -107,7 +110,9 @@ const isJetpackConnected = ( getResource, requireResource ) => (
 	const data = getSetting(
 		'dataEndpoints',
 		{},
-		de => requireResource( requirement, 'jetpack-status' ).data || de.jetpackStatus
+		( de ) =>
+			requireResource( requirement, 'jetpack-status' ).data ||
+			de.jetpackStatus
 	);
 
 	return ( data && data.isActive ) || false;
@@ -119,17 +124,17 @@ const getActivePlugins = ( getResource, requireResource ) => (
 	const resourceName = 'active-plugins';
 	const data = requireResource( requirement, resourceName ).data || [];
 	if ( ! data.length ) {
-		return getSetting( 'onboarding', {}, ob => ob.activePlugins || [] );
+		return getSetting( 'onboarding', {}, ( ob ) => ob.activePlugins || [] );
 	}
 
 	return data;
 };
 
-const getActivePluginsError = getResource => () => {
+const getActivePluginsError = ( getResource ) => () => {
 	return getResource( 'active-plugins' ).error;
 };
 
-const isGetActivePluginsRequesting = getResource => () => {
+const isGetActivePluginsRequesting = ( getResource ) => () => {
 	const { lastReceived, lastRequested } = getResource( 'active-plugins' );
 
 	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
@@ -139,12 +144,13 @@ const isGetActivePluginsRequesting = getResource => () => {
 	return lastRequested > lastReceived;
 };
 
-const getPluginActivations = getResource => plugins => {
+const getPluginActivations = ( getResource ) => ( plugins ) => {
 	const resourceName = 'plugin-activate';
 
 	const activations = {};
-	plugins.forEach( plugin => {
-		const data = getResource( getResourceName( resourceName, plugin ) ).data;
+	plugins.forEach( ( plugin ) => {
+		const data = getResource( getResourceName( resourceName, plugin ) )
+			.data;
 		if ( data ) {
 			activations[ plugin ] = data;
 		}
@@ -153,12 +159,13 @@ const getPluginActivations = getResource => plugins => {
 	return activations;
 };
 
-const getPluginActivationErrors = getResource => plugins => {
+const getPluginActivationErrors = ( getResource ) => ( plugins ) => {
 	const resourceName = 'plugin-activate';
 
 	const errors = {};
-	plugins.forEach( plugin => {
-		const error = getResource( getResourceName( resourceName, plugin ) ).error;
+	plugins.forEach( ( plugin ) => {
+		const error = getResource( getResourceName( resourceName, plugin ) )
+			.error;
 		if ( error ) {
 			errors[ plugin ] = error;
 		}
@@ -167,12 +174,13 @@ const getPluginActivationErrors = getResource => plugins => {
 	return errors;
 };
 
-const getPluginInstallationErrors = getResource => plugins => {
+const getPluginInstallationErrors = ( getResource ) => ( plugins ) => {
 	const resourceName = 'plugin-install';
 
 	const errors = {};
-	plugins.forEach( plugin => {
-		const error = getResource( getResourceName( resourceName, plugin ) ).error;
+	plugins.forEach( ( plugin ) => {
+		const error = getResource( getResourceName( resourceName, plugin ) )
+			.error;
 		if ( error ) {
 			errors[ plugin ] = error;
 		}
@@ -181,7 +189,7 @@ const getPluginInstallationErrors = getResource => plugins => {
 	return errors;
 };
 
-const isPluginActivateRequesting = getResource => () => {
+const isPluginActivateRequesting = ( getResource ) => () => {
 	const { lastReceived, lastRequested } = getResource( 'plugin-activate' );
 
 	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {
@@ -191,7 +199,7 @@ const isPluginActivateRequesting = getResource => () => {
 	return lastRequested > lastReceived;
 };
 
-const isPluginInstallRequesting = getResource => () => {
+const isPluginInstallRequesting = ( getResource ) => () => {
 	const { lastReceived, lastRequested } = getResource( 'plugin-install' );
 
 	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {

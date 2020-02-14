@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -54,8 +53,8 @@ class HistoricalData extends Component {
 	makeQuery( path, errorMessage ) {
 		const { createNotice } = this.props;
 		apiFetch( { path, method: 'POST' } )
-			.then( response => {
-				if ( 'success' === response.status ) {
+			.then( ( response ) => {
+				if ( response.status === 'success' ) {
 					createNotice( 'success', response.message );
 				} else {
 					createNotice( 'error', errorMessage );
@@ -65,7 +64,7 @@ class HistoricalData extends Component {
 					} );
 				}
 			} )
-			.catch( error => {
+			.catch( ( error ) => {
 				if ( error && error.message ) {
 					createNotice( 'error', error.message );
 					this.setState( {
@@ -87,7 +86,9 @@ class HistoricalData extends Component {
 	onImportStarted() {
 		const { notes, updateNote } = this.props;
 
-		const historicalDataNote = notes.find( note => 'wc-admin-historical-data' === note.name );
+		const historicalDataNote = notes.find(
+			( note ) => note.name === 'wc-admin-historical-data'
+		);
 		if ( historicalDataNote ) {
 			updateNote( historicalDataNote.id, { status: 'actioned' } );
 		}
@@ -202,7 +203,7 @@ class HistoricalData extends Component {
 }
 
 export default compose( [
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const { getNotes } = select( 'wc-api' );
 
 		const notesQuery = {
@@ -215,7 +216,7 @@ export default compose( [
 
 		return { notes };
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateNote } = dispatch( 'wc-api' );
 
 		return { updateNote };

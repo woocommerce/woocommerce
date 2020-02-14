@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -14,7 +13,11 @@ class Spinner extends Component {
 		const { className } = this.props;
 		const classes = classnames( 'woocommerce-spinner', className );
 		return (
-			<svg className={ classes } viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+			<svg
+				className={ classes }
+				viewBox="0 0 100 100"
+				xmlns="http://www.w3.org/2000/svg"
+			>
 				<circle
 					className="woocommerce-spinner__circle"
 					fill="none"

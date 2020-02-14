@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -37,8 +36,10 @@ class PayPal extends Component {
 		const query = getQuery();
 		// Handle redirect back from PayPal
 		if ( query[ 'paypal-connect' ] ) {
-			if ( '1' === query[ 'paypal-connect' ] ) {
-				recordEvent( 'tasklist_payment_connect_method', { payment_method: 'paypal' } );
+			if ( query[ 'paypal-connect' ] === '1' ) {
+				recordEvent( 'tasklist_payment_connect_method', {
+					payment_method: 'paypal',
+				} );
 				this.props.markConfigured( 'paypal' );
 				this.props.createNotice(
 					'success',
@@ -62,17 +63,23 @@ class PayPal extends Component {
 
 	componentDidUpdate( prevProps, prevState ) {
 		if (
-			true === prevState.showManualConfiguration &&
-			false === this.state.showManualConfiguration
+			prevState.showManualConfiguration === true &&
+			this.state.showManualConfiguration === false
 		) {
 			this.fetchOAuthConnectURL();
 		}
 
-		if ( false === prevProps.optionsIsRequesting && true === this.props.optionsIsRequesting ) {
+		if (
+			prevProps.optionsIsRequesting === false &&
+			this.props.optionsIsRequesting === true
+		) {
 			this.props.setRequestPending( true );
 		}
 
-		if ( true === prevProps.optionsIsRequesting && false === this.props.optionsIsRequesting ) {
+		if (
+			prevProps.optionsIsRequesting === true &&
+			this.props.optionsIsRequesting === false
+		) {
 			this.props.setRequestPending( false );
 		}
 	}
@@ -113,7 +120,12 @@ class PayPal extends Component {
 	}
 
 	async updateSettings( values ) {
-		const { createNotice, isSettingsError, updateOptions, markConfigured } = this.props;
+		const {
+			createNotice,
+			isSettingsError,
+			updateOptions,
+			markConfigured,
+		} = this.props;
 
 		this.props.setRequestPending( true );
 		await updateOptions( {
@@ -126,7 +138,9 @@ class PayPal extends Component {
 		} );
 
 		if ( ! isSettingsError ) {
-			recordEvent( 'tasklist_payment_connect_method', { payment_method: 'paypal' } );
+			recordEvent( 'tasklist_payment_connect_method', {
+				payment_method: 'paypal',
+			} );
 			this.props.setRequestPending( false );
 			markConfigured( 'paypal' );
 			this.props.createNotice(
@@ -137,7 +151,10 @@ class PayPal extends Component {
 			this.props.setRequestPending( false );
 			createNotice(
 				'error',
-				__( 'There was a problem saving your payment settings.', 'woocommerce-admin' )
+				__(
+					'There was a problem saving your payment settings.',
+					'woocommerce-admin'
+				)
 			);
 		}
 	}
@@ -153,10 +170,16 @@ class PayPal extends Component {
 		const errors = {};
 
 		if ( ! values.api_username ) {
-			errors.api_username = __( 'Please enter your API username', 'woocommerce-admin' );
+			errors.api_username = __(
+				'Please enter your API username',
+				'woocommerce-admin'
+			);
 		}
 		if ( ! values.api_password ) {
-			errors.api_password = __( 'Please enter your API password', 'woocommerce-admin' );
+			errors.api_password = __(
+				'Please enter your API password',
+				'woocommerce-admin'
+			);
 		}
 
 		return errors;
@@ -191,17 +214,27 @@ class PayPal extends Component {
 					return (
 						<Fragment>
 							<TextControl
-								label={ __( 'API Username', 'woocommerce-admin' ) }
+								label={ __(
+									'API Username',
+									'woocommerce-admin'
+								) }
 								required
 								{ ...getInputProps( 'api_username' ) }
 							/>
 							<TextControl
-								label={ __( 'API Password', 'woocommerce-admin' ) }
+								label={ __(
+									'API Password',
+									'woocommerce-admin'
+								) }
 								required
 								{ ...getInputProps( 'api_password' ) }
 							/>
 
-							<Button onClick={ handleSubmit } isPrimary disabled={ optionsIsRequesting }>
+							<Button
+								onClick={ handleSubmit }
+								isPrimary
+								disabled={ optionsIsRequesting }
+							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
 							</Button>
 
@@ -241,7 +274,7 @@ PayPal.defaultProps = {
 };
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const { getOptions, isGetOptionsRequesting } = select( 'wc-api' );
 		const options = getOptions( [ 'woocommerce_ppec_paypal_settings' ] );
 		const optionsIsRequesting = Boolean(
@@ -253,7 +286,7 @@ export default compose(
 			optionsIsRequesting,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateOptions } = dispatch( 'wc-api' );
 		return {

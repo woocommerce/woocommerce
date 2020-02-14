@@ -1,10 +1,14 @@
-/** @format */
 /**
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { Component, createRef } from '@wordpress/element';
-import { SelectControl, Button, Dropdown, IconButton } from '@wordpress/components';
+import {
+	SelectControl,
+	Button,
+	Dropdown,
+	IconButton,
+} from '@wordpress/components';
 import { partial, findIndex, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
@@ -68,7 +72,10 @@ class AdvancedFilters extends Component {
 		if ( ! isEqual( prevQuery, query ) ) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
-				activeFilters: getActiveFiltersFromQuery( query, config.filters ),
+				activeFilters: getActiveFiltersFromQuery(
+					query,
+					config.filters
+				),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
@@ -83,23 +90,29 @@ class AdvancedFilters extends Component {
 	}
 
 	onFilterChange( key, property, value ) {
-		const activeFilters = this.state.activeFilters.map( activeFilter => {
-			if ( key === activeFilter.key ) {
-				return Object.assign( {}, activeFilter, { [ property ]: value } );
+		const activeFilters = this.state.activeFilters.map(
+			( activeFilter ) => {
+				if ( key === activeFilter.key ) {
+					return Object.assign( {}, activeFilter, {
+						[ property ]: value,
+					} );
+				}
+				return activeFilter;
 			}
-			return activeFilter;
-		} );
+		);
 
 		this.setState( { activeFilters } );
 	}
 
 	updateFilter( filter ) {
-		const activeFilters = this.state.activeFilters.map( activeFilter => {
-			if ( filter.key === activeFilter.key ) {
-				return filter;
+		const activeFilters = this.state.activeFilters.map(
+			( activeFilter ) => {
+				if ( filter.key === activeFilter.key ) {
+					return filter;
+				}
+				return activeFilter;
 			}
-			return activeFilter;
-		} );
+		);
 
 		this.setState( { activeFilters } );
 	}
@@ -107,11 +120,14 @@ class AdvancedFilters extends Component {
 	removeFilter( key ) {
 		const { onAdvancedFilterAction } = this.props;
 		const activeFilters = [ ...this.state.activeFilters ];
-		const index = findIndex( activeFilters, filter => filter.key === key );
+		const index = findIndex(
+			activeFilters,
+			( filter ) => filter.key === key
+		);
 		onAdvancedFilterAction( 'remove', activeFilters[ index ] );
 		activeFilters.splice( index, 1 );
 		this.setState( { activeFilters } );
-		if ( 0 === activeFilters.length ) {
+		if ( activeFilters.length === 0 ) {
 			const history = getHistory();
 			history.push( this.getUpdateHref( [] ) );
 		}
@@ -129,7 +145,10 @@ class AdvancedFilters extends Component {
 						options={ matches }
 						value={ match }
 						onChange={ this.onMatchChange }
-						aria-label={ __( 'Choose to apply any or all filters', 'woocommerce-admin' ) }
+						aria-label={ __(
+							'Choose to apply any or all filters',
+							'woocommerce-admin'
+						) }
 					/>
 				),
 			},
@@ -138,7 +157,7 @@ class AdvancedFilters extends Component {
 
 	getAvailableFilterKeys() {
 		const { config } = this.props;
-		const activeFilterKeys = this.state.activeFilters.map( f => f.key );
+		const activeFilterKeys = this.state.activeFilters.map( ( f ) => f.key );
 		return difference( Object.keys( config.filters ), activeFilterKeys );
 	}
 
@@ -146,16 +165,22 @@ class AdvancedFilters extends Component {
 		const { onAdvancedFilterAction, config } = this.props;
 		const filterConfig = config.filters[ key ];
 		const newFilter = { key };
-		if ( Array.isArray( filterConfig.rules ) && filterConfig.rules.length ) {
+		if (
+			Array.isArray( filterConfig.rules ) &&
+			filterConfig.rules.length
+		) {
 			newFilter.rule = filterConfig.rules[ 0 ].value;
 		}
 		if ( filterConfig.input && filterConfig.input.options ) {
-			newFilter.value = getDefaultOptionValue( filterConfig, filterConfig.input.options );
+			newFilter.value = getDefaultOptionValue(
+				filterConfig,
+				filterConfig.input.options
+			);
 		}
-		if ( filterConfig.input && 'Search' === filterConfig.input.component ) {
+		if ( filterConfig.input && filterConfig.input.component === 'Search' ) {
 			newFilter.value = '';
 		}
-		this.setState( state => {
+		this.setState( ( state ) => {
 			return {
 				activeFilters: [ ...state.activeFilters, newFilter ],
 			};
@@ -164,7 +189,9 @@ class AdvancedFilters extends Component {
 		onClose();
 		// after render, focus the newly added filter's first focusable element
 		setTimeout( () => {
-			const addedFilter = this.filterListRef.current.querySelector( 'li:last-of-type fieldset' );
+			const addedFilter = this.filterListRef.current.querySelector(
+				'li:last-of-type fieldset'
+			);
 			addedFilter.focus();
 		} );
 	}
@@ -180,7 +207,11 @@ class AdvancedFilters extends Component {
 
 	getUpdateHref( activeFilters, matchValue ) {
 		const { path, query, config } = this.props;
-		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config.filters );
+		const updatedQuery = getQueryFromActiveFilters(
+			activeFilters,
+			query,
+			config.filters
+		);
 		const match = matchValue === 'all' ? undefined : matchValue;
 		return getNewPath( { ...updatedQuery, match }, path, query );
 	}
@@ -192,7 +223,11 @@ class AdvancedFilters extends Component {
 	onFilter() {
 		const { onAdvancedFilterAction, query, config } = this.props;
 		const { activeFilters, match } = this.state;
-		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config.filters );
+		const updatedQuery = getQueryFromActiveFilters(
+			activeFilters,
+			query,
+			config.filters
+		);
 		onAdvancedFilterAction( 'filter', { ...updatedQuery, match } );
 	}
 
@@ -201,17 +236,28 @@ class AdvancedFilters extends Component {
 		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
-		const updateDisabled = ( 'admin.php' + window.location.search === updateHref ) || 0 === activeFilters.length;
+		const updateDisabled =
+			'admin.php' + window.location.search === updateHref ||
+			activeFilters.length === 0;
 		const isEnglish = this.isEnglish();
 		return (
-			<Card className="woocommerce-filters-advanced woocommerce-analytics__card" title={ this.getTitle() }>
-				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
-					{ activeFilters.map( filter => {
+			<Card
+				className="woocommerce-filters-advanced woocommerce-analytics__card"
+				title={ this.getTitle() }
+			>
+				<ul
+					className="woocommerce-filters-advanced__list"
+					ref={ this.filterListRef }
+				>
+					{ activeFilters.map( ( filter ) => {
 						const { key } = filter;
 						const { input, labels } = config.filters[ key ];
 						return (
-							<li className="woocommerce-filters-advanced__list-item" key={ key }>
-								{ 'SelectControl' === input.component && (
+							<li
+								className="woocommerce-filters-advanced__list-item"
+								key={ key }
+							>
+								{ input.component === 'SelectControl' && (
 									<SelectFilter
 										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
@@ -220,7 +266,7 @@ class AdvancedFilters extends Component {
 										isEnglish={ isEnglish }
 									/>
 								) }
-								{ 'Search' === input.component && (
+								{ input.component === 'Search' && (
 									<SearchFilter
 										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
@@ -230,7 +276,7 @@ class AdvancedFilters extends Component {
 										query={ query }
 									/>
 								) }
-								{ 'Number' === input.component && (
+								{ input.component === 'Number' && (
 									<NumberFilter
 										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
@@ -241,18 +287,26 @@ class AdvancedFilters extends Component {
 										currency={ currency }
 									/>
 								) }
-								{ 'Currency' === input.component && (
+								{ input.component === 'Currency' && (
 									<NumberFilter
 										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
-										config={ { ...config.filters[ key ], ...{ input: { type: 'currency', component: 'Currency' } } } }
+										config={ {
+											...config.filters[ key ],
+											...{
+												input: {
+													type: 'currency',
+													component: 'Currency',
+												},
+											},
+										} }
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }
 										currency={ currency }
 									/>
 								) }
-								{ 'Date' === input.component && (
+								{ input.component === 'Date' && (
 									<DateFilter
 										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
@@ -269,7 +323,10 @@ class AdvancedFilters extends Component {
 										'woocommerce-filters-advanced__remove'
 									) }
 									label={ labels.remove }
-									onClick={ partial( this.removeFilter, key ) }
+									onClick={ partial(
+										this.removeFilter,
+										key
+									) }
 									icon={ <Gridicon icon="cross-small" /> }
 								/>
 							</li>
@@ -288,15 +345,27 @@ class AdvancedFilters extends Component {
 									onClick={ onToggle }
 									aria-expanded={ isOpen }
 								>
-									{ __( 'Add a Filter', 'woocommerce-admin' ) }
+									{ __(
+										'Add a Filter',
+										'woocommerce-admin'
+									) }
 								</IconButton>
 							) }
 							renderContent={ ( { onClose } ) => (
 								<ul className="woocommerce-filters-advanced__add-dropdown">
-									{ availableFilterKeys.map( key => (
+									{ availableFilterKeys.map( ( key ) => (
 										<li key={ key }>
-											<Button onClick={ partial( this.addFilter, key, onClose ) }>
-												{ config.filters[ key ].labels.add }
+											<Button
+												onClick={ partial(
+													this.addFilter,
+													key,
+													onClose
+												) }
+											>
+												{
+													config.filters[ key ].labels
+														.add
+												}
 											</Button>
 										</li>
 									) ) }
@@ -323,7 +392,11 @@ class AdvancedFilters extends Component {
 						</Link>
 					) }
 					{ activeFilters.length > 0 && (
-						<Link type="wc-admin" href={ this.getUpdateHref( [] ) } onClick={ this.clearFilters }>
+						<Link
+							type="wc-admin"
+							href={ this.getUpdateHref( [] ) }
+							onClick={ this.clearFilters }
+						>
 							{ __( 'Clear all filters', 'woocommerce-admin' ) }
 						</Link>
 					) }

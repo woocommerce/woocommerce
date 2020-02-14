@@ -40,13 +40,16 @@ class Form extends Component {
 	}
 
 	setValue( name, value ) {
-		this.setState( prevState => ( {
-			values: { ...prevState.values, [ name ]: value },
-		} ), this.validate );
+		this.setState(
+			( prevState ) => ( {
+				values: { ...prevState.values, [ name ]: value },
+			} ),
+			this.validate
+		);
 	}
 
 	setTouched( name, touched = true ) {
-		this.setState( prevState => ( {
+		this.setState( ( prevState ) => ( {
 			touched: { ...prevState.touched, [ name ]: touched },
 		} ) );
 	}
@@ -56,7 +59,7 @@ class Form extends Component {
 
 		// Handle native events.
 		if ( value.target ) {
-			if ( 'checkbox' === value.target.type ) {
+			if ( value.target.type === 'checkbox' ) {
 				this.setValue( name, ! values[ name ] );
 			} else {
 				this.setValue( name, value.target.value );
@@ -73,7 +76,7 @@ class Form extends Component {
 	async handleSubmit() {
 		const { values } = this.state;
 		const touched = {};
-		Object.keys( values ).map( name => touched[ name ] = true );
+		Object.keys( values ).map( ( name ) => ( touched[ name ] = true ) );
 		this.setState( { touched } );
 
 		if ( await this.isValidForm() ) {

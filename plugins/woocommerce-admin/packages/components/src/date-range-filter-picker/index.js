@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -32,7 +31,11 @@ class DateRangeFilterPicker extends Component {
 	}
 
 	formatDate( date, format ) {
-		if ( date && date._isAMomentObject && ( 'function' === typeof date.format ) ) {
+		if (
+			date &&
+			date._isAMomentObject &&
+			typeof date.format === 'function'
+		) {
 			return date.format( format );
 		}
 
@@ -61,13 +64,13 @@ class DateRangeFilterPicker extends Component {
 
 	onSelect( selectedTab, onClose ) {
 		const { isoDateFormat, onRangeSelect } = this.props;
-		return event => {
+		return ( event ) => {
 			const { period, compare, after, before } = this.state;
 			const data = {
-				period: 'custom' === selectedTab ? 'custom' : period,
+				period: selectedTab === 'custom' ? 'custom' : period,
 				compare,
 			};
-			if ( 'custom' === selectedTab ) {
+			if ( selectedTab === 'custom' ) {
 				data.after = this.formatDate( after, isoDateFormat );
 				data.before = this.formatDate( before, isoDateFormat );
 			} else {
@@ -83,13 +86,15 @@ class DateRangeFilterPicker extends Component {
 		const { primaryDate, secondaryDate } = this.props.dateQuery;
 		return [
 			`${ primaryDate.label } (${ primaryDate.range })`,
-			`${ __( 'vs.', 'woocommerce-admin' ) } ${ secondaryDate.label } (${ secondaryDate.range })`,
+			`${ __( 'vs.', 'woocommerce-admin' ) } ${ secondaryDate.label } (${
+				secondaryDate.range
+			})`,
 		];
 	}
 
 	isValidSelection( selectedTab ) {
 		const { compare, after, before } = this.state;
-		if ( 'custom' === selectedTab ) {
+		if ( selectedTab === 'custom' ) {
 			return compare && after && before;
 		}
 		return true;
@@ -121,7 +126,9 @@ class DateRangeFilterPicker extends Component {
 		} = this.state;
 		return (
 			<div className="woocommerce-filters-filter">
-				<span className="woocommerce-filters-label">{ __( 'Date Range', 'woocommerce-admin' ) }:</span>
+				<span className="woocommerce-filters-label">
+					{ __( 'Date Range', 'woocommerce-admin' ) }:
+				</span>
 				<Dropdown
 					ref={ this.dropdownRef }
 					contentClassName="woocommerce-filters-date__content"

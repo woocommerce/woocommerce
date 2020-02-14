@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -9,36 +7,39 @@ import { utcParse as d3UTCParse } from 'd3-time-format';
 
 /**
  * Allows an overriding formatter or defaults to d3Format or d3TimeFormat
- * @param {string|function} format - either a format string for the D3 formatters or an overriding fomatting method
- * @param {function} formatter - default d3Format or another formatting method, which accepts the string `format`
- * @returns {function} to be used to format an input given the format and formatter
+ *
+ * @param {string|Function} format - either a format string for the D3 formatters or an overriding fomatting method
+ * @param {Function} formatter - default d3Format or another formatting method, which accepts the string `format`
+ * @return {Function} to be used to format an input given the format and formatter
  */
 export const getFormatter = ( format, formatter = d3Format ) =>
 	typeof format === 'function' ? format : formatter( format );
 
 /**
  * Returns an array of unique keys contained in the data.
- * @param {array} data - The chart component's `data` prop.
- * @returns {array} Array of unique keys.
+ *
+ * @param {Array} data - The chart component's `data` prop.
+ * @return {Array} Array of unique keys.
  */
 export const getUniqueKeys = ( data ) => {
 	const keys = new Set(
 		data.reduce( ( acc, curr ) => acc.concat( Object.keys( curr ) ), [] )
 	);
 
-	return [ ...keys ].filter( key => key !== 'date' );
+	return [ ...keys ].filter( ( key ) => key !== 'date' );
 };
 
 /**
  * Describes `getOrderedKeys`
- * @param {array} data - The chart component's `data` prop.
- * @returns {array} Array of unique category keys ordered by cumulative total value
+ *
+ * @param {Array} data - The chart component's `data` prop.
+ * @return {Array} Array of unique category keys ordered by cumulative total value
  */
 export const getOrderedKeys = ( data ) => {
 	const keys = getUniqueKeys( data );
 
 	return keys
-		.map( key => ( {
+		.map( ( key ) => ( {
 			key,
 			focus: true,
 			total: data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
@@ -49,29 +50,33 @@ export const getOrderedKeys = ( data ) => {
 
 /**
  * Describes `getUniqueDates`
- * @param {array} data - the chart component's `data` prop.
+ *
+ * @param {Array} data - the chart component's `data` prop.
  * @param {string} dateParser - D3 time format
- * @returns {array} an array of unique date values sorted from earliest to latest
+ * @return {Array} an array of unique date values sorted from earliest to latest
  */
 export const getUniqueDates = ( data, dateParser ) => {
 	const parseDate = d3UTCParse( dateParser );
-	const dates = new Set(
-		data.map( d => d.date )
-	);
+	const dates = new Set( data.map( ( d ) => d.date ) );
 	return [ ...dates ].sort( ( a, b ) => parseDate( a ) - parseDate( b ) );
 };
 
 /**
  * Check whether data is empty.
- * @param {array} data - the chart component's `data` prop.
+ *
+ * @param {Array} data - the chart component's `data` prop.
  * @param {number} baseValue - base value to test data values against.
- * @returns {boolean} `false` if there was at least one data value different than
+ * @return {boolean} `false` if there was at least one data value different than
  * the baseValue.
  */
 export const isDataEmpty = ( data, baseValue = 0 ) => {
 	for ( let i = 0; i < data.length; i++ ) {
 		for ( const [ key, item ] of Object.entries( data[ i ] ) ) {
-			if ( key !== 'date' && ! isNil( item.value ) && item.value !== baseValue ) {
+			if (
+				key !== 'date' &&
+				! isNil( item.value ) &&
+				item.value !== baseValue
+			) {
 				return false;
 			}
 		}

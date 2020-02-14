@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -27,26 +26,30 @@ const defaultOrderStatuses = [
 ];
 
 const {
-	woocommerce_actionable_order_statuses,
-	woocommerce_excluded_report_order_statuses,
-	woocommerce_default_date_range,
+	woocommerce_actionable_order_statuses: actionableStatuses,
+	woocommerce_excluded_report_order_statuses: excludedStatuses,
+	woocommerce_default_date_range: defaultDateRange,
 } = getSetting( 'wcAdminSettings', {
 	woocommerce_actionable_order_statuses: [],
 	woocommerce_excluded_report_order_statuses: [],
 	woocommerce_default_date_range: DEFAULT_DATE_RANGE,
 } );
 
-const actionableOrderStatuses = Array.isArray( woocommerce_actionable_order_statuses )
-	? woocommerce_actionable_order_statuses
+const actionableOrderStatuses = Array.isArray(
+	actionableStatuses
+)
+	? actionableStatuses
 	: [];
 
-const excludedOrderStatuses = Array.isArray( woocommerce_excluded_report_order_statuses )
-	? woocommerce_excluded_report_order_statuses
+const excludedOrderStatuses = Array.isArray(
+	excludedStatuses
+)
+	? excludedStatuses
 	: [];
 
 const orderStatuses = Object.keys( ORDER_STATUSES )
-	.filter( status => status !== 'refunded' )
-	.map( key => {
+	.filter( ( status ) => status !== 'refunded' )
+	.map( ( key ) => {
 		return {
 			value: key,
 			label: ORDER_STATUSES[ key ],
@@ -65,12 +68,17 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 		options: [
 			{
 				key: 'defaultStatuses',
-				options: orderStatuses.filter( status => defaultOrderStatuses.includes( status.value ) ),
+				options: orderStatuses.filter( ( status ) =>
+					defaultOrderStatuses.includes( status.value )
+				),
 			},
 			{
 				key: 'customStatuses',
 				label: __( 'Custom Statuses', 'woocommerce-admin' ),
-				options: orderStatuses.filter( status => ! defaultOrderStatuses.includes( status.value ) ),
+				options: orderStatuses.filter(
+					( status ) =>
+						! defaultOrderStatuses.includes( status.value )
+				),
 			},
 		],
 		helpText: interpolateComponents( {
@@ -93,12 +101,17 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 		options: [
 			{
 				key: 'defaultStatuses',
-				options: orderStatuses.filter( status => defaultOrderStatuses.includes( status.value ) ),
+				options: orderStatuses.filter( ( status ) =>
+					defaultOrderStatuses.includes( status.value )
+				),
 			},
 			{
 				key: 'customStatuses',
 				label: __( 'Custom Statuses', 'woocommerce-admin' ),
-				options: orderStatuses.filter( status => ! defaultOrderStatuses.includes( status.value ) ),
+				options: orderStatuses.filter(
+					( status ) =>
+						! defaultOrderStatuses.includes( status.value )
+				),
 			},
 		],
 		helpText: __(
@@ -119,7 +132,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 				'the default date range.',
 			'woocommerce-admin'
 		),
-		initialValue: woocommerce_default_date_range,
+		initialValue: defaultDateRange,
 		defaultValue: DEFAULT_DATE_RANGE,
 	},
 ] );

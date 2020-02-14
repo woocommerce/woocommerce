@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,7 +11,11 @@ import PropTypes from 'prop-types';
  */
 import { getDateParamsFromQuery } from 'lib/date';
 import { getNewPath } from '@woocommerce/navigation';
-import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
+import {
+	SummaryList,
+	SummaryListPlaceholder,
+	SummaryNumber,
+} from '@woocommerce/components';
 import { calculateDelta, formatValue } from 'lib/number-format';
 import { formatCurrency } from 'lib/currency-format';
 
@@ -29,7 +32,9 @@ import { recordEvent } from 'lib/tracks';
  */
 export class ReportSummary extends Component {
 	formatVal( val, type ) {
-		return 'currency' === type ? formatCurrency( val ) : formatValue( type, val );
+		return type === 'currency'
+			? formatCurrency( val )
+			: formatValue( type, val );
 	}
 
 	getValues( key, type ) {
@@ -69,7 +74,7 @@ export class ReportSummary extends Component {
 		const { compare } = getDateParamsFromQuery( query );
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
-			charts.map( chart => {
+			charts.map( ( chart ) => {
 				const { key, order, orderby, label, type } = chart;
 				const newPath = { chart: key };
 				if ( orderby ) {
@@ -89,7 +94,7 @@ export class ReportSummary extends Component {
 						href={ href }
 						label={ label }
 						prevLabel={
-							'previous_period' === compare
+							compare === 'previous_period'
 								? __( 'Previous Period:', 'woocommerce-admin' )
 								: __( 'Previous Year:', 'woocommerce-admin' )
 						}
@@ -101,7 +106,10 @@ export class ReportSummary extends Component {
 							if ( onToggle ) {
 								onToggle();
 							}
-							recordEvent( 'analytics_chart_tab_click', { report: report || endpoint, key } );
+							recordEvent( 'analytics_chart_tab_click', {
+								report: report || endpoint,
+								key,
+							} );
 						} }
 					/>
 				);
@@ -184,14 +192,23 @@ ReportSummary.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, isRequesting, limitProperties, query, filters, advancedFilters } = props;
+		const {
+			endpoint,
+			isRequesting,
+			limitProperties,
+			query,
+			filters,
+			advancedFilters,
+		} = props;
 		const limitBy = limitProperties || [ endpoint ];
 
 		if ( isRequesting ) {
 			return {};
 		}
 
-		const hasLimitByParam = limitBy.some( item => query[ item ] && query[ item ].length );
+		const hasLimitByParam = limitBy.some(
+			( item ) => query[ item ] && query[ item ].length
+		);
 
 		if ( query.search && ! hasLimitByParam ) {
 			return {

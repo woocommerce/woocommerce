@@ -1,33 +1,33 @@
 {
-  "name": "@woocommerce/date",
-  "version": "2.0.0",
-  "description": "WooCommerce date utilities.",
-  "author": "Automattic",
-  "license": "GPL-3.0-or-later",
-  "keywords": [
-    "wordpress",
-    "woocommerce",
-    "date"
-  ],
-  "homepage": "https://github.com/woocommerce/woocommerce-admin/tree/master/packages/date/README.md",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/woocommerce/woocommerce-admin.git"
-  },
-  "bugs": {
-    "url": "https://github.com/woocommerce/woocommerce-admin/issues"
-  },
-  "main": "build/index.js",
-  "module": "build-module/index.js",
-  "react-native": "src/index",
-  "dependencies": {
-    "@babel/runtime-corejs2": "7.8.4",
-    "@wordpress/date": "3.8.0",
-    "@wordpress/i18n": "3.9.0",
-    "lodash": "4.17.15",
-    "moment": "2.22.2"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@woocommerce/date",
+	"version": "2.0.0",
+	"description": "WooCommerce date utilities.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"date"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/master/packages/date/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce-admin.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"react-native": "src/index",
+	"dependencies": {
+		"@babel/runtime-corejs2": "7.8.4",
+		"@wordpress/date": "3.8.0",
+		"@wordpress/i18n": "3.9.0",
+		"lodash": "4.17.15",
+		"moment": "2.22.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
 }

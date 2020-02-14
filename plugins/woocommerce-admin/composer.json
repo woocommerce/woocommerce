@@ -1,49 +1,49 @@
 {
-  "name": "woocommerce/woocommerce-admin",
-  "description": "A modern, javascript-driven WooCommerce Admin experience.",
-  "homepage": "https://github.com/woocommerce/woocommerce-admin",
-  "type": "wordpress-plugin",
-  "license": "GPL-3.0-or-later",
-  "prefer-stable": true,
-  "minimum-stability": "dev",
-  "require": {
-    "composer/installers": "1.7.0",
-    "php": ">=5.6|>=7.0",
-    "automattic/jetpack-autoloader": "^1.2.0"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "7.5.20",
-    "woocommerce/woocommerce-sniffs": "0.0.9"
-  },
-  "config": {
-    "platform": {
-      "php": "7.1"
-    }
-  },
-  "scripts": {
-    "test": [
-      "phpunit"
-    ],
-    "phpcs": [
-      "phpcs -s -p"
-    ],
-    "phpcbf": [
-      "phpcbf -p"
-    ]
-  },
-  "extra": {
-    "scripts-description": {
-      "test": "Run unit tests",
-      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
-      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
-    }
-  },
-  "autoload": {
-    "classmap": [
-      "includes/"
-    ],
-    "psr-4": {
-      "Automattic\\WooCommerce\\Admin\\": "src/"
-    }
-  }
+	"name": "woocommerce/woocommerce-admin",
+	"description": "A modern, javascript-driven WooCommerce Admin experience.",
+	"homepage": "https://github.com/woocommerce/woocommerce-admin",
+	"type": "wordpress-plugin",
+	"license": "GPL-3.0-or-later",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"require": {
+		"composer/installers": "1.7.0",
+		"php": ">=5.6|>=7.0",
+		"automattic/jetpack-autoloader": "^1.2.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "7.5.20",
+		"woocommerce/woocommerce-sniffs": "0.0.9"
+	},
+	"config": {
+		"platform": {
+			"php": "7.1"
+		}
+	},
+	"scripts": {
+		"test": [
+			"phpunit"
+		],
+		"phpcs": [
+			"phpcs -s -p"
+		],
+		"phpcbf": [
+			"phpcbf -p"
+		]
+	},
+	"extra": {
+		"scripts-description": {
+			"test": "Run unit tests",
+			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+		}
+	},
+	"autoload": {
+		"classmap": [
+			"includes/"
+		],
+		"psr-4": {
+			"Automattic\\WooCommerce\\Admin\\": "src/"
+		}
+	}
 }

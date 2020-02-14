@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -22,14 +21,14 @@ export default class MyAnimationSlider extends Component {
 	}
 
 	forward() {
-		this.setState( state => ( {
+		this.setState( ( state ) => ( {
 			page: state.page + 1,
 			animate: 'left',
 		} ) );
 	}
 
 	back() {
-		this.setState( state => ( {
+		this.setState( ( state ) => ( {
 			page: state.page - 1,
 			animate: 'right',
 		} ) );
@@ -47,16 +46,15 @@ export default class MyAnimationSlider extends Component {
 		return (
 			<div>
 				<AnimationSlider animationKey={ page } animate={ animate }>
-					{ () => (
-						<div style={ style }>
-							{ pages[ page ] }
-						</div>
-					) }
+					{ () => <div style={ style }>{ pages[ page ] }</div> }
 				</AnimationSlider>
 				<button onClick={ this.back } disabled={ page === 0 }>
 					Back
 				</button>
-				<button onClick={ this.forward } disabled={ page === pages.length + 1 }>
+				<button
+					onClick={ this.forward }
+					disabled={ page === pages.length + 1 }
+				>
 					Forward
 				</button>
 			</div>

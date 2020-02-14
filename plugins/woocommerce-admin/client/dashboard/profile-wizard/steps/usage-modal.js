@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,7 +7,12 @@ import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import { get } from 'lodash';
 import interpolateComponents from 'interpolate-components';
-import { Button, CheckboxControl, FormToggle, Modal } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	FormToggle,
+	Modal,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -33,9 +37,17 @@ class UsageModal extends Component {
 	}
 
 	async componentDidUpdate( prevProps ) {
-		const { hasErrors, isRequesting, onClose, onContinue, createNotice } = this.props;
-		const isRequestSuccessful = ! isRequesting && prevProps.isRequesting && ! hasErrors;
-		const isRequestError = ! isRequesting && prevProps.isRequesting && hasErrors;
+		const {
+			hasErrors,
+			isRequesting,
+			onClose,
+			onContinue,
+			createNotice,
+		} = this.props;
+		const isRequestSuccessful =
+			! isRequesting && prevProps.isRequesting && ! hasErrors;
+		const isRequestError =
+			! isRequesting && prevProps.isRequesting && hasErrors;
 
 		if ( isRequestSuccessful ) {
 			onClose();
@@ -45,7 +57,10 @@ class UsageModal extends Component {
 		if ( isRequestError ) {
 			createNotice(
 				'error',
-				__( 'There was a problem updating your preferences.', 'woocommerce-admin' )
+				__(
+					'There was a problem updating your preferences.',
+					'woocommerce-admin'
+				)
 			);
 			onClose();
 		}
@@ -70,24 +85,36 @@ class UsageModal extends Component {
 			),
 			components: {
 				link: (
-					<Link href="https://woocommerce.com/usage-tracking" target="_blank" type="external" />
+					<Link
+						href="https://woocommerce.com/usage-tracking"
+						target="_blank"
+						type="external"
+					/>
 				),
 			},
 		} );
 
 		return (
 			<Modal
-				title={ __( 'Build a Better WooCommerce', 'woocommerce-admin' ) }
+				title={ __(
+					'Build a Better WooCommerce',
+					'woocommerce-admin'
+				) }
 				onRequestClose={ () => this.props.onClose() }
 				className="woocommerce-profile-wizard__usage-modal"
 			>
 				<div className="woocommerce-profile-wizard__usage-wrapper">
-					<div className="woocommerce-profile-wizard__usage-modal-message">{ trackingMessage }</div>
+					<div className="woocommerce-profile-wizard__usage-modal-message">
+						{ trackingMessage }
+					</div>
 					<div className="woocommerce-profile-wizard__tracking">
 						<CheckboxControl
 							className="woocommerce-profile-wizard__tracking-checkbox"
 							checked={ allowTracking }
-							label={ __( 'Yes, count me in!', 'woocommerce-admin' ) }
+							label={ __(
+								'Yes, count me in!',
+								'woocommerce-admin'
+							) }
 							onChange={ this.onTrackingChange }
 						/>
 
@@ -95,7 +122,7 @@ class UsageModal extends Component {
 							aria-hidden="true"
 							checked={ allowTracking }
 							onChange={ this.onTrackingChange }
-							onClick={ e => e.stopPropagation() }
+							onClick={ ( e ) => e.stopPropagation() }
 							tabIndex="-1"
 						/>
 					</div>
@@ -114,13 +141,22 @@ class UsageModal extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getOptions, getOptionsError, isUpdateOptionsRequesting } = select( 'wc-api' );
+	withSelect( ( select ) => {
+		const {
+			getOptions,
+			getOptionsError,
+			isUpdateOptionsRequesting,
+		} = select( 'wc-api' );
 
 		const options = getOptions( [ 'woocommerce_allow_tracking' ] );
-		const allowTracking = 'yes' === get( options, [ 'woocommerce_allow_tracking' ], false );
-		const isRequesting = Boolean( isUpdateOptionsRequesting( [ 'woocommerce_allow_tracking' ] ) );
-		const hasErrors = Boolean( getOptionsError( [ 'woocommerce_allow_tracking' ] ) );
+		const allowTracking =
+			get( options, [ 'woocommerce_allow_tracking' ], false ) === 'yes';
+		const isRequesting = Boolean(
+			isUpdateOptionsRequesting( [ 'woocommerce_allow_tracking' ] )
+		);
+		const hasErrors = Boolean(
+			getOptionsError( [ 'woocommerce_allow_tracking' ] )
+		);
 
 		return {
 			allowTracking,
@@ -128,7 +164,7 @@ export default compose(
 			hasErrors,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateOptions } = dispatch( 'wc-api' );
 

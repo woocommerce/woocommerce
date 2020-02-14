@@ -1,15 +1,15 @@
-/** @format */
 /**
  * Internal dependencies
  */
 import { CompareFilter } from '@woocommerce/components';
 
-const path = ( new URL( document.location ) ).searchParams.get( 'path' ) || '/devdocs';
+const path =
+	new URL( document.location ).searchParams.get( 'path' ) || '/devdocs';
 const query = {};
 const compareFilter = {
 	type: 'products',
 	param: 'product',
-	getLabels: function() {
+	getLabels() {
 		return Promise.resolve( [] );
 	},
 	labels: {
@@ -21,5 +21,5 @@ const compareFilter = {
 };
 
 export default () => (
-    <CompareFilter path={ path } query={ query } { ...compareFilter } />
+	<CompareFilter path={ path } query={ query } { ...compareFilter } />
 );

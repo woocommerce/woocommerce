@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -46,26 +45,35 @@ class ThemePreview extends Component {
 
 	handleDeviceClick( device ) {
 		const { theme } = this.props;
-		recordEvent( 'storeprofiler_store_theme_demo_device', { device, theme: theme.slug } );
+		recordEvent( 'storeprofiler_store_theme_demo_device', {
+			device,
+			theme: theme.slug,
+		} );
 		this.setState( { device } );
 	}
 
 	render() {
 		const { isBusy, onChoose, onClose, theme } = this.props;
-		const { demo_url, slug, title } = theme;
+		const { demo_url: demoUrl, slug, title } = theme;
 		const { device: currentDevice } = this.state;
 
 		return (
 			<div className="woocommerce-theme-preview">
 				<div className="woocommerce-theme-preview__toolbar">
-					<Button className="woocommerce-theme-preview__close" onClick={ onClose }>
+					<Button
+						className="woocommerce-theme-preview__close"
+						onClick={ onClose }
+					>
 						<i className="material-icons-outlined">close</i>
 					</Button>
 					<div className="woocommerce-theme-preview__theme-name">
 						{ interpolateComponents( {
 							/* translators: Describing who a previewed theme is developed by. E.g., Storefront developed by WooCommerce */
 							mixedString: sprintf(
-								__( '{{strong}}%s{{/strong}} developed by WooCommerce', 'woocommerce-admin' ),
+								__(
+									'{{strong}}%s{{/strong}} developed by WooCommerce',
+									'woocommerce-admin'
+								),
 								title
 							),
 							components: {
@@ -74,23 +82,39 @@ class ThemePreview extends Component {
 						} ) }
 					</div>
 					<div className="woocommerce-theme-preview__devices">
-						{ devices.map( device => (
+						{ devices.map( ( device ) => (
 							<Button
 								key={ device.key }
-								className={ classnames( 'woocommerce-theme-preview__device', {
-									'is-selected': device.key === currentDevice,
-								} ) }
-								onClick={ () => this.handleDeviceClick( device.key ) }
+								className={ classnames(
+									'woocommerce-theme-preview__device',
+									{
+										'is-selected':
+											device.key === currentDevice,
+									}
+								) }
+								onClick={ () =>
+									this.handleDeviceClick( device.key )
+								}
 							>
-								<i className="material-icons-outlined">{ device.icon }</i>
+								<i className="material-icons-outlined">
+									{ device.icon }
+								</i>
 							</Button>
 						) ) }
 					</div>
-					<Button isPrimary onClick={ () => onChoose( slug, 'preview' ) } isBusy={ isBusy }>
+					<Button
+						isPrimary
+						onClick={ () => onChoose( slug, 'preview' ) }
+						isBusy={ isBusy }
+					>
 						{ __( 'Choose', 'woocommerce-admin' ) }
 					</Button>
 				</div>
-				<WebPreview src={ demo_url } title={ title } className={ `is-${ currentDevice }` } />
+				<WebPreview
+					src={ demoUrl }
+					title={ title }
+					className={ `is-${ currentDevice }` }
+				/>
 			</div>
 		);
 	}

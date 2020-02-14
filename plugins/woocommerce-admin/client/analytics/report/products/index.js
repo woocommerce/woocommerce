@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -22,9 +21,13 @@ import ReportFilters from 'analytics/components/report-filters';
 
 class ProductsReport extends Component {
 	getChartMeta() {
-		const { query, isSingleProductView, isSingleProductVariable } = this.props;
+		const {
+			query,
+			isSingleProductView,
+			isSingleProductVariable,
+		} = this.props;
 		const isCompareView =
-			'compare-products' === query.filter &&
+			query.filter === 'compare-products' &&
 			query.products &&
 			query.products.split( ',' ).length > 1;
 
@@ -33,7 +36,9 @@ class ProductsReport extends Component {
 				? 'item-comparison'
 				: 'time-comparison';
 		const compareObject =
-			isSingleProductView && isSingleProductVariable ? 'variations' : 'products';
+			isSingleProductView && isSingleProductVariable
+				? 'variations'
+				: 'products';
 		const label =
 			isSingleProductView && isSingleProductVariable
 				? __( '%d variations', 'woocommerce-admin' )
@@ -48,7 +53,13 @@ class ProductsReport extends Component {
 
 	render() {
 		const { compareObject, itemsLabel, mode } = this.getChartMeta();
-		const { path, query, isError, isRequesting, isSingleProductVariable } = this.props;
+		const {
+			path,
+			query,
+			isError,
+			isRequesting,
+			isSingleProductVariable,
+		} = this.props;
 
 		if ( isError ) {
 			return <ReportError isError />;
@@ -58,8 +69,9 @@ class ProductsReport extends Component {
 			...query,
 		};
 
-		if ( 'item-comparison' === mode ) {
-			chartQuery.segmentby = 'products' === compareObject ? 'product' : 'variation';
+		if ( mode === 'item-comparison' ) {
+			chartQuery.segmentby =
+				compareObject === 'products' ? 'product' : 'variation';
 		}
 
 		return (
@@ -90,7 +102,10 @@ class ProductsReport extends Component {
 					itemsLabel={ itemsLabel }
 					path={ path }
 					query={ chartQuery }
-					selectedChart={ getSelectedChart( chartQuery.chart, charts ) }
+					selectedChart={ getSelectedChart(
+						chartQuery.chart,
+						charts
+					) }
 				/>
 				{ isSingleProductVariable ? (
 					<VariationsReportTable
@@ -122,7 +137,9 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query, isRequesting } = props;
 		const isSingleProductView =
-			! query.search && query.products && 1 === query.products.split( ',' ).length;
+			! query.search &&
+			query.products &&
+			query.products.split( ',' ).length === 1;
 		if ( isRequesting ) {
 			return {
 				query: {
@@ -133,16 +150,25 @@ export default compose(
 			};
 		}
 
-		const { getItems, isGetItemsRequesting, getItemsError } = select( 'wc-api' );
+		const { getItems, isGetItemsRequesting, getItemsError } = select(
+			'wc-api'
+		);
 		if ( isSingleProductView ) {
-			const productId = parseInt( query.products );
+			const productId = parseInt( query.products, 10 );
 			const includeArgs = { include: productId };
 			// TODO Look at similar usage to populate tags in the Search component.
 			const products = getItems( 'products', includeArgs );
 			const isVariable =
-				products && products.get( productId ) && 'variable' === products.get( productId ).type;
-			const isProductsRequesting = isGetItemsRequesting( 'products', includeArgs );
-			const isProductsError = Boolean( getItemsError( 'products', includeArgs ) );
+				products &&
+				products.get( productId ) &&
+				products.get( productId ).type === 'variable';
+			const isProductsRequesting = isGetItemsRequesting(
+				'products',
+				includeArgs
+			);
+			const isProductsError = Boolean(
+				getItemsError( 'products', includeArgs )
+			);
 			return {
 				query: {
 					...query,

@@ -1,15 +1,20 @@
-/** @format */
-
 /**
  * External dependencies
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
-const ActivityPanelToggleBubble = ( { height = 24, width = 24, hasUnread = false } ) => {
-	const classes = classnames( 'woocommerce-layout__activity-panel-toggle-bubble', {
-		'has-unread': hasUnread,
-	} );
+const ActivityPanelToggleBubble = ( {
+	height = 24,
+	width = 24,
+	hasUnread = false,
+} ) => {
+	const classes = classnames(
+		'woocommerce-layout__activity-panel-toggle-bubble',
+		{
+			'has-unread': hasUnread,
+		}
+	);
 
 	/* eslint-disable max-len */
 	return (

@@ -1,8 +1,12 @@
-/** @format */
 /**
  * External dependencies
  */
-import { Button, IconButton, Dropdown, NavigableMenu } from '@wordpress/components';
+import {
+	Button,
+	IconButton,
+	Dropdown,
+	NavigableMenu,
+} from '@wordpress/components';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
@@ -10,7 +14,7 @@ import { noop } from 'lodash';
 /**
  * A component for displaying a button with a main action plus a secondary set of actions behind a menu toggle.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const SplitButton = ( {
 	isPrimary,
@@ -49,10 +53,15 @@ const SplitButton = ( {
 				renderToggle={ ( { isOpen, onToggle } ) => {
 					return (
 						<IconButton
-							icon={ isOpen ? 'arrow-up-alt2' : 'arrow-down-alt2' }
-							className={ classnames( 'woocommerce-split-button__menu-toggle', {
-								'is-active': isOpen,
-							} ) }
+							icon={
+								isOpen ? 'arrow-up-alt2' : 'arrow-down-alt2'
+							}
+							className={ classnames(
+								'woocommerce-split-button__menu-toggle',
+								{
+									'is-active': isOpen,
+								}
+							) }
 							onClick={ onToggle }
 							aria-haspopup="true"
 							aria-expanded={ isOpen }
@@ -63,11 +72,12 @@ const SplitButton = ( {
 				} }
 				renderContent={ ( { onClose } ) => {
 					const renderControl = ( control, index ) => {
-						const ButtonComponent = ( control.icon && IconButton ) || Button;
+						const ButtonComponent =
+							( control.icon && IconButton ) || Button;
 						return (
 							<ButtonComponent
 								key={ index }
-								onClick={ event => {
+								onClick={ ( event ) => {
 									event.stopPropagation();
 									onClose();
 									if ( control.onClick ) {
@@ -127,7 +137,10 @@ SplitButton.propTypes = {
 			/**
 			 * Icon used in button, passed to `IconButton`. Can be either string (dashicon name) or Gridicon.
 			 */
-			icon: PropTypes.oneOfType( [ PropTypes.string, PropTypes.element ] ),
+			icon: PropTypes.oneOfType( [
+				PropTypes.string,
+				PropTypes.element,
+			] ),
 			/**
 			 * Label displayed for this button.
 			 */

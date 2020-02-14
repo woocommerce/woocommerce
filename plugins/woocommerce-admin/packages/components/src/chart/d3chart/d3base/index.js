@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -54,6 +52,7 @@ export default class D3Base extends Component {
 	delayedScroll() {
 		const { tooltip } = this.props;
 		return throttle( () => {
+			// eslint-disable-next-line no-unused-expressions
 			tooltip && tooltip.hide();
 		}, 300 );
 	}
@@ -95,7 +94,11 @@ export default class D3Base extends Component {
 	render() {
 		const { className } = this.props;
 		return (
-			<div className={ classNames( 'd3-base', className ) } ref={ this.chartRef } onScroll={ this.delayedScroll() } />
+			<div
+				className={ classNames( 'd3-base', className ) }
+				ref={ this.chartRef }
+				onScroll={ this.delayedScroll() }
+			/>
 		);
 	}
 }

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,10 +17,19 @@ class TablePlaceholder extends Component {
 	render() {
 		const { numberOfRows, ...tableProps } = this.props;
 		const rows = range( numberOfRows ).map( () =>
-			this.props.headers.map( () => ( { display: <span className="is-placeholder" /> } ) )
+			this.props.headers.map( () => ( {
+				display: <span className="is-placeholder" />,
+			} ) )
 		);
 
-		return <Table ariaHidden={ true } classNames="is-loading" rows={ rows } { ...tableProps } />;
+		return (
+			<Table
+				ariaHidden={ true }
+				classNames="is-loading"
+				rows={ rows }
+				{ ...tableProps }
+			/>
+		);
 	}
 }
 

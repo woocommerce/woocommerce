@@ -29,7 +29,15 @@ const defaultMessages = {
 	noResults: __( 'No results for %s', 'woocommerce-admin' ),
 	search: __( 'Search for items', 'woocommerce-admin' ),
 	selected: ( n ) =>
-		sprintf( _n( '%d item selected', '%d items selected', n, 'woocommerce-admin' ), n ),
+		sprintf(
+			_n(
+				'%d item selected',
+				'%d items selected',
+				n,
+				'woocommerce-admin'
+			),
+			n
+		),
 	updated: __( 'Search results updated.', 'woocommerce-admin' ),
 };
 
@@ -50,7 +58,7 @@ export class SearchListControl extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const { onSearch, search } = this.props;
-		if ( search !== prevProps.search && 'function' === typeof onSearch ) {
+		if ( search !== prevProps.search && typeof onSearch === 'function' ) {
 			onSearch( search );
 		}
 	}
@@ -62,7 +70,10 @@ export class SearchListControl extends Component {
 				onChange( [] );
 			}
 			const i = findIndex( selected, { id } );
-			onChange( [ ...selected.slice( 0, i ), ...selected.slice( i + 1 ) ] );
+			onChange( [
+				...selected.slice( 0, i ),
+				...selected.slice( i + 1 ),
+			] );
 		};
 	}
 
@@ -86,7 +97,7 @@ export class SearchListControl extends Component {
 	}
 
 	isSelected( item ) {
-		return -1 !== findIndex( this.props.selected, { id: item.id } );
+		return findIndex( this.props.selected, { id: item.id } ) !== -1;
 	}
 
 	getFilteredList( list, search ) {
@@ -100,7 +111,9 @@ export class SearchListControl extends Component {
 		const filteredList = list
 			.map( ( item ) => ( re.test( item.name ) ? item : false ) )
 			.filter( Boolean );
-		return isHierarchical ? buildTermsTree( filteredList, list ) : filteredList;
+		return isHierarchical
+			? buildTermsTree( filteredList, list )
+			: filteredList;
 	}
 
 	defaultRenderItem( args ) {
@@ -130,7 +143,6 @@ export class SearchListControl extends Component {
 
 	renderListSection() {
 		const { isLoading, search } = this.props;
-		const list = this.getFilteredList( this.props.list, search );
 		const messages = { ...defaultMessages, ...this.props.messages };
 
 		if ( isLoading ) {
@@ -140,6 +152,7 @@ export class SearchListControl extends Component {
 				</div>
 			);
 		}
+		const list = this.getFilteredList( this.props.list, search );
 
 		if ( ! list.length ) {
 			return (
@@ -153,7 +166,10 @@ export class SearchListControl extends Component {
 						/>
 					</span>
 					<span className="woocommerce-search-list__not-found-text">
-						{ search ? sprintf( messages.noResults, search ) : messages.noItems }
+						{ search
+							? // eslint-disable-next-line @wordpress/valid-sprintf
+							  sprintf( messages.noResults, search )
+							: messages.noItems }
 					</span>
 				</div>
 			);
@@ -194,7 +210,12 @@ export class SearchListControl extends Component {
 					) : null }
 				</div>
 				{ selected.map( ( item, i ) => (
-					<Tag key={ i } label={ item.name } id={ item.id } remove={ this.onRemove } />
+					<Tag
+						key={ i }
+						label={ item.name }
+						id={ item.id }
+						remove={ this.onRemove }
+					/>
 				) ) }
 			</div>
 		);

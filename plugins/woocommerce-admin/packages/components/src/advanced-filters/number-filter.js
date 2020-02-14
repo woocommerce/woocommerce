@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -26,26 +25,25 @@ class NumberFilter extends Component {
 
 	getScreenReaderText( filter, config ) {
 		const { currency } = this.props;
-		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
-		let [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
+		let [ rangeStart, rangeEnd ] = isArray( filter.value )
+			? filter.value
+			: [ filter.value ];
 
 		// Return nothing if we're missing input(s)
-		if (
-			! rangeStart ||
-			( 'between' === rule.value && ! rangeEnd )
-		) {
+		if ( ! rangeStart || ( rule.value === 'between' && ! rangeEnd ) ) {
 			return '';
 		}
+		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
-		if ( 'currency' === inputType ) {
+		if ( inputType === 'currency' ) {
 			rangeStart = currency.formatCurrency( rangeStart );
 			rangeEnd = currency.formatCurrency( rangeEnd );
 		}
 
 		let filterStr = rangeStart;
 
-		if ( 'between' === rule.value ) {
+		if ( rule.value === 'between' ) {
 			filterStr = interpolateComponents( {
 				mixedString: this.getBetweenString(),
 				components: {
@@ -56,13 +54,15 @@ class NumberFilter extends Component {
 			} );
 		}
 
-		return textContent( interpolateComponents( {
-			mixedString: config.labels.title,
-			components: {
-				filter: <Fragment>{ filterStr }</Fragment>,
-				rule: <Fragment>{ rule.label }</Fragment>,
-			},
-		} ) );
+		return textContent(
+			interpolateComponents( {
+				mixedString: config.labels.title,
+				components: {
+					filter: <Fragment>{ filterStr }</Fragment>,
+					rule: <Fragment>{ rule.label }</Fragment>,
+				},
+			} )
+		);
 	}
 
 	getFormControl( {
@@ -73,19 +73,31 @@ class NumberFilter extends Component {
 		currencySymbol,
 		symbolPosition,
 	} ) {
-		if ( 'currency' === type ) {
-			return (
-				0 === symbolPosition.indexOf( 'right' )
-				? <TextControlWithAffixes
-					suffix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
+		if ( type === 'currency' ) {
+			return symbolPosition.indexOf( 'right' ) === 0 ? (
+				<TextControlWithAffixes
+					suffix={
+						<span
+							dangerouslySetInnerHTML={ {
+								__html: currencySymbol,
+							} }
+						/>
+					}
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
 					aria-label={ label }
 					onChange={ onChange }
 				/>
-				: <TextControlWithAffixes
-					prefix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
+			) : (
+				<TextControlWithAffixes
+					prefix={
+						<span
+							dangerouslySetInnerHTML={ {
+								__html: currencySymbol,
+							} }
+						/>
+					}
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
@@ -107,23 +119,17 @@ class NumberFilter extends Component {
 	}
 
 	getFilterInputs() {
-		const {
-			config,
-			filter,
-			onFilterChange,
-			currency,
-		} = this.props;
-		const {
-			symbol: currencySymbol,
-			symbolPosition,
-		} = currency;
-		const inputType = get( config, [ 'input', 'type' ], 'number' );
+		const { config, filter, onFilterChange, currency } = this.props;
+		const { symbol: currencySymbol, symbolPosition } = currency;
 
-		if ( 'between' === filter.rule ) {
+		if ( filter.rule === 'between' ) {
 			return this.getRangeInput();
 		}
+		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
-		const [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
+		const [ rangeStart, rangeEnd ] = isArray( filter.value )
+			? filter.value
+			: [ filter.value ];
 		if ( Boolean( rangeEnd ) ) {
 			// If there's a value for rangeEnd, we've just changed from "between"
 			// to "less than" or "more than" and need to transition the value
@@ -132,20 +138,30 @@ class NumberFilter extends Component {
 
 		let labelFormat = '';
 
-		if ( 'lessthan' === filter.rule ) {
+		if ( filter.rule === 'lessthan' ) {
 			/* eslint-disable-next-line max-len */
 			/* translators: Sentence fragment, "maximum amount" refers to a numeric value the field must be less than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-			labelFormat = _x( '%(field)s maximum amount', 'maximum value input', 'woocommerce-admin' );
+			labelFormat = _x(
+				'%(field)s maximum amount',
+				'maximum value input',
+				'woocommerce-admin'
+			);
 		} else {
 			/* eslint-disable-next-line max-len */
 			/* translators: Sentence fragment, "minimum amount" refers to a numeric value the field must be more than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-			labelFormat = _x( '%(field)s minimum amount', 'minimum value input', 'woocommerce-admin' );
+			labelFormat = _x(
+				'%(field)s minimum amount',
+				'minimum value input',
+				'woocommerce-admin'
+			);
 		}
 
 		return this.getFormControl( {
 			type: inputType,
 			value: rangeStart || rangeEnd,
-			label: sprintf( labelFormat, { field: get( config, [ 'labels', 'add' ] ) } ),
+			label: sprintf( labelFormat, {
+				field: get( config, [ 'labels', 'add' ] ),
+			} ),
 			onChange: partial( onFilterChange, filter.key, 'value' ),
 			currencySymbol,
 			symbolPosition,
@@ -153,18 +169,12 @@ class NumberFilter extends Component {
 	}
 
 	getRangeInput() {
-		const {
-			config,
-			filter,
-			onFilterChange,
-			currency,
-		} = this.props;
-		const {
-			symbol: currencySymbol,
-			symbolPosition,
-		} = currency;
+		const { config, filter, onFilterChange, currency } = this.props;
+		const { symbol: currencySymbol, symbolPosition } = currency;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
-		const [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
+		const [ rangeStart, rangeEnd ] = isArray( filter.value )
+			? filter.value
+			: [ filter.value ];
 
 		const rangeStartOnChange = ( newRangeStart ) => {
 			onFilterChange( filter.key, 'value', [ newRangeStart, rangeEnd ] );
@@ -209,7 +219,13 @@ class NumberFilter extends Component {
 	}
 
 	render() {
-		const { className, config, filter, onFilterChange, isEnglish } = this.props;
+		const {
+			className,
+			config,
+			filter,
+			onFilterChange,
+			isEnglish,
+		} = this.props;
 		const { key, rule } = filter;
 		const { labels, rules } = config;
 
@@ -219,7 +235,10 @@ class NumberFilter extends Component {
 				title: <span className={ className } />,
 				rule: (
 					<SelectControl
-						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__rule'
+						) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -228,9 +247,13 @@ class NumberFilter extends Component {
 				),
 				filter: (
 					<div
-						className={ classnames( className, 'woocommerce-filters-advanced__input-range', {
-							'is-between': 'between' === rule,
-						} ) }
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__input-range',
+							{
+								'is-between': rule === 'between',
+							}
+						) }
 					>
 						{ this.getFilterInputs() }
 					</div>
@@ -242,14 +265,20 @@ class NumberFilter extends Component {
 
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
+			<fieldset
+				className="woocommerce-filters-advanced__line-item"
+				tabIndex="0"
+			>
 				<legend className="screen-reader-text">
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
-						'is-english': isEnglish,
-					} ) }
+					className={ classnames(
+						'woocommerce-filters-advanced__fieldset',
+						{
+							'is-english': isEnglish,
+						}
+					) }
 				>
 					{ children }
 				</div>

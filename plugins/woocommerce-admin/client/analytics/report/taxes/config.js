@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -14,7 +13,8 @@ import { NAMESPACE } from 'wc-api/constants';
 
 const TAXES_REPORT_CHARTS_FILTER = 'woocommerce_admin_taxes_report_charts';
 const TAXES_REPORT_FILTERS_FILTER = 'woocommerce_admin_taxes_report_filters';
-const TAXES_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_taxes_report_advanced_filters';
+const TAXES_REPORT_ADVANCED_FILTERS_FILTER =
+	'woocommerce_admin_taxes_report_advanced_filters';
 
 export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	{
@@ -62,13 +62,22 @@ export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 				settings: {
 					type: 'taxes',
 					param: 'taxes',
-					getLabels: getRequestByIdString( NAMESPACE + '/taxes', tax => ( {
-						id: tax.id,
-						label: getTaxCode( tax ),
-					} ) ),
+					getLabels: getRequestByIdString(
+						NAMESPACE + '/taxes',
+						( tax ) => ( {
+							id: tax.id,
+							label: getTaxCode( tax ),
+						} )
+					),
 					labels: {
-						helpText: __( 'Check at least two tax codes below to compare', 'woocommerce-admin' ),
-						placeholder: __( 'Search for tax codes to compare', 'woocommerce-admin' ),
+						helpText: __(
+							'Check at least two tax codes below to compare',
+							'woocommerce-admin'
+						),
+						placeholder: __(
+							'Search for tax codes to compare',
+							'woocommerce-admin'
+						),
 						title: __( 'Compare Tax Codes', 'woocommerce-admin' ),
 						update: __( 'Compare', 'woocommerce-admin' ),
 					},
@@ -78,4 +87,7 @@ export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 	},
 ] );
 
-export const advancedFilters = applyFilters( TAXES_REPORT_ADVANCED_FILTERS_FILTER, {} );
+export const advancedFilters = applyFilters(
+	TAXES_REPORT_ADVANCED_FILTERS_FILTER,
+	{}
+);

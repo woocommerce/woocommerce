@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -13,7 +11,7 @@ import Rating from './index';
 /**
  * Display a set of stars representing the review's rating.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const ReviewRating = ( { review, ...props } ) => {
 	const rating = ( review && review.rating ) || 0;

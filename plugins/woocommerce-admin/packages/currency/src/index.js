@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -46,7 +45,7 @@ export default class Currency {
 	 * Get the default price format from a currency.
 	 *
 	 * @param {Object} config Currency configuration.
-	 * @return {String} Price format.
+	 * @return {string} Price format.
 	 */
 	getPriceFormat( config ) {
 		if ( config.priceFormat ) {
@@ -70,16 +69,17 @@ export default class Currency {
 	/**
 	 * Formats money value.
 	 *
-	 * @param   {Number|String} number number to format
-	 * @returns {?String} A formatted string.
+	 * @param   {number|string} number number to format
+	 * @return {?string} A formatted string.
 	 */
 	formatCurrency( number ) {
 		const formattedNumber = numberFormat( this, number );
 
-		if ( '' === formattedNumber ) {
+		if ( formattedNumber === '' ) {
 			return formattedNumber;
 		}
 
+		// eslint-disable-next-line @wordpress/valid-sprintf
 		return sprintf( this.priceFormat, this.symbol, formattedNumber );
 	}
 
@@ -87,28 +87,31 @@ export default class Currency {
 	 * Get the rounded decimal value of a number at the precision used for the current currency.
 	 * This is a work-around for fraction-cents, meant to be used like `wc_format_decimal`
 	 *
-	 * @param {Number|String} number A floating point number (or integer), or string that converts to a number
-	 * @return {Number} The original number rounded to a decimal point
+	 * @param {number|string} number A floating point number (or integer), or string that converts to a number
+	 * @return {number} The original number rounded to a decimal point
 	 */
 	formatDecimal( number ) {
-		if ( 'number' !== typeof number ) {
+		if ( typeof number !== 'number' ) {
 			number = parseFloat( number );
 		}
 		if ( Number.isNaN( number ) ) {
 			return 0;
 		}
-		return Math.round( number * Math.pow( 10, this.precision ) ) / Math.pow( 10, this.precision );
+		return (
+			Math.round( number * Math.pow( 10, this.precision ) ) /
+			Math.pow( 10, this.precision )
+		);
 	}
 
 	/**
 	 * Get the string representation of a floating point number to the precision used by the current currency.
 	 * This is different from `formatCurrency` by not returning the currency symbol.
 	 *
-	 * @param  {Number|String} number A floating point number (or integer), or string that converts to a number
-	 * @return {String}               The original number rounded to a decimal point
+	 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
+	 * @return {string}               The original number rounded to a decimal point
 	 */
 	formatDecimalString( number ) {
-		if ( 'number' !== typeof number ) {
+		if ( typeof number !== 'number' ) {
 			number = parseFloat( number );
 		}
 		if ( Number.isNaN( number ) ) {
@@ -120,15 +123,19 @@ export default class Currency {
 	/**
 	 * Render a currency for display in a component.
 	 *
-	 * @param  {Number|String} number A floating point number (or integer), or string that converts to a number
-	 * @return {Node|String} The number formatted as currency and rendered for display.
+	 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
+	 * @return {Node|string} The number formatted as currency and rendered for display.
 	 */
 	render( number ) {
-		if ( 'number' !== typeof number ) {
+		if ( typeof number !== 'number' ) {
 			number = parseFloat( number );
 		}
 		if ( number < 0 ) {
-			return <span className="is-negative">{ this.formatCurrency( number ) }</span>;
+			return (
+				<span className="is-negative">
+					{ this.formatCurrency( number ) }
+				</span>
+			);
 		}
 		return this.formatCurrency( number );
 	}
@@ -138,8 +145,8 @@ export default class Currency {
  * Returns currency data by country/region. Contains code, symbol, position, thousands separator, decimal separator, and precision.
  *
  * Dev Note: When adding new currencies below, the exchange rate array should also be updated in WooCommerce Admin's `business-details.js`.
- * @format
- * @return {object} Curreny data.
+ *
+ * @return {Object} Curreny data.
  */
 export function getCurrencyData() {
 	// See https://github.com/woocommerce/woocommerce-admin/issues/3101.

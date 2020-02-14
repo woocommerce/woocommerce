@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -15,13 +14,19 @@ import { Gravatar } from '@woocommerce/components';
 
 describe( 'ActivityCard', () => {
 	test( 'should have correct title', () => {
-		const card = <ActivityCard title="Inbox message">This card has some content</ActivityCard>;
+		const card = (
+			<ActivityCard title="Inbox message">
+				This card has some content
+			</ActivityCard>
+		);
 		expect( card.props.title ).toBe( 'Inbox message' );
 	} );
 
 	test( 'should render a basic card', () => {
 		const card = shallow(
-			<ActivityCard title="Inbox message">This card has some content</ActivityCard>
+			<ActivityCard title="Inbox message">
+				This card has some content
+			</ActivityCard>
 		);
 		expect( card ).toMatchSnapshot();
 	} );
@@ -37,7 +42,10 @@ describe( 'ActivityCard', () => {
 
 	test( 'should render a custom icon on a card', () => {
 		const card = shallow(
-			<ActivityCard title="Inbox message" icon={ <Gridicon icon="customize" /> }>
+			<ActivityCard
+				title="Inbox message"
+				icon={ <Gridicon icon="customize" /> }
+			>
 				This card has some content
 			</ActivityCard>
 		);
@@ -46,7 +54,10 @@ describe( 'ActivityCard', () => {
 
 	test( 'should render a gravatar on a card', () => {
 		const card = shallow(
-			<ActivityCard title="Inbox message" icon={ <Gravatar user="admin@local.test" /> }>
+			<ActivityCard
+				title="Inbox message"
+				icon={ <Gravatar user="admin@local.test" /> }
+			>
 				This card has some content
 			</ActivityCard>
 		);
@@ -89,10 +100,10 @@ describe( 'ActivityCard', () => {
 			<ActivityCard
 				title="Inbox message"
 				actions={ [
-					<Button isPrimary onClick={ noop }>
+					<Button key="action1" isPrimary onClick={ noop }>
 						Action 1
 					</Button>,
-					<Button isDefault onClick={ noop }>
+					<Button key="action2" isDefault onClick={ noop }>
 						Action 2
 					</Button>,
 				] }

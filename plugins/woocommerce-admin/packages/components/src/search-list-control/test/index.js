@@ -146,7 +146,9 @@ describe( 'SearchListControl', () => {
 	} );
 
 	test( 'should render a search box and list of options, with a custom render callback for each item', () => {
-		const renderItem = ({ item }) => <div key={item.id}>{item.name}!</div>; // eslint-disable-line
+		const renderItem = ( { item } ) => (
+			<div key={ item.id }>{ item.name }!</div>
+		); // eslint-disable-line
 		const component = renderer.create(
 			<SearchListControl
 				instanceId={ 1 }

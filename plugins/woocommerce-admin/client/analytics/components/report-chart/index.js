@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -26,7 +25,10 @@ import { CURRENCY } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { getReportChartData, getTooltipValueFormat } from 'wc-api/reports/utils';
+import {
+	getReportChartData,
+	getTooltipValueFormat,
+} from 'wc-api/reports/utils';
 import ReportError from 'analytics/components/report-error';
 import withSelect from 'wc-api/with-select';
 import { getChartMode, getSelectedFilter } from './utils';
@@ -38,8 +40,10 @@ export class ReportChart extends Component {
 	shouldComponentUpdate( nextProps ) {
 		if (
 			nextProps.isRequesting !== this.props.isRequesting ||
-			nextProps.primaryData.isRequesting !== this.props.primaryData.isRequesting ||
-			nextProps.secondaryData.isRequesting !== this.props.secondaryData.isRequesting ||
+			nextProps.primaryData.isRequesting !==
+				this.props.primaryData.isRequesting ||
+			nextProps.secondaryData.isRequesting !==
+				this.props.secondaryData.isRequesting ||
 			! isEqual( nextProps.query, this.props.query )
 		) {
 			return true;
@@ -55,7 +59,10 @@ export class ReportChart extends Component {
 			interval.subtotals.segments.forEach( function( segment ) {
 				if ( segment.segment_label ) {
 					const label = intervalData[ segment.segment_label ]
-						? segment.segment_label + ' (#' + segment.segment_id + ')'
+						? segment.segment_label +
+						  ' (#' +
+						  segment.segment_id +
+						  ')'
 						: segment.segment_label;
 					intervalData[ segment.segment_id ] = {
 						label,
@@ -76,7 +83,10 @@ export class ReportChart extends Component {
 		const currentInterval = getIntervalForQuery( query );
 		const { primary, secondary } = getCurrentDates( query );
 
-		const chartData = primaryData.data.intervals.map( function( interval, index ) {
+		const chartData = primaryData.data.intervals.map( function(
+			interval,
+			index
+		) {
 			const secondaryDate = getPreviousDate(
 				interval.date_start,
 				primary.after,
@@ -96,7 +106,12 @@ export class ReportChart extends Component {
 				secondary: {
 					label: `${ secondary.label } (${ secondary.range })`,
 					labelDate: secondaryDate.format( 'YYYY-MM-DD HH:mm:ss' ),
-					value: ( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
+					value:
+						( secondaryInterval &&
+							secondaryInterval.subtotals[
+								selectedChart.key
+							] ) ||
+						0,
 				},
 			};
 		} );
@@ -108,8 +123,16 @@ export class ReportChart extends Component {
 		const { primaryData, secondaryData, selectedChart } = this.props;
 
 		return {
-			primary: get( primaryData, [ 'data', 'totals', selectedChart.key ], null ),
-			secondary: get( secondaryData, [ 'data', 'totals', selectedChart.key ], null ),
+			primary: get(
+				primaryData,
+				[ 'data', 'totals', selectedChart.key ],
+				null
+			),
+			secondary: get(
+				secondaryData,
+				[ 'data', 'totals', selectedChart.key ],
+				null
+			),
 		};
 	}
 
@@ -128,7 +151,10 @@ export class ReportChart extends Component {
 		} = this.props;
 		const currentInterval = getIntervalForQuery( query );
 		const allowedIntervals = getAllowedIntervalsForQuery( query );
-		const formats = getDateFormatsForInterval( currentInterval, primaryData.data.intervals.length );
+		const formats = getDateFormatsForInterval(
+			currentInterval,
+			primaryData.data.intervals.length
+		);
 		const emptyMessage = emptySearchResults
 			? __( 'No data for the current search', 'woocommerce-admin' )
 			: __( 'No data for the selected date range', 'woocommerce-admin' );
@@ -152,8 +178,13 @@ export class ReportChart extends Component {
 				showHeaderControls={ showHeaderControls }
 				title={ selectedChart.label }
 				tooltipLabelFormat={ formats.tooltipLabelFormat }
-				tooltipTitle={ ( 'time-comparison' === mode && selectedChart.label ) || null }
-				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
+				tooltipTitle={
+					( mode === 'time-comparison' && selectedChart.label ) ||
+					null
+				}
+				tooltipValueFormat={ getTooltipValueFormat(
+					selectedChart.type
+				) }
 				chartType={ getChartTypeForQuery( query ) }
 				valueType={ selectedChart.type }
 				xFormat={ formats.xFormat }
@@ -173,7 +204,11 @@ export class ReportChart extends Component {
 		const isChartRequesting = isRequesting || primaryData.isRequesting;
 		const chartData = this.getItemChartData();
 
-		return this.renderChart( 'item-comparison', isChartRequesting, chartData );
+		return this.renderChart(
+			'item-comparison',
+			isChartRequesting,
+			chartData
+		);
 	}
 
 	renderTimeComparison() {
@@ -184,16 +219,23 @@ export class ReportChart extends Component {
 		}
 
 		const isChartRequesting =
-			isRequesting || primaryData.isRequesting || secondaryData.isRequesting;
+			isRequesting ||
+			primaryData.isRequesting ||
+			secondaryData.isRequesting;
 		const chartData = this.getTimeChartData();
 		const legendTotals = this.getTimeChartTotals();
 
-		return this.renderChart( 'time-comparison', isChartRequesting, chartData, legendTotals );
+		return this.renderChart(
+			'time-comparison',
+			isChartRequesting,
+			chartData,
+			legendTotals
+		);
 	}
 
 	render() {
 		const { mode } = this.props;
-		if ( 'item-comparison' === mode ) {
+		if ( mode === 'item-comparison' ) {
 			return this.renderItemComparison();
 		}
 		return this.renderTimeComparison();
@@ -286,11 +328,21 @@ ReportChart.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, filters, isRequesting, limitProperties, query, advancedFilters } = props;
+		const {
+			endpoint,
+			filters,
+			isRequesting,
+			limitProperties,
+			query,
+			advancedFilters,
+		} = props;
 		const limitBy = limitProperties || [ endpoint ];
 		const selectedFilter = getSelectedFilter( filters, query );
 		const filterParam = get( selectedFilter, [ 'settings', 'param' ] );
-		const chartMode = props.mode || getChartMode( selectedFilter, query ) || 'time-comparison';
+		const chartMode =
+			props.mode ||
+			getChartMode( selectedFilter, query ) ||
+			'time-comparison';
 
 		const newProps = {
 			mode: chartMode,
@@ -301,7 +353,9 @@ export default compose(
 			return newProps;
 		}
 
-		const hasLimitByParam = limitBy.some( item => query[ item ] && query[ item ].length );
+		const hasLimitByParam = limitBy.some(
+			( item ) => query[ item ] && query[ item ].length
+		);
 
 		if ( query.search && ! hasLimitByParam ) {
 			return {
@@ -320,7 +374,7 @@ export default compose(
 			advancedFilters,
 		} );
 
-		if ( 'item-comparison' === chartMode ) {
+		if ( chartMode === 'item-comparison' ) {
 			return {
 				...newProps,
 				primaryData,

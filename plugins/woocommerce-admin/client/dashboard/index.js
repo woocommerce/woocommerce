@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -31,7 +30,7 @@ class Dashboard extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		if ( ! isOnboardingEnabled() ) {
 			return;
 		}

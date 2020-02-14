@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -14,7 +13,7 @@ const ANIMATION_FRAME_PERIOD = 16;
  * to be mounted. When a filter is added or removed that matches the hook name,
  * the wrapped component re-renders.
  *
- * @param {string|array} hookName Hook names exposed to be used by filters.
+ * @param {string|Array} hookName Hook names exposed to be used by filters.
  *
  * @return {Function} Higher-order component factory.
  */
@@ -48,7 +47,7 @@ export default function useFilters( hookName ) {
 			 * @param {string} updatedHookName  Name of the hook that was updated.
 			 */
 			onHooksUpdated( updatedHookName ) {
-				if ( -1 !== hookNames.indexOf( updatedHookName ) ) {
+				if ( hookNames.indexOf( updatedHookName ) !== -1 ) {
 					this.throttledForceUpdate();
 				}
 			}

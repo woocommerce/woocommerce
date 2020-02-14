@@ -1,14 +1,16 @@
-/** @format */
 /**
  * External dependencies
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const fs = require( 'fs' );
-const woocommerceAdminConfig = require( path.resolve( __dirname, '../../../webpack.config.js' ) );
+const woocommerceAdminConfig = require( path.resolve(
+	__dirname,
+	'../../../webpack.config.js'
+) );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
-const extArg = process.argv.find( arg => arg.startsWith( '--ext=' ) );
+const extArg = process.argv.find( ( arg ) => arg.startsWith( '--ext=' ) );
 
 if ( ! extArg ) {
 	throw new Error( 'Please provide an extension.' );
@@ -50,36 +52,38 @@ const webpackConfig = {
 					loader: 'babel-loader',
 					options: {
 						presets: [
-							[ '@babel/preset-env', { loose: true, modules: 'commonjs' } ],
+							[
+								'@babel/preset-env',
+								{ loose: true, modules: 'commonjs' },
+							],
 						],
 						plugins: [ 'transform-es2015-template-literals' ],
 					},
 				},
-				include: new RegExp( '/node_modules\/(' +
-					'|acorn-jsx' +
-					'|d3-array' +
-					'|debug' +
-					'|regexpu-core' +
-					'|unicode-match-property-ecmascript' +
-					'|unicode-match-property-value-ecmascript)/'
+				include: new RegExp(
+					'/node_modules/(' +
+						'|acorn-jsx' +
+						'|d3-array' +
+						'|debug' +
+						'|regexpu-core' +
+						'|unicode-match-property-ecmascript' +
+						'|unicode-match-property-value-ecmascript)/'
 				),
 			},
 			{
 				test: /\.s?css$/,
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-				],
+				use: [ MiniCssExtractPlugin.loader, 'css-loader' ],
 			},
 		],
 	},
 	resolve: {
 		extensions: [ '.json', '.js', '.jsx' ],
-		modules: [
-			'node_modules',
-		],
+		modules: [ 'node_modules' ],
 		alias: {
-			'gutenberg-components': path.resolve( __dirname, '../../../node_modules/@wordpress/components/src' ),
+			'gutenberg-components': path.resolve(
+				__dirname,
+				'../../../node_modules/@wordpress/components/src'
+			),
 			'@woocommerce/wc-admin-settings': path.resolve(
 				__dirname,
 				'../../../client/settings/index.js'

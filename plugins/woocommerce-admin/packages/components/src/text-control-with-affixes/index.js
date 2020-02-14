@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -63,8 +62,8 @@ class TextControlWithAffixes extends Component {
 		}
 
 		const baseControlClasses = classnames( className, {
-			'with-value': '' !== value,
-			empty: '' === value,
+			'with-value': value !== '',
+			empty: value === '',
 			active: isFocused && ! disabled,
 		} );
 
@@ -75,8 +74,12 @@ class TextControlWithAffixes extends Component {
 		} );
 
 		return (
-			<BaseControl label={ label } id={ id } help={ help } className={ baseControlClasses }
-				onClick={ event => this.handleOnClick( event, onClick ) }
+			<BaseControl
+				label={ label }
+				id={ id }
+				help={ help }
+				className={ baseControlClasses }
+				onClick={ ( event ) => this.handleOnClick( event, onClick ) }
 			>
 				<div className={ affixesClasses }>
 					{ prefix && (

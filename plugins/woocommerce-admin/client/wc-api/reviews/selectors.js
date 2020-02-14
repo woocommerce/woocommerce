@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -17,7 +15,9 @@ const getReviews = ( getResource, requireResource ) => (
 ) => {
 	const resourceName = getResourceName( 'review-query', query );
 	const ids = requireResource( requirement, resourceName ).data || [];
-	const reviews = ids.map( id => getResource( getResourceName( 'review', id ) ).data || {} );
+	const reviews = ids.map(
+		( id ) => getResource( getResourceName( 'review', id ) ).data || {}
+	);
 	return reviews;
 };
 
@@ -29,12 +29,12 @@ const getReviewsTotalCount = ( getResource, requireResource ) => (
 	return requireResource( requirement, resourceName ).totalCount || 0;
 };
 
-const getReviewsError = getResource => ( query = {} ) => {
+const getReviewsError = ( getResource ) => ( query = {} ) => {
 	const resourceName = getResourceName( 'review-query', query );
 	return getResource( resourceName ).error;
 };
 
-const isGetReviewsRequesting = getResource => ( query = {} ) => {
+const isGetReviewsRequesting = ( getResource ) => ( query = {} ) => {
 	const resourceName = getResourceName( 'review-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 

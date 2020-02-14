@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -9,6 +8,10 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
+
+/**
+ * @typedef {Object} Completer
+ */
 
 /**
  * A download IP address autocompleter.
@@ -22,10 +25,12 @@ export default {
 	options( match ) {
 		const query = match
 			? {
-				match,
-			}
+					match,
+			  }
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc-analytics/data/download-ips', query ) } );
+		return apiFetch( {
+			path: addQueryArgs( '/wc-analytics/data/download-ips', query ),
+		} );
 	},
 	isDebounced: true,
 	getOptionIdentifier( download ) {
@@ -35,7 +40,8 @@ export default {
 		return [ download.user_ip_address ];
 	},
 	getOptionLabel( download, query ) {
-		const match = computeSuggestionMatch( download.user_ip_address, query ) || {};
+		const match =
+			computeSuggestionMatch( download.user_ip_address, query ) || {};
 		return (
 			<span
 				key="name"

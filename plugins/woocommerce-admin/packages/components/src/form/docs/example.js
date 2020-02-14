@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -26,17 +25,23 @@ const validate = ( values ) => {
 	return errors;
 };
 
+// eslint-disable-next-line no-console
 const onSubmitCallback = ( values ) => console.log( values );
-const initialValues = { firstName: '', lastName: '', select: '3', checkbox: true, radio: '2' };
+const initialValues = {
+	firstName: '',
+	lastName: '',
+	select: '3',
+	checkbox: true,
+	radio: '2',
+};
 
 export default () => (
-	<Form validate={ validate } onSubmitCallback={ onSubmitCallback } initialValues={ initialValues }>
-		{ ( {
-			getInputProps,
-			values,
-			errors,
-			handleSubmit,
-		} ) => (
+	<Form
+		validate={ validate }
+		onSubmitCallback={ onSubmitCallback }
+		initialValues={ initialValues }
+	>
+		{ ( { getInputProps, values, errors, handleSubmit } ) => (
 			<div>
 				<TextControl
 					label={ 'First Name' }
@@ -79,7 +84,8 @@ export default () => (
 				<br />
 				<h3>Return data:</h3>
 				<pre>
-					Values: { JSON.stringify( values ) }<br />
+					Values: { JSON.stringify( values ) }
+					<br />
 					Errors: { JSON.stringify( errors ) }
 				</pre>
 			</div>

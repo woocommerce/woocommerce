@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -56,10 +55,14 @@ export default class CategoryBreadcrumbs extends Component {
 			<div className="woocommerce-table__breadcrumbs">
 				{ this.getCategoryAncestors( category, categories ) }
 				<Link
-					href={ getNewPath( persistedQuery, '/analytics/categories', {
-						filter: 'single_category',
-						categories: category.id,
-					} ) }
+					href={ getNewPath(
+						persistedQuery,
+						'/analytics/categories',
+						{
+							filter: 'single_category',
+							categories: category.id,
+						}
+					) }
 					type="wc-admin"
 				>
 					{ category.name }

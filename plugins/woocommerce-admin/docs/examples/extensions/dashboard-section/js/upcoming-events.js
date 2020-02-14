@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -11,8 +10,8 @@ import { TableCard } from '@woocommerce/components';
 
 const UpcomingEvents = ( { config } ) => {
 	const rows = flatten(
-		config.map( apple => {
-			return apple.events.map( event => {
+		config.map( ( apple ) => {
+			return apple.events.map( ( event ) => {
 				return [
 					{ display: apple.title, value: 'variety' },
 					{ display: event.title, value: 'event' },

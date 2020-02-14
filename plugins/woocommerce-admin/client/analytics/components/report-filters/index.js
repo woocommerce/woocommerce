@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -17,24 +16,36 @@ import { LOCALE } from '@woocommerce/wc-admin-settings';
  */
 import { recordEvent } from 'lib/tracks';
 import { Currency } from 'lib/currency-format';
-import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from 'lib/date';
+import {
+	getCurrentDates,
+	getDateParamsFromQuery,
+	isoDateFormat,
+} from 'lib/date';
 
 export default class ReportFilters extends Component {
 	constructor() {
 		super();
 		this.trackDateSelect = this.trackDateSelect.bind( this );
 		this.trackFilterSelect = this.trackFilterSelect.bind( this );
-		this.trackAdvancedFilterAction = this.trackAdvancedFilterAction.bind( this );
+		this.trackAdvancedFilterAction = this.trackAdvancedFilterAction.bind(
+			this
+		);
 	}
 
 	trackDateSelect( data ) {
 		const { report } = this.props;
-		recordEvent( 'datepicker_update', { report, ...omitBy( data, isUndefined ) } );
+		recordEvent( 'datepicker_update', {
+			report,
+			...omitBy( data, isUndefined ),
+		} );
 	}
 
 	trackFilterSelect( data ) {
 		const { report } = this.props;
-		recordEvent( 'analytics_filter', { report, filter: data.filter || 'all' } );
+		recordEvent( 'analytics_filter', {
+			report,
+			filter: data.filter || 'all',
+		} );
 	}
 
 	trackAdvancedFilterAction( action, data ) {
@@ -42,31 +53,57 @@ export default class ReportFilters extends Component {
 
 		switch ( action ) {
 			case 'add':
-				recordEvent( 'analytics_filters_add', { report, filter: data.key } );
+				recordEvent( 'analytics_filters_add', {
+					report,
+					filter: data.key,
+				} );
 				break;
 			case 'remove':
-				recordEvent( 'analytics_filters_remove', { report, filter: data.key } );
+				recordEvent( 'analytics_filters_remove', {
+					report,
+					filter: data.key,
+				} );
 				break;
 			case 'filter':
-				const snakeCaseData = Object.keys( data ).reduce( ( result, property ) => {
-					result[ snakeCase( property ) ] = data[ property ];
-					return result;
-				}, {} );
-				recordEvent( 'analytics_filters_filter', { report, snakeCaseData } );
+				const snakeCaseData = Object.keys( data ).reduce(
+					( result, property ) => {
+						result[ snakeCase( property ) ] = data[ property ];
+						return result;
+					},
+					{}
+				);
+				recordEvent( 'analytics_filters_filter', {
+					report,
+					snakeCaseData,
+				} );
 				break;
 			case 'clear_all':
 				recordEvent( 'analytics_filters_clear_all', { report } );
 				break;
 			case 'match':
-				recordEvent( 'analytics_filters_all_any', { report, value: data.match } );
+				recordEvent( 'analytics_filters_all_any', {
+					report,
+					value: data.match,
+				} );
 				break;
 		}
 	}
 
 	render() {
-		const { advancedFilters, filters, path, query, showDatePicker } = this.props;
-		const { period, compare, before, after } = getDateParamsFromQuery( query );
-		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates( query );
+		const {
+			advancedFilters,
+			filters,
+			path,
+			query,
+			showDatePicker,
+		} = this.props;
+		const { period, compare, before, after } = getDateParamsFromQuery(
+			query
+		);
+		const {
+			primary: primaryDate,
+			secondary: secondaryDate,
+		} = getCurrentDates( query );
 		const dateQuery = {
 			period,
 			compare,

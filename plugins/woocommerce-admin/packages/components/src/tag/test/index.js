@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,19 +17,25 @@ describe( 'Tag', () => {
 	} );
 
 	test( '<Tag label="foo" remove={ noop } /> should render a tag with a close button', () => {
-		const tree = renderer.create( <Tag label="foo" remove={ noop } /> ).toJSON();
+		const tree = renderer
+			.create( <Tag label="foo" remove={ noop } /> )
+			.toJSON();
 		expect( tree ).toMatchSnapshot();
 	} );
 
 	test( '<Tag label="foo" popoverContents={ <p>This is a popover</p> } /> should render a tag with a popover', () => {
 		const tree = renderer
-			.create( <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> )
+			.create(
+				<Tag label="foo" popoverContents={ <p>This is a popover</p> } />
+			)
 			.toJSON();
 		expect( tree ).toMatchSnapshot();
 	} );
 
 	test( '<Tag label="foo" screenReaderLabel="FooBar" /> should render a tag with a screen reader label', () => {
-		const tree = renderer.create( <Tag label="foo" screenReaderLabel="FooBar" /> ).toJSON();
+		const tree = renderer
+			.create( <Tag label="foo" screenReaderLabel="FooBar" /> )
+			.toJSON();
 		expect( tree ).toMatchSnapshot();
 	} );
 } );

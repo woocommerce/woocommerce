@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -24,7 +22,13 @@ class Rating extends Component {
 
 		const stars = [];
 		for ( let i = 0; i < totalStars; i++ ) {
-			stars.push( <Gridicon key={ 'star-' + i } icon="star" style={ starStyles } /> );
+			stars.push(
+				<Gridicon
+					key={ 'star-' + i }
+					icon="star"
+					style={ starStyles }
+				/>
+			);
 		}
 		return stars;
 	}
@@ -38,11 +42,18 @@ class Rating extends Component {
 			width: Math.round( perStar * rating ) + '%',
 		};
 
-		const label = sprintf( __( '%1$s out of %2$s stars.', 'woocommerce-admin' ), rating, totalStars );
+		const label = sprintf(
+			__( '%1$s out of %2$s stars.', 'woocommerce-admin' ),
+			rating,
+			totalStars
+		);
 		return (
 			<div className={ classes } aria-label={ label }>
 				{ this.stars() }
-				<div className="woocommerce-rating__star-outline" style={ outlineStyles }>
+				<div
+					className="woocommerce-rating__star-outline"
+					style={ outlineStyles }
+				>
 					{ this.stars() }
 				</div>
 			</div>

@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -20,17 +18,18 @@ function update( resourceNames, data, fetch = apiFetch ) {
 }
 
 function readOptions( resourceNames, fetch ) {
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		return name.startsWith( 'options' );
 	} );
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const optionNames = getResourceIdentifier( resourceName );
-		const url = WC_ADMIN_NAMESPACE + '/options?options=' + optionNames.join( ',' );
+		const url =
+			WC_ADMIN_NAMESPACE + '/options?options=' + optionNames.join( ',' );
 
 		return fetch( { path: url } )
 			.then( optionsToResource )
-			.catch( error => {
+			.catch( ( error ) => {
 				return { [ resourceName ]: { error: String( error.message ) } };
 			} );
 	} );
@@ -39,14 +38,18 @@ function readOptions( resourceNames, fetch ) {
 function updateOptions( resourceNames, data, fetch ) {
 	const url = WC_ADMIN_NAMESPACE + '/options';
 
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		return name.startsWith( 'options-update' );
 	} );
 
-	return filteredNames.map( async resourceName => {
-		return fetch( { path: url, method: 'POST', data: data[ resourceName ] } )
+	return filteredNames.map( async ( resourceName ) => {
+		return fetch( {
+			path: url,
+			method: 'POST',
+			data: data[ resourceName ],
+		} )
 			.then( () => optionsToResource( data[ resourceName ], true ) )
-			.catch( error => {
+			.catch( ( error ) => {
 				return { [ resourceName ]: { error } };
 			} );
 	} );
@@ -61,8 +64,10 @@ function optionsToResource( options, updateResource = false ) {
 	const resources = {};
 
 	optionNames.forEach(
-		optionName =>
-			( resources[ getResourceName( 'options', optionName ) ] = { data: options[ optionName ] } )
+		( optionName ) =>
+			( resources[ getResourceName( 'options', optionName ) ] = {
+				data: options[ optionName ],
+			} )
 	);
 
 	return {

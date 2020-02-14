@@ -1,11 +1,9 @@
 {
-  "extends": [
-    "config:base"
-  ],
-  "lockFileMaintenance": { "enabled": true },
-  "ignoreDeps": ["phpunit/phpunit"],
-  "schedule": ["before 3am on wednesday"],
-  "composer": {
-    "enabled": false
-  }
+	"extends": [ "config:base" ],
+	"lockFileMaintenance": { "enabled": true },
+	"ignoreDeps": [ "phpunit/phpunit" ],
+	"schedule": [ "before 3am on wednesday" ],
+	"composer": {
+		"enabled": false
+	}
 }

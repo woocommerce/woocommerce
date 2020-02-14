@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -11,23 +10,33 @@ import { formatParams, getStatus } from '../utils';
 
 describe( 'formatParams', () => {
 	it( 'returns empty object when skipChecked is false and period is all', () => {
-		expect( formatParams( 'YYYY-MM-DD', { label: 'all' }, false ) ).toEqual( {} );
+		expect( formatParams( 'YYYY-MM-DD', { label: 'all' }, false ) ).toEqual(
+			{}
+		);
 	} );
 
 	it( 'returns skip_existing param', () => {
-		expect( formatParams( 'YYYY-MM-DD', { label: 'all' }, true ) ).toEqual( {
-			skip_existing: true,
-		} );
+		expect( formatParams( 'YYYY-MM-DD', { label: 'all' }, true ) ).toEqual(
+			{
+				skip_existing: true,
+			}
+		);
 	} );
 
 	it( 'returns correct days param based on period label', () => {
-		expect( formatParams( 'YYYY-MM-DD', { label: '30' }, false ) ).toEqual( { days: 30 } );
+		expect(
+			formatParams( 'YYYY-MM-DD', { label: '30' }, false )
+		).toEqual( { days: 30 } );
 	} );
 
 	it( 'returns correct days param based on period date', () => {
 		const date = '2018-01-01';
-		const days = Math.floor( moment().diff( moment( date, 'YYYY-MM-DD' ), 'days', true ) );
-		expect( formatParams( 'YYYY-MM-DD', { label: 'custom', date }, false ) ).toEqual( { days } );
+		const days = Math.floor(
+			moment().diff( moment( date, 'YYYY-MM-DD' ), 'days', true )
+		);
+		expect(
+			formatParams( 'YYYY-MM-DD', { label: 'custom', date }, false )
+		).toEqual( { days } );
 	} );
 
 	it( 'returns both params', () => {

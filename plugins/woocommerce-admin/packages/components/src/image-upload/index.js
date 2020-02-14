@@ -23,7 +23,7 @@ class ImageUpload extends Component {
 			return;
 		}
 
-		this.state.frame = wp.media( {
+		const frame = wp.media( {
 			title: __( 'Select or upload image' ),
 			button: {
 				text: __( 'Select' ),
@@ -34,13 +34,19 @@ class ImageUpload extends Component {
 			multiple: false,
 		} );
 
-		this.state.frame.on( 'select', this.handleImageSelect );
-		this.state.frame.open();
+		frame.on( 'select', this.handleImageSelect );
+		frame.open();
+
+		this.setState( { frame } );
 	}
 
 	handleImageSelect() {
 		const { onChange } = this.props;
-		const attachment = this.state.frame.state().get( 'selection' ).first().toJSON();
+		const attachment = this.state.frame
+			.state()
+			.get( 'selection' )
+			.first()
+			.toJSON();
 		onChange( attachment );
 	}
 
@@ -54,18 +60,36 @@ class ImageUpload extends Component {
 		return (
 			<Fragment>
 				{ !! image && (
-				<div className={ classNames( 'woocommerce-image-upload', 'has-image', className ) }>
-					<div className="woocommerce-image-upload__image-preview">
-						<img src={ image.url } alt="" />
+					<div
+						className={ classNames(
+							'woocommerce-image-upload',
+							'has-image',
+							className
+						) }
+					>
+						<div className="woocommerce-image-upload__image-preview">
+							<img src={ image.url } alt="" />
+						</div>
+						<Button
+							className="woocommerce-image-upload__remove-image"
+							onClick={ this.removeImage }
+						>
+							{ __( 'Remove image', 'woocommerce-admin' ) }
+						</Button>
 					</div>
-					<Button className="woocommerce-image-upload__remove-image" onClick={ this.removeImage }>
-						{ __( 'Remove image', 'woocommerce-admin' ) }
-					</Button>
-				</div>
 				) }
 				{ ! image && (
-					<div className={ classNames( 'woocommerce-image-upload', 'no-image', className ) }>
-						<Button className="woocommerce-image-upload__add-image" onClick={ this.openModal }>
+					<div
+						className={ classNames(
+							'woocommerce-image-upload',
+							'no-image',
+							className
+						) }
+					>
+						<Button
+							className="woocommerce-image-upload__add-image"
+							onClick={ this.openModal }
+						>
 							{ __( 'Add an image', 'woocommerce-admin' ) }
 						</Button>
 					</div>

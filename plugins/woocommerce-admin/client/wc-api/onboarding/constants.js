@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,8 +9,14 @@ import { __ } from '@wordpress/i18n';
 export const pluginNames = {
 	jetpack: __( 'Jetpack', 'woocommerce-admin' ),
 	'woocommerce-services': __( 'WooCommerce Services', 'woocommerce-admin' ),
-	'mailchimp-for-woocommerce': __( 'Mailchimp for WooCommerce', 'woocommerce-admin' ),
-	'facebook-for-woocommerce': __( 'Facebook for WooCommerce', 'woocommerce-admin' ),
+	'mailchimp-for-woocommerce': __(
+		'Mailchimp for WooCommerce',
+		'woocommerce-admin'
+	),
+	'facebook-for-woocommerce': __(
+		'Facebook for WooCommerce',
+		'woocommerce-admin'
+	),
 	'woocommerce-shipstation-integration': __(
 		'WooCommerce ShipStation Gateway',
 		'woocommerce-admin'

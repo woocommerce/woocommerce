@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -40,7 +39,9 @@ class StoreDetails extends Component {
 		// Check if a store address is set so that we don't default
 		// to WooCommerce's default country of the UK.
 		const countryState =
-			( settings.woocommerce_store_address && settings.woocommerce_default_country ) || '';
+			( settings.woocommerce_store_address &&
+				settings.woocommerce_default_country ) ||
+			'';
 
 		this.initialValues = {
 			addressLine1: settings.woocommerce_store_address || '',
@@ -56,7 +57,10 @@ class StoreDetails extends Component {
 	}
 
 	componentWillUnmount() {
-		apiFetch( { path: '/wc-admin/onboarding/tasks/create_store_pages', method: 'POST' } );
+		apiFetch( {
+			path: '/wc-admin/onboarding/tasks/create_store_pages',
+			method: 'POST',
+		} );
 	}
 
 	deriveCurrencySettings( countryState ) {
@@ -72,7 +76,7 @@ class StoreDetails extends Component {
 	onSubmit( values ) {
 		const { profileItems } = this.props;
 
-		if ( 'already-installed' === profileItems.plugins ) {
+		if ( profileItems.plugins === 'already-installed' ) {
 			this.setState( { showUsageModal: true } );
 			return;
 		}
@@ -90,7 +94,9 @@ class StoreDetails extends Component {
 			isProfileItemsError,
 		} = this.props;
 
-		const currencySettings = this.deriveCurrencySettings( values.countryState );
+		const currencySettings = this.deriveCurrencySettings(
+			values.countryState
+		);
 		setCurrency( currencySettings );
 
 		recordEvent( 'storeprofiler_store_details_continue', {
@@ -108,8 +114,10 @@ class StoreDetails extends Component {
 				woocommerce_store_postcode: values.postCode,
 				woocommerce_currency: currencySettings.code,
 				woocommerce_currency_pos: currencySettings.symbolPosition,
-				woocommerce_price_thousand_sep: currencySettings.thousandSeparator,
-				woocommerce_price_decimal_sep: currencySettings.decimalSeparator,
+				woocommerce_price_thousand_sep:
+					currencySettings.thousandSeparator,
+				woocommerce_price_decimal_sep:
+					currencySettings.decimalSeparator,
 				woocommerce_price_num_decimals: currencySettings.precision,
 			},
 		} );
@@ -121,7 +129,10 @@ class StoreDetails extends Component {
 		} else {
 			createNotice(
 				'error',
-				__( 'There was a problem saving your store details.', 'woocommerce-admin' )
+				__(
+					'There was a problem saving your store details.',
+					'woocommerce-admin'
+				)
 			);
 		}
 	}
@@ -147,24 +158,46 @@ class StoreDetails extends Component {
 						onSubmitCallback={ this.onSubmit }
 						validate={ validateStoreAddress }
 					>
-						{ ( { getInputProps, handleSubmit, values, isValidForm, setValue } ) => (
+						{ ( {
+							getInputProps,
+							handleSubmit,
+							values,
+							isValidForm,
+							setValue,
+						} ) => (
 							<Fragment>
 								{ showUsageModal && (
 									<UsageModal
-										onContinue={ () => this.onContinue( values ) }
-										onClose={ () => this.setState( { showUsageModal: false } ) }
+										onContinue={ () =>
+											this.onContinue( values )
+										}
+										onClose={ () =>
+											this.setState( {
+												showUsageModal: false,
+											} )
+										}
 									/>
 								) }
-								<StoreAddress getInputProps={ getInputProps } setValue={ setValue } />
+								<StoreAddress
+									getInputProps={ getInputProps }
+									setValue={ setValue }
+								/>
 
 								<div className="woocommerce-profile-wizard__client">
 									<CheckboxControl
-										label={ __( "I'm setting up a store for a client", 'woocommerce-admin' ) }
+										label={ __(
+											"I'm setting up a store for a client",
+											'woocommerce-admin'
+										) }
 										{ ...getInputProps( 'isClient' ) }
 									/>
 								</div>
 
-								<Button isPrimary onClick={ handleSubmit } disabled={ ! isValidForm }>
+								<Button
+									isPrimary
+									onClick={ handleSubmit }
+									disabled={ ! isValidForm }
+								>
 									{ __( 'Continue', 'woocommerce-admin' ) }
 								</Button>
 							</Fragment>
@@ -177,7 +210,7 @@ class StoreDetails extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const {
 			getSettings,
 			getSettingsError,
@@ -202,7 +235,7 @@ export default compose(
 			settings,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateSettings, updateProfileItems } = dispatch( 'wc-api' );
 

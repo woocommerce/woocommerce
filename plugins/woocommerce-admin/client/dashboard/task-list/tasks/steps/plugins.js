@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -19,7 +18,9 @@ class Plugins extends Component {
 	constructor() {
 		super( ...arguments );
 
-		this.installAndActivatePlugins = this.installAndActivatePlugins.bind( this );
+		this.installAndActivatePlugins = this.installAndActivatePlugins.bind(
+			this
+		);
 		this.skipInstaller = this.skipInstaller.bind( this );
 	}
 
@@ -46,7 +47,7 @@ class Plugins extends Component {
 		} = this.props;
 
 		const newErrors = difference( errors, prevProps.errors );
-		newErrors.map( error => createNotice( 'error', error ) );
+		newErrors.map( ( error ) => createNotice( 'error', error ) );
 
 		if (
 			! isRequesting &&
@@ -60,7 +61,10 @@ class Plugins extends Component {
 		if ( activatedPlugins.length === pluginSlugs.length ) {
 			createNotice(
 				'success',
-				__( 'Plugins were successfully installed and activated.', 'woocommerce-admin' )
+				__(
+					'Plugins were successfully installed and activated.',
+					'woocommerce-admin'
+				)
 			);
 			onComplete();
 		}
@@ -94,11 +98,18 @@ class Plugins extends Component {
 		if ( hasErrors ) {
 			return (
 				<Fragment>
-					<Button isPrimary isBusy={ isRequesting } onClick={ this.installAndActivatePlugins }>
+					<Button
+						isPrimary
+						isBusy={ isRequesting }
+						onClick={ this.installAndActivatePlugins }
+					>
 						{ __( 'Retry', 'woocommerce-admin' ) }
 					</Button>
 					<Button onClick={ this.skipInstaller }>
-						{ __( 'Continue without installing', 'woocommerce-admin' ) }
+						{ __(
+							'Continue without installing',
+							'woocommerce-admin'
+						) }
 					</Button>
 				</Fragment>
 			);
@@ -110,7 +121,11 @@ class Plugins extends Component {
 
 		return (
 			<Fragment>
-				<Button isBusy={ isRequesting } isPrimary onClick={ this.installAndActivatePlugins }>
+				<Button
+					isBusy={ isRequesting }
+					isPrimary
+					onClick={ this.installAndActivatePlugins }
+				>
 					{ __( 'Install & enable', 'woocommerce-admin' ) }
 				</Button>
 				<Button onClick={ this.skipInstaller }>
@@ -160,20 +175,26 @@ export default compose(
 			isPluginActivateRequesting,
 			isPluginInstallRequesting,
 		} = select( 'wc-api' );
-		const pluginSlugs = props.pluginSlugs || Plugins.defaultProps.pluginSlugs;
+		const pluginSlugs =
+			props.pluginSlugs || Plugins.defaultProps.pluginSlugs;
 
-		const isRequesting = isPluginActivateRequesting() || isPluginInstallRequesting();
+		const isRequesting =
+			isPluginActivateRequesting() || isPluginInstallRequesting();
 
 		const activationErrors = getPluginActivationErrors( pluginSlugs );
-		const activatedPlugins = Object.keys( getPluginActivations( pluginSlugs ) );
+		const activatedPlugins = Object.keys(
+			getPluginActivations( pluginSlugs )
+		);
 		const installationErrors = getPluginInstallationErrors( pluginSlugs );
-		const installedPlugins = Object.keys( getPluginInstallations( pluginSlugs ) );
+		const installedPlugins = Object.keys(
+			getPluginInstallations( pluginSlugs )
+		);
 
 		const errors = [];
-		Object.keys( activationErrors ).map( plugin =>
+		Object.keys( activationErrors ).map( ( plugin ) =>
 			errors.push( activationErrors[ plugin ].message )
 		);
-		Object.keys( installationErrors ).map( plugin =>
+		Object.keys( installationErrors ).map( ( plugin ) =>
 			errors.push( installationErrors[ plugin ].message )
 		);
 		const hasErrors = Boolean( errors.length );
@@ -186,7 +207,7 @@ export default compose(
 			isRequesting,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { activatePlugins, installPlugins } = dispatch( 'wc-api' );
 

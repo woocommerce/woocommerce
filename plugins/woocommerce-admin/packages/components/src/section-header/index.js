@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -19,7 +18,10 @@ import { validateComponent } from '../lib/proptype-validator';
 class SectionHeader extends Component {
 	render() {
 		const { children, menu, title } = this.props;
-		const className = classnames( 'woocommerce-section-header', this.props.className );
+		const className = classnames(
+			'woocommerce-section-header',
+			this.props.className
+		);
 		return (
 			<div className={ className }>
 				<H className="woocommerce-section-header__title woocommerce-section-header__header-item">
@@ -53,7 +55,8 @@ SectionHeader.propTypes = {
 	/**
 	 * The title to use for this card.
 	 */
-	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ).isRequired,
+	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] )
+		.isRequired,
 };
 
 export default SectionHeader;

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -20,8 +19,10 @@ import HeaderLogo from './header-logo';
 export default class ProfileWizardHeader extends Component {
 	renderStepper() {
 		const { currentStep, steps } = this.props;
-		const visibleSteps = filter( steps, step => !! step.label );
-		const currentStepIndex = visibleSteps.findIndex( step => step.key === currentStep );
+		const visibleSteps = filter( steps, ( step ) => !! step.label );
+		const currentStepIndex = visibleSteps.findIndex(
+			( step ) => step.key === currentStep
+		);
 
 		visibleSteps.map( ( step, index ) => {
 			const previousStep = visibleSteps[ index - 1 ];
@@ -31,7 +32,7 @@ export default class ProfileWizardHeader extends Component {
 			}
 
 			if ( ! previousStep || previousStep.isComplete ) {
-				step.onClick = key => updateQueryString( { step: key } );
+				step.onClick = ( key ) => updateQueryString( { step: key } );
 			}
 			return step;
 		} );
@@ -40,11 +41,17 @@ export default class ProfileWizardHeader extends Component {
 	}
 
 	render() {
-		const currentStep = this.props.steps.find( s => s.key === this.props.currentStep );
+		const currentStep = this.props.steps.find(
+			( s ) => s.key === this.props.currentStep
+		);
 		const showStepper = ! currentStep || ! currentStep.label ? false : true;
 		const classes = classnames( 'woocommerce-profile-wizard__header', {
 			'is-stepper': showStepper,
 		} );
-		return <div className={ classes }>{ showStepper ? this.renderStepper() : <HeaderLogo /> }</div>;
+		return (
+			<div className={ classes }>
+				{ showStepper ? this.renderStepper() : <HeaderLogo /> }
+			</div>
+		);
 	}
 }

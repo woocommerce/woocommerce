@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -12,9 +10,9 @@ import { appendTimestamp, getCurrentDates } from 'lib/date';
 /**
  * Returns leaderboard data to render a leaderboard table.
  *
- * @param  {Objedt} options                 arguments
- * @param  {String} options.id              Leaderboard ID
- * @param  {Integer} options.per_page       Per page limit
+ * @param  {Object} options                 arguments
+ * @param  {string} options.id              Leaderboard ID
+ * @param  {number} options.per_page       Per page limit
  * @param  {Object} options.persisted_query Persisted query passed to endpoint
  * @param  {Object} options.query           Query parameters in the url
  * @param  {Object} options.select          Instance of @wordpress/select
@@ -22,8 +20,10 @@ import { appendTimestamp, getCurrentDates } from 'lib/date';
  */
 export function getLeaderboard( options ) {
 	const endpoint = 'leaderboards';
-	const { per_page, persisted_query, query, select } = options;
-	const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
+	const { per_page: perPage, persisted_query: persistedQuery, query, select } = options;
+	const { getItems, getItemsError, isGetItemsRequesting } = select(
+		'wc-api'
+	);
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -34,18 +34,18 @@ export function getLeaderboard( options ) {
 	const leaderboardQuery = {
 		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-		per_page,
-		persisted_query: JSON.stringify( persisted_query ),
+		per_page: perPage,
+		persisted_query: JSON.stringify( persistedQuery ),
 	};
 
-	const leaderboards = getItems( endpoint, leaderboardQuery );
-	const leaderboard = leaderboards.get( options.id );
 	if ( isGetItemsRequesting( endpoint, leaderboardQuery ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getItemsError( endpoint, leaderboardQuery ) ) {
 		return { ...response, isError: true };
 	}
 
+	const leaderboards = getItems( endpoint, leaderboardQuery );
+	const leaderboard = leaderboards.get( options.id );
 	return { ...response, rows: leaderboard.rows };
 }
 
@@ -53,17 +53,19 @@ export function getLeaderboard( options ) {
  * Returns items based on a search query.
  *
  * @param  {Object}   select    Instance of @wordpress/select
- * @param  {String}   endpoint  Report API Endpoint
- * @param  {String[]} search    Array of search strings.
+ * @param  {string}   endpoint  Report API Endpoint
+ * @param  {string[]} search    Array of search strings.
  * @return {Object}   Object containing API request information and the matching items.
  */
 export function searchItemsByString( select, endpoint, search ) {
-	const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
+	const { getItems, getItemsError, isGetItemsRequesting } = select(
+		'wc-api'
+	);
 
 	const items = {};
 	let isRequesting = false;
 	let isError = false;
-	search.forEach( searchWord => {
+	search.forEach( ( searchWord ) => {
 		const query = {
 			search: searchWord,
 			per_page: 10,

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -14,7 +13,7 @@ import { withInstanceId } from '@wordpress/compose';
 const ASC = 'asc';
 const DESC = 'desc';
 
-const getDisplay = cell => cell.display || null;
+const getDisplay = ( cell ) => cell.display || null;
 
 /**
  * A table component, without the Card wrapper. This is a basic table display, sortable, but no default filtering.
@@ -82,8 +81,15 @@ class Table extends Component {
 		const { headers, query } = this.props;
 		return () => {
 			const currentKey =
-				query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
-			const currentDir = query.order || get( find( headers, { key: currentKey } ), 'defaultOrder', DESC );
+				query.orderby ||
+				get( find( headers, { defaultSort: true } ), 'key', false );
+			const currentDir =
+				query.order ||
+				get(
+					find( headers, { key: currentKey } ),
+					'defaultOrder',
+					DESC
+				);
 			let dir = DESC;
 			if ( key === currentKey ) {
 				dir = DESC === currentDir ? ASC : DESC;
@@ -94,7 +100,8 @@ class Table extends Component {
 
 	updateTableShadow() {
 		const table = this.container.current;
-		const scrolledToEnd = table.scrollWidth - table.scrollLeft <= table.offsetWidth;
+		const scrolledToEnd =
+			table.scrollWidth - table.scrollLeft <= table.offsetWidth;
 		this.setState( {
 			isScrollable: ! scrolledToEnd,
 		} );
@@ -115,8 +122,12 @@ class Table extends Component {
 		const classes = classnames( 'woocommerce-table__table', classNames, {
 			'is-scrollable': isScrollable,
 		} );
-		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
-		const sortDir = query.order || get( find( headers, { key: sortedBy } ), 'defaultOrder', DESC );
+		const sortedBy =
+			query.orderby ||
+			get( find( headers, { defaultSort: true } ), 'key', false );
+		const sortDir =
+			query.order ||
+			get( find( headers, { key: sortedBy } ), 'defaultOrder', DESC );
 		const hasData = !! rows.length;
 
 		return (
@@ -135,61 +146,122 @@ class Table extends Component {
 						className="woocommerce-table__caption screen-reader-text"
 					>
 						{ caption }
-						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'woocommerce-admin' ) }</small> }
+						{ tabIndex === '0' && (
+							<small>
+								{ __(
+									'(scroll to see more)',
+									'woocommerce-admin'
+								) }
+							</small>
+						) }
 					</caption>
 					<tbody>
 						<tr>
 							{ headers.map( ( header, i ) => {
-								const { cellClassName, isLeftAligned, isSortable, isNumeric, key, label, screenReaderLabel } = header;
+								const {
+									cellClassName,
+									isLeftAligned,
+									isSortable,
+									isNumeric,
+									key,
+									label,
+									screenReaderLabel,
+								} = header;
 								const labelId = `header-${ instanceId }-${ i }`;
 								const thProps = {
-									className: classnames( 'woocommerce-table__header', cellClassName, {
-										'is-left-aligned': isLeftAligned,
-										'is-sortable': isSortable,
-										'is-sorted': sortedBy === key,
-										'is-numeric': isNumeric,
-									} ),
+									className: classnames(
+										'woocommerce-table__header',
+										cellClassName,
+										{
+											'is-left-aligned': isLeftAligned,
+											'is-sortable': isSortable,
+											'is-sorted': sortedBy === key,
+											'is-numeric': isNumeric,
+										}
+									),
 								};
 								if ( isSortable ) {
 									thProps[ 'aria-sort' ] = 'none';
 									if ( sortedBy === key ) {
-										thProps[ 'aria-sort' ] = sortDir === ASC ? 'ascending' : 'descending';
+										thProps[ 'aria-sort' ] =
+											sortDir === ASC
+												? 'ascending'
+												: 'descending';
 									}
 								}
 								// We only sort by ascending if the col is already sorted descending
 								const iconLabel =
 									sortedBy === key && sortDir !== ASC
-										? sprintf( __( 'Sort by %s in ascending order', 'woocommerce-admin' ), screenReaderLabel )
-										: sprintf( __( 'Sort by %s in descending order', 'woocommerce-admin' ), screenReaderLabel );
+										? sprintf(
+												__(
+													'Sort by %s in ascending order',
+													'woocommerce-admin'
+												),
+												screenReaderLabel
+										  )
+										: sprintf(
+												__(
+													'Sort by %s in descending order',
+													'woocommerce-admin'
+												),
+												screenReaderLabel
+										  );
 
 								const textLabel = (
 									<Fragment>
-										<span aria-hidden={ Boolean( screenReaderLabel ) }>{ label }</span>
+										<span
+											aria-hidden={ Boolean(
+												screenReaderLabel
+											) }
+										>
+											{ label }
+										</span>
 										{ screenReaderLabel && (
-											<span className="screen-reader-text">{ screenReaderLabel }</span>
+											<span className="screen-reader-text">
+												{ screenReaderLabel }
+											</span>
 										) }
 									</Fragment>
 								);
 
 								return (
-									<th role="columnheader" scope="col" key={ i } { ...thProps }>
+									<th
+										role="columnheader"
+										scope="col"
+										key={ i }
+										{ ...thProps }
+									>
 										{ isSortable ? (
 											<Fragment>
 												<IconButton
 													icon={
-														sortedBy === key && sortDir === ASC ? (
-															<Gridicon size={ 18 } icon="chevron-up" />
+														sortedBy === key &&
+														sortDir === ASC ? (
+															<Gridicon
+																size={ 18 }
+																icon="chevron-up"
+															/>
 														) : (
-															<Gridicon size={ 18 } icon="chevron-down" />
+															<Gridicon
+																size={ 18 }
+																icon="chevron-down"
+															/>
 														)
 													}
 													aria-describedby={ labelId }
-													onClick={ hasData ? this.sortBy( key ) : noop }
+													onClick={
+														hasData
+															? this.sortBy( key )
+															: noop
+													}
 													isDefault
 												>
 													{ textLabel }
 												</IconButton>
-												<span className="screen-reader-text" id={ labelId }>
+												<span
+													className="screen-reader-text"
+													id={ labelId }
+												>
 													{ iconLabel }
 												</span>
 											</Fragment>
@@ -200,36 +272,55 @@ class Table extends Component {
 								);
 							} ) }
 						</tr>
-						{ hasData
-							? (
-								rows.map( ( row, i ) => (
-									<tr key={ i }>
-										{ row.map( ( cell, j ) => {
-											const { cellClassName, isLeftAligned, isNumeric } = headers[ j ];
-											const isHeader = rowHeader === j;
-											const Cell = isHeader ? 'th' : 'td';
-											const cellClasses = classnames( 'woocommerce-table__item', cellClassName, {
+						{ hasData ? (
+							rows.map( ( row, i ) => (
+								<tr key={ i }>
+									{ row.map( ( cell, j ) => {
+										const {
+											cellClassName,
+											isLeftAligned,
+											isNumeric,
+										} = headers[ j ];
+										const isHeader = rowHeader === j;
+										const Cell = isHeader ? 'th' : 'td';
+										const cellClasses = classnames(
+											'woocommerce-table__item',
+											cellClassName,
+											{
 												'is-left-aligned': isLeftAligned,
 												'is-numeric': isNumeric,
-												'is-sorted': sortedBy === headers[ j ].key,
-											} );
-											return (
-												<Cell scope={ isHeader ? 'row' : null } key={ j } className={ cellClasses }>
-													{ getDisplay( cell ) }
-												</Cell>
-											);
-										} ) }
-									</tr>
-								) )
-							)
-							: (
-								<tr>
-									<td className="woocommerce-table__empty-item" colSpan={ headers.length }>
-										{ __( 'No data to display', 'woocommerce-admin' ) }
-									</td>
+												'is-sorted':
+													sortedBy ===
+													headers[ j ].key,
+											}
+										);
+										return (
+											<Cell
+												scope={
+													isHeader ? 'row' : null
+												}
+												key={ j }
+												className={ cellClasses }
+											>
+												{ getDisplay( cell ) }
+											</Cell>
+										);
+									} ) }
 								</tr>
-							)
-						}
+							) )
+						) : (
+							<tr>
+								<td
+									className="woocommerce-table__empty-item"
+									colSpan={ headers.length }
+								>
+									{ __(
+										'No data to display',
+										'woocommerce-admin'
+									) }
+								</td>
+							</tr>
+						) }
 					</tbody>
 				</table>
 			</div>
@@ -315,7 +406,11 @@ Table.propTypes = {
 				/**
 				 * "Real" value used for sorting, and should be a string or number. A column with `false` value will not be sortable.
 				 */
-				value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number, PropTypes.bool ] ),
+				value: PropTypes.oneOfType( [
+					PropTypes.string,
+					PropTypes.number,
+					PropTypes.bool,
+				] ),
 			} )
 		)
 	).isRequired,

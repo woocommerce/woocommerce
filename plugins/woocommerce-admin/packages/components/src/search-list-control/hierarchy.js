@@ -31,7 +31,10 @@ export function buildTermsTree( filteredList, list = filteredList ) {
 			return {
 				...term,
 				breadcrumbs: getParentsName( listById[ term.parent ] ),
-				children: children && children.length ? fillWithChildren( children ) : [],
+				children:
+					children && children.length
+						? fillWithChildren( children )
+						: [],
 			};
 		} );
 	};

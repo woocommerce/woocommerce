@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,7 +11,7 @@ import { compact, find, get, omit } from 'lodash';
  */
 export function flattenFilters( filters ) {
 	const allFilters = [];
-	filters.forEach( f => {
+	filters.forEach( ( f ) => {
 		if ( ! f.subFilters ) {
 			allFilters.push( f );
 		} else {
@@ -36,17 +35,19 @@ export function flattenFilters( filters ) {
 /**
  * Given a query object, return an array of activeFilters, if any.
  *
- * @param {object} query - query oject
- * @param {object} config - config object
+ * @param {Object} query - query oject
+ * @param {Object} config - config object
  * @return {activeFilters[]} - array of activeFilters
  */
 export function getActiveFiltersFromQuery( query, config ) {
 	return compact(
-		Object.keys( config ).map( configKey => {
+		Object.keys( config ).map( ( configKey ) => {
 			const filter = config[ configKey ];
 			if ( filter.rules ) {
-				const match = find( filter.rules, rule => {
-					return query.hasOwnProperty( getUrlKey( configKey, rule.value ) );
+				const match = find( filter.rules, ( rule ) => {
+					return query.hasOwnProperty(
+						getUrlKey( configKey, rule.value )
+					);
 				} );
 
 				if ( match ) {
@@ -74,8 +75,8 @@ export function getActiveFiltersFromQuery( query, config ) {
  * Get the default option's value from the configuration object for a given filter. The first
  * option is used as default if no `defaultOption` is provided.
  *
- * @param {object} config - a filter config object.
- * @param {array} options - select options.
+ * @param {Object} config - a filter config object.
+ * @param {Array} options - select options.
  * @return {string|undefined}  - the value of the default option.
  */
 export function getDefaultOptionValue( config, options ) {
@@ -84,7 +85,9 @@ export function getDefaultOptionValue( config, options ) {
 		const option = find( options, { value: defaultOption } );
 		if ( ! option ) {
 			/* eslint-disable no-console */
-			console.warn( `invalid defaultOption ${ defaultOption } supplied to ${ config.labels.add }` );
+			console.warn(
+				`invalid defaultOption ${ defaultOption } supplied to ${ config.labels.add }`
+			);
 			/* eslint-enable */
 			return undefined;
 		}
@@ -94,13 +97,17 @@ export function getDefaultOptionValue( config, options ) {
 }
 
 /**
+ * @typedef {Object} activeFilters
+ */
+
+/**
  * Given activeFilters, create a new query object to update the url. Use previousFilters to
  * Remove unused params.
  *
  * @param {activeFilters[]} activeFilters - activeFilters shown in the UI
- * @param {object} query - the current url query object
- * @param {object} config - config object
- * @return {object} - query object representing the new parameters
+ * @param {Object} query - the current url query object
+ * @param {Object} config - config object
+ * @return {Object} - query object representing the new parameters
  */
 export function getQueryFromActiveFilters( activeFilters, query, config ) {
 	const previousFilters = getActiveFiltersFromQuery( query, config );
@@ -110,8 +117,9 @@ export function getQueryFromActiveFilters( activeFilters, query, config ) {
 	}, {} );
 	const nextData = activeFilters.reduce( ( data, filter ) => {
 		if (
-			'between' === filter.rule &&
-			( ! Array.isArray( filter.value ) || filter.value.some( value => ! value ) )
+			filter.rule === 'between' &&
+			( ! Array.isArray( filter.value ) ||
+				filter.value.some( ( value ) => ! value ) )
 		) {
 			return data;
 		}

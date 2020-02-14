@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -26,7 +25,7 @@ export class Leaderboard extends Component {
 	getFormattedHeaders() {
 		return this.props.headers.map( ( header, i ) => {
 			return {
-				isLeftAligned: 0 === i,
+				isLeftAligned: i === 0,
 				hiddenByDefault: false,
 				isSortable: false,
 				key: header.label,
@@ -36,10 +35,16 @@ export class Leaderboard extends Component {
 	}
 
 	getFormattedRows() {
-		return this.props.rows.map( row => {
-			return row.map( column => {
+		return this.props.rows.map( ( row ) => {
+			return row.map( ( column ) => {
 				return {
-					display: <div dangerouslySetInnerHTML={ sanitizeHTML( column.display ) } />,
+					display: (
+						<div
+							dangerouslySetInnerHTML={ sanitizeHTML(
+								column.display
+							) }
+						/>
+					),
 					value: column.value,
 				};
 			} );
@@ -48,18 +53,22 @@ export class Leaderboard extends Component {
 
 	render() {
 		const { isRequesting, isError, totalRows, title } = this.props;
-		const rows = this.getFormattedRows();
 		const classes = 'woocommerce-leaderboard woocommerce-analytics__card';
 
 		if ( isError ) {
 			return <ReportError className={ classes } isError />;
 		}
 
+		const rows = this.getFormattedRows();
+
 		if ( ! isRequesting && rows.length === 0 ) {
 			return (
 				<Card title={ title } className={ classes }>
 					<EmptyTable>
-						{ __( 'No data recorded for the selected time period.', 'woocommerce-admin' ) }
+						{ __(
+							'No data recorded for the selected time period.',
+							'woocommerce-admin'
+						) }
 					</EmptyTable>
 				</Card>
 			);
@@ -104,7 +113,11 @@ Leaderboard.propTypes = {
 		PropTypes.arrayOf(
 			PropTypes.shape( {
 				display: PropTypes.node,
-				value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number, PropTypes.bool ] ),
+				value: PropTypes.oneOfType( [
+					PropTypes.string,
+					PropTypes.number,
+					PropTypes.bool,
+				] ),
 			} )
 		)
 	).isRequired,

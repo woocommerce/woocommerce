@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -13,11 +11,19 @@ import Gridicon from 'gridicons';
 import './style.scss';
 import { Link } from '@woocommerce/components';
 
-const ActivityOutboundLink = props => {
+const ActivityOutboundLink = ( props ) => {
 	const { href, type, className, children, ...restOfProps } = props;
-	const classes = classnames( 'woocommerce-layout__activity-panel-outbound-link', className );
+	const classes = classnames(
+		'woocommerce-layout__activity-panel-outbound-link',
+		className
+	);
 	return (
-		<Link href={ href } type={ type } className={ classes } { ...restOfProps }>
+		<Link
+			href={ href }
+			type={ type }
+			className={ classes }
+			{ ...restOfProps }
+		>
 			{ children }
 			<Gridicon icon="arrow-right" />
 		</Link>

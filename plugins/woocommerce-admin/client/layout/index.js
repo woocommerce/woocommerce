@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -30,7 +29,10 @@ export class PrimaryLayout extends Component {
 	render() {
 		const { children } = this.props;
 		return (
-			<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
+			<div
+				className="woocommerce-layout__primary"
+				id="woocommerce-layout__primary"
+			>
 				{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
 				<Notices />
 				{ children }
@@ -88,7 +90,11 @@ class Layout extends Component {
 		return (
 			<div className="woocommerce-layout">
 				<Header
-					sections={ isFunction( breadcrumbs ) ? breadcrumbs( this.props ) : breadcrumbs }
+					sections={
+						isFunction( breadcrumbs )
+							? breadcrumbs( this.props )
+							: breadcrumbs
+					}
 					isEmbedded={ isEmbedded }
 				/>
 				<TransientNotices />
@@ -112,7 +118,10 @@ Layout.propTypes = {
 		breadcrumbs: PropTypes.oneOfType( [
 			PropTypes.func,
 			PropTypes.arrayOf(
-				PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.string ), PropTypes.string ] )
+				PropTypes.oneOfType( [
+					PropTypes.arrayOf( PropTypes.string ),
+					PropTypes.string,
+				] )
 			),
 		] ).isRequired,
 		wpOpenMenu: PropTypes.string,
@@ -124,13 +133,15 @@ class _PageLayout extends Component {
 		return (
 			<Router history={ getHistory() }>
 				<Switch>
-					{ getPages().map( page => {
+					{ getPages().map( ( page ) => {
 						return (
 							<Route
 								key={ page.path }
 								path={ page.path }
 								exact
-								render={ props => <Layout page={ page } { ...props } /> }
+								render={ ( props ) => (
+									<Layout page={ page } { ...props } />
+								) }
 							/>
 						);
 					} ) }
@@ -140,7 +151,9 @@ class _PageLayout extends Component {
 	}
 }
 // Use the useFilters HoC so PageLayout is re-rendered when filters are used to add new pages or reports
-export const PageLayout = useFilters( [ PAGES_FILTER, REPORTS_FILTER ] )( _PageLayout );
+export const PageLayout = useFilters( [ PAGES_FILTER, REPORTS_FILTER ] )(
+	_PageLayout
+);
 
 export class EmbedLayout extends Component {
 	render() {

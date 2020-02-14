@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -32,9 +31,12 @@ class SelectFilter extends Component {
 			config.input
 				.getOptions()
 				.then( this.updateOptions )
-				.then( returnedOptions => {
+				.then( ( returnedOptions ) => {
 					if ( ! filter.value ) {
-						const value = getDefaultOptionValue( config, returnedOptions );
+						const value = getDefaultOptionValue(
+							config,
+							returnedOptions
+						);
 						onFilterChange( filter.key, 'value', value );
 					}
 				} );
@@ -47,24 +49,33 @@ class SelectFilter extends Component {
 	}
 
 	getScreenReaderText( filter, config ) {
-		if ( '' === filter.value ) {
+		if ( filter.value === '' ) {
 			return '';
 		}
 
 		const rule = find( config.rules, { value: filter.rule } ) || {};
-		const value = find( config.input.options, { value: filter.value } ) || {};
+		const value =
+			find( config.input.options, { value: filter.value } ) || {};
 
-		return textContent( interpolateComponents( {
-			mixedString: config.labels.title,
-			components: {
-				filter: <Fragment>{ value.label }</Fragment>,
-				rule: <Fragment>{ rule.label }</Fragment>,
-			},
-		} ) );
+		return textContent(
+			interpolateComponents( {
+				mixedString: config.labels.title,
+				components: {
+					filter: <Fragment>{ value.label }</Fragment>,
+					rule: <Fragment>{ rule.label }</Fragment>,
+				},
+			} )
+		);
 	}
 
 	render() {
-		const { className, config, filter, onFilterChange, isEnglish } = this.props;
+		const {
+			className,
+			config,
+			filter,
+			onFilterChange,
+			isEnglish,
+		} = this.props;
 		const { options } = this.state;
 		const { key, rule, value } = filter;
 		const { labels, rules } = config;
@@ -74,7 +85,10 @@ class SelectFilter extends Component {
 				title: <span className={ className } />,
 				rule: (
 					<SelectControl
-						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__rule'
+						) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -83,10 +97,17 @@ class SelectFilter extends Component {
 				),
 				filter: options ? (
 					<SelectControl
-						className={ classnames( className, 'woocommerce-filters-advanced__input' ) }
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__input'
+						) }
 						options={ options }
 						value={ value }
-						onChange={ partial( onFilterChange, filter.key, 'value' ) }
+						onChange={ partial(
+							onFilterChange,
+							filter.key,
+							'value'
+						) }
 						aria-label={ labels.filter }
 					/>
 				) : (
@@ -99,14 +120,20 @@ class SelectFilter extends Component {
 
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
+			<fieldset
+				className="woocommerce-filters-advanced__line-item"
+				tabIndex="0"
+			>
 				<legend className="screen-reader-text">
 					{ labels.add || '' }
 				</legend>
 				<div
-					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
-						'is-english': isEnglish,
-					} ) }
+					className={ classnames(
+						'woocommerce-filters-advanced__fieldset',
+						{
+							'is-english': isEnglish,
+						}
+					) }
 				>
 					{ children }
 				</div>

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -14,7 +13,7 @@ export default withState( {
 	isComplete: false,
 	isPending: false,
 } )( ( { currentStep, isComplete, isPending, setState } ) => {
-	const goToStep = key => {
+	const goToStep = ( key ) => {
 		setState( { currentStep: key } );
 	};
 
@@ -49,28 +48,40 @@ export default withState( {
 		},
 	];
 
-	const currentIndex = steps.findIndex( s => currentStep === s.key );
+	const currentIndex = steps.findIndex( ( s ) => currentStep === s.key );
 
 	if ( isComplete ) {
-		steps.forEach( s => ( s.isComplete = true ) );
+		steps.forEach( ( s ) => ( s.isComplete = true ) );
 	}
 
 	return (
 		<div>
 			{ isComplete ? (
-				<button onClick={ () => setState( { currentStep: 'first', isComplete: false } ) }>
+				<button
+					onClick={ () =>
+						setState( { currentStep: 'first', isComplete: false } )
+					}
+				>
 					Reset
 				</button>
 			) : (
 				<div>
 					<button
-						onClick={ () => setState( { currentStep: steps[ currentIndex - 1 ].key } ) }
+						onClick={ () =>
+							setState( {
+								currentStep: steps[ currentIndex - 1 ].key,
+							} )
+						}
 						disabled={ currentIndex < 1 }
 					>
 						Previous step
 					</button>
 					<button
-						onClick={ () => setState( { currentStep: steps[ currentIndex + 1 ].key } ) }
+						onClick={ () =>
+							setState( {
+								currentStep: steps[ currentIndex + 1 ].key,
+							} )
+						}
 						disabled={ currentIndex >= steps.length - 1 }
 					>
 						Next step
@@ -81,11 +92,19 @@ export default withState( {
 					>
 						Complete
 					</button>
-					<button onClick={ () => setState( { isPending: ! isPending } ) }>Toggle Spinner</button>
+					<button
+						onClick={ () => setState( { isPending: ! isPending } ) }
+					>
+						Toggle Spinner
+					</button>
 				</div>
 			) }
 
-			<Stepper steps={ steps } currentStep={ currentStep } isPending={ isPending } />
+			<Stepper
+				steps={ steps }
+				currentStep={ currentStep }
+				isPending={ isPending }
+			/>
 
 			<br />
 

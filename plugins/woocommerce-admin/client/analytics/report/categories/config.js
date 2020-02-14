@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,8 +9,10 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { getCategoryLabels } from 'lib/async-requests';
 
-const CATEGORY_REPORT_CHARTS_FILTER = 'woocommerce_admin_categories_report_charts';
-const CATEGORY_REPORT_FILTERS_FILTER = 'woocommerce_admin_categories_report_filters';
+const CATEGORY_REPORT_CHARTS_FILTER =
+	'woocommerce_admin_categories_report_charts';
+const CATEGORY_REPORT_FILTERS_FILTER =
+	'woocommerce_admin_categories_report_filters';
 const CATEGORY_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_category_report_advanced_filters';
 
@@ -46,7 +47,10 @@ export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Categories', 'woocommerce-admin' ), value: 'all' },
+			{
+				label: __( 'All Categories', 'woocommerce-admin' ),
+				value: 'all',
+			},
 			{
 				label: __( 'Single Category', 'woocommerce-admin' ),
 				value: 'select_category',
@@ -62,8 +66,14 @@ export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 							param: 'categories',
 							getLabels: getCategoryLabels,
 							labels: {
-								placeholder: __( 'Type to search for a category', 'woocommerce-admin' ),
-								button: __( 'Single Category', 'woocommerce-admin' ),
+								placeholder: __(
+									'Type to search for a category',
+									'woocommerce-admin'
+								),
+								button: __(
+									'Single Category',
+									'woocommerce-admin'
+								),
 							},
 						},
 					},
@@ -78,8 +88,14 @@ export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 					param: 'categories',
 					getLabels: getCategoryLabels,
 					labels: {
-						helpText: __( 'Check at least two categories below to compare', 'woocommerce-admin' ),
-						placeholder: __( 'Search for categories to compare', 'woocommerce-admin' ),
+						helpText: __(
+							'Check at least two categories below to compare',
+							'woocommerce-admin'
+						),
+						placeholder: __(
+							'Search for categories to compare',
+							'woocommerce-admin'
+						),
 						title: __( 'Compare Categories', 'woocommerce-admin' ),
 						update: __( 'Compare', 'woocommerce-admin' ),
 					},
@@ -89,4 +105,7 @@ export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 	},
 ] );
 
-export const advancedFilters = applyFilters( CATEGORY_REPORT_ADVANCED_FILTERS_FILTER, {} );
+export const advancedFilters = applyFilters(
+	CATEGORY_REPORT_ADVANCED_FILTERS_FILTER,
+	{}
+);

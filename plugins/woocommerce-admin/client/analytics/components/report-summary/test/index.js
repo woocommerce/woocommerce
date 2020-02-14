@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -96,9 +95,16 @@ describe( 'ReportSummary', () => {
 	} );
 
 	test( 'should show 0s when displaying an empty search', () => {
-		const reportChart = renderChart( 'number', null, undefined, false, false, {
-			emptySearchResults: true,
-		} );
+		const reportChart = renderChart(
+			'number',
+			null,
+			undefined,
+			false,
+			false,
+			{
+				emptySearchResults: true,
+			}
+		);
 		const summaryNumber = reportChart.find( 'SummaryNumber' );
 
 		expect( summaryNumber.props().value ).toBe( '0' );
@@ -117,7 +123,9 @@ describe( 'ReportSummary', () => {
 
 	test( 'should display SummaryListPlaceholder when isRequesting is true', () => {
 		const reportChart = renderChart( 'number', null, null, false, true );
-		const summaryListPlaceholder = reportChart.find( 'SummaryListPlaceholder' );
+		const summaryListPlaceholder = reportChart.find(
+			'SummaryListPlaceholder'
+		);
 		const summaryNumber = reportChart.find( 'SummaryNumber' );
 
 		expect( summaryListPlaceholder ).toHaveLength( 1 );

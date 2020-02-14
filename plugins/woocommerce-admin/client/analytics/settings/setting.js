@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -23,14 +22,21 @@ class Setting extends Component {
 	}
 
 	renderInput = () => {
-		const { handleChange, name, inputText, inputType, options, value, component } = this.props;
+		const {
+			handleChange,
+			name,
+			inputText,
+			inputType,
+			options,
+			value,
+			component,
+		} = this.props;
 		const { disabled } = this.state;
-		const id = uniqueId( name );
 
 		switch ( inputType ) {
 			case 'checkboxGroup':
 				return options.map(
-					optionGroup =>
+					( optionGroup ) =>
 						optionGroup.options.length > 0 && (
 							<div
 								className="woocommerce-setting__options-group"
@@ -42,7 +48,9 @@ class Setting extends Component {
 										{ optionGroup.label }
 									</span>
 								) }
-								{ this.renderCheckboxOptions( optionGroup.options ) }
+								{ this.renderCheckboxOptions(
+									optionGroup.options
+								) }
 							</div>
 						)
 				);
@@ -50,15 +58,26 @@ class Setting extends Component {
 				return this.renderCheckboxOptions( options );
 			case 'button':
 				return (
-					<Button isDefault onClick={ this.handleInputCallback } disabled={ disabled }>
+					<Button
+						isDefault
+						onClick={ this.handleInputCallback }
+						disabled={ disabled }
+					>
 						{ inputText }
 					</Button>
 				);
 			case 'component':
 				const SettingComponent = component;
-				return <SettingComponent value={ value } onChange={ handleChange } { ...this.props } />;
+				return (
+					<SettingComponent
+						value={ value }
+						onChange={ handleChange }
+						{ ...this.props }
+					/>
+				);
 			case 'text':
 			default:
+				const id = uniqueId( name );
 				return (
 					<input
 						id={ id }
@@ -76,7 +95,7 @@ class Setting extends Component {
 	handleInputCallback = () => {
 		const { createNotice, callback } = this.props;
 
-		if ( 'function' !== typeof callback ) {
+		if ( typeof callback !== 'function' ) {
 			return;
 		}
 
@@ -96,7 +115,7 @@ class Setting extends Component {
 		const { handleChange, name, value } = this.props;
 		const { disabled } = this.state;
 
-		return options.map( option => {
+		return options.map( ( option ) => {
 			const id = uniqueId( name + '-' + option.value );
 			return (
 				<label htmlFor={ id } key={ option.value }>
@@ -121,12 +140,19 @@ class Setting extends Component {
 
 		return (
 			<div className="woocommerce-setting">
-				<div className="woocommerce-setting__label" id={ name + '-label' }>
+				<div
+					className="woocommerce-setting__label"
+					id={ name + '-label' }
+				>
 					{ label }
 				</div>
 				<div className="woocommerce-setting__input">
 					{ this.renderInput() }
-					{ helpText && <span className="woocommerce-setting__help">{ helpText }</span> }
+					{ helpText && (
+						<span className="woocommerce-setting__help">
+							{ helpText }
+						</span>
+					) }
 				</div>
 			</div>
 		);
@@ -153,7 +179,13 @@ Setting.propTypes = {
 	/**
 	 * Type of input to use; defaults to a text input.
 	 */
-	inputType: PropTypes.oneOf( [ 'button', 'checkbox', 'checkboxGroup', 'text', 'component' ] ),
+	inputType: PropTypes.oneOf( [
+		'button',
+		'checkbox',
+		'checkboxGroup',
+		'text',
+		'component',
+	] ),
 	/**
 	 * Label used for describing the setting.
 	 */
@@ -196,7 +228,7 @@ Setting.propTypes = {
 };
 
 export default compose(
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		return { createNotice };
 	} )

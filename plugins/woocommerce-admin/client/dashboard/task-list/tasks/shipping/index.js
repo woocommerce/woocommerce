@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -64,10 +63,12 @@ class Shipping extends Component {
 		let hasCountryZone = false;
 
 		await Promise.all(
-			zones.map( async zone => {
+			zones.map( async ( zone ) => {
 				// "Rest of the world zone"
-				if ( 0 === zone.id ) {
-					zone.methods = await apiFetch( { path: `/wc/v3/shipping/zones/${ zone.id }/methods` } );
+				if ( zone.id === 0 ) {
+					zone.methods = await apiFetch( {
+						path: `/wc/v3/shipping/zones/${ zone.id }/methods`,
+					} );
 					zone.name = __( 'Rest of the world', 'woocommerce-admin' );
 					zone.toggleEnabled = true;
 					shippingZones.push( zone );
@@ -75,10 +76,16 @@ class Shipping extends Component {
 				}
 
 				// Return any zone with a single location matching the country zone.
-				zone.locations = await apiFetch( { path: `/wc/v3/shipping/zones/${ zone.id }/locations` } );
-				const countryLocation = zone.locations.find( location => countryCode === location.code );
+				zone.locations = await apiFetch( {
+					path: `/wc/v3/shipping/zones/${ zone.id }/locations`,
+				} );
+				const countryLocation = zone.locations.find(
+					( location ) => countryCode === location.code
+				);
 				if ( countryLocation ) {
-					zone.methods = await apiFetch( { path: `/wc/v3/shipping/zones/${ zone.id }/methods` } );
+					zone.methods = await apiFetch( {
+						path: `/wc/v3/shipping/zones/${ zone.id }/methods`,
+					} );
 					shippingZones.push( zone );
 					hasCountryZone = true;
 				}
@@ -108,24 +115,25 @@ class Shipping extends Component {
 	componentDidUpdate( prevProps, prevState ) {
 		const { countryCode, settings } = this.props;
 		const {
-			woocommerce_store_address,
-			woocommerce_default_country,
-			woocommerce_store_postcode,
+			woocommerce_store_address: storeAddress,
+			woocommerce_default_country: defaultCountry,
+			woocommerce_store_postcode: storePostcode,
 		} = settings;
 		const { step } = this.state;
 
 		if (
-			'store_location' === step &&
-			woocommerce_store_address &&
-			woocommerce_default_country &&
-			woocommerce_store_postcode
+			step === 'store_location' &&
+			storeAddress &&
+			defaultCountry &&
+			storePostcode
 		) {
 			this.completeStep();
 		}
 
 		if (
-			'rates' === step &&
-			( prevProps.countryCode !== countryCode || 'rates' !== prevState.step )
+			step === 'rates' &&
+			( prevProps.countryCode !== countryCode ||
+				prevState.step !== 'rates' )
 		) {
 			this.fetchShippingZones();
 		}
@@ -135,7 +143,7 @@ class Shipping extends Component {
 		const { createNotice } = this.props;
 		const { step } = this.state;
 		const steps = this.getSteps();
-		const currentStepIndex = steps.findIndex( s => s.key === step );
+		const currentStepIndex = steps.findIndex( ( s ) => s.key === step );
 		const nextStep = steps[ currentStepIndex + 1 ];
 
 		if ( nextStep ) {
@@ -158,7 +166,7 @@ class Shipping extends Component {
 		const plugins = [];
 		if ( [ 'GB', 'CA', 'AU' ].includes( countryCode ) ) {
 			plugins.push( 'woocommerce-shipstation-integration' );
-		} else if ( 'US' === countryCode ) {
+		} else if ( countryCode === 'US' ) {
 			plugins.push( 'woocommerce-services' );
 
 			if ( ! isJetpackConnected ) {
@@ -175,12 +183,19 @@ class Shipping extends Component {
 			{
 				key: 'store_location',
 				label: __( 'Set store location', 'woocommerce-admin' ),
-				description: __( 'The address from which your business operates', 'woocommerce-admin' ),
+				description: __(
+					'The address from which your business operates',
+					'woocommerce-admin'
+				),
 				content: (
 					<StoreLocation
-						onComplete={ values => {
-							const country = getCountryCode( values.countryState );
-							recordEvent( 'tasklist_shipping_set_location', { country } );
+						onComplete={ ( values ) => {
+							const country = getCountryCode(
+								values.countryState
+							);
+							recordEvent( 'tasklist_shipping_set_location', {
+								country,
+							} );
 							this.completeStep();
 						} }
 						{ ...this.props }
@@ -211,8 +226,13 @@ class Shipping extends Component {
 			},
 			{
 				key: 'label_printing',
-				label: __( 'Enable shipping label printing', 'woocommerce-admin' ),
-				description: pluginsToActivate.includes( 'woocommerce-shipstation-integration' )
+				label: __(
+					'Enable shipping label printing',
+					'woocommerce-admin'
+				),
+				description: pluginsToActivate.includes(
+					'woocommerce-shipstation-integration'
+				)
 					? interpolateComponents( {
 							mixedString: __(
 								'We recommend using ShipStation to save time at the post office by printing your shipping ' +
@@ -228,12 +248,12 @@ class Shipping extends Component {
 									/>
 								),
 							},
-						} )
+					  } )
 					: __(
 							'With WooCommerce Services and Jetpack you can save time at the ' +
 								'Post Office by printing your shipping labels at home',
 							'woocommerce-admin'
-						),
+					  ),
 				content: (
 					<Plugins
 						onComplete={ () => {
@@ -265,7 +285,9 @@ class Shipping extends Component {
 				),
 				content: (
 					<Connect
-						redirectUrl={ getAdminLink( 'admin.php?page=wc-admin' ) }
+						redirectUrl={ getAdminLink(
+							'admin.php?page=wc-admin'
+						) }
 						completeStep={ this.completeStep }
 						{ ...this.props }
 						onConnect={ () => {
@@ -277,7 +299,7 @@ class Shipping extends Component {
 			},
 		];
 
-		return filter( steps, step => step.visible );
+		return filter( steps, ( step ) => step.visible );
 	}
 
 	render() {
@@ -300,19 +322,26 @@ class Shipping extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting, isJetpackConnected } = select(
-			'wc-api'
-		);
+	withSelect( ( select ) => {
+		const {
+			getSettings,
+			getSettingsError,
+			isGetSettingsRequesting,
+			isJetpackConnected,
+		} = select( 'wc-api' );
 
 		const settings = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
 
-		const countryCode = getCountryCode( settings.woocommerce_default_country );
+		const countryCode = getCountryCode(
+			settings.woocommerce_default_country
+		);
 
 		const { countries = [] } = getSetting( 'dataEndpoints', {} );
-		const country = countryCode ? countries.find( c => c.code === countryCode ) : null;
+		const country = countryCode
+			? countries.find( ( c ) => c.code === countryCode )
+			: null;
 		const countryName = country ? country.name : null;
 
 		return {
@@ -324,7 +353,7 @@ export default compose(
 			settings,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateSettings } = dispatch( 'wc-api' );
 

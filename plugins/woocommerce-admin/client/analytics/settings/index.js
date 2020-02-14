@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -32,7 +31,9 @@ class Settings extends Component {
 		super( ...arguments );
 
 		const settings = {};
-		analyticsSettings.forEach( setting => ( settings[ setting.name ] = setting.initialValue ) );
+		analyticsSettings.forEach(
+			( setting ) => ( settings[ setting.name ] = setting.initialValue )
+		);
 
 		this.state = {
 			settings,
@@ -75,12 +76,19 @@ class Settings extends Component {
 
 	resetDefaults = () => {
 		if (
+			// eslint-disable-next-line no-alert
 			window.confirm(
-				__( 'Are you sure you want to reset all settings to default values?', 'woocommerce-admin' )
+				__(
+					'Are you sure you want to reset all settings to default values?',
+					'woocommerce-admin'
+				)
 			)
 		) {
 			const settings = {};
-			analyticsSettings.forEach( setting => ( settings[ setting.name ] = setting.defaultValue ) );
+			analyticsSettings.forEach(
+				( setting ) =>
+					( settings[ setting.name ] = setting.defaultValue )
+			);
 			this.setState( { settings }, partial( this.saveChanges, 'reset' ) );
 		}
 	};
@@ -94,13 +102,19 @@ class Settings extends Component {
 			if ( ! isError ) {
 				createNotice(
 					'success',
-					__( 'Your settings have been successfully saved.', 'woocommerce-admin' )
+					__(
+						'Your settings have been successfully saved.',
+						'woocommerce-admin'
+					)
 				);
 				newIsDirtyState = false;
 			} else {
 				createNotice(
 					'error',
-					__( 'There was an error saving your settings.  Please try again.', 'woocommerce-admin' )
+					__(
+						'There was an error saving your settings.  Please try again.',
+						'woocommerce-admin'
+					)
 				);
 			}
 			/* eslint-disable react/no-did-update-set-state */
@@ -114,11 +128,11 @@ class Settings extends Component {
 	 * the config for construction of this component when re-navigating to
 	 * the settings page.
 	 *
-	 * @param {object} state - State
+	 * @param {Object} state - State
 	 */
 	persistChanges( state ) {
 		const settings = getSetting( 'wcAdminSettings', {} );
-		analyticsSettings.forEach( setting => {
+		analyticsSettings.forEach( ( setting ) => {
 			const updatedValue = state.settings[ setting.name ];
 			settings[ setting.name ] = updatedValue;
 			setting.initialValue = updatedValue;
@@ -126,13 +140,13 @@ class Settings extends Component {
 		setSetting( 'wcAdminSettings', settings );
 	}
 
-	saveChanges = source => {
+	saveChanges = ( source ) => {
 		const { settings } = this.state;
 		const { query } = this.props;
 		this.persistChanges( this.state );
 		this.props.updateSettings( { wc_admin: settings } );
 
-		if ( 'reset' === source ) {
+		if ( source === 'reset' ) {
 			recordEvent( 'analytics_settings_reset_defaults' );
 		} else {
 			const eventProps = transform(
@@ -162,11 +176,11 @@ class Settings extends Component {
 		const { checked, name, type, value } = e.target;
 		const { settings } = this.state;
 
-		if ( 'checkbox' === type ) {
+		if ( type === 'checkbox' ) {
 			if ( checked ) {
 				settings[ name ].push( value );
 			} else {
-				remove( settings[ name ], v => v === value );
+				remove( settings[ name ], ( v ) => v === value );
 			}
 		} else {
 			settings[ name ] = value;
@@ -184,9 +198,11 @@ class Settings extends Component {
 
 		return (
 			<Fragment>
-				<SectionHeader title={ __( 'Analytics Settings', 'woocommerce-admin' ) } />
+				<SectionHeader
+					title={ __( 'Analytics Settings', 'woocommerce-admin' ) }
+				/>
 				<div className="woocommerce-settings__wrapper">
-					{ analyticsSettings.map( setting => (
+					{ analyticsSettings.map( ( setting ) => (
 						<Setting
 							handleChange={ this.handleInputChange }
 							value={ this.state.settings[ setting.name ] }
@@ -216,8 +232,12 @@ class Settings extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting } = select( 'wc-api' );
+	withSelect( ( select ) => {
+		const {
+			getSettings,
+			getSettingsError,
+			isGetSettingsRequesting,
+		} = select( 'wc-api' );
 
 		const settings = getSettings( 'wc_admin' );
 		const isError = Boolean( getSettingsError( 'wc_admin' ) );
@@ -225,7 +245,7 @@ export default compose(
 
 		return { getSettings, isError, isRequesting, settings };
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateSettings } = dispatch( 'wc-api' );
 

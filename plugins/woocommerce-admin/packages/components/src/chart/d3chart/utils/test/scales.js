@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,11 +7,15 @@ import { scaleBand, scaleLinear, scaleTime } from 'd3-scale';
  * Internal dependencies
  */
 import dummyOrders from './fixtures/dummy-orders';
+import { getOrderedKeys, getUniqueDates } from '../index';
 import {
-	getOrderedKeys,
-	getUniqueDates,
-} from '../index';
-import { calculateStep, getXGroupScale, getXScale, getXLineScale, getYScaleLimits, getYScale } from '../scales';
+	calculateStep,
+	getXGroupScale,
+	getXScale,
+	getXLineScale,
+	getYScaleLimits,
+	getYScale,
+} from '../scales';
 
 jest.mock( 'd3-scale', () => ( {
 	...require.requireActual( 'd3-scale' ),
@@ -43,12 +46,14 @@ describe( 'X scales', () => {
 		it( 'creates band scale with correct parameters', () => {
 			getXScale( testUniqueDates, 100 );
 
-			expect( scaleBand().domain ).toHaveBeenLastCalledWith( testUniqueDates );
+			expect( scaleBand().domain ).toHaveBeenLastCalledWith(
+				testUniqueDates
+			);
 			expect( scaleBand().range ).toHaveBeenLastCalledWith( [ 0, 100 ] );
 			expect( scaleBand().paddingInner ).toHaveBeenLastCalledWith( 0.1 );
 		} );
 
-		it( 'creates band scale with correct paddingInner parameter when it\'s in compact mode', () => {
+		it( "creates band scale with correct paddingInner parameter when it's in compact mode", () => {
 			getXScale( testUniqueDates, 100, true );
 
 			expect( scaleBand().paddingInner ).toHaveBeenLastCalledWith( 0 );
@@ -60,14 +65,22 @@ describe( 'X scales', () => {
 
 		it( 'creates band scale with correct parameters', () => {
 			getXGroupScale( testOrderedKeys, testXScale );
-			const filteredOrderedKeys = [ 'Cap', 'T-Shirt', 'Sunglasses', 'Polo', 'Hoodie' ];
+			const filteredOrderedKeys = [
+				'Cap',
+				'T-Shirt',
+				'Sunglasses',
+				'Polo',
+				'Hoodie',
+			];
 
-			expect( scaleBand().domain ).toHaveBeenLastCalledWith( filteredOrderedKeys );
+			expect( scaleBand().domain ).toHaveBeenLastCalledWith(
+				filteredOrderedKeys
+			);
 			expect( scaleBand().range ).toHaveBeenLastCalledWith( [ 0, 100 ] );
 			expect( scaleBand().padding ).toHaveBeenLastCalledWith( 0.07 );
 		} );
 
-		it( 'creates band scale with correct padding parameter when it\'s in compact mode', () => {
+		it( "creates band scale with correct padding parameter when it's in compact mode", () => {
 			getXGroupScale( testOrderedKeys, testXScale, true );
 
 			expect( scaleBand().padding ).toHaveBeenLastCalledWith( 0 );
@@ -82,7 +95,10 @@ describe( 'X scales', () => {
 				new Date( '2018-05-30T00:00:00' ),
 				new Date( '2018-06-04T00:00:00' ),
 			] );
-			expect( scaleTime().rangeRound ).toHaveBeenLastCalledWith( [ 0, 100 ] );
+			expect( scaleTime().rangeRound ).toHaveBeenLastCalledWith( [
+				0,
+				100,
+			] );
 		} );
 	} );
 } );
@@ -112,11 +128,19 @@ describe( 'Y scales', () => {
 
 	describe( 'getYScaleLimits', () => {
 		it( 'calculate the correct y value limits', () => {
-			expect( getYScaleLimits( dummyOrders ) ).toEqual( { lower: 0, upper: 15000000, step: 5000000 } );
+			expect( getYScaleLimits( dummyOrders ) ).toEqual( {
+				lower: 0,
+				upper: 15000000,
+				step: 5000000,
+			} );
 		} );
 
 		it( 'return defaults if there is no line data', () => {
-			expect( getYScaleLimits( [] ) ).toEqual( { lower: 0, upper: 0, step: 1 } );
+			expect( getYScaleLimits( [] ) ).toEqual( {
+				lower: 0,
+				upper: 0,
+				step: 1,
+			} );
 		} );
 	} );
 
@@ -124,15 +148,27 @@ describe( 'Y scales', () => {
 		it( 'creates positive linear scale with correct parameters', () => {
 			getYScale( 100, 0, 15000000 );
 
-			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
-			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 100, 0 ] );
+			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [
+				0,
+				15000000,
+			] );
+			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [
+				100,
+				0,
+			] );
 		} );
 
 		it( 'creates negative linear scale with correct parameters', () => {
 			getYScale( 100, -15000000, 0 );
 
-			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ -15000000, 0 ] );
-			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 100, 0 ] );
+			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [
+				-15000000,
+				0,
+			] );
+			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [
+				100,
+				0,
+			] );
 		} );
 
 		it( 'avoids the domain starting and ending at the same point when yMin, yMax are 0', () => {

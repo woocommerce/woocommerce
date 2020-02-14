@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -16,11 +15,19 @@ import { placeholderWhiteBackground as placeholder } from './placeholder';
  * If no image can be found, a placeholder matching the front-end image
  * placeholder will be displayed.
  *
- * @return { object } -
+ * @return {Object} -
  */
-const ProductImage = ( { product, alt, width, height, className, ...props } ) => {
+const ProductImage = ( {
+	product,
+	alt,
+	width,
+	height,
+	className,
+	...props
+} ) => {
 	// The first returned image from the API is the featured/product image.
-	const productImage = get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
+	const productImage =
+		get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
 	const src = ( productImage && productImage.src ) || false;
 	const altText = alt || ( productImage && productImage.alt ) || '';
 

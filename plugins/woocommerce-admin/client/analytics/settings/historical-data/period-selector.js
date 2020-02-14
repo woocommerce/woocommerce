@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -19,18 +18,21 @@ function HistoricalDataPeriodSelector( {
 	onPeriodChange,
 	value,
 } ) {
-	const onSelectChange = val => {
+	const onSelectChange = ( val ) => {
 		onPeriodChange( val );
 	};
-	const onDatePickerChange = val => {
+	const onDatePickerChange = ( val ) => {
 		if ( val.date && val.date.isValid ) {
 			onDateChange( val.date.format( dateFormat ) );
 		} else {
 			onDateChange( val.text );
 		}
 	};
-	const getDatePickerError = momentDate => {
-		if ( ! momentDate.isValid() || value.date.length !== dateFormat.length ) {
+	const getDatePickerError = ( momentDate ) => {
+		if (
+			! momentDate.isValid() ||
+			value.date.length !== dateFormat.length
+		) {
 			return dateValidationMessages.invalid;
 		}
 		if ( momentDate.isAfter( new Date(), 'day' ) ) {
@@ -50,7 +52,9 @@ function HistoricalDataPeriodSelector( {
 					dateFormat={ dateFormat }
 					disabled={ disabled }
 					error={ getDatePickerError( momentDate ) }
-					isInvalidDate={ date => moment( date ).isAfter( new Date(), 'day' ) }
+					isInvalidDate={ ( date ) =>
+						moment( date ).isAfter( new Date(), 'day' )
+					}
 					onUpdate={ onDatePickerChange }
 					text={ value.date }
 				/>
@@ -62,7 +66,10 @@ function HistoricalDataPeriodSelector( {
 		<div className="woocommerce-settings-historical-data__columns">
 			<div className="woocommerce-settings-historical-data__column">
 				<SelectControl
-					label={ __( 'Import Historical Data', 'woocommerce-admin' ) }
+					label={ __(
+						'Import Historical Data',
+						'woocommerce-admin'
+					) }
 					value={ value.label }
 					disabled={ disabled }
 					onChange={ onSelectChange }

@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -12,6 +10,10 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { computeSuggestionMatch } from './utils';
 import Flag from '../../flag';
+
+/**
+ * @typedef {Object} Completer
+ */
 
 // Cache countries to avoid repeated requests.
 let allCountries = null;
@@ -32,11 +34,13 @@ export default {
 			return Promise.resolve( allCountries );
 		}
 		// Make the request for country data.
-		return apiFetch( { path: '/wc-analytics/data/countries' } ).then( result => {
-			// Cache the response.
-			allCountries = result;
-			return allCountries;
-		} );
+		return apiFetch( { path: '/wc-analytics/data/countries' } ).then(
+			( result ) => {
+				// Cache the response.
+				allCountries = result;
+				return allCountries;
+			}
+		);
 	},
 	getOptionIdentifier( country ) {
 		return country.code;
@@ -60,20 +64,22 @@ export default {
 					size={ 18 }
 					hideFromScreenReader
 				/>
-				<span key="name" className="woocommerce-search__result-name" aria-label={ name }>
-					{
-						query
-						? (
-							<Fragment>
-								{ match.suggestionBeforeMatch }
-								<strong className="components-form-token-field__suggestion-match">
-									{ match.suggestionMatch }
-								</strong>
-								{ match.suggestionAfterMatch }
-							</Fragment>
-						)
-						: name
-					}
+				<span
+					key="name"
+					className="woocommerce-search__result-name"
+					aria-label={ name }
+				>
+					{ query ? (
+						<Fragment>
+							{ match.suggestionBeforeMatch }
+							<strong className="components-form-token-field__suggestion-match">
+								{ match.suggestionMatch }
+							</strong>
+							{ match.suggestionAfterMatch }
+						</Fragment>
+					) : (
+						name
+					) }
 				</span>
 			</Fragment>
 		);

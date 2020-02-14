@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -25,7 +24,7 @@ import { H, Section } from '../section';
  * Add a collection of report filters to a page. This uses `DatePicker` & `FilterPicker` for the "basic" filters, and `AdvancedFilters`
  * or a comparison card if "advanced" or "compare" are picked from `FilterPicker`.
  *
- * @return { object } -
+ * @return {Object} -
  */
 class ReportFilters extends Component {
 	constructor() {
@@ -48,21 +47,31 @@ class ReportFilters extends Component {
 			return null;
 		}
 
-		if ( 0 === query[ param ].indexOf( 'compare' ) ) {
+		if ( query[ param ].indexOf( 'compare' ) === 0 ) {
 			const filter = find( filters, { value: query[ param ] } );
 			if ( ! filter ) {
 				return null;
 			}
 			const { settings = {} } = filter;
 			return (
-				<div key={ param } className="woocommerce-filters__advanced-filters">
-					<CompareFilter path={ path } query={ query } { ...settings } />
+				<div
+					key={ param }
+					className="woocommerce-filters__advanced-filters"
+				>
+					<CompareFilter
+						path={ path }
+						query={ query }
+						{ ...settings }
+					/>
 				</div>
 			);
 		}
-		if ( 'advanced' === query[ param ] ) {
+		if ( query[ param ] === 'advanced' ) {
 			return (
-				<div key={ param } className="woocommerce-filters__advanced-filters">
+				<div
+					key={ param }
+					className="woocommerce-filters__advanced-filters"
+				>
 					<AdvancedFilters
 						siteLocale={ siteLocale }
 						currency={ currency }
@@ -94,7 +103,9 @@ class ReportFilters extends Component {
 		} = this.props;
 		return (
 			<Fragment>
-				<H className="screen-reader-text">{ __( 'Filters', 'woocommerce-admin' ) }</H>
+				<H className="screen-reader-text">
+					{ __( 'Filters', 'woocommerce-admin' ) }
+				</H>
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">
 						{ showDatePicker && (
@@ -105,7 +116,7 @@ class ReportFilters extends Component {
 								isoDateFormat={ isoDateFormat }
 							/>
 						) }
-						{ filters.map( config => {
+						{ filters.map( ( config ) => {
 							if ( config.showFilters( query ) ) {
 								return (
 									<FilterPicker
@@ -117,6 +128,7 @@ class ReportFilters extends Component {
 									/>
 								);
 							}
+							return null;
 						} ) }
 					</div>
 					{ filters.map( this.renderCard ) }

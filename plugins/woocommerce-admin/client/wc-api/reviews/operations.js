@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,17 +7,26 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { isResourcePrefix, getResourceIdentifier, getResourceName } from '../utils';
+import {
+	isResourcePrefix,
+	getResourceIdentifier,
+	getResourceName,
+} from '../utils';
 import { NAMESPACE } from '../constants';
 
 function read( resourceNames, fetch = apiFetch ) {
-	return [ ...readReviews( resourceNames, fetch ), ...readReviewQueries( resourceNames, fetch ) ];
+	return [
+		...readReviews( resourceNames, fetch ),
+		...readReviewQueries( resourceNames, fetch ),
+	];
 }
 
 function readReviewQueries( resourceNames, fetch ) {
-	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'review-query' ) );
+	const filteredNames = resourceNames.filter( ( name ) =>
+		isResourcePrefix( name, 'review-query' )
+	);
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const query = getResourceIdentifier( resourceName );
 		const url = addQueryArgs( `${ NAMESPACE }/products/reviews`, query );
 
@@ -29,10 +37,12 @@ function readReviewQueries( resourceNames, fetch ) {
 			} );
 
 			const reviews = await response.json();
-			const totalCount = parseInt( response.headers.get( 'x-wp-total' ) );
-			const ids = reviews.map( review => review.id );
+			const totalCount = parseInt( response.headers.get( 'x-wp-total' ), 10 );
+			const ids = reviews.map( ( review ) => review.id );
 			const reviewResources = reviews.reduce( ( resources, review ) => {
-				resources[ getResourceName( 'review', review.id ) ] = { data: review };
+				resources[ getResourceName( 'review', review.id ) ] = {
+					data: review,
+				};
 				return resources;
 			}, {} );
 
@@ -50,8 +60,12 @@ function readReviewQueries( resourceNames, fetch ) {
 }
 
 function readReviews( resourceNames, fetch ) {
-	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'review' ) );
-	return filteredNames.map( resourceName => readReview( resourceName, fetch ) );
+	const filteredNames = resourceNames.filter( ( name ) =>
+		isResourcePrefix( name, 'review' )
+	);
+	return filteredNames.map( ( resourceName ) =>
+		readReview( resourceName, fetch )
+	);
 }
 
 function readReview( resourceName, fetch ) {
@@ -59,10 +73,10 @@ function readReview( resourceName, fetch ) {
 	const url = `${ NAMESPACE }/products/reviews/${ id }`;
 
 	return fetch( { path: url } )
-		.then( review => {
+		.then( ( review ) => {
 			return { [ resourceName ]: { data: review } };
 		} )
-		.catch( error => {
+		.catch( ( error ) => {
 			return { [ resourceName ]: { error } };
 		} );
 }

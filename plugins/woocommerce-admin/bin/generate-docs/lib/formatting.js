@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -38,7 +37,7 @@ function getDescription( description = '' ) {
  * Get a single prop's details formatted for markdown.
  *
  * @param { string } propName Prop name.
- * @param { object } prop Prop details as retrieved from component docs.
+ * @param {Object} prop Prop details as retrieved from component docs.
  * @return { string } Formatted string.
  */
 function getProp( propName, prop ) {
@@ -47,7 +46,9 @@ function getProp( propName, prop ) {
 	cols.push( getPropType( prop.type, propName ) );
 	cols.push( '`' + getPropDefaultValue( prop.defaultValue ) + '`' );
 
-	let description = ( prop.description || '' ).replace( /(\r\n|\n|\r)+/gm, ' ' ).replace( /\.$/, '' );
+	let description = ( prop.description || '' )
+		.replace( /(\r\n|\n|\r)+/gm, ' ' )
+		.replace( /\.$/, '' );
 
 	if ( prop.required ) {
 		description = '(required) ' + description;
@@ -61,7 +62,7 @@ function getProp( propName, prop ) {
 /**
  * Get a single prop's default value.
  *
- * @param { object } value Default value as retrieved from component docs.
+ * @param {Object} value Default value as retrieved from component docs.
  * @return { string } Formatted string.
  */
 function getPropDefaultValue( value ) {
@@ -74,7 +75,7 @@ function getPropDefaultValue( value ) {
 /**
  * Get props and prop details formatted for markdown.
  *
- * @param { object } props Component props as retrieved from component docs.
+ * @param {Object} props Component props as retrieved from component docs.
  * @return { string } Formatted string.
  */
 function getProps( props = {} ) {
@@ -88,7 +89,7 @@ function getProps( props = {} ) {
 		'Name | Type | Default | Description',
 		'--- | --- | --- | ---',
 	];
-	Object.keys( props ).map( key => {
+	Object.keys( props ).forEach( ( key ) => {
 		lines.push( getProp( key, props[ key ] ) );
 	} );
 
@@ -98,7 +99,7 @@ function getProps( props = {} ) {
 /**
  * Get a single prop's type.
  *
- * @param { object } type Prop type as retrieved from component docs.
+ * @param {Object} type Prop type as retrieved from component docs.
  * @return { string } Formatted string.
  */
 function getPropType( type ) {
@@ -123,21 +124,30 @@ function getPropType( type ) {
 	switch ( type.name ) {
 		case 'arrayOf':
 			// replacing "Object" is a hack for shape proptypes.
-			value = 'Array\n' + getPropType( type.value ).replace( 'Object\n', '' );
+			value =
+				'Array\n' + getPropType( type.value ).replace( 'Object\n', '' );
 			break;
 		case 'objectOf':
 			// replacing "Object" is a hack for shape proptypes.
-			value = 'Object\n' + getPropType( type.value ).replace( 'Object\n', '' );
+			value =
+				'Object\n' +
+				getPropType( type.value ).replace( 'Object\n', '' );
 			break;
 		case 'shape':
-			value = map( type.value, ( v, key ) => `\n  - ${ key }: ` + getPropType( v ) ).join( '' );
+			value = map(
+				type.value,
+				( v, key ) => `\n  - ${ key }: ` + getPropType( v )
+			).join( '' );
 			value = 'Object\n' + value.replace( /^\n/, '' );
 			break;
 		case 'enum':
-			value = 'One of: ' + type.value.map( v => v.value ).join( ', ' );
+			value =
+				'One of: ' + type.value.map( ( v ) => v.value ).join( ', ' );
 			break;
 		case 'union':
-			value = 'One of type: ' + type.value.map( v => v.name ).join( ', ' );
+			value =
+				'One of type: ' +
+				type.value.map( ( v ) => v.name ).join( ', ' );
 			break;
 		default:
 			value =

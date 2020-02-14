@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -26,7 +25,7 @@ class InboxPanel extends Component {
 
 	componentWillUnmount() {
 		const userDataFields = {
-			[ 'activity_panel_inbox_last_read' ]: this.mountTime,
+			activity_panel_inbox_last_read: this.mountTime,
 		};
 		this.props.updateCurrentUserData( userDataFields );
 	}
@@ -50,14 +49,18 @@ class InboxPanel extends Component {
 	renderNotes() {
 		const { lastRead, notes } = this.props;
 
-		if ( 0 === Object.keys( notes ).length ) {
+		if ( Object.keys( notes ).length === 0 ) {
 			return this.renderEmptyCard();
 		}
 
-		const notesArray = Object.keys( notes ).map( key => notes[ key ] );
+		const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
-		return notesArray.map( note => (
-			<InboxNoteCard key={ note.id } note={ note } lastRead={ lastRead } />
+		return notesArray.map( ( note ) => (
+			<InboxNoteCard
+				key={ note.id }
+				note={ note }
+				lastRead={ lastRead }
+			/>
 		) );
 	}
 
@@ -108,10 +111,13 @@ class InboxPanel extends Component {
 }
 
 export default compose(
-	withSelect( select => {
-		const { getCurrentUserData, getNotes, getNotesError, isGetNotesRequesting } = select(
-			'wc-api'
-		);
+	withSelect( ( select ) => {
+		const {
+			getCurrentUserData,
+			getNotes,
+			getNotesError,
+			isGetNotesRequesting,
+		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
 		const inboxQuery = {
 			page: 1,
@@ -126,9 +132,14 @@ export default compose(
 		const isError = Boolean( getNotesError( inboxQuery ) );
 		const isRequesting = isGetNotesRequesting( inboxQuery );
 
-		return { notes, isError, isRequesting, lastRead: userData.activity_panel_inbox_last_read };
+		return {
+			notes,
+			isError,
+			isRequesting,
+			lastRead: userData.activity_panel_inbox_last_read,
+		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateCurrentUserData } = dispatch( 'wc-api' );
 
 		return {

@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -16,11 +14,11 @@ function update( resourceNames, data, fetch = apiFetch ) {
 }
 
 function initiateExport( resourceNames, data, fetch ) {
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		return name.startsWith( 'report-export-' );
 	} );
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const prefix = getResourcePrefix( resourceName );
 		const reportType = prefix.split( '-' ).pop();
 		const url = NAMESPACE + '/reports/' + reportType + '/export';

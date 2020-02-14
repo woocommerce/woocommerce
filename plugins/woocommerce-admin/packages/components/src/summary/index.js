@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -17,7 +16,7 @@ import Menu from './menu';
  * A container element for a list of SummaryNumbers. This component handles detecting & switching to
  * the mobile format on smaller screens.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 	const items = children( {} );
@@ -38,7 +37,7 @@ const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 		return summaryMenu;
 	}
 
-	const selected = items.find( item => !! item.props.selected );
+	const selected = items.find( ( item ) => !! item.props.selected );
 	if ( ! selected ) {
 		return summaryMenu;
 	}
@@ -48,8 +47,10 @@ const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 			className="woocommerce-summary"
 			position="bottom"
 			headerTitle={ label }
-			renderToggle={ ( { isOpen, onToggle } ) => cloneElement( selected, { onToggle, isOpen } ) }
-			renderContent={ renderContentArgs => (
+			renderToggle={ ( { isOpen, onToggle } ) =>
+				cloneElement( selected, { onToggle, isOpen } )
+			}
+			renderContent={ ( renderContentArgs ) => (
 				<Menu
 					label={ label }
 					orientation={ orientation }

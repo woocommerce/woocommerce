@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,7 +17,7 @@ let _history;
  * Since they don't parse query arguments, recreate `get location` to return a `pathname` with the
  * query path argument's value.
  *
- * @returns {object} React-router history object with `get location` modified.
+ * @return {Object} React-router history object with `get location` modified.
  */
 function getHistory() {
 	if ( ! _history ) {
@@ -43,14 +42,20 @@ function getHistory() {
 					pathname,
 				};
 			},
-			createHref: ( ...args ) => browserHistory.createHref.apply( browserHistory, args ),
-			push: ( ...args ) => browserHistory.push.apply( browserHistory, args ),
-			replace: ( ...args ) => browserHistory.replace.apply( browserHistory, args ),
+			createHref: ( ...args ) =>
+				browserHistory.createHref.apply( browserHistory, args ),
+			push: ( ...args ) =>
+				browserHistory.push.apply( browserHistory, args ),
+			replace: ( ...args ) =>
+				browserHistory.replace.apply( browserHistory, args ),
 			go: ( ...args ) => browserHistory.go.apply( browserHistory, args ),
-			goBack: ( ...args ) => browserHistory.goBack.apply( browserHistory, args ),
-			goForward: ( ...args ) => browserHistory.goForward.apply( browserHistory, args ),
-			block: ( ...args ) => browserHistory.block.apply( browserHistory, args ),
-			listen: function( listener ) {
+			goBack: ( ...args ) =>
+				browserHistory.goBack.apply( browserHistory, args ),
+			goForward: ( ...args ) =>
+				browserHistory.goForward.apply( browserHistory, args ),
+			block: ( ...args ) =>
+				browserHistory.block.apply( browserHistory, args ),
+			listen( listener ) {
 				return browserHistory.listen( () => {
 					listener( this.location, this.action );
 				} );

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -44,7 +43,11 @@ class ReviewsPanel extends Component {
 	renderReview( review, props ) {
 		const { lastRead } = props;
 		const product =
-			( review && review._embedded && review._embedded.up && review._embedded.up[ 0 ] ) || null;
+			( review &&
+				review._embedded &&
+				review._embedded.up &&
+				review._embedded.up[ 0 ] ) ||
+			null;
 
 		if ( isNull( product ) ) {
 			return null;
@@ -60,8 +63,15 @@ class ReviewsPanel extends Component {
 				review.reviewer
 			),
 			components: {
-				productLink: <Link href={ product.permalink } type="external" />,
-				authorLink: <Link href={ 'mailto:' + review.reviewer_email } type="external" />,
+				productLink: (
+					<Link href={ product.permalink } type="external" />
+				),
+				authorLink: (
+					<Link
+						href={ 'mailto:' + review.reviewer_email }
+						type="external"
+					/>
+				),
 			},
 		} );
 
@@ -77,7 +87,8 @@ class ReviewsPanel extends Component {
 			</Fragment>
 		);
 
-		const productImage = get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
+		const productImage =
+			get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
 		const productImageClasses = classnames(
 			'woocommerce-review-activity-card__image-overlay__product',
 			{
@@ -101,8 +112,12 @@ class ReviewsPanel extends Component {
 		const cardActions = (
 			<Button
 				isDefault
-				onClick={ () => recordEvent( 'review_manage_click', manageReviewEvent ) }
-				href={ getAdminLink( 'comment.php?action=editcomment&c=' + review.id ) }
+				onClick={ () =>
+					recordEvent( 'review_manage_click', manageReviewEvent )
+				}
+				href={ getAdminLink(
+					'comment.php?action=editcomment&c=' + review.id
+				) }
 			>
 				{ __( 'Manage', 'woocommerce-admin' ) }
 			</Button>
@@ -121,10 +136,13 @@ class ReviewsPanel extends Component {
 					review.status === 'hold' ||
 					! lastRead ||
 					! review.date_created_gmt ||
-					new Date( review.date_created_gmt + 'Z' ).getTime() > lastRead
+					new Date( review.date_created_gmt + 'Z' ).getTime() >
+						lastRead
 				}
 			>
-				<span dangerouslySetInnerHTML={ sanitizeHTML( review.review ) } />
+				<span
+					dangerouslySetInnerHTML={ sanitizeHTML( review.review ) }
+				/>
 			</ActivityCard>
 		);
 	}
@@ -132,7 +150,10 @@ class ReviewsPanel extends Component {
 	renderEmptyMessage() {
 		const { lastApprovedReviewTime } = this.props;
 
-		const title = __( 'You have no reviews to moderate', 'woocommerce-admin' );
+		const title = __(
+			'You have no reviews to moderate',
+			'woocommerce-admin'
+		);
 		let buttonUrl = '';
 		let buttonTarget = '';
 		let buttonText = '';
@@ -142,7 +163,8 @@ class ReviewsPanel extends Component {
 			const now = new Date();
 			const DAY = 24 * 60 * 60 * 1000;
 			if ( ( now.getTime() - lastApprovedReviewTime ) / DAY > 30 ) {
-				buttonUrl = 'https://woocommerce.com/posts/reviews-woocommerce-best-practices/';
+				buttonUrl =
+					'https://woocommerce.com/posts/reviews-woocommerce-best-practices/';
 				buttonTarget = '_blank';
 				buttonText = __( 'Learn more', 'woocommerce-admin' );
 				content = (
@@ -162,7 +184,9 @@ class ReviewsPanel extends Component {
 					</Fragment>
 				);
 			} else {
-				buttonUrl = getAdminLink( 'edit-comments.php?comment_type=review' );
+				buttonUrl = getAdminLink(
+					'edit-comments.php?comment_type=review'
+				);
 				buttonText = __( 'View all Reviews', 'woocommerce-admin' );
 				content = (
 					<p>
@@ -176,13 +200,17 @@ class ReviewsPanel extends Component {
 				);
 			}
 		} else {
-			buttonUrl = 'https://woocommerce.com/posts/reviews-woocommerce-best-practices/';
+			buttonUrl =
+				'https://woocommerce.com/posts/reviews-woocommerce-best-practices/';
 			buttonTarget = '_blank';
 			buttonText = __( 'Learn more', 'woocommerce-admin' );
 			content = (
 				<Fragment>
 					<p>
-						{ __( "Your customers haven't started reviewing your products.", 'woocommerce-admin' ) }
+						{ __(
+							"Your customers haven't started reviewing your products.",
+							'woocommerce-admin'
+						) }
 					</p>
 					<p>
 						{ __(
@@ -200,7 +228,11 @@ class ReviewsPanel extends Component {
 				title={ title }
 				icon={ <Gridicon icon="time" size={ 48 } /> }
 				actions={
-					<Button href={ buttonUrl } target={ buttonTarget } isDefault>
+					<Button
+						href={ buttonUrl }
+						target={ buttonTarget }
+						isDefault
+					>
 						{ buttonText }
 					</Button>
 				}
@@ -254,7 +286,9 @@ class ReviewsPanel extends Component {
 					) : (
 						<Fragment>
 							{ reviews.length
-								? reviews.map( review => this.renderReview( review, this.props ) )
+								? reviews.map( ( review ) =>
+										this.renderReview( review, this.props )
+								  )
 								: this.renderEmptyMessage() }
 						</Fragment>
 					) }
@@ -278,7 +312,9 @@ ReviewsPanel.defaultProps = {
 
 export default withSelect( ( select, props ) => {
 	const { hasUnapprovedReviews } = props;
-	const { getReviews, getReviewsError, isGetReviewsRequesting } = select( 'wc-api' );
+	const { getReviews, getReviewsError, isGetReviewsRequesting } = select(
+		'wc-api'
+	);
 	let reviews = [];
 	let isError = false;
 	let isRequesting = false;
@@ -304,7 +340,9 @@ export default withSelect( ( select, props ) => {
 		if ( approvedReviews.length ) {
 			const lastApprovedReview = approvedReviews[ 0 ];
 			if ( lastApprovedReview.date_created_gmt ) {
-				const creationDate = new Date( lastApprovedReview.date_created_gmt );
+				const creationDate = new Date(
+					lastApprovedReview.date_created_gmt
+				);
 				lastApprovedReviewTime = creationDate.getTime();
 			}
 		}

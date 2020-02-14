@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -49,7 +48,10 @@ class TableCard extends Component {
 			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
-		if ( query.orderby !== prevQuery.orderby && ! showCols.includes( query.orderby ) ) {
+		if (
+			query.orderby !== prevQuery.orderby &&
+			! showCols.includes( query.orderby )
+		) {
 			const newShowCols = showCols.concat( query.orderby );
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
@@ -61,15 +63,14 @@ class TableCard extends Component {
 	}
 
 	getShowCols( headers ) {
-		return headers.map( ( { key, visible } ) => {
-			if (
-				'undefined' === typeof visible ||
-				visible
-			) {
-				return key;
-			}
-			return false;
-		} ).filter( Boolean );
+		return headers
+			.map( ( { key, visible } ) => {
+				if ( typeof visible === 'undefined' || visible ) {
+					return key;
+				}
+				return false;
+			} )
+			.filter( Boolean );
 	}
 
 	getVisibleHeaders() {
@@ -82,10 +83,12 @@ class TableCard extends Component {
 		const { headers, rows } = this.props;
 		const { showCols } = this.state;
 
-		return rows.map( row => {
-			return headers.map( ( { key }, i ) => {
-				return showCols.includes( key ) && row[ i ];
-			} ).filter( Boolean );
+		return rows.map( ( row ) => {
+			return headers
+				.map( ( { key }, i ) => {
+					return showCols.includes( key ) && row[ i ];
+				} )
+				.filter( Boolean );
 		} );
 	}
 
@@ -93,13 +96,16 @@ class TableCard extends Component {
 		const { headers, query, onQueryChange, onColumnsChange } = this.props;
 
 		return () => {
-			this.setState( prevState => {
+			this.setState( ( prevState ) => {
 				const hasKey = prevState.showCols.includes( key );
 
 				if ( hasKey ) {
 					// Handle hiding a sorted column
 					if ( query.orderby === key ) {
-						const defaultSort = find( headers, { defaultSort: true } ) || first( headers ) || {};
+						const defaultSort =
+							find( headers, { defaultSort: true } ) ||
+							first( headers ) ||
+							{};
 						onQueryChange( 'sort' )( defaultSort.key, 'desc' );
 					}
 
@@ -152,35 +158,55 @@ class TableCard extends Component {
 				title={ title }
 				action={ actions }
 				menu={
-					showMenu && <EllipsisMenu label={ __( 'Choose which values to display', 'woocommerce-admin' ) }
-						renderContent={ () => (
-							<Fragment>
-								<MenuTitle>{ __( 'Columns:', 'woocommerce-admin' ) }</MenuTitle>
-								{ allHeaders.map( ( { key, label, required } ) => {
-									if ( required ) {
-										return null;
-									}
-									return (
-										<MenuItem
-											checked={ showCols.includes( key ) }
-											isCheckbox
-											isClickable
-											key={ key }
-											onInvoke={ this.onColumnToggle( key ) }
-										>
-											{ label }
-										</MenuItem>
-									);
-								} ) }
-							</Fragment>
-						) }
-					/>
+					showMenu && (
+						<EllipsisMenu
+							label={ __(
+								'Choose which values to display',
+								'woocommerce-admin'
+							) }
+							renderContent={ () => (
+								<Fragment>
+									<MenuTitle>
+										{ __(
+											'Columns:',
+											'woocommerce-admin'
+										) }
+									</MenuTitle>
+									{ allHeaders.map(
+										( { key, label, required } ) => {
+											if ( required ) {
+												return null;
+											}
+											return (
+												<MenuItem
+													checked={ showCols.includes(
+														key
+													) }
+													isCheckbox
+													isClickable
+													key={ key }
+													onInvoke={ this.onColumnToggle(
+														key
+													) }
+												>
+													{ label }
+												</MenuItem>
+											);
+										}
+									) }
+								</Fragment>
+							) }
+						/>
+					)
 				}
 			>
 				{ isLoading ? (
 					<Fragment>
 						<span className="screen-reader-text">
-							{ __( 'Your requested data is loading', 'woocommerce-admin' ) }
+							{ __(
+								'Your requested data is loading',
+								'woocommerce-admin'
+							) }
 						</span>
 						<TablePlaceholder
 							numberOfRows={ rowsPerPage }
@@ -202,8 +228,8 @@ class TableCard extends Component {
 				) }
 
 				<Pagination
-					key={ parseInt( query.paged ) || 1 }
-					page={ parseInt( query.paged ) || 1 }
+					key={ parseInt( query.paged, 10 ) || 1 }
+					page={ parseInt( query.paged, 10 ) || 1 }
 					perPage={ rowsPerPage }
 					total={ totalRows }
 					onPageChange={ this.onPageChange }
@@ -266,7 +292,11 @@ TableCard.propTypes = {
 		PropTypes.arrayOf(
 			PropTypes.shape( {
 				display: PropTypes.node,
-				value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number, PropTypes.bool ] ),
+				value: PropTypes.oneOfType( [
+					PropTypes.string,
+					PropTypes.number,
+					PropTypes.bool,
+				] ),
 			} )
 		)
 	).isRequired,
@@ -285,7 +315,10 @@ TableCard.propTypes = {
 	summary: PropTypes.arrayOf(
 		PropTypes.shape( {
 			label: PropTypes.node,
-			value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
+			value: PropTypes.oneOfType( [
+				PropTypes.string,
+				PropTypes.number,
+			] ),
 		} )
 	),
 	/**

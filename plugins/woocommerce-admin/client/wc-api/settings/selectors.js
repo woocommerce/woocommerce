@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -32,30 +30,33 @@ const getSettings = ( getResource, requireResource ) => (
 		}
 	}
 
-	ids.forEach( id => {
+	ids.forEach( ( id ) => {
 		settings[ id ] = getSetting(
 			'preloadSettings',
 			{},
-			preloadSettings =>
-				getResource( getResourceName( resourceName, id ) ).data || preloadSettings[ id ]
+			( preloadSettings ) =>
+				getResource( getResourceName( resourceName, id ) ).data ||
+				preloadSettings[ id ]
 		);
 	} );
 
 	return settings;
 };
 
-const getSettingsError = getResource => group => {
+const getSettingsError = ( getResource ) => ( group ) => {
 	return getResource( `settings/${ group }` ).error;
 };
 
-const isGetSettingsRequesting = getResource => group => {
-	const { lastReceived, lastRequested } = getResource( `settings/${ group }` );
+const isGetSettingsRequesting = ( getResource ) => ( group ) => {
+	const { lastReceived, lastRequested } = getResource(
+		`settings/${ group }`
+	);
 	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
 		return true;
 	}
 
 	// This selector is used by other "groups", so return early if not looking at wc_admin settings.
-	if ( 'wc_admin' !== group ) {
+	if ( group !== 'wc_admin' ) {
 		return lastRequested > lastReceived;
 	}
 

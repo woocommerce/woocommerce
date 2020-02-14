@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,7 +17,10 @@ class ScrollTo extends Component {
 	scrollTo() {
 		const { offset } = this.props;
 		if ( this.ref.current && this.ref.current.offsetTop ) {
-			window.scrollTo( 0, this.ref.current.offsetTop + parseInt( offset ) );
+			window.scrollTo(
+				0,
+				this.ref.current.offsetTop + parseInt( offset, 10 )
+			);
 		} else {
 			setTimeout( this.scrollTo, 250 );
 		}
@@ -27,11 +29,7 @@ class ScrollTo extends Component {
 	render() {
 		const { children } = this.props;
 		this.ref = createRef();
-		return (
-			<span ref={ this.ref }>
-				{ children }
-			</span>
-		);
+		return <span ref={ this.ref }>{ children }</span>;
 	}
 }
 

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -9,8 +8,11 @@ import { createStore } from 'redux';
  */
 import reducer from './reducer';
 
-export default name => {
+export default ( name ) => {
 	const devTools = window.__REDUX_DEVTOOLS_EXTENSION__;
 
-	return createStore( reducer, devTools && devTools( { name: name, instanceId: name } ) );
+	return createStore(
+		reducer,
+		devTools && devTools( { name, instanceId: name } )
+	);
 };

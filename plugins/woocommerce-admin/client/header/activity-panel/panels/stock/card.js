@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -47,7 +46,9 @@ class ProductStockCard extends Component {
 				quantity: product.stock_quantity,
 			},
 			() => {
-				this.quantityInput && this.quantityInput.focus();
+				if ( this.quantityInput ) {
+					this.quantityInput.focus();
+				}
 			}
 		);
 	}
@@ -85,15 +86,17 @@ class ProductStockCard extends Component {
 
 		if ( editing ) {
 			return [
-				<Button type="submit" isPrimary>
+				<Button key="save" type="submit" isPrimary>
 					{ __( 'Save', 'woocommerce-admin' ) }
 				</Button>,
-				<Button type="reset">{ __( 'Cancel', 'woocommerce-admin' ) }</Button>,
+				<Button key="cancel" type="reset">
+					{ __( 'Cancel', 'woocommerce-admin' ) }
+				</Button>,
 			];
 		}
 
 		return [
-			<Button isDefault onClick={ this.beginEdit }>
+			<Button key="update" isDefault onClick={ this.beginEdit }>
 				{ __( 'Update stock', 'woocommerce-admin' ) }
 			</Button>,
 		];
@@ -113,7 +116,7 @@ class ProductStockCard extends Component {
 							value={ quantity }
 							onKeyDown={ this.handleKeyDown }
 							onChange={ this.onQuantityChange }
-							ref={ input => {
+							ref={ ( input ) => {
 								this.quantityInput = input;
 							} }
 						/>
@@ -125,7 +128,10 @@ class ProductStockCard extends Component {
 
 		return (
 			<span className="woocommerce-stock-activity-card__stock-quantity">
-				{ sprintf( __( '%d in stock', 'woocommerce-admin' ), product.stock_quantity ) }
+				{ sprintf(
+					__( '%d in stock', 'woocommerce-admin' ),
+					product.stock_quantity
+				) }
 			</span>
 		);
 	}
@@ -148,7 +154,10 @@ class ProductStockCard extends Component {
 
 		const title = (
 			<Link
-				href={ 'post.php?action=edit&post=' + ( product.parent_id || product.id ) }
+				href={
+					'post.php?action=edit&post=' +
+					( product.parent_id || product.id )
+				}
 				type="wp-admin"
 			>
 				{ product.name }
@@ -156,13 +165,14 @@ class ProductStockCard extends Component {
 		);
 		let subtitle = null;
 
-		if ( 'variation' === product.type ) {
+		if ( product.type === 'variation' ) {
 			subtitle = Object.values( product.attributes )
-				.map( attr => attr.option )
+				.map( ( attr ) => attr.option )
 				.join( ', ' );
 		}
 
-		const productImage = get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
+		const productImage =
+			get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
 		const productImageClasses = classnames(
 			'woocommerce-stock-activity-card__image-overlay__product',
 			{
@@ -176,9 +186,12 @@ class ProductStockCard extends Component {
 				</div>
 			</div>
 		);
-		const activityCardClasses = classnames( 'woocommerce-stock-activity-card', {
-			'is-dimmed': ! editing && ! isLowStock,
-		} );
+		const activityCardClasses = classnames(
+			'woocommerce-stock-activity-card',
+			{
+				'is-dimmed': ! editing && ! isLowStock,
+			}
+		);
 
 		const activityCard = (
 			<ActivityCard
@@ -205,7 +218,7 @@ class ProductStockCard extends Component {
 }
 
 export default compose(
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateProductStock } = dispatch( 'wc-api' );
 
 		return {

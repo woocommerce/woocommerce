@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -26,7 +25,7 @@ const markTaskComplete = () => {
 			// Redirect back to the root WooCommerce Admin page.
 			getHistory().push( getNewPath( {}, '/', {} ) );
 		} )
-		.catch( error => {
+		.catch( ( error ) => {
 			// Something went wrong with our update.
 			console.log( error );
 		} );
@@ -42,7 +41,7 @@ const markTaskIncomplete = () => {
 			addTaskData.isComplete = false;
 			getHistory().push( getNewPath( {}, '/', {} ) );
 		} )
-		.catch( error => {
+		.catch( ( error ) => {
 			console.log( error );
 		} );
 };
@@ -71,17 +70,21 @@ const Task = () => {
 /**
  * Use the 'woocommerce_admin_onboarding_task_list' filter to add a task page.
  */
-addFilter( 'woocommerce_admin_onboarding_task_list', 'plugin-domain', tasks => {
-	return [
-		...tasks,
-		{
-			key: 'example',
-			title: __( 'Example', 'plugin-domain' ),
-			content: __( 'This is an example task.', 'plugin-domain' ),
-			icon: 'info',
-			container: <Task />,
-			completed: addTaskData.isComplete,
-			visible: true,
-		},
-	];
-} );
+addFilter(
+	'woocommerce_admin_onboarding_task_list',
+	'plugin-domain',
+	( tasks ) => {
+		return [
+			...tasks,
+			{
+				key: 'example',
+				title: __( 'Example', 'plugin-domain' ),
+				content: __( 'This is an example task.', 'plugin-domain' ),
+				icon: 'info',
+				container: <Task />,
+				completed: addTaskData.isComplete,
+				visible: true,
+			},
+		];
+	}
+);

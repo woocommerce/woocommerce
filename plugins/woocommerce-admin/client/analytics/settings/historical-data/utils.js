@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,7 +11,11 @@ export const formatParams = ( dateFormat, period, skipChecked ) => {
 	}
 	if ( period.label !== 'all' ) {
 		if ( period.label === 'custom' ) {
-			const daysDifference = moment().diff( moment( period.date, dateFormat ), 'days', true );
+			const daysDifference = moment().diff(
+				moment( period.date, dateFormat ),
+				'days',
+				true
+			);
 			params.days = Math.floor( daysDifference );
 		} else {
 			params.days = parseInt( period.label, 10 );
@@ -47,7 +50,10 @@ export const getStatus = ( {
 		return 'finalizing';
 	}
 	if ( customersTotal > 0 || ordersTotal > 0 ) {
-		if ( customersProgress === customersTotal && ordersProgress === ordersTotal ) {
+		if (
+			customersProgress === customersTotal &&
+			ordersProgress === ordersTotal
+		) {
 			return 'finished';
 		}
 		return 'ready';

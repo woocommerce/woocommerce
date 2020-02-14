@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -27,20 +26,13 @@ class InboxNoteCard extends Component {
 	onVisible( isVisible ) {
 		if ( isVisible && ! this.hasBeenSeen ) {
 			const { note } = this.props;
-			const {
-				content: note_content,
-				name: note_name,
-				title: note_title,
-				type: note_type,
-				icon: note_icon,
-			} = note;
 
 			recordEvent( 'inbox_note_view', {
-				note_content,
-				note_name,
-				note_title,
-				note_type,
-				note_icon,
+				note_content: note.content,
+				note_name: note.name,
+				note_title: note.title,
+				note_type: note.type,
+				note_icon: note.icon,
 			} );
 
 			this.hasBeenSeen = true;
@@ -54,14 +46,16 @@ class InboxNoteCard extends Component {
 			if ( ! note.actions ) {
 				return [];
 			}
-			return note.actions.map( action => <NoteAction noteId={ note.id } action={ action } /> );
+			return note.actions.map( ( action ) => (
+				<NoteAction key={ note.id } noteId={ note.id } action={ action } />
+			) );
 		};
 
 		return (
 			<VisibilitySensor onChange={ this.onVisible }>
 				<ActivityCard
 					className={ classnames( 'woocommerce-inbox-activity-card', {
-						actioned: 'unactioned' !== note.status,
+						actioned: note.status !== 'unactioned',
 					} ) }
 					title={ note.title }
 					date={ note.date_created }
@@ -69,11 +63,14 @@ class InboxNoteCard extends Component {
 					unread={
 						! lastRead ||
 						! note.date_created_gmt ||
-						new Date( note.date_created_gmt + 'Z' ).getTime() > lastRead
+						new Date( note.date_created_gmt + 'Z' ).getTime() >
+							lastRead
 					}
 					actions={ getButtonsFromActions( note ) }
 				>
-					<span dangerouslySetInnerHTML={ sanitizeHTML( note.content ) } />
+					<span
+						dangerouslySetInnerHTML={ sanitizeHTML( note.content ) }
+					/>
 				</ActivityCard>
 			</VisibilitySensor>
 		);

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,18 +17,26 @@ import CheckIcon from './check-icon';
 class Stepper extends Component {
 	renderCurrentStepContent() {
 		const { currentStep, steps } = this.props;
-		const step = steps.find( s => currentStep === s.key );
+		const step = steps.find( ( s ) => currentStep === s.key );
 
 		if ( ! step.content ) {
 			return null;
 		}
 
-		return <div className="woocommerce-stepper_content">{ step.content }</div>;
+		return (
+			<div className="woocommerce-stepper_content">{ step.content }</div>
+		);
 	}
 
 	render() {
-		const { className, currentStep, steps, isVertical, isPending } = this.props;
-		const currentIndex = steps.findIndex( s => currentStep === s.key );
+		const {
+			className,
+			currentStep,
+			steps,
+			isVertical,
+			isPending,
+		} = this.props;
+		const currentIndex = steps.findIndex( ( s ) => currentStep === s.key );
 		const stepperClassName = classnames( 'woocommerce-stepper', className, {
 			'is-vertical': isVertical,
 		} );
@@ -38,35 +45,56 @@ class Stepper extends Component {
 			<div className={ stepperClassName }>
 				<div className="woocommerce-stepper__steps">
 					{ steps.map( ( step, i ) => {
-						const { key, label, description, isComplete, onClick } = step;
+						const {
+							key,
+							label,
+							description,
+							isComplete,
+							onClick,
+						} = step;
 						const isCurrentStep = key === currentStep;
-						const stepClassName = classnames( 'woocommerce-stepper__step', {
-							'is-active': isCurrentStep,
-							'is-complete': 'undefined' !== typeof isComplete ? isComplete : currentIndex > i,
-						} );
+						const stepClassName = classnames(
+							'woocommerce-stepper__step',
+							{
+								'is-active': isCurrentStep,
+								'is-complete':
+									typeof isComplete !== 'undefined'
+										? isComplete
+										: currentIndex > i,
+							}
+						);
 
 						const icon =
 							isCurrentStep && isPending ? (
 								<Spinner />
 							) : (
 								<div className="woocommerce-stepper__step-icon">
-									<span className="woocommerce-stepper__step-number">{ i + 1 }</span>
+									<span className="woocommerce-stepper__step-number">
+										{ i + 1 }
+									</span>
 									<CheckIcon />
 								</div>
 							);
 
-						const LabelWrapper = 'function' === typeof onClick ? 'button' : 'div';
+						const LabelWrapper =
+							typeof onClick === 'function' ? 'button' : 'div';
 
 						return (
 							<Fragment key={ key }>
 								<div className={ stepClassName }>
 									<LabelWrapper
 										className="woocommerce-stepper__step-label-wrapper"
-										onClick={ 'function' === typeof onClick ? () => onClick( key ) : null }
+										onClick={
+											typeof onClick === 'function'
+												? () => onClick( key )
+												: null
+										}
 									>
 										{ icon }
 										<div className="woocommerce-stepper__step-text">
-											<span className="woocommerce-stepper__step-label">{ label }</span>
+											<span className="woocommerce-stepper__step-label">
+												{ label }
+											</span>
 											{ description && (
 												<span className="woocommerce-stepper__step-description">
 													{ description }
@@ -74,9 +102,13 @@ class Stepper extends Component {
 											) }
 										</div>
 									</LabelWrapper>
-									{ isCurrentStep && isVertical && this.renderCurrentStepContent() }
+									{ isCurrentStep &&
+										isVertical &&
+										this.renderCurrentStepContent() }
 								</div>
-								{ ! isVertical && <div className="woocommerce-stepper__step-divider" /> }
+								{ ! isVertical && (
+									<div className="woocommerce-stepper__step-divider" />
+								) }
 							</Fragment>
 						);
 					} ) }
@@ -109,7 +141,10 @@ Stepper.propTypes = {
 			/**
 			 * Description displayed beneath the label.
 			 */
-			description: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
+			description: PropTypes.oneOfType( [
+				PropTypes.string,
+				PropTypes.array,
+			] ),
 			/**
 			 * Optionally mark a step complete regardless of step index.
 			 */

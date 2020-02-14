@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -61,20 +60,20 @@ class ActivityPanel extends Component {
 
 		// The WordPress Notices tab is handled differently, since they are displayed inline, so the panel should be closed,
 		// Close behavior of the expanded notices is based on current tab.
-		if ( 'wpnotices' === tabName ) {
-			this.setState( state => ( {
-				currentTab: 'wpnotices' === state.currentTab ? '' : tabName,
-				mobileOpen: 'wpnotices' !== state.currentTab,
+		if ( tabName === 'wpnotices' ) {
+			this.setState( ( state ) => ( {
+				currentTab: state.currentTab === 'wpnotices' ? '' : tabName,
+				mobileOpen: state.currentTab !== 'wpnotices',
 				isPanelOpen: false,
 			} ) );
 			return;
 		}
 
-		this.setState( state => {
+		this.setState( ( state ) => {
 			if (
 				tabName === state.currentTab ||
-				'' === state.currentTab ||
-				'wpnotices' === state.currentTab
+				state.currentTab === '' ||
+				state.currentTab === 'wpnotices'
 			) {
 				return {
 					isPanelOpen: ! state.isPanelOpen,
@@ -87,15 +86,15 @@ class ActivityPanel extends Component {
 	}
 
 	clearPanel() {
-		this.setState(
-			( { isPanelOpen } ) => ( isPanelOpen ? { isPanelSwitching: false } : { currentTab: '' } )
+		this.setState( ( { isPanelOpen } ) =>
+			isPanelOpen ? { isPanelSwitching: false } : { currentTab: '' }
 		);
 	}
 
 	// On smaller screen, the panel buttons are hidden behind a toggle.
 	toggleMobile() {
 		const tabs = this.getTabs();
-		this.setState( state => ( {
+		this.setState( ( state ) => ( {
 			mobileOpen: ! state.mobileOpen,
 			currentTab: state.mobileOpen ? '' : tabs[ 0 ].name,
 			isPanelOpen: ! state.mobileOpen,
@@ -118,7 +117,12 @@ class ActivityPanel extends Component {
 
 	// @todo Pull in dynamic unread status/count
 	getTabs() {
-		const { hasUnreadNotes, hasUnreadOrders, hasUnapprovedReviews, hasUnreadStock } = this.props;
+		const {
+			hasUnreadNotes,
+			hasUnreadOrders,
+			hasUnapprovedReviews,
+			hasUnreadStock,
+		} = this.props;
 		return [
 			{
 				name: 'inbox',
@@ -132,21 +136,21 @@ class ActivityPanel extends Component {
 				icon: <Gridicon icon="pages" />,
 				unread: hasUnreadOrders,
 			},
-			'yes' === manageStock
+			manageStock === 'yes'
 				? {
 						name: 'stock',
 						title: __( 'Stock', 'woocommerce-admin' ),
 						icon: <Gridicon icon="clipboard" />,
 						unread: hasUnreadStock,
-					}
+				  }
 				: null,
-			'yes' === reviewsEnabled
+			reviewsEnabled === 'yes'
 				? {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),
 						icon: <Gridicon icon="star" />,
 						unread: hasUnapprovedReviews,
-					}
+				  }
 				: null,
 		].filter( Boolean );
 	}
@@ -162,7 +166,11 @@ class ActivityPanel extends Component {
 				return <StockPanel />;
 			case 'reviews':
 				const { hasUnapprovedReviews } = this.props;
-				return <ReviewsPanel hasUnapprovedReviews={ hasUnapprovedReviews } />;
+				return (
+					<ReviewsPanel
+						hasUnapprovedReviews={ hasUnapprovedReviews }
+					/>
+				);
 			default:
 				return null;
 		}
@@ -173,13 +181,18 @@ class ActivityPanel extends Component {
 
 		const tab = find( this.getTabs(), { name: currentTab } );
 		if ( ! tab ) {
-			return <div className="woocommerce-layout__activity-panel-wrapper" />;
+			return (
+				<div className="woocommerce-layout__activity-panel-wrapper" />
+			);
 		}
 
-		const classNames = classnames( 'woocommerce-layout__activity-panel-wrapper', {
-			'is-open': isPanelOpen,
-			'is-switching': isPanelSwitching,
-		} );
+		const classNames = classnames(
+			'woocommerce-layout__activity-panel-wrapper',
+			{
+				'is-open': isPanelOpen,
+				'is-switching': isPanelSwitching,
+			}
+		);
 
 		return (
 			<div
@@ -203,17 +216,23 @@ class ActivityPanel extends Component {
 
 	renderTab( tab, i ) {
 		const { currentTab, isPanelOpen } = this.state;
-		const className = classnames( 'woocommerce-layout__activity-panel-tab', {
-			'is-active': isPanelOpen && tab.name === currentTab,
-			'has-unread': tab.unread,
-		} );
+		const className = classnames(
+			'woocommerce-layout__activity-panel-tab',
+			{
+				'is-active': isPanelOpen && tab.name === currentTab,
+				'has-unread': tab.unread,
+			}
+		);
 
 		const selected = tab.name === currentTab;
 		let tabIndex = -1;
 
 		// Only make this item tabbable if it is the currently selected item, or the panel is closed and the item is the first item
 		// If wpnotices is currently selected, tabindex below should be  -1 and <WordPressNotices /> will become the tabbed element.
-		if ( selected || ( ! isPanelOpen && i === 0 && 'wpnotices' !== currentTab ) ) {
+		if (
+			selected ||
+			( ! isPanelOpen && i === 0 && currentTab !== 'wpnotices' )
+		) {
 			tabIndex = null;
 		}
 
@@ -229,7 +248,7 @@ class ActivityPanel extends Component {
 				onClick={ partial( this.togglePanel, tab.name ) }
 				icon={ tab.icon }
 			>
-				{ tab.title }{' '}
+				{ tab.title }{ ' ' }
 				{ tab.unread && (
 					<span className="screen-reader-text">
 						{ __( 'unread activity', 'woocommerce-admin' ) }
@@ -247,9 +266,13 @@ class ActivityPanel extends Component {
 			'is-mobile-open': this.state.mobileOpen,
 		} );
 
-		const hasUnread = hasWordPressNotices || tabs.some( tab => tab.unread );
+		const hasUnread =
+			hasWordPressNotices || tabs.some( ( tab ) => tab.unread );
 		const viewLabel = hasUnread
-			? __( 'View Activity Panel, you have unread activity', 'woocommerce-admin' )
+			? __(
+					'View Activity Panel, you have unread activity',
+					'woocommerce-admin'
+			  )
 			: __( 'View Activity Panel', 'woocommerce-admin' );
 
 		return (
@@ -257,17 +280,30 @@ class ActivityPanel extends Component {
 				<H id={ headerId } className="screen-reader-text">
 					{ __( 'Store Activity', 'woocommerce-admin' ) }
 				</H>
-				<Section component="aside" id="woocommerce-activity-panel" aria-labelledby={ headerId }>
+				<Section
+					component="aside"
+					id="woocommerce-activity-panel"
+					aria-labelledby={ headerId }
+				>
 					<IconButton
 						onClick={ this.toggleMobile }
 						icon={
 							mobileOpen ? (
 								<Gridicon icon="cross-small" />
 							) : (
-								<ActivityPanelToggleBubble hasUnread={ hasUnread } />
+								<ActivityPanelToggleBubble
+									hasUnread={ hasUnread }
+								/>
 							)
 						}
-						label={ mobileOpen ? __( 'Close Activity Panel', 'woocommerce-admin' ) : viewLabel }
+						label={
+							mobileOpen
+								? __(
+										'Close Activity Panel',
+										'woocommerce-admin'
+								  )
+								: viewLabel
+						}
 						aria-expanded={ mobileOpen }
 						tooltip={ false }
 						className="woocommerce-layout__activity-panel-mobile-toggle"
@@ -279,9 +315,11 @@ class ActivityPanel extends Component {
 							className="woocommerce-layout__activity-panel-tabs"
 						>
 							{ tabs && tabs.map( this.renderTab ) }
-							{ Boolean( document.getElementById( 'wp__notice-list' ) ) && (
+							{ Boolean(
+								document.getElementById( 'wp__notice-list' )
+							) && (
 								<WordPressNotices
-									showNotices={ 'wpnotices' === currentTab }
+									showNotices={ currentTab === 'wpnotices' }
 									togglePanel={ this.togglePanel }
 									onCountUpdate={ this.updateNoticeFlag }
 								/>
@@ -295,11 +333,16 @@ class ActivityPanel extends Component {
 	}
 }
 
-export default withSelect( select => {
+export default withSelect( ( select ) => {
 	const hasUnreadNotes = getUnreadNotes( select );
 	const hasUnreadOrders = getUnreadOrders( select );
 	const hasUnreadStock = getUnreadStock( select );
 	const hasUnapprovedReviews = getUnapprovedReviews( select );
 
-	return { hasUnreadNotes, hasUnreadOrders, hasUnreadStock, hasUnapprovedReviews };
+	return {
+		hasUnreadNotes,
+		hasUnreadOrders,
+		hasUnreadStock,
+		hasUnapprovedReviews,
+	};
 } )( clickOutside( ActivityPanel ) );

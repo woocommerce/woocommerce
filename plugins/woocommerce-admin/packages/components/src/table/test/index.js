@@ -1,4 +1,4 @@
-/** @format */
+/* eslint-disable jest/no-mocks-import */
 /**
  * External dependencies
  */

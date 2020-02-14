@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -27,7 +26,9 @@ class SearchFilter extends Component {
 		this.updateLabels = this.updateLabels.bind( this );
 
 		if ( filter.value.length ) {
-			config.input.getLabels( filter.value, query ).then( this.updateLabels );
+			config.input
+				.getLabels( filter.value, query )
+				.then( this.updateLabels );
 		}
 	}
 
@@ -37,19 +38,21 @@ class SearchFilter extends Component {
 
 		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
 			const { selected } = this.state;
-			const ids = selected.map( item => item.key );
+			const ids = selected.map( ( item ) => item.key );
 			const filterIds = getIdsFromQuery( filter.value );
-			const hasNewIds = filterIds.every( id => ! ids.includes( id ) );
+			const hasNewIds = filterIds.every( ( id ) => ! ids.includes( id ) );
 
 			if ( hasNewIds ) {
-				config.input.getLabels( filter.value, query ).then( this.updateLabels );
+				config.input
+					.getLabels( filter.value, query )
+					.then( this.updateLabels );
 			}
 		}
 	}
 
 	updateLabels( selected ) {
-		const prevIds = this.state.selected.map( item => item.key );
-		const ids = selected.map( item => item.key );
+		const prevIds = this.state.selected.map( ( item ) => item.key );
+		const ids = selected.map( ( item ) => item.key );
 
 		if ( ! isEqual( ids.sort(), prevIds.sort() ) ) {
 			this.setState( { selected } );
@@ -61,19 +64,19 @@ class SearchFilter extends Component {
 			selected: values,
 		} );
 		const { filter, onFilterChange } = this.props;
-		const idList = values.map( value => value.key ).join( ',' );
+		const idList = values.map( ( value ) => value.key ).join( ',' );
 		onFilterChange( filter.key, 'value', idList );
 	}
 
 	getScreenReaderText( filter, config ) {
 		const { selected } = this.state;
 
-		if ( 0 === selected.length ) {
+		if ( selected.length === 0 ) {
 			return '';
 		}
 
 		const rule = find( config.rules, { value: filter.rule } ) || {};
-		const filterStr = selected.map( item => item.label ).join( ', ' );
+		const filterStr = selected.map( ( item ) => item.label ).join( ', ' );
 
 		return textContent(
 			interpolateComponents( {
@@ -87,7 +90,13 @@ class SearchFilter extends Component {
 	}
 
 	render() {
-		const { className, config, filter, onFilterChange, isEnglish } = this.props;
+		const {
+			className,
+			config,
+			filter,
+			onFilterChange,
+			isEnglish,
+		} = this.props;
 		const { selected } = this.state;
 		const { key, rule } = filter;
 		const { input, labels, rules } = config;
@@ -97,7 +106,10 @@ class SearchFilter extends Component {
 				title: <span className={ className } />,
 				rule: (
 					<SelectControl
-						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__rule'
+						) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -106,7 +118,10 @@ class SearchFilter extends Component {
 				),
 				filter: (
 					<Search
-						className={ classnames( className, 'woocommerce-filters-advanced__input' ) }
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__input'
+						) }
 						onChange={ this.onSearchChange }
 						type={ input.type }
 						placeholder={ labels.placeholder }
@@ -122,16 +137,28 @@ class SearchFilter extends Component {
 
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
-				<legend className="screen-reader-text">{ labels.add || '' }</legend>
+			<fieldset
+				className="woocommerce-filters-advanced__line-item"
+				tabIndex="0"
+			>
+				<legend className="screen-reader-text">
+					{ labels.add || '' }
+				</legend>
 				<div
-					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
-						'is-english': isEnglish,
-					} ) }
+					className={ classnames(
+						'woocommerce-filters-advanced__fieldset',
+						{
+							'is-english': isEnglish,
+						}
+					) }
 				>
 					{ children }
 				</div>
-				{ screenReaderText && <span className="screen-reader-text">{ screenReaderText }</span> }
+				{ screenReaderText && (
+					<span className="screen-reader-text">
+						{ screenReaderText }
+					</span>
+				) }
 			</fieldset>
 		);
 		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/

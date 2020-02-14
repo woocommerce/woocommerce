@@ -1,9 +1,7 @@
 /**
  * External dependencies
  *
- * @format
  */
-
 import { shallow } from 'enzyme';
 
 /**
@@ -14,7 +12,9 @@ import Gravatar from '../';
 describe( 'Gravatar', () => {
 	test( 'should fallback to default mystery person Gravatar', () => {
 		const gravatar = shallow( <Gravatar /> );
-		expect( gravatar.prop( 'src' ) ).toBe( 'https://www.gravatar.com/avatar/0?s=60&d=mp' );
+		expect( gravatar.prop( 'src' ) ).toBe(
+			'https://www.gravatar.com/avatar/0?s=60&d=mp'
+		);
 	} );
 
 	test( 'should return a resized avatar from a user object', () => {
@@ -39,7 +39,9 @@ describe( 'Gravatar', () => {
 	} );
 
 	test( 'should return a resized image when passed a size', () => {
-		const gravatar = shallow( <Gravatar user="test@example.com" size={ 40 } /> );
+		const gravatar = shallow(
+			<Gravatar user="test@example.com" size={ 40 } />
+		);
 		expect( gravatar.prop( 'src' ) ).toBe(
 			'https://www.gravatar.com/avatar/55502f40dc8b7c769880b10874abc9d0?s=40&d=mp'
 		);

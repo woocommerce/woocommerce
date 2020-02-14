@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -58,15 +57,12 @@ export default withState( {
 				title="Revenue Last Week"
 				rows={ rows }
 				headers={ headers }
-				onQueryChange={
-					( param ) => (
-						( value ) => setState( {
-							query: {
-								[ param ]: value,
-							},
-						} )
-					)
-				}
+				onQueryChange={ ( param ) => ( value ) =>
+					setState( {
+						query: {
+							[ param ]: value,
+						},
+					} ) }
 				query={ query }
 				rowsPerPage={ 7 }
 				totalRows={ 10 }
@@ -102,9 +98,7 @@ export default withState( {
 
 		<H>Empty Table</H>
 		<Section component={ false }>
-			<EmptyTable>
-				There are no entries.
-			</EmptyTable>
+			<EmptyTable>There are no entries.</EmptyTable>
 		</Section>
 	</div>
 ) );

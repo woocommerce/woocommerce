@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -10,8 +8,8 @@ import { find } from 'lodash';
  * of charts. If the chart is not found it will return the first chart.
  *
  * @param {string} chartName - the name of the chart to get configuration for
- * @param {array} charts - list of charts for a particular report
- * @returns {object} - chart configuration object
+ * @param {Array} charts - list of charts for a particular report
+ * @return {Object} - chart configuration object
  */
 export default function getSelectedChart( chartName, charts = [] ) {
 	const chart = find( charts, { key: chartName } );

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -108,13 +107,23 @@ class HeaderLogo extends Component {
 								/>
 							</g>
 							{ ! isJetpackConnected && (
-								<svg height="150" width="150" viewBox="0 0 32 32">
+								<svg
+									height="150"
+									width="150"
+									viewBox="0 0 32 32"
+								>
 									<path
 										fill="#2B2D2F"
 										d="M16,0C7.2,0,0,7.2,0,16s7.2,16,16,16s16-7.2,16-16S24.8,0,16,0z"
 									/>
-									<polygon fill="#F6F6F6" points="15,19 7,19 15,3 " />
-									<polygon fill="#F6F6F6" points="17,29 17,13 25,13 " />
+									<polygon
+										fill="#F6F6F6"
+										points="15,19 7,19 15,3 "
+									/>
+									<polygon
+										fill="#F6F6F6"
+										points="17,29 17,13 25,13 "
+									/>
 								</svg>
 							) }
 						</g>
@@ -126,7 +135,7 @@ class HeaderLogo extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const { isJetpackConnected } = select( 'wc-api' );
 		return {
 			isJetpackConnected: isJetpackConnected(),

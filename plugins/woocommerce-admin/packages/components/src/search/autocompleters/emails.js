@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -9,6 +8,10 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
+
+/**
+ * @typedef {Object} Completer
+ */
 
 /**
  * A customer email completer.
@@ -22,12 +25,14 @@ export default {
 	options( search ) {
 		const query = search
 			? {
-				search,
-				searchby: 'email',
-				per_page: 10,
-			}
+					search,
+					searchby: 'email',
+					per_page: 10,
+			  }
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc-analytics/customers', query ) } );
+		return apiFetch( {
+			path: addQueryArgs( '/wc-analytics/customers', query ),
+		} );
 	},
 	isDebounced: true,
 	getOptionIdentifier( customer ) {
@@ -39,7 +44,11 @@ export default {
 	getOptionLabel( customer, query ) {
 		const match = computeSuggestionMatch( customer.email, query ) || {};
 		return (
-			<span key="name" className="woocommerce-search__result-name" aria-label={ customer.email }>
+			<span
+				key="name"
+				className="woocommerce-search__result-name"
+				aria-label={ customer.email }
+			>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }

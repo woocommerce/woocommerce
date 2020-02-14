@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -20,7 +19,9 @@ export default class CouponsReport extends Component {
 	getChartMeta() {
 		const { query } = this.props;
 		const isCompareView =
-			'compare-coupons' === query.filter && query.coupons && query.coupons.split( ',' ).length > 1;
+			query.filter === 'compare-coupons' &&
+			query.coupons &&
+			query.coupons.split( ',' ).length > 1;
 
 		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
 		const itemsLabel = __( '%d coupons', 'woocommerce-admin' );
@@ -39,7 +40,7 @@ export default class CouponsReport extends Component {
 			...query,
 		};
 
-		if ( 'item-comparison' === mode ) {
+		if ( mode === 'item-comparison' ) {
 			chartQuery.segmentby = 'coupon';
 		}
 

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -15,7 +14,9 @@ const storeCurrency = new Currency( CURRENCY );
 // Allow our exported API to be called without knowing about the Currency instance.
 const formatCurrency = storeCurrency.formatCurrency.bind( storeCurrency );
 const formatDecimal = storeCurrency.formatDecimal.bind( storeCurrency );
-const formatDecimalString = storeCurrency.formatDecimalString.bind( storeCurrency );
+const formatDecimalString = storeCurrency.formatDecimalString.bind(
+	storeCurrency
+);
 const render = storeCurrency.render.bind( storeCurrency );
 const setCurrency = storeCurrency.setCurrency.bind( storeCurrency );
 

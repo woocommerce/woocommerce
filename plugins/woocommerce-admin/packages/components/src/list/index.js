@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -17,7 +16,7 @@ import Link from '../link';
  */
 class List extends Component {
 	handleKeyDown( event, onClick ) {
-		if ( 'function' === typeof onClick && event.keyCode === ENTER ) {
+		if ( typeof onClick === 'function' && event.keyCode === ENTER ) {
 			onClick();
 		}
 	}
@@ -29,55 +28,66 @@ class List extends Component {
 		return (
 			<ul className={ listClassName } role="menu">
 				{ items.map( ( item, i ) => {
-					const { after, before, className: itemClasses, content, href, onClick, target, title } = item;
-					const hasAction = 'function' === typeof onClick || href;
-					const itemClassName = classnames( 'woocommerce-list__item', itemClasses, {
-						'has-action': hasAction,
-					} );
+					const {
+						after,
+						before,
+						className: itemClasses,
+						content,
+						href,
+						onClick,
+						target,
+						title,
+					} = item;
+					const hasAction = typeof onClick === 'function' || href;
+					const itemClassName = classnames(
+						'woocommerce-list__item',
+						itemClasses,
+						{
+							'has-action': hasAction,
+						}
+					);
 					const InnerTag = href ? Link : 'div';
 
 					const innerTagProps = {
 						className: 'woocommerce-list__item-inner',
-						onClick: 'function' === typeof onClick ? onClick : null,
+						onClick: typeof onClick === 'function' ? onClick : null,
 						'aria-disabled': hasAction ? 'false' : null,
 						tabIndex: hasAction ? '0' : null,
 						role: hasAction ? 'menuitem' : null,
-						onKeyDown: ( e ) => hasAction ? this.handleKeyDown( e, onClick ) : null,
+						onKeyDown: ( e ) =>
+							hasAction ? this.handleKeyDown( e, onClick ) : null,
 						target: href ? target : null,
 						type: href ? 'external' : null,
-						href: href,
+						href,
 					};
 
 					return (
-						<li
-							className={ itemClassName }
-							key={ i }
-						>
+						<li className={ itemClassName } key={ i }>
 							<InnerTag { ...innerTagProps }>
-								{ before &&
+								{ before && (
 									<div className="woocommerce-list__item-before">
 										{ before }
 									</div>
-								}
+								) }
 								<div className="woocommerce-list__item-text">
 									<span className="woocommerce-list__item-title">
 										{ title }
 									</span>
-									{ content &&
+									{ content && (
 										<span className="woocommerce-list__item-content">
 											{ content }
 										</span>
-									}
+									) }
 								</div>
-								{ after &&
+								{ after && (
 									<div className="woocommerce-list__item-after">
 										{ after }
 									</div>
-								}
+								) }
 							</InnerTag>
 						</li>
-                    );
-                } ) }
+					);
+				} ) }
 			</ul>
 		);
 	}

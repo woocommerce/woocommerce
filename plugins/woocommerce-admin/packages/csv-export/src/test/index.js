@@ -1,4 +1,4 @@
-/** @format */
+/* eslint-disable jest/no-mocks-import */
 /**
  * External dependencies
  */
@@ -8,7 +8,11 @@ import { saveAs } from 'browser-filesaver';
 /**
  * Internal dependencies
  */
-import { downloadCSVFile, generateCSVDataFromTable, generateCSVFileName } from '../index';
+import {
+	downloadCSVFile,
+	generateCSVDataFromTable,
+	generateCSVFileName,
+} from '../index';
 import mockCSVData from '../__mocks__/mock-csv-data';
 import mockHeaders from '../__mocks__/mock-headers';
 import mockRows from '../__mocks__/mock-rows';
@@ -23,7 +27,9 @@ describe( 'generateCSVDataFromTable', () => {
 	} );
 
 	it( 'should generate a CSV string from table contents', () => {
-		expect( generateCSVDataFromTable( mockHeaders, mockRows ) ).toBe( mockCSVData );
+		expect( generateCSVDataFromTable( mockHeaders, mockRows ) ).toBe(
+			mockCSVData
+		);
 	} );
 } );
 
@@ -35,13 +41,20 @@ describe( 'generateCSVFileName', () => {
 
 	it( 'should generate a file name with the `name` and the date', () => {
 		const fileName = generateCSVFileName( 'Revenue table' );
-		expect( fileName ).toBe( 'revenue-table_' + moment().format( 'YYYY-MM-DD' ) + '.csv' );
+		expect( fileName ).toBe(
+			'revenue-table_' + moment().format( 'YYYY-MM-DD' ) + '.csv'
+		);
 	} );
 
 	it( 'should generate a file name with the `name` and `params`', () => {
-		const fileName = generateCSVFileName( 'Revenue table', { orderby: 'revenue', order: 'desc' } );
+		const fileName = generateCSVFileName( 'Revenue table', {
+			orderby: 'revenue',
+			order: 'desc',
+		} );
 		expect( fileName ).toBe(
-			'revenue-table_' + moment().format( 'YYYY-MM-DD' ) + '_orderby-revenue_order-desc.csv'
+			'revenue-table_' +
+				moment().format( 'YYYY-MM-DD' ) +
+				'_orderby-revenue_order-desc.csv'
 		);
 	} );
 } );
@@ -52,7 +65,10 @@ describe( 'downloadCSVFile', () => {
 		const fileName = 'test.csv';
 		downloadCSVFile( fileName, mockCSVData );
 
-		const blob = new Blob( [ mockCSVData ], { type: 'text/csv;charset=utf-8' } );
+		// eslint-disable-next-line no-undef
+		const blob = new Blob( [ mockCSVData ], {
+			type: 'text/csv;charset=utf-8',
+		} );
 
 		expect( saveAs ).toHaveBeenCalledWith( blob, fileName );
 	} );

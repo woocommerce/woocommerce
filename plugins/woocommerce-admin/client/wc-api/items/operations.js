@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -9,7 +7,11 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { getResourceIdentifier, getResourcePrefix, getResourceName } from '../utils';
+import {
+	getResourceIdentifier,
+	getResourcePrefix,
+	getResourceName,
+} from '../utils';
 import { NAMESPACE } from '../constants';
 
 const typeEndpointMap = {
@@ -23,17 +25,17 @@ const typeEndpointMap = {
 };
 
 function read( resourceNames, fetch = apiFetch ) {
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		const prefix = getResourcePrefix( name );
 		return Boolean( typeEndpointMap[ prefix ] );
 	} );
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const prefix = getResourcePrefix( resourceName );
 		const endpoint = typeEndpointMap[ prefix ];
 		const query = getResourceIdentifier( resourceName );
 		const url = addQueryArgs( `${ NAMESPACE }/${ endpoint }`, query );
-		const isUnboundedRequest = -1 === query.per_page;
+		const isUnboundedRequest = query.per_page === -1;
 
 		try {
 			const response = await fetch( {
@@ -59,12 +61,14 @@ function read( resourceNames, fetch = apiFetch ) {
 				totalCount = items.length;
 			} else {
 				items = await response.json();
-				totalCount = parseInt( response.headers.get( 'x-wp-total' ) );
+				totalCount = parseInt( response.headers.get( 'x-wp-total' ), 10 );
 			}
 
-			const ids = items.map( item => item.id );
+			const ids = items.map( ( item ) => item.id );
 			const itemResources = items.reduce( ( resources, item ) => {
-				resources[ getResourceName( `${ prefix }-item`, item.id ) ] = { data: item };
+				resources[ getResourceName( `${ prefix }-item`, item.id ) ] = {
+					data: item,
+				};
 				return resources;
 			}, {} );
 
@@ -83,17 +87,17 @@ function read( resourceNames, fetch = apiFetch ) {
 
 function update( resourceNames, data, fetch = apiFetch ) {
 	const updateableTypes = [ 'items-query-products-item' ];
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		return updateableTypes.includes( getResourcePrefix( name ) );
 	} );
 
-	return filteredNames.map( async resourceName => {
-		const { id, parent_id, type, ...itemData } = data[ resourceName ];
+	return filteredNames.map( async ( resourceName ) => {
+		const { id, parent_id: parentId, type, ...itemData } = data[ resourceName ];
 		let url = NAMESPACE;
 
 		switch ( type ) {
 			case 'variation':
-				url += `/products/${ parent_id }/variations/${ id }`;
+				url += `/products/${ parentId }/variations/${ id }`;
 				break;
 			case 'variable':
 			case 'simple':
@@ -102,10 +106,10 @@ function update( resourceNames, data, fetch = apiFetch ) {
 		}
 
 		return fetch( { path: url, method: 'PUT', data: itemData } )
-			.then( item => {
+			.then( ( item ) => {
 				return { [ resourceName ]: { data: item } };
 			} )
-			.catch( error => {
+			.catch( ( error ) => {
 				return { [ resourceName ]: { error } };
 			} );
 	} );
@@ -113,7 +117,7 @@ function update( resourceNames, data, fetch = apiFetch ) {
 
 function updateLocally( resourceNames, data ) {
 	const updateableTypes = [ 'items-query-products-item' ];
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		return updateableTypes.includes( getResourcePrefix( name ) );
 	} );
 
@@ -124,7 +128,7 @@ function updateLocally( resourceNames, data ) {
 		status: 'publish',
 	} );
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		return {
 			[ resourceName ]: { data: data[ resourceName ] },
 			// Force low stock products to be re-fetched after updating an item.

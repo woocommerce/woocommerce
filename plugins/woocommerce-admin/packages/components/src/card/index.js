@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,18 +17,31 @@ import { validateComponent } from '../lib/proptype-validator';
  */
 class Card extends Component {
 	render() {
-		const { action, children, description, isInactive, menu, title } = this.props;
-		const className = classnames( 'woocommerce-card', this.props.className, {
-			'has-menu': !! menu,
-			'has-action': !! action,
-			'is-inactive': !! isInactive,
-		} );
+		const {
+			action,
+			children,
+			description,
+			isInactive,
+			menu,
+			title,
+		} = this.props;
+		const className = classnames(
+			'woocommerce-card',
+			this.props.className,
+			{
+				'has-menu': !! menu,
+				'has-action': !! action,
+				'is-inactive': !! isInactive,
+			}
+		);
 		return (
 			<div className={ className }>
 				{ title && (
 					<div className="woocommerce-card__header">
 						<div className="woocommerce-card__title-wrapper">
-							<H className="woocommerce-card__title woocommerce-card__header-item">{ title }</H>
+							<H className="woocommerce-card__title woocommerce-card__header-item">
+								{ title }
+							</H>
 							{ description && (
 								<H className="woocommerce-card__description woocommerce-card__header-item">
 									{ description }
@@ -42,11 +54,15 @@ class Card extends Component {
 							</div>
 						) }
 						{ menu && (
-							<div className="woocommerce-card__menu woocommerce-card__header-item">{ menu }</div>
+							<div className="woocommerce-card__menu woocommerce-card__header-item">
+								{ menu }
+							</div>
 						) }
 					</div>
 				) }
-				<Section className="woocommerce-card__body">{ children }</Section>
+				<Section className="woocommerce-card__body">
+					{ children }
+				</Section>
 			</div>
 		);
 	}

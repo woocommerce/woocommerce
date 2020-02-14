@@ -1,7 +1,5 @@
 /**
  * External dependencies
- *
- * @format
  */
 
 import * as SHARED from '@woocommerce/settings';
@@ -13,7 +11,8 @@ import * as FALLBACKS from './fallbacks';
 
 // If `getSetting` is not set, then it was not available so let's do
 // defaults.
-const SOURCE = ! SHARED || typeof SHARED.getSetting === 'undefined' ? FALLBACKS : SHARED;
+const SOURCE =
+	! SHARED || typeof SHARED.getSetting === 'undefined' ? FALLBACKS : SHARED;
 
 export const ADMIN_URL = SOURCE.ADMIN_URL;
 export const COUNTRIES = SOURCE.COUNTRIES;

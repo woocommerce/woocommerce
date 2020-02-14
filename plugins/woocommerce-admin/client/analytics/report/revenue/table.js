@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -11,9 +10,17 @@ import { get } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from 'lib/date';
+import {
+	appendTimestamp,
+	defaultTableDateFormat,
+	getCurrentDates,
+} from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/currency-format';
+import {
+	formatCurrency,
+	getCurrencyFormatDecimal,
+	renderCurrency,
+} from 'lib/currency-format';
 import { formatValue } from 'lib/number-format';
 
 /**
@@ -103,13 +110,13 @@ class RevenueReportTable extends Component {
 	}
 
 	getRowsContent( data = [] ) {
-		return data.map( row => {
+		return data.map( ( row ) => {
 			const {
 				coupons,
-				gross_sales,
-				total_sales,
-				net_revenue,
-				orders_count,
+				gross_sales: grossSales,
+				total_sales: totalSales,
+				net_revenue: netRevenue,
+				orders_count: ordersCount,
 				refunds,
 				shipping,
 				taxes,
@@ -119,24 +126,32 @@ class RevenueReportTable extends Component {
 			// we need to know which kind of report this is, and parse the `label` to get this row's date
 			const orderLink = (
 				<Link
-					href={ 'edit.php?post_type=shop_order&m=' + formatDate( 'Ymd', row.date_start ) }
+					href={
+						'edit.php?post_type=shop_order&m=' +
+						formatDate( 'Ymd', row.date_start )
+					}
 					type="wp-admin"
 				>
-					{ formatValue( 'number', orders_count ) }
+					{ formatValue( 'number', ordersCount ) }
 				</Link>
 			);
 			return [
 				{
-					display: <Date date={ row.date_start } visibleFormat={ defaultTableDateFormat } />,
+					display: (
+						<Date
+							date={ row.date_start }
+							visibleFormat={ defaultTableDateFormat }
+						/>
+					),
 					value: row.date_start,
 				},
 				{
 					display: orderLink,
-					value: Number( orders_count ),
+					value: Number( ordersCount ),
 				},
 				{
-					display: renderCurrency( gross_sales ),
-					value: getCurrencyFormatDecimal( gross_sales ),
+					display: renderCurrency( grossSales ),
+					value: getCurrencyFormatDecimal( grossSales ),
 				},
 				{
 					display: formatCurrency( refunds ),
@@ -147,8 +162,8 @@ class RevenueReportTable extends Component {
 					value: getCurrencyFormatDecimal( coupons ),
 				},
 				{
-					display: renderCurrency( net_revenue ),
-					value: getCurrencyFormatDecimal( net_revenue ),
+					display: renderCurrency( netRevenue ),
+					value: getCurrencyFormatDecimal( netRevenue ),
 				},
 				{
 					display: renderCurrency( taxes ),
@@ -159,8 +174,8 @@ class RevenueReportTable extends Component {
 					value: getCurrencyFormatDecimal( shipping ),
 				},
 				{
-					display: renderCurrency( total_sales ),
-					value: getCurrencyFormatDecimal( total_sales ),
+					display: renderCurrency( totalSales ),
+					value: getCurrencyFormatDecimal( totalSales ),
 				},
 			];
 		} );
@@ -168,14 +183,14 @@ class RevenueReportTable extends Component {
 
 	getSummary( totals, totalResults = 0 ) {
 		const {
-			orders_count = 0,
-			gross_sales = 0,
-			total_sales = 0,
+			orders_count: ordersCount = 0,
+			gross_sales: grossSales = 0,
+			total_sales: totalSales = 0,
 			refunds = 0,
 			coupons = 0,
 			taxes = 0,
 			shipping = 0,
-			net_revenue = 0,
+			net_revenue: netRevenue = 0,
 		} = totals;
 		return [
 			{
@@ -183,12 +198,17 @@ class RevenueReportTable extends Component {
 				value: formatValue( 'number', totalResults ),
 			},
 			{
-				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: formatValue( 'number', orders_count ),
+				label: _n(
+					'order',
+					'orders',
+					ordersCount,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', ordersCount ),
 			},
 			{
 				label: __( 'gross sales', 'woocommerce-admin' ),
-				value: formatCurrency( gross_sales ),
+				value: formatCurrency( grossSales ),
 			},
 			{
 				label: __( 'returns', 'woocommerce-admin' ),
@@ -200,7 +220,7 @@ class RevenueReportTable extends Component {
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
-				value: formatCurrency( net_revenue ),
+				value: formatCurrency( netRevenue ),
 			},
 			{
 				label: __( 'taxes', 'woocommerce-admin' ),
@@ -212,7 +232,7 @@ class RevenueReportTable extends Component {
 			},
 			{
 				label: __( 'total sales', 'woocommerce-admin' ),
-				value: formatCurrency( total_sales ),
+				value: formatCurrency( totalSales ),
 			},
 		];
 	}
@@ -241,7 +261,11 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query, filters, advancedFilters } = props;
 		const datesFromQuery = getCurrentDates( query );
-		const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
+		const {
+			getReportStats,
+			getReportStatsError,
+			isReportStatsRequesting,
+		} = select( 'wc-api' );
 
 		// @todo Support hour here when viewing a single day
 		const tableQuery = {
@@ -262,8 +286,13 @@ export default compose(
 			advancedFilters,
 		} );
 		const revenueData = getReportStats( 'revenue', filteredTableQuery );
-		const isError = Boolean( getReportStatsError( 'revenue', filteredTableQuery ) );
-		const isRequesting = isReportStatsRequesting( 'revenue', filteredTableQuery );
+		const isError = Boolean(
+			getReportStatsError( 'revenue', filteredTableQuery )
+		);
+		const isRequesting = isReportStatsRequesting(
+			'revenue',
+			filteredTableQuery
+		);
 
 		return {
 			tableData: {

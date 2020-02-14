@@ -4,14 +4,17 @@
 import { isArray, isNumber, isString } from 'lodash';
 
 /**
+ * @typedef {Object} ReactNode
+ */
+
+/**
  * DOM Node.textContent for React components
  * See: https://github.com/rwu823/react-addons-text-content/blob/master/src/index.js
  *
  * @param {Array<string|ReactNode>} components array of components
  *
- * @returns {string} concatenated text content of all nodes
- */
-export function textContent( components ) {
+ * @return {string} concatenated text content of all nodes
+ */ export function textContent( components ) {
 	let text = '';
 
 	const toText = ( component ) => {

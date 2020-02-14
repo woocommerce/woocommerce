@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Internal dependencies
  */
@@ -7,11 +6,13 @@ import { updateLinkHref } from '../controller';
 describe( 'updateLinkHref', () => {
 	const timeExcludedScreens = [ 'devdocs', 'stock', 'settings', 'customers' ];
 
-	const REPORT_URL = 'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/orders';
+	const REPORT_URL =
+		'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/orders';
 	const DASHBOARD_URL = 'http://example.com/wp-admin/admin.php?page=wc-admin';
 	const REPORT_URL_TIME_EXCLUDED =
 		'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/settings';
-	const WOO_URL = 'http://example.com/wp-admin/edit.php?post_type=shop_coupon';
+	const WOO_URL =
+		'http://example.com/wp-admin/edit.php?post_type=shop_coupon';
 	const WP_ADMIN_URL = 'http://example.com/wp-admin/edit-comments.php';
 
 	const nextQuery = {
@@ -33,7 +34,9 @@ describe( 'updateLinkHref', () => {
 		const item = { href: DASHBOARD_URL };
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
-		expect( item.href ).toBe( 'admin.php?page=wc-admin&fruit=apple&dish=cobbler' );
+		expect( item.href ).toBe(
+			'admin.php?page=wc-admin&fruit=apple&dish=cobbler'
+		);
 	} );
 
 	it( 'should not add the nextQuery to a time excluded screen', () => {
@@ -41,7 +44,9 @@ describe( 'updateLinkHref', () => {
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 		const encodedPath = encodeURIComponent( '/analytics/settings' );
 
-		expect( item.href ).toBe( `admin.php?page=wc-admin&path=${ encodedPath }` );
+		expect( item.href ).toBe(
+			`admin.php?page=wc-admin&path=${ encodedPath }`
+		);
 	} );
 
 	it( 'should not update WooCommerce urls', () => {

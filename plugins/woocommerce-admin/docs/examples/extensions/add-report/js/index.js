@@ -14,7 +14,12 @@ import { ReportFilters, TableCard } from '@woocommerce/components';
 const Report = ( { path, query } ) => {
 	return (
 		<Fragment>
-			<ReportFilters query={ query } path={ path } filters={ [] } advancedFilters={ {} } />
+			<ReportFilters
+				query={ query }
+				path={ path }
+				filters={ [] }
+				advancedFilters={ {} }
+			/>
 			<TableCard
 				title="Apples"
 				headers={ [
@@ -54,7 +59,7 @@ const Report = ( { path, query } ) => {
 /**
  * Use the 'woocommerce_admin_reports_list' filter to add a report page.
  */
-addFilter( 'woocommerce_admin_reports_list', 'plugin-domain', reports => {
+addFilter( 'woocommerce_admin_reports_list', 'plugin-domain', ( reports ) => {
 	return [
 		...reports,
 		{

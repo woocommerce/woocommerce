@@ -1,4 +1,3 @@
-/** @format */
 /**
  * Export all autocompleters
  */

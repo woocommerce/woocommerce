@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,7 +11,11 @@ import { find } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from 'lib/date';
+import {
+	getCurrentDates,
+	appendTimestamp,
+	getDateParamsFromQuery,
+} from 'lib/date';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from 'lib/number-format';
 import { formatCurrency } from 'lib/currency-format';
@@ -61,9 +64,13 @@ class StorePerformance extends Component {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
+						<MenuTitle>
+							{ __( 'Display Stats:', 'woocommerce-admin' ) }
+						</MenuTitle>
 						{ indicators.map( ( indicator, i ) => {
-							const checked = ! hiddenBlocks.includes( indicator.stat );
+							const checked = ! hiddenBlocks.includes(
+								indicator.stat
+							);
 							return (
 								<MenuItem
 									checked={ checked }
@@ -82,7 +89,9 @@ class StorePerformance extends Component {
 								</MenuItem>
 							);
 						} ) }
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+						{ window.wcAdminFeatures[
+							'analytics-dashboard/customizable'
+						] && (
 							<Controls
 								onToggle={ onToggle }
 								onMove={ onMove }
@@ -112,7 +121,11 @@ class StorePerformance extends Component {
 			userIndicators,
 		} = this.props;
 		if ( primaryRequesting || secondaryRequesting ) {
-			return <SummaryListPlaceholder numberOfItems={ userIndicators.length } />;
+			return (
+				<SummaryListPlaceholder
+					numberOfItems={ userIndicators.length }
+				/>
+			);
 		}
 
 		if ( primaryError || secondaryError ) {
@@ -123,15 +136,21 @@ class StorePerformance extends Component {
 
 		const { compare } = getDateParamsFromQuery( query );
 		const prevLabel =
-			'previous_period' === compare
+			compare === 'previous_period'
 				? __( 'Previous Period:', 'woocommerce-admin' )
 				: __( 'Previous Year:', 'woocommerce-admin' );
 		return (
 			<SummaryList>
 				{ () =>
 					userIndicators.map( ( indicator, i ) => {
-						const primaryItem = find( primaryData.data, data => data.stat === indicator.stat );
-						const secondaryItem = find( secondaryData.data, data => data.stat === indicator.stat );
+						const primaryItem = find(
+							primaryData.data,
+							( data ) => data.stat === indicator.stat
+						);
+						const secondaryItem = find(
+							secondaryData.data,
+							( data ) => data.stat === indicator.stat
+						);
 
 						if ( ! primaryItem || ! secondaryItem ) {
 							return null;
@@ -143,16 +162,29 @@ class StorePerformance extends Component {
 								primaryItem._links.report[ 0 ].href ) ||
 							'';
 						const reportUrl =
-							( href && getNewPath( persistedQuery, href, { chart: primaryItem.chart } ) ) || '';
-						const isCurrency = 'currency' === primaryItem.format;
+							( href &&
+								getNewPath( persistedQuery, href, {
+									chart: primaryItem.chart,
+								} ) ) ||
+							'';
+						const isCurrency = primaryItem.format === 'currency';
 
-						const delta = calculateDelta( primaryItem.value, secondaryItem.value );
+						const delta = calculateDelta(
+							primaryItem.value,
+							secondaryItem.value
+						);
 						const primaryValue = isCurrency
 							? formatCurrency( primaryItem.value )
-							: formatValue( primaryItem.format, primaryItem.value );
+							: formatValue(
+									primaryItem.format,
+									primaryItem.value
+							  );
 						const secondaryValue = isCurrency
 							? formatCurrency( secondaryItem.value )
-							: formatValue( secondaryItem.format, secondaryItem.value );
+							: formatValue(
+									secondaryItem.format,
+									secondaryItem.value
+							  );
 
 						return (
 							<SummaryNumber
@@ -164,7 +196,9 @@ class StorePerformance extends Component {
 								prevValue={ secondaryValue }
 								delta={ delta }
 								onLinkClickCallback={ () => {
-									recordEvent( 'dash_indicators_click', { key: indicator.stat } );
+									recordEvent( 'dash_indicators_click', {
+										key: indicator.stat,
+									} );
 								} }
 							/>
 						);
@@ -179,11 +213,15 @@ class StorePerformance extends Component {
 		return (
 			<Fragment>
 				<SectionHeader
-					title={ title || __( 'Store Performance', 'woocommerce-admin' ) }
+					title={
+						title || __( 'Store Performance', 'woocommerce-admin' )
+					}
 					menu={ this.renderMenu() }
 				/>
 				{ userIndicators.length > 0 && (
-					<div className="woocommerce-dashboard__store-performance">{ this.renderList() }</div>
+					<div className="woocommerce-dashboard__store-performance">
+						{ this.renderList() }
+					</div>
 				) }
 			</Fragment>
 		);
@@ -192,15 +230,21 @@ class StorePerformance extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { hiddenBlocks, query } = props;
-		const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
+		const {
+			getReportItems,
+			getReportItemsError,
+			isReportItemsRequesting,
+		} = select( 'wc-api' );
 
 		const datesFromQuery = getCurrentDates( query );
 		const endPrimary = datesFromQuery.primary.before;
 		const endSecondary = datesFromQuery.secondary.before;
 		const userIndicators = indicators.filter(
-			indicator => ! hiddenBlocks.includes( indicator.stat )
+			( indicator ) => ! hiddenBlocks.includes( indicator.stat )
 		);
-		const statKeys = userIndicators.map( indicator => indicator.stat ).join( ',' );
+		const statKeys = userIndicators
+			.map( ( indicator ) => indicator.stat )
+			.join( ',' );
 
 		if ( statKeys.length === 0 ) {
 			return {
@@ -212,7 +256,10 @@ export default compose(
 
 		const primaryQuery = {
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( endPrimary, endPrimary.isSame( moment(), 'day' ) ? 'now' : 'end' ),
+			before: appendTimestamp(
+				endPrimary,
+				endPrimary.isSame( moment(), 'day' ) ? 'now' : 'end'
+			),
 			stats: statKeys,
 		};
 
@@ -225,13 +272,29 @@ export default compose(
 			stats: statKeys,
 		};
 
-		const primaryData = getReportItems( 'performance-indicators', primaryQuery );
-		const primaryError = getReportItemsError( 'performance-indicators', primaryQuery ) || null;
-		const primaryRequesting = isReportItemsRequesting( 'performance-indicators', primaryQuery );
+		const primaryData = getReportItems(
+			'performance-indicators',
+			primaryQuery
+		);
+		const primaryError =
+			getReportItemsError( 'performance-indicators', primaryQuery ) ||
+			null;
+		const primaryRequesting = isReportItemsRequesting(
+			'performance-indicators',
+			primaryQuery
+		);
 
-		const secondaryData = getReportItems( 'performance-indicators', secondaryQuery );
-		const secondaryError = getReportItemsError( 'performance-indicators', secondaryQuery ) || null;
-		const secondaryRequesting = isReportItemsRequesting( 'performance-indicators', secondaryQuery );
+		const secondaryData = getReportItems(
+			'performance-indicators',
+			secondaryQuery
+		);
+		const secondaryError =
+			getReportItemsError( 'performance-indicators', secondaryQuery ) ||
+			null;
+		const secondaryRequesting = isReportItemsRequesting(
+			'performance-indicators',
+			secondaryQuery
+		);
 
 		return {
 			hiddenBlocks,
@@ -245,7 +308,7 @@ export default compose(
 			secondaryRequesting,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateCurrentUserData } = dispatch( 'wc-api' );
 
 		return {

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,19 +9,25 @@ import classnames from 'classnames';
  * A button useful for a launcher of a dropdown component. The button is 100% width of its container and displays
  * single or multiple lines rendered as `<span/>` elments.
  *
- * @param { object } props Props passed to component.
- * @return { object } -
+ * @param {Object} props Props passed to component.
+ * @return {Object} -
  */
-const DropdownButton = props => {
+const DropdownButton = ( props ) => {
 	const { labels, isOpen, ...otherProps } = props;
 	const buttonClasses = classnames( 'woocommerce-dropdown-button', {
 		'is-open': isOpen,
 		'is-multi-line': labels.length > 1,
 	} );
 	return (
-		<Button className={ buttonClasses } aria-expanded={ isOpen } { ...otherProps }>
+		<Button
+			className={ buttonClasses }
+			aria-expanded={ isOpen }
+			{ ...otherProps }
+		>
 			<div className="woocommerce-dropdown-button__labels">
-				{ labels.map( ( label, i ) => <span key={ i }>{ label }</span> ) }
+				{ labels.map( ( label, i ) => (
+					<span key={ i }>{ label }</span>
+				) ) }
 			</div>
 		</Button>
 	);

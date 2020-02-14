@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -55,7 +54,12 @@ class HistoricalDataLayout extends Component {
 
 		return (
 			<Fragment>
-				<SectionHeader title={ __( 'Import Historical Data', 'woocommerce-admin' ) } />
+				<SectionHeader
+					title={ __(
+						'Import Historical Data',
+						'woocommerce-admin'
+					) }
+				/>
 				<div className="woocommerce-settings__wrapper">
 					<div className="woocommerce-setting">
 						<div className="woocommerce-setting__input">
@@ -81,18 +85,27 @@ class HistoricalDataLayout extends Component {
 										onChange={ onSkipChange }
 									/>
 									<HistoricalDataProgress
-										label={ __( 'Registered Customers', 'woocommerce-admin' ) }
+										label={ __(
+											'Registered Customers',
+											'woocommerce-admin'
+										) }
 										progress={ customersProgress }
 										total={ customersTotal }
 									/>
 									<HistoricalDataProgress
-										label={ __( 'Orders and Refunds', 'woocommerce-admin' ) }
+										label={ __(
+											'Orders and Refunds',
+											'woocommerce-admin'
+										) }
 										progress={ ordersProgress }
 										total={ ordersTotal }
 									/>
 								</Fragment>
 							) }
-							<HistoricalDataStatus importDate={ importDate } status={ status } />
+							<HistoricalDataStatus
+								importDate={ importDate }
+								status={ status }
+							/>
 						</div>
 					</div>
 				</div>
@@ -110,7 +123,11 @@ class HistoricalDataLayout extends Component {
 }
 
 export default withSelect( ( select, props ) => {
-	const { getImportStatus, isGetImportStatusRequesting, getImportTotals } = select( 'wc-api' );
+	const {
+		getImportStatus,
+		isGetImportStatusRequesting,
+		getImportTotals,
+	} = select( 'wc-api' );
 	const {
 		activeImport,
 		dateFormat,
@@ -129,12 +146,15 @@ export default withSelect( ( select, props ) => {
 
 	const params = formatParams( dateFormat, period, skipChecked );
 	// Use timestamp to invalidate previous totals when the import finished/stopped
-	const { customers, orders } = getImportTotals( params, lastImportStopTimestamp );
+	const { customers, orders } = getImportTotals(
+		params,
+		lastImportStopTimestamp
+	);
 	const requirement = inProgress
 		? {
 				freshness: 3 * SECOND,
 				timeout: 3 * SECOND,
-			}
+		  }
 		: DEFAULT_REQUIREMENT;
 
 	// Use timestamp to invalidate previous status when a new import starts
@@ -144,12 +164,18 @@ export default withSelect( ( select, props ) => {
 		is_importing: isImporting,
 		orders: ordersStatus,
 	} = getImportStatus( lastImportStartTimestamp, requirement );
-	const { imported: customersProgress, total: customersTotal } = customersStatus || {};
+	const { imported: customersProgress, total: customersTotal } =
+		customersStatus || {};
 	const { imported: ordersProgress, total: ordersTotal } = ordersStatus || {};
-	const isStatusLoading = isGetImportStatusRequesting( lastImportStartTimestamp );
+	const isStatusLoading = isGetImportStatusRequesting(
+		lastImportStartTimestamp
+	);
 
 	const hasImportStarted = Boolean(
-		! lastImportStartTimestamp && ! isStatusLoading && ! inProgress && isImporting === true
+		! lastImportStartTimestamp &&
+			! isStatusLoading &&
+			! inProgress &&
+			isImporting === true
 	);
 	if ( hasImportStarted ) {
 		onImportStarted();

@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -16,15 +14,20 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		.data( data )
 		.enter()
 		.append( 'g' )
-		.attr( 'transform', d => `translate(${ scales.xScale( d.date ) }, 0)` )
+		.attr(
+			'transform',
+			( d ) => `translate(${ scales.xScale( d.date ) }, 0)`
+		)
 		.attr( 'class', 'bargroup' )
 		.attr( 'role', 'region' )
-		.attr(
-			'aria-label',
-			d =>
-				params.mode === 'item-comparison'
-					? formats.screenReaderFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() )
-					: null
+		.attr( 'aria-label', ( d ) =>
+			params.mode === 'item-comparison'
+				? formats.screenReaderFormat(
+						d.date instanceof Date
+							? d.date
+							: moment( d.date ).toDate()
+				  )
+				: null
 		);
 
 	barGroup
@@ -36,15 +39,19 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		.attr( 'height', height )
 		.attr( 'opacity', '0' )
 		.on( 'mouseover', ( d, i, nodes ) => {
-			tooltip.show( data.find( e => e.date === d.date ), d3Event.target, nodes[ i ].parentNode );
+			tooltip.show(
+				data.find( ( e ) => e.date === d.date ),
+				d3Event.target,
+				nodes[ i ].parentNode
+			);
 		} )
 		.on( 'mouseout', () => tooltip.hide() );
 
 	const basePosition = scales.yScale( 0 );
 	barGroup
 		.selectAll( '.bar' )
-		.data( d =>
-			params.visibleKeys.map( row => ( {
+		.data( ( d ) =>
+			params.visibleKeys.map( ( row ) => ( {
 				key: row.key,
 				focus: row.focus,
 				value: get( d, [ row.key, 'value' ], 0 ),
@@ -56,28 +63,39 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		.enter()
 		.append( 'rect' )
 		.attr( 'class', 'bar' )
-		.attr( 'x', d => scales.xGroupScale( d.key ) )
-		.attr( 'y', d => Math.min( basePosition, scales.yScale( d.value ) ) )
+		.attr( 'x', ( d ) => scales.xGroupScale( d.key ) )
+		.attr( 'y', ( d ) =>
+			Math.min( basePosition, scales.yScale( d.value ) )
+		)
 		.attr( 'width', scales.xGroupScale.bandwidth() )
-		.attr( 'height', d => Math.abs( basePosition - scales.yScale( d.value ) ) )
-		.attr( 'fill', d => params.getColor( d.key ) )
+		.attr( 'height', ( d ) =>
+			Math.abs( basePosition - scales.yScale( d.value ) )
+		)
+		.attr( 'fill', ( d ) => params.getColor( d.key ) )
 		.attr( 'pointer-events', 'none' )
 		.attr( 'tabindex', '0' )
-		.attr( 'aria-label', d => {
+		.attr( 'aria-label', ( d ) => {
 			let label = d.label || d.key;
 			if ( params.mode === 'time-comparison' ) {
-				const dayData = data.find( e => e.date === d.date );
-				label = formats.screenReaderFormat( moment( dayData[ d.key ].labelDate ).toDate() );
+				const dayData = data.find( ( e ) => e.date === d.date );
+				label = formats.screenReaderFormat(
+					moment( dayData[ d.key ].labelDate ).toDate()
+				);
 			}
 			return `${ label } ${ tooltip.valueFormat( d.value ) }`;
 		} )
-		.style( 'opacity', d => {
+		.style( 'opacity', ( d ) => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
 		} )
 		.on( 'focus', ( d, i, nodes ) => {
-			const targetNode = d.value > 0 ? d3Event.target : d3Event.target.parentNode;
-			tooltip.show( data.find( e => e.date === d.date ), targetNode, nodes[ i ].parentNode );
+			const targetNode =
+				d.value > 0 ? d3Event.target : d3Event.target.parentNode;
+			tooltip.show(
+				data.find( ( e ) => e.date === d.date ),
+				targetNode,
+				nodes[ i ].parentNode
+			);
 		} )
 		.on( 'blur', () => tooltip.hide() );
 };

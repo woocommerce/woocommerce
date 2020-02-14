@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,18 +17,21 @@ const typeEndpointMap = {
 };
 
 function read( resourceNames, fetch = apiFetch ) {
-	const filteredNames = resourceNames.filter( name => {
+	const filteredNames = resourceNames.filter( ( name ) => {
 		const prefix = getResourcePrefix( name );
 		return Boolean( typeEndpointMap[ prefix ] );
 	} );
 
-	return filteredNames.map( async resourceName => {
+	return filteredNames.map( async ( resourceName ) => {
 		const prefix = getResourcePrefix( resourceName );
 		const endpoint = typeEndpointMap[ prefix ];
 		const query = getResourceIdentifier( resourceName );
 		const fetchArgs = {
 			parse: false,
-			path: addQueryArgs( `${ NAMESPACE }/${ endpoint }`, omit( query, [ 'timestamp' ] ) ),
+			path: addQueryArgs(
+				`${ NAMESPACE }/${ endpoint }`,
+				omit( query, [ 'timestamp' ] )
+			),
 		};
 
 		try {

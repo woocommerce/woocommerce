@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -12,14 +11,14 @@ import crypto from 'crypto';
 /**
  * Display a users Gravatar.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const Gravatar = ( { alt, title, size, user, className } ) => {
 	const classes = classnames( 'woocommerce-gravatar', className, {
 		'is-placeholder': ! user,
 	} );
 
-	const getResizedImageURL = imageURL => {
+	const getResizedImageURL = ( imageURL ) => {
 		const parsedURL = url.parse( imageURL );
 		const query = parse( parsedURL.query );
 
@@ -30,7 +29,7 @@ const Gravatar = ( { alt, title, size, user, className } ) => {
 		return url.format( parsedURL );
 	};
 
-	const getAvatarURLFromEmail = email => {
+	const getAvatarURLFromEmail = ( email ) => {
 		return (
 			'https://www.gravatar.com/avatar/' +
 			crypto
@@ -45,7 +44,9 @@ const Gravatar = ( { alt, title, size, user, className } ) => {
 	let avatarURL = 'https://www.gravatar.com/avatar/0?s=' + size + '&d=mp';
 	if ( user ) {
 		avatarURL = getResizedImageURL(
-			isString( user ) ? getAvatarURLFromEmail( user ) : user.avatar_URLs[ 96 ]
+			isString( user )
+				? getAvatarURLFromEmail( user )
+				: user.avatar_URLs[ 96 ]
 		);
 	}
 

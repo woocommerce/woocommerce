@@ -1,4 +1,5 @@
-/** @format */
+/* eslint-disable no-undef */
+/* eslint-disable no-alert */
 /**
  * Internal dependencies
  */

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -9,11 +8,14 @@ import PropTypes from 'prop-types';
  * with the purpose of replacing a table with no rows.
  * It mimics the same height a table would have according to the `numberOfRows` prop.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const EmptyTable = ( { children, numberOfRows } ) => {
 	return (
-		<div className="woocommerce-table is-empty" style={ { '--number-of-rows': numberOfRows } }>
+		<div
+			className="woocommerce-table is-empty"
+			style={ { '--number-of-rows': numberOfRows } }
+		>
 			{ children }
 		</div>
 	);

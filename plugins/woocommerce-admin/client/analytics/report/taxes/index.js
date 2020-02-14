@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -19,7 +18,7 @@ import ReportFilters from 'analytics/components/report-filters';
 export default class TaxesReport extends Component {
 	getChartMeta() {
 		const { query } = this.props;
-		const isCompareTaxView = 'compare-taxes' === query.filter;
+		const isCompareTaxView = query.filter === 'compare-taxes';
 		const mode = isCompareTaxView ? 'item-comparison' : 'time-comparison';
 		const itemsLabel = __( '%d taxes', 'woocommerce-admin' );
 
@@ -37,7 +36,7 @@ export default class TaxesReport extends Component {
 			...query,
 		};
 
-		if ( 'item-comparison' === mode ) {
+		if ( mode === 'item-comparison' ) {
 			chartQuery.segmentby = 'tax_rate_id';
 		}
 		return (

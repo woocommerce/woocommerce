@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,7 +9,11 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { Link } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from 'lib/currency-format';
+import {
+	formatCurrency,
+	getCurrencyFormatDecimal,
+	renderCurrency,
+} from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { getTaxCode } from './utils';
 import { formatValue } from 'lib/number-format';
@@ -71,16 +74,27 @@ export default class TaxesReportTable extends Component {
 	}
 
 	getRowsContent( taxes ) {
-		return map( taxes, tax => {
+		return map( taxes, ( tax ) => {
 			const { query } = this.props;
-			const { order_tax, orders_count, tax_rate, tax_rate_id, total_tax, shipping_tax } = tax;
+			const {
+				order_tax: orderTax,
+				orders_count: ordersCount,
+				tax_rate: taxRate,
+				tax_rate_id: taxRateId,
+				total_tax: totalTax,
+				shipping_tax: shippingTax,
+			} = tax;
 			const taxCode = getTaxCode( tax );
 
 			const persistedQuery = getPersistedQuery( query );
-			const ordersTaxLink = getNewPath( persistedQuery, '/analytics/orders', {
-				filter: 'advanced',
-				tax_rate_includes: tax_rate_id,
-			} );
+			const ordersTaxLink = getNewPath(
+				persistedQuery,
+				'/analytics/orders',
+				{
+					filter: 'advanced',
+					tax_rate_includes: taxRateId,
+				}
+			);
 			const taxLink = (
 				<Link href={ ordersTaxLink } type="wc-admin">
 					{ taxCode }
@@ -93,24 +107,24 @@ export default class TaxesReportTable extends Component {
 					value: taxCode,
 				},
 				{
-					display: tax_rate.toFixed( 2 ) + '%',
-					value: tax_rate,
+					display: taxRate.toFixed( 2 ) + '%',
+					value: taxRate,
 				},
 				{
-					display: renderCurrency( total_tax ),
-					value: getCurrencyFormatDecimal( total_tax ),
+					display: renderCurrency( totalTax ),
+					value: getCurrencyFormatDecimal( totalTax ),
 				},
 				{
-					display: renderCurrency( order_tax ),
-					value: getCurrencyFormatDecimal( order_tax ),
+					display: renderCurrency( orderTax ),
+					value: getCurrencyFormatDecimal( orderTax ),
 				},
 				{
-					display: renderCurrency( shipping_tax ),
-					value: getCurrencyFormatDecimal( shipping_tax ),
+					display: renderCurrency( shippingTax ),
+					value: getCurrencyFormatDecimal( shippingTax ),
 				},
 				{
-					display: formatValue( 'number', orders_count ),
-					value: orders_count,
+					display: formatValue( 'number', ordersCount ),
+					value: ordersCount,
 				},
 			];
 		} );
@@ -118,32 +132,42 @@ export default class TaxesReportTable extends Component {
 
 	getSummary( totals ) {
 		const {
-			tax_codes = 0,
-			total_tax = 0,
-			order_tax = 0,
-			shipping_tax = 0,
-			orders_count = 0,
+			tax_codes: taxesCodes = 0,
+			total_tax: totalTax = 0,
+			order_tax: orderTax = 0,
+			shipping_tax: shippingTax = 0,
+			orders_count: ordersCount = 0,
 		} = totals;
 		return [
 			{
-				label: _n( 'tax code', 'tax codes', tax_codes, 'woocommerce-admin' ),
-				value: formatValue( 'number', tax_codes ),
+				label: _n(
+					'tax code',
+					'tax codes',
+					taxesCodes,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', taxesCodes ),
 			},
 			{
 				label: __( 'total tax', 'woocommerce-admin' ),
-				value: formatCurrency( total_tax ),
+				value: formatCurrency( totalTax ),
 			},
 			{
 				label: __( 'order tax', 'woocommerce-admin' ),
-				value: formatCurrency( order_tax ),
+				value: formatCurrency( orderTax ),
 			},
 			{
 				label: __( 'shipping tax', 'woocommerce-admin' ),
-				value: formatCurrency( shipping_tax ),
+				value: formatCurrency( shippingTax ),
 			},
 			{
-				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
-				value: formatValue( 'number', orders_count ),
+				label: _n(
+					'order',
+					'orders',
+					ordersCount,
+					'woocommerce-admin'
+				),
+				value: formatValue( 'number', ordersCount ),
 			},
 		];
 	}

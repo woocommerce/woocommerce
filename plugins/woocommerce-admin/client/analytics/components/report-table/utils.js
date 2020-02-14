@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -22,16 +21,22 @@ export function extendTableData( select, props, queriedTableData ) {
 		[ extendItemsMethodNames.load ]: loadMethod,
 	} = select( 'wc-api' );
 	const extendQuery = {
-		include: itemsData.map( item => item[ itemIdField ] ).join( ',' ),
+		include: itemsData.map( ( item ) => item[ itemIdField ] ).join( ',' ),
 		per_page: itemsData.length,
 	};
 	const extendedItems = loadMethod( extendQuery );
-	const isExtendedItemsRequesting = isRequestingMethod ? isRequestingMethod( extendQuery ) : false;
-	const isExtendedItemsError = getErrorMethod ? getErrorMethod( extendQuery ) : false;
+	const isExtendedItemsRequesting = isRequestingMethod
+		? isRequestingMethod( extendQuery )
+		: false;
+	const isExtendedItemsError = getErrorMethod
+		? getErrorMethod( extendQuery )
+		: false;
 
-	const extendedItemsData = itemsData.map( item => {
+	const extendedItemsData = itemsData.map( ( item ) => {
 		const extendedItemData = first(
-			extendedItems.filter( extendedItem => item.id === extendedItem.id )
+			extendedItems.filter(
+				( extendedItem ) => item.id === extendedItem.id
+			)
 		);
 		return {
 			...item,
@@ -39,7 +44,8 @@ export function extendTableData( select, props, queriedTableData ) {
 		};
 	} );
 
-	const isRequesting = queriedTableData.isRequesting || isExtendedItemsRequesting;
+	const isRequesting =
+		queriedTableData.isRequesting || isExtendedItemsRequesting;
 	const isError = queriedTableData.isError || isExtendedItemsError;
 
 	return {

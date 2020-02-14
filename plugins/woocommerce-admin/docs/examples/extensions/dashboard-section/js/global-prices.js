@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -28,9 +27,14 @@ for ( let i = 1; i <= 20; i++ ) {
 }
 
 const GlobalPrices = () => {
-	const average = data.reduce( ( total, item ) => total + item.primary.value, 0 ) / data.length;
+	const average =
+		data.reduce( ( total, item ) => total + item.primary.value, 0 ) /
+		data.length;
 	return (
-		<Card className="woocommerce-dashboard__chart-block woocommerce-analytics__card" title="Global Apple Prices">
+		<Card
+			className="woocommerce-dashboard__chart-block woocommerce-analytics__card"
+			title="Global Apple Prices"
+		>
 			<Chart
 				title="Global Apple Prices"
 				interval="day"

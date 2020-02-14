@@ -1,5 +1,3 @@
-/** @format */
-
 /**
  * External dependencies
  */
@@ -19,23 +17,27 @@ const getItems = ( getResource, requireResource ) => (
 	const resourceName = getResourceName( `items-query-${ type }`, query );
 	const ids = requireResource( requirement, resourceName ).data || [];
 	const items = new Map();
-	ids.forEach( id => {
-		items.set( id, getResource( getResourceName( `items-query-${ type }-item`, id ) ).data );
+	ids.forEach( ( id ) => {
+		items.set(
+			id,
+			getResource( getResourceName( `items-query-${ type }-item`, id ) )
+				.data
+		);
 	} );
 	return items;
 };
 
-const getItemsTotalCount = getResource => ( type, query = {} ) => {
+const getItemsTotalCount = ( getResource ) => ( type, query = {} ) => {
 	const resourceName = getResourceName( `items-query-${ type }`, query );
 	return getResource( resourceName ).totalCount || 0;
 };
 
-const getItemsError = getResource => ( type, query = {} ) => {
+const getItemsError = ( getResource ) => ( type, query = {} ) => {
 	const resourceName = getResourceName( `items-query-${ type }`, query );
 	return getResource( resourceName ).error;
 };
 
-const isGetItemsRequesting = getResource => ( type, query = {} ) => {
+const isGetItemsRequesting = ( getResource ) => ( type, query = {} ) => {
 	const resourceName = getResourceName( `items-query-${ type }`, query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 

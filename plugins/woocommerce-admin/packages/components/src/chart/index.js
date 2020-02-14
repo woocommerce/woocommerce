@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,7 +7,11 @@ import { Component, createRef, Fragment } from '@wordpress/element';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import { isEqual, partial, without } from 'lodash';
 import Gridicon from 'gridicons';
-import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
+import {
+	IconButton,
+	NavigableMenu,
+	SelectControl,
+} from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
 import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
@@ -67,9 +70,13 @@ class Chart extends Component {
 
 	getDataKeys() {
 		const { data, filterParam, mode, query } = this.props;
-		if ( 'item-comparison' === mode ) {
-			const selectedIds = filterParam ? getIdsFromQuery( query[ filterParam ] ) : [];
-			return this.getOrderedKeys( [], [], selectedIds ).map( orderedItem => orderedItem.key );
+		if ( mode === 'item-comparison' ) {
+			const selectedIds = filterParam
+				? getIdsFromQuery( query[ filterParam ] )
+				: [];
+			return this.getOrderedKeys( [], [], selectedIds ).map(
+				( orderedItem ) => orderedItem.key
+			);
 		}
 		return getUniqueKeys( data );
 	}
@@ -132,20 +139,31 @@ class Chart extends Component {
 			return accum;
 		}, {} );
 
-		const updatedKeys = Object.entries( uniqueKeys ).map( ( [ key, label ] ) => {
-			return {
-				focus: focusedKeys.length === 0 || focusedKeys.includes( key ),
-				key,
-				label,
-				total: legendTotals && 'undefined' !== typeof legendTotals[ key ]
-					? legendTotals[ key ] : data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
-				visible: visibleKeys.includes( key ),
-			};
-		} );
+		const updatedKeys = Object.entries( uniqueKeys ).map(
+			( [ key, label ] ) => {
+				return {
+					focus:
+						focusedKeys.length === 0 || focusedKeys.includes( key ),
+					key,
+					label,
+					total:
+						legendTotals &&
+						typeof legendTotals[ key ] !== 'undefined'
+							? legendTotals[ key ]
+							: data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
+					visible: visibleKeys.includes( key ),
+				};
+			}
+		);
 
-		if ( 'item-comparison' === mode ) {
-			return updatedKeys.sort( ( a, b ) => b.total - a.total )
-				.filter( key => key.total > 0 || selectedIds.includes( parseInt( key.key, 10 ) ) );
+		if ( mode === 'item-comparison' ) {
+			return updatedKeys
+				.sort( ( a, b ) => b.total - a.total )
+				.filter(
+					( key ) =>
+						key.total > 0 ||
+						selectedIds.includes( parseInt( key.key, 10 ) )
+				);
 		}
 
 		return updatedKeys;
@@ -198,10 +216,10 @@ class Chart extends Component {
 	}
 
 	getVisibleData( data, orderedKeys ) {
-		const visibleKeys = orderedKeys.filter( d => d.visible );
-		return data.map( d => {
+		const visibleKeys = orderedKeys.filter( ( d ) => d.visible );
+		return data.map( ( d ) => {
 			const newRow = { date: d.date };
-			visibleKeys.forEach( row => {
+			visibleKeys.forEach( ( row ) => {
 				newRow[ row.key ] = d[ row.key ];
 			} );
 			return newRow;
@@ -232,7 +250,7 @@ class Chart extends Component {
 			<SelectControl
 				className="woocommerce-chart__interval-select"
 				value={ interval }
-				options={ allowedIntervals.map( allowedInterval => ( {
+				options={ allowedIntervals.map( ( allowedInterval ) => ( {
 					value: allowedInterval,
 					label: intervalLabels[ allowedInterval ],
 				} ) ) }
@@ -297,9 +315,17 @@ class Chart extends Component {
 			yBelow1Format,
 			yFormat,
 		} = this.props;
-		const selectedIds = filterParam ? getIdsFromQuery( query[ filterParam ] ) : [];
-		const orderedKeys = this.getOrderedKeys( focusedKeys, visibleKeys, selectedIds );
-		const visibleData = isRequesting ? null : this.getVisibleData( data, orderedKeys );
+		const selectedIds = filterParam
+			? getIdsFromQuery( query[ filterParam ] )
+			: [];
+		const orderedKeys = this.getOrderedKeys(
+			focusedKeys,
+			visibleKeys,
+			selectedIds
+		);
+		const visibleData = isRequesting
+			? null
+			: this.getVisibleData( data, orderedKeys );
 
 		const legendPosition = this.getLegendPosition();
 		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
@@ -354,26 +380,43 @@ class Chart extends Component {
 							role="menubar"
 						>
 							<IconButton
-								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': chartType === 'line',
-								} ) }
+								className={ classNames(
+									'woocommerce-chart__type-button',
+									{
+										'woocommerce-chart__type-button-selected':
+											chartType === 'line',
+									}
+								) }
 								icon={ <Gridicon icon="line-graph" /> }
-								title={ __( 'Line chart', 'woocommerce-admin' ) }
+								title={ __(
+									'Line chart',
+									'woocommerce-admin'
+								) }
 								aria-checked={ chartType === 'line' }
 								role="menuitemradio"
 								tabIndex={ chartType === 'line' ? 0 : -1 }
-								onClick={ partial( this.handleTypeToggle, 'line' ) }
+								onClick={ partial(
+									this.handleTypeToggle,
+									'line'
+								) }
 							/>
 							<IconButton
-								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': chartType === 'bar',
-								} ) }
+								className={ classNames(
+									'woocommerce-chart__type-button',
+									{
+										'woocommerce-chart__type-button-selected':
+											chartType === 'bar',
+									}
+								) }
 								icon={ <Gridicon icon="stats-alt" /> }
 								title={ __( 'Bar chart', 'woocommerce-admin' ) }
 								aria-checked={ chartType === 'bar' }
 								role="menuitemradio"
 								tabIndex={ chartType === 'bar' ? 0 : -1 }
-								onClick={ partial( this.handleTypeToggle, 'bar' ) }
+								onClick={ partial(
+									this.handleTypeToggle,
+									'bar'
+								) }
 							/>
 						</NavigableMenu>
 					</div>
@@ -390,41 +433,51 @@ class Chart extends Component {
 						{ isRequesting && (
 							<Fragment>
 								<span className="screen-reader-text">
-									{ __( 'Your requested data is loading', 'woocommerce-admin' ) }
+									{ __(
+										'Your requested data is loading',
+										'woocommerce-admin'
+									) }
 								</span>
 								<ChartPlaceholder height={ chartHeight } />
 							</Fragment>
 						) }
-						{ ! isRequesting &&
-							width > 0 && (
-								<D3Chart
-									baseValue={ baseValue }
-									chartType={ chartType }
-									colorScheme={ d3InterpolateViridis }
-									data={ visibleData }
-									dateParser={ dateParser }
-									height={ chartHeight }
-									emptyMessage={ emptyMessage }
-									interval={ interval }
-									margin={ margin }
-									mode={ mode }
-									orderedKeys={ orderedKeys }
-									screenReaderFormat={ screenReaderFormat }
-									tooltipLabelFormat={ tooltipLabelFormat }
-									tooltipValueFormat={ tooltipValueFormat }
-									tooltipPosition={ isViewportLarge ? 'over' : 'below' }
-									tooltipTitle={ tooltipTitle }
-									valueType={ valueType }
-									width={ chartDirection === 'row' ? width - 320 : width }
-									xFormat={ xFormat }
-									x2Format={ x2Format }
-									yBelow1Format={ d3chartYBelow1Format }
-									yFormat={ d3chartYFormat }
-								/>
-							) }
+						{ ! isRequesting && width > 0 && (
+							<D3Chart
+								baseValue={ baseValue }
+								chartType={ chartType }
+								colorScheme={ d3InterpolateViridis }
+								data={ visibleData }
+								dateParser={ dateParser }
+								height={ chartHeight }
+								emptyMessage={ emptyMessage }
+								interval={ interval }
+								margin={ margin }
+								mode={ mode }
+								orderedKeys={ orderedKeys }
+								screenReaderFormat={ screenReaderFormat }
+								tooltipLabelFormat={ tooltipLabelFormat }
+								tooltipValueFormat={ tooltipValueFormat }
+								tooltipPosition={
+									isViewportLarge ? 'over' : 'below'
+								}
+								tooltipTitle={ tooltipTitle }
+								valueType={ valueType }
+								width={
+									chartDirection === 'row'
+										? width - 320
+										: width
+								}
+								xFormat={ xFormat }
+								x2Format={ x2Format }
+								yBelow1Format={ d3chartYBelow1Format }
+								yFormat={ d3chartYFormat }
+							/>
+						) }
 					</div>
-					{ ( legendPosition === 'bottom' ) && (
-						<div className="woocommerce-chart__footer">{ legend }</div>
+					{ legendPosition === 'bottom' && (
+						<div className="woocommerce-chart__footer">
+							{ legend }
+						</div>
 					) }
 				</Section>
 			</div>
@@ -489,7 +542,14 @@ Chart.propTypes = {
 	/**
 	 * Interval specification (hourly, daily, weekly etc).
 	 */
-	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
+	interval: PropTypes.oneOf( [
+		'hour',
+		'day',
+		'week',
+		'month',
+		'quarter',
+		'year',
+	] ),
 	/**
 	 * Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`.
 	 */
@@ -510,7 +570,10 @@ Chart.propTypes = {
 	/**
 	 * A datetime formatting string or overriding function to format the screen reader labels.
 	 */
-	screenReaderFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	screenReaderFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * Wether header UI controls must be displayed.
 	 */
@@ -522,11 +585,17 @@ Chart.propTypes = {
 	/**
 	 * A datetime formatting string or overriding function to format the tooltip label.
 	 */
-	tooltipLabelFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	tooltipLabelFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * A number formatting string or function to format the value displayed in the tooltips.
 	 */
-	tooltipValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	tooltipValueFormat: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.func,
+	] ),
 	/**
 	 * A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
 	 */

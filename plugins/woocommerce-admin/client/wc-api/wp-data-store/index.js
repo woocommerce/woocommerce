@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -10,7 +9,7 @@ import { registerGenericStore } from '@wordpress/data';
 import createApiClient from './create-api-client';
 import wcApiSpec from '../wc-api-spec';
 
-if ( 'development' === process.env.NODE_ENV ) {
+if ( process.env.NODE_ENV === 'development' ) {
 	window.__FRESH_DATA_DEV_INFO__ = true;
 }
 
@@ -23,10 +22,13 @@ function createWcApiStore() {
 		return {
 			selectors: apiClient.getSelectors( componentRequirements ),
 			onComplete: () => {
-				if ( 0 === componentRequirements.length ) {
+				if ( componentRequirements.length === 0 ) {
 					apiClient.clearComponentRequirements( component );
 				} else {
-					apiClient.setComponentRequirements( component, componentRequirements );
+					apiClient.setComponentRequirements(
+						component,
+						componentRequirements
+					);
 				}
 			},
 			onUnmount: () => {
@@ -41,8 +43,9 @@ function createWcApiStore() {
 		// @todo Remove the `() =>` after the `@wordpress/data` PR is merged:
 		// https://github.com/WordPress/gutenberg/pull/11460
 		//
-		getSelectors: () => context => {
-			const component = context && context.component ? context.component : context;
+		getSelectors: () => ( context ) => {
+			const component =
+				context && context.component ? context.component : context;
 			return getComponentSelectors( component );
 		},
 		getActions() {

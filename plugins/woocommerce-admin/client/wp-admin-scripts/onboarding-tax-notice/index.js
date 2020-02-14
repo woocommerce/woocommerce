@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -18,8 +17,8 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
  */
 const saveCompleted = () => {
 	if ( document.querySelector( '.blockUI.blockOverlay' ) !== null ) {
-		const promise = new Promise( resolve => {
-			requestAnimationFrame( resolve );
+		const promise = new Promise( ( resolve ) => {
+			window.requestAnimationFrame( resolve );
 		} );
 		return promise.then( () => saveCompleted() );
 	}

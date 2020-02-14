@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -6,7 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
 const STOCK_REPORT_FILTERS_FILTER = 'woocommerce_admin_stock_report_filters';
-const STOCK_REPORT_ADVANCED_FILTERS_FILTER = 'woocommerce_admin_stock_report_advanced_filters';
+const STOCK_REPORT_ADVANCED_FILTERS_FILTER =
+	'woocommerce_admin_stock_report_advanced_filters';
 
 export const showDatePicker = false;
 
@@ -18,12 +18,24 @@ export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
 		showFilters: () => true,
 		filters: [
 			{ label: __( 'All Products', 'woocommerce-admin' ), value: 'all' },
-			{ label: __( 'Out of Stock', 'woocommerce-admin' ), value: 'outofstock' },
-			{ label: __( 'Low Stock', 'woocommerce-admin' ), value: 'lowstock' },
+			{
+				label: __( 'Out of Stock', 'woocommerce-admin' ),
+				value: 'outofstock',
+			},
+			{
+				label: __( 'Low Stock', 'woocommerce-admin' ),
+				value: 'lowstock',
+			},
 			{ label: __( 'In Stock', 'woocommerce-admin' ), value: 'instock' },
-			{ label: __( 'On Backorder', 'woocommerce-admin' ), value: 'onbackorder' },
+			{
+				label: __( 'On Backorder', 'woocommerce-admin' ),
+				value: 'onbackorder',
+			},
 		],
 	},
 ] );
 
-export const advancedFilters = applyFilters( STOCK_REPORT_ADVANCED_FILTERS_FILTER, {} );
+export const advancedFilters = applyFilters(
+	STOCK_REPORT_ADVANCED_FILTERS_FILTER,
+	{}
+);

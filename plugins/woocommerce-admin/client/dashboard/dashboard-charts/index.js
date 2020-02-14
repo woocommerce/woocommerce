@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,13 +7,22 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
-import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
+import {
+	IconButton,
+	NavigableMenu,
+	SelectControl,
+} from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
-import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/components';
+import {
+	EllipsisMenu,
+	MenuItem,
+	MenuTitle,
+	SectionHeader,
+} from '@woocommerce/components';
 import { getAllowedIntervalsForQuery } from 'lib/date';
 
 /**
@@ -40,7 +48,7 @@ class DashboardCharts extends Component {
 		return () => {
 			this.setState( { chartType } );
 			const userDataFields = {
-				[ 'dashboard_chart_type' ]: chartType,
+				dashboard_chart_type: chartType,
 			};
 			this.props.updateCurrentUserData( userDataFields );
 			recordEvent( 'dash_charts_type_toggle', { chart_type: chartType } );
@@ -63,11 +71,16 @@ class DashboardCharts extends Component {
 
 		return (
 			<EllipsisMenu
-				label={ __( 'Choose which charts to display', 'woocommerce-admin' ) }
+				label={ __(
+					'Choose which charts to display',
+					'woocommerce-admin'
+				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						<MenuTitle>{ __( 'Charts', 'woocommerce-admin' ) }</MenuTitle>
-						{ uniqCharts.map( chart => {
+						<MenuTitle>
+							{ __( 'Charts', 'woocommerce-admin' ) }
+						</MenuTitle>
+						{ uniqCharts.map( ( chart ) => {
 							const key = chart.endpoint + '_' + chart.key;
 							const checked = ! hiddenBlocks.includes( key );
 							return (
@@ -78,17 +91,22 @@ class DashboardCharts extends Component {
 									key={ chart.endpoint + '_' + chart.key }
 									onInvoke={ () => {
 										onToggleHiddenBlock( key )();
-										recordEvent( 'dash_charts_chart_toggle', {
-											status: checked ? 'off' : 'on',
-											key,
-										} );
+										recordEvent(
+											'dash_charts_chart_toggle',
+											{
+												status: checked ? 'off' : 'on',
+												key,
+											}
+										);
 									} }
 								>
 									{ chart.label }
 								</MenuItem>
 							);
 						} ) }
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+						{ window.wcAdminFeatures[
+							'analytics-dashboard/customizable'
+						] && (
 							<Controls
 								onToggle={ onToggle }
 								onMove={ onMove }
@@ -107,7 +125,9 @@ class DashboardCharts extends Component {
 	}
 
 	renderIntervalSelector() {
-		const allowedIntervals = getAllowedIntervalsForQuery( this.props.query );
+		const allowedIntervals = getAllowedIntervalsForQuery(
+			this.props.query
+		);
 		if ( ! allowedIntervals || allowedIntervals.length < 1 ) {
 			return null;
 		}
@@ -125,7 +145,7 @@ class DashboardCharts extends Component {
 			<SelectControl
 				className="woocommerce-chart__interval-select"
 				value={ this.state.interval }
-				options={ allowedIntervals.map( allowedInterval => ( {
+				options={ allowedIntervals.map( ( allowedInterval ) => ( {
 					value: allowedInterval,
 					label: intervalLabels[ allowedInterval ],
 				} ) ) }
@@ -134,10 +154,10 @@ class DashboardCharts extends Component {
 		);
 	}
 
-	setInterval = interval => {
+	setInterval = ( interval ) => {
 		this.setState( { interval }, () => {
 			const userDataFields = {
-				[ 'dashboard_chart_interval' ]: this.state.interval,
+				dashboard_chart_interval: this.state.interval,
 			};
 			this.props.updateCurrentUserData( userDataFields );
 			recordEvent( 'dash_charts_interval', { interval } );
@@ -163,21 +183,32 @@ class DashboardCharts extends Component {
 							role="menubar"
 						>
 							<IconButton
-								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected':
-										! query.chartType || query.chartType === 'line',
-								} ) }
+								className={ classNames(
+									'woocommerce-chart__type-button',
+									{
+										'woocommerce-chart__type-button-selected':
+											! query.chartType ||
+											query.chartType === 'line',
+									}
+								) }
 								icon={ <Gridicon icon="line-graph" /> }
-								title={ __( 'Line chart', 'woocommerce-admin' ) }
+								title={ __(
+									'Line chart',
+									'woocommerce-admin'
+								) }
 								aria-checked={ query.chartType === 'line' }
 								role="menuitemradio"
 								tabIndex={ query.chartType === 'line' ? 0 : -1 }
 								onClick={ this.handleTypeToggle( 'line' ) }
 							/>
 							<IconButton
-								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': query.chartType === 'bar',
-								} ) }
+								className={ classNames(
+									'woocommerce-chart__type-button',
+									{
+										'woocommerce-chart__type-button-selected':
+											query.chartType === 'bar',
+									}
+								) }
 								icon={ <Gridicon icon="stats-alt" /> }
 								title={ __( 'Bar chart', 'woocommerce-admin' ) }
 								aria-checked={ query.chartType === 'bar' }
@@ -188,8 +219,10 @@ class DashboardCharts extends Component {
 						</NavigableMenu>
 					</SectionHeader>
 					<div className="woocommerce-dashboard__columns">
-						{ uniqCharts.map( chart => {
-							return hiddenBlocks.includes( chart.endpoint + '_' + chart.key ) ? null : (
+						{ uniqCharts.map( ( chart ) => {
+							return hiddenBlocks.includes(
+								chart.endpoint + '_' + chart.key
+							) ? null : (
 								<ChartBlock
 									charts={ [ chart ] }
 									endpoint={ chart.endpoint }
@@ -212,7 +245,7 @@ DashboardCharts.propTypes = {
 };
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select ) => {
 		const { getCurrentUserData } = select( 'wc-api' );
 		const userData = getCurrentUserData();
 
@@ -221,7 +254,7 @@ export default compose(
 			userPrefChartInterval: userData.dashboard_chart_interval,
 		};
 	} ),
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { updateCurrentUserData } = dispatch( 'wc-api' );
 
 		return {

@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -8,7 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * Display a number with a styled border.
  *
- * @return { object } -
+ * @return {Object} -
  */
 const Count = ( { count, label } ) => {
 	if ( ! label ) {

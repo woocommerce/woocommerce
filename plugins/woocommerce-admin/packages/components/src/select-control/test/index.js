@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -29,12 +28,17 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 3 );
 		}, 0 );
 	} );
 
 	it( 'returns matching elements', () => {
-		const selectControl = mount( <SelectControl isSearchable options={ options } /> );
+		const selectControl = mount(
+			<SelectControl isSearchable options={ options } />
+		);
 		selectControl.setState( {
 			query,
 		} );
@@ -43,7 +47,10 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 2 );
 		}, 0 );
 	} );
 
@@ -65,12 +72,17 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 1 );
 		}, 0 );
 	} );
 
 	it( 'trims spaces from input', () => {
-		const selectControl = mount( <SelectControl isSearchable options={ options } /> );
+		const selectControl = mount(
+			<SelectControl isSearchable options={ options } />
+		);
 		selectControl.setState( {
 			query,
 		} );
@@ -79,7 +91,10 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 2 );
 		}, 0 );
 	} );
 
@@ -95,18 +110,26 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 1 );
 		}, 0 );
 	} );
 
 	it( 'shows options initially', () => {
-		const selectControl = mount( <SelectControl isSearchable options={ options } /> );
+		const selectControl = mount(
+			<SelectControl isSearchable options={ options } />
+		);
 
 		selectControl.instance().search( '' );
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 3 );
 		}, 0 );
 	} );
 
@@ -118,13 +141,18 @@ describe( 'SelectControl', () => {
 		selectControl.instance().search( '' );
 		selectControl.update();
 
-		expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 0 );
+		expect(
+			selectControl.find( Button ).filter( '.' + optionClassname ).length
+		).toBe( 0 );
 
 		selectControl.instance().search( query );
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 2 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 2 );
 		}, 0 );
 	} );
 
@@ -132,8 +160,10 @@ describe( 'SelectControl', () => {
 		const selectControl = mount(
 			<SelectControl
 				options={ options }
-				onFilter={ filteredOptions =>
-					filteredOptions.concat( [ { key: 'new-option', label: 'New options' } ] )
+				onFilter={ ( filteredOptions ) =>
+					filteredOptions.concat( [
+						{ key: 'new-option', label: 'New options' },
+					] )
 				}
 			/>
 		);
@@ -142,15 +172,21 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 3 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 3 );
 		}, 0 );
 	} );
 
 	it( 'changes the options on search', () => {
 		const queriedOptions = [];
-		const queryOptions = searchedQuery => {
+		const queryOptions = ( searchedQuery ) => {
 			if ( searchedQuery === 'test' ) {
-				queriedOptions.push( { key: 'test-option', label: 'Test option' } );
+				queriedOptions.push( {
+					key: 'test-option',
+					label: 'Test option',
+				} );
 			}
 		};
 		const selectControl = mount(
@@ -166,14 +202,20 @@ describe( 'SelectControl', () => {
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 0 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 0 );
 		}, 0 );
 
 		selectControl.instance().search( 'test' );
 		selectControl.update();
 
 		setTimeout( function() {
-			expect( selectControl.find( Button ).filter( '.' + optionClassname ).length ).toBe( 1 );
+			expect(
+				selectControl.find( Button ).filter( '.' + optionClassname )
+					.length
+			).toBe( 1 );
 		}, 0 );
 	} );
 } );

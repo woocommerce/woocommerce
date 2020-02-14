@@ -1,4 +1,3 @@
-/** @format */
 /**
  * External dependencies
  */
@@ -15,6 +14,9 @@ import { computeSuggestionMatch } from './utils';
 import ProductImage from '../../product-image';
 
 /**
+ * @typedef {Object} Completer
+ */
+/**
  * A products completer.
  * See https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface
  *
@@ -26,12 +28,14 @@ export default {
 	options( search ) {
 		const query = search
 			? {
-				search,
-				per_page: 10,
-				orderby: 'popularity',
-			}
+					search,
+					per_page: 10,
+					orderby: 'popularity',
+			  }
 			: {};
-		return apiFetch( { path: addQueryArgs( '/wc-analytics/products', query ) } );
+		return apiFetch( {
+			path: addQueryArgs( '/wc-analytics/products', query ),
+		} );
 	},
 	isDebounced: true,
 	getOptionIdentifier( product ) {
@@ -50,7 +54,9 @@ export default {
 					),
 					components: {
 						query: (
-							<strong className="components-form-token-field__suggestion-match">{ query }</strong>
+							<strong className="components-form-token-field__suggestion-match">
+								{ query }
+							</strong>
 						),
 					},
 				} ) }
@@ -58,7 +64,7 @@ export default {
 		);
 		const titleOption = {
 			key: 'title',
-			label: label,
+			label,
 			value: { id: query, name: query },
 		};
 
@@ -76,7 +82,11 @@ export default {
 					height={ 18 }
 					alt=""
 				/>
-				<span key="name" className="woocommerce-search__result-name" aria-label={ product.name }>
+				<span
+					key="name"
+					className="woocommerce-search__result-name"
+					aria-label={ product.name }
+				>
 					{ match.suggestionBeforeMatch }
 					<strong className="components-form-token-field__suggestion-match">
 						{ match.suggestionMatch }
