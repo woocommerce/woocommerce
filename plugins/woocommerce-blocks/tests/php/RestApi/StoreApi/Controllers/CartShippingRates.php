@@ -76,15 +76,6 @@ class CartShippingRates extends TestCase {
 	/**
 	 * Test getting shipping.
 	 */
-	public function test_get_items_missing_address() {
-		$request  = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
-	}
-
-	/**
-	 * Test getting shipping.
-	 */
 	public function test_get_items_address_validation() {
 		// US address.
 		$request = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
@@ -103,6 +94,33 @@ class CartShippingRates extends TestCase {
 		$this->assertEquals( 'Test City', $data[0]['destination']->city );
 		$this->assertEquals( 'AL', $data[0]['destination']->state );
 		$this->assertEquals( '90210', $data[0]['destination']->postcode );
+		$this->assertEquals( 'US', $data[0]['destination']->country );
+
+		// Address with empty country.
+		$request = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
+		$request->set_param( 'country', '' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Address with invalid country.
+		$request = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
+		$request->set_param( 'country', 'ZZZZZZZZ' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+
+		// US address with named state.
+		$request = new WP_REST_Request( 'GET', '/wc/store/cart/shipping-rates' );
+		$request->set_param( 'state', 'Alabama' );
+		$request->set_param( 'country', 'US' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'AL', $data[0]['destination']->state );
 		$this->assertEquals( 'US', $data[0]['destination']->country );
 
 		// US address with invalid state.

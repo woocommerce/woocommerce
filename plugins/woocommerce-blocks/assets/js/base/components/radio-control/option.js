@@ -3,6 +3,11 @@
  */
 import classnames from 'classnames';
 
+/**
+ * Internal dependencies
+ */
+import OptionLayout from './option-layout';
+
 const Option = ( { checked, name, onChange, option } ) => {
 	const {
 		value,
@@ -33,38 +38,13 @@ const Option = ( { checked, name, onChange, option } ) => {
 					[ `${ name }-${ value }__secondary-description` ]: secondaryDescription,
 				} ) }
 			/>
-			{ label && (
-				<span
-					id={ `${ name }-${ value }__label` }
-					className="wc-block-radio-control__label"
-				>
-					{ label }
-				</span>
-			) }
-			{ secondaryLabel && (
-				<span
-					id={ `${ name }-${ value }__secondary-label` }
-					className="wc-block-radio-control__secondary-label"
-				>
-					{ secondaryLabel }
-				</span>
-			) }
-			{ description && (
-				<span
-					id={ `${ name }-${ value }__description` }
-					className="wc-block-radio-control__description"
-				>
-					{ description }
-				</span>
-			) }
-			{ secondaryDescription && (
-				<span
-					id={ `${ name }-${ value }__secondary-description` }
-					className="wc-block-radio-control__secondary-description"
-				>
-					{ secondaryDescription }
-				</span>
-			) }
+			<OptionLayout
+				id={ `${ name }-${ value }` }
+				label={ label }
+				secondaryLabel={ secondaryLabel }
+				description={ description }
+				secondaryDescription={ secondaryDescription }
+			/>
 		</label>
 	);
 };

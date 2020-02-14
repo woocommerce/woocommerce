@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { useState, Fragment } from '@wordpress/element';
 import {
 	TotalsCouponCodeInput,
 	TotalsItem,
 } from '@woocommerce/base-components/totals';
-import RadioControl from '@woocommerce/base-components/radio-control';
+import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
 import {
 	COUPONS_ENABLED,
 	DISPLAY_PRICES_INCLUDING_TAXES,
@@ -15,12 +15,12 @@ import {
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { Card, CardBody } from 'wordpress-components';
 import { previewCartItems } from '@woocommerce/resource-previews';
+import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 
 /**
  * Internal dependencies
  */
 import CheckoutButton from './checkout-button';
-import placeholderShippingMethods from '../../placeholder-shipping-methods';
 import CartLineItemsTitle from './cart-line-items-title';
 import CartLineItemsTable from './cart-line-items-table';
 
@@ -111,12 +111,10 @@ const cartTotals = {
  * Component that renders the Cart block when user has something in cart aka "full".
  */
 const Cart = () => {
-	const currency = getCurrencyFromPriceResponse( cartTotals );
+	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalRowsConfig = getTotalRowsConfig( cartTotals );
 
-	const [ selectedShippingOption, setSelectedShippingOption ] = useState(
-		placeholderShippingMethods[ 0 ].value
-	);
+	const [ selectedShippingRate, setSelectedShippingRate ] = useState();
 
 	return (
 		<div className="wc-block-cart">
@@ -137,7 +135,7 @@ const Cart = () => {
 							( { label, value, description } ) => (
 								<TotalsItem
 									key={ label }
-									currency={ currency }
+									currency={ totalsCurrency }
 									label={ label }
 									value={ value }
 									description={ description }
@@ -151,23 +149,42 @@ const Cart = () => {
 									'woo-gutenberg-products-block'
 								) }
 							</legend>
-							<RadioControl
+							<ShippingRatesControl
 								className="wc-block-cart__shipping-options"
-								selected={ selectedShippingOption }
-								options={ placeholderShippingMethods.map(
-									( option ) => ( {
-										label: option.label,
-										value: option.value,
-										description: [
-											option.price,
-											option.schedule,
-										]
-											.filter( Boolean )
-											.join( ' — ' ),
-									} )
+								noResultsMessage={ sprintf(
+									// translators: %s shipping destination.
+									__(
+										'No shipping options were found for %s.',
+										'woo-gutenberg-products-block'
+									),
+									// @todo Should display destination name,
+									// see: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1606
+									'location'
 								) }
+								selected={ selectedShippingRate }
+								renderOption={ ( option ) => ( {
+									label: option.name,
+									value: option.rate_id,
+									description: (
+										<Fragment>
+											{ option.price && (
+												<FormattedMonetaryAmount
+													currency={ getCurrencyFromPriceResponse(
+														option
+													) }
+													value={ option.price }
+												/>
+											) }
+											{ option.price &&
+											option.delivery_time
+												? ' — '
+												: null }
+											{ option.delivery_time }
+										</Fragment>
+									),
+								} ) }
 								onChange={ ( newSelectedShippingOption ) =>
-									setSelectedShippingOption(
+									setSelectedShippingRate(
 										newSelectedShippingOption
 									)
 								}
@@ -180,7 +197,7 @@ const Cart = () => {
 						) }
 						<TotalsItem
 							className="wc-block-cart__totals-footer"
-							currency={ currency }
+							currency={ totalsCurrency }
 							label={ __(
 								'Total',
 								'woo-gutenberg-products-block'

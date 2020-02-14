@@ -1,10 +1,22 @@
 .wc-block-radio-control__option {
-	display: flex;
-	position: relative;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	padding: $gap-small $gap-small $gap-small ($gap-larger * 2);
 	border-bottom: 1px solid $core-grey-light-600;
+	display: block;
+	padding: $gap-small $gap-small 0 ($gap-larger * 2);
+	position: relative;
+}
+
+.wc-block-radio-control__option-layout {
+	border-bottom: 1px solid $core-grey-light-600;
+	display: flex;
+	flex-wrap: wrap;
+	padding-bottom: $gap-small;
+	padding-left: $gap-large;
+	justify-content: space-between;
+}
+
+.wc-block-radio-control__option .wc-block-radio-control__option-layout {
+	border-bottom: 0;
+	padding-left: 0;
 }
 
 .wc-block-radio-control__input {
