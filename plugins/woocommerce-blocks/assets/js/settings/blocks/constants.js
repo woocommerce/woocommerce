@@ -35,3 +35,5 @@ export const ATTRIBUTES = getSetting( 'attributes', [] );
 export const WC_BLOCKS_ASSET_URL = getSetting( 'wcBlocksAssetUrl', '' );
 export const SHIPPING_COUNTRIES = getSetting( 'shippingCountries', {} );
 export const ALLOWED_COUNTRIES = getSetting( 'allowedCountries', {} );
+export const SHIPPING_COUNTIES = getSetting( 'shippingCounties', {} );
+export const ALLOWED_COUNTIES = getSetting( 'allowedCounties', {} );
