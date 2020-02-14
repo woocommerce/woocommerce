@@ -1,4 +1,4 @@
-.wc-block-country-input {
+.wc-block-select {
 	position: relative;
 	margin-top: $gap;
 
@@ -23,17 +23,23 @@
 
 	.components-custom-select-control__button {
 		background-color: #fff;
+		box-shadow: none;
+		color: $input-text-active;
+		font-family: inherit;
 		font-size: 16px;
 		font-weight: normal;
 		height: 100%;
+		letter-spacing: inherit;
 		line-height: 1;
 		padding: $gap-large $gap $gap-smallest;
+		text-transform: none;
 		width: 100%;
 
 		&:hover,
 		&:focus,
 		&:active {
 			background-color: #fff;
+			text-decoration: none;
 		}
 	}
 
@@ -48,5 +54,9 @@
 		font-size: 16px;
 		margin-left: 0;
 		padding-left: $gap;
+	}
+
+	.components-custom-select-control__item-icon {
+		display: none;
 	}
 }

@@ -2,14 +2,12 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
-import { CustomSelectControl } from 'wordpress-components';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
+import Select from '../select';
 
 const CountryInput = ( {
 	className,
@@ -24,19 +22,12 @@ const CountryInput = ( {
 	} ) );
 
 	return (
-		<CustomSelectControl
-			className={ classnames( 'wc-block-country-input', className, {
-				'is-active': value,
-			} ) }
+		<Select
+			className={ className }
 			label={ label }
+			onChange={ onChange }
 			options={ options }
-			onChange={ ( { selectedItem } ) => {
-				onChange( selectedItem.key );
-			} }
-			value={ {
-				key: value,
-				name: decodeEntities( countries[ value ] ),
-			} }
+			value={ options.find( ( option ) => option.key === value ) }
 		/>
 	);
 };

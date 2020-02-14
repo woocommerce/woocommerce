@@ -52,6 +52,8 @@ class Checkout extends AbstractBlock {
 		);
 		$data_registry->add( 'allowedCountries', WC()->countries->get_allowed_countries() );
 		$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
+		$data_registry->add( 'allowedCounties', WC()->countries->get_allowed_country_states() );
+		$data_registry->add( 'shippingCounties', WC()->countries->get_shipping_country_states() );
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
 		return $content;
 	}
