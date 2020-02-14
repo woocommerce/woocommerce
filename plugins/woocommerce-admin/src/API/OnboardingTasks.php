@@ -185,6 +185,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Block content.
 	 */
 	private static function get_homepage_cover_block( $image ) {
+		$shop_url = get_permalink( wc_get_page_id( 'shop' ) );
 		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
 			return '<!-- wp:cover {"url":"' . esc_url( $image['url'] ) . '","id":' . intval( $image['id'] ) . '} -->
 			<div class="wp-block-cover has-background-dim" style="background-image:url(' . esc_url( $image['url'] ) . ')"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
@@ -196,7 +197,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			<!-- /wp:paragraph -->
 
 			<!-- wp:button {"align":"center"} -->
-			<div class="wp-block-button aligncenter"><a class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce-admin' ) . '</a></div>
+			<div class="wp-block-button aligncenter"><a href="' . esc_url( $shop_url ) . '" class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce-admin' ) . '</a></div>
 			<!-- /wp:button --></div></div>
 			<!-- /wp:cover -->';
 		}
@@ -211,7 +212,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		<!-- /wp:paragraph -->
 
 		<!-- wp:button {"align":"center"} -->
-		<div class="wp-block-button aligncenter"><a class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce-admin' ) . '</a></div>
+		<div class="wp-block-button aligncenter"><a href="' . esc_url( $shop_url ) . '" class="wp-block-button__link">' . __( 'Go shopping', 'woocommerce-admin' ) . '</a></div>
 		<!-- /wp:button --></div></div>
 		<!-- /wp:cover -->';
 	}
