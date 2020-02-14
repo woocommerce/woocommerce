@@ -304,10 +304,10 @@ class WC_Structured_Data {
 					$markup['review'][] = array(
 						'@type'         => 'Review',
 						'reviewRating'  => array(
-                            '@type'		=> 'Rating',
-                            'bestRating'	=> '5',
-                            'ratingValue'	=> get_comment_meta( $comment->comment_ID, 'rating', true ),
-                            'worstRating'	=> '1',
+							'@type'       => 'Rating',
+							'bestRating'  => '5',
+							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
+							'worstRating' => '1',
 						),
 						'author'        => array(
 							'@type' => 'Person',
