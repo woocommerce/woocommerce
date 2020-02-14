@@ -58,7 +58,7 @@ jobs:
           script:
               - phpunit
         - name: PHP Linting Check
-          php: 7.1
+          php: 7.3
           env:
               - WP_TRAVISCI=phpcs
               - WOOCOMMERCE_BLOCKS_PHASE=experimental
@@ -69,19 +69,19 @@ jobs:
               - npm install
               - npm run test
           env:
-            - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=experimental
         - name: Javascript/CSS Lint and Bundle Size Check
           script:
               - npm install
               - npm run build:ci
           env:
-            - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=experimental
         - name: E2E Tests
           script:
-            - npm install
-            - npm run docker:up
-            - composer install
-            - npm run build:e2e-test
-            - npm run test:e2e
+              - npm install
+              - npm run docker:up
+              - composer install
+              - npm run build:e2e-test
+              - npm run test:e2e
           env:
-            - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=experimental
