@@ -146,7 +146,8 @@
 		"react-number-format": "4.3.1",
 		"trim-html": "0.1.9",
 		"use-debounce": "3.3.0",
-		"wordpress-components": "npm:@wordpress/components@8.5.0"
+		"wordpress-components": "npm:@wordpress/components@8.5.0",
+		"wordpress-element": "npm:@wordpress/element@2.11.0"
 	},
 	"husky": {
 		"hooks": {
