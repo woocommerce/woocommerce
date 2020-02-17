@@ -10,7 +10,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import TextInput from '../text-input';
 import Select from '../select';
 
-const CountyInput = ( {
+const StateInput = ( {
 	className,
 	counties,
 	country,
@@ -46,7 +46,7 @@ const CountyInput = ( {
 	);
 };
 
-CountyInput.propTypes = {
+StateInput.propTypes = {
 	counties: PropTypes.objectOf(
 		PropTypes.oneOfType( [
 			PropTypes.array,
@@ -60,4 +60,4 @@ CountyInput.propTypes = {
 	value: PropTypes.string,
 };
 
-export default CountyInput;
+export default StateInput;

@@ -50,6 +50,7 @@ class Cart extends AbstractBlock {
 			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
 		);
 		$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
+		$data_registry->add( 'shippingCounties', WC()->countries->get_shipping_country_states() );
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
 			$this->block_name . '-frontend',
 			$this->block_name . '-block-frontend'

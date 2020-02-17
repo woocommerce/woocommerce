@@ -7,17 +7,17 @@ import { SHIPPING_COUNTIES } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import CountyInput from './county-input.js';
+import StateInput from './state-input.js';
 
-const ShippingCountyInput = ( props ) => {
-	return <CountyInput counties={ SHIPPING_COUNTIES } { ...props } />;
+const ShippingStateInput = ( props ) => {
+	return <StateInput counties={ SHIPPING_COUNTIES } { ...props } />;
 };
 
-ShippingCountyInput.propTypes = {
+ShippingStateInput.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	className: PropTypes.string,
 	label: PropTypes.string,
 	value: PropTypes.string,
 };
 
-export default ShippingCountyInput;
+export default ShippingStateInput;
