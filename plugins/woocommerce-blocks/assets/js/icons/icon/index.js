@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { cloneElement, isValidElement } from '@wordpress/element';
-import { SVG } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
 function Icon( { srcElement, size = 24, ...props } ) {
@@ -17,12 +16,7 @@ function Icon( { srcElement, size = 24, ...props } ) {
 }
 
 Icon.propTypes = {
-	srcElement: PropTypes.oneOfType( [
-		PropTypes.instanceOf( SVG ),
-		// HTMLImageElement is a global interface
-		// eslint-disable-next-line no-undef
-		PropTypes.instanceOf( HTMLImageElement ),
-	] ),
+	srcElement: PropTypes.element,
 	size: PropTypes.number,
 };
 
