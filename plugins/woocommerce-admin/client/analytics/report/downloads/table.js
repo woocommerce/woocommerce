@@ -9,18 +9,18 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { defaultTableDateFormat, getCurrentDates } from 'lib/date';
+import { getCurrentDates, defaultTableDateFormat } from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
 
-export default class CouponsReportTable extends Component {
+export default class DownloadsReportTable extends Component {
 	constructor() {
 		super();
 
@@ -68,6 +68,7 @@ export default class CouponsReportTable extends Component {
 	getRowsContent( downloads ) {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
+		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
 
 		return map( downloads, ( download ) => {
 			const {
@@ -97,7 +98,7 @@ export default class CouponsReportTable extends Component {
 					display: (
 						<Date
 							date={ date }
-							visibleFormat={ defaultTableDateFormat }
+							visibleFormat={ dateFormat }
 						/>
 					),
 					value: date,

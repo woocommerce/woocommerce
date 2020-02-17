@@ -22,6 +22,7 @@ import {
 	renderCurrency,
 } from 'lib/currency-format';
 import { formatValue } from 'lib/number-format';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -110,7 +111,9 @@ class RevenueReportTable extends Component {
 	}
 
 	getRowsContent( data = [] ) {
-		return data.map( ( row ) => {
+		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+
+    return data.map( ( row ) => {
 			const {
 				coupons,
 				gross_sales: grossSales,
@@ -140,7 +143,7 @@ class RevenueReportTable extends Component {
 					display: (
 						<Date
 							date={ row.date_start }
-							visibleFormat={ defaultTableDateFormat }
+							visibleFormat={ dateFormat }
 						/>
 					),
 					value: row.date_start,

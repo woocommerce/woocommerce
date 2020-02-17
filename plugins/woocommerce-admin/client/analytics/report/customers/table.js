@@ -8,11 +8,11 @@ import { Tooltip } from '@wordpress/components';
 /**
  * WooCommerce dependencies
  */
-import { defaultTableDateFormat } from 'lib/date';
 import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from 'lib/number-format';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { defaultTableDateFormat } from 'lib/date';
 
 const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
 
@@ -113,6 +113,8 @@ export default class CustomersReportTable extends Component {
 	}
 
 	getRowsContent( customers ) {
+		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+
 		return customers.map( ( customer ) => {
 			const {
 				avg_order_value: avgOrderValue,
@@ -145,7 +147,7 @@ export default class CustomersReportTable extends Component {
 			const dateLastActiveDisplay = dateLastActive ? (
 				<Date
 					date={ dateLastActive }
-					visibleFormat={ defaultTableDateFormat }
+					visibleFormat={ dateFormat }
 				/>
 			) : (
 				'—'
@@ -154,7 +156,7 @@ export default class CustomersReportTable extends Component {
 			const dateRegisteredDisplay = dateRegistered ? (
 				<Date
 					date={ dateRegistered }
-					visibleFormat={ defaultTableDateFormat }
+					visibleFormat={ dateFormat }
 				/>
 			) : (
 				'—'

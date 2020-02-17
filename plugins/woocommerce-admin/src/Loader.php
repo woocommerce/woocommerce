@@ -690,6 +690,7 @@ class Loader {
 		$settings['wcVersion']         = WC_VERSION;
 		$settings['siteUrl']           = site_url();
 		$settings['onboardingEnabled'] = self::is_onboarding_enabled();
+		$settings['dateFormat']        = get_option( 'date_format' );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
