@@ -21,7 +21,7 @@ registerBlockType( 'woocommerce/product-categories', {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Show your product categories as a list or dropdown.',
+		'Show all product categories as a list or dropdown.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {

@@ -23,7 +23,7 @@ registerBlockType( 'woocommerce/product-search', {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Help visitors find your products.',
+		'A search box to allow customers to search for products by keyword.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {

@@ -23,7 +23,7 @@ const blockSettings = {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display all products from your store as a grid.',
+		'Display products from your store in a grid layout.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {
