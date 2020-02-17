@@ -18,6 +18,33 @@
 	.wc-block-cart__item-count {
 		float: right;
 	}
+	.wc-block-cart__change-address {
+		white-space: nowrap;
+	}
+	.wc-block-cart__change-address-button {
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		color: inherit;
+		font-family: inherit;
+		font-weight: inherit;
+		display: inline;
+		font-weight: inherit;
+		letter-spacing: inherit;
+		margin: 0;
+		padding: 0;
+		text-decoration: underline;
+		text-transform: none;
+		vertical-align: middle;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background: transparent;
+			opacity: 0.8;
+		}
+	}
 	.wc-block-cart__totals-footer {
 		color: #000;
 		font-size: 1.25em;

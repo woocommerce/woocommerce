@@ -4,13 +4,17 @@
 
 	label {
 		position: absolute;
-		transform: translateX(#{$gap}) translateY(#{$gap-small});
+		transform: translateY(#{$gap-small});
 		transform-origin: top left;
 		transition: all 200ms ease;
 		font-size: 16px;
 		line-height: 22px;
 		color: $gray-50;
 		z-index: 1;
+		margin: 0 $gap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{  2 * $gap });
 
 		@media screen and (prefers-reduced-motion: reduce) {
 			transition: none;
@@ -18,7 +22,7 @@
 	}
 
 	&.is-active label {
-		transform: translateX(#{$gap}) translateY(#{$gap-smallest}) scale(0.75);
+		transform: translateY(#{$gap-smallest}) scale(0.75);
 	}
 
 	.components-custom-select-control__button {
@@ -28,10 +32,12 @@
 		font-family: inherit;
 		font-size: 16px;
 		font-weight: normal;
-		height: 100%;
+		height: 48px;
 		letter-spacing: inherit;
 		line-height: 1;
+		overflow: hidden;
 		padding: $gap-large $gap $gap-smallest;
+		text-overflow: ellipsis;
 		text-transform: none;
 		width: 100%;
 
