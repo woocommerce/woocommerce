@@ -20,7 +20,7 @@ registerBlockType( 'woocommerce/attribute-filter', {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display a list of filters based on a chosen product attribute. Works in combination with the All Products block.',
+		'Allow customers to filter the grid by product attribute, such as color. Works in combination with the All Products block.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {

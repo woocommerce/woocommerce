@@ -20,7 +20,7 @@ registerBlockType( 'woocommerce/price-filter', {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display a slider to filter products in your store by price. Works in combination with the All Products block.',
+		'Allow customers to filter the products by choosing a lower or upper price limit. Works in combination with the All Products block.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {

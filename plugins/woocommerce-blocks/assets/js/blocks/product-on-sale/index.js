@@ -24,7 +24,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display a grid of on sale products.',
+		'Display a grid of products currently on sale.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {

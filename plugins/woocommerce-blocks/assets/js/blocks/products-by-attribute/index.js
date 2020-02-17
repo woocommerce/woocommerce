@@ -24,7 +24,7 @@ registerBlockType( blockTypeName, {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display a grid of products from your selected attributes.',
+		'Display a grid of products with selected attributes.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {
