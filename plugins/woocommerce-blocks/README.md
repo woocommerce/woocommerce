@@ -4,6 +4,10 @@ Feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to ite
 
 If you're just looking to use these blocks, update to the latest version of WooCommerce! The blocks are bundled into WooCommerce since version 3.6, and can be added from the "WooCommerce" section in the block inserter.
 
+## Documentation
+
+To find out more about the blocks and how to use them, [check out the documentation on WooCommerce.com](https://docs.woocommerce.com/document/woocommerce-blocks/).
+
 If you want to see what we're working on for future versions, or want to help out, read on.
 
 ## Table of Contents
