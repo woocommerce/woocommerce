@@ -451,12 +451,16 @@ export function getReportTableData( options ) {
 		},
 	};
 
+	// Disable eslint rule requiring `items` to be defined below because the next two if statements
+	// depend on `getReportItems` to have been called.
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	const items = getReportItems( endpoint, tableQuery );
+
 	if ( isReportItemsRequesting( endpoint, tableQuery ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportItemsError( endpoint, tableQuery ) ) {
 		return { ...response, isError: true };
 	}
 
-	const items = getReportItems( endpoint, tableQuery );
 	return { ...response, items };
 }
