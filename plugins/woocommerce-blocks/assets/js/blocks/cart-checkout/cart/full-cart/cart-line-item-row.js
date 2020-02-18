@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, RawHTML } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
@@ -26,7 +26,15 @@ const calcPriceDifference = ( subtotal, total ) => {
 
 const ProductVariationDetails = ( { variation } ) => {
 	const variationsText = variation
-		.map( ( v ) => `${ v.attribute }: ${ v.value }` )
+		.map( ( v ) => {
+			if ( v.attribute ) {
+				return `${ decodeEntities( v.attribute ) }: ${ decodeEntities(
+					v.value
+				) }`;
+			}
+			// Support for product attributes with no name/key
+			return `${ decodeEntities( v.value ) }`;
+		} )
 		.join( ' / ' );
 
 	return (
@@ -39,7 +47,7 @@ const ProductVariationDetails = ( { variation } ) => {
 const CartLineItemRow = ( { lineItem } ) => {
 	const {
 		name,
-		description,
+		summary,
 		images,
 		variation,
 		quantity,
@@ -117,7 +125,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 				<div className="wc-block-cart-item__product-name">{ name }</div>
 				{ lowStockBadge }
 				<div className="wc-block-cart-item__product-metadata">
-					{ description }
+					<RawHTML>{ summary }</RawHTML>
 					<ProductVariationDetails variation={ variation } />
 				</div>
 			</td>
@@ -147,7 +155,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 CartLineItemRow.propTypes = {
 	lineItem: PropTypes.shape( {
 		name: PropTypes.string.isRequired,
-		description: PropTypes.string.isRequired,
+		summary: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
 		quantity: PropTypes.number.isRequired,
 		low_stock_remaining: PropTypes.number,

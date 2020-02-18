@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, Fragment } from '@wordpress/element';
 import {
@@ -15,7 +16,6 @@ import {
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { Card, CardBody } from 'wordpress-components';
-import { previewCartItems } from '@woocommerce/resource-previews';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -34,25 +34,11 @@ const onActivateCoupon = ( couponCode ) => {
 	// eslint-disable-next-line no-console
 	console.log( 'coupon activated: ' + couponCode );
 };
-const cartTotals = {
-	currency: 'EUR',
-	currency_minor_unit: 2,
-	total_items: '6000',
-	total_items_tax: '0',
-	total_fees: '0',
-	total_fees_tax: '0',
-	total_discount: '0',
-	total_discount_tax: '0',
-	total_shipping: '0',
-	total_shipping_tax: '0',
-	total_tax: '0',
-	total_price: '6000',
-};
 
 /**
  * Component that renders the Cart block when user has something in cart aka "full".
  */
-const Cart = () => {
+const Cart = ( { cartItems = [], cartTotals = {} } ) => {
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState();
 	const [
 		shippingCalculatorAddress,
@@ -67,7 +53,6 @@ const Cart = () => {
 	/**
 	 * Given an API response with cart totals, generates an array of rows to display in the Cart block.
 	 *
-	 * @param {Object} cartTotals - Cart totals data as provided by the API.
 	 * @return {Object[]} Values to display in the cart block.
 	 */
 	const getTotalRowsConfig = () => {
@@ -141,8 +126,8 @@ const Cart = () => {
 	return (
 		<div className="wc-block-cart">
 			<div className="wc-block-cart__main">
-				<CartLineItemsTitle itemCount={ previewCartItems.length } />
-				<CartLineItemsTable lineItems={ previewCartItems } />
+				<CartLineItemsTitle itemCount={ cartItems.length } />
+				<CartLineItemsTable lineItems={ cartItems } />
 			</div>
 			<div className="wc-block-cart__sidebar">
 				<Card isElevated={ true }>
@@ -250,6 +235,20 @@ const Cart = () => {
 	);
 };
 
-Cart.propTypes = {};
+Cart.propTypes = {
+	cartItems: PropTypes.array,
+	cartTotals: PropTypes.shape( {
+		total_items: PropTypes.string,
+		total_items_tax: PropTypes.string,
+		total_fees: PropTypes.string,
+		total_fees_tax: PropTypes.string,
+		total_discount: PropTypes.string,
+		total_discount_tax: PropTypes.string,
+		total_shipping: PropTypes.string,
+		total_shipping_tax: PropTypes.string,
+		total_tax: PropTypes.string,
+		total_price: PropTypes.string,
+	} ),
+};
 
 export default Cart;
