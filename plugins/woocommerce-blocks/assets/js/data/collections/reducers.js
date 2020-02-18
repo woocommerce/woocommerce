@@ -14,6 +14,22 @@ import { hasInState, updateState } from '../utils';
  *                            any changes.
  */
 const receiveCollection = ( state = {}, action ) => {
+	// Update last modified and previous last modified values.
+	if ( action.type === types.RECEIVE_LAST_MODIFIED ) {
+		if ( action.timestamp === state.lastModified ) {
+			return state;
+		}
+		return {
+			...state,
+			lastModified: action.timestamp,
+		};
+	}
+
+	// When invalidating data, remove stored values from state.
+	if ( action.type === types.INVALIDATE_RESOLUTION_FOR_STORE ) {
+		return {};
+	}
+
 	const { type, namespace, resourceName, queryString, response } = action;
 	// ids are stringified so they can be used as an index.
 	const ids = action.ids ? JSON.stringify( action.ids ) : '[]';

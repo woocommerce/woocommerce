@@ -67,19 +67,18 @@ export const useCollection = ( options ) => {
 				return null;
 			}
 			const store = select( storeKey );
-			// filter out query if it is undefined.
 			const args = [
 				namespace,
 				resourceName,
 				currentQuery,
 				currentResourceValues,
 			];
-
-			// is there an error? if so return it.
 			const error = store.getCollectionError( ...args );
+
 			if ( error ) {
-				// Throw an exception within setState - this is needed because
-				// this is a hook (https://github.com/facebook/react/issues/14981).
+				// Is there an error? If so, throw an exception.
+				// This uses setState because useCollection is a hook.
+				// See https://github.com/facebook/react/issues/14981
 				setState( () => {
 					throw error;
 				} );

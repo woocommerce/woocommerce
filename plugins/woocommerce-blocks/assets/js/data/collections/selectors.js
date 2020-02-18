@@ -132,3 +132,13 @@ export const getCollectionHeader = (
 	}
 	return null;
 };
+
+/**
+ * Gets the last modified header for the collection.
+ *
+ * @param {string} state The current collection state.
+ * @return {number} Timestamp.
+ */
+export const getCollectionLastModified = ( state ) => {
+	return state.lastModified || 0;
+};

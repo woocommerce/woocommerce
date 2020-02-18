@@ -225,22 +225,22 @@ class ProductQuery {
 	}
 
 	/**
-	 * Get objects.
+	 * Get results of query.
 	 *
 	 * @param \WP_REST_Request $request Request data.
 	 * @return array
 	 */
-	public function get_objects( $request ) {
+	public function get_results( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
 
 		add_filter( 'posts_clauses', [ $this, 'add_query_clauses' ], 10, 2 );
 
 		$query       = new \WP_Query();
-		$result      = $query->query( $query_args );
+		$results     = $query->query( $query_args );
 		$total_posts = $query->found_posts;
 
 		// Out-of-bounds, run the query again without LIMIT for total count.
-		if ( $total_posts < 1 ) {
+		if ( $total_posts < 1 && $query_args['paged'] > 1 ) {
 			unset( $query_args['paged'] );
 			$count_query = new \WP_Query();
 			$count_query->query( $query_args );
@@ -250,10 +250,37 @@ class ProductQuery {
 		remove_filter( 'posts_clauses', [ $this, 'add_query_clauses' ], 10 );
 
 		return [
-			'objects' => array_map( 'wc_get_product', $result ),
+			'results' => $results,
 			'total'   => (int) $total_posts,
 			'pages'   => (int) ceil( $total_posts / (int) $query->query_vars['posts_per_page'] ),
 		];
+	}
+
+	/**
+	 * Get objects.
+	 *
+	 * @param \WP_REST_Request $request Request data.
+	 * @return array
+	 */
+	public function get_objects( $request ) {
+		$results = $this->get_results( $request );
+
+		return [
+			'objects' => array_map( 'wc_get_product', $results['results'] ),
+			'total'   => $results['total'],
+			'pages'   => $results['pages'],
+		];
+	}
+
+	/**
+	 * Get last modified date for all products.
+	 *
+	 * @return int timestamp.
+	 */
+	public function get_last_modified() {
+		global $wpdb;
+
+		return strtotime( $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" ) );
 	}
 
 	/**

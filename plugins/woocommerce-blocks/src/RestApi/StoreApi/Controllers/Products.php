@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use \WP_Error as RestError;
 use \WP_REST_Server as RestServer;
 use \WP_REST_Controller as RestController;
+use \WP_REST_Response as RestResponse;
 use \WC_REST_Exception as RestException;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductSchema;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\Pagination;
@@ -148,19 +149,25 @@ class Products extends RestController {
 	 * @return RestError|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$query_results = $this->product_query->get_objects( $request );
-		$objects       = array();
+		$response = new RestResponse();
 
-		foreach ( $query_results['objects'] as $object ) {
-			$data      = $this->prepare_item_for_response( $object, $request );
-			$objects[] = $this->prepare_response_for_collection( $data );
+		// Only get objects during GET requests.
+		if ( 'GET' === $request->get_method() ) {
+			$query_results    = $this->product_query->get_objects( $request );
+			$response_objects = [];
+
+			foreach ( $query_results['objects'] as $object ) {
+				$data               = $this->prepare_item_for_response( $object, $request );
+				$response_objects[] = $this->prepare_response_for_collection( $data );
+			}
+
+			$response->set_data( $response_objects );
+		} else {
+			$query_results = $this->product_query->get_results( $request );
 		}
 
-		$total     = $query_results['total'];
-		$max_pages = $query_results['pages'];
-
-		$response = rest_ensure_response( $objects );
-		$response = ( new Pagination() )->add_headers( $response, $request, $total, $max_pages );
+		$response = ( new Pagination() )->add_headers( $response, $request, $query_results['total'], $query_results['pages'] );
+		$response->header( 'Last-Modified', $this->product_query->get_last_modified() );
 
 		return $response;
 	}
