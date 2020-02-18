@@ -19,6 +19,7 @@ import {
 	ExpressCheckoutFormControl,
 	PaymentMethods,
 } from '@woocommerce/base-components/payment-methods';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -286,9 +287,11 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 								} )
 							}
 							renderOption={ ( option ) => ( {
-								label: option.name,
+								label: decodeEntities( option.name ),
 								value: option.rate_id,
-								description: option.description,
+								description: decodeEntities(
+									option.description
+								),
 								secondaryLabel: (
 									<FormattedMonetaryAmount
 										currency={ getCurrencyFromPriceResponse(
@@ -297,7 +300,9 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 										value={ option.price }
 									/>
 								),
-								secondaryDescription: option.delivery_time,
+								secondaryDescription: decodeEntities(
+									option.delivery_time
+								),
 							} ) }
 							selected={ shippingMethod.methods }
 						/>
