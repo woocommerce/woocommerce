@@ -39,8 +39,6 @@ matrix:
     php: 7.4
     script:
       - composer require wp-cli/i18n-command
-      - nvm install 10
-      - npm install
       - npm run build
       - docker-compose up --build -d
       - bash tests/bin/run-e2e-CI.sh
@@ -65,6 +63,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - nvm install 10
   - npm install
   - composer install --no-dev
   - |
