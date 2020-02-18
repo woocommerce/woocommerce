@@ -116,6 +116,16 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.13 - 2020-02-18 =
+- Respect hidden products in All Products block. #1753
+
+= 2.5.12 - 2020-02-05 =
+- Fix ratings appearing as text in the editor instead. #1650
+- Fix error with the All Products block and Internet Explorer 11 when adding products to the cart. #1642
+- bug: Check for instance of WooCommerce and WP_Error before initializing session and cart in `rest_authentication_errors` callback. #1698
+- Fix display of price slider when using RTL languages. #1651
+- Renamed the "all products" align option so it's clear the final element gets alignment, not just buttons. #1659
+
 = 2.5.11 - 2020-01-20 =
 - bug: Fix a javascript error when editing All Products inner blocks "Link to Product Page" option #1593
 - bug: Fix an issue in All Products when ordering by newness was reversed #1598
