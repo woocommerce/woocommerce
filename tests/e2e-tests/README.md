@@ -7,8 +7,8 @@ Automated end-to-end tests for WooCommerce.
 - [Pre-requisites](#pre-requisites)
   - [Install NodeJS](#install-nodejs)
   - [Install Docker](#install-docker)
-  - [Configuration](#configuration)
-      - [Test Environment Configuration](#test-environment-configuration)
+  - [Configuration (how it works under the hood)](#configuration-(how it-works-under-the-hood))
+      - [Test Environment](#test-environment)
       - [Environment Variables](#environment-variables)
 - [Jest test sequencer](#jest-test-sequencer)      
 - [Running tests](#running-tests)
@@ -44,9 +44,9 @@ Once installed, you should see `Docker Desktop is running` message with the gree
 
 Note, that if you install docker through other methods such as homebrew, for example, your steps to set it up will be different. The commands listed in steps below may also vary.
 
-### Configuration
+### Configuration (how it works under the hood)
 
-#### Test Environment Configuration
+#### Test Environment
 
 We recommend using Docker for running tests locally in order for the test environment to match the setup on Travis CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is being copied to the `plugins` folder of that newly built test site. No WooCommerce Docker image is being built or needed.
 
@@ -82,7 +82,9 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 
 ### Prep work for running tests
 
-- Checkout the branch to test and stay on this branch. 
+- `cd` to the WooCommerce plugin folder
+
+- `git checkout master` or checkout the branch where you need to run tests 
 
 - Run `npm install`
 
@@ -100,6 +102,8 @@ wordpress-cli_1             | Success: Created user 2.
 woocommerce_wordpress-cli_1 exited with code 0
 woocommerce_wordpress-cli_1 exited with code 0
 ```
+
+For more Docker commands, scroll down to [Docker basics](#docker-basics).
 
 - Open new terminal window and `cd` to the current branch again.
 
@@ -126,7 +130,7 @@ Tests are being run headless by default. However, sometimes it's useful to obser
 npm run test:e2e-dev
 ```
 
-The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by editing `PUPPETEER_SLOWMO` variable in `./tests/e2e-tests/config/jest-puppeteer.dev.config.js` file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
+The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by editing `PUPPETEER_SLOWMO` variable in `./tests/bin/e2e-test-integration.js` file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
 
 ### How to run an individual test
 
@@ -194,7 +198,8 @@ Tests are kept in `tests/e2e-tests/specs` folder.
 
 The following packages are being used to write tests:
 
-- `e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils).
+- `e2e-test-utils` - End-To-End (E2E) test utils for WordPress. You can find the full list of utils [here](https://github.com/WordPress/gutenberg/tree/master/packages/e2e-test-utils);
+- `puppeteer-utils` - Utilities and configuration for running puppeteer against WordPress. See details in the [package's repository](https://github.com/Automattic/puppeteer-utils). 
 
 ## Debugging tests 
 
