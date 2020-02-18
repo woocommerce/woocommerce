@@ -71,6 +71,13 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.25.1 2020-02-07 =
+
+- Dev: Enable onboarding #3651 (Onboarding) 
+- Now `decodeEntities` method is used to correct the breadcrumb. #3653 (Activity Panel) 
+- Fix: Fix styling of search control in report table header and filters. #3603 (Analytics, Components, Packages) 
+🤯
+
 = 0.25.0 2020-01-29 =
 
 - Fix: Onboarding: Mark profiler complete on WC update #3590 (On Merge to WC Core, Onboarding) 
