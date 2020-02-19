@@ -44,5 +44,5 @@ export const IS_SHIPPING_COST_HIDDEN = getSetting(
 export const WC_BLOCKS_ASSET_URL = getSetting( 'wcBlocksAssetUrl', '' );
 export const SHIPPING_COUNTRIES = getSetting( 'shippingCountries', {} );
 export const ALLOWED_COUNTRIES = getSetting( 'allowedCountries', {} );
-export const SHIPPING_COUNTIES = getSetting( 'shippingCounties', {} );
-export const ALLOWED_COUNTIES = getSetting( 'allowedCounties', {} );
+export const SHIPPING_STATES = getSetting( 'shippingStates', {} );
+export const ALLOWED_STATES = getSetting( 'allowedStates', {} );
