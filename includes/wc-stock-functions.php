@@ -311,7 +311,7 @@ function wc_get_held_stock_quantity( WC_Product $product, $exclude_order_id = 0 
 		return 0;
 	}
 
-	return ( new \Automattic\WooCommerce\Checkout\Helpers() )->get_reserved_stock( $product, $exclude_order_id );
+	return ( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->get_reserved_stock( $product, $exclude_order_id );
 }
 
 /**
@@ -337,7 +337,7 @@ function wc_reserve_stock_for_order( $order ) {
 	$order = wc_get_order( $order );
 
 	if ( $order ) {
-		( new \Automattic\WooCommerce\Checkout\Helpers() )->reserve_stock_for_order( $order );
+		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->reserve_stock_for_order( $order );
 	}
 }
 add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' );
@@ -363,7 +363,7 @@ function wc_release_stock_for_order( $order ) {
 	$order = wc_get_order( $order );
 
 	if ( $order ) {
-		( new \Automattic\WooCommerce\Checkout\Helpers() )->release_stock_for_order( $order );
+		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->release_stock_for_order( $order );
 	}
 }
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );
