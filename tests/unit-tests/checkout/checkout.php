@@ -157,11 +157,12 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		return 0.01;
 	}
 
-	 * Helper method to create a managed product and a order for that product .
+	/**
+	 * Helper method to create a managed product and a order for that product.
 	 *
-	 * @return array( WC_Product, WC_Order ) array
+	 * @return array
 	 * @throws Exception When unable to create an order .
-	 * /
+	 */
 	protected function create_order_for_managed_inventory_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_props( array( 'manage_stock' => true ) );
@@ -202,16 +203,6 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_stock_managed_by_id(), 2 );
 
 		$this->assertEquals( false, WC()->cart->check_cart_items() );
-	}
-
-	/**
-	 * Legacy version for test `test_create_order_when_out_of_stock` above.
-	 *
-	 * @throws Exception When unable to create order.
-	 */
-	public function test_create_order_when_out_of_stock_legacy() {
-		add_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
-		$this->test_create_order_when_out_of_stock();
 	}
 
 	/**
