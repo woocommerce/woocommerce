@@ -2,14 +2,15 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { __, sprintf } from '@wordpress/i18n';
-import { useState, Fragment, useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { useState, useEffect } from '@wordpress/element';
 import {
 	TotalsCouponCodeInput,
 	TotalsItem,
 } from '@woocommerce/base-components/totals';
 import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
 import ShippingCalculator from '@woocommerce/base-components/shipping-calculator';
+import ShippingLocation from '@woocommerce/base-components/shipping-location';
 import {
 	COUPONS_ENABLED,
 	SHIPPING_ENABLED,
@@ -82,7 +83,6 @@ const Cart = ( {
 	 * Given an API response with cart totals, generates an array of rows to display in the Cart block.
 	 *
 	 * @return {Object[]} Values to display in the cart block.
-	 * @param cartTotals
 	 */
 	const getTotalRowsConfig = () => {
 		const totalItems = parseInt( cartTotals.total_items, 10 );
@@ -137,16 +137,15 @@ const Cart = ( {
 					? totalShipping + totalShippingTax
 					: totalShipping,
 				description: (
-					<Fragment>
-						{ __(
-							'Shipping to location',
-							'woo-gutenberg-products-block'
-						) + ' ' }
+					<>
+						<ShippingLocation
+							address={ shippingCalculatorAddress }
+						/>
 						<ShippingCalculator
 							address={ shippingCalculatorAddress }
 							setAddress={ setShippingCalculatorAddress }
 						/>
-					</Fragment>
+					</>
 				),
 			} );
 		}
@@ -176,22 +175,16 @@ const Cart = ( {
 						  }
 						: null
 				}
-				noResultsMessage={ sprintf(
-					// translators: %s shipping destination.
-					__(
-						'No shipping options were found for %s.',
-						'woo-gutenberg-products-block'
-					),
-					// @todo Should display destination name,
-					// see: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1606
-					'location'
+				noResultsMessage={ __(
+					'No shipping options were found.',
+					'woo-gutenberg-products-block'
 				) }
 				selected={ selectedShippingRate }
 				renderOption={ ( option ) => ( {
 					label: decodeEntities( option.name ),
 					value: option.rate_id,
 					description: (
-						<Fragment>
+						<>
 							{ option.price && (
 								<FormattedMonetaryAmount
 									currency={ getCurrencyFromPriceResponse(
@@ -204,7 +197,7 @@ const Cart = ( {
 								? ' — '
 								: null }
 							{ decodeEntities( option.delivery_time ) }
-						</Fragment>
+						</>
 					),
 				} ) }
 				onChange={ ( newSelectedShippingOption ) =>

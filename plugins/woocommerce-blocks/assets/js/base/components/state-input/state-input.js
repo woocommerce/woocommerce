@@ -13,19 +13,19 @@ import Select from '../select';
 
 const StateInput = ( {
 	className,
-	counties,
+	states,
 	country,
 	label,
 	onChange,
 	autoComplete = 'off',
 	value = '',
 } ) => {
-	const countryCounties = counties[ country ];
+	const countryStates = states[ country ];
 	const options =
-		countryCounties && Object.keys( countryCounties ).length > 0
-			? Object.keys( countryCounties ).map( ( key ) => ( {
+		countryStates && Object.keys( countryStates ).length > 0
+			? Object.keys( countryStates ).map( ( key ) => ( {
 					key,
-					name: decodeEntities( countryCounties[ key ] ),
+					name: decodeEntities( countryStates[ key ] ),
 			  } ) )
 			: [];
 
@@ -89,7 +89,7 @@ const StateInput = ( {
 };
 
 StateInput.propTypes = {
-	counties: PropTypes.objectOf(
+	states: PropTypes.objectOf(
 		PropTypes.oneOfType( [
 			PropTypes.array,
 			PropTypes.objectOf( PropTypes.string ),

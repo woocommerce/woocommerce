@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ALLOWED_COUNTIES } from '@woocommerce/block-settings';
+import { ALLOWED_STATES } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { ALLOWED_COUNTIES } from '@woocommerce/block-settings';
 import StateInput from './state-input.js';
 
 const BillingStateInput = ( props ) => {
-	return <StateInput counties={ ALLOWED_COUNTIES } { ...props } />;
+	return <StateInput states={ ALLOWED_STATES } { ...props } />;
 };
 
 BillingStateInput.propTypes = {
