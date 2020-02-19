@@ -7,10 +7,10 @@ Automated end-to-end tests for WooCommerce.
 - [Pre-requisites](#pre-requisites)
   - [Install NodeJS](#install-nodejs)
   - [Install Docker](#install-docker)
-  - [Configuration (how it works under the hood)](#configuration-(how it-works-under-the-hood))
-      - [Test Environment](#test-environment)
-      - [Environment Variables](#environment-variables)
-- [Jest test sequencer](#jest-test-sequencer)      
+- [Configuration](#configuration)
+  - [Test Environment](#test-environment)
+  - [Environment Variables](#environment-variables)
+  - [Jest test sequencer](#jest-test-sequencer)      
 - [Running tests](#running-tests)
   - [Prep work for running tests](#prep-work-for-running-tests)
   - [How to run tests in headless mode](#how-to-run-tests-in-headless-mode) 
@@ -44,13 +44,15 @@ Once installed, you should see `Docker Desktop is running` message with the gree
 
 Note, that if you install docker through other methods such as homebrew, for example, your steps to set it up will be different. The commands listed in steps below may also vary.
 
-### Configuration (how it works under the hood)
+## Configuration
 
-#### Test Environment
+This section explains how e2e tests are working behind the scenes. These are not instructions on how to build environment for running e2e tests and run them. If you are looking for instructions on how to run e2e tests, jump to [Running tests](#running-tests). 
+
+### Test Environment
 
 We recommend using Docker for running tests locally in order for the test environment to match the setup on Travis CI (where Docker is also used for running tests). [An official WordPress Docker image](https://github.com/docker-library/docs/blob/master/wordpress/README.md) is used to build the site. Once the site using the WP Docker image is built, the current WooCommerce dev branch is being copied to the `plugins` folder of that newly built test site. No WooCommerce Docker image is being built or needed.
 
-#### Environment Variables
+### Environment Variables
 
 During the process of Docker building a container with test site for running tests, site URL is being set. Admin and customer users are also being created in advance with details specified in the `docker-compose.yaml` file. As a result, there is `./tests/e2e-tests/config/default.json` file that contains pre-set variables needed to run the test:
 
@@ -72,7 +74,7 @@ During the process of Docker building a container with test site for running tes
 
 If you changed either site URL or one of the users details in the  `docker-compose.yaml` file, you'd need to copy the content of the `default.json`, paste it to `test:e2e.json` and edit it further there to match your own setup. 
 
-## Jest test sequencer
+### Jest test sequencer
 
 [Jest](https://jestjs.io/) is being used to run e2e tests. By default, jest runs tests ordered by the time it takes to run the test (the test that takes longer to run will be run first, the test that takes less time to run will run last). Jest sequencer introduces tools that can be used to specify the order in which the tests are being run. In our case, they are being run in alphabetical order of the directories where tests are located. This way, tests in the new directory `activate-and-setup` will run first. 
 
