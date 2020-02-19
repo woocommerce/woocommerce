@@ -37,19 +37,9 @@ final class ReserveStock {
 	 * @param int       $minutes How long to reserve stock in minutes. Defaults to woocommerce_hold_stock_minutes.
 	 */
 	public function reserve_stock_for_order( \WC_Order $order, $minutes = 0 ) {
-		/**
-		 * Filter: woocommerce_should_reserve_stock_for_orders
-		 * Allows enable/disable hold stock functionality on checkout.
-		 *
-		 * @param bool $enabled Default to true.
-		 */
-		if ( ! apply_filters( 'woocommerce_should_reserve_stock_for_orders', true ) ) {
-			return;
-		}
+		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
 
-		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 10 );
-
-		if ( ! $minutes || ! wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) {
+		if ( ! $minutes ) {
 			return;
 		}
 
