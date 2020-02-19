@@ -26,12 +26,21 @@ export const HOME_URL = getSetting( 'homeUrl', '' );
 export const SHOP_URL = getSetting( 'shopUrl', '' );
 export const CHECKOUT_URL = getSetting( 'checkoutUrl', '' );
 export const COUPONS_ENABLED = getSetting( 'couponsEnabled', true );
+export const SHIPPING_ENABLED = getSetting( 'shippingEnabled', true );
 export const DISPLAY_PRICES_INCLUDING_TAXES = getSetting(
 	'displayPricesIncludingTaxes',
 	false
 );
 export const PRODUCT_COUNT = getSetting( 'productCount', 0 );
 export const ATTRIBUTES = getSetting( 'attributes', [] );
+export const IS_SHIPPING_CALCULATOR_ENABLED = getSetting(
+	'isShippingCalculatorEnabled',
+	true
+);
+export const IS_SHIPPING_COST_HIDDEN = getSetting(
+	'isShippingCostHidden',
+	false
+);
 export const WC_BLOCKS_ASSET_URL = getSetting( 'wcBlocksAssetUrl', '' );
 export const SHIPPING_COUNTRIES = getSetting( 'shippingCountries', {} );
 export const ALLOWED_COUNTRIES = getSetting( 'allowedCountries', {} );

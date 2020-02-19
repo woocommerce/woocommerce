@@ -33,7 +33,7 @@ const TotalsCouponCodeInput = ( { componentId, onSubmit } ) => {
 					htmlFor={ `wc-block-coupon-code__input-${ componentId }` }
 				/>
 			}
-			initialOpen={ false }
+			initialOpen={ true }
 		>
 			<PanelRow className="wc-block-coupon-code__row">
 				<TextInput
