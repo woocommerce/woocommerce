@@ -367,7 +367,6 @@ class WC_Checkout {
 			}
 
 			$order->hold_applied_coupons( $data['billing_email'] );
-			$order->hold_stock_for_checkout( WC()->cart );
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
@@ -401,13 +400,30 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			/**
+			 * Action hook fired after an order is created used to add custom meta to the order.
+			 *
+			 * @since 3.0.0
+			 */
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
+
+			/**
+			 * Action hook fired after an order is created.
+			 *
+			 * @since 4.0.0
+			 */
+			do_action( 'woocommerce_checkout_order_created', $order );
 
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order && $order instanceof WC_Order ) {
 				$order->get_data_store()->release_held_coupons( $order );
-				$order->release_held_stock();
+				/**
+				 * Action hook fired when an order is discarded due to Exception.
+				 *
+				 * @since 4.0.0
+				 */
+				do_action( 'woocommerce_checkout_order_exception', $order );
 			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
