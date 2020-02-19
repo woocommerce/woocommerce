@@ -140,7 +140,7 @@
 	"dependencies": {
 		"@woocommerce/components": "4.0.0",
 		"classnames": "2.2.6",
-		"compare-versions": "3.5.1",
+		"compare-versions": "3.6.0",
 		"downshift": "4.0.8",
 		"config": "3.2.5",
 		"react-number-format": "4.3.1",
