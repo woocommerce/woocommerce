@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, Fragment } from '@wordpress/element';
+import { useState, Fragment, useEffect } from '@wordpress/element';
 import {
 	TotalsCouponCodeInput,
 	TotalsItem,
@@ -12,6 +12,7 @@ import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-co
 import ShippingCalculator from '@woocommerce/base-components/shipping-calculator';
 import {
 	COUPONS_ENABLED,
+	SHIPPING_ENABLED,
 	DISPLAY_PRICES_INCLUDING_TAXES,
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
@@ -38,7 +39,12 @@ const onActivateCoupon = ( couponCode ) => {
 /**
  * Component that renders the Cart block when user has something in cart aka "full".
  */
-const Cart = ( { cartItems = [], cartTotals = {} } ) => {
+const Cart = ( {
+	cartItems = [],
+	cartTotals = {},
+	isShippingCalculatorEnabled,
+	isShippingCostHidden,
+} ) => {
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState();
 	const [
 		shippingCalculatorAddress,
@@ -50,10 +56,33 @@ const Cart = ( { cartItems = [], cartTotals = {} } ) => {
 		country: '',
 	} );
 
+	const [ showShippingCosts, setShowShippingCosts ] = useState(
+		! isShippingCostHidden
+	);
+	useEffect( () => {
+		if ( ! SHIPPING_ENABLED ) {
+			return setShowShippingCosts( false );
+		}
+		if ( isShippingCalculatorEnabled ) {
+			if ( isShippingCostHidden ) {
+				if ( shippingCalculatorAddress.country ) {
+					return setShowShippingCosts( true );
+				}
+			} else {
+				return setShowShippingCosts( true );
+			}
+		}
+		return setShowShippingCosts( false );
+	}, [
+		isShippingCalculatorEnabled,
+		isShippingCostHidden,
+		shippingCalculatorAddress,
+	] );
 	/**
 	 * Given an API response with cart totals, generates an array of rows to display in the Cart block.
 	 *
 	 * @return {Object[]} Values to display in the cart block.
+	 * @param cartTotals
 	 */
 	const getTotalRowsConfig = () => {
 		const totalItems = parseInt( cartTotals.total_items, 10 );
@@ -96,33 +125,94 @@ const Cart = ( { cartItems = [], cartTotals = {} } ) => {
 				value: totalTax,
 			} );
 		}
-		const totalShipping = parseInt( cartTotals.total_shipping, 10 );
-		const totalShippingTax = parseInt( cartTotals.total_shipping_tax, 10 );
-		totalRowsConfig.push( {
-			label: __( 'Shipping:', 'woo-gutenberg-products-block' ),
-			value: DISPLAY_PRICES_INCLUDING_TAXES
-				? totalShipping + totalShippingTax
-				: totalShipping,
-			description: (
-				<Fragment>
-					{ __(
-						'Shipping to location',
-						'woo-gutenberg-products-block'
-					) + ' ' }
-					<ShippingCalculator
-						address={ shippingCalculatorAddress }
-						setAddress={ setShippingCalculatorAddress }
-					/>
-				</Fragment>
-			),
-		} );
-
+		if ( SHIPPING_ENABLED && isShippingCalculatorEnabled ) {
+			const totalShipping = parseInt( cartTotals.total_shipping, 10 );
+			const totalShippingTax = parseInt(
+				cartTotals.total_shipping_tax,
+				10
+			);
+			totalRowsConfig.push( {
+				label: __( 'Shipping:', 'woo-gutenberg-products-block' ),
+				value: DISPLAY_PRICES_INCLUDING_TAXES
+					? totalShipping + totalShippingTax
+					: totalShipping,
+				description: (
+					<Fragment>
+						{ __(
+							'Shipping to location',
+							'woo-gutenberg-products-block'
+						) + ' ' }
+						<ShippingCalculator
+							address={ shippingCalculatorAddress }
+							setAddress={ setShippingCalculatorAddress }
+						/>
+					</Fragment>
+				),
+			} );
+		}
 		return totalRowsConfig;
 	};
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalRowsConfig = getTotalRowsConfig( cartTotals );
 
+	const ShippingCalculatorOptions = () => (
+		<fieldset className="wc-block-cart__shipping-options-fieldset">
+			<legend className="screen-reader-text">
+				{ __(
+					'Choose the shipping method.',
+					'woo-gutenberg-products-block'
+				) }
+			</legend>
+			<ShippingRatesControl
+				className="wc-block-cart__shipping-options"
+				address={
+					shippingCalculatorAddress.country
+						? {
+								city: shippingCalculatorAddress.city,
+								state: shippingCalculatorAddress.state,
+								postcode: shippingCalculatorAddress.postcode,
+								country: shippingCalculatorAddress.country,
+						  }
+						: null
+				}
+				noResultsMessage={ sprintf(
+					// translators: %s shipping destination.
+					__(
+						'No shipping options were found for %s.',
+						'woo-gutenberg-products-block'
+					),
+					// @todo Should display destination name,
+					// see: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1606
+					'location'
+				) }
+				selected={ selectedShippingRate }
+				renderOption={ ( option ) => ( {
+					label: decodeEntities( option.name ),
+					value: option.rate_id,
+					description: (
+						<Fragment>
+							{ option.price && (
+								<FormattedMonetaryAmount
+									currency={ getCurrencyFromPriceResponse(
+										option
+									) }
+									value={ option.price }
+								/>
+							) }
+							{ option.price && option.delivery_time
+								? ' — '
+								: null }
+							{ decodeEntities( option.delivery_time ) }
+						</Fragment>
+					),
+				} ) }
+				onChange={ ( newSelectedShippingOption ) =>
+					setSelectedShippingRate( newSelectedShippingOption )
+				}
+			/>
+		</fieldset>
+	);
 	return (
 		<div className="wc-block-cart">
 			<div className="wc-block-cart__main">
@@ -149,70 +239,7 @@ const Cart = ( { cartItems = [], cartTotals = {} } ) => {
 								/>
 							)
 						) }
-						<fieldset className="wc-block-cart__shipping-options-fieldset">
-							<legend className="screen-reader-text">
-								{ __(
-									'Choose the shipping method.',
-									'woo-gutenberg-products-block'
-								) }
-							</legend>
-							<ShippingRatesControl
-								className="wc-block-cart__shipping-options"
-								address={
-									shippingCalculatorAddress.country
-										? {
-												city:
-													shippingCalculatorAddress.city,
-												state:
-													shippingCalculatorAddress.state,
-												postcode:
-													shippingCalculatorAddress.postcode,
-												country:
-													shippingCalculatorAddress.country,
-										  }
-										: null
-								}
-								noResultsMessage={ sprintf(
-									// translators: %s shipping destination.
-									__(
-										'No shipping options were found for %s.',
-										'woo-gutenberg-products-block'
-									),
-									// @todo Should display destination name,
-									// see: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1606
-									'location'
-								) }
-								selected={ selectedShippingRate }
-								renderOption={ ( option ) => ( {
-									label: decodeEntities( option.name ),
-									value: option.rate_id,
-									description: (
-										<Fragment>
-											{ option.price && (
-												<FormattedMonetaryAmount
-													currency={ getCurrencyFromPriceResponse(
-														option
-													) }
-													value={ option.price }
-												/>
-											) }
-											{ option.price &&
-											option.delivery_time
-												? ' — '
-												: null }
-											{ decodeEntities(
-												option.delivery_time
-											) }
-										</Fragment>
-									),
-								} ) }
-								onChange={ ( newSelectedShippingOption ) =>
-									setSelectedShippingRate(
-										newSelectedShippingOption
-									)
-								}
-							/>
-						</fieldset>
+						{ showShippingCosts && <ShippingCalculatorOptions /> }
 						{ COUPONS_ENABLED && (
 							<TotalsCouponCodeInput
 								onSubmit={ onActivateCoupon }
