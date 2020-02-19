@@ -22,12 +22,13 @@ const TextInput = ( {
 	screenReaderLabel,
 	disabled,
 	help,
+	autoComplete = 'off',
 	value = '',
 	onChange,
 } ) => {
 	const [ isActive, setIsActive ] = useState( false );
 	const onChangeValue = ( event ) => onChange( event.target.value );
-	const textInputId = id || componentId;
+	const textInputId = id || 'textinput-' + componentId;
 
 	return (
 		<div
@@ -35,19 +36,11 @@ const TextInput = ( {
 				'is-active': isActive || value,
 			} ) }
 		>
-			<Label
-				label={ label }
-				screenReaderLabel={ screenReaderLabel || label }
-				wrapperElement="label"
-				wrapperProps={ {
-					htmlFor: textInputId,
-				} }
-				htmlFor={ textInputId }
-			/>
 			<input
 				type={ type }
 				id={ textInputId }
 				value={ value }
+				autoComplete={ autoComplete }
 				onChange={ onChangeValue }
 				onFocus={ () => setIsActive( true ) }
 				onBlur={ () => setIsActive( false ) }
@@ -56,6 +49,15 @@ const TextInput = ( {
 				aria-describedby={
 					!! help ? textInputId + '__help' : undefined
 				}
+			/>
+			<Label
+				label={ label }
+				screenReaderLabel={ screenReaderLabel || label }
+				wrapperElement="label"
+				wrapperProps={ {
+					htmlFor: textInputId,
+				} }
+				htmlFor={ textInputId }
 			/>
 			{ !! help && (
 				<p
@@ -78,6 +80,7 @@ TextInput.propTypes = {
 	screenReaderLabel: PropTypes.string,
 	disabled: PropTypes.bool,
 	help: PropTypes.string,
+	autoComplete: PropTypes.string,
 };
 
 export default withComponentId( TextInput );
