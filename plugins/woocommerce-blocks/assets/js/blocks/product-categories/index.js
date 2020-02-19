@@ -31,6 +31,7 @@ registerBlockType( 'woocommerce/product-categories', {
 	example: {
 		attributes: {
 			hasCount: true,
+			hasImage: false,
 		},
 	},
 	attributes: {
@@ -40,6 +41,14 @@ registerBlockType( 'woocommerce/product-categories', {
 		hasCount: {
 			type: 'boolean',
 			default: true,
+		},
+
+		/**
+		 * Whether to show the category image in each category.
+		 */
+		hasImage: {
+			type: 'boolean',
+			default: false,
 		},
 
 		/**

@@ -10,6 +10,38 @@
 	}
 }
 
+.wc-block-product-categories-list--has-images {
+	list-style: none outside;
+
+	.wc-block-product-categories-list-item {
+		margin: 4px 0 4px 60px;
+		list-style: none outside;
+		clear: both;
+
+		ul {
+			margin: 4px 0 0;
+		}
+	}
+
+	.wc-block-product-categories-list-item__image {
+		max-width: 50px;
+		display: inline-block;
+		position: relative;
+		padding: 0;
+		margin: 0;
+		margin-right: 0.5em;
+		margin-left: -60px;
+		position: relative;
+		vertical-align: middle;
+		border: 1px solid #eee;
+
+		img {
+			margin: 0;
+			padding: 0;
+		}
+	}
+}
+
 .wc-block-product-categories-list-item-count::before {
 	content: " (";
 }

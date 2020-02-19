@@ -30,10 +30,52 @@ const EmptyPlaceholder = () => (
  */
 const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 	const getInspectorControls = () => {
-		const { hasCount, hasEmpty, isDropdown, isHierarchical } = attributes;
+		const {
+			hasCount,
+			hasImage,
+			hasEmpty,
+			isDropdown,
+			isHierarchical,
+		} = attributes;
 
 		return (
 			<InspectorControls key="inspector">
+				<PanelBody
+					title={ __(
+						'List Settings',
+						'woo-gutenberg-products-block'
+					) }
+					initialOpen
+				>
+					<ToggleButtonControl
+						label={ __(
+							'Display style',
+							'woo-gutenberg-products-block'
+						) }
+						value={ isDropdown ? 'dropdown' : 'list' }
+						options={ [
+							{
+								label: __(
+									'List',
+									'woo-gutenberg-products-block'
+								),
+								value: 'list',
+							},
+							{
+								label: __(
+									'Dropdown',
+									'woo-gutenberg-products-block'
+								),
+								value: 'dropdown',
+							},
+						] }
+						onChange={ ( value ) =>
+							setAttributes( {
+								isDropdown: value === 'dropdown',
+							} )
+						}
+					/>
+				</PanelBody>
 				<PanelBody
 					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
 					initialOpen
@@ -59,6 +101,29 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 							setAttributes( { hasCount: ! hasCount } )
 						}
 					/>
+					{ ! isDropdown && (
+						<ToggleControl
+							label={ __(
+								'Show category images',
+								'woo-gutenberg-products-block'
+							) }
+							help={
+								hasImage
+									? __(
+											'Category images are visible.',
+											'woo-gutenberg-products-block'
+									  )
+									: __(
+											'Category images are hidden.',
+											'woo-gutenberg-products-block'
+									  )
+							}
+							checked={ hasImage }
+							onChange={ () =>
+								setAttributes( { hasImage: ! hasImage } )
+							}
+						/>
+					) }
 					<ToggleControl
 						label={ __(
 							'Show hierarchy',
@@ -101,42 +166,6 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 						checked={ hasEmpty }
 						onChange={ () =>
 							setAttributes( { hasEmpty: ! hasEmpty } )
-						}
-					/>
-				</PanelBody>
-				<PanelBody
-					title={ __(
-						'List Settings',
-						'woo-gutenberg-products-block'
-					) }
-					initialOpen
-				>
-					<ToggleButtonControl
-						label={ __(
-							'Display style',
-							'woo-gutenberg-products-block'
-						) }
-						value={ isDropdown ? 'dropdown' : 'list' }
-						options={ [
-							{
-								label: __(
-									'List',
-									'woo-gutenberg-products-block'
-								),
-								value: 'list',
-							},
-							{
-								label: __(
-									'Dropdown',
-									'woo-gutenberg-products-block'
-								),
-								value: 'dropdown',
-							},
-						] }
-						onChange={ ( value ) =>
-							setAttributes( {
-								isDropdown: value === 'dropdown',
-							} )
 						}
 					/>
 				</PanelBody>
