@@ -1,0 +1,16 @@
+.wc-block-loading-mask {
+	position: relative;
+	min-height: 18px + $gap;
+
+	.components-spinner {
+		position: absolute;
+		margin: 0;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}
+
+.wc-blocks-loading-mask__children {
+	opacity: 0.5;
+}
