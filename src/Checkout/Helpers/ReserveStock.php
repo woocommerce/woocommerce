@@ -152,26 +152,6 @@ final class ReserveStock {
 	}
 
 	/**
-	 * Returns query statement for getting current `_stock` of a product.
-	 *
-	 * @todo Once merged to woo core data store, this method can be removed.
-	 * @internal MAX function below is used to make sure result is a scalar.
-	 * @param int $product_id Product ID.
-	 * @return string|void Query statement.
-	 */
-	private function get_query_for_stock( $product_id ) {
-		global $wpdb;
-		return $wpdb->prepare(
-			"
-			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
-			WHERE meta_table.meta_key = '_stock'
-			AND meta_table.post_id = %d
-			",
-			$product_id
-		);
-	}
-
-	/**
 	 * Returns query statement for getting reserved stock of a product.
 	 *
 	 * @param int     $product_id Product ID.
