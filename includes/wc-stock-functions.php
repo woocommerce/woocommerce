@@ -334,7 +334,7 @@ function wc_reserve_stock_for_order( $order ) {
 		return;
 	}
 
-	$order = wc_get_order( $order );
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
 		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->reserve_stock_for_order( $order );
@@ -360,17 +360,17 @@ function wc_release_stock_for_order( $order ) {
 		return;
 	}
 
-	$order = wc_get_order( $order );
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
 		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->release_stock_for_order( $order );
 	}
 }
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );
-add_action( 'woocommerce_order_status_cancelled', 'wc_release_stock_for_order' );
-add_action( 'woocommerce_order_status_completed', 'wc_release_stock_for_order' );
-add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order' );
-add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order' );
+add_action( 'woocommerce_order_status_cancelled', 'wc_release_stock_for_order', 11 );
+add_action( 'woocommerce_order_status_completed', 'wc_release_stock_for_order', 11 );
+add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );
+add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11 );
 
 /**
  * Return low stock amount to determine if notification needs to be sent
