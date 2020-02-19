@@ -2059,43 +2059,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Returns query statement for getting current `_stock` of a product.
 	 *
-	 * @since 3.9.0
+	 * @internal MAX function below is used to make sure result is a scalar.
 	 * @param int $product_id Product ID.
 	 * @return string|void Query statement.
 	 */
 	public function get_query_for_stock( $product_id ) {
 		global $wpdb;
 		return $wpdb->prepare(
-			// MAX function below is used to make sure result is a scalar.
 			"
-			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta
-			WHERE {$wpdb->postmeta}.meta_key = '_stock'
-			AND {$wpdb->postmeta}.post_id = %d
-			FOR UPDATE
+			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
+			WHERE meta_table.meta_key = '_stock'
+			AND meta_table.post_id = %d
 			",
-			$product_id
-		);
-	}
-
-	/**
-	 * Returns query statement for getting quantity of stock held by orders in checkout.
-	 *
-	 * @since 3.9.0
-	 * @param int $product_id Product ID.
-	 * @return string|void Query statement.
-	 */
-	public function get_query_for_held_stock( $product_id ) {
-		global $wpdb;
-		return $wpdb->prepare(
-			"
-			SELECT COALESCE ( SUM( meta_value ), 0 ) FROM $wpdb->postmeta
-			WHERE {$wpdb->postmeta}.meta_key like %s
-			AND {$wpdb->postmeta}.meta_key > CONCAT( %s, UNIX_TIMESTAMP() )
-			AND {$wpdb->postmeta}.post_id = %d
-			FOR UPDATE
-			",
-			'_held_for_checkout_%',
-			'_held_for_checkout_',
 			$product_id
 		);
 	}
