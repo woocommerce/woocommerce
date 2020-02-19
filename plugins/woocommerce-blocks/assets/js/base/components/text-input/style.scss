@@ -6,6 +6,7 @@
 .wc-block-text-input label {
 	position: absolute;
 	transform: translateY(#{$gap-small});
+	left: 0;
 	transform-origin: top left;
 	font-size: 16px;
 	line-height: 22px;
@@ -20,7 +21,9 @@
 		transition: none;
 	}
 }
-
+.wc-block-text-input input:-webkit-autofill + label {
+	transform: translateY(#{$gap-smallest}) scale(0.75);
+}
 .wc-block-text-input.is-active label {
 	transform: translateY(#{$gap-smallest}) scale(0.75);
 }
