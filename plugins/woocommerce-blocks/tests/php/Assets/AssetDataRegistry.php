@@ -31,6 +31,12 @@ class AssetDataRegistry extends WP_UnitTestCase {
 		$this->assertEquals( [ 'test' => 'foo' ], $this->registry->get() );
 	}
 
+	public function test_data_exists() {
+		$this->registry->add( 'foo', 'lorem-ipsum' );
+		$this->assertEquals( true, $this->registry->exists( 'foo' ) );
+		$this->assertEquals( false, $this->registry->exists( 'bar' ) );
+	}
+
 	public function test_add_lazy_data() {
 		$lazy = function () {
 			return 'bar';

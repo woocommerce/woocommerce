@@ -166,6 +166,16 @@ class AssetDataRegistry {
 	}
 
 	/**
+	 * Allows checking whether a key exists.
+	 *
+	 * @param string $key  The key to check if exists.
+	 * @return bool  Whether the key exists in the current data registry.
+	 */
+	public function exists( $key ) {
+		return array_key_exists( $key, $this->data );
+	}
+
+	/**
 	 * Interface for adding data to the registry.
 	 *
 	 * @param string $key  The key used to reference the data being registered.
