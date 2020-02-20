@@ -52,7 +52,7 @@ class WC_Admin_Notes_Onboarding_Profiler {
 		$note->add_action(
 			'continue-profiler',
 			__( 'Continue Store Setup', 'woocommerce-admin' ),
-			wc_admin_url(),
+			wc_admin_url( '&enable_onboarding=1' ),
 			'unactioned',
 			true
 		);

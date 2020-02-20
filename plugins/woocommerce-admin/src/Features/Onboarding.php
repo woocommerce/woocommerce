@@ -60,28 +60,69 @@ class Onboarding {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		// Adds the ability to toggle the new onboarding experience on or off.
-		// @todo This option should be removed when merging the onboarding feature to core.
-		add_action( 'current_screen', array( $this, 'enable_onboarding' ) );
-		add_action( 'woocommerce_updated', array( $this, 'maybe_mark_complete' ) );
-
-		if ( ! Loader::is_onboarding_enabled() ) {
-			add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
-			return;
-		}
+		$this->add_toggle_actions();
 
 		// Include WC Admin Onboarding classes.
 		if ( self::should_show_tasks() ) {
 			OnboardingTasks::get_instance();
 		}
 
-		// Rest API hooks need to run before is_admin() checks.
-		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
-		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
-		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
+		if ( ! Loader::is_onboarding_enabled() ) {
+			return;
+		}
 
 		// Add onboarding notes.
 		new WC_Admin_Notes_Onboarding_Profiler();
+
+		// Add actions and filters.
+		$this->add_actions();
+		$this->add_filters();
+	}
+
+	/**
+	 * Adds the ability to toggle the new onboarding experience on or off.
+	 */
+	private function add_toggle_actions() {
+		// @todo This toggle option should be removed when a/b testing is complete.
+		add_action( 'current_screen', array( $this, 'enable_onboarding' ) );
+		add_action( 'woocommerce_updated', array( $this, 'maybe_mark_complete' ) );
+		// Track the onboarding toggle event earlier so they are captured before redirecting.
+		add_action( 'add_option_' . self::OPT_IN_OPTION, array( $this, 'track_onboarding_toggle' ), 1, 2 );
+		add_action( 'update_option_' . self::OPT_IN_OPTION, array( $this, 'track_onboarding_toggle' ), 1, 2 );
+
+		if ( ! Loader::is_onboarding_enabled() ) {
+			add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
+		}
+	}
+
+	/**
+	 * Add onboarding actions.
+	 */
+	private function add_actions() {
+		// Rest API hooks need to run before is_admin() checks.
+		add_action( 'woocommerce_theme_installed', array( $this, 'delete_themes_transient' ) );
+		add_action( 'after_switch_theme', array( $this, 'delete_themes_transient' ) );
+
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
+		add_action( 'current_screen', array( $this, 'finish_square_connect' ) );
+		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
+		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
+		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
+		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
+		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
+		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
+	}
+
+	/**
+	 * Add onboarding filters.
+	 */
+	private function add_filters() {
+		// Rest API hooks need to run before is_admin() checks.
+		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
 
 		if ( ! is_admin() ) {
 			return;
@@ -95,14 +136,6 @@ class Onboarding {
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
-		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
-		add_action( 'current_screen', array( $this, 'finish_square_connect' ) );
-		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
-		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
-		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
-		add_action( 'current_screen', array( $this, 'calypso_tests' ) );
-		add_action( 'current_screen', array( $this, 'redirect_wccom_install' ) );
-		add_action( 'current_screen', array( $this, 'redirect_old_onboarding' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
 	}
@@ -712,17 +745,25 @@ class Onboarding {
 
 		$enabled = 1 === absint( $_GET['enable_onboarding'] ); // phpcs:ignore CSRF ok.
 
-		wc_admin_record_tracks_event(
-			'wcadmin_onboarding_toggled',
-			array(
-				'previous'  => ! $enabled,
-				'new_value' => $enabled,
-			)
-		);
-
 		update_option( self::OPT_IN_OPTION, $enabled ? 'yes' : 'no' );
 		wp_safe_redirect( wc_admin_url() );
 		exit;
+	}
+
+	/**
+	 * Track changes to the onboarding option.
+	 *
+	 * @param mixed  $mixed Option name or previous value if option previously existed.
+	 * @param string $value Value of the updated option.
+	 */
+	public static function track_onboarding_toggle( $mixed, $value ) {
+		wc_admin_record_tracks_event(
+			'onboarding_toggled',
+			array(
+				'previous_value' => ! $value,
+				'new_value'      => $value,
+			)
+		);
 	}
 
 	/**

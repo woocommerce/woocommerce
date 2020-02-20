@@ -134,8 +134,8 @@ class Analytics {
 			array(
 				'id'     => 'woocommerce-analytics-customers',
 				'title'  => __( 'Customers', 'woocommerce-admin' ),
-				'parent' => 'woocommerce-analytics',
-				'path'   => '/analytics/customers',
+				'parent' => 'woocommerce',
+				'path'   => '/customers',
 			),
 			array(
 				'id'     => 'woocommerce-analytics-settings',

@@ -22,6 +22,7 @@ import Plugins from './steps/plugins';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
+import { recordEvent } from 'lib/tracks';
 import Start from './steps/start';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
@@ -160,6 +161,11 @@ class ProfileWizard extends Component {
 		const currentStepIndex = this.getSteps().findIndex(
 			( s ) => s.key === currentStep.key
 		);
+
+		recordEvent( 'storeprofiler_step_complete', {
+			step: currentStep.key,
+		} );
+
 		const nextStep = this.getSteps()[ currentStepIndex + 1 ];
 
 		if ( typeof nextStep === 'undefined' ) {
@@ -186,6 +192,7 @@ class ProfileWizard extends Component {
 	completeProfiler() {
 		const { notes, updateNote, updateProfileItems } = this.props;
 		updateProfileItems( { completed: true } );
+		recordEvent( 'storeprofiler_complete' );
 
 		const profilerNote = notes.find(
 			( note ) => note.name === 'wc-admin-onboarding-profiler-reminder'

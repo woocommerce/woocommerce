@@ -154,6 +154,10 @@ class List extends Component {
 			selectedIndex,
 			staticList,
 		} = this.props;
+		const optionsHaveValues = options ? options[ 0 ].value.id !== '' : false;
+		if ( ! optionsHaveValues ) {
+			return null;
+		}
 		const listboxClasses = classnames(
 			'woocommerce-select-control__listbox',
 			{

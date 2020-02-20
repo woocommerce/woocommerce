@@ -165,7 +165,13 @@ class OnboardingTasks {
 	 * @return array
 	 */
 	public function component_settings( $settings ) {
-		$products = wp_count_posts( 'product' );
+		// Bail early if not on a wc-admin powered page, or task list shouldn't be shown.
+		if (
+			! \Automattic\WooCommerce\Admin\Loader::is_admin_page() ||
+			! \Automattic\WooCommerce\Admin\Features\Onboarding::should_show_tasks()
+		) {
+			return $settings;
+		}
 
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.

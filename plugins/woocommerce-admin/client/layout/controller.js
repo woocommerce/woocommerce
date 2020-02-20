@@ -73,6 +73,12 @@ export const getPages = () => {
 		} );
 		pages.push( {
 			container: AnalyticsReport,
+			path: '/customers',
+			breadcrumbs: [ __( 'Customers', 'woocommerce-admin' ) ],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+		} );
+		pages.push( {
+			container: AnalyticsReport,
 			path: '/analytics/:report',
 			breadcrumbs: ( { match } ) => {
 				const report = find( getReports(), {
