@@ -863,8 +863,7 @@ function wc_print_js() {
 		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
 		$wc_queued_js = str_replace( "\r", '', $wc_queued_js );
 
-		$js = "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) { $wc_queued_js });\n</script>\n";
-
+		$js = "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\ndocument.addEventListener(\"DOMContentLoaded\", function(event) {\njQuery(function($) { $wc_queued_js \n})\n})\n</script>\n";
 		/**
 		 * Queued jsfilter.
 		 *
