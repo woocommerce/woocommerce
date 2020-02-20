@@ -50,10 +50,18 @@ class Checkout extends AbstractBlock {
 		$data_registry = Package::container()->get(
 			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
 		);
-		$data_registry->add( 'allowedCountries', WC()->countries->get_allowed_countries() );
-		$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
-		$data_registry->add( 'allowedStates', WC()->countries->get_allowed_country_states() );
-		$data_registry->add( 'shippingStates', WC()->countries->get_shipping_country_states() );
+		if ( ! $data_registry->exists( 'allowedCountries' ) ) {
+			$data_registry->add( 'allowedCountries', WC()->countries->get_allowed_countries() );
+		}
+		if ( ! $data_registry->exists( 'shippingCountries' ) ) {
+			$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
+		}
+		if ( ! $data_registry->exists( 'allowedStates' ) ) {
+			$data_registry->add( 'allowedStates', WC()->countries->get_allowed_country_states() );
+		}
+		if ( ! $data_registry->exists( 'shippingStates' ) ) {
+			$data_registry->add( 'shippingStates', WC()->countries->get_shipping_country_states() );
+		}
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
 		return $content;
 	}
