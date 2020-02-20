@@ -305,7 +305,9 @@ class WC_Structured_Data {
 						'@type'         => 'Review',
 						'reviewRating'  => array(
 							'@type'       => 'Rating',
+							'bestRating'  => '5',
 							'ratingValue' => get_comment_meta( $comment->comment_ID, 'rating', true ),
+							'worstRating' => '1',
 						),
 						'author'        => array(
 							'@type' => 'Person',
@@ -350,7 +352,9 @@ class WC_Structured_Data {
 		if ( $rating ) {
 			$markup['reviewRating'] = array(
 				'@type'       => 'Rating',
+				'bestRating'  => '5',
 				'ratingValue' => $rating,
+				'worstRating' => '1',
 			);
 		} elseif ( $comment->comment_parent ) {
 			return;
