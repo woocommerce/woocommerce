@@ -16,7 +16,13 @@ const LoadingMask = ( {
 	className,
 	screenReaderLabel,
 	showSpinner = false,
+	isLoading = true,
 } ) => {
+	// If nothing is loading, just pass through the children.
+	if ( ! isLoading ) {
+		return children;
+	}
+
 	return (
 		<div className={ classNames( className, 'wc-block-loading-mask' ) }>
 			{ showSpinner && <Spinner /> }
@@ -38,6 +44,7 @@ LoadingMask.propTypes = {
 	className: PropTypes.string,
 	screenReaderLabel: PropTypes.string,
 	showSpinner: PropTypes.bool,
+	isLoading: PropTypes.bool,
 };
 
 export default LoadingMask;
