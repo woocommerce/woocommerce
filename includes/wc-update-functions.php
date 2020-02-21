@@ -2095,7 +2095,12 @@ function wc_update_400_increase_size_of_column() {
  * Reset ActionScheduler migration status. Needs AS >= 3.0 shipped with WC >= 4.0.
  */
 function wc_reset_action_scheduler_migration_status() {
-	\ActionScheduler_DataController::mark_migration_incomplete();
+	if (
+		class_exists( 'ActionScheduler_DataController' ) &&
+		method_exists( 'ActionScheduler_DataController', 'mark_migration_incomplete' )
+	) {
+		\ActionScheduler_DataController::mark_migration_incomplete();
+	}
 }
 
 /**
