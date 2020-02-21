@@ -1522,7 +1522,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$args['city']     = WC()->countries->get_base_city();
 		}
 
-		return $args;
+		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
 	}
 
 	/**
