@@ -15,9 +15,8 @@ If you want to see what we're working on for future versions, or want to help ou
 -   [Installing the stable version](#installing-the-stable-version)
 -   [Installing the development version](#installing-the-development-version)
 -   [Getting started with block development](#getting-started-with-block-development)
--   [Contributing](CONTRIBUTING.md)
-    -   [About the npm scripts](CONTRIBUTING.md#npm-scripts)
-    -   [Publishing a release](CONTRIBUTING.md#publishing-woocommerceblock-library)
+-   [Contributing](docs)
+    -   [Publishing a release](docs/releases/readme.md)
 -   Code Documentation
     -   [Blocks](assets/js/blocks)
     -   [Components](assets/js/components)
