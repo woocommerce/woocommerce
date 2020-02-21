@@ -77,6 +77,7 @@ const ShippingCalculatorAddress = ( { address: initialAddress, onUpdate } ) => {
 				className="wc-block-shipping-calculator-address__button"
 				disabled={ isShallowEqual( address, initialAddress ) }
 				onClick={ () => onUpdate( address ) }
+				type="submit"
 			>
 				{ __( 'Update', 'woo-gutenberg-products-block' ) }
 			</Button>
