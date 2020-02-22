@@ -474,7 +474,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'is_snoozable'      => array(
-					'description' => __( 'Whether or a user can request to be reminded about the note.', 'woocommerce-admin' ),
+					'description' => __( 'Whether or not a user can request to be reminded about the note.', 'woocommerce-admin' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
