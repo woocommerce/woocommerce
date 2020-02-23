@@ -158,4 +158,21 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 
 		return $order_item_type;
 	}
+
+	/**
+	 * Clear meta cache.
+	 *
+	 * @param int      $item_id Item ID.
+	 * @param int|null $order_id Order ID. If not set, it will be loaded using the item ID.
+	 */
+	protected function clear_cache( $item_id, $order_id ) {
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+
+		if ( ! $order_id ) {
+			$order_id = $this->get_order_id_by_order_item_id( $item_id );
+		}
+		if ( $order_id ) {
+			wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		}
+	}
 }
