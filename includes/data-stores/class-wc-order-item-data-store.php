@@ -40,7 +40,11 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 			)
 		);
 
-		return absint( $wpdb->insert_id );
+		$item_id = absint( $wpdb->insert_id );
+
+		$this->clear_cache( $item_id, $order_id );
+
+		return $item_id;
 	}
 
 	/**
@@ -53,7 +57,9 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 */
 	public function update_order_item( $item_id, $item ) {
 		global $wpdb;
-		return $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $item, array( 'order_item_id' => $item_id ) );
+		$updated = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $item, array( 'order_item_id' => $item_id ) );
+		$this->clear_cache( $item_id, null );
+		return $updated;
 	}
 
 	/**
@@ -63,6 +69,8 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  int $item_id Item ID.
 	 */
 	public function delete_order_item( $item_id ) {
+		$this->clear_cache( $item_id, null );
+
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
