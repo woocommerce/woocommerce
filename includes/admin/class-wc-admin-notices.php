@@ -105,6 +105,9 @@ class WC_Admin_Notices {
 	 */
 	public static function add_notice( $name ) {
 		self::$notices = array_unique( array_merge( self::get_notices(), array( $name ) ) );
+
+		// Adding early save to prevent more race conditions with notices.
+		self::store_notices();
 	}
 
 	/**
@@ -115,6 +118,9 @@ class WC_Admin_Notices {
 	public static function remove_notice( $name ) {
 		self::$notices = array_diff( self::get_notices(), array( $name ) );
 		delete_option( 'woocommerce_admin_notice_' . $name );
+
+		// Adding early save to prevent more race conditions with notices.
+		self::store_notices();
 	}
 
 	/**
@@ -218,7 +224,7 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * If we need to update, include a message with the update button.
+	 * If we need to update the database, include a message with the DB update button.
 	 */
 	public static function update_notice() {
 		if ( WC_Install::needs_db_update() ) {
