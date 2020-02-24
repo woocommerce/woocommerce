@@ -1,6 +1,18 @@
-# WooCommerce Unit Tests
+# WooCommerce Tests
 
-## Initial Setup
+## Table of contents
+
+- [WooCommerce Unit Tests](#woocommerce-unit-tests)
+  - [Initial Setup](#initial-setup)
+  - [Running Tests](#running-tests)
+  - [Writing Tests](#writing-tests)
+  - [Automated Tests](#automated-tests)
+  - [Code Coverage](#code-coverage)
+- [WooCommerce E2E Tests](#woocommerce-e2e-tests)
+
+## WooCommerce Unit Tests
+
+### Initial Setup
 
 From the WooCommerce root directory (if you are using VVV you might need to `vagrant ssh` first), run the following:
 
@@ -24,7 +36,7 @@ Example:
 
 **Important**: The `<db-name>` database will be created if it doesn't exist and all data will be removed during testing.
 
-## Running Tests
+### Running Tests
 
 Change to the plugin root directory and type:
 
@@ -40,7 +52,7 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
     $ vendor/bin/phpunit --coverage-text
 
-## Writing Tests
+### Writing Tests
 
 * Each test file should roughly correspond to an associated source file, e.g. the `formatting/functions.php` test file covers code in the `wc-formatting-functions.php` file
 * Each test method should cover a single method or function with one or more assertions
@@ -53,10 +65,14 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 * Filters persist between test cases so be sure to remove them in your test method or in the `tearDown()` method.
 * Use data providers where possible. Be sure that their name is like `data_provider_function_to_test` (i.e. the data provider for `test_is_postcode` would be `data_provider_test_is_postcode`). Read more about data providers [here](https://phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.data-providers).
 
-## Automated Tests
+### Automated Tests
 
 Tests are automatically run with [Travis-CI](https://travis-ci.org/woocommerce/woocommerce) for each commit and pull request.
 
-## Code Coverage
+### Code Coverage
 
-Code coverage is available on [Scrutinizer](https://scrutinizer-ci.com/g/woocommerce/woocommerce/) and [Codecov](https://codecov.io/gh/woocommerce/woocommerce/) which receives updated data after each Travis build.
+Code coverage is available on [Codecov](https://codecov.io/gh/woocommerce/woocommerce/) which receives updated data after each Travis build.
+
+## WooCommerce E2E Tests
+
+See [e2e-tests README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e-tests) to learn how to setup testing environment for running e2e tests and run them. 

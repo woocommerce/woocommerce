@@ -60,7 +60,7 @@ describe( 'Add New Simple Product Page', () => {
 	} );
 } );
 
-describe( 'Add New Variable Product Page', () => {
+describe.skip( 'Add New Variable Product Page', () => {
 	it( 'can create product with variations', async () => {
 		// Go to "add product" page
 		await StoreOwnerFlow.openNewProduct();
