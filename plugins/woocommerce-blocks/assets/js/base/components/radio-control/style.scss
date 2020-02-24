@@ -20,9 +20,32 @@
 }
 
 .wc-block-radio-control__input {
+	appearance: none;
+	background: #fff;
+	border: 2px solid currentColor;
+	border-radius: 50%;
+	display: inline-block;
+	height: 1rem;
+	margin: 0 0 0 -8px;
+	left: $gap-larger;
+	min-height: 16px;
+	min-width: 16px;
 	position: absolute;
-	left: $gap-large;
-	top: $gap-large;
+	top: $gap;
+	width: 1rem;
+
+	&:checked::before {
+		background: currentColor;
+		border-radius: 50%;
+		content: "";
+		display: block;
+		height: 8px;
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 8px;
+	}
 }
 
 .wc-block-radio-control__label,

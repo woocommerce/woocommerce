@@ -61,13 +61,12 @@
 		border: 0;
 	}
 	.wc-block-cart__shipping-options {
-		.wc-block-radio-control__label {
+		.wc-block-radio-control__label,
+		.wc-block-radio-control__description,
+		.wc-block-radio-control__secondary-label,
+		.wc-block-radio-control__secondary-description {
 			flex-basis: 100%;
-			line-height: 16px;
-		}
-
-		.wc-block-radio-control__description {
-			flex-basis: 100%;
+			text-align: left;
 		}
 
 		.wc-block-radio-control__option {
@@ -80,7 +79,7 @@
 
 		.wc-block-radio-control__input {
 			left: 0;
-			top: $gap;
+			margin: 0;
 		}
 	}
 }
