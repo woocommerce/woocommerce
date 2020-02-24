@@ -9,6 +9,7 @@ languages/*
 !languages/README.md
 woocommerce-admin.zip
 includes/feature-config.php
+storybook-static/
 
 # Directories/files that may appear in your environment
 .DS_Store
