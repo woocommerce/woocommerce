@@ -87,25 +87,23 @@ class WC_Tracker {
 	/**
 	 * Test whether this site is a staging site according to the Jetpack criteria.
 	 *
-	 * With Jetpack 8.1+, it uses \Automattic\Jetpack\Status::is_staging_site, with older JP,
-	 * it uses Jetpack::is_staging_site.
+	 * With Jetpack 8.1+, Jetpack::is_staging_site has been deprecated.
+	 * \Automattic\Jetpack\Status::is_staging_site is the replacement.
+	 * However, there are version of JP where \Automattic\Jetpack\Status exists, but does *not* contain is_staging_site method,
+	 * so with those, code still needs to use the previous check as a fallback.
 	 *
 	 * @return bool
 	 */
 	private static function is_jetpack_staging_site() {
-		$is_jp_staging = false;
 		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
 			// Preferred way of checking with Jetpack 8.1+.
 			$jp_status = new \Automattic\Jetpack\Status();
-			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) && $jp_status->is_staging_site() ) {
-				$is_jp_staging = true;
+			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+				return $jp_status->is_staging_site();
 			}
-		} else {
-			// Fallback for older Jetpack.
-			$is_jp_staging = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
 		}
 
-		return $is_jp_staging;
+		return ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
 	}
 
 	/**
