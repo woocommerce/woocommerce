@@ -554,6 +554,7 @@ class Onboarding {
 				'klarna-payments-for-woocommerce'     => 'klarna-payments-for-woocommerce/klarna-payments-for-woocommerce.php',
 				'woocommerce-square'                  => 'woocommerce-square/woocommerce-square.php',
 				'woocommerce-shipstation-integration' => 'woocommerce-shipstation-integration/woocommerce-shipstation.php',
+				'woocommerce-payfast-gateway'         => 'woocommerce-payfast-gateway/gateway-payfast.php',
 			)
 		);
 	}

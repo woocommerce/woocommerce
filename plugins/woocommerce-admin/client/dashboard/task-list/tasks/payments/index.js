@@ -36,6 +36,7 @@ import Stripe from './stripe';
 import Square from './square';
 import PayPal from './paypal';
 import Klarna from './klarna';
+import PayFast from './payfast';
 
 class Payments extends Component {
 	constructor() {
@@ -130,6 +131,7 @@ class Payments extends Component {
 			square: false,
 			create_stripe: this.isStripeEnabled(),
 			stripe_email: ( this.isStripeEnabled() && stripeEmail ) || '',
+			payfast: false,
 		};
 		return values;
 	}
@@ -229,6 +231,7 @@ class Payments extends Component {
 	getMethodOptions() {
 		const { getInputProps } = this.formData;
 		const { countryCode, profileItems } = this.props;
+
 		const methods = [
 			{
 				key: 'stripe',
@@ -318,6 +321,32 @@ class Payments extends Component {
 					) &&
 					[ 'US', 'CA', 'JP', 'GB', 'AU' ].includes( countryCode ),
 			},
+			{
+				key: 'payfast',
+				title: __( 'PayFast', 'woocommerce-admin' ),
+				content: (
+					<Fragment>
+						{ __(
+							'The PayFast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs.',
+							'woocommerce-admin'
+						) }
+						<p>
+							{ __(
+								'Selecting this extension will configure your store to use South African rands as the selected currency.',
+								'woocommerce-admin'
+							) }
+						</p>
+					</Fragment>
+				),
+				before: (
+					<img
+						src={ wcAssetUrl + 'images/payfast.png' }
+						alt="PayFast logo"
+					/>
+				),
+				after: <FormToggle { ...getInputProps( 'payfast' ) } />,
+				visible: [ 'ZA' ].includes( countryCode ),
+			},
 		];
 
 		return filter( methods, ( method ) => method.visible );
@@ -340,6 +369,7 @@ class Payments extends Component {
 			'klarna-checkout': values.klarna_checkout,
 			'klarna-payments': values.klarna_payments,
 			square: values.square,
+			payfast: values.payfast,
 		};
 		return keys( pickBy( methods ) );
 	}
@@ -352,6 +382,7 @@ class Payments extends Component {
 			'klarna-checkout-for-woocommerce': values.klarna_checkout,
 			'klarna-payments-for-woocommerce': values.klarna_payments,
 			'woocommerce-square': values.square,
+			'woocommerce-payfast-gateway': values.payfast,
 		};
 		return keys( pickBy( pluginSlugs ) );
 	}
@@ -380,7 +411,8 @@ class Payments extends Component {
 			values.paypal ||
 			values.klarna_checkout ||
 			values.klarna_payments ||
-			values.square;
+			values.square ||
+			values.payfast;
 
 		const { showIndividualConfigs } = this.state;
 		const { activePlugins, countryCode, isJetpackConnected } = this.props;
@@ -525,6 +557,21 @@ class Payments extends Component {
 				visible:
 					showIndividualConfigs &&
 					methods.includes( 'klarna-payments' ),
+			},
+			{
+				key: 'payfast',
+				label: __( 'Enable PayFast', 'woocommerce-admin' ),
+				description: __(
+					'Connect your store to your PayFast account',
+					'woocommerce-admin'
+				),
+				content: (
+					<PayFast
+						markConfigured={ this.markConfigured }
+						setRequestPending={ this.setMethodRequestPending }
+					/>
+				),
+				visible: showIndividualConfigs && methods.includes( 'payfast' ),
 			},
 		];
 
