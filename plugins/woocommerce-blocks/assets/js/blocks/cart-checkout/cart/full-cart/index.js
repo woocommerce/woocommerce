@@ -153,7 +153,7 @@ const Cart = ( {
 	};
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const totalRowsConfig = getTotalRowsConfig( cartTotals );
+	const totalRowsConfig = getTotalRowsConfig();
 
 	const ShippingCalculatorOptions = () => (
 		<fieldset className="wc-block-cart__shipping-options-fieldset">
