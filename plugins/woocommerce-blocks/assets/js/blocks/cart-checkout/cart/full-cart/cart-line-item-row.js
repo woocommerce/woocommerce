@@ -48,6 +48,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 	const {
 		name,
 		summary,
+		permalink,
 		images,
 		variation,
 		quantity,
@@ -116,13 +117,20 @@ const CartLineItemRow = ( { lineItem } ) => {
 	return (
 		<tr className="wc-block-cart-items__row">
 			<td className="wc-block-cart-item__image">
-				<img
-					{ ...imageProps }
-					alt={ decodeEntities( imageProps.alt ) }
-				/>
+				<a href={ permalink }>
+					<img
+						{ ...imageProps }
+						alt={ decodeEntities( imageProps.alt ) }
+					/>
+				</a>
 			</td>
 			<td className="wc-block-cart-item__product">
-				<div className="wc-block-cart-item__product-name">{ name }</div>
+				<a
+					className="wc-block-cart-item__product-name"
+					href={ permalink }
+				>
+					{ name }
+				</a>
 				{ lowStockBadge }
 				<div className="wc-block-cart-item__product-metadata">
 					<RawHTML>{ summary }</RawHTML>
