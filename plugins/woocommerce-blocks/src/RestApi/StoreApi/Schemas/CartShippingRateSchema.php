@@ -79,7 +79,21 @@ class CartShippingRateSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'items'       => [
-					'type' => 'string',
+					'type'       => 'object',
+					'properties' => [
+						'name'     => [
+							'description' => __( 'Name of the item.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'quantity' => [
+							'description' => __( 'Quantity of the item in the current package.', 'woo-gutenberg-products-block' ),
+							'type'        => 'number',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
 				],
 			],
 			'shipping_rates' => [
@@ -179,6 +193,15 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $package ) {
+		// Add product names and quantities.
+		$items = array();
+		foreach ( $package['contents'] as $item_id => $values ) {
+			$items[ $item_id ] = [
+				'name'     => $values['data']->get_name(),
+				'quantity' => $values['quantity'],
+			];
+		}
+
 		return [
 			'destination'    => (object) $this->prepare_html_response(
 				[
@@ -190,7 +213,7 @@ class CartShippingRateSchema extends AbstractSchema {
 					'country'   => $package['destination']['country'],
 				]
 			),
-			'items'          => array_values( wp_list_pluck( $package['contents'], 'key' ) ),
+			'items'          => $items,
 			'shipping_rates' => array_values( array_map( [ $this, 'get_rate_response' ], $package['rates'] ) ),
 		];
 	}

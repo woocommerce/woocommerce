@@ -8,7 +8,10 @@ import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { withFeedbackPrompt } from '@woocommerce/block-hocs';
 import ViewSwitcher from '@woocommerce/block-components/view-switcher';
-import { previewCart } from '@woocommerce/resource-previews';
+import {
+	previewCart,
+	previewShippingRates,
+} from '@woocommerce/resource-previews';
 import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
 
 /**
@@ -102,6 +105,7 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 										isShippingCalculatorEnabled={
 											isShippingCalculatorEnabled
 										}
+										shippingRates={ previewShippingRates }
 									/>
 								</Disabled>
 							</>

@@ -3,3 +3,22 @@
 	margin-bottom: 0;
 	padding-bottom: $gap-small;
 }
+
+.wc-block-shipping-rates-control__package-items {
+	display: block;
+	font-size: 75%;
+	list-style: none;
+	margin: 0;
+	padding: 0 0 $gap;
+}
+
+.wc-block-shipping-rates-control__package-item {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-shipping-rates-control__package-item:not(:last-child)::after {
+	content: ", ";
+	white-space: pre;
+}

@@ -52,11 +52,11 @@ const PackageOptions = ( {
 };
 
 PackageOptions.propTypes = {
-	noResultsMessage: PropTypes.string.isRequired,
 	onChange: PropTypes.func.isRequired,
 	options: PropTypes.arrayOf( PropTypes.object ).isRequired,
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
+	noResultsMessage: PropTypes.string,
 	selected: PropTypes.string,
 };
 
