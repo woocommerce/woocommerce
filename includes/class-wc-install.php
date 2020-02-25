@@ -259,7 +259,7 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
-			WC_Admin_Notices::add_notice( 'update' );
+			WC_Admin_Notices::add_notice( 'update', true );
 			if ( WC()->is_wc_admin_active() ) {
 				// Pre-init data store override to allow storing WC Admin notice during activation (package is not loaded yet).
 				add_filter( 'woocommerce_data_stores', array( '\Automattic\WooCommerce\Admin\API\Init', 'add_data_stores' ) );
@@ -379,7 +379,7 @@ class WC_Install {
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
 				self::update();
 			} else {
-				WC_Admin_Notices::add_notice( 'update' );
+				WC_Admin_Notices::add_notice( 'update', true );
 
 				// Pre-init data store override to allow storing WC Admin notice during activation (package is not loaded yet).
 				if ( WC()->is_wc_admin_active() ) {
