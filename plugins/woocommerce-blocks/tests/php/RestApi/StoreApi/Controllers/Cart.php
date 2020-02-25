@@ -86,6 +86,34 @@ class Cart extends TestCase {
 	}
 
 	/**
+	 * Test applying coupon to cart.
+	 */
+	public function test_apply_coupon() {
+		wc()->cart->remove_coupon( $this->coupon->get_code() );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon/' . $this->coupon->get_code() ) );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( '100', $data['totals']->total_discount );
+	}
+
+	/**
+	 * Test removing coupon from cart.
+	 */
+	public function test_remove_coupon() {
+		// Invalid coupon.
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon/doesnotexist' ) );
+		$data     = $response->get_data();
+		$this->assertEquals( 404, $response->get_status() );
+
+		// Applied coupon.
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon/' . $this->coupon->get_code() ) );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( '0', $data['totals']->total_discount );
+	}
+
+	/**
 	 * Test schema retrieval.
 	 */
 	public function test_get_item_schema() {

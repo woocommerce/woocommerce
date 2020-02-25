@@ -4,7 +4,7 @@
 import { withRestApiHydration } from '@woocommerce/block-hocs';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import { RawHTML } from '@wordpress/element';
-
+import LoadingMask from '@woocommerce/base-components/loading-mask';
 /**
  * Internal dependencies
  */
@@ -19,24 +19,46 @@ const CartFrontend = ( {
 	isShippingCalculatorEnabled,
 	isShippingCostHidden,
 } ) => {
-	const { cartData, isLoading } = useStoreCart();
+	const {
+		cartItems,
+		cartTotals,
+		cartIsLoading,
+		cartErrors,
+		cartCoupons,
+	} = useStoreCart();
 
-	if ( isLoading ) {
+	// Blank state on first load.
+	if ( cartIsLoading && ! cartItems.length ) {
 		return null;
 	}
 
-	const cartItems = cartData.items;
-	const isCartEmpty = cartItems.length <= 0;
-
-	return isCartEmpty ? (
-		<RawHTML>{ emptyCart }</RawHTML>
-	) : (
-		<FullCart
-			cartItems={ cartItems }
-			cartTotals={ cartData.totals }
-			isShippingCalculatorEnabled={ isShippingCalculatorEnabled }
-			isShippingCostHidden={ isShippingCostHidden }
-		/>
+	return (
+		<>
+			<div className="errors">
+				{ // @todo This is a placeholder for error messages - this needs refactoring.
+				cartErrors &&
+					cartErrors.map( ( error = {}, i ) => (
+						<div className="woocommerce-info" key={ 'notice-' + i }>
+							{ error.message }
+						</div>
+					) ) }
+			</div>
+			{ ! cartItems.length ? (
+				<RawHTML>{ emptyCart }</RawHTML>
+			) : (
+				<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
+					<FullCart
+						cartItems={ cartItems }
+						cartTotals={ cartTotals }
+						cartCoupons={ cartCoupons }
+						isShippingCalculatorEnabled={
+							isShippingCalculatorEnabled
+						}
+						isShippingCostHidden={ isShippingCostHidden }
+					/>
+				</LoadingMask>
+			) }
+		</>
 	);
 };
 

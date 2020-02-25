@@ -70,7 +70,7 @@ const ShippingRatesControl = ( {
 					'Loading shipping rates…',
 					'woo-gutenberg-products-block'
 				) }
-				showSpinner={ true }
+				showSpinner={ false }
 			>
 				<Packages
 					className={ className }

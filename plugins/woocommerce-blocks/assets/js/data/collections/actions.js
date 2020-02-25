@@ -78,25 +78,31 @@ export function* __experimentalPersistItemToCollection(
 	if ( ! route ) {
 		return;
 	}
-	const item = yield apiFetch( {
-		path: route,
-		method: 'POST',
-		data,
-		cache: 'no-store',
-	} );
-	if ( item ) {
-		newCollection.push( item );
-		yield receiveCollection(
-			namespace,
-			resourceName,
-			'',
-			[],
-			{
-				items: newCollection,
-				headers: Headers,
-			},
-			true
-		);
+
+	try {
+		const item = yield apiFetch( {
+			path: route,
+			method: 'POST',
+			data,
+			cache: 'no-store',
+		} );
+
+		if ( item ) {
+			newCollection.push( item );
+			yield receiveCollection(
+				namespace,
+				resourceName,
+				'',
+				[],
+				{
+					items: newCollection,
+					headers: Headers,
+				},
+				true
+			);
+		}
+	} catch ( error ) {
+		yield receiveCollectionError( namespace, resourceName, '', [], error );
 	}
 }
 
