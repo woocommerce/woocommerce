@@ -2429,7 +2429,10 @@ class WC_Admin_Setup_Wizard {
 
 		Jetpack::maybe_set_version_option();
 		$jetpack = Jetpack::init();
-		$jetpack->configure();
+		// Older versions of jetpack may not have this method.
+		if ( method_exists( $jetpack, 'configure' ) ) {
+			$jetpack->configure();
+		}
 		$register_result = Jetpack::try_registration();
 
 		if ( is_wp_error( $register_result ) ) {
