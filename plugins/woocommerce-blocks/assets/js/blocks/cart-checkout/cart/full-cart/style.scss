@@ -199,7 +199,7 @@ table.wc-block-cart-items {
 				margin-left: 0.5em;
 			}
 
-			.wc-block-cart-item__discount-badge {
+			.wc-block-cart-item__sale-badge {
 				background-color: $core-grey-dark-600;
 				border-radius: 3px;
 				color: $white;
@@ -275,7 +275,7 @@ table.wc-block-cart-items {
 				grid-row-start: 2;
 				align-self: center;
 
-				.wc-block-cart-item__discount-badge {
+				.wc-block-cart-item__sale-badge {
 					display: none;
 				}
 			}

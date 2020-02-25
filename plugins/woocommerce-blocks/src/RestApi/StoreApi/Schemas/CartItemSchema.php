@@ -27,6 +27,20 @@ class CartItemSchema extends AbstractSchema {
 	protected $title = 'cart_item';
 
 	/**
+	 * We use product schema for line item price info.
+	 *
+	 * @var ProductSchema
+	 */
+	protected $product_schema;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->product_schema = new ProductSchema();
+	}
+
+	/**
 	 * Cart schema properties.
 	 *
 	 * @return array
@@ -166,6 +180,55 @@ class CartItemSchema extends AbstractSchema {
 					],
 				],
 			],
+			'prices'              => [
+				'description' => __( 'Price data for the product in the current line item, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'type'        => 'object',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'properties'  => array_merge(
+					$this->get_store_currency_properties(),
+					[
+						'price'         => [
+							'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'regular_price' => [
+							'description' => __( 'Regular product price', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'sale_price'    => [
+							'description' => __( 'Sale product price, if applicable.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'price_range'   => [
+							'description' => __( 'Price range, if applicable.', 'woo-gutenberg-products-block' ),
+							'type'        => [ 'object', 'null' ],
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+							'properties'  => [
+								'min_amount' => [
+									'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
+									'type'        => 'string',
+									'context'     => [ 'view', 'edit' ],
+									'readonly'    => true,
+								],
+								'max_amount' => [
+									'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
+									'type'        => 'string',
+									'context'     => [ 'view', 'edit' ],
+									'readonly'    => true,
+								],
+							],
+						],
+					]
+				),
+			],
 			'totals'              => [
 				'description' => __( 'Item total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
@@ -175,25 +238,25 @@ class CartItemSchema extends AbstractSchema {
 					$this->get_store_currency_properties(),
 					[
 						'line_subtotal'     => [
-							'description' => __( 'Line price subtotal (excluding coupons and discounts).', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Line subtotal (the price of the product before coupon discounts have been applied).', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'line_subtotal_tax' => [
-							'description' => __( 'Line price subtotal tax.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Line subtotal tax.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'line_total'        => [
-							'description' => __( 'Line price total (including coupons and discounts).', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Line total (the price of the product after coupon discounts have been applied).', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
 						'line_total_tax'    => [
-							'description' => __( 'Line price total tax.', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Line total tax.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -224,6 +287,8 @@ class CartItemSchema extends AbstractSchema {
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'];
 
+		$product_prices = $this->product_schema->get_prices( $product );
+
 		return [
 			'key'                 => $cart_item['key'],
 			'id'                  => $product->get_id(),
@@ -237,6 +302,7 @@ class CartItemSchema extends AbstractSchema {
 			'permalink'           => $product->get_permalink(),
 			'images'              => ( new ProductImages() )->images_to_array( $product ),
 			'variation'           => $this->format_variation_data( $cart_item['variation'], $product ),
+			'prices'              => (object) $product_prices,
 			'totals'              => (object) array_merge(
 				$this->get_store_currency_response(),
 				[

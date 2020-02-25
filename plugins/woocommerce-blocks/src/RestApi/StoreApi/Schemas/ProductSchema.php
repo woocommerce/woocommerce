@@ -289,7 +289,7 @@ class ProductSchema extends AbstractSchema {
 	 * @param \WC_Product $product Product instance.
 	 * @return array
 	 */
-	protected function get_prices( \WC_Product $product ) {
+	public function get_prices( \WC_Product $product ) {
 		$prices                  = $this->get_store_currency_response();
 		$tax_display_mode        = get_option( 'woocommerce_tax_display_shop' );
 		$price_function          = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
