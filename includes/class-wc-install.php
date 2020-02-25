@@ -155,6 +155,7 @@ class WC_Install {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
+		add_action( 'plugins_loaded', array( __CLASS__, 'wc_admin_db_update_notice' ), 100 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -184,6 +185,17 @@ class WC_Install {
 		$blog_id = get_current_blog_id();
 
 		add_action( 'wp_' . $blog_id . '_wc_updater_cron', array( __CLASS__, 'run_manual_database_update' ) );
+	}
+
+	/**
+	 * Add WC Admin based db update notice.
+	 *
+	 * @since 4.0.0
+	 */
+	public static function wc_admin_db_update_notice() {
+		if ( WC()->is_wc_admin_active() ) {
+			new WC_Notes_Run_Db_Update();
+		}
 	}
 
 	/**
@@ -247,7 +259,12 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
-			WC_Admin_Notices::add_notice( 'update' );
+			WC_Admin_Notices::add_notice( 'update', true );
+			if ( WC()->is_wc_admin_active() ) {
+				// Pre-init data store override to allow storing WC Admin notice during activation (package is not loaded yet).
+				add_filter( 'woocommerce_data_stores', array( '\Automattic\WooCommerce\Admin\API\Init', 'add_data_stores' ) );
+				WC_Notes_Run_Db_Update::add_reminder();
+			}
 		}
 	}
 
@@ -347,7 +364,7 @@ class WC_Install {
 	 */
 	private static function maybe_enable_setup_wizard() {
 		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
-			WC_Admin_Notices::add_notice( 'install' );
+			WC_Admin_Notices::add_notice( 'install', true );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
 	}
@@ -362,7 +379,13 @@ class WC_Install {
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
 				self::update();
 			} else {
-				WC_Admin_Notices::add_notice( 'update' );
+				WC_Admin_Notices::add_notice( 'update', true );
+
+				// Pre-init data store override to allow storing WC Admin notice during activation (package is not loaded yet).
+				if ( WC()->is_wc_admin_active() ) {
+					add_filter( 'woocommerce_data_stores', array( '\Automattic\WooCommerce\Admin\API\Init', 'add_data_stores' ) );
+					WC_Notes_Run_Db_Update::add_reminder();
+				}
 			}
 		} else {
 			self::update_db_version();
