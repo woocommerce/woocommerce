@@ -9,9 +9,9 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Package from './package';
-import './style.scss';
+import Packages from './packages';
 import LoadingMask from '../loading-mask';
+import './style.scss';
 
 const ShippingRatesControl = ( {
 	address,
@@ -26,24 +26,6 @@ const ShippingRatesControl = ( {
 		shippingRates,
 		( newRates ) => newRates.length > 0
 	);
-
-	const renderPackages = ( rates ) =>
-		rates.map( ( shippingRate, i ) => (
-			<Package
-				key={ shippingRate.items.join() }
-				className={ className }
-				noResultsMessage={ noResultsMessage }
-				onChange={ ( newShippingRate ) => {
-					const newSelected = [ ...selected ];
-					newSelected[ i ] = newShippingRate;
-					onChange( newSelected );
-				} }
-				renderOption={ renderOption }
-				selected={ selected[ i ] }
-				shippingRate={ shippingRate }
-				showItems={ rates.length > 1 }
-			/>
-		) );
 
 	// Select first item when shipping rates are loaded.
 	useEffect(
@@ -90,12 +72,28 @@ const ShippingRatesControl = ( {
 				) }
 				showSpinner={ true }
 			>
-				{ renderPackages( previousShippingRates || [] ) }
+				<Packages
+					className={ className }
+					noResultsMessage={ noResultsMessage }
+					onChange={ onChange }
+					renderOption={ renderOption }
+					selected={ selected }
+					shippingRates={ previousShippingRates || [] }
+				/>
 			</LoadingMask>
 		);
 	}
 
-	return renderPackages( shippingRates );
+	return (
+		<Packages
+			className={ className }
+			noResultsMessage={ noResultsMessage }
+			onChange={ onChange }
+			renderOption={ renderOption }
+			selected={ selected }
+			shippingRates={ shippingRates }
+		/>
+	);
 };
 
 ShippingRatesControl.propTypes = {
@@ -115,3 +113,4 @@ ShippingRatesControl.propTypes = {
 };
 
 export default ShippingRatesControl;
+export { Packages };
