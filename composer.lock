@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c674cf272eafa6cfdb1bf5d82004c974",
+    "content-hash": "0f417cae197a09b0d1723fb3ebb43f19",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -383,16 +383,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.0.1",
+            "version": "3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "3847b7c97032ca92abed6c6f154e548437dc5803"
+                "reference": "ca6f65cca0aa6bdc02e6939c93fd439c5a552b76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3847b7c97032ca92abed6c6f154e548437dc5803",
-                "reference": "3847b7c97032ca92abed6c6f154e548437dc5803",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/ca6f65cca0aa6bdc02e6939c93fd439c5a552b76",
+                "reference": "ca6f65cca0aa6bdc02e6939c93fd439c5a552b76",
                 "shasum": ""
             },
             "require-dev": {
@@ -414,7 +414,7 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
-            "time": "2020-01-14T01:30:08+00:00"
+            "time": "2020-02-25T02:28:35+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
