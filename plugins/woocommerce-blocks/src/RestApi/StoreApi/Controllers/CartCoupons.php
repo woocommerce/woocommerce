@@ -193,6 +193,7 @@ class CartCoupons extends RestController {
 
 		$cart = $controller->get_cart_instance();
 		$cart->remove_coupon( $request['code'] );
+		$cart->calculate_totals();
 
 		return new RestResponse( null, 204 );
 	}
@@ -207,6 +208,7 @@ class CartCoupons extends RestController {
 		$controller = new CartController();
 		$cart       = $controller->get_cart_instance();
 		$cart->remove_coupons();
+		$cart->calculate_totals();
 
 		return new RestResponse( [], 200 );
 	}

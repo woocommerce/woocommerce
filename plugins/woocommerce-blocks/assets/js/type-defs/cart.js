@@ -45,4 +45,60 @@
  * @property {string} email      The email for the billing address
  */
 
+/**
+ * @typedef {Object} CartData
+ *
+ * @property {Array}      coupons       Coupons applied to cart.
+ * @property {Array}      items         Items in the cart.
+ * @property {number}     itemsCount    Number of items in the cart.
+ * @property {number}     itemsWeight   Weight of items in the cart.
+ * @property {boolean}    needsShipping True if the cart needs shipping.
+ * @property {CartTotals} totals        Cart total amounts.
+ */
+
+/**
+ * @typedef {Object} CartTotals
+ *
+ * @property {string} currency_code               Currency code (in ISO format)
+ *                                                for returned prices.
+ * @property {string} currency_symbol             Currency symbol for the
+ *                                                currency which can be used to
+ *                                                format returned prices.
+ * @property {number} currency_minor_unit         Currency minor unit (number of
+ *                                                digits after the decimal
+ *                                                separator) for returned
+ *                                                prices.
+ * @property {string} currency_decimal_separator  Decimal separator for the
+ *                                                currency which can be used to
+ *                                                format returned prices.
+ * @property {string} currency_thousand_separator Thousand separator for the
+ *                                                currency which can be used to
+ *                                                format returned prices.
+ * @property {string} currency_prefix             Price prefix for the currency
+ *                                                which can be used to format
+ *                                                returned prices.
+ * @property {string} currency_suffix             Price prefix for the currency
+ *                                                which can be used to format
+ *                                                returned prices.
+ * @property {number} total_items                 Total price of items in the
+ *                                                cart.
+ * @property {number} total_items_tax             Total tax on items in the
+ *                                                cart.
+ * @property {number} total_fees                  Total price of any applied
+ *                                                fees.
+ * @property {number} total_fees_tax              Total tax on fees.
+ * @property {number} total_discount              Total discount from applied
+ *                                                coupons.
+ * @property {number} total_discount_tax          Total tax removed due to
+ *                                                discount from applied coupons.
+ * @property {number} total_shipping              Total price of shipping.
+ * @property {number} total_shipping_tax          Total tax on shipping.
+ * @property {number} total_price                 Total price the customer will
+ *                                                pay.
+ * @property {number} total_tax                   Total tax applied to items and
+ *                                                shipping.
+ * @property {Array}  tax_lines                   Lines of taxes applied to
+ *                                                items and shipping.
+ */
+
 export {};

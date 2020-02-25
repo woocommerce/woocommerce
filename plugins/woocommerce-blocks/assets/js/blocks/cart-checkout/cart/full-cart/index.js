@@ -13,6 +13,7 @@ import ShippingRatesControl, {
 } from '@woocommerce/base-components/shipping-rates-control';
 import ShippingCalculator from '@woocommerce/base-components/shipping-calculator';
 import ShippingLocation from '@woocommerce/base-components/shipping-location';
+import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
 	COUPONS_ENABLED,
 	SHIPPING_ENABLED,
@@ -22,6 +23,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { Card, CardBody } from 'wordpress-components';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useStoreCartCoupons } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -32,12 +34,6 @@ import CartLineItemsTable from './cart-line-items-table';
 
 import './style.scss';
 import './editor.scss';
-
-// @todo this are placeholders
-const onActivateCoupon = ( couponCode ) => {
-	// eslint-disable-next-line no-console
-	console.log( 'coupon activated: ' + couponCode );
-};
 
 const renderShippingRatesControlOption = ( option ) => ( {
 	label: decodeEntities( option.name ),
@@ -62,6 +58,7 @@ const renderShippingRatesControlOption = ( option ) => ( {
 const Cart = ( {
 	cartItems = [],
 	cartTotals = {},
+	cartCoupons = [],
 	isShippingCalculatorEnabled,
 	isShippingCostHidden,
 	shippingRates,
@@ -76,10 +73,16 @@ const Cart = ( {
 		postcode: '',
 		country: '',
 	} );
-
 	const [ showShippingCosts, setShowShippingCosts ] = useState(
 		! isShippingCostHidden
 	);
+	const {
+		applyCoupon,
+		removeCoupon,
+		isApplyingCoupon,
+		isRemovingCoupon,
+	} = useStoreCartCoupons();
+
 	useEffect( () => {
 		if ( ! SHIPPING_ENABLED ) {
 			return setShowShippingCosts( false );
@@ -99,6 +102,7 @@ const Cart = ( {
 		isShippingCostHidden,
 		shippingCalculatorAddress,
 	] );
+
 	/**
 	 * Given an API response with cart totals, generates an array of rows to display in the Cart block.
 	 *
@@ -126,16 +130,41 @@ const Cart = ( {
 			} );
 		}
 		const totalDiscount = parseInt( cartTotals.total_discount, 10 );
-		if ( totalDiscount > 0 ) {
+		if ( totalDiscount > 0 || cartCoupons.length !== 0 ) {
 			const totalDiscountTax = parseInt(
 				cartTotals.total_discount_tax,
 				10
 			);
+			// @todo The remove coupon button is a placeholder - replace with new
+			// chip component.
 			totalRowsConfig.push( {
 				label: __( 'Discount:', 'woo-gutenberg-products-block' ),
-				value: DISPLAY_PRICES_INCLUDING_TAXES
-					? totalDiscount + totalDiscountTax
-					: totalDiscount,
+				value:
+					( DISPLAY_PRICES_INCLUDING_TAXES
+						? totalDiscount + totalDiscountTax
+						: totalDiscount ) * -1,
+				description: (
+					<LoadingMask
+						screenReaderLabel={ __(
+							'Removing coupon…',
+							'woo-gutenberg-products-block'
+						) }
+						isLoading={ isRemovingCoupon }
+						showSpinner={ false }
+					>
+						{ cartCoupons.map( ( cartCoupon ) => (
+							<button
+								key={ 'coupon-' + cartCoupon.code }
+								disabled={ isRemovingCoupon }
+								onClick={ () => {
+									removeCoupon( cartCoupon.code );
+								} }
+							>
+								{ cartCoupon.code }
+							</button>
+						) ) }
+					</LoadingMask>
+				),
 			} );
 		}
 		if ( ! DISPLAY_PRICES_INCLUDING_TAXES ) {
@@ -248,7 +277,8 @@ const Cart = ( {
 						{ showShippingCosts && <ShippingCalculatorOptions /> }
 						{ COUPONS_ENABLED && (
 							<TotalsCouponCodeInput
-								onSubmit={ onActivateCoupon }
+								onSubmit={ applyCoupon }
+								isLoading={ isApplyingCoupon }
 							/>
 						) }
 						<TotalsItem
