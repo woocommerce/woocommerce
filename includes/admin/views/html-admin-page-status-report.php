@@ -127,9 +127,9 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Admin package running on your site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				if ( class_exists( '\Automattic\WooCommerce\Admin\Package' ) ) {
-					$version = \Automattic\WooCommerce\Admin\Package::get_version();
-					$path    = \Automattic\WooCommerce\Admin\Package::get_path();
+				if ( class_exists( '\Automattic\WooCommerce\Admin\Composer\Package' ) ) {
+					$version = \Automattic\WooCommerce\Admin\Composer\Package::get_version();
+					$path    = \Automattic\WooCommerce\Admin\Composer\Package::get_path();
 				} else {
 					$version = null;
 				}
