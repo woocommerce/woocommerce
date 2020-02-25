@@ -102,25 +102,31 @@ class WC_Admin_Notices {
 	 * Show a notice.
 	 *
 	 * @param string $name Notice name.
+	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
-	public static function add_notice( $name ) {
+	public static function add_notice( $name, $force_save = false ) {
 		self::$notices = array_unique( array_merge( self::get_notices(), array( $name ) ) );
 
-		// Adding early save to prevent more race conditions with notices.
-		self::store_notices();
+		if ( $force_save ) {
+			// Adding early save to prevent more race conditions with notices.
+			self::store_notices();
+		}
 	}
 
 	/**
 	 * Remove a notice from being displayed.
 	 *
 	 * @param string $name Notice name.
+	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
-	public static function remove_notice( $name ) {
+	public static function remove_notice( $name, $force_save = false ) {
 		self::$notices = array_diff( self::get_notices(), array( $name ) );
 		delete_option( 'woocommerce_admin_notice_' . $name );
 
-		// Adding early save to prevent more race conditions with notices.
-		self::store_notices();
+		if ( $force_save ) {
+			// Adding early save to prevent more race conditions with notices.
+			self::store_notices();
+		}
 	}
 
 	/**
