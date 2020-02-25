@@ -89,7 +89,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 				<?php
 				if ( class_exists( '\Automattic\WooCommerce\Blocks\Package' ) ) {
 					$version = \Automattic\WooCommerce\Blocks\Package::get_version();
-					$path    = \Automattic\WooCommerce\Blocks\Package::get_path();
+					$path    = \Automattic\WooCommerce\Blocks\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				} else {
 					$version = null;
 				}
@@ -109,7 +109,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 				<?php
 				if ( class_exists( 'ActionScheduler_Versions' ) && class_exists( 'ActionScheduler' ) ) {
 					$version = ActionScheduler_Versions::instance()->latest_version();
-					$path    = ActionScheduler::plugin_path( '' );
+					$path    = ActionScheduler::plugin_path( '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				} else {
 					$version = null;
 				}
@@ -128,13 +128,24 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			<td>
 				<?php
 				if ( class_exists( '\Automattic\WooCommerce\Admin\Composer\Package' ) ) {
-					$version = \Automattic\WooCommerce\Admin\Composer\Package::get_version();
-					$path    = \Automattic\WooCommerce\Admin\Composer\Package::get_path();
+					$version        = \Automattic\WooCommerce\Admin\Composer\Package::get_active_version();
+					$package_active = \Automattic\WooCommerce\Admin\Composer\Package::is_package_active();
+					$path           = \Automattic\WooCommerce\Admin\Composer\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				} elseif ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+					$version        = WC_ADMIN_VERSION_NUMBER;
+					$package_active = false;
 				} else {
 					$version = null;
 				}
 
 				if ( ! is_null( $version ) ) {
+					if ( ! isset( $path ) || ! $package_active ) {
+						if ( defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
+							$path = dirname( WC_ADMIN_PLUGIN_FILE ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+						} else {
+							$path = __( 'Active Plugin', 'woocommerce' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+						}
+					}
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the WC Admin package.', 'woocommerce' ) . '</mark>';
