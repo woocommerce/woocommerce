@@ -246,13 +246,18 @@ export function getSummaryNumbers( options ) {
 	};
 
 	const primaryQuery = getRequestQuery( { ...options, dataType: 'primary' } );
+
+	// Disable eslint rule requiring `getReportStats` to be defined below because the next two statements
+	// depend on `getReportStats` to have been called.
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	const primary = getReportStats( endpoint, primaryQuery );
+
 	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportStatsError( endpoint, primaryQuery ) ) {
 		return { ...response, isError: true };
 	}
 
-	const primary = getReportStats( endpoint, primaryQuery );
 	const primaryTotals =
 		( primary && primary.data && primary.data.totals ) || null;
 
@@ -260,13 +265,18 @@ export function getSummaryNumbers( options ) {
 		...options,
 		dataType: 'secondary',
 	} );
+
+	// Disable eslint rule requiring `getReportStats` to be defined below because the next two statements
+	// depend on `getReportStats` to have been called.
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	const secondary = getReportStats( endpoint, secondaryQuery );
+
 	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportStatsError( endpoint, secondaryQuery ) ) {
 		return { ...response, isError: true };
 	}
 
-	const secondary = getReportStats( endpoint, secondaryQuery );
 	const secondaryTotals =
 		( secondary && secondary.data && secondary.data.totals ) || null;
 

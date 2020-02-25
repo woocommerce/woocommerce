@@ -90,7 +90,8 @@ class OrdersPanel extends Component {
 
 		const getCustomerString = ( order ) => {
 			const extendedInfo = order.extended_info || {};
-			const { first_name: firstName, last_name: lastName } = extendedInfo.customer || {};
+			const { first_name: firstName, last_name: lastName } =
+				extendedInfo.customer || {};
 
 			if ( ! firstName && ! lastName ) {
 				return '';
@@ -110,7 +111,11 @@ class OrdersPanel extends Component {
 		};
 
 		const orderCardTitle = ( order ) => {
-			const { extended_info: extendedInfo, order_id: orderId, orderNumber } = order;
+			const {
+				extended_info: extendedInfo,
+				order_id: orderId,
+				order_number: orderNumber,
+			} = order;
 			const { customer } = extendedInfo || {};
 			const customerUrl = customer.customer_id
 				? getNewPath( {}, '/analytics/customers', {

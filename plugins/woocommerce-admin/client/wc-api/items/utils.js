@@ -20,7 +20,12 @@ import { appendTimestamp, getCurrentDates } from 'lib/date';
  */
 export function getLeaderboard( options ) {
 	const endpoint = 'leaderboards';
-	const { per_page: perPage, persisted_query: persistedQuery, query, select } = options;
+	const {
+		per_page: perPage,
+		persisted_query: persistedQuery,
+		query,
+		select,
+	} = options;
 	const { getItems, getItemsError, isGetItemsRequesting } = select(
 		'wc-api'
 	);
@@ -38,13 +43,17 @@ export function getLeaderboard( options ) {
 		persisted_query: JSON.stringify( persistedQuery ),
 	};
 
+	// Disable eslint rule requiring `getItems` to be defined below because the next two statements
+	// depend on `getItems` to have been called.
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	const leaderboards = getItems( endpoint, leaderboardQuery );
+
 	if ( isGetItemsRequesting( endpoint, leaderboardQuery ) ) {
 		return { ...response, isRequesting: true };
 	} else if ( getItemsError( endpoint, leaderboardQuery ) ) {
 		return { ...response, isError: true };
 	}
 
-	const leaderboards = getItems( endpoint, leaderboardQuery );
 	const leaderboard = leaderboards.get( options.id );
 	return { ...response, rows: leaderboard.rows };
 }
