@@ -11,17 +11,14 @@ import { Icon, trash } from '@woocommerce/icons';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
- * Return the difference between two price amounts, e.g. a discount.
+ * Return a currency value as a number for doing calculations.
+ * Note this doesn't convert into dollars, currency values are in minor units (e.g. cents).
  *
- * @param {string} subtotal Currency value in minor unit, e.g. cents.
- * @param {string} total Currency value in minor unit, e.g. cents.
- * @return {number} The difference (discount).
+ * @param {string} currencyValue Currency value string (in minor unit).
+ * @return {number} The currency value as int (in minor unit).
  */
-const calcPriceDifference = ( subtotal, total ) => {
-	const subtotalValue = parseInt( subtotal, 10 );
-	const totalValue = parseInt( total, 10 );
-
-	return subtotalValue - totalValue;
+const getPriceNumber = ( currencyValue ) => {
+	return parseInt( currencyValue, 10 );
 };
 
 const ProductVariationDetails = ( { variation } ) => {
@@ -53,9 +50,8 @@ const CartLineItemRow = ( { lineItem } ) => {
 		variation,
 		quantity,
 		low_stock_remaining: lowStockRemaining,
-		totals,
+		prices,
 	} = lineItem;
-	const { line_total: total, line_subtotal: subtotal } = totals;
 
 	const imageProps = {};
 	if ( images && images.length ) {
@@ -68,24 +64,27 @@ const CartLineItemRow = ( { lineItem } ) => {
 	const [ lineQuantity, setLineQuantity ] = useState( quantity );
 	const currency = getCurrency();
 
-	const discountAmount = calcPriceDifference( subtotal, total );
+	const lineFullPrice = getPriceNumber( prices.regular_price ) * lineQuantity;
+	const purchasePrice = getPriceNumber( prices.price ) * lineQuantity;
+	const saleDiscountAmount = lineFullPrice - purchasePrice;
+
 	let fullPrice = null,
-		discountBadge = null;
-	if ( discountAmount > 0 ) {
+		saleBadge = null;
+	if ( saleDiscountAmount > 0 ) {
 		fullPrice = (
 			<div className="wc-block-cart-item__full-price">
 				<FormattedMonetaryAmount
 					currency={ currency }
-					value={ subtotal }
+					value={ lineFullPrice }
 				/>
 			</div>
 		);
-		discountBadge = (
-			<div className="wc-block-cart-item__discount-badge">
+		saleBadge = (
+			<div className="wc-block-cart-item__sale-badge">
 				{ sprintf(
 					/* translators: %s discount amount */
 					__( 'Save %s!', 'woo-gutenberg-products-block' ),
-					formatPrice( discountAmount, currency )
+					formatPrice( saleDiscountAmount, currency )
 				) }
 			</div>
 		);
@@ -151,10 +150,10 @@ const CartLineItemRow = ( { lineItem } ) => {
 				<div className="wc-block-cart-item__line-total">
 					<FormattedMonetaryAmount
 						currency={ currency }
-						value={ total }
+						value={ purchasePrice }
 					/>
 				</div>
-				{ discountBadge }
+				{ saleBadge }
 			</td>
 		</tr>
 	);
@@ -176,6 +175,10 @@ CartLineItemRow.propTypes = {
 		totals: PropTypes.shape( {
 			line_subtotal: PropTypes.string.isRequired,
 			line_total: PropTypes.string.isRequired,
+		} ).isRequired,
+		prices: PropTypes.shape( {
+			price: PropTypes.string.isRequired,
+			regular_price: PropTypes.string.isRequired,
 		} ).isRequired,
 	} ),
 };
