@@ -39,10 +39,3 @@ find ./packages/woocommerce-admin -iname '*.js' -exec sed -i.bak -e "s/, 'woocom
 # Cleanup backup files
 find ./packages -name "*.bak" -type f -delete
 output 2 "Done!"
-
-# Apply patches
-output 2 "Applying patch #450 to Action Schduler"
-cd packages/action-scheduler
-curl -O https://patch-diff.githubusercontent.com/raw/woocommerce/action-scheduler/pull/450.patch
-patch -p1 < 450.patch
-output 2 "Done!"
