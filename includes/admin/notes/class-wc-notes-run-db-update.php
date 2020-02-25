@@ -22,13 +22,17 @@ class WC_Notes_Run_Db_Update {
 	 * Attach hooks.
 	 */
 	public function __construct() {
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		// If the old notice gets dismissed, also hide this new one.
+		add_action( 'woocommerce_hide_update_notice', array( __CLASS__, 'set_notice_actioned' ) );
+
+		// Not using Jetpack\Constants here as it can run before 'plugin_loaded' is done.
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX
+			|| defined( 'DOING_CRON' ) && DOING_CRON
+			|| ! is_admin() ) {
 			return;
 		}
 
 		add_action( 'admin_init', array( __CLASS__, 'show_reminder' ) );
-		// If the old notice gets dismissed, also hide this new one.
-		add_action( 'woocommerce_hide_update_notice', array( __CLASS__, 'set_notice_actioned' ) );
 	}
 
 	/**
