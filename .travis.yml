@@ -63,6 +63,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - nvm install 10
   - npm install
   - composer install --no-dev
   - |
