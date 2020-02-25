@@ -364,7 +364,7 @@ class WC_Install {
 	 */
 	private static function maybe_enable_setup_wizard() {
 		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
-			WC_Admin_Notices::add_notice( 'install' );
+			WC_Admin_Notices::add_notice( 'install', true );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
 	}
