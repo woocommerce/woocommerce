@@ -3,6 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withFeedbackPrompt } from '@woocommerce/block-hocs';
+import { previewShippingRates } from '@woocommerce/resource-previews';
+import { SHIPPING_METHODS_EXIST } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -15,7 +17,13 @@ const CheckoutEditor = ( { attributes } ) => {
 	// @todo: wrap Block with Disabled once you finish building the form
 	return (
 		<div className={ className }>
-			<Block attributes={ attributes } isEditor={ true } />
+			<Block
+				attributes={ attributes }
+				isEditor={ true }
+				shippingRates={
+					SHIPPING_METHODS_EXIST ? previewShippingRates : []
+				}
+			/>
 		</div>
 	);
 };
