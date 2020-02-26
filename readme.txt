@@ -185,6 +185,10 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - New WooCommerce Admin. #25011
 * Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.12 #25587
 * Enhancement - Updated Action Scheduler to 3.0.1. #25566
+* Enhancement - Update dependency woocommerce/woocommerce-admin to v0.25.1. #25620
+* Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.13. #25696
+* Enhancement - Added the WC Admin enabled db update notice. #25736
+* Enhancement - Update Action Scheduler to version 3.1.1. #25745
 * Performance - Improved the client-side preparation for variation saving. #25382
 * Tweak - Enhance order details and payment summary. #25504
 * Tweak - Increase new onboarding group test to 50%. #25501
@@ -216,6 +220,15 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Restored the default behavior of "Shipping destination" option. #25571
 * Fix - Set image CSS on emails to be `max-width: 100%` so that they don't break the email template. #24764
 * Fix - Setup wizard shipping setup verification logic correction. #25540
+* Fix - Fixed typo in label. #25645
+* Fix - Added the missing "bestRating" and "worstRating" params to structured schema data. #25667
+* Fix - Replaced deprecated Jetpack::is_staging_site call. #25670
+* Fix - Avoid `Automattic\Jetpack\Constants` in main woocommerce class. #25697
+* Fix - Change the namespace of the WC Admin Package class and update WC Admin package. #25701
+* Fix - Unmark completed AS migration during the update to make sure AS migration happens. #25707
+* Fix - configure Jetpack plugin before trying to connect/register. #25742
+* Fix - Check configure exists before calling to support older JP versions. #25747
+* Fix - Prevent edited attribute notice being hidden by new dashboard. #25757
 * Dev - Added support for placeholder attribute in quantity inputs. #25418
 * Dev - Added `tax_status` and `tax_class` columns to the product meta data lookup table. #25428
 * Dev - Introduced `woocommerce_top_rated_widget_args` filter. #25320
@@ -233,6 +246,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Introduced `woocommerce_shortcode_products_query_results` filter. #25573
 * Dev - Removed `hash_equals()` polyfill as it was no longer needed. #25474
 * Dev - Removed unused `.order-actions` CSS. #25581
+* Dev - Applies woocommerce_maxmind_geolocation_database_path in MaxMind database migration. #25681
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
