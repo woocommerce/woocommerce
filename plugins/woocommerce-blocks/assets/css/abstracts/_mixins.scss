@@ -31,16 +31,24 @@
 @mixin placeholder() {
 	animation: loading-fade 1.2s ease-in-out infinite;
 	background-color: $core-grey-light-500 !important;
-	color: transparent;
-	border: 0;
+	border-color: $core-grey-light-500 !important;
+	color: $core-grey-light-500 !important;
 	box-shadow: none;
+	pointer-events: none;
 
-	&::after {
-		content: "\00a0";
+	// Forces direct descendants to keep layout but lose visibility.
+	> * {
+		visibility: hidden;
 	}
 
 	@media screen and (prefers-reduced-motion: reduce) {
 		animation: none;
+	}
+}
+
+@mixin force-content() {
+	&::after {
+		content: "\00a0";
 	}
 }
 

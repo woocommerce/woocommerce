@@ -9,10 +9,21 @@ import PropTypes from 'prop-types';
  */
 import CartLineItemRow from './cart-line-item-row';
 
-const CartLineItemsTable = ( { lineItems = [] } ) => {
-	const products = lineItems.map( ( lineItem ) => {
-		return <CartLineItemRow key={ lineItem.key } lineItem={ lineItem } />;
-	} );
+const placeholderRows = [ ...Array( 3 ) ].map( ( _x, i ) => (
+	<CartLineItemRow key={ i } />
+) );
+
+const CartLineItemsTable = ( { lineItems = [], isLoading = false } ) => {
+	const products = isLoading
+		? placeholderRows
+		: lineItems.map( ( lineItem ) => {
+				return (
+					<CartLineItemRow
+						key={ lineItem.key }
+						lineItem={ lineItem }
+					/>
+				);
+		  } );
 
 	return (
 		<table className="wc-block-cart-items">
@@ -43,6 +54,7 @@ CartLineItemsTable.propTypes = {
 			key: PropTypes.string.isRequired,
 		} )
 	),
+	isLoading: PropTypes.bool,
 };
 
 export default CartLineItemsTable;

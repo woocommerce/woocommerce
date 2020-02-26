@@ -88,7 +88,7 @@ export const getCurrencyFromPriceResponse = ( currencyData ) => {
  * @param {Object} currencyData Currency data object.
  * @return {Object} Normalized currency info.
  */
-export const getCurrency = ( currencyData ) => {
+export const getCurrency = ( currencyData = {} ) => {
 	return {
 		...siteCurrencySettings,
 		...currencyData,

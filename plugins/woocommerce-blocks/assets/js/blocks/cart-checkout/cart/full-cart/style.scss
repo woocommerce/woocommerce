@@ -138,7 +138,6 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__product-name {
 				color: $core-grey-dark-600;
 				font-size: 16px;
-				display: block;
 			}
 
 			.wc-block-cart-item__low-stock-badge {
@@ -157,6 +156,7 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__product-metadata {
 				color: $core-grey-dark-400;
 				font-size: 12px;
+				margin-top: 0.25em;
 			}
 		}
 		.wc-block-cart-item__quantity {
@@ -189,12 +189,16 @@ table.wc-block-cart-items {
 			font-size: 16px;
 			line-height: 19px;
 
-			.wc-block-cart-item__full-price {
+			.wc-block-formatted-money-amount {
+				display: block;
+			}
+
+			.wc-block-cart-item__regular-price {
 				color: $core-grey-dark-400;
 				text-decoration: line-through;
 			}
 
-			.wc-block-cart-item__line-total {
+			.wc-block-cart-item__price {
 				color: $black;
 				margin-left: 0.5em;
 			}
@@ -210,6 +214,42 @@ table.wc-block-cart-items {
 				display: inline-block;
 			}
 		}
+	}
+}
+
+// Loading placeholder state.
+.wc-block-cart--is-loading {
+	.wc-block-cart-items {
+		.wc-block-cart-items__row {
+			.wc-block-cart-item__product-name,
+			.wc-block-cart-item__price,
+			.wc-block-cart-item__product-metadata,
+			.wc-block-cart-item__image a,
+			.wc-block-quantity-selector {
+				@include placeholder();
+			}
+			.wc-block-cart-item__product-name {
+				min-width: 50%;
+				display: inline-block;
+				@include force-content();
+			}
+			.wc-block-cart-item__product-metadata {
+				@include force-content();
+			}
+			.wc-block-cart-item__remove-link,
+			.wc-block-cart-item__remove-icon {
+				visibility: hidden;
+			}
+			.wc-block-cart-item__image a {
+				display: block;
+			}
+			.wc-block-cart-item__price {
+				@include force-content();
+			}
+		}
+	}
+	.wc-block-cart__sidebar .components-card {
+		@include placeholder();
 	}
 }
 

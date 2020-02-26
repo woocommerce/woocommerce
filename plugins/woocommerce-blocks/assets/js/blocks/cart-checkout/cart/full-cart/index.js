@@ -24,6 +24,7 @@ import { Card, CardBody } from 'wordpress-components';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useStoreCartCoupons } from '@woocommerce/base-hooks';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -62,6 +63,7 @@ const Cart = ( {
 	isShippingCalculatorEnabled,
 	isShippingCostHidden,
 	shippingRates,
+	isLoading = false,
 } ) => {
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState();
 	const [
@@ -113,7 +115,7 @@ const Cart = ( {
 		const totalItemsTax = parseInt( cartTotals.total_items_tax, 10 );
 		const totalRowsConfig = [
 			{
-				label: __( 'List items:', 'woo-gutenberg-products-block' ),
+				label: __( 'Subtotal:', 'woo-gutenberg-products-block' ),
 				value: DISPLAY_PRICES_INCLUDING_TAXES
 					? totalItems + totalItemsTax
 					: totalItems,
@@ -248,11 +250,19 @@ const Cart = ( {
 			) }
 		</fieldset>
 	);
+
+	const cartClassName = classnames( 'wc-block-cart', {
+		'wc-block-cart--is-loading': isLoading,
+	} );
+
 	return (
-		<div className="wc-block-cart">
+		<div className={ cartClassName }>
 			<div className="wc-block-cart__main">
 				<CartLineItemsTitle itemCount={ cartItems.length } />
-				<CartLineItemsTable lineItems={ cartItems } />
+				<CartLineItemsTable
+					lineItems={ cartItems }
+					isLoading={ isLoading }
+				/>
 			</div>
 			<div className="wc-block-cart__sidebar">
 				<Card isElevated={ true }>
@@ -314,6 +324,7 @@ Cart.propTypes = {
 	} ),
 	isShippingCalculatorEnabled: PropTypes.bool,
 	isShippingCostHidden: PropTypes.bool,
+	isLoading: PropTypes.bool,
 	/**
 	 * List of shipping rates to display. If defined, shipping rates will not be fetched from the API (used for the block preview).
 	 */

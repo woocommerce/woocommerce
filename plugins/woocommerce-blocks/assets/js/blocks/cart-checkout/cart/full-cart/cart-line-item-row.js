@@ -8,119 +8,39 @@ import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrency, formatPrice } from '@woocommerce/base-utils';
 import { Icon, trash } from '@woocommerce/icons';
-import { decodeEntities } from '@wordpress/html-entities';
 
 /**
- * Return a currency value as a number for doing calculations.
- * Note this doesn't convert into dollars, currency values are in minor units (e.g. cents).
- *
- * @param {string} currencyValue Currency value string (in minor unit).
- * @return {number} The currency value as int (in minor unit).
+ * Internal dependencies
  */
-const getPriceNumber = ( currencyValue ) => {
-	return parseInt( currencyValue, 10 );
-};
+import ProductVariationData from './product-variation-data';
+import ProductImage from './product-image';
+import ProductLowStockBadge from './product-low-stock-badge';
 
-const ProductVariationDetails = ( { variation } ) => {
-	const variationsText = variation
-		.map( ( v ) => {
-			if ( v.attribute ) {
-				return `${ decodeEntities( v.attribute ) }: ${ decodeEntities(
-					v.value
-				) }`;
-			}
-			// Support for product attributes with no name/key
-			return `${ decodeEntities( v.value ) }`;
-		} )
-		.join( ' / ' );
-
-	return (
-		<div className="wc-block-cart-item__product-attributes">
-			{ variationsText }
-		</div>
-	);
-};
-
-const CartLineItemRow = ( { lineItem } ) => {
+/**
+ * Cart line item table row component.
+ */
+const CartLineItemRow = ( { lineItem = {} } ) => {
 	const {
-		name,
-		summary,
-		permalink,
-		images,
-		variation,
-		quantity,
-		low_stock_remaining: lowStockRemaining,
-		prices,
+		name = '',
+		summary = '',
+		permalink = '',
+		images = [],
+		variation = [],
+		quantity = 1,
+		prices = {},
 	} = lineItem;
-
-	const imageProps = {};
-	if ( images && images.length ) {
-		imageProps.src = lineItem.images[ 0 ].src || '';
-		imageProps.alt = lineItem.images[ 0 ].alt || '';
-		imageProps.srcSet = lineItem.images[ 0 ].srcset || '';
-		imageProps.sizes = lineItem.images[ 0 ].sizes || '';
-	}
 
 	const [ lineQuantity, setLineQuantity ] = useState( quantity );
 	const currency = getCurrency();
-
-	const lineFullPrice = getPriceNumber( prices.regular_price ) * lineQuantity;
-	const purchasePrice = getPriceNumber( prices.price ) * lineQuantity;
-	const saleDiscountAmount = lineFullPrice - purchasePrice;
-
-	let fullPrice = null,
-		saleBadge = null;
-	if ( saleDiscountAmount > 0 ) {
-		fullPrice = (
-			<div className="wc-block-cart-item__full-price">
-				<FormattedMonetaryAmount
-					currency={ currency }
-					value={ lineFullPrice }
-				/>
-			</div>
-		);
-		saleBadge = (
-			<div className="wc-block-cart-item__sale-badge">
-				{ sprintf(
-					/* translators: %s discount amount */
-					__( 'Save %s!', 'woo-gutenberg-products-block' ),
-					formatPrice( saleDiscountAmount, currency )
-				) }
-			</div>
-		);
-	}
-
-	// We use this in two places so we can stack the quantity selector under
-	// product info on smaller screens.
-	const quantitySelector = ( className ) => {
-		return (
-			<QuantitySelector
-				className={ className }
-				quantity={ lineQuantity }
-				onChange={ setLineQuantity }
-				itemName={ name }
-			/>
-		);
-	};
-
-	const lowStockBadge = lowStockRemaining ? (
-		<div className="wc-block-cart-item__low-stock-badge">
-			{ sprintf(
-				/* translators: %s stock amount (number of items in stock for product) */
-				__( '%s left in stock', 'woo-gutenberg-products-block' ),
-				lowStockRemaining
-			) }
-		</div>
-	) : null;
+	const regularPrice = parseInt( prices.regular_price, 10 ) * lineQuantity;
+	const purchasePrice = parseInt( prices.price, 10 ) * lineQuantity;
+	const saleAmount = regularPrice - purchasePrice;
 
 	return (
 		<tr className="wc-block-cart-items__row">
 			<td className="wc-block-cart-item__image">
 				<a href={ permalink }>
-					<img
-						{ ...imageProps }
-						alt={ decodeEntities( imageProps.alt ) }
-					/>
+					<ProductImage image={ images.length ? images[ 0 ] : {} } />
 				</a>
 			</td>
 			<td className="wc-block-cart-item__product">
@@ -130,14 +50,20 @@ const CartLineItemRow = ( { lineItem } ) => {
 				>
 					{ name }
 				</a>
-				{ lowStockBadge }
+				<ProductLowStockBadge
+					lowStockRemaining={ lineItem.low_stock_remaining }
+				/>
 				<div className="wc-block-cart-item__product-metadata">
 					<RawHTML>{ summary }</RawHTML>
-					<ProductVariationDetails variation={ variation } />
+					<ProductVariationData variation={ variation } />
 				</div>
 			</td>
 			<td className="wc-block-cart-item__quantity">
-				{ quantitySelector() }
+				<QuantitySelector
+					quantity={ lineQuantity }
+					onChange={ setLineQuantity }
+					itemName={ name }
+				/>
 				<button className="wc-block-cart-item__remove-link">
 					{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
 				</button>
@@ -146,14 +72,27 @@ const CartLineItemRow = ( { lineItem } ) => {
 				</button>
 			</td>
 			<td className="wc-block-cart-item__total">
-				{ fullPrice }
-				<div className="wc-block-cart-item__line-total">
+				{ saleAmount > 0 && (
 					<FormattedMonetaryAmount
+						className="wc-block-cart-item__regular-price"
 						currency={ currency }
-						value={ purchasePrice }
+						value={ regularPrice }
 					/>
-				</div>
-				{ saleBadge }
+				) }
+				<FormattedMonetaryAmount
+					className="wc-block-cart-item__price"
+					currency={ currency }
+					value={ purchasePrice }
+				/>
+				{ saleAmount > 0 && (
+					<div className="wc-block-cart-item__sale-badge">
+						{ sprintf(
+							/* translators: %s discount amount */
+							__( 'Save %s!', 'woo-gutenberg-products-block' ),
+							formatPrice( saleAmount, currency )
+						) }
+					</div>
+				) }
 			</td>
 		</tr>
 	);
