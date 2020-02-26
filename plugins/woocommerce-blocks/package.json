@@ -143,7 +143,7 @@
 		"@woocommerce/components": "4.0.0",
 		"classnames": "2.2.6",
 		"compare-versions": "3.6.0",
-		"config": "3.2.5",
+		"config": "3.2.6",
 		"downshift": "4.1.0",
 		"react-number-format": "4.3.1",
 		"trim-html": "0.1.9",
