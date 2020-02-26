@@ -1548,8 +1548,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Check it can be used with cart.
 		if ( ! $the_coupon->is_valid() ) {
-			// Notices are escaped using wc_kses_notice, which allows <a> tag, but we don't want that in coupon error output.
-			wc_add_notice( esc_html( $the_coupon->get_error_message() ), 'error' );
+			wc_add_notice( $the_coupon->get_error_message(), 'error' );
 			return false;
 		}
 
