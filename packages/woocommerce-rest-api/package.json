@@ -1,0 +1,31 @@
+{
+  "name": "woocommerce-rest-api",
+  "title": "WooCommerce REST API",
+  "version": "1.0.5",
+  "homepage": "https://woocommerce.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woocommerce/woocommerce-rest-api.git"
+  },
+  "license": "GPL-3.0+",
+  "main": "Gruntfile.js",
+  "devDependencies": {
+    "husky": "4.0.10",
+    "lint-staged": "9.5.0"
+  },
+  "engines": {
+    "node": ">=10.15.0",
+    "npm": ">=6.4.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.php": [
+      "php -d display_errors=1 -l",
+      "composer run-script phpcs-pre-commit"
+    ]
+  }
+}
