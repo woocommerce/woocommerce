@@ -91,10 +91,40 @@ class Cart extends TestCase {
 	public function test_apply_coupon() {
 		wc()->cart->remove_coupon( $this->coupon->get_code() );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon/' . $this->coupon->get_code() ) );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$request->set_body_params(
+			array(
+				'code' => $this->coupon->get_code(),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( '100', $data['totals']->total_discount );
+
+		// Test coupons with different case.
+		$newcoupon = CouponHelper::create_coupon( 'testCoupon' );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$request->set_body_params(
+			array(
+				'code' => 'testCoupon',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Test coupons with special chars in the code.
+		$newcoupon = CouponHelper::create_coupon( '$5 off' );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$request->set_body_params(
+			array(
+				'code' => '$5 off',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
 	}
 
 	/**
@@ -102,12 +132,24 @@ class Cart extends TestCase {
 	 */
 	public function test_remove_coupon() {
 		// Invalid coupon.
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon/doesnotexist' ) );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon' );
+		$request->set_body_params(
+			array(
+				'code' => 'doesnotexist',
+			)
+		);
+		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 404, $response->get_status() );
 
 		// Applied coupon.
-		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon/' . $this->coupon->get_code() ) );
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon' );
+		$request->set_body_params(
+			array(
+				'code' => $this->coupon->get_code(),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( '0', $data['totals']->total_discount );

@@ -71,34 +71,34 @@ class Cart extends RestController {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/apply-coupon/(?P<code>[\w-]+)',
+			'/' . $this->rest_base . '/apply-coupon',
 			[
-				'args'   => [
-					'code' => [
-						'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-					],
-				],
 				[
 					'methods'  => 'POST',
 					'callback' => [ $this, 'apply_coupon' ],
+					'args'     => [
+						'code' => [
+							'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+						],
+					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/remove-coupon/(?P<code>[\w-]+)',
+			'/' . $this->rest_base . '/remove-coupon',
 			[
-				'args'   => [
-					'code' => [
-						'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-					],
-				],
 				[
 					'methods'  => 'POST',
 					'callback' => [ $this, 'remove_coupon' ],
+					'args'     => [
+						'code' => [
+							'description' => __( 'Unique identifier for the coupon within the cart.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+						],
+					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -118,15 +118,16 @@ class Cart extends RestController {
 			return new RestError( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
 		}
 
-		$controller = new CartController();
-		$cart       = $controller->get_cart_instance();
+		$controller  = new CartController();
+		$cart        = $controller->get_cart_instance();
+		$coupon_code = wc_format_coupon_code( $request['code'] );
 
 		if ( ! $cart || ! $cart instanceof \WC_Cart ) {
 			return new RestError( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woo-gutenberg-products-block' ), array( 'status' => 500 ) );
 		}
 
 		try {
-			$controller->apply_coupon( $request['code'] );
+			$controller->apply_coupon( $coupon_code );
 		} catch ( RestException $e ) {
 			return new RestError( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -150,19 +151,20 @@ class Cart extends RestController {
 			return new RestError( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
 		}
 
-		$controller = new CartController();
-		$cart       = $controller->get_cart_instance();
+		$controller  = new CartController();
+		$cart        = $controller->get_cart_instance();
+		$coupon_code = wc_format_coupon_code( $request['code'] );
 
 		if ( ! $cart || ! $cart instanceof \WC_Cart ) {
 			return new RestError( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woo-gutenberg-products-block' ), array( 'status' => 500 ) );
 		}
 
-		if ( ! $controller->has_coupon( $request['code'] ) ) {
+		if ( ! $controller->has_coupon( $coupon_code ) ) {
 			return new RestError( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
 		}
 
 		$cart = $controller->get_cart_instance();
-		$cart->remove_coupon( $request['code'] );
+		$cart->remove_coupon( $coupon_code );
 		$cart->calculate_totals();
 
 		$data     = $this->prepare_item_for_response( $cart, $request );

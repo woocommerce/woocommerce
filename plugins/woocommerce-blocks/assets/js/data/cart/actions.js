@@ -79,8 +79,11 @@ export function* applyCoupon( couponCode ) {
 
 	try {
 		const result = yield apiFetch( {
-			path: '/wc/store/cart/apply-coupon/' + couponCode,
+			path: '/wc/store/cart/apply-coupon',
 			method: 'POST',
+			data: {
+				code: couponCode,
+			},
 			cache: 'no-store',
 		} );
 
@@ -105,8 +108,11 @@ export function* removeCoupon( couponCode ) {
 
 	try {
 		const result = yield apiFetch( {
-			path: '/wc/store/cart/remove-coupon/' + couponCode,
+			path: '/wc/store/cart/remove-coupon',
 			method: 'POST',
+			data: {
+				code: couponCode,
+			},
 			cache: 'no-store',
 		} );
 
