@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 3.9.2 - 2020-02-13 =
+
+* Security - Show a notice when a logged-in customer pays for a guest order.
+* Security - Disallow links in coupon error messages.
+* Fix - Restored the default behavior of the "Shipping destination" option. #25571
+
 = 3.9.1 - 2020-01-28 =
 
 * Tweak - Trim whitespaces and strip slashes from MaxMind License Key.
