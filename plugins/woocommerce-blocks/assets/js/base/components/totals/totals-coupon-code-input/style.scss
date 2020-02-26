@@ -29,8 +29,9 @@
 		}
 	}
 
-	.wc-block-coupon-code__row {
+	.wc-block-coupon-code__form {
 		display: flex;
+		margin-bottom: 0;
 	}
 
 	.wc-block-coupon-code__input {
@@ -39,6 +40,7 @@
 	}
 
 	.wc-block-coupon-code__button {
+		height: 48px;
 		margin-left: $gap;
 		padding-left: $gap-large;
 		padding-right: $gap-large;
