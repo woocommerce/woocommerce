@@ -27,11 +27,6 @@ const CartFrontend = ( {
 		cartCoupons,
 	} = useStoreCart();
 
-	// Blank state on first load.
-	if ( cartIsLoading && ! cartItems.length ) {
-		return null;
-	}
-
 	return (
 		<>
 			<div className="errors">
@@ -43,7 +38,7 @@ const CartFrontend = ( {
 						</div>
 					) ) }
 			</div>
-			{ ! cartItems.length ? (
+			{ ! cartIsLoading && ! cartItems.length ? (
 				<RawHTML>{ emptyCart }</RawHTML>
 			) : (
 				<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
@@ -55,6 +50,7 @@ const CartFrontend = ( {
 							isShippingCalculatorEnabled
 						}
 						isShippingCostHidden={ isShippingCostHidden }
+						isLoading={ cartIsLoading }
 					/>
 				</LoadingMask>
 			) }

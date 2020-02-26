@@ -17,9 +17,11 @@ const CartLineItemsTitle = ( {
 	return (
 		<h2 aria-label={ readableHeading }>
 			<span>{ title } </span>
-			<span className="wc-block-cart__item-count">
-				{ itemCountHeading }
-			</span>
+			{ !! itemCount && (
+				<span className="wc-block-cart__item-count">
+					{ itemCountHeading }
+				</span>
+			) }
 		</h2>
 	);
 };
