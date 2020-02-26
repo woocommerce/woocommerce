@@ -42,7 +42,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 
 		$item_id = absint( $wpdb->insert_id );
 
-		$this->clear_cache( $item_id, $order_id );
+		$this->clear_caches( $item_id, $order_id );
 
 		return $item_id;
 	}
@@ -58,7 +58,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	public function update_order_item( $item_id, $item ) {
 		global $wpdb;
 		$updated = $wpdb->update( $wpdb->prefix . 'woocommerce_order_items', $item, array( 'order_item_id' => $item_id ) );
-		$this->clear_cache( $item_id, null );
+		$this->clear_caches( $item_id, null );
 		return $updated;
 	}
 
@@ -69,7 +69,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param  int $item_id Item ID.
 	 */
 	public function delete_order_item( $item_id ) {
-		$this->clear_cache( $item_id, null );
+		$this->clear_caches( $item_id, null );
 
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d", $item_id ) );
@@ -173,7 +173,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * @param int      $item_id Item ID.
 	 * @param int|null $order_id Order ID. If not set, it will be loaded using the item ID.
 	 */
-	protected function clear_cache( $item_id, $order_id ) {
+	protected function clear_caches( $item_id, $order_id ) {
 		wp_cache_delete( 'item-' . $item_id, 'order-items' );
 
 		if ( ! $order_id ) {
