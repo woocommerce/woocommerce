@@ -9,7 +9,9 @@ import NoShipping from '@woocommerce/base-components/checkout/no-shipping';
 import TextInput from '@woocommerce/base-components/text-input';
 import { ShippingCountryInput } from '@woocommerce/base-components/country-input';
 import { ShippingStateInput } from '@woocommerce/base-components/state-input';
-import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
+import ShippingRatesControl, {
+	Packages,
+} from '@woocommerce/base-components/shipping-rates-control';
 import InputRow from '@woocommerce/base-components/input-row';
 import { CheckboxControl } from '@wordpress/components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
@@ -31,11 +33,25 @@ import '../../../payment-methods-demo';
 /**
  * Component displaying an attribute filter.
  */
-const Block = ( { shippingMethods = [], isEditor = false } ) => {
-	const [ shippingMethod, setShippingMethod ] = useState( {} );
+const Block = ( { shippingRates = [], isEditor = false } ) => {
+	const [ selectedShippingRate, setSelectedShippingRate ] = useState( {} );
 	const [ contactFields, setContactFields ] = useState( {} );
 	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
 	const [ shippingFields, setShippingFields ] = useState( {} );
+
+	const renderShippingRatesControlOption = ( option ) => ( {
+		label: decodeEntities( option.name ),
+		value: option.rate_id,
+		description: decodeEntities( option.description ),
+		secondaryLabel: (
+			<FormattedMonetaryAmount
+				currency={ getCurrencyFromPriceResponse( option ) }
+				value={ option.price }
+			/>
+		),
+		secondaryDescription: decodeEntities( option.delivery_time ),
+	} );
+
 	return (
 		<CheckoutProvider>
 			<ExpressCheckoutFormControl />
@@ -263,7 +279,7 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 					</FormStep>
 				) }
 				{ SHIPPING_ENABLED &&
-					( shippingMethods.length === 0 && isEditor ? (
+					( shippingRates.length === 0 && isEditor ? (
 						<NoShipping />
 					) : (
 						<FormStep
@@ -279,60 +295,59 @@ const Block = ( { shippingMethods = [], isEditor = false } ) => {
 							) }
 							stepNumber={ 3 }
 						>
-							<ShippingRatesControl
-								address={
-									shippingFields.country
-										? {
-												address_1:
-													shippingFields.streetAddress,
-												address_2:
-													shippingFields.apartment,
-												city: shippingFields.city,
-												state: shippingFields.state,
-												postcode:
-													shippingFields.postcode,
-												country: shippingFields.country,
-										  }
-										: null
-								}
-								noResultsMessage={ __(
-									'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
-									'woo-gutenberg-products-block'
-								) }
-								onChange={ ( newMethods ) =>
-									setShippingMethod( {
-										...shippingMethod,
-										methods: newMethods,
-									} )
-								}
-								renderOption={ ( option ) => ( {
-									label: decodeEntities( option.name ),
-									value: option.rate_id,
-									description: decodeEntities(
-										option.description
-									),
-									secondaryLabel: (
-										<FormattedMonetaryAmount
-											currency={ getCurrencyFromPriceResponse(
-												option
-											) }
-											value={ option.price }
-										/>
-									),
-									secondaryDescription: decodeEntities(
-										option.delivery_time
-									),
-								} ) }
-								selected={ shippingMethod.methods }
-							/>
+							{ shippingRates.length > 0 ? (
+								<Packages
+									renderOption={
+										renderShippingRatesControlOption
+									}
+									shippingRates={ shippingRates }
+									selected={ [
+										shippingRates[ 0 ].shipping_rates[ 0 ]
+											.rate_id,
+									] }
+								/>
+							) : (
+								<ShippingRatesControl
+									address={
+										shippingFields.country
+											? {
+													address_1:
+														shippingFields.streetAddress,
+													address_2:
+														shippingFields.apartment,
+													city: shippingFields.city,
+													state: shippingFields.state,
+													postcode:
+														shippingFields.postcode,
+													country:
+														shippingFields.country,
+											  }
+											: null
+									}
+									noResultsMessage={ __(
+										'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
+										'woo-gutenberg-products-block'
+									) }
+									selected={ selectedShippingRate.methods }
+									renderOption={
+										renderShippingRatesControlOption
+									}
+									onChange={ ( newMethods ) =>
+										setSelectedShippingRate( {
+											...selectedShippingRate,
+											methods: newMethods,
+										} )
+									}
+								/>
+							) }
 							<CheckboxControl
 								className="wc-block-checkout__add-note"
 								label="Add order notes?"
-								checked={ shippingMethod.orderNote }
+								checked={ selectedShippingRate.orderNote }
 								onChange={ () =>
-									setShippingMethod( {
-										...shippingMethod,
-										orderNote: ! shippingMethod.orderNote,
+									setSelectedShippingRate( {
+										...selectedShippingRate,
+										orderNote: ! selectedShippingRate.orderNote,
 									} )
 								}
 							/>
