@@ -121,8 +121,9 @@ class CartShippingRates extends RestController {
 		$packages = $this->get_shipping_packages( $request );
 		$response = [];
 
-		foreach ( $packages as $package ) {
-			$response[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $package, $request ) );
+		foreach ( $packages as $key => $package ) {
+			$package['key'] = $key;
+			$response[]     = $this->prepare_response_for_collection( $this->prepare_item_for_response( $package, $request ) );
 		}
 
 		return rest_ensure_response( $response );

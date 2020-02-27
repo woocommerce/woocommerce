@@ -1,15 +1,17 @@
-.wc-block-shipping-rates-control__no-results {
-	border-bottom: 1px solid $core-grey-light-600;
-	margin-bottom: 0;
-	padding-bottom: $gap-small;
+.wc-block-shipping-rates-control__package:not(:first-of-type) {
+	margin-top: $gap-larger;
+}
+
+.wc-block-shipping-rates-control__package-title {
+	font-weight: bold;
 }
 
 .wc-block-shipping-rates-control__package-items {
 	display: block;
-	font-size: 75%;
+	font-size: 0.875em;
 	list-style: none;
-	margin: 0;
-	padding: 0 0 $gap;
+	margin: 0 0 $gap-small;
+	padding: 0;
 }
 
 .wc-block-shipping-rates-control__package-item {
@@ -21,4 +23,8 @@
 .wc-block-shipping-rates-control__package-item:not(:last-child)::after {
 	content: ", ";
 	white-space: pre;
+}
+
+.wc-block-shipping-rates-control__no-results {
+	margin-bottom: 0;
 }

@@ -42,7 +42,6 @@ const PackageOptions = ( {
 
 	return (
 		<RadioControlOptionLayout
-			className={ className }
 			label={ label }
 			secondaryLabel={ secondaryLabel }
 			description={ description }
