@@ -16,7 +16,7 @@ exports[`Chip with custom wrapper should render a chip made up of a div instead 
     Test
   </span>
   <button
-    aria-label="Remove \\"Test\\""
+    aria-label="Remove coupon \\"Test\\""
     className="wc-block-components-chip__remove"
     disabled={false}
     onClick={[Function]}
@@ -42,7 +42,7 @@ exports[`Chip without custom wrapper should render defined radius 1`] = `
     Test
   </span>
   <button
-    aria-label="Remove \\"Test\\""
+    aria-label="Remove coupon \\"Test\\""
     className="wc-block-components-chip__remove"
     disabled={false}
     onClick={[Function]}
@@ -68,7 +68,7 @@ exports[`Chip without custom wrapper should render text and the remove button 1`
     Test
   </span>
   <button
-    aria-label="Remove \\"Test\\""
+    aria-label="Remove coupon \\"Test\\""
     className="wc-block-components-chip__remove"
     disabled={false}
     onClick={[Function]}
@@ -94,7 +94,7 @@ exports[`Chip without custom wrapper should render with disabled remove button 1
     Test
   </span>
   <button
-    aria-label="Remove \\"Test\\""
+    aria-label="Remove coupon \\"Test\\""
     className="wc-block-components-chip__remove"
     disabled={true}
     onClick={[Function]}
