@@ -168,6 +168,10 @@ class ProductCategories extends AbstractDynamicBlock {
 	 * @return string Rendered output.
 	 */
 	protected function renderDropdown( $categories, $attributes, $uid ) {
+		$aria_label = empty( $attributes['hasCount'] ) ?
+			__( 'List of categories', 'woo-gutenberg-products-block' ) :
+			__( 'List of categories with their product counts', 'woo-gutenberg-products-block' );
+
 		$output = '
 			<div class="wc-block-product-categories__dropdown">
 				<label
@@ -176,7 +180,7 @@ class ProductCategories extends AbstractDynamicBlock {
 				>
 					' . esc_html__( 'Select a category', 'woo-gutenberg-products-block' ) . '
 				</label>
-				<select id="' . esc_attr( $uid ) . '-select">
+				<select aria-label="' . esc_attr( $aria_label ) . '" id="' . esc_attr( $uid ) . '-select">
 					<option value="false" hidden>
 						' . esc_html__( 'Select a category', 'woo-gutenberg-products-block' ) . '
 					</option>
@@ -314,6 +318,20 @@ class ProductCategories extends AbstractDynamicBlock {
 		if ( empty( $attributes['hasCount'] ) ) {
 			return '';
 		}
-		return $attributes['isDropdown'] ? '(' . absint( $category->count ) . ')' : '<span class="wc-block-product-categories-list-item-count">' . absint( $category->count ) . '</span>';
+
+		if ( $attributes['isDropdown'] ) {
+			return '(' . absint( $category->count ) . ')';
+		}
+
+		$screen_reader_text = sprintf(
+			/* translators: %s number of products in cart. */
+			_n( '%d product', '%d products', absint( $category->count ), 'woo-gutenberg-products-block' ),
+			absint( $category->count )
+		);
+
+		return '<span class="wc-block-product-categories-list-item-count">'
+			. '<span aria-hidden="true">' . absint( $category->count ) . '</span>'
+			. '<span class="screen-reader-text">' . esc_html( $screen_reader_text ) . '</span>'
+		. '</span>';
 	}
 }
