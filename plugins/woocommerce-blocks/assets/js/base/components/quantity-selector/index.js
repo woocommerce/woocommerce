@@ -18,6 +18,7 @@ const QuantitySelector = ( {
 	quantity = 1,
 	onChange = () => null,
 	itemName = '',
+	disabled,
 } ) => {
 	const classes = classNames( 'wc-block-quantity-selector', className );
 	const inputRef = useRef( null );
@@ -63,6 +64,7 @@ const QuantitySelector = ( {
 		<div className={ classes }>
 			<input
 				className="wc-block-quantity-selector__input"
+				disabled={ disabled }
 				type="number"
 				step="1"
 				min="0"
@@ -91,7 +93,7 @@ const QuantitySelector = ( {
 					'woo-gutenberg-products-block'
 				) }
 				className="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus"
-				disabled={ currentValue <= 0 }
+				disabled={ disabled || currentValue <= 0 }
 				onClick={ () => {
 					const newQuantity = currentValue - 1;
 					setCurrentValue( newQuantity );
@@ -114,6 +116,7 @@ const QuantitySelector = ( {
 					'Increase quantity',
 					'woo-gutenberg-products-block'
 				) }
+				disabled={ disabled }
 				className="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus"
 				onClick={ () => {
 					const newQuantity = currentValue + 1;
@@ -141,6 +144,7 @@ QuantitySelector.propTypes = {
 	quantity: PropTypes.number,
 	onChange: PropTypes.func,
 	itemName: PropTypes.string,
+	disabled: PropTypes.bool,
 };
 
 export default QuantitySelector;
