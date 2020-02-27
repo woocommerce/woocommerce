@@ -10,14 +10,12 @@
 		border-bottom: 1px solid $core-grey-light-600;
 		display: flex;
 		flex-wrap: wrap;
-		padding-bottom: $gap-small;
-		padding-left: $gap-large;
 		justify-content: space-between;
+		padding-bottom: $gap-small;
 	}
 
 	.wc-block-radio-control__option .wc-block-radio-control__option-layout {
 		border-bottom: 0;
-		padding-left: 0;
 	}
 
 	.wc-block-radio-control__input {

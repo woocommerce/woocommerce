@@ -63,6 +63,7 @@ class CartShippingRates extends TestCase {
 
 		$this->assertArrayHasKey( 'destination', $data[0] );
 		$this->assertArrayHasKey( 'items', $data[0] );
+		$this->assertArrayHasKey( 'name', $data[0] );
 		$this->assertArrayHasKey( 'shipping_rates', $data[0] );
 
 		$this->assertEquals( null, $data[0]['destination']->address_1 );
@@ -153,6 +154,7 @@ class CartShippingRates extends TestCase {
 
 		$this->assertArrayHasKey( 'destination', $schema['properties'] );
 		$this->assertArrayHasKey( 'items', $schema['properties'] );
+		$this->assertArrayHasKey( 'name', $schema['properties'] );
 		$this->assertArrayHasKey( 'shipping_rates', $schema['properties'] );
 		$this->assertArrayHasKey( 'name', $schema['properties']['shipping_rates']['items']['properties'] );
 		$this->assertArrayHasKey( 'description', $schema['properties']['shipping_rates']['items']['properties'] );
@@ -168,13 +170,15 @@ class CartShippingRates extends TestCase {
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartShippingRates();
-		$packages   = wc()->shipping->calculate_shipping( wc()->cart->get_shipping_packages() );
-		$response   = $controller->prepare_item_for_response( current( $packages ), [] );
-		$data       = $response->get_data();
+		$controller         = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartShippingRates();
+		$packages           = wc()->shipping->calculate_shipping( wc()->cart->get_shipping_packages() );
+		$packages[0]['key'] = 0;
+		$response           = $controller->prepare_item_for_response( current( $packages ), [] );
+		$data               = $response->get_data();
 
 		$this->assertArrayHasKey( 'destination', $data );
 		$this->assertArrayHasKey( 'items', $data );
+		$this->assertArrayHasKey( 'name', $data );
 		$this->assertArrayHasKey( 'shipping_rates', $data );
 	}
 

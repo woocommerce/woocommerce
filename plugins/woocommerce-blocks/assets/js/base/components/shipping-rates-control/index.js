@@ -63,36 +63,24 @@ const ShippingRatesControl = ( {
 		[ shippingRates ]
 	);
 
-	if ( shippingRatesLoading ) {
-		return (
-			<LoadingMask
-				screenReaderLabel={ __(
-					'Loading shipping rates…',
-					'woo-gutenberg-products-block'
-				) }
-				showSpinner={ false }
-			>
-				<Packages
-					className={ className }
-					noResultsMessage={ noResultsMessage }
-					onChange={ onChange }
-					renderOption={ renderOption }
-					selected={ selected }
-					shippingRates={ previousShippingRates || [] }
-				/>
-			</LoadingMask>
-		);
-	}
-
 	return (
-		<Packages
-			className={ className }
-			noResultsMessage={ noResultsMessage }
-			onChange={ onChange }
-			renderOption={ renderOption }
-			selected={ selected }
-			shippingRates={ shippingRates }
-		/>
+		<LoadingMask
+			isLoading={ shippingRatesLoading }
+			screenReaderLabel={ __(
+				'Loading shipping rates…',
+				'woo-gutenberg-products-block'
+			) }
+			showSpinner={ true }
+		>
+			<Packages
+				className={ className }
+				noResultsMessage={ noResultsMessage }
+				onChange={ onChange }
+				renderOption={ renderOption }
+				selected={ selected }
+				shippingRates={ previousShippingRates || shippingRates }
+			/>
+		</LoadingMask>
 	);
 };
 

@@ -3,9 +3,9 @@
  */
 import PropTypes from 'prop-types';
 import { _n, sprintf } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import Label from '@woocommerce/base-components/label';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -21,17 +21,20 @@ const Package = ( {
 	selected,
 	shippingRate,
 	showItems,
+	title,
 } ) => {
 	return (
-		<Fragment>
-			<PackageOptions
-				className={ className }
-				noResultsMessage={ noResultsMessage }
-				onChange={ onChange }
-				options={ shippingRate.shipping_rates }
-				renderOption={ renderOption }
-				selected={ selected }
-			/>
+		<div
+			className={ classNames(
+				'wc-block-shipping-rates-control__package',
+				className
+			) }
+		>
+			{ title && (
+				<div className="wc-block-shipping-rates-control__package-title">
+					{ title }
+				</div>
+			) }
 			{ showItems && (
 				<ul className="wc-block-shipping-rates-control__package-items">
 					{ Object.values( shippingRate.items ).map( ( v ) => {
@@ -61,7 +64,15 @@ const Package = ( {
 					} ) }
 				</ul>
 			) }
-		</Fragment>
+			<PackageOptions
+				className={ className }
+				noResultsMessage={ noResultsMessage }
+				onChange={ onChange }
+				options={ shippingRate.shipping_rates }
+				renderOption={ renderOption }
+				selected={ selected }
+			/>
+		</div>
 	);
 };
 
@@ -81,6 +92,7 @@ Package.propTypes = {
 	noResultsMessage: PropTypes.string,
 	selected: PropTypes.string,
 	showItems: PropTypes.bool,
+	title: PropTypes.string,
 };
 
 export default Package;
