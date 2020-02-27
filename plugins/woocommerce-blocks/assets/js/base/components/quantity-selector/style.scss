@@ -33,6 +33,9 @@
 			background: $core-grey-light-200;
 			outline: 1px solid $core-grey-dark-100;
 		}
+		&:disabled {
+			color: $core-grey-dark-100;
+		}
 	}
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
