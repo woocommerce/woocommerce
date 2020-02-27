@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 3.9.3 - 2020-02-27 =
+* Fix - Replaced deprecated Jetpack::is_staging_site call. #25670
+* Fix - Corrected the cache invalidation behavior of order item CRUD actions. #25734
+* Fix - Configure Jetpack plugin before trying to connect/register. #25742
+* Fix - Check configure exists before calling to support older JP versions. #25747
+* Fix - Better handling of coupon code when rendering.
+
 = 3.9.2 - 2020-02-13 =
 
 * Security - Show a notice when a logged-in customer pays for a guest order.
