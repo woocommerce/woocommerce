@@ -88,6 +88,7 @@ const CoreConfig = {
 		new DefinePlugin( {
 			// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
 			'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
+				// eslint-disable-next-line woocommerce/feature-flag
 				process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
 			),
 		} ),
@@ -96,8 +97,10 @@ const CoreConfig = {
 			// file name
 			fileName: 'blocks.ini',
 			// content of the file
-			content: `woocommerce_blocks_phase = ${ process.env
-				.WOOCOMMERCE_BLOCKS_PHASE || 'experimental' }`,
+			content: `woocommerce_blocks_phase = ${
+				// eslint-disable-next-line woocommerce/feature-flag
+				process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
+			}`,
 		} ),
 	],
 };

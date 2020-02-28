@@ -21,7 +21,7 @@ if ( program.dev ) {
 
 const envVars = Object.assign( {}, process.env, testEnvVars );
 
-let jestProcess = spawnSync(
+const jestProcess = spawnSync(
 	'jest',
 	[
 		'--maxWorkers=1',
@@ -36,6 +36,7 @@ let jestProcess = spawnSync(
 	}
 );
 
+// eslint-disable-next-line no-console
 console.log( 'Jest exit code: ' + jestProcess.status );
 
 // Pass Jest exit code to npm
