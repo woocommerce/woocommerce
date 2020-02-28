@@ -1,4 +1,8 @@
 /**
+ * @typedef {import('./cart').CartData} CartData
+ */
+
+/**
  * @typedef {Object} StoreCart
  *
  * @property {Array}   cartCoupons       An array of coupons applied to the cart.
@@ -24,14 +28,15 @@
  */
 
 /**
- * @typedef {Object} StoreCartItems
+ * @typedef {Object} StoreCartItem
  *
- * @property {boolean}  isLoading             True when cart items are being loaded.
- * @property {Array}    cartItems             An array of items in the cart.
- * @property {Function} isItemQuantityPending Callback for determining if a cart item
- *                                            is currently updating (i.e. remoe / change
- *                                            quantity).
- * @property {Function} removeItemFromCart    Callback for removing a cart item.
+ * @property {boolean}  isLoading             True when cart items are being
+ *                                            loaded.
+ * @property {CartData} cartData              A cart item from the data store.
+ * @property {Function} isPending             Callback for determining if a cart
+ *                                            item is currently updating (i.e.
+ *                                            remove / change quantity).
+ * @property {Function} removeItem            Callback for removing a cart item.
  */
 
- export {};
+export {};
