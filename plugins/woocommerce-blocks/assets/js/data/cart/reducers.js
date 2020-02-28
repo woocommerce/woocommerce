@@ -4,6 +4,22 @@
 import { ACTION_TYPES as types } from './action-types';
 
 /**
+ * Sub-reducer for cart items array.
+ *
+ * @param   {Array}  state   cartData.items state slice.
+ * @param   {Object}  action  Action object.
+ */
+const cartItemsReducer = ( state = [], action ) => {
+	switch ( action.type ) {
+		case types.RECEIVE_REMOVED_ITEM:
+			return state.filter( ( cartItem ) => {
+				return cartItem.key !== action.cartItemKey;
+			} );
+	}
+	return state;
+};
+
+/**
  * Reducer for receiving items related to the cart.
  *
  * @param   {Object}  state   The current state in the store.
@@ -13,6 +29,7 @@ import { ACTION_TYPES as types } from './action-types';
  */
 const reducer = (
 	state = {
+		cartItemsQuantityPending: [],
 		cartData: {
 			coupons: [],
 			items: [],
@@ -61,6 +78,32 @@ const reducer = (
 				metaData: {
 					...state.metaData,
 					removingCoupon: action.couponCode,
+				},
+			};
+			break;
+
+		case types.ITEM_QUANTITY_PENDING:
+			// Remove key by default - handles isQuantityPending==false
+			// and prevents duplicates when isQuantityPending===true.
+			const newPendingKeys = state.cartItemsQuantityPending.filter(
+				( key ) => key !== action.cartItemKey
+			);
+			if ( action.isQuantityPending ) {
+				newPendingKeys.push( action.cartItemKey );
+			}
+			state = {
+				...state,
+				cartItemsQuantityPending: newPendingKeys,
+			};
+			break;
+
+		// Delegate to cartItemsReducer.
+		case types.RECEIVE_REMOVED_ITEM:
+			state = {
+				...state,
+				cartData: {
+					...state.cartData,
+					items: cartItemsReducer( state.cartData.items, action ),
 				},
 			};
 			break;

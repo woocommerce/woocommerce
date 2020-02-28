@@ -23,4 +23,15 @@
  * @property {boolean}  isRemovingCoupon True when a coupon is being removed.
  */
 
-export {};
+/**
+ * @typedef {Object} StoreCartItems
+ *
+ * @property {boolean}  isLoading             True when cart items are being loaded.
+ * @property {Array}    cartItems             An array of items in the cart.
+ * @property {Function} isItemQuantityPending Callback for determining if a cart item
+ *                                            is currently updating (i.e. remoe / change
+ *                                            quantity).
+ * @property {Function} removeItemFromCart    Callback for removing a cart item.
+ */
+
+ export {};
