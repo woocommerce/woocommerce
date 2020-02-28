@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrency, formatPrice } from '@woocommerce/base-utils';
+import { useStoreCartItem } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
 
 /**
@@ -21,6 +22,7 @@ import ProductLowStockBadge from './product-low-stock-badge';
  */
 const CartLineItemRow = ( { lineItem = {} } ) => {
 	const {
+		key = '',
 		name = '',
 		summary = '',
 		permalink = '',
@@ -35,6 +37,10 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 	const regularPrice = parseInt( prices.regular_price, 10 ) * lineQuantity;
 	const purchasePrice = parseInt( prices.price, 10 ) * lineQuantity;
 	const saleAmount = regularPrice - purchasePrice;
+
+	const { removeItem, isPending: itemQuantityDisabled } = useStoreCartItem(
+		key
+	);
 
 	return (
 		<tr className="wc-block-cart-items__row">
@@ -60,14 +66,23 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			</td>
 			<td className="wc-block-cart-item__quantity">
 				<QuantitySelector
+					disabled={ itemQuantityDisabled }
 					quantity={ lineQuantity }
 					onChange={ setLineQuantity }
 					itemName={ name }
 				/>
-				<button className="wc-block-cart-item__remove-link">
+				<button
+					disabled={ itemQuantityDisabled }
+					className="wc-block-cart-item__remove-link"
+					onClick={ removeItem }
+				>
 					{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
 				</button>
-				<button className="wc-block-cart-item__remove-icon">
+				<button
+					disabled={ itemQuantityDisabled }
+					className="wc-block-cart-item__remove-icon"
+					onClick={ removeItem }
+				>
 					<Icon srcElement={ trash } />
 				</button>
 			</td>
@@ -100,6 +115,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 
 CartLineItemRow.propTypes = {
 	lineItem: PropTypes.shape( {
+		key: PropTypes.string.isRequired,
 		name: PropTypes.string.isRequired,
 		summary: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,

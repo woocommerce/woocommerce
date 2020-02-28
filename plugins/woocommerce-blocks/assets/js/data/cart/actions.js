@@ -125,3 +125,59 @@ export function* removeCoupon( couponCode ) {
 
 	yield receiveRemovingCoupon( '' );
 }
+
+/**
+ * Returns an action object to indicate if the specified cart item
+ * is being updated; i.e. removing, or changing quantity.
+ *
+ * @param {string} cartItemKey Cart item being updated.
+ * @param {boolean} isQuantityPending Flag for update state; true if API request is pending.
+ * @return {Object} Object for action.
+ */
+export function itemQuantityPending( cartItemKey, isQuantityPending ) {
+	return {
+		type: types.ITEM_QUANTITY_PENDING,
+		cartItemKey,
+		isQuantityPending,
+	};
+}
+
+/**
+ * Returns an action object to remove a cart item from the store.
+ *
+ * @param {string} cartItemKey Cart item to remove.
+ * @return {Object} Object for action.
+ */
+export function receiveRemovedItem( cartItemKey ) {
+	return {
+		type: types.RECEIVE_REMOVED_ITEM,
+		cartItemKey,
+	};
+}
+
+/**
+ * Removes specified item from the cart:
+ * - Calls API to remove item.
+ * - If successful, yields action to remove item from store.
+ * - If error, yields action to store error.
+ * - Sets cart item as pending while API request is in progress.
+ *
+ * @param {string} cartItemKey Cart item being updated.
+ */
+export function* removeItemFromCart( cartItemKey ) {
+	yield itemQuantityPending( cartItemKey, true );
+
+	try {
+		yield apiFetch( {
+			path: `/wc/store/cart/items/${ cartItemKey }`,
+			method: 'DELETE',
+			cache: 'no-store',
+		} );
+
+		yield receiveRemovedItem( cartItemKey );
+	} catch ( error ) {
+		yield receiveError( error );
+	}
+
+	yield itemQuantityPending( cartItemKey, false );
+}
