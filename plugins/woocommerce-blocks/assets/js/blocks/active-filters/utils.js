@@ -39,11 +39,13 @@ export const formatPriceRange = ( minPrice, maxPrice ) => {
 /**
  * Render a removable item in the active filters block list.
  *
- * @param {string} type Type string.
- * @param {string} name Name string.
- * @param {string} prefix Prefix shown before item name.
- * @param {Function} removeCallback Callback to remove item.
- * @param {boolean} [showLabel=true] Should the label be shown for this item?
+ * @param {Object}   listItem                  The removable item to render.
+ * @param {string}   listItem.type             Type string.
+ * @param {string}   listItem.name             Name string.
+ * @param {string}   listItem.prefix           Prefix shown before item name.
+ * @param {Function} listItem.removeCallback   Callback to remove item.
+ * @param {boolean}  [listItem.showLabel=true] Should the label be shown for
+ *                                             this item?
  */
 export const renderRemovableListItem = ( {
 	type,
