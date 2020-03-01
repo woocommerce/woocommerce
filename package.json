@@ -30,7 +30,7 @@
     "babel-eslint": "10.0.3",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "commander": "4.1.0",
+    "commander": "4.1.1",
     "config": "3.2.5",
     "cross-env": "6.0.3",
     "eslint": "6.8.0",
