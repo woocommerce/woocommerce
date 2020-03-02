@@ -676,7 +676,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		// We round here because this is a total entry, as opposed to line items in other setters.
+		$this->set_prop( 'total_tax', wc_format_decimal( wc_round_tax_total( $value ) ) );
 	}
 
 	/**
@@ -1636,8 +1637,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		$this->set_shipping_tax( $this->round_line_tax( array_sum( $shipping_taxes ) ) );
-		$this->set_cart_tax( $this->round_line_tax( array_sum( $cart_taxes ) ) );
+		$this->set_shipping_tax( $this->round_line_tax( array_sum( $shipping_taxes ), false ) );
+		$this->set_cart_tax( $this->round_line_tax( array_sum( $cart_taxes ), false ) );
 		$this->save();
 	}
 
