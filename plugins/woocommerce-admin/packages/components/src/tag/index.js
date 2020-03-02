@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Dashicon, IconButton, Popover } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
 import { withState, withInstanceId } from '@wordpress/compose';
 
@@ -31,6 +32,7 @@ const Tag = ( {
 		// @todo Maybe this should be a loading indicator?
 		return null;
 	}
+	label = decodeEntities( label );
 	const classes = classnames( 'woocommerce-tag', className, {
 		'has-remove': !! remove,
 	} );

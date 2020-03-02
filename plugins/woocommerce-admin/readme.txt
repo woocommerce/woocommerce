@@ -71,6 +71,23 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.26.0 2020-02-21 =
+
+- Fix: Warning in product data store when tax amount is non-numeric. #3656
+- Fix: Enable onboarding in production. #3680
+- Enhancement: Move Customers report to WooCommerce Menu #3632
+- Performance: Remove slow physical products query from non setup checklist pages #3722
+- Tweak: use cron instead of Action Scheduler for unsnoozing notes. #3662
+- Dev: Add tracks events when profiler steps are completed #3726
+- Dev: Ensure continue setup loads the onboarding profiler #3646
+- Fix: Added new control in /packages/components/src/select-control/list.js #3700
+- Fix: Alignment of select text #3723 👏 @edmundcwm
+- Performance: Make Stock Panel indicator more performant. #3729
+- Performance: Remove sideloaded images to save on build size #3731
+- Fix: Create Onboarding homepage without redirect #3727
+- Add: Deactivation note for feature plugin #3687
+- Dev: Travis tests on Github for release branch #3751
+=======
 = 0.25.1 2020-02-07 =
 
 - Dev: Enable onboarding #3651 (Onboarding) 

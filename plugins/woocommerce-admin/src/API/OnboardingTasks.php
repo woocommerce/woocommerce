@@ -187,13 +187,13 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	private static function get_homepage_cover_block( $image ) {
 		$shop_url = get_permalink( wc_get_page_id( 'shop' ) );
 		if ( ! empty( $image['url'] ) && ! empty( $image['id'] ) ) {
-			return '<!-- wp:cover {"url":"' . esc_url( $image['url'] ) . '","id":' . intval( $image['id'] ) . '} -->
-			<div class="wp-block-cover has-background-dim" style="background-image:url(' . esc_url( $image['url'] ) . ')"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
+			return '<!-- wp:cover {"url":"' . esc_url( $image['url'] ) . '","id":' . intval( $image['id'] ) . ',"dimRatio":0} -->
+			<div class="wp-block-cover" style="background-image:url(' . esc_url( $image['url'] ) . ')"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","textColor":"white","fontSize":"large"} -->
 			<p class="has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce-admin' ) . '</p>
 			<!-- /wp:paragraph -->
 
-			<!-- wp:paragraph {"align":"center"} -->
-			<p class="has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce-admin' ) . '</p>
+			<!-- wp:paragraph {"align":"center","textColor":"white"} -->
+			<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce-admin' ) . '</p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:button {"align":"center"} -->
@@ -202,13 +202,13 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			<!-- /wp:cover -->';
 		}
 
-		return '<!-- wp:cover {"overlayColor":"very-dark-gray"} -->
-		<div class="wp-block-cover has-very-dark-gray-background-color has-background-dim"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","fontSize":"large"} -->
-		<p class="has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce-admin' ) . '</p>
+		return '<!-- wp:cover {"dimRatio":0} -->
+		<div class="wp-block-cover"><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","placeholder":"' . __( 'Write title…', 'woocommerce-admin' ) . '","textColor":"white","fontSize":"large"} -->
+		<p class="has-text-color has-text-align-center has-large-font-size">' . __( 'Welcome to the store', 'woocommerce-admin' ) . '</p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:paragraph {"align":"center"} -->
-		<p class="has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce-admin' ) . '</p>
+		<!-- wp:paragraph {"align":"center","textColor":"white"} -->
+		<p class="has-text-color has-text-align-center">' . __( 'Write a short welcome message here', 'woocommerce-admin' ) . '</p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:button {"align":"center"} -->
@@ -319,12 +319,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$industry_images = array();
 		$industries      = Onboarding::get_allowed_industries();
 		foreach ( $industries as $industry_slug => $label ) {
-			$file_path = WC_ADMIN_ABSPATH . 'images/onboarding/' . $industry_slug . '.jpg';
-			if ( 'other' === $industry_slug || ! file_exists( $file_path ) ) {
-				$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/other.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
-				continue;
-			}
-			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/' . $industry_slug . '.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
+			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/other-small.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
 		}
 		return $industry_images;
 	}
@@ -347,14 +342,25 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( ! empty( $profile['industry'] ) ) {
 			foreach ( $profile['industry'] as $selected_industry ) {
-				$images_to_sideload[] = ! empty( $available_images[ $selected_industry ] ) ? $available_images[ $selected_industry ] : $available_images['other'];
+				if ( is_string( $selected_industry ) ) {
+					$industry_slug = $selected_industry;
+				} elseif ( is_array( $selected_industry ) && ! empty( $selected_industry['slug'] ) ) {
+					$industry_slug = $selected_industry['slug'];
+				} else {
+					continue;
+				}
+				// Capture the first industry for use in our minimum images logic.
+				$first_industry       = isset( $first_industry ) ? $first_industry : $industry_slug;
+				$images_to_sideload[] = ! empty( $available_images[ $industry_slug ] ) ? $available_images[ $industry_slug ] : $available_images['other'];
 			}
 		}
 
 		// Make sure we have at least {$number_of_images} images.
 		if ( count( $images_to_sideload ) < $number_of_images ) {
 			for ( $i = count( $images_to_sideload ); $i < $number_of_images; $i++ ) {
-				$images_to_sideload[] = ! empty( $profile['industry'] ) && ! empty( $available_images[ $profile['industry'][0] ] ) ? $available_images[ $profile['industry'][0] ] : $available_images['other'];
+				// Fill up missing image slots with the first selected industry, or other.
+				$industry             = isset( $first_industry ) ? $first_industry : 'other';
+				$images_to_sideload[] = empty( $available_images[ $industry ] ) ? $available_images['other'] : $available_images[ $industry ];
 			}
 		}
 
@@ -402,7 +408,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			array(
 				'post_title'   => __( 'Homepage', 'woocommerce-admin' ),
 				'post_type'    => 'page',
-				'post_status'  => 'draft',
+				'post_status'  => 'publish',
 				'post_content' => '', // Template content is updated below, so images can be attached to the post.
 			)
 		);
@@ -417,11 +423,13 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				)
 			);
 
+			update_option( 'show_on_front', 'page' );
+			update_option( 'page_on_front', $post_id );
 			update_option( 'woocommerce_onboarding_homepage_post_id', $post_id );
 
 			return array(
 				'status'         => 'success',
-				'message'        => __( 'Homepage created successfully.', 'woocommerce-admin' ),
+				'message'        => __( 'Homepage created.', 'woocommerce-admin' ),
 				'post_id'        => $post_id,
 				'edit_post_link' => htmlspecialchars_decode( get_edit_post_link( $post_id ) ),
 			);

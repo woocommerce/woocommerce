@@ -49,6 +49,7 @@ script:
 branches:
   only:
     - master
+    - version/1.0
 
 before_deploy:
   # Remove our unneeded symlink.

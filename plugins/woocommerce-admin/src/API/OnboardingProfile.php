@@ -240,11 +240,9 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'description'       => __( 'Industry.', 'woocommerce-admin' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
-				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( Onboarding::get_allowed_industries() ),
-					'type' => 'string',
+					'type' => 'json',
 				),
 			),
 			'product_types'       => array(

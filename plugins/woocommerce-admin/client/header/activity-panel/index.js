@@ -336,7 +336,7 @@ class ActivityPanel extends Component {
 export default withSelect( ( select ) => {
 	const hasUnreadNotes = getUnreadNotes( select );
 	const hasUnreadOrders = getUnreadOrders( select );
-	const hasUnreadStock = getUnreadStock( select );
+	const hasUnreadStock = getUnreadStock();
 	const hasUnapprovedReviews = getUnapprovedReviews( select );
 
 	return {

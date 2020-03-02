@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Button, CheckboxControl } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
-import { filter, get, includes } from 'lodash';
+import { filter, get, find, findIndex } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -16,7 +16,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { H, Card } from '@woocommerce/components';
+import { H, Card, TextControl } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
@@ -30,9 +30,11 @@ class Industry extends Component {
 		this.state = {
 			error: null,
 			selected: profileItems.industry || [],
+			textInputListContent: {},
 		};
 		this.onContinue = this.onContinue.bind( this );
-		this.onChange = this.onChange.bind( this );
+		this.onIndustryChange = this.onIndustryChange.bind( this );
+		this.onDetailChange = this.onDetailChange.bind( this );
 	}
 
 	async onContinue() {
@@ -47,9 +49,16 @@ class Industry extends Component {
 			isError,
 			updateProfileItems,
 		} = this.props;
+		const selectedIndustriesList = this.state.selected.map(
+			( industry ) => industry.slug
+		);
+		const industriesWithDetail = filter( this.state.selected, ( value ) => {
+			return typeof value.detail !== 'undefined';
+		} );
 
 		recordEvent( 'storeprofiler_store_industry_continue', {
-			store_industry: this.state.selected,
+			store_industry: selectedIndustriesList,
+			industries_with_detail: industriesWithDetail,
 		} );
 		await updateProfileItems( { industry: this.state.selected } );
 
@@ -73,19 +82,26 @@ class Industry extends Component {
 		this.setState( { error } );
 	}
 
-	onChange( slug ) {
+	onIndustryChange( slug ) {
 		this.setState(
 			( state ) => {
-				if ( includes( state.selected, slug ) ) {
+				const newSelected = state.selected;
+				const selectedIndustry = find( newSelected, { slug } );
+				if ( selectedIndustry ) {
+					const newTextInputListContent = state.textInputListContent;
+					newTextInputListContent[ slug ] = selectedIndustry.detail;
 					return {
 						selected:
 							filter( state.selected, ( value ) => {
-								return value !== slug;
+								return value.slug !== slug;
 							} ) || [],
+						textInputListContent: newTextInputListContent,
 					};
 				}
-				const newSelected = state.selected;
-				newSelected.push( slug );
+				newSelected.push( {
+					slug,
+					detail: state.textInputListContent[ slug ],
+				} );
 				return {
 					selected: newSelected,
 				};
@@ -94,9 +110,23 @@ class Industry extends Component {
 		);
 	}
 
+	onDetailChange( value, slug ) {
+		this.setState( ( state ) => {
+			const newSelected = state.selected;
+			const newTextInputListContent = state.textInputListContent;
+			const industryIndex = findIndex( newSelected, { slug } );
+			newSelected[ industryIndex ].detail = value;
+			newTextInputListContent[ slug ] = value;
+			return {
+				selected: newSelected,
+				textInputListContent: newTextInputListContent,
+			};
+		} );
+	}
+
 	render() {
 		const { industries } = onboarding;
-		const { error, selected } = this.state;
+		const { error, selected, textInputListContent } = this.state;
 
 		return (
 			<Fragment>
@@ -112,14 +142,45 @@ class Industry extends Component {
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
 						{ Object.keys( industries ).map( ( slug ) => {
+							const selectedIndustry = find( selected, { slug } );
+
 							return (
-								<CheckboxControl
-									key={ slug }
-									label={ industries[ slug ] }
-									onChange={ () => this.onChange( slug ) }
-									checked={ selected.includes( slug ) }
-									className="woocommerce-profile-wizard__checkbox"
-								/>
+								<div key={ `div-${ slug }` }>
+									<CheckboxControl
+										key={ `checkbox-control-${ slug }` }
+										label={ industries[ slug ].label }
+										onChange={ () =>
+											this.onIndustryChange( slug )
+										}
+										checked={ selectedIndustry || false }
+										className="woocommerce-profile-wizard__checkbox"
+									/>
+									{ industries[ slug ].use_description &&
+										selectedIndustry && (
+											<TextControl
+												key={ `text-control-${ selectedIndustry.slug }` }
+												label={
+													industries[
+														selectedIndustry.slug
+													].description_label
+												}
+												value={
+													selectedIndustry.detail ||
+													textInputListContent[
+														slug
+													] ||
+													''
+												}
+												onChange={ ( value ) =>
+													this.onDetailChange(
+														value,
+														selectedIndustry.slug
+													)
+												}
+												className="woocommerce-profile-wizard__text"
+											/>
+										) }
+								</div>
 							);
 						} ) }
 						{ error && (

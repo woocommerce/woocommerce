@@ -3,6 +3,7 @@
  */
 import { __, _n, _x } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * WooCommerce dependencies
@@ -65,13 +66,14 @@ export default class StockReportTable extends Component {
 			const {
 				id,
 				manage_stock: manageStock,
-				name,
 				parent_id: parentId,
 				sku,
 				stock_quantity: stockQuantity,
 				stock_status: stockStatus,
 				low_stock_amount: lowStockAmount,
 			} = product;
+
+			const name = decodeEntities( product.name );
 
 			const productDetailLink = getNewPath(
 				persistedQuery,

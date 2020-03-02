@@ -127,6 +127,7 @@ class Products extends \WC_REST_Products_Controller {
 		if ( $request->get_param( 'low_in_stock' ) && is_numeric( $object_data['low_stock_amount'] ) ) {
 			$data->data['low_stock_amount'] = $object_data['low_stock_amount'];
 		}
+		$data->data['name'] = wp_strip_all_tags( $data->data['name'] );
 
 		return $data;
 	}

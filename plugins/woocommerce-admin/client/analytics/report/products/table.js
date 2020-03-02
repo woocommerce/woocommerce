@@ -4,6 +4,7 @@
 import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { decodeEntities } from '@wordpress/html-entities';
 import { map } from 'lodash';
 
 /**
@@ -117,12 +118,13 @@ class ProductsReportTable extends Component {
 				category_ids: categoryIds,
 				low_stock_amount: lowStockAmount,
 				manage_stock: extendedInfoManageStock,
-				name,
 				sku,
 				stock_status: extendedInfoStockStatus,
 				stock_quantity: stockQuantity,
 				variations = [],
 			} = extendedInfo;
+
+			const name = decodeEntities( extendedInfo.name );
 			const ordersLink = getNewPath(
 				persistedQuery,
 				'/analytics/orders',
@@ -144,7 +146,7 @@ class ProductsReportTable extends Component {
 			const productCategories =
 				( categoryIds &&
 					categoryIds
-						.map( categoryId => categories.get( categoryId ) )
+						.map( ( categoryId ) => categories.get( categoryId ) )
 						.filter( Boolean ) ) ||
 				[];
 

@@ -240,16 +240,6 @@
 			padding: $gap-small $gap;
 			min-height: 56px;
 
-			&::after {
-				content: '';
-				position: absolute;
-				left: $gap-large * 2 + $gap;
-				width: calc(100% - #{$gap-large * 2 + $gap});
-				height: 1px;
-				background-color: $studio-gray-5;
-				bottom: 0;
-			}
-
 			.components-base-control {
 				position: relative;
 			}
@@ -291,6 +281,10 @@
 					display: none;
 				}
 			}
+		}
+
+		.woocommerce-profile-wizard__text {
+			margin: 0 16px 10px;
 		}
 
 		svg.dashicon.components-checkbox-control__checked {
