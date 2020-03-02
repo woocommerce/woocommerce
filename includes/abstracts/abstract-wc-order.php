@@ -1637,8 +1637,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		$this->set_shipping_tax( $this->round_line_tax( array_sum( $shipping_taxes ), false ) );
-		$this->set_cart_tax( $this->round_line_tax( array_sum( $cart_taxes ), false ) );
+		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
+		$this->set_cart_tax( array_sum( $cart_taxes ) );
 		$this->save();
 	}
 
