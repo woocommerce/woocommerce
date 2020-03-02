@@ -606,10 +606,8 @@ final class WC_Cart_Totals {
 	 * @return array
 	 */
 	protected function round_merged_taxes( $taxes ) {
-		if ( $this->round_at_subtotal() ) {
-			foreach ( $taxes as $rate_id => $tax ) {
-				$taxes[ $rate_id ] = wc_round_tax_total( $tax, 0 );
-			}
+		foreach ( $taxes as $rate_id => $tax ) {
+			$taxes[ $rate_id ] = $this->round_line_tax( $tax );
 		}
 
 		return $taxes;
