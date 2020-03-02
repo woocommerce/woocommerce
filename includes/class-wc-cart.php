@@ -448,7 +448,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_subtotal_tax( $value ) {
-		$this->totals['subtotal_tax'] = wc_round_tax_total( $value );
+		$this->totals['subtotal_tax'] = $value;
 	}
 
 	/**
@@ -458,7 +458,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_discount_total( $value ) {
-		$this->totals['discount_total'] = wc_cart_round_discount( $value, wc_get_price_decimals() );
+		$this->totals['discount_total'] = $value;
 	}
 
 	/**
@@ -468,7 +468,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->totals['discount_tax'] = wc_round_tax_total( $value );
+		$this->totals['discount_tax'] = $value;
 	}
 
 	/**
@@ -488,7 +488,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->totals['shipping_tax'] = wc_round_tax_total( $value );
+		$this->totals['shipping_tax'] = $value;
 	}
 
 	/**
@@ -508,7 +508,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_cart_contents_tax( $value ) {
-		$this->totals['cart_contents_tax'] = wc_round_tax_total( $value );
+		$this->totals['cart_contents_tax'] = $value;
 	}
 
 	/**
@@ -528,6 +528,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_total_tax( $value ) {
+		// We round here because this is a total entry, as opposed to line items in other setters.
 		$this->totals['total_tax'] = wc_round_tax_total( $value );
 	}
 
@@ -548,7 +549,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_fee_tax( $value ) {
-		$this->totals['fee_tax'] = wc_round_tax_total( $value );
+		$this->totals['fee_tax'] = $value;
 	}
 
 	/**
