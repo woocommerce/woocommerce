@@ -302,15 +302,23 @@ class WC_Shortcode_My_Account {
 		}
 
 		if ( ! $user_data ) {
-			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
+			$filter_outcome = apply_filters( 'retrieve_password_no_user_data_found', false, $errors );
 
-			return false;
+			if ( false === $filter_outcome ) {
+				wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
+			}
+
+			return $filter_outcome;
 		}
 
 		if ( is_multisite() && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-			wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
+			$filter_outcome = apply_filters( 'retrieve_password_user_not_a_member_of_this_multisite_blog', false, $errors, $user_data, get_current_blog_id() );
 
-			return false;
+			if ( false === $filter_outcome ) {
+				wc_add_notice( __( 'Invalid username or email.', 'woocommerce' ), 'error' );
+			}
+
+			return $filter_outcome;
 		}
 
 		// Redefining user_login ensures we return the right case in the email.
