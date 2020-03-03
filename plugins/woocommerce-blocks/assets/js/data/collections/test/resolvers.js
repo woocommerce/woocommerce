@@ -88,7 +88,7 @@ describe( 'getCollection', () => {
 						'products',
 						'?foo=bar',
 						[ 20, 30 ],
-						{ items: undefined, headers: undefined }
+						{ items: [], headers: undefined }
 					)
 				);
 			}
