@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   db:
-    image: mariadb:10.4
+    image: mariadb:10.5
     restart: on-failure
     environment:
       MYSQL_DATABASE: testdb
