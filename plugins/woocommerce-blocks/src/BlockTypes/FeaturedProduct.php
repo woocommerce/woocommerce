@@ -77,7 +77,7 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			$product->get_price_html()
 		);
 
-		$output = sprintf( '<div class="%1$s" style="%2$s">', $this->get_classes( $attributes ), $this->get_styles( $attributes, $product ) );
+		$output = sprintf( '<div class="%1$s" style="%2$s">', esc_attr( $this->get_classes( $attributes ) ), esc_attr( $this->get_styles( $attributes, $product ) ) );
 
 		$output .= $title;
 		if ( $attributes['showDesc'] ) {

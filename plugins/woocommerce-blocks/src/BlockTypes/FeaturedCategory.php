@@ -64,7 +64,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			wc_format_content( $category->description )
 		);
 
-		$output = sprintf( '<div class="%1$s" style="%2$s">', $this->get_classes( $attributes ), $this->get_styles( $attributes, $category ) );
+		$output = sprintf( '<div class="%1$s" style="%2$s">', esc_attr( $this->get_classes( $attributes ) ), esc_attr( $this->get_styles( $attributes, $category ) ) );
 
 		$output .= $title;
 		if ( $attributes['showDesc'] ) {
