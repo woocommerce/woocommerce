@@ -142,15 +142,7 @@ class WC_Tests_Order extends WC_Unit_Test_Case {
 		$product->set_regular_price( 22.99 );
 		$product->save();
 
-		$flat_rate_settings = array(
-			'enabled'      => 'yes',
-			'title'        => 'Flat rate',
-			'availability' => 'all',
-			'countries'    => '',
-			'tax_status'   => 'taxable',
-			'cost'         => '10',
-		);
-		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		WC_Helper_Shipping::create_simple_flat_rate();
 
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
