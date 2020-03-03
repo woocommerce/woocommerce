@@ -25,7 +25,7 @@
     "@babel/polyfill": "7.8.3",
     "@babel/preset-env": "7.8.6",
     "@babel/register": "7.8.6",
-    "@wordpress/e2e-test-utils": "4.2.0",
+    "@wordpress/e2e-test-utils": "4.3.0",
     "autoprefixer": "9.7.4",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
