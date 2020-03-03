@@ -7,13 +7,9 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import {
-	receiveCollection,
-	receiveCollectionError,
-	DEFAULT_EMPTY_ARRAY,
-} from './actions';
+import { receiveCollection, receiveCollectionError } from './actions';
 import { STORE_KEY as SCHEMA_STORE_KEY } from '../schema/constants';
-import { STORE_KEY } from './constants';
+import { STORE_KEY, DEFAULT_EMPTY_ARRAY } from './constants';
 import { apiFetchWithHeaders } from './controls';
 
 /**

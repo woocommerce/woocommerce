@@ -228,7 +228,11 @@ class CartController {
 		if ( $coupon->get_code() !== $coupon_code ) {
 			throw new RestException(
 				'woocommerce_rest_cart_coupon_error',
-				__( 'Invalid coupon code.', 'woo-gutenberg-products-block' ),
+				sprintf(
+					/* Translators: %s coupon code */
+					__( '"%s" is an invalid coupon code.', 'woo-gutenberg-products-block' ),
+					esc_html( $coupon_code )
+				),
 				403
 			);
 		}
@@ -236,7 +240,11 @@ class CartController {
 		if ( $this->has_coupon( $coupon_code ) ) {
 			throw new RestException(
 				'woocommerce_rest_cart_coupon_error',
-				__( 'Coupon has already been applied.', 'woo-gutenberg-products-block' ),
+				sprintf(
+					/* Translators: %s coupon code */
+					__( 'Coupon code "%s" has already been applied.', 'woo-gutenberg-products-block' ),
+					esc_html( $coupon_code )
+				),
 				403
 			);
 		}

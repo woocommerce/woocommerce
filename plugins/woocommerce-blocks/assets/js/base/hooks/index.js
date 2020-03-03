@@ -4,6 +4,7 @@ export * from './use-store-cart';
 export * from './use-store-cart-coupons';
 export * from './use-store-cart-item';
 export * from './use-store-products';
+export * from './use-store-notices';
 export * from './use-collection';
 export * from './use-collection-header';
 export * from './use-collection-data';
