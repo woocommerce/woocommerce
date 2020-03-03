@@ -16,6 +16,7 @@ const CountryInput = ( {
 	onChange,
 	value = '',
 	autoComplete = 'off',
+	required = false,
 } ) => {
 	const options = Object.keys( countries ).map( ( key ) => ( {
 		key,
@@ -30,6 +31,7 @@ const CountryInput = ( {
 				onChange={ onChange }
 				options={ options }
 				value={ options.find( ( option ) => option.key === value ) }
+				required={ required }
 			/>
 			{ autoComplete !== 'off' && (
 				<input

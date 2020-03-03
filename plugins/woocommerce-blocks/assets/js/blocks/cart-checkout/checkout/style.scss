@@ -3,3 +3,19 @@
 .wc-block-checkout__use-address-for-billing {
 	margin-top: $gap;
 }
+
+@include breakpoint( ">480px" ) {
+	.wc-block-checkout__shipping-fields {
+		.wc-block-address-form {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			grid-column-gap: $gap-small;
+		}
+
+		.wc-block-address-form__company,
+		.wc-block-address-form__address_1,
+		.wc-block-address-form__address_2 {
+			grid-column-start: span 2;
+		}
+	}
+}
