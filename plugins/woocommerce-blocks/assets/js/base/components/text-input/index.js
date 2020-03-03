@@ -25,6 +25,7 @@ const TextInput = ( {
 	autoComplete = 'off',
 	value = '',
 	onChange,
+	required = false,
 } ) => {
 	const [ isActive, setIsActive ] = useState( false );
 	const onChangeValue = ( event ) => onChange( event.target.value );
@@ -49,6 +50,7 @@ const TextInput = ( {
 				aria-describedby={
 					!! help ? textInputId + '__help' : undefined
 				}
+				required={ required }
 			/>
 			<Label
 				label={ label }
@@ -81,6 +83,7 @@ TextInput.propTypes = {
 	disabled: PropTypes.bool,
 	help: PropTypes.string,
 	autoComplete: PropTypes.string,
+	required: PropTypes.bool,
 };
 
 export default withComponentId( TextInput );

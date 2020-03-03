@@ -19,15 +19,15 @@ const StateInput = ( {
 	onChange,
 	autoComplete = 'off',
 	value = '',
+	required = false,
 } ) => {
 	const countryStates = states[ country ];
-	const options =
-		countryStates && Object.keys( countryStates ).length > 0
-			? Object.keys( countryStates ).map( ( key ) => ( {
-					key,
-					name: decodeEntities( countryStates[ key ] ),
-			  } ) )
-			: [];
+	const options = countryStates
+		? Object.keys( countryStates ).map( ( key ) => ( {
+				key,
+				name: decodeEntities( countryStates[ key ] ),
+		  } ) )
+		: null;
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
@@ -50,40 +50,49 @@ const StateInput = ( {
 		[ onChange, options ]
 	);
 
-	return options.length > 0 ? (
-		<>
-			<Select
-				className={ className }
-				label={ label }
-				onChange={ onChangeState }
-				options={ options }
-				value={ options.find( ( option ) => option.key === value ) }
-			/>
-			{ autoComplete !== 'off' && (
-				<input
-					type="text"
-					aria-hidden={ true }
-					autoComplete={ autoComplete }
-					value={ value }
-					onChange={ ( event ) =>
-						onChangeState( event.target.value )
-					}
-					style={ {
-						height: '0',
-						border: '0',
-						padding: '0',
-						position: 'absolute',
-					} }
-				/>
-			) }
-		</>
-	) : (
+	if ( Array.isArray( options ) ) {
+		return (
+			options.length > 0 && (
+				<>
+					<Select
+						className={ className }
+						label={ label }
+						onChange={ onChangeState }
+						options={ options }
+						value={ options.find(
+							( option ) => option.key === value
+						) }
+						required={ required }
+					/>
+					{ autoComplete !== 'off' && (
+						<input
+							type="text"
+							aria-hidden={ true }
+							autoComplete={ autoComplete }
+							value={ value }
+							onChange={ ( event ) =>
+								onChangeState( event.target.value )
+							}
+							style={ {
+								height: '0',
+								border: '0',
+								padding: '0',
+								position: 'absolute',
+							} }
+						/>
+					) }
+				</>
+			)
+		);
+	}
+	return (
 		<TextInput
 			className={ className }
 			label={ label }
 			onChange={ onChangeState }
 			autoComplete={ autoComplete }
 			value={ value }
+			required={ required }
 		/>
 	);
 };

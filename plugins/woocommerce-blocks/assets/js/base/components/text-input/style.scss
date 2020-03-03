@@ -1,6 +1,7 @@
 .wc-block-text-input {
 	position: relative;
 	margin-top: $gap;
+	white-space: nowrap;
 }
 
 .wc-block-text-input label {

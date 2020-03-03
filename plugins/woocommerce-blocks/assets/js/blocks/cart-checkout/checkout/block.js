@@ -3,16 +3,14 @@
  */
 import { Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import AddressForm from '@woocommerce/base-components/address-form';
 import FormStep from '@woocommerce/base-components/checkout/form-step';
 import CheckoutForm from '@woocommerce/base-components/checkout/form';
 import NoShipping from '@woocommerce/base-components/checkout/no-shipping';
 import TextInput from '@woocommerce/base-components/text-input';
-import { ShippingCountryInput } from '@woocommerce/base-components/country-input';
-import { ShippingStateInput } from '@woocommerce/base-components/state-input';
 import ShippingRatesControl, {
 	Packages,
 } from '@woocommerce/base-components/shipping-rates-control';
-import InputRow from '@woocommerce/base-components/input-row';
 import { CheckboxControl } from '@wordpress/components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
@@ -30,9 +28,6 @@ import { decodeEntities } from '@wordpress/html-entities';
 import './style.scss';
 import '../../../payment-methods-demo';
 
-/**
- * Component displaying an attribute filter.
- */
 const Block = ( { shippingRates = [], isEditor = false } ) => {
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState( {} );
 	const [ contactFields, setContactFields ] = useState( {} );
@@ -97,6 +92,7 @@ const Block = ( { shippingRates = [], isEditor = false } ) => {
 								email: newValue,
 							} )
 						}
+						required={ true }
 					/>
 					<CheckboxControl
 						className="wc-block-checkout__keep-updated"
@@ -127,126 +123,10 @@ const Block = ( { shippingRates = [], isEditor = false } ) => {
 						) }
 						stepNumber={ 2 }
 					>
-						<InputRow>
-							<TextInput
-								label={ __(
-									'First name',
-									'woo-gutenberg-products-block'
-								) }
-								value={ shippingFields.firstName }
-								autoComplete="given-name"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										firstName: newValue,
-									} )
-								}
-							/>
-							<TextInput
-								label={ __(
-									'Surname',
-									'woo-gutenberg-products-block'
-								) }
-								value={ shippingFields.lastName }
-								autoComplete="family-name"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										lastName: newValue,
-									} )
-								}
-							/>
-						</InputRow>
-						<TextInput
-							label={ __(
-								'Street address',
-								'woo-gutenberg-products-block'
-							) }
-							value={ shippingFields.streetAddress }
-							autoComplete="address-line1"
-							onChange={ ( newValue ) =>
-								setShippingFields( {
-									...shippingFields,
-									streetAddress: newValue,
-								} )
-							}
+						<AddressForm
+							onChange={ setShippingFields }
+							values={ shippingFields }
 						/>
-						<TextInput
-							label={ __(
-								'Apartment, suite, etc.',
-								'woo-gutenberg-products-block'
-							) }
-							value={ shippingFields.apartment }
-							autoComplete="address-line2"
-							onChange={ ( newValue ) =>
-								setShippingFields( {
-									...shippingFields,
-									apartment: newValue,
-								} )
-							}
-						/>
-						<InputRow>
-							<ShippingCountryInput
-								label={ __(
-									'Country / Region',
-									'woo-gutenberg-products-block'
-								) }
-								value={ shippingFields.country }
-								autoComplete="country"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										country: newValue,
-										state: '',
-									} )
-								}
-							/>
-							<TextInput
-								label={ __(
-									'City',
-									'woo-gutenberg-products-block'
-								) }
-								value={ shippingFields.city }
-								autoComplete="address-level2"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										city: newValue,
-									} )
-								}
-							/>
-						</InputRow>
-						<InputRow>
-							<ShippingStateInput
-								country={ shippingFields.country }
-								label={ __(
-									'State / County',
-									'woo-gutenberg-products-block'
-								) }
-								value={ shippingFields.state }
-								autoComplete="address-level1"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										state: newValue,
-									} )
-								}
-							/>
-							<TextInput
-								label={ __(
-									'Postal code',
-									'woo-gutenberg-products-block'
-								) }
-								value={ shippingFields.postcode }
-								autoComplete="postal-code"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										postcode: newValue,
-									} )
-								}
-							/>
-						</InputRow>
 						<TextInput
 							type="tel"
 							label={ __(
@@ -261,6 +141,7 @@ const Block = ( { shippingRates = [], isEditor = false } ) => {
 									phone: newValue,
 								} )
 							}
+							required={ true }
 						/>
 						<CheckboxControl
 							className="wc-block-checkout__use-address-for-billing"
@@ -316,7 +197,7 @@ const Block = ( { shippingRates = [], isEditor = false } ) => {
 										shippingFields.country
 											? {
 													address_1:
-														shippingFields.streetAddress,
+														shippingFields.address_1,
 													address_2:
 														shippingFields.apartment,
 													city: shippingFields.city,
