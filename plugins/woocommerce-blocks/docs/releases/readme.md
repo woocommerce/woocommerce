@@ -47,7 +47,7 @@ _Outcome_: **Team is aware of release and in agreement about what fixes & featur
 -   Ensure your local checkout is updated to the tip of the release branch.
 -   For _patch_ releases, cherry pick relevant PRs into the release branch:
     -   If PR is already labelled `status: cherry-picked 🍒` then continue to next PR.
-    -   Ideally, use GitHub Hub to cherry pick the PR - `hub am -3 {http://URL-TO-PR}`.
+    -   Ideally, use GitHub Hub to cherry pick the PR - `hub cherry-pick {PR-COMMIT-URL}`.
     -   If there are serious conflicts or extensive differences between `master` and release branch, you may need to take more care:
         -   Manually cherry pick individual commits using git - `git cherry-pick {COMMIT-HASH}`.
         -   Or in some cases, manually craft a new PR with appropriate changes, targeting release branch.
