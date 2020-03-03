@@ -13,7 +13,6 @@ import { filter, get } from 'lodash';
  * WooCommerce dependencies
  */
 import { Card, H, Link } from '@woocommerce/components';
-import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -25,55 +24,40 @@ import SpeedIcon from './images/flash_on';
 import MobileAppIcon from './images/phone_android';
 import PrintIcon from './images/print';
 import withSelect from 'wc-api/with-select';
-import UsageModal from '../usage-modal';
 import { recordEvent } from 'lib/tracks';
 import { pluginNames } from 'wc-api/onboarding/constants';
 
-class Start extends Component {
+class Benefits extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			showUsageModal: false,
-			continueAction: '',
+			isPending: false,
 		};
-		this.startWizard = this.startWizard.bind( this );
-		this.skipWizard = this.skipWizard.bind( this );
+		this.startPluginInstall = this.startPluginInstall.bind( this );
+		this.skipPluginInstall = this.skipPluginInstall.bind( this );
 	}
 
-	componentDidMount() {
-		const {
-			updateProfileItems,
-			profileItems,
-			tosAccepted,
-			isJetpackConnected,
-		} = this.props;
-		if (
-			isJetpackConnected &&
-			this.props.activePlugins.includes( 'woocommerce-services' ) &&
-			tosAccepted
-		) {
-			// Don't track event again if they revisit the start page.
-			if ( profileItems.plugins !== 'already-installed' ) {
-				recordEvent(
-					'wcadmin_storeprofiler_already_installed_plugins',
-					{}
-				);
-			}
+	componentDidUpdate( prevProps ) {
+		const { goToNextStep, isRequesting } = this.props;
+		const { isPending } = this.state;
 
-			updateProfileItems( { plugins: 'already-installed' } );
-			return updateQueryString( { step: 'store-details' } );
+		if ( ! isRequesting && prevProps.isRequesting && isPending ) {
+			goToNextStep();
+			this.setState( { isPending: false } );
 		}
 	}
 
-	async skipWizard() {
+	async skipPluginInstall() {
 		const {
 			createNotice,
+			isJetpackActive,
 			isProfileItemsError,
 			updateProfileItems,
-			isJetpackConnected,
 		} = this.props;
 
-		const plugins = isJetpackConnected ? 'skipped-wcs' : 'skipped';
+		this.setState( { isPending: true } );
+
+		const plugins = isJetpackActive ? 'skipped-wcs' : 'skipped';
 		await updateProfileItems( { plugins } );
 
 		if ( isProfileItemsError ) {
@@ -85,46 +69,32 @@ class Start extends Component {
 				)
 			);
 		} else {
-			recordEvent( 'storeprofiler_welcome_clicked', {
-				get_started: true,
+			recordEvent( 'storeprofiler_install_plugins', {
+				install: false,
 				plugins,
 			} );
-			return updateQueryString( { step: 'store-details' } );
 		}
 	}
 
-	async startWizard() {
+	async startPluginInstall() {
 		const {
-			createNotice,
-			isProfileItemsError,
+			isJetpackActive,
 			updateProfileItems,
 			updateOptions,
-			goToNextStep,
-			isJetpackConnected,
 		} = this.props;
+
+		this.setState( { isPending: true } );
 
 		await updateOptions( {
 			woocommerce_setup_jetpack_opted_in: true,
 		} );
 
-		const plugins = isJetpackConnected ? 'installed-wcs' : 'installed';
-		await updateProfileItems( { plugins } );
-
-		if ( ! isProfileItemsError ) {
-			recordEvent( 'storeprofiler_welcome_clicked', {
-				get_started: true,
-				plugins,
-			} );
-			goToNextStep();
-		} else {
-			createNotice(
-				'error',
-				__(
-					'There was a problem updating your preferences.',
-					'woocommerce-admin'
-				)
-			);
-		}
+		const plugins = isJetpackActive ? 'installed-wcs' : 'installed';
+		recordEvent( 'storeprofiler_install_plugins', {
+			install: true,
+			plugins,
+		} );
+		updateProfileItems( { plugins } );
 	}
 
 	renderBenefit( benefit ) {
@@ -144,7 +114,7 @@ class Start extends Component {
 	}
 
 	getBenefits() {
-		const { activePlugins, isJetpackConnected, tosAccepted } = this.props;
+		const { isJetpackActive, isWcsActive, tosAccepted } = this.props;
 		return [
 			{
 				title: __( 'Security', 'woocommerce-admin' ),
@@ -153,7 +123,7 @@ class Start extends Component {
 					'Jetpack automatically blocks brute force attacks to protect your store from unauthorized access.',
 					'woocommerce-admin'
 				),
-				visible: ! isJetpackConnected,
+				visible: ! isJetpackActive,
 			},
 			{
 				title: __( 'Sales Tax', 'woocommerce-admin' ),
@@ -162,9 +132,7 @@ class Start extends Component {
 					'With WooCommerce Services we ensure that the correct rate of tax is charged on all of your orders.',
 					'woocommerce-admin'
 				),
-				visible:
-					! activePlugins.includes( 'woocommerce-services' ) ||
-					! tosAccepted,
+				visible: ! isWcsActive || ! tosAccepted,
 			},
 			{
 				title: __( 'Speed', 'woocommerce-admin' ),
@@ -173,7 +141,7 @@ class Start extends Component {
 					'Cache your images and static files on our own powerful global network of servers and speed up your site.',
 					'woocommerce-admin'
 				),
-				visible: ! isJetpackConnected,
+				visible: ! isJetpackActive,
 			},
 			{
 				title: __( 'Mobile App', 'woocommerce-admin' ),
@@ -182,7 +150,7 @@ class Start extends Component {
 					'Your store in your pocket. Manage orders, receive sales notifications, and more. Only with a Jetpack connection.',
 					'woocommerce-admin'
 				),
-				visible: ! isJetpackConnected,
+				visible: ! isJetpackActive,
 			},
 			{
 				title: __(
@@ -194,7 +162,7 @@ class Start extends Component {
 					'Save time at the Post Office by printing USPS shipping labels at home.',
 					'woocommerce-admin'
 				),
-				visible: isJetpackConnected || ! tosAccepted,
+				visible: isJetpackActive || ! tosAccepted,
 			},
 			{
 				title: __( 'Simple payment setup', 'woocommerce-admin' ),
@@ -203,7 +171,7 @@ class Start extends Component {
 					'WooCommerce Services enables us to provision Stripe and Paypal accounts quickly and easily for you.',
 					'woocommerce-admin'
 				),
-				visible: isJetpackConnected || ! tosAccepted,
+				visible: isJetpackActive || ! tosAccepted,
 			},
 		];
 	}
@@ -220,14 +188,14 @@ class Start extends Component {
 	}
 
 	render() {
-		const { showUsageModal, continueAction } = this.state;
-		const { isJetpackConnected, activePlugins } = this.props;
+		const { isJetpackActive, isWcsActive } = this.props;
+		const { isPending } = this.state;
 
 		const pluginsToInstall = [];
-		if ( ! isJetpackConnected ) {
+		if ( ! isJetpackActive ) {
 			pluginsToInstall.push( 'jetpack' );
 		}
-		if ( ! activePlugins.includes( 'woocommerce-services' ) ) {
+		if ( ! isWcsActive ) {
 			pluginsToInstall.push( 'woocommerce-services' );
 		}
 		const pluginNamesString = pluginsToInstall
@@ -236,24 +204,9 @@ class Start extends Component {
 
 		return (
 			<Fragment>
-				{ showUsageModal && (
-					<UsageModal
-						onContinue={ () =>
-							continueAction === 'wizard'
-								? this.startWizard()
-								: this.skipWizard()
-						}
-						onClose={ () =>
-							this.setState( {
-								showUsageModal: false,
-								continueAction: '',
-							} )
-						}
-					/>
-				) }
 				<H className="woocommerce-profile-wizard__header-title">
 					{ __(
-						'Start setting up your WooCommerce store',
+						'Start enhancing your WooCommerce store',
 						'woocommerce-admin'
 					) }
 				</H>
@@ -304,12 +257,8 @@ class Start extends Component {
 
 					<Button
 						isPrimary
-						onClick={ () =>
-							this.setState( {
-								showUsageModal: true,
-								continueAction: 'wizard',
-							} )
-						}
+						isBusy={ isPending }
+						onClick={ this.startPluginInstall }
 						className="woocommerce-profile-wizard__continue"
 					>
 						{ __( 'Get started', 'woocommerce-admin' ) }
@@ -320,13 +269,9 @@ class Start extends Component {
 					<p>
 						<Button
 							isLink
+							isBusy={ isPending }
 							className="woocommerce-profile-wizard__skip"
-							onClick={ () =>
-								this.setState( {
-									showUsageModal: true,
-									continueAction: 'skip',
-								} )
-							}
+							onClick={ this.skipPluginInstall }
 						>
 							{ sprintf(
 								__( 'Proceed without %s', 'woocommerce-admin' ),
@@ -347,7 +292,7 @@ export default compose(
 			getActivePlugins,
 			getOptions,
 			getProfileItems,
-			isJetpackConnected,
+			isGetProfileItemsRequesting,
 		} = select( 'wc-api' );
 
 		const isProfileItemsError = Boolean( getProfileItemsError() );
@@ -361,13 +306,16 @@ export default compose(
 
 		const activePlugins = getActivePlugins();
 		const profileItems = getProfileItems();
+		const isJetpackActive = activePlugins.includes( 'jetpack' );
+		const isWcsActive = activePlugins.includes( 'woocommerce-services' );
 
 		return {
+			isJetpackActive,
 			isProfileItemsError,
-			activePlugins,
+			isWcsActive,
 			tosAccepted,
 			profileItems,
-			isJetpackConnected: isJetpackConnected(),
+			isRequesting: isGetProfileItemsRequesting(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
@@ -380,4 +328,4 @@ export default compose(
 			updateOptions,
 		};
 	} )
-)( Start );
+)( Benefits );

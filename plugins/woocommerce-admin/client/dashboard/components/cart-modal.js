@@ -37,13 +37,12 @@ class CartModal extends Component {
 		const { productIds, onClickPurchaseNow } = this.props;
 		this.setState( { purchaseNowButtonBusy: true } );
 		if ( ! productIds.length ) {
-
 			return;
 		}
 
 		recordEvent( 'tasklist_modal_proceed_checkout', {
 			product_ids: productIds,
-			purchase_install: false,
+			purchase_install: true,
 		} );
 
 		const { connectNonce } = getSetting( 'onboarding', {} );

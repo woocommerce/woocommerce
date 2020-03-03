@@ -73,15 +73,8 @@ class StoreDetails extends Component {
 		return currencyData[ region ] || currencyData.US;
 	}
 
-	onSubmit( values ) {
-		const { profileItems } = this.props;
-
-		if ( profileItems.plugins === 'already-installed' ) {
-			this.setState( { showUsageModal: true } );
-			return;
-		}
-
-		this.onContinue( values );
+	onSubmit() {
+		this.setState( { showUsageModal: true } );
 	}
 
 	async onContinue( values ) {
