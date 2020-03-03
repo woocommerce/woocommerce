@@ -187,7 +187,7 @@ class CartItemSchema extends AbstractSchema {
 				],
 			],
 			'prices'              => [
-				'description' => __( 'Price data for the product in the current line item, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Price data for the product in the current line item, including or excluding taxes based on the "display prices during cart and checkout" setting. Provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -293,7 +293,7 @@ class CartItemSchema extends AbstractSchema {
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'];
 
-		$product_prices = $this->product_schema->get_prices( $product );
+		$product_prices = $this->product_schema->get_prices( $product, get_option( 'woocommerce_tax_display_cart' ) );
 
 		return [
 			'key'                 => $cart_item['key'],

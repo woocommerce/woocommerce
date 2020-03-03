@@ -27,8 +27,12 @@ export const SHOP_URL = getSetting( 'shopUrl', '' );
 export const CHECKOUT_URL = getSetting( 'checkoutUrl', '' );
 export const COUPONS_ENABLED = getSetting( 'couponsEnabled', true );
 export const SHIPPING_ENABLED = getSetting( 'shippingEnabled', true );
-export const DISPLAY_PRICES_INCLUDING_TAXES = getSetting(
-	'displayPricesIncludingTaxes',
+export const DISPLAY_SHOP_PRICES_INCLUDING_TAX = getSetting(
+	'displayShopPricesIncludingTax',
+	false
+);
+export const DISPLAY_CART_PRICES_INCLUDING_TAX = getSetting(
+	'displayCartPricesIncludingTax',
 	false
 );
 export const PRODUCT_COUNT = getSetting( 'productCount', 0 );

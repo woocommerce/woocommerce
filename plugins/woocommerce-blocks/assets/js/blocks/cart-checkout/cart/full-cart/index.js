@@ -18,7 +18,7 @@ import Chip from '@woocommerce/base-components/chip';
 import {
 	COUPONS_ENABLED,
 	SHIPPING_ENABLED,
-	DISPLAY_PRICES_INCLUDING_TAXES,
+	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { Card, CardBody } from 'wordpress-components';
@@ -26,6 +26,7 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
 import { decodeEntities } from '@wordpress/html-entities';
 import { useStoreCartCoupons } from '@woocommerce/base-hooks';
 import classnames from 'classnames';
+import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 
 /**
  * Internal dependencies
@@ -116,8 +117,8 @@ const Cart = ( {
 		const totalItemsTax = parseInt( cartTotals.total_items_tax, 10 );
 		const totalRowsConfig = [
 			{
-				label: __( 'Subtotal:', 'woo-gutenberg-products-block' ),
-				value: DISPLAY_PRICES_INCLUDING_TAXES
+				label: __( 'Subtotal', 'woo-gutenberg-products-block' ),
+				value: DISPLAY_CART_PRICES_INCLUDING_TAX
 					? totalItems + totalItemsTax
 					: totalItems,
 			},
@@ -126,8 +127,8 @@ const Cart = ( {
 		if ( totalFees > 0 ) {
 			const totalFeesTax = parseInt( cartTotals.total_fees_tax, 10 );
 			totalRowsConfig.push( {
-				label: __( 'Fees:', 'woo-gutenberg-products-block' ),
-				value: DISPLAY_PRICES_INCLUDING_TAXES
+				label: __( 'Fees', 'woo-gutenberg-products-block' ),
+				value: DISPLAY_CART_PRICES_INCLUDING_TAX
 					? totalFees + totalFeesTax
 					: totalFees,
 			} );
@@ -141,9 +142,9 @@ const Cart = ( {
 			// @todo The remove coupon button is a placeholder - replace with new
 			// chip component.
 			totalRowsConfig.push( {
-				label: __( 'Discount:', 'woo-gutenberg-products-block' ),
+				label: __( 'Discount', 'woo-gutenberg-products-block' ),
 				value:
-					( DISPLAY_PRICES_INCLUDING_TAXES
+					( DISPLAY_CART_PRICES_INCLUDING_TAX
 						? totalDiscount + totalDiscountTax
 						: totalDiscount ) * -1,
 				description: cartCoupons.length !== 0 && (
@@ -181,13 +182,7 @@ const Cart = ( {
 				),
 			} );
 		}
-		if ( ! DISPLAY_PRICES_INCLUDING_TAXES ) {
-			const totalTax = parseInt( cartTotals.total_tax, 10 );
-			totalRowsConfig.push( {
-				label: __( 'Taxes:', 'woo-gutenberg-products-block' ),
-				value: totalTax,
-			} );
-		}
+
 		if ( SHIPPING_ENABLED && isShippingCalculatorEnabled ) {
 			const totalShipping = parseInt( cartTotals.total_shipping, 10 );
 			const totalShippingTax = parseInt(
@@ -195,8 +190,8 @@ const Cart = ( {
 				10
 			);
 			totalRowsConfig.push( {
-				label: __( 'Shipping:', 'woo-gutenberg-products-block' ),
-				value: DISPLAY_PRICES_INCLUDING_TAXES
+				label: __( 'Shipping', 'woo-gutenberg-products-block' ),
+				value: DISPLAY_CART_PRICES_INCLUDING_TAX
 					? totalShipping + totalShippingTax
 					: totalShipping,
 				description: (
@@ -311,6 +306,17 @@ const Cart = ( {
 								) }
 							</fieldset>
 						) }
+						{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
+							<TotalsItem
+								className="wc-block-cart__total-tax"
+								currency={ totalsCurrency }
+								label={ __(
+									'Taxes',
+									'woo-gutenberg-products-block'
+								) }
+								value={ parseInt( cartTotals.total_tax, 10 ) }
+							/>
+						) }
 						{ COUPONS_ENABLED && (
 							<TotalsCouponCodeInput
 								onSubmit={ applyCoupon }
@@ -325,6 +331,33 @@ const Cart = ( {
 								'woo-gutenberg-products-block'
 							) }
 							value={ parseInt( cartTotals.total_price, 10 ) }
+							description={
+								DISPLAY_CART_PRICES_INCLUDING_TAX && (
+									<p className="wc-block-cart__totals-footer-tax">
+										{ __experimentalCreateInterpolateElement(
+											__(
+												'Including <TaxAmount/> in taxes',
+												'woo-gutenberg-products-block'
+											),
+											{
+												TaxAmount: (
+													<FormattedMonetaryAmount
+														className="wc-block-cart__totals-footer-tax-value"
+														currency={
+															totalsCurrency
+														}
+														displayType="text"
+														value={ parseInt(
+															cartTotals.total_tax,
+															10
+														) }
+													/>
+												),
+											}
+										) }
+									</p>
+								)
+							}
 						/>
 						<CheckoutButton />
 					</CardBody>
