@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { boolean } from '@storybook/addon-knobs';
+import { useState } from 'react';
 
 /**
  * Internal dependencies
@@ -14,9 +15,15 @@ export default {
 	component: QuantitySelector,
 };
 
-export const Default = () => (
-	<QuantitySelector
-		disabled={ boolean( 'Disabled', false ) }
-		itemName='widgets'
-	/>
-);
+export const Default = () => {
+	const [ quantity, changeQuantity ] = useState();
+
+	return (
+		<QuantitySelector
+			disabled={ boolean( 'Disabled', false ) }
+			quantity={ quantity }
+			onChange={ changeQuantity }
+			itemName="widgets"
+		/>
+	);
+};

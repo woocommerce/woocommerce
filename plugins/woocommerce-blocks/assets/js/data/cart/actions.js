@@ -127,6 +127,19 @@ export function* removeCoupon( couponCode ) {
 }
 
 /**
+ * Returns an action object for updating a single cart item in the store.
+ *
+ * @param {Object}   [response={}]    A cart item API response.
+ * @return {Object} Object for action.
+ */
+export function receiveCartItem( response = {} ) {
+	return {
+		type: types.RECEIVE_CART_ITEM,
+		cartItem: response,
+	};
+}
+
+/**
  * Returns an action object to indicate if the specified cart item
  * is being updated; i.e. removing, or changing quantity.
  *
@@ -175,6 +188,36 @@ export function* removeItemFromCart( cartItemKey ) {
 		} );
 
 		yield receiveRemovedItem( cartItemKey );
+	} catch ( error ) {
+		yield receiveError( error );
+	}
+
+	yield itemQuantityPending( cartItemKey, false );
+}
+
+/**
+ * Changes the quantity for specified cart item:
+ * - Calls API to set quantity.
+ * - If successful, yields action to update store.
+ * - If error, yields action to store error.
+ * - Sets cart item as pending while API request is in progress.
+ *
+ * @param {string} cartItemKey Cart item being updated.
+ * @param {number} quantity Specified (new) quantity.
+ */
+export function* changeCartItemQuantity( cartItemKey, quantity ) {
+	yield itemQuantityPending( cartItemKey, true );
+
+	try {
+		const result = yield apiFetch( {
+			path: `/wc/store/cart/items/${ cartItemKey }?quantity=${ quantity }`,
+			method: 'PUT',
+			cache: 'no-store',
+		} );
+
+		if ( result ) {
+			yield receiveCartItem( result );
+		}
 	} catch ( error ) {
 		yield receiveError( error );
 	}

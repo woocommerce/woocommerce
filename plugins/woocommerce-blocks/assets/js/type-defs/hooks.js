@@ -30,13 +30,15 @@
 /**
  * @typedef {Object} StoreCartItem
  *
- * @property {boolean}  isLoading             True when cart items are being
- *                                            loaded.
- * @property {CartData} cartData              A cart item from the data store.
- * @property {Function} isPending             Callback for determining if a cart
- *                                            item is currently updating (i.e.
- *                                            remove / change quantity).
- * @property {Function} removeItem            Callback for removing a cart item.
+ * @property {boolean}  isLoading       True when cart items are being
+ *                                      loaded.
+ * @property {CartData} cartData        A cart item from the data store.
+ * @property {Function} isPending       Callback for determining if a cart
+ *                                      item is currently updating (i.e.
+ *                                      remove / change quantity).
+ * @property {Function} changeQuantity  Callback for changing quantity of item 
+ *                                      in cart.
+ * @property {Function} removeItem      Callback for removing a cart item.
  */
 
 export {};

@@ -11,6 +11,15 @@ import { ACTION_TYPES as types } from './action-types';
  */
 const cartItemsReducer = ( state = [], action ) => {
 	switch ( action.type ) {
+		case types.RECEIVE_CART_ITEM:
+			// Replace specified cart element with the new data from server.
+			return state.map( ( cartItem ) => {
+				if ( cartItem.key === action.cartItem.key ) {
+					return action.cartItem;
+				}
+				return cartItem;
+			} );
+
 		case types.RECEIVE_REMOVED_ITEM:
 			return state.filter( ( cartItem ) => {
 				return cartItem.key !== action.cartItemKey;
@@ -98,6 +107,7 @@ const reducer = (
 			break;
 
 		// Delegate to cartItemsReducer.
+		case types.RECEIVE_CART_ITEM:
 		case types.RECEIVE_REMOVED_ITEM:
 			state = {
 				...state,
