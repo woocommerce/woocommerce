@@ -28,10 +28,15 @@ export const useStoreCartItem = ( cartItemKey ) => {
 		( select, { dispatch } ) => {
 			const store = select( storeKey );
 			const isPending = store.isItemQuantityPending( cartItemKey );
-			const { removeItemFromCart } = dispatch( storeKey );
+			const { removeItemFromCart, changeCartItemQuantity } = dispatch(
+				storeKey
+			);
 
 			return {
 				isPending,
+				changeQuantity: ( newQuantity ) => {
+					changeCartItemQuantity( cartItemKey, newQuantity );
+				},
 				removeItem: () => {
 					removeItemFromCart( cartItemKey );
 				},

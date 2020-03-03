@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, RawHTML } from '@wordpress/element';
+import { RawHTML } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
@@ -32,15 +32,16 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		prices = {},
 	} = lineItem;
 
-	const [ lineQuantity, setLineQuantity ] = useState( quantity );
 	const currency = getCurrency();
-	const regularPrice = parseInt( prices.regular_price, 10 ) * lineQuantity;
-	const purchasePrice = parseInt( prices.price, 10 ) * lineQuantity;
+	const regularPrice = parseInt( prices.regular_price, 10 ) * quantity;
+	const purchasePrice = parseInt( prices.price, 10 ) * quantity;
 	const saleAmount = regularPrice - purchasePrice;
 
-	const { removeItem, isPending: itemQuantityDisabled } = useStoreCartItem(
-		key
-	);
+	const {
+		changeQuantity,
+		removeItem,
+		isPending: itemQuantityDisabled,
+	} = useStoreCartItem( key );
 
 	return (
 		<tr className="wc-block-cart-items__row">
@@ -67,8 +68,9 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 			<td className="wc-block-cart-item__quantity">
 				<QuantitySelector
 					disabled={ itemQuantityDisabled }
-					quantity={ lineQuantity }
-					onChange={ setLineQuantity }
+					quantity={ quantity }
+					maximum={ lineItem.sold_individually ? 1 : undefined }
+					onChange={ changeQuantity }
 					itemName={ name }
 				/>
 				<button
@@ -121,6 +123,7 @@ CartLineItemRow.propTypes = {
 		images: PropTypes.array.isRequired,
 		quantity: PropTypes.number.isRequired,
 		low_stock_remaining: PropTypes.number,
+		sold_individually: PropTypes.bool,
 		variation: PropTypes.arrayOf(
 			PropTypes.shape( {
 				attribute: PropTypes.string.isRequired,
