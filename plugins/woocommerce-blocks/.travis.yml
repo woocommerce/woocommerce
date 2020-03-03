@@ -78,7 +78,7 @@ jobs:
               - WOOCOMMERCE_BLOCKS_PHASE=experimental
         - name: E2E Tests
           script:
-              - npm install
+              - npm ci
               - npm run docker:up
               - composer install
               - npm run build:e2e-test
