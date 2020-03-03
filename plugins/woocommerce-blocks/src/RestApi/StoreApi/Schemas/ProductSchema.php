@@ -287,11 +287,12 @@ class ProductSchema extends AbstractSchema {
 	 * Get an array of pricing data.
 	 *
 	 * @param \WC_Product $product Product instance.
+	 * @param string      $tax_display_mode If returned prices are incl or excl of tax.
 	 * @return array
 	 */
-	public function get_prices( \WC_Product $product ) {
+	public function get_prices( \WC_Product $product, $tax_display_mode = '' ) {
 		$prices                  = $this->get_store_currency_response();
-		$tax_display_mode        = get_option( 'woocommerce_tax_display_shop' );
+		$tax_display_mode        = in_array( $tax_display_mode, [ 'incl', 'excl' ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
 		$price_function          = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 		$prices['price']         = $this->prepare_money_response( $price_function( $product ), wc_get_price_decimals() );
 		$prices['regular_price'] = $this->prepare_money_response( $price_function( $product, [ 'price' => $product->get_regular_price() ] ), wc_get_price_decimals() );
