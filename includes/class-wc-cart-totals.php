@@ -684,7 +684,7 @@ final class WC_Cart_Totals {
 
 		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
 
-		$this->set_total( 'items_total', round( $items_total ) );
+		$this->set_total( 'items_total', $items_total );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
 		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
