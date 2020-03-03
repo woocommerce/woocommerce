@@ -31,7 +31,7 @@ const Packages = ( {
 			selected={ selected[ i ] }
 			shippingRate={ shippingRate }
 			showItems={ shippingRates.length > 1 }
-			title={ shippingRate.name }
+			title={ shippingRates.length > 1 ? shippingRate.name : null }
 		/>
 	) );
 };
