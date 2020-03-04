@@ -146,7 +146,7 @@
 		"compare-versions": "3.6.0",
 		"config": "3.2.6",
 		"downshift": "4.1.0",
-		"react-number-format": "4.3.1",
+		"react-number-format": "4.4.1",
 		"trim-html": "0.1.9",
 		"use-debounce": "3.3.0",
 		"wordpress-components": "npm:@wordpress/components@8.5.0",
