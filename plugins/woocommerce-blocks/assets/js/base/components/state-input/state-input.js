@@ -79,6 +79,7 @@ const StateInput = ( {
 								padding: '0',
 								position: 'absolute',
 							} }
+							tabIndex={ -1 }
 						/>
 					) }
 				</>

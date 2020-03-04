@@ -52,6 +52,7 @@ const CountryInput = ( {
 						padding: '0',
 						position: 'absolute',
 					} }
+					tabIndex={ -1 }
 				/>
 			) }
 		</>
