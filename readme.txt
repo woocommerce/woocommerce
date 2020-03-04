@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 3.9.2
+Stable tag: 3.9.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -178,6 +178,14 @@ INTERESTED IN DEVELOPMENT?
 [Browse the code](https://plugins.trac.wordpress.org/browser/woocommerce/), check out the [SVN repository](https://plugins.svn.wordpress.org/woocommerce/), or subscribe to the [development log](https://plugins.trac.wordpress.org/log/woocommerce/) by [RSS](https://plugins.trac.wordpress.org/log/woocommerce/?limit=100&mode=stop_on_copy&format=rss).
 
 == Changelog ==
+
+= 3.9.3 - 2020-02-27 =
+* Fix - Replaced deprecated Jetpack::is_staging_site call. #25670
+* Fix - Corrected the cache invalidation behavior of order item CRUD actions. #25734
+* Fix - Configure Jetpack plugin before trying to connect/register. #25742
+* Fix - Check configure exists before calling to support older JP versions. #25747
+* Fix - Better handling of coupon code when rendering.
+* Dev - Updated WooCommerce blocks to 2.5.14 (See changelog at https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases).
 
 = 3.9.2 - 2020-02-13 =
 
