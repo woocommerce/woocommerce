@@ -61,6 +61,9 @@ class Cart extends AbstractBlock {
 		if ( ! $data_registry->exists( 'defaultAddressFields' ) ) {
 			$data_registry->add( 'defaultAddressFields', WC()->countries->get_default_address_fields() );
 		}
+		if ( ! $data_registry->exists( 'cartData' ) ) {
+			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
+		}
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
 			$this->block_name . '-frontend',
 			$this->block_name . '-block-frontend'

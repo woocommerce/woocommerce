@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { withRestApiHydration } from '@woocommerce/block-hocs';
+import {
+	withRestApiHydration,
+	withStoreCartApiHydration,
+} from '@woocommerce/block-hocs';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import { RawHTML } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
@@ -59,6 +62,6 @@ const getProps = ( el ) => ( {
 
 renderFrontend(
 	'.wp-block-woocommerce-cart',
-	withRestApiHydration( CartFrontend ),
+	withStoreCartApiHydration( withRestApiHydration( CartFrontend ) ),
 	getProps
 );
