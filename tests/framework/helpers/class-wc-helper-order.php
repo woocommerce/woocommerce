@@ -13,7 +13,7 @@
 class WC_Helper_Order {
 
 	/**
-	 * Delete a product.
+	 * Delete an order.
 	 *
 	 * @param int $order_id ID of the order to delete.
 	 */
