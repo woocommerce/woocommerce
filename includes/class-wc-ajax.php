@@ -1574,6 +1574,10 @@ class WC_AJAX {
 				continue;
 			}
 
+			if ( $product_object->get_backorders() === 'no' && $product_object->get_stock_quantity() <= 0 ) {
+				continue;
+			}
+
 			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
 				$stock_amount    = $product_object->get_stock_quantity();
 				/* Translators: %d stock amount */
