@@ -185,6 +185,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Configure Jetpack plugin before trying to connect/register. #25742
 * Fix - Check configure exists before calling to support older JP versions. #25747
 * Fix - Better handling of coupon code when rendering.
+* Dev - Updated WooCommerce blocks to 2.5.14 (See changelog at https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases).
 
 = 3.9.2 - 2020-02-13 =
 
