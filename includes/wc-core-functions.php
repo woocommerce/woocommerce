@@ -505,21 +505,16 @@ function get_woocommerce_currencies() {
 	return $currencies;
 }
 
-
 /**
- * Get Currency symbol.
+ * Get all available Currency symbols.
  *
  * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
  *
- * @param string $currency Currency. (default: '').
- * @return string
+ * @return array
  */
-function get_woocommerce_currency_symbol( $currency = '' ) {
-	if ( ! $currency ) {
-		$currency = get_woocommerce_currency();
-	}
+function get_woocommerce_currency_symbols() {
 
-	$symbols         = apply_filters(
+	$symbols = apply_filters(
 		'woocommerce_currency_symbols',
 		array(
 			'AED' => '&#x62f;.&#x625;',
@@ -688,6 +683,25 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'ZMW' => 'ZK',
 		)
 	);
+
+	return $symbols;
+}
+
+/**
+ * Get Currency symbol.
+ *
+ * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ *
+ * @param string $currency Currency. (default: '').
+ * @return string
+ */
+function get_woocommerce_currency_symbol( $currency = '' ) {
+	if ( ! $currency ) {
+		$currency = get_woocommerce_currency();
+	}
+
+	$symbols = get_woocommerce_currency_symbols();
+
 	$currency_symbol = isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : '';
 
 	return apply_filters( 'woocommerce_currency_symbol', $currency_symbol, $currency );
