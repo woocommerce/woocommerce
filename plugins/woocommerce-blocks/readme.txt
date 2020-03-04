@@ -116,6 +116,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.14 - 2020-03-03 =
+- Added screen reader text to product counts in the product category list block #1828
+- Added screenreader alternative text to the sale badge. #1826
+- Product Search block is now compatible with WordPress 5.4 and the last versions of Gutenberg. #1841
+- Security: Improved escaping of attributes on blocks. #1854
+
 = 2.5.13 - 2020-02-18 =
 - Respect hidden products in All Products block. #1753
 
