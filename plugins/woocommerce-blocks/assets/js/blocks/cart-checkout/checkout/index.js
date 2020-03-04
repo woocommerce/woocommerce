@@ -38,15 +38,22 @@ const settings = {
 			type: 'boolean',
 			default: false,
 		},
+		useShippingAsBilling: {
+			type: 'boolean',
+			default: true,
+		},
 	},
 	edit,
 	/**
 	 * Save the props to post content.
 	 */
 	save( { attributes } ) {
-		const { className } = attributes;
+		const { className, useShippingAsBilling } = attributes;
+		const data = {
+			'data-use-shipping-as-billing': useShippingAsBilling,
+		};
 		return (
-			<div className={ className }>
+			<div className={ className } { ...data }>
 				Checkout block coming soon to store near you
 			</div>
 		);

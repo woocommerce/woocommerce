@@ -5,6 +5,7 @@
 }
 
 @include breakpoint( ">480px" ) {
+	.wc-block-checkout__billing-fields,
 	.wc-block-checkout__shipping-fields {
 		.wc-block-address-form {
 			display: grid;

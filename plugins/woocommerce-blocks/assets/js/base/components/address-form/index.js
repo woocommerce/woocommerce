@@ -4,12 +4,30 @@
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import TextInput from '@woocommerce/base-components/text-input';
-import { ShippingCountryInput } from '@woocommerce/base-components/country-input';
-import { ShippingStateInput } from '@woocommerce/base-components/state-input';
+import {
+	BillingCountryInput,
+	ShippingCountryInput,
+} from '@woocommerce/base-components/country-input';
+import {
+	BillingStateInput,
+	ShippingStateInput,
+} from '@woocommerce/base-components/state-input';
 import {
 	COUNTRY_LOCALE,
 	DEFAULT_ADDRESS_FIELDS,
 } from '@woocommerce/block-settings';
+
+const defaultFieldNames = [
+	'first_name',
+	'last_name',
+	'company',
+	'address_1',
+	'address_2',
+	'country',
+	'city',
+	'postcode',
+	'state',
+];
 
 const defaultFieldValues = {
 	first_name: {
@@ -43,18 +61,9 @@ const defaultFieldValues = {
 };
 
 const AddressForm = ( {
-	fields = [
-		'first_name',
-		'last_name',
-		'company',
-		'address_1',
-		'address_2',
-		'country',
-		'city',
-		'postcode',
-		'state',
-	],
+	fields = defaultFieldNames,
 	onChange,
+	type = 'shipping',
 	values,
 } ) => {
 	const countryLocale = COUNTRY_LOCALE[ values.country ] || {};
@@ -75,8 +84,12 @@ const AddressForm = ( {
 					return null;
 				}
 				if ( addressField.key === 'country' ) {
+					const Tag =
+						type === 'shipping'
+							? ShippingCountryInput
+							: BillingCountryInput;
 					return (
-						<ShippingCountryInput
+						<Tag
 							key={ addressField.key }
 							label={ __(
 								'Country / Region',
@@ -96,8 +109,12 @@ const AddressForm = ( {
 					);
 				}
 				if ( addressField.key === 'state' ) {
+					const Tag =
+						type === 'shipping'
+							? ShippingStateInput
+							: BillingStateInput;
 					return (
-						<ShippingStateInput
+						<Tag
 							key={ addressField.key }
 							country={ values.country }
 							label={ addressField.label }
@@ -139,7 +156,8 @@ const AddressForm = ( {
 AddressForm.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	values: PropTypes.object.isRequired,
-	fields: PropTypes.arrayOf( PropTypes.string ),
+	fields: PropTypes.arrayOf( PropTypes.oneOf( defaultFieldNames ) ),
+	type: PropTypes.oneOf( [ 'billing', 'shipping' ] ),
 };
 
 export default AddressForm;

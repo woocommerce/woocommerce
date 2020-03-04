@@ -3,31 +3,11 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import Label from '../../label';
 import './style.scss';
-
-const StepNumber = ( { stepNumber } ) => {
-	return (
-		<div className="wc-block-checkout-step__number">
-			<Label
-				label={ stepNumber }
-				screenReaderLabel={ sprintf(
-					__(
-						// translators: %s is a step number (1, 2, 3...)
-						'Step %d',
-						'woo-gutenberg-products-block'
-					),
-					stepNumber
-				) }
-			/>
-		</div>
-	);
-};
 
 const StepHeading = ( { title, stepHeadingContent } ) => (
 	<div className="wc-block-checkout-step__heading">
@@ -43,7 +23,6 @@ const StepHeading = ( { title, stepHeadingContent } ) => (
 const FormStep = ( {
 	id,
 	className,
-	stepNumber,
 	title,
 	legend,
 	description,
@@ -56,7 +35,6 @@ const FormStep = ( {
 			id={ id }
 		>
 			<legend className="screen-reader-text">{ legend || title }</legend>
-			<StepNumber stepNumber={ stepNumber } />
 			<StepHeading
 				title={ title }
 				stepHeadingContent={ stepHeadingContent() }
@@ -72,11 +50,11 @@ const FormStep = ( {
 FormStep.propTypes = {
 	id: PropTypes.string,
 	className: PropTypes.string,
-	stepNumber: PropTypes.number,
 	title: PropTypes.string,
 	description: PropTypes.string,
 	children: PropTypes.node,
 	stepHeadingContent: PropTypes.func,
+	legend: PropTypes.string,
 };
 
 export default FormStep;
