@@ -21,8 +21,10 @@ class Library {
 		add_action( 'init', array( __CLASS__, 'register_blocks' ) );
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
 		add_action( 'init', array( __CLASS__, 'maybe_create_tables' ) );
+		add_action( 'init', array( __CLASS__, 'maybe_create_cronjobs' ) );
 		add_filter( 'wc_order_statuses', array( __CLASS__, 'register_draft_order_status' ) );
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( __CLASS__, 'register_draft_order_post_status' ) );
+		add_action( 'woocommerce_cleanup_draft_orders', array( __CLASS__, 'delete_expired_draft_orders' ) );
 	}
 
 	/**
@@ -76,6 +78,15 @@ class Library {
 		);
 
 		update_option( 'wc_blocks_db_version', \Automattic\WooCommerce\Blocks\Package::get_version() );
+	}
+
+	/**
+	 * Maybe create cron events.
+	 */
+	public static function maybe_create_cronjobs() {
+		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( 'woocommerce_cleanup_draft_orders' ) ) {
+			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
+		}
 	}
 
 	/**
@@ -150,5 +161,25 @@ class Library {
 			'label_count'               => _n_noop( 'Drafts <span class="count">(%s)</span>', 'Drafts <span class="count">(%s)</span>', 'woo-gutenberg-products-block' ),
 		];
 		return $statuses;
+	}
+
+	/**
+	 * Delete draft orders older than a day.
+	 *
+	 * Ran on a daily cron schedule.
+	 */
+	public static function delete_expired_draft_orders() {
+		global $wpdb;
+
+		$wpdb->query(
+			"
+			DELETE posts, term_relationships, postmeta
+			FROM $wpdb->posts posts
+			LEFT JOIN $wpdb->term_relationships term_relationships ON ( posts.ID = term_relationships.object_id )
+			LEFT JOIN $wpdb->postmeta postmeta ON ( posts.ID = postmeta.post_id )
+			WHERE posts.post_status = 'wc-checkout-draft'
+			AND posts.post_modified <= ( NOW() - INTERVAL 1 DAY )
+			"
+		);
 	}
 }
