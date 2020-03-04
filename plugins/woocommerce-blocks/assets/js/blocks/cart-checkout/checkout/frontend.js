@@ -9,10 +9,10 @@ import { withRestApiHydration } from '@woocommerce/block-hocs';
 import Block from './block.js';
 import renderFrontend from '../../../utils/render-frontend.js';
 
-const getProps = () => {
+const getProps = ( el ) => {
 	return {
 		attributes: {
-			isEditor: false,
+			useShippingAsBilling: el.dataset.useShippingAsBilling !== 'false',
 		},
 	};
 };

@@ -12,7 +12,7 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
  * @param {Function} [getProps] Function to generate the props object for the
  * block.
  */
-export default ( selector, Block, getProps = () => {} ) => {
+export default ( selector, Block, getProps = () => ( {} ) ) => {
 	const containers = document.querySelectorAll( selector );
 
 	if ( containers.length ) {
