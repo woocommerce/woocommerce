@@ -322,7 +322,7 @@ function get_woocommerce_currency() {
 /**
  * Get full list of currency codes.
  *
- * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
  *
  * @return array
  */
@@ -508,7 +508,7 @@ function get_woocommerce_currencies() {
 /**
  * Get all available Currency symbols.
  *
- * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
  *
  * @return array
  */
@@ -690,7 +690,7 @@ function get_woocommerce_currency_symbols() {
 /**
  * Get Currency symbol.
  *
- * Currency Symbols and mames should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
+ * Currency symbols and names should follow the Unicode CLDR recommendation (http://cldr.unicode.org/translation/currency-names)
  *
  * @param string $currency Currency. (default: '').
  * @return string
