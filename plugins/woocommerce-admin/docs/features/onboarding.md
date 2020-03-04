@@ -13,10 +13,6 @@ Users of the published WooCommerce Admin plugin need to either opt-in to using t
 
 To enable the new onboarding experience manually, log-in to `wp-admin`, and go to `WooCommerce > Settings > Help > Setup Wizard`. Click `Enable` under the `New onboarding experience` heading.
 
-You can also set the following configuration flag in your `wp-config.php`:
-
-`define( 'WOOCOMMERCE_ADMIN_ONBOARDING_ENABLED', true );`
-
 ## New REST API endpoints
 
 To power the new onboarding flow client side, new REST API endpoints have been introduced. These are purpose built endpoints that exist under the `/wc-admin/onboarding/` namespace, and are not meant to be shipped in the core rest API package. The source is stored in `src/API/OnboardingPlugins.php`, `src/API/OnboardingProfile.php`, and `src/API/OnboardingTasks.php` respectively.

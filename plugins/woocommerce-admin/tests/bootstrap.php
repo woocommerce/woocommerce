@@ -41,7 +41,7 @@ function wc_admin_install() {
 	\Automattic\WooCommerce\Admin\Install::create_events();
 
 	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
-	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
+	$GLOBALS['wp_roles'] = null; // phpcs:ignore override ok.
 	wp_roles();
 
 	echo esc_html( 'Installing woocommerce-admin...' . PHP_EOL );
@@ -89,7 +89,7 @@ function _manually_load_plugin() {
 	define( 'WC_USE_TRANSACTIONS', false );
 	update_option( 'woocommerce_enable_coupons', 'yes' );
 	update_option( 'woocommerce_calc_taxes', 'yes' );
-	define( 'WOOCOMMERCE_ADMIN_ONBOARDING_ENABLED', true );
+	update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
 	require_once wc_dir() . '/woocommerce.php';
 	require dirname( __DIR__ ) . '/vendor/autoload.php';
