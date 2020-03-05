@@ -233,7 +233,9 @@ class WC_Admin_Notices {
 	 * If we need to update the database, include a message with the DB update button.
 	 */
 	public static function update_notice() {
-		if ( WC()->is_wc_admin_active() ) {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+		if ( WC()->is_wc_admin_active() && in_array( $screen_id, wc_get_screen_ids(), true ) ) {
 			return;
 		}
 
