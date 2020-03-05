@@ -55,6 +55,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
+	 * The updated coupon properties
+	 *
+	 * @since 4.1.0
+	 * @var array
+	 */
+	protected $updated_props = array();
+
+	/**
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0

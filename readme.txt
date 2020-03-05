@@ -181,26 +181,22 @@ INTERESTED IN DEVELOPMENT?
 
 = 4.0.0 - 2020-03-03 =
 
-* Add - Add woocommerce_admin_process_variation_object hook before $variation->save(), pass WC_Product_Variation object to hooks in the variation metabox. #24929
-* Add - Added support for placeholder attribute in quantity inputs. #25418
-* Add - Added tax_status and tax_class columns to the product meta data lookup table. #25428
-* Add - Added woocommerce_top_rated_widget_args filter for WC_Widget_Top_Rated_Products widget. #25320
-* Dev - Add actions before and after grouped product list to allow adding custom rows. #25093
-* Dev - Add filter to tweak whether a product has enough stock while attempting to pay for an order. #25230
-* Dev - Added the automattic/jetpack-constants package and replace PHP constant definition checks with it. #25516
-* Dev - Adds a triggerHandler called checkout_place_order_success on a successful order during the checkout process. This allows plugin develops to hook into the JavaScript process that gets triggered on the client side on order checkout. #25289
-* Dev - Allow filtering of default meta value inside WC_Data::get_meta even if meta key not found. #24066
-* Dev - Includes Emogrifier composer package instead of including into includes/libraries. #25525
-* Dev - Introduce WC_Countries::get_vat_countries for returning a list of countries that uses VAT and refactor WC_Countries::get_european_union_countries with backward compatibility and deprecation to remove the VAT functionality from there. Brexit, remove GB from WC_Countries::get_european_union_countries. #24943
-* Dev - Introduced woocommerce_download_product_filepath filter. #25485
-* Dev - Introduced woocommerce_email_content_type filter. Updated woocommerce_email_from_name filter arguments to include default wp_email() "from" name. Updated woocommerce_email_from_address filter arguments to include default wp_email() email address. #25405
-* Dev - Introduced woocommerce_shortcode_products_query_results filter. #25573
-* Dev - Removed hash_equals() polyfill as it was no longer needed. #25474
-* Dev - Removed unused .order-actions CSS. #25581
 * Enhancement - Included information about packages in the System Status Report. #25584
 * Enhancement - New WooCommerce Admin. #25011
 * Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.12 #25587
 * Enhancement - Updated Action Scheduler to 3.0.1. #25566
+* Performance - Improved the client-side preparation for variation saving. #25382
+* Tweak - Enhance order details and payment summary. #25504
+* Tweak - Increase new onboarding group test to 50%. #25501
+* Tweak - Increased range and precision for `min_price` and `max_price` in the product meta lookup table. #25253
+* Tweak - Move action scheduler to external via composer. #25404
+* Tweak - Only update the customer IP address when order gets created from admin. #25137
+* Tweak - Remove WooCommerce Admin install alert. #25502
+* Tweak - Removed WC Admin from the Setup Wizard if it's already active. #25562
+* Tweak - Set email header table width to 100% for full width. #25294
+* Tweak - Simplified MaxMind integration title. #25522
+* Tweak - Update 'Country' to 'Country / Region' label. #25530
+* Tweak - WooCommerce.com plugins auto-install and update improvement. #25532
 * Fix - Add missing closing tag. #25319
 * Fix - Added validation to the cost field for flat rate shipping. #24919
 * Fix - Address in shipping calculator malformed for Canada. #25149
@@ -213,25 +209,30 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Fixed get_discount function return type. #25567
 * Fix - Fixed possible multiple is_vat_exempt order meta in order creation. #25426
 * Fix - Fixed wrong context help for translators. #25496
-* Fix - Make WC_Shipping::is package shippable less strict. #25386
-* Fix - Prevent undefined wp_delete_user() error while removing inactive accounts. #25489
+* Fix - Make `WC_Shipping::is` package shippable less strict. #25386
+* Fix - Prevent undefined `wp_delete_user()` error while removing inactive accounts. #25489
 * Fix - Removed constants and autoloader from the uninstall script. #25589
 * Fix - Removed the lowercase conversion for product search terms that caused incorrect results to case sensitive searches. #25314
 * Fix - Restored the default behavior of "Shipping destination" option. #25571
-* Fix - Set image CSS on emails to be max-width: 100% so that they don't break the email template. #24764
+* Fix - Set image CSS on emails to be `max-width: 100%` so that they don't break the email template. #24764
 * Fix - Setup wizard shipping setup verification logic correction. #25540
-* Performance - Improved the client-side preparation for variation saving. #25382
-* Tweak - Enhance order details and payment summary. #25504
-* Tweak - Increase new onboarding group test to 50%. #25501
-* Tweak - Increased range and precision for min_price and max_price in the product meta lookup table. #25253
-* Tweak - Move action scheduler to external via composer. #25404
-* Tweak - Only update the customer IP address when order gets created from admin. #25137
-* Tweak - Remove WooCommerce Admin install alert. #25502
-* Tweak - Removed WC Admin from the Setup Wizard if it's already active. #25562
-* Tweak - Set email header table width to 100% for full width. #25294
-* Tweak - Simplified MaxMind integration title. #25522
-* Tweak - Update 'Country' to 'Country / Region' label. #25530
-* Tweak - WooCommerce.com plugins auto-install and update improvement. #25532
+* Dev - Added support for placeholder attribute in quantity inputs. #25418
+* Dev - Added `tax_status` and `tax_class` columns to the product meta data lookup table. #25428
+* Dev - Introduced `woocommerce_top_rated_widget_args` filter. #25320
+* Dev - Introduced `woocommerce_admin_process_variation_object` hook. #24929
+* Dev - Added actions before and after grouped product list to allow adding custom rows. #25093
+* Dev - Added filter to tweak whether a product has enough stock while attempting to pay for an order. #25230
+* Dev - Added the `automattic/jetpack-constants` package and replace PHP constant definition checks with it. #25516
+* Dev - Added a `triggerHandler` called `checkout_place_order_success` on a successful order during the checkout process. #25289
+* Dev - Allow filtering of default meta value inside `WC_Data::get_meta` even if meta key not found. #24066
+* Dev - Includes Emogrifier composer package instead of including into `includes/libraries`. #25525
+* Dev - Introduce `WC_Countries::get_vat_countries` for returning a list of countries that uses VAT and refactor `WC_Countries::get_european_union_countries` with backward compatibility and deprecation to remove the VAT functionality from there. Brexit, remove GB from `WC_Countries::get_european_union_countries`. #24943
+* Dev - Introduced `woocommerce_download_product_filepath` filter. #25485
+* Dev - Introduced `woocommerce_email_content_type` filter. #25405
+* Dev - Updated `woocommerce_email_from_name` and `woocommerce_email_from_address` filter arguments to include `wp_email()` default data. #25405
+* Dev - Introduced `woocommerce_shortcode_products_query_results` filter. #25573
+* Dev - Removed `hash_equals()` polyfill as it was no longer needed. #25474
+* Dev - Removed unused `.order-actions` CSS. #25581
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 

@@ -2428,6 +2428,11 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		Jetpack::maybe_set_version_option();
+		$jetpack = Jetpack::init();
+		// Older versions of jetpack may not have this method.
+		if ( method_exists( $jetpack, 'configure' ) ) {
+			$jetpack->configure();
+		}
 		$register_result = Jetpack::try_registration();
 
 		if ( is_wp_error( $register_result ) ) {
@@ -2454,7 +2459,7 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_ready() {
 		// We've made it! Don't prompt the user to run the wizard again.
-		WC_Admin_Notices::remove_notice( 'install' );
+		WC_Admin_Notices::remove_notice( 'install', true );
 
 		$user_email   = $this->get_current_user_email();
 		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
