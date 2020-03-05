@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { camelCase, mapKeys } from 'lodash';
+
+/**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
@@ -41,6 +46,7 @@ const reducer = (
 		cartItemsQuantityPending: [],
 		cartData: {
 			coupons: [],
+			shippingRates: [],
 			items: [],
 			itemsCount: 0,
 			itemsWeight: 0,
@@ -69,7 +75,9 @@ const reducer = (
 			state = {
 				...state,
 				errors: [],
-				cartData: action.response,
+				cartData: mapKeys( action.response, ( _, key ) =>
+					camelCase( key )
+				),
 			};
 			break;
 		case types.APPLYING_COUPON:
@@ -114,6 +122,15 @@ const reducer = (
 				cartData: {
 					...state.cartData,
 					items: cartItemsReducer( state.cartData.items, action ),
+				},
+			};
+			break;
+		case types.UPDATING_SHIPPING_ADDRESS:
+			state = {
+				...state,
+				metaData: {
+					...state.metaData,
+					updatingShipping: action.isResolving,
 				},
 			};
 			break;

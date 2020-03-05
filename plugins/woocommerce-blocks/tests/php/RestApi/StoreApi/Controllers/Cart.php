@@ -11,6 +11,7 @@ use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case as TestCase;
 use \WC_Helper_Product as ProductHelper;
 use \WC_Helper_Coupon as CouponHelper;
+use \WC_Helper_Shipping;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
 /**
@@ -48,6 +49,8 @@ class Cart extends TestCase {
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
 		wc()->cart->apply_coupon( $this->coupon->get_code() );
+
+		WC_Helper_Shipping::create_simple_flat_rate();
 	}
 
 	/**
@@ -56,6 +59,10 @@ class Cart extends TestCase {
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/store/cart', $routes );
+		$this->assertArrayHasKey( '/wc/store/cart/apply-coupon', $routes );
+		$this->assertArrayHasKey( '/wc/store/cart/remove-coupon', $routes );
+		$this->assertArrayHasKey( '/wc/store/cart/update-shipping', $routes );
+		$this->assertArrayHasKey( '/wc/store/cart/select-shipping-rate/(?P<package_id>[\d]+)', $routes );
 	}
 
 	/**
@@ -68,7 +75,7 @@ class Cart extends TestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 3, $data['items_count'] );
 		$this->assertEquals( 2, count( $data['items'] ) );
-		$this->assertEquals( false, $data['needs_shipping'] );
+		$this->assertEquals( true, $data['needs_shipping'] );
 		$this->assertEquals( '30', $data['items_weight'] );
 
 		$this->assertEquals( 'GBP', $data['totals']->currency_code );
@@ -151,6 +158,111 @@ class Cart extends TestCase {
 		$this->assertEquals( '11000', $data['totals']->total_items );
 	}
 
+/**
+	 * Test getting updated shipping.
+	 */
+	public function test_update_shipping() {
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request->set_body_params(
+			array(
+				'country' => 'US',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'shipping_rates', $data );
+
+		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->address_1 );
+		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->address_2 );
+		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->city );
+		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->state );
+		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->postcode );
+		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
+	}
+
+	/**
+	 * Test shipping address validation.
+	 */
+	public function test_get_items_address_validation() {
+		// US address.
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request->set_body_params(
+			array(
+				'address_1' => 'Test address 1',
+				'address_2' => 'Test address 2',
+				'city'      => 'Test City',
+				'state'     => 'AL',
+				'postcode'  => '90210',
+				'country'   => 'US'
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'Test address 1', $data['shipping_rates'][0]['destination']->address_1 );
+		$this->assertEquals( 'Test address 2', $data['shipping_rates'][0]['destination']->address_2 );
+		$this->assertEquals( 'Test City', $data['shipping_rates'][0]['destination']->city );
+		$this->assertEquals( 'AL', $data['shipping_rates'][0]['destination']->state );
+		$this->assertEquals( '90210', $data['shipping_rates'][0]['destination']->postcode );
+		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
+
+		// Address with empty country.
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request->set_body_params(
+			array(
+				'country' => ''
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Address with invalid country.
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request->set_body_params(
+			array(
+				'country' => 'ZZZZZZZZ'
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+
+		// US address with named state.
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request->set_body_params(
+			array(
+				'state'   =>'Alabama',
+				'country' => 'US'
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'AL', $data['shipping_rates'][0]['destination']->state );
+		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
+
+		// US address with invalid state.
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-shipping' );
+		$request->set_body_params(
+			array(
+				'state'   =>'ZZZZZZZZ',
+				'country' => 'US'
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+
 	/**
 	 * Test applying coupon to cart.
 	 */
@@ -230,6 +342,8 @@ class Cart extends TestCase {
 
 		$this->assertArrayHasKey( 'items_count', $schema['properties'] );
 		$this->assertArrayHasKey( 'items', $schema['properties'] );
+		$this->assertArrayHasKey( 'shipping_rates', $schema['properties'] );
+		$this->assertArrayHasKey( 'coupons', $schema['properties'] );
 		$this->assertArrayHasKey( 'needs_shipping', $schema['properties'] );
 		$this->assertArrayHasKey( 'items_weight', $schema['properties'] );
 		$this->assertArrayHasKey( 'totals', $schema['properties'] );
@@ -246,6 +360,8 @@ class Cart extends TestCase {
 
 		$this->assertArrayHasKey( 'items_count', $data );
 		$this->assertArrayHasKey( 'items', $data );
+		$this->assertArrayHasKey( 'shipping_rates', $data );
+		$this->assertArrayHasKey( 'coupons', $data );
 		$this->assertArrayHasKey( 'needs_shipping', $data );
 		$this->assertArrayHasKey( 'items_weight', $data );
 		$this->assertArrayHasKey( 'totals', $data );

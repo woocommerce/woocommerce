@@ -29,6 +29,7 @@ const CartFrontend = ( {
 		cartTotals,
 		cartIsLoading,
 		cartCoupons,
+		shippingRates,
 	} = useStoreCart();
 
 	return (
@@ -46,6 +47,7 @@ const CartFrontend = ( {
 						}
 						isShippingCostHidden={ isShippingCostHidden }
 						isLoading={ cartIsLoading }
+						shippingRates={ shippingRates }
 					/>
 				</LoadingMask>
 			) }

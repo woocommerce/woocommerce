@@ -10,9 +10,7 @@ import FormStep from '@woocommerce/base-components/checkout/form-step';
 import CheckoutForm from '@woocommerce/base-components/checkout/form';
 import NoShipping from '@woocommerce/base-components/checkout/no-shipping';
 import TextInput from '@woocommerce/base-components/text-input';
-import ShippingRatesControl, {
-	Packages,
-} from '@woocommerce/base-components/shipping-rates-control';
+import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
 import { CheckboxControl } from '@wordpress/components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
@@ -23,6 +21,7 @@ import {
 } from '@woocommerce/base-components/payment-methods';
 import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useShippingRates } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -31,6 +30,7 @@ import './style.scss';
 import '../../../payment-methods-demo';
 
 const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
+	const { shippingRatesLoading } = useShippingRates();
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState( {} );
 	const [ contactFields, setContactFields ] = useState( {} );
 	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
@@ -228,55 +228,33 @@ const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
 								'woo-gutenberg-products-block'
 							) }
 						>
-							{ shippingRates.length > 0 ? (
-								<Packages
-									renderOption={
-										renderShippingRatesControlOption
-									}
-									shippingRates={ shippingRates }
-									selected={ [
-										// This is only rendered in the editor, with placeholder
-										// shippingRates, so we can safely fallback to set the
-										// first shipping rate as selected and ignore setting
-										// an onChange prop.
-										shippingRates[ 0 ].shipping_rates[ 0 ]
-											.rate_id,
-									] }
-								/>
-							) : (
-								<ShippingRatesControl
-									address={
-										shippingFields.country
-											? {
-													address_1:
-														shippingFields.address_1,
-													address_2:
-														shippingFields.apartment,
-													city: shippingFields.city,
-													state: shippingFields.state,
-													postcode:
-														shippingFields.postcode,
-													country:
-														shippingFields.country,
-											  }
-											: null
-									}
-									noResultsMessage={ __(
-										'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
-										'woo-gutenberg-products-block'
-									) }
-									selected={ selectedShippingRate.methods }
-									renderOption={
-										renderShippingRatesControlOption
-									}
-									onChange={ ( newMethods ) =>
-										setSelectedShippingRate( {
-											...selectedShippingRate,
-											methods: newMethods,
-										} )
-									}
-								/>
-							) }
+							<ShippingRatesControl
+								address={
+									shippingFields.country
+										? {
+												address_1:
+													shippingFields.address_1,
+												address_2:
+													shippingFields.apartment,
+												city: shippingFields.city,
+												state: shippingFields.state,
+												postcode:
+													shippingFields.postcode,
+												country: shippingFields.country,
+										  }
+										: null
+								}
+								noResultsMessage={ __(
+									'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
+									'woo-gutenberg-products-block'
+								) }
+								renderOption={
+									renderShippingRatesControlOption
+								}
+								shippingRates={ shippingRates }
+								shippingRatesLoading={ shippingRatesLoading }
+							/>
+
 							<CheckboxControl
 								className="wc-block-checkout__add-note"
 								label="Add order notes?"

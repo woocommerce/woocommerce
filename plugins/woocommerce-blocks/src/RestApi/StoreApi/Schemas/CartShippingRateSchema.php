@@ -29,6 +29,18 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	protected function get_properties() {
 		return [
+			'package_id'     => [
+				'description' => __( 'The ID of the package the shipping rates belong to.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'name'           => [
+				'description' => __( 'Name of the package.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'destination'    => [
 				'description' => __( 'Shipping destination address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
@@ -74,13 +86,19 @@ class CartShippingRateSchema extends AbstractSchema {
 				],
 			],
 			'items'          => [
-				'description' => __( 'List of cart items (keys) the returned shipping rates apply to.', 'woo-gutenberg-products-block' ),
+				'description' => __( 'List of cart items the returned shipping rates apply to.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
 					'properties' => [
+						'key'      => [
+							'description' => __( 'Unique identifier for the item within the cart.', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
 						'name'     => [
 							'description' => __( 'Name of the item.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
@@ -95,12 +113,6 @@ class CartShippingRateSchema extends AbstractSchema {
 						],
 					],
 				],
-			],
-			'name'           => [
-				'description' => __( 'Name of the package.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
 			],
 			'shipping_rates' => [
 				'description' => __( 'List of shipping rates.', 'woo-gutenberg-products-block' ),
@@ -122,8 +134,13 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	protected function get_rate_properties() {
 		return array_merge(
-			$this->get_store_currency_properties(),
 			[
+				'rate_id'       => [
+					'description' => __( 'ID of the shipping rate.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
 				'name'          => [
 					'description' => __( 'Name of the shipping rate, e.g. Express shipping.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
@@ -144,12 +161,6 @@ class CartShippingRateSchema extends AbstractSchema {
 				],
 				'price'         => [
 					'description' => __( 'Price of this shipping rate using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
-					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
-					'readonly'    => true,
-				],
-				'rate_id'       => [
-					'description' => __( 'ID of the shipping rate.', 'woo-gutenberg-products-block' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
@@ -188,7 +199,14 @@ class CartShippingRateSchema extends AbstractSchema {
 						],
 					],
 				],
-			]
+				'selected'      => [
+					'description' => __( 'True if this is the rate currently selected by the customer for the cart.', 'woo-gutenberg-products-block' ),
+					'type'        => 'boolean',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+			],
+			$this->get_store_currency_properties()
 		);
 	}
 
@@ -202,13 +220,31 @@ class CartShippingRateSchema extends AbstractSchema {
 		// Add product names and quantities.
 		$items = array();
 		foreach ( $package['contents'] as $item_id => $values ) {
-			$items[ $item_id ] = [
+			$items[] = [
+				'key'      => $item_id,
 				'name'     => $values['data']->get_name(),
 				'quantity' => $values['quantity'],
 			];
 		}
 
+		// Generate package name.
+		$package_number       = absint( $package['package_id'] ) + 1;
+		$package_display_name = apply_filters(
+			'woocommerce_shipping_package_name',
+			$package_number > 1 ?
+				sprintf(
+					/* translators: %d: shipping package number */
+					_x( 'Shipping %d', 'shipping packages', 'woo-gutenberg-products-block' ),
+					$package_number
+				) :
+				_x( 'Shipping', 'shipping packages', 'woo-gutenberg-products-block' ),
+			$package['package_id'],
+			$package
+		);
+
 		return [
+			'package_id'     => $package['package_id'],
+			'name'           => $package_display_name,
 			'destination'    => (object) $this->prepare_html_response(
 				[
 					'address_1' => $package['destination']['address_1'],
@@ -220,38 +256,55 @@ class CartShippingRateSchema extends AbstractSchema {
 				]
 			),
 			'items'          => $items,
-			'name'           => apply_filters(
-				'woocommerce_shipping_package_name',
-				( $package['key'] > 0 ) ?
-					/* translators: %d: shipping package number */
-					sprintf( _x( 'Shipping %d', 'shipping packages', 'woo-gutenberg-products-block' ), ( $package['key'] + 1 ) ) :
-					_x( 'Shipping', 'shipping packages', 'woo-gutenberg-products-block' ),
-				$package['key'],
-				$package
-			),
-			'shipping_rates' => array_values( array_map( [ $this, 'get_rate_response' ], $package['rates'] ) ),
+			'shipping_rates' => $this->prepare_rates_response( $package ),
 		];
+	}
+
+	/**
+	 * Prepare an array of rates from a package for the response.
+	 *
+	 * @param array $package Shipping package complete with rates from WooCommerce.
+	 * @return array
+	 */
+	protected function prepare_rates_response( $package ) {
+		$rates          = $package['rates'];
+		$selected_rates = WC()->session->get( 'chosen_shipping_methods', array() );
+		$selected_rate  = isset( $chosen_shipping_methods[ $package['package_id'] ] ) ? $chosen_shipping_methods[ $package['package_id'] ] : '';
+
+		if ( empty( $selected_rate ) && ! empty( $package['rates'] ) ) {
+			$selected_rate = wc_get_chosen_shipping_method_for_package( $package['package_id'], $package );
+		}
+
+		$response = [];
+
+		foreach ( $package['rates'] as $rate ) {
+			$response[] = $this->get_rate_response( $rate, $selected_rate );
+		}
+
+		return $response;
 	}
 
 	/**
 	 * Response for a single rate.
 	 *
 	 * @param WC_Shipping_Rate $rate Rate object.
+	 * @param string           $selected_rate Selected rate.
 	 * @return array
 	 */
-	protected function get_rate_response( $rate ) {
+	protected function get_rate_response( $rate, $selected_rate = '' ) {
 		return array_merge(
-			$this->get_store_currency_response(),
 			[
+				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
 				'name'          => $this->prepare_html_response( $this->get_rate_prop( $rate, 'label' ) ),
 				'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
 				'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
 				'price'         => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
-				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
 				'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
 				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
 				'meta_data'     => $this->get_rate_meta_data( $rate ),
-			]
+				'selected'      => $selected_rate === $this->get_rate_prop( $rate, 'id' ),
+			],
+			$this->get_store_currency_response()
 		);
 	}
 

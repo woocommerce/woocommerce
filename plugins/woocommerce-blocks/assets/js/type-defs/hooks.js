@@ -6,6 +6,7 @@
  * @typedef {Object} StoreCart
  *
  * @property {Array}   cartCoupons       An array of coupons applied to the cart.
+ * @property {Array}   shippingRates     array of selected shipping rates
  * @property {Array}   cartItems         An array of items in the cart.
  * @property {number}  cartItemsCount    The number of items in the cart.
  * @property {number}  cartItemsWeight   The weight of all items in the cart.
@@ -36,7 +37,7 @@
  * @property {Function} isPending       Callback for determining if a cart
  *                                      item is currently updating (i.e.
  *                                      remove / change quantity).
- * @property {Function} changeQuantity  Callback for changing quantity of item 
+ * @property {Function} changeQuantity  Callback for changing quantity of item
  *                                      in cart.
  * @property {Function} removeItem      Callback for removing a cart item.
  */

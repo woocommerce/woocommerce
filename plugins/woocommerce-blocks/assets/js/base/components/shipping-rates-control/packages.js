@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { useSelectShippingRate } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -12,23 +13,22 @@ import './style.scss';
 const Packages = ( {
 	className,
 	noResultsMessage,
-	onChange = () => {},
 	renderOption,
-	selected = [],
-	shippingRates,
+	shippingRates = [],
 } ) => {
+	const { selectShippingRate, selectedShippingRates } = useSelectShippingRate(
+		shippingRates
+	);
 	return shippingRates.map( ( shippingRate, i ) => (
 		<Package
-			key={ Object.keys( shippingRate.items ).join() }
+			key={ shippingRate.package_id }
 			className={ className }
 			noResultsMessage={ noResultsMessage }
 			onChange={ ( newShippingRate ) => {
-				const newSelected = [ ...selected ];
-				newSelected[ i ] = newShippingRate;
-				onChange( newSelected );
+				selectShippingRate( newShippingRate, i );
 			} }
 			renderOption={ renderOption }
-			selected={ selected[ i ] }
+			selected={ selectedShippingRates[ i ] }
 			shippingRate={ shippingRate }
 			showItems={ shippingRates.length > 1 }
 			title={ shippingRates.length > 1 ? shippingRate.name : null }
@@ -40,11 +40,19 @@ Packages.propTypes = {
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
 	noResultsMessage: PropTypes.string,
-	onChange: PropTypes.func,
-	selected: PropTypes.arrayOf( PropTypes.string ),
 	shippingRates: PropTypes.arrayOf(
 		PropTypes.shape( {
-			items: PropTypes.object.isRequired,
+			items: PropTypes.arrayOf(
+				PropTypes.shape( {
+					key: PropTypes.string,
+					name: PropTypes.string,
+					quantity: PropTypes.number,
+				} )
+			).isRequired,
+			package_id: PropTypes.number,
+			name: PropTypes.string,
+			destination: PropTypes.object,
+			shipping_rates: PropTypes.arrayOf( PropTypes.object ),
 		} ).isRequired
 	).isRequired,
 };

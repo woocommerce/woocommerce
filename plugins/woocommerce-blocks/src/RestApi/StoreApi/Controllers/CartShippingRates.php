@@ -60,7 +60,49 @@ class CartShippingRates extends RestController {
 					'methods'  => RestServer::READABLE,
 					'callback' => [ $this, 'get_items' ],
 					'args'     => [
-						'context' => $this->get_context_param( [ 'default' => 'view' ] ),
+						'address_1' => [
+							'description'       => __( 'First line of the address being shipped to.', 'woo-gutenberg-products-block' ),
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'wc_clean',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+						'address_2' => [
+							'description'       => __( 'Second line of the address being shipped to.', 'woo-gutenberg-products-block' ),
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'wc_clean',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+						'city'      => [
+							'description'       => __( 'City of the address being shipped to.', 'woo-gutenberg-products-block' ),
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'wc_clean',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+						'state'     => [
+							'description'       => __( 'ISO code, or name, for the state, province, or district of the address being shipped to.', 'woo-gutenberg-products-block' ),
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'wc_clean',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+						'postcode'  => [
+							'description'       => __( 'Zip or Postcode of the address being shipped to.', 'woo-gutenberg-products-block' ),
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'wc_clean',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+						'country'   => [
+							'description'       => __( 'ISO code for the country of the address being shipped to.', 'woo-gutenberg-products-block' ),
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'wc_clean',
+							'validate_callback' => 'rest_validate_request_arg',
+						],
+						'context'   => $this->get_context_param( [ 'default' => 'view' ] ),
 					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
@@ -75,6 +117,10 @@ class CartShippingRates extends RestController {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return new RestError( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
+		}
+
 		$controller = new CartController();
 		$cart       = $controller->get_cart_instance();
 
@@ -82,24 +128,8 @@ class CartShippingRates extends RestController {
 			return new RestError( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woo-gutenberg-products-block' ), array( 'status' => 500 ) );
 		}
 
-		if ( ! empty( $request['country'] ) ) {
-			$valid_countries = WC()->countries->get_shipping_countries();
-
-			if (
-				is_array( $valid_countries ) &&
-				count( $valid_countries ) > 0 &&
-				! array_key_exists( $request['country'], $valid_countries )
-			) {
-				return new RestError(
-					'woocommerce_rest_cart_shipping_rates_invalid_country',
-					sprintf(
-						/* translators: 1: valid country codes */
-						__( 'Destination country code is not valid. Please enter one of the following: %s', 'woo-gutenberg-products-block' ),
-						implode( ', ', array_keys( $valid_countries ) )
-					),
-					[ 'status' => 400 ]
-				);
-			}
+		if ( ! $cart->needs_shipping() ) {
+			return rest_ensure_response( [] );
 		}
 
 		$request = $this->validate_shipping_address( $request );
@@ -108,22 +138,21 @@ class CartShippingRates extends RestController {
 			return $request;
 		}
 
-		$cart_items = $controller->get_cart_items(
-			function( $item ) {
-				return ! empty( $item['data'] ) && $item['data']->needs_shipping();
-			}
+		$packages = $controller->get_shipping_packages(
+			true,
+			[
+				'address_1' => $request['address_1'],
+				'address_2' => $request['address_2'],
+				'city'      => $request['city'],
+				'state'     => $request['state'],
+				'postcode'  => $request['postcode'],
+				'country'   => $request['country'],
+			]
 		);
-
-		if ( empty( $cart_items ) ) {
-			return rest_ensure_response( [] );
-		}
-
-		$packages = $this->get_shipping_packages( $request );
 		$response = [];
 
-		foreach ( $packages as $key => $package ) {
-			$package['key'] = $key;
-			$response[]     = $this->prepare_response_for_collection( $this->prepare_item_for_response( $package, $request ) );
+		foreach ( $packages as $package ) {
+			$response[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $package, $request ) );
 		}
 
 		return rest_ensure_response( $response );
@@ -135,8 +164,39 @@ class CartShippingRates extends RestController {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|\WP_REST_Response
 	 */
-	protected function validate_shipping_address( $request ) {
-		$request['country']  = wc_strtoupper( $request['country'] );
+	public function validate_shipping_address( $request ) {
+		$valid_countries = WC()->countries->get_shipping_countries();
+
+		if ( empty( $request['country'] ) ) {
+			return new RestError(
+				'woocommerce_rest_cart_shipping_rates_missing_country',
+				sprintf(
+					/* translators: 1: valid country codes */
+					__( 'No destination country code was given. Please provide one of the following: %s', 'woo-gutenberg-products-block' ),
+					implode( ', ', array_keys( $valid_countries ) )
+				),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$request['country'] = wc_strtoupper( $request['country'] );
+
+		if (
+			is_array( $valid_countries ) &&
+			count( $valid_countries ) > 0 &&
+			! array_key_exists( $request['country'], $valid_countries )
+		) {
+			return new RestError(
+				'woocommerce_rest_cart_shipping_rates_invalid_country',
+				sprintf(
+					/* translators: 1: valid country codes */
+					__( 'Destination country code is not valid. Please enter one of the following: %s', 'woo-gutenberg-products-block' ),
+					implode( ', ', array_keys( $valid_countries ) )
+				),
+				[ 'status' => 400 ]
+			);
+		}
+
 		$request['postcode'] = $request['postcode'] ? wc_format_postcode( $request['postcode'], $request['country'] ) : null;
 
 		if ( ! empty( $request['state'] ) ) {
@@ -248,35 +308,5 @@ class CartShippingRates extends RestController {
 		);
 
 		return $params;
-	}
-
-	/**
-	 * Get packages with calculated shipping.
-	 *
-	 * Based on WC_Cart::get_shipping_packages but allows the destination to be
-	 * customised based on passed params.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @return array of cart items
-	 */
-	protected function get_shipping_packages( $request ) {
-		$packages = WC()->cart->get_shipping_packages();
-
-		if ( $request['country'] ) {
-			foreach ( $packages as $key => $package ) {
-				$packages[ $key ]['destination'] = [
-					'address_1' => $request['address_1'],
-					'address_2' => $request['address_2'],
-					'city'      => $request['city'],
-					'state'     => $request['state'],
-					'postcode'  => $request['postcode'],
-					'country'   => $request['country'],
-				];
-			}
-		}
-
-		$packages = WC()->shipping()->calculate_shipping( $packages );
-
-		return $packages;
 	}
 }
