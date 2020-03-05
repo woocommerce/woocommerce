@@ -229,6 +229,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - configure Jetpack plugin before trying to connect/register. #25742
 * Fix - Check configure exists before calling to support older JP versions. #25747
 * Fix - Prevent edited attribute notice being hidden by new dashboard. #25757
+* Fix - Corrected the cache invalidation behavior of order item CRUD actions. #25734
 * Dev - Added support for placeholder attribute in quantity inputs. #25418
 * Dev - Added `tax_status` and `tax_class` columns to the product meta data lookup table. #25428
 * Dev - Introduced `woocommerce_top_rated_widget_args` filter. #25320
