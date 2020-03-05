@@ -233,6 +233,10 @@ class WC_Admin_Notices {
 	 * If we need to update the database, include a message with the DB update button.
 	 */
 	public static function update_notice() {
+		if ( WC()->is_wc_admin_active() ) {
+			return;
+		}
+
 		if ( WC_Install::needs_db_update() ) {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
