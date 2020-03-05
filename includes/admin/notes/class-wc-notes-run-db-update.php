@@ -32,7 +32,7 @@ class WC_Notes_Run_Db_Update {
 			return;
 		}
 
-		add_action( 'admin_init', array( __CLASS__, 'show_reminder' ) );
+		add_action( 'current_screen', array( __CLASS__, 'show_reminder' ) );
 	}
 
 	/**
@@ -261,28 +261,6 @@ class WC_Notes_Run_Db_Update {
 	}
 
 	/**
-	 * Create a note to remind store owners to complete the db update.
-	 */
-	public static function add_reminder() {
-		try {
-			$data_store = \WC_Data_Store::load( 'admin-note' );
-		} catch ( Exception $e ) {
-			if ( Constants::is_true( 'WP_DEBUG' ) ) {
-				error_log( 'WC_Notes_Run_Db_Update::add_reminder was called before the respective Data Store got registered. Database update notice will not be displayed.' );
-			}
-		}
-		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
-
-		if ( empty( $note_ids ) ) {
-			// Create a new db update notice.
-			self::update_needed_notice();
-		} else {
-			// Refresh the nonce action if needed, so can't be stored just once.
-			self::update_needed_notice( $note_ids[0] );
-		}
-	}
-
-	/**
 	 * Prepare the correct content of the db update note to be displayed by WC Admin.
 	 *
 	 * This one gets called on each page load, so try to bail quickly.
@@ -308,7 +286,7 @@ class WC_Notes_Run_Db_Update {
 				self::update_needed_notice( $note_id );
 			}
 		} else {
-			// Not running update_db_version() here unlike \WC_Admin_Notices::update_notice, as it runs over there.
+			\WC_Install::update_db_version();
 			self::update_done_notice( $note_id );
 		}
 	}
