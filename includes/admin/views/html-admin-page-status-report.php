@@ -127,8 +127,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Admin package running on your site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				// To prevent $path from previous package to leak into the conditions in this section.
-				$path = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$wc_admin_path = null;
 				if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
 					// Plugin version of WC Admin.
 					$version        = WC_ADMIN_VERSION_NUMBER;
@@ -144,20 +143,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 						$version       .= \Automattic\WooCommerce\Admin\Composer\Package::VERSION;
 						$package_active = false;
 					}
-					$path           = \Automattic\WooCommerce\Admin\Composer\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$wc_admin_path = \Automattic\WooCommerce\Admin\Composer\Package::get_path();
 				} else {
 					$version = null;
 				}
 
 				if ( ! is_null( $version ) ) {
-					if ( ! isset( $path ) ) {
+					if ( ! isset( $wc_admin_path ) ) {
 						if ( defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
-							$path = dirname( WC_ADMIN_PLUGIN_FILE ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+							$wc_admin_path = dirname( WC_ADMIN_PLUGIN_FILE );
 						} else {
-							$path = __( 'Active Plugin', 'woocommerce' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+							$wc_admin_path = __( 'Active Plugin', 'woocommerce' );
 						}
 					}
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the WC Admin package.', 'woocommerce' ) . '</mark>';
 				}
