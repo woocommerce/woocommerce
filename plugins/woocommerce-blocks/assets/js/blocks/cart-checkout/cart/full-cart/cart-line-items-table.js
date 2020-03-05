@@ -30,16 +30,24 @@ const CartLineItemsTable = ( { lineItems = [], isLoading = false } ) => {
 			<thead>
 				<tr className="wc-block-cart-items__header">
 					<th className="wc-block-cart-items__header-image">
-						{ __( 'Product', 'woo-gutenberg-products-block' ) }
+						<span>
+							{ __( 'Product', 'woo-gutenberg-products-block' ) }
+						</span>
 					</th>
 					<th className="wc-block-cart-items__header-product">
-						{ __( 'Details', 'woo-gutenberg-products-block' ) }
+						<span>
+							{ __( 'Details', 'woo-gutenberg-products-block' ) }
+						</span>
 					</th>
 					<th className="wc-block-cart-items__header-quantity">
-						{ __( 'Quantity', 'woo-gutenberg-products-block' ) }
+						<span>
+							{ __( 'Quantity', 'woo-gutenberg-products-block' ) }
+						</span>
 					</th>
 					<th className="wc-block-cart-items__header-total">
-						{ __( 'Total', 'woo-gutenberg-products-block' ) }
+						<span>
+							{ __( 'Total', 'woo-gutenberg-products-block' ) }
+						</span>
 					</th>
 				</tr>
 			</thead>
