@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { select, apiFetch } from '@wordpress/data-controls';
-import { camelCase, mapKeys } from 'lodash';
 
 /**
  * Internal dependencies
@@ -25,11 +24,7 @@ export function* getCartData() {
 		return;
 	}
 
-	yield receiveCart(
-		mapKeys( cartData, ( _value, key ) => {
-			return camelCase( key );
-		} )
-	);
+	yield receiveCart( cartData );
 }
 
 /**

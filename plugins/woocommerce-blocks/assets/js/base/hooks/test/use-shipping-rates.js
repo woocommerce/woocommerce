@@ -3,7 +3,7 @@
  */
 import TestRenderer, { act } from 'react-test-renderer';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
-import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -12,12 +12,7 @@ import { useShippingRates } from '../use-shipping-rates';
 
 jest.mock( '@woocommerce/block-data', () => ( {
 	__esModule: true,
-	COLLECTIONS_STORE_KEY: 'test/store',
-} ) );
-
-// Make debounce instantaneous.
-jest.mock( 'use-debounce', () => ( {
-	useDebounce: ( a ) => [ a ],
+	CART_STORE_KEY: 'test/store',
 } ) );
 
 describe( 'useShippingRates', () => {
@@ -33,24 +28,33 @@ describe( 'useShippingRates', () => {
 		};
 	};
 
-	const getWrappedComponents = ( Component, props ) => (
+	const getWrappedComponents = ( Component ) => (
 		<RegistryProvider value={ registry }>
-			<Component { ...props } />
+			<Component />
 		</RegistryProvider>
 	);
 
-	const getTestComponent = () => ( { query } ) => {
-		const items = useShippingRates( query );
+	const getTestComponent = () => () => {
+		const items = useShippingRates();
 		return <div { ...items } />;
+	};
+
+	const mockCartData = {
+		coupons: [],
+		items: [ { foo: 'bar' } ],
+		itemsCount: 123,
+		itemsWeight: 123,
+		needsShipping: false,
+		shippingRates: { foo: 'bar' },
 	};
 
 	const setUpMocks = () => {
 		mocks = {
 			selectors: {
-				getCollectionError: jest.fn().mockReturnValue( false ),
-				getCollection: jest
-					.fn()
-					.mockImplementation( () => ( { foo: 'bar' } ) ),
+				getCartData: jest.fn().mockReturnValue( mockCartData ),
+				getCartErrors: jest.fn().mockReturnValue( false ),
+				getCartTotals: jest.fn().mockReturnValue( 123 ),
+				areShippingRatesLoading: jest.fn().mockReturnValue( false ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
 			},
 		};
@@ -66,49 +70,22 @@ describe( 'useShippingRates', () => {
 		renderer = null;
 		setUpMocks();
 	} );
-	it(
-		'should return expected behaviour for equivalent query on props ' +
-			'across renders',
-		() => {
-			const TestComponent = getTestComponent();
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent, {
-						query: { bar: 'foo' },
-					} )
-				);
-			} );
-			const { shippingRates } = getProps( renderer );
-			// rerender
-			act( () => {
-				renderer.update(
-					getWrappedComponents( TestComponent, {
-						query: { bar: 'foo' },
-					} )
-				);
-			} );
-			// re-render should result in same shippingRates object because although
-			// query-state is a different instance, it's still equivalent.
-			const { shippingRates: newShippingRates } = getProps( renderer );
-			expect( newShippingRates ).toBe( shippingRates );
-			// now let's change the query passed through to verify new object
-			// is created.
-			// remember this won't actually change the results because the mock
-			// selector is returning an equivalent object when it is called,
-			// however it SHOULD be a new object instance.
-			act( () => {
-				renderer.update(
-					getWrappedComponents( TestComponent, {
-						query: { foo: 'bar' },
-					} )
-				);
-			} );
-			const { shippingRates: shippingRatesVerification } = getProps(
-				renderer
+	it( 'should return expected shipping rates provided by the store', () => {
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent )
 			);
-			expect( shippingRatesVerification ).not.toBe( shippingRates );
-			expect( shippingRatesVerification ).toEqual( shippingRates );
-			renderer.unmount();
-		}
-	);
+		} );
+		const { shippingRates } = getProps( renderer );
+		expect( shippingRates ).toBe( mockCartData.shippingRates );
+		// rerender
+		act( () => {
+			renderer.update( getWrappedComponents( TestComponent ) );
+		} );
+		// re-render should result in same shippingRates object.
+		const { shippingRates: newShippingRates } = getProps( renderer );
+		expect( newShippingRates ).toBe( shippingRates );
+		renderer.unmount();
+	} );
 } );

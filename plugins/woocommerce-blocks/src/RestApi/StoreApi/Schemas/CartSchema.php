@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas;
 
+use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -37,6 +39,16 @@ class CartSchema extends AbstractSchema {
 				'items'       => [
 					'type'       => 'object',
 					'properties' => $this->force_schema_readonly( ( new CartCouponSchema() )->get_properties() ),
+				],
+			],
+			'shipping_rates' => [
+				'description' => __( 'List of available shipping rates for the cart.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( ( new CartShippingRateSchema() )->get_properties() ),
 				],
 			],
 			'items'          => [
@@ -171,12 +183,15 @@ class CartSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $cart ) {
-		$cart_coupon_schema = new CartCouponSchema();
-		$cart_item_schema   = new CartItemSchema();
-		$context            = 'edit';
+		$controller           = new CartController();
+		$cart_coupon_schema   = new CartCouponSchema();
+		$cart_item_schema     = new CartItemSchema();
+		$shipping_rate_schema = new CartShippingRateSchema();
+		$context              = 'edit';
 
 		return [
 			'coupons'        => array_values( array_map( [ $cart_coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
+			'shipping_rates' => array_values( array_map( [ $shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ),
 			'items'          => array_values( array_map( [ $cart_item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
 			'items_count'    => $cart->get_cart_contents_count(),
 			'items_weight'   => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),

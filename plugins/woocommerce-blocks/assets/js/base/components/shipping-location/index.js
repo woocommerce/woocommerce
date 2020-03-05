@@ -13,6 +13,10 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Shows a formatted shipping location.
  */
 const ShippingLocation = ( { address } ) => {
+	// we bail early if we don't have an address.
+	if ( Object.values( address ).length === 0 ) {
+		return null;
+	}
 	const formattedCountry =
 		typeof SHIPPING_COUNTRIES[ address.country ] === 'string'
 			? decodeEntities( SHIPPING_COUNTRIES[ address.country ] )

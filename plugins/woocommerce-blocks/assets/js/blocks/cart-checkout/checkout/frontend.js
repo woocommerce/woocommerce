@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { withRestApiHydration } from '@woocommerce/block-hocs';
+import { useStoreCart } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -9,6 +10,16 @@ import { withRestApiHydration } from '@woocommerce/block-hocs';
 import Block from './block.js';
 import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
+
+/**
+ * Wrapper component to supply API data.
+ *
+ * @param {Object} attributes object of key value attributes passed to block.
+ */
+const CheckoutFrontend = ( attributes ) => {
+	const { shippingRates } = useStoreCart();
+	return <Block attributes={ attributes } shippingRates={ shippingRates } />;
+};
 
 const getProps = ( el ) => {
 	const attributes = {};
@@ -33,6 +44,6 @@ const getProps = ( el ) => {
 
 renderFrontend(
 	'.wp-block-woocommerce-checkout',
-	withRestApiHydration( Block ),
+	withRestApiHydration( CheckoutFrontend ),
 	getProps
 );

@@ -81,9 +81,10 @@ Package.propTypes = {
 	renderOption: PropTypes.func.isRequired,
 	shippingRate: PropTypes.shape( {
 		shipping_rates: PropTypes.arrayOf( PropTypes.object ).isRequired,
-		items: PropTypes.objectOf(
+		items: PropTypes.arrayOf(
 			PropTypes.shape( {
 				name: PropTypes.string.isRequired,
+				key: PropTypes.string.isRequired,
 				quantity: PropTypes.number.isRequired,
 			} ).isRequired
 		).isRequired,

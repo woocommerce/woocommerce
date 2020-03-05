@@ -1,12 +1,33 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 export const previewShippingRates = [
 	{
 		destination: {},
-		items: {},
+		package_id: 0,
+		name: __( 'Shipping', 'woo-gutenberg-products-block' ),
+		items: [
+			{
+				key: '33e75ff09dd601bbe69f351039152189',
+				name: _x(
+					'Beanie with Logo',
+					'example product in Cart Block',
+					'woo-gutenberg-products-block'
+				),
+				quantity: 2,
+			},
+			{
+				key: '6512bd43d9caa6e02c990b0a82652dca',
+				name: _x(
+					'Beanie',
+					'example product in Cart Block',
+					'woo-gutenberg-products-block'
+				),
+				quantity: 1,
+			},
+		],
 		shipping_rates: [
 			{
 				currency_code: 'USD',
@@ -21,6 +42,8 @@ export const previewShippingRates = [
 				delivery_time: '',
 				price: '200',
 				rate_id: 'free_shipping:1',
+				method_id: 'flat_rate',
+				selected: true,
 			},
 			{
 				currency_code: 'USD',
@@ -35,6 +58,8 @@ export const previewShippingRates = [
 				delivery_time: '',
 				price: '0',
 				rate_id: 'local_pickup:1',
+				method_id: 'local_pickup',
+				selected: false,
 			},
 		],
 	},

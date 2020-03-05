@@ -51,6 +51,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 
 			return {
 				cartCoupons: cartData.coupons,
+				shippingRates: cartData.shippingRates,
 				cartItems: cartData.items,
 				cartItemsCount: cartData.itemsCount,
 				cartItemsWeight: cartData.itemsWeight,

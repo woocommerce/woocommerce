@@ -49,6 +49,7 @@
  * @typedef {Object} CartData
  *
  * @property {Array}      coupons       Coupons applied to cart.
+ * @property {Array}      shippingRates array of selected shipping rates
  * @property {Array}      items         Items in the cart.
  * @property {number}     itemsCount    Number of items in the cart.
  * @property {number}     itemsWeight   Weight of items in the cart.

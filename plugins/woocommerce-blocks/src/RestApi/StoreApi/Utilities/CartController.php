@@ -210,6 +210,43 @@ class CartController {
 	}
 
 	/**
+	 * Get shipping packages from the cart and format as required.
+	 *
+	 * @param bool  $calculate_rates Should rates for the packages also be returned.
+	 * @param array $destination Pass an address to override the package destination before calculation.
+	 * @return array
+	 */
+	public function get_shipping_packages( $calculate_rates = true, $destination = [] ) {
+		$cart     = $this->get_cart_instance();
+		$packages = $cart->get_shipping_packages();
+
+		// Add package ID to array.
+		foreach ( $packages as $key => $package ) {
+			$packages[ $key ]['package_id'] = $key;
+
+			if ( ! empty( $destination ) ) {
+				$packages[ $key ]['destination'] = $destination;
+			}
+		}
+
+		return $calculate_rates ? WC()->shipping()->calculate_shipping( $packages ) : $packages;
+	}
+
+	/**
+	 * Selects a shipping rate.
+	 *
+	 * @param int    $package_id ID of the package to choose a rate for.
+	 * @param string $rate_id ID of the rate being chosen.
+	 */
+	public function select_shipping_rate( $package_id, $rate_id ) {
+		$cart                        = $this->get_cart_instance();
+		$session_data                = WC()->session->get( 'chosen_shipping_methods' ) ? WC()->session->get( 'chosen_shipping_methods' ) : [];
+		$session_data[ $package_id ] = $rate_id;
+
+		WC()->session->set( 'chosen_shipping_methods', $session_data );
+	}
+
+	/**
 	 * Based on the core cart class but returns errors rather than rendering notices directly.
 	 *
 	 * @todo Overriding the core apply_coupon method was necessary because core outputs notices when a coupon gets
