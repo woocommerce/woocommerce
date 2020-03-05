@@ -127,19 +127,30 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Admin package running on your site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				if ( class_exists( '\Automattic\WooCommerce\Admin\Composer\Package' ) ) {
-					$version        = \Automattic\WooCommerce\Admin\Composer\Package::get_active_version();
-					$package_active = \Automattic\WooCommerce\Admin\Composer\Package::is_package_active();
-					$path           = \Automattic\WooCommerce\Admin\Composer\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				} elseif ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+				// To prevent $path from previous package to leak into the conditions in this section.
+				$path = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+					// Plugin version of WC Admin.
 					$version        = WC_ADMIN_VERSION_NUMBER;
 					$package_active = false;
+				} elseif ( class_exists( '\Automattic\WooCommerce\Admin\Composer\Package' ) ) {
+					if ( WC()->is_wc_admin_active() ) {
+						// Fully active package version of WC Admin.
+						$version        = \Automattic\WooCommerce\Admin\Composer\Package::get_active_version();
+						$package_active = \Automattic\WooCommerce\Admin\Composer\Package::is_package_active();
+					} else {
+						// with WP version < 5.3, package is present, but inactive.
+						$version        = __( 'Inactive ', 'woocommerce' );
+						$version       .= \Automattic\WooCommerce\Admin\Composer\Package::VERSION;
+						$package_active = false;
+					}
+					$path           = \Automattic\WooCommerce\Admin\Composer\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				} else {
 					$version = null;
 				}
 
 				if ( ! is_null( $version ) ) {
-					if ( ! isset( $path ) || ! $package_active ) {
+					if ( ! isset( $path ) ) {
 						if ( defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 							$path = dirname( WC_ADMIN_PLUGIN_FILE ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 						} else {
