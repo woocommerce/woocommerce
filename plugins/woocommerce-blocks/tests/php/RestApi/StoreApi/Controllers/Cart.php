@@ -86,6 +86,72 @@ class Cart extends TestCase {
 	}
 
 	/**
+	 * Test removing a nonexistent cart item.
+	 */
+	public function test_remove_bad_cart_item() {
+		// Test removing a bad cart item - should return 404.
+		$request  = new WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
+		$request->set_body_params(
+			array(
+				'key' => 'bad_item_key_123',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_cart_invalid_key', $data['code'] );
+	}
+
+	/**
+	 * Test remove cart item.
+	 */
+	public function test_remove_cart_item() {
+		// Test removing a valid cart item - should return updated cart.
+		$request  = new WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
+		$request->set_body_params(
+			array(
+				'key' => $this->keys[0],
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $data['items_count'] );
+		$this->assertEquals( 1, count( $data['items'] ) );
+		$this->assertEquals( '10', $data['items_weight'] );
+		$this->assertEquals( '1000', $data['totals']->total_items );
+
+		// Test removing same item again - should return 404 (item is already removed).
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_cart_invalid_key', $data['code'] );
+	}
+
+	/**
+	 * Test changing the quantity of a cart item.
+	 */
+	public function test_update_item() {
+		$request = new WP_REST_Request( 'POST', '/wc/store/cart/update-item' );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 10,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 10, $data['items'][0]['quantity'] );
+		$this->assertEquals( 11, $data['items_count'] );
+		$this->assertEquals( '11000', $data['totals']->total_items );
+	}
+
+	/**
 	 * Test applying coupon to cart.
 	 */
 	public function test_apply_coupon() {
