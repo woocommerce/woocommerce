@@ -564,7 +564,7 @@ class WC_Email extends WC_Settings_API {
 				try {
 					$emogrifier = new $emogrifier_class( $content, $css );
                                         
-                                        do_action( 'woocommerce_emogrifier', $emogrifier, $this );
+                    do_action( 'woocommerce_emogrifier', $emogrifier, $this );
 
 					$content    = $emogrifier->emogrify();
 				} catch ( Exception $e ) {
