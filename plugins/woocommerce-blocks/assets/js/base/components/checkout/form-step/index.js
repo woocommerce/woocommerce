@@ -27,7 +27,7 @@ const FormStep = ( {
 	legend,
 	description,
 	children,
-	stepHeadingContent = () => null,
+	stepHeadingContent = () => {},
 } ) => {
 	return (
 		<fieldset
