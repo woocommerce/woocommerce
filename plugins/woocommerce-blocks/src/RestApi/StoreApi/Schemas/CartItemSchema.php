@@ -370,7 +370,7 @@ class CartItemSchema extends AbstractSchema {
 			} else {
 				// If this is a custom option slug, get the options name.
 				$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $product );
-				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $product );
+				$label = wc_attribute_label( str_replace( 'attribute_', '', $key ), $product );
 			}
 
 			$return[] = [
