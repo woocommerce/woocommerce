@@ -308,6 +308,8 @@ Example response:
 
 ## Cart API
 
+### Get the cart
+
 ```http
 GET /cart
 ```
@@ -453,6 +455,43 @@ Example response:
 		]
 	}
 }
+```
+
+### Edit single cart item
+
+Change the quantity of a cart item.
+
+```http
+PUT /cart/update-item/
+```
+
+| Attribute  | Type    | Required | Description                        |
+| :--------- | :------ | :------: | :--------------------------------- |
+| `key`      | string  |   Yes    | The key of the cart item to edit.  |
+| `quantity` | integer |   Yes    | Quantity of this item in the cart. |
+
+Returns the full cart object (same response as `GET /cart`).
+
+```http
+curl --request POST "https://example-store.com/wp-json/wc/store/cart/update-item?key=1ff1de774005f8da13f42943881c655f&quantity=3"
+```
+
+### Delete single cart item
+
+Delete/remove an item from the cart.
+
+```http
+POST /cart/remove-item/
+```
+
+| Attribute | Type   | Required | Description                       |
+| :-------- | :----- | :------: | :-------------------------------- |
+| `key`     | string |   Yes    | The key of the cart item to edit. |
+
+Returns the full cart object (same response as `GET /cart`).
+
+```http
+curl --request POST "https://example-store.com/wp-json/wc/store/cart/remove-item?key=1ff1de774005f8da13f42943881c655f"
 ```
 
 ## Cart items API

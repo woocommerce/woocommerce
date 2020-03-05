@@ -199,13 +199,13 @@ export function* removeItemFromCart( cartItemKey ) {
 	yield itemQuantityPending( cartItemKey, true );
 
 	try {
-		yield apiFetch( {
-			path: `/wc/store/cart/items/${ cartItemKey }`,
-			method: 'DELETE',
+		const cart = yield apiFetch( {
+			path: `/wc/store/cart/remove-item/?key=${ cartItemKey }`,
+			method: 'POST',
 			cache: 'no-store',
 		} );
 
-		yield receiveRemovedItem( cartItemKey );
+		yield receiveCart( cart );
 	} catch ( error ) {
 		yield receiveError( error );
 	}
@@ -227,15 +227,17 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
 	yield itemQuantityPending( cartItemKey, true );
 
 	try {
-		const result = yield apiFetch( {
-			path: `/wc/store/cart/items/${ cartItemKey }?quantity=${ quantity }`,
-			method: 'PUT',
+		const cart = yield apiFetch( {
+			path: `/wc/store/cart/update-item`,
+			method: 'POST',
+			data: {
+				key: cartItemKey,
+				quantity,
+			},
 			cache: 'no-store',
 		} );
 
-		if ( result ) {
-			yield receiveCartItem( result );
-		}
+		yield receiveCart( cart );
 	} catch ( error ) {
 		yield receiveError( error );
 	}
