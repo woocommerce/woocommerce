@@ -2,6 +2,6 @@
 
 exports[`Checkout Block can be created 1`] = `
 "<!-- wp:woocommerce/checkout -->
-<div class=\\"wp-block-woocommerce-checkout\\">Checkout block coming soon to store near you</div>
+<div class=\\"wp-block-woocommerce-checkout\\" data-use-shipping-as-billing=\\"true\\">Checkout block coming soon to store near you</div>
 <!-- /wp:woocommerce/checkout -->"
 `;
