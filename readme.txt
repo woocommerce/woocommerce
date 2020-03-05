@@ -252,6 +252,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Removed `hash_equals()` polyfill as it was no longer needed. #25474
 * Dev - Removed unused `.order-actions` CSS. #25581
 * Dev - Applies woocommerce_maxmind_geolocation_database_path in MaxMind database migration. #25681
+* Dev - Support both .data() and .dataset for formdata in add to cart requests. #25726
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
