@@ -156,7 +156,11 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 							$wc_admin_path = __( 'Active Plugin', 'woocommerce' );
 						}
 					}
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
+					if ( WC()->is_wc_admin_active() ) {
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
+					} else {
+						echo '<span class="dashicons dashicons-no-alt"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code> ';
+					}
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the WC Admin package.', 'woocommerce' ) . '</mark>';
 				}
