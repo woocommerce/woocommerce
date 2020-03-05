@@ -190,6 +190,7 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Added the WC Admin enabled db update notice. #25736
 * Enhancement - Update Action Scheduler to version 3.1.1. #25745
 * Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.14. #25807
+* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.0. #25822
 * Performance - Improved the client-side preparation for variation saving. #25382
 * Tweak - Enhance order details and payment summary. #25504
 * Tweak - Increase new onboarding group test to 50%. #25501
