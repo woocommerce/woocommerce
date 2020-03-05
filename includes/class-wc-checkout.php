@@ -272,7 +272,7 @@ class WC_Checkout {
 			foreach ( $fields as $single_field_type => $field ) {
 				if ( empty( $field['label'] ) && ! empty( $field['placeholder'] ) ) {
 					$this->fields[ $field_type ][ $single_field_type ]['label']       = $field['placeholder'];
-					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = 'screen-reader-text';
+					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = array( 'screen-reader-text' );
 				}
 			}
 		}
