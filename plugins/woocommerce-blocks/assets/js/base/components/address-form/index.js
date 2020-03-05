@@ -17,19 +17,7 @@ import {
 	DEFAULT_ADDRESS_FIELDS,
 } from '@woocommerce/block-settings';
 
-const defaultFieldNames = [
-	'first_name',
-	'last_name',
-	'company',
-	'address_1',
-	'address_2',
-	'country',
-	'city',
-	'postcode',
-	'state',
-];
-
-const defaultFieldValues = {
+export const defaultFieldConfig = {
 	first_name: {
 		autocomplete: 'given-name',
 	},
@@ -48,6 +36,7 @@ const defaultFieldValues = {
 	country: {
 		autocomplete: 'country',
 		priority: 65,
+		required: true,
 	},
 	city: {
 		autocomplete: 'address-level2',
@@ -61,7 +50,8 @@ const defaultFieldValues = {
 };
 
 const AddressForm = ( {
-	fields = defaultFieldNames,
+	fields = Object.keys( defaultFieldConfig ),
+	fieldConfig = defaultFieldConfig,
 	onChange,
 	type = 'shipping',
 	values,
@@ -71,11 +61,13 @@ const AddressForm = ( {
 		key: field,
 		...DEFAULT_ADDRESS_FIELDS[ field ],
 		...countryLocale[ field ],
-		...defaultFieldValues[ field ],
+		...fieldConfig[ field ],
 	} ) );
 	const sortedAddressFields = addressFields.sort(
 		( a, b ) => a.priority - b.priority
 	);
+
+	const optionalText = __( '(optional)', 'woo-gutenberg-products-block' );
 
 	return (
 		<div className="wc-block-address-form">
@@ -83,6 +75,17 @@ const AddressForm = ( {
 				if ( addressField.hidden ) {
 					return null;
 				}
+
+				const requiredField = addressField.required;
+				let fieldLabel = addressField.label || addressField.placeholder;
+
+				if (
+					! addressField.required &&
+					! fieldLabel.includes( optionalText )
+				) {
+					fieldLabel = fieldLabel + ' ' + optionalText;
+				}
+
 				if ( addressField.key === 'country' ) {
 					const Tag =
 						type === 'shipping'
@@ -91,10 +94,7 @@ const AddressForm = ( {
 					return (
 						<Tag
 							key={ addressField.key }
-							label={ __(
-								'Country / Region',
-								'woo-gutenberg-products-block'
-							) }
+							label={ fieldLabel }
 							value={ values.country }
 							autoComplete={ addressField.autocomplete }
 							onChange={ ( newValue ) =>
@@ -104,10 +104,11 @@ const AddressForm = ( {
 									state: '',
 								} )
 							}
-							required={ true }
+							required={ requiredField }
 						/>
 					);
 				}
+
 				if ( addressField.key === 'state' ) {
 					const Tag =
 						type === 'shipping'
@@ -117,7 +118,7 @@ const AddressForm = ( {
 						<Tag
 							key={ addressField.key }
 							country={ values.country }
-							label={ addressField.label }
+							label={ fieldLabel }
 							value={ values.state }
 							autoComplete={ addressField.autocomplete }
 							onChange={ ( newValue ) =>
@@ -126,17 +127,16 @@ const AddressForm = ( {
 									state: newValue,
 								} )
 							}
-							required={
-								! values.country || addressField.required
-							}
+							required={ requiredField }
 						/>
 					);
 				}
+
 				return (
 					<TextInput
 						key={ addressField.key }
 						className={ `wc-block-address-form__${ addressField.key }` }
-						label={ addressField.label || addressField.placeholder }
+						label={ fieldLabel }
 						value={ values[ addressField.key ] }
 						autoComplete={ addressField.autocomplete }
 						onChange={ ( newValue ) =>
@@ -145,7 +145,7 @@ const AddressForm = ( {
 								[ addressField.key ]: newValue,
 							} )
 						}
-						required={ addressField.required }
+						required={ requiredField }
 					/>
 				);
 			} ) }
@@ -156,7 +156,10 @@ const AddressForm = ( {
 AddressForm.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	values: PropTypes.object.isRequired,
-	fields: PropTypes.arrayOf( PropTypes.oneOf( defaultFieldNames ) ),
+	fields: PropTypes.arrayOf(
+		PropTypes.oneOf( Object.keys( defaultFieldConfig ) )
+	),
+	fieldConfig: PropTypes.object,
 	type: PropTypes.oneOf( [ 'billing', 'shipping' ] ),
 };
 
