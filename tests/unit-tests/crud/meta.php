@@ -36,7 +36,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 */
 	function test_disappearing_item_meta() {
 		// Setup for testing by making an item.
-		$item = new WC_Order_Item_Product();
+		$item          = new WC_Order_Item_Product();
 		$this->item_id = $item->save();
 
 		$item = WC_Order_Factory::get_order_item( $this->item_id );
@@ -78,7 +78,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 */
 	function test_disappearing_order_meta() {
 		// Setup for testing by making an item.
-		$order = new WC_Order();
+		$order          = new WC_Order();
 		$this->order_id = $order->save();
 
 		$order = wc_get_order( $this->order_id );
@@ -119,7 +119,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 */
 	function test_get_meta_data_after_update_post_meta() {
 		// Create an object.
-		$object  = new WC_Product;
+		$object = new WC_Product();
 		$object->save();
 
 		// Update a meta value.
@@ -138,8 +138,8 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 	 */
 	function test_strings_in_meta() {
 		// Create objects.
-		$object = new WC_Product;
-		$object_to_store = new stdClass();
+		$object                 = new WC_Product();
+		$object_to_store        = new stdClass();
 		$object_to_store->prop1 = 'prop_value';
 		$object_to_store->prop2 = 'prop_value_with_\\\"quotes"';
 
@@ -149,7 +149,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 
 		// Get object and check it.
 		$object = wc_get_product( $object_id );
-		$value = $object->get_meta( 'Test Object', true );
+		$value  = $object->get_meta( 'Test Object', true );
 
 		$this->assertEquals( $object_to_store, $object->get_meta( 'Test Object', true ) );
 		$this->assertEquals( 'Test\slashes', $object->get_meta( 'Test meta with slash', true ) );

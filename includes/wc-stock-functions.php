@@ -20,32 +20,37 @@ defined( 'ABSPATH' ) || exit;
  * @param  int|WC_Product $product        Product ID or product instance.
  * @param  int|null       $stock_quantity Stock quantity.
  * @param  string         $operation      Type of opertion, allows 'set', 'increase' and 'decrease'.
- *
+ * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
  * @return bool|int|null
  */
-function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
-	$product = wc_get_product( $product );
+function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set', $updating = false ) {
+	if ( ! is_a( $product, 'WC_Product' ) ) {
+		$product = wc_get_product( $product );
+	}
 
 	if ( ! $product ) {
 		return false;
 	}
 
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
-		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
+		// Some products (variations) can have their stock managed by their parent. Get the correct object to be updated here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
+		$product_with_stock    = $product_id_with_stock !== $product->get_id() ? wc_get_product( $product_id_with_stock ) : $product;
 		$data_store            = WC_Data_Store::load( 'product' );
-		$data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
-		delete_transient( 'wc_low_stock_count' );
-		delete_transient( 'wc_outofstock_count' );
-		delete_transient( 'wc_product_children_' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
-		wp_cache_delete( 'product-' . $product_id_with_stock, 'products' );
 
-		// Re-read product data after updating stock, then have stock status calculated and saved.
-		$product_with_stock = wc_get_product( $product_id_with_stock );
-		$product_with_stock->set_stock_status();
-		$product_with_stock->set_date_modified( current_time( 'timestamp', true ) );
-		$product_with_stock->save();
+		// Update the database.
+		$new_stock = $data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 
+		// Update the product object.
+		$data_store->read_stock_quantity( $product_with_stock, $new_stock );
+
+		// If this is not being called during an update routine, save the product so stock status etc is in sync, and caches are cleared.
+		if ( ! $updating ) {
+			$product_with_stock->set_stock_status();
+			$product_with_stock->save();
+		}
+
+		// Fire actions to let 3rd parties know the stock changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
 			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
 		} else {
@@ -115,17 +120,17 @@ function wc_maybe_increase_stock_levels( $order_id ) {
 		return;
 	}
 
-	$stock_reduced  = $order->get_data_store()->get_stock_reduced( $order_id );
-	$trigger_reduce = (bool) $stock_reduced;
+	$stock_reduced    = $order->get_data_store()->get_stock_reduced( $order_id );
+	$trigger_increase = (bool) $stock_reduced;
 
-	// Only continue if we're reducing stock.
-	if ( ! $trigger_reduce ) {
+	// Only continue if we're increasing stock.
+	if ( ! $trigger_increase ) {
 		return;
 	}
 
 	wc_increase_stock_levels( $order );
 
-	// Ensure stock is marked as "reduced" in case payment complete or other stock actions are called.
+	// Ensure stock is not marked as "reduced" anymore.
 	$order->get_data_store()->set_stock_reduced( $order_id, false );
 }
 add_action( 'woocommerce_order_status_cancelled', 'wc_maybe_increase_stock_levels' );
@@ -195,15 +200,15 @@ function wc_reduce_stock_levels( $order_id ) {
  *
  * @since 3.5.0
  * @param WC_Order $order order object.
- * @param array $changes Array of changes.
+ * @param array    $changes Array of changes.
  */
 function wc_trigger_stock_change_notifications( $order, $changes ) {
 	if ( empty( $changes ) ) {
 		return;
 	}
 
-	$order_notes      = array();
-	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+	$order_notes     = array();
+	$no_stock_amount = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
 
 	foreach ( $changes as $change ) {
 		$order_notes[]    = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
@@ -216,7 +221,8 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 
 		if ( $change['to'] < 0 ) {
 			do_action(
-				'woocommerce_product_on_backorder', array(
+				'woocommerce_product_on_backorder',
+				array(
 					'product'  => wc_get_product( $change['product']->get_id() ),
 					'order_id' => $order->get_id(),
 					'quantity' => abs( $change['from'] - $change['to'] ),
@@ -255,7 +261,7 @@ function wc_increase_stock_levels( $order_id ) {
 			continue;
 		}
 
-		// Only reduce stock once for each item.
+		// Only increase stock once for each item.
 		$product            = $item->get_product();
 		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
 
@@ -301,16 +307,19 @@ function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 			"
 			SELECT SUM( order_item_meta.meta_value ) AS held_qty
 			FROM {$wpdb->posts} AS posts
+			LEFT JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_items as order_items ON posts.ID = order_items.order_id
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta2 ON order_items.order_item_id = order_item_meta2.order_item_id
 			WHERE 	order_item_meta.meta_key    = '_qty'
 			AND 	order_item_meta2.meta_key   = %s
 			AND 	order_item_meta2.meta_value = %d
+			AND		postmeta.meta_key			= '_created_via'
+			AND		postmeta.meta_value			= 'checkout'
 			AND 	posts.post_type             IN ( '" . implode( "','", wc_get_order_types() ) . "' )
 			AND 	posts.post_status           = 'wc-pending'
 			AND		posts.ID                    != %d;",
-			'variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
+			'product_variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
 			$product->get_stock_managed_by_id(),
 			$exclude_order_id
 		)
@@ -320,7 +329,7 @@ function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 /**
  * Return low stock amount to determine if notification needs to be sent
  *
- * @param  WC_Product $product
+ * @param  WC_Product $product Product to get data from.
  * @since  3.5.0
  * @return int
  */

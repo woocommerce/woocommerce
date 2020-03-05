@@ -35,7 +35,7 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 		// Uncached widget.
 		ob_start();
 		$cache_hit = $dummy_widget->get_cached_widget( array( 'widget_id' => $dummy_widget->widget_id ) );
-		$output = ob_get_clean();
+		$output    = ob_get_clean();
 		$this->assertFalse( $cache_hit );
 		$this->assertEmpty( $output );
 
@@ -47,7 +47,7 @@ class WC_Tests_Widget extends WC_Unit_Test_Case {
 		// Cached widget.
 		ob_start();
 		$cache_hit = $dummy_widget->get_cached_widget( array( 'widget_id' => $dummy_widget->widget_id ) );
-		$output = ob_get_clean();
+		$output    = ob_get_clean();
 		$this->assertTrue( $cache_hit );
 		$this->assertEquals( 'Dummy', $output );
 	}

@@ -18,7 +18,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 	/**
 	 * Meta type. This should match up with
-	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://developer.wordpress.org/reference/functions/add_metadata/.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 *
 	 * @var string
@@ -44,7 +44,8 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		global $wpdb;
 
 		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_order_items', array(
+			$wpdb->prefix . 'woocommerce_order_items',
+			array(
 				'order_item_name' => $item->get_name(),
 				'order_item_type' => $item->get_type(),
 				'order_id'        => $item->get_order_id(),
@@ -72,11 +73,13 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 		if ( array_intersect( array( 'name', 'order_id' ), array_keys( $changes ) ) ) {
 			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_order_items', array(
+				$wpdb->prefix . 'woocommerce_order_items',
+				array(
 					'order_item_name' => $item->get_name(),
 					'order_item_type' => $item->get_type(),
 					'order_id'        => $item->get_order_id(),
-				), array( 'order_item_id' => $item->get_id() )
+				),
+				array( 'order_item_id' => $item->get_id() )
 			);
 		}
 

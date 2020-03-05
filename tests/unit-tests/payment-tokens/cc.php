@@ -90,8 +90,8 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_cc_read_pulls_meta() {
-		$token = WC_Helper_Payment_Token::create_cc_token();
-		$token_id = $token->get_id();
+		$token      = WC_Helper_Payment_Token::create_cc_token();
+		$token_id   = $token->get_id();
 		$token_read = new WC_Payment_Token_CC( $token_id );
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}

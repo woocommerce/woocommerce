@@ -59,17 +59,19 @@ function wc_has_notice( $message, $notice_type = 'success' ) {
 
 	$notices = WC()->session->get( 'wc_notices', array() );
 	$notices = isset( $notices[ $notice_type ] ) ? $notices[ $notice_type ] : array();
-	return array_search( $message, $notices, true ) !== false;
+	return array_search( $message, wp_list_pluck( $notices, 'notice' ), true ) !== false;
 }
 
 /**
  * Add and store a notice.
  *
  * @since 2.1
- * @param string $message The text to display in the notice.
+ * @version 3.9.0
+ * @param string $message     The text to display in the notice.
  * @param string $notice_type Optional. The name of the notice type - either error, success or notice.
+ * @param array  $data        Optional notice data.
  */
-function wc_add_notice( $message, $notice_type = 'success' ) {
+function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
 		return;
@@ -82,7 +84,14 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	$notices[ $notice_type ][] = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+
+	if ( ! empty( $message ) ) {
+		$notices[ $notice_type ][] = array(
+			'notice' => apply_filters( 'woocommerce_add_' . $notice_type, $message ),
+			'data'   => $data,
+		);
+	}
 
 	WC()->session->set( 'wc_notices', $notices );
 }
@@ -91,16 +100,16 @@ function wc_add_notice( $message, $notice_type = 'success' ) {
  * Set all notices at once.
  *
  * @since 2.6.0
- * @param mixed $notices Array of notices.
+ * @param array[] $notices Array of notices.
  */
 function wc_set_notices( $notices ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
 		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.6' );
 		return;
 	}
+
 	WC()->session->set( 'wc_notices', $notices );
 }
-
 
 /**
  * Unset all notices.
@@ -136,9 +145,19 @@ function wc_print_notices( $return = false ) {
 
 	foreach ( $notice_types as $notice_type ) {
 		if ( wc_notice_count( $notice_type ) > 0 ) {
-			wc_get_template( "notices/{$notice_type}.php", array(
-				'messages' => array_filter( $all_notices[ $notice_type ] ),
-			) );
+			$messages = array();
+
+			foreach ( $all_notices[ $notice_type ] as $notice ) {
+				$messages[] = isset( $notice['notice'] ) ? $notice['notice'] : $notice;
+			}
+
+			wc_get_template(
+				"notices/{$notice_type}.php",
+				array(
+					'messages' => array_filter( $messages ), // @deprecated 3.9.0
+					'notices'  => array_filter( $all_notices[ $notice_type ] ),
+				)
+			);
 		}
 	}
 
@@ -150,32 +169,46 @@ function wc_print_notices( $return = false ) {
 		return $notices;
 	}
 
-	echo $notices; // WPCS: XSS ok.
+	echo $notices; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
  * Print a single notice immediately.
  *
  * @since 2.1
+ * @version 3.9.0
  * @param string $message The text to display in the notice.
  * @param string $notice_type Optional. The singular name of the notice type - either error, success or notice.
+ * @param array  $data        Optional notice data. @since 3.9.0.
  */
-function wc_print_notice( $message, $notice_type = 'success' ) {
+function wc_print_notice( $message, $notice_type = 'success', $data = array() ) {
 	if ( 'success' === $notice_type ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	wc_get_template( "notices/{$notice_type}.php", array(
-		'messages' => array( apply_filters( 'woocommerce_add_' . $notice_type, $message ) ),
-	) );
+	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+
+	wc_get_template(
+		"notices/{$notice_type}.php",
+		array(
+			'messages' => array( $message ), // @deprecated 3.9.0
+			'notices'  => array(
+				array(
+					'notice' => $message,
+					'data'   => $data,
+				),
+			),
+		)
+	);
 }
 
 /**
  * Returns all queued notices, optionally filtered by a notice type.
  *
  * @since  2.1
+ * @version 3.9.0
  * @param  string $notice_type Optional. The singular name of the notice type - either error, success or notice.
- * @return array|mixed
+ * @return array[]
  */
 function wc_get_notices( $notice_type = '' ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -217,14 +250,45 @@ function wc_add_wp_error_notices( $errors ) {
  * @return string
  */
 function wc_kses_notice( $message ) {
-	return wp_kses( $message,
-		array_replace_recursive( // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
-			wp_kses_allowed_html( 'post' ),
-			array(
-				'a' => array(
-					'tabindex' => true,
-				),
-			)
+	$allowed_tags = array_replace_recursive(
+		wp_kses_allowed_html( 'post' ),
+		array(
+			'a' => array(
+				'tabindex' => true,
+			),
 		)
 	);
+
+	/**
+	 * Kses notice allowed tags.
+	 *
+	 * @since 3.9.0
+	 * @param array[]|string $allowed_tags An array of allowed HTML elements and attributes, or a context name such as 'post'.
+	 */
+	return wp_kses( $message, apply_filters( 'woocommerce_kses_notice_allowed_tags', $allowed_tags ) );
+}
+
+/**
+ * Get notice data attribute.
+ *
+ * @since 3.9.0
+ * @param array $notice Notice data.
+ * @return string
+ */
+function wc_get_notice_data_attr( $notice ) {
+	if ( empty( $notice['data'] ) ) {
+		return;
+	}
+
+	$attr = '';
+
+	foreach ( $notice['data'] as $key => $value ) {
+		$attr .= sprintf(
+			' data-%1$s="%2$s"',
+			sanitize_title( $key ),
+			esc_attr( $value )
+		);
+	}
+
+	return $attr;
 }

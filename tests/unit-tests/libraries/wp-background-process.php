@@ -18,12 +18,14 @@ class WC_Tests_Libraries_Background_Process extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_is_queue_empty() {
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php' );
+		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php';
 		$queue = new WC_Mock_Background_Process();
 		$this->assertEquals( true, $queue->is_queue_empty() );
-		$queue->push_to_queue( array(
-			'mock_key' => 'mock_value',
-		) );
+		$queue->push_to_queue(
+			array(
+				'mock_key' => 'mock_value',
+			)
+		);
 		$queue->save();
 		$this->assertEquals( false, $queue->is_queue_empty() );
 	}
@@ -34,7 +36,7 @@ class WC_Tests_Libraries_Background_Process extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_schedule_cron_healthcheck() {
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php' );
+		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php';
 		$queue = new WC_Mock_Background_Process();
 		$this->assertArrayHasKey( 'wp_' . get_current_blog_id() . '_wc_mock_background_process_cron_interval', $queue->schedule_cron_healthcheck( array() ) );
 	}
@@ -42,7 +44,7 @@ class WC_Tests_Libraries_Background_Process extends WC_Unit_Test_Case {
 	 * Test prefix & action against identifier.
 	 */
 	public function test_identifier() {
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php' );
+		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php';
 		$queue = new WC_Mock_Background_Process();
 		$this->assertEquals( 'wp_' . get_current_blog_id() . '_wc_mock_background_process', $queue->get_identifier() );
 	}
@@ -53,11 +55,13 @@ class WC_Tests_Libraries_Background_Process extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_get_batch() {
-		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php' );
+		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'class-wc-mock-background-process.php';
 		$queue = new WC_Mock_Background_Process();
-		$queue->push_to_queue( array(
-			'mock_key' => 'mock_value',
-		) );
+		$queue->push_to_queue(
+			array(
+				'mock_key' => 'mock_value',
+			)
+		);
 		$queue->save();
 		$this->assertNotEmpty( $queue->get_batch() );
 	}

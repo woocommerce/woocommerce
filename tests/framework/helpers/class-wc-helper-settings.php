@@ -40,13 +40,13 @@ class WC_Helper_Settings {
 			'option_key'  => '',
 		);
 		$groups[] = array(
-			'id'    => 'coupon-data',
-			'label' => 'Coupon data',
-			'option_key'  => '',
+			'id'         => 'coupon-data',
+			'label'      => 'Coupon data',
+			'option_key' => '',
 		);
 		$groups[] = array(
-			'id' => 'invalid',
-			'option_key'  => '',
+			'id'         => 'invalid',
+			'option_key' => '',
 		);
 		return $groups;
 	}

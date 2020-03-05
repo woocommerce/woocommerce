@@ -127,7 +127,7 @@ class WC_Action_Queue implements WC_Queue_Interface {
 		$next_timestamp = as_next_scheduled_action( $hook, $args, $group );
 
 		if ( $next_timestamp ) {
-			return wc_string_to_datetime( $next_timestamp );
+			return new WC_DateTime( "@{$next_timestamp}", new DateTimeZone( 'UTC' ) );
 		}
 
 		return null;

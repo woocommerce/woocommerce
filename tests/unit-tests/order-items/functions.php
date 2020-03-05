@@ -22,10 +22,12 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 
 		$order  = new WC_Order();
 		$item_1 = new WC_Order_Item_Product();
-		$item_1->set_props( array(
-			'product'  => WC_Helper_Product::create_simple_product(),
-			'quantity' => 4,
-		) );
+		$item_1->set_props(
+			array(
+				'product'  => WC_Helper_Product::create_simple_product(),
+				'quantity' => 4,
+			)
+		);
 		$order->add_item( $item_1 );
 		$order->save();
 

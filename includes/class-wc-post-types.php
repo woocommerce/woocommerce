@@ -51,7 +51,8 @@ class WC_Post_Types {
 			'product_type',
 			apply_filters( 'woocommerce_taxonomy_objects_product_type', array( 'product' ) ),
 			apply_filters(
-				'woocommerce_taxonomy_args_product_type', array(
+				'woocommerce_taxonomy_args_product_type',
+				array(
 					'hierarchical'      => false,
 					'show_ui'           => false,
 					'show_in_nav_menus' => false,
@@ -66,7 +67,8 @@ class WC_Post_Types {
 			'product_visibility',
 			apply_filters( 'woocommerce_taxonomy_objects_product_visibility', array( 'product', 'product_variation' ) ),
 			apply_filters(
-				'woocommerce_taxonomy_args_product_visibility', array(
+				'woocommerce_taxonomy_args_product_visibility',
+				array(
 					'hierarchical'      => false,
 					'show_ui'           => false,
 					'show_in_nav_menus' => false,
@@ -81,7 +83,8 @@ class WC_Post_Types {
 			'product_cat',
 			apply_filters( 'woocommerce_taxonomy_objects_product_cat', array( 'product' ) ),
 			apply_filters(
-				'woocommerce_taxonomy_args_product_cat', array(
+				'woocommerce_taxonomy_args_product_cat',
+				array(
 					'hierarchical'          => true,
 					'update_count_callback' => '_wc_term_recount',
 					'label'                 => __( 'Categories', 'woocommerce' ),
@@ -120,7 +123,8 @@ class WC_Post_Types {
 			'product_tag',
 			apply_filters( 'woocommerce_taxonomy_objects_product_tag', array( 'product' ) ),
 			apply_filters(
-				'woocommerce_taxonomy_args_product_tag', array(
+				'woocommerce_taxonomy_args_product_tag',
+				array(
 					'hierarchical'          => false,
 					'update_count_callback' => '_wc_term_recount',
 					'label'                 => __( 'Product tags', 'woocommerce' ),
@@ -160,7 +164,8 @@ class WC_Post_Types {
 			'product_shipping_class',
 			apply_filters( 'woocommerce_taxonomy_objects_product_shipping_class', array( 'product', 'product_variation' ) ),
 			apply_filters(
-				'woocommerce_taxonomy_args_product_shipping_class', array(
+				'woocommerce_taxonomy_args_product_shipping_class',
+				array(
 					'hierarchical'          => false,
 					'update_count_callback' => '_update_post_term_count',
 					'label'                 => __( 'Shipping classes', 'woocommerce' ),
@@ -230,6 +235,8 @@ class WC_Post_Types {
 							'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
 							/* translators: %s: attribute name */
 							'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
+							/* translators: %s: attribute name */
+							'back_to_items'     => sprintf( __( '&larr; Back to "%s" attributes', 'woocommerce' ), $label ),
 						),
 						'show_ui'               => true,
 						'show_in_quick_edit'    => false,
@@ -290,7 +297,8 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 'yes' : 'no' ) ) {
+		$theme_support = current_theme_supports( 'woocommerce' ) ? 'yes' : 'no';
+		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 

@@ -549,13 +549,16 @@ table.variations {
 			margin-top: 0 !important;
 		}
 
+		h1,
 		h2 {
-			margin: 0 0 1rem;
-			font-size: 1em;
-
 			&:before {
 				content: none;
 			}
+		}
+
+		h2:first-of-type {
+			font-size: 1em;
+			margin: 0 0 1rem;
 		}
 	}
 
@@ -973,6 +976,7 @@ table.variations {
  #ship-to-different-address {
 	font-size: 1em;
 	display: inline-block;
+	margin: 1.42em 0;
 
 	label {
 		font-weight: 300;

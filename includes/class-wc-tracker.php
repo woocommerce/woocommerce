@@ -10,6 +10,8 @@
  * @package WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -38,7 +40,7 @@ class WC_Tracker {
 	 */
 	public static function send_tracking_data( $override = false ) {
 		// Don't trigger this on AJAX Requests.
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		if ( Constants::is_true( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -60,16 +62,19 @@ class WC_Tracker {
 		update_option( 'woocommerce_tracker_last_send', time() );
 
 		$params = self::get_tracking_data();
-		wp_safe_remote_post( self::$api_url, array(
-			'method'      => 'POST',
-			'timeout'     => 45,
-			'redirection' => 5,
-			'httpversion' => '1.0',
-			'blocking'    => false,
-			'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
-			'body'        => wp_json_encode( $params ),
-			'cookies'     => array(),
-		) );
+		wp_safe_remote_post(
+			self::$api_url,
+			array(
+				'method'      => 'POST',
+				'timeout'     => 45,
+				'redirection' => 5,
+				'httpversion' => '1.0',
+				'blocking'    => false,
+				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
+				'body'        => wp_json_encode( $params ),
+				'cookies'     => array(),
+			)
+		);
 	}
 
 	/**
@@ -82,58 +87,81 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Test whether this site is a staging site according to the Jetpack criteria.
+	 *
+	 * With Jetpack 8.1+, Jetpack::is_staging_site has been deprecated.
+	 * \Automattic\Jetpack\Status::is_staging_site is the replacement.
+	 * However, there are version of JP where \Automattic\Jetpack\Status exists, but does *not* contain is_staging_site method,
+	 * so with those, code still needs to use the previous check as a fallback.
+	 *
+	 * @return bool
+	 */
+	private static function is_jetpack_staging_site() {
+		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
+			// Preferred way of checking with Jetpack 8.1+.
+			$jp_status = new \Automattic\Jetpack\Status();
+			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+				return $jp_status->is_staging_site();
+			}
+		}
+
+		return ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
+	}
+
+	/**
 	 * Get all the tracking data.
 	 *
 	 * @return array
 	 */
 	private static function get_tracking_data() {
-		$data                       = array();
+		$data = array();
 
 		// General site info.
-		$data['url']                = home_url();
-		$data['email']              = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
-		$data['theme']              = self::get_theme_info();
+		$data['url']   = home_url();
+		$data['email'] = apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) );
+		$data['theme'] = self::get_theme_info();
 
 		// WordPress Info.
-		$data['wp']                 = self::get_wordpress_info();
+		$data['wp'] = self::get_wordpress_info();
 
 		// Server Info.
-		$data['server']             = self::get_server_info();
+		$data['server'] = self::get_server_info();
 
 		// Plugin info.
-		$all_plugins                = self::get_all_plugins();
-		$data['active_plugins']     = $all_plugins['active_plugins'];
-		$data['inactive_plugins']   = $all_plugins['inactive_plugins'];
+		$all_plugins              = self::get_all_plugins();
+		$data['active_plugins']   = $all_plugins['active_plugins'];
+		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
 
 		// Jetpack & WooCommerce Connect.
-		$data['jetpack_version']    = defined( 'JETPACK__VERSION' ) ? JETPACK__VERSION : 'none';
+
+		$data['jetpack_version']    = Constants::is_defined( 'JETPACK__VERSION' ) ? Constants::get_constant( 'JETPACK__VERSION' ) : 'none';
 		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
-		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
+		$data['jetpack_is_staging'] = self::is_jetpack_staging_site() ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
 		$data['helper_connected']   = self::get_helper_connected();
 
 		// Store count info.
-		$data['users']              = self::get_user_counts();
-		$data['products']           = self::get_product_counts();
-		$data['orders']             = self::get_orders();
-		$data['reviews']            = self::get_review_counts();
-		$data['categories']         = self::get_category_counts();
+		$data['users']      = self::get_user_counts();
+		$data['products']   = self::get_product_counts();
+		$data['orders']     = self::get_orders();
+		$data['reviews']    = self::get_review_counts();
+		$data['categories'] = self::get_category_counts();
 
 		// Payment gateway info.
-		$data['gateways']           = self::get_active_payment_gateways();
+		$data['gateways'] = self::get_active_payment_gateways();
 
 		// Shipping method info.
-		$data['shipping_methods']   = self::get_active_shipping_methods();
+		$data['shipping_methods'] = self::get_active_shipping_methods();
 
 		// Get all WooCommerce options info.
-		$data['settings']           = self::get_all_woocommerce_options_values();
+		$data['settings'] = self::get_all_woocommerce_options_values();
 
 		// Template overrides.
 		$data['template_overrides'] = self::get_all_template_overrides();
 
 		// Template overrides.
-		$data['admin_user_agents']  = self::get_admin_user_agents();
+		$data['admin_user_agents'] = self::get_admin_user_agents();
 
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
@@ -197,20 +225,20 @@ class WC_Tracker {
 		}
 
 		if ( function_exists( 'ini_get' ) ) {
-			$server_data['php_post_max_size'] = size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) );
-			$server_data['php_time_limt'] = ini_get( 'max_execution_time' );
+			$server_data['php_post_max_size']  = size_format( wc_let_to_num( ini_get( 'post_max_size' ) ) );
+			$server_data['php_time_limt']      = ini_get( 'max_execution_time' );
 			$server_data['php_max_input_vars'] = ini_get( 'max_input_vars' );
-			$server_data['php_suhosin'] = extension_loaded( 'suhosin' ) ? 'Yes' : 'No';
+			$server_data['php_suhosin']        = extension_loaded( 'suhosin' ) ? 'Yes' : 'No';
 		}
 
 		$database_version             = wc_get_server_database_version();
 		$server_data['mysql_version'] = $database_version['number'];
 
-		$server_data['php_max_upload_size'] = size_format( wp_max_upload_size() );
+		$server_data['php_max_upload_size']  = size_format( wp_max_upload_size() );
 		$server_data['php_default_timezone'] = date_default_timezone_get();
-		$server_data['php_soap'] = class_exists( 'SoapClient' ) ? 'Yes' : 'No';
-		$server_data['php_fsockopen'] = function_exists( 'fsockopen' ) ? 'Yes' : 'No';
-		$server_data['php_curl'] = function_exists( 'curl_init' ) ? 'Yes' : 'No';
+		$server_data['php_soap']             = class_exists( 'SoapClient' ) ? 'Yes' : 'No';
+		$server_data['php_fsockopen']        = function_exists( 'fsockopen' ) ? 'Yes' : 'No';
+		$server_data['php_curl']             = function_exists( 'curl_init' ) ? 'Yes' : 'No';
 
 		return $server_data;
 	}
@@ -232,7 +260,7 @@ class WC_Tracker {
 
 		foreach ( $plugins as $k => $v ) {
 			// Take care of formatting the data how we want it.
-			$formatted = array();
+			$formatted         = array();
 			$formatted['name'] = strip_tags( $v['Name'] );
 			if ( isset( $v['Version'] ) ) {
 				$formatted['version'] = strip_tags( $v['Version'] );
@@ -299,7 +327,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_product_counts() {
+	public static function get_product_counts() {
 		$product_count          = array();
 		$product_count_data     = wp_count_posts( 'product' );
 		$product_count['total'] = $product_count_data->publish;
@@ -346,22 +374,35 @@ class WC_Tracker {
 	 */
 	private static function get_review_counts() {
 		global $wpdb;
-		$review_count = array();
-		$counts       = $wpdb->get_results( "
+		$review_count = array( 'total' => 0 );
+		$status_map   = array(
+			'0'     => 'pending',
+			'1'     => 'approved',
+			'trash' => 'trash',
+			'spam'  => 'spam',
+		);
+		$counts       = $wpdb->get_results(
+			"
 			SELECT comment_approved, COUNT(*) AS num_reviews
 			FROM {$wpdb->comments}
 			WHERE comment_type = 'review'
 			GROUP BY comment_approved
-			", ARRAY_A );
-		if ( $counts ) {
-			foreach ( $counts as $count ) {
-				if ( 1 === $count['comment_approved'] ) {
-					$review_count['approved'] = $count['num_reviews'];
-				} else {
-					$review_count['pending'] = $count['num_reviews'];
-				}
-			}
+			",
+			ARRAY_A
+		);
+
+		if ( ! $counts ) {
+			return $review_count;
 		}
+
+		foreach ( $counts as $count ) {
+			$status = $count['comment_approved'];
+			if ( array_key_exists( $status, $status_map ) ) {
+				$review_count[ $status_map[ $status ] ] = $count['num_reviews'];
+			}
+			$review_count['total'] += $count['num_reviews'];
+		}
+
 		return $review_count;
 	}
 
@@ -401,7 +442,7 @@ class WC_Tracker {
 	 */
 	private static function get_active_shipping_methods() {
 		$active_methods   = array();
-		$shipping_methods = WC()->shipping->get_shipping_methods();
+		$shipping_methods = WC()->shipping()->get_shipping_methods();
 		foreach ( $shipping_methods as $id => $shipping_method ) {
 			if ( isset( $shipping_method->enabled ) && 'yes' === $shipping_method->enabled ) {
 				$active_methods[ $id ] = array(
@@ -451,7 +492,7 @@ class WC_Tracker {
 		$template_paths = apply_filters( 'woocommerce_template_overrides_scan_paths', array( 'WooCommerce' => WC()->plugin_path() . '/templates/' ) );
 		$scanned_files  = array();
 
-		require_once( WC()->plugin_path() . '/includes/admin/class-wc-admin-status.php' );
+		require_once WC()->plugin_path() . '/includes/admin/class-wc-admin-status.php';
 
 		foreach ( $template_paths as $plugin_name => $template_path ) {
 			$scanned_files[ $plugin_name ] = WC_Admin_Status::scan_template_files( $template_path );
@@ -493,25 +534,44 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_order_totals() {
+	public static function get_order_totals() {
 		global $wpdb;
 
-		$gross_total = $wpdb->get_var( "
+		$gross_total = $wpdb->get_var(
+			"
 			SELECT
 				SUM( order_meta.meta_value ) AS 'gross_total'
 			FROM {$wpdb->prefix}posts AS orders
 			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
 			WHERE order_meta.meta_key =  '_order_total'
-				AND orders.post_status =  'wc-completed'
+				AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
 			GROUP BY order_meta.meta_key
-		" );
+		"
+		);
 
 		if ( is_null( $gross_total ) ) {
 			$gross_total = 0;
 		}
 
+		$processing_gross_total = $wpdb->get_var(
+			"
+			SELECT
+				SUM( order_meta.meta_value ) AS 'gross_total'
+			FROM {$wpdb->prefix}posts AS orders
+			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+			WHERE order_meta.meta_key =  '_order_total'
+				AND orders.post_status = 'wc-processing'
+			GROUP BY order_meta.meta_key
+		"
+		);
+
+		if ( is_null( $processing_gross_total ) ) {
+			$processing_gross_total = 0;
+		}
+
 		return array(
-			'gross' => $gross_total,
+			'gross'            => $gross_total,
+			'processing_gross' => $processing_gross_total,
 		);
 	}
 
@@ -523,13 +583,16 @@ class WC_Tracker {
 	private static function get_order_dates() {
 		global $wpdb;
 
-		$min_max = $wpdb->get_row( "
+		$min_max = $wpdb->get_row(
+			"
 			SELECT
 				MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
 			FROM {$wpdb->prefix}posts
 			WHERE post_type = 'shop_order'
 			AND post_status = 'wc-completed'
-		", ARRAY_A );
+		",
+			ARRAY_A
+		);
 
 		if ( is_null( $min_max ) ) {
 			$min_max = array(
@@ -538,29 +601,25 @@ class WC_Tracker {
 			);
 		}
 
-		return $min_max;
-	}
-
-	/**
-	 * Make a request when opting out of tracker usage.
-	 *
-	 * @return void
-	 */
-	public static function opt_out_request() {
-		$body = array(
-			'event' => 'opt-out',
-			'email' => apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) ),
-			'url'   => home_url(),
+		$processing_min_max = $wpdb->get_row(
+			"
+			SELECT
+				MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
+			FROM {$wpdb->prefix}posts
+			WHERE post_type = 'shop_order'
+			AND post_status = 'wc-processing'
+		",
+			ARRAY_A
 		);
-		wp_safe_remote_post( self::$api_url . 'event/', array(
-			'method'      => 'POST',
-			'redirection' => 5,
-			'httpversion' => '1.0',
-			'blocking'    => false,
-			'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
-			'body'        => wp_json_encode( $body ),
-			'cookies'     => array(),
-		) );
+
+		if ( is_null( $processing_min_max ) ) {
+			$processing_min_max = array(
+				'processing_first' => '-',
+				'processing_last'  => '-',
+			);
+		}
+
+		return array_merge( $min_max, $processing_min_max );
 	}
 }
 

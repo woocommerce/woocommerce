@@ -505,7 +505,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 				$i++;
 				/* translators: 1: current item count */
 				$prefix  = count( $download_files ) > 1 ? sprintf( __( 'Download %d', 'woocommerce' ), $i ) : __( 'Download', 'woocommerce' );
-				$links[] = '<small class="download-url">' . $prefix . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
+				$links[] = '<small class="download-url">' . esc_html( $prefix ) . ': <a href="' . esc_url( $file['download_url'] ) . '" target="_blank">' . esc_html( $file['name'] ) . '</a></small>' . "\n";
 			}
 
 			echo '<br/>' . implode( '<br/>', $links );
@@ -596,6 +596,17 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 		}
 
 		return $item_meta_array;
+	}
+
+	/**
+	 * Get coupon codes only.
+	 *
+	 * @deprecated 3.7.0 - Replaced with better named method to reflect the actual data being returned.
+	 * @return array
+	 */
+	public function get_used_coupons() {
+		wc_deprecated_function( 'get_used_coupons', '3.7', 'WC_Abstract_Order::get_coupon_codes' );
+		return $this->get_coupon_codes();
 	}
 
 	/**

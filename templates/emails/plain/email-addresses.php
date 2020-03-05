@@ -15,11 +15,9 @@
  * @version 3.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
-echo "\n" . esc_html( wc_strtoupper( __( 'Billing address', 'woocommerce' ) ) ) . "\n\n";
+echo "\n" . esc_html( wc_strtoupper( esc_html__( 'Billing address', 'woocommerce' ) ) ) . "\n\n";
 echo preg_replace( '#<br\s*/?>#i', "\n", $order->get_formatted_billing_address() ) . "\n"; // WPCS: XSS ok.
 
 if ( $order->get_billing_phone() ) {
@@ -34,7 +32,7 @@ if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() ) {
 	$shipping = $order->get_formatted_shipping_address();
 
 	if ( $shipping ) {
-		echo "\n" . esc_html( wc_strtoupper( __( 'Shipping address', 'woocommerce' ) ) ) . "\n\n";
+		echo "\n" . esc_html( wc_strtoupper( esc_html__( 'Shipping address', 'woocommerce' ) ) ) . "\n\n";
 		echo preg_replace( '#<br\s*/?>#i', "\n", $shipping ) . "\n"; // WPCS: XSS ok.
 	}
 }

@@ -111,7 +111,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				'percent' => '',
 				'min_fee' => '',
 				'max_fee' => '',
-			), $atts, 'fee'
+			),
+			$atts,
+			'fee'
 		);
 
 		$calculated_fee = 0;
@@ -151,7 +153,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost(
-				$cost, array(
+				$cost,
+				array(
 					'qty'  => $this->get_package_item_qty( $package ),
 					'cost' => $package['contents_cost'],
 				)
@@ -159,7 +162,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		// Add shipping class costs.
-		$shipping_classes = WC()->shipping->get_shipping_classes();
+		$shipping_classes = WC()->shipping()->get_shipping_classes();
 
 		if ( ! empty( $shipping_classes ) ) {
 			$found_shipping_classes = $this->find_shipping_classes( $package );
@@ -176,7 +179,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				$has_costs  = true;
 				$class_cost = $this->evaluate_cost(
-					$class_cost_string, array(
+					$class_cost_string,
+					array(
 						'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
 						'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 					)
@@ -252,12 +256,17 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @since 3.4.0
 	 * @param string $value Unsanitized value.
+	 * @throws Exception Last error triggered.
 	 * @return string
 	 */
 	public function sanitize_cost( $value ) {
 		$value = is_null( $value ) ? '' : $value;
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
+		// Thrown an error on the front end if the evaluate_cost will fail.
+		if ( false === $this->evaluate_cost( $value ) ) {
+			throw new Exception( WC_Eval_Math::$last_error );
+		}
 		return $value;
 	}
 }

@@ -30,7 +30,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 	 */
 	public function test_get_timestamp() {
 		$object = new WC_Customer_Download_Log();
-		$set_to = current_time( 'timestamp', true );
+		$set_to = time();
 
 		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
 		$dt_str       = date( 'c', $set_to );
@@ -84,7 +84,7 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 		$download_1->save();
 
 		// Create download log.
-		$timestamp = current_time( 'timestamp', true );
+		$timestamp = time();
 
 		// Convert timestamp to WC_DateTime using ISO 8601 for PHP 5.2 compat.
 		$dt_str       = date( 'c', $timestamp );
@@ -137,9 +137,11 @@ class WC_Tests_Customer_Download_Log extends WC_Unit_Test_Case {
 
 		// Make sure download log was recorded properly.
 		$data_store    = WC_Data_Store::load( 'customer-download-log' );
-		$download_logs = $data_store->get_download_logs( array(
-			'permission_id' => $download_1->get_id(),
-		) );
+		$download_logs = $data_store->get_download_logs(
+			array(
+				'permission_id' => $download_1->get_id(),
+			)
+		);
 
 		$this->assertEquals( 1, count( $download_logs ), 'After single download, permission should have one download log in database.' );
 

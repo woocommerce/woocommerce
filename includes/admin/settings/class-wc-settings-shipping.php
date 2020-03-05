@@ -6,6 +6,8 @@
  * @version     2.6.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Settings_Shipping', false ) ) {
@@ -49,9 +51,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'classes' => __( 'Shipping classes', 'woocommerce' ),
 		);
 
-		if ( ! defined( 'WC_INSTALLING' ) ) {
+		if ( ! Constants::is_defined( 'WC_INSTALLING' ) ) {
 			// Load shipping methods so we can show any global options they may have.
-			$shipping_methods = WC()->shipping->load_shipping_methods();
+			$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 			foreach ( $shipping_methods as $method ) {
 				if ( ! $method->has_settings() ) {
@@ -76,8 +78,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_shipping_settings', array(
-
+				'woocommerce_shipping_settings',
+				array(
 					array(
 						'title' => __( 'Shipping options', 'woocommerce' ),
 						'type'  => 'title',
@@ -146,7 +148,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		global $current_section, $hide_save_button;
 
 		// Load shipping methods so we can show any global options they may have.
-		$shipping_methods = WC()->shipping->load_shipping_methods();
+		$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 		if ( '' === $current_section ) {
 			$this->output_zones_screen();
@@ -157,10 +159,17 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
 		} else {
+			$is_shipping_method = false;
 			foreach ( $shipping_methods as $method ) {
 				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) && $method->has_settings() ) {
+					$is_shipping_method = true;
 					$method->admin_options();
 				}
+			}
+			if ( ! $is_shipping_method ) {
+				$settings = $this->get_settings();
+				$settings = apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+				WC_Admin_Settings::output_fields( $settings );
 			}
 		}
 	}
@@ -182,12 +191,17 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			case '':
 				break;
 			default:
-				$wc_shipping = WC_Shipping::instance();
+				$wc_shipping        = WC_Shipping::instance();
+				$is_shipping_method = false;
 
 				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
 					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) ) {
+						$is_shipping_method = true;
 						do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
 					}
+				}
+				if ( ! $is_shipping_method ) {
+					WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
 				}
 				break;
 		}
@@ -229,10 +243,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			wp_die( esc_html__( 'Zone does not exist!', 'woocommerce' ) );
 		}
 
-		$allowed_countries = WC()->countries->get_allowed_countries();
-		$wc_shipping       = WC_Shipping::instance();
-		$shipping_methods  = $wc_shipping->get_shipping_methods();
-		$continents        = WC()->countries->get_continents();
+		$allowed_countries   = WC()->countries->get_shipping_countries();
+		$shipping_continents = WC()->countries->get_shipping_continents();
 
 		// Prepare locations.
 		$locations = array();
@@ -247,7 +259,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		}
 
 		wp_localize_script(
-			'wc-shipping-zone-methods', 'shippingZoneMethodsLocalizeScript', array(
+			'wc-shipping-zone-methods',
+			'shippingZoneMethodsLocalizeScript',
+			array(
 				'methods'                 => $zone->get_shipping_methods( false, 'json' ),
 				'zone_name'               => $zone->get_zone_name(),
 				'zone_id'                 => $zone->get_id(),
@@ -272,12 +286,12 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Show zones
 	 */
 	protected function zones_screen() {
-		$allowed_countries = WC()->countries->get_allowed_countries();
-		$continents        = WC()->countries->get_continents();
-		$method_count      = wc_get_shipping_method_count();
+		$method_count = wc_get_shipping_method_count();
 
 		wp_localize_script(
-			'wc-shipping-zones', 'shippingZonesLocalizeScript', array(
+			'wc-shipping-zones',
+			'shippingZonesLocalizeScript',
+			array(
 				'zones'                   => WC_Shipping_Zones::get_zones( 'json' ),
 				'default_zone'            => array(
 					'zone_id'    => 0,
@@ -336,7 +350,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function output_shipping_class_screen() {
 		$wc_shipping = WC_Shipping::instance();
 		wp_localize_script(
-			'wc-shipping-classes', 'shippingClassesLocalizeScript', array(
+			'wc-shipping-classes',
+			'shippingClassesLocalizeScript',
+			array(
 				'classes'                   => $wc_shipping->get_shipping_classes(),
 				'default_shipping_class'    => array(
 					'term_id'     => 0,
@@ -354,7 +370,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		// Extendable columns to show on the shipping classes screen.
 		$shipping_class_columns = apply_filters(
-			'woocommerce_shipping_classes_columns', array(
+			'woocommerce_shipping_classes_columns',
+			array(
 				'wc-shipping-class-name'        => __( 'Shipping class', 'woocommerce' ),
 				'wc-shipping-class-slug'        => __( 'Slug', 'woocommerce' ),
 				'wc-shipping-class-description' => __( 'Description', 'woocommerce' ),

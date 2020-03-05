@@ -5,6 +5,8 @@
  * @package WooCommerce\Log Handlers
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -146,7 +148,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 				$temphandle = @fopen( $file, 'w+' ); // @codingStandardsIgnoreLine.
 				@fclose( $temphandle ); // @codingStandardsIgnoreLine.
 
-				if ( defined( 'FS_CHMOD_FILE' ) ) {
+				if ( Constants::is_defined( 'FS_CHMOD_FILE' ) ) {
 					@chmod( $file, FS_CHMOD_FILE ); // @codingStandardsIgnoreLine.
 				}
 			}
@@ -253,7 +255,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 
 		if ( isset( $logs[ $handle ] ) && $logs[ $handle ] ) {
 			$file = realpath( trailingslashit( WC_LOG_DIR ) . $logs[ $handle ] );
-			if ( 0 === stripos( $file, trailingslashit( WC_LOG_DIR ) ) && is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
+			if ( 0 === stripos( $file, realpath( trailingslashit( WC_LOG_DIR ) ) ) && is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
@@ -364,7 +366,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 */
 	public static function get_log_file_name( $handle ) {
 		if ( function_exists( 'wp_hash' ) ) {
-			$date_suffix = date( 'Y-m-d', current_time( 'timestamp', true ) );
+			$date_suffix = date( 'Y-m-d', time() );
 			$hash_suffix = wp_hash( $handle );
 			return sanitize_file_name( implode( '-', array( $handle, $date_suffix, $hash_suffix ) ) . '.log' );
 		} else {

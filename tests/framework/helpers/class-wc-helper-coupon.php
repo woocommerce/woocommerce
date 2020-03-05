@@ -19,32 +19,37 @@ class WC_Helper_Coupon {
 	 */
 	public static function create_coupon( $coupon_code = 'dummycoupon', $meta = array() ) {
 		// Insert post
-		$coupon_id = wp_insert_post( array(
-			'post_title'   => $coupon_code,
-			'post_type'    => 'shop_coupon',
-			'post_status'  => 'publish',
-			'post_excerpt' => 'This is a dummy coupon',
-		) );
+		$coupon_id = wp_insert_post(
+			array(
+				'post_title'   => $coupon_code,
+				'post_type'    => 'shop_coupon',
+				'post_status'  => 'publish',
+				'post_excerpt' => 'This is a dummy coupon',
+			)
+		);
 
-		$meta = wp_parse_args( $meta, array(
-			'discount_type'              => 'fixed_cart',
-			'coupon_amount'              => '1',
-			'individual_use'             => 'no',
-			'product_ids'                => '',
-			'exclude_product_ids'        => '',
-			'usage_limit'                => '',
-			'usage_limit_per_user'       => '',
-			'limit_usage_to_x_items'     => '',
-			'expiry_date'                => '',
-			'free_shipping'              => 'no',
-			'exclude_sale_items'         => 'no',
-			'product_categories'         => array(),
-			'exclude_product_categories' => array(),
-			'minimum_amount'             => '',
-			'maximum_amount'             => '',
-			'customer_email'             => array(),
-			'usage_count'                => '0',
-		) );
+		$meta = wp_parse_args(
+			$meta,
+			array(
+				'discount_type'              => 'fixed_cart',
+				'coupon_amount'              => '1',
+				'individual_use'             => 'no',
+				'product_ids'                => '',
+				'exclude_product_ids'        => '',
+				'usage_limit'                => '',
+				'usage_limit_per_user'       => '',
+				'limit_usage_to_x_items'     => '',
+				'expiry_date'                => '',
+				'free_shipping'              => 'no',
+				'exclude_sale_items'         => 'no',
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'minimum_amount'             => '',
+				'maximum_amount'             => '',
+				'customer_email'             => array(),
+				'usage_count'                => '0',
+			)
+		);
 
 		// Update meta.
 		foreach ( $meta as $key => $value ) {

@@ -26,7 +26,7 @@ class WC_Tests_WC_Object_Query extends WC_Unit_Test_Case {
 	 * @since 3.1.0
 	 */
 	function test_query_with_args() {
-		$args = array(
+		$args  = array(
 			'limit' => 15,
 		);
 		$query = new WC_Mock_WC_Object_Query( $args );

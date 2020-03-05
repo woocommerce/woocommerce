@@ -4,6 +4,10 @@
  *
  * @package WooCommerce\Tests\Util
  */
+
+/**
+ * Tests for WC_Privacy_Exporters class.
+ */
 class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 
 	/**
@@ -92,7 +96,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 							'value' => 'PA',
 						),
 						array(
-							'name'  => 'Billing Country',
+							'name'  => 'Billing Country / Region',
 							'value' => 'US',
 						),
 						array(
@@ -120,7 +124,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 							'value' => 'PA',
 						),
 						array(
-							'name'  => 'Shipping Country',
+							'name'  => 'Shipping Country / Region',
 							'value' => 'US',
 						),
 					),

@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3>
 		<a href="#" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
+		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop to set admin attribute order', 'woocommerce' ); ?>"></div>			
 		<strong class="attribute_name"><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content hidden">
@@ -40,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<select multiple="multiple" data-placeholder="<?php esc_attr_e( 'Select terms', 'woocommerce' ); ?>" class="multiselect attribute_values wc-enhanced-select" name="attribute_values[<?php echo esc_attr( $i ); ?>][]">
 									<?php
 									$args      = array(
-										'orderby'    => 'name',
+										'orderby'    => ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name',
 										'hide_empty' => 0,
 									);
 									$all_terms = get_terms( $attribute->get_taxonomy(), apply_filters( 'woocommerce_product_attribute_terms', $args ) );
@@ -59,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php
 							}
 
-							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i );
+							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
 						} else {
 							/* translators: %s: WC_DELIMITER */
 							?>

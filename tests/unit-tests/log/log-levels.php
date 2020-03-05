@@ -13,7 +13,7 @@ class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_level_severity() {
-		$this->assertEquals( 0,   WC_Log_Levels::get_level_severity( 'unrecognized level' ) );
+		$this->assertEquals( 0, WC_Log_Levels::get_level_severity( 'unrecognized level' ) );
 		$this->assertEquals( 100, WC_Log_Levels::get_level_severity( 'debug' ) );
 		$this->assertEquals( 200, WC_Log_Levels::get_level_severity( 'info' ) );
 		$this->assertEquals( 300, WC_Log_Levels::get_level_severity( 'notice' ) );

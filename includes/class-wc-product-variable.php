@@ -285,10 +285,17 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array
 	 */
 	public function get_available_variations() {
+
+		$variation_ids        = $this->get_children();
 		$available_variations = array();
 
-		foreach ( $this->get_children() as $child_id ) {
-			$variation = wc_get_product( $child_id );
+		if ( is_callable( '_prime_post_caches' ) ) {
+			_prime_post_caches( $variation_ids );
+		}
+
+		foreach ( $variation_ids as $variation_id ) {
+
+			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
 			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
@@ -302,6 +309,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$available_variations[] = $this->get_available_variation( $variation );
 		}
+
 		$available_variations = array_values( array_filter( $available_variations ) );
 
 		return $available_variations;
@@ -325,7 +333,8 @@ class WC_Product_Variable extends WC_Product {
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
 		return apply_filters(
-			'woocommerce_available_variation', array(
+			'woocommerce_available_variation',
+			array(
 				'attributes'            => $variation->get_variation_attributes(),
 				'availability_html'     => wc_get_stock_html( $variation ),
 				'backorders_allowed'    => $variation->backorders_allowed(),
@@ -350,7 +359,9 @@ class WC_Product_Variable extends WC_Product {
 				'variation_is_visible'  => $variation->variation_is_visible(),
 				'weight'                => $variation->get_weight(),
 				'weight_html'           => wc_format_weight( $variation->get_weight() ),
-			), $this, $variation
+			),
+			$this,
+			$variation
 		);
 	}
 
@@ -434,25 +445,41 @@ class WC_Product_Variable extends WC_Product {
 	 */
 	public function save() {
 		$this->validate_props();
-		if ( $this->data_store ) {
-			// Trigger action before saving to the DB. Allows you to adjust object props before save.
-			do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
-			// Get names before save.
-			$previous_name = $this->data['name'];
-			$new_name      = $this->get_name( 'edit' );
-
-			if ( $this->get_id() ) {
-				$this->data_store->update( $this );
-			} else {
-				$this->data_store->create( $this );
-			}
-
-			$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
-			$this->data_store->sync_managed_variation_stock_status( $this );
-
+		if ( ! $this->data_store ) {
 			return $this->get_id();
 		}
+
+		/**
+		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		// Get names before save.
+		$previous_name = $this->data['name'];
+		$new_name      = $this->get_name( 'edit' );
+
+		if ( $this->get_id() ) {
+			$this->data_store->update( $this );
+		} else {
+			$this->data_store->create( $this );
+		}
+
+		$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
+		$this->data_store->sync_managed_variation_stock_status( $this );
+
+		/**
+		 * Trigger action after saving to the DB.
+		 *
+		 * @param WC_Data          $this The object being saved.
+		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 */
+		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+
+		return $this->get_id();
 	}
 
 	/*
@@ -587,10 +614,13 @@ class WC_Product_Variable extends WC_Product {
 			}
 
 			wc_do_deprecated_action(
-				'woocommerce_variable_product_sync', array(
+				'woocommerce_variable_product_sync',
+				array(
 					$product->get_id(),
 					$product->get_visible_children(),
-				), '3.0', 'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product'
+				),
+				'3.0',
+				'woocommerce_variable_product_sync_data, woocommerce_new_product or woocommerce_update_product'
 			);
 		}
 

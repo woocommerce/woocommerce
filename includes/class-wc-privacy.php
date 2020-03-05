@@ -169,12 +169,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( apply_filters( 'woocommerce_trash_pending_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-pending',
-			'type'         => 'shop_order',
-		) ) );
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_pending_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-pending',
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -191,12 +196,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( apply_filters( 'woocommerce_trash_failed_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-failed',
-			'type'         => 'shop_order',
-		) ) );
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_failed_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-failed',
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -213,12 +223,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::trash_orders_query( apply_filters( 'woocommerce_trash_cancelled_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-cancelled',
-			'type'         => 'shop_order',
-		) ) );
+		return self::trash_orders_query(
+			apply_filters(
+				'woocommerce_trash_cancelled_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-cancelled',
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -256,13 +271,18 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			return 0;
 		}
 
-		return self::anonymize_orders_query( apply_filters( 'woocommerce_anonymize_completed_orders_query_args', array(
-			'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
-			'limit'        => $limit, // Batches of 20.
-			'status'       => 'wc-completed',
-			'anonymized'   => false,
-			'type'         => 'shop_order',
-		) ) );
+		return self::anonymize_orders_query(
+			apply_filters(
+				'woocommerce_anonymize_completed_orders_query_args',
+				array(
+					'date_created' => '<' . strtotime( '-' . $option['number'] . ' ' . $option['unit'] ),
+					'limit'        => $limit, // Batches of 20.
+					'status'       => 'wc-completed',
+					'anonymized'   => false,
+					'type'         => 'shop_order',
+				)
+			)
+		);
 	}
 
 	/**
@@ -313,33 +333,42 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 */
 	protected static function delete_inactive_accounts_query( $timestamp, $limit = 20 ) {
 		$count      = 0;
-		$user_query = new WP_User_Query( array(
-			'fields'     => 'ID',
-			'number'     => $limit,
-			'role__in'   => apply_filters( 'woocommerce_delete_inactive_account_roles', array(
-				'Customer',
-				'Subscriber',
-			) ),
-			'meta_query' => array(
-				'relation' => 'AND',
-				array(
-					'key'     => 'wc_last_active',
-					'value'   => (string) $timestamp,
-					'compare' => '<',
-					'type'    => 'NUMERIC',
+		$user_query = new WP_User_Query(
+			array(
+				'fields'     => 'ID',
+				'number'     => $limit,
+				'role__in'   => apply_filters(
+					'woocommerce_delete_inactive_account_roles',
+					array(
+						'Customer',
+						'Subscriber',
+					)
 				),
-				array(
-					'key'     => 'wc_last_active',
-					'value'   => '0',
-					'compare' => '>',
-					'type'    => 'NUMERIC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
+					array(
+						'key'     => 'wc_last_active',
+						'value'   => (string) $timestamp,
+						'compare' => '<',
+						'type'    => 'NUMERIC',
+					),
+					array(
+						'key'     => 'wc_last_active',
+						'value'   => '0',
+						'compare' => '>',
+						'type'    => 'NUMERIC',
+					),
 				),
-			),
-		) );
+			)
+		);
 
 		$user_ids = $user_query->get_results();
 
 		if ( $user_ids ) {
+			if ( ! function_exists( 'wp_delete_user' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/user.php';
+			}
+
 			foreach ( $user_ids as $user_id ) {
 				wp_delete_user( $user_id );
 				$count ++;

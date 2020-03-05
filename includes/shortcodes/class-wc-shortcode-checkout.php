@@ -86,10 +86,10 @@ class WC_Shortcode_Checkout {
 			try {
 				$order_key          = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
 				$order              = wc_get_order( $order_id );
- 				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
+				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
 
 				// Order or payment link is invalid.
-				if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
+				if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 				}
 
@@ -104,6 +104,14 @@ class WC_Shortcode_Checkout {
 					return;
 				}
 
+				// Add notice if logged in customer is trying to pay for guest order.
+				if ( ! $order->get_user_id() && is_user_logged_in() ) {
+					// If order has does not have same billing email then current logged in user then show warning.
+					if ( $order->get_billing_email() !== wp_get_current_user()->user_email ) {
+						wc_print_notice( __( 'You are paying for a guest order. Please continue with payment only if you recognize this order.', 'woocommerce' ), 'error' );
+					}
+				}
+
 				// Logged in customer trying to pay for someone else's order.
 				if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
 					throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );
@@ -116,7 +124,7 @@ class WC_Shortcode_Checkout {
 				}
 
 				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
-				if ( ! $order->has_status( 'pending' ) ) {
+				if ( ! $order->has_status( wc_get_is_pending_statuses() ) ) {
 					$quantities = array();
 
 					foreach ( $order->get_items() as $item_key => $item ) {
@@ -153,7 +161,7 @@ class WC_Shortcode_Checkout {
 							$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $order->get_id() ) : 0;
 							$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
-							if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
+							if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
 								/* translators: 1: product name 2: quantity in stock */
 								throw new Exception( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
 							}
@@ -177,7 +185,8 @@ class WC_Shortcode_Checkout {
 				}
 
 				wc_get_template(
-					'checkout/form-pay.php', array(
+					'checkout/form-pay.php',
+					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
 						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
@@ -193,7 +202,7 @@ class WC_Shortcode_Checkout {
 			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
 			$order     = wc_get_order( $order_id );
 
-			if ( $order && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
+			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				if ( $order->needs_payment() ) {
 
@@ -227,7 +236,7 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( ! $order || $order->get_order_key() !== $order_key ) {
+			if ( ! $order || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 				$order = false;
 			}
 		}
@@ -235,8 +244,9 @@ class WC_Shortcode_Checkout {
 		// Empty awaiting payment session.
 		unset( WC()->session->order_awaiting_payment );
 
-		// In case order is created from admin, but paid by the actual customer, store the ip address of the payer.
-		if ( $order ) {
+		// In case order is created from admin, but paid by the actual customer, store the ip address of the payer
+		// when they visit the payment confirmation page.
+		if ( $order && $order->is_created_via( 'admin' ) ) {
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->save();
 		}
@@ -251,6 +261,9 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout.
 	 */
 	private static function checkout() {
+		// Show non-cart errors.
+		do_action( 'woocommerce_before_checkout_form_cart_notices' );
+
 		// Check cart has contents.
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 			return;
@@ -268,6 +281,7 @@ class WC_Shortcode_Checkout {
 		if ( empty( $_POST ) && wc_notice_count( 'error' ) > 0 ) { // WPCS: input var ok, CSRF ok.
 
 			wc_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
+			wc_clear_notices();
 
 		} else {
 

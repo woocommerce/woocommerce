@@ -348,12 +348,16 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									$width  = $this->barwidth / sizeof( $chart_data );
 									$offset = ( $width * $index );
 									$series = $data['data'];
+
 									foreach ( $series as $key => $series_data ) {
 										$series[ $key ][0] = $series_data[0] + $offset;
 									}
+
+									$series = wp_json_encode( $series );
+
 									echo '{
 											label: "' . esc_js( $data['category'] ) . '",
-											data: jQuery.parseJSON( "' . json_encode( $series ) . '" ),
+											data: JSON.parse( decodeURIComponent( "' . rawurlencode( $series ) . '" ) ),
 											color: "' . $color . '",
 											bars: {
 												fillColor: "' . $color . '",
@@ -407,7 +411,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 									tickColor: 'transparent',
 									mode: "time",
 									timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
-									monthNames: <?php echo json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
+									monthNames: JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( array_values( $wp_locale->month_abbrev ) ) ); ?>' ) ),
 									tickLength: 1,
 									minTickSize: [1, "<?php echo $this->chart_groupby; ?>"],
 									tickSize: [1, "<?php echo $this->chart_groupby; ?>"],

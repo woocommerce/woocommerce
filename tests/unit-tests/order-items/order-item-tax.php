@@ -14,17 +14,17 @@ class WC_Tests_Order_Item_Tax extends WC_Unit_Test_Case {
 	 */
 	function test_set_get_tax_totals() {
 
-		$item = new WC_Order_Item_Tax;
+		$item = new WC_Order_Item_Tax();
 		$this->assertEquals( 0, $item->get_tax_total() );
 
-		$item->set_tax_total( "1.50" );
-		$this->assertEquals( "1.50", $item->get_tax_total() );
+		$item->set_tax_total( '1.50' );
+		$this->assertEquals( '1.50', $item->get_tax_total() );
 
-		$item->set_tax_total( "" );
+		$item->set_tax_total( '' );
 		$this->assertEquals( 0, $item->get_tax_total() );
 
 		$item->set_tax_total( 10.99 );
-		$this->assertEquals( "10.99", $item->get_tax_total() );
+		$this->assertEquals( '10.99', $item->get_tax_total() );
 	}
 
 	/**
@@ -34,16 +34,16 @@ class WC_Tests_Order_Item_Tax extends WC_Unit_Test_Case {
 	 */
 	function test_set_get_shipping_tax_totals() {
 
-		$item = new WC_Order_Item_Tax;
+		$item = new WC_Order_Item_Tax();
 		$this->assertEquals( 0, $item->get_shipping_tax_total() );
 
-		$item->set_shipping_tax_total( "1.50" );
-		$this->assertEquals( "1.50", $item->get_shipping_tax_total() );
+		$item->set_shipping_tax_total( '1.50' );
+		$this->assertEquals( '1.50', $item->get_shipping_tax_total() );
 
-		$item->set_shipping_tax_total( "" );
+		$item->set_shipping_tax_total( '' );
 		$this->assertEquals( 0, $item->get_shipping_tax_total() );
 
 		$item->set_shipping_tax_total( 10.99 );
-		$this->assertEquals( "10.99", $item->get_shipping_tax_total() );
+		$this->assertEquals( '10.99', $item->get_shipping_tax_total() );
 	}
 }

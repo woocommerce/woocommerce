@@ -6,6 +6,8 @@
  * @version     3.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -45,7 +47,7 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 		$this->major_untested_plugins = $this->get_untested_plugins( $response->new_version, 'major' );
 		$this->minor_untested_plugins = $this->get_untested_plugins( $response->new_version, 'minor' );
 
-		$current_version_parts = explode( '.', WC_VERSION );
+		$current_version_parts = explode( '.', Constants::get_constant( 'WC_VERSION' ) );
 		$new_version_parts     = explode( '.', $this->new_version );
 
 		// If user has already moved to the minor version, we don't need to flag up anything.
@@ -109,7 +111,7 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 		$upgrade_notice    = '';
 
 		foreach ( $check_for_notices as $check_version ) {
-			if ( version_compare( WC_VERSION, $check_version, '>' ) ) {
+			if ( version_compare( Constants::get_constant( 'WC_VERSION' ), $check_version, '>' ) ) {
 				continue;
 			}
 

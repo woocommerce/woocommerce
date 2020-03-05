@@ -1,10 +1,13 @@
 <?php
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Product
  * @since 2.3
  */
+
+ /**
+  * WC_Tests_Product_Functions class.
+  */
 class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 	/**
@@ -67,7 +70,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'type'   => 'variation',
 			)
 		);
-		$this->assertCount( 2, $products );
+		$this->assertCount( 4, $products );
 
 		// Test parent.
 		$products = wc_get_products(
@@ -77,7 +80,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'parent' => $variation->get_id(),
 			)
 		);
-		$this->assertCount( 2, $products );
+		$this->assertCount( 4, $products );
 
 		// Test parent_exclude.
 		$products = wc_get_products(
@@ -730,8 +733,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product() {
-
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
 		$product_copy = wc_get_product( $product->get_id() );
@@ -740,12 +741,27 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_product_object().
+	 *
+	 * @since 3.9.0
+	 */
+	public function test_wc_get_product_object() {
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( 'simple' ) );
+		$this->assertInstanceOf( 'WC_Product_Grouped', wc_get_product_object( 'grouped' ) );
+		$this->assertInstanceOf( 'WC_Product_External', wc_get_product_object( 'external' ) );
+		$this->assertInstanceOf( 'WC_Product_Variable', wc_get_product_object( 'variable' ) );
+		$this->assertInstanceOf( 'WC_Product_Variation', wc_get_product_object( 'variation' ) );
+
+		// Test incorrect type.
+		$this->assertInstanceOf( 'WC_Product_Simple', wc_get_product_object( 'foo+bar' ) );
+	}
+
+	/**
 	 * Test wc_update_product_stock().
 	 *
 	 * @since 2.3
 	 */
 	public function test_wc_update_product_stock() {
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
 		$product->save();
@@ -756,6 +772,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 5, $product->get_stock_quantity() );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_increase_decrease.
+	 */
 	public function test_wc_update_product_stock_increase_decrease() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
@@ -775,13 +794,19 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 5, $new_value );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_should_return_false_if_invalid_product.
+	 */
 	public function test_wc_update_product_stock_should_return_false_if_invalid_product() {
 		$this->assertFalse( wc_update_product_stock( 1 ) );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_should_return_stock_quantity_if_no_stock_quantity_given.
+	 */
 	public function test_wc_update_product_stock_should_return_stock_quantity_if_no_stock_quantity_given() {
 		$stock_quantity = 5;
-		$product = WC_Helper_Product::create_simple_product();
+		$product        = WC_Helper_Product::create_simple_product();
 		$product->set_stock_quantity( $stock_quantity );
 		$product->set_manage_stock( true );
 		$product->save();
@@ -789,6 +814,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $stock_quantity, wc_update_product_stock( $product ) );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_should_return_null_if_not_managing_stock.
+	 */
 	public function test_wc_update_product_stock_should_return_null_if_not_managing_stock() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_stock_quantity( 5 );
@@ -817,14 +845,13 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_delete_product_transients() {
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 10 );
 		$product->set_sale_price( 5 );
 		$product->save();
 
-		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
-		wc_get_featured_product_ids(); // Creates the transient for featured products
+		wc_get_product_ids_on_sale();  // Creates the transient for on sale products.
+		wc_get_featured_product_ids(); // Creates the transient for featured products.
 
 		wc_delete_product_transients();
 
@@ -842,7 +869,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		delete_transient( 'wc_products_onsale' );
 
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 10 );
 		$product->set_sale_price( 5 );
@@ -861,7 +887,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		delete_transient( 'wc_featured_products' );
 
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_featured( true );
 		$product->save();
@@ -876,6 +901,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_placeholder_img() {
 		$this->assertTrue( (bool) strstr( wc_placeholder_img(), wc_placeholder_img_src() ) );
+
+		// Test custom class attribute is honoured.
+		$attr = array( 'class' => 'custom-class' );
+		$this->assertContains( 'class="custom-class"', wc_placeholder_img( 'woocommerce_thumbnail', $attr ) );
 	}
 
 	/**
@@ -885,7 +914,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_product_types() {
 		$product_types = (array) apply_filters(
-			'product_type_selector', array(
+			'product_type_selector',
+			array(
 				'simple'   => 'Simple product',
 				'grouped'  => 'Grouped product',
 				'external' => 'External/Affiliate product',
@@ -914,7 +944,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product_id_by_sku() {
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( $product->get_id(), wc_get_product_id_by_sku( $product->get_sku() ) );
@@ -923,7 +952,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_min_max_price_meta_query()
 	 *
-	 * @since 3.0.0
+	 * @expectedDeprecated wc_get_min_max_price_meta_query()
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query(
@@ -939,7 +968,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'value'   => array( 10, 100 ),
 				'compare' => 'BETWEEN',
 				'type'    => 'DECIMAL(10,2)',
-			), $meta_query
+			),
+			$meta_query
 		);
 	}
 
@@ -988,6 +1018,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; Large, Blueish' ) );
 	}
 
+	/**
+	 * Test: test_wc_get_attachment_image_attributes.
+	 */
 	public function test_wc_get_attachment_image_attributes() {
 		$image_attr = array(
 			'src'    => 'https://wc.local/wp-content/uploads/2018/02/single-1-250x250.jpg',
@@ -996,7 +1029,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			'srcset' => 'https://wc.local/wp-content/uploads/2018/02/single-1-250x250.jpg 250w, https://wc.local/wp-content/uploads/2018/02/single-1-350x350.jpg 350w, https://wc.local/wp-content/uploads/2018/02/single-1-150x150.jpg 150w, https://wc.local/wp-content/uploads/2018/02/single-1-300x300.jpg 300w, https://wc.local/wp-content/uploads/2018/02/single-1-768x768.jpg 768w, https://wc.local/wp-content/uploads/2018/02/single-1-100x100.jpg 100w, https://wc.local/wp-content/uploads/2018/02/single-1.jpg 800w',
 			'sizes'  => '(max-width: 250px) 100vw, 250px',
 		);
-		// Test regular image attr
+		// Test regular image attr.
 		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
 
 		$image_attr = array(
@@ -1009,7 +1042,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Test blank src image attr, this is used in lazy loading.
 		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
 
-		$image_attr = array(
+		$image_attr    = array(
 			'src'    => 'https://wc.local/wp-content/woocommerce_uploads/my-image.jpg',
 			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
 			'alt'    => '',
@@ -1027,5 +1060,23 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_attr, wc_get_attachment_image_attributes( $image_attr ) );
 
 		unset( $image_attr, $expected_attr );
+	}
+
+	/**
+	 * Test wc_get_product_stock_status_options().
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_wc_get_product_stock_status_options() {
+		$status_options = (array) apply_filters(
+			'woocommerce_product_stock_status_options',
+			array(
+				'instock'     => 'In stock',
+				'outofstock'  => 'Out of stock',
+				'onbackorder' => 'On backorder',
+			)
+		);
+
+		$this->assertEquals( $status_options, wc_get_product_stock_status_options() );
 	}
 }

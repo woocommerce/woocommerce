@@ -2,10 +2,10 @@
 <ruleset name="WordPress Coding Standards">
 	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
 
+	<file>.</file>
+
 	<!-- Exclude paths -->
 	<exclude-pattern>tests/cli/</exclude-pattern>
-	<exclude-pattern>apigen/</exclude-pattern>
-	<exclude-pattern>includes/gateways/simplify-commerce</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/legacy/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>
@@ -15,9 +15,18 @@
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 
+	<!-- Show progress, show the error codes for each message (source). -->
+	<arg value="ps" />
+
+	<!-- Strip the filepaths in reports down to the relevant bit. -->
+	<arg name="basepath" value="./" />
+
+	<!-- Check up to 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
+
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="4.7" />
-	<config name="testVersion" value="5.2-" />
+	<config name="minimum_supported_wp_version" value="5.0" />
+	<config name="testVersion" value="5.6-" />
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
@@ -35,6 +44,7 @@
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
 	</rule>
 
 	<rule ref="Generic.Commenting">
@@ -47,5 +57,6 @@
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>i18n/</exclude-pattern>
+		<exclude-pattern>src/</exclude-pattern>
 	</rule>
 </ruleset>

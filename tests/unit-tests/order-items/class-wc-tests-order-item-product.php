@@ -146,10 +146,12 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$variation_product = new WC_Product_Variation();
 		$variation_product->set_name( 'Test Variation' );
 		$variation_product->set_parent_id( $parent_product->get_id() );
-		$variation_product->set_attributes( array(
-			'color' => 'Green',
-			'size'  => 'Large',
-		) );
+		$variation_product->set_attributes(
+			array(
+				'color' => 'Green',
+				'size'  => 'Large',
+			)
+		);
 		$variation_product->save();
 
 		$product_item = new WC_Order_Item_Product();
@@ -158,7 +160,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$product_item->save();
 
 		// Test with show_all on.
-		$formatted = $product_item->get_formatted_meta_data( '_', true );
+		$formatted          = $product_item->get_formatted_meta_data( '_', true );
 		$formatted_as_array = array();
 		foreach ( $formatted as $f ) {
 			$formatted_as_array[] = (array) $f;
@@ -188,7 +190,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		);
 
 		// Test with show_all off.
-		$formatted = $product_item->get_formatted_meta_data( '_', false );
+		$formatted          = $product_item->get_formatted_meta_data( '_', false );
 		$formatted_as_array = array();
 		foreach ( $formatted as $f ) {
 			$formatted_as_array[] = (array) $f;
@@ -267,7 +269,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$this->assertTrue( isset( $item['item_meta_array'] ) );
 		$item['item_meta_array'] = array(
 			0 => (object) array(
-				'key' => 'test',
+				'key'   => 'test',
 				'value' => 'val',
 			),
 		);

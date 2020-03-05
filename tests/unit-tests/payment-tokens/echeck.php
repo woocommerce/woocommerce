@@ -33,7 +33,7 @@ class WC_Tests_Payment_Token_eCheck extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_echeck_read_pulls_meta() {
-		$token = WC_Helper_Payment_Token::create_eCheck_token();
+		$token    = WC_Helper_Payment_Token::create_eCheck_token();
 		$token_id = $token->get_id();
 
 		$token_read = new WC_Payment_Token_ECheck( $token_id );

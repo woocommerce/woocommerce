@@ -20,7 +20,7 @@ class WC_Product_Factory {
 	 *
 	 * @param mixed $product_id WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
 	 * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
-	 * @return WC_Product|bool Product object or null if the product cannot be loaded.
+	 * @return WC_Product|bool Product object or false if the product cannot be loaded.
 	 */
 	public function get_product( $product_id = false, $deprecated = array() ) {
 		$product_id = $this->get_product_id( $product_id );

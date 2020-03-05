@@ -6,6 +6,8 @@
  * @version 2.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -31,6 +33,10 @@ class WC_Admin_Status {
 	 * Handles output of tools.
 	 */
 	public static function status_tools() {
+		if ( ! class_exists( 'WC_REST_System_Status_Tools_Controller' ) ) {
+			wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Tools_Controller.' );
+		}
+
 		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'debug_action' ) ) { // WPCS: input var ok, sanitization ok.
@@ -91,7 +97,9 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
-		if ( defined( 'WC_LOG_HANDLER' ) && 'WC_Log_Handler_DB' === WC_LOG_HANDLER ) {
+		$log_handler = Constants::get_constant( 'WC_LOG_HANDLER' );
+
+		if ( 'WC_Log_Handler_DB' === $log_handler ) {
 			self::status_logs_db();
 		} else {
 			self::status_logs_file();

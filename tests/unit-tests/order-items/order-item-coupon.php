@@ -13,7 +13,7 @@ class WC_Tests_Order_Item_Coupon extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_setters_getters() {
-		$coupon = new WC_Order_Item_Coupon;
+		$coupon = new WC_Order_Item_Coupon();
 
 		$coupon->set_name( 'testcoupon' );
 		$this->assertTrue( 'testcoupon' === $coupon->get_name() && $coupon->get_name() === $coupon->get_code() );

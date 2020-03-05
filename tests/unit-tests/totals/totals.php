@@ -30,6 +30,13 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
+		// Set a valid address for the customer so shipping rates will calculate.
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_state( 'NY' );
+		WC()->customer->set_shipping_postcode( '12345' );
+
+		WC()->cart->empty_cart();
+
 		$this->ids = array();
 
 		$tax_rate    = array(
@@ -167,7 +174,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function test_cart_totals() {
 		WC()->customer->set_is_vat_exempt( false );
 		$this->totals = new WC_Cart_Totals( WC()->cart );
-		$cart = WC()->cart;
+		$cart         = WC()->cart;
 
 		$this->assertEquals( 40.00, $cart->get_fee_total() );
 		$this->assertEquals( 36.00, $cart->get_cart_contents_total() );
@@ -201,7 +208,7 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 	public function test_cart_totals_tax_exempt_customer() {
 		WC()->customer->set_is_vat_exempt( true );
 		$this->totals = new WC_Cart_Totals( WC()->cart );
-		$cart = WC()->cart;
+		$cart         = WC()->cart;
 
 		$this->assertEquals( 40.00, $cart->get_fee_total() );
 		$this->assertEquals( 36.00, $cart->get_cart_contents_total() );
