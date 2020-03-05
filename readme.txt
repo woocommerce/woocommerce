@@ -234,6 +234,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Corrected the cache invalidation behavior of order item CRUD actions. #25734
 * Fix - Don't show duplicated update notifications on Woo Screens. #25828
 * Fix - Escape MaxMind database URL. #25682
+* Fix - System status report should correctly identify inactive package. #25830
 * Dev - Added support for placeholder attribute in quantity inputs. #25418
 * Dev - Added `tax_status` and `tax_class` columns to the product meta data lookup table. #25428
 * Dev - Introduced `woocommerce_top_rated_widget_args` filter. #25320
