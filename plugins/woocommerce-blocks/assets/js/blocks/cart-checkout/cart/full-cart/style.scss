@@ -265,6 +265,7 @@ table.wc-block-cart-items {
 		.wc-block-cart__main {
 			padding: 0;
 			flex: none;
+			min-width: 200px;
 		}
 		.wc-block-cart__sidebar {
 			padding: 0;
@@ -318,6 +319,10 @@ table.wc-block-cart-items {
 				grid-column-start: 3;
 				grid-row-start: 2;
 				align-self: center;
+
+				.wc-block-formatted-money-amount {
+					display: inline-block;
+				}
 
 				.wc-block-cart-item__sale-badge {
 					display: none;
