@@ -264,7 +264,7 @@ class WC_Install {
 			if ( WC()->is_wc_admin_active() ) {
 				// Pre-init data store override to allow storing WC Admin notice during activation (package is not loaded yet).
 				add_filter( 'woocommerce_data_stores', array( '\Automattic\WooCommerce\Admin\API\Init', 'add_data_stores' ) );
-				WC_Notes_Run_Db_Update::add_reminder();
+				WC_Notes_Run_Db_Update::show_reminder();
 			}
 		}
 	}
@@ -385,7 +385,7 @@ class WC_Install {
 				// Pre-init data store override to allow storing WC Admin notice during activation (package is not loaded yet).
 				if ( WC()->is_wc_admin_active() ) {
 					add_filter( 'woocommerce_data_stores', array( '\Automattic\WooCommerce\Admin\API\Init', 'add_data_stores' ) );
-					WC_Notes_Run_Db_Update::add_reminder();
+					WC_Notes_Run_Db_Update::show_reminder();
 				}
 			}
 		} else {
