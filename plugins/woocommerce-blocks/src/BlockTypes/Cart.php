@@ -68,6 +68,91 @@ class Cart extends AbstractBlock {
 			$this->block_name . '-frontend',
 			$this->block_name . '-block-frontend'
 		);
-		return $content;
+		return $content . $this->get_skeleton();
+	}
+
+	/**
+	 * Render skeleton markup for the cart block.
+	 */
+	protected function get_skeleton() {
+		return '
+			<div class="wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton" aria-hidden="true">
+				<div class="wc-block-cart__main">
+					<h2><span></span></h2>
+					<table class="wc-block-cart-items">
+						<thead>
+							<tr class="wc-block-cart-items__header">
+								<th class="wc-block-cart-items__header-image"><span /></th>
+								<th class="wc-block-cart-items__header-product"><span /></th>
+								<th class="wc-block-cart-items__header-quantity"><span /></th>
+								<th class="wc-block-cart-items__header-total"><span /></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="wc-block-cart-items__row">
+								<td class="wc-block-cart-item__image">
+									<div><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></div>
+								</td>
+								<td class="wc-block-cart-item__product">
+									<div class="wc-block-cart-item__product-name"></div>
+									<div class="wc-block-cart-item__product-metadata"></div>
+								</td>
+								<td class="wc-block-cart-item__quantity">
+								<div class="wc-block-quantity-selector">
+									<input class="wc-block-quantity-selector__input" type="number" step="1" min="0" value="1" />
+									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus">－</button>
+									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus">＋</button>
+								</div>
+								</td>
+								<td class="wc-block-cart-item__total">
+									<div class="wc-block-cart-item__price"></div>
+								</td>
+							</tr>
+							<tr class="wc-block-cart-items__row">
+								<td class="wc-block-cart-item__image">
+									<div><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></div>
+								</td>
+								<td class="wc-block-cart-item__product">
+									<div class="wc-block-cart-item__product-name">&nbsp;</div>
+									<div class="wc-block-cart-item__product-metadata">&nbsp;</div>
+								</td>
+								<td class="wc-block-cart-item__quantity">
+								<div class="wc-block-quantity-selector">
+									<input class="wc-block-quantity-selector__input" type="number" step="1" min="0" value="1" />
+									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus">－</button>
+									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus">＋</button>
+								</div>
+								</td>
+								<td class="wc-block-cart-item__total">
+									<div class="wc-block-cart-item__price"></div>
+								</td>
+							</tr>
+							<tr class="wc-block-cart-items__row">
+								<td class="wc-block-cart-item__image">
+									<div><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></div>
+								</td>
+								<td class="wc-block-cart-item__product">
+									<div class="wc-block-cart-item__product-name"></div>
+									<div class="wc-block-cart-item__product-metadata"></div>
+								</td>
+								<td class="wc-block-cart-item__quantity">
+								<div class="wc-block-quantity-selector">
+									<input class="wc-block-quantity-selector__input" type="number" step="1" min="0" value="1" />
+									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--minus">－</button>
+									<button class="wc-block-quantity-selector__button wc-block-quantity-selector__button--plus">＋</button>
+								</div>
+								</td>
+								<td class="wc-block-cart-item__total">
+									<div class="wc-block-cart-item__price"></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="wc-block-cart__sidebar">
+					<div class="components-card"></div>
+				</div>
+			</div>
+		';
 	}
 }

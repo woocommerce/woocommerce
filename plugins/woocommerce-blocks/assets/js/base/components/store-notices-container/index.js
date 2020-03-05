@@ -28,6 +28,9 @@ const StoreNoticesContainer = ( { className, notices } ) => {
 	const { removeNotice } = useStoreNoticesContext();
 	const wrapperClass = classnames( className, 'wc-block-components-notices' );
 
+	if ( ! notices.length ) {
+		return null;
+	}
 	return (
 		<div className={ wrapperClass }>
 			{ notices.map( ( props ) => (
