@@ -5,10 +5,13 @@ import {
 	withRestApiHydration,
 	withStoreCartApiHydration,
 } from '@woocommerce/block-hocs';
+import { __ } from '@wordpress/i18n';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import { RawHTML } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import StoreNoticesProvider from '@woocommerce/base-context/store-notices-context';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 
 /**
  * Internal dependencies
@@ -62,8 +65,28 @@ const getProps = ( el ) => ( {
 	isShippingCostHidden: el.dataset.isshippingcosthidden === 'true',
 } );
 
+const getErrorBoundaryProps = () => {
+	return {
+		header: __( 'Something went wrong…', 'woo-gutenberg-products-block' ),
+		text: __experimentalCreateInterpolateElement(
+			__(
+				'The cart has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+				'woo-gutenberg-products-block'
+			),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
+					<a href="javascript:window.location.reload(true)" />
+				),
+			}
+		),
+		showErrorMessage: CURRENT_USER_IS_ADMIN,
+	};
+};
+
 renderFrontend(
 	'.wp-block-woocommerce-cart',
 	withStoreCartApiHydration( withRestApiHydration( CartFrontend ) ),
-	getProps
+	getProps,
+	getErrorBoundaryProps
 );

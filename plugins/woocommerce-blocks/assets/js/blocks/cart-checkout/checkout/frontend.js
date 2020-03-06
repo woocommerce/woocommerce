@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { withRestApiHydration } from '@woocommerce/block-hocs';
 import { useStoreCart } from '@woocommerce/base-hooks';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 
 /**
  * Internal dependencies
@@ -12,13 +16,35 @@ import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
 
 /**
- * Wrapper component to supply API data.
+ * Wrapper component for the checkout block.
  *
- * @param {Object} attributes object of key value attributes passed to block.
+ * @param {Object} props Props for the block.
  */
-const CheckoutFrontend = ( attributes ) => {
+const CheckoutFrontend = ( props ) => {
 	const { shippingRates } = useStoreCart();
-	return <Block attributes={ attributes } shippingRates={ shippingRates } />;
+	return (
+		<BlockErrorBoundary
+			header={ __(
+				'Something went wrong…',
+				'woo-gutenberg-products-block'
+			) }
+			text={ __experimentalCreateInterpolateElement(
+				__(
+					'The checkout has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+					'woo-gutenberg-products-block'
+				),
+				{
+					a: (
+						// eslint-disable-next-line jsx-a11y/anchor-has-content
+						<a href="." />
+					),
+				}
+			) }
+			showErrorMessage={ CURRENT_USER_IS_ADMIN }
+		>
+			<Block { ...props } shippingRates={ shippingRates } />
+		</BlockErrorBoundary>
+	);
 };
 
 const getProps = ( el ) => {
@@ -42,8 +68,28 @@ const getProps = ( el ) => {
 	};
 };
 
+const getErrorBoundaryProps = () => {
+	return {
+		header: __( 'Something went wrong…', 'woo-gutenberg-products-block' ),
+		text: __experimentalCreateInterpolateElement(
+			__(
+				'The checkout has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+				'woo-gutenberg-products-block'
+			),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
+					<a href="javascript:window.location.reload(true)" />
+				),
+			}
+		),
+		showErrorMessage: CURRENT_USER_IS_ADMIN,
+	};
+};
+
 renderFrontend(
 	'.wp-block-woocommerce-checkout',
 	withRestApiHydration( CheckoutFrontend ),
-	getProps
+	getProps,
+	getErrorBoundaryProps
 );

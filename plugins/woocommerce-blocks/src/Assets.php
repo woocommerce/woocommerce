@@ -106,6 +106,7 @@ class Assets {
 		return array_merge(
 			$settings,
 			[
+				'currentUserIsAdmin'            => is_user_logged_in() && current_user_can( 'manage_woocommerce' ),
 				'min_columns'                   => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
 				'max_columns'                   => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
 				'default_columns'               => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
