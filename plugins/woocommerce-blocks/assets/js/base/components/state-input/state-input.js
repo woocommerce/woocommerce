@@ -27,7 +27,7 @@ const StateInput = ( {
 				key,
 				name: decodeEntities( countryStates[ key ] ),
 		  } ) )
-		: null;
+		: [];
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
@@ -50,40 +50,36 @@ const StateInput = ( {
 		[ onChange, options ]
 	);
 
-	if ( Array.isArray( options ) ) {
+	if ( options.length > 0 ) {
 		return (
-			options.length > 0 && (
-				<>
-					<Select
-						className={ className }
-						label={ label }
-						onChange={ onChangeState }
-						options={ options }
-						value={ options.find(
-							( option ) => option.key === value
-						) }
-						required={ required }
+			<>
+				<Select
+					className={ className }
+					label={ label }
+					onChange={ onChangeState }
+					options={ options }
+					value={ options.find( ( option ) => option.key === value ) }
+					required={ required }
+				/>
+				{ autoComplete !== 'off' && (
+					<input
+						type="text"
+						aria-hidden={ true }
+						autoComplete={ autoComplete }
+						value={ value }
+						onChange={ ( event ) =>
+							onChangeState( event.target.value )
+						}
+						style={ {
+							height: '0',
+							border: '0',
+							padding: '0',
+							position: 'absolute',
+						} }
+						tabIndex={ -1 }
 					/>
-					{ autoComplete !== 'off' && (
-						<input
-							type="text"
-							aria-hidden={ true }
-							autoComplete={ autoComplete }
-							value={ value }
-							onChange={ ( event ) =>
-								onChangeState( event.target.value )
-							}
-							style={ {
-								height: '0',
-								border: '0',
-								padding: '0',
-								position: 'absolute',
-							} }
-							tabIndex={ -1 }
-						/>
-					) }
-				</>
-			)
+				) }
+			</>
 		);
 	}
 	return (
