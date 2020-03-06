@@ -1,0 +1,13 @@
+.wc-block-checkbox {
+	.components-checkbox-control__input[type="checkbox"]:checked {
+		background: currentColor;
+		border-color: currentColor;
+	}
+	.components-checkbox-control__input[type="checkbox"]:focus {
+		border-color: currentColor;
+		box-shadow: 0 0 2px currentColor;
+	}
+	.components-checkbox-control__label {
+		display: inline;
+	}
+}
