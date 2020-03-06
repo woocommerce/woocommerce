@@ -47,7 +47,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 			/>
 			{ attributes.showReviewRating && ! REVIEW_RATINGS_ENABLED && (
 				<Notice
-					className="wc-block-reviews__notice"
+					className="wc-block-base-control-notice"
 					isDismissible={ false }
 				>
 					{ __experimentalCreateInterpolateElement(
@@ -136,7 +136,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					/>
 					{ attributes.imageType === 'reviewer' && ! SHOW_AVATARS && (
 						<Notice
-							className="wc-block-reviews__notice"
+							className="wc-block-base-control-notice"
 							isDismissible={ false }
 						>
 							{ __experimentalCreateInterpolateElement(

@@ -101,6 +101,12 @@ class Assets {
 	public static function get_wc_block_data( $settings ) {
 		$tag_count      = wp_count_terms( 'product_tag' );
 		$product_counts = wp_count_posts( 'product' );
+		$page_ids       = [
+			'shop'     => wc_get_page_id( 'shop' ),
+			'checkout' => wc_get_page_id( 'checkout' ),
+			'privacy'  => wc_privacy_policy_page_id(),
+			'terms'    => wc_terms_and_conditions_page_id(),
+		];
 
 		// Global settings used in each block.
 		return array_merge(
@@ -120,9 +126,6 @@ class Assets {
 				'isLargeCatalog'                => $product_counts->publish > 100,
 				'limitTags'                     => $tag_count > 100,
 				'hasTags'                       => $tag_count > 0,
-				'homeUrl'                       => esc_url( home_url( '/' ) ),
-				'shopUrl'                       => get_permalink( wc_get_page_id( 'shop' ) ),
-				'checkoutUrl'                   => get_permalink( wc_get_page_id( 'checkout' ) ),
 				'couponsEnabled'                => wc_coupons_enabled(),
 				'shippingEnabled'               => wc_shipping_enabled(),
 				'displayShopPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
@@ -136,6 +139,25 @@ class Assets {
 				'wcBlocksAssetUrl'              => plugins_url( 'assets/', __DIR__ ),
 				'restApiRoutes'                 => [
 					'/wc/store' => array_keys( \Automattic\WooCommerce\Blocks\RestApi::get_routes_from_namespace( 'wc/store' ) ),
+				],
+				'homeUrl'                       => esc_url( home_url( '/' ) ),
+				'storePages'                    => [
+					'shop'     => $page_ids['shop'] ? [
+						'name' => get_the_title( $page_ids['shop'] ),
+						'url'  => get_permalink( $page_ids['shop'] ),
+					] : false,
+					'checkout' => $page_ids['checkout'] ? [
+						'name' => get_the_title( $page_ids['checkout'] ),
+						'url'  => get_permalink( $page_ids['checkout'] ),
+					] : false,
+					'privacy'  => $page_ids['privacy'] ? [
+						'name' => get_the_title( $page_ids['privacy'] ),
+						'url'  => get_permalink( $page_ids['privacy'] ),
+					] : false,
+					'terms'    => $page_ids['terms'] ? [
+						'name' => get_the_title( $page_ids['terms'] ),
+						'url'  => get_permalink( $page_ids['terms'] ),
+					] : false,
 				],
 			]
 		);

@@ -6,9 +6,12 @@ import { __ } from '@wordpress/i18n';
 import AddressForm, {
 	defaultFieldConfig,
 } from '@woocommerce/base-components/address-form';
-import FormStep from '@woocommerce/base-components/checkout/form-step';
-import CheckoutForm from '@woocommerce/base-components/checkout/form';
-import NoShipping from '@woocommerce/base-components/checkout/no-shipping';
+import {
+	FormStep,
+	CheckoutForm,
+	NoShipping,
+	Policies,
+} from '@woocommerce/base-components/checkout';
 import TextInput from '@woocommerce/base-components/text-input';
 import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
@@ -294,6 +297,7 @@ const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
 						}
 					/>
 				</FormStep>
+				{ attributes.showPolicyLinks && <Policies /> }
 			</CheckoutForm>
 		</CheckoutProvider>
 	);

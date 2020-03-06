@@ -4,14 +4,21 @@
 import { __ } from '@wordpress/i18n';
 import { withFeedbackPrompt } from '@woocommerce/block-hocs';
 import { previewShippingRates } from '@woocommerce/resource-previews';
-import { SHIPPING_METHODS_EXIST } from '@woocommerce/block-settings';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	ToggleControl,
 	CheckboxControl,
+	Notice,
 } from '@wordpress/components';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
+import {
+	PRIVACY_URL,
+	TERMS_URL,
+	SHIPPING_METHODS_EXIST,
+} from '@woocommerce/block-settings';
+import { getAdminLink } from '@woocommerce/settings';
+import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 
 /**
  * Internal dependencies
@@ -28,6 +35,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 		showPhoneField,
 		requireCompanyField,
 		requirePhoneField,
+		showPolicyLinks,
 	} = attributes;
 	return (
 		<div className={ className }>
@@ -135,6 +143,63 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 							} )
 						}
 					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+				>
+					<p className="wc-block-checkout__controls-text">
+						{ __(
+							'Choose additional content to display on checkout.',
+							'woo-gutenberg-products-block'
+						) }
+					</p>
+					<ToggleControl
+						label={ __(
+							'Show links to terms and conditions and privacy policy',
+							'woo-gutenberg-products-block'
+						) }
+						checked={ showPolicyLinks }
+						onChange={ () =>
+							setAttributes( {
+								showPolicyLinks: ! showPolicyLinks,
+							} )
+						}
+					/>
+					{ showPolicyLinks && ( ! PRIVACY_URL || ! TERMS_URL ) && (
+						<Notice
+							className="wc-block-base-control-notice"
+							isDismissible={ false }
+						>
+							{ __experimentalCreateInterpolateElement(
+								__(
+									'Pages must be first setup in store settings: <a1>Privacy policy</a1>, <a2>Terms and conditions</a2>.',
+									'woo-gutenberg-products-block'
+								),
+								{
+									a1: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content
+										<a
+											href={ getAdminLink(
+												'admin.php?page=wc-settings&tab=account'
+											) }
+											target="_blank"
+											rel="noopener noreferrer"
+										/>
+									),
+									a2: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content
+										<a
+											href={ getAdminLink(
+												'admin.php?page=wc-settings&tab=advanced'
+											) }
+											target="_blank"
+											rel="noopener noreferrer"
+										/>
+									),
+								}
+							) }
+						</Notice>
+					) }
 				</PanelBody>
 			</InspectorControls>
 			<BlockErrorBoundary

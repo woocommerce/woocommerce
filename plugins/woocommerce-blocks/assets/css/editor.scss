@@ -40,3 +40,13 @@
 	}
 }
 
+// Style inline notices in the inspector.
+.components-base-control {
+	+ .wc-block-base-control-notice {
+		margin: -$gap 0 $gap;
+	}
+
+	& + .wc-block-base-control-notice:last-child {
+		margin: -$gap 0 $gap-small;
+	}
+}

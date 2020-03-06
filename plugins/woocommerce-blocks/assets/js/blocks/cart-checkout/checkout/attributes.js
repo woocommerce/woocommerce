@@ -28,6 +28,10 @@ const blockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
+	showPolicyLinks: {
+		type: 'boolean',
+		default: true,
+	},
 };
 
 export default blockAttributes;
