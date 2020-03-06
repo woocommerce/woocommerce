@@ -17,7 +17,6 @@ use \WP_REST_Response as RestResponse;
 use \WP_REST_Request as RestRequest;
 use \WC_REST_Exception as RestException;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\OrderSchema;
-use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock;
 
 /**
  * Cart Order API.
@@ -127,9 +126,15 @@ class CartOrder extends RestController {
 			// Create or retrieve the draft order for the current cart.
 			$order_object = $this->create_order_from_cart( $request );
 
-			// Try to reserve stock, if available.
-			$this->reserve_stock( $order_object );
+			// Try to reserve stock for 10 mins, if available.
+			// @todo Remove once min support for WC reaches 4.0.0.
+			if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
+				$reserve_stock = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
+			} else {
+				$reserve_stock = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
+			}
 
+			$reserve_stock->reserve_stock_for_order( $order_object, 10 );
 			$response = $this->prepare_item_for_response( $order_object, $request );
 			$response->set_status( 201 );
 			return $response;
@@ -165,21 +170,6 @@ class CartOrder extends RestController {
 		}
 
 		WC()->customer->save();
-	}
-
-	/**
-	 * Put a temporary hold on stock for this order.
-	 *
-	 * @throws RestException Exception when stock cannot be reserved.
-	 * @param \WC_Order $order Order object.
-	 */
-	protected function reserve_stock( \WC_Order $order ) {
-		$reserve_stock_helper = new ReserveStock();
-		$result               = $reserve_stock_helper->reserve_stock_for_order( $order );
-
-		if ( is_wp_error( $result ) ) {
-			throw new RestException( $result->get_error_code(), $result->get_error_message(), $result->get_error_data( 'status' ) );
-		}
 	}
 
 	/**

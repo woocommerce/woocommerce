@@ -24,7 +24,7 @@ class ProductSummaryTests extends TestCase {
 	}
 
 	/**
-	 * Test that stock is reserved for draft orders.
+	 * Test that we can get a valid summary.
 	 */
 	public function test_get_summary() {
 		$product = new \WC_Product();
