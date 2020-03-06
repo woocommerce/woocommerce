@@ -9,10 +9,10 @@
   "require": {
     "php": ">=5.6|>=7.0",
     "automattic/jetpack-autoloader": "^1.2.0",
-    "automattic/jetpack-constants": "^1.1",
+    "automattic/jetpack-constants": "1.1.3",
     "composer/installers": "1.7.0",
     "maxmind-db/reader": "1.6.0",
-    "pelago/emogrifier": "^3.1",
+    "pelago/emogrifier": "3.1.0",
     "woocommerce/action-scheduler": "3.1.1",
     "woocommerce/woocommerce-blocks": "2.5.14",
     "woocommerce/woocommerce-rest-api": "1.0.7",
@@ -21,7 +21,7 @@
   "require-dev": {
     "phpunit/phpunit": "7.5.20",
     "woocommerce/woocommerce-sniffs": "0.0.9",
-    "wp-cli/i18n-command": "^2.2"
+    "wp-cli/i18n-command": "2.2.2"
   },
   "config": {
     "platform": {

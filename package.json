@@ -64,7 +64,7 @@
     "puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "stylelint": "12.0.1",
     "stylelint-config-wordpress": "16.0.0",
-    "wp-textdomain": "^1.0.1"
+    "wp-textdomain": "1.0.1"
   },
   "engines": {
     "node": ">=10.15.0",
