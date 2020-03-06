@@ -24,8 +24,6 @@ export const LIMIT_TAGS = getSetting( 'limitTags' );
 export const HAS_PRODUCTS = getSetting( 'hasProducts', true );
 export const HAS_TAGS = getSetting( 'hasTags', true );
 export const HOME_URL = getSetting( 'homeUrl', '' );
-export const SHOP_URL = getSetting( 'shopUrl', '' );
-export const CHECKOUT_URL = getSetting( 'checkoutUrl', '' );
 export const COUPONS_ENABLED = getSetting( 'couponsEnabled', true );
 export const SHIPPING_ENABLED = getSetting( 'shippingEnabled', true );
 export const DISPLAY_SHOP_PRICES_INCLUDING_TAX = getSetting(
@@ -57,3 +55,20 @@ export const SHIPPING_METHODS_EXIST = getSetting(
 );
 export const COUNTRY_LOCALE = getSetting( 'countryLocale', {} );
 export const DEFAULT_ADDRESS_FIELDS = getSetting( 'defaultAddressFields', {} );
+
+const defaultPage = {
+	name: '',
+	url: '',
+};
+const storePages = getSetting( 'storePages', {
+	shop: defaultPage,
+	checkout: defaultPage,
+	privacy: defaultPage,
+	terms: defaultPage,
+} );
+export const SHOP_URL = storePages.shop.url;
+export const CHECKOUT_URL = storePages.checkout.url;
+export const PRIVACY_URL = storePages.privacy.url;
+export const TERMS_URL = storePages.terms.url;
+export const PRIVACY_PAGE_NAME = storePages.privacy.name;
+export const TERMS_PAGE_NAME = storePages.terms.name;
