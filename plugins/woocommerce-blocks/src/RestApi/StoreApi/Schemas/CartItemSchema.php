@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
 use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductSummary;
-use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock;
 
 /**
  * CartItemSchema class.
@@ -335,8 +334,15 @@ class CartItemSchema extends AbstractSchema {
 			return null;
 		}
 
-		$draft_order     = WC()->session->get( 'store_api_draft_order' );
-		$reserve_stock   = new ReserveStock();
+		$draft_order = WC()->session->get( 'store_api_draft_order' );
+
+		// @todo Remove once min support for WC reaches 4.0.0.
+		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
+			$reserve_stock = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
+		} else {
+			$reserve_stock = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
+		}
+
 		$reserved_stock  = $reserve_stock->get_reserved_stock( $product, isset( $draft_order['id'] ) ? $draft_order['id'] : 0 );
 		$remaining_stock = $product->get_stock_quantity() - $reserved_stock;
 

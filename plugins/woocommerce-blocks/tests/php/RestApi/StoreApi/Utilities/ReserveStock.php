@@ -32,8 +32,7 @@ class ReserveStockTests extends TestCase {
 		$order->set_status( 'checkout-draft' );
 		$order->save();
 
-		$result = $class->reserve_stock_for_order( $order );
-		$this->assertTrue( $result );
+		$class->reserve_stock_for_order( $order );
 		$this->assertEquals( 4, $this->get_reserved_stock_by_product_id( $product->get_stock_managed_by_id() ) );
 
 		// Repeat.
@@ -41,17 +40,38 @@ class ReserveStockTests extends TestCase {
 		$order->set_status( 'checkout-draft' );
 		$order->save();
 
-		$result = $class->reserve_stock_for_order( $order );
-		$this->assertTrue( $result );
+		$class->reserve_stock_for_order( $order );
 		$this->assertEquals( 8, $this->get_reserved_stock_by_product_id( $product->get_stock_managed_by_id() ) );
+	}
 
-		// Repeat again - should not be enough stock for this.
-		$order = OrderHelper::create_order( 1, $product );
+	/**
+	 * Test that trying to reserve stock too much throws an exception.
+	 *
+	 * @expectedException Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStockException
+	 */
+	public function test_reserve_stock_for_order_throws_exception() {
+		$class = new ReserveStock();
+
+		$product = ProductHelper::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock( 10 );
+		$product->save();
+
+		$order = OrderHelper::create_order( 1, $product ); // Note this adds 4 to the order.
 		$order->set_status( 'checkout-draft' );
 		$order->save();
 
-		$result = $class->reserve_stock_for_order( $order );
-		$this->assertTrue( is_wp_error( $result ) );
+		$order2 = OrderHelper::create_order( 1, $product );
+		$order2->set_status( 'checkout-draft' );
+		$order2->save();
+
+		$order3 = OrderHelper::create_order( 1, $product );
+		$order3->set_status( 'checkout-draft' );
+		$order3->save();
+
+		$class->reserve_stock_for_order( $order );
+		$class->reserve_stock_for_order( $order2 );
+		$class->reserve_stock_for_order( $order3 );
 	}
 
 	/**
