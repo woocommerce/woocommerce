@@ -600,7 +600,7 @@ function get_woocommerce_currency_symbols() {
 			'KRW' => '&#8361;',
 			'KWD' => '&#x62f;.&#x643;',
 			'KYD' => '&#36;',
-			'KZT' => 'KZT',
+			'KZT' => '&#8376;',
 			'LAK' => '&#8365;',
 			'LBP' => '&#x644;.&#x644;',
 			'LKR' => '&#xdbb;&#xdd4;',
