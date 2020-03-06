@@ -45,21 +45,6 @@
 			opacity: 0.8;
 		}
 	}
-	.wc-block-cart__totals-footer {
-		.wc-block-totals-table-item__value,
-		.wc-block-totals-table-item__label {
-			color: #000;
-			font-size: 1.25em;
-		}
-
-		.wc-block-totals-table-item__label {
-			font-weight: normal;
-		}
-
-		.wc-block-cart__totals-footer-tax {
-			margin-bottom: 0;
-		}
-	}
 	// Added extra class and label for specificity.
 	fieldset.wc-block-cart__shipping-options-fieldset {
 		background-color: transparent;
