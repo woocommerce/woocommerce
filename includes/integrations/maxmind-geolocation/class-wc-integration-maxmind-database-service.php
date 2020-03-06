@@ -88,7 +88,7 @@ class WC_Integration_MaxMind_Database_Service {
 		$download_uri = add_query_arg(
 			array(
 				'edition_id'  => self::DATABASE,
-				'license_key' => wc_clean( $license_key ),
+				'license_key' => urlencode( wc_clean( $license_key ) ),
 				'suffix'      => 'tar.gz',
 			),
 			'https://download.maxmind.com/app/geoip_download'
@@ -97,7 +97,7 @@ class WC_Integration_MaxMind_Database_Service {
 		// Needed for the download_url call right below.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
-		$tmp_archive_path = download_url( $download_uri );
+		$tmp_archive_path = download_url( esc_url_raw( $download_uri ) );
 		if ( is_wp_error( $tmp_archive_path ) ) {
 			// Transform the error into something more informative.
 			$error_data = $tmp_archive_path->get_error_data();

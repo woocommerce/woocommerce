@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloada
 Requires at least: 5.0
 Tested up to: 5.3
 Requires PHP: 7.0
-Stable tag: 3.9.1
+Stable tag: 3.9.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -189,6 +189,8 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.13. #25696
 * Enhancement - Added the WC Admin enabled db update notice. #25736
 * Enhancement - Update Action Scheduler to version 3.1.1. #25745
+* Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.14. #25807
+* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.0. #25822
 * Performance - Improved the client-side preparation for variation saving. #25382
 * Tweak - Enhance order details and payment summary. #25504
 * Tweak - Increase new onboarding group test to 50%. #25501
@@ -229,6 +231,10 @@ INTERESTED IN DEVELOPMENT?
 * Fix - configure Jetpack plugin before trying to connect/register. #25742
 * Fix - Check configure exists before calling to support older JP versions. #25747
 * Fix - Prevent edited attribute notice being hidden by new dashboard. #25757
+* Fix - Corrected the cache invalidation behavior of order item CRUD actions. #25734
+* Fix - Don't show duplicated update notifications on Woo Screens. #25828
+* Fix - Escape MaxMind database URL. #25682
+* Fix - System status report should correctly identify inactive package. #25830
 * Dev - Added support for placeholder attribute in quantity inputs. #25418
 * Dev - Added `tax_status` and `tax_class` columns to the product meta data lookup table. #25428
 * Dev - Introduced `woocommerce_top_rated_widget_args` filter. #25320
@@ -247,6 +253,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Removed `hash_equals()` polyfill as it was no longer needed. #25474
 * Dev - Removed unused `.order-actions` CSS. #25581
 * Dev - Applies woocommerce_maxmind_geolocation_database_path in MaxMind database migration. #25681
+* Dev - Support both .data() and .dataset for formdata in add to cart requests. #25726
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
