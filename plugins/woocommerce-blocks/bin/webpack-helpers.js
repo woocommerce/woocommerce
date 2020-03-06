@@ -132,6 +132,8 @@ const stableMainEntry = {
 	'panel-style': './node_modules/@wordpress/components/src/panel/style.scss',
 	'custom-select-control-style':
 		'./node_modules/@wordpress/components/src/custom-select-control/style.scss',
+	'checkbox-control-style':
+		'./node_modules/@wordpress/components/src/checkbox-control/style.scss',
 	'spinner-style':
 		'./node_modules/@wordpress/components/src/spinner/style.scss',
 };

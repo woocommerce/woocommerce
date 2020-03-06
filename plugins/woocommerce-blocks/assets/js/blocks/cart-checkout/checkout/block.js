@@ -11,7 +11,7 @@ import CheckoutForm from '@woocommerce/base-components/checkout/form';
 import NoShipping from '@woocommerce/base-components/checkout/no-shipping';
 import TextInput from '@woocommerce/base-components/text-input';
 import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
-import { CheckboxControl } from '@wordpress/components';
+import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import CheckoutProvider from '@woocommerce/base-context/checkout-context';
