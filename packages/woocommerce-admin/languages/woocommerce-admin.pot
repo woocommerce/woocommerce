@@ -1,0 +1,6043 @@
+# Copyright (C) 2020 WooCommerce
+# This file is distributed under the same license as the WooCommerce Admin package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Admin 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wc-admin\n"
+"POT-Creation-Date: 2020-03-05 01:54:39+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2020-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Country: United States\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: "
+"__;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;_nx_noop:1,2,3c;esc_"
+"attr__;esc_html__;esc_attr_e;esc_html_e;esc_attr_x:1,2c;esc_html_x:1,2c;\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-Bookmarks: \n"
+"X-Textdomain-Support: yes\n"
+"X-Generator: grunt-wp-i18n 1.0.3\n"
+
+#: docs/examples/extensions/add-report/woocommerce-admin-add-report-example.php:43
+msgid "Example"
+msgstr ""
+
+#: docs/examples/extensions/sql-modification/woocommerce-admin-sql-modification.php:47
+msgid "United States Dollar"
+msgstr ""
+
+#: docs/examples/extensions/sql-modification/woocommerce-admin-sql-modification.php:51
+msgid "New Zealand Dollar"
+msgstr ""
+
+#: docs/examples/extensions/sql-modification/woocommerce-admin-sql-modification.php:55
+msgid "South African Rand"
+msgstr ""
+
+#: includes/connect-existing-pages.php:25
+msgid "Extensions"
+msgstr ""
+
+#: includes/connect-existing-pages.php:29
+msgid "Reports"
+msgstr ""
+
+#: includes/connect-existing-pages.php:33 src/Features/Analytics.php:142
+#: client/header/activity-panel/panels/orders.js:198
+#: client/layout/controller.js:64
+msgid "Settings"
+msgstr ""
+
+#: includes/connect-existing-pages.php:37
+#: src/API/Reports/Orders/Controller.php:479
+#: src/API/Reports/Products/Controller.php:399
+#: src/API/Reports/Stock/Controller.php:529
+#: src/API/Reports/Variations/Controller.php:365
+#: client/analytics/report/orders/table.js:51
+#: client/analytics/report/products/table-variations.js:73
+#: client/analytics/report/products/table.js:88
+#: client/analytics/report/stock/table.js:49
+msgid "Status"
+msgstr ""
+
+#: includes/connect-existing-pages.php:41
+msgid "System status"
+msgstr ""
+
+#: includes/connect-existing-pages.php:42
+msgid "Tools"
+msgstr ""
+
+#: includes/connect-existing-pages.php:43
+msgid "Logs"
+msgstr ""
+
+#: includes/connect-existing-pages.php:121 src/API/Leaderboards.php:128
+#: src/API/Leaderboards.php:258 src/API/Reports/Categories/Controller.php:336
+#: src/API/Reports/Coupons/Controller.php:303
+#: src/API/Reports/Customers/Controller.php:579
+#: src/API/Reports/Orders/Stats/Controller.php:164
+#: src/API/Reports/Products/Controller.php:393
+#: src/API/Reports/Revenue/Stats/Controller.php:451
+#: src/API/Reports/Taxes/Controller.php:310
+#: src/API/Reports/Variations/Controller.php:361 src/Features/Analytics.php:94
+#: src/ReportCSVEmail.php:35
+#: client/analytics/report/categories/config.js:35
+#: client/analytics/report/categories/table.js:62
+#: client/analytics/report/coupons/table.js:42
+#: client/analytics/report/customers/table.js:64
+#: client/analytics/report/index.js:53
+#: client/analytics/report/orders/config.js:21
+#: client/analytics/report/orders/table.js:291
+#: client/analytics/report/products/config.js:35
+#: client/analytics/report/products/table-variations.js:66
+#: client/analytics/report/products/table.js:72
+#: client/analytics/report/revenue/table.js:47
+#: client/analytics/report/taxes/config.js:43
+#: client/analytics/report/taxes/table.js:63
+#: client/dashboard/dashboard-charts/config.js:42
+#: client/header/activity-panel/index.js:107
+#: client/header/activity-panel/panels/orders.js:228
+msgid "Orders"
+msgstr ""
+
+#: includes/connect-existing-pages.php:132
+#: includes/connect-existing-pages.php:162
+#: includes/connect-existing-pages.php:192
+msgid "Add New"
+msgstr ""
+
+#: includes/connect-existing-pages.php:142
+msgid "Edit Order"
+msgstr ""
+
+#: includes/connect-existing-pages.php:151
+#: src/API/Reports/Revenue/Stats/Controller.php:454
+#: src/Features/Analytics.php:112 src/ReportCSVEmail.php:38
+#: client/analytics/report/coupons/table.js:178
+#: client/analytics/report/index.js:63
+#: client/analytics/report/orders/table.js:78
+#: client/analytics/report/revenue/config.js:29
+#: client/analytics/report/revenue/table.js:68
+msgid "Coupons"
+msgstr ""
+
+#: includes/connect-existing-pages.php:172
+msgid "Edit Coupon"
+msgstr ""
+
+#: includes/connect-existing-pages.php:181
+#: src/API/Reports/Categories/Controller.php:335 src/Features/Analytics.php:100
+#: src/ReportCSVEmail.php:36
+#: client/analytics/report/categories/table.js:56
+#: client/analytics/report/index.js:48
+#: client/analytics/report/orders/config.js:97
+#: client/analytics/report/orders/table.js:64
+#: client/analytics/report/products/table.js:276
+msgid "Products"
+msgstr ""
+
+#: includes/connect-existing-pages.php:202
+msgid "Edit Product"
+msgstr ""
+
+#: includes/connect-existing-pages.php:212
+msgid "Import Products"
+msgstr ""
+
+#: includes/connect-existing-pages.php:222
+msgid "Export Products"
+msgstr ""
+
+#: includes/connect-existing-pages.php:232
+msgid "Product categories"
+msgstr ""
+
+#: includes/connect-existing-pages.php:242
+msgid "Edit category"
+msgstr ""
+
+#: includes/connect-existing-pages.php:252
+msgid "Product tags"
+msgstr ""
+
+#: includes/connect-existing-pages.php:262
+msgid "Edit tag"
+msgstr ""
+
+#: includes/connect-existing-pages.php:272
+msgid "Attributes"
+msgstr ""
+
+#: includes/connect-existing-pages.php:282
+msgid "Edit attribute"
+msgstr ""
+
+#: includes/emails/html-admin-report-export-download.php:17
+msgid "Download your %s Report"
+msgstr ""
+
+#: includes/emails/plain-admin-report-export-download.php:15
+#. translators: %1$s: report name, %2$s: download URL
+msgid "Download your %1$s Report: %2$s"
+msgstr ""
+
+#: src/API/Coupons.php:37
+msgid "Limit results to coupons with codes matching a given string."
+msgstr ""
+
+#: src/API/Customers.php:53 src/API/Notes.php:63
+msgid "Unique ID for the resource."
+msgstr ""
+
+#: src/API/Data.php:41
+msgid "An endpoint used for searching download logs for a specific IP address."
+msgstr ""
+
+#: src/API/DataDownloadIPs.php:75
+msgid "Invalid request. Please pass the match parameter."
+msgstr ""
+
+#: src/API/DataDownloadIPs.php:139
+msgid "A partial IP address can be passed and matching results will be returned."
+msgstr ""
+
+#: src/API/DataDownloadIPs.php:160
+msgid "IP address."
+msgstr ""
+
+#: src/API/Leaderboards.php:122
+msgid "Top Coupons - Number of Orders"
+msgstr ""
+
+#: src/API/Leaderboards.php:125 src/API/Reports/Coupons/Controller.php:302
+#: client/analytics/report/coupons/table.js:35
+msgid "Coupon Code"
+msgstr ""
+
+#: src/API/Leaderboards.php:131 src/API/Reports/Coupons/Controller.php:304
+#: client/analytics/report/coupons/table.js:50
+msgid "Amount Discounted"
+msgstr ""
+
+#: src/API/Leaderboards.php:188
+msgid "Top Categories - Items Sold"
+msgstr ""
+
+#: src/API/Leaderboards.php:191 src/API/Reports/Categories/Controller.php:332
+#: src/API/Reports/Products/Controller.php:394
+#: client/analytics/report/categories/table.js:35
+#: client/analytics/report/products/table.js:78
+msgid "Category"
+msgstr ""
+
+#: src/API/Leaderboards.php:194 src/API/Leaderboards.php:324
+#: src/API/Reports/Categories/Controller.php:333
+#: src/API/Reports/Orders/Controller.php:482
+#: src/API/Reports/Products/Controller.php:391
+#: src/API/Reports/Products/Stats/Controller.php:160
+#: src/API/Reports/Variations/Controller.php:359
+#: client/analytics/report/categories/config.js:21
+#: client/analytics/report/categories/table.js:42
+#: client/analytics/report/orders/table.js:70
+#: client/analytics/report/products/config.js:21
+#: client/analytics/report/products/table-variations.js:50
+#: client/analytics/report/products/table.js:56
+#: client/dashboard/dashboard-charts/config.js:52
+msgid "Items Sold"
+msgstr ""
+
+#: src/API/Leaderboards.php:197 src/API/Leaderboards.php:327
+#: client/analytics/report/categories/config.js:28
+#: client/analytics/report/categories/table.js:50
+#: client/analytics/report/orders/config.js:26
+#: client/analytics/report/orders/table.js:85
+#: client/analytics/report/products/config.js:28
+#: client/analytics/report/products/table-variations.js:59
+#: client/analytics/report/products/table.js:65
+#: client/analytics/report/revenue/config.js:36
+#: client/analytics/report/revenue/table.js:75
+#: client/dashboard/dashboard-charts/config.js:37
+msgid "Net Sales"
+msgstr ""
+
+#: src/API/Leaderboards.php:252
+msgid "Top Customers - Total Spend"
+msgstr ""
+
+#: src/API/Leaderboards.php:255
+msgid "Customer Name"
+msgstr ""
+
+#: src/API/Leaderboards.php:261 src/API/Reports/Customers/Controller.php:580
+#: client/analytics/report/customers/config.js:229
+#: client/analytics/report/customers/table.js:70
+msgid "Total Spend"
+msgstr ""
+
+#: src/API/Leaderboards.php:318
+msgid "Top Products - Items Sold"
+msgstr ""
+
+#: src/API/Leaderboards.php:321
+#: client/analytics/report/downloads/config.js:49
+msgid "Product"
+msgstr ""
+
+#: src/API/Leaderboards.php:438 src/API/Notes.php:343
+#: src/API/Reports/Categories/Controller.php:222
+#: src/API/Reports/Coupons/Controller.php:228
+#: src/API/Reports/Coupons/Stats/Controller.php:274
+#: src/API/Reports/Customers/Controller.php:354
+#: src/API/Reports/Downloads/Controller.php:253
+#: src/API/Reports/Downloads/Stats/Controller.php:231
+#: src/API/Reports/Orders/Controller.php:260
+#: src/API/Reports/Orders/Stats/Controller.php:333
+#: src/API/Reports/Products/Controller.php:262
+#: src/API/Reports/Products/Stats/Controller.php:315
+#: src/API/Reports/Revenue/Stats/Controller.php:360
+#: src/API/Reports/Stock/Controller.php:430
+#: src/API/Reports/Taxes/Controller.php:234
+#: src/API/Reports/Taxes/Stats/Controller.php:311
+#: src/API/Reports/Variations/Controller.php:261
+msgid "Current page of the collection."
+msgstr ""
+
+#: src/API/Leaderboards.php:446 src/API/Notes.php:351
+#: src/API/Reports/Categories/Controller.php:230
+#: src/API/Reports/Coupons/Controller.php:236
+#: src/API/Reports/Coupons/Stats/Controller.php:282
+#: src/API/Reports/Customers/Controller.php:362
+#: src/API/Reports/Downloads/Controller.php:261
+#: src/API/Reports/Downloads/Stats/Controller.php:239
+#: src/API/Reports/Orders/Controller.php:268
+#: src/API/Reports/Orders/Stats/Controller.php:341
+#: src/API/Reports/Products/Controller.php:270
+#: src/API/Reports/Products/Stats/Controller.php:323
+#: src/API/Reports/Revenue/Stats/Controller.php:368
+#: src/API/Reports/Stock/Controller.php:438
+#: src/API/Reports/Taxes/Controller.php:242
+#: src/API/Reports/Taxes/Stats/Controller.php:319
+#: src/API/Reports/Variations/Controller.php:269
+msgid "Maximum number of items to be returned in result set."
+msgstr ""
+
+#: src/API/Leaderboards.php:455 src/API/Reports/Categories/Controller.php:239
+#: src/API/Reports/Coupons/Controller.php:245
+#: src/API/Reports/Coupons/Stats/Controller.php:291
+#: src/API/Reports/Downloads/Controller.php:270
+#: src/API/Reports/Downloads/Stats/Controller.php:248
+#: src/API/Reports/Orders/Controller.php:277
+#: src/API/Reports/Orders/Stats/Controller.php:350
+#: src/API/Reports/PerformanceIndicators/Controller.php:512
+#: src/API/Reports/Products/Controller.php:279
+#: src/API/Reports/Products/Stats/Controller.php:332
+#: src/API/Reports/Revenue/Stats/Controller.php:377
+#: src/API/Reports/Taxes/Controller.php:251
+#: src/API/Reports/Taxes/Stats/Controller.php:328
+#: src/API/Reports/Variations/Controller.php:278
+msgid "Limit response to resources published after a given ISO8601 compliant date."
+msgstr ""
+
+#: src/API/Leaderboards.php:461 src/API/Reports/Categories/Controller.php:245
+#: src/API/Reports/Coupons/Controller.php:251
+#: src/API/Reports/Coupons/Stats/Controller.php:297
+#: src/API/Reports/Downloads/Controller.php:276
+#: src/API/Reports/Downloads/Stats/Controller.php:254
+#: src/API/Reports/Orders/Controller.php:283
+#: src/API/Reports/Orders/Stats/Controller.php:356
+#: src/API/Reports/PerformanceIndicators/Controller.php:518
+#: src/API/Reports/Products/Controller.php:285
+#: src/API/Reports/Products/Stats/Controller.php:338
+#: src/API/Reports/Revenue/Stats/Controller.php:383
+#: src/API/Reports/Taxes/Controller.php:257
+#: src/API/Reports/Taxes/Stats/Controller.php:334
+#: src/API/Reports/Variations/Controller.php:284
+msgid "Limit response to resources published before a given ISO8601 compliant date."
+msgstr ""
+
+#: src/API/Leaderboards.php:467
+msgid "URL query to persist across links."
+msgstr ""
+
+#: src/API/Leaderboards.php:487
+msgid "Leaderboard ID."
+msgstr ""
+
+#: src/API/Leaderboards.php:493
+msgid "Displayed title for the leaderboard."
+msgstr ""
+
+#: src/API/Leaderboards.php:499
+msgid "Table headers."
+msgstr ""
+
+#: src/API/Leaderboards.php:506
+msgid "Table column header."
+msgstr ""
+
+#: src/API/Leaderboards.php:516
+msgid "Table rows."
+msgstr ""
+
+#: src/API/Leaderboards.php:523
+msgid "Table cell display."
+msgstr ""
+
+#: src/API/Leaderboards.php:529
+msgid "Table cell value."
+msgstr ""
+
+#: src/API/NoteActions.php:34
+msgid "Unique ID for the Note."
+msgstr ""
+
+#: src/API/NoteActions.php:38
+msgid "Unique ID for the Note Action."
+msgstr ""
+
+#: src/API/NoteActions.php:65 src/API/NoteActions.php:84 src/API/Notes.php:94
+#: src/API/Notes.php:207
+msgid "Sorry, there is no resource with that ID."
+msgstr ""
+
+#: src/API/Notes.php:175 src/API/Notes.php:189 src/API/OnboardingProfile.php:76
+#: src/API/Reports/Controller.php:63
+msgid "Sorry, you cannot list resources."
+msgstr ""
+
+#: src/API/Notes.php:238 src/API/OnboardingProfile.php:90
+#: src/API/Reports/Import/Controller.php:113
+msgid "Sorry, you cannot edit this resource."
+msgstr ""
+
+#: src/API/Notes.php:323 src/API/Reports/Categories/Controller.php:251
+#: src/API/Reports/Coupons/Controller.php:257
+#: src/API/Reports/Coupons/Stats/Controller.php:303
+#: src/API/Reports/Customers/Controller.php:371
+#: src/API/Reports/Downloads/Controller.php:282
+#: src/API/Reports/Downloads/Stats/Controller.php:260
+#: src/API/Reports/Orders/Controller.php:289
+#: src/API/Reports/Orders/Stats/Controller.php:362
+#: src/API/Reports/Products/Controller.php:291
+#: src/API/Reports/Products/Stats/Controller.php:344
+#: src/API/Reports/Revenue/Stats/Controller.php:389
+#: src/API/Reports/Stock/Controller.php:471
+#: src/API/Reports/Taxes/Controller.php:263
+#: src/API/Reports/Taxes/Stats/Controller.php:340
+#: src/API/Reports/Variations/Controller.php:290
+msgid "Order sort attribute ascending or descending."
+msgstr ""
+
+#: src/API/Notes.php:330 src/API/Reports/Categories/Controller.php:258
+#: src/API/Reports/Coupons/Controller.php:264
+#: src/API/Reports/Coupons/Stats/Controller.php:310
+#: src/API/Reports/Customers/Controller.php:378
+#: src/API/Reports/Downloads/Controller.php:289
+#: src/API/Reports/Downloads/Stats/Controller.php:267
+#: src/API/Reports/Orders/Controller.php:296
+#: src/API/Reports/Orders/Stats/Controller.php:369
+#: src/API/Reports/Products/Controller.php:298
+#: src/API/Reports/Products/Stats/Controller.php:351
+#: src/API/Reports/Revenue/Stats/Controller.php:396
+#: src/API/Reports/Stock/Controller.php:478
+#: src/API/Reports/Taxes/Controller.php:270
+#: src/API/Reports/Taxes/Stats/Controller.php:347
+#: src/API/Reports/Variations/Controller.php:297
+msgid "Sort collection by object attribute."
+msgstr ""
+
+#: src/API/Notes.php:360
+msgid "Type of note."
+msgstr ""
+
+#: src/API/Notes.php:370
+msgid "Status of note."
+msgstr ""
+
+#: src/API/Notes.php:394
+msgid "ID of the note record."
+msgstr ""
+
+#: src/API/Notes.php:400
+msgid "Name of the note."
+msgstr ""
+
+#: src/API/Notes.php:406
+msgid "The type of the note (e.g. error, warning, etc.)."
+msgstr ""
+
+#: src/API/Notes.php:412
+msgid "Locale used for the note title and content."
+msgstr ""
+
+#: src/API/Notes.php:418
+msgid "Title of the note."
+msgstr ""
+
+#: src/API/Notes.php:424
+msgid "Content of the note."
+msgstr ""
+
+#: src/API/Notes.php:430
+msgid "Icon (gridicon) for the note."
+msgstr ""
+
+#: src/API/Notes.php:436
+msgid "Content data for the note. JSON string. Available for re-localization."
+msgstr ""
+
+#: src/API/Notes.php:442
+msgid "The status of the note (e.g. unactioned, actioned)."
+msgstr ""
+
+#: src/API/Notes.php:447
+msgid "Source of the note."
+msgstr ""
+
+#: src/API/Notes.php:453
+msgid "Date the note was created."
+msgstr ""
+
+#: src/API/Notes.php:459
+msgid "Date the note was created (GMT)."
+msgstr ""
+
+#: src/API/Notes.php:465
+msgid "Date after which the user should be reminded of the note, if any."
+msgstr ""
+
+#: src/API/Notes.php:471
+msgid "Date after which the user should be reminded of the note, if any (GMT)."
+msgstr ""
+
+#: src/API/Notes.php:477
+msgid "Whether or a user can request to be reminded about the note."
+msgstr ""
+
+#: src/API/Notes.php:483
+msgid "An array of actions, if any, for the note."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:154
+msgid "Sorry, you cannot manage plugins."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:169
+msgid "Invalid plugin."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:205 src/API/OnboardingPlugins.php:215
+#. translators: %s: plugin slug (example: woocommerce-services)
+msgid "The requested plugin `%s` could not be installed. Plugin API call failed."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:228 src/API/OnboardingPlugins.php:240
+#. translators: %s: plugin slug (example: woocommerce-services)
+msgid "The requested plugin `%s` could not be installed."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:278
+msgid "Invalid plugins."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:290
+#. translators: %s: plugin slug (example: woocommerce-services)
+msgid "Invalid plugin %s."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:295
+msgid "The requested plugins could not be activated."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:314
+msgid "Jetpack is not installed or active."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:325
+#: client/wc-api/onboarding/constants.js:11
+msgid "Jetpack"
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:338 src/API/OnboardingPlugins.php:401
+msgid "There was an error loading the WooCommerce.com Helper API."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:355 src/API/OnboardingPlugins.php:360
+#: src/API/OnboardingPlugins.php:417 src/API/OnboardingPlugins.php:422
+#: src/API/OnboardingPlugins.php:438
+#: client/dashboard/task-list/tasks/connect.js:57
+msgid "There was an error connecting to WooCommerce.com. Please try again."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:458
+msgid "There was an error connecting to PayPal."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:489
+msgid "There was an error connecting to Square."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:535
+msgid "Plugin slug."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:541
+msgid "Plugin name."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:547
+msgid "Plugin status."
+msgstr ""
+
+#: src/API/OnboardingPlugins.php:567
+msgid "Action that should be completed to connect Jetpack."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:136
+msgid "Onboarding profile data has been updated."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:207
+msgid "Whether or not the profile was completed."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:214
+msgid "How the Jetpack/WooCommerce Services step was handled."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:228
+msgid "Account type used for Jetpack."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:240
+msgid "Industry."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:250
+msgid "Types of products sold."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:262
+msgid "Number of products to be added."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:276
+msgid "Other places the store is selling products."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:290
+msgid "Current annual revenue of the store."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:305
+msgid "Name of other platform used to sell."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:319
+msgid "Extra business extensions to install."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:331
+msgid "Selected store theme."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:339
+msgid "Whether or not the user opted to purchase items now or later."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:346
+msgid "Whether or not this store was setup for a client."
+msgstr ""
+
+#: src/API/OnboardingProfile.php:353
+msgid ""
+"Whether or not the store was connected to WooCommerce.com during the "
+"extension flow."
+msgstr ""
+
+#: src/API/OnboardingTasks.php:89
+msgid "Sorry, you are not allowed to create resources."
+msgstr ""
+
+#: src/API/OnboardingTasks.php:103
+msgid "Sorry, you are not allowed to create new pages."
+msgstr ""
+
+#: src/API/OnboardingTasks.php:132
+msgid "Sorry, the sample products data file was not found."
+msgstr ""
+
+#: src/API/OnboardingTasks.php:190 src/API/OnboardingTasks.php:205
+msgid "Write title…"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:191 src/API/OnboardingTasks.php:206
+msgid "Welcome to the store"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:195 src/API/OnboardingTasks.php:210
+msgid "Write a short welcome message here"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:199 src/API/OnboardingTasks.php:214
+msgid "Go shopping"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:232 src/API/OnboardingTasks.php:239
+msgid "Content…"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:260
+msgid "Shop by Category"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:266
+msgid "New In"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:272
+msgid "Fan Favorites"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:278
+msgid "On Sale"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:284
+msgid "Best Sellers"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:300
+msgid "New Products"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:408
+msgid "Homepage"
+msgstr ""
+
+#: src/API/OnboardingTasks.php:431
+msgid "Homepage created."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:76
+msgid "Sorry, you cannot manage themes."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:92 src/API/OnboardingThemes.php:166
+msgid "Invalid theme."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:127
+#. translators: %s: theme slug (example: woocommerce-services)
+msgid "The requested theme `%s` could not be installed. Theme API call failed."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:142
+#. translators: %s: theme slug (example: woocommerce-services)
+msgid "The requested theme `%s` could not be installed."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:175
+#. translators: %s: theme slug (example: woocommerce-services)
+msgid "Invalid theme %s."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:180
+msgid "The requested theme could not be activated."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:202
+msgid "Theme slug."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:208
+msgid "Theme name."
+msgstr ""
+
+#: src/API/OnboardingThemes.php:214
+msgid "Theme status."
+msgstr ""
+
+#: src/API/Options.php:76
+msgid "You must supply an array of options."
+msgstr ""
+
+#: src/API/Options.php:81
+msgid "Sorry, you cannot view these options."
+msgstr ""
+
+#: src/API/Options.php:115
+msgid "You must supply an array of options and values."
+msgstr ""
+
+#: src/API/Options.php:120
+msgid "Sorry, you cannot manage these options."
+msgstr ""
+
+#: src/API/Options.php:202
+msgid "Array of options with associated values."
+msgstr ""
+
+#: src/API/Orders.php:37
+msgid "Limit result set to orders matching part of an order number."
+msgstr ""
+
+#: src/API/ProductVariations.php:36 src/API/Products.php:68
+msgid "Search by similar product name or sku."
+msgstr ""
+
+#: src/API/ProductVariations.php:86
+msgid "Product parent name."
+msgstr ""
+
+#: src/API/ProductVariations.php:91
+msgid "Product type."
+msgstr ""
+
+#: src/API/ProductVariations.php:98 src/API/Reports/Stock/Controller.php:379
+msgid "Product parent ID."
+msgstr ""
+
+#: src/API/Products.php:62
+msgid "Limit result set to products that are low or out of stock."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:78
+msgid "Invalid response from data store."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:170
+msgid "Category ID."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:176
+msgid "Amount of items sold."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:182
+#: src/API/Reports/Revenue/Stats/Controller.php:169
+msgid "Total Sales."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:188
+#: src/API/Reports/Coupons/Controller.php:169
+#: src/API/Reports/Products/Stats/Controller.php:175
+#: src/API/Reports/Revenue/Stats/Controller.php:223
+#: src/API/Reports/Taxes/Controller.php:214
+#: src/API/Reports/Taxes/Stats/Controller.php:193
+msgid "Number of orders."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:194
+msgid "Amount of products."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:204
+msgid "Category name."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:272
+#: src/API/Reports/Coupons/Stats/Controller.php:322
+#: src/API/Reports/Downloads/Stats/Controller.php:277
+#: src/API/Reports/Orders/Stats/Controller.php:381
+#: src/API/Reports/Products/Stats/Controller.php:368
+#: src/API/Reports/Revenue/Stats/Controller.php:414
+#: src/API/Reports/Taxes/Stats/Controller.php:360
+msgid "Time interval to use for buckets in the returned data."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:286
+#: src/API/Reports/Orders/Controller.php:367
+#: src/API/Reports/Orders/Stats/Controller.php:405
+msgid "Limit result set to items that have the specified order status."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:296
+#: src/API/Reports/Orders/Controller.php:377
+#: src/API/Reports/Orders/Stats/Controller.php:416
+msgid "Limit result set to items that don't have the specified order status."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:306
+msgid ""
+"Limit result set to all items that have the specified term assigned in the "
+"categories taxonomy."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:315
+msgid "Add additional piece of info about each category to the report."
+msgstr ""
+
+#: src/API/Reports/Categories/Controller.php:334
+#: src/API/Reports/Revenue/Stats/Controller.php:457
+msgid "Net Revenue"
+msgstr ""
+
+#: src/API/Reports/Categories/DataStore.php:277
+#: src/API/Reports/Orders/Stats/DataStore.php:298
+#: src/API/Reports/Orders/Stats/DataStore.php:351
+#: src/API/Reports/Products/Stats/DataStore.php:181
+#: src/API/Reports/Products/Stats/DataStore.php:197
+#: src/API/Reports/Taxes/Stats/DataStore.php:191
+msgid "Sorry, fetching revenue data failed."
+msgstr ""
+
+#: src/API/Reports/Controller.php:81
+msgid ""
+"Batch endpoint for getting specific performance indicators from `stats` "
+"endpoints."
+msgstr ""
+
+#: src/API/Reports/Controller.php:85
+msgid "Stats about revenue."
+msgstr ""
+
+#: src/API/Reports/Controller.php:89
+msgid "Stats about orders."
+msgstr ""
+
+#: src/API/Reports/Controller.php:93
+msgid "Products detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:97
+msgid "Stats about products."
+msgstr ""
+
+#: src/API/Reports/Controller.php:101
+msgid "Product categories detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:105
+msgid "Stats about product categories."
+msgstr ""
+
+#: src/API/Reports/Controller.php:109
+msgid "Coupons detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:113
+msgid "Stats about coupons."
+msgstr ""
+
+#: src/API/Reports/Controller.php:117
+msgid "Taxes detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:121
+msgid "Stats about taxes."
+msgstr ""
+
+#: src/API/Reports/Controller.php:125
+msgid "Product downloads detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:129
+msgid "Product download files detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:133
+msgid "Stats about product downloads."
+msgstr ""
+
+#: src/API/Reports/Controller.php:137
+msgid "Customers detailed reports."
+msgstr ""
+
+#: src/API/Reports/Controller.php:257
+msgid "An alphanumeric identifier for the resource."
+msgstr ""
+
+#: src/API/Reports/Controller.php:263
+msgid "A human-readable description of the resource."
+msgstr ""
+
+#: src/API/Reports/Controller.php:269
+msgid "API path."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:157
+msgid "Coupon ID."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:163
+#: src/API/Reports/Coupons/Stats/Controller.php:146
+msgid "Net discount amount."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:179
+msgid "Coupon code."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:185
+msgid "Coupon creation date."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:191
+msgid "Coupon creation date in GMT."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:197
+msgid "Coupon expiration date."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:203
+msgid "Coupon expiration date in GMT."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:210
+msgid "Coupon discount type."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:276
+#: src/API/Reports/Coupons/Stats/Controller.php:336
+msgid "Limit result set to coupons assigned specific coupon IDs."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:285
+#: src/API/Reports/Orders/Controller.php:411
+msgid "Add additional piece of info about each coupon to the report."
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:305
+#: client/analytics/report/coupons/table.js:56
+msgid "Created"
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:306
+#: client/analytics/report/coupons/table.js:60
+msgid "Expires"
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:307
+#: client/analytics/report/coupons/table.js:64
+msgid "Type"
+msgstr ""
+
+#: src/API/Reports/Coupons/Controller.php:319
+#: src/API/Reports/Products/Controller.php:428
+#: src/API/Reports/Products/Controller.php:429
+#: client/analytics/report/orders/table.js:101
+msgctxt "customer type"
+msgid "N/A"
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:154
+msgid "Number of coupons."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:160
+#: client/analytics/report/coupons/config.js:20
+#: client/dashboard/dashboard-charts/config.js:62
+msgid "Discounted Orders"
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:161
+msgid "Number of discounted orders."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:171
+#: src/API/Reports/Orders/Stats/Controller.php:225
+#: src/API/Reports/Products/Stats/Controller.php:184
+#: src/API/Reports/Revenue/Stats/Controller.php:252
+#: src/API/Reports/Taxes/Stats/Controller.php:208
+msgid "Reports data grouped by segment condition."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:179
+#: src/API/Reports/Orders/Stats/Controller.php:233
+#: src/API/Reports/Products/Stats/Controller.php:192
+#: src/API/Reports/Revenue/Stats/Controller.php:260
+#: src/API/Reports/Taxes/Stats/Controller.php:216
+msgid "Segment identificator."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:185
+#: src/API/Reports/Coupons/Stats/Controller.php:250
+#: src/API/Reports/Downloads/Stats/Controller.php:207
+#: src/API/Reports/Orders/Stats/Controller.php:239
+#: src/API/Reports/Orders/Stats/Controller.php:309
+#: src/API/Reports/Products/Stats/Controller.php:205
+#: src/API/Reports/Products/Stats/Controller.php:270
+#: src/API/Reports/Revenue/Stats/Controller.php:266
+#: src/API/Reports/Revenue/Stats/Controller.php:336
+#: src/API/Reports/Taxes/Stats/Controller.php:222
+#: src/API/Reports/Taxes/Stats/Controller.php:287
+msgid "Interval subtotals."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:204
+#: src/API/Reports/Customers/Stats/Controller.php:166
+#: src/API/Reports/Downloads/Stats/Controller.php:161
+#: src/API/Reports/Orders/Stats/Controller.php:263
+#: src/API/Reports/Products/Stats/Controller.php:224
+#: src/API/Reports/Revenue/Stats/Controller.php:290
+#: src/API/Reports/Stock/Stats/Controller.php:118
+#: src/API/Reports/Taxes/Stats/Controller.php:241
+msgid "Totals data."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:211
+#: src/API/Reports/Downloads/Stats/Controller.php:168
+#: src/API/Reports/Orders/Stats/Controller.php:270
+#: src/API/Reports/Products/Stats/Controller.php:231
+#: src/API/Reports/Revenue/Stats/Controller.php:297
+#: src/API/Reports/Taxes/Stats/Controller.php:248
+msgid "Reports data grouped by intervals."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:219
+#: src/API/Reports/Downloads/Stats/Controller.php:176
+#: src/API/Reports/Orders/Stats/Controller.php:278
+#: src/API/Reports/Products/Stats/Controller.php:239
+#: src/API/Reports/Revenue/Stats/Controller.php:305
+#: src/API/Reports/Taxes/Stats/Controller.php:256
+msgid "Type of interval."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:226
+#: src/API/Reports/Downloads/Stats/Controller.php:183
+#: src/API/Reports/Orders/Stats/Controller.php:285
+#: src/API/Reports/Products/Stats/Controller.php:246
+#: src/API/Reports/Revenue/Stats/Controller.php:312
+#: src/API/Reports/Taxes/Stats/Controller.php:263
+msgid "The date the report start, in the site's timezone."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:232
+#: src/API/Reports/Downloads/Stats/Controller.php:189
+#: src/API/Reports/Orders/Stats/Controller.php:291
+#: src/API/Reports/Products/Stats/Controller.php:252
+#: src/API/Reports/Revenue/Stats/Controller.php:318
+#: src/API/Reports/Taxes/Stats/Controller.php:269
+msgid "The date the report start, as GMT."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:238
+#: src/API/Reports/Downloads/Stats/Controller.php:195
+#: src/API/Reports/Orders/Stats/Controller.php:297
+#: src/API/Reports/Products/Stats/Controller.php:258
+#: src/API/Reports/Revenue/Stats/Controller.php:324
+#: src/API/Reports/Taxes/Stats/Controller.php:275
+msgid "The date the report end, in the site's timezone."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:244
+#: src/API/Reports/Downloads/Stats/Controller.php:201
+#: src/API/Reports/Orders/Stats/Controller.php:303
+#: src/API/Reports/Products/Stats/Controller.php:264
+#: src/API/Reports/Revenue/Stats/Controller.php:330
+#: src/API/Reports/Taxes/Stats/Controller.php:281
+msgid "The date the report end, as GMT."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Controller.php:345
+#: src/API/Reports/Orders/Stats/Controller.php:505
+#: src/API/Reports/Products/Stats/Controller.php:409
+#: src/API/Reports/Revenue/Stats/Controller.php:428
+#: src/API/Reports/Taxes/Stats/Controller.php:383
+msgid "Segment the response by additional constraint."
+msgstr ""
+
+#: src/API/Reports/Coupons/Stats/Segmenter.php:285
+#: src/API/Reports/Orders/Stats/Segmenter.php:380
+#: src/API/Reports/Products/Stats/Segmenter.php:171
+msgid ""
+"product_includes parameter need to specify exactly one product when "
+"segmenting by variation."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:227
+#: src/API/Reports/Orders/Controller.php:202
+msgid "Customer ID."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:233
+msgid "User ID."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:239
+msgid "Name."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:245
+msgid "Username."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:251
+#: src/API/Reports/Taxes/Controller.php:178
+msgid "Country / Region."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:257
+msgid "City."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:263
+msgid "Region."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:269
+msgid "Postal code."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:275
+msgid "Date registered."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:281
+msgid "Date registered GMT."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:287
+msgid "Date last active."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:293
+msgid "Date last active GMT."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:299
+msgid "Order count."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:305
+msgid "Total spend."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:311
+msgid "Avg order value."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:330
+#: src/API/Reports/Customers/Controller.php:479
+#: src/API/Reports/Customers/Stats/Controller.php:187
+#: src/API/Reports/Customers/Stats/Controller.php:281
+msgid ""
+"Limit response to objects registered before (or at) a given ISO8601 "
+"compliant datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:336
+#: src/API/Reports/Customers/Controller.php:485
+#: src/API/Reports/Customers/Stats/Controller.php:193
+#: src/API/Reports/Customers/Stats/Controller.php:287
+msgid ""
+"Limit response to objects registered after (or at) a given ISO8601 "
+"compliant datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:342
+msgid ""
+"Limit response to resources with orders published after a given ISO8601 "
+"compliant date."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:348
+msgid ""
+"Limit response to resources with orders published before a given ISO8601 "
+"compliant date."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:397
+#: src/API/Reports/Customers/Stats/Controller.php:199
+#: src/API/Reports/Downloads/Stats/Controller.php:291
+#: src/API/Reports/Orders/Stats/Controller.php:395
+#: src/API/Reports/Products/Controller.php:322
+msgid ""
+"Indicates whether all the conditions should be true for the resulting set, "
+"or if any one of them is sufficient. Match affects the following "
+"parameters: status_is, status_is_not, product_includes, product_excludes, "
+"coupon_includes, coupon_excludes, customer, categories"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:407
+#: src/API/Reports/Customers/Stats/Controller.php:209
+msgid ""
+"Limit response to objects with a customer field containing the search term. "
+"Searches the field provided by `searchby`."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:422
+#: src/API/Reports/Customers/Stats/Controller.php:224
+msgid "Limit response to objects with specfic names."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:427
+#: src/API/Reports/Customers/Stats/Controller.php:229
+msgid "Limit response to objects excluding specfic names."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:432
+#: src/API/Reports/Customers/Stats/Controller.php:234
+msgid "Limit response to objects with specfic usernames."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:437
+#: src/API/Reports/Customers/Stats/Controller.php:239
+msgid "Limit response to objects excluding specfic usernames."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:442
+#: src/API/Reports/Customers/Stats/Controller.php:244
+msgid "Limit response to objects including emails."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:447
+#: src/API/Reports/Customers/Stats/Controller.php:249
+msgid "Limit response to objects excluding emails."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:452
+#: src/API/Reports/Customers/Stats/Controller.php:254
+msgid "Limit response to objects with specfic countries."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:457
+#: src/API/Reports/Customers/Stats/Controller.php:259
+msgid "Limit response to objects excluding specfic countries."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:462
+#: src/API/Reports/Customers/Stats/Controller.php:264
+msgid ""
+"Limit response to objects last active before (or at) a given ISO8601 "
+"compliant datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:468
+#: src/API/Reports/Customers/Stats/Controller.php:270
+msgid ""
+"Limit response to objects last active after (or at) a given ISO8601 "
+"compliant datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:474
+#: src/API/Reports/Customers/Controller.php:491
+#: src/API/Reports/Customers/Stats/Controller.php:276
+#: src/API/Reports/Customers/Stats/Controller.php:293
+msgid ""
+"Limit response to objects last active between two given ISO8601 compliant "
+"datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:496
+#: src/API/Reports/Customers/Stats/Controller.php:298
+msgid ""
+"Limit response to objects with an order count greater than or equal to "
+"given integer."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:502
+#: src/API/Reports/Customers/Stats/Controller.php:304
+msgid ""
+"Limit response to objects with an order count less than or equal to given "
+"integer."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:508
+#: src/API/Reports/Customers/Stats/Controller.php:310
+msgid "Limit response to objects with an order count between two given integers."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:513
+#: src/API/Reports/Customers/Stats/Controller.php:315
+msgid ""
+"Limit response to objects with a total order spend greater than or equal to "
+"given number."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:518
+#: src/API/Reports/Customers/Stats/Controller.php:320
+msgid ""
+"Limit response to objects with a total order spend less than or equal to "
+"given number."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:523
+#: src/API/Reports/Customers/Stats/Controller.php:325
+msgid ""
+"Limit response to objects with a total order spend between two given "
+"numbers."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:528
+#: src/API/Reports/Customers/Stats/Controller.php:330
+msgid ""
+"Limit response to objects with an average order spend greater than or equal "
+"to given number."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:533
+#: src/API/Reports/Customers/Stats/Controller.php:335
+msgid ""
+"Limit response to objects with an average order spend less than or equal to "
+"given number."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:538
+#: src/API/Reports/Customers/Stats/Controller.php:340
+msgid ""
+"Limit response to objects with an average order spend between two given "
+"numbers."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:543
+#: src/API/Reports/Customers/Stats/Controller.php:345
+msgid ""
+"Limit response to objects with last order before (or at) a given ISO8601 "
+"compliant datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:549
+#: src/API/Reports/Customers/Stats/Controller.php:351
+msgid ""
+"Limit response to objects with last order after (or at) a given ISO8601 "
+"compliant datetime."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:555
+#: src/API/Reports/Customers/Stats/Controller.php:357
+msgid "Limit result to items with specified customer ids."
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:574
+#: client/analytics/report/customers/config.js:67
+#: client/analytics/report/customers/table.js:37
+msgid "Name"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:575
+#: client/analytics/report/customers/config.js:139
+#: client/analytics/report/customers/table.js:44
+#: client/analytics/report/downloads/config.js:77
+msgid "Username"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:576
+#: client/analytics/report/customers/table.js:49
+msgid "Last Active"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:577
+#: client/analytics/report/customers/table.js:55
+msgid "Sign Up"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:578
+#: client/analytics/report/customers/config.js:167
+#: client/analytics/report/customers/table.js:60
+msgid "Email"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:581
+#: client/analytics/report/customers/config.js:257
+#: client/analytics/report/customers/table.js:76
+msgid "AOV"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:582
+#: client/analytics/report/customers/config.js:98
+#: client/analytics/report/customers/table.js:82
+#: client/dashboard/components/settings/general/store-address.js:177
+msgid "Country / Region"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:583
+#: client/analytics/report/customers/table.js:87
+#: client/dashboard/components/settings/general/store-address.js:194
+msgid "City"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:584
+#: client/analytics/report/customers/table.js:93
+msgid "Region"
+msgstr ""
+
+#: src/API/Reports/Customers/Controller.php:585
+#: client/analytics/report/customers/table.js:99
+msgid "Postal Code"
+msgstr ""
+
+#: src/API/Reports/Customers/Stats/Controller.php:133
+msgid "Number of customers."
+msgstr ""
+
+#: src/API/Reports/Customers/Stats/Controller.php:139
+msgid "Average number of orders."
+msgstr ""
+
+#: src/API/Reports/Customers/Stats/Controller.php:145
+msgid "Average total spend per customer."
+msgstr ""
+
+#: src/API/Reports/Customers/Stats/Controller.php:152
+msgid "Average AOV per customer."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:164
+msgid "ID."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:170
+#: src/API/Reports/Downloads/Controller.php:206
+#: src/API/Reports/Products/Controller.php:165
+#: src/API/Reports/Variations/Controller.php:170
+#: src/API/Reports/Variations/Controller.php:176
+msgid "Product ID."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:173
+msgid "The date of the download, in the site's timezone."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:179
+msgid "The date of the download, as GMT."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:188
+msgid "Download ID."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:194
+msgid "File name."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:200
+msgid "File URL."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:212
+#: src/API/Reports/Orders/Controller.php:172
+msgid "Order ID."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:218
+#: src/API/Reports/Orders/Controller.php:178
+msgid "Order Number."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:224
+msgid "User ID for the downloader."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:230
+msgid "User name of the downloader."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:236
+msgid "IP address for the downloader."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:299
+msgid ""
+"Indicates whether all the conditions should be true for the resulting set, "
+"or if any one of them is sufficient. Match affects the following "
+"parameters: products, orders, username, ip_address."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:309
+#: src/API/Reports/Downloads/Stats/Controller.php:301
+#: src/API/Reports/Orders/Controller.php:307
+#: src/API/Reports/Orders/Stats/Controller.php:426
+msgid "Limit result set to items that have the specified product(s) assigned."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:319
+#: src/API/Reports/Downloads/Stats/Controller.php:311
+#: src/API/Reports/Orders/Controller.php:317
+#: src/API/Reports/Orders/Stats/Controller.php:436
+msgid "Limit result set to items that don't have the specified product(s) assigned."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:329
+#: src/API/Reports/Downloads/Stats/Controller.php:320
+#: src/API/Reports/Orders/Controller.php:418
+msgid "Limit result set to items that have the specified order ids."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:338
+#: src/API/Reports/Downloads/Stats/Controller.php:329
+#: src/API/Reports/Orders/Controller.php:427
+msgid "Limit result set to items that don't have the specified order ids."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:347
+msgid "Limit response to objects that have the specified user ids."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:356
+msgid "Limit response to objects that don't have the specified user ids."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:365
+#: src/API/Reports/Downloads/Stats/Controller.php:356
+msgid "Limit response to objects that have a specified ip address."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:374
+#: src/API/Reports/Downloads/Stats/Controller.php:365
+msgid "Limit response to objects that don't have a specified ip address."
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:392
+#: src/API/Reports/Orders/Controller.php:477
+#: src/API/Reports/Revenue/Stats/Controller.php:450
+#: client/analytics/report/downloads/table.js:36
+#: client/analytics/report/orders/table.js:37
+#: client/analytics/report/revenue/table.js:39
+msgid "Date"
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:393
+#: src/API/Reports/Products/Controller.php:389
+#: client/analytics/report/downloads/table.js:44
+#: client/analytics/report/products/table.js:43
+msgid "Product Title"
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:394
+#: client/analytics/report/downloads/table.js:50
+msgid "File Name"
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:395
+#: src/API/Reports/Orders/Controller.php:478
+#: client/analytics/report/downloads/table.js:54
+#: client/analytics/report/orders/table.js:45
+msgid "Order #"
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:396
+#: client/analytics/report/downloads/table.js:59
+msgid "User Name"
+msgstr ""
+
+#: src/API/Reports/Downloads/Controller.php:397
+#: client/analytics/report/downloads/table.js:63
+msgid "IP"
+msgstr ""
+
+#: src/API/Reports/Downloads/Stats/Controller.php:146
+#: src/Features/Analytics.php:124 src/Features/Onboarding.php:246
+#: src/ReportCSVEmail.php:40
+#: client/analytics/report/downloads/config.js:21
+#: client/analytics/report/downloads/table.js:169
+#: client/analytics/report/index.js:90
+#: client/dashboard/dashboard-charts/config.js:92
+msgid "Downloads"
+msgstr ""
+
+#: src/API/Reports/Downloads/Stats/Controller.php:147
+msgid "Number of downloads."
+msgstr ""
+
+#: src/API/Reports/Downloads/Stats/Controller.php:338
+msgid "Limit response to objects that have the specified customer ids."
+msgstr ""
+
+#: src/API/Reports/Downloads/Stats/Controller.php:347
+msgid "Limit response to objects that don't have the specified customer ids."
+msgstr ""
+
+#: src/API/Reports/Downloads/Stats/DataStore.php:120
+#: src/API/Reports/Downloads/Stats/DataStore.php:136
+msgid "Sorry, fetching downloads data failed."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:79
+msgid "Parameters to pass on to the exported report."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:84
+msgid "When true, email a link to download the export to the requesting user."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:103
+#: src/API/Reports/Import/Controller.php:218
+msgid "Regeneration status."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:109
+#: src/API/Reports/Import/Controller.php:224
+msgid "Regenerate data message."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:132
+msgid "Percentage complete."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:138
+msgid "Export download URL."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:167
+msgid "There is no data to export for the given request."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:175
+msgid "Your report file is being generated."
+msgstr ""
+
+#: src/API/Reports/Export/Controller.php:210
+msgid "Sorry, there is no export with that ID."
+msgstr ""
+
+#: src/API/Reports/Import/Controller.php:190
+msgid "Number of days to import."
+msgstr ""
+
+#: src/API/Reports/Import/Controller.php:197
+msgid "Skip importing existing order data."
+msgstr ""
+
+#: src/API/Reports/Import/Controller.php:246
+msgid "All pending and in-progress import actions have been cancelled."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:184
+msgid "Date the order was created, in the site's timezone."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:190
+msgid "Date the order was created, as GMT."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:196
+msgid "Order status."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:208
+#: src/API/Reports/Products/Controller.php:171
+#: src/API/Reports/Products/Stats/Controller.php:161
+#: src/API/Reports/Variations/Controller.php:182
+msgid "Number of items sold."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:214
+msgid "Net total revenue."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:220
+msgid "Returning or new customer."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:230
+msgid "List of order product IDs, names, quantities."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:236
+msgid "List of order coupons."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:242
+msgid "Order customer information."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:327
+#: src/API/Reports/Orders/Stats/Controller.php:445
+msgid "Limit result set to items that have the specified coupon(s) assigned."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:337
+#: src/API/Reports/Orders/Stats/Controller.php:454
+#: src/API/Reports/Orders/Stats/Controller.php:483
+msgid "Limit result set to items that don't have the specified coupon(s) assigned."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:347
+#: src/API/Reports/Orders/Stats/Controller.php:463
+msgid "Limit result set to items that have the specified tax rate(s) assigned."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:357
+#: src/API/Reports/Orders/Stats/Controller.php:473
+msgid ""
+"Limit result set to items that don't have the specified tax rate(s) "
+"assigned."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:387
+msgid "Limit result set to returning or new customers."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:398
+#: src/API/Reports/Orders/Stats/Controller.php:492
+msgid "Limit result set to specific types of refunds."
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:451
+#. translators: 1: numeric product quantity, 2: name of product
+msgid "%1$s× %2$s"
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:480
+#: client/analytics/report/orders/table.js:57
+msgid "Customer"
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:481
+#: client/analytics/report/orders/table.js:63
+msgid "Product(s)"
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:483
+#: client/analytics/report/orders/table.js:77
+msgid "Coupon(s)"
+msgstr ""
+
+#: src/API/Reports/Orders/Controller.php:484
+#: src/API/Reports/Products/Controller.php:392
+#: src/API/Reports/Variations/Controller.php:360
+msgid "N. Revenue"
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:157
+#: src/API/Reports/Products/Stats/Controller.php:168
+#: src/API/Reports/Revenue/Stats/Controller.php:177
+msgid "Net Sales."
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:165
+msgid "Number of orders"
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:172
+msgid "Average order value."
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:180
+msgid "Average items per order"
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:186
+msgid "Number of items sold"
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:192
+#: src/API/Reports/Revenue/Stats/Controller.php:185
+msgid "Amount discounted by coupons."
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:198
+#: src/API/Reports/Revenue/Stats/Controller.php:191
+msgid "Unique coupons count."
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:204
+msgid "Number of orders done by returning customers"
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:210
+msgid "Number of orders done by new customers"
+msgstr ""
+
+#: src/API/Reports/Orders/Stats/Controller.php:216
+msgid "Number of distinct products sold."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:130
+msgid "Sorry, fetching performance indicators failed."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:278
+msgid "A list of stats to query must be provided."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:433
+#: src/API/Reports/Stock/Controller.php:373
+msgid "Unique identifier for the resource."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:440
+msgid "The specific chart this stat referrers to."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:446
+msgid "Human readable label for the stat."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:452
+msgid "Format of the stat."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:459
+msgid ""
+"Value of the stat. Returns null if the stat does not exist or cannot be "
+"loaded."
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:490
+msgid "There was an issue loading the report endpoints"
+msgstr ""
+
+#: src/API/Reports/PerformanceIndicators/Controller.php:500
+#. translators: Allowed values is a list of stat endpoints.
+msgid "Limit response to specific report stats. Allowed values: %s."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:177
+#: src/API/Reports/Variations/Controller.php:188
+msgid "Total Net Sales of all items sold."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:183
+#: src/API/Reports/Variations/Controller.php:194
+msgid "Number of orders product appeared in."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:190
+#: src/API/Reports/Stock/Controller.php:385
+#: src/API/Reports/Variations/Controller.php:201
+msgid "Product name."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:196
+#: src/API/Reports/Variations/Controller.php:207
+msgid "Product price."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:202
+#: src/API/Reports/Variations/Controller.php:213
+msgid "Product image."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:208
+#: src/API/Reports/Variations/Controller.php:219
+msgid "Product link."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:214
+msgid "Product category IDs."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:220
+#: src/API/Reports/Variations/Controller.php:231
+msgid "Product inventory status."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:226
+#: src/API/Reports/Variations/Controller.php:237
+msgid "Product inventory quantity."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:232
+#: src/API/Reports/Variations/Controller.php:243
+msgid "Product inventory threshold for low stock."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:238
+msgid "Product variations IDs."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:244
+msgid "Product SKU."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:313
+#: src/API/Reports/Products/Stats/Controller.php:382
+msgid "Limit result to items from the specified categories."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:332
+#: src/API/Reports/Products/Stats/Controller.php:391
+#: src/API/Reports/Variations/Controller.php:310
+msgid "Limit result to items with specified product ids."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:342
+#: src/API/Reports/Variations/Controller.php:328
+msgid "Add additional piece of info about each product to the report."
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:390
+#: src/API/Reports/Stock/Controller.php:528
+#: src/API/Reports/Variations/Controller.php:358
+#: client/analytics/report/products/table-variations.js:44
+#: client/analytics/report/products/table.js:50
+#: client/analytics/report/stock/table.js:44
+msgid "SKU"
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:395
+#: client/analytics/report/products/table-variations.js:204
+#: client/analytics/report/products/table.js:82
+msgid "Variations"
+msgstr ""
+
+#: src/API/Reports/Products/Controller.php:400
+#: src/API/Reports/Stock/Controller.php:530
+#: src/API/Reports/Variations/Controller.php:366 src/Features/Analytics.php:130
+#: src/ReportCSVEmail.php:41
+#: client/analytics/report/index.js:79
+#: client/analytics/report/products/table-variations.js:79
+#: client/analytics/report/products/table.js:94
+#: client/analytics/report/stock/table.js:165
+#: client/header/activity-panel/index.js:114
+#: client/header/activity-panel/panels/stock/index.js:76
+msgid "Stock"
+msgstr ""
+
+#: src/API/Reports/Products/DataStore.php:229
+#. translators: %s is product name
+msgid "%s (Deleted)"
+msgstr ""
+
+#: src/API/Reports/Products/DataStore.php:229
+msgid "(Deleted)"
+msgstr ""
+
+#: src/API/Reports/Products/Stats/Controller.php:198
+msgid "Human readable segment label, either product or variation name."
+msgstr ""
+
+#: src/API/Reports/Products/Stats/Controller.php:400
+#: src/API/Reports/Variations/Controller.php:319
+msgid "Limit result to items with specified variation ids."
+msgstr ""
+
+#: src/API/Reports/Query.php:24
+#. translators: %s: Method name
+msgid "Method '%s' not implemented. Must be overridden in subclass."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:198
+#: src/API/Reports/Revenue/Stats/Controller.php:456
+#: client/analytics/report/revenue/config.js:49
+#: client/analytics/report/revenue/table.js:89
+#: client/dashboard/dashboard-charts/config.js:87
+msgid "Shipping"
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:199
+msgid "Total of shipping."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:207
+msgid "Total of taxes."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:214
+#: src/API/Reports/Revenue/Stats/Controller.php:453
+#: client/analytics/report/revenue/config.js:22
+#: client/analytics/report/revenue/table.js:61
+#: client/dashboard/dashboard-charts/config.js:57
+msgid "Returns"
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:215
+msgid "Total of returns."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:229
+msgid "Items sold."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:235
+msgid "Products sold."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:241
+msgid "Gross Sales."
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:452
+#: client/analytics/report/revenue/config.js:55
+#: client/analytics/report/revenue/table.js:96
+#: client/dashboard/dashboard-charts/config.js:32
+msgid "Total Sales"
+msgstr ""
+
+#: src/API/Reports/Revenue/Stats/Controller.php:455
+#: src/Features/Analytics.php:118 src/ReportCSVEmail.php:39
+#: client/analytics/report/index.js:68
+#: client/analytics/report/revenue/config.js:42
+#: client/analytics/report/revenue/table.js:82
+#: client/analytics/report/taxes/table.js:168
+msgid "Taxes"
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:391
+msgid "Unique identifier."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:397
+msgid "Stock status."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:404
+msgid "Stock quantity."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:410
+msgid "Manage stock."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:447
+msgid "Ensure result set excludes specific IDs."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:456
+msgid "Limit result set to specific ids."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:465
+msgid "Offset the result set by a specific number of items."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:493
+msgid "Limit result set to those of particular parent IDs."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:502
+msgid "Limit result set to all items except those of a particular parent ID."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:511
+msgid "Limit result set to items assigned a stock report type."
+msgstr ""
+
+#: src/API/Reports/Stock/Controller.php:527
+#: client/analytics/report/stock/table.js:37
+msgid "Product / Variation"
+msgstr ""
+
+#: src/API/Reports/Stock/Stats/Controller.php:88
+msgid "Number of products."
+msgstr ""
+
+#: src/API/Reports/Stock/Stats/Controller.php:94
+msgid "Number of low stock products."
+msgstr ""
+
+#: src/API/Reports/Stock/Stats/Controller.php:105
+#. translators: Stock status. Example: "Number of low stock products
+msgid "Number of %s products."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:160
+msgid "Tax rate ID."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:166
+msgid "Tax rate name."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:172
+msgid "Tax rate."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:184
+msgid "State."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:190
+msgid "Priority."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:196
+#: src/API/Reports/Taxes/Stats/Controller.php:169
+msgid "Total tax."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:202
+#: src/API/Reports/Taxes/Stats/Controller.php:177
+msgid "Order tax."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:208
+#: src/API/Reports/Taxes/Stats/Controller.php:185
+msgid "Shipping tax."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:286
+msgid "Limit result set to items assigned one or more tax rates."
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:305
+#: client/analytics/report/taxes/table.js:35
+msgid "Tax Code"
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:306
+#: client/analytics/report/taxes/table.js:42
+msgid "Rate"
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:307
+#: client/analytics/report/taxes/config.js:22
+#: client/analytics/report/taxes/table.js:48
+#: client/dashboard/dashboard-charts/config.js:72
+msgid "Total Tax"
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:308
+#: client/analytics/report/taxes/config.js:29
+#: client/analytics/report/taxes/table.js:53
+#: client/dashboard/dashboard-charts/config.js:77
+msgid "Order Tax"
+msgstr ""
+
+#: src/API/Reports/Taxes/Controller.php:309
+#: client/analytics/report/taxes/config.js:36
+#: client/analytics/report/taxes/table.js:58
+#: client/dashboard/dashboard-charts/config.js:82
+msgid "Shipping Tax"
+msgstr ""
+
+#: src/API/Reports/Taxes/Stats/Controller.php:199
+msgid "Amount of tax codes."
+msgstr ""
+
+#: src/API/Reports/Taxes/Stats/Controller.php:374
+msgid ""
+"Limit result set to all items that have the specified term assigned in the "
+"taxes taxonomy."
+msgstr ""
+
+#: src/API/Reports/Taxes/Stats/DataStore.php:225
+msgid "Sorry, fetching tax data failed."
+msgstr ""
+
+#: src/API/Reports/TimeInterval.php:589 src/API/Reports/TimeInterval.php:621
+#. translators: 1: parameter name
+msgid "%1$s is not a numerically indexed array."
+msgstr ""
+
+#: src/API/Reports/TimeInterval.php:601
+#. translators: %s: parameter name
+msgid "%s must contain 2 numbers."
+msgstr ""
+
+#: src/API/Reports/TimeInterval.php:633
+#. translators: %s: parameter name
+msgid "%s must contain 2 valid dates."
+msgstr ""
+
+#: src/API/Reports/Variations/Controller.php:225
+msgid "Product attributes."
+msgstr ""
+
+#: src/API/Reports/Variations/Controller.php:357
+#: client/analytics/report/products/table-variations.js:38
+msgid "Product / Variation Title"
+msgstr ""
+
+#: src/API/Taxes.php:37
+msgid "Search by similar tax code."
+msgstr ""
+
+#: src/API/Taxes.php:42
+msgid "Limit result set to items that have the specified rate ID(s) assigned."
+msgstr ""
+
+#: src/API/Themes.php:65
+msgid "Sorry, you are not allowed to install themes on this site."
+msgstr ""
+
+#: src/API/Themes.php:80
+msgid "Specified file failed upload test."
+msgstr ""
+
+#: src/API/Themes.php:164
+msgid "Theme installation status."
+msgstr ""
+
+#: src/API/Themes.php:170
+msgid "Theme installation message."
+msgstr ""
+
+#: src/API/Themes.php:176
+msgid "Uploaded theme."
+msgstr ""
+
+#: src/API/Themes.php:195
+msgid "A zip file of the theme to be uploaded."
+msgstr ""
+
+#: src/FeaturePlugin.php:234
+#. translators: 1: URL of WooCommerce plugin, 2: The minimum WooCommerce
+#. version number
+msgid ""
+"The WooCommerce Admin feature plugin requires <a "
+"href=\"%1$s\">WooCommerce</a> %2$s or greater to be installed and active."
+msgstr ""
+
+#: src/FeaturePlugin.php:243
+#. translators: 1: URL of WordPress.org, 2: The minimum WordPress version
+#. number
+msgid ""
+"The WooCommerce Admin feature plugin requires <a "
+"href=\"%1$s\">WordPress</a> %2$s or greater to be installed and active."
+msgstr ""
+
+#: src/FeaturePlugin.php:291
+msgid ""
+"You have installed a development version of WooCommerce Admin which "
+"requires files to be built. From the plugin directory, run <code>npm "
+"install</code> to install dependencies, <code>npm run build</code> to build "
+"the files."
+msgstr ""
+
+#: src/FeaturePlugin.php:294
+#. translators: 1: URL of GitHub Repository build page
+msgid ""
+"Or you can download a pre-built version of the plugin by visiting <a "
+"href=\"%1$s\">the releases page in the repository</a>."
+msgstr ""
+
+#: src/Features/Analytics.php:81
+#: client/layout/controller.js:82
+msgid "Analytics"
+msgstr ""
+
+#: src/Features/Analytics.php:88 src/ReportCSVEmail.php:34
+#: client/analytics/report/index.js:43
+#: client/analytics/report/revenue/table.js:231
+msgid "Revenue"
+msgstr ""
+
+#: src/Features/Analytics.php:106 src/ReportCSVEmail.php:37
+#: client/analytics/report/categories/table.js:161
+#: client/analytics/report/index.js:58
+msgid "Categories"
+msgstr ""
+
+#: src/Features/Analytics.php:136 src/ReportCSVEmail.php:42
+#: client/analytics/report/customers/table.js:253
+#: client/analytics/report/index.js:85
+#: client/layout/controller.js:71
+msgid "Customers"
+msgstr ""
+
+#: src/Features/AnalyticsDashboard.php:85
+#: client/layout/controller.js:53
+msgid "Dashboard"
+msgstr ""
+
+#: src/Features/Onboarding.php:190
+msgid "Fashion, apparel, and accessories"
+msgstr ""
+
+#: src/Features/Onboarding.php:195
+msgid "Health and beauty"
+msgstr ""
+
+#: src/Features/Onboarding.php:200
+msgid "Art, music, and photography"
+msgstr ""
+
+#: src/Features/Onboarding.php:205
+msgid "Electronics and computers"
+msgstr ""
+
+#: src/Features/Onboarding.php:210
+msgid "Food and drink"
+msgstr ""
+
+#: src/Features/Onboarding.php:215
+msgid "Home, furniture, and garden"
+msgstr ""
+
+#: src/Features/Onboarding.php:220
+msgid "CBD and other hemp-derived products"
+msgstr ""
+
+#: src/Features/Onboarding.php:225
+#: client/dashboard/profile-wizard/steps/business-details.js:432
+msgid "Other"
+msgstr ""
+
+#: src/Features/Onboarding.php:242
+msgid "Physical products"
+msgstr ""
+
+#: src/Features/Onboarding.php:243
+msgid "Products you ship to customers."
+msgstr ""
+
+#: src/Features/Onboarding.php:247
+msgid "Virtual products that customers download."
+msgstr ""
+
+#: src/Features/Onboarding.php:250
+msgid "Subscriptions"
+msgstr ""
+
+#: src/Features/Onboarding.php:254
+msgid "Memberships"
+msgstr ""
+
+#: src/Features/Onboarding.php:258
+msgid "Composite Products"
+msgstr ""
+
+#: src/Features/Onboarding.php:262
+msgid "Bookings"
+msgstr ""
+
+#: src/Features/Onboarding.php:417
+#. translators: Amount of product per year (e.g. Bookings - $240.00 per year)
+msgid " — %s per year"
+msgstr ""
+
+#: src/Features/Onboarding.php:423
+#. translators: site currency symbol (used to show that the product costs
+#. money)
+msgid " — %s"
+msgstr ""
+
+#: src/Features/Onboarding.php:762 src/Features/Onboarding.php:862
+msgid "New onboarding experience"
+msgstr ""
+
+#: src/Features/Onboarding.php:763
+msgid ""
+"If you want to try out the new WooCommerce onboarding experience, click the "
+"button below."
+msgstr ""
+
+#: src/Features/Onboarding.php:764 src/Features/Onboarding.php:841
+#: src/Features/Onboarding.php:847
+msgid "Enable"
+msgstr ""
+
+#: src/Features/Onboarding.php:835
+msgid "WooCommerce Onboarding"
+msgstr ""
+
+#: src/Features/Onboarding.php:837
+msgid "Profile Setup Wizard"
+msgstr ""
+
+#: src/Features/Onboarding.php:838
+msgid ""
+"If you need to enable or disable the setup wizard again, please click on "
+"the button below."
+msgstr ""
+
+#: src/Features/Onboarding.php:840 src/Features/Onboarding.php:848
+#: src/Features/Onboarding.php:864
+msgid "Disable"
+msgstr ""
+
+#: src/Features/Onboarding.php:844
+msgid "Task List"
+msgstr ""
+
+#: src/Features/Onboarding.php:845
+msgid ""
+"If you need to enable or disable the task list, please click on the button "
+"below."
+msgstr ""
+
+#: src/Features/Onboarding.php:852
+msgid "Calypso / WordPress.com"
+msgstr ""
+
+#: src/Features/Onboarding.php:854
+msgid "Quickly access the Jetpack connection flow in Calypso."
+msgstr ""
+
+#: src/Features/Onboarding.php:855 src/Features/Onboarding.php:859
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:193
+#: client/dashboard/task-list/tasks/payments/paypal.js:110
+#: client/dashboard/task-list/tasks/payments/square.js:101
+#: client/dashboard/task-list/tasks/payments/stripe.js:209
+#: client/dashboard/task-list/tasks/steps/connect.js:56
+msgid "Connect"
+msgstr ""
+
+#: src/Features/Onboarding.php:858
+msgid "Quickly access the WooCommerce.com connection flow in Calypso."
+msgstr ""
+
+#: src/Features/Onboarding.php:863
+msgid ""
+"To disable the new WooCommerce onboarding experience, click the button "
+"below."
+msgstr ""
+
+#: src/Features/Onboarding.php:910 src/Features/Onboarding.php:916
+msgid "WooCommerce Helper was not able to connect to WooCommerce.com."
+msgstr ""
+
+#. Author of the plugin/theme
+#: client/dashboard/profile-wizard/header-logo.js:21
+#: client/header/index.js:116
+msgid "WooCommerce"
+msgstr ""
+
+#: src/Loader.php:606
+#. translators: %1$s: updated title, %2$s: blog info name
+msgid "%1$s &lsaquo; %2$s"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "WooCommerce Admin"
+msgstr ""
+
+#: src/Loader.php:739
+msgid "Settings for WooCommerce admin reporting."
+msgstr ""
+
+#: src/Loader.php:755
+msgid "Excluded report order statuses"
+msgstr ""
+
+#: src/Loader.php:756
+msgid "Statuses that should not be included when calculating report totals."
+msgstr ""
+
+#: src/Loader.php:764
+msgid "Actionable order statuses"
+msgstr ""
+
+#: src/Loader.php:765
+msgid "Statuses that require extra action on behalf of the store admin."
+msgstr ""
+
+#: src/Loader.php:773 src/Loader.php:774
+msgid "Default Date Range"
+msgstr ""
+
+#: src/Notes/DataStore.php:115
+msgid "Invalid data store for admin note."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:303
+msgid "The admin note name prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:316
+msgid "The admin note type prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:324
+#. translators: %s: admin note type.
+msgid "The admin note type prop (%s) is not one of the supported types."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:340
+msgid "The admin note locale prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:353
+msgid "The admin note title prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:384
+msgid "The admin note content prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:397
+msgid "The admin note icon prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:414
+msgid "The admin note content_data prop must be an instance of stdClass."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:427
+msgid "The admin note status prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:435
+#. translators: %s: admin note status property.
+msgid "The admin note status prop (%s) is not one of the supported statuses."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:451
+msgid "The admin note source prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:464
+msgid "The admin note date prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:512
+msgid "The admin note action name prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Note.php:516
+msgid "The admin note action label prop cannot be empty."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Add_First_Product.php:42
+msgid ""
+"Grow your revenue by adding products to your store. Add products manually, "
+"import from a sheet, or migrate from another platform."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Add_First_Product.php:45
+#: client/dashboard/task-list/tasks.js:80
+msgid "Add your first product"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Add_First_Product.php:52
+msgid "Add a product"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Deactivate_Plugin.php:38
+msgid "Deactivate old WooCommerce Admin version"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Deactivate_Plugin.php:39
+msgid ""
+"Your current version of WooCommerce Admin is outdated and a newer version "
+"is included with WooCommerce.  We recommend deactivating the plugin and "
+"using the stable version included with WooCommerce."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Deactivate_Plugin.php:47
+msgid "Deactivate"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:61
+msgid ""
+"Grow your business by targeting the right people and driving sales with "
+"Facebook. You can install this free extension now."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:64
+#: client/dashboard/profile-wizard/steps/business-details.js:247
+msgid "Market on Facebook"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:71
+#: src/Notes/WC_Admin_Notes_Mobile_App.php:56
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:241
+#: src/Notes/WC_Admin_Notes_Welcome_Message.php:49
+#: client/dashboard/profile-wizard/steps/product-types.js:117
+#: client/header/activity-panel/panels/orders.js:57
+#: client/header/activity-panel/panels/reviews.js:181
+msgid "Learn more"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:72
+msgid "Install now"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:101
+msgid ""
+"You're almost ready to start driving sales with Facebook. Complete the "
+"setup steps to control how WooCommerce integrates with your Facebook store."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:102
+msgid "Market on Facebook — Installed"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Facebook_Extension.php:108
+msgid "Setup"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Giving_Feedback_Notes.php:52
+msgid "Review your experience"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Giving_Feedback_Notes.php:53
+msgid ""
+"If you like WooCommerce Admin please leave us a 5 star rating. A huge "
+"thanks in advance!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Giving_Feedback_Notes.php:61
+msgid "Review"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Historical_Data.php:66
+msgid "WooCommerce Admin: Historical Analytics Data"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Historical_Data.php:67
+msgid ""
+"To view your historical analytics data, you must process your existing "
+"orders and customers."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Historical_Data.php:76
+msgid "Get Started"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Mobile_App.php:46
+msgid ""
+"Install the WooCommerce mobile app to manage orders, receive sales "
+"notifications, and view key metrics — wherever you are."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Mobile_App.php:49
+msgid "Install Woo mobile app"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_New_Sales_Record.php:87
+#. translators: 1 and 4: Date (e.g. October 16th), 2 and 3: Amount (e.g.
+#. $160.00)
+msgid ""
+"Woohoo, %1$s was your record day for sales! Net Sales was %2$s beating the "
+"previous record of %3$s set on %4$s."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_New_Sales_Record.php:108
+msgid "New sales record!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_New_Sales_Record.php:115
+msgid "View report"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding.php:37
+msgid "Congratulations - your store is ready for launch!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding.php:38
+msgid "You’re ready to take your first order - may the sales roll in!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding.php:46
+msgid "Market my store"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Email_Marketing.php:50
+msgid ""
+"We're here for you — get tips, product updates, and inspiration straight to "
+"your mailbox."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Email_Marketing.php:53
+msgid "Tips, product updates, and inspiration"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Email_Marketing.php:60
+msgid "Yes please!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Profiler.php:45
+msgid "Welcome to WooCommerce! Set up your store and start selling"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Profiler.php:46
+msgid ""
+"We're here to help you going through the most important steps to get your "
+"store up and running."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Profiler.php:54
+msgid "Continue Store Setup"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Onboarding_Profiler.php:61
+msgid "Skip Setup"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:184
+msgid "First order"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:196
+#. translators: Number of orders processed.
+msgid "Congratulations on processing %s orders!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:213
+msgid ""
+"Congratulations on getting your first order from a customer! Learn how to "
+"manage your orders."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:215
+msgid ""
+"You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce "
+"success stories for inspiration."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:224
+msgid ""
+"Another order milestone! Take a look at your Orders Report to review your "
+"orders to date."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:247
+msgid "Browse"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Order_Milestones.php:260
+msgid "Review your orders"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Settings_Notes.php:41
+msgid "Looking for the Store Notice setting?"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Settings_Notes.php:42
+msgid "It can now be found in the Customizer."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Settings_Notes.php:50
+msgid "Open Customizer"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Tracking_Opt_In.php:58
+#. translators: 1: open link to WooCommerce.com settings, 2: open link to
+#. WooCommerce.com tracking documentation, 3: close link tag.
+msgid ""
+"Gathering usage data allows us to improve WooCommerce. Your store will be "
+"considered as we evaluate new features, judge the quality of an update, or "
+"determine if an improvement makes sense. You can always visit the "
+"%1$sSettings%3$s and choose to stop sharing data. %2$sRead more%3$s about "
+"what data we collect."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Tracking_Opt_In.php:71
+msgid "Help WooCommerce improve with usage tracking"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Tracking_Opt_In.php:78
+msgid "Dismiss"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Tracking_Opt_In.php:79
+msgid "Activate usage tracking"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Welcome_Message.php:40
+msgid "New feature(s)"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Welcome_Message.php:41
+msgid ""
+"Welcome to the new WooCommerce experience! In this new release you'll be "
+"able to have a glimpse of how your store is doing in the Dashboard, manage "
+"important aspects of your business (such as managing orders, stock, "
+"reviews) from anywhere in the interface, dive into your store data with a "
+"completely new Analytics section and more!"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:184
+msgid "Connect to WooCommerce.com"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:185
+msgid "Connect to get important product notifications and updates."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:313
+#. translators: name of the extension subscription expiring soon
+msgid "%s subscription expiring soon"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:319
+#. translators: number of days until the subscription expires
+msgid ""
+"Your subscription expires in %d days. Enable autorenew to avoid losing "
+"updates and access to support."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:343
+msgid "Enable Autorenew"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:375
+#. translators: name of the extension subscription that expired
+msgid "%s subscription expired"
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:381
+#. translators: date the subscription expired, e.g. Jun 7th 2018
+msgid ""
+"Your subscription expired on %s. Get a new subscription to continue "
+"receiving updates and access to support."
+msgstr ""
+
+#: src/Notes/WC_Admin_Notes_Woo_Subscriptions_Notes.php:407
+msgid "Renew Subscription"
+msgstr ""
+
+#: src/PageController.php:197
+msgid ""
+"Current page retrieval should be called on or after the `current_screen` "
+"hook."
+msgstr ""
+
+#: src/ReportCSVEmail.php:74
+msgid "Your Report Download"
+msgstr ""
+
+#: src/ReportCSVEmail.php:83
+msgid "[{site_title}]: Your {report_name} Report download is ready"
+msgstr ""
+
+#: src/ReportsSync.php:51
+msgid ""
+"Report sync schedulers should be derived from the "
+"Automattic\\WooCommerce\\Admin\\Schedulers\\ImportScheduler class."
+msgstr ""
+
+#: src/ReportsSync.php:81
+msgid ""
+"An import is already in progress.  Please allow the previous import to "
+"complete before beginning a new one."
+msgstr ""
+
+#: src/ReportsSync.php:97
+msgid ""
+"Report table data is being rebuilt.  Please allow some time for data to "
+"fully populate."
+msgstr ""
+
+#: src/ReportsSync.php:181
+msgid "Report table data is being deleted."
+msgstr ""
+
+#: src/Schedulers/CustomersScheduler.php:200
+msgid "[deleted]"
+msgstr ""
+
+#: vendor/autoload_packages.php:81
+#: vendor/automattic/jetpack-autoloader/src/autoload.php:81
+#. translators: %s Name of a PHP Class
+msgid "Not all plugins have loaded yet but we requested the class %s"
+msgstr ""
+
+#: woocommerce-admin.php:38 woocommerce-admin.php:56
+#. translators: 1: composer command. 2: plugin directory
+msgid ""
+"Your installation of the WooCommerce Admin feature plugin is incomplete. "
+"Please run %1$s within the %2$s directory."
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/woocommerce/woocommerce-admin"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"A new JavaScript-driven interface for managing your store. The plugin "
+"includes new and improved reports, and a dashboard to monitor all the "
+"important key metrics of your site."
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://woocommerce.com/"
+msgstr ""
+
+#: client/analytics/components/leaderboard/index.js:62
+msgid "No data recorded for the selected time period."
+msgstr ""
+
+#: client/analytics/components/report-chart/index.js:133
+msgid "No data for the current search"
+msgstr ""
+
+#: client/analytics/components/report-chart/index.js:134
+msgid "No data for the selected date range"
+msgstr ""
+
+#: client/analytics/components/report-error/index.js:25
+msgid "There was an error getting your stats. Please try again."
+msgstr ""
+
+#: client/analytics/components/report-error/index.js:26
+#: client/header/activity-panel/panels/inbox/index.js:72
+#: client/header/activity-panel/panels/orders.js:208
+#: client/header/activity-panel/panels/reviews.js:221
+#: client/header/activity-panel/panels/stock/index.js:56
+msgid "Reload"
+msgstr ""
+
+#: client/analytics/components/report-error/index.js:32
+msgid "No results could be found for this date range."
+msgstr ""
+
+#: client/analytics/components/report-error/index.js:33
+msgid "View Orders"
+msgstr ""
+
+#: client/analytics/components/report-summary/index.js:93
+#: client/dashboard/store-performance/index.js:127
+#: packages/components/build-module/summary/number.js:171
+msgid "Previous Period:"
+msgstr ""
+
+#: client/analytics/components/report-summary/index.js:94
+#: client/dashboard/store-performance/index.js:128
+msgid "Previous Year:"
+msgstr ""
+
+#: client/analytics/components/report-table/index.js:278
+msgid "Select All"
+msgstr ""
+
+#: client/analytics/components/report-table/index.js:380
+msgid "Check at least two items below to compare"
+msgstr ""
+
+#: client/analytics/components/report-table/index.js:385
+#: client/analytics/report/categories/config.js:84
+#: client/analytics/report/coupons/config.js:73
+#: client/analytics/report/products/config.js:113
+#: client/analytics/report/taxes/config.js:73
+msgid "Compare"
+msgstr ""
+
+#: client/analytics/components/report-table/index.js:395
+msgid "Search by item name"
+msgstr ""
+
+#: client/analytics/components/report-table/index.js:413
+msgid "Download"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:44
+#: client/analytics/report/coupons/config.js:36
+#: client/analytics/report/customers/config.js:24
+#: client/analytics/report/downloads/config.js:28
+#: client/analytics/report/orders/config.js:47
+#: client/analytics/report/products/config.js:43
+#: client/analytics/report/stock/config.js:15
+#: client/analytics/report/taxes/config.js:52
+msgid "Show"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:49
+msgid "All Categories"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:65
+msgid "Type to search for a category"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:66
+msgid "Single Category"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:73
+#: client/analytics/report/coupons/config.js:65
+#: client/analytics/report/products/config.js:102
+#: client/analytics/report/taxes/config.js:59
+msgid "Comparison"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:81
+#: client/analytics/report/categories/table.js:140
+msgid "Check at least two categories below to compare"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:82
+msgid "Search for categories to compare"
+msgstr ""
+
+#: client/analytics/report/categories/config.js:83
+msgid "Compare Categories"
+msgstr ""
+
+#: client/analytics/report/categories/index.js:31
+#: client/analytics/report/products/index.js:40
+msgid "%d products"
+msgstr ""
+
+#: client/analytics/report/categories/index.js:32
+msgid "%d categories"
+msgstr ""
+
+#: client/analytics/report/categories/table.js:118
+msgid "category"
+msgid_plural "categories"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/categories/table.js:122
+#: client/analytics/report/orders/table.js:247
+#: client/analytics/report/products/table-variations.js:161
+#: client/analytics/report/products/table.js:228
+msgid "item sold"
+msgid_plural "items sold"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/categories/table.js:126
+#: client/analytics/report/orders/table.js:255
+#: client/analytics/report/products/table-variations.js:165
+#: client/analytics/report/products/table.js:232
+#: client/analytics/report/revenue/table.js:202
+msgid "net sales"
+msgstr ""
+
+#: client/analytics/report/categories/table.js:130
+#: client/analytics/report/coupons/table.js:140
+#: client/analytics/report/orders/table.js:226
+#: client/analytics/report/revenue/table.js:186
+#: client/analytics/report/taxes/table.js:145
+msgid "order"
+msgid_plural "orders"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/categories/table.js:141
+msgid "Search by category name"
+msgstr ""
+
+#: client/analytics/report/coupons/config.js:27
+msgid "Amount"
+msgstr ""
+
+#: client/analytics/report/coupons/config.js:41
+msgid "All Coupons"
+msgstr ""
+
+#: client/analytics/report/coupons/config.js:57
+msgid "Type to search for a coupon"
+msgstr ""
+
+#: client/analytics/report/coupons/config.js:58
+msgid "Single Coupon"
+msgstr ""
+
+#: client/analytics/report/coupons/config.js:72
+msgid "Compare Coupon Codes"
+msgstr ""
+
+#: client/analytics/report/coupons/config.js:74
+msgid "Check at least two coupon codes below to compare"
+msgstr ""
+
+#: client/analytics/report/coupons/index.js:26
+msgid "%d coupons"
+msgstr ""
+
+#: client/analytics/report/coupons/table.js:136
+#: client/analytics/report/orders/table.js:251
+msgid "coupon"
+msgid_plural "coupons"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/coupons/table.js:144
+msgid "amount discounted"
+msgstr ""
+
+#: client/analytics/report/coupons/table.js:152
+msgid "Percentage"
+msgstr ""
+
+#: client/analytics/report/coupons/table.js:153
+msgid "Fixed cart"
+msgstr ""
+
+#: client/analytics/report/coupons/table.js:154
+msgid "Fixed product"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:100
+msgid "Remove country / region filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:101
+msgid "Select a country / region filter match"
+msgstr ""
+
+# A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:103
+msgid "{{title}}Country / Region{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:107
+msgid "Select country / region"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:140
+#: client/analytics/report/downloads/config.js:78
+msgid "Search customer username"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:141
+#: client/analytics/report/downloads/config.js:79
+msgid "Remove customer username filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:142
+#: client/analytics/report/downloads/config.js:80
+msgid "Select a customer username filter match"
+msgstr ""
+
+# A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg
+#: client/analytics/report/customers/config.js:144
+#: client/analytics/report/downloads/config.js:82
+msgid "{{title}}Username{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:145
+#: client/analytics/report/downloads/config.js:83
+msgid "Select customer username"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:168
+msgid "Search customer email"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:169
+msgid "Remove customer email filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:170
+msgid "Select a customer email filter match"
+msgstr ""
+
+# A sentence describing a customer email filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:172
+msgid "{{title}}Email{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:173
+msgid "Select customer email"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:198
+msgid "No. of Orders"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:199
+msgid "Remove order filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:200
+msgid "Select an order count filter match"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:201
+msgid "{{title}}No. of Orders{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:230
+msgid "Remove total spend filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:231
+msgid "Select a total spend filter match"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:232
+msgid "{{title}}Total Spend{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:258
+msgid "Remove average order value filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:259
+msgid "Select an average order value filter match"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:260
+msgid "{{title}}AOV{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:286
+msgid "Registered"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:287
+msgid "Remove registered filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:288
+msgid "Select a registered filter match"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:29
+msgid "All Customers"
+msgstr ""
+
+# A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:290
+msgid "{{title}}Registered{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:316
+msgid "Last active"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:317
+msgid "Remove last active filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:318
+msgid "Select a last active filter match"
+msgstr ""
+
+# A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:320
+msgid "{{title}}Last active{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:321
+msgid "Select registered date"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:45
+msgid "Type to search for a customer"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:46
+msgid "Single Customer"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:52
+#: client/analytics/report/downloads/config.js:34
+#: client/analytics/report/orders/config.js:53
+msgid "Advanced Filters"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:69
+msgid "Remove customer name filter"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:70
+msgid "Select a customer name filter match"
+msgstr ""
+
+# A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:72
+msgid "{{title}}Name{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:73
+msgid "Select customer name"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:99
+#: client/analytics/report/downloads/config.js:50
+msgid "Search"
+msgstr ""
+
+#: client/analytics/report/customers/table.js:221
+msgid "customer"
+msgid_plural "customers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/customers/table.js:225
+msgid "average order"
+msgid_plural "average orders"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/customers/table.js:229
+msgid "average lifetime spend"
+msgstr ""
+
+#: client/analytics/report/customers/table.js:233
+msgid "average order value"
+msgstr ""
+
+#: client/analytics/report/customers/table.js:251
+msgid "Search by customer name"
+msgstr ""
+
+#: client/analytics/report/customers/table.js:77
+#: client/analytics/report/orders/config.js:33
+#: client/dashboard/dashboard-charts/config.js:47
+msgid "Average Order Value"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:105
+msgid "Order number"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:106
+msgid "Search order number"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:107
+msgid "Remove order number filter"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:108
+msgid "Select a order number filter match"
+msgstr ""
+
+# A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg
+#: client/analytics/report/downloads/config.js:110
+msgid "{{title}}Order number{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:111
+msgid "Select order number"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:139
+msgid "IP Address"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:140
+msgid "Search IP address"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:141
+msgid "Remove IP address filter"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:142
+msgid "Select an IP address filter match"
+msgstr ""
+
+# A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg
+#: client/analytics/report/downloads/config.js:144
+msgid "{{title}}IP Address{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:145
+msgid "Select IP address"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:33
+msgid "All Downloads"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:51
+msgid "Remove product filter"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:52
+#: client/analytics/report/orders/config.js:100
+msgid "Select a product filter match"
+msgstr ""
+
+# A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/downloads/config.js:54
+#: client/analytics/report/orders/config.js:102
+msgid "{{title}}Product{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:55
+msgid "Select product"
+msgstr ""
+
+#: client/analytics/report/downloads/table.js:146
+#: client/analytics/report/revenue/table.js:182
+msgid "day"
+msgid_plural "days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/downloads/table.js:150
+msgid "download"
+msgid_plural "downloads"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/downloads/table.js:55
+#: client/analytics/report/orders/table.js:46
+msgid "Order Number"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:103
+msgid "Select products"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:125
+msgid "Coupon Codes"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:126
+msgid "Search coupons"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:127
+msgid "Remove coupon filter"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:128
+msgid "Select a coupon filter match"
+msgstr ""
+
+# A sentence describing a Coupon filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:130
+msgid "{{title}}Coupon Code{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:131
+msgid "Select coupon codes"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:153
+msgid "Customer Type"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:154
+msgid "Remove customer filter"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:155
+msgid "Select a customer filter match"
+msgstr ""
+
+# A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:157
+msgid "{{title}}Customer is{{/title}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:158
+msgid "Select a customer type"
+msgstr ""
+
+#: client/analytics/report/orders/table.js:97
+msgctxt "customer type"
+msgid "New"
+msgstr ""
+
+#: client/analytics/report/orders/table.js:99
+msgctxt "customer type"
+msgid "Returning"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:171
+msgid "Refunds"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:172
+msgid "Remove refunds filter"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:173
+msgid "Select a refund filter match"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:174
+msgid "{{title}}Refunds{{/title}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:175
+msgid "Select a refund type"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:180
+#: packages/components/build-module/advanced-filters/index.js:45
+msgid "All"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:181
+msgid "Partially refunded"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:182
+msgid "Fully refunded"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:183
+msgid "None"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:190
+msgid "Tax Rates"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:191
+msgid "Search tax rates"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:192
+msgid "Remove tax rate filter"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:193
+msgid "Select a tax rate filter match"
+msgstr ""
+
+# A sentence describing a tax rate filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:195
+msgid "{{title}}Tax Rate{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:196
+msgid "Select tax rates"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:38
+msgid "Average Items Per Order"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:52
+msgid "All Orders"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:68
+msgid "Order Status"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:69
+msgid "Remove order status filter"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:70
+msgid "Select an order status filter match"
+msgstr ""
+
+# A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:72
+msgid "{{title}}Order Status{{/title}} {{rule /}} {{filter /}}"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:73
+msgid "Select an order status"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:98
+msgid "Search products"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:99
+msgid "Remove products filter"
+msgstr ""
+
+#: client/analytics/report/orders/table.js:191
+msgid "%s× %s"
+msgstr ""
+
+#: client/analytics/report/orders/table.js:230
+msgid "new customer"
+msgid_plural "new customers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/orders/table.js:234
+msgid "returning customer"
+msgid_plural "returning customers"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/orders/table.js:243
+#: client/analytics/report/products/table.js:224
+#: client/analytics/report/stock/table.js:128
+msgid "product"
+msgid_plural "products"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/products/config.js:110
+#: client/analytics/report/products/table-variations.js:179
+msgid "Check at least two variations below to compare"
+msgstr ""
+
+#: client/analytics/report/products/config.js:111
+msgid "Search for variations to compare"
+msgstr ""
+
+#: client/analytics/report/products/config.js:112
+msgid "Compare Variations"
+msgstr ""
+
+#: client/analytics/report/products/config.js:48
+#: client/analytics/report/stock/config.js:20
+msgid "All Products"
+msgstr ""
+
+#: client/analytics/report/products/config.js:64
+msgid "Type to search for a product"
+msgstr ""
+
+#: client/analytics/report/products/config.js:65
+msgid "Single Product"
+msgstr ""
+
+#: client/analytics/report/products/config.js:80
+#: client/analytics/report/products/table.js:253
+msgid "Check at least two products below to compare"
+msgstr ""
+
+#: client/analytics/report/products/config.js:81
+msgid "Search for products to compare"
+msgstr ""
+
+#: client/analytics/report/products/config.js:82
+msgid "Compare Products"
+msgstr ""
+
+#: client/analytics/report/products/config.js:97
+msgid "All Variations"
+msgstr ""
+
+#: client/analytics/report/products/index.js:39
+msgid "%d variations"
+msgstr ""
+
+#: client/analytics/report/products/table-variations.js:157
+msgid "variation sold"
+msgid_plural "variations sold"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/products/table-variations.js:169
+#: client/analytics/report/products/table.js:236
+msgid "orders"
+msgid_plural "orders"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/products/table-variations.js:180
+msgid "Search by variation name or SKU"
+msgstr ""
+
+#: client/analytics/report/products/table.js:254
+msgid "Search by product name or SKU"
+msgstr ""
+
+#: client/analytics/report/revenue/config.js:15
+#: client/analytics/report/revenue/table.js:54
+msgid "Gross Sales"
+msgstr ""
+
+#: client/analytics/report/revenue/table.js:190
+msgid "gross sales"
+msgstr ""
+
+#: client/analytics/report/revenue/table.js:194
+msgid "returns"
+msgstr ""
+
+#: client/analytics/report/revenue/table.js:198
+msgid "coupons"
+msgstr ""
+
+#: client/analytics/report/revenue/table.js:206
+msgid "taxes"
+msgstr ""
+
+#: client/analytics/report/revenue/table.js:210
+msgid "shipping"
+msgstr ""
+
+#: client/analytics/report/revenue/table.js:214
+msgid "total sales"
+msgstr ""
+
+#: client/analytics/report/stock/config.js:21
+msgid "Out of Stock"
+msgstr ""
+
+#: client/analytics/report/stock/config.js:22
+msgid "Low Stock"
+msgstr ""
+
+#: client/analytics/report/stock/config.js:23
+msgid "In Stock"
+msgstr ""
+
+#: client/analytics/report/stock/config.js:24
+msgid "On Backorder"
+msgstr ""
+
+#: client/analytics/report/stock/table.js:132
+msgid "out of stock"
+msgstr ""
+
+#: client/analytics/report/stock/table.js:136
+msgid "low stock"
+msgstr ""
+
+#: client/analytics/report/stock/table.js:140
+msgid "on backorder"
+msgstr ""
+
+#: client/analytics/report/stock/table.js:144
+#: client/header/activity-panel/panels/stock/card.js:121
+msgid "in stock"
+msgstr ""
+
+#: client/analytics/report/taxes/config.js:57
+msgid "All Taxes"
+msgstr ""
+
+#: client/analytics/report/taxes/config.js:70
+msgid "Check at least two tax codes below to compare"
+msgstr ""
+
+#: client/analytics/report/taxes/config.js:71
+msgid "Search for tax codes to compare"
+msgstr ""
+
+#: client/analytics/report/taxes/config.js:72
+msgid "Compare Tax Codes"
+msgstr ""
+
+#: client/analytics/report/taxes/index.js:24
+msgid "%d taxes"
+msgstr ""
+
+#: client/analytics/report/taxes/table.js:129
+msgid "tax code"
+msgid_plural "tax codes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/analytics/report/taxes/table.js:133
+msgid "total tax"
+msgstr ""
+
+#: client/analytics/report/taxes/table.js:137
+msgid "order tax"
+msgstr ""
+
+#: client/analytics/report/taxes/table.js:141
+msgid "shipping tax"
+msgstr ""
+
+#: client/analytics/report/taxes/utils.js:8
+#: packages/components/build-module/search/autocompleters/utils.js:30
+msgid "TAX"
+msgstr ""
+
+#: client/analytics/settings/config.js:100
+msgid "Custom Statuses"
+msgstr ""
+
+#: client/analytics/settings/config.js:104
+msgid ""
+"Orders with these statuses require action on behalf of the store "
+"admin.These orders will show up in the Orders tab under the activity panel."
+msgstr ""
+
+#: client/analytics/settings/config.js:114
+msgid "Default Date Range:"
+msgstr ""
+
+#: client/analytics/settings/config.js:117
+msgid ""
+"Select a default date range. When no range is selected, reports will be "
+"viewed by the default date range."
+msgstr ""
+
+#: client/analytics/settings/config.js:54
+msgid "Exclude the %s status from reports"
+msgstr ""
+
+#: client/analytics/settings/config.js:63
+msgid "Excluded Statuses:"
+msgstr ""
+
+#: client/analytics/settings/config.js:77
+msgid ""
+"Orders with these statuses are excluded from the totals in your reports. "
+"The {{strong}}Refunded{{/strong}} status can not be excluded."
+msgstr ""
+
+#: client/analytics/settings/config.js:91
+msgid "Actionable Statuses:"
+msgstr ""
+
+#: client/analytics/settings/historical-data/actions.js:29
+msgid "Stop Import"
+msgstr ""
+
+#: client/analytics/settings/historical-data/actions.js:32
+msgid "Imported data will not be lost if the import is stopped."
+msgstr ""
+
+#: client/analytics/settings/historical-data/actions.js:37
+msgid "Navigating away from this page will not affect the import."
+msgstr ""
+
+#: client/analytics/settings/historical-data/actions.js:63
+msgid "Start"
+msgstr ""
+
+#: client/analytics/settings/historical-data/actions.js:73
+msgid "Re-import Data"
+msgstr ""
+
+#: client/analytics/settings/historical-data/actions.js:76
+msgid "Delete Previously Imported Data"
+msgstr ""
+
+#: client/analytics/settings/historical-data/index.js:103
+msgid "There was a problem deleting your previous data."
+msgstr ""
+
+#: client/analytics/settings/historical-data/index.js:126
+msgid "There was a problem rebuilding your report data."
+msgstr ""
+
+#: client/analytics/settings/historical-data/index.js:139
+msgid "There was a problem stopping your current import."
+msgstr ""
+
+#: client/analytics/settings/historical-data/index.js:27
+#: packages/components/build-module/advanced-filters/date-filter.js:37
+#: packages/components/build-module/date-range-filter-picker/index.js:25
+#: packages/date/build-module/index.js:594
+msgid "MM/DD/YYYY"
+msgstr ""
+
+#: client/analytics/settings/historical-data/layout.js:58
+#: client/analytics/settings/historical-data/period-selector.js:65
+msgid "Import Historical Data"
+msgstr ""
+
+#: client/analytics/settings/historical-data/layout.js:63
+msgid ""
+"This tool populates historical analytics data by processing customers and "
+"orders created prior to activating WooCommerce Admin."
+msgstr ""
+
+#: client/analytics/settings/historical-data/layout.js:84
+msgid "Registered Customers"
+msgstr ""
+
+#: client/analytics/settings/historical-data/layout.js:89
+msgid "Orders and Refunds"
+msgstr ""
+
+#: client/analytics/settings/historical-data/period-selector.js:46
+msgid "Beginning on"
+msgstr ""
+
+#: client/analytics/settings/historical-data/progress.js:14
+msgid "%(progress)s of %(total)s"
+msgstr ""
+
+#: client/analytics/settings/historical-data/progress.js:9
+msgid "Imported %(label)s"
+msgstr ""
+
+#: client/analytics/settings/historical-data/skip-checkbox.js:14
+msgid "Skip previously imported customers and orders"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:19
+msgid "Nothing To Import"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:20
+msgid "Ready To Import"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:21
+msgid "Initializing"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:22
+msgid "Importing Customers"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:23
+msgid "Importing Orders"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:24
+msgid "Finalizing"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:27
+msgid "All historical data imported"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:29
+msgid "Historical data from %s onward imported"
+msgstr ""
+
+#: client/analytics/settings/historical-data/status.js:38
+msgid "Status:"
+msgstr ""
+
+#: client/analytics/settings/index.js:103
+msgid "There was an error saving your settings.  Please try again."
+msgstr ""
+
+#: client/analytics/settings/index.js:187
+msgid "Analytics Settings"
+msgstr ""
+
+#: client/analytics/settings/index.js:199
+msgid "Reset Defaults"
+msgstr ""
+
+#: client/analytics/settings/index.js:202
+msgid "Save Settings"
+msgstr ""
+
+#: client/analytics/settings/index.js:68
+msgid "You have unsaved changes. If you proceed, they will be lost."
+msgstr ""
+
+#: client/analytics/settings/index.js:79
+msgid "Are you sure you want to reset all settings to default values?"
+msgstr ""
+
+#: client/analytics/settings/index.js:97
+msgid "Your settings have been successfully saved."
+msgstr ""
+
+#: client/dashboard/components/cart-modal.js:115
+msgid "%s — %s per year"
+msgstr ""
+
+#: client/dashboard/components/cart-modal.js:131
+msgid "Would you like to purchase and install the following features now?"
+msgstr ""
+
+#: client/dashboard/components/cart-modal.js:141
+msgid ""
+"You won't have access to this functionality until the extensions have been "
+"purchased and installed."
+msgstr ""
+
+#: client/dashboard/components/cart-modal.js:153
+msgid "I'll do it later"
+msgstr ""
+
+#: client/dashboard/components/cart-modal.js:162
+msgid "Purchase & install now"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:163
+msgid "Address line 1"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:170
+msgid "Address line 2 (optional)"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:201
+msgid "Post code"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:28
+msgid "Please add an address"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:31
+msgid "Please select a country / region"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:34
+msgid "Please add a city"
+msgstr ""
+
+#: client/dashboard/components/settings/general/store-address.js:37
+msgid "Please add a post code"
+msgstr ""
+
+#: client/dashboard/customizable.js:170
+msgid "Add more sections"
+msgstr ""
+
+#: client/dashboard/customizable.js:176
+msgid "Dashboard Sections"
+msgstr ""
+
+#: client/dashboard/customizable.js:184
+msgid "Add %s section"
+msgstr ""
+
+# %s is the chart type
+#: client/dashboard/dashboard-charts/block.js:59
+msgid "%s Report"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/config.js:67
+msgid "Gross discounted"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:116
+#: packages/components/build-module/chart/index.js:308
+msgid "By hour"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:117
+#: packages/components/build-module/chart/index.js:309
+msgid "By day"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:118
+#: packages/components/build-module/chart/index.js:310
+msgid "By week"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:119
+#: packages/components/build-module/chart/index.js:311
+msgid "By month"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:120
+#: packages/components/build-module/chart/index.js:312
+msgid "By quarter"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:121
+#: packages/components/build-module/chart/index.js:313
+msgid "By year"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:155
+#: client/dashboard/default-sections.js:37
+msgid "Charts"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:171
+#: packages/components/build-module/chart/index.js:458
+msgid "Line chart"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:182
+#: packages/components/build-module/chart/index.js:470
+msgid "Bar chart"
+msgstr ""
+
+#: client/dashboard/dashboard-charts/index.js:66
+msgid "Choose which charts to display"
+msgstr ""
+
+#: client/dashboard/default-sections.js:21
+msgid "Performance"
+msgstr ""
+
+#: client/dashboard/default-sections.js:59
+#: client/dashboard/leaderboards/index.js:145
+msgid "Leaderboards"
+msgstr ""
+
+#: client/dashboard/leaderboards/index.js:61
+msgid "Choose which leaderboards to display and other settings"
+msgstr ""
+
+#: client/dashboard/leaderboards/index.js:90
+msgid "Rows Per Table"
+msgstr ""
+
+#: client/dashboard/profile-wizard/header-logo.js:20
+msgid "Jetpack + WooCommerce"
+msgstr ""
+
+#: client/dashboard/profile-wizard/index.js:106
+msgid "Industry"
+msgstr ""
+
+#: client/dashboard/profile-wizard/index.js:112
+msgid "Product Types"
+msgstr ""
+
+#: client/dashboard/profile-wizard/index.js:119
+msgid "Business Details"
+msgstr ""
+
+#: client/dashboard/profile-wizard/index.js:126
+msgid "Theme"
+msgstr ""
+
+#: client/dashboard/profile-wizard/index.js:53
+msgid "There was a problem finishing the profile wizard."
+msgstr ""
+
+#: client/dashboard/profile-wizard/index.js:99
+msgid "Store Details"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:108
+msgid "There was a problem updating your business details."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:134
+msgid "This field is required"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:213
+msgid "Installing the following plugin: %s"
+msgid_plural "Installing the following plugins: %s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:228
+msgid "The following plugin will be installed for free: %s"
+msgid_plural "The following plugins will be installed for free: %s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:249
+msgid ""
+"Grow your business by targeting the right people and driving sales with "
+"Facebook."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:256
+msgid "Contact customers with Mailchimp"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:258
+msgid ""
+"Send targeted campaigns, recover abandoned carts and much more with "
+"Mailchimp."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:316
+msgid "I don't have any products yet."
+msgstr ""
+
+# %s: $0 revenue amount
+#: client/dashboard/profile-wizard/steps/business-details.js:341
+msgid "%s (I'm just getting started)"
+msgstr ""
+
+# %s: A given revenue amount, e.g., $2500
+#: client/dashboard/profile-wizard/steps/business-details.js:349
+msgid "Up to %s"
+msgstr ""
+
+# %s: A given revenue amount, e.g., $250000
+#: client/dashboard/profile-wizard/steps/business-details.js:381
+msgid "More than %s"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:390
+msgid "No"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:394
+msgid "Yes, on another platform"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:398
+msgid "Yes, I own a different store powered by WooCommerce"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:402
+msgid "Yes, in person at physical stores and/or events"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:406
+msgid "Yes, on another platform and in person at physical stores and/or events"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:416
+msgid "Shopify"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:420
+msgid "BigCommerce"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:424
+msgid "Magento"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:428
+msgid "Wix"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:448
+msgid "Tell us about your business"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:451
+msgid ""
+"We'd love to know if you are just getting started or you already have a "
+"business in place."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:459
+msgid "How many products do you plan to sell?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:466
+msgid "Currently selling elsewhere?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:476
+msgid "What's your current annual revenue?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:485
+msgid "Which platform is the store using?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:502
+#: client/dashboard/profile-wizard/steps/industry.js:158
+#: client/dashboard/profile-wizard/steps/product-types.js:145
+#: client/dashboard/profile-wizard/steps/store-details.js:168
+#: client/dashboard/profile-wizard/steps/usage-modal.js:108
+#: client/dashboard/task-list/index.js:246
+#: client/dashboard/task-list/tasks/payments/klarna.js:68
+#: client/dashboard/task-list/tasks/steps/location.js:88
+#: client/dashboard/task-list/tasks/steps/plugins.js:115
+msgid "Continue"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/industry.js:122
+msgid "In which industry does the store operate?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/industry.js:125
+#: client/dashboard/profile-wizard/steps/product-types.js:98
+msgid "Choose any that apply"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/industry.js:64
+msgid "There was a problem updating your industries."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/industry.js:72
+msgid "Please select at least one industry"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:112
+msgid "Connecting your store"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:116
+msgid "You will be redirected to WordPress.com to continue connecting your site."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:134
+msgid "Enhance your store setup"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:144
+msgid "Install %s"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:148
+msgid "Activate %s"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:157
+#: client/dashboard/task-list/tasks/steps/connect.js:52
+#: client/dashboard/task-list/tasks/steps/plugins.js:98
+msgid "Retry"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/plugins.js:164
+msgid "Activate & continue"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/product-types.js:38
+msgid "Please select at least one product type"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/product-types.js:60
+msgid "There was a problem updating your product types."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/product-types.js:96
+msgid "What type of products will be listed?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:106
+#: client/dashboard/profile-wizard/steps/usage-modal.js:48
+msgid "There was a problem updating your preferences."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:129
+msgid "Security"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:131
+msgid ""
+"Jetpack automatically blocks brute force attacks to protect your store from "
+"unauthorized access."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:138
+msgid "Sales Tax"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:140
+msgid ""
+"With WooCommerce Services we ensure that the correct rate of tax is charged "
+"on all of your orders."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:147
+msgid "Speed"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:149
+msgid ""
+"Cache your images and static files on our own powerful global network of "
+"servers and speed up your site."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:156
+msgid "Mobile App"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:158
+msgid ""
+"Your store in your pocket. Manage orders, receive sales notifications, and "
+"more. Only with a Jetpack connection."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:165
+msgid "Print your own shipping labels"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:167
+msgid "Save time at the Post Office by printing USPS shipping labels at home."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:174
+msgid "Simple payment setup"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:176
+msgid ""
+"WooCommerce Services enables us to provision Stripe and Paypal accounts "
+"quickly and easily for you."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:221
+msgid "Start setting up your WooCommerce store"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:227
+msgid ""
+"Simplify and enhance the setup of your store with the free features and "
+"benefits offered by {{strong}}%s{{/strong}}."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:245
+msgid ""
+"By connecting your site you agree to our fascinating {{tosLink}}Terms of "
+"Service{{/tosLink}} and to {{detailsLink}}share details{{/detailsLink}} "
+"with WordPress.com. "
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:268
+msgid "Get started"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/start/index.js:279
+msgid "Proceed without %s"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/store-details.js:124
+msgid "There was a problem saving your store details."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/store-details.js:135
+msgid "Where is your store based?"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/store-details.js:138
+msgid "This will help us configure your store and get you started quickly"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/store-details.js:162
+msgid "I'm setting up a store for a client"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:110
+msgid "%s was installed and activated on your site."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:165
+msgid "This theme does not support WooCommerce."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:183
+msgid "Continue with my active theme"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:191
+#: client/dashboard/profile-wizard/steps/theme/preview.js:90
+msgid "Choose"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:196
+msgid "Live demo"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:210
+msgid "Currently active theme"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:213
+msgid "Installed"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:215
+msgid "Free"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:218
+msgid "%s per year"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:274
+msgid "Choose a theme"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:277
+msgid ""
+"Choose how your store appears to customers. And don't worry, you can always "
+"switch themes and edit them later."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:289
+msgid "All themes"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:293
+msgid "Paid themes"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:297
+msgid "Free themes"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:323
+msgid "Skip this step"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/index.js:69
+msgid "There was a problem selecting your store theme."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/preview.js:68
+msgid "{{strong}}%s{{/strong}} developed by WooCommerce"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/uploader.js:80
+msgid "Upload a theme"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/uploader.js:82
+msgid "Drop a theme zip file here to upload"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/uploader.js:85
+msgid "Drop your theme zip file here"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/uploader.js:93
+msgid "Uploading theme"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/theme/uploader.js:95
+msgid "Your theme is being uploaded"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/usage-modal.js:66
+msgid ""
+"Get improved features and faster fixes by sharing non-sensitive data via "
+"{{link}}usage tracking{{/link}} that shows us how WooCommerce is used. No "
+"personal data is tracked or stored."
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/usage-modal.js:80
+msgid "Build a Better WooCommerce"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/usage-modal.js:90
+msgid "Yes, count me in!"
+msgstr ""
+
+#: client/dashboard/section-controls.js:42
+msgid "Section Title"
+msgstr ""
+
+#: client/dashboard/section-controls.js:53
+msgid "Move up"
+msgstr ""
+
+#: client/dashboard/section-controls.js:59
+msgid "Move Down"
+msgstr ""
+
+#: client/dashboard/section-controls.js:63
+#: client/dashboard/task-list/index.js:180
+msgid "Remove block"
+msgstr ""
+
+#: client/dashboard/section-controls.js:64
+msgid "Remove section"
+msgstr ""
+
+#: client/dashboard/store-performance/index.js:182
+msgid "Store Performance"
+msgstr ""
+
+#: client/dashboard/store-performance/index.js:58
+msgid "Choose which analytics to display and the section name"
+msgstr ""
+
+#: client/dashboard/store-performance/index.js:64
+msgid "Display Stats:"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:158
+msgid "Is this card useful?"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:161
+msgid "No, hide it"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:165
+msgid "Yes, keep it"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:176
+msgid "Task List Options"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:181
+msgid "Remove this card"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:224
+msgid "Woo hoo - you're almost there!"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:233
+msgid ""
+"Based on the information you provided we’ve prepared some final set up "
+"tasks for you to perform."
+msgstr ""
+
+#: client/dashboard/task-list/index.js:239
+msgid "Once complete your store will be ready for launch - exciting!"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:282
+msgid "Set up your store and start selling"
+msgstr ""
+
+#: client/dashboard/task-list/index.js:283
+msgid ""
+"Below you’ll find a list of the most important steps to get your store up "
+"and running."
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:101
+msgid "Set up shipping"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:102
+msgid "Configure some basic shipping rates to get started"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:112
+msgid "Set up tax"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:113
+msgid "Choose how to configure tax rates - manually or automatically"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:124
+msgid "Set up payments"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:125
+msgid "Select which payment providers you’d like to use and configure them"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:55
+msgid "Purchase & install extensions"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:56
+msgid "Purchase, install, and manage your extensions directly from your dashboard"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:68
+msgid "Connect your store to WooCommerce.com"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:69
+msgid "Install and manage your extensions directly from your Dashboard"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:81
+msgid "Add products manually, import from a sheet or migrate from another platform"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:92
+msgid "Personalize your store"
+msgstr ""
+
+#: client/dashboard/task-list/tasks.js:93
+msgid "Create a custom homepage and upload your logo"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:101
+msgid "🎨 Your store is looking great! Don't forget to continue personalizing it."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:138
+msgid "There was an error importing some of the demo products."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:143
+msgid "All demo products have been imported."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:175
+msgid "Customize"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:241
+msgid "Import demo products"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:242
+msgid ""
+"We’ll add some products that will make it easier to see what your store "
+"looks like"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:249
+msgid "Import products"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:260
+msgid "Create a custom homepage"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:261
+msgid "Create a new homepage and customize it to suit your needs"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:268
+msgid "Create homepage"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:284
+msgid "Upload a logo"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:285
+msgid "Ensure your store is on-brand by adding your logo"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:298
+#: client/dashboard/task-list/tasks/payments/index.js:363
+#: client/dashboard/task-list/tasks/payments/paypal.js:205
+#: client/dashboard/task-list/tasks/payments/stripe.js:296
+#: client/dashboard/task-list/tasks/shipping/index.js:202
+msgid "Proceed"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:301
+#: client/dashboard/task-list/tasks/payments/paypal.js:213
+#: client/dashboard/task-list/tasks/payments/square.js:109
+#: client/dashboard/task-list/tasks/payments/stripe.js:304
+msgid "Skip"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:309
+msgid "Set a store notice"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:310
+msgid "Optionally display a prominent notice across all pages of your store"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:318
+msgid "Store notice text"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:323
+#: client/dashboard/task-list/tasks/shipping/index.js:203
+msgid "Complete task"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/appearance.js:94
+msgid "Store logo updated sucessfully."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/connect.js:30
+msgid ""
+"You must click approve to install your extensions and connect to "
+"WooCommerce.com."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/connect.js:98
+msgid "Store connected to WooCommerce.com and extensions are being installed."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:198
+msgid "Create a Stripe account for me"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:204
+msgid "Email address"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:218
+msgid "Credit cards - powered by Stripe"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:221
+msgid ""
+"Accept debit and credit cards in 135+ currencies, methods such as Alipay, "
+"and one-touch checkout with Apple Pay."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:235
+msgid "PayPal Checkout"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:238
+msgid ""
+"Safe and secure payments using credit cards or your customer's PayPal "
+"account."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:250
+msgid "Klarna Checkout"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:261
+msgid "Klarna Payments"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:262
+msgid ""
+"Choose the payment that you want, pay now, pay later or slice it. No credit "
+"card numbers, no passwords, no worries."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:272
+msgid "Square"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:273
+msgid ""
+"Securely accept credit and debit cards with one low rate, no surprise fees "
+"(custom rates available). Sell online and in store and track sales and "
+"inventory in one place."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:357
+msgid "Choose payment methods"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:358
+msgid "Select which payment methods you'd like to use"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:371
+msgid "Install selected methods"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:372
+msgid "Install plugins required to offer the selected payment methods"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:390
+msgid "Configure payment methods"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:391
+msgid "Set up your chosen payment methods"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:397
+msgid "Enable Stripe"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:398
+msgid "Connect your store to your Stripe account"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:414
+msgid "Enable PayPal Checkout"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:415
+msgid "Connect your store to your PayPal account"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:426
+msgid "Enable Square"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:427
+msgid "Connect your store to your Square account"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:451
+msgid "Klarna"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/index.js:99
+msgid "💰 Ka-ching! Your store can now accept payments 💳"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/klarna.js:55
+msgid ""
+"Klarna can be configured under your {{link}}store settings{{/link}}. Figure "
+"out {{helpLink}}what you need{{/helpLink}}."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:134
+msgid "PayPal connected successfully."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:140
+#: client/dashboard/task-list/tasks/payments/stripe.js:239
+msgid "There was a problem saving your payment settings."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:156
+msgid "Please enter your API username"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:159
+msgid "Please enter your API password"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:175
+msgid "Your API details can be obtained from your {{link}}PayPal account{{/link}}"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:194
+msgid "API Username"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/paypal.js:199
+msgid "API Password"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/square.js:40
+msgid "Square connected successfully."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/square.js:68
+msgid ""
+"There was an error connecting to Square. Please try again or skip to "
+"connect later in store settings."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:144
+msgid "Stripe"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:147
+msgid ""
+"We tried to create a Stripe account automatically for "
+"{{strong}}%s{{/strong}}, but an error occured. Please try connecting "
+"manually to continue."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:159
+msgid "You already have a Stripe account"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:162
+msgid ""
+"We tried to create a Stripe account automatically for "
+"{{strong}}%s{{/strong}}, but one already exists. Please sign in and connect "
+"to continue."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:198
+msgid "OK"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:233
+msgid "Stripe connected successfully."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:255
+msgid "Please enter your publishable key"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:258
+msgid "Please enter your secret key"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:266
+msgid "Your API details can be obtained from your {{link}}Stripe account{{/link}}"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:285
+msgid "Live Publishable Key"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/payments/stripe.js:290
+msgid "Live Secret Key"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/products.js:21
+msgid "Add manually (recommended)"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/products.js:22
+msgid "For small stores we recommend adding products manually"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/products.js:31
+msgid "Import"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/products.js:32
+msgid "For larger stores we recommend importing all products at once via CSV file"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/products.js:44
+msgid "Migrate"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/products.js:45
+msgid ""
+"For stores currently selling elsewhere we suggest using a product migration "
+"service"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:146
+msgid "📦 Shipping is done! Don't worry, you can always change it later."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:177
+#: client/dashboard/task-list/tasks/tax.js:202
+msgid "Set store location"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:178
+#: client/dashboard/task-list/tasks/tax.js:203
+msgid "The address from which your business operates"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:193
+msgid "Set shipping costs"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:194
+msgid "Define how much customers pay to ship to different destinations"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:214
+msgid "Enable shipping label printing"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:217
+msgid ""
+"We recommend using ShipStation to save time at the post office by printing "
+"your shipping labels at home. Try ShipStation free for 30 days. "
+"{{link}}Learn more{{/link}}."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:232
+msgid ""
+"With WooCommerce Services and Jetpack you can save time at the Post Office "
+"by printing your shipping labels at home"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:261
+#: client/dashboard/task-list/tasks/tax.js:248
+msgid "Connect your store"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:262
+msgid "Connect your store to WordPress.com to enable label printing"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/index.js:71
+msgid "Rest of the world"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/rates.js:101
+msgid "Your shipping rates have been updated."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/rates.js:120
+msgid "Free shipping"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/rates.js:164
+msgid "Shipping rates can not be negative numbers."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/rates.js:209
+msgid "Shipping cost"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/shipping/rates.js:230
+#: packages/components/build-module/date-range-filter-picker/content.js:151
+msgid "Update"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/steps/connect.js:60
+#: client/dashboard/task-list/tasks/steps/plugins.js:127
+msgid "No thanks"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/steps/location.js:46
+msgid "There was a problem saving your store location."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/steps/plugins.js:101
+msgid "Continue without installing"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/steps/plugins.js:124
+msgid "Install & enable"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/steps/plugins.js:63
+msgid "Plugins were successfully installed and activated."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:176
+msgid "You're awesome! One less item on your to-do list ✅"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:186
+msgid "There was a problem updating your tax settings."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:220
+msgid "Install Jetpack and WooCommerce Services"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:221
+msgid ""
+"Jetpack and WooCommerce Services allow you to automate sales tax "
+"calculations"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:249
+msgid ""
+"Connect your store to WordPress.com to enable automated sales tax "
+"calculations"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:268
+msgid "Set up tax rates manually"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:275
+msgid "Configure tax rates"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:276
+msgid "Head over to the tax rate settings screen to configure your tax rates"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:290
+msgid "Configure"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:295
+msgid ""
+"By clicking \"Configure\" you're enabling tax rates and calculations. More "
+"info {{link}}here{{/link}}."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:346
+msgid "Good news!"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:350
+msgid ""
+"{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Services{{/strong}} "
+"can automate your sales tax calculations for you."
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:369
+msgid "Yes please"
+msgstr ""
+
+#: client/dashboard/task-list/tasks/tax.js:379
+msgid "No thanks, I'll configure taxes manually"
+msgstr ""
+
+#: client/header/activity-panel/index.js:101
+#: client/header/activity-panel/panels/inbox/index.js:92
+msgid "Inbox"
+msgstr ""
+
+#: client/header/activity-panel/index.js:122
+#: client/header/activity-panel/panels/reviews.js:240
+msgid "Reviews"
+msgstr ""
+
+#: client/header/activity-panel/index.js:210
+msgid "unread activity"
+msgstr ""
+
+#: client/header/activity-panel/index.js:227
+msgid "View Activity Panel, you have unread activity"
+msgstr ""
+
+#: client/header/activity-panel/index.js:228
+msgid "View Activity Panel"
+msgstr ""
+
+#: client/header/activity-panel/index.js:233
+msgid "Store Activity"
+msgstr ""
+
+#: client/header/activity-panel/index.js:245
+msgid "Close Activity Panel"
+msgstr ""
+
+#: client/header/activity-panel/panels/inbox/index.js:38
+msgid "Your inbox is empty"
+msgstr ""
+
+#: client/header/activity-panel/panels/inbox/index.js:41
+msgid ""
+"As things begin to happen in your store your inbox will start to fill up. "
+"You'll see things like achievements, new feature announcements, extension "
+"recommendations and more!"
+msgstr ""
+
+#: client/header/activity-panel/panels/inbox/index.js:68
+msgid "There was an error getting your inbox. Please try again."
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:112
+msgid ""
+"Order {{orderLink}}#%(orderNumber)s{{/orderLink}} %(customerString)s "
+"{{destinationFlag/}}"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:156
+msgid "%d product"
+msgid_plural "%d products"
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/header/activity-panel/panels/orders.js:168
+msgid "Begin fulfillment"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:180
+msgid "Manage all orders"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:193
+msgid ""
+"You currently don't have any actionable statuses. To display orders here, "
+"select orders that require further review in settings."
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:204
+msgid "There was an error getting your orders. Please try again."
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:229
+msgid "No orders to fulfill"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:41
+msgid "Good job, you've fulfilled all of your new orders!"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:49
+msgid "You have no orders to fulfill"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:61
+msgid ""
+"You're still waiting for your customers to make their first orders. While "
+"you wait why not learn how to manage orders?"
+msgstr ""
+
+#: client/header/activity-panel/panels/orders.js:87
+msgid "placed by {{customerLink}}%(customerName)s{{/customerLink}}"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:107
+msgid "Manage"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:135
+msgid "You have no reviews to moderate"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:151
+msgid "We noticed that it's been a while since your products had any reviews."
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:166
+msgid "View all Reviews"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:169
+msgid ""
+"Awesome, you've moderated all of your product reviews. How about responding "
+"to some of those negative reviews?"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:185
+msgid "Your customers haven't started reviewing your products."
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:188
+msgid ""
+"Take some time to learn about best practices for collecting and using your "
+"reviews."
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:217
+msgid "There was an error getting your reviews. Please try again."
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:241
+msgid "No reviews to moderate"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:55
+msgid ""
+"{{productLink}}%s{{/productLink}} reviewed by "
+"{{authorLink}}%s{{/authorLink}}"
+msgstr ""
+
+#: client/header/activity-panel/panels/reviews.js:74
+msgid "Verified customer"
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/card.js:128
+msgid "%d in stock"
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/card.js:89
+msgid "Save"
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/card.js:91
+msgid "Cancel"
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/card.js:97
+msgid "Update stock"
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/index.js:30
+msgid "Your stock is in good shape."
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/index.js:33
+msgid "You currently have no products running low on stock."
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/index.js:52
+msgid "There was an error getting your low stock products. Please try again."
+msgstr ""
+
+#: client/header/activity-panel/panels/stock/index.js:77
+msgid "No products with low stock"
+msgstr ""
+
+#: client/header/index.js:87
+msgid "%1$s &lsaquo; %2$s &#8212; WooCommerce"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:101
+msgid "Tomorrow"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:112
+msgid "Next Week"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:123
+msgid "Next Month"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:144
+msgid "Remind Me Later"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:207
+msgid "Previous Alert"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:215
+msgid "{{current /}} of {{total /}}"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:226
+msgid "Next Alert"
+msgstr ""
+
+#: client/layout/store-alerts/index.js:90
+msgid "Later Today"
+msgstr ""
+
+#: client/wc-api/export/mutations.js:27
+msgid "Your %s Report will be emailed to you."
+msgstr ""
+
+#: client/wc-api/export/mutations.js:34
+msgid "There was a problem exporting your %s Report. Please try again."
+msgstr ""
+
+#: client/wc-api/items/mutations.js:35
+msgid "%s stock updated."
+msgstr ""
+
+#: client/wc-api/items/mutations.js:41
+msgid "%s stock could not be updated."
+msgstr ""
+
+#: client/wc-api/onboarding/constants.js:12
+msgid "WooCommerce Services"
+msgstr ""
+
+#: client/wc-api/onboarding/constants.js:13
+msgid "Mailchimp for WooCommerce"
+msgstr ""
+
+#: client/wc-api/onboarding/constants.js:14
+msgid "Facebook for WooCommerce"
+msgstr ""
+
+#: client/wc-api/onboarding/constants.js:15
+msgid "WooCommerce ShipStation Gateway"
+msgstr ""
+
+#: client/wc-api/onboarding/operations.js:237
+msgid "There was an error installing %s. Please try again."
+msgstr ""
+
+#: client/wc-api/onboarding/operations.js:242
+msgid "There was an error connecting to %s. Please try again."
+msgstr ""
+
+#: client/wc-api/onboarding/operations.js:248
+msgid "There was an error activating %s. Please try again."
+msgstr ""
+
+#: client/wp-admin-scripts/onboarding-homepage-notice/index.js:76
+msgid "🏠 Nice work creating your store's homepage!"
+msgstr ""
+
+#: client/wp-admin-scripts/onboarding-homepage-notice/index.js:82
+#: client/wp-admin-scripts/onboarding-product-notice/index.js:25
+#: client/wp-admin-scripts/onboarding-tax-notice/index.js:49
+msgid "Continue setup."
+msgstr ""
+
+#: client/wp-admin-scripts/onboarding-product-import-notice/index.js:27
+msgid "Continue setup"
+msgstr ""
+
+#: client/wp-admin-scripts/onboarding-product-notice/index.js:19
+msgid "🎉 Congrats on adding your first product!"
+msgstr ""
+
+#: client/wp-admin-scripts/onboarding-tax-notice/index.js:43
+msgid "You've added your first tax rate!"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/date-filter.js:35
+#: packages/date/build-module/index.js:132
+msgid "MMM D, YYYY"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/index.js:174
+msgid "Choose to apply any or all filters"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/index.js:365
+msgid "Add a Filter"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/index.js:389
+msgid "Filter"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/index.js:393
+msgid "Clear all filters"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/index.js:48
+msgid "Any"
+msgstr ""
+
+# Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ
+#: packages/components/build-module/advanced-filters/number-filter.js:219
+msgid "%(field)s range start"
+msgstr ""
+
+# Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ
+#: packages/components/build-module/advanced-filters/number-filter.js:233
+msgid "%(field)s range end"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-picker.js:117
+msgid "Choose a date"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-picker.js:119
+msgid "Date input describing a selected date in format %s"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-picker.js:133
+msgid "select a date"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-range.js:206
+msgid "Start Date"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-range.js:208
+msgid "Date input describing a selected date range's start date in format %s"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-range.js:214
+msgid "to"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-range.js:218
+msgid "End Date"
+msgstr ""
+
+#: packages/components/build-module/calendar/date-range.js:220
+msgid "Date input describing a selected date range's end date in format %s"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:10
+msgid "Interact with the calendar and select start and end dates."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:11
+msgid "Clear Date"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:12
+msgid "Clear Dates"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:13
+msgid "Move backward to switch to the previous month."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:14
+msgid "Move forward to switch to the next month."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:15
+msgid "Enter key"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:16
+msgid "Right and left arrow keys"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:17
+msgid "up and down arrow keys"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:18
+msgid "page up and page down keys"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:19
+msgid "Home and end keys"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:20
+msgid "Escape key"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:21
+msgid "Question mark"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:22
+msgid "Select the date in focus."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:23
+msgid "Move backward (left) and forward (right) by one day."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:24
+msgid "Move backward (up) and forward (down) by one week."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:25
+msgid "Switch months."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:26
+msgid "Go to the first or last day of a week."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:27
+msgid "Return to the date input field."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:28
+msgid ""
+"Press the down arrow key to interact with the calendar and\n"
+"  select a date."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:31
+msgid "Select %s as a start date."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:35
+msgid "Select %s as an end date."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:43
+msgid "%s is not selectable."
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:47
+msgid "Selected. %s"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:8
+msgid "Calendar"
+msgstr ""
+
+#: packages/components/build-module/calendar/phrases.js:9
+msgid "Close"
+msgstr ""
+
+#: packages/components/build-module/chart/d3chart/legend.js:115
+msgid "You may select up to %d items."
+msgstr ""
+
+#: packages/components/build-module/chart/index.js:482
+#: packages/components/build-module/table/index.js:237
+msgid "Your requested data is loading"
+msgstr ""
+
+#: packages/components/build-module/compare-filter/index.js:154
+#: packages/components/build-module/search-list-control/index.js:244
+#: packages/components/build-module/select-control/tags.js:102
+msgid "Clear all"
+msgstr ""
+
+#: packages/components/build-module/count/index.js:21
+msgid "Total %d"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/compare-periods.js:49
+#: packages/components/build-module/date-range-filter-picker/content.js:133
+msgid "compare to"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/content.js:103
+#: packages/date/build-module/index.js:63
+msgid "Custom"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/content.js:143
+msgid "Reset"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/content.js:92
+msgid "Select date range and comparison"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/content.js:96
+msgid "select a date range"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/content.js:99
+msgid "Presets"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/index.js:122
+msgid "vs."
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/index.js:170
+msgid "Date Range"
+msgstr ""
+
+#: packages/components/build-module/date-range-filter-picker/preset-periods.js:52
+msgid "select a preset period"
+msgstr ""
+
+#: packages/components/build-module/filter-picker/index.js:278
+msgid "filter report to show:"
+msgstr ""
+
+#: packages/components/build-module/filters/index.js:130
+msgid "Filters"
+msgstr ""
+
+#: packages/components/build-module/image-upload/index.js:46
+msgid "Select or upload image"
+msgstr ""
+
+#: packages/components/build-module/image-upload/index.js:48
+msgid "Select"
+msgstr ""
+
+#: packages/components/build-module/image-upload/index.js:87
+msgid "Remove image"
+msgstr ""
+
+#: packages/components/build-module/image-upload/index.js:92
+msgid "Add an image"
+msgstr ""
+
+#: packages/components/build-module/pagination/index.js:137
+msgid "Page %d of %d"
+msgstr ""
+
+#: packages/components/build-module/pagination/index.js:144
+msgid "Previous Page"
+msgstr ""
+
+#: packages/components/build-module/pagination/index.js:151
+msgid "Next Page"
+msgstr ""
+
+#: packages/components/build-module/pagination/index.js:170
+msgid "Go to page"
+msgstr ""
+
+#: packages/components/build-module/pagination/index.js:196
+msgid "Rows per page"
+msgstr ""
+
+#: packages/components/build-module/rating/index.js:68
+msgid "%1$s out of %2$s stars."
+msgstr ""
+
+#: packages/components/build-module/search-list-control/index.js:33
+msgid "Clear all selected items"
+msgstr ""
+
+#: packages/components/build-module/search-list-control/index.js:34
+msgid "Results"
+msgstr ""
+
+#: packages/components/build-module/search-list-control/index.js:35
+msgid "No items found."
+msgstr ""
+
+#: packages/components/build-module/search-list-control/index.js:36
+msgid "No results for %s"
+msgstr ""
+
+#: packages/components/build-module/search-list-control/index.js:37
+msgid "Search for items"
+msgstr ""
+
+#: packages/components/build-module/search-list-control/index.js:39
+msgid "%d item selected"
+msgid_plural "%d items selected"
+msgstr[0] ""
+msgstr[1] ""
+
+#: packages/components/build-module/search-list-control/index.js:41
+msgid "Search results updated."
+msgstr ""
+
+#: packages/components/build-module/search/autocompleters/categories.js:49
+msgid "All categories with titles that include {{query /}}"
+msgstr ""
+
+#: packages/components/build-module/search/autocompleters/coupons.js:48
+msgid "All coupons with codes that include {{query /}}"
+msgstr ""
+
+#: packages/components/build-module/search/autocompleters/customers.js:49
+msgid "All customers with names that include {{query /}}"
+msgstr ""
+
+#: packages/components/build-module/search/autocompleters/product.js:51
+msgid "All products with titles that include {{query /}}"
+msgstr ""
+
+#: packages/components/build-module/search/autocompleters/taxes.js:48
+msgid "All taxes with codes that include {{query /}}"
+msgstr ""
+
+#: packages/components/build-module/select-control/control.js:241
+msgid "Move backward for selected items"
+msgstr ""
+
+#: packages/components/build-module/select-control/index.js:186
+msgid "%d result found, use up and down arrow keys to navigate."
+msgid_plural "%d results found, use up and down arrow keys to navigate."
+msgstr[0] ""
+msgstr[1] ""
+
+#: packages/components/build-module/select-control/index.js:188
+msgid "No results."
+msgstr ""
+
+#: packages/components/build-module/select-control/tags.js:86
+msgid "%1$s (%2$s of %3$s)"
+msgstr ""
+
+#: packages/components/build-module/summary/index.js:87
+msgid "Performance Indicators"
+msgstr ""
+
+#: packages/components/build-module/summary/menu.js:36
+msgid ""
+"List of data points available for filtering. Use arrow keys to cycle "
+"through the list. Click a data point for a detailed report."
+msgstr ""
+
+#: packages/components/build-module/summary/number.js:47
+msgid "Up %d%% from %s"
+msgstr ""
+
+#: packages/components/build-module/summary/number.js:47
+msgid "Down %d%% from %s"
+msgstr ""
+
+#: packages/components/build-module/summary/number.js:52
+msgid "No change from %s"
+msgstr ""
+
+#: packages/components/build-module/summary/number.js:95
+msgid "%d%%"
+msgstr ""
+
+#: packages/components/build-module/table/index.js:214
+msgid "Choose which values to display"
+msgstr ""
+
+#: packages/components/build-module/table/index.js:216
+msgid "Columns:"
+msgstr ""
+
+#: packages/components/build-module/table/table.js:179
+msgid "(scroll to see more)"
+msgstr ""
+
+#: packages/components/build-module/table/table.js:206
+msgid "Sort by %s in ascending order"
+msgstr ""
+
+#: packages/components/build-module/table/table.js:206
+msgid "Sort by %s in descending order"
+msgstr ""
+
+#: packages/components/build-module/table/table.js:255
+msgid "No data to display"
+msgstr ""
+
+#: packages/components/build-module/tag/index.js:81
+msgid "Remove %s"
+msgstr ""
+
+#: client/analytics/report/products/table.js:181
+msgctxt "categories"
+msgid "+%d more"
+msgstr ""
+
+#: packages/components/src/order-status/docs/example.js:13
+msgid "Processing Order"
+msgstr ""
+
+#: packages/components/src/order-status/docs/example.js:14
+msgid "Pending Order"
+msgstr ""
+
+#: packages/components/src/order-status/docs/example.js:15
+msgid "Completed Order"
+msgstr ""
+
+#: packages/date/build-module/index.js:134
+msgid "MMM D"
+msgstr ""
+
+#: packages/date/build-module/index.js:33
+msgid "Today"
+msgstr ""
+
+#: packages/date/build-module/index.js:36
+msgid "Yesterday"
+msgstr ""
+
+#: packages/date/build-module/index.js:39
+msgid "Week to Date"
+msgstr ""
+
+#: packages/date/build-module/index.js:42
+msgid "Last Week"
+msgstr ""
+
+#: packages/date/build-module/index.js:45
+msgid "Month to Date"
+msgstr ""
+
+#: packages/date/build-module/index.js:48
+msgid "Last Month"
+msgstr ""
+
+#: packages/date/build-module/index.js:51
+msgid "Quarter to Date"
+msgstr ""
+
+#: packages/date/build-module/index.js:54
+msgid "Last Quarter"
+msgstr ""
+
+#: packages/date/build-module/index.js:552
+msgid "Week of %B %-d, %Y"
+msgstr ""
+
+#: packages/date/build-module/index.js:57
+msgid "Year to Date"
+msgstr ""
+
+#: packages/date/build-module/index.js:595
+msgid "MMMM D, YYYY"
+msgstr ""
+
+#: packages/date/build-module/index.js:596
+msgid "D MMMM YYYY LT"
+msgstr ""
+
+#: packages/date/build-module/index.js:597
+msgid "dddd, D MMMM YYYY LT"
+msgstr ""
+
+#: packages/date/build-module/index.js:598
+msgid "HH:mm"
+msgstr ""
+
+#: packages/date/build-module/index.js:60
+msgid "Last Year"
+msgstr ""
+
+#: packages/date/build-module/index.js:605
+msgid "Invalid date"
+msgstr ""
+
+#: packages/date/build-module/index.js:606
+msgid "Select a date in the past"
+msgstr ""
+
+#: packages/date/build-module/index.js:608
+msgid "Start date must be before end date"
+msgstr ""
+
+#: packages/date/build-module/index.js:67
+msgid "Previous Period"
+msgstr ""
+
+#: packages/date/build-module/index.js:70
+msgid "Previous Year"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:59
+msgctxt ""
+"A sentence describing filters for Customers. See screen shot for context: "
+"https://cloudup.com/cCsm3GeXJbE"
+msgid "Customers Match {{select /}} Filters"
+msgstr ""
+
+# Sentence fragment, logical, "Includes" refers to orders including a given tax rate(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:202
+msgctxt "tax rate"
+msgid "Includes"
+msgstr ""
+
+# Sentence fragment, logical, "Excludes" refers to orders excluding a given tax rate(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:207
+msgctxt "tax rate"
+msgid "Excludes"
+msgstr ""
+
+# Sentence fragment, logical, "Less Than" refers to average order value of a customer, more than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:266
+msgctxt "average order value of customer"
+msgid "Less Than"
+msgstr ""
+
+#: client/analytics/report/customers/config.js:272
+msgctxt "average order value of customer"
+msgid "More Than"
+msgstr ""
+
+# Sentence fragment, logical, "Between" refers to average order value of a customer, between two given amounts. Screenshot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:337
+msgctxt "date"
+msgid "Between"
+msgstr ""
+
+# Sentence fragment, logical, "Before" refers to customers registered before a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:327
+msgctxt "date"
+msgid "Before"
+msgstr ""
+
+# Sentence fragment, logical, "after" refers to customers registered after a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE
+#: client/analytics/report/customers/config.js:332
+msgctxt "date"
+msgid "After"
+msgstr ""
+
+#: client/analytics/report/downloads/config.js:41
+msgctxt ""
+"A sentence describing filters for Downloads. See screen shot for context: "
+"https://cloudup.com/ccxhyH2mEDg"
+msgid "Downloads Match {{select /}} Filters"
+msgstr ""
+
+#: client/analytics/report/orders/config.js:60
+msgctxt ""
+"A sentence describing filters for Orders. See screen shot for context: "
+"https://cloudup.com/cSsUY9VeCVJ"
+msgid "Orders Match {{select /}} Filters"
+msgstr ""
+
+# Sentence fragment, logical, "Is" refers to searching for orders matching a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:79
+msgctxt "order status"
+msgid "Is"
+msgstr ""
+
+# Sentence fragment, logical, "Is Not" refers to searching for orders that don\'t match a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ
+#: client/analytics/report/orders/config.js:84
+msgctxt "order status"
+msgid "Is Not"
+msgstr ""
+
+#: client/analytics/report/products/table-variations.js:135
+#: client/analytics/report/products/table.js:137
+#: client/analytics/report/stock/table.js:93
+msgctxt "Indication of a low quantity"
+msgid "Low"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:183
+msgctxt "store product count or revenue"
+msgid "%s+"
+msgstr ""
+
+#: client/dashboard/profile-wizard/steps/business-details.js:189
+msgctxt "store product count or revenue range"
+msgid "%1$s - %2$s"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/date-filter.js:77
+msgctxt "Date range inputs arranged on a single line"
+msgid "{{after /}}{{span}} and {{/span}}{{before /}}"
+msgstr ""
+
+#: packages/components/build-module/advanced-filters/number-filter.js:41
+msgctxt "Numerical range inputs arranged on a single line"
+msgid "{{rangeStart /}}{{span}} and {{/span}}{{rangeEnd /}}"
+msgstr ""
+
+# Sentence fragment, "maximum amount" refers to a numeric value the field must be less than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ
+#: packages/components/build-module/advanced-filters/number-filter.js:165
+msgctxt "maximum value input"
+msgid "%(field)s maximum amount"
+msgstr ""
+
+# Sentence fragment, "minimum amount" refers to a numeric value the field must be more than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ
+#: packages/components/build-module/advanced-filters/number-filter.js:170
+msgctxt "minimum value input"
+msgid "%(field)s minimum amount"
+msgstr ""
+
