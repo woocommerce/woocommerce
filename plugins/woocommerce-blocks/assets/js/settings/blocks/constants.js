@@ -3,6 +3,7 @@
  */
 import { getSetting } from '@woocommerce/settings';
 
+export const CURRENT_USER_IS_ADMIN = getSetting( 'currentUserIsAdmin', false );
 export const REVIEW_RATINGS_ENABLED = getSetting(
 	'reviewRatingsEnabled',
 	true

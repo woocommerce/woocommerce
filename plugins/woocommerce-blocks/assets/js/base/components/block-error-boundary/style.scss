@@ -17,11 +17,11 @@
 .wc-block-error__image {
 	max-width: 25%;
 }
-.wc-block-error__text,
-.wc-block-error__message {
+.wc-block-error__text {
 	margin: 0;
 }
 .wc-block-error__message {
+	margin: 1em 0 0 0;
 	font-style: italic;
 }
 

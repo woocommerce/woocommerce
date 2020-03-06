@@ -11,6 +11,7 @@ import {
 	ToggleControl,
 	CheckboxControl,
 } from '@wordpress/components';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 		requireCompanyField,
 		requirePhoneField,
 	} = attributes;
-	// @todo: wrap Block with Disabled once you finish building the form
 	return (
 		<div className={ className }>
 			<InspectorControls>
@@ -137,13 +137,29 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<Block
-				attributes={ attributes }
-				isEditor={ true }
-				shippingRates={
-					SHIPPING_METHODS_EXIST ? previewShippingRates : []
-				}
-			/>
+			<BlockErrorBoundary
+				header={ __(
+					'Checkout Block Error',
+					'woo-gutenberg-products-block'
+				) }
+				text={ __(
+					'There was an error whilst rendering the checkout block. If this problem continues, try re-creating the block.',
+					'woo-gutenberg-products-block'
+				) }
+				showErrorMessage={ true }
+				errorMessagePrefix={ __(
+					'Error message:',
+					'woo-gutenberg-products-block'
+				) }
+			>
+				<Block
+					attributes={ attributes }
+					isEditor={ true }
+					shippingRates={
+						SHIPPING_METHODS_EXIST ? previewShippingRates : []
+					}
+				/>
+			</BlockErrorBoundary>
 		</div>
 	);
 };

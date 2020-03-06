@@ -13,6 +13,7 @@ const BlockError = ( {
 		'woo-gutenberg-products-block'
 	),
 	errorMessage,
+	errorMessagePrefix = __( 'Error:', 'woo-gutenberg-products-block' ),
 } ) => {
 	return (
 		<div className="wc-block-error">
@@ -29,7 +30,10 @@ const BlockError = ( {
 				) }
 				{ text && <p className="wc-block-error__text">{ text }</p> }
 				{ errorMessage && (
-					<p className="wc-block-error__message">{ errorMessage }</p>
+					<p className="wc-block-error__message">
+						{ errorMessagePrefix ? errorMessagePrefix + ' ' : '' }
+						{ errorMessage }
+					</p>
 				) }
 			</div>
 		</div>
@@ -58,7 +62,11 @@ BlockError.propTypes = {
 	 * If it's `null` or an empty string, nothing will be displayed.
 	 * If it's not defined, the default text will be used.
 	 */
-	text: PropTypes.string,
+	text: PropTypes.node,
+	/**
+	 * Text preceeding the error message.
+	 */
+	errorMessagePrefix: PropTypes.string,
 };
 
 export default BlockError;

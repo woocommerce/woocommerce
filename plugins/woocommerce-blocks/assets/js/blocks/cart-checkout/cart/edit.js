@@ -13,6 +13,7 @@ import {
 	previewShippingRates,
 } from '@woocommerce/resource-previews';
 import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * Internal dependencies
@@ -95,22 +96,56 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 						{ currentView === 'full' && (
 							<>
 								{ SHIPPING_ENABLED && <BlockSettings /> }
-								<Disabled>
-									<FullCart
-										cartItems={ previewCart.items }
-										cartTotals={ previewCart.totals }
-										isShippingCostHidden={
-											isShippingCostHidden
-										}
-										isShippingCalculatorEnabled={
-											isShippingCalculatorEnabled
-										}
-										shippingRates={ previewShippingRates }
-									/>
-								</Disabled>
+								<BlockErrorBoundary
+									header={ __(
+										'Cart Block Error',
+										'woo-gutenberg-products-block'
+									) }
+									text={ __(
+										'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
+										'woo-gutenberg-products-block'
+									) }
+									showErrorMessage={ true }
+									errorMessagePrefix={ __(
+										'Error message:',
+										'woo-gutenberg-products-block'
+									) }
+								>
+									<Disabled>
+										<FullCart
+											cartItems={ previewCart.items }
+											cartTotals={ previewCart.totals }
+											isShippingCostHidden={
+												isShippingCostHidden
+											}
+											isShippingCalculatorEnabled={
+												isShippingCalculatorEnabled
+											}
+											shippingRates={
+												previewShippingRates
+											}
+										/>
+									</Disabled>
+								</BlockErrorBoundary>
 							</>
 						) }
-						<EmptyCart hidden={ currentView === 'full' } />
+						<BlockErrorBoundary
+							header={ __(
+								'Cart Block Error',
+								'woo-gutenberg-products-block'
+							) }
+							text={ __(
+								'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
+								'woo-gutenberg-products-block'
+							) }
+							showErrorMessage={ true }
+							errorMessagePrefix={ __(
+								'Error message:',
+								'woo-gutenberg-products-block'
+							) }
+						>
+							<EmptyCart hidden={ currentView === 'full' } />
+						</BlockErrorBoundary>
 					</>
 				) }
 			/>
