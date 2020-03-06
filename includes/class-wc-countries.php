@@ -647,9 +647,9 @@ class WC_Countries {
 	 */
 	public function get_default_address_fields() {
 		if ( 'optional' === get_option( 'woocommerce_checkout_address_2_field', 'optional' ) ) {
-			$address_2_placeholder = __( 'Apartment, suite, unit etc. (optional)', 'woocommerce' );
+			$address_2_placeholder = __( 'Apartment, suite, unit, etc. (optional)', 'woocommerce' );
 		} else {
-			$address_2_placeholder = __( 'Apartment, suite, unit etc.', 'woocommerce' );
+			$address_2_placeholder = __( 'Apartment, suite, unit, etc.', 'woocommerce' );
 		}
 
 		$fields = array(
