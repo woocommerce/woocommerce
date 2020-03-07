@@ -187,8 +187,7 @@ class WC_Admin_Setup_Wizard {
 		return $this->should_show_theme()
 			|| $this->should_show_automated_tax()
 			|| $this->should_show_mailchimp()
-			|| $this->should_show_facebook()
-			|| $this->should_show_wc_admin();
+			|| $this->should_show_facebook();
 	}
 
 	/**
@@ -2082,17 +2081,6 @@ class WC_Admin_Setup_Wizard {
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
 						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
 						'plugins'     => $this->get_wcs_requisite_plugins(),
-					) );
-				endif;
-
-				if ( $this->should_show_wc_admin() ) :
-					$this->display_recommended_item( array(
-						'type'        => 'wc_admin',
-						'title'       => __( 'WooCommerce Admin', 'woocommerce' ),
-						'description' => __( 'Manage your store\'s reports and monitor key metrics with a new and improved interface and dashboard.', 'woocommerce' ),
-						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
-						'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
-						'plugins'     => array( array( 'name' => __( 'WooCommerce Admin', 'woocommerce' ), 'slug' => 'woocommerce-admin' ) ),
 					) );
 				endif;
 
