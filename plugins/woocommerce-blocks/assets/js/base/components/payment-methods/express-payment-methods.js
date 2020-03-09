@@ -35,7 +35,7 @@ const ExpressPaymentMethods = () => {
 			<li key="noneRegistered">No registered Payment Methods</li>
 		);
 	return (
-		<ul className="wc-component__express-payment-event-buttons">
+		<ul className="wc-block-component-express-checkout-payment-event-buttons">
 			{ content }
 		</ul>
 	);

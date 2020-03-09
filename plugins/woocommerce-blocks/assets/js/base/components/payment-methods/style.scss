@@ -1,38 +1,67 @@
-.wc-component__container-with-border {
+.wc-block-component-express-checkout {
 	margin: auto;
 	border: 2px solid $black;
 	border-radius: 5px;
 	padding: 10px;
-	margin-bottom: $gap-large;
 
-	.wc-component__text-overlay-on-border {
+	.wc-block-component-express-checkout__title {
 		position: relative;
-		top: -24px;
 		background-color: $white;
 		padding-left: $gap-small;
 		padding-right: $gap-small;
+		margin-top: -24px;
+		margin-left: $gap-small;
+		margin-bottom: $gap-small;
 		width: fit-content;
 		color: $black;
+		font-weight: bold;
 	}
 
-	.wc-component__container-content {
-		margin-top: -15px;
-		padding-left: $gap-large;
-		padding-right: $gap-large;
-		padding-bottom: $gap;
+	.wc-block-component-express-checkout__content {
+		padding: 0 $gap-large;
 	}
 
-	.wc-component__express-payment-event-buttons {
+	.wc-block-component-express-checkout-payment-event-buttons {
 		list-style: none;
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
 		width: 100%;
 		padding: 0;
-		margin: 0;
+		margin: 0 0 $gap;
+		overflow: hidden;
 		> li {
 			display: inline-block;
 			width: 50%;
+			> img {
+				width: 100%;
+			}
 		}
+		> li:nth-child(even) {
+			padding-left: $gap-smaller;
+		}
+		> li:nth-child(odd) {
+			padding-right: $gap-smaller;
+		}
+	}
+}
+.wc-block-component-express-checkout-continue-rule {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	padding: 0 ($gap-large+14px);
+	margin: $gap-large 0;
+
+	&::before {
+		margin-right: 10px;
+	}
+	&::after {
+		margin-left: 10px;
+	}
+	&::before,
+	&::after {
+		content: " ";
+		flex: 1;
+		border-bottom: 1px solid $core-grey-light-600;
 	}
 }

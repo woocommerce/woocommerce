@@ -13,14 +13,19 @@ import './style.scss';
 
 const ExpressCheckoutContainer = ( { children } ) => {
 	return (
-		<div className="wc-component__checkout-container wc-component__container-with-border">
-			<div className="wc-component__text-overlay-on-border">
-				<strong>
+		<>
+			<div className="wc-block-component-express-checkout">
+				<div className="wc-block-component-express-checkout__title">
 					{ __( 'Express checkout', 'woo-gutenberg-products-block' ) }
-				</strong>
+				</div>
+				<div className="wc-block-component-express-checkout__content">
+					{ children }
+				</div>
 			</div>
-			<div className="wc-component__container-content">{ children }</div>
-		</div>
+			<div className="wc-block-component-express-checkout-continue-rule">
+				{ __( 'Or continue below', 'woo-gutenberg-products-block' ) }
+			</div>
+		</>
 	);
 };
 
