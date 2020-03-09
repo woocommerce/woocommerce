@@ -192,7 +192,7 @@
 		"promptly": "3.0.3",
 		"prop-types": "15.7.2",
 		"raw-loader": "4.0.0",
-		"react-docgen": "5.2.1",
+		"react-docgen": "5.3.0",
 		"readline-sync": "1.4.10",
 		"recast": "0.18.5",
 		"replace": "1.1.5",
