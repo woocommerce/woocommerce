@@ -2463,12 +2463,10 @@ class WC_Admin_Setup_Wizard {
 		WC_Admin_Notices::remove_notice( 'install', true );
 
 		$user_email   = $this->get_current_user_email();
-		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
 		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
 		$help_text    = sprintf(
-			/* translators: %1$s: link to videos, %2$s: link to docs */
-			__( 'Watch our <a href="%1$s" target="_blank">guided tour videos</a> to learn more about WooCommerce, and visit WooCommerce.com to learn more about <a href="%2$s" target="_blank">getting started</a>.', 'woocommerce' ),
-			$videos_url,
+			/* translators: %1$s: link to docs */
+			__( 'Visit WooCommerce.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$docs_url
 		);
 		?>
