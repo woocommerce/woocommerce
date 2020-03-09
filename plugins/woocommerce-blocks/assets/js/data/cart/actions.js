@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
+import { STORE_KEY as CART_STORE_KEY } from './constants';
 
 /**
  * Returns an action object used in updating the store with the provided items
@@ -214,18 +215,20 @@ export function* removeItemFromCart( cartItemKey ) {
 }
 
 /**
- * Changes the quantity for specified cart item:
+ * Persists a quantity change the for specified cart item:
  * - Calls API to set quantity.
  * - If successful, yields action to update store.
  * - If error, yields action to store error.
- * - Sets cart item as pending while API request is in progress.
  *
  * @param {string} cartItemKey Cart item being updated.
  * @param {number} quantity Specified (new) quantity.
  */
 export function* changeCartItemQuantity( cartItemKey, quantity ) {
-	yield itemQuantityPending( cartItemKey, true );
+	const cartItem = yield select( CART_STORE_KEY, 'getCartItem', cartItemKey );
 
+	if ( cartItem?.quantity === quantity ) {
+		return;
+	}
 	try {
 		const cart = yield apiFetch( {
 			path: `/wc/store/cart/update-item`,
@@ -241,8 +244,6 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
 	} catch ( error ) {
 		yield receiveError( error );
 	}
-
-	yield itemQuantityPending( cartItemKey, false );
 }
 
 /**
