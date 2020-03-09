@@ -177,6 +177,10 @@
 				"maxSize": "140 kB"
 			},
 			{
+				"path": "./build/checkout-frontend.js",
+				"maxSize": "140 kB"
+			},
+			{
 				"path": "./build/*.css",
 				"maxSize": "50kB"
 			},
