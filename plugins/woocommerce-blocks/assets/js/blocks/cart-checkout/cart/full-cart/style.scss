@@ -318,7 +318,7 @@ table.wc-block-cart-items {
 
 // Mobile styles.
 @include breakpoint( "<782px" ) {
-	.wc-block-cart {
+	.wc-block-cart:not(.wc-block-cart--is-loading):not(.wc-block-cart--skeleton) {
 		display: block;
 		margin: 0 0 $gap;
 		.wc-block-cart__main {
@@ -329,6 +329,21 @@ table.wc-block-cart-items {
 		.wc-block-cart__sidebar {
 			padding: 0;
 			flex: none;
+			max-width: 100%;
+
+			.wc-block-cart__totals-title {
+				display: none;
+			}
+
+			// Reset (remove) totals "card" styling on mobile.
+			.components-card {
+				box-shadow: none;
+				border: none;
+			}
+			.components-card__body {
+				border: none;
+				padding: 0;
+			}
 		}
 	}
 	table.wc-block-cart-items {
