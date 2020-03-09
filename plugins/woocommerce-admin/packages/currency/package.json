@@ -21,7 +21,7 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@babel/runtime-corejs2": "7.8.4",
+		"@babel/runtime-corejs2": "7.8.7",
 		"@woocommerce/number": "2.0.0"
 	},
 	"publishConfig": {
