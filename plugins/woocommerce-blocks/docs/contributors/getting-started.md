@@ -52,6 +52,11 @@ You can read more about legacy builds in the [this doc](./assets/js/legacy/READM
 
 Run `$ npm run package-plugin` to trigger install and build, and then create a zip file which you can use to install WooCommerce Blocks in WordPress admin.
 
+You can also do different variations of this command. By default it builds a production version of the plugin. You can also:
+
+-   Build a development version of the plugin: `$ npm run package-plugin:dev`
+-   Just do a zip build of the current environment (useful when you already have built files for zipping): `$ npm run package-plugin:zip_only`
+
 ## Linting
 
 Run `$ npm run lint` to check code against our linting rules.

@@ -3,6 +3,37 @@
 # Exit if any command fails.
 set -e
 
+TYPE='PRODUCTION';
+
+print_usage() {
+	echo "build-plugin-zip - attempt to build a plugin"
+	echo "By default this will build a clean production build and zip archive"
+	echo "of the built plugin assets"
+	echo " "
+	echo "build-plugin-zip [arguments]"
+	echo " "
+	echo "options:"
+	echo "-h          show brief help"
+	echo "-d          build plugin in development mode"
+	echo "-z          build zip only, skipping build commands (so it uses files"
+	echo "            existing on disk already)"
+	echo " "
+}
+
+# get args
+while getopts 'hdz' flag; do
+	case "${flag}" in
+		h) print_usage ;;
+		d) TYPE='DEV' ;;
+		z) TYPE='ZIP_ONLY' ;;
+		*)
+			print_usage
+			exit 1
+			;;
+	esac
+done
+
+
 # Store paths
 SOURCE_PATH=$(pwd)
 
@@ -79,17 +110,32 @@ if [ -z "$NO_CHECKS" ]; then
 fi
 
 # Run the build.
-status "Installing dependencies... 📦"
-composer install --no-dev
-PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
-status "==========================="
 npm list webpack
-status "Generating build... 👷‍♀️"
-status "==========================="
-npm list webpack
-npm run build
-status "==========================="
-npm list webpack
+if [ $TYPE = 'DEV' ]; then
+	status "Installing dependencies... 👷‍♀️"
+	status "==========================="
+	composer install
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
+	status "==========================="
+	status "Generating development build... 👷‍♀️"
+	status "==========================="
+	npm list webpack
+	npm run dev
+	status "==========================="
+elif [ $TYPE = 'ZIP_ONLY' ]; then
+	status "Skipping build commands - using current built assets on disk for built archive...👷‍♀️"
+	status "==========================="
+else
+	status "Installing dependencies... 📦"
+	composer install --no-dev
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
+	status "==========================="
+	status "Generating production build... 👷‍♀️"
+	status "==========================="
+	npm list webpack
+	npm run build
+	status "==========================="
+fi
 
 # Generate the plugin zip file.
 status "Creating archive... 🎁"
