@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.0.0 - 2020-03-03 =
+= 4.0.0 - 2020-03-10 =
 
 * Enhancement - Included information about packages in the System Status Report. #25584
 * Enhancement - New WooCommerce Admin. #25011
