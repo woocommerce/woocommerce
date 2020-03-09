@@ -6,6 +6,7 @@ import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import Label from '@woocommerce/base-components/label';
 import classNames from 'classnames';
+import { PanelBody, PanelRow } from 'wordpress-components';
 
 /**
  * Internal dependencies
@@ -15,6 +16,7 @@ import './style.scss';
 
 const Package = ( {
 	className,
+	collapsible = false,
 	noResultsMessage,
 	onChange,
 	renderOption,
@@ -23,13 +25,8 @@ const Package = ( {
 	showItems,
 	title,
 } ) => {
-	return (
-		<div
-			className={ classNames(
-				'wc-block-shipping-rates-control__package',
-				className
-			) }
-		>
+	const header = (
+		<>
 			{ title && (
 				<div className="wc-block-shipping-rates-control__package-title">
 					{ title }
@@ -64,14 +61,38 @@ const Package = ( {
 					} ) }
 				</ul>
 			) }
-			<PackageOptions
-				className={ className }
-				noResultsMessage={ noResultsMessage }
-				onChange={ onChange }
-				options={ shippingRate.shipping_rates }
-				renderOption={ renderOption }
-				selected={ selected }
-			/>
+		</>
+	);
+	const body = (
+		<PackageOptions
+			className={ className }
+			noResultsMessage={ noResultsMessage }
+			onChange={ onChange }
+			options={ shippingRate.shipping_rates }
+			renderOption={ renderOption }
+			selected={ selected }
+		/>
+	);
+	if ( collapsible ) {
+		return (
+			<PanelBody
+				className="wc-block-shipping-rates-control__package"
+				title={ header }
+				initialOpen={ true }
+			>
+				<PanelRow>{ body }</PanelRow>
+			</PanelBody>
+		);
+	}
+	return (
+		<div
+			className={ classNames(
+				'wc-block-shipping-rates-control__package',
+				className
+			) }
+		>
+			{ header }
+			{ body }
 		</div>
 	);
 };
@@ -90,6 +111,7 @@ Package.propTypes = {
 		).isRequired,
 	} ).isRequired,
 	className: PropTypes.string,
+	collapsible: PropTypes.bool,
 	noResultsMessage: PropTypes.string,
 	selected: PropTypes.string,
 	showItems: PropTypes.bool,

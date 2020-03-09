@@ -79,6 +79,7 @@ const ShippingCalculatorOptions = ( {
 						  }
 						: null
 				}
+				collapsibleWhenMultiple={ true }
 				noResultsMessage={ __(
 					'No shipping options were found.',
 					'woo-gutenberg-products-block'

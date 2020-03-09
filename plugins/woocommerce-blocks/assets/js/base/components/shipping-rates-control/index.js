@@ -16,6 +16,7 @@ const ShippingRatesControl = ( {
 	shippingRates,
 	shippingRatesLoading,
 	className,
+	collapsibleWhenMultiple = false,
 	noResultsMessage,
 	renderOption,
 } ) => {
@@ -23,6 +24,8 @@ const ShippingRatesControl = ( {
 		shippingRates,
 		( newRates ) => newRates.length > 0
 	);
+
+	const shippingRatesToDisplay = previousShippingRates || shippingRates;
 
 	return (
 		<LoadingMask
@@ -35,9 +38,12 @@ const ShippingRatesControl = ( {
 		>
 			<Packages
 				className={ className }
+				collapsible={
+					shippingRatesToDisplay.length > 1 && collapsibleWhenMultiple
+				}
 				noResultsMessage={ noResultsMessage }
 				renderOption={ renderOption }
-				shippingRates={ previousShippingRates || shippingRates }
+				shippingRates={ shippingRatesToDisplay }
 			/>
 		</LoadingMask>
 	);
@@ -55,6 +61,7 @@ ShippingRatesControl.propTypes = {
 	noResultsMessage: PropTypes.string.isRequired,
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
+	collapsibleWhenMultiple: PropTypes.bool,
 };
 
 export default ShippingRatesControl;
