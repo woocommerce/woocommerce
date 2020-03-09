@@ -28,20 +28,20 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		permalink = '',
 		images = [],
 		variation = [],
-		quantity = 1,
 		prices = {},
 	} = lineItem;
+
+	const {
+		quantity,
+		changeQuantity,
+		removeItem,
+		isPending: itemQuantityDisabled,
+	} = useStoreCartItem( key );
 
 	const currency = getCurrency();
 	const regularPrice = parseInt( prices.regular_price, 10 ) * quantity;
 	const purchasePrice = parseInt( prices.price, 10 ) * quantity;
 	const saleAmount = regularPrice - purchasePrice;
-
-	const {
-		changeQuantity,
-		removeItem,
-		isPending: itemQuantityDisabled,
-	} = useStoreCartItem( key );
 
 	return (
 		<tr className="wc-block-cart-items__row">
@@ -121,7 +121,6 @@ CartLineItemRow.propTypes = {
 		name: PropTypes.string.isRequired,
 		summary: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
-		quantity: PropTypes.number.isRequired,
 		low_stock_remaining: PropTypes.number,
 		sold_individually: PropTypes.bool,
 		variation: PropTypes.arrayOf(

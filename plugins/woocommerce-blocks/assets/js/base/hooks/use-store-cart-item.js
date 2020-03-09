@@ -3,8 +3,10 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { useState, useEffect } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { useDebounce } from 'use-debounce';
 
 /**
  * Internal dependencies
@@ -22,32 +24,60 @@ import { useStoreCart } from './use-store-cart';
  */
 export const useStoreCartItem = ( cartItemKey ) => {
 	const { cartItems, cartIsLoading } = useStoreCart();
-	const cartItem = cartItems.filter( ( item ) => item.key === cartItemKey );
-
-	const results = useSelect(
-		( select, { dispatch } ) => {
+	const [ cartItem, setCartItem ] = useState( {
+		key: '',
+		isLoading: true,
+		cartData: {},
+		quantity: 0,
+		isPending: false,
+		changeQuantity: () => void null,
+		removeItem: () => void null,
+	} );
+	// Store quantity in hook state. This is used to keep the UI
+	// updated while server request is updated.
+	const [ quantity, changeQuantity ] = useState( cartItem.quantity );
+	const [ debouncedQuantity ] = useDebounce( quantity, 400 );
+	const isPending = useSelect(
+		( select ) => {
 			const store = select( storeKey );
-			const isPending = store.isItemQuantityPending( cartItemKey );
-			const { removeItemFromCart, changeCartItemQuantity } = dispatch(
-				storeKey
-			);
-
-			return {
-				isPending,
-				changeQuantity: ( newQuantity ) => {
-					changeCartItemQuantity( cartItemKey, newQuantity );
-				},
-				removeItem: () => {
-					removeItemFromCart( cartItemKey );
-				},
-			};
+			return store.isItemQuantityPending( cartItemKey );
 		},
 		[ cartItemKey ]
 	);
+	useEffect( () => {
+		if ( ! cartIsLoading ) {
+			const foundCartItem = cartItems.find(
+				( item ) => item.key === cartItemKey
+			);
+			if ( foundCartItem ) {
+				setCartItem( foundCartItem );
+			}
+		}
+	}, [ cartItems, cartIsLoading, cartItemKey ] );
+
+	const { removeItemFromCart, changeCartItemQuantity } = useDispatch(
+		storeKey
+	);
+	const removeItem = () => {
+		removeItemFromCart( cartItemKey );
+	};
+
+	// Observe debounced quantity value, fire action to update server when it
+	// changes.
+	useEffect( () => {
+		if ( debouncedQuantity === 0 ) {
+			changeQuantity( cartItem.quantity );
+			return;
+		}
+		changeCartItemQuantity( cartItemKey, debouncedQuantity );
+	}, [ debouncedQuantity, cartItemKey, cartItem.quantity ] );
 
 	return {
+		isPending,
+		quantity,
+		changeQuantity,
+		removeItem,
 		isLoading: cartIsLoading,
 		cartItem,
-		...results,
 	};
 };
