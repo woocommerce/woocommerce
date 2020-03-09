@@ -5,13 +5,6 @@
 		color: $studio-pink-50;
 	}
 
-	.woocommerce-profile-wizard__skip.components-button.is-link {
-		color: $studio-gray-60;
-		margin-top: 0;
-		margin-bottom: 0;
-		font-weight: normal;
-	}
-
 	.woocommerce-profile-wizard__continue {
 		line-height: 32px;
 	}
@@ -44,19 +37,6 @@
 		}
 	}
 
-	.woocommerce-profile-wizard__container {
-		.woocommerce-profile-wizard__tos {
-			font-size: 12px;
-			margin-top: 0;
-			margin-bottom: $gap-large;
-			padding: $gap-smaller;
-
-			a {
-				color: $studio-gray-60;
-			}
-		}
-	}
-
 	.woocommerce-profile-wizard__header {
 		height: 56px;
 		border-bottom: 1px solid $studio-gray-5;
@@ -64,18 +44,6 @@
 		align-items: center;
 		justify-content: center;
 		background: $studio-white;
-
-		svg.woocommerce-profile-wizard__header-logo > g {
-			transform: translateX(12%);
-		}
-
-		svg.woocommerce-profile-wizard__header-logo-with-jetpack > g {
-			transform: translateX(25%);
-		}
-
-		.woocommerce-profile-wizard__plus {
-			stroke: $studio-gray-80;
-		}
 	}
 
 	.woocommerce-profile-wizard__header-title {
@@ -181,6 +149,50 @@
 		&:last-child p {
 			border-bottom: 0;
 			margin-bottom: 0;
+		}
+	}
+
+	.woocommerce-profile-wizard__benefits {
+		display: grid;
+		grid-gap: $gap;
+		grid-auto-columns: 1fr;
+		grid-auto-flow: column;
+
+		@include breakpoint( '<960px' ) {
+			justify-items: center;
+			grid-auto-flow: row;
+		}
+	}
+
+	.woocommerce-profile-wizard__benefits-logo {
+		display: block;
+		margin: 0 auto;
+	}
+
+	.woocommerce-profile-wizard__benefit-card {
+		display: flex;
+		flex-direction: column;
+		background: $studio-gray-0;
+		width: 100%;
+		max-width: 295px;
+		overflow: hidden;
+		text-align: left;
+
+		.woocommerce-profile-wizard__benefit-card-title {
+			font-size: 16px;
+			font-weight: 600;
+			margin-top: 0;
+			margin-bottom: $gap-smaller;
+		}
+
+		.woocommerce-profile-wizard__benefit-card-content {
+			padding: #{$gap-small * 2} #{$gap * 2} #{$gap * 2} #{$gap * 2};
+
+			p {
+				padding: 0;
+				margin: 0;
+				font-size: 14px;
+			}
 		}
 	}
 
@@ -348,6 +360,41 @@
 	}
 }
 
+.woocommerce-profile-wizard__benefits-card.woocommerce-card {
+	display: inline-block;
+	max-width: 100%;
+	text-align: center;
+
+	.woocommerce-card__body {
+		padding: $gap-large * 2;
+	}
+
+	.woocommerce-profile-wizard__header-title {
+		margin-top: $gap-large;
+		margin-bottom: $gap-large;
+	}
+
+	.woocommerce-profile-wizard__card-actions {
+		margin-top: $gap;
+		display: inline-flex;
+
+		.components-button {
+			width: auto;
+
+			&:first-child {
+				margin-right: $gap;
+			}
+		}
+	}
+
+	.woocommerce-profile-wizard__benefits-install-notice {
+		margin-top: $gap-large;
+		margin-bottom: 0;
+		font-size: 14px;
+		color: $studio-gray-40;
+	}
+}
+
 .woocommerce-profile-wizard__plugins-card {
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
@@ -363,7 +410,7 @@
 	}
 }
 
-.woocommerce-profile-wizard__header.is-stepper {
+.woocommerce-profile-wizard__header {
 	svg > g {
 		transform: initial;
 	}
