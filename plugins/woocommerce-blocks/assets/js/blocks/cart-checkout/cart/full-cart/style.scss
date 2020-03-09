@@ -1,4 +1,5 @@
 .wc-block-cart {
+	color: $core-grey-dark-600;
 	display: flex;
 	flex-wrap: wrap;
 	margin: 0 (-$gap) $gap;
@@ -63,6 +64,10 @@
 
 		.wc-block-radio-control__option {
 			padding-left: $gap-large;
+
+			&:last-child {
+				border-bottom: none;
+			}
 		}
 
 		.wc-block-radio-control__input {
@@ -268,6 +273,47 @@ table.wc-block-cart-items {
 }
 .is-loading + .wc-block-cart--skeleton {
 	display: flex;
+}
+
+// Reset Gutenberg <Panel> styles when used in the sidebar.
+.wc-block-cart__sidebar {
+	.components-panel__body {
+		border-top: 1px solid $core-grey-light-600;
+		border-bottom: 1px solid $core-grey-light-600;
+
+		&.is-opened {
+			padding-left: 0;
+			padding-right: 0;
+
+			> .components-panel__body-title {
+				margin-left: 0;
+				margin-right: 0;
+			}
+		}
+
+		> .components-panel__body-title,
+		.components-panel__body-toggle {
+			&,
+			&:hover,
+			&:focus,
+			&:active {
+				background-color: transparent;
+				color: inherit;
+			}
+		}
+
+		.components-panel__body-toggle {
+			font-weight: normal;
+			font-size: inherit;
+			padding-left: 0;
+			padding-right: 36px;
+
+			&.components-button,
+			&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
+				color: inherit;
+			}
+		}
+	}
 }
 
 // Mobile styles.

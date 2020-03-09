@@ -12,6 +12,7 @@ import './style.scss';
 
 const Packages = ( {
 	className,
+	collapsible = false,
 	noResultsMessage,
 	renderOption,
 	shippingRates = [],
@@ -19,26 +20,34 @@ const Packages = ( {
 	const { selectShippingRate, selectedShippingRates } = useSelectShippingRate(
 		shippingRates
 	);
-	return shippingRates.map( ( shippingRate, i ) => (
-		<Package
-			key={ shippingRate.package_id }
-			className={ className }
-			noResultsMessage={ noResultsMessage }
-			onChange={ ( newShippingRate ) => {
-				selectShippingRate( newShippingRate, i );
-			} }
-			renderOption={ renderOption }
-			selected={ selectedShippingRates[ i ] }
-			shippingRate={ shippingRate }
-			showItems={ shippingRates.length > 1 }
-			title={ shippingRates.length > 1 ? shippingRate.name : null }
-		/>
-	) );
+	return (
+		<div className="wc-block-shipping-rates-control">
+			{ shippingRates.map( ( shippingRate, i ) => (
+				<Package
+					key={ shippingRate.package_id }
+					className={ className }
+					collapsible={ collapsible }
+					noResultsMessage={ noResultsMessage }
+					onChange={ ( newShippingRate ) => {
+						selectShippingRate( newShippingRate, i );
+					} }
+					renderOption={ renderOption }
+					selected={ selectedShippingRates[ i ] }
+					shippingRate={ shippingRate }
+					showItems={ shippingRates.length > 1 }
+					title={
+						shippingRates.length > 1 ? shippingRate.name : null
+					}
+				/>
+			) ) }
+		</div>
+	);
 };
 
 Packages.propTypes = {
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
+	collapsible: PropTypes.bool,
 	noResultsMessage: PropTypes.string,
 	shippingRates: PropTypes.arrayOf(
 		PropTypes.shape( {

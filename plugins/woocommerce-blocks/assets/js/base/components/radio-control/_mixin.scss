@@ -18,33 +18,12 @@
 		border-bottom: 0;
 	}
 
-	.wc-block-radio-control__input {
-		appearance: none;
-		background: #fff;
-		border: 2px solid currentColor;
-		border-radius: 50%;
-		display: inline-block;
-		height: 1rem;
-		margin: 0 0 0 -8px;
-		left: $gap-larger;
-		min-height: 16px;
-		min-width: 16px;
-		position: absolute;
-		top: $gap;
-		width: 1rem;
-
-		&:checked::before {
-			background: currentColor;
-			border-radius: 50%;
-			content: "";
-			display: block;
-			height: 8px;
-			left: 50%;
-			margin: 0;
+	.wc-block-radio-control {
+		.wc-block-radio-control__input {
+			margin: 0 0 0 -8px;
+			left: $gap-larger;
 			position: absolute;
-			top: 50%;
-			transform: translate(-50%, -50%);
-			width: 8px;
+			top: $gap;
 		}
 	}
 
@@ -67,5 +46,33 @@
 	.wc-block-radio-control__secondary-label,
 	.wc-block-radio-control__secondary-description {
 		text-align: right;
+	}
+}
+
+@mixin radio-control-input-styles {
+	.wc-block-radio-control__input {
+		appearance: none;
+		background: #fff;
+		border: 2px solid currentColor;
+		border-radius: 50%;
+		display: inline-block;
+		height: 1rem;
+		min-height: 16px;
+		min-width: 16px;
+		width: 1rem;
+
+		&:checked::before {
+			background: currentColor;
+			border-radius: 50%;
+			content: "";
+			display: block;
+			height: 8px;
+			left: 50%;
+			margin: 0;
+			position: absolute;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			width: 8px;
+		}
 	}
 }
