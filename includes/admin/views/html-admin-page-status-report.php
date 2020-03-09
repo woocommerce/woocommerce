@@ -139,8 +139,11 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 						$package_active = \Automattic\WooCommerce\Admin\Composer\Package::is_package_active();
 					} else {
 						// with WP version < 5.3, package is present, but inactive.
-						$version        = __( 'Inactive ', 'woocommerce' );
-						$version       .= \Automattic\WooCommerce\Admin\Composer\Package::VERSION;
+						$version = sprintf(
+							/* translators: %s: Version number of wc-admin package */
+							__( 'Inactive %s', 'woocommerce' ),
+							\Automattic\WooCommerce\Admin\Composer\Package::VERSION
+						);
 						$package_active = false;
 					}
 					$wc_admin_path = \Automattic\WooCommerce\Admin\Composer\Package::get_path();
