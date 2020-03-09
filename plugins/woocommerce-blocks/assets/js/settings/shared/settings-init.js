@@ -1,3 +1,6 @@
+/**
+ * @type {import("@woocommerce/type-defs/settings").WooCommerceSharedSettings}
+ */
 const defaults = {
 	adminUrl: '',
 	countries: [],
@@ -21,19 +24,29 @@ const defaults = {
 	wcAssetUrl: '',
 };
 
+// @ts-ignore wcSettings is window global
 const globalSharedSettings = typeof wcSettings === 'object' ? wcSettings : {};
 
 // Use defaults or global settings, depending on what is set.
+/**
+ * @type {import("@woocommerce/type-defs/settings").WooCommerceSharedSettings}
+ */
 const allSettings = {
 	...defaults,
 	...globalSharedSettings,
 };
 
+/**
+ * @type {import("@woocommerce/type-defs/settings").WooCommerceSiteCurrency}
+ */
 allSettings.currency = {
 	...defaults.currency,
 	...allSettings.currency,
 };
 
+/**
+ * @type {import("@woocommerce/type-defs/settings").WooCommerceSiteLocale}
+ */
 allSettings.locale = {
 	...defaults.locale,
 	...allSettings.locale,

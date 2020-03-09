@@ -2,7 +2,7 @@ export * from './use-query-state';
 export * from './use-shallow-equal';
 export * from './use-store-cart';
 export * from './use-store-cart-coupons';
-export * from './use-store-cart-item';
+export * from './use-store-cart-item-quantity';
 export * from './use-store-products';
 export * from './use-store-notices';
 export * from './use-collection';

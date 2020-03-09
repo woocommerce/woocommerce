@@ -1,5 +1,3 @@
-/** @typedef { import('@woocommerce/type-defs/hooks').StoreCartItem } StoreCartItem */
-
 /**
  * External dependencies
  */
@@ -14,24 +12,27 @@ import { useDebounce } from 'use-debounce';
 import { useStoreCart } from './use-store-cart';
 
 /**
+ * @typedef {import('@woocommerce/type-defs/hooks').StoreCartItemQuantity} StoreCartItemQuantity
+ * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
+ */
+
+/**
  * This is a custom hook for loading the Store API /cart/ endpoint and
  * actions for removing or changing item quantity.
  *
  * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/master/src/RestApi/StoreApi
  *
  * @param {string} cartItemKey Key for a cart item.
- * @return {StoreCartItem} An object exposing data and actions relating to cart items.
+ * @return {StoreCartItemQuantity} An object exposing data and actions relating to cart items.
  */
-export const useStoreCartItem = ( cartItemKey ) => {
+export const useStoreCartItemQuantity = ( cartItemKey ) => {
 	const { cartItems, cartIsLoading } = useStoreCart();
+	/**
+	 * @type {[CartItem, function( CartItem ):undefined]}
+	 */
 	const [ cartItem, setCartItem ] = useState( {
 		key: '',
-		isLoading: true,
-		cartData: {},
 		quantity: 0,
-		isPending: false,
-		changeQuantity: () => void null,
-		removeItem: () => void null,
 	} );
 	// Store quantity in hook state. This is used to keep the UI
 	// updated while server request is updated.
@@ -78,6 +79,5 @@ export const useStoreCartItem = ( cartItemKey ) => {
 		changeQuantity,
 		removeItem,
 		isLoading: cartIsLoading,
-		cartItem,
 	};
 };

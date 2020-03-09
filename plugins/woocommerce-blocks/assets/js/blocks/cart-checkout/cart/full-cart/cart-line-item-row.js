@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrency, formatPrice } from '@woocommerce/base-utils';
-import { useStoreCartItem } from '@woocommerce/base-hooks';
+import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
 
 /**
@@ -36,7 +36,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		changeQuantity,
 		removeItem,
 		isPending: itemQuantityDisabled,
-	} = useStoreCartItem( key );
+	} = useStoreCartItemQuantity( key );
 
 	const currency = getCurrency();
 	const regularPrice = parseInt( prices.regular_price, 10 ) * quantity;
