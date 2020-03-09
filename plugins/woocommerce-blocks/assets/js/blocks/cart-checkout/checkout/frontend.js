@@ -60,6 +60,8 @@ const getProps = ( el ) => {
 			} else {
 				attributes[ key ] = el.dataset[ key ];
 			}
+		} else {
+			attributes[ key ] = blockAttributes[ key ].default;
 		}
 	} );
 

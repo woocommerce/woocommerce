@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import TextInput from '@woocommerce/base-components/text-input';
 import {
@@ -12,91 +11,56 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
-import {
-	COUNTRY_LOCALE,
-	DEFAULT_ADDRESS_FIELDS,
-} from '@woocommerce/block-settings';
 
-export const defaultFieldConfig = {
-	first_name: {
-		autocomplete: 'given-name',
-	},
-	last_name: {
-		autocomplete: 'family-name',
-	},
-	company: {
-		autocomplete: 'organization',
-	},
-	address_1: {
-		autocomplete: 'address-line1',
-	},
-	address_2: {
-		autocomplete: 'address-line2',
-	},
-	country: {
-		autocomplete: 'country',
-		priority: 65,
-		required: true,
-	},
-	city: {
-		autocomplete: 'address-level2',
-	},
-	postcode: {
-		autocomplete: 'postal-code',
-	},
-	state: {
-		autocomplete: 'address-level1',
-	},
-};
+/**
+ * Internal dependencies
+ */
+import defaultAddressFields from './default-address-fields';
+import countryAddressFields from './country-address-fields';
 
+/**
+ * Checkout address form.
+ */
 const AddressForm = ( {
-	fields = Object.keys( defaultFieldConfig ),
-	fieldConfig = defaultFieldConfig,
+	fields = Object.keys( defaultAddressFields ),
+	fieldConfig = {},
 	onChange,
 	type = 'shipping',
 	values,
 } ) => {
-	const countryLocale = COUNTRY_LOCALE[ values.country ] || {};
+	const countryLocale = countryAddressFields[ values.country ] || {};
 	const addressFields = fields.map( ( field ) => ( {
 		key: field,
-		...DEFAULT_ADDRESS_FIELDS[ field ],
-		...countryLocale[ field ],
+		...defaultAddressFields[ field ],
 		...fieldConfig[ field ],
+		...countryLocale[ field ],
 	} ) );
 	const sortedAddressFields = addressFields.sort(
-		( a, b ) => a.priority - b.priority
+		( a, b ) => a.index - b.index
 	);
-
-	const optionalText = __( '(optional)', 'woo-gutenberg-products-block' );
 
 	return (
 		<div className="wc-block-address-form">
-			{ sortedAddressFields.map( ( addressField ) => {
-				if ( addressField.hidden ) {
+			{ sortedAddressFields.map( ( field ) => {
+				if ( field.hidden ) {
 					return null;
 				}
 
-				const requiredField = addressField.required;
-				let fieldLabel = addressField.label || addressField.placeholder;
-
-				if (
-					! addressField.required &&
-					! fieldLabel.includes( optionalText )
-				) {
-					fieldLabel = fieldLabel + ' ' + optionalText;
-				}
-
-				if ( addressField.key === 'country' ) {
+				if ( field.key === 'country' ) {
 					const Tag =
 						type === 'shipping'
 							? ShippingCountryInput
 							: BillingCountryInput;
 					return (
 						<Tag
-							key={ addressField.key }
-							label={ fieldLabel }
+							key={ field.key }
+							label={
+								field.required
+									? field.label
+									: field.optionalLabel
+							}
 							value={ values.country }
-							autoComplete={ addressField.autocomplete }
+							autoComplete={ field.autocomplete }
 							onChange={ ( newValue ) =>
 								onChange( {
 									...values,
@@ -104,48 +68,54 @@ const AddressForm = ( {
 									state: '',
 								} )
 							}
-							required={ requiredField }
+							required={ field.required }
 						/>
 					);
 				}
 
-				if ( addressField.key === 'state' ) {
+				if ( field.key === 'state' ) {
 					const Tag =
 						type === 'shipping'
 							? ShippingStateInput
 							: BillingStateInput;
 					return (
 						<Tag
-							key={ addressField.key }
+							key={ field.key }
 							country={ values.country }
-							label={ fieldLabel }
+							label={
+								field.required
+									? field.label
+									: field.optionalLabel
+							}
 							value={ values.state }
-							autoComplete={ addressField.autocomplete }
+							autoComplete={ field.autocomplete }
 							onChange={ ( newValue ) =>
 								onChange( {
 									...values,
 									state: newValue,
 								} )
 							}
-							required={ requiredField }
+							required={ field.required }
 						/>
 					);
 				}
 
 				return (
 					<TextInput
-						key={ addressField.key }
-						className={ `wc-block-address-form__${ addressField.key }` }
-						label={ fieldLabel }
-						value={ values[ addressField.key ] }
-						autoComplete={ addressField.autocomplete }
+						key={ field.key }
+						className={ `wc-block-address-form__${ field.key }` }
+						label={
+							field.required ? field.label : field.optionalLabel
+						}
+						value={ values[ field.key ] }
+						autoComplete={ field.autocomplete }
 						onChange={ ( newValue ) =>
 							onChange( {
 								...values,
-								[ addressField.key ]: newValue,
+								[ field.key ]: newValue,
 							} )
 						}
-						required={ requiredField }
+						required={ field.required }
 					/>
 				);
 			} ) }
@@ -157,7 +127,7 @@ AddressForm.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	values: PropTypes.object.isRequired,
 	fields: PropTypes.arrayOf(
-		PropTypes.oneOf( Object.keys( defaultFieldConfig ) )
+		PropTypes.oneOf( Object.keys( defaultAddressFields ) )
 	),
 	fieldConfig: PropTypes.object,
 	type: PropTypes.oneOf( [ 'billing', 'shipping' ] ),

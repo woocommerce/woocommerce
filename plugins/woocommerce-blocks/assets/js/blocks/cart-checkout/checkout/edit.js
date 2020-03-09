@@ -54,7 +54,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 					</p>
 					<ToggleControl
 						label={ __(
-							'Company name',
+							'Company',
 							'woo-gutenberg-products-block'
 						) }
 						checked={ showCompanyField }
@@ -81,7 +81,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 					) }
 					<ToggleControl
 						label={ __(
-							'Apartment, suite, unit etc',
+							'Apartment, suite, etc.',
 							'woo-gutenberg-products-block'
 						) }
 						checked={ showAddress2Field }
@@ -92,10 +92,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 						}
 					/>
 					<ToggleControl
-						label={ __(
-							'Phone number',
-							'woo-gutenberg-products-block'
-						) }
+						label={ __( 'Phone', 'woo-gutenberg-products-block' ) }
 						checked={ showPhoneField }
 						onChange={ () =>
 							setAttributes( {

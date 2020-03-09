@@ -69,12 +69,6 @@ class Checkout extends AbstractBlock {
 				$data_registry->add( 'shippingMethodsExist', $methods_exist );
 			}
 		}
-		if ( ! $data_registry->exists( 'countryLocale' ) ) {
-			$data_registry->add( 'countryLocale', WC()->countries->get_country_locale() );
-		}
-		if ( ! $data_registry->exists( 'defaultAddressFields' ) ) {
-			$data_registry->add( 'defaultAddressFields', WC()->countries->get_default_address_fields() );
-		}
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
 		return $content;
 	}

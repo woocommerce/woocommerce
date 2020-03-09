@@ -3,9 +3,8 @@
  */
 import { Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import AddressForm, {
-	defaultFieldConfig,
-} from '@woocommerce/base-components/address-form';
+import AddressForm from '@woocommerce/base-components/address-form';
+import defaultAddressFields from '@woocommerce/base-components/address-form/default-address-fields';
 import {
 	FormStep,
 	CheckoutForm,
@@ -63,14 +62,14 @@ const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
 		! SHIPPING_ENABLED || ! useShippingAddressAsBilling;
 
 	const addressFields = {
-		...defaultFieldConfig,
+		...defaultAddressFields,
 		company: {
-			...defaultFieldConfig.company,
+			...defaultAddressFields.company,
 			hidden: ! attributes.showCompanyField,
 			required: attributes.requireCompanyField,
 		},
 		address_2: {
-			...defaultFieldConfig.address_2,
+			...defaultAddressFields.address_2,
 			hidden: ! attributes.showAddress2Field,
 		},
 	};
