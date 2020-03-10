@@ -48,7 +48,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 	const {
 		name,
 		summary,
-		low_stock_remaining: lowStockRemaining,
+		low_stock_remaining: lowStockRemaining = null,
 		backorders_allowed: backOrdersAllowed,
 		permalink,
 		images,
@@ -147,7 +147,10 @@ CartLineItemRow.propTypes = {
 		name: PropTypes.string.isRequired,
 		summary: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
-		low_stock_remaining: PropTypes.number.isRequired,
+		low_stock_remaining: PropTypes.oneOfType( [
+			PropTypes.number,
+			PropTypes.oneOf( [ null ] ),
+		] ),
 		backorders_allowed: PropTypes.bool.isRequired,
 		sold_individually: PropTypes.bool.isRequired,
 		variation: PropTypes.arrayOf(
