@@ -427,6 +427,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			update_option( 'page_on_front', $post_id );
 			update_option( 'woocommerce_onboarding_homepage_post_id', $post_id );
 
+			// Use the full width template on stores using Storefront.
+			if ( 'storefront' === get_stylesheet() ) {
+				update_post_meta( $post_id, '_wp_page_template', 'template-fullwidth.php' );
+			}
+
 			return array(
 				'status'         => 'success',
 				'message'        => __( 'Homepage created.', 'woocommerce-admin' ),
