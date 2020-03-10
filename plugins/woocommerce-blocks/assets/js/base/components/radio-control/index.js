@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import withComponentId from '@woocommerce/base-hocs/with-component-id';
+import { withInstanceId } from 'wordpress-compose';
 
 /**
  * Internal dependencies
@@ -13,13 +13,13 @@ import './style.scss';
 
 const RadioControl = ( {
 	className,
-	componentId,
+	instanceId,
 	id,
 	selected,
 	onChange,
 	options = [],
 } ) => {
-	const radioControlId = id || componentId;
+	const radioControlId = id || instanceId;
 
 	return (
 		options.length && (
@@ -40,6 +40,6 @@ const RadioControl = ( {
 	);
 };
 
-export default withComponentId( RadioControl );
+export default withInstanceId( RadioControl );
 export { RadioControlOption };
 export { default as RadioControlOptionLayout } from './option-layout';

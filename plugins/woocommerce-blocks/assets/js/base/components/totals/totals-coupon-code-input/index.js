@@ -8,7 +8,7 @@ import Button from '@woocommerce/base-components/button';
 import TextInput from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import PropTypes from 'prop-types';
-import withComponentId from '@woocommerce/base-hocs/with-component-id';
+import { withInstanceId } from 'wordpress-compose';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ import './style.scss';
 import LoadingMask from '../../loading-mask';
 
 const TotalsCouponCodeInput = ( {
-	componentId,
+	instanceId,
 	isLoading = false,
 	onSubmit = () => {},
 } ) => {
@@ -46,7 +46,7 @@ const TotalsCouponCodeInput = ( {
 						'Introduce Coupon Code',
 						'woo-gutenberg-products-block'
 					) }
-					htmlFor={ `wc-block-coupon-code__input-${ componentId }` }
+					htmlFor={ `wc-block-coupon-code__input-${ instanceId }` }
 				/>
 			}
 			initialOpen={ true }
@@ -62,7 +62,7 @@ const TotalsCouponCodeInput = ( {
 				<PanelRow className="wc-block-coupon-code__row">
 					<form className="wc-block-coupon-code__form">
 						<TextInput
-							id={ `wc-block-coupon-code__input-${ componentId }` }
+							id={ `wc-block-coupon-code__input-${ instanceId }` }
 							className="wc-block-coupon-code__input"
 							label={ __(
 								'Enter code',
@@ -95,4 +95,4 @@ TotalsCouponCodeInput.propTypes = {
 	isLoading: PropTypes.bool,
 };
 
-export default withComponentId( TotalsCouponCodeInput );
+export default withInstanceId( TotalsCouponCodeInput );

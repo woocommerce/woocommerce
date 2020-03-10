@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { ButtonGroup, Button } from '@wordpress/components';
 import { useState, Fragment } from '@wordpress/element';
-import withComponentId from '@woocommerce/base-hocs/with-component-id';
+import { withInstanceId } from 'wordpress-compose';
 
 /**
  * Internal dependencies
@@ -18,12 +18,12 @@ const ViewSwitcher = ( {
 	label = __( 'View', 'woo-gutenberg-products-block' ),
 	views,
 	defaultView,
-	componentId,
+	instanceId,
 	render,
 } ) => {
 	const [ currentView, setCurrentView ] = useState( defaultView );
 	const classes = classnames( className, 'wc-block-view-switch-control' );
-	const htmlId = 'wc-block-view-switch-control-' + componentId;
+	const htmlId = 'wc-block-view-switch-control-' + instanceId;
 
 	return (
 		<Fragment>
@@ -77,8 +77,8 @@ ViewSwitcher.propTypes = {
 	 * Render prop for selected views.
 	 */
 	render: PropTypes.func.isRequired,
-	// from withComponentId
-	componentId: PropTypes.number.isRequired,
+	// from withInstanceId
+	instanceId: PropTypes.number.isRequired,
 };
 
-export default withComponentId( ViewSwitcher );
+export default withInstanceId( ViewSwitcher );

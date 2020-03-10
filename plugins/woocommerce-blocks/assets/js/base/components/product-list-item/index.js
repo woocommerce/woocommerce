@@ -7,18 +7,18 @@ import {
 	useInnerBlockConfigurationContext,
 	useProductLayoutContext,
 } from '@woocommerce/base-context';
-import withComponentId from '@woocommerce/base-hocs/with-component-id';
+import { withInstanceId } from 'wordpress-compose';
 
 /**
  * Internal dependencies
  */
 import { renderProductLayout } from './utils';
 
-const ProductListItem = ( { product, attributes, componentId } ) => {
+const ProductListItem = ( { product, attributes, instanceId } ) => {
 	const { layoutConfig } = attributes;
 	const { parentName } = useInnerBlockConfigurationContext();
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
-	const isLoading = ! Object.keys( product ).length > 0;
+	const isLoading = Object.keys( product ).length === 0;
 	const classes = classnames( `${ layoutStyleClassPrefix }__product`, {
 		'is-loading': isLoading,
 	} );
@@ -29,7 +29,7 @@ const ProductListItem = ( { product, attributes, componentId } ) => {
 				parentName,
 				product,
 				layoutConfig,
-				componentId
+				instanceId
 			) }
 		</li>
 	);
@@ -38,8 +38,8 @@ const ProductListItem = ( { product, attributes, componentId } ) => {
 ProductListItem.propTypes = {
 	attributes: PropTypes.object.isRequired,
 	product: PropTypes.object,
-	// from withComponentId
-	componentId: PropTypes.number.isRequired,
+	// from withInstanceId
+	instanceId: PropTypes.number.isRequired,
 };
 
-export default withComponentId( ProductListItem );
+export default withInstanceId( ProductListItem );
