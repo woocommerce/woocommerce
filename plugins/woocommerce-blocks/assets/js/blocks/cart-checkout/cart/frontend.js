@@ -61,8 +61,8 @@ const CartFrontend = ( {
 const getProps = ( el ) => ( {
 	emptyCart: el.innerHTML,
 	isShippingCalculatorEnabled:
-		el.dataset.isshippingcalculatorenabled === 'true',
-	isShippingCostHidden: el.dataset.isshippingcosthidden === 'true',
+		el.dataset.isShippingCalculatorEnabled === 'true',
+	isShippingCostHidden: el.dataset.isShippingCostHidden === 'true',
 } );
 
 const getErrorBoundaryProps = () => {
