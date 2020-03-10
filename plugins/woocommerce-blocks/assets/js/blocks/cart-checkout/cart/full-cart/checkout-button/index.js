@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
@@ -18,7 +17,7 @@ import { MastercardLogo, VisaLogo } from './payment-logos'; // @todo we want to 
  */
 const CheckoutButton = () => {
 	return (
-		<Fragment>
+		<div className="wc-block-cart__submit-container">
 			<Button
 				className="wc-block-cart__submit-button"
 				href={ CHECKOUT_URL }
@@ -30,7 +29,7 @@ const CheckoutButton = () => {
 				<AmericanExpressLogo />
 				<VisaLogo />
 			</div>
-		</Fragment>
+		</div>
 	);
 };
 
