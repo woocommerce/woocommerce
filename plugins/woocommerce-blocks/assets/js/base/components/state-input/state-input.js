@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -28,7 +28,15 @@ const StateInput = ( {
 				name: decodeEntities( countryStates[ key ] ),
 		  } ) )
 		: [];
-
+	// @todo: remove this code block when issue https://github.com/woocommerce/woocommerce/issues/25854 is merged
+	// Defaults to the first state when selecting a country with states, this is here
+	// until a bug in Woo core is fixed.
+	// see: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1919
+	useEffect( () => {
+		if ( ! value && options.length ) {
+			onChangeState( options[ 0 ].key );
+		}
+	}, [ country ] );
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
 	 *
