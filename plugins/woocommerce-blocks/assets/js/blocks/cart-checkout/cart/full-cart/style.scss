@@ -404,6 +404,18 @@ table.wc-block-cart-items {
 			}
 		}
 	}
+
+	// Submit button is sticky to bottom of screen on mobile.
+	.wc-block-cart__submit-container {
+		background: $white;
+		bottom: 0;
+		box-shadow: 0 -10px 20px 10px transparentize($core-grey-light-700, 0.5);
+		left: 0;
+		padding: $gap;
+		position: fixed;
+		width: 100%;
+		z-index: 1;
+	}
 }
 .wc-block-cart-coupon-list {
 	list-style: none;
