@@ -145,7 +145,7 @@ export const advancedFilters = applyFilters(
 			},
 			order: {
 				labels: {
-					add: __( 'Order number', 'woocommerce-admin' ),
+					add: __( 'Order #', 'woocommerce-admin' ),
 					placeholder: __(
 						'Search order number',
 						'woocommerce-admin'
@@ -160,7 +160,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
-						'{{title}}Order number{{/title}} {{rule /}} {{filter /}}',
+						'{{title}}Order #{{/title}} {{rule /}} {{filter /}}',
 						'woocommerce-admin'
 					),
 					filter: __( 'Select order number', 'woocommerce-admin' ),

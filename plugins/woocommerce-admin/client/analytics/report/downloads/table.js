@@ -55,7 +55,7 @@ export default class DownloadsReportTable extends Component {
 				key: 'order_number',
 			},
 			{
-				label: __( 'User Name', 'woocommerce-admin' ),
+				label: __( 'Username', 'woocommerce-admin' ),
 				key: 'user_id',
 			},
 			{
@@ -96,10 +96,7 @@ export default class DownloadsReportTable extends Component {
 			return [
 				{
 					display: (
-						<Date
-							date={ date }
-							visibleFormat={ dateFormat }
-						/>
+						<Date date={ date } visibleFormat={ dateFormat } />
 					),
 					value: date,
 				},
