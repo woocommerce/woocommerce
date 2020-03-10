@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useState } from '@wordpress/element';
-import withComponentId from '@woocommerce/base-hocs/with-component-id';
+import { withInstanceId } from 'wordpress-compose';
 
 /**
  * Internal dependencies
@@ -14,7 +14,7 @@ import './style.scss';
 
 const TextInput = ( {
 	className,
-	componentId,
+	instanceId,
 	id,
 	type = 'text',
 	ariaLabel,
@@ -29,7 +29,7 @@ const TextInput = ( {
 } ) => {
 	const [ isActive, setIsActive ] = useState( false );
 	const onChangeValue = ( event ) => onChange( event.target.value );
-	const textInputId = id || 'textinput-' + componentId;
+	const textInputId = id || 'textinput-' + instanceId;
 
 	return (
 		<div
@@ -86,4 +86,4 @@ TextInput.propTypes = {
 	required: PropTypes.bool,
 };
 
-export default withComponentId( TextInput );
+export default withInstanceId( TextInput );
