@@ -175,7 +175,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 					'readonly'    => true,
 				),
 				'country'      => array(
-					'description' => __( 'Country.', 'woocommerce-admin' ),
+					'description' => __( 'Country / Region.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

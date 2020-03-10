@@ -47,4 +47,4 @@ function add_report_add_report_menu_item( $report_pages ) {
 
 	return $report_pages;
 }
-add_filter( 'woocommerce_admin_report_menu_items', 'add_report_add_report_menu_item' );
+add_filter( 'woocommerce_analytics_report_menu_items', 'add_report_add_report_menu_item' );

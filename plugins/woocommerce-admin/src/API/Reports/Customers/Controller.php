@@ -248,7 +248,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 					'readonly'    => true,
 				),
 				'country'              => array(
-					'description' => __( 'Country.', 'woocommerce-admin' ),
+					'description' => __( 'Country / Region.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -579,7 +579,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'orders_count'    => __( 'Orders', 'woocommerce-admin' ),
 			'total_spend'     => __( 'Total Spend', 'woocommerce-admin' ),
 			'avg_order_value' => __( 'AOV', 'woocommerce-admin' ),
-			'country'         => __( 'Country', 'woocommerce-admin' ),
+			'country'         => __( 'Country / Region', 'woocommerce-admin' ),
 			'city'            => __( 'City', 'woocommerce-admin' ),
 			'region'          => __( 'Region', 'woocommerce-admin' ),
 			'postcode'        => __( 'Postal Code', 'woocommerce-admin' ),

@@ -792,6 +792,10 @@ class Onboarding {
 	 * @param string $value Value of the updated option.
 	 */
 	public static function track_onboarding_toggle( $mixed, $value ) {
+		if ( defined( 'WC_ADMIN_MIGRATING_OPTIONS' ) && WC_ADMIN_MIGRATING_OPTIONS ) {
+			return;
+		};
+
 		wc_admin_record_tracks_event(
 			'onboarding_toggled',
 			array(

@@ -150,7 +150,7 @@ class TableCard extends Component {
 		const allHeaders = this.props.headers;
 		const headers = this.getVisibleHeaders();
 		const rows = this.getVisibleRows();
-		const classes = classnames( 'woocommerce-table', className );
+		const classes = classnames( 'woocommerce-table', 'woocommerce-analytics__card', className );
 
 		return (
 			<Card

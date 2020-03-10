@@ -28,7 +28,6 @@ import StockPanel from './panels/stock';
 import { recordEvent } from 'lib/tracks';
 import ReviewsPanel from './panels/reviews';
 import withSelect from 'wc-api/with-select';
-import WordPressNotices from './wordpress-notices';
 
 const manageStock = getSetting( 'manageStock', 'no' );
 const reviewsEnabled = getSetting( 'reviewsEnabled', 'no' );
@@ -40,13 +39,11 @@ class ActivityPanel extends Component {
 		this.clearPanel = this.clearPanel.bind( this );
 		this.toggleMobile = this.toggleMobile.bind( this );
 		this.renderTab = this.renderTab.bind( this );
-		this.updateNoticeFlag = this.updateNoticeFlag.bind( this );
 		this.state = {
 			isPanelOpen: false,
 			mobileOpen: false,
 			currentTab: '',
 			isPanelSwitching: false,
-			hasWordPressNotices: false,
 		};
 	}
 
@@ -58,23 +55,8 @@ class ActivityPanel extends Component {
 			recordEvent( 'activity_panel_open', { tab: tabName } );
 		}
 
-		// The WordPress Notices tab is handled differently, since they are displayed inline, so the panel should be closed,
-		// Close behavior of the expanded notices is based on current tab.
-		if ( tabName === 'wpnotices' ) {
-			this.setState( ( state ) => ( {
-				currentTab: state.currentTab === 'wpnotices' ? '' : tabName,
-				mobileOpen: state.currentTab !== 'wpnotices',
-				isPanelOpen: false,
-			} ) );
-			return;
-		}
-
 		this.setState( ( state ) => {
-			if (
-				tabName === state.currentTab ||
-				state.currentTab === '' ||
-				state.currentTab === 'wpnotices'
-			) {
+			if ( tabName === state.currentTab || state.currentTab === '' ) {
 				return {
 					isPanelOpen: ! state.isPanelOpen,
 					currentTab: tabName,
@@ -107,12 +89,6 @@ class ActivityPanel extends Component {
 		if ( isPanelOpen ) {
 			this.togglePanel( currentTab );
 		}
-	}
-
-	updateNoticeFlag( noticeCount ) {
-		this.setState( {
-			hasWordPressNotices: noticeCount > 0,
-		} );
 	}
 
 	// @todo Pull in dynamic unread status/count
@@ -227,12 +203,8 @@ class ActivityPanel extends Component {
 		const selected = tab.name === currentTab;
 		let tabIndex = -1;
 
-		// Only make this item tabbable if it is the currently selected item, or the panel is closed and the item is the first item
-		// If wpnotices is currently selected, tabindex below should be  -1 and <WordPressNotices /> will become the tabbed element.
-		if (
-			selected ||
-			( ! isPanelOpen && i === 0 && currentTab !== 'wpnotices' )
-		) {
+		// Only make this item tabbable if it is the currently selected item, or the panel is closed and the item is the first item.
+		if ( selected || ( ! isPanelOpen && i === 0 ) ) {
 			tabIndex = null;
 		}
 
@@ -260,14 +232,13 @@ class ActivityPanel extends Component {
 
 	render() {
 		const tabs = this.getTabs();
-		const { currentTab, mobileOpen, hasWordPressNotices } = this.state;
+		const { mobileOpen } = this.state;
 		const headerId = uniqueId( 'activity-panel-header_' );
 		const panelClasses = classnames( 'woocommerce-layout__activity-panel', {
 			'is-mobile-open': this.state.mobileOpen,
 		} );
 
-		const hasUnread =
-			hasWordPressNotices || tabs.some( ( tab ) => tab.unread );
+		const hasUnread = tabs.some( ( tab ) => tab.unread );
 		const viewLabel = hasUnread
 			? __(
 					'View Activity Panel, you have unread activity',
@@ -315,15 +286,6 @@ class ActivityPanel extends Component {
 							className="woocommerce-layout__activity-panel-tabs"
 						>
 							{ tabs && tabs.map( this.renderTab ) }
-							{ Boolean(
-								document.getElementById( 'wp__notice-list' )
-							) && (
-								<WordPressNotices
-									showNotices={ currentTab === 'wpnotices' }
-									togglePanel={ this.togglePanel }
-									onCountUpdate={ this.updateNoticeFlag }
-								/>
-							) }
 						</NavigableMenu>
 						{ this.renderPanel() }
 					</div>

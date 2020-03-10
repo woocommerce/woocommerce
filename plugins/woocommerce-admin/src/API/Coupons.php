@@ -84,9 +84,8 @@ class Coupons extends \WC_REST_Coupons_Controller {
 
 		$search = $wp_query->get( 'search' );
 		if ( $search ) {
-			$search = $wpdb->esc_like( $search );
-			$search = "'%" . $search . "%'";
-			$where .= ' AND ' . $wpdb->posts . '.post_title LIKE ' . $search;
+			$code_like = '%' . $wpdb->esc_like( $search ) . '%';
+			$where    .= $wpdb->prepare( "AND {$wpdb->posts}.post_title LIKE %s", $code_like );
 		}
 
 		return $where;

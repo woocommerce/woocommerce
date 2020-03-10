@@ -53,7 +53,7 @@ export class Leaderboard extends Component {
 
 	render() {
 		const { isRequesting, isError, totalRows, title } = this.props;
-		const classes = 'woocommerce-leaderboard woocommerce-analytics__card';
+		const classes = 'woocommerce-leaderboard';
 
 		if ( isError ) {
 			return <ReportError className={ classes } isError />;

@@ -51,10 +51,16 @@ function wc_admin_url( $path = null, $query = array() ) {
  * @param array  $properties Properties to pass along with event.
  */
 function wc_admin_record_tracks_event( $event_name, $properties = array() ) {
+	// WC post types must be registered first for WC_Tracks to work.
+	if ( ! post_type_exists( 'product' ) ) {
+		return;
+	}
+
 	if ( ! class_exists( 'WC_Tracks' ) ) {
 		if ( ! defined( 'WC_ABSPATH' ) || ! file_exists( WC_ABSPATH . 'includes/tracks/class-wc-tracks.php' ) ) {
 			return;
 		}
+
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';

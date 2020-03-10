@@ -17,7 +17,7 @@ This option loads the report for the customer you have selected.
 There are several filters available to the Customers Report:
 
 - Name
-- Country
+- Country / Region
 - Username
 - Email
 - Orders (count)
@@ -28,7 +28,7 @@ There are several filters available to the Customers Report:
 
 ![Customers Report Advanced Filters](images/analytics-customers-report-advanced-filters.png)
 
-A special note about the Name, Username, Country, and Email filters:
+A special note about the Name, Username, Country / Region, and Email filters:
 
 ![Customers Report Advanced Name Filter](images/analytics-customers-report-name-filter.png)
 
@@ -53,7 +53,7 @@ The report table allows sorting by the following columns:
 - Sign Up
 - Orders
 - Total Spend
-- Country
+- Country / Region
 - City
 - Region
 - Postal Code

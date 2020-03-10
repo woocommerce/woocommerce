@@ -159,10 +159,9 @@ class Products extends \WC_REST_Products_Controller {
 
 		$search = $wp_query->get( 'search' );
 		if ( $search ) {
-			$search = $wpdb->esc_like( $search );
-			$search = "'%" . $search . "%'";
-			$where .= " AND ({$wpdb->posts}.post_title LIKE {$search}";
-			$where .= wc_product_sku_enabled() ? ' OR wc_product_meta_lookup.sku LIKE ' . $search . ')' : ')';
+			$title_like = '%' . $wpdb->esc_like( $search ) . '%';
+			$where     .= $wpdb->prepare( " AND ({$wpdb->posts}.post_title LIKE %s", $title_like );  // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$where     .= wc_product_sku_enabled() ? $wpdb->prepare( ' OR wc_product_meta_lookup.sku LIKE %s)', $search ) : ')';
 		}
 
 		if ( $wp_query->get( 'low_in_stock' ) ) {

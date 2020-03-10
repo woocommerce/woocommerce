@@ -116,20 +116,8 @@ git commit -m "Adding /vendor directory to release" --no-verify
 # Push branch upstream
 git push origin $BRANCH
 
-output 2 "Creating archive... 🎁"
-
-build_files=$(ls dist/*/*.{js,css})
-
-zip -r ${ZIP_FILE} \
-	woocommerce-admin.php \
-	uninstall.php \
-	includes/ \
-	images/ \
-	$build_files \
-	languages/woocommerce-admin.pot \
-	readme.txt \
-	src/ \
-	vendor/
+# Create the zip archive
+./bin/make-zip.sh $ZIP_FILE
 
 # Create the new release.
 if [ $IS_PRE_RELEASE = true ]; then

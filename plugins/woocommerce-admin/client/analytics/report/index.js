@@ -99,7 +99,7 @@ export const getReports = () => {
  * because it no longer exists under the path `/analytics/:report`. Use `props.path`/
  * instead to determine if the Customers Report is being rendered.
  *
- * @param {Object} props - component props
+ * @param {Object} params -url parameters
  * @return {string} - report parameter
  */
 const getReportParam = ( { params, path } ) => {

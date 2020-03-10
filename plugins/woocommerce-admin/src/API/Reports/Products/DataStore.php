@@ -122,7 +122,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$join = " JOIN {$wpdb->posts} AS _products ON {$id_cell} = _products.ID";
 				break;
 			case 'sku':
-				$join = " JOIN {$wpdb->postmeta} AS postmeta ON {$id_cell} = postmeta.post_id AND postmeta.meta_key = '_sku'";
+				$join = " LEFT JOIN {$wpdb->postmeta} AS postmeta ON {$id_cell} = postmeta.post_id AND postmeta.meta_key = '_sku'";
 				break;
 			case 'variations':
 				$type = 'left_join';

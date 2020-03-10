@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
  * WooCommerce dependencies
  */
 import { updateQueryString } from '@woocommerce/navigation';
+import { getDateParamsFromQuery, getCurrentDates } from '@woocommerce/date';
+import Currency from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -91,6 +93,19 @@ class ReportFilters extends Component {
 		onDateSelect( data );
 	}
 
+	getDateQuery( query ) {
+		const { period, compare, before, after } = getDateParamsFromQuery( query );
+		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates( query );
+		return {
+			period,
+			compare,
+			before,
+			after,
+			primaryDate,
+			secondaryDate,
+		};
+	}
+
 	render() {
 		const {
 			dateQuery,
@@ -111,7 +126,7 @@ class ReportFilters extends Component {
 						{ showDatePicker && (
 							<DateRangeFilterPicker
 								key={ JSON.stringify( query ) }
-								dateQuery={ dateQuery }
+								dateQuery={ dateQuery || this.getDateQuery( query ) }
 								onRangeSelect={ this.onRangeSelect }
 								isoDateFormat={ isoDateFormat }
 							/>
@@ -178,7 +193,7 @@ ReportFilters.propTypes = {
 	/**
 	 * The currency formatting instance for the site.
 	 */
-	currency: PropTypes.object.isRequired,
+	currency: PropTypes.object,
 	/**
 	 * The date query string represented in object form.
 	 */
@@ -194,7 +209,7 @@ ReportFilters.propTypes = {
 		secondaryDate: PropTypes.shape( {
 			label: PropTypes.string.isRequired,
 			range: PropTypes.string.isRequired,
-		} ).isRequired,
+		} ),
 	} ),
 	/**
 	 * ISO date format string.
@@ -209,6 +224,15 @@ ReportFilters.defaultProps = {
 	query: {},
 	showDatePicker: true,
 	onDateSelect: () => {},
+	currency: new Currency( {
+		code: 'USD',
+		precision: 2,
+		symbol: '$',
+		symbolPosition: 'left',
+		decimalSeparator: '.',
+		thousandSeparator: ',',
+		priceFormat: '%1$s%2$s',
+	} ),
 };
 
 export default ReportFilters;

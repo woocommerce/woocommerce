@@ -393,18 +393,11 @@ class ReportTable extends Component {
 		}
 
 		// Hide any headers based on user prefs, if loaded.
-		const filteredHeaders = this.filterShownHeaders(
-			headers,
-			userPrefColumns
-		);
-		const className = classnames(
-			'woocommerce-report-table',
-			'woocommerce-analytics__card',
-			{
-				'has-compare': !! compareBy,
-				'has-search': !! searchBy,
-			}
-		);
+		const filteredHeaders = this.filterShownHeaders( headers, userPrefColumns );
+		const className = classnames( 'woocommerce-report-table', {
+			'has-compare': !! compareBy,
+			'has-search': !! searchBy,
+		} );
 
 		return (
 			<Fragment>
