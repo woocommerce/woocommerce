@@ -6,6 +6,7 @@ import { useReducer, useEffect } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useDebounce } from 'use-debounce';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+
 /**
  * Internal dependencies
  */
@@ -26,7 +27,7 @@ import { pluckAddress } from '../utils';
  *                 - {Object} shippingAddress       An object containing shipping address.
  */
 export const useShippingRates = ( addressFieldsKeys ) => {
-	const { shippingRates } = useStoreCart();
+	const { cartErrors, shippingRates } = useStoreCart();
 	const addressFields = Object.fromEntries(
 		addressFieldsKeys.map( ( key ) => [ key, '' ] )
 	);
@@ -63,5 +64,6 @@ export const useShippingRates = ( addressFieldsKeys ) => {
 		shippingAddress,
 		setShippingAddress,
 		shippingRatesLoading,
+		shippingRatesErrors: cartErrors,
 	};
 };

@@ -28,12 +28,17 @@ const CartFrontend = ( {
 	isShippingCostHidden,
 } ) => {
 	const {
+		cartErrors,
 		cartItems,
 		cartTotals,
 		cartIsLoading,
 		cartCoupons,
 		shippingRates,
 	} = useStoreCart();
+
+	if ( cartErrors && cartErrors.length > 0 ) {
+		throw new Error( cartErrors[ 0 ].message );
+	}
 
 	return (
 		<StoreNoticesProvider context="wc/cart">

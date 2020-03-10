@@ -22,7 +22,7 @@ import { useStoreCart } from './use-store-cart';
  * store api /cart/coupons endpoint.
  */
 export const useStoreCartCoupons = () => {
-	const { cartCoupons, cartIsLoading } = useStoreCart();
+	const { cartCoupons, cartErrors, cartIsLoading } = useStoreCart();
 	const {
 		addErrorNotice,
 		addSuccessNotice,
@@ -100,6 +100,7 @@ export const useStoreCartCoupons = () => {
 
 	return {
 		appliedCoupons: cartCoupons,
+		cartCouponsErrors: cartErrors,
 		isLoading: cartIsLoading,
 		...results,
 	};
