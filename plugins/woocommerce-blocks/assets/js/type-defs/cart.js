@@ -93,30 +93,39 @@
  */
 
 /**
+ * @typedef {Object} CartItemPriceRange
+ *
+ * @property {string} min_amount Price min amount in range.
+ * @property {string} max_amount Price max amount in range.
+ */
+
+/**
  * @typedef {Object} CartItemPrices
  *
- * @property {string} currency_code               The ISO code for the currency.
- * @property {number} currency_minor_unit         The precision (decimal
- *                                                places).
- * @property {string} currency_symbol             The symbol for the currency
- *                                                (eg '$')
- * @property {string} currency_prefix             Price prefix for the currency
- *                                                which can be used to format
- *                                                returned prices.
- * @property {string} currency_suffix             Price suffix for the currency
- *                                                which can be used to format
- *                                                returned prices.
- * @property {string} currency_decimal_separator  The string used for the
- *                                                decimal separator.
- * @property {string} currency_thousand_separator The string used for the
- *                                                thousands separator.
- * @property {string} price                       Current product price.
- * @property {string} regular_price               Regular product price.
- * @property {string} sale_price                  Sale product price, if
- *                                                applicable.
- * @property {Object} price_range                 Price range, if applicable.
- * @property {string} price_range.min_amount      Price min amount in range.
- * @property {string} price_range.max_amount      Price max amount in range.
+ * @property {string}      currency_code               The ISO code for the
+ *                                                     currency.
+ * @property {number}      currency_minor_unit         The precision (decimal
+ *                                                     places).
+ * @property {string}      currency_symbol             The symbol for the
+ *                                                     currency (eg '$')
+ * @property {string}      currency_prefix             Price prefix for the
+ *                                                     currency which can be
+ *                                                     used to format returned
+ *                                                     prices.
+ * @property {string}      currency_suffix             Price suffix for the
+ *                                                     currency which can be
+ *                                                     used to format returned
+ *                                                     prices.
+ * @property {string}      currency_decimal_separator  The string used for the
+ *                                                     decimal separator.
+ * @property {string}      currency_thousand_separator The string used for the
+ *                                                     thousands separator.
+ * @property {string}      price                       Current product price.
+ * @property {string}      regular_price               Regular product price.
+ * @property {string}      sale_price                  Sale product price, if
+ *                                                     applicable.
+ * @property {CartItemPriceRange|null} price_range     Price range, if
+ *                                                     applicable.
  *
  */
 
@@ -140,6 +149,9 @@
  * @property {number|null}         low_stock_remaining Quantity left in stock if
  *                                                     stock is low, or null if
  *                                                     not applicable.
+ * @property {boolean}             backorders_allowed  True if backorders are
+ *                                                     allowed past stock
+ *                                                     availability.
  * @property {boolean}             sold_individually   If true, only one item of
  *                                                     this product is allowed
  *                                                     for purchase in a single
@@ -150,6 +162,7 @@
  *                                                     product/variation.
  * @property {CartItemVariation[]} variation           Chosen attributes (for
  *                                                     variations).
+ * @property {CartItemPrices}      prices              Item prices.
  * @property {CartItemTotals}      totals              Item total amounts
  *                                                     provided using the
  *                                                     smallest unit of the

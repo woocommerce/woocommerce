@@ -104,6 +104,12 @@ class CartItemSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'backorders_allowed'  => [
+				'description' => __( 'True if backorders are allowed past stock availability.', 'woo-gutenberg-products-block' ),
+				'type'        => [ 'boolean' ],
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'sold_individually'   => [
 				'description' => __( 'If true, only one item of this product is allowed for purchase in a single order.', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
@@ -304,6 +310,7 @@ class CartItemSchema extends AbstractSchema {
 			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
 			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
+			'backorders_allowed'  => $product->backorders_allowed(),
 			'sold_individually'   => $product->is_sold_individually(),
 			'permalink'           => $product->get_permalink(),
 			'images'              => ( new ProductImages() )->images_to_array( $product ),
@@ -322,14 +329,14 @@ class CartItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * If a product has low stock, return the remaining stock amount for display.
+	 * Returns the remaining stock for a product if it has stock.
 	 *
-	 * Note; unlike the products API, this also factors in draft orders so the results are more up to date.
+	 * This also factors in draft orders.
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return integer|null
 	 */
-	protected function get_low_stock_remaining( \WC_Product $product ) {
+	protected function get_remaining_stock( \WC_Product $product ) {
 		if ( is_null( $product->get_stock_quantity() ) ) {
 			return null;
 		}
@@ -343,10 +350,25 @@ class CartItemSchema extends AbstractSchema {
 			$reserve_stock = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
 		}
 
-		$reserved_stock  = $reserve_stock->get_reserved_stock( $product, isset( $draft_order['id'] ) ? $draft_order['id'] : 0 );
-		$remaining_stock = $product->get_stock_quantity() - $reserved_stock;
+		$reserved_stock = $reserve_stock->get_reserved_stock( $product, isset( $draft_order['id'] ) ? $draft_order['id'] : 0 );
+		return $product->get_stock_quantity() - $reserved_stock;
+	}
 
-		if ( $remaining_stock <= wc_get_low_stock_amount( $product ) ) {
+	/**
+	 * If a product has low stock, return the remaining stock amount for display.
+	 *
+	 * Note; unlike the products API, this also factors in draft orders so the results are more up to date.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return integer|null
+	 */
+	protected function get_low_stock_remaining( \WC_Product $product ) {
+		$remaining_stock = $this->get_remaining_stock( $product );
+
+		if (
+			null !== $remaining_stock
+			&& $remaining_stock <= wc_get_low_stock_amount( $product )
+		) {
 			return $remaining_stock;
 		}
 

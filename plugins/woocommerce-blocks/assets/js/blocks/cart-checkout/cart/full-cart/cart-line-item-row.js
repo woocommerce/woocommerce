@@ -9,6 +9,7 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
 import { getCurrency, formatPrice } from '@woocommerce/base-utils';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -18,17 +19,41 @@ import ProductImage from './product-image';
 import ProductLowStockBadge from './product-low-stock-badge';
 
 /**
+ * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
+ */
+
+/**
+ *
+ * @param {boolean}     backOrdersAllowed Whether to allow backorders or not.
+ * @param {number|null} lowStockAmount    If present the number of stock
+ *                                        remaining.
+ *
+ * @return {number} The maximum number value for the quantity input.
+ */
+const getMaximumQuantity = ( backOrdersAllowed, lowStockAmount ) => {
+	const maxQuantityLimit = getSetting( 'quantitySelectLimit', 99 );
+	if ( backOrdersAllowed || ! lowStockAmount ) {
+		return maxQuantityLimit;
+	}
+	return Math.min( lowStockAmount, maxQuantityLimit );
+};
+
+/**
  * Cart line item table row component.
  */
-const CartLineItemRow = ( { lineItem = {} } ) => {
+const CartLineItemRow = ( { lineItem } ) => {
+	/**
+	 * @type {CartItem}
+	 */
 	const {
-		key = '',
-		name = '',
-		summary = '',
-		permalink = '',
-		images = [],
-		variation = [],
-		prices = {},
+		name,
+		summary,
+		low_stock_remaining: lowStockRemaining,
+		backorders_allowed: backOrdersAllowed,
+		permalink,
+		images,
+		variation,
+		prices,
 	} = lineItem;
 
 	const {
@@ -36,9 +61,9 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 		changeQuantity,
 		removeItem,
 		isPending: itemQuantityDisabled,
-	} = useStoreCartItemQuantity( key );
+	} = useStoreCartItemQuantity( lineItem );
 
-	const currency = getCurrency();
+	const currency = getCurrency( prices );
 	const regularPrice = parseInt( prices.regular_price, 10 ) * quantity;
 	const purchasePrice = parseInt( prices.price, 10 ) * quantity;
 	const saleAmount = regularPrice - purchasePrice;
@@ -57,9 +82,7 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				>
 					{ name }
 				</a>
-				<ProductLowStockBadge
-					lowStockRemaining={ lineItem.low_stock_remaining }
-				/>
+				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
 				<div className="wc-block-cart-item__product-metadata">
 					<RawHTML>{ summary }</RawHTML>
 					<ProductVariationData variation={ variation } />
@@ -69,7 +92,10 @@ const CartLineItemRow = ( { lineItem = {} } ) => {
 				<QuantitySelector
 					disabled={ itemQuantityDisabled }
 					quantity={ quantity }
-					maximum={ lineItem.sold_individually ? 1 : undefined }
+					maximum={ getMaximumQuantity(
+						backOrdersAllowed,
+						lowStockRemaining
+					) }
 					onChange={ changeQuantity }
 					itemName={ name }
 				/>
@@ -121,8 +147,9 @@ CartLineItemRow.propTypes = {
 		name: PropTypes.string.isRequired,
 		summary: PropTypes.string.isRequired,
 		images: PropTypes.array.isRequired,
-		low_stock_remaining: PropTypes.number,
-		sold_individually: PropTypes.bool,
+		low_stock_remaining: PropTypes.number.isRequired,
+		backorders_allowed: PropTypes.bool.isRequired,
+		sold_individually: PropTypes.bool.isRequired,
 		variation: PropTypes.arrayOf(
 			PropTypes.shape( {
 				attribute: PropTypes.string.isRequired,
