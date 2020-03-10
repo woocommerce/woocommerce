@@ -19,24 +19,28 @@
 /**
  * @typedef {Object} StoreCartCoupon
  *
- * @property {Array}    appliedCoupons   Collection of applied coupons from the
- *                                       API.
- * @property {boolean}  isLoading        True when coupon data is being loaded.
- * @property {Function} applyCoupon      Callback for applying a coupon by code.
- * @property {Function} removeCoupon     Callback for removing a coupon by code.
- * @property {boolean}  isApplyingCoupon True when a coupon is being applied.
- * @property {boolean}  isRemovingCoupon True when a coupon is being removed.
+ * @property {Array}    appliedCoupons    Collection of applied coupons from the
+ *                                        API.
+ * @property {boolean}  isLoading         True when coupon data is being loaded.
+ * @property {Function} applyCoupon       Callback for applying a coupon by code.
+ * @property {Function} removeCoupon      Callback for removing a coupon by code.
+ * @property {boolean}  isApplyingCoupon  True when a coupon is being applied.
+ * @property {boolean}  isRemovingCoupon  True when a coupon is being removed.
+ * @property {boolean}  cartCouponsErrors An array of errors thrown by the cart.
  */
 
 /**
  * @typedef {Object} StoreCartItemQuantity
  *
- * @property {number}      quantity        The quantity of the item in the cart.
- * @property {boolean}     isPending       Whether the cart item is updating or
- *                                         not.
- * @property {Function}    changeQuantity  Callback for changing quantity of
- *                                         item in cart.
- * @property {Function}    removeItem      Callback for removing a cart item.
+ * @property {number}   quantity               The quantity of the item in the
+ *                                             cart.
+ * @property {boolean}  isPending              Whether the cart item is updating
+ *                                             or not.
+ * @property {Function} changeQuantity         Callback for changing quantity
+ *                                             of item in cart.
+ * @property {Function} removeItem             Callback for removing a cart item.
+ * @property {Object}   cartItemQuantityErrors An array of errors thrown by
+ *                                             the cart.
  */
 
 export {};

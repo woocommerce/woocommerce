@@ -22,6 +22,7 @@ const useStoreCartApiHydration = () => {
 		const { isResolving, hasFinishedResolution } = select( CART_STORE_KEY );
 		const {
 			receiveCart,
+			receiveError,
 			startResolution,
 			finishResolution,
 		} = registry.dispatch( CART_STORE_KEY );
@@ -31,7 +32,11 @@ const useStoreCartApiHydration = () => {
 			! hasFinishedResolution( 'getCartData', [] )
 		) {
 			startResolution( 'getCartData', [] );
-			receiveCart( cartData.current );
+			if ( cartData.current?.code?.includes( 'error' ) ) {
+				receiveError( cartData.current );
+			} else {
+				receiveCart( cartData.current );
+			}
 			finishResolution( 'getCartData', [] );
 		}
 	}, [] );

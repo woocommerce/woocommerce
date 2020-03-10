@@ -21,7 +21,12 @@ import renderFrontend from '../../../utils/render-frontend.js';
  * @param {Object} props Props for the block.
  */
 const CheckoutFrontend = ( props ) => {
-	const { shippingRates } = useStoreCart();
+	const { cartErrors, shippingRates } = useStoreCart();
+
+	if ( cartErrors && cartErrors.length > 0 ) {
+		throw new Error( cartErrors[ 0 ].message );
+	}
+
 	return (
 		<BlockErrorBoundary
 			header={ __(

@@ -7,6 +7,11 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 
 /**
+ * Internal dependencies
+ */
+import { useStoreCart } from './use-store-cart';
+
+/**
  * @typedef {import('@woocommerce/type-defs/hooks').StoreCartItemQuantity} StoreCartItemQuantity
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
  */
@@ -23,6 +28,7 @@ import { useDebounce } from 'use-debounce';
  *                                 to cart items.
  */
 export const useStoreCartItemQuantity = ( cartItem ) => {
+	const { cartErrors } = useStoreCart();
 	// Store quantity in hook state. This is used to keep the UI
 	// updated while server request is updated.
 	const [ quantity, changeQuantity ] = useState( cartItem.quantity );
@@ -53,5 +59,6 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 		quantity,
 		changeQuantity,
 		removeItem,
+		cartItemQuantityErrors: cartErrors,
 	};
 };
