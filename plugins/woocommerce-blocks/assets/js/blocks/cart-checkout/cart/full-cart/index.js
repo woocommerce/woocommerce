@@ -4,7 +4,6 @@
  */
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
 import {
 	SubtotalsItem,
 	TotalsFeesItem,
@@ -106,9 +105,6 @@ const Cart = ( {
 } ) => {
 	const { updateShippingAddress, shippingRatesLoading } = useShippingRates();
 	const shippingAddress = shippingRates[ 0 ]?.destination;
-	const [ showShippingCosts, setShowShippingCosts ] = useState(
-		! isShippingCostHidden
-	);
 	const {
 		applyCoupon,
 		removeCoupon,
@@ -116,21 +112,11 @@ const Cart = ( {
 		isRemovingCoupon,
 	} = useStoreCartCoupons();
 
-	useEffect( () => {
-		if ( ! SHIPPING_ENABLED ) {
-			return setShowShippingCosts( false );
-		}
-		if ( isShippingCalculatorEnabled ) {
-			if ( isShippingCostHidden ) {
-				if ( shippingAddress?.country ) {
-					return setShowShippingCosts( true );
-				}
-			} else {
-				return setShowShippingCosts( true );
-			}
-		}
-		return setShowShippingCosts( false );
-	}, [ isShippingCalculatorEnabled, isShippingCostHidden, shippingAddress ] );
+	const showShippingCosts = Boolean(
+		SHIPPING_ENABLED &&
+			isShippingCalculatorEnabled &&
+			( ! isShippingCostHidden || shippingAddress?.country )
+	);
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
