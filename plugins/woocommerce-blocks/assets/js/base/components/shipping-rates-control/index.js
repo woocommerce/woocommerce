@@ -50,18 +50,12 @@ const ShippingRatesControl = ( {
 };
 
 ShippingRatesControl.propTypes = {
-	address: PropTypes.shape( {
-		address_1: PropTypes.string,
-		address_2: PropTypes.string,
-		city: PropTypes.string,
-		state: PropTypes.string,
-		postcode: PropTypes.string,
-		country: PropTypes.string,
-	} ),
 	noResultsMessage: PropTypes.string.isRequired,
 	renderOption: PropTypes.func.isRequired,
 	className: PropTypes.string,
 	collapsibleWhenMultiple: PropTypes.bool,
+	shippingRates: PropTypes.array,
+	shippingRatesLoading: PropTypes.bool,
 };
 
 export default ShippingRatesControl;

@@ -173,6 +173,10 @@
 				"maxSize": "60 kB"
 			},
 			{
+				"path": "./build/cart.js",
+				"maxSize": "70 kB"
+			},
+			{
 				"path": "./build/cart-frontend.js",
 				"maxSize": "140 kB"
 			},
