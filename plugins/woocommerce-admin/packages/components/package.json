@@ -49,7 +49,7 @@
 		"interpolate-components": "1.1.1",
 		"lodash": "4.17.15",
 		"memoize-one": "5.1.1",
-		"moment": "2.22.1",
+		"moment": "2.24.0",
 		"prop-types": "15.7.2",
 		"qs": "6.9.1",
 		"react-dates": "21.8.0",
