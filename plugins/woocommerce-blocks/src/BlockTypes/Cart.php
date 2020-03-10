@@ -58,6 +58,16 @@ class Cart extends AbstractBlock {
 		if ( ! $data_registry->exists( 'cartData' ) ) {
 			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
 		}
+		if ( ! $data_registry->exists( 'quantitySelectLimit' ) ) {
+			/**
+			 * Note: this filter will be deprecated if/when quantity select limits
+			 * are added at the product level.
+			 *
+			 * @return {integer} $max_quantity_limit Maximum quantity of products that can be selected in the cart.
+			 */
+			$max_quantity_limit = apply_filters( 'woocommerce_maximum_quantity_selected_cart', 99 );
+			$data_registry->add( 'quantitySelectLimit', $max_quantity_limit );
+		}
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
 			$this->block_name . '-frontend',
 			$this->block_name . '-block-frontend'

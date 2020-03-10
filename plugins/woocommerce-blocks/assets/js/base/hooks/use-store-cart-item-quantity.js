@@ -7,11 +7,6 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 
 /**
- * Internal dependencies
- */
-import { useStoreCart } from './use-store-cart';
-
-/**
  * @typedef {import('@woocommerce/type-defs/hooks').StoreCartItemQuantity} StoreCartItemQuantity
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
  */
@@ -22,18 +17,12 @@ import { useStoreCart } from './use-store-cart';
  *
  * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/master/src/RestApi/StoreApi
  *
- * @param {string} cartItemKey Key for a cart item.
- * @return {StoreCartItemQuantity} An object exposing data and actions relating to cart items.
+ * @param {CartItem} cartItem      The cartItem to get quantity info from and
+ *                                 will have quantity updated on.
+ * @return {StoreCartItemQuantity} An object exposing data and actions relating
+ *                                 to cart items.
  */
-export const useStoreCartItemQuantity = ( cartItemKey ) => {
-	const { cartItems, cartIsLoading } = useStoreCart();
-	/**
-	 * @type {[CartItem, function( CartItem ):undefined]}
-	 */
-	const [ cartItem, setCartItem ] = useState( {
-		key: '',
-		quantity: 0,
-	} );
+export const useStoreCartItemQuantity = ( cartItem ) => {
 	// Store quantity in hook state. This is used to keep the UI
 	// updated while server request is updated.
 	const [ quantity, changeQuantity ] = useState( cartItem.quantity );
@@ -41,43 +30,28 @@ export const useStoreCartItemQuantity = ( cartItemKey ) => {
 	const isPending = useSelect(
 		( select ) => {
 			const store = select( storeKey );
-			return store.isItemQuantityPending( cartItemKey );
+			return store.isItemQuantityPending( cartItem.key );
 		},
-		[ cartItemKey ]
+		[ cartItem.key ]
 	);
-	useEffect( () => {
-		if ( ! cartIsLoading ) {
-			const foundCartItem = cartItems.find(
-				( item ) => item.key === cartItemKey
-			);
-			if ( foundCartItem ) {
-				setCartItem( foundCartItem );
-			}
-		}
-	}, [ cartItems, cartIsLoading, cartItemKey ] );
 
 	const { removeItemFromCart, changeCartItemQuantity } = useDispatch(
 		storeKey
 	);
 	const removeItem = () => {
-		removeItemFromCart( cartItemKey );
+		removeItemFromCart( cartItem.key );
 	};
 
 	// Observe debounced quantity value, fire action to update server when it
 	// changes.
 	useEffect( () => {
-		if ( debouncedQuantity === 0 ) {
-			changeQuantity( cartItem.quantity );
-			return;
-		}
-		changeCartItemQuantity( cartItemKey, debouncedQuantity );
-	}, [ debouncedQuantity, cartItemKey, cartItem.quantity ] );
+		changeCartItemQuantity( cartItem.key, debouncedQuantity );
+	}, [ debouncedQuantity, cartItem.key ] );
 
 	return {
 		isPending,
 		quantity,
 		changeQuantity,
 		removeItem,
-		isLoading: cartIsLoading,
 	};
 };
