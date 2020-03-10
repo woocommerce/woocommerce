@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SVG } from '@wordpress/components';
+import { SVG } from 'wordpress-components';
 
 // This uses `delete_outline` icon from Material.
 // https://material.io/resources/icons/?icon=delete_outline&style=baseline

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { cloneElement, isValidElement } from '@wordpress/element';
+import { cloneElement, isValidElement } from 'wordpress-element';
 import PropTypes from 'prop-types';
 
 function Icon( { srcElement, size = 24, ...props } ) {

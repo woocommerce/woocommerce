@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { withInstanceId } from '@wordpress/compose';
+import withComponentId from '@woocommerce/base-hocs/with-component-id';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 
@@ -41,7 +41,7 @@ const Tabs = ( {
 	tabs,
 	activeClass = 'is-active',
 	initialTabName,
-	instanceId,
+	componentId,
 	ariaLabel = __( 'Tabbed Content', 'woo-gutenberg-products-block' ),
 	children,
 } ) => {
@@ -59,7 +59,7 @@ const Tabs = ( {
 	if ( ! selectedTab ) {
 		throw new Error( 'There is no available tab for the selected item' );
 	}
-	const selectedId = `${ instanceId }-${ selectedTab.name }`;
+	const selectedId = `${ componentId }-${ selectedTab.name }`;
 	return (
 		<div className={ classnames( 'wc-component__tabs', className ) }>
 			<div
@@ -76,8 +76,8 @@ const Tabs = ( {
 								[ activeClass ]: tab.name === selected,
 							}
 						) }
-						tabId={ `${ instanceId }-${ tab.name }` }
-						aria-controls={ `${ instanceId }-${ tab.name }-view` }
+						tabId={ `${ componentId }-${ tab.name }` }
+						aria-controls={ `${ componentId }-${ tab.name }-view` }
 						selected={ tab.name === selected }
 						key={ tab.name }
 						ariaLabel={ tab.ariaLabel || null }
@@ -102,4 +102,4 @@ const Tabs = ( {
 	);
 };
 
-export default withInstanceId( Tabs );
+export default withComponentId( Tabs );
