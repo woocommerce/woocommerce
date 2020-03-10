@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import useCheckoutContext from '@woocommerce/base-context/checkout-context';
+import useCheckoutContext from '@woocommerce/base-context';
 
 const useCheckoutNotices = () => {
 	const { notices, updateNotices } = useCheckoutContext();

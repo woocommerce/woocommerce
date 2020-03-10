@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCheckoutContext } from '@woocommerce/base-context/checkout-context';
+import { usePaymentMethodDataContext } from '@woocommerce/base-context';
 import { usePaymentMethods } from '@woocommerce/base-hooks';
 import { useEffect } from '@wordpress/element';
 
@@ -9,7 +9,7 @@ const useActivePaymentMethod = () => {
 	const {
 		activePaymentMethod,
 		setActivePaymentMethod,
-	} = useCheckoutContext();
+	} = usePaymentMethodDataContext();
 	const { paymentMethods, isInitialized } = usePaymentMethods();
 	// if payment method has not been set yet, let's set it.
 	useEffect( () => {
@@ -21,11 +21,16 @@ const useActivePaymentMethod = () => {
 			const paymentMethodIds = Object.keys( paymentMethods );
 			setActivePaymentMethod(
 				paymentMethodIds.length > 0
-					? paymentMethods[ paymentMethodIds[ 0 ] ].name
+					? paymentMethods[ paymentMethodIds[ 0 ] ].id
 					: null
 			);
 		}
-	}, [ activePaymentMethod, setActivePaymentMethod, isInitialized ] );
+	}, [
+		activePaymentMethod,
+		setActivePaymentMethod,
+		isInitialized,
+		paymentMethods,
+	] );
 	return { activePaymentMethod, setActivePaymentMethod };
 };
 

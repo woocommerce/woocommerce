@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { useProductLayoutContext } from '@woocommerce/base-context';
 
 const ProductSummary = ( { className, product } ) => {
 	const { layoutStyleClassPrefix } = useProductLayoutContext();

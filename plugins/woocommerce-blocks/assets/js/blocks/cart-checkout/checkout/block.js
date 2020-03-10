@@ -16,7 +16,7 @@ import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-co
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import CheckoutProvider from '@woocommerce/base-context/checkout-context';
+import { CheckoutProvider } from '@woocommerce/base-context';
 import {
 	ExpressCheckoutFormControl,
 	PaymentMethods,

@@ -3,8 +3,10 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { useInnerBlockConfigurationContext } from '@woocommerce/base-context/inner-block-configuration-context';
-import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import {
+	useInnerBlockConfigurationContext,
+	useProductLayoutContext,
+} from '@woocommerce/base-context';
 import withComponentId from '@woocommerce/base-hocs/with-component-id';
 
 /**
