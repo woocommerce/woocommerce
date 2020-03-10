@@ -201,6 +201,9 @@
  *                                                        can be dispatched for
  *                                                        the checkout context
  *                                                        data.
+ * @property {boolean}                 isEditor           Indicates whether in
+ *                                                        the editor context
+ *                                                        (true) or not (false).
  */
 
 export {};

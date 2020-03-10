@@ -25,6 +25,7 @@ export const paypalPaymentMethod = {
 	label: <img src={ paypalSvg } alt="" />,
 	stepContent: <div>Billing steps</div>,
 	activeContent: <PaypalActivePaymentMethod />,
+	edit: <PaypalActivePaymentMethod />,
 	canMakePayment: Promise.resolve( true ),
 	ariaLabel: 'paypal payment method',
 };
@@ -34,6 +35,7 @@ export const ccPaymentMethod = {
 	label: <img src={ ccSvg } alt="" />,
 	stepContent: null,
 	activeContent: <CreditCardActivePaymentMethod />,
+	edit: <CreditCardActivePaymentMethod />,
 	canMakePayment: Promise.resolve( true ),
 	ariaLabel: 'credit-card-payment-method',
 };

@@ -7,8 +7,14 @@ import {
 	useActivePaymentMethod,
 	usePaymentMethods,
 } from '@woocommerce/base-hooks';
-import { useCallback, cloneElement } from '@wordpress/element';
+import {
+	useCallback,
+	cloneElement,
+	useRef,
+	useEffect,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useCheckoutContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -38,20 +44,48 @@ const createTabs = ( paymentMethods ) => {
 		: [ noPaymentMethodTab() ];
 };
 
+/**
+ * Returns a payment method for the given context.
+ *
+ * @param {string} id The payment method slug to return.
+ * @param {Object} paymentMethods The current registered payment methods
+ * @param {boolean} isEditor Whether in the editor context (true) or not (false).
+ *
+ * @return {Object} The payment method matching the id for the given context.
+ */
+const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
+	let paymentMethod = paymentMethods[ id ] || null;
+	if ( paymentMethod ) {
+		paymentMethod = isEditor
+			? paymentMethod.edit
+			: paymentMethod.activeContent;
+	}
+	return paymentMethod;
+};
+
 const PaymentMethods = () => {
 	const [ checkoutData ] = useCheckoutData();
+	const { isEditor } = useCheckoutContext();
 	const { dispatch, select } = usePaymentEvents();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
+	const currentPaymentMethods = useRef( paymentMethods );
+
+	// update ref on changes
+	useEffect( () => {
+		currentPaymentMethods.current = paymentMethods;
+	}, [ paymentMethods ] );
+
 	const {
 		activePaymentMethod,
 		setActivePaymentMethod,
 	} = useActivePaymentMethod();
 	const getRenderedTab = useCallback(
 		() => ( selectedTab ) => {
-			const paymentMethod =
-				( paymentMethods[ selectedTab ] &&
-					paymentMethods[ selectedTab ].activeContent ) ||
-				null;
+			const paymentMethod = getPaymentMethod(
+				selectedTab,
+				currentPaymentMethods.current,
+				isEditor
+			);
 			const paymentEvents = { dispatch, select };
 			return paymentMethod
 				? cloneElement( paymentMethod, {
@@ -61,7 +95,7 @@ const PaymentMethods = () => {
 				  } )
 				: null;
 		},
-		[ checkoutData, dispatch, select ]
+		[ checkoutData, dispatch, select, isEditor ]
 	);
 	if (
 		! isInitialized ||

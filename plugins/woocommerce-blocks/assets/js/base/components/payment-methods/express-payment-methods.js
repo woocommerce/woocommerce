@@ -6,10 +6,12 @@ import {
 	usePaymentEvents,
 	useExpressPaymentMethods,
 } from '@woocommerce/base-hooks';
-import { cloneElement } from '@wordpress/element';
+import { cloneElement, isValidElement } from '@wordpress/element';
+import { useCheckoutContext } from '@woocommerce/base-context';
 
 const ExpressPaymentMethods = () => {
 	const [ checkoutData ] = useCheckoutData();
+	const { isEditor } = useCheckoutContext();
 	const { dispatch, select } = usePaymentEvents();
 	// not implementing isInitialized here because it's utilized further
 	// up in the tree for express payment methods. We won't even get here if
@@ -19,17 +21,18 @@ const ExpressPaymentMethods = () => {
 	const content =
 		paymentMethodSlugs.length > 0 ? (
 			paymentMethodSlugs.map( ( slug ) => {
-				const expressPaymentMethod =
-					paymentMethods[ slug ].activeContent;
+				const expressPaymentMethod = isEditor
+					? paymentMethods[ slug ].edit
+					: paymentMethods[ slug ].activeContent;
 				const paymentEvents = { dispatch, select };
-				return (
+				return isValidElement( expressPaymentMethod ) ? (
 					<li key={ slug } id={ `express-payment-method-${ slug }` }>
 						{ cloneElement( expressPaymentMethod, {
 							checkoutData,
 							paymentEvents,
 						} ) }
 					</li>
-				);
+				) : null;
 			} )
 		) : (
 			<li key="noneRegistered">No registered Payment Methods</li>

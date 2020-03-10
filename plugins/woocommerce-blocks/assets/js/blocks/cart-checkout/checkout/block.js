@@ -79,7 +79,7 @@ const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
 	} = useShippingRates( Object.keys( addressFields ) );
 
 	return (
-		<CheckoutProvider>
+		<CheckoutProvider isEditor={ isEditor }>
 			<ExpressCheckoutFormControl />
 			<CheckoutForm>
 				<FormStep
