@@ -89,7 +89,7 @@ copy_dest_files() {
 	cd "$CURRENT_DIR" || exit
 }
 
-status "💃 Time to release WooCommerce Blocks 🕺"
+status "💃 Time to build a WooCommerce Blocks ZIP 🕺"
 
 if [ -z "$NO_CHECKS" ]; then
 	# Make sure there are no changes in the working tree. Release builds should be
