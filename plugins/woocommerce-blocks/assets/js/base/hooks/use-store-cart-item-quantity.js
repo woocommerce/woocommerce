@@ -4,6 +4,7 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { usePrevious } from '@woocommerce/base-hooks';
 import { useDebounce } from 'use-debounce';
 
 /**
@@ -33,6 +34,7 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 	// updated while server request is updated.
 	const [ quantity, changeQuantity ] = useState( cartItem.quantity );
 	const [ debouncedQuantity ] = useDebounce( quantity, 400 );
+	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
 	const isPending = useSelect(
 		( select ) => {
 			const store = select( storeKey );
@@ -51,7 +53,10 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 	// Observe debounced quantity value, fire action to update server when it
 	// changes.
 	useEffect( () => {
-		changeCartItemQuantity( cartItem.key, debouncedQuantity );
+		// Don't run it if quantity didn't change but it was set for the first time.
+		if ( Number.isFinite( previousDebouncedQuantity ) ) {
+			changeCartItemQuantity( cartItem.key, debouncedQuantity );
+		}
 	}, [ debouncedQuantity, cartItem.key ] );
 
 	return {
