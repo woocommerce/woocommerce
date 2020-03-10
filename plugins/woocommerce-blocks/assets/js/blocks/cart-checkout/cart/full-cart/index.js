@@ -56,7 +56,6 @@ const renderShippingRatesControlOption = ( option ) => ( {
 const ShippingCalculatorOptions = ( {
 	shippingRates,
 	shippingRatesLoading,
-	shippingAddress,
 } ) => {
 	return (
 		<fieldset className="wc-block-cart__shipping-options-fieldset">
@@ -68,16 +67,6 @@ const ShippingCalculatorOptions = ( {
 			</legend>
 			<ShippingRatesControl
 				className="wc-block-cart__shipping-options"
-				address={
-					shippingAddress
-						? {
-								city: shippingAddress.city,
-								state: shippingAddress.state,
-								postcode: shippingAddress.postcode,
-								country: shippingAddress.country,
-						  }
-						: null
-				}
 				collapsibleWhenMultiple={ true }
 				noResultsMessage={ __(
 					'No shipping options were found.',
@@ -103,8 +92,12 @@ const Cart = ( {
 	shippingRates,
 	isLoading = false,
 } ) => {
-	const { updateShippingAddress, shippingRatesLoading } = useShippingRates();
-	const shippingAddress = shippingRates[ 0 ]?.destination;
+	const defaultAddressFields = [ 'country', 'state', 'city', 'postcode' ];
+	const {
+		shippingAddress,
+		setShippingAddress,
+		shippingRatesLoading,
+	} = useShippingRates( defaultAddressFields );
 	const {
 		applyCoupon,
 		removeCoupon,
@@ -161,7 +154,7 @@ const Cart = ( {
 							<TotalsShippingItem
 								currency={ totalsCurrency }
 								shippingAddress={ shippingAddress }
-								updateShippingAddress={ updateShippingAddress }
+								updateShippingAddress={ setShippingAddress }
 								values={ cartTotals }
 							/>
 						) }
@@ -178,7 +171,6 @@ const Cart = ( {
 									shippingRatesLoading={
 										shippingRatesLoading
 									}
-									shippingAddress={ shippingAddress }
 								/>
 							</fieldset>
 						) }

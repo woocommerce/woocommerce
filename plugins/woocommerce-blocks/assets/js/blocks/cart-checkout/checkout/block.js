@@ -32,11 +32,9 @@ import './style.scss';
 import '../../../payment-methods-demo';
 
 const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
-	const { shippingRatesLoading } = useShippingRates();
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState( {} );
 	const [ contactFields, setContactFields ] = useState( {} );
 	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
-	const [ shippingFields, setShippingFields ] = useState( {} );
 	const [ billingFields, setBillingFields ] = useState( {} );
 	const [ useShippingAsBilling, setUseShippingAsBilling ] = useState(
 		attributes.useShippingAsBilling
@@ -73,6 +71,12 @@ const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
 			hidden: ! attributes.showAddress2Field,
 		},
 	};
+
+	const {
+		shippingRatesLoading,
+		shippingAddress: shippingFields,
+		setShippingAddress: setShippingFields,
+	} = useShippingRates( Object.keys( addressFields ) );
 
 	return (
 		<CheckoutProvider>
