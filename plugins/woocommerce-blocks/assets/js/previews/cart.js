@@ -31,6 +31,8 @@ export const previewCart = {
 			sku: 'woo-beanie',
 			permalink: 'https://example.org',
 			low_stock_remaining: 2,
+			backorders_allowed: false,
+			sold_individually: false,
 			images: [
 				{
 					id: 10,
@@ -95,6 +97,8 @@ export const previewCart = {
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-cap',
 			permalink: 'https://example.org',
+			backorders_allowed: false,
+			sold_individually: false,
 			images: [
 				{
 					id: 11,

@@ -310,7 +310,7 @@ class CartItemSchema extends AbstractSchema {
 			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
 			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
-			'backorders_allowed'  => $product->backorders_allowed(),
+			'backorders_allowed'  => (bool) $product->backorders_allowed(),
 			'sold_individually'   => $product->is_sold_individually(),
 			'permalink'           => $product->get_permalink(),
 			'images'              => ( new ProductImages() )->images_to_array( $product ),
