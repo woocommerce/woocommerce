@@ -16,7 +16,7 @@ import {
 	useQueryStateByKey,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
-import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { useProductLayoutContext } from '@woocommerce/base-context';
 import { speak } from '@wordpress/a11y';
 
 /**

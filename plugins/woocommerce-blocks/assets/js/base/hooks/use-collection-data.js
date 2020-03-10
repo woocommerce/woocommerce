@@ -7,7 +7,7 @@ import {
 	useQueryStateByKey,
 	useCollection,
 } from '@woocommerce/base-hooks';
-import { useQueryStateContext } from '@woocommerce/base-context/query-state-context';
+import { useQueryStateContext } from '@woocommerce/base-context';
 import { useDebounce } from 'use-debounce';
 import { sortBy } from 'lodash';
 

@@ -15,7 +15,7 @@ import { useDispatch } from '@wordpress/data';
 import { find } from 'lodash';
 import { useCollection } from '@woocommerce/base-hooks';
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
-import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { useProductLayoutContext } from '@woocommerce/base-context';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**

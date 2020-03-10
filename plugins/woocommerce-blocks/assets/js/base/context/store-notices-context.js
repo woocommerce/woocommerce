@@ -7,10 +7,10 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import StoreNoticesContainer from '@woocommerce/base-components/store-notices-container';
 
 const StoreNoticesContext = createContext( {
-    notices: [],
-    createNotice: () => void null,
-    removeNotice: () => void null,
-    context: 'wc/core',
+	notices: [],
+	createNotice: () => void null,
+	removeNotice: () => void null,
+	context: 'wc/core',
 } );
 
 export const useStoreNoticesContext = () => {
@@ -27,7 +27,7 @@ export const useStoreNoticesContext = () => {
  *  - Info
  *  - Success
  */
-const StoreNoticesProvider = ( {
+export const StoreNoticesProvider = ( {
 	children,
 	className = '',
 	createNoticeContainer = true,
@@ -87,5 +87,3 @@ StoreNoticesProvider.propTypes = {
 	children: PropTypes.node,
 	context: PropTypes.string,
 };
-
-export default StoreNoticesProvider;

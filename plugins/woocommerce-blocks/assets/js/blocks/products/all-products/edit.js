@@ -25,8 +25,10 @@ import PropTypes from 'prop-types';
 import { Icon, grid } from '@woocommerce/icons';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import { HAS_PRODUCTS } from '@woocommerce/block-settings';
-import { InnerBlockConfigurationProvider } from '@woocommerce/base-context/inner-block-configuration-context';
-import { ProductLayoutContextProvider } from '@woocommerce/base-context/product-layout-context';
+import {
+	InnerBlockConfigurationProvider,
+	ProductLayoutContextProvider,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies

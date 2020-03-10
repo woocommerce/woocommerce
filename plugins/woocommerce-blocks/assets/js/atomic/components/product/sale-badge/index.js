@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { useProductLayoutContext } from '@woocommerce/base-context';
 import Label from '@woocommerce/base-components/label';
 
 const ProductSaleBadge = ( { className, product, align } ) => {

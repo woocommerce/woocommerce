@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { WC_BLOCKS_ASSET_URL } from '@woocommerce/block-settings';
-import { useProductLayoutContext } from '@woocommerce/base-context/product-layout-context';
+import { useProductLayoutContext } from '@woocommerce/base-context';
 
 const NoProducts = () => {
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
