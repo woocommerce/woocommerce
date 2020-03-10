@@ -75,11 +75,14 @@ export const useCheckoutContext = () => {
  *                                            submit.
  * @param {string}  props.submitLabel         What will be used for the checkout
  *                                            submit button label.
+ * @param {boolean} props.isEditor            Whether the checkout is in the
+ *                                            editor context or not.
  */
 export const CheckoutProvider = ( {
 	children,
 	activePaymentMethod: initialActivePaymentMethod,
 	redirectUrl,
+	isEditor,
 	submitLabel = __( 'Place Order', 'woo-gutenberg-product-block' ),
 } ) => {
 	// note, this is done intentionally so that the default state now has
@@ -180,6 +183,7 @@ export const CheckoutProvider = ( {
 		onCheckoutCompleteError,
 		onCheckoutProcessing,
 		dispatchActions,
+		isEditor,
 	};
 	return (
 		<CheckoutContext.Provider value={ checkoutData }>

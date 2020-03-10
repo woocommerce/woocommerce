@@ -17,6 +17,7 @@ registerExpressPaymentMethod(
 		new Config( {
 			id: 'applepay',
 			activeContent: <ExpressApplePay />,
+			edit: <ExpressApplePay />,
 			canMakePayment: Promise.resolve( true ),
 		} )
 );
@@ -25,6 +26,7 @@ registerExpressPaymentMethod(
 		new Config( {
 			id: 'paypal',
 			activeContent: <ExpressPaypal />,
+			edit: <ExpressPaypal />,
 			canMakePayment: Promise.resolve( true ),
 		} )
 );
