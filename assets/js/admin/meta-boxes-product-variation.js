@@ -469,7 +469,7 @@ jQuery( function( $ ) {
 					return;
 				}
 
-				data[ elem.name ] = elem.value;
+				data[ elem.name ] = $input.val();
 
 			});
 
