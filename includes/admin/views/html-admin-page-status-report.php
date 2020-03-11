@@ -83,6 +83,94 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			</td>
 		</tr>
 		<tr>
+			<td data-export-label="WC Blocks Version"><?php esc_html_e( 'WooCommerce Blocks package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Blocks package running on your site.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php
+				if ( class_exists( '\Automattic\WooCommerce\Blocks\Package' ) ) {
+					$version = \Automattic\WooCommerce\Blocks\Package::get_version();
+					$path    = \Automattic\WooCommerce\Blocks\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				} else {
+					$version = null;
+				}
+
+				if ( ! is_null( $version ) ) {
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
+				} else {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Blocks package.', 'woocommerce' ) . '</mark>';
+				}
+				?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Action Scheduler Version"><?php esc_html_e( 'Action Scheduler package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Action Scheduler package running on your site.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php
+				if ( class_exists( 'ActionScheduler_Versions' ) && class_exists( 'ActionScheduler' ) ) {
+					$version = ActionScheduler_Versions::instance()->latest_version();
+					$path    = ActionScheduler::plugin_path( '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				} else {
+					$version = null;
+				}
+
+				if ( ! is_null( $version ) ) {
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
+				} else {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ) . '</mark>';
+				}
+				?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="WC Admin Version"><?php esc_html_e( 'WooCommerce Admin package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Admin package running on your site.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php
+				$wc_admin_path = null;
+				if ( defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+					// Plugin version of WC Admin.
+					$version        = WC_ADMIN_VERSION_NUMBER;
+					$package_active = false;
+				} elseif ( class_exists( '\Automattic\WooCommerce\Admin\Composer\Package' ) ) {
+					if ( WC()->is_wc_admin_active() ) {
+						// Fully active package version of WC Admin.
+						$version        = \Automattic\WooCommerce\Admin\Composer\Package::get_active_version();
+						$package_active = \Automattic\WooCommerce\Admin\Composer\Package::is_package_active();
+					} else {
+						// with WP version < 5.3, package is present, but inactive.
+						$version = sprintf(
+							/* translators: %s: Version number of wc-admin package */
+							__( 'Inactive %s', 'woocommerce' ),
+							\Automattic\WooCommerce\Admin\Composer\Package::VERSION
+						);
+						$package_active = false;
+					}
+					$wc_admin_path = \Automattic\WooCommerce\Admin\Composer\Package::get_path();
+				} else {
+					$version = null;
+				}
+
+				if ( ! is_null( $version ) ) {
+					if ( ! isset( $wc_admin_path ) ) {
+						if ( defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
+							$wc_admin_path = dirname( WC_ADMIN_PLUGIN_FILE );
+						} else {
+							$wc_admin_path = __( 'Active Plugin', 'woocommerce' );
+						}
+					}
+					if ( WC()->is_wc_admin_active() ) {
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code></mark> ';
+					} else {
+						echo '<span class="dashicons dashicons-no-alt"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $wc_admin_path ) . '</code> ';
+					}
+				} else {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the WC Admin package.', 'woocommerce' ) . '</mark>';
+				}
+				?>
+			</td>
+		</tr>
+		<tr>
 			<td data-export-label="Log Directory Writable"><?php esc_html_e( 'Log directory writable', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
@@ -435,25 +523,6 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 			</td>
 		</tr>
 
-		<?php if ( $settings['geolocation_enabled'] ) { ?>
-			<tr>
-				<td data-export-label="MaxMind GeoIP Database"><?php esc_html_e( 'MaxMind GeoIP database', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The GeoIP database from MaxMind is used to geolocate customers.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-				<td>
-					<?php
-					if ( version_compare( $environment['php_version'], '5.4', '<' ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( __( 'MaxMind GeoIP database requires at least PHP 5.4.', 'woocommerce' ) ) . '</mark>';
-					} elseif ( file_exists( $database['maxmind_geoip_database'] ) ) {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code></mark> ';
-					} else {
-						/* Translators: %1$s: Library url, %2$s: install path. */
-						printf( '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'The MaxMind GeoIP Database does not exist - Geolocation will not function. You can download and install it manually from %1$s to the path: %2$s. Scroll down to "Downloads" and download the "MaxMind DB binary, gzipped" file next to "GeoLite2 Country". Please remember to uncompress GeoLite2-Country_xxxxxxxx.tar.gz and upload the GeoLite2-Country.mmdb file only.', 'woocommerce' ), '<a href="https://dev.maxmind.com/geoip/geoip2/geolite2/">https://dev.maxmind.com/geoip/geoip2/geolite2/</a>', '<code class="private">' . esc_html( $database['maxmind_geoip_database'] ) . '</code>' ) . '</mark>', esc_html( WC_LOG_DIR ) );
-					}
-					?>
-				</td>
-			</tr>
-		<?php } ?>
-
 		<?php if ( ! empty( $database['database_size'] ) && ! empty( $database['database_tables'] ) ) : ?>
 			<tr>
 				<td><?php esc_html_e( 'Total Database Size', 'woocommerce' ); ?></td>
@@ -584,7 +653,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 	</thead>
 	<tbody>
 		<?php
-		foreach ( $active_plugins as $plugin ) {
+		foreach ( $active_plugins as $plugin ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			if ( ! empty( $plugin['name'] ) ) {
 				$dirname = dirname( $plugin['plugin'] );
 
@@ -636,7 +705,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 	</thead>
 	<tbody>
 		<?php
-		foreach ( $inactive_plugins as $plugin ) {
+		foreach ( $inactive_plugins as $plugin ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			if ( ! empty( $plugin['name'] ) ) {
 				$dirname = dirname( $plugin['plugin'] );
 
@@ -715,7 +784,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		</thead>
 		<tbody>
 			<?php
-			foreach ( $dropins_mu_plugins['mu_plugins'] as $mu_plugin ) {
+			foreach ( $dropins_mu_plugins['mu_plugins'] as $mu_plugin ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				$plugin_name = esc_html( $mu_plugin['name'] );
 				if ( ! empty( $mu_plugin['url'] ) ) {
 					$plugin_name = '<a href="' . esc_url( $mu_plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';

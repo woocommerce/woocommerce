@@ -779,8 +779,36 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		}
 		$object->add_item( $item );
 
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'total' => 10,
+			)
+		);
+		$object->add_item( $fee );
+
 		$object->calculate_totals();
-		$this->assertEquals( 55, $object->get_total() );
+		$this->assertEquals( 66, $object->get_total() );
+	}
+
+	/**
+	 * Test: calculate_totals negative fees should not make order total negative.
+	 *
+	 * See: https://github.com/woocommerce/woocommerce/commit/804feb93333a8f00d0f93a163c6de58204f31f14
+	 */
+	public function test_calculate_totals_negative_fees_should_not_make_order_total_negative() {
+		$order = WC_Helper_Order::create_order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'total' => -60,
+			)
+		);
+		$order->add_item( $fee );
+
+		$order->calculate_totals();
+		$this->assertEquals( 0, $order->get_total() );
 	}
 
 	/**
@@ -1941,5 +1969,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertContains( 'Error saving order', $note->content );
 
 		remove_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
+	}
+
+	/**
+	 * Basic test for WC_Order::get_total_fees().
+	 */
+	public function test_get_total_fees_should_return_total_fees() {
+		$order      = WC_Helper_Order::create_order();
+		$fee_totals = array( 25, 50.50, 34.56 );
+
+		foreach ( $fee_totals as $total ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_props(
+				array(
+					'name'       => 'Some Fee',
+					'tax_status' => 'taxable',
+					'total'      => $total,
+					'tax_class'  => '',
+				)
+			);
+			$order->add_item( $fee );
+		}
+
+		$this->assertEquals( 110.06, $order->get_total_fees() );
 	}
 }

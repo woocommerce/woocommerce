@@ -5,6 +5,8 @@
  * @package WooCommerce/Tests
  */
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Class Functions.
  *
@@ -368,7 +370,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$orders   = wc_get_orders(
 			array(
-				'version' => WC_VERSION,
+				'version' => Constants::get_constant( 'WC_VERSION' ),
 				'return'  => 'ids',
 			)
 		);

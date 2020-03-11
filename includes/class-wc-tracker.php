@@ -10,6 +10,8 @@
  * @package WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -38,7 +40,7 @@ class WC_Tracker {
 	 */
 	public static function send_tracking_data( $override = false ) {
 		// Don't trigger this on AJAX Requests.
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		if ( Constants::is_true( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -85,6 +87,28 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Test whether this site is a staging site according to the Jetpack criteria.
+	 *
+	 * With Jetpack 8.1+, Jetpack::is_staging_site has been deprecated.
+	 * \Automattic\Jetpack\Status::is_staging_site is the replacement.
+	 * However, there are version of JP where \Automattic\Jetpack\Status exists, but does *not* contain is_staging_site method,
+	 * so with those, code still needs to use the previous check as a fallback.
+	 *
+	 * @return bool
+	 */
+	private static function is_jetpack_staging_site() {
+		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
+			// Preferred way of checking with Jetpack 8.1+.
+			$jp_status = new \Automattic\Jetpack\Status();
+			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+				return $jp_status->is_staging_site();
+			}
+		}
+
+		return ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
+	}
+
+	/**
 	 * Get all the tracking data.
 	 *
 	 * @return array
@@ -109,9 +133,10 @@ class WC_Tracker {
 		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
 
 		// Jetpack & WooCommerce Connect.
-		$data['jetpack_version']    = defined( 'JETPACK__VERSION' ) ? JETPACK__VERSION : 'none';
+
+		$data['jetpack_version']    = Constants::is_defined( 'JETPACK__VERSION' ) ? Constants::get_constant( 'JETPACK__VERSION' ) : 'none';
 		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
-		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
+		$data['jetpack_is_staging'] = self::is_jetpack_staging_site() ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
 		$data['helper_connected']   = self::get_helper_connected();

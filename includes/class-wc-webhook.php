@@ -11,6 +11,8 @@
  * @since    2.2.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 require_once 'legacy/class-wc-legacy-webhook.php';
@@ -19,6 +21,14 @@ require_once 'legacy/class-wc-legacy-webhook.php';
  * Webhook class.
  */
 class WC_Webhook extends WC_Legacy_Webhook {
+
+	/**
+	 * Store which object IDs this webhook has processed (ie scheduled to be delivered)
+	 * within the current page request.
+	 *
+	 * @var array
+	 */
+	protected $processed = array();
 
 	/**
 	 * Stores webhook data.
@@ -103,6 +113,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return;
 		}
 
+		// Mark this $arg as processed to ensure it doesn't get processed again within the current request.
+		$this->processed[] = $arg;
+
 		/**
 		 * Process webhook delivery.
 		 *
@@ -123,7 +136,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if webhook should be delivered, false otherwise.
 	 */
 	private function should_deliver( $arg ) {
-		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg );
+		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg ) && ! $this->is_already_processed( $arg );
 
 		/**
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
@@ -281,6 +294,19 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
+	 * Checks if the specified resource has already been queued for delivery within the current request.
+	 *
+	 * Helps avoid duplication of data being sent for topics that have more than one hook defined.
+	 *
+	 * @param mixed $arg First hook argument.
+	 *
+	 * @return bool
+	 */
+	protected function is_already_processed( $arg ) {
+		return false !== array_search( $arg, $this->processed, true );
+	}
+
+	/**
 	 * Deliver the webhook payload using wp_safe_remote_request().
 	 *
 	 * @since 2.2.0
@@ -297,7 +323,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'redirection' => 0,
 			'httpversion' => '1.0',
 			'blocking'    => true,
-			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'        => trim( wp_json_encode( $payload ) ),
 			'headers'     => array(
 				'Content-Type' => 'application/json',
@@ -531,7 +557,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'Body'    => $response_body,
 		);
 
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+		if ( ! Constants::is_true( 'WP_DEBUG' ) ) {
 			$message['Webhook Delivery']['Body']             = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}
@@ -610,7 +636,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 */
 	public function deliver_ping() {
 		$args = array(
-			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
 		);
 

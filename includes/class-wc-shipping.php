@@ -8,6 +8,8 @@
  * @package WooCommerce/Classes/Shipping
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -163,7 +165,7 @@ class WC_Shipping {
 			$matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
 
 			// Debug output.
-			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
+			if ( $debug_mode && ! Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) && ! Constants::is_defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
 				wc_add_notice( $matched_zone_notice );
 			}
 		} else {
@@ -294,12 +296,7 @@ class WC_Shipping {
 		}
 
 		$states = WC()->countries->get_states( $country );
-		if ( is_array( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
-			return false;
-		}
-
-		$postcode = wc_format_postcode( $package['destination']['postcode'], $country );
-		if ( ! WC_Validation::is_postcode( $postcode, $country ) ) {
+		if ( is_array( $states ) && ! empty( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
 			return false;
 		}
 
