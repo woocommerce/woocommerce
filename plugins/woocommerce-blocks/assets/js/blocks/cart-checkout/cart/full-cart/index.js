@@ -95,7 +95,6 @@ const Cart = ( {
 	const defaultAddressFields = [ 'country', 'state', 'city', 'postcode' ];
 	const {
 		shippingAddress,
-		shippingRatesErrors,
 		setShippingAddress,
 		shippingRatesLoading,
 	} = useShippingRates( defaultAddressFields );
@@ -104,13 +103,7 @@ const Cart = ( {
 		removeCoupon,
 		isApplyingCoupon,
 		isRemovingCoupon,
-		cartCouponsErrors,
 	} = useStoreCartCoupons();
-
-	const errors = [ ...shippingRatesErrors, ...cartCouponsErrors ];
-	if ( errors.length > 0 ) {
-		throw new Error( errors[ 0 ].message );
-	}
 
 	const showShippingCosts = Boolean(
 		SHIPPING_ENABLED &&

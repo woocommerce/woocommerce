@@ -57,16 +57,11 @@ const CartLineItemRow = ( { lineItem } ) => {
 	} = lineItem;
 
 	const {
-		cartItemQuantityErrors,
 		quantity,
 		changeQuantity,
 		removeItem,
 		isPending: itemQuantityDisabled,
 	} = useStoreCartItemQuantity( lineItem );
-
-	if ( cartItemQuantityErrors && cartItemQuantityErrors.length > 0 ) {
-		throw new Error( cartItemQuantityErrors[ 0 ].message );
-	}
 
 	const currency = getCurrency( prices );
 	const regularPrice = parseInt( prices.regular_price, 10 ) * quantity;
