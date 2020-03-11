@@ -10,8 +10,8 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 /**
  * Internal dependencies
  */
-import { useStoreCart } from './use-store-cart';
-import { pluckAddress } from '../utils';
+import { useStoreCart } from '../cart/use-store-cart';
+import { pluckAddress } from '../../utils';
 /**
  * This is a custom hook that is wired up to the `wc/store/cart/shipping-rates` route.
  * Given a a set of default fields keys, this will handle shipping form state and load
