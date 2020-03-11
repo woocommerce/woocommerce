@@ -2,10 +2,8 @@
  * External dependencies
  */
 import {
-	useCheckoutData,
-	usePaymentEvents,
-	useActivePaymentMethod,
 	usePaymentMethods,
+	usePaymentMethodInterface,
 } from '@woocommerce/base-hooks';
 import {
 	useCallback,
@@ -31,12 +29,12 @@ const noPaymentMethodTab = () => {
 };
 
 const createTabs = ( paymentMethods ) => {
-	const paymentMethodsKeys = Object.keys( paymentMethods );
-	return paymentMethodsKeys.length > 0
-		? paymentMethodsKeys.map( ( key ) => {
-				const { label, ariaLabel } = paymentMethods[ key ];
+	const paymentMethodIds = Object.keys( paymentMethods );
+	return paymentMethodIds.length > 0
+		? paymentMethodIds.map( ( id ) => {
+				const { label, ariaLabel } = paymentMethods[ id ];
 				return {
-					name: key,
+					name: id,
 					title: () => label,
 					ariaLabel,
 				};
@@ -64,21 +62,21 @@ const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
 };
 
 const PaymentMethods = () => {
-	const [ checkoutData ] = useCheckoutData();
 	const { isEditor } = useCheckoutContext();
-	const { dispatch, select } = usePaymentEvents();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
 	const currentPaymentMethods = useRef( paymentMethods );
+	const {
+		activePaymentMethod,
+		setActivePaymentMethod,
+		...paymentMethodInterface
+	} = usePaymentMethodInterface();
+	const currentPaymentMethodInterface = useRef( paymentMethodInterface );
 
 	// update ref on changes
 	useEffect( () => {
 		currentPaymentMethods.current = paymentMethods;
-	}, [ paymentMethods ] );
-
-	const {
-		activePaymentMethod,
-		setActivePaymentMethod,
-	} = useActivePaymentMethod();
+		currentPaymentMethodInterface.current = paymentMethodInterface;
+	}, [ paymentMethods, paymentMethodInterface, activePaymentMethod ] );
 	const getRenderedTab = useCallback(
 		() => ( selectedTab ) => {
 			const paymentMethod = getPaymentMethod(
@@ -86,16 +84,14 @@ const PaymentMethods = () => {
 				currentPaymentMethods.current,
 				isEditor
 			);
-			const paymentEvents = { dispatch, select };
 			return paymentMethod
 				? cloneElement( paymentMethod, {
-						isActive: true,
-						checkoutData,
-						paymentEvents,
+						activePaymentMethod: paymentMethod.id,
+						...currentPaymentMethodInterface.current,
 				  } )
 				: null;
 		},
-		[ checkoutData, dispatch, select, isEditor ]
+		[ isEditor, activePaymentMethod ]
 	);
 	if (
 		! isInitialized ||
