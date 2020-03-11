@@ -121,6 +121,35 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test when `usage_count` meta is deleted for some reason.
+	 *
+	 * @throws Exception When unable to create order.
+	 */
+	public function test_create_order_with_usage_limit_deleted() {
+		$coupon_code = 'coupon4one';
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+		$coupon = WC_Helper_Coupon::create_coupon(
+			$coupon_code,
+			array( 'usage_limit' => 1 )
+		);
+
+		delete_post_meta( $coupon->get_id(), 'usage_count' );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		$checkout = WC_Checkout::instance();
+		$order_id = $checkout->create_order(
+			array(
+				'billing_email' => 'a@b.com',
+				'payment_method' => 'dummy_payment_gateway',
+			)
+		);
+		$this->assertNotWPError( $order_id );
+		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ), 1 );
+	}
+
+	/**
 	 * Helper function to return 0.01.
 	 *
 	 * @return float
