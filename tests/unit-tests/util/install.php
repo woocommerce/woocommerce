@@ -1,8 +1,14 @@
 <?php
+/**
+ * Tests for the WC_Install class.
+ *
+ * @package WooCommerce\Tests\Util
+ */
 
 /**
  * Class WC_Tests_Install.
- * @package WooCommerce\Tests\Util
+ *
+ * @covers WC_Install
  */
 class WC_Tests_Install extends WC_Unit_Test_Case {
 
@@ -51,7 +57,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create pages.
 	 */
 	public function test_create_pages() {
-		// Clear options
+		// Clear options.
 		delete_option( 'woocommerce_shop_page_id' );
 		delete_option( 'woocommerce_cart_page_id' );
 		delete_option( 'woocommerce_checkout_page_id' );
@@ -64,13 +70,13 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_checkout_page_id' ) );
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_myaccount_page_id' ) );
 
-		// Delete pages
+		// Delete pages.
 		wp_delete_post( get_option( 'woocommerce_shop_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
 
-		// Clear options
+		// Clear options.
 		delete_option( 'woocommerce_shop_page_id' );
 		delete_option( 'woocommerce_cart_page_id' );
 		delete_option( 'woocommerce_checkout_page_id' );
@@ -88,7 +94,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		// Clean existing install first
+		// Clean existing install first.
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
@@ -143,11 +149,14 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	public function test_get_tables_enables_filter() {
 		$this->assertNotContains( 'some_table_name', WC_Install::get_tables() );
 
-		add_filter( 'woocommerce_install_get_tables', function ( $tables ) {
-			$tables[] = 'some_table_name';
+		add_filter(
+			'woocommerce_install_get_tables',
+			function ( $tables ) {
+				$tables[] = 'some_table_name';
 
-			return $tables;
-		} );
+				return $tables;
+			}
+		);
 
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
