@@ -3,7 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withFeedbackPrompt } from '@woocommerce/block-hocs';
-import { previewShippingRates } from '@woocommerce/resource-previews';
+import {
+	previewCart,
+	previewShippingRates,
+} from '@woocommerce/resource-previews';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -216,6 +219,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 			>
 				<Block
 					attributes={ attributes }
+					cartTotals={ previewCart.totals }
 					isEditor={ true }
 					shippingRates={
 						SHIPPING_METHODS_EXIST ? previewShippingRates : []

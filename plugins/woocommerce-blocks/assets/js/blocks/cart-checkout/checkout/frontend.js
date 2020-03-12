@@ -24,7 +24,12 @@ import renderFrontend from '../../../utils/render-frontend.js';
  * @param {Object} props Props for the block.
  */
 const CheckoutFrontend = ( props ) => {
-	const { cartErrors, shippingRates } = useStoreCart();
+	const {
+		cartCoupons,
+		cartErrors,
+		cartTotals,
+		shippingRates,
+	} = useStoreCart();
 
 	if ( cartErrors && cartErrors.length > 0 ) {
 		throw new Error( cartErrors[ 0 ].message );
@@ -50,7 +55,12 @@ const CheckoutFrontend = ( props ) => {
 			) }
 			showErrorMessage={ CURRENT_USER_IS_ADMIN }
 		>
-			<Block { ...props } shippingRates={ shippingRates } />
+			<Block
+				{ ...props }
+				cartCoupons={ cartCoupons }
+				cartTotals={ cartTotals }
+				shippingRates={ shippingRates }
+			/>
 		</BlockErrorBoundary>
 	);
 };

@@ -1,0 +1,86 @@
+.wc-block-sidebar-layout {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 (-$gap) $gap;
+
+	.wc-block-main {
+		flex: 1 0 65%;
+		margin: 0;
+		padding: 0 $gap;
+		min-width: 500px;
+	}
+
+	.wc-block-sidebar {
+		flex: 1 1 35%;
+		margin: 0;
+		max-width: 35%;
+		padding: 0 $gap;
+
+		// Reset Gutenberg <Panel> styles when used in the sidebar.
+		.components-panel__body {
+			border-top: 1px solid $core-grey-light-600;
+			border-bottom: 1px solid $core-grey-light-600;
+
+			&.is-opened {
+				padding-left: 0;
+				padding-right: 0;
+
+				> .components-panel__body-title {
+					margin-left: 0;
+					margin-right: 0;
+				}
+			}
+
+			> .components-panel__body-title,
+			.components-panel__body-toggle {
+				&,
+				&:hover,
+				&:focus,
+				&:active {
+					background-color: transparent;
+					color: inherit;
+				}
+			}
+
+			.components-panel__body-toggle {
+				font-weight: normal;
+				font-size: inherit;
+				padding-left: 0;
+				padding-right: 36px;
+
+				&.components-button,
+				&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
+					color: inherit;
+				}
+			}
+		}
+	}
+}
+
+@include breakpoint( "<782px" ) {
+	.wc-block-sidebar-layout {
+		display: block;
+		margin: 0 0 $gap;
+
+		.wc-block-main {
+			padding: 0;
+			flex: none;
+			min-width: 200px;
+		}
+		.wc-block-sidebar {
+			padding: 0;
+			flex: none;
+			max-width: 100%;
+
+			// Reset (remove) totals "card" styling on mobile.
+			.components-card {
+				box-shadow: none;
+				border: none;
+			}
+			.components-card__body {
+				border: none;
+				padding: 0;
+			}
+		}
+	}
+}
