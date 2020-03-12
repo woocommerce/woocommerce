@@ -350,8 +350,6 @@ class WC_Admin_Status {
 	private static function output_plugins_info( $plugins, $untested_plugins ) {
 		foreach ( $plugins as $plugin ) {
 			if ( ! empty( $plugin['name'] ) ) {
-				$dirname = dirname( $plugin['plugin'] );
-
 				// Link the plugin name to the plugin url if available.
 				$plugin_name = esc_html( $plugin['name'] );
 				if ( ! empty( $plugin['url'] ) ) {
