@@ -12,7 +12,7 @@
  * Requires PHP: 5.6.20
  *
  * WC requires at least: 3.6.0
- * WC tested up to: 3.9.1
+ * WC tested up to: 4.0.0
  *
  * @package WC_Admin
  */
