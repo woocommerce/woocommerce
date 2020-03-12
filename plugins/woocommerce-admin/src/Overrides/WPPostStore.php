@@ -22,8 +22,8 @@ class WPPostStore extends \ActionScheduler_wpPostStore {
 	 * For WC Admin actions, force a lower action claim
 	 * priority by setting a high value for `menu_order`.
 	 *
-	 * @param ActionScheduler_Action $action Action.
-	 * @param DateTime               $scheduled_date Action schedule.
+	 * @param \ActionScheduler_Action $action Action.
+	 * @param \DateTime               $scheduled_date Action schedule.
 	 * @return array Post data array for usage in wp_insert_post().
 	 */
 	protected function create_post_array( \ActionScheduler_Action $action, \DateTime $scheduled_date = null ) {
@@ -60,5 +60,14 @@ class WPPostStore extends \ActionScheduler_wpPostStore {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Cancel all actions by group.
+	 *
+	 * @param string $group Group name.
+	 */
+	public function cancel_actions_by_group( $group ) {
+		WC()->queue()->cancel_all( null, array(), $group );
 	}
 }

@@ -165,17 +165,19 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 			1,
 			OrdersScheduler::queue()->search(
 				array(
-					'hook' => OrdersScheduler::get_action( 'import' ),
+					'status' => 'pending',
+					'hook'   => OrdersScheduler::get_action( 'import' ),
 				)
 			)
 		);
 		// Verify that no follow up action was queued.
 		WC_Helper_Queue::run_all_pending();
 		$this->assertCount(
-			1,
+			0,
 			OrdersScheduler::queue()->search(
 				array(
-					'hook' => OrdersScheduler::get_action( 'import' ),
+					'status' => 'pending',
+					'hook'   => OrdersScheduler::get_action( 'import' ),
 				)
 			)
 		);

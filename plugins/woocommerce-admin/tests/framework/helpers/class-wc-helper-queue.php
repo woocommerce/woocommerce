@@ -42,4 +42,18 @@ class WC_Helper_Queue {
 			}
 		}
 	}
+
+	/**
+	 * Cancel all pending actions.
+	 *
+	 * @return void
+	 */
+	public static function cancel_all_pending() {
+		// Force immediate hard delete for Action Scheduler < 3.0.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type = 'scheduled-action'" );
+
+		ActionScheduler_Store::instance()->cancel_actions_by_group( 'wc-admin-data' );
+		ActionScheduler_Store::instance()->cancel_actions_by_group( 'wc-admin-notes' );
+	}
 }

@@ -231,16 +231,10 @@ trait SchedulerTraits {
 		);
 
 		$next_job_schedule = null;
-		$blocking_job_hook = null;
 
 		if ( is_array( $blocking_jobs ) ) {
 			foreach ( $blocking_jobs as $blocking_job ) {
-				$blocking_job_hook = $blocking_job->get_hook();
-				if ( method_exists( $blocking_job->get_schedule(), 'get_date' ) ) {
-					$next_job_schedule = $blocking_job->get_schedule()->get_date();
-				} else {
-					$next_job_schedule = $blocking_job->get_schedule()->next();
-				}
+				$next_job_schedule = self::get_next_action_time( $blocking_job );
 
 				// Ensure that the next schedule is a DateTime (it can be null).
 				if ( is_a( $next_job_schedule, 'DateTime' ) ) {
@@ -264,8 +258,9 @@ trait SchedulerTraits {
 		// or schedule to run now if no blocking jobs exist.
 		$blocking_job = static::get_next_blocking_job( $action_name );
 		if ( $blocking_job ) {
+			$after = new \DateTime();
 			self::queue()->schedule_single(
-				$blocking_job->get_schedule()->next()->getTimestamp() + 5,
+				self::get_next_action_time( $blocking_job )->getTimestamp() + 5,
 				$action_hook,
 				$args,
 				static::$group
@@ -273,6 +268,24 @@ trait SchedulerTraits {
 		} else {
 			call_user_func_array( array( static::class, $action_name ), $args );
 		}
+	}
+
+	/**
+	 * Get the DateTime for the next scheduled time an action should run.
+	 * This function allows backwards compatibility with Action Scheduler < v3.0.
+	 *
+	 * @param \ActionScheduler_Action $action Action.
+	 * @return DateTime|null
+	 */
+	public static function get_next_action_time( $action ) {
+		if ( method_exists( $action->get_schedule(), 'get_next' ) ) {
+			$after             = new \DateTime();
+			$next_job_schedule = $action->get_schedule()->get_next( $after );
+		} else {
+			$next_job_schedule = $action->get_schedule()->next();
+		}
+
+		return $next_job_schedule;
 	}
 
 	/**
