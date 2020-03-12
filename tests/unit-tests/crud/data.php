@@ -22,15 +22,6 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		update_option( 'timezone_string', '' );
 	}
 
-	public function onNotSuccessfulTest( $e ) {
-		// @codingStandardsIgnoreStart
-		date_default_timezone_set( 'UTC' );
-		// @codingStandardsIgnoreEnd
-		update_option( 'gmt_offset', 0 );
-		update_option( 'timezone_string', '' );
-		parent::onNotSuccessfulTest( $e );
-	}
-
 	/**
 	 * Create a test post we can add/test meta against.
 	 */
