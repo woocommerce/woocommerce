@@ -194,7 +194,10 @@ class WC_Install {
 	 * @since 4.0.0
 	 */
 	public static function wc_admin_db_update_notice() {
-		if ( WC()->is_wc_admin_active() ) {
+		if (
+			WC()->is_wc_admin_active() &&
+			false !== get_option( 'woocommerce_admin_install_timestamp' )
+		) {
 			new WC_Notes_Run_Db_Update();
 		}
 	}
