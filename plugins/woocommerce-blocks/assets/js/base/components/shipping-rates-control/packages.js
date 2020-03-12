@@ -20,19 +20,20 @@ const Packages = ( {
 	const { selectShippingRate, selectedShippingRates } = useSelectShippingRate(
 		shippingRates
 	);
+	/* eslint-disable camelcase */
 	return (
 		<div className="wc-block-shipping-rates-control">
-			{ shippingRates.map( ( shippingRate, i ) => (
+			{ shippingRates.map( ( { package_id, ...shippingRate } ) => (
 				<Package
-					key={ shippingRate.package_id }
+					key={ package_id }
 					className={ className }
 					collapsible={ collapsible }
 					noResultsMessage={ noResultsMessage }
 					onChange={ ( newShippingRate ) => {
-						selectShippingRate( newShippingRate, i );
+						selectShippingRate( newShippingRate, package_id );
 					} }
 					renderOption={ renderOption }
-					selected={ selectedShippingRates[ i ] }
+					selected={ selectedShippingRates[ package_id ] }
 					shippingRate={ shippingRate }
 					showItems={ shippingRates.length > 1 }
 					title={
@@ -42,6 +43,7 @@ const Packages = ( {
 			) ) }
 		</div>
 	);
+	/* eslint-enable */
 };
 
 Packages.propTypes = {
