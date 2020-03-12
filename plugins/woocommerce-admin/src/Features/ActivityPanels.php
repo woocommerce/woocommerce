@@ -46,7 +46,7 @@ class ActivityPanels {
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
-		add_action( 'woocommerce_updated', array( $this, 'woocommerce_updated_note' ) );
+		add_action( 'woocommerce_admin_updated', array( $this, 'woocommerce_updated_note' ) );
 		add_action( 'woocommerce_update_product', array( __CLASS__, 'clear_low_out_of_stock_count_transient' ) );
 	}
 
