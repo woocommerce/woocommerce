@@ -62,6 +62,9 @@ class Checkout extends AbstractBlock {
 		if ( ! $data_registry->exists( 'shippingStates' ) ) {
 			$data_registry->add( 'shippingStates', WC()->countries->get_shipping_country_states() );
 		}
+		if ( ! $data_registry->exists( 'cartData' ) ) {
+			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
+		}
 		if ( function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 			if ( $screen && $screen->is_block_editor() && ! $data_registry->exists( 'shippingMethodsExist' ) ) {
