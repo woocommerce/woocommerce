@@ -156,7 +156,7 @@ class WC_Install {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
-		add_action( 'woocommerce_admin_updated', array( __CLASS__, 'wc_admin_db_update_notice' ) );
+		add_action( 'plugins_loaded', array( __CLASS__, 'wc_admin_db_update_notice' ), 100 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
