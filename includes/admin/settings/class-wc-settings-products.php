@@ -272,7 +272,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'default' => 'yes',
 						'desc_tip' => sprintf(
 							// translators: Link to WooCommerce Docs.
-							__( "Not required if you download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
+							__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
 							'https://docs.woocommerce.com/document/digital-downloadable-product-handling#unique-string'
 						),
 					),
