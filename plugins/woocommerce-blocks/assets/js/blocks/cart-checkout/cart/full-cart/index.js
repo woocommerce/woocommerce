@@ -25,6 +25,11 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
 import { decodeEntities } from '@wordpress/html-entities';
 import { useStoreCartCoupons, useShippingRates } from '@woocommerce/base-hooks';
 import classnames from 'classnames';
+import {
+	Sidebar,
+	SidebarLayout,
+	Main,
+} from '@woocommerce/base-components/sidebar-layout';
 
 /**
  * Internal dependencies
@@ -118,15 +123,15 @@ const Cart = ( {
 	} );
 
 	return (
-		<div className={ cartClassName }>
-			<div className="wc-block-cart__main">
+		<SidebarLayout className={ cartClassName }>
+			<Main className="wc-block-cart__main">
 				<CartLineItemsTitle itemCount={ cartItems.length } />
 				<CartLineItemsTable
 					lineItems={ cartItems }
 					isLoading={ isLoading }
 				/>
-			</div>
-			<div className="wc-block-cart__sidebar">
+			</Main>
+			<Sidebar className="wc-block-cart__sidebar">
 				<Card isElevated={ true }>
 					<CardBody>
 						<h2 className="wc-block-cart__totals-title">
@@ -183,6 +188,7 @@ const Cart = ( {
 						{ COUPONS_ENABLED && (
 							<TotalsCouponCodeInput
 								onSubmit={ applyCoupon }
+								initialOpen={ true }
 								isLoading={ isApplyingCoupon }
 							/>
 						) }
@@ -193,8 +199,8 @@ const Cart = ( {
 						<CheckoutButton />
 					</CardBody>
 				</Card>
-			</div>
-		</div>
+			</Sidebar>
+		</SidebarLayout>
 	);
 };
 

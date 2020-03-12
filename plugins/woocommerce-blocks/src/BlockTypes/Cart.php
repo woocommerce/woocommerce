@@ -80,8 +80,8 @@ class Cart extends AbstractBlock {
 	 */
 	protected function get_skeleton() {
 		return '
-			<div class="wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton" aria-hidden="true">
-				<div class="wc-block-cart__main">
+			<div class="wc-block-sidebar-layout wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton" aria-hidden="true">
+				<div class="wc-block-main wc-block-cart__main">
 					<h2><span></span></h2>
 					<table class="wc-block-cart-items">
 						<thead>
@@ -153,7 +153,7 @@ class Cart extends AbstractBlock {
 						</tbody>
 					</table>
 				</div>
-				<div class="wc-block-cart__sidebar">
+				<div class="wc-block-sidebar wc-block-cart__sidebar">
 					<div class="components-card"></div>
 				</div>
 			</div>

@@ -36,11 +36,15 @@ const TotalsShippingItem = ( {
 			currency={ currency }
 			description={
 				<>
-					<ShippingLocation address={ shippingAddress } />
-					<ShippingCalculator
-						address={ shippingAddress }
-						setAddress={ updateShippingAddress }
-					/>
+					{ shippingAddress && (
+						<ShippingLocation address={ shippingAddress } />
+					) }
+					{ updateShippingAddress && shippingAddress && (
+						<ShippingCalculator
+							address={ shippingAddress }
+							setAddress={ updateShippingAddress }
+						/>
+					) }
 				</>
 			}
 			label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }

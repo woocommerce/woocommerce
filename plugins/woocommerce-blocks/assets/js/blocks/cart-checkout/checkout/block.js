@@ -24,14 +24,26 @@ import {
 import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useShippingRates } from '@woocommerce/base-hooks';
+import {
+	Sidebar,
+	SidebarLayout,
+	Main,
+} from '@woocommerce/base-components/sidebar-layout'; // @todo
 
 /**
  * Internal dependencies
  */
+import CheckoutSidebar from './sidebar.js';
 import './style.scss';
 import '../../../payment-methods-demo';
 
-const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
+const Block = ( {
+	attributes,
+	cartCoupons = [],
+	cartTotals = {},
+	isEditor = false,
+	shippingRates = [],
+} ) => {
 	const [ selectedShippingRate, setSelectedShippingRate ] = useState( {} );
 	const [ contactFields, setContactFields ] = useState( {} );
 	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
@@ -80,228 +92,248 @@ const Block = ( { attributes, isEditor = false, shippingRates = [] } ) => {
 
 	return (
 		<CheckoutProvider isEditor={ isEditor }>
-			<ExpressCheckoutFormControl />
-			<CheckoutForm>
-				<FormStep
-					id="contact-fields"
-					className="wc-block-checkout__contact-fields"
-					title={ __(
-						'Contact information',
-						'woo-gutenberg-products-block'
-					) }
-					description={ __(
-						"We'll use this email to send you details and updates about your order.",
-						'woo-gutenberg-products-block'
-					) }
-					stepHeadingContent={ () => (
-						<Fragment>
-							{ __(
-								'Already have an account? ',
-								'woo-gutenberg-products-block'
-							) }
-							<a href="/wp-login.php">
-								{ __(
-									'Log in.',
-									'woo-gutenberg-products-block'
-								) }
-							</a>
-						</Fragment>
-					) }
-				>
-					<TextInput
-						type="email"
-						label={ __(
-							'Email address',
-							'woo-gutenberg-products-block'
-						) }
-						value={ contactFields.email }
-						autoComplete="email"
-						onChange={ ( newValue ) =>
-							setContactFields( {
-								...contactFields,
-								email: newValue,
-							} )
-						}
-						required={ true }
-					/>
-					<CheckboxControl
-						className="wc-block-checkout__keep-updated"
-						label={ __(
-							'Keep me up to date on news and exclusive offers',
-							'woo-gutenberg-products-block'
-						) }
-						checked={ contactFields.keepUpdated }
-						onChange={ () =>
-							setContactFields( {
-								...contactFields,
-								keepUpdated: ! contactFields.keepUpdated,
-							} )
-						}
-					/>
-				</FormStep>
-				{ SHIPPING_ENABLED && (
-					<FormStep
-						id="shipping-fields"
-						className="wc-block-checkout__shipping-fields"
-						title={ __(
-							'Shipping address',
-							'woo-gutenberg-products-block'
-						) }
-						description={ __(
-							'Enter the physical address where you want us to deliver your order.',
-							'woo-gutenberg-products-block'
-						) }
-					>
-						<AddressForm
-							onChange={ setShippingFields }
-							values={ shippingFields }
-							fields={ Object.keys( addressFields ) }
-							fieldConfig={ addressFields }
-						/>
-						{ attributes.showPhoneField && (
-							<TextInput
-								type="tel"
-								label={
-									attributes.requirePhoneField
-										? __(
-												'Phone',
-												'woo-gutenberg-products-block'
-										  )
-										: __(
-												'Phone (optional)',
-												'woo-gutenberg-products-block'
-										  )
-								}
-								value={ shippingFields.phone }
-								autoComplete="tel"
-								onChange={ ( newValue ) =>
-									setShippingFields( {
-										...shippingFields,
-										phone: newValue,
-									} )
-								}
-								required={ attributes.requirePhoneField }
-							/>
-						) }
-						<CheckboxControl
-							className="wc-block-checkout__use-address-for-billing"
-							label={ __(
-								'Use same address for billing',
-								'woo-gutenberg-products-block'
-							) }
-							checked={ useShippingAddressAsBilling }
-							onChange={ ( isChecked ) =>
-								setUseShippingAsBilling( isChecked )
-							}
-						/>
-					</FormStep>
-				) }
-				{ showBillingFields && (
-					<FormStep
-						id="billing-fields"
-						className="wc-block-checkout__billing-fields"
-						title={ __(
-							'Billing address',
-							'woo-gutenberg-products-block'
-						) }
-						description={ __(
-							'Enter the address that matches your card or payment method.',
-							'woo-gutenberg-products-block'
-						) }
-					>
-						<AddressForm
-							onChange={ setBillingFields }
-							type="billing"
-							values={ billingFields }
-							fields={ Object.keys( addressFields ) }
-							fieldConfig={ addressFields }
-						/>
-					</FormStep>
-				) }
-				{ SHIPPING_ENABLED &&
-					( shippingRates.length === 0 && isEditor ? (
-						<NoShipping />
-					) : (
+			<SidebarLayout>
+				<Main>
+					<ExpressCheckoutFormControl />
+					<CheckoutForm>
 						<FormStep
-							id="shipping-option"
-							className="wc-block-checkout__shipping-option"
+							id="contact-fields"
+							className="wc-block-checkout__contact-fields"
 							title={ __(
-								'Shipping options',
+								'Contact information',
 								'woo-gutenberg-products-block'
 							) }
 							description={ __(
-								'Select your shipping method below.',
+								"We'll use this email to send you details and updates about your order.",
 								'woo-gutenberg-products-block'
 							) }
+							stepHeadingContent={ () => (
+								<Fragment>
+									{ __(
+										'Already have an account? ',
+										'woo-gutenberg-products-block'
+									) }
+									<a href="/wp-login.php">
+										{ __(
+											'Log in.',
+											'woo-gutenberg-products-block'
+										) }
+									</a>
+								</Fragment>
+							) }
 						>
-							<ShippingRatesControl
-								address={
-									shippingFields.country
-										? {
-												address_1:
-													shippingFields.address_1,
-												address_2:
-													shippingFields.apartment,
-												city: shippingFields.city,
-												state: shippingFields.state,
-												postcode:
-													shippingFields.postcode,
-												country: shippingFields.country,
-										  }
-										: null
-								}
-								noResultsMessage={ __(
-									'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
+							<TextInput
+								type="email"
+								label={ __(
+									'Email address',
 									'woo-gutenberg-products-block'
 								) }
-								renderOption={
-									renderShippingRatesControlOption
+								value={ contactFields.email }
+								autoComplete="email"
+								onChange={ ( newValue ) =>
+									setContactFields( {
+										...contactFields,
+										email: newValue,
+									} )
 								}
-								shippingRates={ shippingRates }
-								shippingRatesLoading={ shippingRatesLoading }
+								required={ true }
 							/>
-
 							<CheckboxControl
-								className="wc-block-checkout__add-note"
-								label="Add order notes?"
-								checked={ selectedShippingRate.orderNote }
+								className="wc-block-checkout__keep-updated"
+								label={ __(
+									'Keep me up to date on news and exclusive offers',
+									'woo-gutenberg-products-block'
+								) }
+								checked={ contactFields.keepUpdated }
 								onChange={ () =>
-									setSelectedShippingRate( {
-										...selectedShippingRate,
-										orderNote: ! selectedShippingRate.orderNote,
+									setContactFields( {
+										...contactFields,
+										keepUpdated: ! contactFields.keepUpdated,
 									} )
 								}
 							/>
 						</FormStep>
-					) ) }
-				<FormStep
-					id="payment-method"
-					className="wc-block-checkout__payment-method"
-					title={ __(
-						'Payment method',
-						'woo-gutenberg-products-block'
-					) }
-					description={ __(
-						'Select a payment method below.',
-						'woo-gutenberg-products-block'
-					) }
-				>
-					<PaymentMethods />
-					{ /*@todo this should be something the payment method controls*/ }
-					<CheckboxControl
-						className="wc-block-checkout__save-card-info"
-						label={ __(
-							'Save payment information to my account for future purchases.',
-							'woo-gutenberg-products-block'
+						{ SHIPPING_ENABLED && (
+							<FormStep
+								id="shipping-fields"
+								className="wc-block-checkout__shipping-fields"
+								title={ __(
+									'Shipping address',
+									'woo-gutenberg-products-block'
+								) }
+								description={ __(
+									'Enter the physical address where you want us to deliver your order.',
+									'woo-gutenberg-products-block'
+								) }
+							>
+								<AddressForm
+									onChange={ setShippingFields }
+									values={ shippingFields }
+									fields={ Object.keys( addressFields ) }
+									fieldConfig={ addressFields }
+								/>
+								{ attributes.showPhoneField && (
+									<TextInput
+										type="tel"
+										label={
+											attributes.requirePhoneField
+												? __(
+														'Phone',
+														'woo-gutenberg-products-block'
+												  )
+												: __(
+														'Phone (optional)',
+														'woo-gutenberg-products-block'
+												  )
+										}
+										value={ shippingFields.phone }
+										autoComplete="tel"
+										onChange={ ( newValue ) =>
+											setShippingFields( {
+												...shippingFields,
+												phone: newValue,
+											} )
+										}
+										required={
+											attributes.requirePhoneField
+										}
+									/>
+								) }
+								<CheckboxControl
+									className="wc-block-checkout__use-address-for-billing"
+									label={ __(
+										'Use same address for billing',
+										'woo-gutenberg-products-block'
+									) }
+									checked={ useShippingAddressAsBilling }
+									onChange={ ( isChecked ) =>
+										setUseShippingAsBilling( isChecked )
+									}
+								/>
+							</FormStep>
 						) }
-						checked={ shouldSavePayment }
-						onChange={ () =>
-							setShouldSavePayment( ! shouldSavePayment )
-						}
+						{ showBillingFields && (
+							<FormStep
+								id="billing-fields"
+								className="wc-block-checkout__billing-fields"
+								title={ __(
+									'Billing address',
+									'woo-gutenberg-products-block'
+								) }
+								description={ __(
+									'Enter the address that matches your card or payment method.',
+									'woo-gutenberg-products-block'
+								) }
+							>
+								<AddressForm
+									onChange={ setBillingFields }
+									type="billing"
+									values={ billingFields }
+									fields={ Object.keys( addressFields ) }
+									fieldConfig={ addressFields }
+								/>
+							</FormStep>
+						) }
+						{ SHIPPING_ENABLED &&
+							( shippingRates.length === 0 && isEditor ? (
+								<NoShipping />
+							) : (
+								<FormStep
+									id="shipping-option"
+									className="wc-block-checkout__shipping-option"
+									title={ __(
+										'Shipping options',
+										'woo-gutenberg-products-block'
+									) }
+									description={ __(
+										'Select your shipping method below.',
+										'woo-gutenberg-products-block'
+									) }
+								>
+									<ShippingRatesControl
+										address={
+											shippingFields.country
+												? {
+														address_1:
+															shippingFields.address_1,
+														address_2:
+															shippingFields.apartment,
+														city:
+															shippingFields.city,
+														state:
+															shippingFields.state,
+														postcode:
+															shippingFields.postcode,
+														country:
+															shippingFields.country,
+												  }
+												: null
+										}
+										noResultsMessage={ __(
+											'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
+											'woo-gutenberg-products-block'
+										) }
+										renderOption={
+											renderShippingRatesControlOption
+										}
+										shippingRates={ shippingRates }
+										shippingRatesLoading={
+											shippingRatesLoading
+										}
+									/>
+
+									<CheckboxControl
+										className="wc-block-checkout__add-note"
+										label="Add order notes?"
+										checked={
+											selectedShippingRate.orderNote
+										}
+										onChange={ () =>
+											setSelectedShippingRate( {
+												...selectedShippingRate,
+												orderNote: ! selectedShippingRate.orderNote,
+											} )
+										}
+									/>
+								</FormStep>
+							) ) }
+						<FormStep
+							id="payment-method"
+							className="wc-block-checkout__payment-method"
+							title={ __(
+								'Payment method',
+								'woo-gutenberg-products-block'
+							) }
+							description={ __(
+								'Select a payment method below.',
+								'woo-gutenberg-products-block'
+							) }
+						>
+							<PaymentMethods />
+							{ /*@todo this should be something the payment method controls*/ }
+							<CheckboxControl
+								className="wc-block-checkout__save-card-info"
+								label={ __(
+									'Save payment information to my account for future purchases.',
+									'woo-gutenberg-products-block'
+								) }
+								checked={ shouldSavePayment }
+								onChange={ () =>
+									setShouldSavePayment( ! shouldSavePayment )
+								}
+							/>
+						</FormStep>
+						{ attributes.showPolicyLinks && <Policies /> }
+					</CheckoutForm>
+				</Main>
+				<Sidebar>
+					<CheckoutSidebar
+						cartCoupons={ cartCoupons }
+						cartTotals={ cartTotals }
+						shippingRates={ shippingRates }
 					/>
-				</FormStep>
-				{ attributes.showPolicyLinks && <Policies /> }
-			</CheckoutForm>
+				</Sidebar>
+			</SidebarLayout>
 		</CheckoutProvider>
 	);
 };

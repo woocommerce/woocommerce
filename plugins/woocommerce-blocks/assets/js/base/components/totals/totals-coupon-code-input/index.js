@@ -19,6 +19,7 @@ import LoadingMask from '../../loading-mask';
 const TotalsCouponCodeInput = ( {
 	instanceId,
 	isLoading = false,
+	initialOpen,
 	onSubmit = () => {},
 } ) => {
 	const [ couponValue, setCouponValue ] = useState( '' );
@@ -49,7 +50,7 @@ const TotalsCouponCodeInput = ( {
 					htmlFor={ `wc-block-coupon-code__input-${ instanceId }` }
 				/>
 			}
-			initialOpen={ true }
+			initialOpen={ initialOpen }
 		>
 			<LoadingMask
 				screenReaderLabel={ __(
