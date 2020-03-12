@@ -75,6 +75,10 @@ class FeaturePlugin {
 		if ( did_action( 'plugins_loaded' ) ) {
 			self::on_plugins_loaded();
 		} else {
+			// Make sure we hook into `plugins_loaded` before core's Automattic\WooCommerce\Package::init().
+			// If core is network activated but we aren't, the packaged version of WooCommerce Admin will
+			// attempt to use a data store that hasn't been loaded yet - because we've defined our constants here.
+			// See: https://github.com/woocommerce/woocommerce-admin/issues/3869.
 			add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), 9 );
 		}
 		add_filter( 'action_scheduler_store_class', array( $this, 'replace_actionscheduler_store_class' ) );
