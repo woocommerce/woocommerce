@@ -134,7 +134,7 @@
 		"stylelint-config-wordpress": "13.1.0",
 		"typescript": "3.8.3",
 		"webpack": "4.41.5",
-		"webpack-cli": "3.3.10",
+		"webpack-cli": "3.3.11",
 		"webpack-rtl-plugin": "2.0.0",
 		"woocommerce": "git+https://github.com/woocommerce/woocommerce.git",
 		"zenhub-api": "0.2.0"
