@@ -122,12 +122,19 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$tables = $wpdb->get_col(
-			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%' OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
+			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%'
+			OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
 		);
 		$result = WC_Install::get_tables();
-		sort( $result );
+		$diff   = array_diff( $result, $tables );
 
-		$this->assertEquals( $tables, $result );
+		$this->assertEmpty(
+			$diff,
+			sprintf(
+				'The following table(s) were returned from WC_Install::get_tables() but do not exist: %s',
+				implode( ', ', $diff )
+			)
+		);
 	}
 
 	/**
