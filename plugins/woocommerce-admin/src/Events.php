@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Add_First_Product;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Facebook_Extension;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Giving_Feedback_Notes;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Mobile_App;
@@ -65,7 +64,6 @@ class Events {
 		WC_Admin_Notes_Giving_Feedback_Notes::add_notes_for_admin_giving_feedback();
 		WC_Admin_Notes_Mobile_App::possibly_add_mobile_app_note();
 		WC_Admin_Notes_Facebook_Extension::possibly_add_facebook_note();
-		WC_Admin_Notes_Add_First_Product::possibly_add_first_product_note();
 		WC_Admin_Notes_Tracking_Opt_In::possibly_add_tracking_opt_in_note();
 		WC_Admin_Notes_Onboarding_Email_Marketing::possibly_add_onboarding_email_marketing_note();
 	}
