@@ -356,12 +356,11 @@ class WC_Admin_Status {
 					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
 				}
 
-				$version_string = '';
-				$network_string = '';
+				$has_newer_version = false;
+				$network_string    = '';
 				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
-						/* translators: %s: plugin latest version */
-						$version_string = ' &ndash; <strong style="color:red;">' . sprintf( esc_html__( '%s is available', 'woocommerce' ), $plugin['version_latest'] ) . '</strong>';
+						$has_newer_version = true;
 					}
 
 					if ( false !== $plugin['network_activated'] ) {
@@ -370,7 +369,15 @@ class WC_Admin_Status {
 				}
 				$untested_string = '';
 				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
-					$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
+					$untested_string = ' &ndash; <strong style="color:red;">';
+
+					if ( $has_newer_version ) {
+						$untested_string .= esc_html__( 'This version is not tested with the active version of WooCommerce (update is available)', 'woocommerce' );
+					} else {
+						$untested_string .= esc_html__( 'This version is not tested with the active version of WooCommerce', 'woocommerce' );
+					}
+
+					$untested_string .= '</strong>';
 				}
 				?>
 				<tr>
