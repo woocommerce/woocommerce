@@ -141,20 +141,14 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - get tables should apply the woocommerce_install_get_tables filter.
 	 */
 	public function test_get_tables_enables_filter() {
-		$default = WC_Install::get_tables();
-		$added   = $this->append_table_to_get_tables( array() );
+		$this->assertNotContains( 'some_table_name', WC_Install::get_tables() );
 
-		add_filter( 'woocommerce_install_get_tables', array( $this, 'append_table_to_get_tables' ) );
+		add_filter( 'woocommerce_install_get_tables', function ( $tables ) {
+			$tables[] = 'some_table_name';
 
-		$this->assertEquals( $added, array_values( array_diff( WC_Install::get_tables(), $default ) ) );
-	}
+			return $tables;
+		} );
 
-	/**
-	 * Filter callback for test_get_tables_enables_filter().
-	 */
-	public function append_table_to_get_tables( $tables ) {
-		$tables[] = 'some_table_name';
-
-		return $tables;
+		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
 }
