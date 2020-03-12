@@ -16,7 +16,14 @@ defined( 'ABSPATH' ) || exit;
 			sprintf(
 				/* translators: %s: Link to settings page. */
 				__( 'Your store is configured to serve digital products using "Redirect only" method. This method is deprecated, <a href="%s">please switch to  a different method instead.</a>', 'woocommerce' ),
-				admin_url( 'admin.php?page=wc-settings&tab=products&section=downloadable' )
+				add_query_arg(
+					array(
+						'page'    => 'wc-settings',
+						'tab'     => 'products',
+						'section' => 'downloadable',
+					),
+					admin_url( 'admin.php' )
+				)
 			)
 		);
 		?>
