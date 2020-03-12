@@ -1,8 +1,10 @@
 /**
  * @typedef {Object} CartTotalItem
  *
- * @property {string} label  Label for total item
- * @property {number} value  The value of the total item
+ * @property {string} label        Label for total item
+ * @property {number} value        The value of the total item (in subunits).
+ * @property {number} valueWithTax The value of the total item with tax
+ *                                 included (in subunits).
  */
 
 /**
@@ -84,12 +86,15 @@
  *                                                thousands separator.
  * @property {string} line_subtotal               Line subtotal (the price of
  *                                                the product before coupon
- *                                                discounts have been applied).
- * @property {string} line_subtotal_tax           Line subtotal tax.
+ *                                                discounts have been applied
+ *                                                in subunits).
+ * @property {string} line_subtotal_tax           Line subtotal tax (in
+ *                                                subunits).
  * @property {string} line_total                  Line total (the price of the
  *                                                product after coupon
- *                                                discounts have been applied).
- * @property {string} line_total_tax              Line total tax.
+ *                                                discounts have been applied
+ *                                                in subunits).
+ * @property {string} line_total_tax              Line total tax (in subunits).
  */
 
 /**
@@ -120,10 +125,12 @@
  *                                                     decimal separator.
  * @property {string}      currency_thousand_separator The string used for the
  *                                                     thousands separator.
- * @property {string}      price                       Current product price.
- * @property {string}      regular_price               Regular product price.
+ * @property {string}      price                       Current product price
+ *                                                     in subunits.
+ * @property {string}      regular_price               Regular product price
+ *                                                     in subunits.
  * @property {string}      sale_price                  Sale product price, if
- *                                                     applicable.
+ *                                                     applicable (in subunits).
  * @property {CartItemPriceRange|null} price_range     Price range, if
  *                                                     applicable.
  *
@@ -206,24 +213,29 @@
  *                                                which can be used to format
  *                                                returned prices.
  * @property {number} total_items                 Total price of items in the
- *                                                cart.
+ *                                                cart (in subunits).
  * @property {number} total_items_tax             Total tax on items in the
- *                                                cart.
+ *                                                cart (in subunits).
  * @property {number} total_fees                  Total price of any applied
- *                                                fees.
- * @property {number} total_fees_tax              Total tax on fees.
+ *                                                fees (in subunits).
+ * @property {number} total_fees_tax              Total tax on fees (
+ *                                                in subunits).
  * @property {number} total_discount              Total discount from applied
- *                                                coupons.
+ *                                                coupons (in subunits).
  * @property {number} total_discount_tax          Total tax removed due to
- *                                                discount from applied coupons.
- * @property {number} total_shipping              Total price of shipping.
- * @property {number} total_shipping_tax          Total tax on shipping.
+ *                                                discount from applied coupons
+ *                                                (in subunits).
+ * @property {number} total_shipping              Total price of shipping
+ *                                                (in subunits).
+ * @property {number} total_shipping_tax          Total tax on shipping
+ *                                                (in subunits).
  * @property {number} total_price                 Total price the customer will
- *                                                pay.
+ *                                                pay (in subunits).
  * @property {number} total_tax                   Total tax applied to items and
- *                                                shipping.
+ *                                                shipping (in subunits).
  * @property {Array}  tax_lines                   Lines of taxes applied to
- *                                                items and shipping.
+ *                                                items and shipping
+ *                                                (in subunits).
  */
 
 export {};

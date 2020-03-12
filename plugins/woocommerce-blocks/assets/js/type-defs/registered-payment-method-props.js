@@ -119,20 +119,29 @@
 /**
  * @typedef BillingDataProps
  *
- * @property {CartBillingAddress} billingData    The address used for billing.
- * @property {Function}           setBillingData Used to set the cart billing
- *                                               address.
- * @property {Object}             order          The order object for the
- *                                               purchase.
- * @property {boolean}            orderLoading   True if the order is being
- *                                               loaded.
- * @property {CartTotalItem}      cartTotal      The total item for the cart.
- * @property {SiteCurrency}       currency       Currency object.
- * @property {string}             country        ISO country code for the
- *                                               default country for the site.
- * @property {CartTotalItem[]}    cartItems      The various subtotal amounts.
- * @property {string[]}           appliedCoupons All the coupons that were
- *                                               applied.
+ * @property {CartBillingAddress} billingData               The address used for
+ *                                                          billing.
+ * @property {Function}           setBillingData            Used to set the cart
+ *                                                          billing address.
+ * @property {Object}             order                     The order object for
+ *                                                          the purchase.
+ * @property {boolean}            orderLoading              True if the order is
+ *                                                          being loaded.
+ * @property {CartTotalItem}      cartTotal                 The total item for
+ *                                                          the cart.
+ * @property {SiteCurrency}       currency                  Currency object.
+ * @property {string}             country                   ISO country code
+ *                                                          for the default
+ *                                                          country for the
+ *                                                          site.
+ * @property {CartTotalItem[]}    cartTotalItems            The various subtotal
+ *                                                          amounts.
+ * @property {boolean}            displayPricesIncludingTax True means that the
+ *                                                          site is configured
+ *                                                          to display prices
+ *                                                          including tax.
+ * @property {string[]}           appliedCoupons            All the coupons that
+ *                                                          were applied.
  */
 
 /**
