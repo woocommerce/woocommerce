@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { withRestApiHydration } from '@woocommerce/block-hocs';
+import {
+	withRestApiHydration,
+	withStoreCartApiHydration,
+} from '@woocommerce/block-hocs';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
@@ -96,7 +99,7 @@ const getErrorBoundaryProps = () => {
 
 renderFrontend(
 	'.wp-block-woocommerce-checkout',
-	withRestApiHydration( CheckoutFrontend ),
+	withStoreCartApiHydration( withRestApiHydration( CheckoutFrontend ) ),
 	getProps,
 	getErrorBoundaryProps
 );
