@@ -89,7 +89,7 @@ const Block = ( {
 		shippingRatesLoading,
 		shippingAddress: shippingFields,
 		setShippingAddress: setShippingFields,
-	} = useShippingRates( Object.keys( addressFields ) );
+	} = useShippingRates();
 
 	return (
 		<CheckoutProvider isEditor={ isEditor }>

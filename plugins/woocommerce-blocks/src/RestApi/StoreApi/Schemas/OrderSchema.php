@@ -219,53 +219,7 @@ class OrderSchema extends AbstractSchema {
 				'description' => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => [
-					'first_name' => [
-						'description' => __( 'First name', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'last_name'  => [
-						'description' => __( 'Last name', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'company'    => [
-						'description' => __( 'Company', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'address_1'  => [
-						'description' => __( 'Address', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'address_2'  => [
-						'description' => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'city'       => [
-						'description' => __( 'City', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'state'      => [
-						'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'postcode'   => [
-						'description' => __( 'Postal code', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'country'    => [
-						'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-				],
+				'properties'  => $this->force_schema_readonly( ( new ShippingAddressSchema() )->get_properties() ),
 			],
 			'coupons'            => [
 				'description' => __( 'List of applied coupons.', 'woo-gutenberg-products-block' ),
@@ -422,19 +376,7 @@ class OrderSchema extends AbstractSchema {
 					'phone'      => $order->get_billing_phone(),
 				]
 			),
-			'shipping_address'   => (object) $this->prepare_html_response(
-				[
-					'first_name' => $order->get_shipping_first_name(),
-					'last_name'  => $order->get_shipping_last_name(),
-					'company'    => $order->get_shipping_company(),
-					'address_1'  => $order->get_shipping_address_1(),
-					'address_2'  => $order->get_shipping_address_2(),
-					'city'       => $order->get_shipping_city(),
-					'state'      => $order->get_shipping_state(),
-					'postcode'   => $order->get_shipping_postcode(),
-					'country'    => $order->get_shipping_country(),
-				]
-			),
+			'shipping_address'   => ( new ShippingAddressSchema() )->get_item_response( $order ),
 			'coupons'            => array_values( array_map( [ $order_coupon_schema, 'get_item_response' ], $order->get_items( 'coupon' ) ) ),
 			'items'              => array_values( array_map( [ $order_item_schema, 'get_item_response' ], $order->get_items( 'line_item' ) ) ),
 			'totals'             => (object) array_merge(

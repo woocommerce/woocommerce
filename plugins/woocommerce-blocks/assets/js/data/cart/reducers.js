@@ -47,6 +47,17 @@ const reducer = (
 		cartData: {
 			coupons: [],
 			shippingRates: [],
+			shippingAddress: {
+				first_name: '',
+				last_name: '',
+				company: '',
+				address_1: '',
+				address_2: '',
+				city: '',
+				state: '',
+				postcode: '',
+				country: '',
+			},
 			items: [],
 			itemsCount: 0,
 			itemsWeight: 0,
