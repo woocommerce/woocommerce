@@ -42,9 +42,6 @@ const getMaximumQuantity = ( backOrdersAllowed, lowStockAmount ) => {
  * Cart line item table row component.
  */
 const CartLineItemRow = ( { lineItem } ) => {
-	/**
-	 * @type {CartItem}
-	 */
 	const {
 		name,
 		summary,
@@ -142,32 +139,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 };
 
 CartLineItemRow.propTypes = {
-	lineItem: PropTypes.shape( {
-		key: PropTypes.string.isRequired,
-		name: PropTypes.string.isRequired,
-		summary: PropTypes.string.isRequired,
-		images: PropTypes.array.isRequired,
-		low_stock_remaining: PropTypes.oneOfType( [
-			PropTypes.number,
-			PropTypes.oneOf( [ null ] ),
-		] ),
-		backorders_allowed: PropTypes.bool.isRequired,
-		sold_individually: PropTypes.bool.isRequired,
-		variation: PropTypes.arrayOf(
-			PropTypes.shape( {
-				attribute: PropTypes.string.isRequired,
-				value: PropTypes.string.isRequired,
-			} )
-		).isRequired,
-		totals: PropTypes.shape( {
-			line_subtotal: PropTypes.string.isRequired,
-			line_total: PropTypes.string.isRequired,
-		} ).isRequired,
-		prices: PropTypes.shape( {
-			price: PropTypes.string.isRequired,
-			regular_price: PropTypes.string.isRequired,
-		} ).isRequired,
-	} ),
+	lineItem: PropTypes.object.isRequired,
 };
 
 export default CartLineItemRow;

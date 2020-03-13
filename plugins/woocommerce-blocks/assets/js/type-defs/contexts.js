@@ -206,4 +206,13 @@
  *                                                        (true) or not (false).
  */
 
+/**
+ * @typedef {Object} EditorDataContext
+ *
+ * @property {boolean}                 isEditor           Indicates whether in
+ *                                                        the editor context
+ *                                                        (true) or not (false).
+ * @property {number}                  currentPostId      The post ID being edited.
+ */
+
 export {};

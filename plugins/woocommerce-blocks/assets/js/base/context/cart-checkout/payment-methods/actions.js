@@ -14,7 +14,7 @@ const SET_BILLING_DATA = 'set_billing_data';
 /**
  * Used to dispatch a status update only for the given type.
  *
- * @param type
+ * @param {string} type
  *
  * @return {Object} The action object.
  */

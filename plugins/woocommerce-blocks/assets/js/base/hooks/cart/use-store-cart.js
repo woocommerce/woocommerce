@@ -5,6 +5,8 @@
  */
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
+import { useEditorContext } from '@woocommerce/base-context';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * @constant
@@ -12,6 +14,7 @@ import { useSelect } from '@wordpress/data';
  */
 const defaultCartData = {
 	cartCoupons: [],
+	shippingRates: [],
 	cartItems: [],
 	cartItemsCount: 0,
 	cartItemsWeight: 0,
@@ -19,7 +22,6 @@ const defaultCartData = {
 	cartTotals: {},
 	cartIsLoading: true,
 	cartErrors: [],
-	shippingRates: [],
 };
 
 /**
@@ -35,6 +37,7 @@ const defaultCartData = {
  * @return {StoreCart} Object containing cart data.
  */
 export const useStoreCart = ( options = { shouldSelect: true } ) => {
+	const { isEditor } = useEditorContext();
 	const { shouldSelect } = options;
 
 	const results = useSelect(
@@ -42,6 +45,21 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			if ( ! shouldSelect ) {
 				return null;
 			}
+
+			if ( isEditor ) {
+				return {
+					cartCoupons: previewCart.coupons,
+					shippingRates: previewCart.shipping_rates,
+					cartItems: previewCart.items,
+					cartItemsCount: previewCart.items_count,
+					cartItemsWeight: previewCart.items_weight,
+					cartNeedsShipping: previewCart.needs_shipping,
+					cartTotals: previewCart.totals,
+					cartIsLoading: false,
+					cartErrors: [],
+				};
+			}
+
 			const store = select( storeKey );
 			const cartData = store.getCartData();
 			const cartErrors = store.getCartErrors();
@@ -49,7 +67,6 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			const cartIsLoading = ! store.hasFinishedResolution(
 				'getCartData'
 			);
-
 			return {
 				cartCoupons: cartData.coupons,
 				shippingRates: cartData.shippingRates,

@@ -13,13 +13,17 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import './style.scss';
 import AddressForm from '../address-form';
 
-const ShippingCalculatorAddress = ( { address: initialAddress, onUpdate } ) => {
+const ShippingCalculatorAddress = ( {
+	address: initialAddress,
+	onUpdate,
+	addressFields,
+} ) => {
 	const [ address, setAddress ] = useState( initialAddress );
 
 	return (
 		<form className="wc-block-shipping-calculator-address">
 			<AddressForm
-				fields={ [ 'country', 'state', 'city', 'postcode' ] }
+				fields={ addressFields }
 				onChange={ setAddress }
 				values={ address }
 			/>
@@ -39,13 +43,9 @@ const ShippingCalculatorAddress = ( { address: initialAddress, onUpdate } ) => {
 };
 
 ShippingCalculatorAddress.propTypes = {
-	address: PropTypes.shape( {
-		city: PropTypes.string,
-		state: PropTypes.string,
-		postcode: PropTypes.string,
-		country: PropTypes.string,
-	} ),
+	address: PropTypes.object.isRequired,
 	onUpdate: PropTypes.func.isRequired,
+	addressFields: PropTypes.array.isRequired,
 };
 
 export default ShippingCalculatorAddress;
