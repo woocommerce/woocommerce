@@ -38,9 +38,8 @@ describe( 'useShippingRates', () => {
 		</RegistryProvider>
 	);
 
-	const defaultFieldsConfig = [ 'country', 'state', 'city', 'postcode' ];
 	const getTestComponent = () => () => {
-		const items = useShippingRates( defaultFieldsConfig );
+		const items = useShippingRates();
 		return <div { ...items } />;
 	};
 
@@ -50,6 +49,12 @@ describe( 'useShippingRates', () => {
 		itemsCount: 123,
 		itemsWeight: 123,
 		needsShipping: false,
+		shippingAddress: {
+			country: '',
+			state: '',
+			city: '',
+			postcode: '',
+		},
 		shippingRates: [
 			{
 				shippingRates: [ { foo: 'bar' } ],
@@ -94,9 +99,7 @@ describe( 'useShippingRates', () => {
 		} );
 
 		const { shippingAddress } = getProps( renderer );
-		expect( shippingAddress ).toStrictEqual(
-			mockCartData.shippingRates[ 0 ].destination
-		);
+		expect( shippingAddress ).toStrictEqual( mockCartData.shippingAddress );
 		// rerender
 		act( () => {
 			renderer.update( getWrappedComponents( TestComponent ) );

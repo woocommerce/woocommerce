@@ -130,10 +130,6 @@
  * @property {CartTotalItem}      cartTotal                 The total item for
  *                                                          the cart.
  * @property {SiteCurrency}       currency                  Currency object.
- * @property {string}             country                   ISO country code
- *                                                          for the default
- *                                                          country for the
- *                                                          site.
  * @property {CartTotalItem[]}    cartTotalItems            The various subtotal
  *                                                          amounts.
  * @property {boolean}            displayPricesIncludingTax True means that the

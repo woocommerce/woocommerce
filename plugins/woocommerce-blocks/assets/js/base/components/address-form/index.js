@@ -66,6 +66,8 @@ const AddressForm = ( {
 									...values,
 									country: newValue,
 									state: '',
+									city: '',
+									postcode: '',
 								} )
 							}
 							required={ field.required }

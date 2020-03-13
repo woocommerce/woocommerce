@@ -169,9 +169,6 @@ export const usePaymentMethodInterface = () => {
 			orderLoading,
 			cartTotal: currentCartTotal.current,
 			currency: getCurrencyFromPriceResponse( cartTotals ),
-			// @todo need to pass along the default country set for the site
-			// if it's available.
-			country: '',
 			cartTotalItems: currentCartTotals.current,
 			displayPricesIncludingTax: DISPLAY_CART_PRICES_INCLUDING_TAX,
 			appliedCoupons,
