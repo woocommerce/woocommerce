@@ -8,15 +8,33 @@
 	.wc-block-checkout__billing-fields,
 	.wc-block-checkout__shipping-fields {
 		.wc-block-address-form {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			grid-column-gap: $gap-small;
-		}
+			margin-left: #{-$gap-small / 2};
+			margin-right: #{-$gap-small / 2};
 
-		.wc-block-address-form__company,
-		.wc-block-address-form__address_1,
-		.wc-block-address-form__address_2 {
-			grid-column-start: span 2;
+			&::after {
+				content: "";
+				clear: both;
+				display: block;
+			}
+
+			.wc-block-text-input,
+			.wc-block-select {
+				float: left;
+				margin-left: #{$gap-small / 2};
+				margin-right: #{$gap-small / 2};
+				position: relative;
+				width: calc(50% - #{$gap-small});
+			}
+
+			.wc-block-address-form__company,
+			.wc-block-address-form__address_1,
+			.wc-block-address-form__address_2 {
+				width: calc(100% - #{$gap-small});
+			}
+
+			.wc-block-checkbox {
+				clear: both;
+			}
 		}
 	}
 }
