@@ -50,7 +50,7 @@ class WC_Site_Tracking {
 	public static function enqueue_scripts() {
 
 		// Add w.js to the page.
-		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
+		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array( 'wp-hooks' ), gmdate( 'YW' ), false );
 
 		// Expose tracking via a function in the wcTracks global namespace directly before wc_print_js.
 		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
@@ -68,6 +68,10 @@ class WC_Site_Tracking {
 			window.wcTracks.recordEvent = function( name, properties ) {
 				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
 				var eventProperties = properties || {};
+				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
+					eventProperties = window.wp.hooks.applyFilters( 'woocommerceTracksEventProperties', eventProperties, eventName );
+					console.log( 'new', eventProperties );
+				}
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
 				window._tkq = window._tkq || [];
