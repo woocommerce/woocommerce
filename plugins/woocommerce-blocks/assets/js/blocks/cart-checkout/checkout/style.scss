@@ -4,6 +4,85 @@
 	margin-top: $gap;
 }
 
+.wc-block-checkout .wc-block-shipping-rates-control__package:not(:first-of-type) {
+	margin-top: $gap-larger;
+}
+
+.wc-block-checkout__sidebar {
+	.wc-block-order-summary {
+		border: none;
+
+		> .components-panel__body-title > .components-panel__body-toggle {
+			padding: $gap-small 0;
+		}
+
+		.components-panel__body-toggle {
+			padding: 0;
+		}
+	}
+
+	.wc-block-order-summary__button-icon {
+		vertical-align: middle;
+	}
+
+	.wc-block-order-summary__button-text {
+		margin-left: $gap;
+	}
+
+	.wc-block-order-summary__row {
+		display: table;
+		width: 100%;
+	}
+
+	.wc-block-order-summary-item {
+		display: table-row;
+	}
+
+	.wc-block-order-summary-item__image,
+	.wc-block-order-summary-item__description,
+	.wc-block-order-summary-item__total-price {
+		display: table-cell;
+		vertical-align: top;
+	}
+
+	.wc-block-order-summary-item__image {
+		width: 48px;
+		position: relative;
+	}
+
+	.wc-block-order-summary-item__quantity {
+		align-items: center;
+		background: #fff;
+		border: 2px solid currentColor;
+		border-radius: 50%;
+		display: flex;
+		font-size: 11px;
+		min-height: 22px;
+		position: absolute;
+		justify-content: center;
+		right: -6px;
+		top: -6px;
+		min-width: 22px;
+	}
+
+	.wc-block-order-summary-item__description {
+		padding-left: $gap-small;
+		padding-right: $gap-small;
+	}
+
+	.wc-block-product-name {
+		display: inline;
+	}
+
+	.wc-block-order-summary-item__prices {
+		font-size: 0.875em;
+	}
+
+	.wc-block-order-summary-item__total-price {
+		float: right;
+	}
+}
+
 @include breakpoint( ">480px" ) {
 	.wc-block-checkout__billing-fields,
 	.wc-block-checkout__shipping-fields {
@@ -35,6 +114,40 @@
 			.wc-block-checkbox {
 				clear: both;
 			}
+		}
+	}
+
+	.wc-block-checkout__sidebar {
+		.wc-block-totals-table-item {
+			padding-left: $gap-small;
+			padding-right: $gap-small;
+		}
+
+		.wc-block-coupon-code .components-panel__body-toggle {
+			padding-left: $gap-small;
+		}
+
+		.wc-block-coupon-code__row {
+			padding-left: $gap-small;
+			padding-right: $gap-small;
+		}
+
+		.wc-block-order-summary {
+			> .components-panel__body-title > .components-panel__body-toggle {
+				padding-left: $gap-small;
+			}
+		}
+
+		.wc-block-order-summary__row {
+			padding: 0 $gap-small;
+		}
+	}
+}
+
+@include breakpoint( ">782px" ) {
+	.wc-block-checkout__sidebar {
+		.wc-block-order-summary {
+			margin: -20px;
 		}
 	}
 }

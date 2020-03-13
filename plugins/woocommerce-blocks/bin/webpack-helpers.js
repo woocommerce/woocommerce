@@ -104,6 +104,15 @@ const stableMainEntry = {
 	// Shared blocks code
 	blocks: './assets/js/index.js',
 
+	// @wordpress/components styles
+	'panel-style': './node_modules/@wordpress/components/src/panel/style.scss',
+	'custom-select-control-style':
+		'./node_modules/@wordpress/components/src/custom-select-control/style.scss',
+	'checkbox-control-style':
+		'./node_modules/@wordpress/components/src/checkbox-control/style.scss',
+	'spinner-style':
+		'./node_modules/@wordpress/components/src/spinner/style.scss',
+
 	// Blocks
 	'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
 	'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
@@ -129,13 +138,6 @@ const stableMainEntry = {
 	'active-filters': './assets/js/blocks/active-filters/index.js',
 	'block-error-boundary':
 		'./assets/js/base/components/block-error-boundary/style.scss',
-	'panel-style': './node_modules/@wordpress/components/src/panel/style.scss',
-	'custom-select-control-style':
-		'./node_modules/@wordpress/components/src/custom-select-control/style.scss',
-	'checkbox-control-style':
-		'./node_modules/@wordpress/components/src/checkbox-control/style.scss',
-	'spinner-style':
-		'./node_modules/@wordpress/components/src/spinner/style.scss',
 };
 
 const experimentalMainEntry = {

@@ -9,49 +9,49 @@
 		padding: 0 $gap;
 		min-width: 500px;
 	}
+}
 
-	.wc-block-sidebar {
-		flex: 1 1 35%;
-		margin: 0;
-		max-width: 35%;
-		padding: 0 $gap;
+.wc-block-sidebar {
+	flex: 1 1 35%;
+	margin: 0;
+	max-width: 35%;
+	padding: 0 $gap;
 
-		// Reset Gutenberg <Panel> styles when used in the sidebar.
-		.components-panel__body {
-			border-top: 1px solid $core-grey-light-600;
-			border-bottom: 1px solid $core-grey-light-600;
+	// Reset Gutenberg <Panel> styles when used in the sidebar.
+	.components-panel__body {
+		border-top: 1px solid $core-grey-light-600;
+		border-bottom: 1px solid $core-grey-light-600;
 
-			&.is-opened {
-				padding-left: 0;
-				padding-right: 0;
+		&.is-opened {
+			padding-left: 0;
+			padding-right: 0;
 
-				> .components-panel__body-title {
-					margin-left: 0;
-					margin-right: 0;
-				}
+			> .components-panel__body-title {
+				margin-left: 0;
+				margin-right: 0;
 			}
+		}
 
-			> .components-panel__body-title,
-			.components-panel__body-toggle {
-				&,
-				&:hover,
-				&:focus,
-				&:active {
-					background-color: transparent;
-					color: inherit;
-				}
+		> .components-panel__body-title,
+		.components-panel__body-toggle {
+			&,
+			&:hover,
+			&:focus,
+			&:active {
+				background-color: transparent;
+				color: inherit;
 			}
+		}
 
-			.components-panel__body-toggle {
-				font-weight: normal;
-				font-size: inherit;
-				padding-left: 0;
-				padding-right: 36px;
+		.components-panel__body-toggle {
+			font-weight: normal;
+			font-size: inherit;
+			padding-left: 0;
+			padding-right: 36px;
 
-				&.components-button,
-				&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
-					color: inherit;
-				}
+			&.components-button,
+			&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
+				color: inherit;
 			}
 		}
 	}

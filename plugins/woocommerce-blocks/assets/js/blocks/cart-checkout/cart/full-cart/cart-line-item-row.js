@@ -1,22 +1,21 @@
 /**
  * External dependencies
  */
-import { RawHTML } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
-import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import { getCurrency, formatPrice } from '@woocommerce/base-utils';
+import { getCurrency } from '@woocommerce/base-utils';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
-
-/**
- * Internal dependencies
- */
-import ProductVariationData from './product-variation-data';
-import ProductImage from './product-image';
-import ProductLowStockBadge from './product-low-stock-badge';
+import {
+	ProductImage,
+	ProductLowStockBadge,
+	ProductMetadata,
+	ProductName,
+	ProductPrice,
+	ProductSaleBadge,
+} from '@woocommerce/base-components/cart-checkout';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
@@ -73,17 +72,9 @@ const CartLineItemRow = ( { lineItem } ) => {
 				</a>
 			</td>
 			<td className="wc-block-cart-item__product">
-				<a
-					className="wc-block-cart-item__product-name"
-					href={ permalink }
-				>
-					{ name }
-				</a>
+				<ProductName permalink={ permalink } name={ name } />
 				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
-				<div className="wc-block-cart-item__product-metadata">
-					<RawHTML>{ summary }</RawHTML>
-					<ProductVariationData variation={ variation } />
-				</div>
+				<ProductMetadata summary={ summary } variation={ variation } />
 			</td>
 			<td className="wc-block-cart-item__quantity">
 				<QuantitySelector
@@ -112,27 +103,15 @@ const CartLineItemRow = ( { lineItem } ) => {
 				</button>
 			</td>
 			<td className="wc-block-cart-item__total">
-				{ saleAmount > 0 && (
-					<FormattedMonetaryAmount
-						className="wc-block-cart-item__regular-price"
-						currency={ currency }
-						value={ regularPrice }
-					/>
-				) }
-				<FormattedMonetaryAmount
-					className="wc-block-cart-item__price"
+				<ProductPrice
 					currency={ currency }
+					regularValue={ regularPrice }
 					value={ purchasePrice }
 				/>
-				{ saleAmount > 0 && (
-					<div className="wc-block-cart-item__sale-badge">
-						{ sprintf(
-							/* translators: %s discount amount */
-							__( 'Save %s!', 'woo-gutenberg-products-block' ),
-							formatPrice( saleAmount, currency )
-						) }
-					</div>
-				) }
+				<ProductSaleBadge
+					currency={ currency }
+					saleAmount={ saleAmount }
+				/>
 			</td>
 		</tr>
 	);

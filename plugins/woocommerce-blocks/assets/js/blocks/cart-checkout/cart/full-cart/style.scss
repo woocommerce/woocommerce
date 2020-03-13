@@ -113,32 +113,6 @@ table.wc-block-cart-items {
 			width: 100%;
 			margin: 0;
 		}
-		.wc-block-cart-item__product {
-			.wc-block-cart-item__product-name {
-				color: $core-grey-dark-600;
-				font-size: 16px;
-				display: block;
-			}
-
-			.wc-block-cart-item__low-stock-badge {
-				display: inline-block;
-
-				background-color: $white;
-				border-radius: 3px;
-				border: 1px solid $black;
-				color: $black;
-				font-size: 12px;
-				padding: 0 1em;
-				text-transform: uppercase;
-				white-space: nowrap;
-			}
-
-			.wc-block-cart-item__product-metadata {
-				color: $core-grey-dark-400;
-				font-size: 12px;
-				margin-top: 0.25em;
-			}
-		}
 		.wc-block-cart-item__quantity {
 			.wc-block-cart-item__remove-link {
 				@include link-button;
@@ -172,27 +146,6 @@ table.wc-block-cart-items {
 			.wc-block-formatted-money-amount {
 				display: block;
 			}
-
-			.wc-block-cart-item__regular-price {
-				color: $core-grey-dark-400;
-				text-decoration: line-through;
-			}
-
-			.wc-block-cart-item__price {
-				color: $black;
-				margin-left: 0.5em;
-			}
-
-			.wc-block-cart-item__sale-badge {
-				background-color: $core-grey-dark-600;
-				border-radius: 3px;
-				color: $white;
-				font-size: 12px;
-				padding: 0 1em;
-				text-transform: uppercase;
-				white-space: nowrap;
-				display: inline-block;
-			}
 		}
 	}
 }
@@ -211,20 +164,19 @@ table.wc-block-cart-items {
 	}
 	.wc-block-cart-items {
 		.wc-block-cart-items__row {
-			.wc-block-cart-item__product-name,
-			.wc-block-cart-item__price,
-			.wc-block-cart-item__product-metadata,
+			.wc-block-product-price,
+			.wc-block-product-metadata,
 			.wc-block-cart-item__image > *,
 			.wc-block-quantity-selector {
 				@include placeholder();
 			}
-			.wc-block-cart-item__product-name {
+			.wc-block-product-name {
 				@include placeholder();
 				@include force-content();
 				min-width: 84px;
 				display: inline-block;
 			}
-			.wc-block-cart-item__product-metadata {
+			.wc-block-product-metadata {
 				margin-top: 0.25em;
 				min-width: 8em;
 			}
@@ -240,7 +192,7 @@ table.wc-block-cart-items {
 				> div {
 					display: none;
 				}
-				.wc-block-cart-item__price {
+				.wc-block-product-price {
 					@include force-content();
 					display: block;
 				}
@@ -321,7 +273,7 @@ table.wc-block-cart-items {
 					display: inline-block;
 				}
 
-				.wc-block-cart-item__sale-badge {
+				.wc-block-sale-badge {
 					display: none;
 				}
 			}
