@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { isValidElement } from '@wordpress/element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 
 /**
@@ -16,23 +17,29 @@ const TotalsItem = ( { className, currency, label, value, description } ) => {
 			className={ classnames( 'wc-block-totals-table-item', className ) }
 		>
 			<span className="wc-block-totals-table-item__label">{ label }</span>
-			<FormattedMonetaryAmount
-				className="wc-block-totals-table-item__value"
-				currency={ currency }
-				displayType="text"
-				value={ value }
-			/>
-			<span className="wc-block-totals-table-item__description">
+			{ isValidElement( value ) ? (
+				<div className="wc-block-totals-table-item__value">
+					{ value }
+				</div>
+			) : (
+				<FormattedMonetaryAmount
+					className="wc-block-totals-table-item__value"
+					currency={ currency }
+					displayType="text"
+					value={ value }
+				/>
+			) }
+			<div className="wc-block-totals-table-item__description">
 				{ description }
-			</span>
+			</div>
 		</div>
 	);
 };
 
 TotalsItem.propTypes = {
-	currency: PropTypes.object.isRequired,
+	currency: PropTypes.object,
 	label: PropTypes.string.isRequired,
-	value: PropTypes.number.isRequired,
+	value: PropTypes.oneOfType( [ PropTypes.number, PropTypes.node ] ),
 	className: PropTypes.string,
 	description: PropTypes.node,
 };

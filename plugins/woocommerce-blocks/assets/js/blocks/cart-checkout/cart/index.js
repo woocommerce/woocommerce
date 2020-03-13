@@ -2,14 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, cart } from '@woocommerce/icons';
-import {
-	IS_SHIPPING_CALCULATOR_ENABLED,
-	IS_SHIPPING_COST_HIDDEN,
-} from '@woocommerce/block-settings';
+import { kebabCase } from 'lodash';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -17,6 +14,7 @@ import {
 import edit from './edit';
 import { example } from './example';
 import './style.scss';
+import blockAttributes from './attributes';
 
 /**
  * Register and run the Cart block.
@@ -36,35 +34,27 @@ const settings = {
 		multiple: false,
 	},
 	example,
-	attributes: {
-		isShippingCalculatorEnabled: {
-			type: 'boolean',
-			default: IS_SHIPPING_CALCULATOR_ENABLED,
-		},
-		isShippingCostHidden: {
-			type: 'boolean',
-			default: IS_SHIPPING_COST_HIDDEN,
-		},
-	},
-
+	attributes: blockAttributes,
 	edit,
 
 	/**
 	 * Save the props to post content.
 	 */
 	save( { attributes } ) {
-		const {
-			className,
-			isShippingCalculatorEnabled,
-			isShippingCostHidden,
-		} = attributes;
-		const data = {
-			'data-is-shipping-calculator-enabled': isShippingCalculatorEnabled,
-			'data-is-shipping-cost-hidden': isShippingCostHidden,
-		};
+		const data = {};
+
+		Object.keys( blockAttributes ).forEach( ( key ) => {
+			if (
+				blockAttributes[ key ].save !== false &&
+				typeof attributes[ key ] !== 'undefined'
+			) {
+				data[ 'data-' + kebabCase( key ) ] = attributes[ key ];
+			}
+		} );
+
 		return (
 			<div
-				className={ classNames( 'is-loading', className ) }
+				className={ classnames( 'is-loading', attributes.className ) }
 				{ ...data }
 			>
 				<InnerBlocks.Content />

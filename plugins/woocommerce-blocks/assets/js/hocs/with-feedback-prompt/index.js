@@ -28,10 +28,10 @@ const withFeedbackPrompt = ( content ) =>
 	createHigherOrderComponent( ( BlockEdit ) => {
 		return ( props ) => (
 			<Fragment>
-				<BlockEdit { ...props } />
 				<InspectorControls>
 					<FeedbackPrompt text={ content } />
 				</InspectorControls>
+				<BlockEdit { ...props } />
 			</Fragment>
 		);
 	}, 'withFeedbackPrompt' );

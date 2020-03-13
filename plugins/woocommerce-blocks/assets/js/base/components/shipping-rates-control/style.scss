@@ -26,8 +26,14 @@
 	white-space: pre;
 }
 
+.wc-block-cart__shipping-address,
+.wc-block-cart__shipping-address button {
+	color: $core-grey-dark-400;
+}
+
 .wc-block-shipping-rates-control__no-results {
 	margin-bottom: 0;
+	font-style: italic;
 }
 
 // Resets when it's inside a panel.

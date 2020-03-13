@@ -7,11 +7,14 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import productPicture from './product-image';
+import { previewShippingRates } from './shipping-rates';
 
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
 // https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/master/src/RestApi/StoreApi#cart-api
 export const previewCart = {
+	coupons: [],
+	shipping_rates: previewShippingRates,
 	items: [
 		{
 			key: '1',
@@ -143,9 +146,17 @@ export const previewCart = {
 			},
 		},
 	],
+	items_count: 4,
+	items_weight: 0,
+	needs_shipping: true,
 	totals: {
-		currency: 'USD',
+		currency_code: 'USD',
+		currency_symbol: '$',
 		currency_minor_unit: 2,
+		currency_decimal_separator: '.',
+		currency_thousand_separator: ',',
+		currency_prefix: '$',
+		currency_suffix: '',
 		total_items: '3000',
 		total_items_tax: '0',
 		total_fees: '0',
@@ -156,5 +167,6 @@ export const previewCart = {
 		total_shipping_tax: '0',
 		total_tax: '0',
 		total_price: '3000',
+		tax_lines: [],
 	},
 };
