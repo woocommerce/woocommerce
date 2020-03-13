@@ -343,7 +343,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_percent( $coupon, $items_to_apply ) {
 		$total_discount        = 0;
-		$cart_total            = 0;
+		$discounted_cart_total = 0;
 		$limit_usage_qty       = 0;
 		$applied_count         = 0;
 		$adjust_final_discount = true;
@@ -379,17 +379,17 @@ class WC_Discounts {
 				}
 			}
 
-			$discount       = wc_round_discount( min( $discounted_price, $discount ), 0 );
-			$cart_total     = $cart_total + $price_to_discount;
-			$total_discount = $total_discount + $discount;
-			$applied_count  = $applied_count + $apply_quantity;
+			$discount               = wc_round_discount( min( $discounted_price, $discount ), 0 );
+			$discounted_cart_total += $discounted_price;
+			$total_discount        += $discount;
+			$applied_count         += $apply_quantity;
 
 			// Store code and discount amount per item.
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 		}
 
 		// Work out how much discount would have been given to the cart as a whole and compare to what was discounted on all line items.
-		$cart_total_discount = wc_round_discount( $cart_total * ( $coupon_amount / 100 ), 0 );
+		$cart_total_discount = wc_round_discount( $discounted_cart_total * ( $coupon_amount / 100 ), 0 );
 
 		if ( $total_discount < $cart_total_discount && $adjust_final_discount ) {
 			$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $cart_total_discount - $total_discount );
