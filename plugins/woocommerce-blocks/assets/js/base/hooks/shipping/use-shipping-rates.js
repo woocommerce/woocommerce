@@ -29,11 +29,10 @@ import { pluckAddress } from '../../utils';
  */
 export const useShippingRates = ( addressFieldsKeys ) => {
 	const { cartErrors, shippingRates } = useStoreCart();
-	const addressFields = Object.fromEntries(
-		addressFieldsKeys.map( ( key ) => [ key, '' ] )
-	);
-	const derivedAddress = shippingRates[ 0 ]?.destination;
-	const initialAddress = { ...addressFields, ...derivedAddress };
+	const initialAddress = shippingRates[ 0 ]?.destination || {};
+	addressFieldsKeys.forEach( ( key ) => {
+		initialAddress[ key ] = initialAddress[ key ] || '';
+	} );
 	const shippingAddressReducer = ( state, address ) => ( {
 		...state,
 		...address,

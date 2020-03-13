@@ -11,6 +11,7 @@
 			padding: $gap-small $gap;
 			color: $black;
 			outline-offset: -1px;
+			text-align: center;
 			transition: box-shadow 0.1s linear;
 			&.is-active {
 				box-shadow: inset 0 -3px $black;
@@ -24,8 +25,7 @@
 			}
 			.wc-component__tab-item-content {
 				width: fit-content;
-				display: block;
-				margin: auto;
+				display: inline-block;
 			}
 		}
 	}

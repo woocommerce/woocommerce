@@ -12,9 +12,10 @@
 		margin-top: -24px;
 		margin-left: $gap-small;
 		margin-bottom: $gap-small;
-		width: fit-content;
 		color: $black;
 		font-weight: bold;
+		display: inline-block;
+		vertical-align: middle;
 	}
 
 	.wc-block-component-express-checkout__content {
