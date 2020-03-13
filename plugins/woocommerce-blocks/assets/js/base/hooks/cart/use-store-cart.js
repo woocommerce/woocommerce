@@ -60,7 +60,6 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			if ( isEditor ) {
 				return {
 					cartCoupons: previewCart.coupons,
-					shippingRates: previewCart.shipping_rates,
 					cartItems: previewCart.items,
 					cartItemsCount: previewCart.items_count,
 					cartItemsWeight: previewCart.items_weight,
@@ -68,6 +67,13 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 					cartTotals: previewCart.totals,
 					cartIsLoading: false,
 					cartErrors: [],
+					shippingRates: previewCart.shipping_rates,
+					shippingAddress: {
+						country: '',
+						state: '',
+						city: '',
+						postcode: '',
+					},
 				};
 			}
 

@@ -4,6 +4,7 @@
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { useThrowError } from '@woocommerce/base-hooks';
 
 /**
  * This is a custom hook for loading the selected shipping rate from the cart store and actions for selecting a rate.
@@ -17,6 +18,7 @@ See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tr
  * locally by a state and updated optimistically.
  */
 export const useSelectShippingRate = ( shippingRates ) => {
+	const throwError = useThrowError();
 	const initiallySelectedRates = shippingRates
 		.map(
 			// the API responds with those keys.
@@ -42,7 +44,11 @@ export const useSelectShippingRate = ( shippingRates ) => {
 			...selectedShippingRates,
 			[ packageId ]: newShippingRate,
 		} );
-		selectShippingRate( newShippingRate, packageId );
+		selectShippingRate( newShippingRate, packageId ).catch( ( error ) => {
+			// we throw this error because an error on selecting a rate
+			// is problematic.
+			throwError( error );
+		} );
 	};
 	return {
 		selectShippingRate: setRate,

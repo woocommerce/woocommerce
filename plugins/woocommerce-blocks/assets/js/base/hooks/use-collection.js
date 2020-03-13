@@ -3,7 +3,8 @@
  */
 import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { useRef, useState } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
+import { useThrowError } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -60,7 +61,7 @@ export const useCollection = ( options ) => {
 	// ensure we feed the previous reference if it's equivalent
 	const currentQuery = useShallowEqual( query );
 	const currentResourceValues = useShallowEqual( resourceValues );
-	const [ , setState ] = useState();
+	const throwError = useThrowError();
 	const results = useSelect(
 		( select ) => {
 			if ( ! shouldSelect ) {
@@ -76,12 +77,7 @@ export const useCollection = ( options ) => {
 			const error = store.getCollectionError( ...args );
 
 			if ( error ) {
-				// Is there an error? If so, throw an exception.
-				// This uses setState because useCollection is a hook.
-				// See https://github.com/facebook/react/issues/14981
-				setState( () => {
-					throw error;
-				} );
+				throwError( error );
 			}
 
 			return {
