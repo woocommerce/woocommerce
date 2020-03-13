@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@woocommerce/base-components/cart-checkout';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 

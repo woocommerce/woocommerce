@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { PanelBody, PanelRow } from 'wordpress-components';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@woocommerce/base-components/cart-checkout';
 import TextInput from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import PropTypes from 'prop-types';
@@ -13,8 +13,8 @@ import { withInstanceId } from 'wordpress-compose';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import LoadingMask from '../../loading-mask';
+import './style.scss';
 
 const TotalsCouponCodeInput = ( {
 	instanceId,
