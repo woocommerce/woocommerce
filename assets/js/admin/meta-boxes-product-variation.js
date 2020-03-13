@@ -452,7 +452,8 @@ jQuery( function( $ ) {
 
 			$( ':input', fields ).each( function( index, elem ) {
 
-				var $input = $( elem );
+				var $input = $( elem ),
+					value  = $input.val();
 
 				// Bypass inputs without name att
 				if ( ! elem.name ) {
@@ -469,7 +470,12 @@ jQuery( function( $ ) {
 					return;
 				}
 
-				data[ elem.name ] = $input.val();
+				// Do not send values for empty multi-selects.
+				if ( $input.is( 'select[multiple]' ) && null === value ) {
+					return;
+				}
+
+				data[ elem.name ] = value;
 
 			});
 
