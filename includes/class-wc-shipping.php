@@ -279,28 +279,19 @@ class WC_Shipping {
 	/**
 	 * See if package is shippable.
 	 *
-	 * Packages must have a valid destination to be shipped.
+	 * Packages are shippable until proven otherwise e.g. after getting a shipping country.
 	 *
 	 * @param  array $package Package of cart items.
 	 * @return bool
 	 */
 	public function is_package_shippable( $package ) {
+		// Packages are shippable until proven otherwise.
 		if ( empty( $package['destination']['country'] ) ) {
-			return false;
-		}
-		$country = $package['destination']['country'];
-
-		$countries = array_keys( WC()->countries->get_shipping_countries() );
-		if ( ! in_array( $country, $countries, true ) ) {
-			return false;
+			return true;
 		}
 
-		$states = WC()->countries->get_states( $country );
-		if ( is_array( $states ) && ! empty( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
-			return false;
-		}
-
-		return true;
+		$allowed = array_keys( WC()->countries->get_shipping_countries() );
+		return in_array( $package['destination']['country'], $allowed, true );
 	}
 
 	/**
