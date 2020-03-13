@@ -268,7 +268,10 @@ export function* selectShippingRate( rateId, packageId = 0 ) {
 		}
 	} catch ( error ) {
 		yield receiveError( error );
+		// Re-throw the error.
+		throw error;
 	}
+	return true;
 }
 
 /**
@@ -305,6 +308,10 @@ export function* updateShippingAddress( address ) {
 		}
 	} catch ( error ) {
 		yield receiveError( error );
+		yield shippingRatesAreResolving( false );
+		// rethrow error.
+		throw error;
 	}
 	yield shippingRatesAreResolving( false );
+	return true;
 }

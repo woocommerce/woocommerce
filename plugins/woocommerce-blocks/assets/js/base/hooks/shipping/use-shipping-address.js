@@ -11,6 +11,7 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { useStoreCart } from '../cart/use-store-cart';
+import { useThrowError } from '../use-throw-error';
 import { pluckAddress } from '../../utils';
 
 const shouldUpdateStore = ( oldAddress, newAddress ) =>
@@ -21,6 +22,7 @@ export const useShippingAddress = () => {
 	const [ shippingAddress, setShippingAddress ] = useState( initialAddress );
 	const [ debouncedShippingAddress ] = useDebounce( shippingAddress, 400 );
 	const { updateShippingAddress } = useDispatch( storeKey );
+	const throwError = useThrowError();
 
 	// Note, we're intentionally not using initialAddress as a dependency here
 	// so that the stale (previous) value is being used for comparison.
@@ -29,7 +31,12 @@ export const useShippingAddress = () => {
 			debouncedShippingAddress.country &&
 			shouldUpdateStore( initialAddress, debouncedShippingAddress )
 		) {
-			updateShippingAddress( debouncedShippingAddress );
+			updateShippingAddress( debouncedShippingAddress ).catch(
+				( error ) => {
+					// error is non-recoverable so throw
+					throwError( error );
+				}
+			);
 		}
 	}, [ debouncedShippingAddress ] );
 	return {

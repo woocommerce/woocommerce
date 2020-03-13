@@ -11,3 +11,4 @@ export * from './use-shallow-equal';
 export * from './use-store-products';
 export * from './use-store-notices';
 export * from './use-query-state';
+export * from './use-throw-error';
