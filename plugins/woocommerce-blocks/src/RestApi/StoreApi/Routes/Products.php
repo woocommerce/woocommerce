@@ -1,173 +1,84 @@
 <?php
 /**
- * Products controller.
+ * Products route.
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  * @package WooCommerce/Blocks
  */
 
-namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WP_Error as RestError;
-use \WP_REST_Server as RestServer;
-use \WP_REST_Controller as RestController;
-use \WP_REST_Response as RestResponse;
-use \WC_REST_Exception as RestException;
-use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductSchema;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQuery;
 
 /**
- * Products API.
- *
- * @since 2.5.0
+ * Products class.
  */
-class Products extends RestController {
+class Products extends AbstractRoute {
 	/**
-	 * Endpoint namespace.
+	 * Get the namespace for this route.
 	 *
-	 * @var string
+	 * @return string
 	 */
-	protected $namespace = 'wc/store';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'products';
-
-	/**
-	 * Schema class instance.
-	 *
-	 * @var ProductSchema
-	 */
-	protected $schema;
-
-	/**
-	 * Query class instance.
-	 *
-	 * @var ProductQuery
-	 */
-	protected $product_query;
-
-	/**
-	 * Setup API class.
-	 */
-	public function __construct() {
-		$this->schema        = new ProductSchema();
-		$this->product_query = new ProductQuery();
+	public function get_namespace() {
+		return 'wc/store';
 	}
 
 	/**
-	 * Register the routes for products.
+	 * Get the path of this REST route.
+	 *
+	 * @return string
 	 */
-	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'  => RestServer::READABLE,
-					'callback' => [ $this, 'get_items' ],
-					'args'     => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
-			array(
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
-						'type'        => 'integer',
-					),
-				),
-				array(
-					'methods'  => RestServer::READABLE,
-					'callback' => array( $this, 'get_item' ),
-					'args'     => array(
-						'context' => $this->get_context_param(
-							array(
-								'default' => 'view',
-							)
-						),
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
+	public function get_path() {
+		return '/products';
 	}
 
 	/**
-	 * Product item schema.
+	 * Get method arguments for this REST route.
 	 *
-	 * @return array
+	 * @return array An array of endpoints.
 	 */
-	public function get_item_schema() {
-		return $this->schema->get_item_schema();
-	}
-
-	/**
-	 * Prepare a single item for response.
-	 *
-	 * @param \WC_Product      $item Product object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
-	 */
-	public function prepare_item_for_response( $item, $request ) {
-		return rest_ensure_response( $this->schema->get_item_response( $item ) );
-	}
-
-	/**
-	 * Get a single item.
-	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return RestError|\WP_REST_Response
-	 */
-	public function get_item( $request ) {
-		$object = wc_get_product( (int) $request['id'] );
-
-		if ( ! $object || 0 === $object->get_id() ) {
-			return new RestError( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
-		}
-
-		$data     = $this->prepare_item_for_response( $object, $request );
-		$response = rest_ensure_response( $data );
-
-		return $response;
+	public function get_args() {
+		return [
+			[
+				'methods'  => \WP_REST_Server::READABLE,
+				'callback' => [ $this, 'get_response' ],
+				'args'     => $this->get_collection_params(),
+			],
+			'schema' => [ $this->schema, 'get_public_item_schema' ],
+		];
 	}
 
 	/**
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return RestError|\WP_REST_Response
+	 * @throws RouteException On error.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
-	public function get_items( $request ) {
-		$response = new RestResponse();
+	protected function get_route_response( \WP_REST_Request $request ) {
+		$response      = new \WP_REST_Response();
+		$product_query = new ProductQuery();
 
 		// Only get objects during GET requests.
-		if ( 'GET' === $request->get_method() ) {
-			$query_results    = $this->product_query->get_objects( $request );
+		if ( \WP_REST_Server::READABLE === $request->get_method() ) {
+			$query_results    = $product_query->get_objects( $request );
 			$response_objects = [];
 
 			foreach ( $query_results['objects'] as $object ) {
-				$data               = $this->prepare_item_for_response( $object, $request );
+				$data               = rest_ensure_response( $this->schema->get_item_response( $object ) );
 				$response_objects[] = $this->prepare_response_for_collection( $data );
 			}
 
 			$response->set_data( $response_objects );
 		} else {
-			$query_results = $this->product_query->get_results( $request );
+			$query_results = $product_query->get_results( $request );
 		}
 
 		$response = ( new Pagination() )->add_headers( $response, $request, $query_results['total'], $query_results['pages'] );
-		$response->header( 'Last-Modified', $this->product_query->get_last_modified() );
+		$response->header( 'Last-Modified', $product_query->get_last_modified() );
 
 		return $response;
 	}
@@ -182,16 +93,16 @@ class Products extends RestController {
 	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),  // @codingStandardsIgnoreLine.
+				'href' => rest_url( $this->get_namespace() . $this->get_path() . '/' . $item->get_id() ),
 			),
 			'collection' => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),  // @codingStandardsIgnoreLine.
+				'href' => rest_url( $this->get_namespace() . $this->get_path() ),
 			),
 		);
 
 		if ( $item->get_parent_id() ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $item->get_parent_id() ) ),  // @codingStandardsIgnoreLine.
+				'href' => rest_url( $this->get_namespace() . $this->get_path() . '/' . $item->get_parent_id() ),
 			);
 		}
 

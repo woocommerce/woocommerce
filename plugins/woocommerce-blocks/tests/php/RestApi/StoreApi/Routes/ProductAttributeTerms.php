@@ -65,25 +65,12 @@ class ProductAttributeTerms extends TestCase {
 	}
 
 	/**
-	 * Test schema retrieval.
-	 */
-	public function test_get_item_schema() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductAttributeTerms();
-		$schema     = $controller->get_item_schema();
-
-		$this->assertArrayHasKey( 'id', $schema['properties'] );
-		$this->assertArrayHasKey( 'name', $schema['properties'] );
-		$this->assertArrayHasKey( 'slug', $schema['properties'] );
-		$this->assertArrayHasKey( 'description', $schema['properties'] );
-		$this->assertArrayHasKey( 'count', $schema['properties'] );
-	}
-
-	/**
 	 * Test conversion of product to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductAttributeTerms();
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), [] );
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\TermSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductAttributeTerms( $schema );
+		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), new \WP_REST_Request() );
 		$data       = $response->get_data();
 
 		$this->assertArrayHasKey( 'id', $data );
@@ -97,7 +84,8 @@ class ProductAttributeTerms extends TestCase {
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductAttributeTerms();
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\TermSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductAttributeTerms( $schema );
 		$params     = $controller->get_collection_params();
 
 		$this->assertArrayHasKey( 'order', $params );
@@ -109,8 +97,9 @@ class ProductAttributeTerms extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductAttributeTerms();
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), [] );
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\TermSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductAttributeTerms( $schema );
+		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();
 		$validate   = new ValidateSchema( $schema );
 

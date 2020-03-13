@@ -9,8 +9,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WP_Error as Error;
-use \WC_REST_Exception as RestException;
+use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\RouteException;
 
 /**
  * Woo Cart Controller class.
@@ -26,140 +25,143 @@ class CartController {
 	 * the cart. For us this would cause notices to build up and output on the store, out of context. Core would need
 	 * refactoring to split notices out from other cart actions.
 	 *
-	 * @throws RestException Exception if invalid data is detected.
+	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
 	 * @return string|Error
 	 */
 	public function add_to_cart( $request ) {
-		try {
-			$request = wp_parse_args(
-				$request,
-				[
-					'id'             => 0,
-					'quantity'       => 1,
-					'variation'      => [],
-					'cart_item_data' => [],
-				]
+		$request = wp_parse_args(
+			$request,
+			[
+				'id'             => 0,
+				'quantity'       => 1,
+				'variation'      => [],
+				'cart_item_data' => [],
+			]
+		);
+
+		$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
+		$product = $this->get_product_for_cart( $request );
+
+		if ( $product->is_type( 'variation' ) ) {
+			$product_id   = $product->get_parent_id();
+			$variation_id = $product->get_id();
+		} else {
+			$product_id   = $product->get_id();
+			$variation_id = 0;
+		}
+
+		$cart_id          = wc()->cart->generate_cart_id(
+			$product_id,
+			$variation_id,
+			$request['variation'],
+			$request['cart_item_data']
+		);
+		$existing_cart_id = wc()->cart->find_product_in_cart( $cart_id );
+
+		if ( ! $product->is_purchasable() ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_is_not_purchasable',
+				__( 'This product cannot be purchased.', 'woo-gutenberg-products-block' ),
+				403
 			);
+		}
 
-			$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
-			$product = $this->get_product_for_cart( $request );
-
-			if ( $product->is_type( 'variation' ) ) {
-				$product_id   = $product->get_parent_id();
-				$variation_id = $product->get_id();
-			} else {
-				$product_id   = $product->get_id();
-				$variation_id = 0;
-			}
-
-			$cart_id          = wc()->cart->generate_cart_id(
-				$product_id,
-				$variation_id,
-				$request['variation'],
-				$request['cart_item_data']
+		if ( $product->is_sold_individually() && $existing_cart_id ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_sold_individually',
+				sprintf(
+					/* translators: %s: product name */
+					__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
 			);
-			$existing_cart_id = wc()->cart->find_product_in_cart( $cart_id );
+		}
 
-			if ( ! $product->is_purchasable() ) {
-				throw new RestException(
-					'woocommerce_rest_cart_product_is_not_purchasable',
-					__( 'This product cannot be purchased.', 'woo-gutenberg-products-block' ),
-					403
-				);
-			}
+		if ( ! $product->is_in_stock() ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_no_stock',
+				sprintf(
+					/* translators: %s: product name */
+					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
+			);
+		}
 
-			if ( $product->is_sold_individually() && $existing_cart_id ) {
-				throw new RestException(
-					'woocommerce_rest_cart_product_sold_individually',
-					sprintf(
-						/* translators: %s: product name */
-						__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
-						$product->get_name()
-					),
-					403
-				);
-			}
+		if ( $product->managing_stock() ) {
+			$cart_product_quantities   = wc()->cart->get_cart_item_quantities();
+			$stock_controller_id       = $product->get_stock_managed_by_id();
+			$stock_controller_quantity = isset( $cart_product_quantities[ $stock_controller_id ] ) ? $cart_product_quantities[ $stock_controller_id ] : 0;
 
-			if ( ! $product->is_in_stock() ) {
-				throw new RestException(
+			if ( ! $product->has_enough_stock( $stock_controller_quantity + $request['quantity'] ) ) {
+				throw new RouteException(
 					'woocommerce_rest_cart_product_no_stock',
 					sprintf(
-						/* translators: %s: product name */
-						__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
-						$product->get_name()
+						/* translators: 1: product name 2: quantity in stock */
+						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
+						$product->get_name(),
+						wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product )
 					),
 					403
 				);
 			}
-
-			if ( $product->managing_stock() ) {
-				$cart_product_quantities   = wc()->cart->get_cart_item_quantities();
-				$stock_controller_id       = $product->get_stock_managed_by_id();
-				$stock_controller_quantity = isset( $cart_product_quantities[ $stock_controller_id ] ) ? $cart_product_quantities[ $stock_controller_id ] : 0;
-
-				if ( ! $product->has_enough_stock( $stock_controller_quantity + $request['quantity'] ) ) {
-					throw new RestException(
-						'woocommerce_rest_cart_product_no_stock',
-						sprintf(
-							/* translators: 1: product name 2: quantity in stock */
-							__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
-							$product->get_name(),
-							wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product )
-						),
-						403
-					);
-				}
-			}
-
-			if ( $existing_cart_id ) {
-				wc()->cart->set_quantity( $existing_cart_id, $request['quantity'] + wc()->cart->cart_contents[ $existing_cart_id ]['quantity'], true );
-				return $existing_cart_id;
-			}
-
-			wc()->cart->cart_contents[ $cart_id ] = apply_filters(
-				'woocommerce_add_cart_item',
-				array_merge(
-					$request['cart_item_data'],
-					array(
-						'key'          => $cart_id,
-						'product_id'   => $product_id,
-						'variation_id' => $variation_id,
-						'variation'    => $request['variation'],
-						'quantity'     => $request['quantity'],
-						'data'         => $product,
-						'data_hash'    => wc_get_cart_item_data_hash( $product ),
-					)
-				),
-				$cart_id
-			);
-
-			wc()->cart->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', wc()->cart->cart_contents );
-
-			do_action(
-				'woocommerce_add_to_cart',
-				$cart_id,
-				$product_id,
-				$request['quantity'],
-				$variation_id,
-				$request['variation'],
-				$request['cart_item_data']
-			);
-
-			return $cart_id;
-		} catch ( RestException $e ) {
-			return new Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
+
+		if ( $existing_cart_id ) {
+			wc()->cart->set_quantity( $existing_cart_id, $request['quantity'] + wc()->cart->cart_contents[ $existing_cart_id ]['quantity'], true );
+			return $existing_cart_id;
+		}
+
+		wc()->cart->cart_contents[ $cart_id ] = apply_filters(
+			'woocommerce_add_cart_item',
+			array_merge(
+				$request['cart_item_data'],
+				array(
+					'key'          => $cart_id,
+					'product_id'   => $product_id,
+					'variation_id' => $variation_id,
+					'variation'    => $request['variation'],
+					'quantity'     => $request['quantity'],
+					'data'         => $product,
+					'data_hash'    => wc_get_cart_item_data_hash( $product ),
+				)
+			),
+			$cart_id
+		);
+
+		wc()->cart->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', wc()->cart->cart_contents );
+
+		do_action(
+			'woocommerce_add_to_cart',
+			$cart_id,
+			$product_id,
+			$request['quantity'],
+			$variation_id,
+			$request['variation'],
+			$request['cart_item_data']
+		);
+
+		return $cart_id;
 	}
 
 	/**
 	 * Get main instance of cart class.
 	 *
+	 * @throws RouteException When cart cannot be loaded.
 	 * @return \WC_Cart
 	 */
 	public function get_cart_instance() {
-		return wc()->cart;
+		$cart = wc()->cart;
+
+		if ( ! $cart || ! $cart instanceof \WC_Cart ) {
+			throw new RouteException( 'woocommerce_rest_cart_error', __( 'Unable to retrieve cart.', 'woo-gutenberg-products-block' ), 500 );
+		}
+
+		return $cart;
 	}
 
 	/**
@@ -253,7 +255,7 @@ class CartController {
 	 * applied. For us this would cause notices to build up and output on the store, out of context. Core would need
 	 * refactoring to split notices out from other cart actions.
 	 *
-	 * @throws RestException Exception if invalid data is detected.
+	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param string $coupon_code Coupon code.
 	 */
@@ -263,7 +265,7 @@ class CartController {
 		$coupon          = new \WC_Coupon( $coupon_code );
 
 		if ( $coupon->get_code() !== $coupon_code ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
 					/* Translators: %s coupon code */
@@ -275,7 +277,7 @@ class CartController {
 		}
 
 		if ( $this->has_coupon( $coupon_code ) ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
 					/* Translators: %s coupon code */
@@ -287,7 +289,7 @@ class CartController {
 		}
 
 		if ( ! $coupon->is_valid() ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				$coupon->get_error_message(),
 				403
@@ -306,7 +308,7 @@ class CartController {
 			$individual_use_coupon = new \WC_Coupon( $code );
 
 			if ( false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $coupon, $individual_use_coupon, $applied_coupons ) ) {
-				throw new RestException(
+				throw new RouteException(
 					'woocommerce_rest_cart_coupon_error',
 					sprintf(
 						/* translators: %s: coupon code */
@@ -335,7 +337,7 @@ class CartController {
 	/**
 	 * Get a product object to be added to the cart.
 	 *
-	 * @throws RestException Exception if invalid data is detected.
+	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
 	 * @return \WC_Product|Error Returns a product object if purchasable.
@@ -344,7 +346,7 @@ class CartController {
 		$product = wc_get_product( $request['id'] );
 
 		if ( ! $product || 'trash' === $product->get_status() ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				__( 'This product cannot be added to the cart.', 'woo-gutenberg-products-block' ),
 				403
@@ -388,7 +390,7 @@ class CartController {
 	/**
 	 * If variations are set, validate and format the values ready to add to the cart.
 	 *
-	 * @throws RestException Exception if invalid data is detected.
+	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
 	 * @return array Updated request array.
@@ -436,7 +438,7 @@ class CartController {
 					continue;
 				}
 
-				throw new RestException(
+				throw new RouteException(
 					'woocommerce_rest_invalid_variation_data',
 					/* translators: %1$s: Attribute name, %2$s: Allowed values. */
 					sprintf( __( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woo-gutenberg-products-block' ), $attribute_label, implode( ', ', $attribute->get_slugs() ) ),
@@ -451,7 +453,7 @@ class CartController {
 		}
 
 		if ( ! empty( $missing_attributes ) ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_missing_variation_data',
 				/* translators: %s: Attribute name. */
 				__( 'Missing variation data for variable product.', 'woo-gutenberg-products-block' ) . ' ' . sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woo-gutenberg-products-block' ), wc_format_list_of_items( $missing_attributes ) ),
@@ -465,7 +467,7 @@ class CartController {
 	/**
 	 * Try to match request data to a variation ID and return the ID.
 	 *
-	 * @throws RestException Exception if variation cannot be found.
+	 * @throws RouteException Exception if variation cannot be found.
 	 *
 	 * @param array       $request Add to cart request params.
 	 * @param \WC_Product $product Product being added to the cart.
@@ -477,7 +479,7 @@ class CartController {
 		$variation_id     = $data_store->find_matching_product_variation( $product, $match_attributes );
 
 		if ( empty( $variation_id ) ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_variation_id_from_variation_data',
 				__( 'No matching variation found.', 'woo-gutenberg-products-block' ),
 				400
@@ -492,7 +494,7 @@ class CartController {
 	 *
 	 * Labels are converted to names (e.g. Size to pa_size), and values are cleaned.
 	 *
-	 * @throws RestException Exception if variation cannot be found.
+	 * @throws RouteException Exception if variation cannot be found.
 	 *
 	 * @param array $variation_data Key value pairs of attributes and values.
 	 * @param array $variable_product_attributes Product attributes we're expecting.
@@ -543,7 +545,7 @@ class CartController {
 	/**
 	 * Get product attributes from the variable product (which may be the parent if the product object is a variation).
 	 *
-	 * @throws RestException Exception if product is invalid.
+	 * @throws RouteException Exception if product is invalid.
 	 *
 	 * @param \WC_Product $product Product being added to the cart.
 	 * @return array
@@ -554,7 +556,7 @@ class CartController {
 		}
 
 		if ( ! $product || 'trash' === $product->get_status() ) {
-			throw new RestException(
+			throw new RouteException(
 				'woocommerce_rest_cart_invalid_parent_product',
 				__( 'This product cannot be added to the cart.', 'woo-gutenberg-products-block' ),
 				403

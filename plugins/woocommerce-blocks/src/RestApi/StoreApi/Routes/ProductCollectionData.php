@@ -1,6 +1,6 @@
 <?php
 /**
- * Products collection data controller. Get aggregate data from a collection of products.
+ * Products collection data route. Get aggregate data from a collection of products.
  *
  * Supports the same parameters as /products, but returns a different response.
  *
@@ -8,87 +8,58 @@
  * @package WooCommerce/Blocks
  */
 
-namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WP_REST_Controller as RestController;
-use \WP_REST_Server as RestServer;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ProductQueryFilters;
-use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductCollectionDataSchema;
 
 /**
- * ProductCollectionData API.
- *
- * @since 2.5.0
+ * ProductCollectionData route.
  */
-class ProductCollectionData extends RestController {
+class ProductCollectionData extends AbstractRoute {
 	/**
-	 * Endpoint namespace.
+	 * Get the namespace for this route.
 	 *
-	 * @var string
+	 * @return string
 	 */
-	protected $namespace = 'wc/store';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'products/collection-data';
-
-	/**
-	 * Setup API class.
-	 */
-	public function __construct() {
-		$this->schema = new ProductCollectionDataSchema();
+	public function get_namespace() {
+		return 'wc/store';
 	}
 
 	/**
-	 * Register the routes for products.
+	 * Get the path of this REST route.
+	 *
+	 * @return string
 	 */
-	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
+	public function get_path() {
+		return '/products/collection-data';
+	}
+
+	/**
+	 * Get method arguments for this REST route.
+	 *
+	 * @return array An array of endpoints.
+	 */
+	public function get_args() {
+		return [
 			[
-				[
-					'methods'  => RestServer::READABLE,
-					'callback' => [ $this, 'get_items' ],
-					'args'     => $this->get_collection_params(),
-				],
-				'schema' => [ $this, 'get_public_item_schema' ],
-			]
-		);
-	}
-
-	/**
-	 * Return the schema.
-	 *
-	 * @return array
-	 */
-	public function get_item_schema() {
-		return $this->schema->get_item_schema();
-	}
-
-	/**
-	 * Prepare a single item for response.
-	 *
-	 * @param array            $data Collection data to return.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
-	 */
-	public function prepare_item_for_response( $data, $request ) {
-		return rest_ensure_response( $this->schema->get_item_response( $data ) );
+				'methods'  => \WP_REST_Server::READABLE,
+				'callback' => [ $this, 'get_response' ],
+				'args'     => $this->get_collection_params(),
+			],
+			'schema' => [ $this->schema, 'get_public_item_schema' ],
+		];
 	}
 
 	/**
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return RestError|\WP_REST_Response
+	 * @throws RouteException On error.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
-	public function get_items( $request ) {
+	protected function get_route_response( \WP_REST_Request $request ) {
 		$data    = [
 			'min_price'        => null,
 			'max_price'        => null,
@@ -173,7 +144,7 @@ class ProductCollectionData extends RestController {
 			}
 		}
 
-		return rest_ensure_response( $this->prepare_item_for_response( $data, $request ) );
+		return rest_ensure_response( $this->schema->get_item_response( $data ) );
 	}
 
 	/**
@@ -182,7 +153,7 @@ class ProductCollectionData extends RestController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = ( new Products() )->get_collection_params();
+		$params = ( new Products( $this->schema ) )->get_collection_params();
 
 		$params['calculate_price_range'] = [
 			'description' => __( 'If true, calculates the minimum and maximum product prices for the collection.', 'woo-gutenberg-products-block' ),

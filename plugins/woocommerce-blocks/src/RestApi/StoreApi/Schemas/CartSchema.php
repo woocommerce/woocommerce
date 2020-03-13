@@ -29,7 +29,7 @@ class CartSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function get_properties() {
+	public function get_properties() {
 		return [
 			'coupons'        => [
 				'description' => __( 'List of applied cart coupons.', 'woo-gutenberg-products-block' ),

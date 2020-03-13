@@ -27,7 +27,7 @@ class OrderItemSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function get_properties() {
+	public function get_properties() {
 		return [
 			'id'        => [
 				'description' => __( 'The item product or variation ID.', 'woo-gutenberg-products-block' ),
