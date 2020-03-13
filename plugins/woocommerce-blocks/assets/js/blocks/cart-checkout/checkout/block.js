@@ -92,7 +92,7 @@ const Block = ( {
 
 	return (
 		<CheckoutProvider isEditor={ isEditor }>
-			<SidebarLayout>
+			<SidebarLayout className="wc-block-checkout">
 				<Main>
 					<ExpressCheckoutFormControl />
 					<CheckoutForm>

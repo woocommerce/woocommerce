@@ -79,6 +79,7 @@ const StateInput = ( {
 							onChangeState( event.target.value )
 						}
 						style={ {
+							minHeight: '0',
 							height: '0',
 							border: '0',
 							padding: '0',

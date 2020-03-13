@@ -47,6 +47,7 @@ const CountryInput = ( {
 						onChange( foundOption ? foundOption.key : '' );
 					} }
 					style={ {
+						minHeight: '0',
 						height: '0',
 						border: '0',
 						padding: '0',

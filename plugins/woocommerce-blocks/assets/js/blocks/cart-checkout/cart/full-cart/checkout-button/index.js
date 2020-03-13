@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@woocommerce/base-components/cart-checkout';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
 /**

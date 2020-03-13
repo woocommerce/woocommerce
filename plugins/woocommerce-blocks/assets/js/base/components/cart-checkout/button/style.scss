@@ -1,0 +1,24 @@
+// Extra classes are added for specificity.
+.wc-block-cart,
+.wc-block-checkout {
+	.button.wc-block-button {
+		background-color: #000 !important;
+		color: #fff !important;
+		display: block;
+		font-size: inherit;
+		font-weight: bold;
+		height: 48px; // same height as text-input
+		line-height: 1;
+		padding: $gap-small;
+		text-align: center;
+		text-decoration: none;
+		text-transform: none;
+
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: $black !important;
+			color: #fff !important;
+		}
+	}
+}
