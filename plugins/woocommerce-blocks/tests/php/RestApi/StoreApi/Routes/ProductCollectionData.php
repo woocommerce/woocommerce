@@ -160,25 +160,11 @@ class ProductCollectionData extends TestCase {
 	}
 
 	/**
-	 * Test schema retrieval.
-	 */
-	public function test_get_item_schema() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductCollectionData();
-		$schema     = $controller->get_item_schema();
-
-		$this->assertArrayHasKey( 'price_range', $schema['properties'] );
-		$this->assertArrayHasKey( 'currency_minor_unit', $schema['properties']['price_range']['properties'] );
-		$this->assertArrayHasKey( 'min_price', $schema['properties']['price_range']['properties'] );
-		$this->assertArrayHasKey( 'max_price', $schema['properties']['price_range']['properties'] );
-		$this->assertArrayHasKey( 'attribute_counts', $schema['properties'] );
-		$this->assertArrayHasKey( 'rating_counts', $schema['properties'] );
-	}
-
-	/**
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductCollectionData();
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductCollectionDataSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductCollectionData( $schema );
 		$params     = $controller->get_collection_params();
 
 		$this->assertArrayHasKey( 'calculate_price_range', $params );
@@ -191,7 +177,8 @@ class ProductCollectionData extends TestCase {
 	 */
 	public function test_schema_matches_response() {
 		ProductHelper::create_variation_product();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\ProductCollectionData();
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductCollectionDataSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductCollectionData( $schema );
 		$request    = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
 		$request->set_param( 'calculate_price_range', true );
 		$request->set_param(

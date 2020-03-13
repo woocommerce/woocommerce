@@ -152,7 +152,7 @@ class CartItems extends TestCase {
 	 * Test updating an item.
 	 */
 	public function test_update_item() {
-		$request = new WP_REST_Request( 'POST', '/wc/store/cart/items/' . $this->keys[0] );
+		$request = new WP_REST_Request( 'PUT', '/wc/store/cart/items/' . $this->keys[0] );
 		$request->set_body_params(
 			array(
 				'quantity' => '10',
@@ -202,33 +202,13 @@ class CartItems extends TestCase {
 	}
 
 	/**
-	 * Test schema retrieval.
-	 */
-	public function test_get_item_schema() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartItems();
-		$schema     = $controller->get_item_schema();
-
-		$this->assertArrayHasKey( 'key', $schema['properties'] );
-		$this->assertArrayHasKey( 'id', $schema['properties'] );
-		$this->assertArrayHasKey( 'quantity', $schema['properties'] );
-		$this->assertArrayHasKey( 'name', $schema['properties'] );
-		$this->assertArrayHasKey( 'short_description', $schema['properties'] );
-		$this->assertArrayHasKey( 'sku', $schema['properties'] );
-		$this->assertArrayHasKey( 'low_stock_remaining', $schema['properties'] );
-		$this->assertArrayHasKey( 'backorders_allowed', $schema['properties'] );
-		$this->assertArrayHasKey( 'permalink', $schema['properties'] );
-		$this->assertArrayHasKey( 'images', $schema['properties'] );
-		$this->assertArrayHasKey( 'totals', $schema['properties'] );
-		$this->assertArrayHasKey( 'variation', $schema['properties'] );
-	}
-
-	/**
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartItems();
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartItemSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\CartItems( $schema );
 		$cart       = wc()->cart->get_cart();
-		$response   = $controller->prepare_item_for_response( current( $cart ), [] );
+		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		$data       = $response->get_data();
 
 		$this->assertArrayHasKey( 'key', $data );
@@ -252,17 +232,18 @@ class CartItems extends TestCase {
 	 */
 	public function test_schema_matches_response() {
 		$cart       = wc()->cart->get_cart();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\CartItems();
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartItemSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\CartItems( $schema );
 		$schema     = $controller->get_item_schema();
 		$validate   = new ValidateSchema( $schema );
 
 		// Simple product.
-		$response = $controller->prepare_item_for_response( current( $cart ), [] );
+		$response = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		$diff     = $validate->get_diff_from_object( $response->get_data() );
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 
 		// Variable product.
-		$response = $controller->prepare_item_for_response( end( $cart ), [] );
+		$response = $controller->prepare_item_for_response( end( $cart ), new \WP_REST_Request() );
 		$diff     = $validate->get_diff_from_object( $response->get_data() );
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 	}

@@ -334,28 +334,13 @@ class Cart extends TestCase {
 	}
 
 	/**
-	 * Test schema retrieval.
-	 */
-	public function test_get_item_schema() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Cart();
-		$schema     = $controller->get_item_schema();
-
-		$this->assertArrayHasKey( 'items_count', $schema['properties'] );
-		$this->assertArrayHasKey( 'items', $schema['properties'] );
-		$this->assertArrayHasKey( 'shipping_rates', $schema['properties'] );
-		$this->assertArrayHasKey( 'coupons', $schema['properties'] );
-		$this->assertArrayHasKey( 'needs_shipping', $schema['properties'] );
-		$this->assertArrayHasKey( 'items_weight', $schema['properties'] );
-		$this->assertArrayHasKey( 'totals', $schema['properties'] );
-	}
-
-	/**
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Cart();
+		$schema    = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Cart( $schema );
 		$cart       = wc()->cart;
-		$response   = $controller->prepare_item_for_response( $cart, [] );
+		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
 		$data       = $response->get_data();
 
 		$this->assertArrayHasKey( 'items_count', $data );
@@ -371,9 +356,10 @@ class Cart extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Cart();
+		$schema    = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Cart( $schema );
 		$cart       = wc()->cart;
-		$response   = $controller->prepare_item_for_response( $cart, [] );
+		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();
 		$validate   = new ValidateSchema( $schema );
 

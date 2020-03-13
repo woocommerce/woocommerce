@@ -27,7 +27,7 @@ class CartShippingRateSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function get_properties() {
+	public function get_properties() {
 		return [
 			'package_id'     => [
 				'description' => __( 'The ID of the package the shipping rates belong to.', 'woo-gutenberg-products-block' ),

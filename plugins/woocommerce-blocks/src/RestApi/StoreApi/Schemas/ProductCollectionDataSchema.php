@@ -27,7 +27,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function get_properties() {
+	public function get_properties() {
 		return [
 			'price_range'      => [
 				'description' => __( 'Min and max prices found in collection of products, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),

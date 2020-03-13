@@ -39,11 +39,81 @@ abstract class AbstractSchema {
 	}
 
 	/**
-	 * Returns schema properties.
+	 * Returns the public schema.
 	 *
 	 * @return array
 	 */
-	abstract protected function get_properties();
+	public function get_public_item_schema() {
+		$schema = $this->get_item_schema();
+
+		foreach ( $schema['properties'] as &$property ) {
+			unset( $property['arg_options'] );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Retrieves an array of endpoint arguments from the item schema for the controller.
+	 *
+	 * @param string $method Optional. HTTP method of the request.
+	 * @return array Endpoint arguments.
+	 */
+	public function get_endpoint_args_for_item_schema( $method = \WP_REST_Server::CREATABLE ) {
+		$schema            = $this->get_item_schema();
+		$schema_properties = ! empty( $schema['properties'] ) ? $schema['properties'] : array();
+		$endpoint_args     = array();
+
+		foreach ( $schema_properties as $field_id => $params ) {
+
+			// Arguments specified as `readonly` are not allowed to be set.
+			if ( ! empty( $params['readonly'] ) ) {
+				continue;
+			}
+
+			$endpoint_args[ $field_id ] = array(
+				'validate_callback' => 'rest_validate_request_arg',
+				'sanitize_callback' => 'rest_sanitize_request_arg',
+			);
+
+			if ( isset( $params['description'] ) ) {
+				$endpoint_args[ $field_id ]['description'] = $params['description'];
+			}
+
+			if ( \WP_REST_Server::CREATABLE === $method && isset( $params['default'] ) ) {
+				$endpoint_args[ $field_id ]['default'] = $params['default'];
+			}
+
+			if ( \WP_REST_Server::CREATABLE === $method && ! empty( $params['required'] ) ) {
+				$endpoint_args[ $field_id ]['required'] = true;
+			}
+
+			foreach ( array( 'type', 'format', 'enum', 'items', 'properties', 'additionalProperties' ) as $schema_prop ) {
+				if ( isset( $params[ $schema_prop ] ) ) {
+					$endpoint_args[ $field_id ][ $schema_prop ] = $params[ $schema_prop ];
+				}
+			}
+
+			// Merge in any options provided by the schema property.
+			if ( isset( $params['arg_options'] ) ) {
+
+				// Only use required / default from arg_options on CREATABLE endpoints.
+				if ( \WP_REST_Server::CREATABLE !== $method ) {
+					$params['arg_options'] = array_diff_key(
+						$params['arg_options'],
+						array(
+							'required' => '',
+							'default'  => '',
+						)
+					);
+				}
+
+				$endpoint_args[ $field_id ] = array_merge( $endpoint_args[ $field_id ], $params['arg_options'] );
+			}
+		}
+
+		return $endpoint_args;
+	}
 
 	/**
 	 * Force all schema properties to be readonly.

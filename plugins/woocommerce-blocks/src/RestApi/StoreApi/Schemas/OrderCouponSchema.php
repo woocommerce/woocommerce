@@ -25,7 +25,7 @@ class OrderCouponSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function get_properties() {
+	public function get_properties() {
 		return [
 			'code'   => [
 				'description' => __( 'The coupons unique code.', 'woo-gutenberg-products-block' ),

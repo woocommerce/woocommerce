@@ -27,7 +27,7 @@ class OrderSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function get_properties() {
+	public function get_properties() {
 		return [
 			'id'                 => [
 				'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),

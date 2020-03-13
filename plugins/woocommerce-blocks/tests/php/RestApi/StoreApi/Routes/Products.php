@@ -100,35 +100,12 @@ class Products extends TestCase {
 	}
 
 	/**
-	 * Test schema retrieval.
-	 */
-	public function test_get_item_schema() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Products();
-		$schema     = $controller->get_item_schema();
-
-		$this->assertArrayHasKey( 'id', $schema['properties'] );
-		$this->assertArrayHasKey( 'name', $schema['properties'] );
-		$this->assertArrayHasKey( 'variation', $schema['properties'] );
-		$this->assertArrayHasKey( 'permalink', $schema['properties'] );
-		$this->assertArrayHasKey( 'description', $schema['properties'] );
-		$this->assertArrayHasKey( 'on_sale', $schema['properties'] );
-		$this->assertArrayHasKey( 'sku', $schema['properties'] );
-		$this->assertArrayHasKey( 'prices', $schema['properties'] );
-		$this->assertArrayHasKey( 'average_rating', $schema['properties'] );
-		$this->assertArrayHasKey( 'review_count', $schema['properties'] );
-		$this->assertArrayHasKey( 'images', $schema['properties'] );
-		$this->assertArrayHasKey( 'has_options', $schema['properties'] );
-		$this->assertArrayHasKey( 'is_purchasable', $schema['properties'] );
-		$this->assertArrayHasKey( 'is_in_stock', $schema['properties'] );
-		$this->assertArrayHasKey( 'add_to_cart', $schema['properties'] );
-	}
-
-	/**
 	 * Test conversion of prdouct to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Products();
-		$response   = $controller->prepare_item_for_response( $this->products[0], [] );
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Products( $schema );
+		$response   = $controller->prepare_item_for_response( $this->products[0], new \WP_REST_Request() );
 		$data       = $response->get_data();
 
 		$this->assertArrayHasKey( 'id', $data );
@@ -152,7 +129,8 @@ class Products extends TestCase {
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Products();
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Products( $schema );
 		$params     = $controller->get_collection_params();
 
 		$this->assertArrayHasKey( 'page', $params );
@@ -189,8 +167,9 @@ class Products extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Controllers\Products();
-		$response   = $controller->prepare_item_for_response( $this->products[0], [] );
+		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductSchema();
+		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Products( $schema );
+		$response   = $controller->prepare_item_for_response( $this->products[0], new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();
 		$validate   = new ValidateSchema( $schema );
 
