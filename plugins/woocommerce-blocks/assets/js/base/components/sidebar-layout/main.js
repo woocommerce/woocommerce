@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
 const Main = ( { children, className } ) => {
 	return (
@@ -9,6 +10,10 @@ const Main = ( { children, className } ) => {
 			{ children }
 		</div>
 	);
+};
+
+Main.propTypes = {
+	className: PropTypes.string,
 };
 
 export default Main;

@@ -17,8 +17,14 @@ import {
 } from '@woocommerce/block-settings';
 import { useStoreCartCoupons } from '@woocommerce/base-hooks';
 
+/**
+ * Internal dependencies
+ */
+import OrderSummary from './order-summary.js';
+
 const CheckoutSidebar = ( {
 	cartCoupons = [],
+	cartItems = [],
 	cartTotals = {},
 	shippingRates,
 } ) => {
@@ -33,6 +39,7 @@ const CheckoutSidebar = ( {
 
 	return (
 		<>
+			<OrderSummary cartItems={ cartItems } />
 			<SubtotalsItem currency={ totalsCurrency } values={ cartTotals } />
 			<TotalsFeesItem currency={ totalsCurrency } values={ cartTotals } />
 			<TotalsDiscountItem

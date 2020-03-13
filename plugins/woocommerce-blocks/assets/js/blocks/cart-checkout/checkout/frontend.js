@@ -26,6 +26,7 @@ import renderFrontend from '../../../utils/render-frontend.js';
 const CheckoutFrontend = ( props ) => {
 	const {
 		cartCoupons,
+		cartItems,
 		cartErrors,
 		cartTotals,
 		shippingRates,
@@ -58,6 +59,7 @@ const CheckoutFrontend = ( props ) => {
 			<Block
 				{ ...props }
 				cartCoupons={ cartCoupons }
+				cartItems={ cartItems }
 				cartTotals={ cartTotals }
 				shippingRates={ shippingRates }
 			/>

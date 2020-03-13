@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
 const SidebarLayout = ( { children, className } ) => {
 	return (
@@ -9,6 +10,10 @@ const SidebarLayout = ( { children, className } ) => {
 			{ children }
 		</div>
 	);
+};
+
+SidebarLayout.propTypes = {
+	className: PropTypes.string,
 };
 
 export default SidebarLayout;

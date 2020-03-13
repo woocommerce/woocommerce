@@ -219,6 +219,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 			>
 				<Block
 					attributes={ attributes }
+					cartItems={ previewCart.items }
 					cartTotals={ previewCart.totals }
 					isEditor={ true }
 					shippingRates={

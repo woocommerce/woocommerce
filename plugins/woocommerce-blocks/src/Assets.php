@@ -35,10 +35,10 @@ class Assets {
 	 * as part of ongoing refactoring.
 	 */
 	public static function register_assets() {
+		self::register_style( 'wc-block-vendors-style', plugins_url( self::get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), [] );
 		self::register_style( 'wc-block-editor', plugins_url( self::get_block_asset_build_path( 'editor', 'css' ), __DIR__ ), array( 'wp-edit-blocks' ) );
 		wp_style_add_data( 'wc-block-editor', 'rtl', 'replace' );
-		self::register_style( 'wc-block-style', plugins_url( self::get_block_asset_build_path( 'style', 'css' ), __DIR__ ), [] );
-		self::register_style( 'wc-block-vendors-style', plugins_url( self::get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ), [] );
+		self::register_style( 'wc-block-style', plugins_url( self::get_block_asset_build_path( 'style', 'css' ), __DIR__ ), array( 'wc-block-vendors-style' ) );
 		wp_style_add_data( 'wc-block-style', 'rtl', 'replace' );
 
 		// Shared libraries and components across all blocks.
