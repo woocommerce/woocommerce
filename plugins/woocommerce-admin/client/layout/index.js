@@ -87,6 +87,7 @@ class Layout extends Component {
 	render() {
 		const { isEmbedded, ...restProps } = this.props;
 		const { breadcrumbs } = this.props.page;
+
 		return (
 			<div className="woocommerce-layout">
 				<Header

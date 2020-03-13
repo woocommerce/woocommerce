@@ -480,6 +480,7 @@ class Onboarding {
 	 */
 	public function preload_options( $options ) {
 		$options[] = 'woocommerce_task_list_hidden';
+		$options[] = 'woocommerce_task_list_do_this_later';
 
 		if ( ! self::should_show_tasks() && ! self::should_show_profiler() ) {
 			return $options;

@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, List, MenuItem, EllipsisMenu } from '@woocommerce/components';
+import { Card, List, MenuItem, EllipsisMenu, LinkButton } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
@@ -276,30 +276,30 @@ class TaskDashboard extends Component {
 	}
 
 	onSkipStoreSetup = () => {
-		const completedTaskKeys = this.getTasks()
-			.filter( ( x ) => x.completed )
-			.map( ( x ) => x.key );
+		const completedTasksNames = this.getTasks()
+			.filter( x => x.completed )
+			.map( x => x.title );
 
 		recordEvent( 'wcadmin_tasklist_skip', {
-			completed_tasks_count: completedTaskKeys.length,
-			completed_tasks: completedTaskKeys,
-			reason: 'skip',
+			completed_tasks: completedTasksNames.length,
+			completed_tasks_names: completedTasksNames,
+			skip_option: 'skip store setup'
 		} );
 
 		this.props.updateOptions( {
-			woocommerce_task_list_hidden: 'yes',
+			woocommerce_task_list_skip_store_setup: true,
 		} );
 	};
 
 	onDoThisLater = () => {
-		const completedTaskKeys = this.getTasks()
-			.filter( ( x ) => x.completed )
-			.map( ( x ) => x.key );
+		const completedTasksNames = this.getTasks()
+			.filter( x => x.completed )
+			.map( x => x.title );
 
 		recordEvent( 'wcadmin_tasklist_skip', {
-			completed_tasks_count: completedTaskKeys.length,
-			completed_tasks: completedTaskKeys,
-			reason: 'later',
+			completed_tasks: completedTasksNames.length,
+			completed_tasks_names: completedTasksNames,
+			skip_option: 'i\'ll do this later'
 		} );
 
 		this.props.updateOptions( {
@@ -308,26 +308,20 @@ class TaskDashboard extends Component {
 	};
 
 	renderSkipActions() {
-		const { doThisLater } = this.props;
+		const { skipStoreSetup, doThisLater } = this.props;
 
 		return (
-			<div className="skip-actions">
-				<Button
-					isLink
-					className="is-secondary"
-					onClick={ this.onSkipStoreSetup }
-				>
-					{ __( 'Skip store setup', 'woocommerce-admin' ) }
-				</Button>
-				{ ! doThisLater && ' | ' }
+			<div style={ { textAlign: 'center' } }>
+				{ ! skipStoreSetup && (
+					<LinkButton onClick={ this.onSkipStoreSetup }>
+						{ __( 'Skip store setup', 'woocommerce-admin' ) }
+					</LinkButton>				
+				) }
+				{ ! skipStoreSetup && ! doThisLater && ' | ' }
 				{ ! doThisLater && (
-					<Button
-						isLink
-						className="is-secondary"
-						onClick={ this.onDoThisLater }
-					>
-						{ __( "I'll do this later", 'woocommerce-admin' ) }
-					</Button>
+					<LinkButton onClick={ this.onDoThisLater }>
+						{ __( 'I\'ll do this later', 'woocommerce-admin' ) }
+					</LinkButton>
 				) }
 			</div>
 		);
@@ -406,7 +400,7 @@ export default compose(
 		const options = getOptions( [
 			'woocommerce_task_list_prompt_shown',
 			'woocommerce_task_list_welcome_modal_dismissed',
-			'woocommerce_task_list_hidden',
+			'woocommerce_task_list_skip_store_setup',
 			'woocommerce_task_list_do_this_later',
 		] );
 		const promptShown = get(
@@ -419,25 +413,21 @@ export default compose(
 			[ 'woocommerce_task_list_welcome_modal_dismissed' ],
 			false
 		);
-		const taskListPayments = getOptions( [
-			'woocommerce_task_list_payments',
-		] );
-		const taskListHidden =
-			get( options, [ 'woocommerce_task_list_hidden' ], 'no' ) === 'yes';
-		const doThisLater = get(
-			options,
-			[ 'woocommerce_task_list_do_this_later' ],
-			false
-		);
+		const taskListPayments = getOptions( [ 'woocommerce_task_list_payments' ] );
+		const skipStoreSetup = get( options, [ 'woocommerce_task_list_skip_store_setup' ], false );
+		const doThisLater = get( options, [ 'woocommerce_task_list_do_this_later' ], false );
 
 		return {
 			modalDismissed,
 			profileItems,
 			promptShown,
 			taskListPayments,
+<<<<<<< HEAD
 			isJetpackConnected: isJetpackConnected(),
-			taskListHidden,
+=======
+			skipStoreSetup,
 			doThisLater,
+>>>>>>> d657ebf5... Hook up buttons to task list, hook up options to onboarding-experience to set up the menu
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

@@ -63,6 +63,7 @@ class OnboardingTasks {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_homepage_notice_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_tax_notice_admin_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_product_import_notice_admin_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_menu_experience_script' ) );
 
 		// Update payment cache on payment gateways update.
 		add_action( 'update_option_woocommerce_stripe_settings', array( $this, 'check_stripe_completion' ), 10, 2 );
@@ -328,6 +329,25 @@ class OnboardingTasks {
 			delete_transient( self::ACTIVE_TASK_TRANSIENT );
 			wp_enqueue_script( 'onboarding-product-import-notice', Loader::get_url( 'wp-admin-scripts/onboarding-product-import-notice.js' ), array( 'wc-navigation', 'wp-i18n', 'wp-data' ), WC_ADMIN_VERSION_NUMBER, true );
 		}
+	}
+
+	/**
+	 * Add a script that does some fine tuning around the WooCommerce menu experience during onboarding
+	 * (hiding menu items while the task list is showing and the rest of the WooCommerce dashboard is
+	 * not shown).
+	 */
+	public function add_onboarding_menu_experience_script() {
+		if ( ! Loader::is_onboarding_enabled() ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'onboarding-menu-experience',
+			Loader::get_url( 'wp-admin-scripts/onboarding-menu-experience.js' ),
+			array( WC_ADMIN_APP ),
+			Loader::get_file_version( 'wp-admin-scripts/onboarding-menu-experience.js' ),
+			true
+		);
 	}
 
 	/**

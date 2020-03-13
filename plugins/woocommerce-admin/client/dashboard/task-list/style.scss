@@ -36,6 +36,16 @@
 				color: $studio-white;
 			}
 		}
+
+		.skip-actions {
+			text-align: center;
+
+			button.components-button.is-secondary {
+				color: $studio-gray-50;
+				margin: 0;
+				min-width: 0;
+			}
+		}
 	}
 
 	.woocommerce-list {

@@ -225,14 +225,20 @@ class CustomizableDashboard extends Component {
 	}
 
 	render() {
-		const { query, path, taskListHidden, taskListCompleted } = this.props;
+		const {
+			query,
+			path,
+			taskListHidden,
+			taskListCompleted,
+			doThisLater,
+		} = this.props;
 		const { sections } = this.state;
 
 		if (
 			isOnboardingEnabled() &&
-			wcSettings.onboarding &&
 			! taskListHidden &&
-			( query.task || ! taskListCompleted )
+			( query.task || ! taskListCompleted ) &&
+			! doThisLater
 		) {
 			return <TaskList query={ query } />;
 		}
@@ -252,6 +258,8 @@ class CustomizableDashboard extends Component {
 			primaryDate,
 			secondaryDate,
 		};
+		const showTaskList =
+			isOnboardingEnabled() && ! taskListHidden && ! taskListCompleted;
 
 		const visibleSectionKeys = sections
 			.filter( ( section ) => section.isVisible )
@@ -259,10 +267,7 @@ class CustomizableDashboard extends Component {
 
 		return (
 			<Fragment>
-				{ isOnboardingEnabled() &&
-					wcSettings.onboarding &&
-					! taskListHidden &&
-					taskListCompleted && <TaskList query={ query } inline /> }
+				{ showTaskList && <TaskList query={ query } inline /> }
 
 				<ReportFilters
 					report="dashboard"
@@ -314,13 +319,17 @@ class CustomizableDashboard extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getCurrentUserData, getProfileItems, getOptions } = select(
-			'wc-api'
-		);
+		const {
+			getCurrentUserData,
+			getProfileItems,
+			isGetProfileItemsRequesting,
+			getOptions,
+			isGetOptionsRequesting,
+		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
-
 		const withSelectData = {
 			userPrefSections: userData.dashboard_sections,
+			requesting: false,
 		};
 
 		if ( isOnboardingEnabled() ) {
@@ -338,12 +347,27 @@ export default compose(
 
 			withSelectData.taskListCompleted =
 				visibleTasks.length === completedTasks.length;
+
+			const options = getOptions( [
+				'woocommerce_task_list_hidden',
+				'woocommerce_task_list_do_this_later',
+			] );
 			withSelectData.taskListHidden =
-				get(
-					getOptions( [ 'woocommerce_task_list_hidden' ] ),
-					[ 'woocommerce_task_list_hidden' ],
-					'no'
-				) === 'yes';
+				get( options, [ 'woocommerce_task_list_hidden' ], 'no' ) ===
+				'yes';
+			withSelectData.doThisLater = get(
+				options,
+				[ 'woocommerce_task_list_do_this_later' ],
+				false
+			);
+			withSelectData.requesting =
+				withSelectData.requesting || isGetProfileItemsRequesting();
+			withSelectData.requesting =
+				withSelectData.requesting ||
+				isGetOptionsRequesting( [
+					'woocommerce_task_list_payments',
+					'woocommerce_task_list_hidden',
+				] );
 		}
 
 		return withSelectData;
