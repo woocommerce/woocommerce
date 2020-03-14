@@ -17,6 +17,7 @@ jQuery( function( $ ) {
 			.on( 'click', '.add_to_cart_button', { addToCartHandler: this }, this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )
+			.on( 'ajax_request_not_sent.adding_to_cart', this.updateButton )
 			.on( 'added_to_cart removed_from_cart', { addToCartHandler: this }, this.updateFragments );
 	};
 
@@ -158,10 +159,13 @@ jQuery( function( $ ) {
 
 		if ( $button ) {
 			$button.removeClass( 'loading' );
-			$button.addClass( 'added' );
+			
+			if( fragments ) {
+				$button.addClass( 'added' );
+			}
 
 			// View cart text.
-			if ( ! wc_add_to_cart_params.is_cart && $button.parent().find( '.added_to_cart' ).length === 0 ) {
+			if ( fragments && ! wc_add_to_cart_params.is_cart && $button.parent().find( '.added_to_cart' ).length === 0 ) {
 				$button.after( ' <a href="' + wc_add_to_cart_params.cart_url + '" class="added_to_cart wc-forward" title="' +
 					wc_add_to_cart_params.i18n_view_cart + '">' + wc_add_to_cart_params.i18n_view_cart + '</a>' );
 			}
