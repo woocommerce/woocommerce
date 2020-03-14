@@ -76,35 +76,33 @@ jQuery( function( $ ) {
 			});
 
 			// Trigger event.
-			var valid = $( document.body ).triggerHandler( 'adding_to_cart', [ $thisbutton, data ] );
+			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
-			if( valid !== false ) {
-				e.data.addToCartHandler.addRequest({
-					type: 'POST',
-					url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
-					data: data,
-					success: function( response ) {
-						if ( ! response ) {
-							return;
-						}
+			e.data.addToCartHandler.addRequest({
+				type: 'POST',
+				url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
+				data: data,
+				success: function( response ) {
+					if ( ! response ) {
+						return;
+					}
 
-						if ( response.error && response.product_url ) {
-							window.location = response.product_url;
-							return;
-						}
+					if ( response.error && response.product_url ) {
+						window.location = response.product_url;
+						return;
+					}
 
-						// Redirect to cart option
-						if ( wc_add_to_cart_params.cart_redirect_after_add === 'yes' ) {
-							window.location = wc_add_to_cart_params.cart_url;
-							return;
-						}
+					// Redirect to cart option
+					if ( wc_add_to_cart_params.cart_redirect_after_add === 'yes' ) {
+						window.location = wc_add_to_cart_params.cart_url;
+						return;
+					}
 
-						// Trigger event so themes can refresh other areas.
-						$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
-					},
-					dataType: 'json'
-				});
-			}
+					// Trigger event so themes can refresh other areas.
+					$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+				},
+				dataType: 'json'
+			});
 		}
 	};
 
