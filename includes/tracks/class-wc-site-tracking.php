@@ -70,7 +70,6 @@ class WC_Site_Tracking {
 				var eventProperties = properties || {};
 				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
 					eventProperties = window.wp.hooks.applyFilters( 'woocommerceTracksEventProperties', eventProperties, eventName );
-					console.log( 'new', eventProperties );
 				}
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
