@@ -69,6 +69,12 @@ jQuery( function( $ ) {
 			$thisbutton.removeClass( 'added' );
 			$thisbutton.addClass( 'loading' );
 
+			// Allow 3rd parties to validate and quit early.
+			if( false === $( document.body ).triggerHandler( 'should_send_ajax_request.adding_to_cart', [ $thisbutton ] ) ) { 
+				$( document.body ).trigger( 'ajax_request_not_sent.adding_to_cart', [ false, false, $thisbutton ] );
+				return true;
+			}
+
 			var data = {};
 
 			$.each( $thisbutton[0].dataset, function( key, value ) {
