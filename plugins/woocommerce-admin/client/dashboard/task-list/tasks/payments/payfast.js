@@ -11,12 +11,12 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Form, Link, TextControl } from '@woocommerce/components';
+import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from 'lib/tracks';
+import withSelect from 'wc-api/with-select';
 
 class PayFast extends Component {
 	getInitialConfigValues = () => {
@@ -54,20 +54,39 @@ class PayFast extends Component {
 		return errors;
 	};
 
-	updateSettings = async ( values ) => {
+	componentDidUpdate( prevProps ) {
 		const {
 			createNotice,
-			isSettingsError,
-			updateOptions,
+			isOptionsRequesting,
+			hasOptionsError,
 			markConfigured,
-			setRequestPending,
 		} = this.props;
 
-		setRequestPending( true );
+		if ( prevProps.isOptionsRequesting && ! isOptionsRequesting ) {
+			if ( ! hasOptionsError ) {
+				markConfigured( 'payfast' );
+				createNotice(
+					'success',
+					__( 'PayFast connected successfully', 'woocommerce-admin' )
+				);
+			} else {
+				createNotice(
+					'error',
+					__(
+						'There was a problem saving your payment setings',
+						'woocommerce-admin'
+					)
+				);
+			}
+		}
+	}
+
+	updateSettings = ( values ) => {
+		const { updateOptions } = this.props;
 
 		// Because the PayFast extension only works with the South African Rand
 		// currency, force the store to use it while setting the PayFast settings
-		await updateOptions( {
+		updateOptions( {
 			woocommerce_currency: 'ZAR',
 			woocommerce_payfast_settings: {
 				merchant_id: values.merchant_id,
@@ -76,30 +95,10 @@ class PayFast extends Component {
 				enabled: 'yes',
 			},
 		} );
-
-		if ( ! isSettingsError ) {
-			recordEvent( 'tasklist_payment_connect_method', {
-				payment_method: 'payfast',
-			} );
-			setRequestPending( false );
-			markConfigured( 'payfast' );
-			createNotice(
-				'success',
-				__( 'PayFast connected successfully', 'woocommerce-admin' )
-			);
-		} else {
-			setRequestPending( false );
-			createNotice(
-				'error',
-				__(
-					'There was a problem saving your payment setings',
-					'woocommerce-admin'
-				)
-			);
-		}
 	};
 
-	render() {
+	renderConnectStep() {
+		const { isOptionsRequesting } = this.props;
 		const helpText = interpolateComponents( {
 			mixedString: __(
 				'Your API details can be obtained from your {{link}}PayFast account{{/link}}',
@@ -149,16 +148,14 @@ class PayFast extends Component {
 								required
 								{ ...getInputProps( 'pass_phrase' ) }
 							/>
-							<Button onClick={ handleSubmit } isPrimary>
+							<Button
+								isPrimary
+								isBusy={ isOptionsRequesting }
+								onClick={ handleSubmit }
+							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
 							</Button>
-							<Button
-								onClick={ () => {
-									this.props.markConfigured( 'payfast' );
-								} }
-							>
-								{ __( 'Skip', 'woocommerce-admin' ) }
-							</Button>
+
 							<p>{ helpText }</p>
 						</Fragment>
 					);
@@ -166,9 +163,52 @@ class PayFast extends Component {
 			</Form>
 		);
 	}
+
+	render() {
+		const { installStep, isOptionsRequesting } = this.props;
+
+		return (
+			<Stepper
+				isVertical
+				isPending={ ! installStep.isComplete || isOptionsRequesting }
+				currentStep={ installStep.isComplete ? 'connect' : 'install' }
+				steps={ [
+					installStep,
+					{
+						key: 'connect',
+						label: __(
+							'Connect your PayFast account',
+							'woocommerce-admin'
+						),
+						content: this.renderConnectStep(),
+					},
+				] }
+			/>
+		);
+	}
 }
 
 export default compose(
+	withSelect( ( select ) => {
+		const { getOptionsError, isUpdateOptionsRequesting } = select(
+			'wc-api'
+		);
+		const isOptionsRequesting = Boolean(
+			isUpdateOptionsRequesting( [
+				'woocommerce_currency',
+				'woocommerce_payfast_settings',
+			] )
+		);
+		const hasOptionsError = getOptionsError( [
+			'woocommerce_currency',
+			'woocommerce_payfast_settings',
+		] );
+
+		return {
+			hasOptionsError,
+			isOptionsRequesting,
+		};
+	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateOptions } = dispatch( 'wc-api' );

@@ -317,7 +317,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
 		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
 
-		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 		$connect_url = add_query_arg( array( 'calypso_env' => $calypso_env ), $connect_url );
 
 		return( array(
@@ -372,7 +372,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			\WC_Helper_API::url( 'oauth/authorize' )
 		);
 
-		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
+		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ) {
 			$connect_url = add_query_arg(
 				array(
 					'calypso_env' => WOOCOMMERCE_CALYPSO_ENVIRONMENT,
@@ -463,12 +463,12 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 				'env'                     => 'live',
 				'wc_ppec_ips_admin_nonce' => wp_create_nonce( 'wc_ppec_ips' ),
 			),
-			wc_admin_url( '&task=payments&paypal-connect-finish=1' )
+			wc_admin_url( '&task=payments&method=paypal&paypal-connect-finish=1' )
 		);
 
 		// https://github.com/woocommerce/woocommerce-gateway-paypal-express-checkout/blob/b6df13ba035038aac5024d501e8099a37e13d6cf/includes/class-wc-gateway-ppec-ips-handler.php#L79-L93.
 		$query_args  = array(
-			'redirect'    => urlencode( $redirect_url ),
+			'redirect'    => rawurlencode( $redirect_url ),
 			'countryCode' => WC()->countries->get_base_country(),
 			'merchantId'  => md5( site_url( '/' ) . time() ),
 		);
@@ -491,9 +491,9 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
 
-		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&square-connect-finish=1' ), 'wc_square_connected' );
+		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&method=square&square-connect-finish=1' ), 'wc_square_connected' );
 		$args         = array(
-			'redirect' => urlencode( urlencode( $redirect_url ) ),
+			'redirect' => rawurlencode( rawurlencode( $redirect_url ) ),
 			'scopes'   => implode(
 				',',
 				array(

@@ -2,110 +2,84 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
-import { withDispatch } from '@wordpress/data';
+import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
-import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
+import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getQuery } from '@woocommerce/navigation';
-import { Form, Link, TextControl } from '@woocommerce/components';
+import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
-import { recordEvent } from 'lib/tracks';
 
 class PayPal extends Component {
 	constructor( props ) {
 		super( props );
 
 		this.state = {
+			autoConnectFailed: false,
 			connectURL: '',
-			showManualConfiguration: props.manualConfig,
+			isPending: false,
 		};
 
 		this.updateSettings = this.updateSettings.bind( this );
 	}
 
 	componentDidMount() {
-		const { showManualConfiguration } = this.state;
+		const { autoConnectFailed } = this.state;
+		const { createNotice, markConfigured } = this.props;
 
 		const query = getQuery();
 		// Handle redirect back from PayPal
 		if ( query[ 'paypal-connect' ] ) {
 			if ( query[ 'paypal-connect' ] === '1' ) {
-				recordEvent( 'tasklist_payment_connect_method', {
-					payment_method: 'paypal',
-				} );
-				this.props.markConfigured( 'paypal' );
-				this.props.createNotice(
+				createNotice(
 					'success',
 					__( 'PayPal connected successfully.', 'woocommerce-admin' )
 				);
+				markConfigured( 'paypal' );
 				return;
 			}
 
 			/* eslint-disable react/no-did-mount-set-state */
 			this.setState( {
-				showManualConfiguration: true,
+				autoConnectFailed: true,
 			} );
 			/* eslint-enable react/no-did-mount-set-state */
 			return;
 		}
 
-		if ( ! showManualConfiguration ) {
+		if ( ! autoConnectFailed ) {
 			this.fetchOAuthConnectURL();
-		}
-	}
-
-	componentDidUpdate( prevProps, prevState ) {
-		if (
-			prevState.showManualConfiguration === true &&
-			this.state.showManualConfiguration === false
-		) {
-			this.fetchOAuthConnectURL();
-		}
-
-		if (
-			prevProps.optionsIsRequesting === false &&
-			this.props.optionsIsRequesting === true
-		) {
-			this.props.setRequestPending( true );
-		}
-
-		if (
-			prevProps.optionsIsRequesting === true &&
-			this.props.optionsIsRequesting === false
-		) {
-			this.props.setRequestPending( false );
 		}
 	}
 
 	async fetchOAuthConnectURL() {
-		this.props.setRequestPending( true );
+		this.setState( { isPending: true } );
 		try {
 			const result = await apiFetch( {
 				path: WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-paypal',
 				method: 'POST',
 			} );
 			if ( ! result || ! result.connectUrl ) {
-				this.props.setRequestPending( false );
 				this.setState( {
-					showManualConfiguration: true,
+					autoConnectFailed: true,
 				} );
 				return;
 			}
-			this.props.setRequestPending( false );
 			this.setState( {
 				connectURL: result.connectUrl,
+				isPending: false,
 			} );
 		} catch ( error ) {
-			this.props.setRequestPending( false );
 			this.setState( {
-				showManualConfiguration: true,
+				autoConnectFailed: true,
+				isPending: false,
 			} );
 		}
 	}
@@ -123,14 +97,14 @@ class PayPal extends Component {
 		const {
 			createNotice,
 			isSettingsError,
+			options,
 			updateOptions,
 			markConfigured,
 		} = this.props;
 
-		this.props.setRequestPending( true );
 		await updateOptions( {
 			woocommerce_ppec_paypal_settings: {
-				...this.props.options.woocommerce_ppec_paypal_settings,
+				...options.woocommerce_ppec_paypal_settings,
 				api_username: values.api_username,
 				api_password: values.api_password,
 				enabled: 'yes',
@@ -138,17 +112,12 @@ class PayPal extends Component {
 		} );
 
 		if ( ! isSettingsError ) {
-			recordEvent( 'tasklist_payment_connect_method', {
-				payment_method: 'paypal',
-			} );
-			this.props.setRequestPending( false );
-			markConfigured( 'paypal' );
-			this.props.createNotice(
+			createNotice(
 				'success',
 				__( 'PayPal connected successfully.', 'woocommerce-admin' )
 			);
+			markConfigured( 'paypal' );
 		} else {
-			this.props.setRequestPending( false );
 			createNotice(
 				'error',
 				__(
@@ -186,7 +155,7 @@ class PayPal extends Component {
 	}
 
 	renderManualConfig() {
-		const { optionsIsRequesting } = this.props;
+		const { isOptionsRequesting } = this.props;
 		const link = (
 			<Link
 				href="https://docs.woocommerce.com/document/paypal-express-checkout/#section-8"
@@ -233,17 +202,9 @@ class PayPal extends Component {
 							<Button
 								onClick={ handleSubmit }
 								isPrimary
-								disabled={ optionsIsRequesting }
+								disabled={ isOptionsRequesting }
 							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
-							</Button>
-
-							<Button
-								onClick={ () => {
-									this.props.markConfigured( 'paypal' );
-								} }
-							>
-								{ __( 'Skip', 'woocommerce-admin' ) }
 							</Button>
 
 							<p>{ help }</p>
@@ -254,18 +215,50 @@ class PayPal extends Component {
 		);
 	}
 
+	getConnectStep() {
+		const { autoConnectFailed, connectURL, isPending } = this.state;
+		const connectStep = {
+			key: 'connect',
+			label: __( 'Connect your PayPal account', 'woocommerce-admin' ),
+		};
+
+		if ( isPending ) {
+			return connectStep;
+		}
+
+		if ( ! autoConnectFailed && connectURL ) {
+			return {
+				...connectStep,
+				description: __(
+					'A Paypal account is required to process payments. You will be redirected to the Paypal website to create the connection.',
+					'woocommerce-admin'
+				),
+				content: this.renderConnectButton(),
+			};
+		}
+
+		return {
+			...connectStep,
+			description: __(
+				'Connect your store to your PayPal account. Don’t have a PayPal account? Create one.',
+				'woocommerce-admin'
+			),
+			content: this.renderManualConfig(),
+		};
+	}
+
 	render() {
-		const { connectURL, showManualConfiguration } = this.state;
+		const { installStep } = this.props;
+		const { isPending } = this.state;
 
-		if ( connectURL && ! showManualConfiguration ) {
-			return this.renderConnectButton();
-		}
-
-		if ( showManualConfiguration ) {
-			return this.renderManualConfig();
-		}
-
-		return null;
+		return (
+			<Stepper
+				isVertical
+				isPending={ ! installStep.isComplete || isPending }
+				currentStep={ installStep.isComplete ? 'connect' : 'install' }
+				steps={ [ installStep, this.getConnectStep() ] }
+			/>
+		);
 	}
 }
 
@@ -277,13 +270,13 @@ export default compose(
 	withSelect( ( select ) => {
 		const { getOptions, isGetOptionsRequesting } = select( 'wc-api' );
 		const options = getOptions( [ 'woocommerce_ppec_paypal_settings' ] );
-		const optionsIsRequesting = Boolean(
+		const isOptionsRequesting = Boolean(
 			isGetOptionsRequesting( [ 'woocommerce_ppec_paypal_settings' ] )
 		);
 
 		return {
 			options,
-			optionsIsRequesting,
+			isOptionsRequesting,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

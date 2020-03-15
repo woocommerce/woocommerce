@@ -5,68 +5,50 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
-import { getQuery } from '@woocommerce/navigation';
 import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
 /**
  * WooCommerce dependencies
  */
+import { getQuery } from '@woocommerce/navigation';
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
-import { recordEvent } from 'lib/tracks';
+import { Stepper } from '@woocommerce/components';
 
 class Square extends Component {
 	constructor( props ) {
 		super( props );
 
 		this.state = {
-			showSkipButton: false,
+			isPending: false,
 		};
 
 		this.connect = this.connect.bind( this );
 	}
 
 	componentDidMount() {
+		const { createNotice, markConfigured } = this.props;
 		const query = getQuery();
 		// Handle redirect back from Square
 		if ( query[ 'square-connect' ] ) {
 			if ( query[ 'square-connect' ] === '1' ) {
-				recordEvent( 'tasklist_payment_connect_method', {
-					payment_method: 'square',
-				} );
-				this.props.markConfigured( 'square' );
-				this.props.createNotice(
+				createNotice(
 					'success',
 					__( 'Square connected successfully.', 'woocommerce-admin' )
 				);
+				markConfigured( 'square' );
 			}
 		}
 	}
 
-	componentDidUpdate( prevProps ) {
-		if (
-			prevProps.optionsIsRequesting === false &&
-			this.props.optionsIsRequesting === true
-		) {
-			this.props.setRequestPending( true );
-		}
-
-		if (
-			prevProps.optionsIsRequesting === true &&
-			this.props.optionsIsRequesting === false
-		) {
-			this.props.setRequestPending( false );
-		}
-	}
-
 	async connect() {
-		const { updateOptions } = this.props;
-		this.props.setRequestPending( true );
+		const { createNotice, options, updateOptions } = this.props;
+		this.setState( { isPending: true } );
 
 		updateOptions( {
 			woocommerce_stripe_settings: {
-				...this.props.options.woocommerce_stripe_settings,
+				...options.woocommerce_stripe_settings,
 				enabled: 'yes',
 			},
 		} );
@@ -83,39 +65,55 @@ class Square extends Component {
 			} );
 
 			if ( ! result || ! result.connectUrl ) {
-				this.props.setRequestPending( false );
-				this.setState( { showSkipButton: true } );
-				this.props.createNotice( 'error', errorMessage );
+				this.setState( { isPending: false } );
+				createNotice( 'error', errorMessage );
 				return;
 			}
 
-			this.props.setRequestPending( false );
+			this.setState( { isPending: true } );
 			window.location = result.connectUrl;
 		} catch ( error ) {
-			this.props.setRequestPending( false );
-			this.setState( { showSkipButton: true } );
-			this.props.createNotice( 'error', errorMessage );
+			this.setState( { isPending: false } );
+			createNotice( 'error', errorMessage );
 		}
 	}
 
 	render() {
-		const { showSkipButton } = this.state;
+		const { installStep } = this.props;
+		const { isPending } = this.state;
 
 		return (
-			<Fragment>
-				<Button isPrimary isDefault onClick={ this.connect }>
-					{ __( 'Connect', 'woocommerce-admin' ) }
-				</Button>
-				{ showSkipButton && (
-					<Button
-						onClick={ () => {
-							this.props.markConfigured( 'square' );
-						} }
-					>
-						{ __( 'Skip', 'woocommerce-admin' ) }
-					</Button>
-				) }
-			</Fragment>
+			<Stepper
+				isVertical
+				isPending={ ! installStep.isComplete || isPending }
+				currentStep={ installStep.isComplete ? 'connect' : 'install' }
+				steps={ [
+					installStep,
+					{
+						key: 'connect',
+						label: __(
+							'Connect your Square account',
+							'woocommerce-admin'
+						),
+						description: __(
+							'A Square account is required to process payments. You will be redirected to the Square website to create the connection.',
+							'woocommerce-admin'
+						),
+						content: (
+							<Fragment>
+								<Button
+									isPrimary
+									isDefault
+									isBusy={ isPending }
+									onClick={ this.connect }
+								>
+									{ __( 'Connect', 'woocommerce-admin' ) }
+								</Button>
+							</Fragment>
+						),
+					},
+				] }
+			/>
 		);
 	}
 }

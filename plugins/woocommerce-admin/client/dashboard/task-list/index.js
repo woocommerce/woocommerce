@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component, cloneElement, Fragment } from '@wordpress/element';
 import { get } from 'lodash';
 import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
@@ -334,7 +334,7 @@ class TaskDashboard extends Component {
 	}
 
 	render() {
-		const { inline } = this.props;
+		const { inline, query } = this.props;
 		const { isCartModalOpen, isWelcomeModalOpen } = this.state;
 		const currentTask = this.getCurrentTask();
 		const listTasks = this.getTasks().map( ( task ) => {
@@ -362,7 +362,9 @@ class TaskDashboard extends Component {
 			<Fragment>
 				<div className="woocommerce-task-dashboard__container">
 					{ currentTask ? (
-						currentTask.container
+						cloneElement( currentTask.container, {
+							query,
+						} )
 					) : (
 						<Fragment>
 							<Card
