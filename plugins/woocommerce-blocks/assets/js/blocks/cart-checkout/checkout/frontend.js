@@ -70,13 +70,16 @@ const getProps = ( el ) => {
 
 	Object.keys( blockAttributes ).forEach( ( key ) => {
 		if ( typeof el.dataset[ key ] !== 'undefined' ) {
-			if (
-				el.dataset[ key ] === 'true' ||
-				el.dataset[ key ] === 'false'
-			) {
-				attributes[ key ] = el.dataset[ key ] !== 'false';
-			} else {
-				attributes[ key ] = el.dataset[ key ];
+			switch ( blockAttributes[ key ].type ) {
+				case 'boolean':
+					attributes[ key ] = el.dataset[ key ] !== 'false';
+					break;
+				case 'number':
+					attributes[ key ] = parseInt( el.dataset[ key ], 10 );
+					break;
+				default:
+					attributes[ key ] = el.dataset[ key ];
+					break;
 			}
 		} else {
 			attributes[ key ] = blockAttributes[ key ].default;

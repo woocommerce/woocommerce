@@ -3,7 +3,7 @@
 	text-align: center;
 	list-style: none outside;
 	line-height: 1;
-	margin: 2em 0 1em;
+	margin: $gap-large 0;
 }
 .wc-block-components-checkout-policies__item {
 	list-style: none outside;
@@ -18,5 +18,6 @@
 	a {
 		padding: 0 0.25em;
 		text-decoration: underline;
+		color: $gray-60;
 	}
 }

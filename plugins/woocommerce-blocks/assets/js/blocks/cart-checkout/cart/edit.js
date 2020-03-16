@@ -18,13 +18,10 @@ import { EditorProvider } from '@woocommerce/base-context';
 import FullCart from './full-cart';
 import EmptyCart from './empty-cart';
 
-/**
- * Component to handle edit mode of "Cart Block".
- */
-const CartEditor = ( { className, attributes, setAttributes } ) => {
+const BlockSettings = ( { attributes, setAttributes } ) => {
 	const { isShippingCalculatorEnabled, isShippingCostHidden } = attributes;
 
-	const BlockSettings = () => (
+	return (
 		<InspectorControls>
 			<PanelBody
 				title={ __( 'Shipping rates', 'woo-gutenberg-products-block' ) }
@@ -64,7 +61,13 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 			</PanelBody>
 		</InspectorControls>
 	);
+};
 
+/**
+ * Component to handle edit mode of "Cart Block".
+ */
+const CartEditor = ( { className, attributes, setAttributes } ) => {
+	const { isShippingCalculatorEnabled, isShippingCostHidden } = attributes;
 	return (
 		<div className={ className }>
 			<ViewSwitcher
@@ -87,7 +90,12 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 					<>
 						{ currentView === 'full' && (
 							<>
-								{ SHIPPING_ENABLED && <BlockSettings /> }
+								{ SHIPPING_ENABLED && (
+									<BlockSettings
+										attributes={ attributes }
+										setAttributes={ setAttributes }
+									/>
+								) }
 								<BlockErrorBoundary
 									header={ __(
 										'Cart Block Error',

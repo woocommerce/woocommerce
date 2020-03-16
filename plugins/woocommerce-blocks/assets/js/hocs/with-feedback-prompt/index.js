@@ -4,11 +4,7 @@
 import { Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-
-/**
- * Internal dependencies
- */
-import FeedbackPrompt from './feedback-prompt.js';
+import FeedbackPrompt from '@woocommerce/block-components/feedback-prompt';
 
 /**
  * Adds a feedback prompt with custom text to the editor sidebar.

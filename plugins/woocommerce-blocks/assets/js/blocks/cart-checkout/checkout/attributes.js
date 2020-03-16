@@ -32,6 +32,14 @@ const blockAttributes = {
 		type: 'boolean',
 		default: true,
 	},
+	showReturnToCart: {
+		type: 'boolean',
+		default: true,
+	},
+	cartPageId: {
+		type: 'number',
+		default: 0,
+	},
 };
 
 export default blockAttributes;
