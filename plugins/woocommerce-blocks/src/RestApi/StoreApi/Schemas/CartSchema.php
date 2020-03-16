@@ -31,6 +31,12 @@ class CartSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
+			'order_id'         => [
+				'description' => __( 'The draft order ID associated with this cart if one has been created. 0 if no draft exists.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'coupons'          => [
 				'description' => __( 'List of applied cart coupons.', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
@@ -201,6 +207,7 @@ class CartSchema extends AbstractSchema {
 		$context                 = 'edit';
 
 		return [
+			'order_id'         => $this->get_order_id(),
 			'coupons'          => array_values( array_map( [ $cart_coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
 			'shipping_rates'   => array_values( array_map( [ $shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ),
 			'shipping_address' => $shipping_address_schema,
@@ -227,6 +234,23 @@ class CartSchema extends AbstractSchema {
 				]
 			),
 		];
+	}
+
+	/**
+	 * Get a draft order ID from the session for current cart.
+	 *
+	 * @return int Draft order ID, or 0 if there isn't one yet.
+	 */
+	protected function get_order_id() {
+		$draft_order_session = WC()->session->get( 'store_api_draft_order' );
+		$draft_order_id      = isset( $draft_order_session['id'] ) ? absint( $draft_order_session['id'] ) : 0;
+		$draft_order         = $draft_order_id ? wc_get_order( $draft_order_id ) : false;
+
+		if ( $draft_order && $draft_order->has_status( 'checkout-draft' ) && 'store-api' === $draft_order->get_created_via() ) {
+			return $draft_order_id;
+		}
+
+		return 0;
 	}
 
 	/**
