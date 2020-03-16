@@ -635,18 +635,21 @@ class WC_Tracker {
 	public static function post_contains_text( $post_id, $text ) {
 		global $wpdb;
 
+		// Search for the text anywhere in the post.
+		$wildcarded = "%{$text}%";
+
 		$result = $wpdb->get_var(
 			$wpdb->prepare(
 				"
-				SELECT COUNT( * ) FROM {$wpdb->prefix}_posts
+				SELECT COUNT( * ) FROM {$wpdb->prefix}posts
 				WHERE ID=%d
-				AND {$wpdb->prefix}_posts.post_content LIKE %s
+				AND {$wpdb->prefix}posts.post_content LIKE %s
 				",
-				array( $post_id, $text )
+				array( $post_id, $wildcarded )
 			)
 		);
 
-		return ( 0 !== $result ) ? 'Yes' : 'No';
+		return ( '0' !== $result ) ? 'Yes' : 'No';
 	}
 
 	/**
