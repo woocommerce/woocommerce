@@ -332,7 +332,6 @@ const Block = ( {
 						cartCoupons={ cartCoupons }
 						cartItems={ cartItems }
 						cartTotals={ cartTotals }
-						shippingRates={ shippingRates }
 					/>
 				</Sidebar>
 			</SidebarLayout>
