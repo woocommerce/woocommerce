@@ -2,14 +2,16 @@
 .wc-block-cart,
 .wc-block-checkout {
 	.button.wc-block-button {
+		align-items: center;
 		background-color: #000 !important;
 		color: #fff !important;
-		display: block;
+		display: flex;
 		font-size: inherit;
 		font-weight: bold;
 		height: 48px; // same height as text-input
+		justify-content: center;
 		line-height: 1;
-		padding: $gap-small;
+		padding: 0 $gap-small;
 		text-align: center;
 		text-decoration: none;
 		text-transform: none;

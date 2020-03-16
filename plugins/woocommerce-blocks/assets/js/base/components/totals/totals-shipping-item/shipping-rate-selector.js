@@ -26,15 +26,15 @@ const renderShippingRatesControlOption = ( option ) => ( {
 
 const ShippingRateSelector = ( { shippingRates, shippingRatesLoading } ) => {
 	return (
-		<fieldset className="wc-block-cart__shipping-options-fieldset">
+		<fieldset className="wc-block-totals__shipping-options-fieldset">
 			<legend className="screen-reader-text">
 				{ __(
-					'Choose the shipping method.',
+					'Choose a shipping method',
 					'woo-gutenberg-products-block'
 				) }
 			</legend>
 			<ShippingRatesControl
-				className="wc-block-cart__shipping-options"
+				className="wc-block-totals__shipping-options"
 				collapsibleWhenMultiple={ true }
 				noResultsMessage={ __(
 					'No shipping options were found.',

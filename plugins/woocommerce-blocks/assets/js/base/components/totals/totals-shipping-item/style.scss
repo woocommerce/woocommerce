@@ -1,0 +1,56 @@
+// Added extra class and label for specificity.
+fieldset.wc-block-totals__shipping-options-fieldset {
+	background-color: transparent;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.wc-block-totals__shipping-options {
+	.wc-block-radio-control__label,
+	.wc-block-radio-control__description,
+	.wc-block-radio-control__secondary-label,
+	.wc-block-radio-control__secondary-description {
+		flex-basis: 100%;
+		text-align: left;
+	}
+
+	.wc-block-radio-control__option {
+		padding-left: $gap-large;
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	.wc-block-radio-control__input {
+		left: 0;
+		margin: 0;
+	}
+}
+
+
+.wc-block-totals__change-address-button {
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	color: inherit;
+	font-family: inherit;
+	font-weight: inherit;
+	display: inline;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	margin: 0;
+	padding: 0;
+	text-decoration: underline;
+	text-transform: none;
+	vertical-align: middle;
+
+	&:hover,
+	&:focus,
+	&:active {
+		background: transparent;
+		opacity: 0.8;
+	}
+}

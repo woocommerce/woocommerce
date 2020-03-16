@@ -26,7 +26,6 @@ const CheckoutSidebar = ( {
 	cartCoupons = [],
 	cartItems = [],
 	cartTotals = {},
-	shippingRates,
 } ) => {
 	const {
 		applyCoupon,
@@ -34,7 +33,6 @@ const CheckoutSidebar = ( {
 		isApplyingCoupon,
 		isRemovingCoupon,
 	} = useStoreCartCoupons();
-	const shippingAddress = shippingRates[ 0 ]?.destination;
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
@@ -51,7 +49,9 @@ const CheckoutSidebar = ( {
 			/>
 			<TotalsShippingItem
 				currency={ totalsCurrency }
-				shippingAddress={ shippingAddress }
+				noResultsMessage={ null }
+				isCheckout={ true }
+				showCalculator={ false }
 				values={ cartTotals }
 			/>
 			{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (

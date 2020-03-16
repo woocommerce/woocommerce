@@ -15,6 +15,7 @@ import { useShippingRates } from '@woocommerce/base-hooks';
 import TotalsItem from '../totals-item';
 import ShippingRateSelector from './shipping-rate-selector';
 import hasShippingRate from './has-shipping-rate';
+import './style.scss';
 
 /**
  * Renders the shipping totals row, rates, and calculator if enabled.
@@ -22,6 +23,7 @@ import hasShippingRate from './has-shipping-rate';
 const TotalsShippingItem = ( {
 	currency,
 	values,
+	isCheckout = false,
 	showCalculator = true,
 	showRatesWithoutAddress = false,
 } ) => {
@@ -44,14 +46,14 @@ const TotalsShippingItem = ( {
 	const showingRates = showRatesWithoutAddress || hasShippingAddress;
 
 	// If we have no rates, and an address is needed.
-	if ( ! hasRates && ! hasShippingAddress ) {
+	if ( ! hasRates && ! hasShippingAddress && ! isCheckout ) {
 		return (
 			<TotalsItem
 				label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
 				value={
 					showCalculator ? (
 						<button
-							className="wc-block-cart__change-address-button"
+							className="wc-block-totals__change-address-button"
 							onClick={ () => {
 								setIsShippingCalculatorOpen(
 									! isShippingCalculatorOpen
@@ -100,7 +102,7 @@ const TotalsShippingItem = ( {
 						<ShippingLocation address={ shippingAddress } />{ ' ' }
 						{ showCalculator && (
 							<button
-								className="wc-block-cart__change-address-button"
+								className="wc-block-totals__change-address-button"
 								onClick={ () => {
 									setIsShippingCalculatorOpen(
 										! isShippingCalculatorOpen
@@ -127,19 +129,11 @@ const TotalsShippingItem = ( {
 				}
 				currency={ currency }
 			/>
-			{ showingRates && (
-				<fieldset className="wc-block-cart__shipping-options-fieldset">
-					<legend className="screen-reader-text">
-						{ __(
-							'Choose a shipping method',
-							'woo-gutenberg-products-block'
-						) }
-					</legend>
-					<ShippingRateSelector
-						shippingRates={ shippingRates }
-						shippingRatesLoading={ shippingRatesLoading }
-					/>
-				</fieldset>
+			{ ! isCheckout && showingRates && (
+				<ShippingRateSelector
+					shippingRates={ shippingRates }
+					shippingRatesLoading={ shippingRatesLoading }
+				/>
 			) }
 		</>
 	);
@@ -151,6 +145,7 @@ TotalsShippingItem.propTypes = {
 		total_shipping: PropTypes.string,
 		total_shipping_tax: PropTypes.string,
 	} ).isRequired,
+	isCheckout: PropTypes.bool,
 	showCalculator: PropTypes.bool,
 	showRatesWithoutAddress: PropTypes.bool,
 };
