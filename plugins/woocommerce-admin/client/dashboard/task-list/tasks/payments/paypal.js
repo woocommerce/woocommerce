@@ -31,7 +31,6 @@ class PayPal extends Component {
 	}
 
 	componentDidMount() {
-		const { autoConnectFailed } = this.state;
 		const { createNotice, markConfigured } = this.props;
 
 		const query = getQuery();
@@ -54,12 +53,35 @@ class PayPal extends Component {
 			return;
 		}
 
-		if ( ! autoConnectFailed ) {
+		this.fetchOAuthConnectURL();
+	}
+
+	componentDidUpdate( prevProps ) {
+		const { activePlugins } = this.props;
+
+		if (
+			! prevProps.activePlugins.includes(
+				'woocommerce-gateway-paypal-express-checkout'
+			) &&
+			activePlugins.includes(
+				'woocommerce-gateway-paypal-express-checkout'
+			)
+		) {
 			this.fetchOAuthConnectURL();
 		}
 	}
 
 	async fetchOAuthConnectURL() {
+		const { activePlugins } = this.props;
+
+		if (
+			! activePlugins.includes(
+				'woocommerce-gateway-paypal-express-checkout'
+			)
+		) {
+			return;
+		}
+
 		this.setState( { isPending: true } );
 		try {
 			const result = await apiFetch( {
@@ -268,13 +290,17 @@ PayPal.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptions, isGetOptionsRequesting } = select( 'wc-api' );
+		const { getActivePlugins, getOptions, isGetOptionsRequesting } = select(
+			'wc-api'
+		);
 		const options = getOptions( [ 'woocommerce_ppec_paypal_settings' ] );
 		const isOptionsRequesting = Boolean(
 			isGetOptionsRequesting( [ 'woocommerce_ppec_paypal_settings' ] )
 		);
+		const activePlugins = getActivePlugins();
 
 		return {
+			activePlugins,
 			options,
 			isOptionsRequesting,
 		};

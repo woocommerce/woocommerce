@@ -50,7 +50,7 @@ function updateOptions( resourceNames, data, fetch ) {
 		} )
 			.then( () => optionsToResource( data[ resourceName ], true ) )
 			.catch( ( error ) => {
-				return { [ resourceName ]: { error } };
+				return { [ resourceName ]: { data: {}, error } };
 			} );
 	} );
 }

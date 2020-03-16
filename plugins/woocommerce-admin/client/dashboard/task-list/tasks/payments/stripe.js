@@ -68,6 +68,7 @@ class Stripe extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const {
+			activePlugins,
 			createNotice,
 			isOptionsRequesting,
 			hasOptionsError,
@@ -85,6 +86,15 @@ class Stripe extends Component {
 					)
 				);
 			}
+		}
+
+		if (
+			! prevProps.activePlugins.includes(
+				'woocommerce-gateway-stripe'
+			) &&
+			activePlugins.includes( 'woocommerce-gateway-stripe' )
+		) {
+			this.fetchOAuthConnectURL();
 		}
 	}
 
@@ -113,6 +123,11 @@ class Stripe extends Component {
 	}
 
 	async fetchOAuthConnectURL() {
+		const { activePlugins } = this.props;
+		if ( ! activePlugins.includes( 'woocommerce-gateway-stripe' ) ) {
+			return;
+		}
+
 		try {
 			this.setState( { isPending: true } );
 			const result = await apiFetch( {

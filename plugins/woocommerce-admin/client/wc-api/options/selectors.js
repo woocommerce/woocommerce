@@ -43,6 +43,11 @@ const getOptionsError = ( getResource ) => ( optionNames ) => {
 	return getResource( getResourceName( 'options', optionNames ) ).error;
 };
 
+const getUpdateOptionsError = ( getResource ) => ( optionNames ) => {
+	return getResource( getResourceName( 'options-update', optionNames ) )
+		.error;
+};
+
 const isGetOptionsRequesting = ( getResource ) => ( optionNames ) => {
 	const { lastReceived, lastRequested } = getResource(
 		getResourceName( 'options', optionNames )
@@ -70,6 +75,7 @@ const isUpdateOptionsRequesting = ( getResource ) => ( optionNames ) => {
 export default {
 	getOptions,
 	getOptionsError,
+	getUpdateOptionsError,
 	isGetOptionsRequesting,
 	isUpdateOptionsRequesting,
 };
