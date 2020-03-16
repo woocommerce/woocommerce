@@ -58,6 +58,9 @@ class BusinessDetails extends Component {
 			'mailchimp-for-woocommerce': businessExtensions
 				? businessExtensions.includes( 'mailchimp-for-woocommerce' )
 				: true,
+			'kliken-marketing-for-google': businessExtensions
+				? businessExtensions.includes( 'kliken-marketing-for-google' )
+				: true,
 		};
 
 		this.state = {
@@ -69,6 +72,7 @@ class BusinessDetails extends Component {
 		this.extensions = [
 			'facebook-for-woocommerce',
 			'mailchimp-for-woocommerce',
+			'kliken-marketing-for-google',
 		];
 
 		this.onContinue = this.onContinue.bind( this );
@@ -100,6 +104,7 @@ class BusinessDetails extends Component {
 			used_platform_name: otherPlatformName,
 			install_facebook: values[ 'facebook-for-woocommerce' ],
 			install_mailchimp: values[ 'mailchimp-for-woocommerce' ],
+			install_google_ads: values[ 'kliken-marketing-for-google' ],
 		} );
 
 		const _updates = {
@@ -335,37 +340,47 @@ class BusinessDetails extends Component {
 					'woocommerce-admin'
 				),
 			},
+			{
+				slug: 'kliken-marketing-for-google',
+				title: __(
+					'Drive sales with Google Shopping',
+					'woocommerce-admin'
+				),
+				icon: 'onboarding/google-ads.png',
+				description: __(
+					'Get in front of new customers on Google and secure $150 in ads credit with Kliken’s integration.',
+					'woocommerce-admin'
+				),
+			},
 		];
 
 		return (
 			<Fragment>
-				<div className="woocommerce-profile-wizard__benefits">
-					{ extensionBenefits.map( ( benefit ) => (
-						<div
-							className="woocommerce-profile-wizard__benefit"
-							key={ benefit.title }
-						>
-							<div className="woocommerce-profile-wizard__business-extension">
-								<img
-									src={ wcAdminAssetUrl + benefit.icon }
-									alt=""
-								/>
-							</div>
-							<div className="woocommerce-profile-wizard__benefit-content">
-								<H className="woocommerce-profile-wizard__benefit-title">
-									{ benefit.title }
-								</H>
-								<p>{ benefit.description }</p>
-							</div>
-							<div className="woocommerce-profile-wizard__benefit-toggle">
-								<FormToggle
-									checked={ values[ benefit.slug ] }
-									{ ...getInputProps( benefit.slug ) }
-								/>
-							</div>
+				{ extensionBenefits.map( ( benefit ) => (
+					<div
+						className="woocommerce-profile-wizard__benefit"
+						key={ benefit.title }
+					>
+						<div className="woocommerce-profile-wizard__business-extension">
+							<img
+								src={ wcAdminAssetUrl + benefit.icon }
+								alt=""
+							/>
 						</div>
-					) ) }
-				</div>
+						<div className="woocommerce-profile-wizard__benefit-content">
+							<H className="woocommerce-profile-wizard__benefit-title">
+								{ benefit.title }
+							</H>
+							<p>{ benefit.description }</p>
+						</div>
+						<div className="woocommerce-profile-wizard__benefit-toggle">
+							<FormToggle
+								checked={ values[ benefit.slug ] }
+								{ ...getInputProps( benefit.slug ) }
+							/>
+						</div>
+					</div>
+				) ) }
 
 				{ installExtensions && (
 					<div className="woocommerce-profile-wizard__card-actions">

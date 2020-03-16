@@ -333,7 +333,11 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array( 'mailchimp-for-woocommerce', 'facebook-for-woocommerce' ),
+					'enum' => array(
+						'mailchimp-for-woocommerce',
+						'facebook-for-woocommerce',
+						'kliken-marketing-for-google',
+					),
 					'type' => 'string',
 				),
 			),
