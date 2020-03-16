@@ -112,6 +112,8 @@ const stableMainEntry = {
 		'./node_modules/@wordpress/components/src/checkbox-control/style.scss',
 	'spinner-style':
 		'./node_modules/@wordpress/components/src/spinner/style.scss',
+	'snackbar-notice-style':
+		'./node_modules/@wordpress/components/src/snackbar/style.scss',
 
 	// Blocks
 	'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
@@ -268,13 +270,19 @@ const getMainConfig = ( options = {} ) => {
 							loader: 'sass-loader',
 							query: {
 								includePaths: [ 'node_modules' ],
-								data:
-									'@import "~@wordpress/base-styles/colors"; ' +
-									'@import "~@wordpress/base-styles/variables"; ' +
-									'@import "~@wordpress/base-styles/mixins"; ' +
-									'@import "~@wordpress/base-styles/breakpoints"; ' +
-									'@import "~@wordpress/base-styles/animations"; ' +
-									'@import "~@wordpress/base-styles/z-index"; ',
+								data: [
+									'colors',
+									'breakpoints',
+									'variables',
+									'mixins',
+									'animations',
+									'z-index',
+								]
+									.map(
+										( imported ) =>
+											`@import "~@wordpress/base-styles/${ imported }";`
+									)
+									.join( ' ' ),
 							},
 						},
 					],
@@ -289,12 +297,21 @@ const getMainConfig = ( options = {} ) => {
 						{
 							loader: 'sass-loader',
 							query: {
-								includePaths: [ 'assets/css/abstracts' ],
-								data:
-									'@import "_colors"; ' +
-									'@import "_variables"; ' +
-									'@import "_breakpoints"; ' +
-									'@import "_mixins"; ',
+								includePaths: [
+									'assets/css/abstracts',
+									'node_modules',
+								],
+								data: [
+									'_colors',
+									'_variables',
+									'_breakpoints',
+									'_mixins',
+								]
+									.map(
+										( imported ) =>
+											`@import "${ imported }";`
+									)
+									.join( ' ' ),
 							},
 						},
 					],

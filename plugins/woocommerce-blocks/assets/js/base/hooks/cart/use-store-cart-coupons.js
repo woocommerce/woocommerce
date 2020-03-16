@@ -23,11 +23,7 @@ import { useStoreCart } from './use-store-cart';
  */
 export const useStoreCartCoupons = () => {
 	const { cartCoupons, cartErrors, cartIsLoading } = useStoreCart();
-	const {
-		addErrorNotice,
-		addSuccessNotice,
-		addInfoNotice,
-	} = useStoreNotices();
+	const { addErrorNotice, addSnackbarNotice } = useStoreNotices();
 
 	const results = useSelect(
 		( select, { dispatch } ) => {
@@ -40,7 +36,7 @@ export const useStoreCartCoupons = () => {
 				applyCoupon( couponCode )
 					.then( ( result ) => {
 						if ( result === true ) {
-							addSuccessNotice(
+							addSnackbarNotice(
 								sprintf(
 									// translators: %s coupon code.
 									__(
@@ -66,7 +62,7 @@ export const useStoreCartCoupons = () => {
 				removeCoupon( couponCode )
 					.then( ( result ) => {
 						if ( result === true ) {
-							addInfoNotice(
+							addSnackbarNotice(
 								sprintf(
 									// translators: %s coupon code.
 									__(
@@ -95,7 +91,7 @@ export const useStoreCartCoupons = () => {
 				isRemovingCoupon,
 			};
 		},
-		[ addErrorNotice, addSuccessNotice, addInfoNotice ]
+		[ addErrorNotice, addSnackbarNotice ]
 	);
 
 	return {

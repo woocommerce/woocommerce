@@ -4,11 +4,15 @@
 import PropTypes from 'prop-types';
 import { createContext, useContext, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import StoreNoticesContainer from '@woocommerce/base-components/store-notices-container';
+import {
+	StoreNoticesContainer,
+	SnackbarNoticesContainer,
+} from '@woocommerce/base-components/store-notices-container';
 
 const StoreNoticesContext = createContext( {
 	notices: [],
 	createNotice: () => void null,
+	createSnackBarNotice: () => void null,
 	removeNotice: () => void null,
 	context: 'wc/core',
 } );
@@ -52,6 +56,16 @@ export const StoreNoticesProvider = ( {
 		[ createNotice, context ]
 	);
 
+	const createSnackbarNotice = useCallback(
+		( content = '', options = {} ) => {
+			createNoticeWithContext( 'default', content, {
+				...options,
+				type: 'snackbar',
+			} );
+		},
+		[ createNoticeWithContext ]
+	);
+
 	const { notices } = useSelect(
 		( select ) => {
 			return {
@@ -64,6 +78,7 @@ export const StoreNoticesProvider = ( {
 	const contextValue = {
 		notices,
 		createNotice: createNoticeWithContext,
+		createSnackbarNotice,
 		removeNotice: removeNoticeWithContext,
 		context,
 	};
@@ -77,6 +92,7 @@ export const StoreNoticesProvider = ( {
 				/>
 			) }
 			{ children }
+			<SnackbarNoticesContainer />
 		</StoreNoticesContext.Provider>
 	);
 };
