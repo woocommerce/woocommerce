@@ -345,10 +345,11 @@
 		font-size: 14px;
 		color: $studio-gray-60;
 		margin: 0;
+		margin-right: $gap-larger;
 	}
 
 	.woocommerce-task-payment__after {
-		margin-left: $gap-larger;
+		margin-left: auto;
 
 		.components-button.is-button {
 			margin: 0;
@@ -384,6 +385,36 @@
 			order: 3;
 			margin-top: $gap;
 		}
+	}
+}
+
+.woocommerce-task-payment-method {
+	.woocommerce-card__body {
+		padding: $gap-large;
+
+		> h3 {
+			margin: 0;
+			color: $studio-gray-90;
+		}
+
+		p {
+			font-size: 14px;
+			color: $studio-gray-50;
+			font-weight: 400;
+			margin-top: 2px;
+			margin-bottom: $gap-smaller;
+		}
+	}
+}
+
+.woocommerce-task-payment-method__fields {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 0 $gap;
+	margin-bottom: $gap-smaller;
+
+	.components-base-control {
+		margin-bottom: 0;
 	}
 }
 

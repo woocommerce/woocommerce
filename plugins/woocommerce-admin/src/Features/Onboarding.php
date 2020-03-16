@@ -499,6 +499,9 @@ class Onboarding {
 		$options[] = 'woocommerce_default_country';
 		$options[] = 'woocommerce_kco_settings';
 		$options[] = 'woocommerce_klarna_payments_settings';
+		$options[] = 'woocommerce_cod_settings';
+		$options[] = 'woocommerce_bacs_settings';
+		$options[] = 'woocommerce_bacs_accounts';
 
 		return $options;
 	}

@@ -113,6 +113,15 @@ class Payments extends Component {
 	}
 
 	markConfigured( method ) {
+		const { enabledMethods } = this.state;
+
+		this.setState( {
+			enabledMethods: {
+				...enabledMethods,
+				[ method ]: true,
+			},
+		} );
+
 		getHistory().push( getNewPath( { task: 'payments' }, '/', {} ) );
 
 		recordEvent( 'tasklist_payment_connect_method', {
@@ -330,6 +339,9 @@ export default compose(
 			'woocommerce_klarna_payments_settings',
 			'woocommerce_kco_settings',
 			'wc_square_refresh_tokens',
+			'woocommerce_cod_settings',
+			'woocommerce_bacs_settings',
+			'woocommerce_bacs_accounts',
 		] );
 		const countryCode = getCountryCode(
 			options.woocommerce_default_country
