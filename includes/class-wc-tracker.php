@@ -163,6 +163,9 @@ class WC_Tracker {
 		// Template overrides.
 		$data['admin_user_agents'] = self::get_admin_user_agents();
 
+		// Cart & checkout tech (blocks or shortcodes).
+		$data['cart_checkout'] = self::get_cart_checkout_info();
+
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
 
@@ -620,6 +623,60 @@ class WC_Tracker {
 		}
 
 		return array_merge( $min_max, $processing_min_max );
+	}
+
+	/**
+	 * Search a specific post for text content.
+	 *
+	 * @param integer $post_id The id of the post to search.
+	 * @param string  $text    The text to search for.
+	 * @return string 'Yes' if post contains $text (otherwise 'No').
+	 */
+	public static function post_contains_text( $post_id, $text ) {
+		global $wpdb;
+
+		$result = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT COUNT( * ) FROM {$wpdb->prefix}_posts
+				WHERE ID=%d
+				AND {$wpdb->prefix}_posts.post_content LIKE %s
+				",
+				array( $post_id, $text )
+			)
+		);
+
+		return ( 0 !== $result ) ? 'Yes' : 'No';
+	}
+
+	/**
+	 * Get info about the cart & checkout pages.
+	 *
+	 * @return array
+	 */
+	public static function get_cart_checkout_info() {
+		global $wpdb;
+
+		$cart_page_id     = wc_get_page_id( 'cart' );
+		$checkout_page_id = wc_get_page_id( 'checkout' );
+		return array(
+			'cart_page_contains_cart_block'             => self::post_contains_text(
+				$cart_page_id,
+				'<!-- wp:woocommerce/cart'
+			),
+			'cart_page_contains_cart_shortcode'         => self::post_contains_text(
+				$cart_page_id,
+				'[woocommerce_cart]'
+			),
+			'checkout_page_contains_checkout_block'     => self::post_contains_text(
+				$checkout_page_id,
+				'<!-- wp:woocommerce/checkout'
+			),
+			'checkout_page_contains_checkout_shortcode' => self::post_contains_text(
+				$checkout_page_id,
+				'[woocommerce_checkout]'
+			),
+		);
 	}
 }
 
