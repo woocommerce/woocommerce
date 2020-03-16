@@ -24,3 +24,24 @@
 		margin-top: 1em;
 	}
 }
+
+.components-snackbar-list {
+	position: fixed;
+	bottom: 100px;
+	left: 100px;
+
+	@include breakpoint( "<600px" ) {
+		position: fixed;
+		top: 10px;
+		left: 0;
+		bottom: auto;
+		width: fit-content;
+	}
+
+	.components-snackbar-list__notice-container {
+		@include breakpoint( "<600px" ) {
+			margin-left: 10px;
+			margin-right: 10px;
+		}
+	}
+}

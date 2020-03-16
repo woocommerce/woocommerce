@@ -178,11 +178,11 @@
 			},
 			{
 				"path": "./build/cart-frontend.js",
-				"maxSize": "140 kB"
+				"maxSize": "155 kB"
 			},
 			{
 				"path": "./build/checkout-frontend.js",
-				"maxSize": "140 kB"
+				"maxSize": "155 kB"
 			},
 			{
 				"path": "./build/*.css",
@@ -190,7 +190,7 @@
 			},
 			{
 				"path": "./build/vendors*.js",
-				"maxSize": "350 kb"
+				"maxSize": "360 kb"
 			}
 		]
 	},
