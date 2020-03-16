@@ -11,6 +11,10 @@ import {
 	NoShipping,
 	Policies,
 } from '@woocommerce/base-components/checkout';
+import {
+	PlaceOrderButton,
+	ReturnToCartButton,
+} from '@woocommerce/base-components/cart-checkout';
 import TextInput from '@woocommerce/base-components/text-input';
 import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
@@ -29,6 +33,7 @@ import {
 	SidebarLayout,
 	Main,
 } from '@woocommerce/base-components/sidebar-layout';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -324,6 +329,20 @@ const Block = ( {
 								}
 							/>
 						</FormStep>
+						<div className="wc-block-checkout__actions">
+							{ attributes.showReturnToCart && (
+								<ReturnToCartButton
+									link={
+										 getSetting(
+													'page-' +
+														attributes?.cartPageId,
+													false
+											  )
+									}
+								/>
+							) }
+							<PlaceOrderButton />
+						</div>
 						{ attributes.showPolicyLinks && <Policies /> }
 					</CheckoutForm>
 				</Main>

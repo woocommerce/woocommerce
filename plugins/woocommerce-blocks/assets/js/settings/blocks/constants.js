@@ -55,18 +55,27 @@ export const SHIPPING_METHODS_EXIST = getSetting(
 );
 
 const defaultPage = {
-	name: '',
-	url: '',
+	id: 0,
+	title: '',
+	permalink: '',
 };
 const storePages = getSetting( 'storePages', {
 	shop: defaultPage,
+	cart: defaultPage,
 	checkout: defaultPage,
 	privacy: defaultPage,
 	terms: defaultPage,
 } );
-export const SHOP_URL = storePages.shop.url;
-export const CHECKOUT_URL = storePages.checkout.url;
-export const PRIVACY_URL = storePages.privacy.url;
-export const TERMS_URL = storePages.terms.url;
-export const PRIVACY_PAGE_NAME = storePages.privacy.name;
-export const TERMS_PAGE_NAME = storePages.terms.name;
+export const SHOP_URL = storePages.shop.permalink;
+
+export const CHECKOUT_PAGE_ID = storePages.checkout.id;
+export const CHECKOUT_URL = storePages.checkout.permalink;
+
+export const PRIVACY_URL = storePages.privacy.permalink;
+export const PRIVACY_PAGE_NAME = storePages.privacy.title;
+
+export const TERMS_URL = storePages.terms.permalink;
+export const TERMS_PAGE_NAME = storePages.terms.title;
+
+export const CART_PAGE_ID = storePages.cart.id;
+export const CART_URL = storePages.cart.permalink;

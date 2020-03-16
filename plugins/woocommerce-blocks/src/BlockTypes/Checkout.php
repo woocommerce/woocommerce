@@ -50,6 +50,12 @@ class Checkout extends AbstractBlock {
 		$data_registry = Package::container()->get(
 			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
 		);
+		if ( ! empty( $attributes['cartPageId'] ) && ! $data_registry->exists( 'page-' . $attributes['cartPageId'] ) ) {
+			$permalink = get_permalink( $attributes['cartPageId'] );
+			if ( $permalink ) {
+				$data_registry->add( 'page-' . $attributes['cartPageId'], get_permalink( $attributes['cartPageId'] ) );
+			}
+		}
 		if ( ! $data_registry->exists( 'allowedCountries' ) ) {
 			$data_registry->add( 'allowedCountries', WC()->countries->get_allowed_countries() );
 		}

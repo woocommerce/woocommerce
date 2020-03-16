@@ -1,5 +1,6 @@
 export { default as Icon } from './icon';
 
+export { default as arrowBack } from './library/arrow-back';
 export { default as bill } from './library/bill';
 export { default as card } from './library/card';
 export { default as cart } from './library/cart';

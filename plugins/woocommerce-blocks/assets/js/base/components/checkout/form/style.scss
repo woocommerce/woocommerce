@@ -1,12 +1,3 @@
 .wc-block-checkout-form {
-	margin-right: $gap-large;
 	max-width: 100%;
-}
-
-// Responsive media styles.
-@include breakpoint( "<480px" ) {
-	.wc-block-checkout-form {
-		margin-left: $gap-smaller;
-		margin-right: $gap;
-	}
 }

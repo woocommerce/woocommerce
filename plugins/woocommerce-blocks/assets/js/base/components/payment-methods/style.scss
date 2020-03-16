@@ -2,7 +2,7 @@
 	margin: auto;
 	border: 2px solid $black;
 	border-radius: 5px;
-	padding: 10px;
+	padding: 8px;
 
 	.wc-block-component-express-checkout__title {
 		position: relative;
@@ -50,7 +50,7 @@
 	display: flex;
 	align-items: center;
 	text-align: center;
-	padding: 0 ($gap-large+14px);
+	padding: 0 $gap-larger;
 	margin: $gap-large 0;
 
 	&::before {

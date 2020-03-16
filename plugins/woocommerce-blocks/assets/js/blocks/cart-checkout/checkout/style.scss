@@ -83,6 +83,22 @@
 	}
 }
 
+.wc-block-checkout__actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: $gap-large 0 $gap-large*2;
+	padding: 0 $gap-larger;
+
+	.wc-block-components-checkout-place-order-button {
+		width: 50%;
+		padding: 1em;
+		border-radius: 3px;
+		height: auto;
+		margin-left: auto;
+	}
+}
+
 @include breakpoint( ">480px" ) {
 	.wc-block-checkout__billing-fields,
 	.wc-block-checkout__shipping-fields {

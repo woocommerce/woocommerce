@@ -8,7 +8,7 @@ $line-offset-from-circle-size: 8px;
 .wc-block-checkout-form fieldset.wc-block-checkout-step {
 	position: relative;
 	border: none;
-	padding: 0 0 $gap-larger $gap-large;
+	padding: 0 $gap-larger $gap-larger $gap-larger;
 	background: none;
 	margin: 0;
 
@@ -63,7 +63,7 @@ $line-offset-from-circle-size: 8px;
 	width: 1px;
 	background-color: $gray-10;
 	position: absolute;
-	left: 0;
+	left: $circle-size/2;
 	top: $circle-size + $line-offset-from-circle-size;
 }
 
@@ -73,7 +73,7 @@ $line-offset-from-circle-size: 8px;
 	position: absolute;
 	width: $circle-size;
 	height: $circle-size;
-	left: -$circle-size / 2;
+	left: 0;
 	top: 0;
 	background: $gray-20;
 	color: $white;
