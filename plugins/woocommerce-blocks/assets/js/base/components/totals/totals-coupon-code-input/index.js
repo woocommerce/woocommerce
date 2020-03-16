@@ -76,7 +76,7 @@ const TotalsCouponCodeInput = ( {
 						/>
 						<Button
 							className="wc-block-coupon-code__button"
-							disabled={ isLoading }
+							disabled={ isLoading || ! couponValue }
 							onClick={ ( e ) => {
 								e.preventDefault();
 								onSubmit( couponValue );
