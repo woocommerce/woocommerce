@@ -447,31 +447,7 @@ jQuery( function( $ ) {
 		 * @return {Object}
 		 */
 		get_variations_fields: function( fields ) {
-
-			var data = {};
-
-			$( ':input', fields ).each( function( index, elem ) {
-
-				var $input = $( elem );
-
-				// Bypass inputs without name att
-				if ( ! elem.name ) {
-					return;
-				}
-
-				// Bypass non-checked checkboxes and radio buttons.
-				if ( ( $input.is( ':radio' ) || $input.is( ':checkbox' ) ) && ! $input.is( ':checked' ) ) {
-					return;
-				}
-
-				// Bypass disabled fields.
-				if ( true === $input.prop( 'disabled' ) ) {
-					return;
-				}
-
-				data[ elem.name ] = elem.value;
-
-			});
+			var data = $( ':input', fields ).serializeJSON();
 
 			$( '.variations-defaults select' ).each( function( index, element ) {
 				var select = $( element );
