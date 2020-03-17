@@ -10,17 +10,27 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
+/**
+ * ProductSaleBadge
+ *
+ * @param {Object} props            Incoming props.
+ * @param {Object} props.currency   Currency object.
+ * @param {number} props.saleAmount Currency object.
+ *
+ * @return {*} The component.
+ */
 const ProductSaleBadge = ( { currency, saleAmount } ) => {
+	if ( ! saleAmount ) {
+		return null;
+	}
 	return (
-		saleAmount > 0 && (
-			<div className="wc-block-sale-badge">
-				{ sprintf(
-					/* translators: %s discount amount */
-					__( 'Save %s!', 'woo-gutenberg-products-block' ),
-					formatPrice( saleAmount, currency )
-				) }
-			</div>
-		)
+		<div className="wc-block-sale-badge">
+			{ sprintf(
+				/* translators: %s discount amount */
+				__( 'Save %s!', 'woo-gutenberg-products-block' ),
+				formatPrice( saleAmount, currency )
+			) }
+		</div>
 	);
 };
 

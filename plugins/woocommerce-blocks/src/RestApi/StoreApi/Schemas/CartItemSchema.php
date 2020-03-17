@@ -204,7 +204,7 @@ class CartItemSchema extends AbstractSchema {
 							'readonly'    => true,
 						],
 						'regular_price' => [
-							'description' => __( 'Regular product price', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Regular product price.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -229,6 +229,38 @@ class CartItemSchema extends AbstractSchema {
 								],
 								'max_amount' => [
 									'description' => __( 'Price amount.', 'woo-gutenberg-products-block' ),
+									'type'        => 'string',
+									'context'     => [ 'view', 'edit' ],
+									'readonly'    => true,
+								],
+							],
+						],
+						'raw_prices'    => [
+							'description' => __( 'Raw unrounded product prices used in calculations. Provided using a higher unit of precision than the currency.', 'woo-gutenberg-products-block' ),
+							'type'        => [ 'object', 'null' ],
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+							'properties'  => [
+								'precision'     => [
+									'description' => __( 'Decimal precision of the returned prices.', 'woo-gutenberg-products-block' ),
+									'type'        => 'integer',
+									'context'     => [ 'view', 'edit' ],
+									'readonly'    => true,
+								],
+								'price'         => [
+									'description' => __( 'Current product price.', 'woo-gutenberg-products-block' ),
+									'type'        => 'string',
+									'context'     => [ 'view', 'edit' ],
+									'readonly'    => true,
+								],
+								'regular_price' => [
+									'description' => __( 'Regular product price.', 'woo-gutenberg-products-block' ),
+									'type'        => 'string',
+									'context'     => [ 'view', 'edit' ],
+									'readonly'    => true,
+								],
+								'sale_price'    => [
+									'description' => __( 'Sale product price, if applicable.', 'woo-gutenberg-products-block' ),
 									'type'        => 'string',
 									'context'     => [ 'view', 'edit' ],
 									'readonly'    => true,
@@ -296,8 +328,6 @@ class CartItemSchema extends AbstractSchema {
 	public function get_item_response( $cart_item ) {
 		$product = $cart_item['data'];
 
-		$product_prices = $this->product_schema->get_prices( $product, get_option( 'woocommerce_tax_display_cart' ) );
-
 		return [
 			'key'                 => $cart_item['key'],
 			'id'                  => $product->get_id(),
@@ -313,7 +343,7 @@ class CartItemSchema extends AbstractSchema {
 			'permalink'           => $product->get_permalink(),
 			'images'              => ( new ProductImages() )->images_to_array( $product ),
 			'variation'           => $this->format_variation_data( $cart_item['variation'], $product ),
-			'prices'              => (object) $product_prices,
+			'prices'              => (object) $this->get_prices( $product, get_option( 'woocommerce_tax_display_cart' ), wc_stock_amount( $cart_item['quantity'] ) ),
 			'totals'              => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
@@ -324,6 +354,33 @@ class CartItemSchema extends AbstractSchema {
 				]
 			),
 		];
+	}
+
+	/**
+	 * Get an array of pricing data for the product line item.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @param string      $tax_display_mode If returned prices are incl or excl of tax.
+	 * @param int         $qty Line item quantity of this product.
+	 * @return array
+	 */
+	public function get_prices( \WC_Product $product, $tax_display_mode = '', $qty = 1 ) {
+		$prices           = $this->get_store_currency_response();
+		$tax_display_mode = in_array( $tax_display_mode, [ 'incl', 'excl' ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
+		$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+
+		// Get individual product prices from product schema.
+		$prices = $this->product_schema->get_prices( $product, $tax_display_mode );
+
+		// Add raw prices (prices with greater precision).
+		$prices['raw_prices'] = [
+			'precision'     => wc_get_rounding_precision(),
+			'price'         => $this->prepare_money_response( $price_function( $product ), wc_get_rounding_precision() ),
+			'regular_price' => $this->prepare_money_response( $price_function( $product, [ 'price' => $product->get_regular_price() ] ), wc_get_rounding_precision() ),
+			'sale_price'    => $this->prepare_money_response( $price_function( $product, [ 'price' => $product->get_sale_price() ] ), wc_get_rounding_precision() ),
+		];
+
+		return $prices;
 	}
 
 	/**

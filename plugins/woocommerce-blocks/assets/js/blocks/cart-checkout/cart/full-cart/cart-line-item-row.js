@@ -16,6 +16,7 @@ import {
 	ProductPrice,
 	ProductSaleBadge,
 } from '@woocommerce/base-components/cart-checkout';
+import Dinero from 'dinero.js';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
@@ -38,18 +39,47 @@ const getMaximumQuantity = ( backOrdersAllowed, lowStockAmount ) => {
 };
 
 /**
+ * Convert a Dinero object with precision to store currency minor unit.
+ *
+ * @param {Dinero} priceObject Price object to convert.
+ * @param {Object} currency    Currency data.
+ * @return {number} Amount with new minor unit precision.
+ */
+const getAmountFromRawPrice = ( priceObject, currency ) => {
+	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
+};
+
+/**
  * Cart line item table row component.
  */
 const CartLineItemRow = ( { lineItem } ) => {
 	const {
-		name,
-		summary,
+		name = '',
+		summary = '',
 		low_stock_remaining: lowStockRemaining = null,
-		backorders_allowed: backOrdersAllowed,
-		permalink,
-		images,
-		variation,
-		prices,
+		backorders_allowed: backOrdersAllowed = false,
+		permalink = '',
+		images = [],
+		variation = [],
+		prices = {
+			currency_code: 'USD',
+			currency_minor_unit: 2,
+			currency_symbol: '$',
+			currency_prefix: '$',
+			currency_suffix: '',
+			currency_decimal_separator: '.',
+			currency_thousand_separator: ',',
+			price: '0',
+			regular_price: '0',
+			sale_price: '0',
+			price_range: null,
+			raw_prices: {
+				precision: 6,
+				price: '0',
+				regular_price: '0',
+				sale_price: '0',
+			},
+		},
 	} = lineItem;
 
 	const {
@@ -60,9 +90,15 @@ const CartLineItemRow = ( { lineItem } ) => {
 	} = useStoreCartItemQuantity( lineItem );
 
 	const currency = getCurrency( prices );
-	const regularPrice = parseInt( prices.regular_price, 10 ) * quantity;
-	const purchasePrice = parseInt( prices.price, 10 ) * quantity;
-	const saleAmount = regularPrice - purchasePrice;
+	const regularAmount = Dinero( {
+		amount: parseInt( prices.raw_prices.regular_price, 10 ),
+		precision: parseInt( prices.raw_prices.precision, 10 ),
+	} ).multiply( quantity );
+	const purchaseAmount = Dinero( {
+		amount: parseInt( prices.raw_prices.price, 10 ),
+		precision: parseInt( prices.raw_prices.precision, 10 ),
+	} ).multiply( quantity );
+	const saleAmount = regularAmount.subtract( purchaseAmount );
 
 	return (
 		<tr className="wc-block-cart-items__row">
@@ -105,12 +141,15 @@ const CartLineItemRow = ( { lineItem } ) => {
 			<td className="wc-block-cart-item__total">
 				<ProductPrice
 					currency={ currency }
-					regularValue={ regularPrice }
-					value={ purchasePrice }
+					regularValue={ getAmountFromRawPrice(
+						regularAmount,
+						currency
+					) }
+					value={ getAmountFromRawPrice( purchaseAmount, currency ) }
 				/>
 				<ProductSaleBadge
 					currency={ currency }
-					saleAmount={ saleAmount }
+					saleAmount={ getAmountFromRawPrice( saleAmount, currency ) }
 				/>
 			</td>
 		</tr>
@@ -118,7 +157,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 };
 
 CartLineItemRow.propTypes = {
-	lineItem: PropTypes.object.isRequired,
+	lineItem: PropTypes.object,
 };
 
 export default CartLineItemRow;
