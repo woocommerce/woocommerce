@@ -98,8 +98,6 @@ export function* applyCoupon( couponCode ) {
 	} catch ( error ) {
 		// Store the error message in state.
 		yield receiveError( error );
-		// Finished handling the coupon.
-		yield receiveApplyingCoupon( '' );
 		// Re-throw the error.
 		throw error;
 	}

@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@woocommerce/base-components/cart-checkout';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import { useValidationContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ const ShippingCalculatorAddress = ( {
 	addressFields,
 } ) => {
 	const [ address, setAddress ] = useState( initialAddress );
+	const { getValidationError } = useValidationContext();
 
 	return (
 		<form className="wc-block-shipping-calculator-address">
@@ -29,7 +31,10 @@ const ShippingCalculatorAddress = ( {
 			/>
 			<Button
 				className="wc-block-shipping-calculator-address__button"
-				disabled={ isShallowEqual( address, initialAddress ) }
+				disabled={
+					isShallowEqual( address, initialAddress ) ||
+					getValidationError( 'country' )
+				}
 				onClick={ ( e ) => {
 					e.preventDefault();
 					return onUpdate( address );

@@ -3,11 +3,14 @@
  */
 import PropTypes from 'prop-types';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useValidationContext } from '@woocommerce/base-context';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import Select from '../select';
+import { ValidationInputError } from '../validation';
 
 const CountryInput = ( {
 	className,
@@ -22,16 +25,18 @@ const CountryInput = ( {
 		key,
 		name: decodeEntities( countries[ key ] ),
 	} ) );
+	const { getValidationError } = useValidationContext();
+	const errorMessage = getValidationError( 'country' );
 
 	return (
-		<>
+		<div className={ classnames( className, 'wc-block-country-input' ) }>
 			<Select
-				className={ className }
 				label={ label }
 				onChange={ onChange }
 				options={ options }
 				value={ options.find( ( option ) => option.key === value ) }
 				required={ required }
+				hasError={ !! errorMessage }
 			/>
 			{ autoComplete !== 'off' && (
 				<input
@@ -56,7 +61,8 @@ const CountryInput = ( {
 					tabIndex={ -1 }
 				/>
 			) }
-		</>
+			<ValidationInputError errorMessage={ errorMessage } />
+		</div>
 	);
 };
 

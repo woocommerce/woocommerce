@@ -18,6 +18,7 @@ const TextInput = ( {
 	id,
 	type = 'text',
 	ariaLabel,
+	ariaDescribedBy,
 	label,
 	screenReaderLabel,
 	disabled,
@@ -48,7 +49,9 @@ const TextInput = ( {
 				aria-label={ ariaLabel || label }
 				disabled={ disabled }
 				aria-describedby={
-					!! help ? textInputId + '__help' : undefined
+					!! help && ! ariaDescribedBy
+						? textInputId + '__help'
+						: ariaDescribedBy
 				}
 				required={ required }
 			/>
@@ -78,6 +81,7 @@ TextInput.propTypes = {
 	id: PropTypes.string,
 	value: PropTypes.string,
 	ariaLabel: PropTypes.string,
+	ariaDescribedBy: PropTypes.string,
 	label: PropTypes.string,
 	screenReaderLabel: PropTypes.string,
 	disabled: PropTypes.bool,

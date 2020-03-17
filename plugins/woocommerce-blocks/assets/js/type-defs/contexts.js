@@ -215,4 +215,22 @@
  * @property {number}                  currentPostId      The post ID being edited.
  */
 
+/**
+ * @typedef {Object} ValidationContext
+ *
+ * @property {function(string):string}  getValidationError       Return validation error or empty
+ *                                                               string if it doesn't exist for the
+ *                                                               given property.
+ * @property {function(Object<string>)} setValidationErrors      Receive an object of properties and
+ *                                                               error messages as strings and adds
+ *                                                               to the validation error state.
+ * @property {function(string)}         clearValidationError     Clears a validation error for the
+ *                                                               given property name.
+ * @property {function()}               clearAllValidationErrors Clears all validation errors
+ *                                                               currently in state.
+ * @property {function(string)}         getValidationErrorId     Returns the css id for the
+ *                                                               validation error using the given
+ *                                                               inputId string.
+ */
+
 export {};

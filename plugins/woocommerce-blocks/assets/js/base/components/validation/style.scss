@@ -1,0 +1,16 @@
+.wc-block-form-input-validation-error {
+	color: $error-red;
+	@include font-size(12);
+	margin-top: -$gap-large;
+	padding-top: $gap-smallest;
+	display: block;
+
+	> p {
+		padding: 0;
+		margin: 0;
+	}
+}
+
+.wc-block-select + .wc-block-form-input-validation-error {
+	margin-bottom: $gap-large;
+}

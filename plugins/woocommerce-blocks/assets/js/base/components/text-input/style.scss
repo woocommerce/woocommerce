@@ -1,7 +1,23 @@
 .wc-block-text-input {
 	position: relative;
-	margin-top: $gap;
+	margin-bottom: $gap-large;
 	white-space: nowrap;
+
+	&.has-error input {
+		/**
+		 *  This is needed because of the input[type="*"] rules later in this
+		 *  file (and in themes like storefront) have higher specificity for
+		 *  border
+		 */
+		border-color: $error-red !important;
+		&:focus {
+			outline-color: $error-red;
+		}
+	}
+
+	&.has-error label {
+		color: $error-red;
+	}
 }
 
 .wc-block-text-input label {

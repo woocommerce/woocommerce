@@ -1,7 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { getSetting } from '@woocommerce/settings';
+import { getSetting } from '../shared';
 
 export const CURRENT_USER_IS_ADMIN = getSetting( 'currentUserIsAdmin', false );
 export const REVIEW_RATINGS_ENABLED = getSetting(

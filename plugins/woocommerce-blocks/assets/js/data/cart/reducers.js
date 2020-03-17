@@ -149,6 +149,7 @@ const reducer = (
 		case types.RECEIVE_REMOVED_ITEM:
 			state = {
 				...state,
+				errors: [],
 				cartData: {
 					...state.cartData,
 					items: cartItemsReducer( state.cartData.items, action ),

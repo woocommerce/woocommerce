@@ -11,12 +11,38 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
+import { useValidationContext } from '@woocommerce/base-context';
+import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import defaultAddressFields from './default-address-fields';
 import countryAddressFields from './country-address-fields';
+
+const validateCountry = (
+	values,
+	setValidationErrors,
+	clearValidationError,
+	hasValidationError
+) => {
+	if (
+		! hasValidationError &&
+		! values.country &&
+		Object.values( values ).some( ( value ) => value !== '' )
+	) {
+		setValidationErrors( {
+			country: __(
+				'Please select a country to calculate rates.',
+				'woo-gutenberg-products-block'
+			),
+		} );
+	}
+	if ( hasValidationError && values.country ) {
+		clearValidationError( 'country' );
+	}
+};
 
 /**
  * Checkout address form.
@@ -28,6 +54,11 @@ const AddressForm = ( {
 	type = 'shipping',
 	values,
 } ) => {
+	const {
+		getValidationError,
+		setValidationErrors,
+		clearValidationError,
+	} = useValidationContext();
 	const countryLocale = countryAddressFields[ values.country ] || {};
 	const addressFields = fields.map( ( field ) => ( {
 		key: field,
@@ -38,7 +69,20 @@ const AddressForm = ( {
 	const sortedAddressFields = addressFields.sort(
 		( a, b ) => a.index - b.index
 	);
-
+	const countryValidationError = getValidationError( 'country' );
+	useEffect( () => {
+		validateCountry(
+			values,
+			setValidationErrors,
+			clearValidationError,
+			!! countryValidationError
+		);
+	}, [
+		values,
+		countryValidationError,
+		setValidationErrors,
+		clearValidationError,
+	] );
 	return (
 		<div className="wc-block-address-form">
 			{ sortedAddressFields.map( ( field ) => {
