@@ -150,13 +150,14 @@
 		"classnames": "2.2.6",
 		"compare-versions": "3.6.0",
 		"config": "3.3.0",
+		"dinero.js": "^1.8.0",
 		"downshift": "4.1.0",
 		"react-number-format": "4.4.1",
 		"trim-html": "0.1.9",
 		"use-debounce": "3.3.0",
 		"wordpress-components": "npm:@wordpress/components@8.5.0",
-		"wordpress-element": "npm:@wordpress/element@2.11.0",
-		"wordpress-compose": "npm:@wordpress/compose@3.11.0"
+		"wordpress-compose": "npm:@wordpress/compose@3.11.0",
+		"wordpress-element": "npm:@wordpress/element@2.11.0"
 	},
 	"husky": {
 		"hooks": {

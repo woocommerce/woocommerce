@@ -12,6 +12,7 @@ import {
 	ProductPrice,
 } from '@woocommerce/base-components/cart-checkout';
 import PropTypes from 'prop-types';
+import Dinero from 'dinero.js';
 
 const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 	const {
@@ -28,6 +29,13 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 	const currency = getCurrency( prices );
 	const regularPrice = parseInt( prices.regular_price, 10 );
 	const purchasePrice = parseInt( prices.price, 10 );
+	const linePrice = Dinero( {
+		amount: parseInt( prices.raw_prices.price, 10 ),
+		precision: parseInt( prices.raw_prices.precision, 10 ),
+	} )
+		.multiply( quantity )
+		.convertPrecision( currency.minorUnit )
+		.getAmount();
 
 	return (
 		<div className="wc-block-order-summary-item">
@@ -49,7 +57,7 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 					<ProductPrice
 						className="wc-block-order-summary-item__total-price"
 						currency={ currency }
-						value={ purchasePrice * quantity }
+						value={ linePrice }
 					/>
 					<ProductName permalink={ permalink } name={ name } />
 				</div>

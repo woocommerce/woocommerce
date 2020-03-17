@@ -96,7 +96,7 @@ class ProductSchema extends AbstractSchema {
 							'readonly'    => true,
 						],
 						'regular_price' => [
-							'description' => __( 'Regular product price', 'woo-gutenberg-products-block' ),
+							'description' => __( 'Regular product price.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,

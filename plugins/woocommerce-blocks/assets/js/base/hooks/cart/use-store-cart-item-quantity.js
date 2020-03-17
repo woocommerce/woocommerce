@@ -29,35 +29,39 @@ import { useStoreCart } from './use-store-cart';
  *                                 to cart items.
  */
 export const useStoreCartItemQuantity = ( cartItem ) => {
+	const { key: cartItemKey = '', quantity: cartItemQuantity = 1 } = cartItem;
 	const { cartErrors } = useStoreCart();
 	// Store quantity in hook state. This is used to keep the UI
 	// updated while server request is updated.
-	const [ quantity, changeQuantity ] = useState( cartItem.quantity );
+	const [ quantity, changeQuantity ] = useState( cartItemQuantity );
 	const [ debouncedQuantity ] = useDebounce( quantity, 400 );
 	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
-	const isPending = useSelect(
-		( select ) => {
-			const store = select( storeKey );
-			return store.isItemQuantityPending( cartItem.key );
-		},
-		[ cartItem.key ]
-	);
-
 	const { removeItemFromCart, changeCartItemQuantity } = useDispatch(
 		storeKey
 	);
+
+	const isPending = useSelect(
+		( select ) => {
+			if ( ! cartItemKey ) {
+				return false;
+			}
+			const store = select( storeKey );
+			return store.isItemQuantityPending( cartItemKey );
+		},
+		[ cartItemKey ]
+	);
+
 	const removeItem = () => {
-		removeItemFromCart( cartItem.key );
+		return cartItemKey ? removeItemFromCart( cartItemKey ) : false;
 	};
 
-	// Observe debounced quantity value, fire action to update server when it
-	// changes.
+	// Observe debounced quantity value, fire action to update server on change.
 	useEffect( () => {
 		// Don't run it if quantity didn't change but it was set for the first time.
-		if ( Number.isFinite( previousDebouncedQuantity ) ) {
-			changeCartItemQuantity( cartItem.key, debouncedQuantity );
+		if ( cartItemKey && Number.isFinite( previousDebouncedQuantity ) ) {
+			changeCartItemQuantity( cartItemKey, debouncedQuantity );
 		}
-	}, [ debouncedQuantity, cartItem.key ] );
+	}, [ debouncedQuantity, cartItemKey ] );
 
 	return {
 		isPending,
