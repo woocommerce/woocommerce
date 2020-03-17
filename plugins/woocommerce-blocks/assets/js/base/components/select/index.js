@@ -10,11 +10,12 @@ import { CustomSelectControl } from 'wordpress-components';
  */
 import './style.scss';
 
-const Select = ( { className, label, onChange, options, value } ) => {
+const Select = ( { className, label, onChange, options, value, hasError } ) => {
 	return (
 		<CustomSelectControl
 			className={ classnames( 'wc-block-select', className, {
 				'is-active': value,
+				'has-error': hasError,
 			} ) }
 			label={ label }
 			onChange={ ( { selectedItem } ) => {

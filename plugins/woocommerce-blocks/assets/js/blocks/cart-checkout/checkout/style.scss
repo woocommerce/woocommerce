@@ -113,12 +113,20 @@
 			}
 
 			.wc-block-text-input,
+			.wc-block-country-input,
 			.wc-block-select {
 				float: left;
 				margin-left: #{$gap-small / 2};
 				margin-right: #{$gap-small / 2};
 				position: relative;
 				width: calc(50% - #{$gap-small});
+
+				.wc-block-select {
+					float: none;
+					width: 100%;
+					margin-left: 0;
+					margin-right: 0;
+				}
 			}
 
 			.wc-block-address-form__company,
