@@ -71,7 +71,7 @@ class WC_Site_Tracking {
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
 				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
-					eventProperties = window.wp.hooks.applyFilters( 'woocommerceTracksEventProperties', eventProperties, eventName );
+					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
 					delete( eventProperties._ui );
 					delete( eventProperties._ut );
 				}
