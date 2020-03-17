@@ -68,11 +68,13 @@ class WC_Site_Tracking {
 			window.wcTracks.recordEvent = function( name, properties ) {
 				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
 				var eventProperties = properties || {};
-				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
-					eventProperties = window.wp.hooks.applyFilters( 'woocommerceTracksEventProperties', eventProperties, eventName );
-				}
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
+				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
+					eventProperties = window.wp.hooks.applyFilters( 'woocommerceTracksEventProperties', eventProperties, eventName );
+					delete( eventProperties._ui );
+					delete( eventProperties._ut );
+				}
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}

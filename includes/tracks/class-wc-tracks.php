@@ -98,7 +98,11 @@ class WC_Tracks {
 		$blog_details   = self::get_blog_details( $user->ID );
 
 		// Allow event props to be filtered to enable adding site-wide props.
-		$filtered_properties = apply_filters( 'woocommerce-tracks-event-properties', $properties, $prefixed_event_name );
+		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $properties, $prefixed_event_name );
+
+		// Delete _ui and _ut protected properties.
+		unset( $filtered_properties['_ui'] );
+		unset( $filtered_properties['_ut'] );
 
 		$event_obj = new WC_Tracks_Event( array_merge( $data, $server_details, $identity, $blog_details, $filtered_properties ) );
 
