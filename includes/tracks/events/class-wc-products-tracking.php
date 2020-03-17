@@ -6,7 +6,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
