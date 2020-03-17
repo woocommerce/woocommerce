@@ -43,8 +43,14 @@ import './editor.scss';
  * Component that renders the Cart block when user has something in cart aka "full".
  */
 const Cart = ( { attributes } ) => {
-	const { cartItems, cartTotals, cartIsLoading } = useStoreCart();
 	const { isShippingCalculatorEnabled, isShippingCostHidden } = attributes;
+
+	const {
+		cartItems,
+		cartTotals,
+		cartIsLoading,
+		cartItemsCount,
+	} = useStoreCart();
 
 	const {
 		applyCoupon,
@@ -63,7 +69,7 @@ const Cart = ( { attributes } ) => {
 	return (
 		<SidebarLayout className={ cartClassName }>
 			<Main className="wc-block-cart__main">
-				<CartLineItemsTitle itemCount={ cartItems.length } />
+				<CartLineItemsTitle itemCount={ cartItemsCount } />
 				<CartLineItemsTable
 					lineItems={ cartItems }
 					isLoading={ cartIsLoading }
