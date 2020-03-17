@@ -22,6 +22,9 @@ function replace_version( $filename, $package_json ) {
 		if ( stripos( $line, "const VERSION =" ) !== false ) {
 			$line = "\tconst VERSION = '{$package_json->version}';\n";
 		}
+		if ( stripos( $line, 'Stable tag: ' ) !== false ) {
+			$line = "Stable tag: {$package_json->version}\n";
+		}
 		$lines[] = $line;
 	}
 	file_put_contents( $filename, $lines );
@@ -30,3 +33,4 @@ function replace_version( $filename, $package_json ) {
 replace_version( 'woocommerce-admin.php', $package );
 replace_version( 'src/FeaturePlugin.php', $package );
 replace_version( 'src/Package.php', $package );
+replace_version( 'readme.txt', $package );
