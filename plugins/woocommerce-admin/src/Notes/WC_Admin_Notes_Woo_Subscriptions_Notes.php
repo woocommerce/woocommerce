@@ -191,7 +191,8 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->add_action(
 			'connect',
 			__( 'Connect', 'woocommerce-admin' ),
-			'?page=wc-addons&section=helper'
+			'?page=wc-addons&section=helper',
+			WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED
 		);
 		$note->save();
 	}
