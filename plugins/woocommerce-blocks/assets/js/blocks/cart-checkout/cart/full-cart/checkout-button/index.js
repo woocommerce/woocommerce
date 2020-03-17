@@ -15,12 +15,12 @@ import { MastercardLogo, VisaLogo } from './payment-logos'; // @todo we want to 
 /**
  * Checkout button rendered in the full cart page.
  */
-const CheckoutButton = () => {
+const CheckoutButton = ( { link } ) => {
 	return (
 		<div className="wc-block-cart__submit-container">
 			<Button
 				className="wc-block-cart__submit-button"
-				href={ CHECKOUT_URL }
+				href={ link || CHECKOUT_URL }
 			>
 				{ __( 'Proceed to Checkout', 'woo-gutenberg-products-block' ) }
 			</Button>

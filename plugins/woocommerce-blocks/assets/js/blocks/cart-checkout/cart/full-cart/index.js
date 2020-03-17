@@ -27,6 +27,7 @@ import {
 	SidebarLayout,
 	Main,
 } from '@woocommerce/base-components/sidebar-layout';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -41,8 +42,9 @@ import './editor.scss';
 /**
  * Component that renders the Cart block when user has something in cart aka "full".
  */
-const Cart = ( { isShippingCalculatorEnabled, isShippingCostHidden } ) => {
+const Cart = ( { attributes } ) => {
 	const { cartItems, cartTotals, cartIsLoading } = useStoreCart();
+	const { isShippingCalculatorEnabled, isShippingCostHidden } = attributes;
 
 	const {
 		applyCoupon,
@@ -117,7 +119,12 @@ const Cart = ( { isShippingCalculatorEnabled, isShippingCostHidden } ) => {
 							currency={ totalsCurrency }
 							values={ cartTotals }
 						/>
-						<CheckoutButton />
+						<CheckoutButton
+							link={ getSetting(
+								'page-' + attributes?.checkoutPageId,
+								false
+							) }
+						/>
 					</CardBody>
 				</Card>
 			</Sidebar>
@@ -126,8 +133,7 @@ const Cart = ( { isShippingCalculatorEnabled, isShippingCostHidden } ) => {
 };
 
 Cart.propTypes = {
-	isShippingCalculatorEnabled: PropTypes.bool,
-	isShippingCostHidden: PropTypes.bool,
+	attributes: PropTypes.object.isRequired,
 };
 
 export default Cart;

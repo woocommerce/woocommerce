@@ -267,7 +267,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 											'WooCommerce Cart Page',
 											'woo-gutenberg-products-block'
 										),
-										value: '',
+										value: 0,
 									},
 								],
 								...Object.values( pages ).map( ( page ) => {
