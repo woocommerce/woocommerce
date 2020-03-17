@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,7 +24,7 @@ class WC_Products_Tracking {
 	}
 
 	/**
-	 * Send a Tracks event when a product is updated.
+	 * Send some Tracks events when a product is updated.
 	 *
 	 * @param int    $product_id Product id.
 	 * @param object $post WordPress post.
@@ -38,6 +39,18 @@ class WC_Products_Tracking {
 		);
 
 		WC_Tracks::record_event( 'product_edit', $properties );
+
+		$product = new WC_Product( $product_id );
+		$update_properties = array(
+			'product_id'            => $product_id,
+			// 'product_type'          => TODO where does this come from?? there is no product type, only category ids.
+			'category_ids'          => $product->get_category_ids(),
+			'manage_stock'          => 0 == $product->get_manage_stock() ? 'N' : 'Y',
+			// 'stock_quantity_update' => 'Y'	TODO this may require hooking in to product edit at a lower level, which doesn't seem possible for an extension.
+			// You can only get the current product, not the product before the update...
+		);
+
+		WC_Tracks::record_event( 'product_update', $update_properties );
 	}
 
 	/**
