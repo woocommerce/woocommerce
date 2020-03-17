@@ -32,12 +32,7 @@ const Block = ( { emptyCart, attributes } ) => {
 				<RawHTML>{ emptyCart }</RawHTML>
 			) : (
 				<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
-					<FullCart
-						isShippingCalculatorEnabled={
-							attributes.isShippingCalculatorEnabled
-						}
-						isShippingCostHidden={ attributes.isShippingCostHidden }
-					/>
+					<FullCart attributes={ attributes } />
 				</LoadingMask>
 			) }
 		</>

@@ -15,6 +15,10 @@ const blockAttributes = {
 		type: 'boolean',
 		default: IS_SHIPPING_COST_HIDDEN,
 	},
+	checkoutPageId: {
+		type: 'number',
+		default: 0,
+	},
 };
 
 export default blockAttributes;

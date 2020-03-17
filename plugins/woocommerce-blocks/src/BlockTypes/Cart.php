@@ -49,6 +49,12 @@ class Cart extends AbstractBlock {
 		$data_registry = Package::container()->get(
 			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
 		);
+		if ( ! empty( $attributes['checkoutPageId'] ) && ! $data_registry->exists( 'page-' . $attributes['checkoutPageId'] ) ) {
+			$permalink = get_permalink( $attributes['checkoutPageId'] );
+			if ( $permalink ) {
+				$data_registry->add( 'page-' . $attributes['checkoutPageId'], get_permalink( $attributes['checkoutPageId'] ) );
+			}
+		}
 		if ( ! $data_registry->exists( 'shippingCountries' ) ) {
 			$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
 		}
