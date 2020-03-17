@@ -639,7 +639,7 @@ function get_woocommerce_currency_symbols() {
 			'QAR' => '&#x631;.&#x642;',
 			'RMB' => '&yen;',
 			'RON' => 'lei',
-			'RSD' => '&#x434;&#x438;&#x43d;.',
+			'RSD' => '&#1088;&#1089;&#1076;',
 			'RUB' => '&#8381;',
 			'RWF' => 'Fr',
 			'SAR' => '&#x631;.&#x633;',
