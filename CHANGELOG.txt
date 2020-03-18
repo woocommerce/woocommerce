@@ -2,7 +2,7 @@
 
 = 4.0.1 - 2020-03-18 =
 
-WooCommerce
+**WooCommerce**
 * Enhancement - Update Action Scheduler to 3.1.4. #25966
 * Enhancement - Bump Woocommerce Admin dependency to version 1.0.2. #25961
 * Fix - Add usage_count meta before using it in a query. #25882
@@ -13,7 +13,7 @@ WooCommerce
 * Fix - Made the package shipping check more permissive. #25916
 * Fix - Fix admin notes table does not exist errors when upgrading to 4.0.x. #25891
 
-WooCommerce Admin
+**WooCommerce Admin**
 * Enhancement - Onboarding: business step: add Google Ads extension install
 * Tweak - create database tables on an earlier hook to avoid conflicts with core WooCommerce.
 * Fix - Add Report Extension Example: Add default props to ReportFilters
@@ -28,7 +28,7 @@ WooCommerce Admin
 * Dev - Bump WooCommerce tested up to tag
 * Dev - Update prestart script so readme.txt stable tag is updated
 
-Action Scheduler
+**Action Scheduler**
 * Fix - Re-create tables if needed on Scheduled Actions screen load (PR #492)
 * Fix - Add null action check on Scheduled Actions screen list rows. (PR #493)
 * Fix - Fix context on ignored action log message (PR #481)
