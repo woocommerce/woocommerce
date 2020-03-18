@@ -54,7 +54,7 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 					'args'                => array(
 						'products' => array(
 							'required' => true,
-							'type'     => 'array',
+							'type'     => 'object',
 						),
 					),
 				),
