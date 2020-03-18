@@ -39,11 +39,13 @@ class WC_Products_Tracking {
 
 		WC_Tracks::record_event( 'product_edit', $properties );
 
-		$product = new WC_Product( $product_id );
+		$product_factory = new WC_Product_Factory();
+		$product = $product_factory->get_product( $product_id );
 		$update_properties = array(
 			'product_id'            => $product_id,
-			// 'product_type'          => TODO where does this come from?? there is no product type, only category ids.
-			'category_ids'          => $product->get_category_ids(),
+			'product_type'          => $product->get_type(),
+			'is_virtual'            => $product->get_virtual(),
+			'is_downloadable'       => $product->get_downloadable(),
 			'manage_stock'          => 0 == $product->get_manage_stock() ? 'N' : 'Y',
 			// 'stock_quantity_update' => 'Y'	TODO this may require hooking in to product edit at a lower level, which doesn't seem possible for an extension.
 			// You can only get the current product, not the product before the update...
