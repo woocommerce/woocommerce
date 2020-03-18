@@ -184,9 +184,9 @@ INTERESTED IN DEVELOPMENT?
 **WooCommerce**
 * Enhancement - Update Action Scheduler to 3.1.4. #25966
 * Enhancement - Bump Woocommerce Admin dependency to version 1.0.2. #25961
-* Fix - Add usage_count meta before using it in a query. #25882
+* Fix - Add `usage_count` meta before using it in a query. #25882
 * Fix - Corrected argument type validation in plugin installer API. #25858
-* Fix - Use standard admin_url function instead of absolute path. #25884
+* Fix - Use standard `admin_url` function instead of absolute path. #25884
 * Fix - Reverted the performance optimization made to variation saving. #25950
 * Fix - Send dummy params to evaluate_cost method to detect validation errors. #25946
 * Fix - Made the package shipping check more permissive. #25916
@@ -200,7 +200,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - type warning on install timestamp in PHP 7.4
 * Fix - PHP error when WooCommerce core is Network Active on Multisites.
 * Fix - missing database table errors on WooCommerce upgrade.
-* Fix - undefined const WC_ADMIN_VERSION_NUMBER when WP < 5.3
+* Fix - undefined const `WC_ADMIN_VERSION_NUMBER` when WP < 5.3
 * Fix - Made the admin note loading more resilient to prevent failures when loading notes with invalid content_data. #3926
 * Dev - Add Changelog script
 * Dev - Fix failing tests after WC core merge.
