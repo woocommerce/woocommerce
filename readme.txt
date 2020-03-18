@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony
-Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, woo
+Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.0
-Tested up to: 5.3
+Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.0.0
+Stable tag: 4.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -178,6 +178,42 @@ INTERESTED IN DEVELOPMENT?
 [Browse the code](https://plugins.trac.wordpress.org/browser/woocommerce/), check out the [SVN repository](https://plugins.svn.wordpress.org/woocommerce/), or subscribe to the [development log](https://plugins.trac.wordpress.org/log/woocommerce/) by [RSS](https://plugins.trac.wordpress.org/log/woocommerce/?limit=100&mode=stop_on_copy&format=rss).
 
 == Changelog ==
+
+= 4.0.1 - 2020-03-18 =
+
+**WooCommerce**
+* Enhancement - Update Action Scheduler to 3.1.4. #25966
+* Enhancement - Bump Woocommerce Admin dependency to version 1.0.2. #25961
+* Fix - Add `usage_count` meta before using it in a query. #25882
+* Fix - Corrected argument type validation in plugin installer API. #25858
+* Fix - Use standard `admin_url` function instead of absolute path. #25884
+* Fix - Reverted the performance optimization made to variation saving. #25950
+* Fix - Send dummy params to evaluate_cost method to detect validation errors. #25946
+* Fix - Made the package shipping check more permissive. #25916
+* Fix - Fix admin notes table does not exist errors when upgrading to 4.0.x. #25891
+
+**WooCommerce Admin**
+* Enhancement - Onboarding: business step: add Google Ads extension install.
+* Tweak - create database tables on an earlier hook to avoid conflicts with core WooCommerce.
+* Fix - Add Report Extension Example: Add default props to ReportFilters.
+* Fix - Product report sorting by SKU when some products don't have SKUs.
+* Fix - type warning on install timestamp in PHP 7.4.
+* Fix - PHP error when WooCommerce core is Network Active on Multisites.
+* Fix - missing database table errors on WooCommerce upgrade.
+* Fix - undefined const `WC_ADMIN_VERSION_NUMBER` when WP < 5.3
+* Fix - Made the admin note loading more resilient to prevent failures when loading notes with invalid content_data. #3926
+* Dev - Add Changelog script.
+* Dev - Fix failing tests after WC core merge.
+* Dev - Bump WooCommerce tested up to tag.
+* Dev - Update prestart script so readme.txt stable tag is updated.
+
+**Action Scheduler**
+* Fix - Re-create tables if needed on Scheduled Actions screen load. #492
+* Fix - Add null action check on Scheduled Actions screen list rows. #493
+* Fix - Fix context on ignored action log message. #481
+* Fix - Restore scheduled action row and bulk action processing on WooCommerce Status screen. #487
+* Fix - Include logs table re-create missed in #492. #495
+* Fix - Ensure valid table name in save action. #498
 
 = 4.0.0 - 2020-03-10 =
 

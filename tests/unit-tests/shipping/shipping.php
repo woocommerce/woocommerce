@@ -21,7 +21,7 @@ class WC_Tests_Shipping extends WC_Unit_Test_Case {
 	public function test_is_package_shippable() {
 		$shipping = new WC_Shipping();
 
-		// Failure for no country.
+		// Success for no country.
 		$result = $shipping->is_package_shippable(
 			array(
 				'destination' => array(
@@ -32,7 +32,7 @@ class WC_Tests_Shipping extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertFalse( $result );
+		$this->assertTrue( $result );
 
 		// Failure for disallowed country.
 		$result = $shipping->is_package_shippable(
@@ -47,26 +47,13 @@ class WC_Tests_Shipping extends WC_Unit_Test_Case {
 		);
 		$this->assertFalse( $result );
 
-		// Failure for no state when required.
+		// Success for correct country.
 		$result = $shipping->is_package_shippable(
 			array(
 				'destination' => array(
 					'country'  => 'US',
 					'state'    => '',
-					'postcode' => '99999',
-					'address'  => '',
-				),
-			)
-		);
-		$this->assertFalse( $result );
-
-		// Success for correct address.
-		$result = $shipping->is_package_shippable(
-			array(
-				'destination' => array(
-					'country'  => 'US',
-					'state'    => 'CA',
-					'postcode' => '99999',
+					'postcode' => '',
 					'address'  => '',
 				),
 			)
