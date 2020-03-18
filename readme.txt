@@ -201,6 +201,7 @@ WooCommerce Admin
 * Fix - PHP error when WooCommerce core is Network Active on Multisites.
 * Fix - missing database table errors on WooCommerce upgrade.
 * Fix - undefined const WC_ADMIN_VERSION_NUMBER when WP < 5.3
+* Fix - Made the admin note loading more resilient to prevent failures when loading notes with invalid content_data. #3926
 * Dev - Add Changelog script
 * Dev - Fix failing tests after WC core merge.
 * Dev - Bump WooCommerce tested up to tag
