@@ -11,6 +11,14 @@ defined( 'ABSPATH' ) || exit;
  * This class adds actions to track usage of WooCommerce.
  */
 class WC_Site_Tracking {
+
+	/**
+	 * Constructor. Sets up tracks support on init.
+	 */
+	public function __construct() {
+		add_action( 'init', array( __CLASS__, 'init' ) );
+	}
+
 	/**
 	 * Check if tracking is enabled.
 	 *
@@ -52,21 +60,43 @@ class WC_Site_Tracking {
 		// Add w.js to the page.
 		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
 
-		// Expose tracking via a function in the wcTracks global namespace directly before wc_print_js.
-		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
+		$allow_frontend_tracks = apply_filters( 'woocommerce_apply_frontend_user_tracking', true );
 
+		// Expose tracking via a function in the wcTracks global namespace directly before wc_print_js.
+		add_filter( 'admin_footer', array( __CLASS__, 'admin_tracking_function' ), 24 );
+
+		if ( $allow_frontend_tracks ) {
+			// Expose tracking via a function in the wcTracks global namespace on frontend.
+			add_action( 'wp_footer', array( __CLASS__, 'frontend_tracking_function' ) );
+		}
 	}
 
 	/**
-	 * Adds the tracking function to the admin footer.
+	 * Render tracking function with admin prefix.
 	 */
-	public static function add_tracking_function() {
+	public static function admin_tracking_function() {
+		self::render_tracking_function( WC_Tracks::ADMIN_PREFIX );
+	}
+
+	/**
+	 * Render tracking function with frontend prefix.
+	 */
+	public static function frontend_tracking_function() {
+		self::render_tracking_function( WC_Tracks::FRONTEND_PREFIX );
+	}
+
+	/**
+	 * Renders a tracking function with specified event prefix.
+	 *
+	 * @param string $event_name_prefix Prefix to add to all triggered events.
+	 */
+	public static function render_tracking_function( $event_name_prefix ) {
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.recordEvent = function( name, properties ) {
-				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
+				var eventName = '<?php echo esc_attr( $event_name_prefix ); ?>' + name;
 				var eventProperties = properties || {};
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
@@ -91,20 +121,9 @@ class WC_Site_Tracking {
 	}
 
 	/**
-	 * Init tracking.
+	 * Set up admin tracking.
 	 */
-	public static function init() {
-
-		if ( ! self::is_tracking_enabled() ) {
-
-			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
-			add_filter( 'admin_footer', array( __CLASS__, 'add_empty_tracking_function' ), 24 );
-
-			return;
-		}
-
-		self::enqueue_scripts();
-
+	public static function init_admin_events() {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-admin-setup-wizard-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-extensions-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-importer-tracking.php';
@@ -134,4 +153,48 @@ class WC_Site_Tracking {
 			}
 		}
 	}
+
+	/**
+	 * Set up frontend tracking.
+	 */
+	public static function init_frontend_events() {
+		include_once WC_ABSPATH . 'includes/tracks/events/frontend/class-wc-cart-tracking.php';
+
+		$tracking_classes = array(
+			'WC_Cart_Tracking',
+		);
+
+		foreach ( $tracking_classes as $tracking_class ) {
+			$tracker_instance    = new $tracking_class();
+			$tracker_init_method = array( $tracker_instance, 'init' );
+
+			if ( is_callable( $tracker_init_method ) ) {
+				call_user_func( $tracker_init_method );
+			}
+		}
+	}
+
+	/**
+	 * Init tracking.
+	 */
+	public static function init() {
+		if ( ! self::is_tracking_enabled() ) {
+
+			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
+			add_filter( 'admin_footer', array( __CLASS__, 'add_empty_tracking_function' ), 24 );
+			add_action( 'wp_footer', array( __CLASS__, 'add_empty_tracking_function' ) );
+
+			return;
+		}
+
+		self::enqueue_scripts();
+
+		if ( is_admin() ) {
+			self::init_admin_events();
+		}
+
+		self::init_frontend_events();
+	}
 }
+
+new WC_Site_Tracking();

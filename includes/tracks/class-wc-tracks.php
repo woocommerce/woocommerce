@@ -11,9 +11,14 @@
 class WC_Tracks {
 
 	/**
-	 * Tracks event name prefix.
+	 * Event name prefix for admin tracks.
 	 */
-	const PREFIX = 'wcadmin_';
+	const ADMIN_PREFIX = 'wcadmin_';
+
+	/**
+	 * Event name prefix for front-end tracks.
+	 */
+	const FRONTEND_PREFIX = 'wcstore_';
 
 	/**
 	 * Get total product counts.
@@ -88,7 +93,7 @@ class WC_Tracks {
 		}
 
 		$data = array(
-			'_en' => self::PREFIX . $event_name,
+			'_en' => self::ADMIN_PREFIX . $event_name,
 			'_ts' => WC_Tracks_Client::build_timestamp(),
 		);
 
