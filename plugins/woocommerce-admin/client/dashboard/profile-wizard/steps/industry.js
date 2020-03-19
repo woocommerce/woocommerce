@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Button, CheckboxControl } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
-import { filter, get, find, findIndex } from 'lodash';
+import { filter, find, findIndex, get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -52,9 +52,12 @@ class Industry extends Component {
 		const selectedIndustriesList = this.state.selected.map(
 			( industry ) => industry.slug
 		);
-		const industriesWithDetail = filter( this.state.selected, ( value ) => {
-			return typeof value.detail !== 'undefined';
-		} );
+
+		// Here the selected industries are converted to a string that is a comma separated list
+		const industriesWithDetail = this.state.selected
+			.map( ( industry ) => industry.detail )
+			.filter( ( n ) => n )
+			.join( ',' );
 
 		recordEvent( 'storeprofiler_store_industry_continue', {
 			store_industry: selectedIndustriesList,
