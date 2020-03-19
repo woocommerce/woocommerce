@@ -53,7 +53,11 @@ class WC_Helper_Queue {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type = 'scheduled-action'" );
 
-		ActionScheduler_Store::instance()->cancel_actions_by_group( 'wc-admin-data' );
-		ActionScheduler_Store::instance()->cancel_actions_by_group( 'wc-admin-notes' );
+		// Delete actions for Action Scheduler >= 3.0.
+		$store = ActionScheduler_Store::instance();
+
+		if ( is_callable( array( $store, 'cancel_actions_by_group' ) ) ) {
+			$store->cancel_actions_by_group( 'wc-admin-data' );
+		}
 	}
 }

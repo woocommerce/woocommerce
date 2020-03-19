@@ -81,7 +81,6 @@ class FeaturePlugin {
 			// See: https://github.com/woocommerce/woocommerce-admin/issues/3869.
 			add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), 9 );
 		}
-		add_filter( 'action_scheduler_store_class', array( $this, 'replace_actionscheduler_store_class' ) );
 	}
 
 	/**
@@ -187,26 +186,6 @@ class FeaturePlugin {
 		new WC_Admin_Notes_Welcome_Message();
 		new WC_Admin_Notes_Facebook_Extension();
 		new WC_Admin_Notes_Tracking_Opt_In();
-	}
-
-	/**
-	 * Filter in our ActionScheduler Store class.
-	 *
-	 * @param string $store_class ActionScheduler Store class name.
-	 * @return string ActionScheduler Store class name.
-	 */
-	public function replace_actionscheduler_store_class( $store_class ) {
-		// Don't override any other overrides.
-		if ( 'ActionScheduler_wpPostStore' !== $store_class ) {
-			return $store_class;
-		}
-
-		// Don't override if action scheduler is 3.0.0 or greater.
-		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
-			return $store_class;
-		}
-
-		return 'Automattic\WooCommerce\Admin\Overrides\WPPostStore';
 	}
 
 	/**

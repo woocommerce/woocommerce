@@ -78,6 +78,9 @@ class Package {
 		self::$package_active = true;
 		self::$active_version = self::VERSION;
 		$feature_plugin_instance->init();
+
+		// Unhook the custom Action Scheduler data store class in active older versions of WC Admin.
+		remove_filter( 'action_scheduler_store_class', array( $feature_plugin_instance, 'replace_actionscheduler_store_class' ) );
 	}
 
 	/**

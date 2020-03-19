@@ -20,36 +20,10 @@ class WC_Admin_Notes {
 	const UNSNOOZE_HOOK = 'wc_admin_unsnooze_admin_notes';
 
 	/**
-	 * Action scheduler group.
-	 */
-	const QUEUE_GROUP = 'wc-admin-notes';
-
-	/**
-	 * Queue instance.
-	 *
-	 * @var WC_Queue_Interface
-	 */
-	protected static $queue = null;
-
-	/**
-	 * Get queue instance.
-	 *
-	 * @return WC_Queue_Interface
-	 */
-	public static function queue() {
-		if ( is_null( self::$queue ) ) {
-			self::$queue = WC()->queue();
-		}
-
-		return self::$queue;
-	}
-
-	/**
 	 * Hook appropriate actions.
 	 */
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'schedule_unsnooze_notes' ) );
-		add_action( self::UNSNOOZE_HOOK, array( __CLASS__, 'unsnooze_notes' ) );
 	}
 
 	/**
@@ -160,17 +134,9 @@ class WC_Admin_Notes {
 	}
 
 	/**
-	 * Clears all queued actions.
+	 * Unschedule unsnooze notes event.
 	 */
 	public static function clear_queued_actions() {
-		$store = \ActionScheduler::store();
-
-		if ( is_a( $store, 'Automattic\WooCommerce\Admin\Overrides\WPPostStore' ) ) {
-			// If we're using our data store, call our bespoke deletion method.
-			$action_types = array( self::UNSNOOZE_HOOK );
-			$store->clear_pending_wcadmin_actions( $action_types );
-		} else {
-			self::queue()->cancel_all( null, array(), self::QUEUE_GROUP );
-		}
+		wp_clear_scheduled_hook( self::UNSNOOZE_HOOK );
 	}
 }

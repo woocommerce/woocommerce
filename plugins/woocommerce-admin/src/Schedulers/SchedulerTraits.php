@@ -359,14 +359,8 @@ trait SchedulerTraits {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		$store = \ActionScheduler::store();
-
-		if ( is_a( $store, 'Automattic\WooCommerce\Admin\Overrides\WPPostStore' ) ) {
-			// If we're using our data store, call our bespoke deletion method.
-			$actions = static::get_actions();
-			$store->clear_pending_wcadmin_actions( $actions );
-		} elseif ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
-			$store->cancel_actions_by_group( static::$group );
+		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
+			\ActionScheduler::store()->cancel_actions_by_group( static::$group );
 		} else {
 			$actions = static::get_actions();
 			foreach ( $actions as $action ) {
