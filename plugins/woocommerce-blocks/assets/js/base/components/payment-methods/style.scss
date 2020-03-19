@@ -46,23 +46,3 @@
 		}
 	}
 }
-.wc-block-component-express-checkout-continue-rule {
-	display: flex;
-	align-items: center;
-	text-align: center;
-	padding: 0 $gap-larger;
-	margin: $gap-large 0;
-
-	&::before {
-		margin-right: 10px;
-	}
-	&::after {
-		margin-left: 10px;
-	}
-	&::before,
-	&::after {
-		content: " ";
-		flex: 1;
-		border-bottom: 1px solid $core-grey-light-600;
-	}
-}
