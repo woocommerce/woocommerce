@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activi
 Requires at least: 5.3.0
 Tested up to: 5.3.2
 Requires PHP: 5.6.20
-Stable tag: 1.0.0
+Stable tag: 1.0.3
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/license.txt
 
@@ -70,6 +70,31 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 1.0.3 2020-03-19 =
+
+- Fix: Stop calling protected has_satisfied_dependencies() on outdated plugin. #3938
+- Fix: Rename image assets in OBW business details step. #3931
+- Fix: Stop using WP Post store for Action Scheduler. #3936
+
+= 1.0.2 2020-03-18 =
+
+- Enhancement: Onboarding: business step: add Google Ads extension install #3725
+- Dev: Update prestart script so readme.txt stable tag is updated #3911
+- Tweak: create database tables on an earlier hook to avoid conflicts with core WooCommerce. #3896 
+- Fix - Made the admin note loading more resilient to prevent failures when loading notes with invalid content_data. #3926
+
+= 1.0.1 2020-03-12 =
+
+- Fix: Add Report Extension Example: Add default props to ReportFilters
+- Fix: Product report sorting by SKU when some products don't have SKUs
+- Dev: Add Changelog script
+- Fix: type warning on install timestamp in PHP 7.4
+- Fix: PHP error when WooCommerce core is Network Active on Multisites.
+- Fix: missing database table errors on WooCommerce upgrade.
+- Fix: undefined const WC_ADMIN_VERSION_NUMBER when WP < 5.3
+- Dev: Fix failing tests after WC core merge.
+- Dev: Bump WooCommerce tested up to tag
 
 = 1.0.0 2020-03-5 =
 
