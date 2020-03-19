@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, card } from '@woocommerce/icons';
 import { kebabCase } from 'lodash';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -50,9 +51,10 @@ const settings = {
 		} );
 
 		return (
-			<div className={ attributes.className } { ...data }>
-				Checkout block coming soon to store near you
-			</div>
+			<div
+				className={ classnames( 'is-loading', attributes.className ) }
+				{ ...data }
+			/>
 		);
 	},
 };
