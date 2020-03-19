@@ -141,6 +141,7 @@ class Assets {
 				'restApiRoutes'                 => [
 					'/wc/store' => array_keys( \Automattic\WooCommerce\Blocks\RestApi::get_routes_from_namespace( 'wc/store' ) ),
 				],
+				'storeApiNonce'                 => wp_create_nonce( 'wc_store_api' ),
 				'homeUrl'                       => esc_url( home_url( '/' ) ),
 				'storePages'                    => [
 					'shop'     => self::format_page_resource( $page_ids['shop'] ),

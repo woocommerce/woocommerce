@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { apiFetch, select } from '@wordpress/data-controls';
+import { select } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
 import { STORE_KEY as CART_STORE_KEY } from './constants';
+import { apiFetchWithHeaders } from '../shared-controls';
 
 /**
  * Returns an action object used in updating the store with the provided items
@@ -70,80 +71,6 @@ export function receiveRemovingCoupon( couponCode ) {
 }
 
 /**
- * Applies a coupon code and either invalidates caches, or receives an error if
- * the coupon cannot be applied.
- *
- * @throws Will throw an error if there is an API problem.
- * @param {string} couponCode The coupon code to apply to the cart.
- */
-export function* applyCoupon( couponCode ) {
-	yield receiveApplyingCoupon( couponCode );
-
-	try {
-		const result = yield apiFetch( {
-			path: '/wc/store/cart/apply-coupon',
-			method: 'POST',
-			data: {
-				code: couponCode,
-			},
-			cache: 'no-store',
-		} );
-
-		if ( result ) {
-			yield receiveCart( result );
-		}
-
-		// Finished handling the coupon.
-		yield receiveApplyingCoupon( '' );
-	} catch ( error ) {
-		// Store the error message in state.
-		yield receiveError( error );
-		// Re-throw the error.
-		throw error;
-	}
-
-	return true;
-}
-
-/**
- * Removes a coupon code and either invalidates caches, or receives an error if
- * the coupon cannot be removed.
- *
- * @throws Will throw an error if there is an API problem.
- * @param {string} couponCode The coupon code to remove from the cart.
- */
-export function* removeCoupon( couponCode ) {
-	yield receiveRemovingCoupon( couponCode );
-
-	try {
-		const result = yield apiFetch( {
-			path: '/wc/store/cart/remove-coupon',
-			method: 'POST',
-			data: {
-				code: couponCode,
-			},
-			cache: 'no-store',
-		} );
-
-		if ( result ) {
-			yield receiveCart( result );
-		}
-
-		// Finished handling the coupon.
-		yield receiveRemovingCoupon( '' );
-	} catch ( error ) {
-		// Store the error message in state.
-		yield receiveError( error );
-		// Finished handling the coupon.
-		yield receiveRemovingCoupon( '' );
-		// Re-throw the error.
-		throw error;
-	}
-
-	return true;
-}
-
-/**
  * Returns an action object for updating a single cart item in the store.
  *
  * @param {Object}   [response={}]    A cart item API response.
@@ -186,6 +113,85 @@ export function receiveRemovedItem( cartItemKey ) {
 }
 
 /**
+ * Returns an action object used to track what shipping address are we updating to.
+ *
+ * @param {boolean} isResolving if we're loading shipping address or not.
+ * @return {Object} Object for action.
+ */
+export function shippingRatesAreResolving( isResolving ) {
+	return {
+		type: types.UPDATING_SHIPPING_ADDRESS,
+		isResolving,
+	};
+}
+
+/**
+ * Applies a coupon code and either invalidates caches, or receives an error if
+ * the coupon cannot be applied.
+ *
+ * @throws Will throw an error if there is an API problem.
+ * @param {string} couponCode The coupon code to apply to the cart.
+ */
+export function* applyCoupon( couponCode ) {
+	yield receiveApplyingCoupon( couponCode );
+
+	try {
+		const { response } = yield apiFetchWithHeaders( {
+			path: '/wc/store/cart/apply-coupon',
+			method: 'POST',
+			data: {
+				code: couponCode,
+			},
+			cache: 'no-store',
+		} );
+
+		yield receiveCart( response );
+		yield receiveApplyingCoupon( '' );
+	} catch ( error ) {
+		// Store the error message in state.
+		yield receiveError( error );
+		// Re-throw the error.
+		throw error;
+	}
+
+	return true;
+}
+
+/**
+ * Removes a coupon code and either invalidates caches, or receives an error if
+ * the coupon cannot be removed.
+ *
+ * @throws Will throw an error if there is an API problem.
+ * @param {string} couponCode The coupon code to remove from the cart.
+ */
+export function* removeCoupon( couponCode ) {
+	yield receiveRemovingCoupon( couponCode );
+
+	try {
+		const { response } = yield apiFetchWithHeaders( {
+			path: '/wc/store/cart/remove-coupon',
+			method: 'POST',
+			data: {
+				code: couponCode,
+			},
+			cache: 'no-store',
+		} );
+
+		yield receiveCart( response );
+		yield receiveRemovingCoupon( '' );
+	} catch ( error ) {
+		// Store the error message in state.
+		yield receiveError( error );
+		// Finished handling the coupon.
+		yield receiveRemovingCoupon( '' );
+		// Re-throw the error.
+		throw error;
+	}
+
+	return true;
+}
+
+/**
  * Removes specified item from the cart:
  * - Calls API to remove item.
  * - If successful, yields action to remove item from store.
@@ -198,13 +204,13 @@ export function* removeItemFromCart( cartItemKey ) {
 	yield itemQuantityPending( cartItemKey, true );
 
 	try {
-		const cart = yield apiFetch( {
+		const { response } = yield apiFetchWithHeaders( {
 			path: `/wc/store/cart/remove-item/?key=${ cartItemKey }`,
 			method: 'POST',
 			cache: 'no-store',
 		} );
 
-		yield receiveCart( cart );
+		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
 	}
@@ -228,8 +234,8 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
 		return;
 	}
 	try {
-		const cart = yield apiFetch( {
-			path: `/wc/store/cart/update-item`,
+		const { response } = yield apiFetchWithHeaders( {
+			path: '/wc/store/cart/update-item',
 			method: 'POST',
 			data: {
 				key: cartItemKey,
@@ -238,7 +244,7 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
 			cache: 'no-store',
 		} );
 
-		yield receiveCart( cart );
+		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
 	}
@@ -252,7 +258,7 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
  */
 export function* selectShippingRate( rateId, packageId = 0 ) {
 	try {
-		const result = yield apiFetch( {
+		const { response } = yield apiFetchWithHeaders( {
 			path: `/wc/store/cart/select-shipping-rate/${ packageId }`,
 			method: 'POST',
 			data: {
@@ -261,28 +267,13 @@ export function* selectShippingRate( rateId, packageId = 0 ) {
 			cache: 'no-store',
 		} );
 
-		if ( result ) {
-			yield receiveCart( result );
-		}
+		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
 		// Re-throw the error.
 		throw error;
 	}
 	return true;
-}
-
-/**
- * Returns an action object used to track what shipping address are we updating to.
- *
- * @param {boolean} isResolving if we're loading shipping address or not.
- * @return {Object} Object for action.
- */
-export function shippingRatesAreResolving( isResolving ) {
-	return {
-		type: types.UPDATING_SHIPPING_ADDRESS,
-		isResolving,
-	};
 }
 
 /**
@@ -294,16 +285,14 @@ the coupon cannot be applied.
 export function* updateShippingAddress( address ) {
 	yield shippingRatesAreResolving( true );
 	try {
-		const result = yield apiFetch( {
+		const { response } = yield apiFetchWithHeaders( {
 			path: '/wc/store/cart/update-shipping',
 			method: 'POST',
 			data: address,
 			cache: 'no-store',
 		} );
 
-		if ( result ) {
-			yield receiveCart( result );
-		}
+		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
 		yield shippingRatesAreResolving( false );
