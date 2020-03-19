@@ -10,7 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { receiveCollection, receiveCollectionError } from './actions';
 import { STORE_KEY as SCHEMA_STORE_KEY } from '../schema/constants';
 import { STORE_KEY, DEFAULT_EMPTY_ARRAY } from './constants';
-import { apiFetchWithHeaders } from './controls';
+import { apiFetchWithHeaders } from '../shared-controls';
 
 /**
  * Check if the store needs invalidating due to a change in last modified headers.
@@ -52,9 +52,9 @@ export function* getCollection( namespace, resourceName, query, ids ) {
 
 	try {
 		const {
-			items = DEFAULT_EMPTY_ARRAY,
+			response = DEFAULT_EMPTY_ARRAY,
 			headers,
-		} = yield apiFetchWithHeaders( route + queryString );
+		} = yield apiFetchWithHeaders( { path: route + queryString } );
 
 		if ( headers && headers.get && headers.has( 'last-modified' ) ) {
 			// Do any invalidation before the collection is received to prevent
@@ -65,7 +65,7 @@ export function* getCollection( namespace, resourceName, query, ids ) {
 		}
 
 		yield receiveCollection( namespace, resourceName, queryString, ids, {
-			items,
+			items: response,
 			headers,
 		} );
 	} catch ( error ) {

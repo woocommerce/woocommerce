@@ -63,6 +63,7 @@ class CartCreateOrder extends TestCase {
 	 */
 	public function test_create_item() {
 		$request = new WP_REST_Request( 'POST', '/wc/store/cart/create-order' );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_param(
 			'billing_address',
 			[

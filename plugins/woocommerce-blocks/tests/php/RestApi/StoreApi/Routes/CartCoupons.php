@@ -74,6 +74,7 @@ class CartCoupons extends TestCase {
 		wc()->cart->remove_coupons();
 
 		$request = new WP_REST_Request( 'POST', '/wc/store/cart/coupons' );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => $this->coupon->get_code(),
@@ -93,6 +94,7 @@ class CartCoupons extends TestCase {
 		wc()->cart->remove_coupons();
 
 		$request = new WP_REST_Request( 'POST', '/wc/store/cart/coupons' );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => 'IDONOTEXIST',
@@ -109,6 +111,7 @@ class CartCoupons extends TestCase {
 	 */
 	public function test_delete_item() {
 		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/coupons/' . $this->coupon->get_code() );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -116,12 +119,14 @@ class CartCoupons extends TestCase {
 		$this->assertEmpty( $data );
 
 		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/coupons/' . $this->coupon->get_code() );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 404, $response->get_status() );
 
 		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/coupons/i-do-not-exist' );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -133,6 +138,7 @@ class CartCoupons extends TestCase {
 	 */
 	public function test_delete_items() {
 		$request  = new WP_REST_Request( 'DELETE', '/wc/store/cart/coupons' );
+		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 

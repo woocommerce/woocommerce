@@ -21,6 +21,7 @@ class RestApi {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ), 10 );
 		add_action( 'rest_api_init', array( '\Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController', 'register_routes' ), 10 );
 		add_filter( 'rest_authentication_errors', array( __CLASS__, 'maybe_init_cart_session' ), 1 );
+		add_filter( 'rest_authentication_errors', array( __CLASS__, 'store_api_authentication' ) );
 	}
 
 	/**
@@ -53,6 +54,37 @@ class RestApi {
 		$response_data = $namespace_index->get_data();
 
 		return isset( $response_data['routes'] ) ? $response_data['routes'] : null;
+	}
+
+	/**
+	 * Check if is request to the Store API.
+	 *
+	 * @return bool
+	 */
+	protected static function is_request_to_store_api() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+
+		return false !== strpos( $request_uri, $rest_prefix . 'wc/store' );
+	}
+
+	/**
+	 * The Store API does not require authentication.
+	 *
+	 * @param \WP_Error|mixed $result Error from another authentication handler, null if we should handle it, or another value if not.
+	 * @return \WP_Error|null|bool
+	 */
+	public static function store_api_authentication( $result ) {
+		// Pass through errors from other authentication methods used before this one.
+		if ( ! empty( $result ) || ! self::is_request_to_store_api() ) {
+			return $result;
+		}
+
+		return true;
 	}
 
 	/**
