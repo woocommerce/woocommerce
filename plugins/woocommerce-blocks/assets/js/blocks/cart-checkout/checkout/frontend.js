@@ -18,6 +18,7 @@ import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import Block from './block.js';
 import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
+import EmptyCart from './empty-cart';
 
 /**
  * Wrapper component for the checkout block.
@@ -30,38 +31,45 @@ const CheckoutFrontend = ( props ) => {
 		cartItems,
 		cartTotals,
 		shippingRates,
+		cartIsLoading,
 	} = useStoreCart();
 
 	return (
-		<BlockErrorBoundary
-			header={ __(
-				'Something went wrong…',
-				'woo-gutenberg-products-block'
+		<>
+			{ ! cartIsLoading && cartItems.length === 0 ? (
+				<EmptyCart />
+			) : (
+				<BlockErrorBoundary
+					header={ __(
+						'Something went wrong…',
+						'woo-gutenberg-products-block'
+					) }
+					text={ __experimentalCreateInterpolateElement(
+						__(
+							'The checkout has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+							'woo-gutenberg-products-block'
+						),
+						{
+							a: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content
+								<a href="." />
+							),
+						}
+					) }
+					showErrorMessage={ CURRENT_USER_IS_ADMIN }
+				>
+					<StoreNoticesProvider context="wc/checkout">
+						<Block
+							{ ...props }
+							cartCoupons={ cartCoupons }
+							cartItems={ cartItems }
+							cartTotals={ cartTotals }
+							shippingRates={ shippingRates }
+						/>
+					</StoreNoticesProvider>
+				</BlockErrorBoundary>
 			) }
-			text={ __experimentalCreateInterpolateElement(
-				__(
-					'The checkout has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
-					'woo-gutenberg-products-block'
-				),
-				{
-					a: (
-						// eslint-disable-next-line jsx-a11y/anchor-has-content
-						<a href="." />
-					),
-				}
-			) }
-			showErrorMessage={ CURRENT_USER_IS_ADMIN }
-		>
-			<StoreNoticesProvider context="wc/checkout">
-				<Block
-					{ ...props }
-					cartCoupons={ cartCoupons }
-					cartItems={ cartItems }
-					cartTotals={ cartTotals }
-					shippingRates={ shippingRates }
-				/>
-			</StoreNoticesProvider>
-		</BlockErrorBoundary>
+		</>
 	);
 };
 

@@ -2,17 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { WC_BLOCKS_ASSET_URL } from '@woocommerce/block-settings';
 import { useProductLayoutContext } from '@woocommerce/base-context';
+import { Icon, notice } from '@woocommerce/icons';
 
 const NoProducts = () => {
 	const { layoutStyleClassPrefix } = useProductLayoutContext();
 	return (
 		<div className={ `${ layoutStyleClassPrefix }__no-products` }>
-			<img
-				src={ WC_BLOCKS_ASSET_URL + 'img/no-products.svg' }
-				alt={ __( 'No products', 'woo-gutenberg-products-block' ) }
+			<Icon
 				className={ `${ layoutStyleClassPrefix }__no-products-image` }
+				alt=""
+				srcElement={ notice }
+				size={ 100 }
 			/>
 			<strong
 				className={ `${ layoutStyleClassPrefix }__no-products-title` }
