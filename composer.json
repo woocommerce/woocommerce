@@ -29,6 +29,7 @@
     },
     "preferred-install": {
         "woocommerce/action-scheduler": "dist",
+        "woocommerce/woocommerce-admin": "dist",
         "woocommerce/woocommerce-rest-api": "dist",
         "woocommerce/woocommerce-blocks": "dist"
     },
@@ -63,10 +64,11 @@
       "phpcbf -p"
     ],
     "makepot-audit": [
-      "wp i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
+      "wp i18n make-pot . --include=\"packages\/woocommerce-blocks,packages\/woocommerce-rest-api,packages\/action-scheduler\" --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests,packages\" --slug=woocommerce"
     ],
     "makepot": [
-      "@makepot-audit --skip-audit"
+      "@makepot-audit --skip-audit",
+      "./bin/combine-pot-files.sh"
     ]
   },
   "extra": {
