@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Status Tracking
+ * WooCommerce Cart Tracking
  *
  * @package WooCommerce\Tracks
  */
