@@ -370,7 +370,42 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			}
 
 			foreach ( $user_ids as $user_id ) {
-				wp_delete_user( $user_id );
+				$posts_made_prior = get_posts(
+					array(
+						'post_type' => array( 'post', 'page' ),
+						'author'    => $user_id,
+					)
+				);
+
+				if ( empty( $posts_made_prior ) ) {
+					wp_delete_user( $user_id );
+				} else {
+					$admin_users = get_users( array( 'role' => 'administrator' ) );
+
+					$posts_made_prior_list = '<ul>';
+					foreach ( $posts_made_prior as $post ) {
+						$post->post_author = $admin_users[0]->ID;
+						wp_update_post( $post );
+						$posts_made_prior_list .= '<li><a href="' . esc_attr( $post->guid ) . '">' . esc_html( $post->post_title ) . '</a></li>';
+					}
+					$posts_made_prior_list .= '</ul>';
+
+					$deleted_user = get_user_by( 'ID', $user_id );
+					wp_delete_user( $user_id );
+					$subject = __( 'Contents of a deleted inactive user transferred to admin', 'woocommerce' );
+					$message = '<h1>' . $subject . '</h1><p>' . sprintf(
+						/* translators: 1: deleted user username 2: deleted user email 3: admin username 4: admin email */
+						__( 'An inactive user (%1$s - %2$s) who had published pages and/or posts, before to be demoted to subscriber or customer role, was automatically deleted by WooCommerce data retention policy. All the contents of the deleted user were transferred to the administrator: %3$s - %4$s.', 'woocommerce' ),
+						esc_html( $deleted_user->user_login ),
+						esc_html( $deleted_user->user_email ),
+						esc_html( $admin_users[0]->user_login ),
+						esc_html( $admin_users[0]->user_email )
+					) . '</p><h2>' . __( 'Transferred contents list', 'woocommerce' ) . '</h2>' . $posts_made_prior_list;
+
+					foreach ( $admin_users as $admin ) {
+						wc_mail( $admin->user_email, $subject, $message );
+					}
+				}
 				$count ++;
 			}
 		}
