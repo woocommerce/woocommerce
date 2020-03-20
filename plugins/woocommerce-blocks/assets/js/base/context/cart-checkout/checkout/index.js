@@ -10,6 +10,7 @@ import {
 	EMIT_TYPES,
 	emitterSubscribers,
 	emitEvent,
+	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
 
@@ -124,23 +125,18 @@ export const CheckoutProvider = ( {
 	useEffect( () => {
 		const status = checkoutState.status;
 		if ( status === STATUS.PROCESSING ) {
-			const error = emitEvent(
+			emitEventWithAbort(
 				currentObservers.current,
 				EMIT_TYPES.CHECKOUT_PROCESSING,
 				{}
-			);
-			//@todo bail if error object detected (see flow).
-			//Fire off checkoutFail event, and then reset checkout
-			//status to idle (with hasError flag) - then return from this hook.
-			// Finally after the event subscribers have processed, do the
-			// checkout submit sending the order to the server for processing
-			// and followup on errors from it.
-			// I'll need to setup a special emitter that aborts on first fail
-			// instead of hitting all subscribed event observers.
-			if ( error ) {
-				dispatchActions.setHasError();
-			}
-			dispatch( actions.setComplete() );
+			).then( ( response ) => {
+				if ( response !== true ) {
+					// @todo handle any validation error property values in the
+					// response
+					dispatchActions.setHasError();
+				}
+				dispatch( actions.setComplete() );
+			} );
 		}
 		if ( checkoutState.isComplete ) {
 			if ( checkoutState.hasError ) {
@@ -154,14 +150,21 @@ export const CheckoutProvider = ( {
 					currentObservers.current,
 					EMIT_TYPES.CHECKOUT_COMPLETE_WITH_SUCCESS,
 					{}
-				);
-			}
-			// all observers have done their thing so let's redirect (if no error)
-			if ( ! checkoutState.hasError ) {
-				window.location = checkoutState.redirectUrl;
+				).then( () => {
+					// all observers have done their thing so let's redirect
+					// (if no error)
+					if ( ! checkoutState.hasError ) {
+						window.location = checkoutState.redirectUrl;
+					}
+				} );
 			}
 		}
-	}, [ checkoutState.status, checkoutState.hasError ] );
+	}, [
+		checkoutState.status,
+		checkoutState.hasError,
+		checkoutState.isComplete,
+		checkoutState.redirectUrl,
+	] );
 
 	const onSubmit = () => {
 		dispatch( actions.setProcessing() );

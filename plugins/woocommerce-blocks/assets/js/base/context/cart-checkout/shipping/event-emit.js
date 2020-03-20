@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { actions, reducer, emitEvent } from '../event_emit';
+import { actions, reducer, emitEvent } from '../event-emit';
 
 const EMIT_TYPES = {
 	SHIPPING_RATES_SUCCESS: 'shipping_rates_success',

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { actions, reducer, emitEvent } from '../event_emit';
+import { actions, reducer, emitEvent, emitEventWithAbort } from '../event-emit';
 
 const EMIT_TYPES = {
 	CHECKOUT_COMPLETE_WITH_SUCCESS: 'checkout_complete',
@@ -70,4 +70,10 @@ const emitterSubscribers = ( dispatcher ) => ( {
 	},
 } );
 
-export { EMIT_TYPES, emitterSubscribers, reducer, emitEvent };
+export {
+	EMIT_TYPES,
+	emitterSubscribers,
+	reducer,
+	emitEvent,
+	emitEventWithAbort,
+};
