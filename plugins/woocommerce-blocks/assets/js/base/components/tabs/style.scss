@@ -1,10 +1,10 @@
-.wc-component__tabs {
-	.wc-component__tab-list {
+.wc-block-components-tabs {
+	.wc-block-components-tabs__list {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
 		width: 100%;
-		> .wc-component__tab-item {
+		> .wc-block-components-tabs__item {
 			border: none;
 			flex: auto;
 			background: transparent;
@@ -23,13 +23,13 @@
 				outline-offset: -1px;
 				outline: 1px dotted $gray-60;
 			}
-			.wc-component__tab-item-content {
+			.wc-block-components-tabs__item-content {
 				width: fit-content;
 				display: inline-block;
 			}
 		}
 	}
-	.wc-component__tab-content {
+	.wc-block-components-tabs__content {
 		padding: $gap;
 	}
 }

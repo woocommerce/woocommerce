@@ -27,6 +27,8 @@ const NoShipping = () => {
 			<Button
 				isDefault
 				href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+				target="_blank"
+				rel="noopener noreferrer"
 			>
 				{ __(
 					'Configure Shipping Options',

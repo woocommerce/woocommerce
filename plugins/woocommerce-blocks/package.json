@@ -180,11 +180,11 @@
 			},
 			{
 				"path": "./build/cart-frontend.js",
-				"maxSize": "155 kB"
+				"maxSize": "160 kB"
 			},
 			{
 				"path": "./build/checkout-frontend.js",
-				"maxSize": "155 kB"
+				"maxSize": "160 kB"
 			},
 			{
 				"path": "./build/*.css",
