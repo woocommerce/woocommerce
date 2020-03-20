@@ -27,26 +27,6 @@ export const actions = {
 };
 
 /**
- * Emits events on registered observers for the provided type and passes along
- * the provided data.
- *
- * @param {Object} observers The registered observers to omit to.
- * @param {string} eventType The event type being emitted.
- * @param {*}      data      Data passed along to the observer when it is
- *                           invoked.
- */
-export const emitEvent = ( observers, eventType, data ) => {
-	const observersByType = observers[ eventType ] || [];
-	let hasError = false;
-	observersByType.forEach( ( observer ) => {
-		if ( typeof observer === 'function' ) {
-			hasError = !! observer( data, hasError );
-		}
-	} );
-	return hasError;
-};
-
-/**
  * Handles actions for emmitters
  *
  * @param {Object} state  Current state.
