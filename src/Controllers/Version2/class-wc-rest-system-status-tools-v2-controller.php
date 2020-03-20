@@ -442,6 +442,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				wc_delete_product_transients();
 				wc_delete_shop_order_transients();
 				delete_transient( 'wc_count_comments' );
+				delete_transient( 'as_comment_count' );
 
 				$attribute_taxonomies = wc_get_attribute_taxonomies();
 
