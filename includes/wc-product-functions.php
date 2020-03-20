@@ -201,6 +201,39 @@ function wc_get_featured_product_ids() {
 }
 
 /**
+ * Populate a batch of rating count lookup table data for products.
+ *
+ * @since 4.0.1
+ * @param int $id Product ID.
+ */
+function wc_get_parent_grouped_id( $id ) {
+
+	global $wpdb;
+
+	if ( $product->is_type( array( 'simple' ) ) ) {
+		$product_id = $product->get_id();
+		$group_ids  = array();
+
+		$group_data = $wpdb->get_col(
+			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
+				"SELECT post_id
+				FROM $wpdb->postmeta
+				WHERE meta_key = '_children' 
+				AND meta_value LIKE %s",
+				'%' . $wpdb->esc_like( $product_id ) . '%'
+			)
+		);
+
+		if ( is_array( $group_data ) && count( $group_data ) > 0 ) {
+			foreach ( $group_data as $group_data_key => $group_data_value ) {
+				$group_ids[] = $group_data_value;
+			}
+		}
+	}
+	return $group_ids;
+}
+
+/**
  * Filter to allow product_cat in the permalinks for products.
  *
  * @param  string  $permalink The existing permalink URL.

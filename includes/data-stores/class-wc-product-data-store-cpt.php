@@ -628,6 +628,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					$product->set_price( $product->get_regular_price( 'edit' ) );
 				}
 			}
+
+			/* Syncing Prices of child product store in Groupe Product */
+			$grouped_product_ids = wc_get_parent_grouped_id( $product );
+			if ( ! empty( $grouped_product_ids ) ) {
+				foreach ( $grouped_product_ids as $key => $value ) {
+					$wc_post_data = new WC_Post_Data();
+					$wc_post_data->deferred_product_sync( $value );
+				}
+			}
 		}
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
