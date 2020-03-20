@@ -346,6 +346,10 @@
 		color: $studio-gray-60;
 		margin: 0;
 		margin-right: $gap-larger;
+
+		.text-style-strong {
+			font-weight: bold;
+		}
 	}
 
 	.woocommerce-task-payment__after {

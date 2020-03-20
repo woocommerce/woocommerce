@@ -4,7 +4,7 @@
 
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { filter } from 'lodash';
+import { filter, some } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -36,6 +36,11 @@ export function getPaymentMethods( {
 		stripeSupportedCountries: [],
 	} ).stripeSupportedCountries;
 
+	const hasCbdIndustry =
+		some( profileItems.industry, {
+			slug: 'cbd-other-hemp-derived-products',
+		} ) || false;
+
 	const methods = [
 		{
 			key: 'stripe',
@@ -53,7 +58,8 @@ export function getPaymentMethods( {
 				</Fragment>
 			),
 			before: <img src={ wcAssetUrl + 'images/stripe.png' } alt="" />,
-			visible: stripeCountries.includes( countryCode ),
+			visible:
+				stripeCountries.includes( countryCode ) && ! hasCbdIndustry,
 			plugins: [ 'woocommerce-gateway-stripe' ],
 			container: <Stripe />,
 			isConfigured:
@@ -77,7 +83,7 @@ export function getPaymentMethods( {
 				</Fragment>
 			),
 			before: <img src={ wcAssetUrl + 'images/paypal.png' } alt="" />,
-			visible: true,
+			visible: ! hasCbdIndustry,
 			plugins: [ 'woocommerce-gateway-paypal-express-checkout' ],
 			container: <PayPal />,
 			isConfigured:
@@ -99,7 +105,9 @@ export function getPaymentMethods( {
 			before: (
 				<img src={ wcAssetUrl + 'images/klarna-black.png' } alt="" />
 			),
-			visible: [ 'SE', 'FI', 'NO', 'NL' ].includes( countryCode ),
+			visible:
+				[ 'SE', 'FI', 'NO', 'NL' ].includes( countryCode ) &&
+				! hasCbdIndustry,
 			plugins: [ 'klarna-checkout-for-woocommerce' ],
 			container: <Klarna plugin={ 'checkout' } />,
 			// @todo This should check actual Klarna connection information.
@@ -121,7 +129,9 @@ export function getPaymentMethods( {
 			before: (
 				<img src={ wcAssetUrl + 'images/klarna-black.png' } alt="" />
 			),
-			visible: [ 'DK', 'DE', 'AT' ].includes( countryCode ),
+			visible:
+				[ 'DK', 'DE', 'AT' ].includes( countryCode ) &&
+				! hasCbdIndustry,
 			plugins: [ 'klarna-payments-for-woocommerce' ],
 			container: <Klarna plugin={ 'payments' } />,
 			// @todo This should check actual Klarna connection information.
@@ -136,18 +146,32 @@ export function getPaymentMethods( {
 		{
 			key: 'square',
 			title: __( 'Square', 'woocommerce-admin' ),
-			content: __(
-				'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). ' +
-					'Sell online and in store and track sales and inventory in one place.',
-				'woocommerce-admin'
+			content: (
+				<Fragment>
+					{ __(
+						'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). ' +
+							'Sell online and in store and track sales and inventory in one place.',
+						'woocommerce-admin'
+					) }
+					{ hasCbdIndustry && (
+						<span className="text-style-strong">
+							{ __(
+								' Selling CBD products is only supported by Square.',
+								'woocommerce-admin'
+							) }
+						</span>
+					) }
+				</Fragment>
 			),
 			before: (
 				<img src={ wcAssetUrl + 'images/square-black.png' } alt="" />
 			),
 			visible:
-				[ 'brick-mortar', 'brick-mortar-other' ].includes(
+				( hasCbdIndustry && [ 'US' ].includes( countryCode ) ) ||
+				( [ 'brick-mortar', 'brick-mortar-other' ].includes(
 					profileItems.selling_venues
-				) && [ 'US', 'CA', 'JP', 'GB', 'AU' ].includes( countryCode ),
+				) &&
+					[ 'US', 'CA', 'JP', 'GB', 'AU' ].includes( countryCode ) ),
 			plugins: [ 'woocommerce-square' ],
 			container: <Square />,
 			isConfigured:
@@ -182,7 +206,7 @@ export function getPaymentMethods( {
 					alt="PayFast logo"
 				/>
 			),
-			visible: [ 'ZA' ].includes( countryCode ),
+			visible: [ 'ZA' ].includes( countryCode ) && ! hasCbdIndustry,
 			plugins: [ 'woocommerce-payfast-gateway' ],
 			container: <PayFast />,
 			isConfigured:
@@ -203,8 +227,10 @@ export function getPaymentMethods( {
 				'woocommerce-admin'
 			),
 			before: <CodIcon />,
-			visible: true,
-			isEnabled: options.woocommerce_cod_settings && options.woocommerce_cod_settings.enabled === 'yes',
+			visible: ! hasCbdIndustry,
+			isEnabled:
+				options.woocommerce_cod_settings &&
+				options.woocommerce_cod_settings.enabled === 'yes',
 			optionName: 'woocommerce_cod_settings',
 		},
 		{
@@ -215,10 +241,14 @@ export function getPaymentMethods( {
 				'woocommerce-admin'
 			),
 			before: <BacsIcon />,
-			visible: true,
+			visible: ! hasCbdIndustry,
 			container: <Bacs />,
-			isConfigured: options.woocommerce_bacs_accounts && options.woocommerce_bacs_accounts.length,
-			isEnabled: options.woocommerce_bacs_settings && options.woocommerce_bacs_settings.enabled === 'yes',
+			isConfigured:
+				options.woocommerce_bacs_accounts &&
+				options.woocommerce_bacs_accounts.length,
+			isEnabled:
+				options.woocommerce_bacs_settings &&
+				options.woocommerce_bacs_settings.enabled === 'yes',
 			optionName: 'woocommerce_bacs_settings',
 		},
 	];

@@ -489,7 +489,18 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce-admin' ), 500 );
 		}
 
-		$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
+		if ( 'US' === WC()->countries->get_base_country() ) {
+			$profile = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+			if ( ! empty( $profile['industry'] ) ) {
+				$has_cbd_industry = array_search( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ) );
+			}
+		}
+
+		if ( $has_cbd_industry ) {
+			$url  = 'https://squareup.com/t/f_partnerships/d_referrals/p_woocommerce/c_general/o_none/l_us/dt_alldevice/pr_payments/?route=/solutions/cbd';
+		} else {
+			$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
+		}
 
 		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&method=square&square-connect-finish=1' ), 'wc_square_connected' );
 		$args         = array(
