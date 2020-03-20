@@ -10,30 +10,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-
-const TabButton = ( {
-	tabId,
-	onClick,
-	children,
-	selected,
-	ariaLabel,
-	...rest
-} ) => {
-	return (
-		<button
-			role="tab"
-			type="button"
-			tabIndex={ selected ? null : -1 }
-			aria-selected={ selected }
-			aria-label={ ariaLabel }
-			id={ tabId }
-			onClick={ onClick }
-			{ ...rest }
-		>
-			<span className="wc-component__tab-item-content">{ children }</span>
-		</button>
-	);
-};
+import TabButton from './tab-button';
 
 const Tabs = ( {
 	className,
@@ -61,16 +38,16 @@ const Tabs = ( {
 	}
 	const selectedId = `${ instanceId }-${ selectedTab.name }`;
 	return (
-		<div className={ classnames( 'wc-component__tabs', className ) }>
+		<div className={ classnames( 'wc-block-components-tabs', className ) }>
 			<div
 				role="tablist"
 				aria-label={ ariaLabel }
-				className="wc-component__tab-list"
+				className="wc-block-components-tabs__list"
 			>
 				{ tabs.map( ( tab ) => (
 					<TabButton
 						className={ classnames(
-							'wc-component__tab-item',
+							'wc-block-components-tabs__item',
 							tab.className,
 							{
 								[ activeClass ]: tab.name === selected,
@@ -92,8 +69,8 @@ const Tabs = ( {
 					aria-labelledby={ selectedId }
 					role="tabpanel"
 					id={ `${ selectedId }-view` }
-					className="wc-component__tab-content"
-					tabIndex="0"
+					className="wc-block-components-tabs__content"
+					tabIndex={ 0 }
 				>
 					{ children( selected ) }
 				</div>

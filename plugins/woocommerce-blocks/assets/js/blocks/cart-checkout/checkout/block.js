@@ -244,22 +244,22 @@ const Block = ( {
 									/>
 								</FormStep>
 							) }
-							{ SHIPPING_ENABLED &&
-								( shippingRates.length === 0 && isEditor ? (
-									<NoShipping />
-								) : (
-									<FormStep
-										id="shipping-option"
-										className="wc-block-checkout__shipping-option"
-										title={ __(
-											'Shipping options',
-											'woo-gutenberg-products-block'
-										) }
-										description={ __(
-											'Select your shipping method below.',
-											'woo-gutenberg-products-block'
-										) }
-									>
+							{ SHIPPING_ENABLED && (
+								<FormStep
+									id="shipping-option"
+									className="wc-block-checkout__shipping-option"
+									title={ __(
+										'Shipping options',
+										'woo-gutenberg-products-block'
+									) }
+									description={ __(
+										'Select a shipping method below.',
+										'woo-gutenberg-products-block'
+									) }
+								>
+									{ shippingRates.length === 0 && isEditor ? (
+										<NoShipping />
+									) : (
 										<ShippingRatesControl
 											address={
 												shippingFields.country
@@ -291,22 +291,22 @@ const Block = ( {
 												shippingRatesLoading
 											}
 										/>
-
-										<CheckboxControl
-											className="wc-block-checkout__add-note"
-											label="Add order notes?"
-											checked={
-												selectedShippingRate.orderNote
-											}
-											onChange={ () =>
-												setSelectedShippingRate( {
-													...selectedShippingRate,
-													orderNote: ! selectedShippingRate.orderNote,
-												} )
-											}
-										/>
-									</FormStep>
-								) ) }
+									) }
+									<CheckboxControl
+										className="wc-block-checkout__add-note"
+										label="Add order notes?"
+										checked={
+											selectedShippingRate.orderNote
+										}
+										onChange={ () =>
+											setSelectedShippingRate( {
+												...selectedShippingRate,
+												orderNote: ! selectedShippingRate.orderNote,
+											} )
+										}
+									/>
+								</FormStep>
+							) }
 							<FormStep
 								id="payment-method"
 								className="wc-block-checkout__payment-method"

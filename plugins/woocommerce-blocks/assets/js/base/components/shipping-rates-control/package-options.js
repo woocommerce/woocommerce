@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 import RadioControl, {
 	RadioControlOptionLayout,
 } from '@woocommerce/base-components/radio-control';
+import { Notice } from 'wordpress-components';
+import classnames from 'classnames';
 
 const PackageOptions = ( {
 	className,
@@ -16,9 +18,16 @@ const PackageOptions = ( {
 } ) => {
 	if ( options.length === 0 ) {
 		return (
-			<p className="wc-block-shipping-rates-control__no-results">
+			<Notice
+				isDismissible={ false }
+				className={ classnames(
+					'wc-block-shipping-rates-control__no-results-notice',
+					'woocommerce-message',
+					'woocommerce-info'
+				) }
+			>
 				{ noResultsMessage }
-			</p>
+			</Notice>
 		);
 	}
 

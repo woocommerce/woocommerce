@@ -18,29 +18,7 @@ import { useCheckoutContext } from '@woocommerce/base-context';
  * Internal dependencies
  */
 import Tabs from '../tabs';
-
-const noPaymentMethodTab = () => {
-	const label = __( 'Not Existing', 'woo-gutenberg-products-block' );
-	return {
-		name: label,
-		label,
-		title: () => label,
-	};
-};
-
-const createTabs = ( paymentMethods ) => {
-	const paymentMethodIds = Object.keys( paymentMethods );
-	return paymentMethodIds.length > 0
-		? paymentMethodIds.map( ( id ) => {
-				const { label, ariaLabel } = paymentMethods[ id ];
-				return {
-					name: id,
-					title: () => label,
-					ariaLabel,
-				};
-		  } )
-		: [ noPaymentMethodTab() ];
-};
+import NoPaymentMethods from './no-payment-methods/index';
 
 /**
  * Returns a payment method for the given context.
@@ -61,6 +39,11 @@ const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
 	return paymentMethod;
 };
 
+/**
+ * PaymentMethods component.
+ *
+ * @return {*} The rendered component.
+ */
 const PaymentMethods = () => {
 	const { isEditor } = useCheckoutContext();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
@@ -72,11 +55,12 @@ const PaymentMethods = () => {
 	} = usePaymentMethodInterface();
 	const currentPaymentMethodInterface = useRef( paymentMethodInterface );
 
-	// update ref on changes
+	// update ref on change.
 	useEffect( () => {
 		currentPaymentMethods.current = paymentMethods;
 		currentPaymentMethodInterface.current = paymentMethodInterface;
 	}, [ paymentMethods, paymentMethodInterface, activePaymentMethod ] );
+
 	const getRenderedTab = useCallback(
 		() => ( selectedTab ) => {
 			const paymentMethod = getPaymentMethod(
@@ -93,19 +77,23 @@ const PaymentMethods = () => {
 		},
 		[ isEditor, activePaymentMethod ]
 	);
-	if (
-		! isInitialized ||
-		( Object.keys( paymentMethods ).length === 0 && isInitialized )
-	) {
-		// @todo this can be a placeholder informing the user there are no
-		// payment methods setup?
-		return <div>No Payment Methods Initialized</div>;
+
+	if ( ! isInitialized || Object.keys( paymentMethods ).length === 0 ) {
+		return <NoPaymentMethods />;
 	}
+
 	return (
 		<Tabs
-			className="wc-component__payment-method-options"
+			className="wc-block-components-checkout-payment-methods"
 			onSelect={ ( tabName ) => setActivePaymentMethod( tabName ) }
-			tabs={ createTabs( paymentMethods ) }
+			tabs={ Object.keys( paymentMethods ).map( ( id ) => {
+				const { label, ariaLabel } = paymentMethods[ id ];
+				return {
+					name: id,
+					title: () => label,
+					ariaLabel,
+				};
+			} ) }
 			initialTabName={ activePaymentMethod }
 			ariaLabel={ __(
 				'Payment Methods',

@@ -27,9 +27,8 @@
 	color: $core-grey-dark-400;
 }
 
-.wc-block-shipping-rates-control__no-results {
-	margin-bottom: 0;
-	font-style: italic;
+.components-notice.wc-block-shipping-rates-control__no-results-notice {
+	margin-bottom: $gap;
 }
 
 // Resets when it's inside a panel.
