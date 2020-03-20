@@ -91,6 +91,8 @@ class WC_Site_Tracking {
 	 * @param string $event_name_prefix Prefix to add to all triggered events.
 	 */
 	public static function render_tracking_function( $event_name_prefix ) {
+		// Note: When adding/removing default event properties here, consider
+		// also adding them in WC_Tracks::get_blog_details() or record_event().
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
@@ -98,7 +100,8 @@ class WC_Site_Tracking {
 			window.wcTracks.recordEvent = function( name, properties ) {
 				var eventName = '<?php echo esc_attr( $event_name_prefix ); ?>' + name;
 				var eventProperties = properties || {};
-				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
+				eventProperties.url = '<?php echo esc_js( home_url() ); ?>'
+				eventProperties.woo_version = '<?php echo esc_js( WC()->version ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
