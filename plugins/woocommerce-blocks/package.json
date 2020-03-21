@@ -25,7 +25,7 @@
 		"deploy": "cross-env WOOCOMMERCE_BLOCKS_PHASE=stable composer install --no-dev && npm run build --loglevel error && sh ./bin/github-deploy.sh",
 		"release": "sh ./bin/wordpress-deploy.sh",
 		"build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
-		"build:ci": "npm run build && npm run size-check && npm run lint:js && npm run lint:css",
+		"lint:ci": "npm run lint:js && npm run lint:css",
 		"build:e2e-test": "npm run build",
 		"dev": "cross-env BABEL_ENV=default webpack",
 		"docker:up": "docker-compose up -d",
@@ -52,7 +52,6 @@
 		"test:e2e:update": "./tests/bin/e2e-test-integration.js -- --updateSnapshot",
 		"test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
 		"test:watch": "npm run test -- --watch",
-		"size-check": "bundlewatch",
 		"storybook": "start-storybook  -c ./storybook -p 6006 --ci",
 		"build-storybook": "build-storybook  -c ./storybook",
 		"changelog": "node ./bin/changelog",
@@ -101,7 +100,6 @@
 		"babel-plugin-transform-react-jsx": "6.24.1",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"babel-plugin-transform-runtime": "6.23.0",
-		"bundlewatch": "0.2.6",
 		"chalk": "3.0.0",
 		"clean-webpack-plugin": "3.0.0",
 		"commander": "4.1.1",
@@ -163,38 +161,6 @@
 		"hooks": {
 			"pre-commit": "lint-staged"
 		}
-	},
-	"bundlewatch": {
-		"files": [
-			{
-				"path": "./build/*.js",
-				"maxSize": "200 kB"
-			},
-			{
-				"path": "./build/*frontend*.js",
-				"maxSize": "60 kB"
-			},
-			{
-				"path": "./build/cart.js",
-				"maxSize": "80 kB"
-			},
-			{
-				"path": "./build/cart-frontend.js",
-				"maxSize": "160 kB"
-			},
-			{
-				"path": "./build/checkout-frontend.js",
-				"maxSize": "160 kB"
-			},
-			{
-				"path": "./build/*.css",
-				"maxSize": "50kB"
-			},
-			{
-				"path": "./build/vendors*.js",
-				"maxSize": "360 kb"
-			}
-		]
 	},
 	"lint-staged": {
 		"*.scss": [

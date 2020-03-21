@@ -70,10 +70,10 @@ jobs:
               - npm run test
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=experimental
-        - name: Javascript/CSS Lint and Bundle Size Check
+        - name: Javascript/CSS Lint check
           script:
               - npm install
-              - npm run build:ci
+              - npm run lint:ci
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=experimental
         - name: E2E Tests
