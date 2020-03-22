@@ -90,15 +90,13 @@ jobs:
           name: Deploy Storybook
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=experimental
-          script:
-              -  #ignore default phpunit build!
           install:
               - npm ci
-          before_deploy:
+          script:
               - npm run storybook:build
           deploy:
               provider: pages
-              cleanup: false
+              skip_cleanup: true
               github_token: $GITHUB_TOKEN
               keep_history: true
               local_dir: storybook/dist
