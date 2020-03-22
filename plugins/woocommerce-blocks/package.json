@@ -53,7 +53,7 @@
 		"test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
 		"test:watch": "npm run test -- --watch",
 		"storybook": "start-storybook  -c ./storybook -p 6006 --ci",
-		"build-storybook": "build-storybook  -c ./storybook",
+		"storybook:build": "build-storybook  -c ./storybook -o ./storybook/dist",
 		"changelog": "node ./bin/changelog",
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'"
 	},

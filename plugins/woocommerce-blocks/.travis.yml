@@ -85,3 +85,20 @@ jobs:
               - npm run test:e2e
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=experimental
+        - stage: deploy
+          if: (NOT type IN (pull_request)) AND (branch = master)
+          name: Deploy Storybook
+          env:
+              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+          install:
+              - npm ci
+          before_deploy:
+              - npm run storybook:build
+          deploy:
+              provider: pages
+              skip_cleanup: true
+              github_token: $GITHUB_TOKEN
+              keep_history: true
+              local_dir: storybook/dist
+              on:
+                  branch: master
