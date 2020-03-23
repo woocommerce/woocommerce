@@ -15,7 +15,9 @@
  *                   executed.
  */
 export const emitEvent = async ( observers, eventType, data ) => {
-	const observersByType = observers[ eventType ] || [];
+	const observersByType = observers[ eventType ]
+		? Object.values( observers[ eventType ] )
+		: [];
 	for ( let i = 0; i < observersByType.length; i++ ) {
 		try {
 			await Promise.resolve( observersByType[ i ]( data ) );
@@ -43,7 +45,9 @@ export const emitEvent = async ( observers, eventType, data ) => {
  *                   return value of the aborted observer.
  */
 export const emitEventWithAbort = async ( observers, eventType, data ) => {
-	const observersByType = observers[ eventType ] || [];
+	const observersByType = observers[ eventType ]
+		? Object.values( observers[ eventType ] )
+		: [];
 	for ( let i = 0; i < observersByType.length; i++ ) {
 		try {
 			const response = await Promise.resolve(

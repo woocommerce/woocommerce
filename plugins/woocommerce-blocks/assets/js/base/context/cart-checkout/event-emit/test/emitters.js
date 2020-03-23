@@ -18,7 +18,7 @@ describe( 'Testing emitters', () => {
 	} );
 	describe( 'Testing emitEvent()', () => {
 		it( 'invokes all observers', async () => {
-			const observers = { test: Object.values( observerMocks ) };
+			const observers = { test: observerMocks };
 			const response = await emitEvent( observers, 'test', 'foo' );
 			expect( console ).toHaveErroredWith( 'an error' );
 			expect( observerMocks.observerA ).toHaveBeenCalledTimes( 1 );
@@ -31,7 +31,7 @@ describe( 'Testing emitters', () => {
 			'aborts on non truthy value and does not invoke remaining ' +
 				'observers',
 			async () => {
-				const observers = { test: Object.values( observerMocks ) };
+				const observers = { test: observerMocks };
 				const response = await emitEventWithAbort(
 					observers,
 					'test',
