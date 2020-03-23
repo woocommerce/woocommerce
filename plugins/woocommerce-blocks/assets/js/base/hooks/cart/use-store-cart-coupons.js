@@ -58,7 +58,9 @@ export const useStoreCartCoupons = () => {
 						}
 					} )
 					.catch( ( error ) => {
-						setValidationErrors( { coupon: error.message } );
+						setValidationErrors( {
+							coupon: { message: error.message, hidden: false },
+						} );
 						// Finished handling the coupon.
 						receiveApplyingCoupon( '' );
 					} );

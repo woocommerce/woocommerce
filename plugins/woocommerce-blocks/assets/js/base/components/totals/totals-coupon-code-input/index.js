@@ -5,12 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { PanelBody, PanelRow } from 'wordpress-components';
 import { Button } from '@woocommerce/base-components/cart-checkout';
-import TextInput from '@woocommerce/base-components/text-input';
+import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import { ValidationInputError } from '@woocommerce/base-components/validation';
 import PropTypes from 'prop-types';
 import { withInstanceId } from 'wordpress-compose';
-import classnames from 'classnames';
 import { useValidationContext } from '@woocommerce/base-context';
 
 /**
@@ -27,21 +26,18 @@ const TotalsCouponCodeInput = ( {
 } ) => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const currentIsLoading = useRef( false );
-	const {
-		getValidationError,
-		clearValidationError,
-		getValidationErrorId,
-	} = useValidationContext();
-	const validationMessage = getValidationError( 'coupon' );
+	const { getValidationError, getValidationErrorId } = useValidationContext();
+
+	const validationError = getValidationError( 'coupon' );
 
 	useEffect( () => {
 		if ( currentIsLoading.current !== isLoading ) {
-			if ( ! isLoading && couponValue && ! validationMessage ) {
+			if ( ! isLoading && couponValue && ! validationError ) {
 				setCouponValue( '' );
 			}
 			currentIsLoading.current = isLoading;
 		}
-	}, [ isLoading, couponValue, validationMessage ] );
+	}, [ isLoading, couponValue, validationError ] );
 
 	const textInputId = `wc-block-coupon-code__input-${ instanceId }`;
 
@@ -73,14 +69,10 @@ const TotalsCouponCodeInput = ( {
 			>
 				<PanelRow className="wc-block-coupon-code__row">
 					<form className="wc-block-coupon-code__form">
-						<TextInput
+						<ValidatedTextInput
 							id={ textInputId }
-							className={ classnames(
-								'wc-block-coupon-code__input',
-								{
-									'has-error': !! validationMessage,
-								}
-							) }
+							errorId="coupon"
+							className="wc-block-coupon-code__input"
 							label={ __(
 								'Enter code',
 								'woo-gutenberg-products-block'
@@ -91,8 +83,9 @@ const TotalsCouponCodeInput = ( {
 							) }
 							onChange={ ( newCouponValue ) => {
 								setCouponValue( newCouponValue );
-								clearValidationError( 'coupon' );
 							} }
+							validateOnMount={ false }
+							showError={ false }
 						/>
 						<Button
 							className="wc-block-coupon-code__button"
@@ -106,11 +99,11 @@ const TotalsCouponCodeInput = ( {
 							{ __( 'Apply', 'woo-gutenberg-products-block' ) }
 						</Button>
 					</form>
+					<ValidationInputError
+						propertyName="coupon"
+						elementId={ textInputId }
+					/>
 				</PanelRow>
-				<ValidationInputError
-					errorMessage={ validationMessage }
-					elementId={ textInputId }
-				/>
 			</LoadingMask>
 		</PanelBody>
 	);

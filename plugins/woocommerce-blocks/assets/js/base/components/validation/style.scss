@@ -1,13 +1,18 @@
 .wc-block-form-input-validation-error {
 	color: $error-red;
 	@include font-size(12);
-	margin-top: -$gap-large;
-	padding-top: $gap-smallest;
-	display: block;
+	max-width: 100%;
+	position: absolute;
+	top: calc(100% - 1px);
+	white-space: normal;
 
 	> p {
-		padding: 0;
+		align-items: center;
+		display: flex;
+		line-height: 12px; // This allows two lines in a 24px bottom margin.
 		margin: 0;
+		min-height: 24px;
+		padding: 0;
 	}
 }
 

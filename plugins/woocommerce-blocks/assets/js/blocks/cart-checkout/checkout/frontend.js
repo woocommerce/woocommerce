@@ -7,7 +7,10 @@ import {
 	withStoreCartApiHydration,
 } from '@woocommerce/block-hocs';
 import { useStoreCart } from '@woocommerce/base-hooks';
-import { StoreNoticesProvider } from '@woocommerce/base-context';
+import {
+	StoreNoticesProvider,
+	ValidationContextProvider,
+} from '@woocommerce/base-context';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
@@ -59,13 +62,15 @@ const CheckoutFrontend = ( props ) => {
 					showErrorMessage={ CURRENT_USER_IS_ADMIN }
 				>
 					<StoreNoticesProvider context="wc/checkout">
-						<Block
-							{ ...props }
-							cartCoupons={ cartCoupons }
-							cartItems={ cartItems }
-							cartTotals={ cartTotals }
-							shippingRates={ shippingRates }
-						/>
+						<ValidationContextProvider>
+							<Block
+								{ ...props }
+								cartCoupons={ cartCoupons }
+								cartItems={ cartItems }
+								cartTotals={ cartTotals }
+								shippingRates={ shippingRates }
+							/>
+						</ValidationContextProvider>
 					</StoreNoticesProvider>
 				</BlockErrorBoundary>
 			) }

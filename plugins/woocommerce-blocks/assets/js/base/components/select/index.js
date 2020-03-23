@@ -10,20 +10,32 @@ import { CustomSelectControl } from 'wordpress-components';
  */
 import './style.scss';
 
-const Select = ( { className, label, onChange, options, value, hasError } ) => {
+const Select = ( {
+	className,
+	feedback,
+	id,
+	label,
+	onChange,
+	options,
+	value,
+} ) => {
 	return (
-		<CustomSelectControl
+		<div
+			id={ id }
 			className={ classnames( 'wc-block-select', className, {
 				'is-active': value,
-				'has-error': hasError,
 			} ) }
-			label={ label }
-			onChange={ ( { selectedItem } ) => {
-				onChange( selectedItem.key );
-			} }
-			options={ options }
-			value={ value }
-		/>
+		>
+			<CustomSelectControl
+				label={ label }
+				onChange={ ( { selectedItem } ) => {
+					onChange( selectedItem.key );
+				} }
+				options={ options }
+				value={ value }
+			/>
+			{ feedback }
+		</div>
 	);
 };
 
@@ -36,6 +48,8 @@ Select.propTypes = {
 		} ).isRequired
 	).isRequired,
 	className: PropTypes.string,
+	feedback: PropTypes.node,
+	id: PropTypes.string,
 	label: PropTypes.string,
 	value: PropTypes.shape( {
 		key: PropTypes.string.isRequired,
@@ -44,3 +58,4 @@ Select.propTypes = {
 };
 
 export default Select;
+export { default as ValidatedSelect } from './validated';

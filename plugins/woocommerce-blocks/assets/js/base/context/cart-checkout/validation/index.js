@@ -38,11 +38,9 @@ export const ValidationContextProvider = ( { children } ) => {
 	 *
 	 * @param {string} property The property the error message is for.
 	 *
-	 * @return {string} Either the error message for the given property or an
-	 *                  empty string.
+	 * @return {Object} The error object for the given property.
 	 */
-	const getValidationError = ( property ) =>
-		validationErrors[ property ] || '';
+	const getValidationError = ( property ) => validationErrors[ property ];
 
 	/**
 	 * Clears any validation error that exists in state for the given property
@@ -73,11 +71,80 @@ export const ValidationContextProvider = ( { children } ) => {
 		// all values must be a string.
 		newErrors = pickBy(
 			newErrors,
-			( message ) => typeof message === 'string'
+			( { message } ) => typeof message === 'string'
 		);
 		if ( Object.values( newErrors ).length > 0 ) {
-			updateValidationErrors( { ...validationErrors, ...newErrors } );
+			updateValidationErrors( ( prevErrors ) => ( {
+				...prevErrors,
+				...newErrors,
+			} ) );
 		}
+	};
+
+	const updateValidationError = ( property, newError ) => {
+		updateValidationErrors( ( prevErrors ) => {
+			if ( ! prevErrors.hasOwnProperty( property ) ) {
+				return prevErrors;
+			}
+			return {
+				...prevErrors,
+				[ property ]: {
+					...prevErrors[ property ],
+					...newError,
+				},
+			};
+		} );
+	};
+
+	/**
+	 * Given a property name and if an associated error exists, it sets its
+	 * `hidden` value to true.
+	 *
+	 * @param {string} property  The name of the property to set the `hidden`
+	 *                           value to true.
+	 */
+	const hideValidationError = ( property ) => {
+		updateValidationError( property, {
+			hidden: true,
+		} );
+	};
+
+	/**
+	 * Given a property name and if an associated error exists, it sets its
+	 * `hidden` value to false.
+	 *
+	 * @param {string} property  The name of the property to set the `hidden`
+	 *                           value to false.
+	 */
+	const showValidationError = ( property ) => {
+		updateValidationError( property, {
+			hidden: false,
+		} );
+	};
+
+	/**
+	 * Sets the `hidden` value of all errors to `false`.
+	 */
+	const showAllValidationErrors = () => {
+		updateValidationErrors( ( prevErrors ) => {
+			const newErrors = {};
+			Object.keys( prevErrors ).forEach( ( property ) => {
+				newErrors[ property ] = {
+					...prevErrors[ property ],
+					hidden: false,
+				};
+			} );
+			return newErrors;
+		} );
+	};
+
+	/**
+	 * Allows checking if the current context has at least one validation error.
+	 *
+	 * @return {boolean} Whether there is at least one error.
+	 */
+	const hasValidationErrors = () => {
+		return Object.keys( validationErrors ).length > 0;
 	};
 
 	/**
@@ -98,6 +165,10 @@ export const ValidationContextProvider = ( { children } ) => {
 		clearValidationError,
 		clearAllValidationErrors,
 		getValidationErrorId,
+		hideValidationError,
+		showValidationError,
+		showAllValidationErrors,
+		hasValidationErrors,
 	};
 	return (
 		<ValidationContext.Provider value={ context }>
