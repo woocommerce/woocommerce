@@ -70,7 +70,7 @@ class Shipping extends Component {
 						path: `/wc/v3/shipping/zones/${ zone.id }/methods`,
 					} );
 					zone.name = __( 'Rest of the world', 'woocommerce-admin' );
-					zone.toggleEnabled = true;
+					zone.toggleable = true;
 					shippingZones.push( zone );
 					return;
 				}

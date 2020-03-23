@@ -32,15 +32,41 @@ class ShippingRates extends Component {
 		this.updateShippingZones = this.updateShippingZones.bind( this );
 	}
 
+	getShippingMethods( zone, type = null ) {
+		if ( ! type ) {
+			return zone.methods;
+		}
+
+		return zone.methods
+			? zone.methods.filter( ( method ) => method.method_id === type )
+			: [];
+	}
+
+	disableShippingMethods( zone, methods ) {
+		if ( ! methods.length ) {
+			return;
+		}
+
+		methods.forEach( ( method ) => {
+			apiFetch( {
+				method: 'POST',
+				path: `/wc/v3/shipping/zones/${ zone.id }/methods/${ method.instance_id }`,
+				data: {
+					enabled: false,
+				},
+			} );
+		} );
+	}
+
 	async updateShippingZones( values ) {
 		const { createNotice, shippingZones } = this.props;
 
 		let restOfTheWorld = false;
 		let shippingCost = false;
-		shippingZones.forEach( zone => {
+		shippingZones.forEach( ( zone ) => {
 			if ( zone.id === 0 ) {
 				restOfTheWorld =
-					zone.toggleEnabled && values[ `${ zone.id }_enabled` ];
+					zone.toggleable && values[ `${ zone.id }_enabled` ];
 			} else {
 				shippingCost =
 					values[ `${ zone.id }_rate` ] !== '' &&
@@ -48,49 +74,41 @@ class ShippingRates extends Component {
 						parseFloat( 0 );
 			}
 
-			const flatRateMethods = zone.methods
-				? zone.methods.filter(
-						( method ) => method.method_id === 'flat_rate'
-				  )
-				: [];
+			const shippingMethods = this.getShippingMethods( zone );
+			const methodType =
+				parseFloat( values[ `${ zone.id }_rate` ] ) === parseFloat( 0 )
+					? 'free_shipping'
+					: 'flat_rate';
+			const shippingMethod = this.getShippingMethods( zone, methodType )
+				.length
+				? this.getShippingMethods( zone, methodType )[ 0 ]
+				: null;
 
-			if ( zone.toggleEnabled && ! values[ `${ zone.id }_enabled` ] ) {
-				// Disable any flat rate methods that exist if toggled off.
-				if ( flatRateMethods.length ) {
-					flatRateMethods.forEach( method => {
-						apiFetch( {
-							method: 'POST',
-							path: `/wc/v3/shipping/zones/${ zone.id }/methods/${ method.instance_id }`,
-							data: {
-								enabled: false,
-							},
-						} );
-					} );
-				}
+			if ( zone.toggleable && ! values[ `${ zone.id }_enabled` ] ) {
+				// Disable any shipping methods that exist if toggled off.
+				this.disableShippingMethods( zone, shippingMethods );
 				return;
+			} else if ( shippingMethod ) {
+				// Disable all methods except the one being updated.
+				const methodsToDisable = shippingMethods.filter(
+					( method ) =>
+						method.instance_id !== shippingMethod.instance_id
+				);
+				this.disableShippingMethods( zone, methodsToDisable );
 			}
 
-			if ( flatRateMethods.length ) {
-				// Update the existing method.
-				apiFetch( {
-					method: 'POST',
-					path: `/wc/v3/shipping/zones/${ zone.id }/methods/${ flatRateMethods[ 0 ].instance_id }`,
-					data: {
-						enabled: true,
-						settings: { cost: values[ `${ zone.id }_rate` ] },
-					},
-				} );
-			} else {
-				// Add new method if one doesn't exist.
-				apiFetch( {
-					method: 'POST',
-					path: `/wc/v3/shipping/zones/${ zone.id }/methods`,
-					data: {
-						method_id: 'flat_rate',
-						settings: { cost: values[ `${ zone.id }_rate` ] },
-					},
-				} );
-			}
+			apiFetch( {
+				method: 'POST',
+				path: shippingMethod
+					? // Update the first existing method if one exists, otherwise create a new one.
+					  `/wc/v3/shipping/zones/${ zone.id }/methods/${ shippingMethod.instance_id }`
+					: `/wc/v3/shipping/zones/${ zone.id }/methods`,
+				data: {
+					method_id: methodType,
+					enabled: true,
+					settings: { cost: values[ `${ zone.id }_rate` ] },
+				},
+			} );
 		} );
 
 		recordEvent( 'tasklist_shipping_set_costs', {
@@ -153,20 +171,16 @@ class ShippingRates extends Component {
 		const values = {};
 
 		this.props.shippingZones.forEach( ( zone ) => {
-			const flatRateMethods =
-				zone.methods && zone.methods.length
-					? zone.methods.filter(
-							( method ) => method.method_id === 'flat_rate'
+			const shippingMethods = this.getShippingMethods( zone );
+			const rate =
+				shippingMethods.length && shippingMethods[ 0 ].settings.cost
+					? this.getFormattedRate(
+							shippingMethods[ 0 ].settings.cost.value
 					  )
-					: [];
-			const rate = flatRateMethods.length
-				? this.getFormattedRate(
-						flatRateMethods[ 0 ].settings.cost.value
-				  )
-				: getCurrencyFormatString( 0 );
+					: getCurrencyFormatString( 0 );
 			values[ `${ zone.id }_rate` ] = rate;
 
-			if ( flatRateMethods.length && flatRateMethods[ 0 ].enabled ) {
+			if ( shippingMethods.length && shippingMethods[ 0 ].enabled ) {
 				values[ `${ zone.id }_enabled` ] = true;
 			} else {
 				values[ `${ zone.id }_enabled` ] = false;
@@ -248,7 +262,7 @@ class ShippingRates extends Component {
 										<div className="woocommerce-shipping-rate__main">
 											<div className="woocommerce-shipping-rate__name">
 												{ zone.name }
-												{ zone.toggleEnabled && (
+												{ zone.toggleable && (
 													<FormToggle
 														{ ...getInputProps(
 															`${ zone.id }_enabled`
@@ -256,7 +270,7 @@ class ShippingRates extends Component {
 													/>
 												) }
 											</div>
-											{ ( ! zone.toggleEnabled ||
+											{ ( ! zone.toggleable ||
 												values[
 													`${ zone.id }_enabled`
 												] ) && (
