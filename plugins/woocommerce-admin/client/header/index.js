@@ -109,24 +109,9 @@ class Header extends Component {
 			'is-scrolled': isScrolled,
 		} );
 
-		const firstBreadCrumbPath = 'admin.php?page=wc-admin';
-
 		return (
 			<div className={ className } ref={ this.headerRef }>
 				<h1 className="woocommerce-layout__header-breadcrumbs">
-					<span>
-						<Link
-							href={
-								isEmbedded
-									? getAdminLink( firstBreadCrumbPath )
-									: firstBreadCrumbPath
-							}
-							type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
-							onClick={ this.trackLinkClick }
-						>
-							{ __( 'WooCommerce', 'woocommerce-admin' ) }
-						</Link>
-					</span>
 					{ _sections.map( ( section, i ) => {
 						const sectionPiece = Array.isArray( section ) ? (
 							<Link

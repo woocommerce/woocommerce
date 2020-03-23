@@ -176,6 +176,10 @@ class PageController {
 			}
 		}
 
+		$woocommerce_breadcrumb = array( 'admin.php?page=wc-admin', __( 'WooCommerce', 'woocommerce-admin' ) );
+
+		array_unshift( $breadcrumbs, $woocommerce_breadcrumb );
+
 		/**
 		 * The navigation breadcrumbs for the current page.
 		 *
