@@ -20,24 +20,56 @@ const ShippingCalculatorAddress = ( {
 	addressFields,
 } ) => {
 	const [ address, setAddress ] = useState( initialAddress );
-	const { getValidationError } = useValidationContext();
+	const {
+		hasValidationErrors,
+		showAllValidationErrors,
+	} = useValidationContext();
+
+	const validateSubmit = () => {
+		showAllValidationErrors();
+		if ( hasValidationErrors() ) {
+			return false;
+		}
+		return true;
+	};
+
+	// Make all fields optional except 'country'.
+	const fieldConfig = {};
+	addressFields.forEach( ( field ) => {
+		if ( field === 'country' ) {
+			fieldConfig[ field ] = {
+				...fieldConfig[ field ],
+				errorMessage: __(
+					'Please select a country to calculate rates.',
+					'woo-gutenberg-products-block'
+				),
+				required: true,
+			};
+		} else {
+			fieldConfig[ field ] = {
+				...fieldConfig[ field ],
+				required: false,
+			};
+		}
+	} );
 
 	return (
 		<form className="wc-block-shipping-calculator-address">
 			<AddressForm
 				fields={ addressFields }
+				fieldConfig={ fieldConfig }
 				onChange={ setAddress }
 				values={ address }
 			/>
 			<Button
 				className="wc-block-shipping-calculator-address__button"
-				disabled={
-					isShallowEqual( address, initialAddress ) ||
-					getValidationError( 'country' )
-				}
+				disabled={ isShallowEqual( address, initialAddress ) }
 				onClick={ ( e ) => {
 					e.preventDefault();
-					return onUpdate( address );
+					const isAddressValid = validateSubmit();
+					if ( isAddressValid ) {
+						return onUpdate( address );
+					}
 				} }
 				type="submit"
 			>

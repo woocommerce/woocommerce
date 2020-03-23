@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useEffect } from '@wordpress/element';
@@ -8,8 +9,8 @@ import { useCallback, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import TextInput from '../text-input';
-import Select from '../select';
+import { ValidatedTextInput } from '../text-input';
+import { ValidatedSelect } from '../select';
 
 const StateInput = ( {
 	className,
@@ -61,12 +62,16 @@ const StateInput = ( {
 	if ( options.length > 0 ) {
 		return (
 			<>
-				<Select
+				<ValidatedSelect
 					className={ className }
 					label={ label }
 					onChange={ onChangeState }
 					options={ options }
 					value={ options.find( ( option ) => option.key === value ) }
+					errorMessage={ __(
+						'Please select a state.',
+						'woo-gutenberg-products-block'
+					) }
 					required={ required }
 				/>
 				{ autoComplete !== 'off' && (
@@ -92,7 +97,7 @@ const StateInput = ( {
 		);
 	}
 	return (
-		<TextInput
+		<ValidatedTextInput
 			className={ className }
 			label={ label }
 			onChange={ onChangeState }

@@ -3,13 +3,64 @@
 	margin-bottom: $gap-large;
 	white-space: nowrap;
 
+	label {
+		position: absolute;
+		transform: translateY(#{$gap-small});
+		left: 0;
+		transform-origin: top left;
+		font-size: 16px;
+		line-height: 22px;
+		color: $gray-50;
+		transition: transform 200ms ease;
+		margin: 0 $gap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{  2 * $gap });
+
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	input:-webkit-autofill + label {
+		transform: translateY(#{$gap-smallest}) scale(0.75);
+	}
+
+	&.is-active label {
+		transform: translateY(#{$gap-smallest}) scale(0.75);
+	}
+
+	input[type="tel"],
+	input[type="url"],
+	input[type="text"],
+	input[type="email"] {
+		background-color: #fff;
+		padding: $gap-small $gap;
+		border-radius: 4px;
+		border: 1px solid $input-border-gray;
+		width: 100%;
+		font-size: 16px;
+		line-height: 22px;
+		font-family: inherit;
+		margin: 0;
+		box-sizing: border-box;
+		height: 48px;
+		color: $input-text-active;
+
+		&:focus {
+			background-color: #fff;
+		}
+	}
+
+	&.is-active input[type="tel"],
+	&.is-active input[type="url"],
+	&.is-active input[type="text"],
+	&.is-active input[type="email"] {
+		padding: $gap-large $gap $gap-smallest;
+	}
+
 	&.has-error input {
-		/**
-		 *  This is needed because of the input[type="*"] rules later in this
-		 *  file (and in themes like storefront) have higher specificity for
-		 *  border
-		 */
-		border-color: $error-red !important;
+		border-color: $error-red;
 		&:focus {
 			outline-color: $error-red;
 		}
@@ -18,56 +69,4 @@
 	&.has-error label {
 		color: $error-red;
 	}
-}
-
-.wc-block-text-input label {
-	position: absolute;
-	transform: translateY(#{$gap-small});
-	left: 0;
-	transform-origin: top left;
-	font-size: 16px;
-	line-height: 22px;
-	color: $gray-50;
-	transition: all 200ms ease;
-	margin: 0 $gap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: calc(100% - #{  2 * $gap });
-
-	@media screen and (prefers-reduced-motion: reduce) {
-		transition: none;
-	}
-}
-.wc-block-text-input input:-webkit-autofill + label {
-	transform: translateY(#{$gap-smallest}) scale(0.75);
-}
-.wc-block-text-input.is-active label {
-	transform: translateY(#{$gap-smallest}) scale(0.75);
-}
-.wc-block-text-input input[type="tel"],
-.wc-block-text-input input[type="url"],
-.wc-block-text-input input[type="text"],
-.wc-block-text-input input[type="email"] {
-	background-color: #fff;
-	padding: $gap-small $gap;
-	border-radius: 4px;
-	border: 1px solid $input-border-gray;
-	width: 100%;
-	font-size: 16px;
-	line-height: 22px;
-	font-family: inherit;
-	margin: 0;
-	box-sizing: border-box;
-	height: 48px;
-	color: $input-text-active;
-
-	&:focus {
-		background-color: #fff;
-	}
-}
-.wc-block-text-input.is-active input[type="tel"],
-.wc-block-text-input.is-active input[type="url"],
-.wc-block-text-input.is-active input[type="text"],
-.wc-block-text-input.is-active input[type="email"] {
-	padding: $gap-large $gap $gap-smallest;
 }

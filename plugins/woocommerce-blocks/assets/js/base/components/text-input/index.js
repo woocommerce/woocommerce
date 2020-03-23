@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
+import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useState } from '@wordpress/element';
-import { withInstanceId } from 'wordpress-compose';
 
 /**
  * Internal dependencies
@@ -12,73 +12,84 @@ import { withInstanceId } from 'wordpress-compose';
 import Label from '../label';
 import './style.scss';
 
-const TextInput = ( {
-	className,
-	instanceId,
-	id,
-	type = 'text',
-	ariaLabel,
-	ariaDescribedBy,
-	label,
-	screenReaderLabel,
-	disabled,
-	help,
-	autoComplete = 'off',
-	value = '',
-	onChange,
-	required = false,
-} ) => {
-	const [ isActive, setIsActive ] = useState( false );
-	const onChangeValue = ( event ) => onChange( event.target.value );
-	const textInputId = id || 'textinput-' + instanceId;
+const TextInput = forwardRef(
+	(
+		{
+			className,
+			id,
+			type = 'text',
+			ariaLabel,
+			ariaDescribedBy,
+			label,
+			screenReaderLabel,
+			disabled,
+			help,
+			autoComplete = 'off',
+			value = '',
+			onChange,
+			required = false,
+			onBlur = () => {},
+			feedback,
+		},
+		ref
+	) => {
+		const [ isActive, setIsActive ] = useState( false );
 
-	return (
-		<div
-			className={ classnames( 'wc-block-text-input', className, {
-				'is-active': isActive || value,
-			} ) }
-		>
-			<input
-				type={ type }
-				id={ textInputId }
-				value={ value }
-				autoComplete={ autoComplete }
-				onChange={ onChangeValue }
-				onFocus={ () => setIsActive( true ) }
-				onBlur={ () => setIsActive( false ) }
-				aria-label={ ariaLabel || label }
-				disabled={ disabled }
-				aria-describedby={
-					!! help && ! ariaDescribedBy
-						? textInputId + '__help'
-						: ariaDescribedBy
-				}
-				required={ required }
-			/>
-			<Label
-				label={ label }
-				screenReaderLabel={ screenReaderLabel || label }
-				wrapperElement="label"
-				wrapperProps={ {
-					htmlFor: textInputId,
-				} }
-				htmlFor={ textInputId }
-			/>
-			{ !! help && (
-				<p
-					id={ textInputId + '__help' }
-					className="wc-block-text-input__help"
-				>
-					{ help }
-				</p>
-			) }
-		</div>
-	);
-};
+		return (
+			<div
+				className={ classnames( 'wc-block-text-input', className, {
+					'is-active': isActive || value,
+				} ) }
+			>
+				<input
+					type={ type }
+					id={ id }
+					value={ value }
+					ref={ ref }
+					autoComplete={ autoComplete }
+					onChange={ ( event ) => {
+						onChange( event.target.value );
+					} }
+					onFocus={ () => setIsActive( true ) }
+					onBlur={ () => {
+						onBlur();
+						setIsActive( false );
+					} }
+					aria-label={ ariaLabel || label }
+					disabled={ disabled }
+					aria-describedby={
+						!! help && ! ariaDescribedBy
+							? id + '__help'
+							: ariaDescribedBy
+					}
+					required={ required }
+				/>
+				<Label
+					label={ label }
+					screenReaderLabel={ screenReaderLabel || label }
+					wrapperElement="label"
+					wrapperProps={ {
+						htmlFor: id,
+					} }
+					htmlFor={ id }
+				/>
+				{ !! help && (
+					<p
+						id={ id + '__help' }
+						className="wc-block-text-input__help"
+					>
+						{ help }
+					</p>
+				) }
+				{ feedback }
+			</div>
+		);
+	}
+);
 
 TextInput.propTypes = {
+	id: PropTypes.string.isRequired,
 	onChange: PropTypes.func.isRequired,
-	id: PropTypes.string,
 	value: PropTypes.string,
 	ariaLabel: PropTypes.string,
 	ariaDescribedBy: PropTypes.string,
@@ -90,4 +101,5 @@ TextInput.propTypes = {
 	required: PropTypes.bool,
 };
 
-export default withInstanceId( TextInput );
+export default TextInput;
+export { default as ValidatedTextInput } from './validated';

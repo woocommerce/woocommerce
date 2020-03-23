@@ -218,10 +218,9 @@
 /**
  * @typedef {Object} ValidationContext
  *
- * @property {function(string):string}  getValidationError       Return validation error or empty
- *                                                               string if it doesn't exist for the
+ * @property {function(string):Object}  getValidationError       Return validation error for the
  *                                                               given property.
- * @property {function(Object<string>)} setValidationErrors      Receive an object of properties and
+ * @property {function(Object<Object>)} setValidationErrors      Receive an object of properties and
  *                                                               error messages as strings and adds
  *                                                               to the validation error state.
  * @property {function(string)}         clearValidationError     Clears a validation error for the
@@ -231,6 +230,14 @@
  * @property {function(string)}         getValidationErrorId     Returns the css id for the
  *                                                               validation error using the given
  *                                                               inputId string.
+ * @property {function(string)}         hideValidationError      Sets the hidden prop of a specific
+ *                                                               error to true.
+ * @property {function(string)}         showValidationError      Sets the hidden prop of a specific
+ *                                                               error to false.
+ * @property {function()}               showAllValidationErrors  Sets the hidden prop of all
+ *                                                               errors to false.
+ * @property {function():boolean}       hasValidationErrors      Returns true if there is at least
+ *                                                               one error.
  */
 
 export {};
