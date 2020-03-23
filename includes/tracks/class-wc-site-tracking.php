@@ -175,6 +175,8 @@ class WC_Site_Tracking {
 				call_user_func( $tracker_init_method );
 			}
 		}
+
+		do_action( 'woocommerce_init_frontend_tracks' );
 	}
 
 	/**
