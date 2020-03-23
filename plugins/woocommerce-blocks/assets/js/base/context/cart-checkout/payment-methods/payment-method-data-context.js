@@ -7,13 +7,7 @@ import {
 	DEFAULT_PAYMENT_METHOD_DATA,
 } from './constants';
 import reducer from './reducer';
-import {
-	statusOnly,
-	error,
-	failed,
-	success,
-	setBillingData as setBilling,
-} from './actions';
+import { statusOnly, error, failed, success } from './actions';
 
 /**
  * External dependencies
@@ -29,7 +23,7 @@ import {
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatchers} PaymentStatusDispatchers
- * @typedef {import('@woocommerce/type-defs/cart').CartBillingAddress} CartBillingAddress
+ * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
  */
 
 const {
@@ -97,7 +91,7 @@ export const PaymentMethodDataProvider = ( {
 		error: ( errorMessage ) => dispatch( error( errorMessage ) ),
 		/**
 		 * @param {string} errorMessage An error message
-		 * @param {CartBillingAddress} billingData The billing data accompanying the payment method
+		 * @param {CartBillingData} billingData The billing data accompanying the payment method
 		 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout submission.
 		 */
 		failed: ( errorMessage, billingData, paymentMethodData ) =>
@@ -109,7 +103,7 @@ export const PaymentMethodDataProvider = ( {
 				} )
 			),
 		/**
-		 * @param {CartBillingAddress} billingData The billing data accompanying the payment method.
+		 * @param {CartBillingData} billingData The billing data accompanying the payment method.
 		 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout.
 		 */
 		success: ( billingData, paymentMethodData ) =>
@@ -120,8 +114,7 @@ export const PaymentMethodDataProvider = ( {
 				} )
 			),
 	} );
-	const setBillingData = ( billingData ) =>
-		dispatch( setBilling( billingData ) );
+
 	const currentStatus = {
 		isPristine: paymentStatus === PRISTINE,
 		isStarted: paymentStatus === STARTED,
@@ -138,12 +131,10 @@ export const PaymentMethodDataProvider = ( {
 		setPaymentStatus,
 		currentStatus,
 		paymentStatuses: STATUS,
-		billingData: paymentStatus.billingData,
 		paymentMethodData: paymentStatus.paymentMethodData,
 		errorMessage: paymentStatus.errorMessage,
 		activePaymentMethod,
 		setActivePaymentMethod,
-		setBillingData,
 	};
 	return (
 		<PaymentMethodDataContext.Provider value={ paymentData }>

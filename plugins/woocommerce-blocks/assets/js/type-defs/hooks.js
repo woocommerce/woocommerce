@@ -1,7 +1,7 @@
 /**
  * @typedef {import('./cart').CartData} CartData
- * @typedef {import('./cart').CartBillingAddress} CartBillingAddress
  * @typedef {import('./cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('./cart').CartBillingAddress} CartBillingAddress
  */
 
 /**
@@ -56,4 +56,15 @@
  *                                             the cart.
  */
 
+/**
+ * @typedef {Object} BillingData
+ *
+ * @property {string}             email             Email address for customer.
+ * @property {Function}           setEmail          Callback for changing email
+ *                                                  address.
+ * @property {CartBillingAddress} billingAddress    Object containing billing
+ *                                                  address.
+ * @property {Function}           setBillingAddress Callback for changing the
+ *                                                  billing Address.
+ */
 export {};

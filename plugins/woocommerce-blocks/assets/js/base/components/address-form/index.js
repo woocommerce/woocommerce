@@ -92,7 +92,6 @@ const AddressForm = ( {
 		setValidationErrors,
 		clearValidationError,
 	] );
-
 	return (
 		<div className="wc-block-address-form">
 			{ sortedAddressFields.map( ( field ) => {
