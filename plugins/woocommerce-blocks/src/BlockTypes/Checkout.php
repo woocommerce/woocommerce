@@ -71,6 +71,9 @@ class Checkout extends AbstractBlock {
 		if ( ! $data_registry->exists( 'cartData' ) ) {
 			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
 		}
+		if ( ! $data_registry->exists( 'billingData' ) && WC()->customer instanceof \WC_Customer ) {
+			$data_registry->add( 'billingData', WC()->customer->get_billing() );
+		}
 		if ( function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 			if ( $screen && $screen->is_block_editor() && ! $data_registry->exists( 'shippingMethodsExist' ) ) {

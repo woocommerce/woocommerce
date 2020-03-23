@@ -1,5 +1,12 @@
 /**
+ * External dependencies
+ */
+import { getSetting } from '@woocommerce/settings';
+
+/**
  * @type {import("@woocommerce/type-defs/checkout").CheckoutStatusConstants}
+ * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
+ *
  */
 export const STATUS = {
 	PRISTINE: 'pristine',
@@ -8,6 +15,10 @@ export const STATUS = {
 	PROCESSING: 'processing',
 	COMPLETE: 'complete',
 };
+/**
+ * @type {CartBillingData}
+ */
+const HYDRATED_BILLING_DATA = getSetting( 'billingData' );
 
 export const DEFAULT_STATE = {
 	redirectUrl: '',
@@ -17,6 +28,7 @@ export const DEFAULT_STATE = {
 	nextStatus: STATUS.IDLE,
 	hasError: false,
 	calculatingCount: 0,
+	billingData: HYDRATED_BILLING_DATA,
 };
 
 export const TYPES = {
@@ -28,4 +40,5 @@ export const TYPES = {
 	SET_NO_ERROR: 'set_checkout_no_error',
 	INCREMENT_CALCULATING: 'increment_calculating',
 	DECREMENT_CALCULATING: 'decrement_calculating',
+	SET_BILLING_DATA: 'set_billing_data',
 };

@@ -44,42 +44,58 @@ class CartUpdateShipping extends AbstractRoute {
 				'methods'  => \WP_REST_Server::CREATABLE,
 				'callback' => [ $this, 'get_response' ],
 				'args'     => [
-					'address_1' => array(
+					'first_name' => [
+						'description'       => __( 'First name', 'woo-gutenberg-products-block' ),
+						'type'              => 'string',
+						'default'           => '',
+						'sanitize_callback' => 'wc_clean',
+						'validate_callback' => 'rest_validate_request_arg',
+
+					],
+					'last_name'  => [
+						'description'       => __( 'Last name', 'woo-gutenberg-products-block' ),
+						'type'              => 'string',
+						'default'           => '',
+						'sanitize_callback' => 'wc_clean',
+						'validate_callback' => 'rest_validate_request_arg',
+
+					],
+					'address_1'  => [
 						'description'       => __( 'First line of the address being shipped to.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
 						'validate_callback' => 'rest_validate_request_arg',
-					),
-					'address_2' => [
+					],
+					'address_2'  => [
 						'description'       => __( 'Second line of the address being shipped to.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
 						'validate_callback' => 'rest_validate_request_arg',
 					],
-					'city'      => [
+					'city'       => [
 						'description'       => __( 'City of the address being shipped to.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
 						'validate_callback' => 'rest_validate_request_arg',
 					],
-					'state'     => [
+					'state'      => [
 						'description'       => __( 'ISO code, or name, for the state, province, or district of the address being shipped to.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
 						'validate_callback' => 'rest_validate_request_arg',
 					],
-					'postcode'  => [
+					'postcode'   => [
 						'description'       => __( 'Zip or Postcode of the address being shipped to.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
 						'validate_callback' => 'rest_validate_request_arg',
 					],
-					'country'   => [
+					'country'    => [
 						'description'       => __( 'ISO code for the country of the address being shipped to.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
@@ -111,12 +127,14 @@ class CartUpdateShipping extends AbstractRoute {
 		// Update customer session.
 		WC()->customer->set_props(
 			array(
-				'shipping_country'   => isset( $request['country'] ) ? $request['country'] : null,
-				'shipping_state'     => isset( $request['state'] ) ? $request['state'] : null,
-				'shipping_postcode'  => isset( $request['postcode'] ) ? $request['postcode'] : null,
-				'shipping_city'      => isset( $request['city'] ) ? $request['city'] : null,
-				'shipping_address_1' => isset( $request['address_1'] ) ? $request['address_1'] : null,
-				'shipping_address_2' => isset( $request['address_2'] ) ? $request['address_2'] : null,
+				'shipping_first_name' => isset( $request['first_name'] ) ? $request['first_name'] : null,
+				'shipping_last_name'  => isset( $request['last_name'] ) ? $request['last_name'] : null,
+				'shipping_country'    => isset( $request['country'] ) ? $request['country'] : null,
+				'shipping_state'      => isset( $request['state'] ) ? $request['state'] : null,
+				'shipping_postcode'   => isset( $request['postcode'] ) ? $request['postcode'] : null,
+				'shipping_city'       => isset( $request['city'] ) ? $request['city'] : null,
+				'shipping_address_1'  => isset( $request['address_1'] ) ? $request['address_1'] : null,
+				'shipping_address_2'  => isset( $request['address_2'] ) ? $request['address_2'] : null,
 			)
 		);
 		WC()->customer->save();

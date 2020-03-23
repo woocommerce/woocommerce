@@ -1,7 +1,7 @@
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
- * @typedef {import('@woocommerce/type-defs/cart').CartBillingAddress} CartBillingAddress
+ * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodCurrentStatus} PaymentMethodCurrentStatus
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
@@ -119,25 +119,25 @@
 /**
  * @typedef BillingDataProps
  *
- * @property {CartBillingAddress} billingData               The address used for
- *                                                          billing.
- * @property {Function}           setBillingData            Used to set the cart
- *                                                          billing address.
- * @property {Object}             order                     The order object for
- *                                                          the purchase.
- * @property {boolean}            orderLoading              True if the order is
- *                                                          being loaded.
- * @property {CartTotalItem}      cartTotal                 The total item for
- *                                                          the cart.
- * @property {SiteCurrency}       currency                  Currency object.
- * @property {CartTotalItem[]}    cartTotalItems            The various subtotal
- *                                                          amounts.
- * @property {boolean}            displayPricesIncludingTax True means that the
- *                                                          site is configured
- *                                                          to display prices
- *                                                          including tax.
- * @property {string[]}           appliedCoupons            All the coupons that
- *                                                          were applied.
+ * @property {CartBillingData} billingData               The address used for
+ *                                                       billing.
+ * @property {Function}        setBillingData            Used to set the cart
+ *                                                       billing address.
+ * @property {Object}          order                     The order object for
+ *                                                       the purchase.
+ * @property {boolean}         orderLoading              True if the order is
+ *                                                       being loaded.
+ * @property {CartTotalItem}   cartTotal                 The total item for
+ *                                                       the cart.
+ * @property {SiteCurrency}    currency                  Currency object.
+ * @property {CartTotalItem[]} cartTotalItems            The various subtotal
+ *                                                       amounts.
+ * @property {boolean}         displayPricesIncludingTax True means that the
+ *                                                       site is configured
+ *                                                       to display prices
+ *                                                       including tax.
+ * @property {string[]}        appliedCoupons            All the coupons that
+ *                                                       were applied.
  */
 
 /**

@@ -4,10 +4,6 @@ const blockAttributes = {
 		default: false,
 		save: false,
 	},
-	useShippingAsBilling: {
-		type: 'boolean',
-		default: true,
-	},
 	showCompanyField: {
 		type: 'boolean',
 		default: false,

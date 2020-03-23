@@ -41,6 +41,7 @@ const CheckoutContext = createContext( {
 	isProcessing: false,
 	hasError: false,
 	redirectUrl: '',
+	billingData: {},
 	onCheckoutCompleteSuccess: () => void null,
 	onCheckoutCompleteError: () => void null,
 	onCheckoutProcessing: () => void null,
@@ -51,6 +52,7 @@ const CheckoutContext = createContext( {
 		clearError: () => void null,
 		incrementCalculating: () => void null,
 		decrementCalculating: () => void null,
+		setBillingData: () => void null,
 	},
 } );
 
@@ -117,6 +119,8 @@ export const CheckoutProvider = ( {
 				void dispatch( actions.incrementCalculating() ),
 			decrementCalculating: () =>
 				void dispatch( actions.decrementCalculating() ),
+			setBillingData: ( data ) =>
+				void dispatch( actions.setBillingData( data ) ),
 		} ),
 		[]
 	);
@@ -175,6 +179,7 @@ export const CheckoutProvider = ( {
 	 */
 	const checkoutData = {
 		submitLabel,
+		billingData: checkoutState.billingData,
 		onSubmit,
 		isComplete: checkoutState.status === STATUS.COMPLETE,
 		isIdle: checkoutState.status === STATUS.IDLE,
