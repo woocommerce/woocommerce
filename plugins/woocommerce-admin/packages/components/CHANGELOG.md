@@ -4,6 +4,7 @@
 - Fix CompareFilter options format (key prop vs. id).
 - Fix styling of `<Search />` component "clear all" button.
 - Add state classes to `<TextControlWithAffixes />` component.
+- Fix `<AnimationSlider />` example code.
 
 # 4.0.0
 
