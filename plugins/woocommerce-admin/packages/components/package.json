@@ -34,7 +34,7 @@
 		"@wordpress/html-entities": "2.6.0",
 		"@wordpress/i18n": "3.9.0",
 		"@wordpress/keycodes": "2.9.0",
-		"@wordpress/viewport": "2.13.0",
+		"@wordpress/viewport": "2.13.2",
 		"classnames": "2.2.6",
 		"core-js": "2.6.11",
 		"d3-axis": "^1.0.12",
