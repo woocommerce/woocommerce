@@ -180,7 +180,7 @@
 		"eslint-loader": "3.0.3",
 		"eslint-plugin-jest": "23.8.2",
 		"eslint-plugin-jsx-a11y": "6.2.3",
-		"eslint-plugin-react": "7.18.3",
+		"eslint-plugin-react": "7.19.0",
 		"eslint-plugin-wpcalypso": "4.1.0",
 		"fs-extra": "8.1.0",
 		"grunt": "1.0.4",
