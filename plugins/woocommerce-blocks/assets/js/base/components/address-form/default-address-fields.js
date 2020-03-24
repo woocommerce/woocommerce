@@ -87,10 +87,7 @@ const AddressFields = {
 	},
 	city: {
 		label: __( 'City', 'woo-gutenberg-products-block' ),
-		optionalLabel: __(
-			'Apartment, suite, etc. (optional)',
-			'woo-gutenberg-products-block'
-		),
+		optionalLabel: __( 'City (optional)', 'woo-gutenberg-products-block' ),
 		autocomplete: 'address-level2',
 		required: true,
 		hidden: false,

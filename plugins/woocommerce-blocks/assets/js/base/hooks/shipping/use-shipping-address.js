@@ -6,6 +6,7 @@ import { useEffect, useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useDebounce } from 'use-debounce';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -39,8 +40,16 @@ export const useShippingAddress = () => {
 			);
 		}
 	}, [ debouncedShippingAddress ] );
+
+	const decodedShippingAddress = {};
+	Object.keys( shippingAddress ).forEach( ( key ) => {
+		decodedShippingAddress[ key ] = decodeEntities(
+			shippingAddress[ key ]
+		);
+	} );
+
 	return {
-		shippingAddress,
+		shippingAddress: decodedShippingAddress,
 		setShippingAddress,
 	};
 };
