@@ -183,7 +183,7 @@
 		"eslint-plugin-react": "7.19.0",
 		"eslint-plugin-wpcalypso": "4.1.0",
 		"fs-extra": "8.1.0",
-		"grunt": "1.0.4",
+		"grunt": "1.1.0",
 		"grunt-checktextdomain": "1.0.1",
 		"grunt-wp-i18n": "1.0.3",
 		"husky": "4.2.3",
