@@ -168,6 +168,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 
 		require_once ABSPATH . 'wp-admin/includes/theme.php';
 
+		$slug             = sanitize_key( $theme );
 		$installed_themes = wp_get_themes();
 
 		if ( ! in_array( $theme, array_keys( $installed_themes ), true ) ) {
