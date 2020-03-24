@@ -95,7 +95,16 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_title( $note_row->title );
 			$note->set_content( $note_row->content );
 			$note->set_icon( $note_row->icon );
-			$note->set_content_data( json_decode( $note_row->content_data ) );
+
+			// The default for 'content_value' used to be an array, so there might be rows with invalid data!
+			$content_data = json_decode( $note_row->content_data );
+			if ( ! $content_data ) {
+				$content_data = new \stdClass();
+			} elseif ( is_array( $content_data ) ) {
+				$content_data = (object) $content_data;
+			}
+			$note->set_content_data( $content_data );
+
 			$note->set_status( $note_row->status );
 			$note->set_source( $note_row->source );
 			$note->set_date_created( $note_row->date_created );
