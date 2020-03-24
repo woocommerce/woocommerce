@@ -205,7 +205,7 @@
 		"recast": "0.18.7",
 		"replace": "1.1.5",
 		"request-promise": "4.2.5",
-		"rimraf": "2.7.1",
+		"rimraf": "3.0.2",
 		"rtlcss": "2.5.0",
 		"sass-loader": "7.3.1",
 		"style-loader": "0.23.1",
