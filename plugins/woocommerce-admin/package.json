@@ -129,7 +129,7 @@
 		"react-click-outside": "3.0.1",
 		"react-dates": "21.8.0",
 		"react-router-dom": "5.1.2",
-		"react-transition-group": "2.9.0",
+		"react-transition-group": "4.3.0",
 		"react-visibility-sensor": "5.1.1",
 		"redux": "4.0.5"
 	},
