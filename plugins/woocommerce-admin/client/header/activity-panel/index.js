@@ -103,7 +103,7 @@ class ActivityPanel extends Component {
 			{
 				name: 'inbox',
 				title: __( 'Inbox', 'woocommerce-admin' ),
-				icon: <Gridicon icon="mail" />,
+				icon: <i className="material-icons-outlined">inbox</i>,
 				unread: hasUnreadNotes,
 			},
 			{
@@ -116,7 +116,7 @@ class ActivityPanel extends Component {
 				? {
 						name: 'stock',
 						title: __( 'Stock', 'woocommerce-admin' ),
-						icon: <Gridicon icon="clipboard" />,
+						icon: <i className="material-icons-outlined">widgets</i>,
 						unread: hasUnreadStock,
 				  }
 				: null,
@@ -124,7 +124,7 @@ class ActivityPanel extends Component {
 				? {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),
-						icon: <Gridicon icon="star" />,
+						icon: <i className="material-icons-outlined">star_border</i>,
 						unread: hasUnapprovedReviews,
 				  }
 				: null,

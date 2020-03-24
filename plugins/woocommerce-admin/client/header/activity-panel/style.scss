@@ -56,6 +56,12 @@
 		display: initial;
 		text-indent: 0;
 		border-radius: 0;
+
+		&.has-text {
+			svg {
+				margin: 0;
+			}
+		}
 	}
 
 	.woocommerce-layout__activity-panel-tab {
@@ -66,15 +72,13 @@
 		outline: none;
 		cursor: pointer;
 		background-color: $studio-white;
-		color: $core-grey-dark-500;
 		max-width: min-content;
 		min-width: 80px;
 		width: 100%;
-		font-size: 11px;
 		height: $header-height;
 
 		&::before {
-			background-color: $studio-woocommerce-purple;
+			background-color: theme(outlines);
 			bottom: 0;
 			content: '';
 			height: 0;
