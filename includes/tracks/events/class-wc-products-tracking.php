@@ -20,6 +20,8 @@ class WC_Products_Tracking {
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
+		add_action( 'woocommerce_variation_set_stock', array( $this, 'track_product_stock_level_set' ), 10, 1 );
+		add_action( 'woocommerce_product_set_stock', array( $this, 'track_product_stock_level_set' ), 10, 1 );
 	}
 
 	/**
@@ -52,6 +54,19 @@ class WC_Products_Tracking {
 		);
 
 		WC_Tracks::record_event( 'product_update', $update_properties );
+	}
+
+	/**
+	 * Send a Tracks event when a product's stock level is adjusted.
+	 *
+	 * @param WC_Product $product Product.
+	 */
+	public function track_product_stock_level_set( $product ) {
+		$properties = array(
+			'product_id' => $product->get_id(),
+		);
+
+		WC_Tracks::record_event( 'product_stock_level_set', $properties );
 	}
 
 	/**
