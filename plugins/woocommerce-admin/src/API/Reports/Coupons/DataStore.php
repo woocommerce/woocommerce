@@ -168,25 +168,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$gmt_timzone = new \DateTimeZone( 'UTC' );
 
 				$date_expires = $coupon->get_date_expires();
-				if ( null === $date_expires ) {
-					$date_expires     = '';
-					$date_expires_gmt = '';
-				} else {
+				if ( is_a( $date_expires, 'DateTime' ) ) {
 					$date_expires     = $date_expires->format( TimeInterval::$iso_datetime_format );
 					$date_expires_gmt = new \DateTime( $date_expires );
 					$date_expires_gmt->setTimezone( $gmt_timzone );
 					$date_expires_gmt = $date_expires_gmt->format( TimeInterval::$iso_datetime_format );
+				} else {
+					$date_expires     = '';
+					$date_expires_gmt = '';
 				}
 
 				$date_created = $coupon->get_date_created();
-				if ( null === $date_created ) {
-					$date_created     = '';
-					$date_created_gmt = '';
-				} else {
+				if ( is_a( $date_created, 'DateTime' ) ) {
 					$date_created     = $date_created->format( TimeInterval::$iso_datetime_format );
 					$date_created_gmt = new \DateTime( $date_created );
 					$date_created_gmt->setTimezone( $gmt_timzone );
 					$date_created_gmt = $date_created_gmt->format( TimeInterval::$iso_datetime_format );
+				} else {
+					$date_created     = '';
+					$date_created_gmt = '';
 				}
 
 				$extended_info = array(
