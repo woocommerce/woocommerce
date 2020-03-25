@@ -148,7 +148,7 @@
 		"classnames": "2.2.6",
 		"compare-versions": "3.6.0",
 		"config": "3.3.0",
-		"dinero.js": "1.8.0",
+		"dinero.js": "1.8.1",
 		"downshift": "4.1.0",
 		"react-number-format": "4.4.1",
 		"trim-html": "0.1.9",
