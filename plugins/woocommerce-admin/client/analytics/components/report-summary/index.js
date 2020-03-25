@@ -18,6 +18,7 @@ import {
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from 'lib/number-format';
 import { formatCurrency } from 'lib/currency-format';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -60,6 +61,7 @@ export class ReportSummary extends Component {
 			summaryData,
 			endpoint,
 			report,
+			defaultDateRange,
 		} = this.props;
 		const { isError, isRequesting: isSummaryDataRequesting } = summaryData;
 
@@ -71,7 +73,7 @@ export class ReportSummary extends Component {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
-		const { compare } = getDateParamsFromQuery( query );
+		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
 			charts.map( ( chart ) => {
@@ -216,6 +218,10 @@ export default compose(
 			};
 		}
 
+		const { woocommerce_default_date_range: defaultDateRange } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+
 		const summaryData = getSummaryNumbers( {
 			endpoint,
 			query,
@@ -223,10 +229,12 @@ export default compose(
 			limitBy,
 			filters,
 			advancedFilters,
+			defaultDateRange,
 		} );
 
 		return {
 			summaryData,
+			defaultDateRange,
 		};
 	} )
 )( ReportSummary );

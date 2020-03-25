@@ -23,6 +23,7 @@ import {
 } from 'lib/currency-format';
 import { formatValue } from 'lib/number-format';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -113,7 +114,7 @@ class RevenueReportTable extends Component {
 	getRowsContent( data = [] ) {
 		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
 
-    return data.map( ( row ) => {
+		return data.map( ( row ) => {
 			const {
 				coupons,
 				gross_sales: grossSales,
@@ -263,7 +264,10 @@ class RevenueReportTable extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query, filters, advancedFilters } = props;
-		const datesFromQuery = getCurrentDates( query );
+		const { woocommerce_default_date_range: defaultDateRange } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		const datesFromQuery = getCurrentDates( query, defaultDateRange );
 		const {
 			getReportStats,
 			getReportStatsError,

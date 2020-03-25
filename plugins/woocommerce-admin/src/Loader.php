@@ -329,6 +329,14 @@ class Loader {
 			true
 		);
 
+		wp_register_script(
+			'wc-store-data',
+			self::get_url( 'data/index.js' ),
+			array(),
+			self::get_file_version( 'data/index.js' ),
+			true
+		);
+
 		wp_set_script_translations( 'wc-date', 'woocommerce-admin' );
 
 		wp_register_script(
@@ -338,6 +346,7 @@ class Loader {
 				'moment',
 				'wp-api-fetch',
 				'wp-data',
+				'wp-data-controls',
 				'wp-element',
 				'wp-hooks',
 				'wp-html-entities',
@@ -348,6 +357,7 @@ class Loader {
 				'wc-date',
 				'wc-navigation',
 				'wc-number',
+				'wc-store-data',
 			),
 			self::get_file_version( 'components/index.js' ),
 			true

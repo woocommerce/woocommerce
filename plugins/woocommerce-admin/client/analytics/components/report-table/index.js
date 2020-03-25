@@ -28,6 +28,7 @@ import {
 	generateCSVDataFromTable,
 	generateCSVFileName,
 } from '@woocommerce/csv-export';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -617,6 +618,10 @@ export default compose(
 				userPrefColumns,
 			};
 		}
+		const { woocommerce_default_date_range: defaultDateRange } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+
 		// Variations and Category charts are powered by the /reports/products/stats endpoint.
 		const chartEndpoint = [ 'variations', 'categories' ].includes(
 			endpoint
@@ -632,7 +637,8 @@ export default compose(
 					filters,
 					advancedFilters,
 					tableQuery,
-			  } )
+					defaultDateRange,
+				} )
 			: {};
 		const queriedTableData =
 			tableData ||
@@ -643,12 +649,9 @@ export default compose(
 				tableQuery,
 				filters,
 				advancedFilters,
+				defaultDateRange,
 			} );
-		const extendedTableData = extendTableData(
-			select,
-			props,
-			queriedTableData
-		);
+		const extendedTableData = extendTableData( select, props, queriedTableData );
 
 		return {
 			primaryData,

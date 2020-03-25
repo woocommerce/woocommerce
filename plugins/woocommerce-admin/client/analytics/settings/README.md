@@ -16,7 +16,6 @@ addFilter( 'woocommerce_admin_analytics_settings', 'wc-example/my-setting', sett
             label: __( 'Custom setting:', 'woocommerce-admin' ),
             inputType: 'text',
             helpText: __( 'Help text to describe what the setting does.' ),
-            initialValue: 'Initial value used',
             defaultValue: 'Default value',
 		},
 	];
@@ -30,5 +29,4 @@ Each settings has the following properties:
 - `inputType` (enum: text|checkbox|checkboxGroup): The type of input to use.
 - `helpText` (string): Text displayed beneath the setting.
 - `options` (array): Array of options used for inputs with selectable options.
-- `initialValue` (string|array): Initial value used when rendering the setting.
 - `defaultValue` (string|array): Value used when resetting to default settings.

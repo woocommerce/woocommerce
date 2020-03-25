@@ -4,12 +4,14 @@
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { omitBy, isUndefined, snakeCase } from 'lodash';
+import { withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
 import { ReportFilters as Filters } from '@woocommerce/components';
 import { LOCALE } from '@woocommerce/wc-admin-settings';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -22,7 +24,7 @@ import {
 	isoDateFormat,
 } from 'lib/date';
 
-export default class ReportFilters extends Component {
+class ReportFilters extends Component {
 	constructor() {
 		super();
 		this.trackDateSelect = this.trackDateSelect.bind( this );
@@ -90,20 +92,12 @@ export default class ReportFilters extends Component {
 	}
 
 	render() {
-		const {
-			advancedFilters,
-			filters,
-			path,
+		const { advancedFilters, filters, path, query, showDatePicker, defaultDateRange } = this.props;
+		const { period, compare, before, after } = getDateParamsFromQuery( query, defaultDateRange );
+		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates(
 			query,
-			showDatePicker,
-		} = this.props;
-		const { period, compare, before, after } = getDateParamsFromQuery(
-			query
+			defaultDateRange
 		);
-		const {
-			primary: primaryDate,
-			secondary: secondaryDate,
-		} = getCurrentDates( query );
 		const dateQuery = {
 			period,
 			compare,
@@ -130,6 +124,13 @@ export default class ReportFilters extends Component {
 		);
 	}
 }
+
+export default withSelect( select => {
+	const { woocommerce_default_date_range: defaultDateRange } = select(
+		SETTINGS_STORE_NAME
+	).getSetting( 'wc_admin', 'wcAdminSettings' );
+	return { defaultDateRange };
+} )( ReportFilters );
 
 ReportFilters.propTypes = {
 	/**

@@ -13,6 +13,7 @@ import { applyFilters } from '@wordpress/hooks';
  * WooCommerce dependencies
  */
 import { H } from '@woocommerce/components';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -224,15 +225,16 @@ class CustomizableDashboard extends Component {
 	}
 
 	renderDashboardReports() {
-		const { query, path } = this.props;
+		const { query, path, defaultDateRange } = this.props;
 		const { sections } = this.state;
 		const { period, compare, before, after } = getDateParamsFromQuery(
-			query
+			query,
+			defaultDateRange
 		);
 		const {
 			primary: primaryDate,
 			secondary: secondaryDate,
-		} = getCurrentDates( query );
+		} = getCurrentDates( query, defaultDateRange );
 		const dateQuery = {
 			period,
 			compare,
@@ -328,8 +330,13 @@ export default compose(
 			isGetOptionsRequesting,
 		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
+		const { woocommerce_default_date_range: defaultDateRange } = select(
+			SETTINGS_STORE_NAME
+		).getSetting( 'wc_admin', 'wcAdminSettings' );
+
 		const withSelectData = {
 			userPrefSections: userData.dashboard_sections,
+			defaultDateRange,
 			requesting: false,
 		};
 

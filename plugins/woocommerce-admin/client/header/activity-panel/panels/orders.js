@@ -23,6 +23,7 @@ import {
 import { formatCurrency } from 'lib/currency-format';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -30,7 +31,8 @@ import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
-import { DEFAULT_ACTIONABLE_STATUSES, QUERY_DEFAULTS } from 'wc-api/constants';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
+import { DEFAULT_ACTIONABLE_STATUSES } from 'analytics/settings/config';
 import withSelect from 'wc-api/with-select';
 
 class OrdersPanel extends Component {
@@ -314,9 +316,10 @@ export default compose(
 			getReportItemsError,
 			isReportItemsRequesting,
 		} = select( 'wc-api' );
+		const { getSetting: getMutableSetting } = select( SETTINGS_STORE_NAME );
 		const {
 			woocommerce_actionable_order_statuses: orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
-		} = getSetting( 'wcAdminSettings', {} );
+		} = getMutableSetting( 'wc_admin', 'wcAdminSettings', {} );
 		if ( ! orderStatuses.length ) {
 			return {
 				orders: [],

@@ -3,6 +3,7 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import { withSelect } from '@wordpress/data';
 import { map } from 'lodash';
 import moment from 'moment';
 
@@ -14,13 +15,14 @@ import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from 'lib/number-format';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
 
-export default class DownloadsReportTable extends Component {
+class CouponsReportTable extends Component {
 	constructor() {
 		super();
 
@@ -143,8 +145,8 @@ export default class DownloadsReportTable extends Component {
 
 	getSummary( totals ) {
 		const { download_count: downloadCount = 0 } = totals;
-		const { query } = this.props;
-		const dates = getCurrentDates( query );
+		const { query, defaultDateRange } = this.props;
+		const dates = getCurrentDates( query, defaultDateRange );
 		const after = moment( dates.primary.after );
 		const before = moment( dates.primary.before );
 		const days = before.diff( after, 'days' ) + 1;
@@ -187,3 +189,10 @@ export default class DownloadsReportTable extends Component {
 		);
 	}
 }
+
+export default withSelect( ( select ) => {
+	const { woocommerce_default_date_range: defaultDateRange } = select(
+		SETTINGS_STORE_NAME
+	).getSetting( 'wc_admin', 'wcAdminSettings' );
+	return { defaultDateRange };
+} )( CouponsReportTable );

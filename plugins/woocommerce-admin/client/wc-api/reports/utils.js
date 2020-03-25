@@ -193,11 +193,12 @@ export function isReportDataEmpty( report, endpoint ) {
  * @param  {string} options.dataType  'primary' or 'secondary'.
  * @param  {Object} options.query     Query parameters in the url.
  * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object} data request query parameters.
  */
 function getRequestQuery( options ) {
 	const { endpoint, dataType, query } = options;
-	const datesFromQuery = getCurrentDates( query );
+	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );
 	const interval = getIntervalForQuery( query );
 	const filterQuery = getFilterQuery( options );
 	const end = datesFromQuery[ dataType ].before;
@@ -227,6 +228,7 @@ function getRequestQuery( options ) {
  * @param  {Object} options.query     Query parameters in the url
  * @param  {Object} options.select    Instance of @wordpress/select
  * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object} Object containing summary number responses.
  */
 export function getSummaryNumbers( options ) {
@@ -295,6 +297,7 @@ export function getSummaryNumbers( options ) {
  * @param  {Object} options.query     Query parameters in the url
  * @param  {Object} options.select    Instance of @wordpress/select
  * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( options ) {
@@ -407,12 +410,13 @@ export function getTooltipValueFormat( type ) {
  * @param  {Object} options              arguments
  * @param  {Object} options.query        Query parameters in the url
  * @param  {Object} options.tableQuery   Query parameters specific for that endpoint
+ * @param  {string} options.defaultDateRange   User specified default date range.
  * @return {Object} Object    Table data response
  */
 export function getReportTableQuery( options ) {
 	const { query, tableQuery = {} } = options;
 	const filterQuery = getFilterQuery( options );
-	const datesFromQuery = getCurrentDates( query );
+	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );
 
 	const noIntervals = includes( noIntervalEndpoints, options.endpoint );
 
@@ -440,6 +444,7 @@ export function getReportTableQuery( options ) {
  * @param  {Object} options.query          Query parameters in the url
  * @param  {Object} options.select         Instance of @wordpress/select
  * @param  {Object} options.tableQuery     Query parameters specific for that endpoint
+ * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( options ) {

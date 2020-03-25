@@ -41,8 +41,7 @@ const externals = {
 	'@wordpress/url': { this: [ 'wp', 'url' ] },
 	'@wordpress/html-entities': { this: [ 'wp', 'htmlEntities' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
-	'@wordpress/keycodes': { this: [ 'wp', 'keycodes' ] },
-	'@woocommerce/settings': { this: [ 'wc', 'wcSettings' ] },
+	'@wordpress/data-controls': { this: [ 'wp', 'dataControls' ] },
 	tinymce: 'tinymce',
 	moment: 'moment',
 	react: 'React',
@@ -57,6 +56,7 @@ const wcAdminPackages = [
 	'date',
 	'navigation',
 	'number',
+	'data',
 ];
 
 const entryPoints = {};
