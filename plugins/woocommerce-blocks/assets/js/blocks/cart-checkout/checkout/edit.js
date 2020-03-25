@@ -226,7 +226,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					}
 				/>
 				{ showReturnToCart &&
-					( currentPostId !== CHECKOUT_PAGE_ID || cartPageId ) &&
+					( currentPostId !== CHECKOUT_PAGE_ID || !! cartPageId ) &&
 					pages && (
 						<SelectControl
 							label={ __(
