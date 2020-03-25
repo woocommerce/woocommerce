@@ -31,7 +31,7 @@ class WC_Order_Tracking {
 			'payment_method'   => $order->get_payment_method(),
 		);
 
-		WC_Tracks::record_event( 'wcadmin_single_order_view', $properties );
+		WC_Tracks::record_event( 'single_order_view', $properties );
 	}
 }
 
