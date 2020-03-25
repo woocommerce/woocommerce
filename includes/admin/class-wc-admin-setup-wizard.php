@@ -162,19 +162,9 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin_onboarding() {
-		if ( ! $this->should_show_wc_admin() && ! $this->is_wc_admin_active() ) {
-			return false;
-		}
-
-		$ab_test = get_option( 'woocommerce_setup_ab_wc_admin_onboarding' );
-
-		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
-		if ( ! $ab_test ) {
-			$ab_test = 1 !== rand( 1, 2 ) ? 'a' : 'b'; // 50% of users. b gets the new experience.
-			update_option( 'woocommerce_setup_ab_wc_admin_onboarding', $ab_test );
-		}
-
-		return 'b' === $ab_test;
+		// As of WooCommerce 4.1, all new sites should use the latest OBW from wc-admin package.
+		// This filter will allow for forcing the old wizard while we migrate e2e tests.
+		return ! apply_filters( 'woocommerce_setup_wizard_force_legacy', false );
 	}
 
 	/**
@@ -405,12 +395,11 @@ class WC_Admin_Setup_Wizard {
 	 * Setup Wizard Footer.
 	 */
 	public function setup_wizard_footer() {
+		$current_step = $this->step;
 		?>
-			<?php if ( 'new_onboarding' === $this->step ) : ?>
-				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Continue with the old setup wizard', 'woocommerce' ); ?></a>
-			<?php elseif ( 'store_setup' === $this->step ) : ?>
+			<?php if ( 'new_onboarding' === $current_step || 'store-setup' === $current_step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
-			<?php elseif ( 'recommended' === $this->step || 'activate' === $this->step ) : ?>
+			<?php elseif ( 'recommended' === $current_step || 'activate' === $current_step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			<?php do_action( 'woocommerce_setup_footer' ); ?>
