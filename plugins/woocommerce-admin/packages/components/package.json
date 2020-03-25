@@ -51,7 +51,7 @@
 		"memoize-one": "5.1.1",
 		"moment": "2.24.0",
 		"prop-types": "15.7.2",
-		"qs": "6.9.1",
+		"qs": "6.9.2",
 		"react-dates": "21.8.0",
 		"react-router-dom": "5.1.2",
 		"react-transition-group": "4.3.0"
