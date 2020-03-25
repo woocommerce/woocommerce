@@ -52,11 +52,14 @@ const blockSettings = {
 	 * @param {Object} attributes Attributes to save.
 	 */
 	save( { attributes } ) {
+		const dataAttributes = {};
+		Object.keys( attributes )
+			.sort()
+			.forEach( ( key ) => {
+				dataAttributes[ key ] = attributes[ key ];
+			} );
 		const data = {
-			'data-attributes': JSON.stringify(
-				attributes,
-				Object.keys( attributes ).sort()
-			),
+			'data-attributes': JSON.stringify( dataAttributes ),
 		};
 		return (
 			<div
