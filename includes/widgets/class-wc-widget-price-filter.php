@@ -41,7 +41,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			'wc-price-slider',
 			'woocommerce_price_slider_params',
 			array(
-				'currency_format_num_decimals' => 0,
+				'currency_format_num_decimals' => esc_attr( wc_get_price_decimals() ),
 				'currency_format_symbol'       => get_woocommerce_currency_symbol(),
 				'currency_format_decimal_sep'  => esc_attr( wc_get_price_decimal_separator() ),
 				'currency_format_thousand_sep' => esc_attr( wc_get_price_thousand_separator() ),
