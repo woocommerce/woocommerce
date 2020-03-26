@@ -1,12 +1,20 @@
 /**
+ * @typedef {import('./billing').BillingData} BillingData
  * @typedef {import('./cart').CartShippingOption} CartShippingOption
  * @typedef {import('./cart').CartShippingAddress} CartShippingAddress
- * @typedef {import('./cart').CartBillingData} CartBillingData
  * @typedef {import('./checkout').CheckoutDispatchActions} CheckoutDispatchActions
  */
 
 /**
- * @typedef {Object} ShippingMethodDataContext
+ * @typedef {Object} BillingDataContext
+ *
+ * @property {BillingData} billingData    The current billing data, including
+ *                                        address and email.
+ * @property {Function}    setBillingData A function for setting billing data.
+ */
+
+/**
+ * @typedef {Object} ShippingDataContext
  *
  * @property {string}               shippingErrorStatus   The current error
  *                                                        status for shipping
@@ -123,8 +131,8 @@
  * @property {function()} processing
  * @property {function()} completed
  * @property {function(string)} error
- * @property {function(string, CartBillingData, Object)} failed
- * @property {function(CartBillingData, Object)} success
+ * @property {function(string, Object)} failed
+ * @property {function(Object)} success
  */
 
 /**
@@ -227,9 +235,6 @@
  * @property {boolean}                 isEditor           Indicates whether in
  *                                                        the editor context
  *                                                        (true) or not (false).
- * @property {CartBillingData}         billingData        An object containing
- *                                                        all billing info like
- *                                                        address, email and tokens.
  */
 
 /**

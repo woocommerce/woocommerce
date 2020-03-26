@@ -21,7 +21,7 @@ import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import Block from './block.js';
 import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
-import EmptyCart from './empty-cart';
+import EmptyCart from './empty-cart/index.js';
 
 /**
  * Wrapper component for the checkout block.

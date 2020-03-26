@@ -12,7 +12,6 @@ const {
 	SET_NO_ERROR,
 	INCREMENT_CALCULATING,
 	DECREMENT_CALCULATING,
-	SET_BILLING_DATA,
 } = TYPES;
 
 /**
@@ -43,9 +42,5 @@ export const actions = {
 	} ),
 	decrementCalculating: () => ( {
 		type: DECREMENT_CALCULATING,
-	} ),
-	setBillingData: ( data ) => ( {
-		type: SET_BILLING_DATA,
-		data,
 	} ),
 };

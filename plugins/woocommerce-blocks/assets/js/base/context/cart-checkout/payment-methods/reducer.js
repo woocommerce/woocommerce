@@ -22,7 +22,7 @@ const {
  */
 const reducer = (
 	state = DEFAULT_PAYMENT_DATA,
-	{ type, billingData, paymentMethodData, errorMessage, paymentMethod }
+	{ type, paymentMethodData, errorMessage, paymentMethod }
 ) => {
 	switch ( type ) {
 		case STARTED:
@@ -40,7 +40,6 @@ const reducer = (
 			return {
 				...state,
 				currentStatus: FAILED,
-				billingData: billingData || state.billingData,
 				paymentMethodData: paymentMethodData || state.paymentMethodData,
 				errorMessage: errorMessage || state.errorMessage,
 			};
@@ -48,7 +47,6 @@ const reducer = (
 			return {
 				...state,
 				currentStatus: SUCCESS,
-				billingData: billingData || state.billingData,
 				paymentMethodData: paymentMethodData || state.paymentMethodData,
 			};
 		case PROCESSING:

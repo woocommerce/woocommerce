@@ -12,7 +12,6 @@ import classnames from 'classnames';
  */
 import edit from './edit';
 import blockAttributes from './attributes';
-import { example } from './example';
 import './editor.scss';
 
 const settings = {
@@ -32,7 +31,9 @@ const settings = {
 		html: false,
 		multiple: false,
 	},
-	example,
+	example: {
+		attributes: {},
+	},
 	attributes: blockAttributes,
 	edit,
 	/**

@@ -24,6 +24,8 @@ import {
 	CheckoutProvider,
 	useValidationContext,
 	useCheckoutContext,
+	useShippingDataContext,
+	useBillingDataContext,
 } from '@woocommerce/base-context';
 import {
 	ExpressCheckoutFormControl,
@@ -31,7 +33,6 @@ import {
 } from '@woocommerce/base-components/payment-methods';
 import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useShippingRates, useBillingData } from '@woocommerce/base-hooks';
 import {
 	Sidebar,
 	SidebarLayout,
@@ -43,7 +44,7 @@ import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 /**
  * Internal dependencies
  */
-import CheckoutSidebar from './sidebar.js';
+import CheckoutSidebar from './sidebar/index.js';
 import './style.scss';
 import '../../../payment-methods-demo';
 
@@ -62,15 +63,20 @@ const Checkout = ( {
 	scrollToTop,
 } ) => {
 	const { isEditor } = useCheckoutContext();
-	const [ selectedShippingRate, setSelectedShippingRate ] = useState( {} );
-	const [ contactFields, setContactFields ] = useState( {} );
-	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
-	const [ shippingAsBilling, setShippingAsBilling ] = useState( true );
-
+	const {
+		shippingRatesLoading,
+		shippingAddress,
+		setShippingAddress,
+	} = useShippingDataContext();
+	const { billingData, setBillingData } = useBillingDataContext();
 	const {
 		hasValidationErrors,
 		showAllValidationErrors,
 	} = useValidationContext();
+
+	const [ contactFields, setContactFields ] = useState( {} );
+	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
+	const [ shippingAsBilling, setShippingAsBilling ] = useState( true );
 
 	const validateSubmit = () => {
 		if ( hasValidationErrors() ) {
@@ -80,6 +86,7 @@ const Checkout = ( {
 		}
 		return true;
 	};
+
 	const renderShippingRatesControlOption = ( option ) => ( {
 		label: decodeEntities( option.name ),
 		value: option.rate_id,
@@ -107,33 +114,22 @@ const Checkout = ( {
 		},
 	};
 
-	const {
-		shippingRatesLoading,
-		shippingAddress,
-		setShippingAddress,
-	} = useShippingRates();
-	const {
-		email,
-		setEmail,
-		billingAddress,
-		setBillingAddress,
-	} = useBillingData();
 	const setShippingFields = useCallback(
 		( address ) => {
 			if ( shippingAsBilling ) {
 				setShippingAddress( address );
-				setBillingAddress( address );
+				setBillingData( address );
 			} else {
 				setShippingAddress( address );
 			}
 		},
-		[ setShippingAddress, setBillingAddress, shippingAsBilling ]
+		[ setShippingAddress, setBillingData, shippingAsBilling ]
 	);
 	useEffect( () => {
 		if ( shippingAsBilling ) {
-			setBillingAddress( shippingAddress );
+			setBillingData( shippingAddress );
 		}
-	}, [ shippingAsBilling, setBillingAddress ] );
+	}, [ shippingAsBilling, setBillingData ] );
 	return (
 		<SidebarLayout className="wc-block-checkout">
 			<Main>
@@ -171,9 +167,11 @@ const Checkout = ( {
 								'Email address',
 								'woo-gutenberg-products-block'
 							) }
-							value={ email }
+							value={ billingData.email }
 							autoComplete="email"
-							onChange={ ( newValue ) => setEmail( newValue ) }
+							onChange={ ( newValue ) =>
+								setBillingData( { email: newValue } )
+							}
 							required={ true }
 						/>
 						<CheckboxControl
@@ -224,13 +222,10 @@ const Checkout = ( {
 													'woo-gutenberg-products-block'
 											  )
 									}
-									value={ shippingAddress.phone }
+									value={ billingData.phone }
 									autoComplete="tel"
 									onChange={ ( newValue ) =>
-										setShippingFields( {
-											...shippingAddress,
-											phone: newValue,
-										} )
+										setBillingData( { phone: newValue } )
 									}
 									required={ attributes.requirePhoneField }
 								/>
@@ -263,9 +258,9 @@ const Checkout = ( {
 							) }
 						>
 							<AddressForm
-								onChange={ setBillingAddress }
+								onChange={ setBillingData }
 								type="billing"
-								values={ billingAddress }
+								values={ billingData }
 								fields={ Object.keys( addressFields ) }
 								fieldConfig={ addressFields }
 							/>
@@ -294,7 +289,7 @@ const Checkout = ( {
 													address_1:
 														shippingAddress.address_1,
 													address_2:
-														shippingAddress.apartment,
+														shippingAddress.address_2,
 													city: shippingAddress.city,
 													state:
 														shippingAddress.state,
@@ -318,16 +313,12 @@ const Checkout = ( {
 									}
 								/>
 							) }
+							{ /*@todo This is not implemented*/ }
 							<CheckboxControl
 								className="wc-block-checkout__add-note"
 								label="Add order notes?"
-								checked={ selectedShippingRate.orderNote }
-								onChange={ () =>
-									setSelectedShippingRate( {
-										...selectedShippingRate,
-										orderNote: ! selectedShippingRate.orderNote,
-									} )
-								}
+								checked={ false }
+								onChange={ () => null }
 							/>
 						</FormStep>
 					) }
