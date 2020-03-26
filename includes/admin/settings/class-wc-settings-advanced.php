@@ -419,12 +419,14 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Notices.
 	 */
 	private function notices() {
-		if ( isset( $_GET['section'] ) && 'webhooks' === $_GET['section'] ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['section'] ) && 'webhooks' === $_GET['section'] ) {
 			WC_Admin_Webhooks::notices();
 		}
-		if ( isset( $_GET['section'] ) && 'keys' === $_GET['section'] ) { // WPCS: input var okay, CSRF ok.
+		if ( isset( $_GET['section'] ) && 'keys' === $_GET['section'] ) {
 			WC_Admin_API_Keys::notices();
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -447,25 +449,26 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		global $current_section;
 
 		if ( apply_filters( 'woocommerce_rest_api_valid_to_save', ! in_array( $current_section, array( 'keys', 'webhooks' ), true ) ) ) {
 			$settings = $this->get_settings( $current_section );
 
 			// Prevent the T&Cs and checkout page from being set to the same page.
-			if ( isset( $_POST['woocommerce_terms_page_id'], $_POST['woocommerce_checkout_page_id'] ) && $_POST['woocommerce_terms_page_id'] === $_POST['woocommerce_checkout_page_id'] ) { // WPCS: input var ok, CSRF ok.
+			if ( isset( $_POST['woocommerce_terms_page_id'], $_POST['woocommerce_checkout_page_id'] ) && $_POST['woocommerce_terms_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
 				$_POST['woocommerce_terms_page_id'] = '';
 			}
 
 			// Prevent the Cart, checkout and my account page from being set to the same page.
-			if ( isset( $_POST['woocommerce_cart_page_id'], $_POST['woocommerce_checkout_page_id'], $_POST['woocommerce_myaccount_page_id'] ) ) { // WPCS: input var ok, CSRF ok.
-				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_checkout_page_id'] ) { // WPCS: input var ok, CSRF ok.
+			if ( isset( $_POST['woocommerce_cart_page_id'], $_POST['woocommerce_checkout_page_id'], $_POST['woocommerce_myaccount_page_id'] ) ) {
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
 					$_POST['woocommerce_checkout_page_id'] = '';
 				}
-				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) { // WPCS: input var ok, CSRF ok.
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) {
 					$_POST['woocommerce_myaccount_page_id'] = '';
 				}
-				if ( $_POST['woocommerce_checkout_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) { // WPCS: input var ok, CSRF ok.
+				if ( $_POST['woocommerce_checkout_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) {
 					$_POST['woocommerce_myaccount_page_id'] = '';
 				}
 			}
@@ -476,9 +479,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 }
 
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Generic.Commenting.Todo.CommentFound
 /**
  * WC_Settings_Rest_API class.
  *
@@ -486,6 +491,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
  * @todo remove in 4.0.
  */
 class WC_Settings_Rest_API extends WC_Settings_Advanced {
-} // @codingStandardsIgnoreLine.
+}
 
 return new WC_Settings_Advanced();
+// phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Generic.Commenting.Todo.CommentFound

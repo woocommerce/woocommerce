@@ -214,17 +214,19 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 * Handles output of the shipping zones page in admin.
 	 */
 	protected function output_zones_screen() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		global $hide_save_button;
 
-		if ( isset( $_REQUEST['zone_id'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_REQUEST['zone_id'] ) ) {
 			$hide_save_button = true;
-			$this->zone_methods_screen( wc_clean( wp_unslash( $_REQUEST['zone_id'] ) ) ); // WPCS: input var ok, CSRF ok.
+			$this->zone_methods_screen( wc_clean( wp_unslash( $_REQUEST['zone_id'] ) ) );
 		} elseif ( isset( $_REQUEST['instance_id'] ) ) {
-			$this->instance_settings_screen( absint( wp_unslash( $_REQUEST['instance_id'] ) ) ); // WPCS: input var ok, CSRF ok.
+			$this->instance_settings_screen( absint( wp_unslash( $_REQUEST['instance_id'] ) ) );
 		} else {
 			$hide_save_button = true;
 			$this->zones_screen();
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -331,9 +333,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			wp_die( esc_html__( 'This shipping method does not have any settings to configure.', 'woocommerce' ) );
 		}
 
-		if ( ! empty( $_POST['save'] ) ) { // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_POST['save'] ) ) {
 
-			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'woocommerce-settings' ) ) { // WPCS: input var ok, sanitization ok.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'woocommerce-settings' ) ) {
 				echo '<div class="updated error"><p>' . esc_html__( 'Edit failed. Please try again.', 'woocommerce' ) . '</p></div>';
 			}
 
