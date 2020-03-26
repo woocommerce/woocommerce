@@ -7,7 +7,7 @@ import {
 	useInnerBlockConfigurationContext,
 	useProductLayoutContext,
 } from '@woocommerce/base-context';
-import { withInstanceId } from 'wordpress-compose';
+import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 
 /**
  * Internal dependencies

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { withInstanceId } from 'wordpress-compose';
+import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 
