@@ -25,7 +25,6 @@ class WC_Order_Tracking {
 	 */
 	public function track_order_viewed( $order ) {
 		$properties = array(
-			'order_id'         => $order->get_id(),
 			'current_status'   => $order->get_status(),
 			'date_created'     => $order->get_date_created(),
 			'payment_method'   => $order->get_payment_method(),
