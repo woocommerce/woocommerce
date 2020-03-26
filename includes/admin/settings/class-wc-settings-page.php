@@ -84,12 +84,30 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
-		 * Get sections.
+		 * Get all sections for this page, both the own ones and the ones defined via filters.
 		 *
 		 * @return array
 		 */
 		public function get_sections() {
-			return apply_filters( 'woocommerce_get_sections_' . $this->id, array() );
+			$sections = $this->get_own_sections();
+			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+		}
+
+		/**
+		 * Get own sections for this page.
+		 * Derived classes should override this method if they define sections.
+		 * There should be one default section with an empty string as identifier.
+		 *
+		 * Example:
+		 * return array(
+		 *   ''        => __( 'General', 'woocommerce' ),
+		 *   'foobars' => __( 'Foos & Bars', 'woocommerce' ),
+		 * );
+		 *
+		 * @return array An associative array where keys are section identifiers and the values are translated section names.
+		 */
+		protected function get_own_sections() {
+			return array();
 		}
 
 		/**

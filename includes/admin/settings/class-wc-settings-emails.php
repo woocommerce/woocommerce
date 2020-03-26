@@ -29,15 +29,14 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get own sections.
 	 *
 	 * @return array
 	 */
-	public function get_sections() {
-		$sections = array(
+	protected function get_own_sections() {
+		return array(
 			'' => __( 'Email options', 'woocommerce' ),
 		);
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**

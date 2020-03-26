@@ -50,11 +50,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get own sections.
 	 *
 	 * @return array
 	 */
-	public function get_sections() {
+	protected function get_own_sections() {
 		$sections = array(
 			''         => __( 'Tax options', 'woocommerce' ),
 			'standard' => __( 'Standard rates', 'woocommerce' ),
@@ -68,7 +68,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$sections[ sanitize_title( $class ) ] = sprintf( __( '%s rates', 'woocommerce' ), $class );
 		}
 
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+		return $sections;
 	}
 
 	/**

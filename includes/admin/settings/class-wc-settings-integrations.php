@@ -32,11 +32,11 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 		}
 
 		/**
-		 * Get sections.
+		 * Get own sections.
 		 *
 		 * @return array
 		 */
-		public function get_sections() {
+		protected function get_own_sections() {
 			global $current_section;
 
 			$sections = array();
@@ -56,7 +56,7 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 				}
 			}
 
-			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+			return $sections;
 		}
 
 		/**
