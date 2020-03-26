@@ -1,13 +1,19 @@
 /**
  * Internal dependencies
  */
-import { STATUS } from './constants';
+import { ACTION_TYPES } from './constants';
 
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
  */
 
-const { ERROR, FAILED, SUCCESS } = STATUS;
+const {
+	ERROR,
+	FAILED,
+	SUCCESS,
+	SET_REGISTERED_PAYMENT_METHOD,
+	SET_REGISTERED_EXPRESS_PAYMENT_METHOD,
+} = ACTION_TYPES;
 
 /**
  * Used to dispatch a status update only for the given type.
@@ -79,4 +85,28 @@ export const success = ( { billingData, paymentMethodData } ) => ( {
 	type: SUCCESS,
 	billingData,
 	paymentMethodData,
+} );
+
+/**
+ * Used to dispatch an action for updating a registered payment method in the
+ * state.
+ *
+ * @param {Object} paymentMethod Payment method to register.
+ * @return {Object} An action object.
+ */
+export const setRegisteredPaymentMethod = ( paymentMethod ) => ( {
+	type: SET_REGISTERED_PAYMENT_METHOD,
+	paymentMethod,
+} );
+
+/**
+ * Used to dispatch an action for updating a registered express payment
+ * method in the state.
+ *
+ * @param {Object} paymentMethod Payment method to register.
+ * @return {Object} An action object.
+ */
+export const setRegisteredExpressPaymentMethod = ( paymentMethod ) => ( {
+	type: SET_REGISTERED_EXPRESS_PAYMENT_METHOD,
+	paymentMethod,
 } );

@@ -93,6 +93,30 @@
  */
 
 /**
+ * A saved customer payment method object (if exists)
+ *
+ * @typedef {Object} CustomerPaymentMethod
+ *
+ * @property {Object}  method     The payment method object (varies on what it
+ *                                might contain)
+ * @property {string}  expires    Short form of expiry for payment method.
+ * @property {boolean} is_default Whether it is the default payment method of
+ *                                the customer or not.
+ * @property {number}  tokenId    The id of the saved payment method.
+ * @property {Object}  actions    Varies, actions that can be done to interact
+ *                                with the payment method.
+ */
+
+/**
+ * A Saved Customer Payment methods object
+ *
+ * This is an object where the keys are payment gateway slugs and the values
+ * Are an array of CustomerPaymentMethod objects.
+ *
+ * @typedef {Object} SavedCustomerPaymentMethods
+ */
+
+/**
  * @typedef {Object} PaymentStatusDispatchers
  *
  * @property {function()} started
@@ -110,34 +134,38 @@
 /**
  * @typedef {Object} PaymentMethodDataContext
  *
- * @property {PaymentStatusDispatch}     setPaymentStatus        Sets the
- *                                                               payment status
- *                                                               for the payment
- *                                                               method.
- * @property {PaymentMethodCurrentStatus} currentStatus          The current
- *                                                               payment status.
- * @property {Object}                     paymentStatuses        An object of
- *                                                               payment status
- *                                                               constants.
- * @property {Object}                     paymentMethodData      Arbitrary data
- *                                                               to be passed
- *                                                               along for
- *                                                               processing by
- *                                                               the payment
- *                                                               method on the
- *                                                               server.
- * @property {string}                     errorMessage           An error
- *                                                               message provided
- *                                                               by the payment
- *                                                               method if there
- *                                                               is an error.
- * @property {string}                     activePaymentMethod    The active
- *                                                               payment method
- *                                                               slug.
- * @property {function()}                 setActivePaymentMethod A function for
- *                                                               setting the
- *                                                               active payment
- *                                                               method.
+ * @property {PaymentStatusDispatch}       setPaymentStatus                 Sets the payment status
+ *                                                                          for the payment method.
+ * @property {PaymentMethodCurrentStatus}  currentStatus                    The current payment
+ *                                                                          status.
+ * @property {Object}                      paymentStatuses                  An object of payment
+ *                                                                          status constants.
+ * @property {Object}                      paymentMethodData                Arbitrary data to be
+ *                                                                          passed along for
+ *                                                                          processing by the
+ *                                                                          payment method on the
+ *                                                                          server.
+ * @property {string}                      errorMessage                     An error message
+ *                                                                          provided by the payment
+ *                                                                          method if there is an
+ *                                                                          error.
+ * @property {string}                      activePaymentMethod              The active payment
+ *                                                                          method slug.
+ * @property {function()}                  setActivePaymentMethod           A function for setting
+ *                                                                          the active payment
+ *                                                                          method.
+ * @property {SavedCustomerPaymentMethods} customerPaymentMethods           Returns the customer
+ *                                                                          if it exists.
+ * @property {Object}                      paymentMethods                   Registered payment
+ *                                                                          methods.
+ * @property {Object}                      expressPaymentMethods            Registered express
+ *                                                                          payment methods.
+ * @property {boolean}                     paymentMethodsInitialized        True when all registered
+ *                                                                          payment methods have
+ *                                                                          been initialized.
+ * @property {boolean}                     expressPaymentMethodsInitialized True when all registered
+ *                                                                          express payment methods
+ *                                                                          have been initialized.
  */
 
 /**
@@ -199,7 +227,7 @@
  * @property {boolean}                 isEditor           Indicates whether in
  *                                                        the editor context
  *                                                        (true) or not (false).
- * @property {CartBillingData}      billingData           An object containing
+ * @property {CartBillingData}         billingData        An object containing
  *                                                        all billing info like
  *                                                        address, email and tokens.
  */

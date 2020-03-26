@@ -12,6 +12,13 @@ export const STATUS = {
 	COMPLETE: 'complete',
 };
 
+export const ACTION_TYPES = {
+	...STATUS,
+	SET_REGISTERED_PAYMENT_METHOD: 'set_registered_payment_method',
+	SET_REGISTERED_EXPRESS_PAYMENT_METHOD:
+		'set_registered_express_payment_method',
+};
+
 /**
  * @todo do typedefs for the payment event state.
  */
@@ -25,6 +32,8 @@ export const DEFAULT_PAYMENT_DATA = {
 		// processing server side.
 	},
 	errorMessage: '',
+	paymentMethods: {},
+	expressPaymentMethods: {},
 };
 
 /**
@@ -46,4 +55,9 @@ export const DEFAULT_PAYMENT_METHOD_DATA = {
 	errorMessage: '',
 	activePaymentMethod: '',
 	setActivePaymentMethod: () => void null,
+	customerPaymentMethods: {},
+	paymentMethods: {},
+	expressPaymentMethods: {},
+	paymentMethodsInitialized: false,
+	expressPaymentMethodsInitialized: false,
 };
