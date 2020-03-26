@@ -413,7 +413,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			)
 		);
 
-		if ( ! is_wp_error( $post_id ) ) {
+		if ( ! is_wp_error( $post_id ) && 0 < $post_id ) {
 
 			$template = self::get_homepage_template( $post_id );
 			wp_update_post(
