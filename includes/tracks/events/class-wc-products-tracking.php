@@ -22,13 +22,14 @@ class WC_Products_Tracking {
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'woocommerce_variation_set_stock', array( $this, 'track_product_stock_level_set' ), 10, 1 );
 		add_action( 'woocommerce_product_set_stock', array( $this, 'track_product_stock_level_set' ), 10, 1 );
+		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10, 1 );
 	}
 
 	/**
 	 * Send some Tracks events when a product is updated.
 	 *
 	 * @param int    $product_id Product id.
-	 * @param object $post WordPress post.
+	 * @param object $post       WordPress post.
 	 */
 	public function track_product_updated( $product_id, $post ) {
 		if ( 'product' !== $post->post_type ) {
@@ -40,18 +41,42 @@ class WC_Products_Tracking {
 		);
 
 		WC_Tracks::record_event( 'product_edit', $properties );
+	}
 
-		$product_factory = new WC_Product_Factory();
-		$product = $product_factory->get_product( $product_id );
-		$update_properties = array(
-			'product_id'            => $product_id,
-			'product_type'          => $product->get_type(),
-			'is_virtual'            => $product->get_virtual(),
-			'is_downloadable'       => $product->get_downloadable(),
-			'manage_stock'          => 0 == $product->get_manage_stock() ? 'N' : 'Y',
+	/**
+	 * Track the Update button being clicked on the client side.
+	 * This is needed because `track_product_updated` (using the `edit_post`
+	 * hook) is called in response to a number of other triggers.
+	 *
+	 * @param WP_Post $post The post, not used.
+	 */
+	public function track_product_updated_client_side( $post ) {
+		wc_enqueue_js(
+			"
+			if ( $( 'h1.wp-heading-inline' ).text().trim() === 'Edit product') {
+				const initialStockValue = $( '#_stock' ).val();
+				let hasRecordedEvent = false;
+
+				$( '#publish' ).click( function() {
+					if ( hasRecordedEvent ) {
+						return;
+					}
+
+					const currentStockValue = $( '#_stock' ).val();
+					const properties = {
+						product_type:			$( '#product-type' ).val(),
+						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Y' : 'N',
+						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Y' : 'N',
+						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Y' : 'N',
+						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Y' : 'N',
+					};
+
+					window.wcTracks.recordEvent( 'product_update', properties );
+					hasRecordedEvent = true;
+				} );
+			}
+			"
 		);
-
-		WC_Tracks::record_event( 'product_update', $update_properties );
 	}
 
 	/**
