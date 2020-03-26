@@ -20,6 +20,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * Constructor.
 	 */
 	public function __construct() {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->id    = 'checkout'; // @todo In future versions this may make more sense as 'payment' however to avoid breakage lets leave this alone until we refactor settings APIs in general.
 		$this->label = _x( 'Payments', 'Settings tab label', 'woocommerce' );
 
@@ -76,6 +77,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * Output the settings.
 	 */
 	public function output() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		global $current_section;
 
 		// Load gateways so we can show any global options they may have.
@@ -84,7 +86,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		if ( $current_section ) {
 			foreach ( $payment_gateways as $gateway ) {
 				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
-					if ( isset( $_GET['toggle_enabled'] ) ) { // WPCS: input var ok, CSRF ok.
+					if ( isset( $_GET['toggle_enabled'] ) ) {
 						$enabled = $gateway->get_option( 'enabled' );
 
 						if ( $enabled ) {
@@ -98,6 +100,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		}
 		$settings = $this->get_settings( $current_section );
 		WC_Admin_Settings::output_fields( $settings );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
