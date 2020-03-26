@@ -31,20 +31,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get own sections.
 	 *
 	 * @return array
 	 */
-	public function get_sections() {
-		$sections = array(
+	protected function get_own_sections() {
+		return array(
 			''                => __( 'Page setup', 'woocommerce' ),
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
-
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**
@@ -426,7 +424,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		if ( isset( $_GET['section'] ) && 'keys' === $_GET['section'] ) {
 			WC_Admin_API_Keys::notices();
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		// phpcs:enable
 	}
 
 	/**
@@ -479,7 +477,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 			}
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		// phpcs:enable
 	}
 }
 
@@ -494,4 +492,4 @@ class WC_Settings_Rest_API extends WC_Settings_Advanced {
 }
 
 return new WC_Settings_Advanced();
-// phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Generic.Commenting.Todo.CommentFound
+// phpcs:enable

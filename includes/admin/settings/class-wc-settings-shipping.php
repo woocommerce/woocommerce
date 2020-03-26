@@ -40,11 +40,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get own sections.
 	 *
 	 * @return array
 	 */
-	public function get_sections() {
+	protected function get_own_sections() {
 		$sections = array(
 			''        => __( 'Shipping zones', 'woocommerce' ),
 			'options' => __( 'Shipping options', 'woocommerce' ),
@@ -64,7 +64,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			}
 		}
 
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+		return $sections;
 	}
 
 	/**
