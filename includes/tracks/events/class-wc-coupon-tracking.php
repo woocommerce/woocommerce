@@ -13,7 +13,7 @@ class WC_Coupon_Tracking {
 	 * Init
 	 */
 	public function init() {
-		add_action( 'woocommerce_coupon_object_updated_props', array( $this, 'track_coupon_created' ), 10, 3 );
+		add_action( 'woocommerce_coupon_object_updated_props', array( $this, 'track_coupon_updated' ), 10, 3 );
 	}
 
 	/**
