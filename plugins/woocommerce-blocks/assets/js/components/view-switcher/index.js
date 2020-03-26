@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { ButtonGroup, Button } from '@wordpress/components';
 import { useState, Fragment } from '@wordpress/element';
-import { withInstanceId } from 'wordpress-compose';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies

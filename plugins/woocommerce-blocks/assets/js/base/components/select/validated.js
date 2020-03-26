@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useValidationContext } from '@woocommerce/base-context';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { withInstanceId } from 'wordpress-compose';
+import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 
 /**
  * Internal dependencies
