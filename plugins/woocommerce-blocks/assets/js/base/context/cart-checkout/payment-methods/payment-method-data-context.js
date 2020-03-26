@@ -7,7 +7,18 @@ import {
 	DEFAULT_PAYMENT_METHOD_DATA,
 } from './constants';
 import reducer from './reducer';
-import { statusOnly, error, failed, success } from './actions';
+import {
+	statusOnly,
+	error,
+	failed,
+	success,
+	setRegisteredPaymentMethod,
+	setRegisteredExpressPaymentMethod,
+} from './actions';
+import {
+	usePaymentMethods,
+	useExpressPaymentMethods,
+} from './use-payment-method-registration';
 
 /**
  * External dependencies
@@ -17,13 +28,17 @@ import {
 	useContext,
 	useState,
 	useReducer,
+	useCallback,
+	useEffect,
 } from '@wordpress/element';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatchers} PaymentStatusDispatchers
  * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
+ * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
  */
 
 const {
@@ -46,9 +61,6 @@ export const usePaymentMethodDataContext = () => {
 	return useContext( PaymentMethodDataContext );
 };
 
-// @todo implement billing (and payment method) data saved to the cart data
-// store. That way checkout can obtain it for processing the order.
-
 /**
  * PaymentMethodDataProvider is automatically included in the
  * CheckoutDataProvider.
@@ -69,6 +81,7 @@ export const PaymentMethodDataProvider = ( {
 	const [ activePaymentMethod, setActive ] = useState(
 		initialActivePaymentMethod
 	);
+	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
 	const [ paymentStatus, dispatch ] = useReducer(
 		reducer,
 		DEFAULT_PAYMENT_DATA
@@ -77,43 +90,71 @@ export const PaymentMethodDataProvider = ( {
 		setActive( paymentMethodSlug );
 		dispatch( statusOnly( PRISTINE ) );
 	};
+	const paymentMethodsInitialized = usePaymentMethods( ( paymentMethod ) =>
+		dispatch( setRegisteredPaymentMethod( paymentMethod ) )
+	);
+	const expressPaymentMethodsInitialized = useExpressPaymentMethods(
+		( paymentMethod ) => {
+			dispatch( setRegisteredExpressPaymentMethod( paymentMethod ) );
+		}
+	);
+	// set initial active payment method if it's undefined.
+	useEffect( () => {
+		const paymentMethodKeys = Object.keys( paymentStatus.paymentMethods );
+		if (
+			paymentMethodsInitialized &&
+			! activePaymentMethod &&
+			paymentMethodKeys.length > 0
+		) {
+			setActivePaymentMethod(
+				Object.keys( paymentStatus.paymentMethods )[ 0 ]
+			);
+		}
+	}, [
+		activePaymentMethod,
+		paymentMethodsInitialized,
+		paymentStatus.paymentMethods,
+	] );
 
 	/**
 	 * @type {PaymentStatusDispatch}
 	 */
-	const setPaymentStatus = () => ( {
-		started: () => dispatch( statusOnly( STARTED ) ),
-		processing: () => dispatch( statusOnly( PROCESSING ) ),
-		completed: () => dispatch( statusOnly( COMPLETE ) ),
-		/**
-		 * @param {string} errorMessage An error message
-		 */
-		error: ( errorMessage ) => dispatch( error( errorMessage ) ),
-		/**
-		 * @param {string} errorMessage An error message
-		 * @param {CartBillingData} billingData The billing data accompanying the payment method
-		 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout submission.
-		 */
-		failed: ( errorMessage, billingData, paymentMethodData ) =>
-			dispatch(
-				failed( {
-					errorMessage,
-					billingData,
-					paymentMethodData,
-				} )
-			),
-		/**
-		 * @param {CartBillingData} billingData The billing data accompanying the payment method.
-		 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout.
-		 */
-		success: ( billingData, paymentMethodData ) =>
-			dispatch(
-				success( {
-					billingData,
-					paymentMethodData,
-				} )
-			),
-	} );
+	const setPaymentStatus = useCallback(
+		() => ( {
+			started: () => dispatch( statusOnly( STARTED ) ),
+			processing: () => dispatch( statusOnly( PROCESSING ) ),
+			completed: () => dispatch( statusOnly( COMPLETE ) ),
+			/**
+			 * @param {string} errorMessage An error message
+			 */
+			error: ( errorMessage ) => dispatch( error( errorMessage ) ),
+			/**
+			 * @param {string} errorMessage An error message
+			 * @param {CartBillingData} billingData The billing data accompanying the payment method
+			 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout submission.
+			 */
+			failed: ( errorMessage, billingData, paymentMethodData ) =>
+				dispatch(
+					failed( {
+						errorMessage,
+						billingData,
+						paymentMethodData,
+					} )
+				),
+			/**
+			 * @param {CartBillingData} billingData The billing data accompanying the payment method.
+			 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout.
+			 */
+			success: ( billingData, paymentMethodData ) =>
+				dispatch(
+					success( {
+						billingData,
+						paymentMethodData,
+					} )
+				),
+		} ),
+		[ dispatch ]
+	);
 
 	const currentStatus = {
 		isPristine: paymentStatus === PRISTINE,
@@ -135,6 +176,11 @@ export const PaymentMethodDataProvider = ( {
 		errorMessage: paymentStatus.errorMessage,
 		activePaymentMethod,
 		setActivePaymentMethod,
+		customerPaymentMethods,
+		paymentMethods: paymentStatus.paymentMethods,
+		expressPaymentMethods: paymentStatus.expressPaymentMethods,
+		paymentMethodsInitialized,
+		expressPaymentMethodsInitialized,
 	};
 	return (
 		<PaymentMethodDataContext.Provider value={ paymentData }>

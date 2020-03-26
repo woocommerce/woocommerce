@@ -10,15 +10,20 @@ import {
 	cloneElement,
 	useRef,
 	useEffect,
+	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useCheckoutContext } from '@woocommerce/base-context';
+import {
+	useCheckoutContext,
+	usePaymentMethodDataContext,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
 import Tabs from '../tabs';
-import NoPaymentMethods from './no-payment-methods/index';
+import NoPaymentMethods from './no-payment-methods';
+import SavedPaymentMethodOptions from './saved-payment-method-options';
 
 /**
  * Returns a payment method for the given context.
@@ -46,6 +51,7 @@ const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
  */
 const PaymentMethods = () => {
 	const { isEditor } = useCheckoutContext();
+	const { customerPaymentMethods = {} } = usePaymentMethodDataContext();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
 	const currentPaymentMethods = useRef( paymentMethods );
 	const {
@@ -54,6 +60,7 @@ const PaymentMethods = () => {
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
 	const currentPaymentMethodInterface = useRef( paymentMethodInterface );
+	const [ selectedToken, setSelectedToken ] = useState( 0 );
 
 	// update ref on change.
 	useEffect( () => {
@@ -78,16 +85,20 @@ const PaymentMethods = () => {
 		[ isEditor, activePaymentMethod ]
 	);
 
-	if ( ! isInitialized || Object.keys( paymentMethods ).length === 0 ) {
+	if (
+		! isInitialized ||
+		Object.keys( currentPaymentMethods.current ).length === 0
+	) {
 		return <NoPaymentMethods />;
 	}
-
-	return (
+	const renderedTabs = (
 		<Tabs
 			className="wc-block-components-checkout-payment-methods"
 			onSelect={ ( tabName ) => setActivePaymentMethod( tabName ) }
-			tabs={ Object.keys( paymentMethods ).map( ( id ) => {
-				const { label, ariaLabel } = paymentMethods[ id ];
+			tabs={ Object.keys( currentPaymentMethods.current ).map( ( id ) => {
+				const { label, ariaLabel } = currentPaymentMethods.current[
+					id
+				];
 				return {
 					name: id,
 					title: () => label,
@@ -103,6 +114,22 @@ const PaymentMethods = () => {
 			{ getRenderedTab() }
 		</Tabs>
 	);
+
+	const renderedSavedPaymentOptions = (
+		<SavedPaymentMethodOptions onSelect={ setSelectedToken } />
+	);
+
+	const renderedTabsAndSavedPaymentOptions = (
+		<>
+			{ renderedSavedPaymentOptions }
+			{ renderedTabs }
+		</>
+	);
+
+	return Object.keys( customerPaymentMethods ).length > 0 &&
+		selectedToken !== 0
+		? renderedSavedPaymentOptions
+		: renderedTabsAndSavedPaymentOptions;
 };
 
 export default PaymentMethods;

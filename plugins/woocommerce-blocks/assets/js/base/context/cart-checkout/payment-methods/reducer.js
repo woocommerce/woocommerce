@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { STATUS, DEFAULT_PAYMENT_DATA } from './constants';
+import { ACTION_TYPES, DEFAULT_PAYMENT_DATA } from './constants';
 const {
 	STARTED,
 	ERROR,
@@ -10,9 +10,9 @@ const {
 	PROCESSING,
 	PRISTINE,
 	COMPLETE,
-} = STATUS;
-
-const SET_BILLING_DATA = 'set_billing_data';
+	SET_REGISTERED_PAYMENT_METHOD,
+	SET_REGISTERED_EXPRESS_PAYMENT_METHOD,
+} = ACTION_TYPES;
 
 /**
  * Reducer for payment data state
@@ -22,7 +22,7 @@ const SET_BILLING_DATA = 'set_billing_data';
  */
 const reducer = (
 	state = DEFAULT_PAYMENT_DATA,
-	{ type, billingData, paymentMethodData, errorMessage }
+	{ type, billingData, paymentMethodData, errorMessage, paymentMethod }
 ) => {
 	switch ( type ) {
 		case STARTED:
@@ -66,11 +66,29 @@ const reducer = (
 			return {
 				...DEFAULT_PAYMENT_DATA,
 				currentStatus: PRISTINE,
+				// keep payment method registration state
+				paymentMethods: {
+					...state.paymentMethods,
+				},
+				expressPaymentMethods: {
+					...state.expressPaymentMethods,
+				},
 			};
-		case SET_BILLING_DATA:
+		case SET_REGISTERED_PAYMENT_METHOD:
 			return {
 				...state,
-				billingData,
+				paymentMethods: {
+					...state.paymentMethods,
+					[ paymentMethod.id ]: paymentMethod,
+				},
+			};
+		case SET_REGISTERED_EXPRESS_PAYMENT_METHOD:
+			return {
+				...state,
+				expressPaymentMethods: {
+					...state.expressPaymentMethods,
+					[ paymentMethod.id ]: paymentMethod,
+				},
 			};
 	}
 	return state;
