@@ -16,6 +16,7 @@ storybook-static/
 Thumbs.db
 wp-cli.local.yml
 *.sql
+*.swp
 *.tar.gz
 *.tgz
 *.zip
