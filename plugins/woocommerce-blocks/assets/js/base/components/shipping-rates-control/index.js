@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import { usePrevious } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -20,13 +19,6 @@ const ShippingRatesControl = ( {
 	noResultsMessage,
 	renderOption,
 } ) => {
-	const previousShippingRates = usePrevious(
-		shippingRates,
-		( newRates ) => newRates.length > 0
-	);
-
-	const shippingRatesToDisplay = previousShippingRates || shippingRates;
-
 	return (
 		<LoadingMask
 			isLoading={ shippingRatesLoading }
@@ -39,11 +31,11 @@ const ShippingRatesControl = ( {
 			<Packages
 				className={ className }
 				collapsible={
-					shippingRatesToDisplay.length > 1 && collapsibleWhenMultiple
+					shippingRates.length > 1 && collapsibleWhenMultiple
 				}
 				noResultsMessage={ noResultsMessage }
 				renderOption={ renderOption }
-				shippingRates={ shippingRatesToDisplay }
+				shippingRates={ shippingRates }
 			/>
 		</LoadingMask>
 	);
