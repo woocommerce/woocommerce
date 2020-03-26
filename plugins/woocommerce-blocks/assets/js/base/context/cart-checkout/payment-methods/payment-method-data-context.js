@@ -19,6 +19,7 @@ import {
 	usePaymentMethods,
 	useExpressPaymentMethods,
 } from './use-payment-method-registration';
+import { useBillingDataContext } from '../billing';
 
 /**
  * External dependencies
@@ -37,7 +38,7 @@ import { getSetting } from '@woocommerce/settings';
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatchers} PaymentStatusDispatchers
- * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
+ * @typedef {import('@woocommerce/type-defs/billing').BillingData} BillingData
  * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
  */
 
@@ -78,6 +79,7 @@ export const PaymentMethodDataProvider = ( {
 	children,
 	activePaymentMethod: initialActivePaymentMethod,
 } ) => {
+	const { setBillingData } = useBillingDataContext();
 	const [ activePaymentMethod, setActive ] = useState(
 		initialActivePaymentMethod
 	);
@@ -130,28 +132,34 @@ export const PaymentMethodDataProvider = ( {
 			error: ( errorMessage ) => dispatch( error( errorMessage ) ),
 			/**
 			 * @param {string} errorMessage An error message
-			 * @param {CartBillingData} billingData The billing data accompanying the payment method
 			 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout submission.
+			 * @param {BillingData} billingData The billing data accompanying the payment method.
 			 */
-			failed: ( errorMessage, billingData, paymentMethodData ) =>
+			failed: ( errorMessage, paymentMethodData, billingData = null ) => {
+				if ( billingData ) {
+					setBillingData( billingData );
+				}
 				dispatch(
 					failed( {
 						errorMessage,
-						billingData,
 						paymentMethodData,
 					} )
-				),
+				);
+			},
 			/**
-			 * @param {CartBillingData} billingData The billing data accompanying the payment method.
 			 * @param {Object} paymentMethodData Arbitrary payment method data to accompany the checkout.
+			 * @param {BillingData} billingData The billing data accompanying the payment method.
 			 */
-			success: ( billingData, paymentMethodData ) =>
+			success: ( paymentMethodData, billingData = null ) => {
+				if ( billingData ) {
+					setBillingData( billingData );
+				}
 				dispatch(
 					success( {
-						billingData,
 						paymentMethodData,
 					} )
-				),
+				);
+			},
 		} ),
 		[ dispatch ]
 	);

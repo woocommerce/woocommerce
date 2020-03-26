@@ -45,8 +45,6 @@ export const error = ( errorMessage ) => ( {
  *                                                      action.
  * @param {string}             action.errorMessage      Any message accompanying
  *                                                      the failed payment.
- * @param {CartBillingData} action.billingData       Billing data used for
- *                                                      the failed payment.
  * @param {Object}             action.paymentMethodData Arbitrary extra
  *                                                      information about the
  *                                                      payment method in use
@@ -55,14 +53,9 @@ export const error = ( errorMessage ) => ( {
  *
  * @return {Object} An action object.
  */
-export const failed = ( {
-	errorMessage,
-	billingData,
-	paymentMethodData,
-} ) => ( {
+export const failed = ( { errorMessage, paymentMethodData } ) => ( {
 	type: FAILED,
 	errorMessage,
-	billingData,
 	paymentMethodData,
 } );
 
@@ -71,8 +64,6 @@ export const failed = ( {
  *
  * @param {Object}             action                   Incoming data for the
  *                                                      action.
- * @param {CartBillingData} action.billingData       Billing data used for
- *                                                      the failed payment.
  * @param {Object}             action.paymentMethodData Arbitrary extra
  *                                                      information about the
  *                                                      payment method in use
@@ -81,9 +72,8 @@ export const failed = ( {
  *
  * @return {Object} An action object.
  */
-export const success = ( { billingData, paymentMethodData } ) => ( {
+export const success = ( { paymentMethodData } ) => ( {
 	type: SUCCESS,
-	billingData,
 	paymentMethodData,
 } );
 

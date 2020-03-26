@@ -1,8 +1,8 @@
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
- * @typedef {import('@woocommerce/type-defs/cart').CartBillingData} CartBillingData
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('@woocommerce/type-defs/billing').BillingData} BillingData
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodCurrentStatus} PaymentMethodCurrentStatus
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingErrorTypes} ShippingErrorTypes
@@ -119,7 +119,7 @@
 /**
  * @typedef BillingDataProps
  *
- * @property {CartBillingData} billingData               The address used for
+ * @property {BillingData}     billingData               The address used for
  *                                                       billing.
  * @property {Function}        setBillingData            Used to set the cart
  *                                                       billing address.

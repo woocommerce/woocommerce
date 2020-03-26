@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import isShallowEqual from '@wordpress/is-shallow-equal';
-
-/**
  * Internal dependencies
  */
 import { TYPES, DEFAULT_STATE, STATUS } from './constants';
@@ -17,7 +12,6 @@ const {
 	SET_NO_ERROR,
 	INCREMENT_CALCULATING,
 	DECREMENT_CALCULATING,
-	SET_BILLING_DATA,
 } = TYPES;
 
 const { PRISTINE, IDLE, CALCULATING, PROCESSING, COMPLETE } = STATUS;
@@ -28,7 +22,7 @@ const { PRISTINE, IDLE, CALCULATING, PROCESSING, COMPLETE } = STATUS;
  * @param {Object} state  Current state.
  * @param {Object} action Incoming action object.
  */
-export const reducer = ( state = DEFAULT_STATE, { url, type, data } ) => {
+export const reducer = ( state = DEFAULT_STATE, { url, type } ) => {
 	let status, nextStatus, newState;
 	switch ( type ) {
 		case SET_PRISTINE:
@@ -125,16 +119,6 @@ export const reducer = ( state = DEFAULT_STATE, { url, type, data } ) => {
 				nextStatus,
 				calculatingCount: Math.max( 0, state.calculatingCount - 1 ),
 			};
-			break;
-		case SET_BILLING_DATA:
-			newState = isShallowEqual( state.billingData, data )
-				? state
-				: {
-						...state,
-						billingData: {
-							...data,
-						},
-				  };
 			break;
 	}
 	// automatically update state to idle from pristine as soon as it
