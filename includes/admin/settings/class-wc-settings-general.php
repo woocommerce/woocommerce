@@ -29,9 +29,15 @@ class WC_Settings_General extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
+	 * @param string $current_section Id of the section to get the settings for.
+	 *
 	 * @return array
 	 */
-	public function get_settings() {
+	public function get_settings( $current_section = '' ) {
+
+		if ( '' !== $current_section ) {
+			return apply_filters( 'woocommerce_get_settings_' . $this->id, array(), $current_section );
+		}
 
 		$currency_code_options = get_woocommerce_currencies();
 
@@ -294,7 +300,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			)
 		);
 
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 
 	/**
@@ -309,24 +315,6 @@ class WC_Settings_General extends WC_Settings_Page {
 		echo '<div class="color_box">' . wc_help_tip( $desc ) . '
 			<input name="' . esc_attr( $id ) . '" id="' . esc_attr( $id ) . '" type="text" value="' . esc_attr( $value ) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr( $id ) . '" class="colorpickdiv"></div>
 		</div>';
-	}
-
-	/**
-	 * Output the settings.
-	 */
-	public function output() {
-		$settings = $this->get_settings();
-
-		WC_Admin_Settings::output_fields( $settings );
-	}
-
-	/**
-	 * Save settings.
-	 */
-	public function save() {
-		$settings = $this->get_settings();
-
-		WC_Admin_Settings::save_fields( $settings );
 	}
 }
 
