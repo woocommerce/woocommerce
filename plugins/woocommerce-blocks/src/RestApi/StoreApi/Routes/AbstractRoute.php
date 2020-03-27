@@ -92,6 +92,10 @@ abstract class AbstractRoute implements RouteInterface {
 	protected function check_nonce( \WP_REST_Request $request ) {
 		$nonce = $request->get_header( 'X-WC-Store-API-Nonce' );
 
+		if ( defined( 'WOOCOMMERCE_STORE_API_DISABLE_NONCE_CHECKS' ) && WOOCOMMERCE_STORE_API_DISABLE_NONCE_CHECKS ) {
+			return;
+		}
+
 		if ( null === $nonce ) {
 			throw new RouteException( 'woocommerce_rest_missing_nonce', __( 'Missing the X-WC-Store-API-Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 403 );
 		}

@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\Blocks;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
+use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
+
 /**
  * Library class.
  */
@@ -24,7 +27,9 @@ class Library {
 		add_action( 'init', array( __CLASS__, 'maybe_create_cronjobs' ) );
 		add_filter( 'wc_order_statuses', array( __CLASS__, 'register_draft_order_status' ) );
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( __CLASS__, 'register_draft_order_post_status' ) );
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( __CLASS__, 'append_draft_order_post_status' ) );
 		add_action( 'woocommerce_cleanup_draft_orders', array( __CLASS__, 'delete_expired_draft_orders' ) );
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', array( __CLASS__, 'process_legacy_payment' ), 10, 2 );
 	}
 
 	/**
@@ -165,6 +170,17 @@ class Library {
 	}
 
 	/**
+	 * Append draft status to a list of statuses.
+	 *
+	 * @param array $statuses Array of statuses.
+	 * @return array
+	 */
+	public static function append_draft_order_post_status( $statuses ) {
+		$statuses[] = 'checkout-draft';
+		return $statuses;
+	}
+
+	/**
 	 * Delete draft orders older than a day.
 	 *
 	 * Ran on a daily cron schedule.
@@ -181,6 +197,56 @@ class Library {
 			WHERE posts.post_status = 'wc-checkout-draft'
 			AND posts.post_modified <= ( NOW() - INTERVAL 1 DAY )
 			"
+		);
+	}
+
+	/**
+	 * Attempt to process a payment for the checkout API if no payment methods support the
+	 * woocommerce_rest_checkout_process_payment_with_context action.
+	 *
+	 * @param PaymentContext $context Holds context for the payment.
+	 * @param PaymentResult  $result  Result of the payment.
+	 */
+	public static function process_legacy_payment( PaymentContext $context, PaymentResult &$result ) {
+		if ( $result->status ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$post_data = $_POST;
+
+		// Set constants.
+		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+
+		// Add the payment data from the API to the POST global.
+		$_POST = $context->payment_data;
+
+		// Call the process payment method of the chosen gatway.
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+		if ( ! isset( $available_gateways[ $context->payment_method ] ) ) {
+			return;
+		}
+
+		$payment_method_object = $available_gateways[ $context->payment_method ];
+		$payment_method_object->validate_fields();
+
+		if ( 0 !== wc_notice_count( 'error' ) ) {
+			return;
+		}
+
+		// Process Payment.
+		$gateway_result = $payment_method_object->process_payment( $context->order->get_id() );
+
+		// Restore $_POST data.
+		$_POST = $post_data;
+
+		// Handle result.
+		$result->set_status( isset( $gateway_result['result'] ) && 'success' === $gateway_result['result'] ? 'success' : 'failure' );
+		$result->set_payment_details(
+			[
+				'redirect' => $gateway_result['redirect'],
+			]
 		);
 	}
 }
