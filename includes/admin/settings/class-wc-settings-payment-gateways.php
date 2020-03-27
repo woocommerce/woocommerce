@@ -45,8 +45,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_default_section() {
-		return apply_filters(
-			'woocommerce_payment_gateways_settings',
+		$settings =
 			array(
 				array(
 					'title' => __( 'Payment methods', 'woocommerce' ),
@@ -61,8 +60,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'payment_gateways_options',
 				),
-			)
-		);
+			);
+
+		return apply_filters( 'woocommerce_payment_gateways_settings', $settings );
 	}
 
 	/**

@@ -39,8 +39,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
 		}
 
-		return apply_filters(
-			'woocommerce_general_settings',
+		$settings =
 			array(
 
 				array(
@@ -290,9 +289,9 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'pricing_options',
 				),
+			);
 
-			)
-		);
+		return apply_filters( 'woocommerce_general_settings', $settings );
 	}
 
 	/**

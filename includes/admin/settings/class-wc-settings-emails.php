@@ -46,8 +46,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	protected function get_settings_for_default_section() {
 
-		return apply_filters(
-			'woocommerce_email_settings',
+		$settings =
 			array(
 				array(
 					'title' => __( 'Email notifications', 'woocommerce' ),
@@ -190,9 +189,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_template_options',
 				),
+			);
 
-			)
-		);
+		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
 
 	/**
