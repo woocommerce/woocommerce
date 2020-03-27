@@ -361,6 +361,15 @@ export default compose(
 				per_page: QUERY_DEFAULTS.pageSize,
 				extended_info: true,
 				order_includes: map( actionableOrders, 'id' ),
+				_fields: [
+					'order_id',
+					'order_number',
+					'status',
+					'data_created_gmt',
+					'total_sales',
+					'extended_info.customer',
+					'extended_info.products',
+				],
 			};
 
 			const reportOrders = getReportItems( 'orders', ordersQuery ).data;
