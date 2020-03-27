@@ -77,12 +77,45 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Get settings array.
 		 *
-		 * @param string $current_section Id of the section to get the settings for.
+		 * The strategy for getting the settings is as follows:
 		 *
-		 * @return array
+		 * - If a method named 'get_settings_for_{section_id}_section' exists in the class
+		 *   it will be invoked (for the default '' section, the method name is 'get_settings_for_default_section').
+		 *   Derived classes can implement these methods as required.
+		 *
+		 * - Otherwise, 'get_settings_for_section' will be invoked. Derived classes can override it
+		 *   as an alternative to implementing 'get_settings_for_{section_id}_section' methods.
+		 *
+		 * @param string $current_section The id of the section to return settings for.
+		 *
+		 * @return array Settings array, each item being an associative array representing a setting.
 		 */
 		public function get_settings( $current_section = '' ) {
-			return apply_filters( 'woocommerce_get_settings_' . $this->id, array(), $current_section );
+			if ( '' === $current_section ) {
+				$method_name = 'get_settings_for_default_section';
+			} else {
+				$method_name = "get_settings_for_{$current_section}_section";
+			}
+
+			if ( method_exists( $this, $method_name ) ) {
+				$settings = $this->$method_name();
+			} else {
+				$settings = $this->get_settings_for_section( $current_section );
+			}
+
+			return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+		}
+
+		/**
+		 * Get the settings for a given section.
+		 * This method is invoked when no 'get_settings_for_{current_section}_section' exists in the class.
+		 *
+		 * @param string $current_section The section name to get the settings for.
+		 *
+		 * @return array Settings array, each item being an associative array representing a setting.
+		 */
+		protected function get_settings_for_section( $current_section ) {
+			return array();
 		}
 
 		/**

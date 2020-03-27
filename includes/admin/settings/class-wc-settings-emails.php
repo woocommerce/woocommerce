@@ -42,17 +42,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
-	 * @param string $current_section Id of the section to get the settings for.
-	 *
 	 * @return array
 	 */
-	public function get_settings( $current_section = '' ) {
+	protected function get_settings_for_default_section() {
 
-		if ( '' !== $current_section ) {
-			return apply_filters( 'woocommerce_get_settings_' . $this->id, array(), $current_section );
-		}
-
-		$settings = apply_filters(
+		return apply_filters(
 			'woocommerce_email_settings',
 			array(
 				array(
@@ -199,8 +193,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 			)
 		);
-
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 
 	/**

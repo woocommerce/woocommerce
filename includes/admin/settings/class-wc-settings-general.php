@@ -27,17 +27,11 @@ class WC_Settings_General extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array.
-	 *
-	 * @param string $current_section Id of the section to get the settings for.
+	 * Get settings or the default section.
 	 *
 	 * @return array
 	 */
-	public function get_settings( $current_section = '' ) {
-
-		if ( '' !== $current_section ) {
-			return apply_filters( 'woocommerce_get_settings_' . $this->id, array(), $current_section );
-		}
+	protected function get_settings_for_default_section() {
 
 		$currency_code_options = get_woocommerce_currencies();
 
@@ -45,7 +39,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
 		}
 
-		$settings = apply_filters(
+		return apply_filters(
 			'woocommerce_general_settings',
 			array(
 
@@ -299,8 +293,6 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			)
 		);
-
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 
 	/**

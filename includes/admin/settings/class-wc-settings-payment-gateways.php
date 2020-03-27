@@ -42,34 +42,27 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
-	 * @param string $current_section Section being shown.
 	 * @return array
 	 */
-	public function get_settings( $current_section = '' ) {
-		$settings = array();
-
-		if ( '' === $current_section ) {
-			$settings = apply_filters(
-				'woocommerce_payment_gateways_settings',
+	protected function get_settings_for_default_section() {
+		return apply_filters(
+			'woocommerce_payment_gateways_settings',
+			array(
 				array(
-					array(
-						'title' => __( 'Payment methods', 'woocommerce' ),
-						'desc'  => __( 'Installed payment methods are listed below and can be sorted to control their display order on the frontend.', 'woocommerce' ),
-						'type'  => 'title',
-						'id'    => 'payment_gateways_options',
-					),
-					array(
-						'type' => 'payment_gateways',
-					),
-					array(
-						'type' => 'sectionend',
-						'id'   => 'payment_gateways_options',
-					),
-				)
-			);
-		}
-
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+					'title' => __( 'Payment methods', 'woocommerce' ),
+					'desc'  => __( 'Installed payment methods are listed below and can be sorted to control their display order on the frontend.', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'payment_gateways_options',
+				),
+				array(
+					'type' => 'payment_gateways',
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'payment_gateways_options',
+				),
+			)
+		);
 	}
 
 	/**
