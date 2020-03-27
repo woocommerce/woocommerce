@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Onboarding_Profiler;
+use \Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -464,7 +465,7 @@ class Onboarding {
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
 			$settings['onboarding']['activePlugins']            = self::get_active_plugins();
-			$settings['onboarding']['installedPlugins']         = self::get_installed_plugins();
+			$settings['onboarding']['installedPlugins']         = PluginsHelper::get_installed_plugin_slugs();
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
 			$settings['onboarding']['connectNonce']             = wp_create_nonce( 'connect' );
@@ -616,16 +617,7 @@ class Onboarding {
 	 * @return array
 	 */
 	public static function get_active_plugins() {
-		$all_active_plugins   = get_option( 'active_plugins', array() );
-		$allowed_plugins      = self::get_allowed_plugins();
-		$active_plugin_files  = array_intersect( $all_active_plugins, $allowed_plugins );
-		$allowed_plugin_slugs = array_flip( $allowed_plugins );
-		$active_plugins       = array();
-		foreach ( $active_plugin_files as $file ) {
-			$slug             = $allowed_plugin_slugs[ $file ];
-			$active_plugins[] = $slug;
-		}
-		return $active_plugins;
+		return array_values( array_intersect( PluginsHelper::get_active_plugin_slugs(), array_keys( self::get_allowed_plugins() ) ) );
 	}
 
 	/**
@@ -646,21 +638,6 @@ class Onboarding {
 		}
 
 		return apply_filters( 'woocommerce_admin_onboarding_themes_whitelist', $allowed_themes );
-	}
-
-	/**
-	 * Get an array of installed plugin slugs.
-	 *
-	 * @return array
-	 */
-	public static function get_installed_plugins() {
-		return array_map(
-			function( $plugin_path ) {
-				$path_parts = explode( '/', $plugin_path );
-				return $path_parts[0];
-			},
-			array_keys( get_plugins() )
-		);
 	}
 
 	/**
