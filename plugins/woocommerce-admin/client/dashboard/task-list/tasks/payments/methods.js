@@ -5,6 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import { filter, some } from 'lodash';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
@@ -13,6 +14,7 @@ import {
 	getSetting,
 	WC_ASSET_URL as wcAssetUrl,
 } from '@woocommerce/wc-admin-settings';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -22,6 +24,8 @@ import BacsIcon from './images/bacs';
 import CodIcon from './images/cod';
 import Stripe from './stripe';
 import Square from './square';
+import WCPay from './wcpay';
+import WCPayIcon from './images/wcpay';
 import PayPal from './paypal';
 import Klarna from './klarna';
 import PayFast from './payfast';
@@ -41,7 +45,90 @@ export function getPaymentMethods( {
 			slug: 'cbd-other-hemp-derived-products',
 		} ) || false;
 
-	const methods = [
+	const methods = [];
+
+	if ( window.wcAdminFeatures.wcpay ) {
+		const tosLink = (
+			<Link
+				href={ 'https://wordpress.com/tos/' }
+				target="_blank"
+				type="external"
+			/>
+		);
+
+		const tosPrompt = interpolateComponents( {
+			mixedString: __(
+				'By clicking "Set up," you agree to the {{link}}Terms of Service{{/link}}',
+				'woocommerce-admin'
+			),
+			components: {
+				link: tosLink,
+			},
+		} );
+
+		const wcPayDocLink = (
+			<Link
+				href={ 'https://docs.woocommerce.com/document/payments/' }
+				target="_blank"
+				type="external"
+			/>
+		);
+
+		const wcPayDocPrompt = interpolateComponents( {
+			mixedString: __(
+				'Setting up a store for a client? {{link}}Start here{{/link}}',
+				'woocommerce-admin'
+			),
+			components: {
+				link: wcPayDocLink,
+			},
+		} );
+
+		const wcPaySettingsLink = (
+			<Link
+				href={
+					'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=woocommerce_payments'
+				}
+			>
+				{ __( 'Settings', 'woocommerce-admin' ) }
+			</Link>
+		);
+
+		// @todo This should check actual connection information.
+		const wcPayIsConfigured = activePlugins.includes(
+			'woocommerce-payments'
+		);
+
+		methods.push( {
+			key: 'wcpay',
+			title: __( 'WooCommerce Payments', 'woocommerce-admin' ),
+			content: (
+				<Fragment>
+					{ __(
+						'Accept credit card payments the easy way! No setup fees. No ' +
+							'monthly fees. Just 2.9% + $0.30 per transaction ' +
+							'on U.S. issued cards. ',
+						'woocommerce-admin'
+					) }
+					{ wcPayIsConfigured && wcPaySettingsLink }
+					{ ! wcPayIsConfigured && <p>{ tosPrompt }</p> }
+					{ profileItems.setup_client && <p>{ wcPayDocPrompt }</p> }
+				</Fragment>
+			),
+			before: <WCPayIcon />,
+			visible: [ 'US' ].includes( countryCode ) && ! hasCbdIndustry,
+			plugins: [ 'woocommerce-payments' ],
+			container: <WCPay />,
+			isConfigured: wcPayIsConfigured,
+			isEnabled:
+				options.woocommerce_woocommerce_payments_settings &&
+				options.woocommerce_woocommerce_payments_settings.enabled ===
+					'yes',
+			optionName: 'woocommerce_woocommerce_payments_settings',
+		} );
+	}
+
+	methods.push(
 		{
 			key: 'stripe',
 			title: __(
@@ -250,8 +337,8 @@ export function getPaymentMethods( {
 				options.woocommerce_bacs_settings &&
 				options.woocommerce_bacs_settings.enabled === 'yes',
 			optionName: 'woocommerce_bacs_settings',
-		},
-	];
+		}
+	);
 
 	return filter( methods, ( method ) => method.visible );
 }

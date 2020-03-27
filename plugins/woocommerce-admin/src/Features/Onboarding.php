@@ -509,6 +509,7 @@ class Onboarding {
 		$options[] = 'woocommerce_cod_settings';
 		$options[] = 'woocommerce_bacs_settings';
 		$options[] = 'woocommerce_bacs_accounts';
+		$options[] = 'woocommerce_woocommerce_payments_settings';
 
 		return $options;
 	}
@@ -607,6 +608,7 @@ class Onboarding {
 				'woocommerce-square'                  => 'woocommerce-square/woocommerce-square.php',
 				'woocommerce-shipstation-integration' => 'woocommerce-shipstation-integration/woocommerce-shipstation.php',
 				'woocommerce-payfast-gateway'         => 'woocommerce-payfast-gateway/gateway-payfast.php',
+				'woocommerce-payments'                => 'woocommerce-payments/woocommerce-payments.php',
 			)
 		);
 	}

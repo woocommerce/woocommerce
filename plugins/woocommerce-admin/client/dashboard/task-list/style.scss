@@ -437,6 +437,20 @@
 	}
 }
 
+.woocommerce-task-payment-wcpay.woocommerce-task-payment-not-configured {
+	background-color: $studio-woocommerce-purple-60;
+
+	.woocommerce-task-payment__title {
+		color: $studio-white;
+	}
+	.woocommerce-task-payment__content {
+		color: $studio-white;
+		a {
+			color: $studio-white;
+		}
+	}
+}
+
 .woocommerce-task-appearance {
 	.woocommerce-image-upload {
 		margin-bottom: $gap-smallest;

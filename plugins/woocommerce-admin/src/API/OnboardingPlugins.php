@@ -131,6 +131,19 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/connect-wcpay',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'connect_wcpay' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_connect_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/connect-square',
 			array(
 				array(
@@ -497,7 +510,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		}
 
 		if ( $has_cbd_industry ) {
-			$url  = 'https://squareup.com/t/f_partnerships/d_referrals/p_woocommerce/c_general/o_none/l_us/dt_alldevice/pr_payments/?route=/solutions/cbd';
+			$url = 'https://squareup.com/t/f_partnerships/d_referrals/p_woocommerce/c_general/o_none/l_us/dt_alldevice/pr_payments/?route=/solutions/cbd';
 		} else {
 			$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
 		}
@@ -525,6 +538,29 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		);
 
 		$connect_url = add_query_arg( $args, $url );
+
+		return( array(
+			'connectUrl' => $connect_url,
+		) );
+	}
+
+	/**
+	 * Returns a URL that can be used to by WCPay to verify business details with Stripe.
+	 *
+	 * @return WP_Error|array Connect URL.
+	 */
+	public function connect_wcpay() {
+		if ( ! class_exists( 'WC_Payments_Account' ) ) {
+			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooCommerce Payments plugin.', 'woocommerce-admin' ), 500 );
+		}
+
+		$connect_url = add_query_arg(
+			array(
+				'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
+				'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+			),
+			admin_url()
+		);
 
 		return( array(
 			'connectUrl' => $connect_url,

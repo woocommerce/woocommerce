@@ -6,7 +6,8 @@
 		"analytics-dashboard/customizable": true,
 		"devdocs": false,
 		"onboarding": true,
+	  	"shipping-label-banner": true,
 		"store-alerts": true,
-	  	"shipping-label-banner": true
+		"wcpay": false
 	}
 }
