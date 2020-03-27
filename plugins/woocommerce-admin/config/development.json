@@ -6,6 +6,7 @@
 		"analytics-dashboard/customizable": true,
 		"devdocs": true,
 		"onboarding": true,
-		"store-alerts": true
+		"store-alerts": true,
+		"shipping-label-banner": true
 	}
 }

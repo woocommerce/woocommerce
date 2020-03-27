@@ -21,9 +21,9 @@ output 2 "Creating archive... 🎁"
 
 ZIP_FILE=$1
 
-build_files=$(ls dist/*/*.{js,css})
+build_files=$(find dist/ \( -name '*.js' -o -name '*.css' \))
 
-zip -r ${ZIP_FILE} \
+zip -r "${ZIP_FILE}" \
 	woocommerce-admin.php \
 	uninstall.php \
 	includes/ \

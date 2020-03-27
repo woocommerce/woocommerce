@@ -84,6 +84,14 @@ class Init {
 					'Automattic\WooCommerce\Admin\API\OnboardingThemes',
 				)
 			);
+		} elseif ( Loader::is_feature_enabled( 'shipping-label-banner' ) ) {
+			// Shipping Banner needs to use /active /install and /activate endpoints.
+			$controllers = array_merge(
+				$controllers,
+				array(
+					\Automattic\WooCommerce\Admin\API\OnboardingPlugins::class,
+				)
+			);
 		}
 
 		// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
