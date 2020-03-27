@@ -68,77 +68,85 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array.
+	 * Get settings for the current section.
 	 *
-	 * @param string $current_section Current section.
+	 * @param string $current_section The id of the section to return settings for.
+	 *
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
-		$settings = array();
+		/*
+		The original implementation of this function was returning the settings for the "Options" section
+		when the supplied value for $current_section was '', which is the id for the "Zones" section.
+		We need this workaround to keep compatibility.
+		*/
+		return parent::get_settings( '' === $current_section ? 'options' : $current_section );
+	}
 
-		if ( '' === $current_section ) {
-			$settings = apply_filters(
-				'woocommerce_shipping_settings',
+	/**
+	 * Get settings for the options section.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_options_section() {
+		return apply_filters(
+			'woocommerce_shipping_settings',
+			array(
 				array(
-					array(
-						'title' => __( 'Shipping options', 'woocommerce' ),
-						'type'  => 'title',
-						'id'    => 'shipping_options',
+					'title' => __( 'Shipping options', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'shipping_options',
+				),
+
+				array(
+					'title'         => __( 'Calculations', 'woocommerce' ),
+					'desc'          => __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
+					'id'            => 'woocommerce_enable_shipping_calc',
+					'default'       => 'yes',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'autoload'      => false,
+				),
+
+				array(
+					'desc'          => __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
+					'id'            => 'woocommerce_shipping_cost_requires_address',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'end',
+				),
+
+				array(
+					'title'           => __( 'Shipping destination', 'woocommerce' ),
+					'desc'            => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
+					'id'              => 'woocommerce_ship_to_destination',
+					'default'         => 'billing',
+					'type'            => 'radio',
+					'options'         => array(
+						'shipping'     => __( 'Default to customer shipping address', 'woocommerce' ),
+						'billing'      => __( 'Default to customer billing address', 'woocommerce' ),
+						'billing_only' => __( 'Force shipping to the customer billing address', 'woocommerce' ),
 					),
+					'autoload'        => false,
+					'desc_tip'        => true,
+					'show_if_checked' => 'option',
+				),
 
-					array(
-						'title'         => __( 'Calculations', 'woocommerce' ),
-						'desc'          => __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
-						'id'            => 'woocommerce_enable_shipping_calc',
-						'default'       => 'yes',
-						'type'          => 'checkbox',
-						'checkboxgroup' => 'start',
-						'autoload'      => false,
-					),
+				array(
+					'title'    => __( 'Debug mode', 'woocommerce' ),
+					'desc'     => __( 'Enable debug mode', 'woocommerce' ),
+					'desc_tip' => __( 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
+					'id'       => 'woocommerce_shipping_debug_mode',
+					'default'  => 'no',
+					'type'     => 'checkbox',
+				),
 
-					array(
-						'desc'          => __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
-						'id'            => 'woocommerce_shipping_cost_requires_address',
-						'default'       => 'no',
-						'type'          => 'checkbox',
-						'checkboxgroup' => 'end',
-					),
-
-					array(
-						'title'           => __( 'Shipping destination', 'woocommerce' ),
-						'desc'            => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
-						'id'              => 'woocommerce_ship_to_destination',
-						'default'         => 'billing',
-						'type'            => 'radio',
-						'options'         => array(
-							'shipping'     => __( 'Default to customer shipping address', 'woocommerce' ),
-							'billing'      => __( 'Default to customer billing address', 'woocommerce' ),
-							'billing_only' => __( 'Force shipping to the customer billing address', 'woocommerce' ),
-						),
-						'autoload'        => false,
-						'desc_tip'        => true,
-						'show_if_checked' => 'option',
-					),
-
-					array(
-						'title'    => __( 'Debug mode', 'woocommerce' ),
-						'desc'     => __( 'Enable debug mode', 'woocommerce' ),
-						'desc_tip' => __( 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
-						'id'       => 'woocommerce_shipping_debug_mode',
-						'default'  => 'no',
-						'type'     => 'checkbox',
-					),
-
-					array(
-						'type' => 'sectionend',
-						'id'   => 'shipping_options',
-					),
-
-				)
-			);
-		}
-
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+				array(
+					'type' => 'sectionend',
+					'id'   => 'shipping_options',
+				),
+			)
+		);
 	}
 
 	/**
@@ -153,7 +161,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		if ( '' === $current_section ) {
 			$this->output_zones_screen();
 		} elseif ( 'options' === $current_section ) {
-			$settings = $this->get_settings();
+			$settings = $this->get_settings( 'options' );
 			WC_Admin_Settings::output_fields( $settings );
 		} elseif ( 'classes' === $current_section ) {
 			$hide_save_button = true;
@@ -182,7 +190,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		switch ( $current_section ) {
 			case 'options':
-				WC_Admin_Settings::save_fields( $this->get_settings() );
+				WC_Admin_Settings::save_fields( $this->get_settings( 'options' ) );
 				do_action( 'woocommerce_update_options_' . $this->id . '_options' );
 				break;
 			case 'classes':

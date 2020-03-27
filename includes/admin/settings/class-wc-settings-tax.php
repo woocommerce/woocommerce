@@ -74,16 +74,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
-	 * @param string $current_section Current section being shown.
 	 * @return array
 	 */
-	public function get_settings( $current_section = '' ) {
-		$settings = array();
-
-		if ( '' === $current_section ) {
-			$settings = include 'views/settings-tax.php';
-		}
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+	public function get_settings_for_default_section() {
+		return include 'views/settings-tax.php';
 	}
 
 	/**
