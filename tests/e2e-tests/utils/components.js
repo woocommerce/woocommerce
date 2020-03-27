@@ -6,9 +6,10 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
+import { clickTab, setCheckbox, uiUnblocked, verifyCheckboxIsUnset } from './index';
 
 const config = require( 'config' );
+const select = require ('puppeteer-select');
 const simpleProductName = config.get( 'products.simple.name' );
 
 const verifyAndPublish = async () => {
@@ -21,6 +22,136 @@ const verifyAndPublish = async () => {
 
 	// Verify
 	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
+};
+
+/**
+ * Complete onboarding wizard.
+ */
+const completeOnboardingWizard = async () => {
+	// Wait for "Yes please" button to appear and click on it
+	await page.waitForSelector( 'button[name=save_step]' );
+	await expect( page ).toMatchElement(
+		'button[name=save_step]', { text: 'Yes please' }
+	);
+	await Promise.all( [
+		// Click on "Yes please" button to move to the next step
+		page.click( 'button[name=save_step]', { text: 'Yes please' } ),
+
+		// Wait for the "Start setting up your WooCommerce store" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Store Details section
+
+	// Wait for "Proceed without Jetpack & WooCommerce Services" option to appear and click on it
+	await page.waitForSelector( '.woocommerce-profile-wizard__skip.is-link' );
+	await expect( page ).toMatchElement(
+		'.woocommerce-profile-wizard__skip.is-link', { text: 'Proceed without Jetpack & WooCommerce Services' }
+	);
+
+	// Click on "Yes please" button to move to the next step
+	await page.click( '.woocommerce-profile-wizard__skip.is-link', { text: 'Proceed without Jetpack & WooCommerce Services' } );
+
+	// Wait for usage tracking pop-up window to appear
+	await page.waitForSelector( '.components-modal__header-heading' );
+	await expect( page ).toMatchElement(
+		'.components-modal__header-heading', { text: 'Build a Better WooCommerce' }
+	);
+
+	await page.waitForSelector( '.components-checkbox-control__input' );
+	// Verify that checkbox next to "Yes, count me in!" is not selected
+	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
+
+	// Defining "Continue" button
+	const trackContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		trackContinueButton.click(),
+
+		// Wait for "Where is your store based?" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Fill store's address - first line
+	await expect( page ).toFill( '#inspector-text-control-0', config.get( 'addresses.admin.store.addressfirstline' ) );
+
+	// Fill store's address - second line
+	await expect( page ).toFill( '#inspector-text-control-1', config.get( 'addresses.admin.store.addresssecondline' ) );
+
+	// Fill country and state where the store is located
+	await expect( page ).toFill( '.woocommerce-select-control__control-input', config.get( 'addresses.admin.store.countryandstate' ) );
+
+	// Fill the city where the store is located
+	await expect( page ).toFill( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
+
+	// Fill postcode of the store
+	await expect( page ).toFill( '#inspector-text-control-3', config.get( 'addresses.admin.store.postcode' ) );
+
+	// Verify that checkbox next to "I'm setting up a store for a client" is not selected
+	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
+
+	// Defining "Continue" button
+	const storeDetailsContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		storeDetailsContinueButton.click(),
+
+		// Wait for "In which industry does the store operate?" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Industry section
+
+	// Select checkbox next to "Fashion, apparel, and accessories"
+	await setCheckbox( '.components-checkbox-control__input' );
+
+	// Defining "Continue" button
+	const industryContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		industryContinueButton.click(),
+
+		// Wait for "What type of products will be listed?" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Product types section
+
+	// Select checkbox next to "Physical products"
+	await setCheckbox( '.components-checkbox-control__input' );
+
+	// Defining "Continue" button
+	const productTypesContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		productTypesContinueButton.click(),
+
+		// Wait for "Tell us about your business" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Business Details section
+
+	// Fill the number of products you plan to sell
+	await expect( page ).toFill( '#woocommerce-select-control-1__control-input', config.get( 'onboardingwizard.numberofproducts' ) );
+
+	// Fill currently selling elsewhere
+	await expect( page ).toFill( '#woocommerce-select-control-2__control-input', config.get( 'onboardingwizard.sellingelsewhere' ) );
+
+	// Defining "Continue" button
+	const businessContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		businessContinueButton.click(),
+
+		// Wait for "Theme" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
 };
 
 /**
@@ -317,6 +448,7 @@ const createVariableProduct = async () => {
 
 export {
 	completeOldSetupWizard,
+	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
 	verifyAndPublish,
