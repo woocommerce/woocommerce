@@ -84,7 +84,7 @@ class Pagination extends Component {
 	}
 
 	renderPageArrows() {
-		const { page } = this.props;
+		const { page, showPageArrowsLabel } = this.props;
 
 		if ( this.pageCount <= 1 ) {
 			return null;
@@ -100,17 +100,19 @@ class Pagination extends Component {
 
 		return (
 			<div className="woocommerce-pagination__page-arrows">
-				<span
-					className="woocommerce-pagination__page-arrows-label"
-					role="status"
-					aria-live="polite"
-				>
-					{ sprintf(
-						__( 'Page %d of %d', 'woocommerce-admin' ),
-						page,
-						this.pageCount
-					) }
-				</span>
+				{ showPageArrowsLabel && (
+					<span
+						className="woocommerce-pagination__page-arrows-label"
+						role="status"
+						aria-live="polite"
+					>
+						{ sprintf(
+							__( 'Page %d of %d', 'woocommerce-admin' ),
+							page,
+							this.pageCount
+						) }
+					</span>
+				) }
 				<div className="woocommerce-pagination__page-arrows-buttons">
 					<IconButton
 						className={ previousLinkClass }
@@ -188,7 +190,7 @@ class Pagination extends Component {
 	}
 
 	render() {
-		const { total, perPage, className } = this.props;
+		const { total, perPage, className, showPagePicker, showPerPagePicker } = this.props;
 		this.pageCount = Math.ceil( total / perPage );
 
 		const classes = classNames( 'woocommerce-pagination', className );
@@ -207,8 +209,8 @@ class Pagination extends Component {
 		return (
 			<div className={ classes }>
 				{ this.renderPageArrows() }
-				{ this.renderPagePicker() }
-				{ this.renderPerPagePicker() }
+				{ showPagePicker && this.renderPagePicker() }
+				{ showPerPagePicker && this.renderPerPagePicker() }
 			</div>
 		);
 	}
@@ -239,11 +241,26 @@ Pagination.propTypes = {
 	 * Additional classNames.
 	 */
 	className: PropTypes.string,
+	/**
+	 * Whether the page picker should be rendered.
+	 */
+	showPagePicker: PropTypes.bool,
+	/**
+	 * Whether the perPage picker should be rendered.
+	 */
+	showPerPagePicker: PropTypes.bool,
+	/**
+	 * Whether the page arrows label should be rendered.
+	 */
+	showPageArrowsLabel: PropTypes.bool,
 };
 
 Pagination.defaultProps = {
 	onPageChange: noop,
 	onPerPageChange: noop,
+	showPagePicker: true,
+	showPerPagePicker: true,
+	showPageArrowsLabel: true,
 };
 
 export default Pagination;

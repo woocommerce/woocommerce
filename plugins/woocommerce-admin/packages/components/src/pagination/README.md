@@ -26,3 +26,6 @@ Name | Type | Default | Description
 `onPerPageChange` | Function | `noop` | A function to execute when the per page option is changed
 `total` | Number | `null` | (required) The total number of results
 `className` | String | `null` | Additional classNames
+`showPagePicker` | Boolean | `true` | Whether the page picker should be shown.
+`showPerPagePicker` | Boolean | `true` | Whether the per page picker should shown.
+`showPageArrowsLabel` | Boolean | `true` | Whether the page arrows label should be shown.
