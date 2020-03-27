@@ -48,7 +48,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
-	 * @param string $current_section Current section slug.
+	 * @param string $current_section Id of the section to get the settings for.
 	 *
 	 * @return array
 	 */

@@ -77,10 +77,12 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Get settings array.
 		 *
+		 * @param string $current_section Id of the section to get the settings for.
+		 *
 		 * @return array
 		 */
-		public function get_settings() {
-			return apply_filters( 'woocommerce_get_settings_' . $this->id, array() );
+		public function get_settings( $current_section = '' ) {
+			return apply_filters( 'woocommerce_get_settings_' . $this->id, array(), $current_section );
 		}
 
 		/**
@@ -96,7 +98,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Get own sections for this page.
 		 * Derived classes should override this method if they define sections.
-		 * There should be one default section with an empty string as identifier.
+		 * There should always be one default section with an empty string as identifier.
 		 *
 		 * Example:
 		 * return array(
@@ -107,7 +109,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return array An associative array where keys are section identifiers and the values are translated section names.
 		 */
 		protected function get_own_sections() {
-			return array();
+			return array( '' => __( 'General', 'woocommerce' ) );
 		}
 
 		/**
@@ -141,7 +143,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * Output the settings.
 		 */
 		public function output() {
-			$settings = $this->get_settings();
+			global $current_section;
+
+			$settings = $this->get_settings( $current_section );
 
 			WC_Admin_Settings::output_fields( $settings );
 		}
@@ -152,7 +156,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function save() {
 			global $current_section;
 
-			$settings = $this->get_settings();
+			$settings = $this->get_settings( $current_section );
 			WC_Admin_Settings::save_fields( $settings );
 
 			if ( $current_section ) {

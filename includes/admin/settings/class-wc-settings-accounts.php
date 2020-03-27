@@ -28,9 +28,16 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
+	 * @param string $current_section Id of the section to get the settings for.
+	 *
 	 * @return array
 	 */
-	public function get_settings() {
+	public function get_settings( $current_section = '' ) {
+
+		if ( '' !== $current_section ) {
+			return apply_filters( 'woocommerce_get_settings_' . $this->id, array(), $current_section );
+		}
+
 		$erasure_text = esc_html__( 'account erasure request', 'woocommerce' );
 		if ( current_user_can( 'manage_privacy_options' ) ) {
 			if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
@@ -241,7 +248,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			$account_settings
 		);
 
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 }
 
