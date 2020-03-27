@@ -7,7 +7,7 @@
 	vertical-align: middle;
 
 	.woocommerce-tag__text,
-	.woocommerce-tag__remove.components-icon-button {
+	.woocommerce-tag__remove {
 		display: inline-block;
 		line-height: 24px;
 		background: $core-grey-light-500;
@@ -29,7 +29,7 @@
 		border-radius: 12px 0 0 12px;
 	}
 
-	.woocommerce-tag__remove.components-icon-button {
+	.woocommerce-tag__remove {
 		cursor: pointer;
 		padding: 0 2px;
 		border-radius: 0 12px 12px 0;
