@@ -105,15 +105,15 @@ const stableMainEntry = {
 	blocks: './assets/js/index.js',
 
 	// @wordpress/components styles
-	'panel-style': './node_modules/@wordpress/components/src/panel/style.scss',
+	'panel-style': './node_modules/wordpress-components/src/panel/style.scss',
 	'custom-select-control-style':
-		'./node_modules/@wordpress/components/src/custom-select-control/style.scss',
+		'./node_modules/wordpress-components/src/custom-select-control/style.scss',
 	'checkbox-control-style':
-		'./node_modules/@wordpress/components/src/checkbox-control/style.scss',
+		'./node_modules/wordpress-components/src/checkbox-control/style.scss',
 	'spinner-style':
-		'./node_modules/@wordpress/components/src/spinner/style.scss',
+		'./node_modules/wordpress-components/src/spinner/style.scss',
 	'snackbar-notice-style':
-		'./node_modules/@wordpress/components/src/snackbar/style.scss',
+		'./node_modules/wordpress-components/src/snackbar/style.scss',
 
 	// Blocks
 	'handpicked-products': './assets/js/blocks/handpicked-products/index.js',

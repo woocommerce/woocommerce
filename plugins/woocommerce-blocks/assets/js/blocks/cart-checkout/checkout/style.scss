@@ -154,10 +154,10 @@
 		min-height: 460px;
 	}
 }
-.wc-block-checkout--skeleton {
+.wc-block-sidebar-layout.wc-block-checkout--skeleton {
 	display: none;
 }
-.is-loading + .wc-block-checkout--skeleton {
+.is-loading + .wc-block-sidebar-layout.wc-block-checkout--skeleton {
 	display: flex;
 }
 

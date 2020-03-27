@@ -46,7 +46,7 @@ const setNonce = ( headers ) => {
  *
  * @return {*} The evaluated result of the remaining middleware chain.
  */
-export const storeNonceMiddleware = ( options, next ) => {
+const storeNonceMiddleware = ( options, next ) => {
 	if ( isStoreApiGetRequest( options ) ) {
 		const existingHeaders = options.headers || {};
 		options.headers = {
