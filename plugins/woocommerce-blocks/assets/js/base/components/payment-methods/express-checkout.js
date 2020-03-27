@@ -8,6 +8,7 @@ import { useExpressPaymentMethods } from '@woocommerce/base-hooks';
  * Internal dependencies
  */
 import ExpressPaymentMethods from './express-payment-methods';
+import './style.scss';
 
 const ExpressCheckoutContainer = ( { children } ) => {
 	return (

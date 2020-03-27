@@ -152,10 +152,10 @@ table.wc-block-cart-items {
 		min-height: 460px;
 	}
 }
-.wc-block-cart--skeleton {
+.wc-block-sidebar-layout.wc-block-cart--skeleton {
 	display: none;
 }
-.is-loading + .wc-block-cart--skeleton {
+.is-loading + .wc-block-sidebar-layout.wc-block-cart--skeleton {
 	display: flex;
 }
 
