@@ -62,6 +62,13 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $urls = array();
 
 	/**
+	 * Contains a cache of retrieved stats data, grouped by report slug.
+	 *
+	 * @var array
+	 */
+	protected $stats_data = array();
+
+	/**
 	 * Register the routes for reports.
 	 */
 	public function register_routes() {
@@ -262,6 +269,33 @@ class Controller extends \WC_REST_Reports_Controller {
 	}
 
 	/**
+	 * Get report stats data, avoiding duplicate requests for stats that use the same endpoint.
+	 *
+	 * @param string $report Report slug to request data for.
+	 * @param array  $query_args Report query args.
+	 * @return WP_REST_Response|WP_Error Report stats data.
+	 */
+	public function get_stats_data( $report, $query_args ) {
+		// Return from cache if we've already requested these report stats.
+		if ( isset( $this->stats_data[ $report ] ) ) {
+			return $this->stats_data[ $report ];
+		}
+
+		// Request the report stats.
+		$request_url = $this->endpoints[ $report ];
+		$request     = new \WP_REST_Request( 'GET', $request_url );
+		$request->set_param( 'before', $query_args['before'] );
+		$request->set_param( 'after', $query_args['after'] );
+
+		$response = rest_do_request( $request );
+
+		// Cache the response.
+		$this->stats_data[ $report ] = $response;
+
+		return $response;
+	}
+
+	/**
 	 * Get all reports.
 	 *
 	 * @param  WP_REST_Request $request Request data.
@@ -290,12 +324,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				continue;
 			}
 
-			$request_url = $this->endpoints[ $report ];
-			$request     = new \WP_REST_Request( 'GET', $request_url );
-			$request->set_param( 'before', $query_args['before'] );
-			$request->set_param( 'after', $query_args['after'] );
-
-			$response = rest_do_request( $request );
+			$response = $this->get_stats_data( $report, $query_args );
 
 			if ( is_wp_error( $response ) ) {
 				return $response;
