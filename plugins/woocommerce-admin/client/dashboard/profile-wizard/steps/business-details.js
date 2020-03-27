@@ -168,7 +168,10 @@ class BusinessDetails extends Component {
 			} else if ( name === 'other_platform_name' ) {
 				if (
 					! values.other_platform_name &&
-					values.other_platform === 'other'
+					values.other_platform === 'other' &&
+					[ 'other', 'brick-mortar-other' ].includes(
+						values.selling_venues
+					)
 				) {
 					errors.other_platform_name = __(
 						'This field is required',
@@ -685,7 +688,7 @@ class BusinessDetails extends Component {
 }
 
 export default compose(
-	withWCApiSelect( select => {
+	withWCApiSelect( ( select ) => {
 		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
 
 		return {
@@ -693,10 +696,12 @@ export default compose(
 			profileItems: getProfileItems(),
 		};
 	} ),
-	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting } = select(
-			SETTINGS_STORE_NAME
-		);
+	withSelect( ( select ) => {
+		const {
+			getSettings,
+			getSettingsError,
+			isGetSettingsRequesting,
+		} = select( SETTINGS_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
