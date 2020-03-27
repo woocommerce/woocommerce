@@ -26,7 +26,7 @@ class WC_Order_Tracking {
 	public function track_order_viewed( $order ) {
 		$properties = array(
 			'current_status'   => $order->get_status(),
-			'date_created'     => $order->get_date_created(),
+			'date_created'     => $order->get_date_created()->format( DateTime::ATOM ),
 			'payment_method'   => $order->get_payment_method(),
 		);
 
