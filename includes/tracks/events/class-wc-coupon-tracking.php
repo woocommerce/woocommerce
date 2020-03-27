@@ -33,6 +33,6 @@ class WC_Coupon_Tracking {
 									  || 0 < intval( $coupon->get_limit_usage_to_x_items() ),
 		);
 
-		WC_Tracks::record_event( 'coupon_add', $properties );
+		WC_Tracks::record_event( 'coupon_updated', $properties );
 	}
 }
