@@ -54,16 +54,16 @@ class WC_Products_Tracking {
 		wc_enqueue_js(
 			"
 			if ( $( 'h1.wp-heading-inline' ).text().trim() === 'Edit product') {
-				const initialStockValue = $( '#_stock' ).val();
-				let hasRecordedEvent = false;
+				var initialStockValue = $( '#_stock' ).val();
+				var hasRecordedEvent = false;
 
 				$( '#publish' ).click( function() {
 					if ( hasRecordedEvent ) {
 						return;
 					}
 
-					const currentStockValue = $( '#_stock' ).val();
-					const properties = {
+					var currentStockValue = $( '#_stock' ).val();
+					var properties = {
 						product_type:			$( '#product-type' ).val(),
 						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Y' : 'N',
 						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Y' : 'N',
