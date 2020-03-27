@@ -26,7 +26,7 @@ class WC_Products_Tracking {
 	}
 
 	/**
-	 * Send some Tracks events when a product is updated.
+	 * Send a Tracks event when a product is updated.
 	 *
 	 * @param int    $product_id Product id.
 	 * @param object $post       WordPress post.
