@@ -1,19 +1,4 @@
 /**
- * Internal dependencies
- */
-import {
-	ERROR_TYPES,
-	DEFAULT_SHIPPING_ADDRESS,
-	DEFAULT_SHIPPING_CONTEXT_DATA,
-} from './constants';
-import {
-	EMIT_TYPES,
-	emitterSubscribers,
-	reducer as emitReducer,
-	emitEvent,
-} from './event-emit';
-
-/**
  * External dependencies
  */
 import {
@@ -22,11 +7,25 @@ import {
 	useState,
 	useReducer,
 	useEffect,
-	useCallback,
 	useRef,
 } from '@wordpress/element';
-import { useShippingRates, useStoreCart } from '@woocommerce/base-hooks';
+import {
+	useShippingAddress,
+	useShippingRates,
+	useStoreCart,
+} from '@woocommerce/base-hooks';
 import { useCheckoutContext } from '@woocommerce/base-context';
+
+/**
+ * Internal dependencies
+ */
+import { ERROR_TYPES, DEFAULT_SHIPPING_CONTEXT_DATA } from './constants';
+import {
+	EMIT_TYPES,
+	emitterSubscribers,
+	reducer as emitReducer,
+	emitEvent,
+} from './event-emit';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingDataContext} ShippingDataContext
@@ -97,9 +96,7 @@ export const ShippingDataProvider = ( { children } ) => {
 		NONE
 	);
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
-	const [ currentShippingAddress, setAddressState ] = useState(
-		DEFAULT_SHIPPING_ADDRESS
-	);
+	const { shippingAddress, setShippingAddress } = useShippingAddress();
 	const currentObservers = useRef( observers );
 	const [ shippingOptions, setShippingOptions ] = useState( [] );
 	const [ shippingOptionsLoading, setShippingOptionsLoading ] = useState(
@@ -108,12 +105,6 @@ export const ShippingDataProvider = ( { children } ) => {
 	// @todo, this will need wired up to persistence (useSelectedRates?) which
 	// will be setup similar to `useShippingRates` (or maybe in the same hook?)
 	const [ selectedRates, setSelectedRates ] = useState( [] );
-	const setShippingAddress = useCallback( ( address ) => {
-		setAddressState( ( prevAddress ) => ( {
-			...prevAddress,
-			...address,
-		} ) );
-	}, [] );
 	const onShippingRateSuccess = emitterSubscribers( subscriber ).onSuccess;
 	const onShippingRateFail = emitterSubscribers( subscriber ).onFail;
 	const onShippingRateSelectSuccess = emitterSubscribers( subscriber )
@@ -195,7 +186,7 @@ export const ShippingDataProvider = ( { children } ) => {
 		shippingRatesLoading: shippingOptionsLoading,
 		selectedRates,
 		setSelectedRates,
-		shippingAddress: currentShippingAddress,
+		shippingAddress,
 		setShippingAddress,
 		onShippingRateSuccess,
 		onShippingRateFail,
@@ -206,7 +197,7 @@ export const ShippingDataProvider = ( { children } ) => {
 	return (
 		<>
 			<ShippingRateCalculation
-				address={ currentShippingAddress }
+				address={ shippingAddress }
 				onChange={ onRateChange }
 			/>
 			<ShippingDataContext.Provider value={ ShippingData }>
