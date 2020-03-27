@@ -51,10 +51,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_default_section() {
-		$settings = apply_filters(
-			'woocommerce_settings_pages',
+		$settings =
 			array(
-
 				array(
 					'title' => __( 'Page setup', 'woocommerce' ),
 					'desc'  => __( 'These pages need to be set so that WooCommerce knows where to send users to checkout.', 'woocommerce' ),
@@ -312,8 +310,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'account_endpoint_options',
 				),
-			)
-		);
+			);
+
+		$settings = apply_filters( 'woocommerce_settings_pages', $settings );
 
 		if ( wc_site_is_https() ) {
 			unset( $settings['unforce_ssl_checkout'], $settings['force_ssl_checkout'] );
@@ -330,8 +329,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	protected function get_settings_for_woocommerce_com_section() {
 		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
 
-		return apply_filters(
-			'woocommerce_com_integration_settings',
+		$settings =
 			array(
 				array(
 					'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
@@ -374,8 +372,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'marketplace_suggestions',
 				),
-			)
-		);
+			);
+
+		return apply_filters( 'woocommerce_com_integration_settings', $settings );
 	}
 
 	/**
@@ -384,8 +383,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_legacy_api_section() {
-		return apply_filters(
-			'woocommerce_settings_rest_api',
+		$settings =
 			array(
 				array(
 					'title' => '',
@@ -404,8 +402,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'legacy_api_options',
 				),
-			)
-		);
+			);
+
+		return apply_filters( 'woocommerce_settings_rest_api', $settings );
 	}
 
 	/**

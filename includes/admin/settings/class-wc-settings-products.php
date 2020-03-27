@@ -73,169 +73,166 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_default_section() {
-		return apply_filters(
-			'woocommerce_product_settings',
-			apply_filters(
-				'woocommerce_products_general_settings',
+		$settings =
+			array(
 				array(
-					array(
-						'title' => __( 'Shop pages', 'woocommerce' ),
-						'type'  => 'title',
-						'desc'  => '',
-						'id'    => 'catalog_options',
-					),
-					array(
-						'title'    => __( 'Shop page', 'woocommerce' ),
-						/* translators: %s: URL to settings. */
-						'desc'     => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
-						'id'       => 'woocommerce_shop_page_id',
-						'type'     => 'single_select_page',
-						'default'  => '',
-						'class'    => 'wc-enhanced-select-nostd',
-						'css'      => 'min-width:300px;',
-						'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
-					),
-					array(
-						'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
-						'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
-						'id'            => 'woocommerce_cart_redirect_after_add',
-						'default'       => 'no',
-						'type'          => 'checkbox',
-						'checkboxgroup' => 'start',
-					),
-					array(
-						'desc'          => __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
-						'id'            => 'woocommerce_enable_ajax_add_to_cart',
-						'default'       => 'yes',
-						'type'          => 'checkbox',
-						'checkboxgroup' => 'end',
-					),
-					array(
-						'title'       => __( 'Placeholder image', 'woocommerce' ),
-						'id'          => 'woocommerce_placeholder_image',
-						'type'        => 'text',
-						'default'     => '',
-						'class'       => '',
-						'css'         => '',
-						'placeholder' => __( 'Enter attachment ID or URL to an image', 'woocommerce' ),
-						'desc_tip'    => __( 'This is the attachment ID, or image URL, used for placeholder images in the product catalog. Products with no image will use this.', 'woocommerce' ),
-					),
-					array(
-						'type' => 'sectionend',
-						'id'   => 'catalog_options',
-					),
+					'title' => __( 'Shop pages', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => '',
+					'id'    => 'catalog_options',
+				),
+				array(
+					'title'    => __( 'Shop page', 'woocommerce' ),
+					/* translators: %s: URL to settings. */
+					'desc'     => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
+					'id'       => 'woocommerce_shop_page_id',
+					'type'     => 'single_select_page',
+					'default'  => '',
+					'class'    => 'wc-enhanced-select-nostd',
+					'css'      => 'min-width:300px;',
+					'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
+				),
+				array(
+					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
+					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
+					'id'            => 'woocommerce_cart_redirect_after_add',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+				),
+				array(
+					'desc'          => __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
+					'id'            => 'woocommerce_enable_ajax_add_to_cart',
+					'default'       => 'yes',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'end',
+				),
+				array(
+					'title'       => __( 'Placeholder image', 'woocommerce' ),
+					'id'          => 'woocommerce_placeholder_image',
+					'type'        => 'text',
+					'default'     => '',
+					'class'       => '',
+					'css'         => '',
+					'placeholder' => __( 'Enter attachment ID or URL to an image', 'woocommerce' ),
+					'desc_tip'    => __( 'This is the attachment ID, or image URL, used for placeholder images in the product catalog. Products with no image will use this.', 'woocommerce' ),
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'catalog_options',
+				),
 
-					array(
-						'title' => __( 'Measurements', 'woocommerce' ),
-						'type'  => 'title',
-						'id'    => 'product_measurement_options',
-					),
+				array(
+					'title' => __( 'Measurements', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'product_measurement_options',
+				),
 
-					array(
-						'title'    => __( 'Weight unit', 'woocommerce' ),
-						'desc'     => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
-						'id'       => 'woocommerce_weight_unit',
-						'class'    => 'wc-enhanced-select',
-						'css'      => 'min-width:300px;',
-						'default'  => 'kg',
-						'type'     => 'select',
-						'options'  => array(
-							'kg'  => __( 'kg', 'woocommerce' ),
-							'g'   => __( 'g', 'woocommerce' ),
-							'lbs' => __( 'lbs', 'woocommerce' ),
-							'oz'  => __( 'oz', 'woocommerce' ),
-						),
-						'desc_tip' => true,
+				array(
+					'title'    => __( 'Weight unit', 'woocommerce' ),
+					'desc'     => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
+					'id'       => 'woocommerce_weight_unit',
+					'class'    => 'wc-enhanced-select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'kg',
+					'type'     => 'select',
+					'options'  => array(
+						'kg'  => __( 'kg', 'woocommerce' ),
+						'g'   => __( 'g', 'woocommerce' ),
+						'lbs' => __( 'lbs', 'woocommerce' ),
+						'oz'  => __( 'oz', 'woocommerce' ),
 					),
+					'desc_tip' => true,
+				),
 
-					array(
-						'title'    => __( 'Dimensions unit', 'woocommerce' ),
-						'desc'     => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
-						'id'       => 'woocommerce_dimension_unit',
-						'class'    => 'wc-enhanced-select',
-						'css'      => 'min-width:300px;',
-						'default'  => 'cm',
-						'type'     => 'select',
-						'options'  => array(
-							'm'  => __( 'm', 'woocommerce' ),
-							'cm' => __( 'cm', 'woocommerce' ),
-							'mm' => __( 'mm', 'woocommerce' ),
-							'in' => __( 'in', 'woocommerce' ),
-							'yd' => __( 'yd', 'woocommerce' ),
-						),
-						'desc_tip' => true,
+				array(
+					'title'    => __( 'Dimensions unit', 'woocommerce' ),
+					'desc'     => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
+					'id'       => 'woocommerce_dimension_unit',
+					'class'    => 'wc-enhanced-select',
+					'css'      => 'min-width:300px;',
+					'default'  => 'cm',
+					'type'     => 'select',
+					'options'  => array(
+						'm'  => __( 'm', 'woocommerce' ),
+						'cm' => __( 'cm', 'woocommerce' ),
+						'mm' => __( 'mm', 'woocommerce' ),
+						'in' => __( 'in', 'woocommerce' ),
+						'yd' => __( 'yd', 'woocommerce' ),
 					),
+					'desc_tip' => true,
+				),
 
-					array(
-						'type' => 'sectionend',
-						'id'   => 'product_measurement_options',
-					),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'product_measurement_options',
+				),
 
-					array(
-						'title' => __( 'Reviews', 'woocommerce' ),
-						'type'  => 'title',
-						'desc'  => '',
-						'id'    => 'product_rating_options',
-					),
+				array(
+					'title' => __( 'Reviews', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => '',
+					'id'    => 'product_rating_options',
+				),
 
-					array(
-						'title'           => __( 'Enable reviews', 'woocommerce' ),
-						'desc'            => __( 'Enable product reviews', 'woocommerce' ),
-						'id'              => 'woocommerce_enable_reviews',
-						'default'         => 'yes',
-						'type'            => 'checkbox',
-						'checkboxgroup'   => 'start',
-						'show_if_checked' => 'option',
-					),
+				array(
+					'title'           => __( 'Enable reviews', 'woocommerce' ),
+					'desc'            => __( 'Enable product reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_reviews',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+				),
 
-					array(
-						'desc'            => __( 'Show "verified owner" label on customer reviews', 'woocommerce' ),
-						'id'              => 'woocommerce_review_rating_verification_label',
-						'default'         => 'yes',
-						'type'            => 'checkbox',
-						'checkboxgroup'   => '',
-						'show_if_checked' => 'yes',
-						'autoload'        => false,
-					),
+				array(
+					'desc'            => __( 'Show "verified owner" label on customer reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_label',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => '',
+					'show_if_checked' => 'yes',
+					'autoload'        => false,
+				),
 
-					array(
-						'desc'            => __( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
-						'id'              => 'woocommerce_review_rating_verification_required',
-						'default'         => 'no',
-						'type'            => 'checkbox',
-						'checkboxgroup'   => 'end',
-						'show_if_checked' => 'yes',
-						'autoload'        => false,
-					),
+				array(
+					'desc'            => __( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_verification_required',
+					'default'         => 'no',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+					'autoload'        => false,
+				),
 
-					array(
-						'title'           => __( 'Product ratings', 'woocommerce' ),
-						'desc'            => __( 'Enable star rating on reviews', 'woocommerce' ),
-						'id'              => 'woocommerce_enable_review_rating',
-						'default'         => 'yes',
-						'type'            => 'checkbox',
-						'checkboxgroup'   => 'start',
-						'show_if_checked' => 'option',
-					),
+				array(
+					'title'           => __( 'Product ratings', 'woocommerce' ),
+					'desc'            => __( 'Enable star rating on reviews', 'woocommerce' ),
+					'id'              => 'woocommerce_enable_review_rating',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'start',
+					'show_if_checked' => 'option',
+				),
 
-					array(
-						'desc'            => __( 'Star ratings should be required, not optional', 'woocommerce' ),
-						'id'              => 'woocommerce_review_rating_required',
-						'default'         => 'yes',
-						'type'            => 'checkbox',
-						'checkboxgroup'   => 'end',
-						'show_if_checked' => 'yes',
-						'autoload'        => false,
-					),
+				array(
+					'desc'            => __( 'Star ratings should be required, not optional', 'woocommerce' ),
+					'id'              => 'woocommerce_review_rating_required',
+					'default'         => 'yes',
+					'type'            => 'checkbox',
+					'checkboxgroup'   => 'end',
+					'show_if_checked' => 'yes',
+					'autoload'        => false,
+				),
 
-					array(
-						'type' => 'sectionend',
-						'id'   => 'product_rating_options',
-					),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'product_rating_options',
+				),
+			);
 
-				)
-			)
-		);
+		$settings = apply_filters( 'woocommerce_products_general_settings', $settings );
+		return apply_filters( 'woocommerce_product_settings', $settings );
 	}
 
 	/**
@@ -244,8 +241,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_inventory_section() {
-		return apply_filters(
-			'woocommerce_inventory_settings',
+		$settings =
 			array(
 				array(
 					'title' => __( 'Inventory', 'woocommerce' ),
@@ -369,8 +365,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'product_inventory_options',
 				),
-			)
-		);
+			);
+
+		return apply_filters( 'woocommerce_inventory_settings', $settings );
 	}
 
 	/**
@@ -379,8 +376,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_downloadable_section() {
-		return apply_filters(
-			'woocommerce_downloadable_products_settings',
+		$settings =
 			array(
 				array(
 					'title' => __( 'Downloadable products', 'woocommerce' ),
@@ -453,8 +449,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'digital_download_options',
 				),
-			)
-		);
+			);
+
+		return apply_filters( 'woocommerce_downloadable_products_settings', $settings );
 	}
 }
 
