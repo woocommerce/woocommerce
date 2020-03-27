@@ -41,5 +41,5 @@ export const pluginNames = {
 		'WooCommerce ShipStation Gateway',
 		'woocommerce-admin'
 	),
-	'kliken-marketing-for-google': __( 'Google Shopping', 'woocommerce-admin' ),
+	'kliken-marketing-for-google': __( 'Google Ads', 'woocommerce-admin' ),
 };
