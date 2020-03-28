@@ -1,0 +1,22 @@
+.woocommerce-marketing-overview {
+	max-width: 1032px;
+	margin: 0 auto;
+
+	.woocommerce-card__header {
+		padding: 16px 24px;
+		border-bottom: 1px solid $core-grey-light-500;
+	}
+
+	.woocommerce-card__title {
+		font-size: 20px;
+		line-height: 28px;
+		font-weight: normal;
+	}
+
+	.woocommerce-card__description {
+		font-size: 14px;
+		line-height: 20px;
+		font-weight: normal;
+		margin-top: 4px;
+	}
+}

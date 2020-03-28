@@ -1,0 +1,6 @@
+.components-button.woocommere-admin-marketing-button {
+	&:not([disabled]) {
+		border-color: $core-blue-dark-900 !important;
+		color: $core-blue-dark-900 !important;
+	}
+}

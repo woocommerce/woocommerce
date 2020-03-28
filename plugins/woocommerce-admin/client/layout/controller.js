@@ -23,6 +23,7 @@ import AnalyticsReport, { getReports } from 'analytics/report';
 import AnalyticsSettings from 'analytics/settings';
 import Dashboard from 'dashboard';
 import DevDocs from 'devdocs';
+import MarketingOverview from 'marketing/overview';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
@@ -109,6 +110,18 @@ export const getPages = () => {
 				];
 			},
 			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
+		} );
+	}
+
+	if ( window.wcAdminFeatures.marketing ) {
+		pages.push( {
+			container: MarketingOverview,
+			path: '/marketing',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Marketing', 'woocommerce-admin' ),
+			],
+			wpOpenMenu: 'toplevel_page_wc-admin-path--marketing',
 		} );
 	}
 

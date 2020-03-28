@@ -5,6 +5,7 @@
 		"analytics-dashboard": true,
 		"analytics-dashboard/customizable": true,
 		"devdocs": true,
+		"marketing": true,
 		"onboarding": true,
 		"shipping-label-banner": true,
 		"store-alerts": true,

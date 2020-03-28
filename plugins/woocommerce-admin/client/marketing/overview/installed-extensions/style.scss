@@ -1,0 +1,63 @@
+.woocommerce-marketing-installed-extensions-card {
+	.woocommerce-card__body {
+		padding: 0;
+	}
+
+	&__item {
+		padding: 18px 24px;
+		display: flex;
+		align-items: center;
+
+		h4 {
+			font-weight: 400;
+			font-size: 16px;
+			margin: 0 0 5px;
+			color: $core-grey-dark-800;
+		}
+
+		p {
+			color: $core-grey-dark-500;
+			margin: 0;
+		}
+	}
+
+	&__item:not(:last-child) {
+		border-bottom: 1px solid $core-grey-light-500;
+	}
+
+	&__item-actions {
+		float: right;
+	}
+
+	&__item-description {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 550px;
+	}
+
+	&__item-links {
+		margin: 0;
+		padding: 0;
+
+		li {
+			display: inline-block;
+			margin: 0 0 0 30px;
+		}
+
+		a {
+			font-weight: 600;
+			color: $core-blue-dark-900 !important;
+			text-decoration: none;
+			font-size: 14px;
+		}
+	}
+
+	.woocommere-admin-marketing-product-icon {
+		margin-right: 14px;
+	}
+
+	&__item-text {
+		flex-grow: 2;
+	}
+}

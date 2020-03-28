@@ -10,6 +10,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -294,11 +295,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		foreach ( $plugins as $plugin ) {
-			$slug              = $plugin;
-			$path              = $allowed_plugins[ $slug ];
-			$installed_plugins = get_plugins();
+			$slug = $plugin;
+			$path = $allowed_plugins[ $slug ];
 
-			if ( ! in_array( $path, array_keys( $installed_plugins ), true ) ) {
+			if ( ! PluginsHelper::is_plugin_installed( $path ) ) {
 				/* translators: %s: plugin slug (example: woocommerce-services) */
 				return new \WP_Error( 'woocommerce_rest_invalid_plugin', sprintf( __( 'Invalid plugin %s.', 'woocommerce-admin' ), $slug ), 404 );
 			}
