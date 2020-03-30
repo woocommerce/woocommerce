@@ -457,8 +457,6 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		global $current_section;
 
 		if ( apply_filters( 'woocommerce_rest_api_valid_to_save', ! in_array( $current_section, array( 'keys', 'webhooks' ), true ) ) ) {
-			$settings = $this->get_settings( $current_section );
-
 			// Prevent the T&Cs and checkout page from being set to the same page.
 			if ( isset( $_POST['woocommerce_terms_page_id'], $_POST['woocommerce_checkout_page_id'] ) && $_POST['woocommerce_terms_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
 				$_POST['woocommerce_terms_page_id'] = '';
@@ -477,11 +475,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				}
 			}
 
-			WC_Admin_Settings::save_fields( $settings );
-
-			if ( $current_section ) {
-				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
-			}
+			$this->save_settings_for_current_section();
+			$this->do_update_options_action();
 		}
 		// phpcs:enable
 	}

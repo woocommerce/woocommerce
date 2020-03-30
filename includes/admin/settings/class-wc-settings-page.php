@@ -184,16 +184,37 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
-		 * Save settings.
+		 * Save settings and trigger the 'woocommerce_update_options_'.id action.
 		 */
 		public function save() {
+			$this->save_settings_for_current_section();
+			$this->do_update_options_action();
+		}
+
+		/**
+		 * Save settings for current section.
+		 */
+		protected function save_settings_for_current_section() {
 			global $current_section;
 
 			$settings = $this->get_settings( $current_section );
 			WC_Admin_Settings::save_fields( $settings );
+		}
 
-			if ( $current_section ) {
-				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+		/**
+		 * Trigger the 'woocommerce_update_options_'.id action.
+		 *
+		 * @param string $section_id Section to trigger the action for, or null for current section.
+		 */
+		protected function do_update_options_action( $section_id = null ) {
+			global $current_section;
+
+			if ( is_null( $section_id ) ) {
+				$section_id = $current_section;
+			}
+
+			if ( $section_id ) {
+				do_action( 'woocommerce_update_options_' . $this->id . '_' . $section_id );
 			}
 		}
 	}

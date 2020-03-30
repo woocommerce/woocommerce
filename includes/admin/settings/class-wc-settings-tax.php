@@ -103,8 +103,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-			$settings = $this->get_settings( $current_section );
-			WC_Admin_Settings::save_fields( $settings );
+			$this->save_settings_for_current_section();
 
 			if ( isset( $_POST['woocommerce_tax_classes'] ) ) {
 				$this->save_tax_classes( wp_unslash( $_POST['woocommerce_tax_classes'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -112,13 +111,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		} elseif ( ! empty( $_POST['tax_rate_country'] ) ) {
 			$this->save_tax_rates();
 		} else {
-			$settings = $this->get_settings( $current_section );
-			WC_Admin_Settings::save_fields( $settings );
+			$this->save_settings_for_current_section();
 		}
 
-		if ( $current_section ) {
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
-		}
+		$this->do_update_options_action();
 
 		// Invalidate caches.
 		WC_Cache_Helper::invalidate_cache_group( 'taxes' );

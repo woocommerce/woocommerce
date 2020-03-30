@@ -223,20 +223,20 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-			WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
-
+			$this->save_settings_for_current_section();
+			$this->do_update_options_action();
 		} else {
 			$wc_emails = WC_Emails::instance();
 
 			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ), true ) ) {
 				foreach ( $wc_emails->get_emails() as $email_id => $email ) {
 					if ( sanitize_title( $email_id ) === $current_section ) {
-						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
+						$this->do_update_options_action( $email->id );
 					}
 				}
 			} else {
-				WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
-				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+				$this->save_settings_for_current_section();
+				$this->do_update_options_action();
 			}
 		}
 	}

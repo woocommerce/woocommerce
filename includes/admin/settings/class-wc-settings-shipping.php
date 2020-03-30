@@ -188,11 +188,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		switch ( $current_section ) {
 			case 'options':
-				WC_Admin_Settings::save_fields( $this->get_settings( 'options' ) );
-				do_action( 'woocommerce_update_options_' . $this->id . '_options' );
+				$this->save_settings_for_current_section();
+				$this->do_update_options_action();
 				break;
 			case 'classes':
-				do_action( 'woocommerce_update_options_' . $this->id . '_classes' );
+				$this->do_update_options_action();
 				break;
 			case '':
 				break;
@@ -203,11 +203,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
 					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) ) {
 						$is_shipping_method = true;
-						do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
+						$this->do_update_options_action( $method->id );
 					}
 				}
 				if ( ! $is_shipping_method ) {
-					WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
+					$this->save_settings_for_current_section();
 				}
 				break;
 		}
