@@ -9,7 +9,6 @@ import { StoreOwnerFlow } from './flows';
 import { clickTab, setCheckbox, uiUnblocked, verifyCheckboxIsUnset } from './index';
 
 const config = require( 'config' );
-const select = require ('puppeteer-select');
 const simpleProductName = config.get( 'products.simple.name' );
 
 const verifyAndPublish = async () => {
@@ -62,12 +61,9 @@ const completeOnboardingWizard = async () => {
 	// Verify that checkbox next to "Yes, count me in!" is not selected
 	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 
-	// Defining "Continue" button
-	const trackContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
-
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		trackContinueButton.click(),
+		page.click( '.woocommerce-profile-wizard__usage-modal button.is-primary' ),
 
 		// Wait for "Where is your store based?" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -92,11 +88,11 @@ const completeOnboardingWizard = async () => {
 	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 
 	// Defining "Continue" button
-	const storeDetailsContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		storeDetailsContinueButton.click(),
+		page.click( 'button.is-primary' ),
 
 		// Wait for "In which industry does the store operate?" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -108,11 +104,11 @@ const completeOnboardingWizard = async () => {
 	await setCheckbox( '.components-checkbox-control__input' );
 
 	// Defining "Continue" button
-	const industryContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		industryContinueButton.click(),
+		page.click( 'button.is-primary' ),
 
 		// Wait for "What type of products will be listed?" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -124,11 +120,12 @@ const completeOnboardingWizard = async () => {
 	await setCheckbox( '.components-checkbox-control__input' );
 
 	// Defining "Continue" button
-	const productTypesContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+	// const productTypesContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		productTypesContinueButton.click(),
+		page.click( 'button.woocommerce-profile-wizard__continue' ),
 
 		// Wait for "Tell us about your business" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -136,18 +133,26 @@ const completeOnboardingWizard = async () => {
 
 	// Business Details section
 
+	// Query for the <SelectControl>s
+	const selectControls = await page.$$( '.woocommerce-select-control' );
+	expect( selectControls ).toHaveLength( 2 );
+	
 	// Fill the number of products you plan to sell
-	await expect( page ).toFill( '#woocommerce-select-control-1__control-input', config.get( 'onboardingwizard.numberofproducts' ) );
+	await selectControls[0].click();
+	await page.waitForSelector( '.woocommerce-select-control__listbox' );
+	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.numberofproducts' ) } );
 
 	// Fill currently selling elsewhere
-	await expect( page ).toFill( '#woocommerce-select-control-2__control-input', config.get( 'onboardingwizard.sellingelsewhere' ) );
+	await selectControls[1].click();
+	await page.waitForSelector( '.woocommerce-select-control__listbox' );
+	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
 	// Defining "Continue" button
-	const businessContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		businessContinueButton.click(),
+		page.click( 'button.woocommerce-profile-wizard__continue' ),
 
 		// Wait for "Theme" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
