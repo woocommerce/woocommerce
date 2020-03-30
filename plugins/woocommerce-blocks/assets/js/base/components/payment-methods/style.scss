@@ -36,6 +36,7 @@
 			width: 50%;
 			> img {
 				width: 100%;
+				height: 48px;
 			}
 		}
 		> li:nth-child(even) {
@@ -45,4 +46,108 @@
 			padding-right: $gap-smaller;
 		}
 	}
+}
+
+.wc-block-card-elements {
+	display: flex;
+	width: 100%;
+}
+
+.wc-block-gateway-container {
+	position: relative;
+	margin-bottom: $gap-large;
+	white-space: nowrap;
+
+	&.wc-card-number-element {
+		flex: auto;
+	}
+
+	&.wc-card-expiry-element,
+	&.wc-card-cvc-element {
+		width: $card-element-width;
+		margin-left: $gap-small;
+	}
+
+	.wc-block-gateway-input {
+		background-color: #fff;
+		padding: $gap-small $gap;
+		border-radius: 4px;
+		border: 1px solid $input-border-gray;
+		width: 100%;
+		font-size: 16px;
+		line-height: 22px;
+		font-family: inherit;
+		margin: 0;
+		box-sizing: border-box;
+		height: 48px;
+		color: $input-text-active;
+
+		&:focus {
+			background-color: #fff;
+		}
+	}
+
+	&:focus {
+		background-color: #fff;
+	}
+
+	label {
+		position: absolute;
+		transform: translateY(#{$gap-small});
+		left: 0;
+		top: 0;
+		transform-origin: top left;
+		font-size: 16px;
+		line-height: 22px;
+		color: $gray-50;
+		transition: transform 200ms ease;
+		margin: 0 $gap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap});
+
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	&.wc-inline-card-element {
+		label {
+			margin-left: $gap-largest;
+		}
+		.wc-block-gateway-input.focused.empty,
+		.wc-block-gateway-input:not(.empty) {
+			& + label {
+				margin-left: $gap;
+				transform: translateY(#{$gap-smallest}) scale(0.75);
+			}
+		}
+		& + .wc-block-form-input-validation-error {
+			position: static;
+			margin-top: -$gap-large;
+		}
+	}
+
+	.wc-block-gateway-input.focused.empty,
+	.wc-block-gateway-input:not(.empty) {
+		padding: $gap-large $gap $gap-smallest;
+		& + label {
+			transform: translateY(#{$gap-smallest}) scale(0.75);
+		}
+	}
+
+	.wc-block-gateway-input.has-error {
+		border-color: $error-red;
+		&:focus {
+			outline-color: $error-red;
+		}
+	}
+
+	.wc-block-gateway-input.has-error + label {
+		color: $error-red;
+	}
+}
+
+.wc-blocks-credit-card-images {
+	padding-top: $gap-small;
 }

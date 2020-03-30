@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Blocks\Assets\BackCompatAssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Library;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\RestApi;
+use Automattic\WooCommerce\Blocks\PaymentMethodIntegrations\Stripe;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -89,6 +90,10 @@ class Bootstrap {
 		// load AssetDataRegistry.
 		$this->container->get( AssetDataRegistry::class );
 
+		// @todo this will eventually get moved into the relevant payment
+		// extensions
+		$this->load_payment_method_integrations();
+
 		Library::init();
 		OldAssets::init();
 		RestApi::init();
@@ -162,5 +167,33 @@ class Bootstrap {
 				$flag        = is_array( $woo_options ) && 'experimental' === $woo_options['woocommerce_blocks_phase'] ? 'experimental' : 'stable';
 		}
 		define( 'WOOCOMMERCE_BLOCKS_PHASE', $flag );
+	}
+
+	/**
+	 * This is a temporary method that is used for setting up payment method
+	 * integrations with Cart and Checkout blocks. This logic should get moved
+	 * to the payment gateway extensions.
+	 */
+	protected function load_payment_method_integrations() {
+		// stripe registration.
+		$this->container->register(
+			Stripe::class,
+			function( Container $container ) {
+				$asset_data_registry = $container->get( AssetDataRegistry::class );
+				$asset_api           = $container->get( AssetApi::class );
+				return new Stripe( $asset_data_registry, $asset_api );
+			}
+		);
+		add_action(
+			'plugins_loaded',
+			function() {
+				if ( class_exists( 'WC_Stripe' ) ) {
+					// initialize hooking into blocks.
+					$stripe = $this->container->get( Stripe::class );
+					$stripe->register_assets();
+				}
+			},
+			15
+		);
 	}
 }

@@ -115,15 +115,17 @@ class Api {
 	 * Registers a style according to `wp_register_style`.
 	 *
 	 * @since 2.5.0
+	 * @since $VID:$ Change src to be relative source.
 	 *
-	 * @param string $handle Name of the stylesheet. Should be unique.
-	 * @param string $src    Full URL of the stylesheet, or path of the stylesheet relative to the WordPress root directory.
-	 * @param array  $deps   Optional. An array of registered stylesheet handles this stylesheet depends on. Default empty array.
-	 * @param string $media  Optional. The media for which this stylesheet has been defined. Default 'all'. Accepts media types like
-	 *                       'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
+	 * @param string $handle       Name of the stylesheet. Should be unique.
+	 * @param string $relative_src Relative source of the stylesheet to the plugin path.
+	 * @param array  $deps         Optional. An array of registered stylesheet handles this stylesheet depends on. Default empty array.
+	 * @param string $media        Optional. The media for which this stylesheet has been defined. Default 'all'. Accepts media types like
+	 *                             'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
 	 */
-	public function register_style( $handle, $src, $deps = [], $media = 'all' ) {
-		$filename = str_replace( plugins_url( '/', __DIR__ ), '', $src );
+	public function register_style( $handle, $relative_src, $deps = [], $media = 'all' ) {
+		$filename = str_replace( plugins_url( '/', __DIR__ ), '', $relative_src );
+		$src      = $this->get_asset_url( $relative_src );
 		$ver      = $this->get_file_version( $filename );
 		wp_register_style( $handle, $src, $deps, $ver, $media );
 	}

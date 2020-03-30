@@ -15,6 +15,7 @@ const {
 	getAlias,
 	getMainConfig,
 	getFrontConfig,
+	getPaymentMethodsExtensionConfig,
 } = require( './bin/webpack-helpers.js' );
 
 const baseConfig = {
@@ -165,10 +166,20 @@ const LegacyFrontendBlocksConfig = {
 	} ),
 };
 
+/**
+ * This is a temporary config for building the payment methods integration
+ * script until it can be moved into the payment extension(s).
+ */
+const PaymentMethodsConfig = {
+	...baseConfig,
+	...getPaymentMethodsExtensionConfig( { alias: getAlias() } ),
+};
+
 module.exports = [
 	CoreConfig,
 	GutenbergBlocksConfig,
 	BlocksFrontendConfig,
 	LegacyBlocksConfig,
 	LegacyFrontendBlocksConfig,
+	PaymentMethodsConfig,
 ];

@@ -15,7 +15,6 @@
 		"*.scss",
 		"./assets/js/atomic/blocks/product/**",
 		"./assets/js/filters/**",
-		"./assets/js/payment-methods-demo/**",
 		"./assets/js/settings/blocks/**"
 	],
 	"repository": {
@@ -77,6 +76,8 @@
 		"@storybook/react": "5.3.12",
 		"@types/jest": "25.1.4",
 		"@types/react": "16.9.23",
+		"@types/wordpress__data": "^4.6.6",
+		"@types/wordpress__element": "^2.4.0",
 		"@wordpress/babel-preset-default": "4.10.0",
 		"@wordpress/base-styles": "1.4.0",
 		"@wordpress/blocks": "6.12.0",
@@ -145,6 +146,8 @@
 		"npm": "6.13.7"
 	},
 	"dependencies": {
+		"@stripe/react-stripe-js": "^1.1.0",
+		"@stripe/stripe-js": "^1.2.0",
 		"@woocommerce/components": "4.0.0",
 		"@wordpress/notices": "2.0.0",
 		"classnames": "2.2.6",

@@ -461,8 +461,144 @@ const getFrontConfig = ( options = {} ) => {
 	};
 };
 
+const getPaymentMethodsExtensionConfig = ( options = {} ) => {
+	const { alias, resolvePlugins = [] } = options;
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
+	return {
+		entry: {
+			'wc-payment-method-extensions':
+				'./assets/js/payment-method-extensions/index.js',
+		},
+		output: {
+			devtoolNamespace: 'wc',
+			path: path.resolve( __dirname, '../build/' ),
+			filename: `[name].js`,
+			// This fixes an issue with multiple webpack projects using chunking
+			// overwriting each other's chunk loader function.
+			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+			jsonpFunction: 'webpackWcBlocksPaymentMethodExtensionJsonp',
+		},
+		module: {
+			rules: [
+				{
+					test: /\.jsx?$/,
+					exclude: /node_modules/,
+					use: {
+						loader: 'babel-loader?cacheDirectory',
+						options: {
+							presets: [
+								[
+									'@babel/preset-env',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
+							],
+							plugins: [
+								require.resolve(
+									'@babel/plugin-proposal-object-rest-spread'
+								),
+								require.resolve(
+									'@babel/plugin-transform-react-jsx'
+								),
+								require.resolve(
+									'@babel/plugin-proposal-async-generator-functions'
+								),
+								require.resolve(
+									'@babel/plugin-transform-runtime'
+								),
+								require.resolve(
+									'@babel/plugin-proposal-class-properties'
+								),
+								NODE_ENV === 'production'
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+							].filter( Boolean ),
+						},
+					},
+				},
+				{
+					test: /\.s?css$/,
+					exclude: /node_modules/,
+					use: [
+						MiniCssExtractPlugin.loader,
+						{ loader: 'css-loader', options: { importLoaders: 1 } },
+						'postcss-loader',
+						{
+							loader: 'sass-loader',
+							query: {
+								includePaths: [
+									'assets/css/abstracts',
+									'node_modules',
+								],
+								data: [
+									'_colors',
+									'_variables',
+									'_breakpoints',
+									'_mixins',
+								]
+									.map(
+										( imported ) =>
+											`@import "${ imported }";`
+									)
+									.join( ' ' ),
+							},
+						},
+					],
+				},
+			],
+		},
+		plugins: [
+			new WebpackRTLPlugin( {
+				filename: `[name]-rtl.css`,
+				minify: {
+					safe: true,
+				},
+			} ),
+			new MiniCssExtractPlugin( {
+				filename: `[name].css`,
+			} ),
+			new ProgressBarPlugin( {
+				format:
+					chalk.blue( 'Build payment method extension scripts' ) +
+					' [:bar] ' +
+					chalk.green( ':percent' ) +
+					' :msg (:elapsed seconds)',
+			} ),
+			new DependencyExtractionWebpackPlugin( {
+				injectPolyfill: true,
+				requestToExternal,
+				requestToHandle,
+			} ),
+			new DefinePlugin( {
+				// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
+				'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
+					// eslint-disable-next-line woocommerce/feature-flag
+					process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
+				),
+			} ),
+		],
+		resolve,
+	};
+};
+
 module.exports = {
 	getAlias,
 	getFrontConfig,
 	getMainConfig,
+	getPaymentMethodsExtensionConfig,
 };
