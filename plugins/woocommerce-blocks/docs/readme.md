@@ -10,6 +10,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 -   [Coding Guidelines](contributors/coding-guidelines.md)
 -   [Smoke Testing](contributors/smoke-testing.md)
 -   [JavaScript Testing](contributors/javascript-testing.md)
+-   [Component Testing & Development (with Storybook)](contributors/storybook.md)
 
 **Releases**
 
