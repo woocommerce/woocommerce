@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
-import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
+import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
 
 const renderShippingRatesControlOption = ( option ) => ( {
 	label: decodeEntities( option.name ),

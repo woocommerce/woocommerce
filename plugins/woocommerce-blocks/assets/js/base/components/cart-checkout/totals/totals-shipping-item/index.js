@@ -3,8 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
-import ShippingCalculator from '@woocommerce/base-components/shipping-calculator';
-import ShippingLocation from '@woocommerce/base-components/shipping-location';
+import {
+	ShippingCalculator,
+	ShippingLocation,
+} from '@woocommerce/base-components/cart-checkout';
 import PropTypes from 'prop-types';
 import { useState } from '@wordpress/element';
 import { useShippingRates } from '@woocommerce/base-hooks';

@@ -9,7 +9,7 @@ import {
 	TotalsFooterItem,
 	TotalsShippingItem,
 	TotalsTaxesItem,
-} from '@woocommerce/base-components/totals';
+} from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import {
 	COUPONS_ENABLED,

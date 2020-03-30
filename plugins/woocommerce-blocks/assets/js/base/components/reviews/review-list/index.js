@@ -6,11 +6,11 @@ import {
 	REVIEW_RATINGS_ENABLED,
 	SHOW_AVATARS,
 } from '@woocommerce/block-settings';
-import ReviewListItem from '@woocommerce/base-components/review-list-item';
 
 /**
  * Internal dependencies
  */
+import ReviewListItem from '../review-list-item';
 import './style.scss';
 
 const ReviewList = ( { attributes, reviews } ) => {
