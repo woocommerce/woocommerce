@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { getSetting } from '@woocommerce/settings';
+
+/**
  * @type {import("@woocommerce/type-defs/checkout").CheckoutStatusConstants}
  */
 export const STATUS = {
@@ -9,6 +14,8 @@ export const STATUS = {
 	COMPLETE: 'complete',
 };
 
+const checkoutData = getSetting( 'checkoutData', { order_id: 0 } );
+
 export const DEFAULT_STATE = {
 	redirectUrl: '',
 	status: STATUS.PRISTINE,
@@ -17,6 +24,7 @@ export const DEFAULT_STATE = {
 	nextStatus: STATUS.IDLE,
 	hasError: false,
 	calculatingCount: 0,
+	orderId: checkoutData.order_id,
 };
 
 export const TYPES = {
@@ -26,6 +34,7 @@ export const TYPES = {
 	SET_PROCESSING: 'set_checkout_is_processing',
 	SET_HAS_ERROR: 'set_checkout_has_error',
 	SET_NO_ERROR: 'set_checkout_no_error',
+	SET_ORDER_ID: 'set_checkout_order_id',
 	INCREMENT_CALCULATING: 'increment_calculating',
 	DECREMENT_CALCULATING: 'decrement_calculating',
 };

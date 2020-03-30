@@ -77,7 +77,7 @@ class Stripe {
 	 */
 	public function enqueue_data() {
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-		$stripe_gateway     = $available_gateways['stripe'] ? $available_gateways['stripe'] : null;
+		$stripe_gateway     = isset( $available_gateways['stripe'] ) && is_a( $available_gateways['stripe'], '\WC_Gateway_Stripe' ) ? $available_gateways['stripe'] : null;
 		$data               = [
 			'stripeTotalLabel' => $this->get_total_label(),
 			'publicKey'        => $this->get_publishable_key(),

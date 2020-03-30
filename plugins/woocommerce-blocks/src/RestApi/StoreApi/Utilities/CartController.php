@@ -185,6 +185,21 @@ class CartController {
 	}
 
 	/**
+	 * Get hashes for items in the current cart. Useful for tracking changes.
+	 *
+	 * @return array
+	 */
+	public function get_cart_hashes() {
+		return [
+			'line_items' => WC()->cart->get_cart_hash(),
+			'shipping'   => md5( wp_json_encode( WC()->cart->shipping_methods ) ),
+			'fees'       => md5( wp_json_encode( WC()->cart->get_fees() ) ),
+			'coupons'    => md5( wp_json_encode( WC()->cart->get_applied_coupons() ) ),
+			'taxes'      => md5( wp_json_encode( WC()->cart->get_taxes() ) ),
+		];
+	}
+
+	/**
 	 * Empty cart contents.
 	 */
 	public function empty_cart() {

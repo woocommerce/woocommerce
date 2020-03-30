@@ -35,7 +35,6 @@ class RoutesController {
 			new Routes\CartApplyCoupon( $schemas['cart'] ),
 			new Routes\CartCoupons( $schemas['coupon'] ),
 			new Routes\CartCouponsByCode( $schemas['coupon'] ),
-			new Routes\CartCreateOrder( $schemas['order'] ),
 			new Routes\CartItems( $schemas['cart-item'] ),
 			new Routes\CartItemsByKey( $schemas['cart-item'] ),
 			new Routes\CartRemoveCoupon( $schemas['cart'] ),
