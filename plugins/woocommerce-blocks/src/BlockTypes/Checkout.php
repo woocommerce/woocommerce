@@ -82,10 +82,17 @@ class Checkout extends AbstractBlock {
 			$data_registry->add( 'shippingMethodsExist', $methods_exist );
 		}
 
+		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
+
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
 		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
-		return $content . $this->get_skeleton();
+
+		$skeleton = $this->get_skeleton();
+		$checkout = WC()->checkout();
+		do_action( 'woocommerce_after_checkout_form', $checkout );
+
+		return $content . $skeleton;
 	}
 
 	/**
