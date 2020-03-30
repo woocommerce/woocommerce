@@ -8,10 +8,7 @@
  */
 import { getSetting } from '@woocommerce/settings';
 
-/**
- * @type {BillingData}
- */
-const HYDRATED_BILLING_DATA = getSetting( 'billingData' );
+const checkoutData = getSetting( 'checkoutData', {} );
 
 /**
  * @type {BillingData}
@@ -35,7 +32,7 @@ export const DEFAULT_BILLING_DATA = {
  */
 export const DEFAULT_STATE = {
 	...DEFAULT_BILLING_DATA,
-	...HYDRATED_BILLING_DATA,
+	...checkoutData.billing_address,
 };
 
 /**

@@ -12,6 +12,7 @@ const {
 	SET_NO_ERROR,
 	INCREMENT_CALCULATING,
 	DECREMENT_CALCULATING,
+	SET_ORDER_ID,
 } = TYPES;
 
 const { PRISTINE, IDLE, CALCULATING, PROCESSING, COMPLETE } = STATUS;
@@ -22,7 +23,7 @@ const { PRISTINE, IDLE, CALCULATING, PROCESSING, COMPLETE } = STATUS;
  * @param {Object} state  Current state.
  * @param {Object} action Incoming action object.
  */
-export const reducer = ( state = DEFAULT_STATE, { url, type } ) => {
+export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
 	let status, nextStatus, newState;
 	switch ( type ) {
 		case SET_PRISTINE:
@@ -118,6 +119,12 @@ export const reducer = ( state = DEFAULT_STATE, { url, type } ) => {
 				status,
 				nextStatus,
 				calculatingCount: Math.max( 0, state.calculatingCount - 1 ),
+			};
+			break;
+		case SET_ORDER_ID:
+			newState = {
+				...state,
+				orderId,
 			};
 			break;
 	}

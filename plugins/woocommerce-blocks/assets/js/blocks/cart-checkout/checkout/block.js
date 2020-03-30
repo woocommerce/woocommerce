@@ -59,7 +59,7 @@ const Checkout = ( {
 	shippingRates = [],
 	scrollToTop,
 } ) => {
-	const { isEditor } = useCheckoutContext();
+	const { isEditor, hasOrder } = useCheckoutContext();
 	const {
 		shippingRatesLoading,
 		shippingAddress,
@@ -126,6 +126,12 @@ const Checkout = ( {
 			setBillingData( shippingAddress );
 		}
 	}, [ shippingAsBilling, setBillingData ] );
+
+	if ( ! isEditor && ! hasOrder ) {
+		// @todo add state here to handle this type of error.
+		return <div>No draft order - add error state.</div>;
+	}
+
 	return (
 		<>
 			<SidebarLayout className="wc-block-checkout">

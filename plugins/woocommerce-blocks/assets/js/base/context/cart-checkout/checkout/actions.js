@@ -12,6 +12,7 @@ const {
 	SET_NO_ERROR,
 	INCREMENT_CALCULATING,
 	DECREMENT_CALCULATING,
+	SET_ORDER_ID,
 } = TYPES;
 
 /**
@@ -42,5 +43,9 @@ export const actions = {
 	} ),
 	decrementCalculating: () => ( {
 		type: DECREMENT_CALCULATING,
+	} ),
+	setOrderId: ( orderId ) => ( {
+		type: SET_ORDER_ID,
+		orderId,
 	} ),
 };

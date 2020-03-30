@@ -35,6 +35,13 @@ class PaymentResult {
 	protected $payment_details = [];
 
 	/**
+	 * Redirect URL for checkout.
+	 *
+	 * @var string
+	 */
+	protected $redirect_url = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $status Sets the payment status for the result.
@@ -51,7 +58,7 @@ class PaymentResult {
 	 * @param string $name Property name.
 	 */
 	public function __get( $name ) {
-		if ( in_array( $name, [ 'status', 'payment_details' ], true ) ) {
+		if ( in_array( $name, [ 'status', 'payment_details', 'redirect_url' ], true ) ) {
 			return $this->$name;
 		}
 		return null;
@@ -82,5 +89,14 @@ class PaymentResult {
 		foreach ( $payment_details as $key => $value ) {
 			$this->payment_details[ (string) $key ] = (string) $value;
 		}
+	}
+
+	/**
+	 * Set redirect URL.
+	 *
+	 * @param array $redirect_url URL to redirect the customer to after checkout.
+	 */
+	public function set_redirect_url( $redirect_url = [] ) {
+		$this->redirect_url = esc_url_raw( $redirect_url );
 	}
 }

@@ -396,7 +396,7 @@ class CartItemSchema extends AbstractSchema {
 			return null;
 		}
 
-		$draft_order = WC()->session->get( 'store_api_draft_order' );
+		$draft_order = WC()->session->get( 'store_api_draft_order', 0 );
 
 		// @todo Remove once min support for WC reaches 4.0.0.
 		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
@@ -405,7 +405,7 @@ class CartItemSchema extends AbstractSchema {
 			$reserve_stock = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
 		}
 
-		$reserved_stock = $reserve_stock->get_reserved_stock( $product, isset( $draft_order['id'] ) ? $draft_order['id'] : 0 );
+		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $draft_order );
 		return $product->get_stock_quantity() - $reserved_stock;
 	}
 

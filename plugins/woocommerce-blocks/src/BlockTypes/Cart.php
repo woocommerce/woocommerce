@@ -52,7 +52,7 @@ class Cart extends AbstractBlock {
 		if ( ! empty( $attributes['checkoutPageId'] ) && ! $data_registry->exists( 'page-' . $attributes['checkoutPageId'] ) ) {
 			$permalink = get_permalink( $attributes['checkoutPageId'] );
 			if ( $permalink ) {
-				$data_registry->add( 'page-' . $attributes['checkoutPageId'], get_permalink( $attributes['checkoutPageId'] ) );
+				$data_registry->add( 'page-' . $attributes['checkoutPageId'], $permalink );
 			}
 		}
 		if ( ! $data_registry->exists( 'shippingCountries' ) ) {

@@ -43,6 +43,7 @@ const CheckoutContext = createContext( {
 	isProcessing: false,
 	hasError: false,
 	redirectUrl: '',
+	orderId: 0,
 	onCheckoutCompleteSuccess: () => void null,
 	onCheckoutCompleteError: () => void null,
 	onCheckoutProcessing: () => void null,
@@ -53,6 +54,7 @@ const CheckoutContext = createContext( {
 		clearError: () => void null,
 		incrementCalculating: () => void null,
 		decrementCalculating: () => void null,
+		setOrderId: () => void null,
 	},
 } );
 
@@ -100,15 +102,15 @@ export const CheckoutProvider = ( {
 	}, [ observers ] );
 	const onCheckoutCompleteSuccess = useMemo(
 		() => emitterSubscribers( subscriber ).onCheckoutCompleteSuccess,
-		[]
+		[ subscriber ]
 	);
 	const onCheckoutCompleteError = useMemo(
 		() => emitterSubscribers( subscriber ).onCheckoutCompleteError,
-		[]
+		[ subscriber ]
 	);
 	const onCheckoutProcessing = useMemo(
 		() => emitterSubscribers( subscriber ).onCheckoutProcessing,
-		[]
+		[ subscriber ]
 	);
 
 	/**
@@ -125,6 +127,8 @@ export const CheckoutProvider = ( {
 				void dispatch( actions.incrementCalculating() ),
 			decrementCalculating: () =>
 				void dispatch( actions.decrementCalculating() ),
+			setOrderId: ( orderId ) =>
+				void dispatch( actions.setOrderId( orderId ) ),
 		} ),
 		[]
 	);
@@ -195,6 +199,8 @@ export const CheckoutProvider = ( {
 		onCheckoutProcessing,
 		dispatchActions,
 		isEditor,
+		orderId: checkoutState.orderId,
+		hasOrder: !! checkoutState.orderId,
 	};
 	return (
 		<CheckoutContext.Provider value={ checkoutData }>

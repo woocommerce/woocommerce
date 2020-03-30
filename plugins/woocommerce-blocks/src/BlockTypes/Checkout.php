@@ -8,6 +8,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Assets;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,63 +50,74 @@ class Checkout extends AbstractBlock {
 	 */
 	public function render( $attributes = array(), $content = '' ) {
 		$data_registry = Package::container()->get(
-			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
+			AssetDataRegistry::class
 		);
-		if ( ! empty( $attributes['cartPageId'] ) && ! $data_registry->exists( 'page-' . $attributes['cartPageId'] ) ) {
-			$permalink = get_permalink( $attributes['cartPageId'] );
-			if ( $permalink ) {
-				$data_registry->add( 'page-' . $attributes['cartPageId'], get_permalink( $attributes['cartPageId'] ) );
+
+		$block_data = [
+			'allowedCountries'  => [ WC()->countries, 'get_allowed_countries' ],
+			'shippingCountries' => [ WC()->countries, 'get_shipping_countries' ],
+			'allowedStates'     => [ WC()->countries, 'get_allowed_country_states' ],
+			'shippingStates'    => [ WC()->countries, 'get_shipping_country_states' ],
+		];
+
+		foreach ( $block_data as $key => $callback ) {
+			if ( ! $data_registry->exists( $key ) ) {
+				$data_registry->add( $key, call_user_func( $callback ) );
 			}
-		}
-		if ( ! $data_registry->exists( 'allowedCountries' ) ) {
-			$data_registry->add( 'allowedCountries', WC()->countries->get_allowed_countries() );
-		}
-		if ( ! $data_registry->exists( 'shippingCountries' ) ) {
-			$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
-		}
-		if ( ! $data_registry->exists( 'allowedStates' ) ) {
-			$data_registry->add( 'allowedStates', WC()->countries->get_allowed_country_states() );
-		}
-		if ( ! $data_registry->exists( 'shippingStates' ) ) {
-			$data_registry->add( 'shippingStates', WC()->countries->get_shipping_country_states() );
-		}
-		if ( ! $data_registry->exists( 'cartData' ) ) {
-			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
-		}
-		if ( ! $data_registry->exists( 'billingData' ) && WC()->customer instanceof \WC_Customer ) {
-			$data_registry->add( 'billingData', WC()->customer->get_billing() );
-		}
-		if ( function_exists( 'get_current_screen' ) ) {
-			$screen = get_current_screen();
-			if ( $screen && $screen->is_block_editor() && ! $data_registry->exists( 'shippingMethodsExist' ) ) {
-				$methods_exist = wc_get_shipping_method_count() > 0;
-				$data_registry->add( 'shippingMethodsExist', $methods_exist );
-			}
-		}
-		if ( is_user_logged_in() && ! $data_registry->exists( 'customerPaymentMethods' ) ) {
-			add_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
-			$data_registry->add(
-				'customerPaymentMethods',
-				wc_get_customer_saved_methods_list( get_current_user_id() )
-			);
-			remove_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
 		}
 
-		if ( is_user_logged_in() && ! $data_registry->exists( 'customerPaymentMethods' ) ) {
-			add_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
-			$data_registry->add(
-				'customerPaymentMethods',
-				wc_get_customer_saved_methods_list( get_current_user_id() )
-			);
-			remove_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
+		$this->hydrate_from_api( $data_registry );
+		$this->hydrate_customer_payment_methods( $data_registry );
+
+		$permalink = ! empty( $attributes['cartPageId'] ) ? get_permalink( $attributes['cartPageId'] ) : false;
+
+		if ( $permalink && ! $data_registry->exists( 'page-' . $attributes['cartPageId'] ) ) {
+			$data_registry->add( 'page-' . $attributes['cartPageId'], $permalink );
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : false;
+
+		if ( $screen && $screen->is_block_editor() && ! $data_registry->exists( 'shippingMethodsExist' ) ) {
+			$methods_exist = wc_get_shipping_method_count() > 0;
+			$data_registry->add( 'shippingMethodsExist', $methods_exist );
 		}
 
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
-		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
+		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
 		return $content . $this->get_skeleton();
 	}
 
+	/**
+	 * Get customer payment methods for use in checkout.
+	 *
+	 * @param AssetDataRegistry $data_registry Data registry instance.
+	 */
+	protected function hydrate_customer_payment_methods( AssetDataRegistry $data_registry ) {
+		if ( ! is_user_logged_in() || $data_registry->exists( 'customerPaymentMethods' ) ) {
+			return;
+		}
+		add_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
+		$data_registry->add(
+			'customerPaymentMethods',
+			wc_get_customer_saved_methods_list( get_current_user_id() )
+		);
+		remove_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
+	}
+
+	/**
+	 * Hydrate the checkout block with data from the API.
+	 *
+	 * @param AssetDataRegistry $data_registry Data registry instance.
+	 */
+	protected function hydrate_from_api( AssetDataRegistry $data_registry ) {
+		if ( ! $data_registry->exists( 'cartData' ) ) {
+			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
+		}
+		if ( ! $data_registry->exists( 'checkoutData' ) ) {
+			$data_registry->add( 'checkoutData', WC()->api->get_endpoint_data( '/wc/store/checkout' ) );
+		}
+	}
 
 	/**
 	 * Render skeleton markup for the checkout block.

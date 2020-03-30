@@ -1,6 +1,6 @@
 <?php
 /**
- * Shipping Address Schema.
+ * Billing Address Schema.
  *
  * @package WooCommerce/Blocks
  */
@@ -12,19 +12,17 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\RestApi\Routes;
 
 /**
- * ShippingAddressSchema class.
+ * BillingAddressSchema class.
  *
- * Provides a generic shipping address schema for composition in other schemas.
- *
- * @since 2.5.0
+ * Provides a generic billing address schema for composition in other schemas.
  */
-class ShippingAddressSchema extends AbstractSchema {
+class BillingAddressSchema extends AbstractSchema {
 	/**
 	 * The schema item name.
 	 *
 	 * @var string
 	 */
-	protected $title = 'shipping_address';
+	protected $title = 'billing_address';
 
 	/**
 	 * Term properties.
@@ -78,13 +76,24 @@ class ShippingAddressSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
+			'email'      => [
+				'description' => __( 'Email', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'format'      => 'email',
+				'context'     => [ 'view', 'edit' ],
+			],
+			'phone'      => [
+				'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+			],
 		];
 	}
 
 	/**
 	 * Convert a term object into an object suitable for the response.
 	 *
-	 * @param \WC_Order|\WC_Customer $address An object with shipping address.
+	 * @param \WC_Order|\WC_Customer $address An object with billing address.
 	 *
 	 * @throws RouteException When the invalid object types are provided.
 	 * @return stdClass
@@ -93,15 +102,17 @@ class ShippingAddressSchema extends AbstractSchema {
 		if ( ( $address instanceof \WC_Customer || $address instanceof \WC_Order ) ) {
 			return (object) $this->prepare_html_response(
 				[
-					'first_name' => $address->get_shipping_first_name(),
-					'last_name'  => $address->get_shipping_last_name(),
-					'company'    => $address->get_shipping_company(),
-					'address_1'  => $address->get_shipping_address_1(),
-					'address_2'  => $address->get_shipping_address_2(),
-					'city'       => $address->get_shipping_city(),
-					'state'      => $address->get_shipping_state(),
-					'postcode'   => $address->get_shipping_postcode(),
-					'country'    => $address->get_shipping_country(),
+					'first_name' => $address->get_billing_first_name(),
+					'last_name'  => $address->get_billing_last_name(),
+					'company'    => $address->get_billing_company(),
+					'address_1'  => $address->get_billing_address_1(),
+					'address_2'  => $address->get_billing_address_2(),
+					'city'       => $address->get_billing_city(),
+					'state'      => $address->get_billing_state(),
+					'postcode'   => $address->get_billing_postcode(),
+					'country'    => $address->get_billing_country(),
+					'email'      => $address->get_billing_email(),
+					'phone'      => $address->get_billing_phone(),
 				]
 			);
 		}
@@ -110,7 +121,7 @@ class ShippingAddressSchema extends AbstractSchema {
 			sprintf(
 				/* translators: Placeholders are class and method names */
 				__( '%1$s requires an instance of %2$s or %3$s for the address', 'woo-gutenberg-products-block' ),
-				'ShippingAddressSchema::get_item_response',
+				'BillingAddressSchema::get_item_response',
 				'WC_Customer',
 				'WC_Order'
 			),
