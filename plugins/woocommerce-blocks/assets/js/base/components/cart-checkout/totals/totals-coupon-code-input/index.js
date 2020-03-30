@@ -8,6 +8,7 @@ import { Button } from '@woocommerce/base-components/cart-checkout';
 import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import { ValidationInputError } from '@woocommerce/base-components/validation';
+import LoadingMask from '@woocommerce/base-components/loading-mask';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import { useValidationContext } from '@woocommerce/base-context';
@@ -15,7 +16,6 @@ import { useValidationContext } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import LoadingMask from '../../loading-mask';
 import './style.scss';
 
 const TotalsCouponCodeInput = ( {

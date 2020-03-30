@@ -5,12 +5,12 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { speak } from '@wordpress/a11y';
+import LoadingMask from '@woocommerce/base-components/loading-mask';
 
 /**
  * Internal dependencies
  */
 import Packages from './packages';
-import LoadingMask from '../loading-mask';
 import './style.scss';
 
 const ShippingRatesControl = ( {

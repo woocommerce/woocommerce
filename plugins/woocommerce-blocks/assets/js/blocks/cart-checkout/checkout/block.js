@@ -3,20 +3,18 @@
  */
 import { Fragment, useState, useCallback, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import AddressForm from '@woocommerce/base-components/address-form';
-import defaultAddressFields from '@woocommerce/base-components/address-form/default-address-fields';
+import defaultAddressFields from '@woocommerce/base-components/cart-checkout/address-form/default-address-fields';
 import {
+	AddressForm,
 	FormStep,
 	CheckoutForm,
 	NoShipping,
-	Policies,
-} from '@woocommerce/base-components/checkout';
-import {
 	PlaceOrderButton,
+	Policies,
 	ReturnToCartButton,
+	ShippingRatesControl,
 } from '@woocommerce/base-components/cart-checkout';
 import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
-import ShippingRatesControl from '@woocommerce/base-components/shipping-rates-control';
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';

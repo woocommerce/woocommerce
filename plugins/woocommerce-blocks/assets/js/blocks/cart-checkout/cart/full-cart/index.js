@@ -12,7 +12,7 @@ import {
 	TotalsFooterItem,
 	TotalsShippingItem,
 	TotalsTaxesItem,
-} from '@woocommerce/base-components/totals';
+} from '@woocommerce/base-components/cart-checkout';
 import {
 	COUPONS_ENABLED,
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
