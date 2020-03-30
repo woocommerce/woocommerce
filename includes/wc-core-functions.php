@@ -190,11 +190,16 @@ function wc_get_template_part( $slug, $name = '' ) {
 			$template = str_replace( ABSPATH, '{{ABSPATH}}', $template );
 		}
 
+		if ( 0 === strpos( $template, WC_ABSPATH ) ) {
+			$template = str_replace( WC_ABSPATH, '{{WC_ABSPATH}}', $template );
+		}
+
 		wp_cache_set( $cache_key, $template, 'woocommerce' );
 	}
 
 	// Make sure that the absolute path to the template is resolved.
 	$template = str_replace( '{{ABSPATH}}', ABSPATH, $template );
+	$template = str_replace( '{{WC_ABSPATH}}', WC_ABSPATH, $template );
 
 	// Allow 3rd party plugins to filter template file from their plugin.
 	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
