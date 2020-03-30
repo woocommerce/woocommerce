@@ -12,7 +12,7 @@ import { previewCart } from '@woocommerce/resource-previews';
  * @constant
  * @type  {StoreCart} Object containing cart data.
  */
-const defaultCartData = {
+export const defaultCartData = {
 	cartCoupons: [],
 	cartItems: [],
 	cartItemsCount: 0,
