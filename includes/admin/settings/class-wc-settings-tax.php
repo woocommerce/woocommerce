@@ -103,7 +103,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-			$settings = $this->get_settings();
+			$settings = $this->get_settings( $current_section );
 			WC_Admin_Settings::save_fields( $settings );
 
 			if ( isset( $_POST['woocommerce_tax_classes'] ) ) {
@@ -111,6 +111,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 		} elseif ( ! empty( $_POST['tax_rate_country'] ) ) {
 			$this->save_tax_rates();
+		} else {
+			$settings = $this->get_settings( $current_section );
+			WC_Admin_Settings::save_fields( $settings );
 		}
 
 		if ( $current_section ) {

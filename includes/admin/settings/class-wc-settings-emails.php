@@ -211,9 +211,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					break;
 				}
 			}
-		} else {
-			parent::output();
 		}
+
+		parent::output();
 	}
 
 	/**
@@ -223,7 +223,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-			WC_Admin_Settings::save_fields( $this->get_settings() );
+			WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
 
 		} else {
 			$wc_emails = WC_Emails::instance();
@@ -235,6 +235,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					}
 				}
 			} else {
+				WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
 				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 			}
 		}
