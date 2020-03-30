@@ -90,29 +90,19 @@ class Checkout extends AbstractBlock {
 			remove_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
 		}
 
-		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
-		return $content . $this->get_skeleton();
-	}
-
-	/**
-	 * Callback for woocommerce_payment_methods_list_item filter to add token id
-	 * to the generated list.
-	 *
-	 * @param array     $list_item The current list item for the saved payment method.
-	 * @param \WC_Token $token     The token for the current list item.
-	 *
-	 * @return array The list item with the token id added.
-	 */
-	public static function include_token_id_with_payment_methods( $list_item, $token ) {
-		$list_item['tokenId'] = $token->get_id();
-		$brand                = ! empty( $list_item['method']['brand'] ) ?
-		strtolower( $list_item['method']['brand'] ) :
-		'';
-		// phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- need to match on translated value from core.
-		if ( ! empty( $brand ) && esc_html__( 'Credit card', 'woocommerce' ) !== $brand ) {
-			$list_item['method']['brand'] = wc_get_credit_card_type_label( $brand );
+		if ( is_user_logged_in() && ! $data_registry->exists( 'customerPaymentMethods' ) ) {
+			add_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
+			$data_registry->add(
+				'customerPaymentMethods',
+				wc_get_customer_saved_methods_list( get_current_user_id() )
+			);
+			remove_filter( 'woocommerce_payment_methods_list_item', [ $this, 'include_token_id_with_payment_methods' ], 10, 2 );
 		}
-		return $list_item;
+
+		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
+		\Automattic\WooCommerce\Blocks\Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
+		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
+		return $content . $this->get_skeleton();
 	}
 
 
@@ -148,5 +138,26 @@ class Checkout extends AbstractBlock {
 				</div>
 			</div>
 		';
+	}
+
+	/**
+	 * Callback for woocommerce_payment_methods_list_item filter to add token id
+	 * to the generated list.
+	 *
+	 * @param array     $list_item The current list item for the saved payment method.
+	 * @param \WC_Token $token     The token for the current list item.
+	 *
+	 * @return array The list item with the token id added.
+	 */
+	public static function include_token_id_with_payment_methods( $list_item, $token ) {
+		$list_item['tokenId'] = $token->get_id();
+		$brand                = ! empty( $list_item['method']['brand'] ) ?
+			strtolower( $list_item['method']['brand'] ) :
+			'';
+		// phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- need to match on translated value from core.
+		if ( ! empty( $brand ) && esc_html__( 'Credit card', 'woocommerce' ) !== $brand ) {
+			$list_item['method']['brand'] = wc_get_credit_card_type_label( $brand );
+		}
+		return $list_item;
 	}
 }

@@ -98,12 +98,18 @@ export const CheckoutProvider = ( {
 	useEffect( () => {
 		currentObservers.current = observers;
 	}, [ observers ] );
-	const onCheckoutCompleteSuccess = emitterSubscribers( subscriber )
-		.onCheckoutCompleteSuccess;
-	const onCheckoutCompleteError = emitterSubscribers( subscriber )
-		.onCheckoutCompleteError;
-	const onCheckoutProcessing = emitterSubscribers( subscriber )
-		.onCheckoutProcessing;
+	const onCheckoutCompleteSuccess = useMemo(
+		() => emitterSubscribers( subscriber ).onCheckoutCompleteSuccess,
+		[]
+	);
+	const onCheckoutCompleteError = useMemo(
+		() => emitterSubscribers( subscriber ).onCheckoutCompleteError,
+		[]
+	);
+	const onCheckoutProcessing = useMemo(
+		() => emitterSubscribers( subscriber ).onCheckoutProcessing,
+		[]
+	);
 
 	/**
 	 * @type {CheckoutDispatchActions}

@@ -173,6 +173,7 @@ export const PaymentMethodDataProvider = ( {
 		hasFailed: paymentStatus === FAILED,
 		isSuccessful: paymentStatus === SUCCESS,
 	};
+
 	/**
 	 * @type {PaymentMethodDataContext}
 	 */

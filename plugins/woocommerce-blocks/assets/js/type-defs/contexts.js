@@ -136,7 +136,7 @@
  */
 
 /**
- * @typedef {function():PaymentStatusDispatchers|undefined} PaymentStatusDispatch
+ * @typedef {function():PaymentStatusDispatchers} PaymentStatusDispatch
  */
 
 /**
@@ -163,6 +163,7 @@
  *                                                                          the active payment
  *                                                                          method.
  * @property {SavedCustomerPaymentMethods} customerPaymentMethods           Returns the customer
+ *                                                                          payment for the customer
  *                                                                          if it exists.
  * @property {Object}                      paymentMethods                   Registered payment
  *                                                                          methods.
@@ -212,17 +213,17 @@
  * @property {string}                  redirectUrl        This is the url that
  *                                                        checkout will redirect
  *                                                        to when it's ready.
- * @property {function()}              onCheckoutCompleteSuccess Used to register a
+ * @property {function(function())}    onCheckoutCompleteSuccess Used to register a
  *                                                        callback that will
  *                                                        fire when the checkout
  *                                                        is marked complete
  *                                                        successfully.
- * @property {function()}              onCheckoutCompleteError Used to register
+ * @property {function(function())}    onCheckoutCompleteError Used to register
  *                                                        a callback that will
  *                                                        fire when the checkout
  *                                                        is marked complete and
  *                                                        has an error.
- * @property {function()}              onCheckoutProcessing Used to register a
+ * @property {function(function())}    onCheckoutProcessing Used to register a
  *                                                        callback that will
  *                                                        fire when the checkout
  *                                                        has been submitted

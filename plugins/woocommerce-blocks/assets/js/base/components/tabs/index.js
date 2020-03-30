@@ -21,6 +21,7 @@ const Tabs = ( {
 	instanceId,
 	ariaLabel = __( 'Tabbed Content', 'woo-gutenberg-products-block' ),
 	children,
+	id,
 } ) => {
 	const [ selected, setSelected ] = useState(
 		initialTabName || ( tabs.length > 0 ? tabs[ 0 ].name : '' )
@@ -38,7 +39,10 @@ const Tabs = ( {
 	}
 	const selectedId = `${ instanceId }-${ selectedTab.name }`;
 	return (
-		<div className={ classnames( 'wc-block-components-tabs', className ) }>
+		<div
+			className={ classnames( 'wc-block-components-tabs', className ) }
+			id={ id }
+		>
 			<div
 				role="tablist"
 				aria-label={ ariaLabel }

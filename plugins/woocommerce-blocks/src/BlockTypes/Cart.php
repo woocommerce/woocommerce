@@ -74,10 +74,12 @@ class Cart extends AbstractBlock {
 			$max_quantity_limit = apply_filters( 'woocommerce_maximum_quantity_selected_cart', 99 );
 			$data_registry->add( 'quantitySelectLimit', $max_quantity_limit );
 		}
+		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
 		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
 			$this->block_name . '-frontend',
 			$this->block_name . '-block-frontend'
 		);
+		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
 		return $content . $this->get_skeleton();
 	}
 

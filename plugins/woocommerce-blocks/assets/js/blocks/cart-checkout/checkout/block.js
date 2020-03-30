@@ -46,7 +46,6 @@ import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
  */
 import CheckoutSidebar from './sidebar/index.js';
 import './style.scss';
-import '../../../payment-methods-demo';
 
 const Block = ( { isEditor = false, ...props } ) => (
 	<CheckoutProvider isEditor={ isEditor }>
@@ -75,7 +74,6 @@ const Checkout = ( {
 	} = useValidationContext();
 
 	const [ contactFields, setContactFields ] = useState( {} );
-	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
 	const [ shippingAsBilling, setShippingAsBilling ] = useState( true );
 
 	const validateSubmit = () => {
@@ -335,18 +333,6 @@ const Checkout = ( {
 						) }
 					>
 						<PaymentMethods />
-						{ /*@todo this should be something the payment method controls*/ }
-						<CheckboxControl
-							className="wc-block-checkout__save-card-info"
-							label={ __(
-								'Save payment information to my account for future purchases.',
-								'woo-gutenberg-products-block'
-							) }
-							checked={ shouldSavePayment }
-							onChange={ () =>
-								setShouldSavePayment( ! shouldSavePayment )
-							}
-						/>
 					</FormStep>
 					<div className="wc-block-checkout__actions">
 						{ attributes.showReturnToCart && (

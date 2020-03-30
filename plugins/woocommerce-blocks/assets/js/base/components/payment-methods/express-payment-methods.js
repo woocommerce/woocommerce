@@ -21,7 +21,7 @@ const ExpressPaymentMethods = () => {
 			paymentMethodIds.map( ( id ) => {
 				const expressPaymentMethod = isEditor
 					? paymentMethods[ id ].edit
-					: paymentMethods[ id ].activeContent;
+					: paymentMethods[ id ].content;
 				return isValidElement( expressPaymentMethod ) ? (
 					<li key={ id } id={ `express-payment-method-${ id }` }>
 						{ cloneElement( expressPaymentMethod, {
