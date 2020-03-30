@@ -70,6 +70,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_billing_address_index',
 		'_shipping_address_index',
 		'_recorded_sales',
+		'_recorded_cancelations',
 		'_recorded_coupon_usage_counts',
 		'_download_permissions_granted',
 		'_order_stock_reduced',
@@ -586,6 +587,28 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	public function set_recorded_sales( $order, $set ) {
 		$order_id = WC_Order_Factory::get_order_id( $order );
 		update_post_meta( $order_id, '_recorded_sales', wc_bool_to_string( $set ) );
+	}
+
+	/**
+	 * Gets information about whether cancelations were recorded.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @return bool
+	 */
+	public function get_recorded_cancelations( $order ) {
+		$order_id = WC_Order_Factory::get_order_id( $order );
+		return wc_string_to_bool( get_post_meta( $order_id, '_recorded_cancelations', true ) );
+	}
+
+	/**
+	 * Stores information about whether cancelations were recorded.
+	 *
+	 * @param WC_Order|int $order Order ID or order object.
+	 * @param bool         $set True or false.
+	 */
+	public function set_recorded_cancelations( $order, $set ) {
+		$order_id = WC_Order_Factory::get_order_id( $order );
+		update_post_meta( $order_id, '_recorded_cancelations', wc_bool_to_string( $set ) );
 	}
 
 	/**

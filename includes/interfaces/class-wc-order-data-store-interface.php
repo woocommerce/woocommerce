@@ -116,6 +116,22 @@ interface WC_Order_Data_Store_Interface {
 	public function set_recorded_sales( $order, $set );
 
 	/**
+	 * Gets information about whether cancelations were recorded.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	public function get_recorded_cancelations( $order );
+
+	/**
+	 * Stores information about whether cancelations were recorded.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param bool     $set If should set.
+	 */
+	public function set_recorded_cancelations( $order, $set );
+
+	/**
 	 * Gets information about whether coupon counts were updated.
 	 *
 	 * @param WC_Order $order Order object.
