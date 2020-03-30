@@ -445,8 +445,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		} elseif ( 'keys' === $current_section ) {
 			WC_Admin_API_Keys::page_output();
 		} else {
-			$settings = $this->get_settings( $current_section );
-			WC_Admin_Settings::output_fields( $settings );
+			parent::output();
 		}
 	}
 

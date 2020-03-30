@@ -175,9 +175,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				}
 			}
 			if ( ! $is_shipping_method ) {
-				$settings = $this->get_settings();
-				$settings = apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
-				WC_Admin_Settings::output_fields( $settings );
+				parent::output();
 			}
 		}
 	}

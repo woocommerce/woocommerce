@@ -212,8 +212,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				}
 			}
 		} else {
-			$settings = $this->get_settings();
-			WC_Admin_Settings::output_fields( $settings );
+			parent::output();
 		}
 	}
 

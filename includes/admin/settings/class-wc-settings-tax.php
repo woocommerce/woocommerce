@@ -91,9 +91,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		if ( 'standard' === $current_section || in_array( $current_section, $tax_classes, true ) ) {
 			$this->output_tax_rates();
 		} else {
-			$settings = $this->get_settings();
-
-			WC_Admin_Settings::output_fields( $settings );
+			parent::output();
 		}
 	}
 

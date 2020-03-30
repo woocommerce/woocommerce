@@ -43,17 +43,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 	}
 
 	/**
-	 * Output the settings.
-	 */
-	public function output() {
-		global $current_section;
-
-		$settings = $this->get_settings( $current_section );
-
-		WC_Admin_Settings::output_fields( $settings );
-	}
-
-	/**
 	 * Save settings.
 	 */
 	public function save() {

@@ -90,8 +90,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 				}
 			}
 		}
-		$settings = $this->get_settings( $current_section );
-		WC_Admin_Settings::output_fields( $settings );
+
+		parent::output();
 		//phpcs:enable
 	}
 
