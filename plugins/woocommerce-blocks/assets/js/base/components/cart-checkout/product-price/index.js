@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
@@ -11,20 +12,38 @@ import PropTypes from 'prop-types';
 import './style.scss';
 
 const ProductPrice = ( { className, currency, regularValue, value } ) => {
+	const isDiscounted =
+		Number.isFinite( regularValue ) && regularValue !== value;
 	return (
 		<>
-			{ Number.isFinite( regularValue ) && regularValue !== value && (
-				<FormattedMonetaryAmount
-					className={ classNames(
-						'wc-block-product-price--regular',
-						className
-					) }
-					currency={ currency }
-					value={ regularValue }
-				/>
+			{ isDiscounted && (
+				<>
+					<span className="screen-reader-text">
+						{ __(
+							'Previous price:',
+							'woo-gutenberg-products-block'
+						) }
+					</span>
+					<FormattedMonetaryAmount
+						className={ classNames(
+							'wc-block-product-price--regular',
+							className
+						) }
+						currency={ currency }
+						value={ regularValue }
+					/>
+					<span className="screen-reader-text">
+						{ __(
+							'Discounted price:',
+							'woo-gutenberg-products-block'
+						) }
+					</span>
+				</>
 			) }
 			<FormattedMonetaryAmount
-				className={ classNames( 'wc-block-product-price', className ) }
+				className={ classNames( 'wc-block-product-price', className, {
+					'is-discounted': isDiscounted,
+				} ) }
 				currency={ currency }
 				value={ value }
 			/>

@@ -24,14 +24,20 @@ const renderShippingRatesControlOption = ( option ) => ( {
 	),
 } );
 
-const ShippingRateSelector = ( { shippingRates, shippingRatesLoading } ) => {
+const ShippingRateSelector = ( {
+	hasRates,
+	shippingRates,
+	shippingRatesLoading,
+} ) => {
 	return (
 		<fieldset className="wc-block-totals__shipping-options-fieldset">
 			<legend className="screen-reader-text">
-				{ __(
-					'Choose a shipping method',
-					'woo-gutenberg-products-block'
-				) }
+				{ hasRates
+					? __( 'Shipping methods', 'woo-gutenberg-products-block' )
+					: __(
+							'Choose a shipping method',
+							'woo-gutenberg-products-block'
+					  ) }
 			</legend>
 			<ShippingRatesControl
 				className="wc-block-totals__shipping-options"

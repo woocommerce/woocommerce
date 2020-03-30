@@ -131,6 +131,7 @@ const TotalsShippingItem = ( {
 			/>
 			{ ! isCheckout && showingRates && (
 				<ShippingRateSelector
+					hasRates={ hasRates }
 					shippingRates={ shippingRates }
 					shippingRatesLoading={ shippingRatesLoading }
 				/>

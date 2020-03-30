@@ -61,8 +61,8 @@ const ValidatedTextInput = ( {
 	const errorMessage = getValidationError( errorId ) || {};
 	const hasError = errorMessage.message && ! errorMessage.hidden;
 	const describedBy =
-		showError && hasError
-			? getValidationErrorId( textInputId )
+		showError && hasError && getValidationErrorId( errorId )
+			? getValidationErrorId( errorId )
 			: ariaDescribedBy;
 
 	return (
