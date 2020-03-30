@@ -193,16 +193,10 @@ class WC_Notes_Run_Db_Update {
 	 * @param int $note_id Note id to update.
 	 */
 	private static function update_done_notice( $note_id ) {
-		$hide_notices_url = html_entity_decode( // to convert &amp;s to normal &, otherwise produces invalid link.
-			wp_nonce_url(
-				add_query_arg(
-					'wc-hide-notice',
-					'update',
-					admin_url( 'admin.php?page=wc-settings' )
-				),
-				'woocommerce_hide_notices_nonce',
-				'_wc_notice_nonce'
-			)
+		$hide_notices_url = add_query_arg(
+			'wc-hide-notice',
+			'update',
+			admin_url( 'admin.php?page=wc-settings' )
 		);
 
 		$note = new WC_Admin_Note( $note_id );
