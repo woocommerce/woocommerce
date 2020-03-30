@@ -99,12 +99,18 @@ const CartLineItemRow = ( { lineItem } ) => {
 		precision: parseInt( prices.raw_prices.precision, 10 ),
 	} ).multiply( quantity );
 	const saleAmount = regularAmount.subtract( purchaseAmount );
+	const firstImage = images.length ? images[ 0 ] : {};
 
 	return (
 		<tr className="wc-block-cart-items__row">
-			<td className="wc-block-cart-item__image">
-				<a href={ permalink }>
-					<ProductImage image={ images.length ? images[ 0 ] : {} } />
+			{ /* If the image has no alt text, this link is unnecessary and can be hidden. */ }
+			<td
+				className="wc-block-cart-item__image"
+				aria-hidden={ ! firstImage.alt }
+			>
+				{ /* We don't need to make it focusable, because product name has the same link. */ }
+				<a href={ permalink } tabIndex={ -1 }>
+					<ProductImage image={ firstImage } />
 				</a>
 			</td>
 			<td className="wc-block-cart-item__product">

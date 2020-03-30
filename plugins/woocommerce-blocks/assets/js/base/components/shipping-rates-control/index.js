@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -19,6 +21,62 @@ const ShippingRatesControl = ( {
 	noResultsMessage,
 	renderOption,
 } ) => {
+	useEffect( () => {
+		if ( shippingRatesLoading ) {
+			return;
+		}
+		const packages = shippingRates.length;
+		const shippingOptions = shippingRates.reduce(
+			( acc, shippingRate ) => acc + shippingRate.shipping_rates.length,
+			0
+		);
+		if ( shippingOptions === 0 ) {
+			speak(
+				__(
+					'No shipping options were found.',
+					'woo-gutenberg-products-block'
+				)
+			);
+		} else if ( packages === 1 ) {
+			speak(
+				sprintf(
+					// translators: %d number of shipping options found.
+					_n(
+						'%d shipping option was found.',
+						'%d shipping options were found.',
+						shippingOptions,
+						'woo-gutenberg-products-block'
+					),
+					shippingOptions
+				)
+			);
+		} else {
+			speak(
+				sprintf(
+					// translators: %d number of shipping packages packages.
+					_n(
+						'Shipping option searched for %d package.',
+						'Shipping options searched for %d packages.',
+						packages,
+						'woo-gutenberg-products-block'
+					),
+					packages
+				) +
+					' ' +
+					sprintf(
+						// translators: %d number of shipping options available.
+						_n(
+							'%d shipping option was found',
+							'%d shipping options were found',
+							shippingOptions,
+							'woo-gutenberg-products-block'
+						),
+						shippingOptions
+					)
+			);
+		}
+	}, [ shippingRatesLoading, shippingRates ] );
+
 	return (
 		<LoadingMask
 			isLoading={ shippingRatesLoading }

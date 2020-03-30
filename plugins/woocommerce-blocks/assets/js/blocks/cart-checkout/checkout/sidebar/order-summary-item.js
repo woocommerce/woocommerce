@@ -54,12 +54,12 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 			</div>
 			<div className="wc-block-order-summary-item__description">
 				<div className="wc-block-order-summary-item__header">
+					<ProductName permalink={ permalink } name={ name } />
 					<ProductPrice
 						className="wc-block-order-summary-item__total-price"
 						currency={ currency }
 						value={ linePrice }
 					/>
-					<ProductName permalink={ permalink } name={ name } />
 				</div>
 				<div className="wc-block-order-summary-item__prices">
 					<ProductPrice

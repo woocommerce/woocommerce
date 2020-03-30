@@ -8,6 +8,7 @@
 		margin: 0;
 		padding: 0 $gap;
 		min-width: 500px;
+		max-width: 65%;
 	}
 }
 
@@ -65,6 +66,7 @@
 		.wc-block-main {
 			padding: 0;
 			flex: none;
+			max-width: 100%;
 			min-width: 200px;
 		}
 		.wc-block-sidebar {
