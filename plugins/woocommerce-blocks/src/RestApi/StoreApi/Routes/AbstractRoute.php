@@ -73,7 +73,7 @@ abstract class AbstractRoute implements RouteInterface {
 			}
 		} catch ( RouteException $error ) {
 			$response = new \WP_Error( $error->getErrorCode(), $error->getMessage(), [ 'status' => $error->getCode() ] );
-		} catch ( Exception $error ) {
+		} catch ( \Exception $error ) {
 			$response = new \WP_Error( 'unknown_server_error', $error->getMessage(), [ 'status' => '500' ] );
 		}
 		return $response;

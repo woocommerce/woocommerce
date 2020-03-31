@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock;
+use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStockException;
 use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 
@@ -225,6 +226,7 @@ class Checkout extends AbstractRoute {
 	/**
 	 * Create or update a draft order based on the cart.
 	 *
+	 * @throws RouteException On error.
 	 * @return \WC_Order Order object.
 	 */
 	protected function create_or_update_draft_order() {
@@ -244,7 +246,16 @@ class Checkout extends AbstractRoute {
 		$this->set_draft_order_id( $order_object->get_id() );
 
 		// Try to reserve stock for 10 mins, if available.
-		$reserve_stock->reserve_stock_for_order( $order_object, 10 );
+		try {
+			$reserve_stock->reserve_stock_for_order( $order_object, 10 );
+		} catch ( ReserveStockException $e ) {
+			$error_data = $e->getErrorData();
+			throw new RouteException(
+				$e->getErrorCode(),
+				$e->getMessage(),
+				$e->getCode()
+			);
+		}
 
 		return $order_object;
 	}
