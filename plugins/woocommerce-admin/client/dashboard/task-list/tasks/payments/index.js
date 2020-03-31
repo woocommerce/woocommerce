@@ -248,25 +248,39 @@ class Payments extends Component {
 						'woocommerce-task-payment-' + key
 					);
 
+					const isRecommended =
+						key === this.recommendedMethod && ! isConfigured;
+					const showRecommendedRibbon =
+						isRecommended && this.recommendedMethod !== 'wcpay';
+					const showRecommendedPill =
+						isRecommended && this.recommendedMethod === 'wcpay';
+
 					return (
 						<Card key={ key } className={ classes }>
 							<div className="woocommerce-task-payment__before">
-								{ key === this.recommendedMethod &&
-									! isConfigured && (
-										<div className="woocommerce-task-payment__recommended-ribbon">
-											<span>
-												{ __(
-													'Recommended',
-													'woocommerce-admin'
-												) }
-											</span>
-										</div>
-									) }
+								{ showRecommendedRibbon && (
+									<div className="woocommerce-task-payment__recommended-ribbon">
+										<span>
+											{ __(
+												'Recommended',
+												'woocommerce-admin'
+											) }
+										</span>
+									</div>
+								) }
 								{ before }
 							</div>
 							<div className="woocommerce-task-payment__text">
 								<H className="woocommerce-task-payment__title">
 									{ title }
+									{ showRecommendedPill && (
+										<span className="woocommerce-task-payment__recommended-pill">
+											{ __(
+												'Recommended',
+												'woocommerce-admin'
+											) }
+										</span>
+									) }
 								</H>
 								<p className="woocommerce-task-payment__content">
 									{ content }
