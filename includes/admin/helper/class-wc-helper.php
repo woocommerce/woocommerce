@@ -24,6 +24,14 @@ class WC_Helper {
 	public static $log;
 
 	/**
+	 * The plugins cache needs to be cleared before calling get_plugins() to ensure the "Woo" header is read correctly.
+	 * This flag makes sure the cache is only cleared at most once per request, clearing it more times would be redundant.
+	 *
+	 * @var bool $is_plugin_cache_clean
+	 */
+	private static $is_plugin_cache_clean = false;
+
+	/**
 	 * Get an absolute path to the requested helper view.
 	 *
 	 * @param string $view The requested view file.
@@ -1147,6 +1155,10 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		if ( ! self::$is_plugin_cache_clean ) {
+			wp_clean_plugins_cache( false );
+			self::$is_plugin_cache_clean = true;
+		}
 		$plugins     = get_plugins();
 		$woo_plugins = array();
 

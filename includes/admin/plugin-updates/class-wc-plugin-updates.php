@@ -51,6 +51,13 @@ class WC_Plugin_Updates {
 	protected $minor_untested_plugins = array();
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		wp_clean_plugins_cache( false );
+	}
+
+	/**
 	 * Common JS for initializing and managing thickbox-based modals.
 	 */
 	protected function generic_modal_js() {
