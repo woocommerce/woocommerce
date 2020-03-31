@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import { clickTab, setCheckbox, uiUnblocked, unsetCheckbox, verifyCheckboxIsUnset } from "./index";
+import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './index';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
