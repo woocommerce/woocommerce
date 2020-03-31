@@ -867,6 +867,22 @@ add_action( 'woocommerce_order_status_cancelled', 'wc_decrease_total_sales_count
 add_action( 'woocommerce_order_status_refunded', 'wc_decrease_total_sales_counts' );
 
 /**
+ * Decrease total sales amount for each product within a deleted order.
+ *
+ * @since 4.1.0
+ * @param int $post_id Post ID.
+ */
+function wc_decrease_deleted_total_sales_counts( $post_id ) {
+	$post_type = get_post_type( $post_id );
+	if ( 'shop_order' !== $post_type ) {
+		return;
+	}
+
+	wc_decrease_total_sales_counts( $post_id );
+}
+add_action( 'before_delete_post', 'wc_decrease_deleted_total_sales_counts' );
+
+/**
  * Update used coupon amount for each coupon within an order.
  *
  * @since 3.0.0
