@@ -317,7 +317,7 @@ function wc_register_order_type( $type, $args = array() ) {
  * @return int
  */
 function wc_processing_order_count() {
-	return wc_orders_count( 'processing' );
+	return apply_filters( 'woocommerce_modify_processing_order_count_in_menu', wc_orders_count( 'processing' ) );
 }
 
 /**
