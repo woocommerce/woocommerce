@@ -38,6 +38,7 @@ class Cart extends AbstractBlock {
 		);
 	}
 
+
 	/**
 	 * Append frontend scripts when rendering the Cart block.
 	 *
@@ -46,6 +47,24 @@ class Cart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
+		$this->enqueue_data( $attributes );
+		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
+		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
+			$this->block_name . '-frontend',
+			$this->block_name . '-block-frontend'
+		);
+		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
+		return $content . $this->get_skeleton();
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
 		$data_registry = Package::container()->get(
 			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
 		);
@@ -74,13 +93,6 @@ class Cart extends AbstractBlock {
 			$max_quantity_limit = apply_filters( 'woocommerce_maximum_quantity_selected_cart', 99 );
 			$data_registry->add( 'quantitySelectLimit', $max_quantity_limit );
 		}
-		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
-			$this->block_name . '-frontend',
-			$this->block_name . '-block-frontend'
-		);
-		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
-		return $content . $this->get_skeleton();
 	}
 
 	/**
