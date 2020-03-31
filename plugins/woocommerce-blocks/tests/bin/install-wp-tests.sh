@@ -20,7 +20,7 @@ WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
 download() {
     if [ `which curl` ]; then
-        curl -s "$1" > "$2";
+        curl -s -L "$1" > "$2";
     elif [ `which wget` ]; then
         wget -nv -O "$2" "$1"
     fi
@@ -148,31 +148,26 @@ install_db() {
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
 
-install_deps() {
+install_woocommerce() {
+	# get built plugin from .org
+	download https://downloads.wordpress.org/plugin/woocommerce.zip "$TMPDIR/woocommerce.zip"
+	unzip -q $TMPDIR/woocommerce.zip -d "$WP_CORE_DIR/wp-content/plugins"
 
 	# Script Variables
 	BRANCH=$TRAVIS_BRANCH
 	REPO=$TRAVIS_REPO_SLUG
-	WORKING_DIR="$PWD"
 
+	# Get github version
 	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
 		BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
 		REPO=$TRAVIS_PULL_REQUEST_SLUG
 	fi
 
-	# checkout dev version of woocommerce
-	cd "$WP_CORE_DIR/wp-content/plugins"
-	git clone --depth 1 "https://github.com/woocommerce/woocommerce.git"
-	# install dependencies
-	cd woocommerce
-	npm install
-	composer install --no-dev
-
-	# Back to original dir
-	cd "$WORKING_DIR"
+	git clone --depth 1 "https://github.com/woocommerce/woocommerce.git" "$TMPDIR/woocommerce-git"
+	mv "$TMPDIR/woocommerce-git/tests" "$WP_CORE_DIR/wp-content/plugins/woocommerce"
 }
 
 install_wp
 install_test_suite
 install_db
-install_deps
+install_woocommerce
