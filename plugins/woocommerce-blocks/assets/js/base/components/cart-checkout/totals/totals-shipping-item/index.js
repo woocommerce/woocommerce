@@ -39,7 +39,7 @@ const TotalsShippingItem = ( {
 		shippingRatesLoading,
 		hasShippingAddress,
 		setShippingAddress,
-	} = useShippingRates( defaultAddressFields );
+	} = useShippingRates();
 	const totalShippingValue = DISPLAY_CART_PRICES_INCLUDING_TAX
 		? parseInt( values.total_shipping, 10 ) +
 		  parseInt( values.total_shipping_tax, 10 )
