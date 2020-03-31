@@ -79,6 +79,9 @@ class Loader {
 		add_action( 'admin_notices', array( __CLASS__, 'inject_before_notices' ), -9999 );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_after_notices' ), PHP_INT_MAX );
 
+		// Added this hook to delete the field woocommerce_onboarding_homepage_post_id when deleting the homepage.
+		add_action( 'trashed_post', array( __CLASS__, 'delete_homepage' ) );
+
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( __CLASS__, 'remove_app_entry_page_menu_item' ), 20 );
 
@@ -971,6 +974,21 @@ class Loader {
 					$script->deps[] = 'wc-settings';
 				}
 			}
+		}
+	}
+
+	/**
+	 * Delete woocommerce_onboarding_homepage_post_id field when the homepage is deleted
+	 *
+	 * @param int $post_id The deleted post id.
+	 */
+	public static function delete_homepage( $post_id ) {
+		if ( 'page' !== get_post_type( $post_id ) ) {
+			return;
+		}
+		$homepage_id = intval( get_option( 'woocommerce_onboarding_homepage_post_id', false ) );
+		if ( $homepage_id === $post_id ) {
+			delete_option( 'woocommerce_onboarding_homepage_post_id' );
 		}
 	}
 }
