@@ -422,7 +422,7 @@ class Loader {
 	 * Loads the required scripts on the correct pages.
 	 */
 	public static function load_scripts() {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
 
@@ -445,6 +445,14 @@ class Loader {
 			wp_enqueue_style( 'wc-admin-ie' );
 		}
 
+	}
+
+	/**
+	 * Returns true if we are on a JS powered admin page or
+	 * a "classic" (non JS app) powered admin page (an embedded page).
+	 */
+	public static function is_admin_or_embed_page() {
+		return self::is_admin_page() || self::is_embed_page();
 	}
 
 	/**
@@ -526,7 +534,7 @@ class Loader {
 	 * @param string $admin_body_class Body class to add.
 	 */
 	public static function add_admin_body_classes( $admin_body_class = '' ) {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return $admin_body_class;
 		}
 
@@ -556,7 +564,7 @@ class Loader {
 	 * Removes notices that should not be displayed on WC Admin pages.
 	 */
 	public static function remove_notices() {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
 
@@ -570,20 +578,32 @@ class Loader {
 	 * Runs before admin notices action and hides them.
 	 */
 	public static function inject_before_notices() {
-		if ( ( ! self::is_admin_page() && ! self::is_embed_page() ) ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
+
+		// Wrap the notices in a hidden div to prevent flickering before
+		// they are moved elsewhere in the page by WordPress Core.
 		echo '<div class="woocommerce-layout__notice-list-hide" id="wp__notice-list">';
-		echo '<div class="wp-header-end" id="woocommerce-layout__notice-catcher"></div>'; // https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737.
+
+		if ( self::is_admin_page() ) {
+			// Capture all notices and hide them. WordPress Core looks for
+			// `.wp-header-end` and appends notices after it if found.
+			// https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737 .
+			echo '<div class="wp-header-end" id="woocommerce-layout__notice-catcher"></div>';
+		}
 	}
 
 	/**
 	 * Runs after admin notices and closes div.
 	 */
 	public static function inject_after_notices() {
-		if ( ( ! self::is_admin_page() && ! self::is_embed_page() ) ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
+
+		// Close the hidden div used to prevent notices from flickering before
+		// they are inserted elsewhere in the page.
 		echo '</div>';
 	}
 
