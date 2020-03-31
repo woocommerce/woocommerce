@@ -116,6 +116,9 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.15 - 2020-03-31 =
+- Fix broken product grid blocks styles in old versions of WordPress. #2000
+
 = 2.5.14 - 2020-03-03 =
 - Added screen reader text to product counts in the product category list block #1828
 - Added screenreader alternative text to the sale badge. #1826
