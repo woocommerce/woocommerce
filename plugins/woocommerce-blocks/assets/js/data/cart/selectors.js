@@ -2,16 +2,6 @@
 /** @typedef { import('@woocommerce/type-defs/cart').CartTotals } CartTotals */
 
 /**
- * External dependencies
- */
-import { createRegistrySelector } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import { STORE_KEY } from './constants';
-
-/**
  * Retrieves cart data from state.
  *
  * @param {Object} state The current state.
@@ -147,11 +137,18 @@ export const isItemQuantityPending = ( state, cartItemKey ) => {
  * @param {Object} state The current state.
  * @return {boolean} are shipping rates loading.
  */
-export const areShippingRatesLoading = createRegistrySelector(
-	( select ) => ( state ) => {
-		return !! (
-			state.metaData.updatingShipping ||
-			select( STORE_KEY ).isResolving( 'getCartData', [] )
-		);
-	}
-);
+export const areShippingRatesLoading = ( state ) => {
+	return !! state.metaData.updatingShipping;
+};
+
+/**
+ * Retrieves if the shipping rate selection is being persisted.
+ *
+ * @param {Object} state The current state.
+ *
+ * @return {boolean} True if the shipping rate selection is being persisted to
+ *                   the server.
+ */
+export const isShippingRateBeingSelected = ( state ) => {
+	return !! state.metaData.updatingSelectedRate;
+};

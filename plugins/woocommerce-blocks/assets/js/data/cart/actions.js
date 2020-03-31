@@ -126,6 +126,21 @@ export function shippingRatesAreResolving( isResolving ) {
 }
 
 /**
+ * Returns an action object used to track whether the shipping rate is being
+ * selected or not.
+ *
+ * @param {boolean} isResolving True if shipping rate is being selected.
+ *
+ * @return {Object} Action object.
+ */
+export function shippingRatesBeingSelected( isResolving ) {
+	return {
+		type: types.UPDATING_SELECTED_SHIPPING_RATE,
+		isResolving,
+	};
+}
+
+/**
  * Applies a coupon code and either invalidates caches, or receives an error if
  * the coupon cannot be applied.
  *
@@ -258,6 +273,7 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
  */
 export function* selectShippingRate( rateId, packageId = 0 ) {
 	try {
+		yield shippingRatesBeingSelected( true );
 		const { response } = yield apiFetchWithHeaders( {
 			path: `/wc/store/cart/select-shipping-rate/${ packageId }`,
 			method: 'POST',
@@ -270,9 +286,11 @@ export function* selectShippingRate( rateId, packageId = 0 ) {
 		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
+		yield shippingRatesBeingSelected( false );
 		// Re-throw the error.
 		throw error;
 	}
+	yield shippingRatesBeingSelected( false );
 	return true;
 }
 

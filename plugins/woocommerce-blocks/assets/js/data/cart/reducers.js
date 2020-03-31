@@ -165,6 +165,14 @@ const reducer = (
 				},
 			};
 			break;
+		case types.UPDATING_SELECTED_SHIPPING_RATE:
+			state = {
+				...state,
+				metaData: {
+					...state.metaData,
+					updatingSelectedRate: action.isResolving,
+				},
+			};
 	}
 	return state;
 };

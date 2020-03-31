@@ -10,7 +10,12 @@ import PropTypes from 'prop-types';
 import Button from '../button';
 
 const PlaceOrderButton = ( { validateSubmit } ) => {
-	const { submitLabel, onSubmit } = useCheckoutContext();
+	const {
+		submitLabel,
+		onSubmit,
+		hasError,
+		isCalculating,
+	} = useCheckoutContext();
 
 	return (
 		<Button
@@ -21,6 +26,7 @@ const PlaceOrderButton = ( { validateSubmit } ) => {
 					onSubmit();
 				}
 			} }
+			disabled={ hasError || isCalculating }
 		>
 			{ submitLabel }
 		</Button>

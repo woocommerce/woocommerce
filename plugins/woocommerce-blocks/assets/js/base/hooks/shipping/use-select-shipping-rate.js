@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useThrowError } from '@woocommerce/base-hooks';
@@ -51,6 +51,9 @@ export const useSelectShippingRate = ( shippingRates ) => {
 		setSelectedShipping( derivedSelectedRates );
 	}, [ derivedSelectedRates ] );
 	const { selectShippingRate } = useDispatch( storeKey );
+	const isSelectingRate = useSelect( ( select ) => {
+		return select( storeKey ).isShippingRateBeingSelected();
+	}, [] );
 	const setRate = ( newShippingRate, packageId ) => {
 		setSelectedShipping( {
 			...selectedShippingRates,
@@ -65,5 +68,6 @@ export const useSelectShippingRate = ( shippingRates ) => {
 	return {
 		selectShippingRate: setRate,
 		selectedShippingRates,
+		isSelectingRate,
 	};
 };
