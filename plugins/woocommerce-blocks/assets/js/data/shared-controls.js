@@ -34,8 +34,11 @@ export const controls = {
 						triggerFetch.setNonce( fetchResponse.headers );
 					} );
 				} )
-				.catch( ( error ) => {
-					reject( error );
+				.catch( ( errorResponse ) => {
+					// Parse error response before rejecting it.
+					errorResponse.json().then( ( error ) => {
+						reject( error );
+					} );
 				} );
 		} );
 	},

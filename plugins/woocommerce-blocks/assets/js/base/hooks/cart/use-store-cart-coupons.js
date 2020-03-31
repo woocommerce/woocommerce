@@ -23,7 +23,7 @@ import { useStoreNotices } from '../use-store-notices';
  * store api /cart/coupons endpoint.
  */
 export const useStoreCartCoupons = () => {
-	const { cartCoupons, cartErrors, cartIsLoading } = useStoreCart();
+	const { cartCoupons, cartIsLoading } = useStoreCart();
 	const { addErrorNotice, addSnackbarNotice } = useStoreNotices();
 	const { setValidationErrors } = useValidationContext();
 
@@ -106,7 +106,6 @@ export const useStoreCartCoupons = () => {
 
 	return {
 		appliedCoupons: cartCoupons,
-		cartCouponsErrors: cartErrors,
 		isLoading: cartIsLoading,
 		...results,
 	};

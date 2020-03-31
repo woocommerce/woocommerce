@@ -38,7 +38,6 @@
  * @property {Function} removeCoupon      Callback for removing a coupon by code.
  * @property {boolean}  isApplyingCoupon  True when a coupon is being applied.
  * @property {boolean}  isRemovingCoupon  True when a coupon is being removed.
- * @property {boolean}  cartCouponsErrors An array of errors thrown by the cart.
  */
 
 /**
