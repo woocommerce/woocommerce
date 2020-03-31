@@ -41,6 +41,7 @@ class Checkout extends AbstractBlock {
 		);
 	}
 
+
 	/**
 	 * Append frontend scripts when rendering the block.
 	 *
@@ -49,6 +50,21 @@ class Checkout extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
+		$this->enqueue_data( $attributes );
+		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
+		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
+		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
+		return $content . $this->get_skeleton();
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
 		$data_registry = Package::container()->get(
 			AssetDataRegistry::class
 		);
@@ -84,11 +100,6 @@ class Checkout extends AbstractBlock {
 			$this->hydrate_from_api( $data_registry );
 			$this->hydrate_customer_payment_methods( $data_registry );
 		}
-
-		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
-		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
-		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
-		return $content . $this->get_skeleton();
 	}
 
 	/**
