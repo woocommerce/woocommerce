@@ -50,12 +50,13 @@ const CheckoutContext = createContext( {
 	dispatchActions: {
 		resetCheckout: () => void null,
 		setRedirectUrl: () => void null,
-		setHasError: () => void null,
-		clearError: () => void null,
+		setHasError: ( hasError ) => void hasError,
 		incrementCalculating: () => void null,
 		decrementCalculating: () => void null,
 		setOrderId: () => void null,
 	},
+	isEditor: false,
+	hasOrder: false,
 } );
 
 /**
@@ -96,7 +97,7 @@ export const CheckoutProvider = ( {
 	const [ checkoutState, dispatch ] = useReducer( reducer, DEFAULT_STATE );
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
-	// set observers on ref so it's always current
+	// set observers on ref so it's always current.
 	useEffect( () => {
 		currentObservers.current = observers;
 	}, [ observers ] );
@@ -121,8 +122,8 @@ export const CheckoutProvider = ( {
 			resetCheckout: () => void dispatch( actions.setPristine() ),
 			setRedirectUrl: ( url ) =>
 				void dispatch( actions.setRedirectUrl( url ) ),
-			setHasError: () => void dispatch( actions.setHasError() ),
-			clearError: () => void dispatch( actions.clearError() ),
+			setHasError: ( hasError ) =>
+				void dispatch( actions.setHasError( hasError ) ),
 			incrementCalculating: () =>
 				void dispatch( actions.incrementCalculating() ),
 			decrementCalculating: () =>
@@ -133,7 +134,7 @@ export const CheckoutProvider = ( {
 		[]
 	);
 
-	// emit events
+	// emit events.
 	useEffect( () => {
 		const status = checkoutState.status;
 		if ( status === STATUS.PROCESSING ) {
@@ -144,7 +145,7 @@ export const CheckoutProvider = ( {
 			).then( ( response ) => {
 				if ( response !== true ) {
 					// @todo handle any validation error property values in the
-					// response
+					// response.
 					dispatchActions.setHasError();
 				}
 				dispatch( actions.setComplete() );
@@ -164,7 +165,7 @@ export const CheckoutProvider = ( {
 					{}
 				).then( () => {
 					// all observers have done their thing so let's redirect
-					// (if no error)
+					// (if no error).
 					if ( ! checkoutState.hasError ) {
 						window.location = checkoutState.redirectUrl;
 					}
