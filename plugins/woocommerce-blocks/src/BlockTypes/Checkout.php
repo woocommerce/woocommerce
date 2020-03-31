@@ -66,20 +66,23 @@ class Checkout extends AbstractBlock {
 			}
 		}
 
-		$this->hydrate_from_api( $data_registry );
-		$this->hydrate_customer_payment_methods( $data_registry );
-
 		$permalink = ! empty( $attributes['cartPageId'] ) ? get_permalink( $attributes['cartPageId'] ) : false;
 
 		if ( $permalink && ! $data_registry->exists( 'page-' . $attributes['cartPageId'] ) ) {
 			$data_registry->add( 'page-' . $attributes['cartPageId'], $permalink );
 		}
 
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : false;
+		// Hydrate the following data depending on admin or frontend context.
+		if ( is_admin() ) {
+			$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : false;
 
-		if ( $screen && $screen->is_block_editor() && ! $data_registry->exists( 'shippingMethodsExist' ) ) {
-			$methods_exist = wc_get_shipping_method_count() > 0;
-			$data_registry->add( 'shippingMethodsExist', $methods_exist );
+			if ( $screen && $screen->is_block_editor() && ! $data_registry->exists( 'shippingMethodsExist' ) ) {
+				$methods_exist = wc_get_shipping_method_count() > 0;
+				$data_registry->add( 'shippingMethodsExist', $methods_exist );
+			}
+		} else {
+			$this->hydrate_from_api( $data_registry );
+			$this->hydrate_customer_payment_methods( $data_registry );
 		}
 
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
