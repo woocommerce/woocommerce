@@ -57,7 +57,7 @@ final class ReserveStock {
 
 				if ( ! $product->is_in_stock() ) {
 					throw new ReserveStockException(
-						'product_out_of_stock',
+						'woocommerce_product_out_of_stock',
 						sprintf(
 							/* translators: %s: product name */
 							__( '%s is out of stock and cannot be purchased.', 'woo-gutenberg-products-block' ),

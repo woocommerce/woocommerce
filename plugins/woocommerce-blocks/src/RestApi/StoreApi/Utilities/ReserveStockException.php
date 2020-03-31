@@ -35,7 +35,7 @@ class ReserveStockException extends \Exception {
 	 */
 	public function __construct( $code, $message, $http_status_code = 400, $data = array() ) {
 		$this->error_code = $code;
-		$this->error_data = array_merge( array( 'status' => $http_status_code ), $data );
+		$this->error_data = $data;
 
 		parent::__construct( $message, $http_status_code );
 	}
