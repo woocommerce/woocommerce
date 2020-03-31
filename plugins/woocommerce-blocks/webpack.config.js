@@ -108,7 +108,14 @@ const CoreConfig = {
 
 const GutenbergBlocksConfig = {
 	...baseConfig,
-	...getMainConfig( { alias: getAlias() } ),
+	...getMainConfig( {
+		alias: getAlias(),
+		// This file is already imported by the All Products dependencies,
+		// so we can safely exclude it from the default build. It's still
+		// needed in the legacy build because it doesn't include the
+		// All Products block.
+		exclude: [ 'product-list-style' ],
+	} ),
 };
 
 const BlocksFrontendConfig = {

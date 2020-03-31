@@ -115,6 +115,12 @@ const stableMainEntry = {
 	'snackbar-notice-style':
 		'./node_modules/wordpress-components/src/snackbar/style.scss',
 
+	// Styles for grid blocks. WP <=5.2 doesn't have the All Products block,
+	// so this file would not be included if not explicitly declared here.
+	// This file is excluded from the default build so CSS styles are included
+	// in the other the components are imported.
+	'product-list-style': './assets/js/base/components/product-list/style.scss',
+
 	// Blocks
 	'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
 	'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
