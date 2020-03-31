@@ -80,6 +80,7 @@ export default class CategoriesReport extends Component {
 					report="categories"
 				/>
 				<ReportChart
+					charts={ charts }
 					filters={ filters }
 					advancedFilters={ advancedFilters }
 					mode={ mode }

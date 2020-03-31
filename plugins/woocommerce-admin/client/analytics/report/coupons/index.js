@@ -63,6 +63,7 @@ export default class CouponsReport extends Component {
 					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
+					charts={ charts }
 					filters={ filters }
 					advancedFilters={ advancedFilters }
 					mode={ mode }

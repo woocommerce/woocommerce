@@ -270,6 +270,12 @@ export default class CustomersReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'customers_count',
+					'avg_orders_count',
+					'avg_total_spend',
+					'avg_avg_order_value',
+				] }
 				isRequesting={ isRequesting }
 				itemIdField="id"
 				query={ query }

@@ -415,6 +415,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['fields']     = array(
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
 	}

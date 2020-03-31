@@ -164,8 +164,42 @@ class DashboardCharts extends Component {
 		} );
 	};
 
+	renderChartBlocks( query ) {
+		const { hiddenBlocks, path } = this.props;
+
+		// Reduce the API response to only the necessary stat fields
+		// by supplying all charts common to each endpoint.
+		const chartsByEndpoint = uniqCharts.reduce( ( byEndpoint, chart ) => {
+			if ( typeof byEndpoint[ chart.endpoint ] === 'undefined' ) {
+				byEndpoint[ chart.endpoint ] = [];
+			}
+			byEndpoint[ chart.endpoint ].push( chart );
+
+			return byEndpoint;
+		}, {} );
+
+		return (
+			<div className="woocommerce-dashboard__columns">
+				{ uniqCharts.map( ( chart ) => {
+					return hiddenBlocks.includes(
+						chart.endpoint + '_' + chart.key
+					) ? null : (
+						<ChartBlock
+							charts={ chartsByEndpoint[ chart.endpoint ] }
+							endpoint={ chart.endpoint }
+							key={ chart.endpoint + '_' + chart.key }
+							path={ path }
+							query={ query }
+							selectedChart={ chart }
+						/>
+					);
+				} ) }
+			</div>
+		);
+	}
+
 	render() {
-		const { hiddenBlocks, path, title } = this.props;
+		const { title } = this.props;
 		const { chartType, interval } = this.state;
 		const query = { ...this.props.query, chartType, interval };
 		return (
@@ -218,21 +252,7 @@ class DashboardCharts extends Component {
 							/>
 						</NavigableMenu>
 					</SectionHeader>
-					<div className="woocommerce-dashboard__columns">
-						{ uniqCharts.map( ( chart ) => {
-							return hiddenBlocks.includes(
-								chart.endpoint + '_' + chart.key
-							) ? null : (
-								<ChartBlock
-									charts={ [ chart ] }
-									endpoint={ chart.endpoint }
-									key={ chart.endpoint + '_' + chart.key }
-									path={ path }
-									query={ query }
-								/>
-							);
-						} ) }
-					</div>
+					{ this.renderChartBlocks( query ) }
 				</div>
 			</Fragment>
 		);

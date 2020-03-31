@@ -182,6 +182,13 @@ export default class TaxesReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'tax_codes',
+					'total_tax',
+					'order_tax',
+					'shipping_tax',
+					'orders_count',
+				] }
 				isRequesting={ isRequesting }
 				itemIdField="tax_rate_id"
 				query={ query }

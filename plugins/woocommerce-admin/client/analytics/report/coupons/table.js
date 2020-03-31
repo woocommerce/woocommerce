@@ -194,6 +194,11 @@ export default class CouponsReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'coupons_count',
+					'orders_count',
+					'amount',
+				] }
 				isRequesting={ isRequesting }
 				itemIdField="coupon_id"
 				query={ query }

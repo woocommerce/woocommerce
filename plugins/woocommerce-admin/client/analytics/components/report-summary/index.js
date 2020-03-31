@@ -195,6 +195,7 @@ ReportSummary.defaultProps = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const {
+			charts,
 			endpoint,
 			isRequesting,
 			limitProperties,
@@ -218,6 +219,8 @@ export default compose(
 			};
 		}
 
+		const fields = charts && charts.map( chart => chart.key );
+
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
@@ -230,6 +233,7 @@ export default compose(
 			filters,
 			advancedFilters,
 			defaultDateRange,
+			fields,
 		} );
 
 		return {

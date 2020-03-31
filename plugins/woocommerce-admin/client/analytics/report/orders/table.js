@@ -327,6 +327,15 @@ export default class OrdersReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'orders_count',
+					'num_new_customers',
+					'num_returning_customers',
+					'products',
+					'num_items_sold',
+					'coupons_count',
+					'net_revenue',
+				] }
 				query={ query }
 				tableQuery={ {
 					extended_info: true,

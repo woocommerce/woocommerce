@@ -58,6 +58,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$args['orderby']   = $request['orderby'];
 		$args['order']     = $request['order'];
 		$args['segmentby'] = $request['segmentby'];
+		$args['fields']    = $request['fields'];
 
 		return $args;
 	}

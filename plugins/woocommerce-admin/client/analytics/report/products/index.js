@@ -94,6 +94,7 @@ class ProductsReport extends Component {
 					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
+					charts={ charts }
 					mode={ mode }
 					filters={ filters }
 					advancedFilters={ advancedFilters }

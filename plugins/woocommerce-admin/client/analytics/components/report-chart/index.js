@@ -330,6 +330,7 @@ ReportChart.defaultProps = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const {
+			charts,
 			endpoint,
 			filters,
 			isRequesting,
@@ -366,6 +367,8 @@ export default compose(
 			};
 		}
 
+		const fields = charts && charts.map( chart => chart.key ); 
+
 		const primaryData = getReportChartData( {
 			endpoint,
 			dataType: 'primary',
@@ -375,6 +378,7 @@ export default compose(
 			filters,
 			advancedFilters,
 			defaultDateRange,
+			fields,
 		} );
 
 		if ( chartMode === 'item-comparison' ) {
@@ -393,6 +397,7 @@ export default compose(
 			filters,
 			advancedFilters,
 			defaultDateRange,
+			fields,
 		} );
 		return {
 			...newProps,

@@ -177,6 +177,7 @@ class CouponsReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [ 'download_count' ] }
 				query={ query }
 				tableQuery={ {
 					_embed: true,

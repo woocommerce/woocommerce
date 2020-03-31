@@ -553,6 +553,10 @@ ReportTable.propTypes = {
 	 */
 	searchBy: PropTypes.string,
 	/**
+	 * List of fields used for summary numbers. (Reduces queries)
+	 */
+	summaryFields: PropTypes.arrayOf( PropTypes.string ),
+	/**
 	 * Table data of that report. If it's not provided, it will be automatically
 	 * loaded via the provided `endpoint`.
 	 */
@@ -596,6 +600,7 @@ export default compose(
 			columnPrefsKey,
 			filters,
 			advancedFilters,
+			summaryFields,
 		} = props;
 
 		let userPrefColumns = [];
@@ -638,6 +643,7 @@ export default compose(
 					advancedFilters,
 					tableQuery,
 					defaultDateRange,
+					fields: summaryFields,
 				} )
 			: {};
 		const queriedTableData =

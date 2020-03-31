@@ -183,6 +183,11 @@ class CategoriesReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'items_sold',
+					'net_revenue',
+					'orders_count',
+				] }
 				isRequesting={ isRequesting }
 				itemIdField="category_id"
 				query={ query }

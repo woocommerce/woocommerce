@@ -333,6 +333,12 @@ class ProductsReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'products_count',
+					'items_sold',
+					'net_revenue',
+					'orders_count',
+				] }
 				itemIdField="product_id"
 				isRequesting={ isRequesting }
 				labels={ labels }

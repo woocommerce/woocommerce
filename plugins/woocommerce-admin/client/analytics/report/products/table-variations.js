@@ -243,6 +243,12 @@ export default class VariationsReportTable extends Component {
 				labels={ labels }
 				query={ query }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'variations_count',
+					'items_sold',
+					'net_revenue',
+					'orders_count',
+				] }
 				searchBy="variations"
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',

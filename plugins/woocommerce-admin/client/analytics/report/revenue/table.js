@@ -250,6 +250,16 @@ class RevenueReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'orders_count',
+					'gross_sales',
+					'total_sales',
+					'refunds',
+					'coupons',
+					'taxes',
+					'shipping',
+					'net_revenue',
+				] }
 				query={ query }
 				tableData={ tableData }
 				title={ __( 'Revenue', 'woocommerce-admin' ) }

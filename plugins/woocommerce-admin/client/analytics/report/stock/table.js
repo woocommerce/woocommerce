@@ -180,6 +180,13 @@ export default class StockReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				summaryFields={ [
+					'products',
+					'outofstock',
+					'lowstock',
+					'instock',
+					'onbackorder',
+				] }
 				query={ query }
 				tableQuery={ {
 					orderby: query.orderby || 'stock_status',

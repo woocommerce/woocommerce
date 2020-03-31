@@ -65,6 +65,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
 		$args['customers']           = $request['customers'];
+		$args['fields']              = $request['fields'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -361,6 +362,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			'items'             => array(
 				'type' => 'integer',
 			),
+		);
+		$params['fields']                  = array(
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

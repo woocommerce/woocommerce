@@ -42,15 +42,15 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args             = array();
-		$args['before']   = $request['before'];
-		$args['after']    = $request['after'];
-		$args['interval'] = $request['interval'];
-		$args['page']     = $request['page'];
-		$args['per_page'] = $request['per_page'];
-		$args['orderby']  = $request['orderby'];
-		$args['order']    = $request['order'];
-
+		$args                      = array();
+		$args['before']            = $request['before'];
+		$args['after']             = $request['after'];
+		$args['interval']          = $request['interval'];
+		$args['page']              = $request['page'];
+		$args['per_page']          = $request['per_page'];
+		$args['orderby']           = $request['orderby'];
+		$args['order']             = $request['order'];
+		$args['fields']            = $request['fields'];
 		$args['match']             = $request['match'];
 		$args['status_is']         = (array) $request['status_is'];
 		$args['status_is_not']     = (array) $request['status_is_not'];
@@ -511,6 +511,12 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 				'coupon',
 				'customer_type', // new vs returning.
 			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['fields']            = array(
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

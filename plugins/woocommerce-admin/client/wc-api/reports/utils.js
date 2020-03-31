@@ -197,7 +197,7 @@ export function isReportDataEmpty( report, endpoint ) {
  * @return {Object} data request query parameters.
  */
 function getRequestQuery( options ) {
-	const { endpoint, dataType, query } = options;
+	const { endpoint, dataType, query, fields } = options;
 	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );
 	const interval = getIntervalForQuery( query );
 	const filterQuery = getFilterQuery( options );
@@ -205,7 +205,7 @@ function getRequestQuery( options ) {
 
 	const noIntervals = includes( noIntervalEndpoints, endpoint );
 	return noIntervals
-		? { ...filterQuery }
+		? { ...filterQuery, fields }
 		: {
 				order: 'asc',
 				interval,
@@ -216,6 +216,7 @@ function getRequestQuery( options ) {
 				),
 				before: appendTimestamp( end, 'end' ),
 				segmentby: query.segmentby,
+				fields,
 				...filterQuery,
 		  };
 }

@@ -36,6 +36,7 @@ export default class RevenueReport extends Component {
 					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
+					charts={ charts }
 					endpoint="revenue"
 					path={ path }
 					query={ query }

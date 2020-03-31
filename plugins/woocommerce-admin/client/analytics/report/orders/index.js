@@ -36,6 +36,7 @@ export default class OrdersReport extends Component {
 					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
+					charts={ charts }
 					endpoint="orders"
 					path={ path }
 					query={ query }

@@ -80,6 +80,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$args['order']     = $request['order'];
 		$args['taxes']     = (array) $request['taxes'];
 		$args['segmentby'] = $request['segmentby'];
+		$args['fields']    = $request['fields'];
 
 		return $args;
 	}
@@ -385,6 +386,12 @@ class Controller extends \WC_REST_Reports_Controller {
 			'enum'              => array(
 				'tax_rate_id',
 			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['fields']    = array(
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
