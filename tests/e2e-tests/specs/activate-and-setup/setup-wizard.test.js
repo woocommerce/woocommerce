@@ -56,11 +56,11 @@ describe( 'Store owner can go through setup Task List', () => {
 	it( 'can setup shipping', async () => {
 		// Query for all tasks on the list
 		const taskListItems = await page.$$( '.woocommerce-list__item-title' );
-		expect( taskListItems ).toHaveLength( 6 );
+		expect( taskListItems ).toHaveLength( 5 );
 
 		await Promise.all( [
 			// Click on "Set up shipping" task to move to the next step
-			taskListItems[3].click(),
+			taskListItems[2].click(),
 
 			// Wait for shipping setup section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -69,16 +69,9 @@ describe( 'Store owner can go through setup Task List', () => {
 		// Wait for "Proceed" button to become active
 		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
-		// Click on "Proceed" button to move to the next step
+		// Click on "Proceed" button to save shipping settings
 		await page.click( 'button.is-primary' );
 		await page.waitFor( 3000 );
-
-		// Wait for "No thanks" button to become active
-		await page.waitForSelector( 'button.components-button:not(:disabled)' );
-
-		// Click on "No thanks" button to move to the next step
-		await page.click( 'button.components-button' );
-		await page.waitFor( 2000 );
 	} );
 } );
 

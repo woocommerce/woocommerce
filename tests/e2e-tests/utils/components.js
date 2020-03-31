@@ -129,8 +129,8 @@ const completeOnboardingWizard = async () => {
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
 	expect( productTypesCheckboxes ).toHaveLength( 6 );
 
-	// Select all industries including "Other"
-	for ( let i = 0; i < 6; i++ ) {
+	// Select Physical and Downloadable products
+	for ( let i = 0; i < 2; i++ ) {
 		await productTypesCheckboxes[i].click();
 	}
 
@@ -187,18 +187,6 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 	// Click on "Continue with my active theme" button to move to the next step
 	await page.click( 'button.is-primary' );
-
-	// Wait for purchases and installation window to appear
-	await page.waitForSelector( '.components-modal__header-heading' );
-	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Would you like to purchase and install the following features now?' }
-	);
-
-	// Wait for "I'll do it later" link to become active
-	await page.waitForSelector( 'button.is-link:not(:disabled)' );
-	// Click on "I'll do it later" link to move to the next step
-	await page.click( 'button.is-link' );
-	await page.waitFor( 3000 );
 
 	// Wait for "Woo-hoo almost there" window to appear
 	await page.waitForSelector( '.components-modal__header-heading' );
