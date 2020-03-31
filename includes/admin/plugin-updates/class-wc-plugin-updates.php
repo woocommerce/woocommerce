@@ -173,7 +173,7 @@ class WC_Plugin_Updates {
 	*/
 
 	/**
-	 * Get active plugins that have a tested version lower than the input version.
+	 * Get installed plugins that have a tested version lower than the input version.
 	 *
 	 * In case of testing major version compatibility and if current WC version is >= major version part
 	 * of the $new_version, no plugins are returned, even if they don't explicitly declare compatibility
