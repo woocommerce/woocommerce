@@ -96,7 +96,6 @@
     "ie 9"
   ],
   "dependencies": {
-    "@jest/test-sequencer": "^25.0.0",
-    "puppeteer-select": "^1.0.3"
+    "@jest/test-sequencer": "^25.0.0"
   }
 }

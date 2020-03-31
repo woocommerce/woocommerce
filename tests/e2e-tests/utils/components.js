@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import { clickTab, setCheckbox, uiUnblocked, verifyCheckboxIsUnset } from './index';
+import { clickTab, setCheckbox, uiUnblocked, unsetCheckbox, verifyCheckboxIsUnset } from "./index";
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -87,7 +87,7 @@ const completeOnboardingWizard = async () => {
 	// Verify that checkbox next to "I'm setting up a store for a client" is not selected
 	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
 
-	// Defining "Continue" button
+	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	await Promise.all( [
@@ -100,10 +100,19 @@ const completeOnboardingWizard = async () => {
 
 	// Industry section
 
-	// Select checkbox next to "Fashion, apparel, and accessories"
-	await setCheckbox( '.components-checkbox-control__input' );
+	// Query for the industries checkboxes
+	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
+	expect( industryCheckboxes ).toHaveLength( 8 );
 
-	// Defining "Continue" button
+	// Select all industries including "Other"
+	for ( let i = 0; i < 8; i++ ) {
+		await industryCheckboxes[i].click();
+	}
+
+	// Fill "Other" industry
+	await expect( page ).toFill( '.components-text-control__input', config.get( 'onboardingwizard.industry' ) );
+
+	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	await Promise.all( [
@@ -116,11 +125,16 @@ const completeOnboardingWizard = async () => {
 
 	// Product types section
 
-	// Select checkbox next to "Physical products"
-	await setCheckbox( '.components-checkbox-control__input' );
+	// Query for the product types checkboxes
+	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
+	expect( productTypesCheckboxes ).toHaveLength( 6 );
 
-	// Defining "Continue" button
-	// const productTypesContinueButton = await select( page ).getElement( 'button:contains(Continue)' );
+	// Select all industries including "Other"
+	for ( let i = 0; i < 6; i++ ) {
+		await productTypesCheckboxes[i].click();
+	}
+
+	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
 
 	await Promise.all( [
@@ -136,7 +150,7 @@ const completeOnboardingWizard = async () => {
 	// Query for the <SelectControl>s
 	const selectControls = await page.$$( '.woocommerce-select-control' );
 	expect( selectControls ).toHaveLength( 2 );
-	
+
 	// Fill the number of products you plan to sell
 	await selectControls[0].click();
 	await page.waitForSelector( '.woocommerce-select-control__listbox' );
@@ -147,7 +161,16 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-select-control__listbox' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Defining "Continue" button
+	// Query for the plugin upload toggles
+	const pluginToggles = await page.$$( '.components-form-toggle__input' );
+	expect( pluginToggles ).toHaveLength( 3 );
+
+	// Disable Market on Facebook, Mailchimp and Google Shopping download
+	for ( let i = 0; i < 3; i++ ) {
+		await pluginToggles[i].click();
+	}
+
+	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
 
 	await Promise.all( [
@@ -157,6 +180,36 @@ const completeOnboardingWizard = async () => {
 		// Wait for "Theme" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	] );
+
+	// Theme section
+
+	// Wait for "Continue with my active theme" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	// Click on "Continue with my active theme" button to move to the next step
+	await page.click( 'button.is-primary' );
+
+	// Wait for purchases and installation window to appear
+	await page.waitForSelector( '.components-modal__header-heading' );
+	await expect( page ).toMatchElement(
+		'.components-modal__header-heading', { text: 'Would you like to purchase and install the following features now?' }
+	);
+
+	// Wait for "I'll do it later" link to become active
+	await page.waitForSelector( 'button.is-link:not(:disabled)' );
+	// Click on "I'll do it later" link to move to the next step
+	await page.click( 'button.is-link' );
+	await page.waitFor( 3000 );
+
+	// Wait for "Woo-hoo almost there" window to appear
+	await page.waitForSelector( '.components-modal__header-heading' );
+	await expect( page ).toMatchElement(
+		'.components-modal__header-heading', { text: 'Woo hoo - you\'re almost there!' }
+	);
+
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	// Click on "Continue" button to move to the next step
+	await page.click( 'button.is-primary:not(:disabled)' );
 };
 
 /**
