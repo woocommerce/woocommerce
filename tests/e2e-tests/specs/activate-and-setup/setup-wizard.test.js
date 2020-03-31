@@ -52,6 +52,36 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 	} );
 } );
 
+describe( 'Store owner can go through setup Task List', () => {
+	it( 'can setup shipping', async () => {
+		// Query for all tasks on the list
+		const taskListItems = await page.$$( '.woocommerce-list__item-title' );
+		expect( taskListItems ).toHaveLength( 6 );
+
+		await Promise.all( [
+			// Click on "Set up shipping" task to move to the next step
+			taskListItems[3].click(),
+
+			// Wait for shipping setup section to load
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+
+		// Wait for "Proceed" button to become active
+		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+
+		// Click on "Proceed" button to move to the next step
+		await page.click( 'button.is-primary' );
+		await page.waitFor( 3000 );
+
+		// Wait for "No thanks" button to become active
+		await page.waitForSelector( 'button.components-button:not(:disabled)' );
+
+		// Click on "No thanks" button to move to the next step
+		await page.click( 'button.components-button' );
+		await page.waitFor( 2000 );
+	} );
+} );
+
 describe( 'Store owner can finish initial store setup', () => {
 
 	it( 'can enable tax rates and calculations', async () => {
@@ -93,42 +123,6 @@ describe( 'Store owner can finish initial store setup', () => {
 			expect( page ).toMatchElement( '#setting-error-settings_updated', { text: 'Permalink structure updated.' } ),
 			verifyValueOfInputField( '#permalink_structure', '/%postname%/' ),
 			verifyValueOfInputField( '#woocommerce_permalink_structure', '/product/' ),
-		] );
-	} );
-
-	it( 'can setup shipping', async () => {
-		// Go to shipping settings page
-		await StoreOwnerFlow.openSettings( 'shipping' );
-
-		await Promise.all( [
-			// Click on "Add shipping zone" button
-			await page.click( '.wc-shipping-zone-add' ),
-
-			// Wait for the shipping zone section to load
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-		] );
-
-		// Fill shipping zone name field
-		await expect( page ).toFill( '#zone_name', config.get( 'settings.shipping.zonename' ) );
-
-		// Click on "Add shipping method" button
-		await page.click( 'button.wc-shipping-zone-add-method' );
-
-		// Wait for "Add shipping method" window to appear
-		await page.waitForSelector( '.wc-backbone-modal-header' );
-		await expect( page ).toMatchElement(
-			'.wc-backbone-modal-header', { text: 'Add shipping method' }
-		);
-
-		// Select Free Shipping
-		await expect( page ).toSelect( 'select[name="add_method_id"]', config.get( 'settings.shipping.shippingmethod') );
-
-		await Promise.all( [
-			// Click on "Continue" button to move to the next step
-			page.click( '#btn-ok' ),
-
-			// Wait for "Shipping zones" section to load
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		] );
 	} );
 } );
