@@ -18,6 +18,7 @@ import {
 	CardNumberElement,
 	CardExpiryElement,
 	CardCvcElement,
+	useElements,
 	useStripe,
 } from '@stripe/react-stripe-js';
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
@@ -221,7 +222,8 @@ const useStripeCheckoutSubscriptions = (
 	sourceId,
 	setSourceId,
 	shouldSavePayment,
-	stripe
+	stripe,
+	elements
 ) => {
 	const onStripeError = useRef( ( event ) => {
 		return event;
@@ -239,54 +241,67 @@ const useStripeCheckoutSubscriptions = (
 			// inputs
 			return {};
 		};
-		const createSource = async ( stripeBilling ) => {
-			return await stripe.createSource( stripeBilling );
+		const createSource = async ( ownerInfo ) => {
+			const elementToGet = getStripeServerData().inline_cc_form
+				? CardElement
+				: CardNumberElement;
+			return await stripe.createSource(
+				elements.getElement( elementToGet ),
+				{
+					type: 'card',
+					owner: ownerInfo,
+				}
+			);
 		};
 		const onSubmit = async () => {
-			paymentStatus.setPaymentStatus().processing();
-			const { billingData } = billing;
-			// use token if it's set.
-			if ( sourceId !== 0 ) {
+			try {
+				paymentStatus.setPaymentStatus().processing();
+				const { billingData } = billing;
+				// use token if it's set.
+				if ( sourceId !== 0 ) {
+					paymentStatus.setPaymentStatus().success( billingData, {
+						paymentMethod: PAYMENT_METHOD_NAME,
+						paymentRequestType: 'cc',
+						sourceId,
+						shouldSavePayment,
+					} );
+					return true;
+				}
+				const ownerInfo = {
+					address: {
+						line1: billingData.address_1,
+						line2: billingData.address_2,
+						city: billingData.city,
+						state: billingData.state,
+						postal_code: billingData.postcode,
+						country: billingData.country,
+					},
+				};
+				if ( billingData.phone ) {
+					ownerInfo.phone = billingData.phone;
+				}
+				if ( billingData.email ) {
+					ownerInfo.email = billingData.email;
+				}
+				if ( billingData.first_name || billingData.last_name ) {
+					ownerInfo.name = `${ billingData.first_name } ${ billingData.last_name }`;
+				}
+
+				const response = await createSource( ownerInfo );
+				if ( response.error ) {
+					return onStripeError.current( response );
+				}
 				paymentStatus.setPaymentStatus().success( billingData, {
+					sourceId: response.source.id,
 					paymentMethod: PAYMENT_METHOD_NAME,
 					paymentRequestType: 'cc',
-					sourceId,
 					shouldSavePayment,
 				} );
+				setSourceId( response.source.id );
 				return true;
+			} catch ( e ) {
+				return e;
 			}
-			const stripeBilling = {
-				address: {
-					line1: billingData.address_1,
-					line2: billingData.address_2,
-					city: billingData.city,
-					state: billingData.state,
-					postal_code: billingData.postcode,
-					country: billingData.country,
-				},
-			};
-			if ( billingData.phone ) {
-				stripeBilling.phone = billingData.phone;
-			}
-			if ( billingData.email ) {
-				stripeBilling.email = billingData.email;
-			}
-			if ( billingData.first_name || billingData.last_name ) {
-				stripeBilling.name = `${ billingData.first_name } ${ billingData.last_name }`;
-			}
-
-			const response = await createSource( stripeBilling );
-			if ( response.error ) {
-				return onStripeError.current( response );
-			}
-			paymentStatus.setPaymentStatus().success( billingData, {
-				sourceId: response.source.id,
-				paymentMethod: PAYMENT_METHOD_NAME,
-				paymentRequestType: 'cc',
-				shouldSavePayment,
-			} );
-			setSourceId( response.source.id );
-			return true;
 		};
 		const onComplete = () => {
 			paymentStatus.setPaymentStatus().completed();
@@ -343,13 +358,16 @@ const CreditCardComponent = ( {
 	const [ sourceId, setSourceId ] = useState( 0 );
 	const stripe = useStripe();
 	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
+	const elements = useElements();
 	const onStripeError = useStripeCheckoutSubscriptions(
 		eventRegistration,
 		paymentStatus,
 		billing,
 		sourceId,
+		setSourceId,
 		shouldSavePayment,
-		stripe
+		stripe,
+		elements
 	);
 	const onChange = ( paymentEvent ) => {
 		if ( paymentEvent.error ) {
