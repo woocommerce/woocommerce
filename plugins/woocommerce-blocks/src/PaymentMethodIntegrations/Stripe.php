@@ -69,6 +69,7 @@ class Stripe {
 			add_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before', [ $this, 'enqueue_data' ] );
 		}
 		add_action( 'init', [ $this, 'register_scripts_and_styles' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_extension_assets' ] );
 	}
 
 	/**
@@ -93,7 +94,7 @@ class Stripe {
 		if ( ! $this->asset_registry->exists( 'stripe_data' ) ) {
 			$this->asset_registry->add( 'stripe_data', $data );
 		}
-		wp_enqueue_script( 'wc-payment-method-extensions' );
+		$this->enqueue_extension_assets();
 	}
 
 	/**
@@ -106,6 +107,13 @@ class Stripe {
 			'build/wc-payment-method-extensions.js',
 			[ 'stripe' ]
 		);
+	}
+
+	/**
+	 * Enqueues the payment method assets
+	 */
+	public function enqueue_extension_assets() {
+		wp_enqueue_script( 'wc-payment-method-extensions' );
 	}
 
 	/**
