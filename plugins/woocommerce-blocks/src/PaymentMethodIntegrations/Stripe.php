@@ -66,7 +66,6 @@ class Stripe {
 		// only do when not in admin.
 		if ( ! is_admin() ) {
 			add_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before', [ $this, 'enqueue_data' ] );
-			add_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before', [ $this, 'enqueue_data' ] );
 		}
 		add_action( 'init', [ $this, 'register_scripts_and_styles' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_extension_assets' ] );
