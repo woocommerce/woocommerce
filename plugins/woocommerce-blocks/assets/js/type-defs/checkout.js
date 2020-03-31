@@ -1,20 +1,18 @@
 /**
  * @typedef {Object} CheckoutDispatchActions
  *
- * @property {function()}                 resetCheckout        Dispatches an action that resets
- *                                                             the checkout to a pristine state.
- * @property {function( string )}         setRedirectUrl       Dispatches an action that sets the
- *                                                             redirectUrl to the given value.
- * @property {function()}                 setHasError          Dispatches an action that sets the
- *                                                             checkout status to having an error.
- * @property {function()}                 clearError           Dispatches an action that clears the
- *                                                             hasError status for the checkout.
- * @property {function()}                 incrementCalculating Dispatches an action that increments
- *                                                             the calculating state for checkout by one.
- * @property {function()}                 decrementCalculating Dispatches an action that decrements
- *                                                             the calculating state for checkout by one.
- * @property {function( number, string )} setOrderId           Dispatches an action that stores the draft
- *                                                             order ID and key to state.
+ * @property {function()}               resetCheckout        Dispatches an action that resets
+ *                                                           the checkout to a pristine state.
+ * @property {function(string)}         setRedirectUrl       Dispatches an action that sets the
+ *                                                           redirectUrl to the given value.
+ * @property {function(boolean=)}      setHasError          Dispatches an action that sets the
+ *                                                           checkout status to having an error.
+ * @property {function()}               incrementCalculating Dispatches an action that increments
+ *                                                           the calculating state for checkout by one.
+ * @property {function()}               decrementCalculating Dispatches an action that decrements
+ *                                                           the calculating state for checkout by one.
+ * @property {function(number, string)} setOrderId           Dispatches an action that stores the draft
+ *                                                           order ID and key to state.
  */
 
 /**

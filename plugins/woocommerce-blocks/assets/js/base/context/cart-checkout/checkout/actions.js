@@ -32,12 +32,10 @@ export const actions = {
 	setComplete: () => ( {
 		type: SET_COMPLETE,
 	} ),
-	setHasError: () => ( {
-		type: SET_HAS_ERROR,
-	} ),
-	clearError: () => ( {
-		type: SET_NO_ERROR,
-	} ),
+	setHasError: ( hasError = true ) => {
+		const type = hasError ? SET_HAS_ERROR : SET_NO_ERROR;
+		return { type };
+	},
 	incrementCalculating: () => ( {
 		type: INCREMENT_CALCULATING,
 	} ),
