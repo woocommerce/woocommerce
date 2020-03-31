@@ -99,24 +99,20 @@ describe( 'Store owner can finish initial store setup', () => {
 	it( 'can setup shipping', async () => {
 		// Go to shipping settings page
 		await StoreOwnerFlow.openSettings( 'shipping' );
-		// Wait for "Add shipping zone" button to become active
-		await page.waitForSelector( 'a.wc-shipping-zone-add:not(:disabled)' );
 
 		await Promise.all( [
 			// Click on "Add shipping zone" button
-			await page.click( 'a.wc-shipping-zone-add' ),
+			await page.click( '.wc-shipping-zone-add' ),
 
 			// Wait for the shipping zone section to load
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		] );
 
-		// Fill shipping zone name
+		// Fill shipping zone name field
 		await expect( page ).toFill( '#zone_name', config.get( 'settings.shipping.zonename' ) );
 
-		// Wait for "Add shipping method" button to become active
-		await page.waitForSelector( 'button.wc-shipping-zone-add-method:not(:disabled)' );
 		// Click on "Add shipping method" button
-		await page.click( 'button.wc-shipping-zone-add-method' )
+		await page.click( 'button.wc-shipping-zone-add-method' );
 
 		// Wait for "Add shipping method" window to appear
 		await page.waitForSelector( '.wc-backbone-modal-header' );
@@ -126,9 +122,6 @@ describe( 'Store owner can finish initial store setup', () => {
 
 		// Select Free Shipping
 		await expect( page ).toSelect( 'select[name="add_method_id"]', config.get( 'settings.shipping.shippingmethod') );
-
-		// Wait for "Add shipping method" button to become active
-		await page.waitForSelector( '#btn-ok:not(:disabled)' );
 
 		await Promise.all( [
 			// Click on "Continue" button to move to the next step
