@@ -127,12 +127,12 @@
 /**
  * @typedef {Object} PaymentStatusDispatchers
  *
- * @property {function()} started
- * @property {function()} processing
- * @property {function()} completed
- * @property {function(string)} error
+ * @property {function()}               started
+ * @property {function()}               processing
+ * @property {function()}               completed
+ * @property {function(string)}         error
  * @property {function(string, Object)} failed
- * @property {function(Object)} success
+ * @property {function(Object,Object)}  success
  */
 
 /**

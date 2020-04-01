@@ -283,4 +283,18 @@
  *                                      form or separate inputs.
  */
 
+/**
+ * @typedef {Object} StripeElementOptions
+ *
+ * @property {Object}            options  The configuration object for stripe
+ *                                        elements.
+ * @property {function(boolean)} onActive A callback for setting whether an
+ *                                        element is active or not. "Active"
+ *                                        means it's not empty.
+ * @property {string}            error    Any error message from the stripe
+ *                                        element.
+ * @property {function(string)}  setError A callback for setting an error
+ *                                        message.
+ */
+
 export {};
