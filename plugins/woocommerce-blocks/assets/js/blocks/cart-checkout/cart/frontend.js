@@ -12,6 +12,7 @@ import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
 	StoreNoticesProvider,
 	ValidationContextProvider,
+	CartProvider,
 } from '@woocommerce/base-context';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
@@ -36,7 +37,9 @@ const Block = ( { emptyCart, attributes } ) => {
 			) : (
 				<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
 					<ValidationContextProvider>
-						<FullCart attributes={ attributes } />
+						<CartProvider>
+							<FullCart attributes={ attributes } />
+						</CartProvider>
 					</ValidationContextProvider>
 				</LoadingMask>
 			) }

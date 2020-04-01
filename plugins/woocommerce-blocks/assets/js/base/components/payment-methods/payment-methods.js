@@ -14,7 +14,7 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
-	useCheckoutContext,
+	useEditorContext,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
 
@@ -48,7 +48,7 @@ const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
  * @return {*} The rendered component.
  */
 const PaymentMethods = () => {
-	const { isEditor } = useCheckoutContext();
+	const { isEditor } = useEditorContext();
 	const { customerPaymentMethods = {} } = usePaymentMethodDataContext();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
 	const currentPaymentMethods = useRef( paymentMethods );

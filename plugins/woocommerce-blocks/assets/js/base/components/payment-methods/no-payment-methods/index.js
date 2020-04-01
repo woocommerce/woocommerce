@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Placeholder, Button, Notice } from 'wordpress-components';
 import { Icon, card } from '@woocommerce/icons';
 import { ADMIN_URL } from '@woocommerce/settings';
-import { useCheckoutContext } from '@woocommerce/base-context';
+import { useEditorContext } from '@woocommerce/base-context';
 import classnames from 'classnames';
 
 /**
@@ -17,7 +17,7 @@ import './style.scss';
  * Render content when no payment methods are found depending on context.
  */
 const NoPaymentMethods = () => {
-	const { isEditor } = useCheckoutContext();
+	const { isEditor } = useEditorContext();
 
 	return isEditor ? (
 		<NoPaymentMethodsPlaceholder />

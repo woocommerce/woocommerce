@@ -22,6 +22,7 @@ import {
 	CheckoutProvider,
 	useValidationContext,
 	useCheckoutContext,
+	useEditorContext,
 	useShippingDataContext,
 	useBillingDataContext,
 } from '@woocommerce/base-context';
@@ -46,8 +47,8 @@ import CheckoutSidebar from './sidebar/index.js';
 import CheckoutOrderError from './checkout-order-error/index.js';
 import './style.scss';
 
-const Block = ( { isEditor = false, ...props } ) => (
-	<CheckoutProvider isEditor={ isEditor }>
+const Block = ( props ) => (
+	<CheckoutProvider>
 		<Checkout { ...props } />
 	</CheckoutProvider>
 );
@@ -60,7 +61,8 @@ const Checkout = ( {
 	shippingRates = [],
 	scrollToTop,
 } ) => {
-	const { isEditor, hasOrder } = useCheckoutContext();
+	const { isEditor } = useEditorContext();
+	const { hasOrder } = useCheckoutContext();
 	const {
 		shippingRatesLoading,
 		shippingAddress,

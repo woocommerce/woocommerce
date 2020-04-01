@@ -23,11 +23,14 @@ export const useEditorContext = () => {
 /**
  * Editor provider
  *
- * @param {Object}  props              Incoming props for the provider.
- * @param {*}       props.children     The children being wrapped.
- * @param {number}  props.currentPostId The post being edited.
+ * @param {Object}  props                 Incoming props for the provider.
+ * @param {*}       props.children        The children being wrapped.
+ * @param {number}  [props.currentPostId] The post being edited.
  */
 export const EditorProvider = ( { children, currentPostId = 0 } ) => {
+	/**
+	 * @type {number} editingPostId
+	 */
 	const editingPostId = useSelect(
 		( select ) => {
 			if ( ! currentPostId ) {

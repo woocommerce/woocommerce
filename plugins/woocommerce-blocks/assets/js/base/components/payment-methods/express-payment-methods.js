@@ -6,10 +6,10 @@ import {
 	usePaymentMethodInterface,
 } from '@woocommerce/base-hooks';
 import { cloneElement, isValidElement } from '@wordpress/element';
-import { useCheckoutContext } from '@woocommerce/base-context';
+import { useEditorContext } from '@woocommerce/base-context';
 
 const ExpressPaymentMethods = () => {
-	const { isEditor } = useCheckoutContext();
+	const { isEditor } = useEditorContext();
 	const paymentMethodInterface = usePaymentMethodInterface();
 	// not implementing isInitialized here because it's utilized further
 	// up in the tree for express payment methods. We won't even get here if

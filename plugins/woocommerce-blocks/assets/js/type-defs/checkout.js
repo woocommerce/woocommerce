@@ -11,7 +11,7 @@
  *                                                           the calculating state for checkout by one.
  * @property {function()}               decrementCalculating Dispatches an action that decrements
  *                                                           the calculating state for checkout by one.
- * @property {function(number, string)} setOrderId           Dispatches an action that stores the draft
+ * @property {function(number|string)} setOrderId            Dispatches an action that stores the draft
  *                                                           order ID and key to state.
  */
 
