@@ -181,6 +181,10 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_customer_get_shipping_state', array( $this, 'force_customer_us_state' ) );
 		add_filter( 'woocommerce_customer_get_shipping_postcode', array( $this, 'force_customer_us_postcode' ) );
 
+		// Create tax classes first.
+		WC_Tax::create_tax_class( '23percent' );
+		WC_Tax::create_tax_class( '5percent' );
+
 		$tax_rate    = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
@@ -244,7 +248,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
 		WC()->cart->calculate_totals();
-		$this->assertEquals( 28.9, WC()->cart->total );
+		$this->assertEquals( 27.05, WC()->cart->total );
 
 		// Add product2 to cart.
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
