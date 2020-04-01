@@ -70,7 +70,7 @@ export const usePaymentMethodDataContext = () => {
  * status and data.
  *
  * @param {Object} props                     Incoming props for provider
- * @param {Array}  props.children            The wrapped components in this
+ * @param {Object} props.children            The wrapped components in this
  *                                           provider.
  * @param {string} props.activePaymentMethod The initial active payment method
  *                                           to set for the context.

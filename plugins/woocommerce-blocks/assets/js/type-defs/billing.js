@@ -13,3 +13,5 @@
  * @property {string} country    The country for the billing address (ISO)
  * @property {string} phone      The phone number for the billing address
  */
+
+export {};

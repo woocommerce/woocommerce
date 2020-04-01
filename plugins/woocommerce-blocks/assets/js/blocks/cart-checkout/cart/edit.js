@@ -15,7 +15,11 @@ import PropTypes from 'prop-types';
 import ViewSwitcher from '@woocommerce/block-components/view-switcher';
 import { SHIPPING_ENABLED, CART_PAGE_ID } from '@woocommerce/block-settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
-import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
+import {
+	EditorProvider,
+	useEditorContext,
+	CartProvider,
+} from '@woocommerce/base-context';
 import { useSelect } from '@wordpress/data';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { getAdminLink } from '@woocommerce/settings';
@@ -212,9 +216,11 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 								>
 									<Disabled>
 										<EditorProvider>
-											<FullCart
-												attributes={ attributes }
-											/>
+											<CartProvider>
+												<FullCart
+													attributes={ attributes }
+												/>
+											</CartProvider>
 										</EditorProvider>
 									</Disabled>
 								</BlockErrorBoundary>

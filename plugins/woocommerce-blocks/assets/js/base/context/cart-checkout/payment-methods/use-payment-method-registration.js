@@ -6,13 +6,13 @@ import {
 	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { useCheckoutContext } from '@woocommerce/base-context';
+import { useEditorContext } from '@woocommerce/base-context';
 
 const usePaymentMethodRegistration = (
 	dispatcher,
 	registeredPaymentMethods
 ) => {
-	const { isEditor } = useCheckoutContext();
+	const { isEditor } = useEditorContext();
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const countPaymentMethodsInitializing = useRef(
 		Object.keys( registeredPaymentMethods ).length
