@@ -1,0 +1,66 @@
+/**
+ * privacy.scss
+ * Styles applied to the Privacy Policy Guide to support WooCommerce content.
+ * Adds support for styling ul/ol elements.
+ */
+
+/**
+ * Styling begins
+ */
+
+// Support for indented bullet-lists.
+.wp-suggested-text ul,
+.policy-text ul {
+	list-style: disc;
+}
+
+.wp-suggested-text ol,
+.policy-text ol {
+	list-style: decimal;
+}
+
+.wp-suggested-text ul li,
+.wp-suggested-text ol li,
+.policy-text ul li,
+.policy-text ol li {
+	margin-left: 2em;
+}
+
+// Pre-5.4 support for italics.
+.branch-4-9 .wp-suggested-text ul,
+.branch-4-9 .wp-suggested-text ol,
+.branch-5-0 .wp-suggested-text ul,
+.branch-5-0 .wp-suggested-text ol,
+.branch-5-1 .wp-suggested-text ul,
+.branch-5-1 .wp-suggested-text ol,
+.branch-5-2 .wp-suggested-text ul,
+.branch-5-2 .wp-suggested-text ol,
+.branch-5-3 .wp-suggested-text ul,
+.branch-5-3 .wp-suggested-text ol {
+	font-style: italic;
+}
+
+// 5.4 support for white background and padding.
+.branch-5-4 .policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.branch-5-4 .policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
+	background-color: #fff;
+	margin: 0;
+	padding: 1em;
+}
+
+.branch-5-4 .hide-privacy-policy-tutorial ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.branch-5-4 .hide-privacy-policy-tutorial ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
+	margin: 1em 0;
+	padding: 0;
+}
+
+.policy-text p:not(.privacy-policy-tutorial):not(.wp-policy-help) + ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text p:not(.privacy-policy-tutorial):not(.wp-policy-help) + ol:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help) + p:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help) + ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help) + ol:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) + p:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) + ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) + ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
+	padding-top: 0;
+}
