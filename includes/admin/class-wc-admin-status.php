@@ -387,7 +387,7 @@ class WC_Admin_Status {
 						<?php
 						/* translators: %s: plugin author */
 						printf( esc_html__( 'by %s', 'woocommerce' ), esc_html( $plugin['author_name'] ) );
-						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $untested_string . $network_string; // WPCS: XSS ok.
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $untested_string . $network_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						?>
 					</td>
 				</tr>
