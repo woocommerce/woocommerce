@@ -13,7 +13,7 @@ class Logo extends Component {
 				viewBox="0 0 161 46"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
-				ariaLabel={ __( 'WooCommerce + Jetpack', 'woocommerce-admin' ) }
+				aria-label={ __( 'WooCommerce + Jetpack', 'woocommerce-admin' ) }
 				className="woocommerce-profile-wizard__benefits-logo"
 			>
 				<path
