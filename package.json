@@ -26,7 +26,7 @@
     "@babel/preset-env": "7.8.6",
     "@babel/register": "7.8.6",
     "@jest/test-sequencer": "^25.0.0",
-    "@wordpress/e2e-test-utils": "4.3.0",
+    "@wordpress/e2e-test-utils": "4.3.1",
     "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
