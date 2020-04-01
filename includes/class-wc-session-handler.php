@@ -10,6 +10,8 @@
  * @package  WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -316,7 +318,7 @@ class WC_Session_Handler extends WC_Session {
 	public function get_session( $customer_id, $default = false ) {
 		global $wpdb;
 
-		if ( defined( 'WP_SETUP_CONFIG' ) ) {
+		if ( Constants::is_defined( 'WP_SETUP_CONFIG' ) ) {
 			return false;
 		}
 

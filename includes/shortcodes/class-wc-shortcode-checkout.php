@@ -104,6 +104,14 @@ class WC_Shortcode_Checkout {
 					return;
 				}
 
+				// Add notice if logged in customer is trying to pay for guest order.
+				if ( ! $order->get_user_id() && is_user_logged_in() ) {
+					// If order has does not have same billing email then current logged in user then show warning.
+					if ( $order->get_billing_email() !== wp_get_current_user()->user_email ) {
+						wc_print_notice( __( 'You are paying for a guest order. Please continue with payment only if you recognize this order.', 'woocommerce' ), 'error' );
+					}
+				}
+
 				// Logged in customer trying to pay for someone else's order.
 				if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
 					throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );

@@ -7,6 +7,8 @@
  * @since 1.0.0
  */
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Parent test case for tests involving HTTP requests.
  *
@@ -355,11 +357,11 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 			return $value;
 		}
 
-		if ( ! defined( 'WP_HTTP_TC_' . $var ) ) {
+		if ( ! Constants::is_defined( 'WP_HTTP_TC_' . $var ) ) {
 			return $default;
 		}
 
-		return constant( 'WP_HTTP_TC_' . $var );
+		return Constants::get_constant( 'WP_HTTP_TC_' . $var );
 	}
 
 	/**
@@ -434,7 +436,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	}
 }
 
-if ( ! defined( 'WP_HTTP_TC_NO_BACKPAT' ) ) {
+if ( ! Constants::is_defined( 'WP_HTTP_TC_NO_BACKPAT' ) ) {
 	abstract class WP_HTTP_UnitTestCase extends WP_HTTP_TestCase {}
 }
 

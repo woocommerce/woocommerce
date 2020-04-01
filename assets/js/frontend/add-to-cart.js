@@ -71,6 +71,13 @@ jQuery( function( $ ) {
 
 			var data = {};
 
+			// Fetch changes that are directly added by calling $thisbutton.data( key, value )
+			$.each( $thisbutton.data(), function( key, value ) {
+				data[ key ] = value;
+			});
+
+			// Fetch data attributes in $thisbutton. Give preference to data-attributes because they can be directly modified by javascript
+			// while `.data` are jquery specific memory stores.
 			$.each( $thisbutton[0].dataset, function( key, value ) {
 				data[ key ] = value;
 			});

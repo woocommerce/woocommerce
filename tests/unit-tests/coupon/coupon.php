@@ -224,6 +224,44 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the remainder is handled correctly and does not turn the total negative.
+	 *
+	 * @since 4.1
+	 */
+	public function test_percent_discount_handles_remainder_correctly() {
+
+		// Create product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 18 );
+		$product->save();
+
+		// Create coupon.
+		$coupon = WC_Helper_Coupon::create_coupon( '20off' );
+		update_post_meta( $coupon->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon->get_id(), 'coupon_amount', '20' );
+		$coupon_2 = WC_Helper_Coupon::create_coupon( '100off' );
+		update_post_meta( $coupon_2->get_id(), 'discount_type', 'percent' );
+		update_post_meta( $coupon_2->get_id(), 'coupon_amount', '100' );
+
+		// Create a flat rate method.
+		WC_Helper_Shipping::create_simple_flat_rate();
+
+		// Add product to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 4 );
+
+		// Add coupon.
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->add_discount( $coupon_2->get_code() );
+
+		// Set the flat_rate shipping method.
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+
+		// Test if the cart total amount is equal 29.5.
+		$this->assertEquals( 10, WC()->cart->total );
+	}
+
+	/**
 	 * Test date setters/getters.
 	 *
 	 * @since 3.0.0
