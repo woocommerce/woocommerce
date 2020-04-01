@@ -19,7 +19,6 @@ import { updateQueryString } from '@woocommerce/navigation';
 import Benefits from './steps/benefits';
 import BusinessDetails from './steps/business-details';
 import Industry from './steps/industry';
-import Plugins from './steps/plugins';
 import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
@@ -157,17 +156,6 @@ class ProfileWizard extends Component {
 				key: 'benefits',
 				container: Benefits,
 			} );
-
-			if (
-				profileItems.hasOwnProperty( 'plugins' ) &&
-				profileItems.plugins !== null &&
-				profileItems.plugins.startsWith( 'installed' )
-			) {
-				steps.push( {
-					key: 'plugins',
-					container: Plugins,
-				} );
-			}
 		}
 		return steps;
 	}
