@@ -32,7 +32,7 @@ setupAnchorLi.hidden = true;
 const topLevelPageWooCommerceLi = document.getElementById(
 	'toplevel_page_woocommerce'
 );
-topLevelPageWooCommerceLi.children[ 1 ].append( setupAnchorLi );
+topLevelPageWooCommerceLi.children[ 1 ].appendChild( setupAnchorLi );
 
 function hideOrShowMenuItemsForTaskList( show ) {
 	const allSubmenuItems = [

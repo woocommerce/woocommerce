@@ -133,6 +133,7 @@ const webpackConfig = {
 						'|acorn-jsx' +
 						'|d3-array' +
 						'|debug' +
+						'|marked' +
 						'|regexpu-core' +
 						'|unicode-match-property-ecmascript' +
 						'|unicode-match-property-value-ecmascript)/'
