@@ -210,10 +210,11 @@ function wc_get_parent_grouped_id( $product ) {
 
 	global $wpdb;
 
-	if ( $product->is_type( array( 'simple' ) ) ) {
-		$product_id = $product->get_id();
-		$group_ids  = array();
+	$group_ids = array();
 
+	if ( $product->is_type( array( 'simple' ) ) ) {
+
+		$product_id = $product->get_id();
 		$group_data = $wpdb->get_col(
 			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
 				"SELECT post_id
