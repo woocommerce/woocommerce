@@ -1,13 +1,17 @@
 <?php
+/**
+ * Tests for the WC_Data class.
+ *
+ * @package WooCommerce\Tests\CRUD
+ */
 
 /**
- * Meta
- * @package WooCommerce\Tests\CRUD
+ * Class WC_Tests_CRUD_Data
  */
 class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
-	 * Restore UTC on failire.
+	 * Restore UTC on failure.
 	 */
 	public function tearDown() {
 		parent::tearDown();
@@ -16,15 +20,6 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		// @codingStandardsIgnoreEnd
 		update_option( 'gmt_offset', 0 );
 		update_option( 'timezone_string', '' );
-	}
-
-	public function onNotSuccessfulTest( Throwable $e ) {
-		// @codingStandardsIgnoreStart
-		date_default_timezone_set( 'UTC' );
-		// @codingStandardsIgnoreEnd
-		update_option( 'gmt_offset', 0 );
-		update_option( 'timezone_string', '' );
-		parent::onNotSuccessfulTest( $e );
 	}
 
 	/**
@@ -52,17 +47,17 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: get_data
+	 * Test: get_data.
 	 */
-	function test_get_data() {
+	public function test_get_data() {
 		$object = new WC_Mock_WC_Data();
 		$this->assertInternalType( 'array', $object->get_data() );
 	}
 
 	/**
-	 * Test: delete_meta_data_by_mid
+	 * Test: delete_meta_data_by_mid.
 	 */
-	function test_delete_meta_data_by_mid() {
+	public function test_delete_meta_data_by_mid() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		$meta_id   = add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
@@ -71,9 +66,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: set_props
+	 * Test: set_props.
 	 */
-	function test_set_props() {
+	public function test_set_props() {
 		$object      = new WC_Mock_WC_Data();
 		$data_to_set = array(
 			'content'    => 'I am a fish',
@@ -97,7 +92,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Tests reading and getting set metadata.
 	 */
-	function test_get_meta_data() {
+	public function test_get_meta_data() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		$object->add_meta_data( 'test_meta_key', 'val1', true );
@@ -118,7 +113,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the meta data cache is not shared among instances.
 	 */
-	function test_get_meta_data_shared_bug() {
+	public function test_get_meta_data_shared_bug() {
 		$object = new WC_Order();
 		$object->add_meta_data( 'test_meta_key', 'val1', true );
 		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
@@ -135,9 +130,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the cache invalidation after an order is saved
+	 * Tests the cache invalidation after an order is saved.
 	 */
-	function test_get_meta_data_cache_invalidation() {
+	public function test_get_meta_data_cache_invalidation() {
 		$object = new WC_Order();
 		$object->add_meta_data( 'test_meta_key', 'val1', true );
 		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
@@ -154,7 +149,10 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( 'updated value', $metas[0]->value );
 	}
 
-	function test_get_meta_data_cache_invalidation_array_to_scalar() {
+	/**
+	 * Ensure get_meta_data() can overwrite array meta values with scalar values.
+	 */
+	public function test_get_meta_data_cache_invalidation_array_to_scalar() {
 		$object = new WC_Order();
 		$object->add_meta_data( 'test_meta_key', array( 'val1' ), true );
 		$object->add_meta_data( 'test_multi_meta_key', 'val2' );
@@ -174,7 +172,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test getting meta by ID.
 	 */
-	function test_get_meta() {
+	public function test_get_meta() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		$object->add_meta_data( 'test_meta_key', 'val1', true );
@@ -183,11 +181,11 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->save_meta_data();
 		$object = new WC_Mock_WC_Data( $object_id );
 
-		// test single meta key
+		// test single meta key.
 		$single_meta = $object->get_meta( 'test_meta_key' );
 		$this->assertEquals( 'val1', $single_meta );
 
-		// test getting multiple
+		// test getting multiple.
 		$meta = $object->get_meta( 'test_multi_meta_key', false );
 		$i    = 2;
 		foreach ( $meta as $data ) {
@@ -200,7 +198,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test seeing if meta exists.
 	 */
-	function test_has_meta() {
+	public function test_has_meta() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		$object->add_meta_data( 'test_meta_key', 'val1', true );
@@ -215,9 +213,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting meta that hasn't been set
+	 * Test getting meta that hasn't been set.
 	 */
-	function test_get_meta_no_meta() {
+	public function test_get_meta_no_meta() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		$object    = new WC_Mock_WC_Data( $object_id );
@@ -232,7 +230,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test setting meta.
 	 */
-	function test_set_meta_data() {
+	public function test_set_meta_data() {
 		global $wpdb;
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
@@ -274,7 +272,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test adding meta data.
 	 */
-	function test_add_meta_data() {
+	public function test_add_meta_data() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		$data      = 'add_meta_data_' . time();
@@ -286,7 +284,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test updating meta data.
 	 */
-	function test_update_meta_data() {
+	public function test_update_meta_data() {
 		global $wpdb;
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
@@ -314,7 +312,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test deleting meta.
 	 */
-	function test_delete_meta_data() {
+	public function test_delete_meta_data() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
@@ -329,9 +327,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 
 	/**
-	 * Test saving metadata.. (Actually making sure changes are written to DB)
+	 * Test saving metadata (Actually making sure changes are written to DB).
 	 */
-	function test_save_meta_data() {
+	public function test_save_meta_data() {
 		global $wpdb;
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
@@ -355,7 +353,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->update_meta_data( 'test_meta_key_2', 'updated_value', $raw_metadata[1]->meta_id );
 
 		$object->save();
-		$object = new WC_Mock_WC_Data( $object_id ); // rereads from the DB
+		$object = new WC_Mock_WC_Data( $object_id ); // rereads from the DB.
 
 		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
 		$this->assertEquals( 'updated_value', $object->get_meta( 'test_meta_key_2' ) );
@@ -364,7 +362,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test reading/getting user meta data too.
 	 */
-	function test_usermeta() {
+	public function test_usermeta() {
 		$object    = $this->create_test_user();
 		$object_id = $object->get_id();
 		$object->add_meta_data( 'test_meta_key', 'val1', true );
@@ -379,7 +377,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	 * Test adding meta data/updating meta data just added without keys colliding when changing
 	 * data before a save.
 	 */
-	function test_add_meta_data_overwrite_before_save() {
+	public function test_add_meta_data_overwrite_before_save() {
 		$object = new WC_Mock_WC_Data();
 		$object->add_meta_data( 'test_field_0', 'another field', true );
 		$object->add_meta_data( 'test_field_1', 'another field', true );
@@ -390,8 +388,10 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test protected method set_date_prop by testing a order date setter.
+	 *
+	 * @param string $timezone The default timezone to operate under.
 	 */
-	function set_date_prop_gmt_offset( $timezone = 'UTC' ) {
+	public function set_date_prop_gmt_offset( $timezone = 'UTC' ) {
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( $timezone );
 
@@ -441,8 +441,10 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 	/**
 	 * Test protected method set_date_prop by testing a order date setter.
+	 *
+	 * @param string $timezone The default timezone to operate under.
 	 */
-	function set_date_prop_timezone_string( $timezone = 'UTC' ) {
+	public function set_date_prop_timezone_string( $timezone = 'UTC' ) {
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( $timezone );
 
@@ -492,7 +494,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test protected method set_date_prop by testing a order date setter.
 	 */
-	function test_set_date_prop_server_timezone() {
+	public function test_set_date_prop_server_timezone() {
 		$this->set_date_prop_gmt_offset();
 		$this->set_date_prop_timezone_string();
 
@@ -506,9 +508,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test applying changes
+	 * Test applying changes.
 	 */
-	function test_apply_changes() {
+	public function test_apply_changes() {
 		$data = array(
 			'prop1' => 'value1',
 			'prop2' => 'value2',
@@ -534,9 +536,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test applying changes with a nested array
+	 * Test applying changes with a nested array.
 	 */
-	function test_apply_changes_nested() {
+	public function test_apply_changes_nested() {
 		$data = array(
 			'prop1' => 'value1',
 			'prop2' => array(

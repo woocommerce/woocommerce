@@ -1,8 +1,14 @@
 <?php
+/**
+ * Tests for the WC_Install class.
+ *
+ * @package WooCommerce\Tests\Util
+ */
 
 /**
  * Class WC_Tests_Install.
- * @package WooCommerce\Tests\Util
+ *
+ * @covers WC_Install
  */
 class WC_Tests_Install extends WC_Unit_Test_Case {
 
@@ -51,7 +57,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create pages.
 	 */
 	public function test_create_pages() {
-		// Clear options
+		// Clear options.
 		delete_option( 'woocommerce_shop_page_id' );
 		delete_option( 'woocommerce_cart_page_id' );
 		delete_option( 'woocommerce_checkout_page_id' );
@@ -64,13 +70,13 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_checkout_page_id' ) );
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_myaccount_page_id' ) );
 
-		// Delete pages
+		// Delete pages.
 		wp_delete_post( get_option( 'woocommerce_shop_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
 
-		// Clear options
+		// Clear options.
 		delete_option( 'woocommerce_shop_page_id' );
 		delete_option( 'woocommerce_cart_page_id' );
 		delete_option( 'woocommerce_checkout_page_id' );
@@ -88,7 +94,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		// Clean existing install first
+		// Clean existing install first.
 		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
@@ -122,32 +128,36 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		$tables = $wpdb->get_col(
-			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%' OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
+			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%'
+			OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
 		);
 		$result = WC_Install::get_tables();
-		sort( $result );
+		$diff   = array_diff( $result, $tables );
 
-		$this->assertEquals( $tables, $result );
+		$this->assertEmpty(
+			$diff,
+			sprintf(
+				'The following table(s) were returned from WC_Install::get_tables() but do not exist: %s',
+				implode( ', ', $diff )
+			)
+		);
 	}
 
 	/**
 	 * Test - get tables should apply the woocommerce_install_get_tables filter.
 	 */
 	public function test_get_tables_enables_filter() {
-		$default = WC_Install::get_tables();
-		$added   = $this->append_table_to_get_tables( array() );
+		$this->assertNotContains( 'some_table_name', WC_Install::get_tables() );
 
-		add_filter( 'woocommerce_install_get_tables', array( $this, 'append_table_to_get_tables' ) );
+		add_filter(
+			'woocommerce_install_get_tables',
+			function ( $tables ) {
+				$tables[] = 'some_table_name';
 
-		$this->assertEquals( $added, array_values( array_diff( WC_Install::get_tables(), $default ) ) );
-	}
+				return $tables;
+			}
+		);
 
-	/**
-	 * Filter callback for test_get_tables_enables_filter().
-	 */
-	public function append_table_to_get_tables( $tables ) {
-		$tables[] = 'some_table_name';
-
-		return $tables;
+		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
 }
