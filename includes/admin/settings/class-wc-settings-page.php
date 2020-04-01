@@ -173,13 +173,23 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
-		 * Output the settings.
+		 * Output the HTML for the settings.
 		 */
 		public function output() {
 			global $current_section;
 
 			$settings = $this->get_settings( $current_section );
 
+			$this->output_fields( $settings );
+		}
+
+		/**
+		 * Output the HTML for the settings (core implementation).
+		 * This method exists to ease unit testing.
+		 *
+		 * @param array $settings The settings to output.
+		 */
+		protected function output_fields( $settings ) {
 			WC_Admin_Settings::output_fields( $settings );
 		}
 
@@ -198,6 +208,16 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			global $current_section;
 
 			$settings = $this->get_settings( $current_section );
+			$this->save_fields( $settings );
+		}
+
+		/**
+		 * Save settings for current section (core implementation).
+		 * This method exists to ease unit testing.
+		 *
+		 * @param array $settings The settings to save.
+		 */
+		protected function save_fields( $settings ) {
 			WC_Admin_Settings::save_fields( $settings );
 		}
 
