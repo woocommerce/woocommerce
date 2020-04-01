@@ -68,7 +68,7 @@ export function getPaymentMethods( {
 
 		const wcPayDocLink = (
 			<Link
-				href={ 'https://docs.woocommerce.com/document/payments/' }
+				href={ 'https://docs.woocommerce.com/document/payments/testing/dev-mode/' }
 				target="_blank"
 				type="external"
 			/>
