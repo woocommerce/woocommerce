@@ -31,7 +31,7 @@ trait OrderTraits {
 			return 0;
 		}
 
-		$total_shipping_amount = $this->get_shipping_total();
+		$total_shipping_amount = (float) $this->get_shipping_total();
 
 		return $total_shipping_amount / $order_items * $product_qty;
 	}
