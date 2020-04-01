@@ -27,7 +27,7 @@
     "@babel/register": "7.8.6",
     "@jest/test-sequencer": "^25.0.0",
     "@wordpress/e2e-test-utils": "4.3.0",
-    "autoprefixer": "9.7.4",
+    "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
