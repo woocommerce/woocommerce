@@ -204,9 +204,9 @@ function wc_get_featured_product_ids() {
  * Populate a batch of rating count lookup table data for products.
  *
  * @since 4.0.1
- * @param int $id Product ID.
+ * @param int $product Product Object.
  */
-function wc_get_parent_grouped_id( $id ) {
+function wc_get_parent_grouped_id( $product ) {
 
 	global $wpdb;
 
