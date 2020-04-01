@@ -5,7 +5,7 @@
  * @package WooCommerce\UnitTests
  */
 
-$wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';
+$wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : sys_get_temp_dir() . '/wordpress-tests-lib';
 
 // Polyfill a function that wasn't added until WordPress 5.1.
 if ( ! function_exists( 'tests_get_phpunit_version' ) ) {

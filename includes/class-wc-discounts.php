@@ -549,10 +549,7 @@ class WC_Discounts {
 		foreach ( $items_to_apply as $item ) {
 			for ( $i = 0; $i < $item->quantity; $i ++ ) {
 				// Find out how much price is available to discount for the item.
-				$discounted_price = $this->get_discounted_price_in_cents( $item );
-
-				// Get the price we actually want to discount, based on settings.
-				$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
+				$price_to_discount = $this->get_discounted_price_in_cents( $item );
 
 				// Run coupon calculations.
 				$discount = min( $price_to_discount, 1 );

@@ -128,24 +128,22 @@ install_db() {
 		return 0
 	fi
 
-	# parse DB_HOST for port or socket references
-	local PARTS=(${DB_HOST//\:/ })
-	local DB_HOSTNAME=${PARTS[0]};
-	local DB_SOCK_OR_PORT=${PARTS[1]};
-	local EXTRA=""
-
-	if ! [ -z $DB_HOSTNAME ] ; then
-		if [ $(echo $DB_SOCK_OR_PORT | grep -e '^[0-9]\{1,\}$') ]; then
-			EXTRA=" --host=$DB_HOSTNAME --port=$DB_SOCK_OR_PORT --protocol=tcp"
-		elif ! [ -z $DB_SOCK_OR_PORT ] ; then
-			EXTRA=" --socket=$DB_SOCK_OR_PORT"
-		elif ! [ -z $DB_HOSTNAME ] ; then
-			EXTRA=" --host=$DB_HOSTNAME --protocol=tcp"
+	# If we're trying to connect to a socket we want to handle it differently.
+	if [[ "$DB_HOST" == *.sock ]]; then
+		# create database using the socket
+		mysqladmin create $DB_NAME --socket="$DB_HOST"
+	else
+		# Decide whether or not there is a port.
+		local PARTS=(${DB_HOST//\:/ })
+		if [[ ${PARTS[1]} =~ ^[0-9]+$ ]]; then
+			EXTRA=" --host=${PARTS[0]} --port=${PARTS[1]} --protocol=tcp"
+		else
+			EXTRA=" --host=$DB_HOST --protocol=tcp"
 		fi
-	fi
 
-	# create database
-	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
+		# create database
+		mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
+	fi
 }
 
 install_wp

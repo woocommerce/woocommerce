@@ -318,7 +318,7 @@ if ( ! class_exists( 'WC_Eval_Math', false ) ) {
 		 */
 		private static function trigger( $msg ) {
 			self::$last_error = $msg;
-			if ( Constants::is_true( 'WP_DEBUG' ) ) {
+			if ( ! Constants::is_true( 'DOING_AJAX' ) && Constants::is_true( 'WP_DEBUG' ) ) {
 				echo "\nError found in:";
 				self::debugPrintCallingFunction();
 				trigger_error( $msg, E_USER_WARNING );
