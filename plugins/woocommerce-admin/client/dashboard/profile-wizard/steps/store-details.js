@@ -19,7 +19,6 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { setCurrency } from 'lib/currency-format';
 import { getCountryCode, getCurrencyRegion } from 'dashboard/utils';
 import {
 	StoreAddress,
@@ -27,6 +26,7 @@ import {
 } from '../../components/settings/general/store-address';
 import UsageModal from './usage-modal';
 import withWCApiSelect from 'wc-api/with-select';
+import { CurrencyContext } from 'lib/currency-context';
 
 class StoreDetails extends Component {
 	constructor( props ) {
@@ -91,7 +91,8 @@ class StoreDetails extends Component {
 		const currencySettings = this.deriveCurrencySettings(
 			values.countryState
 		);
-		setCurrency( currencySettings );
+		const Currency = this.context;
+		Currency.setCurrency( currencySettings );
 
 		recordEvent( 'storeprofiler_store_details_continue', {
 			store_country: getCountryCode( values.countryState ),
@@ -203,8 +204,10 @@ class StoreDetails extends Component {
 	}
 }
 
+StoreDetails.contextType = CurrencyContext;
+
 export default compose(
-	withWCApiSelect( select => {
+	withWCApiSelect( ( select ) => {
 		const { getProfileItemsError, getProfileItems } = select( 'wc-api' );
 
 		const profileItems = getProfileItems();
@@ -215,10 +218,12 @@ export default compose(
 			profileItems,
 		};
 	} ),
-	withSelect( select => {
-		const { getSettings, getSettingsError, isGetSettingsRequesting } = select(
-			SETTINGS_STORE_NAME
-		);
+	withSelect( ( select ) => {
+		const {
+			getSettings,
+			getSettingsError,
+			isGetSettingsRequesting,
+		} = select( SETTINGS_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
@@ -233,7 +238,9 @@ export default compose(
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateProfileItems } = dispatch( 'wc-api' );
-		const { updateAndPersistSettingsForGroup } = dispatch( SETTINGS_STORE_NAME );
+		const { updateAndPersistSettingsForGroup } = dispatch(
+			SETTINGS_STORE_NAME
+		);
 
 		return {
 			createNotice,

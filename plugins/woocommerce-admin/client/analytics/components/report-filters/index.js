@@ -17,12 +17,12 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import { recordEvent } from 'lib/tracks';
-import { Currency } from 'lib/currency-format';
 import {
 	getCurrentDates,
 	getDateParamsFromQuery,
 	isoDateFormat,
 } from 'lib/date';
+import { CurrencyContext } from 'lib/currency-context';
 
 class ReportFilters extends Component {
 	constructor() {
@@ -92,12 +92,22 @@ class ReportFilters extends Component {
 	}
 
 	render() {
-		const { advancedFilters, filters, path, query, showDatePicker, defaultDateRange } = this.props;
-		const { period, compare, before, after } = getDateParamsFromQuery( query, defaultDateRange );
-		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates(
+		const {
+			advancedFilters,
+			filters,
+			path,
+			query,
+			showDatePicker,
+			defaultDateRange,
+		} = this.props;
+		const { period, compare, before, after } = getDateParamsFromQuery(
 			query,
 			defaultDateRange
 		);
+		const {
+			primary: primaryDate,
+			secondary: secondaryDate,
+		} = getCurrentDates( query, defaultDateRange );
 		const dateQuery = {
 			period,
 			compare,
@@ -106,6 +116,8 @@ class ReportFilters extends Component {
 			primaryDate,
 			secondaryDate,
 		};
+		const Currency = this.context;
+
 		return (
 			<Filters
 				query={ query }
@@ -125,7 +137,9 @@ class ReportFilters extends Component {
 	}
 }
 
-export default withSelect( select => {
+ReportFilters.contextType = CurrencyContext;
+
+export default withSelect( ( select ) => {
 	const { woocommerce_default_date_range: defaultDateRange } = select(
 		SETTINGS_STORE_NAME
 	).getSetting( 'wc_admin', 'wcAdminSettings' );

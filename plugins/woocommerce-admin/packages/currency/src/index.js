@@ -8,37 +8,48 @@ import { sprintf } from '@wordpress/i18n';
  */
 import { numberFormat } from '@woocommerce/number';
 
-export default class Currency {
-	constructor( currency = null ) {
-		if ( ! this.code ) {
-			this.setCurrency( currency );
-		}
-	}
+const Currency = ( currencySetting ) => {
+	let currency;
 
-	/**
-	 * Set the currency configuration to use for the class.
-	 *
-	 * @param {Object} currency An object containing currency configuration settings.
-	 */
-	setCurrency( currency ) {
+	setCurrency( currencySetting );
+
+	function setCurrency( setting ) {
 		const defaultCurrency = getCurrencyData().US;
-		const config = { ...defaultCurrency, ...currency };
-
-		this.code = config.code.toString();
-		this.symbol = config.symbol.toString();
-		this.symbolPosition = config.symbolPosition.toString();
-		this.decimalSeparator = config.decimalSeparator.toString();
-		this.priceFormat = this.getPriceFormat( config );
-		this.thousandSeparator = config.thousandSeparator.toString();
-
-		const precisionNumber = parseInt( config.precision, 10 );
-		this.precision = precisionNumber;
+		const config = { ...defaultCurrency, ...setting };
+		currency = {
+			code: config.code.toString(),
+			symbol: config.symbol.toString(),
+			symbolPosition: config.symbolPosition.toString(),
+			decimalSeparator: config.decimalSeparator.toString(),
+			priceFormat: getPriceFormat( config ),
+			thousandSeparator: config.thousandSeparator.toString(),
+			precision: parseInt( config.precision, 10 ),
+		};
 	}
 
-	stripTags( str ) {
+	function stripTags( str ) {
 		const tmp = document.createElement( 'DIV' );
 		tmp.innerHTML = str;
 		return tmp.textContent || tmp.innerText || '';
+	}
+
+	/**
+	 * Formats money value.
+	 *
+	 * @param   {number|string} number number to format
+	 * @return {?string} A formatted string.
+	 */
+	function formatCurrency( number ) {
+		const formattedNumber = numberFormat( currency, number );
+
+		if ( formattedNumber === '' ) {
+			return formattedNumber;
+		}
+
+		const { priceFormat, symbol } = currency;
+
+		// eslint-disable-next-line @wordpress/valid-sprintf
+		return sprintf( priceFormat, symbol, formattedNumber );
 	}
 
 	/**
@@ -47,9 +58,9 @@ export default class Currency {
 	 * @param {Object} config Currency configuration.
 	 * @return {string} Price format.
 	 */
-	getPriceFormat( config ) {
+	function getPriceFormat( config ) {
 		if ( config.priceFormat ) {
-			return this.stripTags( config.priceFormat.toString() );
+			return stripTags( config.priceFormat.toString() );
 		}
 
 		switch ( config.symbolPosition ) {
@@ -66,80 +77,76 @@ export default class Currency {
 		return '%1$s%2$s';
 	}
 
-	/**
-	 * Formats money value.
-	 *
-	 * @param   {number|string} number number to format
-	 * @return {?string} A formatted string.
-	 */
-	formatCurrency( number ) {
-		const formattedNumber = numberFormat( this, number );
+	return {
+		getCurrency: () => {
+			return { ...currency };
+		},
+		setCurrency,
+		formatCurrency,
+		getPriceFormat,
 
-		if ( formattedNumber === '' ) {
-			return formattedNumber;
-		}
-
-		// eslint-disable-next-line @wordpress/valid-sprintf
-		return sprintf( this.priceFormat, this.symbol, formattedNumber );
-	}
-
-	/**
-	 * Get the rounded decimal value of a number at the precision used for the current currency.
-	 * This is a work-around for fraction-cents, meant to be used like `wc_format_decimal`
-	 *
-	 * @param {number|string} number A floating point number (or integer), or string that converts to a number
-	 * @return {number} The original number rounded to a decimal point
-	 */
-	formatDecimal( number ) {
-		if ( typeof number !== 'number' ) {
-			number = parseFloat( number );
-		}
-		if ( Number.isNaN( number ) ) {
-			return 0;
-		}
-		return (
-			Math.round( number * Math.pow( 10, this.precision ) ) /
-			Math.pow( 10, this.precision )
-		);
-	}
-
-	/**
-	 * Get the string representation of a floating point number to the precision used by the current currency.
-	 * This is different from `formatCurrency` by not returning the currency symbol.
-	 *
-	 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
-	 * @return {string}               The original number rounded to a decimal point
-	 */
-	formatDecimalString( number ) {
-		if ( typeof number !== 'number' ) {
-			number = parseFloat( number );
-		}
-		if ( Number.isNaN( number ) ) {
-			return '';
-		}
-		return number.toFixed( this.precision );
-	}
-
-	/**
-	 * Render a currency for display in a component.
-	 *
-	 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
-	 * @return {Node|string} The number formatted as currency and rendered for display.
-	 */
-	render( number ) {
-		if ( typeof number !== 'number' ) {
-			number = parseFloat( number );
-		}
-		if ( number < 0 ) {
+		/**
+		 * Get the rounded decimal value of a number at the precision used for the current currency.
+		 * This is a work-around for fraction-cents, meant to be used like `wc_format_decimal`
+		 *
+		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
+		 * @return {number} The original number rounded to a decimal point
+		 */
+		formatDecimal( number ) {
+			if ( typeof number !== 'number' ) {
+				number = parseFloat( number );
+			}
+			if ( Number.isNaN( number ) ) {
+				return 0;
+			}
+			const { precision } = currency;
 			return (
-				<span className="is-negative">
-					{ this.formatCurrency( number ) }
-				</span>
+				Math.round( number * Math.pow( 10, precision ) ) /
+				Math.pow( 10, precision )
 			);
-		}
-		return this.formatCurrency( number );
-	}
-}
+		},
+
+		/**
+		 * Get the string representation of a floating point number to the precision used by the current currency.
+		 * This is different from `formatCurrency` by not returning the currency symbol.
+		 *
+		 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
+		 * @return {string}               The original number rounded to a decimal point
+		 */
+		formatDecimalString( number ) {
+			if ( typeof number !== 'number' ) {
+				number = parseFloat( number );
+			}
+			if ( Number.isNaN( number ) ) {
+				return '';
+			}
+			const { precision } = currency;
+			return number.toFixed( precision );
+		},
+
+		/**
+		 * Render a currency for display in a component.
+		 *
+		 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
+		 * @return {Node|string} The number formatted as currency and rendered for display.
+		 */
+		render( number ) {
+			if ( typeof number !== 'number' ) {
+				number = parseFloat( number );
+			}
+			if ( number < 0 ) {
+				return (
+					<span className="is-negative">
+						{ formatCurrency( number ) }
+					</span>
+				);
+			}
+			return formatCurrency( number );
+		},
+	};
+};
+
+export default Currency;
 
 /**
  * Returns currency data by country/region. Contains code, symbol, position, thousands separator, decimal separator, and precision.

@@ -9,21 +9,17 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { Link } from '@woocommerce/components';
-import {
-	formatCurrency,
-	getCurrencyFormatDecimal,
-	renderCurrency,
-} from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { getTaxCode } from './utils';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
+import { CurrencyContext } from 'lib/currency-context';
 
-export default class TaxesReportTable extends Component {
+class TaxesReportTable extends Component {
 	constructor() {
 		super();
 
@@ -74,6 +70,12 @@ export default class TaxesReportTable extends Component {
 	}
 
 	getRowsContent( taxes ) {
+		const {
+			render: renderCurrency,
+			formatDecimal: getCurrencyFormatDecimal,
+			getCurrency,
+		} = this.context;
+
 		return map( taxes, ( tax ) => {
 			const { query } = this.props;
 			const {
@@ -123,7 +125,11 @@ export default class TaxesReportTable extends Component {
 					value: getCurrencyFormatDecimal( shippingTax ),
 				},
 				{
-					display: formatValue( 'number', ordersCount ),
+					display: formatValue(
+						getCurrency(),
+						'number',
+						ordersCount
+					),
 					value: ordersCount,
 				},
 			];
@@ -138,6 +144,8 @@ export default class TaxesReportTable extends Component {
 			shipping_tax: shippingTax = 0,
 			orders_count: ordersCount = 0,
 		} = totals;
+		const { formatCurrency, getCurrency } = this.context;
+		const currency = getCurrency();
 		return [
 			{
 				label: _n(
@@ -146,7 +154,7 @@ export default class TaxesReportTable extends Component {
 					taxesCodes,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', taxesCodes ),
+				value: formatValue( currency, 'number', taxesCodes ),
 			},
 			{
 				label: __( 'total tax', 'woocommerce-admin' ),
@@ -167,7 +175,7 @@ export default class TaxesReportTable extends Component {
 					ordersCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', ordersCount ),
+				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
 	}
@@ -204,3 +212,7 @@ export default class TaxesReportTable extends Component {
 		);
 	}
 }
+
+TaxesReportTable.contextType = CurrencyContext;
+
+export default TaxesReportTable;

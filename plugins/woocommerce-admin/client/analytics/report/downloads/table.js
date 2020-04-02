@@ -13,7 +13,7 @@ import moment from 'moment';
 import { getCurrentDates, defaultTableDateFormat } from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
@@ -21,6 +21,7 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
+import { CurrencyContext } from 'lib/currency-context';
 
 class CouponsReportTable extends Component {
 	constructor() {
@@ -150,11 +151,12 @@ class CouponsReportTable extends Component {
 		const after = moment( dates.primary.after );
 		const before = moment( dates.primary.before );
 		const days = before.diff( after, 'days' ) + 1;
+		const currency = this.context.getCurrency();
 
 		return [
 			{
 				label: _n( 'day', 'days', days, 'woocommerce-admin' ),
-				value: formatValue( 'number', days ),
+				value: formatValue( currency, 'number', days ),
 			},
 			{
 				label: _n(
@@ -163,7 +165,7 @@ class CouponsReportTable extends Component {
 					downloadCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', downloadCount ),
+				value: formatValue( currency, 'number', downloadCount ),
 			},
 		];
 	}
@@ -190,6 +192,8 @@ class CouponsReportTable extends Component {
 		);
 	}
 }
+
+CouponsReportTable.contextType = CurrencyContext;
 
 export default withSelect( ( select ) => {
 	const { woocommerce_default_date_range: defaultDateRange } = select(

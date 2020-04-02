@@ -8,9 +8,8 @@ import { Tooltip } from '@wordpress/components';
 /**
  * WooCommerce dependencies
  */
-import { formatCurrency, getCurrencyFormatDecimal } from 'lib/currency-format';
 import { Date, Link } from '@woocommerce/components';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { defaultTableDateFormat } from 'lib/date';
 
@@ -20,8 +19,9 @@ const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
+import { CurrencyContext } from 'lib/currency-context';
 
-export default class CustomersReportTable extends Component {
+class CustomersReportTable extends Component {
 	constructor() {
 		super();
 
@@ -114,6 +114,11 @@ export default class CustomersReportTable extends Component {
 
 	getRowsContent( customers ) {
 		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const {
+			formatCurrency,
+			formatDecimal: getCurrencyFormatDecimal,
+			getCurrency,
+		} = this.context;
 
 		return customers.map( ( customer ) => {
 			const {
@@ -145,19 +150,13 @@ export default class CustomersReportTable extends Component {
 			);
 
 			const dateLastActiveDisplay = dateLastActive ? (
-				<Date
-					date={ dateLastActive }
-					visibleFormat={ dateFormat }
-				/>
+				<Date date={ dateLastActive } visibleFormat={ dateFormat } />
 			) : (
 				'—'
 			);
 
 			const dateRegisteredDisplay = dateRegistered ? (
-				<Date
-					date={ dateRegistered }
-					visibleFormat={ dateFormat }
-				/>
+				<Date date={ dateRegistered } visibleFormat={ dateFormat } />
 			) : (
 				'—'
 			);
@@ -193,7 +192,11 @@ export default class CustomersReportTable extends Component {
 					value: email,
 				},
 				{
-					display: formatValue( 'number', ordersCount ),
+					display: formatValue(
+						getCurrency(),
+						'number',
+						ordersCount
+					),
 					value: ordersCount,
 				},
 				{
@@ -231,6 +234,8 @@ export default class CustomersReportTable extends Component {
 			avg_total_spend: avgTotalSpend = 0,
 			avg_avg_order_value: avgAvgOrderValue = 0,
 		} = totals;
+		const { formatCurrency, getCurrency } = this.context;
+		const currency = getCurrency();
 		return [
 			{
 				label: _n(
@@ -239,7 +244,7 @@ export default class CustomersReportTable extends Component {
 					customersCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', customersCount ),
+				value: formatValue( currency, 'number', customersCount ),
 			},
 			{
 				label: _n(
@@ -248,7 +253,7 @@ export default class CustomersReportTable extends Component {
 					avgOrdersCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', avgOrdersCount ),
+				value: formatValue( currency, 'number', avgOrdersCount ),
 			},
 			{
 				label: __( 'average lifetime spend', 'woocommerce-admin' ),
@@ -294,3 +299,7 @@ export default class CustomersReportTable extends Component {
 		);
 	}
 }
+
+CustomersReportTable.contextType = CurrencyContext;
+
+export default CustomersReportTable;

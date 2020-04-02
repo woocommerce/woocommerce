@@ -16,12 +16,7 @@ import {
 	getCurrentDates,
 } from 'lib/date';
 import { Date, Link } from '@woocommerce/components';
-import {
-	formatCurrency,
-	getCurrencyFormatDecimal,
-	renderCurrency,
-} from 'lib/currency-format';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
@@ -32,6 +27,7 @@ import { QUERY_DEFAULTS } from 'wc-api/constants';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
 import { getReportTableQuery } from 'wc-api/reports/utils';
+import { CurrencyContext } from 'lib/currency-context';
 
 class RevenueReportTable extends Component {
 	constructor() {
@@ -113,6 +109,12 @@ class RevenueReportTable extends Component {
 
 	getRowsContent( data = [] ) {
 		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const {
+			formatCurrency,
+			render: renderCurrency,
+			formatDecimal: getCurrencyFormatDecimal,
+			getCurrency,
+		} = this.context;
 
 		return data.map( ( row ) => {
 			const {
@@ -136,7 +138,7 @@ class RevenueReportTable extends Component {
 					}
 					type="wp-admin"
 				>
-					{ formatValue( 'number', ordersCount ) }
+					{ formatValue( getCurrency(), 'number', ordersCount ) }
 				</Link>
 			);
 			return [
@@ -196,10 +198,12 @@ class RevenueReportTable extends Component {
 			shipping = 0,
 			net_revenue: netRevenue = 0,
 		} = totals;
+		const { formatCurrency, getCurrency } = this.context;
+		const currency = getCurrency();
 		return [
 			{
 				label: _n( 'day', 'days', totalResults, 'woocommerce-admin' ),
-				value: formatValue( 'number', totalResults ),
+				value: formatValue( currency, 'number', totalResults ),
 			},
 			{
 				label: _n(
@@ -208,7 +212,7 @@ class RevenueReportTable extends Component {
 					ordersCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', ordersCount ),
+				value: formatValue( currency, 'number', ordersCount ),
 			},
 			{
 				label: __( 'gross sales', 'woocommerce-admin' ),
@@ -270,6 +274,8 @@ class RevenueReportTable extends Component {
 		);
 	}
 }
+
+RevenueReportTable.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {

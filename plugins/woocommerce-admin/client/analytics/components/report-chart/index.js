@@ -20,8 +20,8 @@ import {
 	getPreviousDate,
 } from 'lib/date';
 import { Chart } from '@woocommerce/components';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { CurrencyContext } from 'lib/currency-context';
 
 /**
  * Internal dependencies
@@ -80,9 +80,18 @@ export class ReportChart extends Component {
 	}
 
 	getTimeChartData() {
-		const { query, primaryData, secondaryData, selectedChart, defaultDateRange } = this.props;
+		const {
+			query,
+			primaryData,
+			secondaryData,
+			selectedChart,
+			defaultDateRange,
+		} = this.props;
 		const currentInterval = getIntervalForQuery( query );
-		const { primary, secondary } = getCurrentDates( query, defaultDateRange );
+		const { primary, secondary } = getCurrentDates(
+			query,
+			defaultDateRange
+		);
 
 		const chartData = primaryData.data.intervals.map( function(
 			interval,
@@ -159,6 +168,7 @@ export class ReportChart extends Component {
 		const emptyMessage = emptySearchResults
 			? __( 'No data for the current search', 'woocommerce-admin' )
 			: __( 'No data for the selected date range', 'woocommerce-admin' );
+		const { formatCurrency, getCurrency } = this.context;
 		return (
 			<Chart
 				allowedIntervals={ allowedIntervals }
@@ -184,13 +194,14 @@ export class ReportChart extends Component {
 					null
 				}
 				tooltipValueFormat={ getTooltipValueFormat(
-					selectedChart.type
+					selectedChart.type,
+					formatCurrency
 				) }
 				chartType={ getChartTypeForQuery( query ) }
 				valueType={ selectedChart.type }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
-				currency={ CURRENCY }
+				currency={ getCurrency() }
 			/>
 		);
 	}
@@ -242,6 +253,8 @@ export class ReportChart extends Component {
 		return this.renderTimeComparison();
 	}
 }
+
+ReportChart.contextType = CurrencyContext;
 
 ReportChart.propTypes = {
 	/**
@@ -341,7 +354,10 @@ export default compose(
 		const limitBy = limitProperties || [ endpoint ];
 		const selectedFilter = getSelectedFilter( filters, query );
 		const filterParam = get( selectedFilter, [ 'settings', 'param' ] );
-		const chartMode = props.mode || getChartMode( selectedFilter, query ) || 'time-comparison';
+		const chartMode =
+			props.mode ||
+			getChartMode( selectedFilter, query ) ||
+			'time-comparison';
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );

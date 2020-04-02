@@ -11,19 +11,13 @@ import PropTypes from 'prop-types';
  * WooCommerce dependencies
  */
 import { Flag, Form, TextControlWithAffixes } from '@woocommerce/components';
-import {
-	CURRENCY,
-	getSetting,
-	setSetting,
-} from '@woocommerce/wc-admin-settings';
+import { getSetting, setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
-import { getCurrencyFormatString } from 'lib/currency-format';
 import { recordEvent } from 'lib/tracks';
-
-const { symbol, symbolPosition } = CURRENCY;
+import { CurrencyContext } from 'lib/currency-context';
 
 class ShippingRates extends Component {
 	constructor() {
@@ -132,6 +126,7 @@ class ShippingRates extends Component {
 	}
 
 	renderInputPrefix() {
+		const { symbolPosition, symbol } = this.context.getCurrency();
 		if ( symbolPosition.indexOf( 'right' ) === 0 ) {
 			return null;
 		}
@@ -143,6 +138,7 @@ class ShippingRates extends Component {
 	}
 
 	renderInputSuffix( rate ) {
+		const { symbolPosition, symbol } = this.context.getCurrency();
 		if ( symbolPosition.indexOf( 'right' ) === 0 ) {
 			return (
 				<span className="woocommerce-shipping-rate__control-suffix">
@@ -159,15 +155,17 @@ class ShippingRates extends Component {
 	}
 
 	getFormattedRate( value ) {
-		const currencyString = getCurrencyFormatString( value );
+		const { formatDecimalString } = this.context;
+		const currencyString = formatDecimalString( value );
 		if ( ! value.length || ! currencyString.length ) {
-			return getCurrencyFormatString( 0 );
+			return formatDecimalString( 0 );
 		}
 
-		return getCurrencyFormatString( value );
+		return formatDecimalString( value );
 	}
 
 	getInitialValues() {
+		const { formatDecimalString } = this.context;
 		const values = {};
 
 		this.props.shippingZones.forEach( ( zone ) => {
@@ -177,7 +175,7 @@ class ShippingRates extends Component {
 					? this.getFormattedRate(
 							shippingMethods[ 0 ].settings.cost.value
 					  )
-					: getCurrencyFormatString( 0 );
+					: formatDecimalString( 0 );
 			values[ `${ zone.id }_rate` ] = rate;
 
 			if ( shippingMethods.length && shippingMethods[ 0 ].enabled ) {
@@ -345,5 +343,7 @@ ShippingRates.propTypes = {
 ShippingRates.defaultProps = {
 	shippingZones: [],
 };
+
+ShippingRates.contextType = CurrencyContext;
 
 export default ShippingRates;

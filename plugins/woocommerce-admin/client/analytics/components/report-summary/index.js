@@ -16,8 +16,7 @@ import {
 	SummaryListPlaceholder,
 	SummaryNumber,
 } from '@woocommerce/components';
-import { calculateDelta, formatValue } from 'lib/number-format';
-import { formatCurrency } from 'lib/currency-format';
+import { calculateDelta, formatValue } from '@woocommerce/number';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -27,15 +26,17 @@ import { getSummaryNumbers } from 'wc-api/reports/utils';
 import ReportError from 'analytics/components/report-error';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
+import { CurrencyContext } from 'lib/currency-context';
 
 /**
  * Component to render summary numbers in reports.
  */
 export class ReportSummary extends Component {
 	formatVal( val, type ) {
+		const { formatCurrency, getCurrency } = this.context;
 		return type === 'currency'
 			? formatCurrency( val )
-			: formatValue( type, val );
+			: formatValue( getCurrency(), type, val );
 	}
 
 	getValues( key, type ) {
@@ -191,6 +192,8 @@ ReportSummary.defaultProps = {
 		isRequesting: false,
 	},
 };
+
+ReportSummary.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {

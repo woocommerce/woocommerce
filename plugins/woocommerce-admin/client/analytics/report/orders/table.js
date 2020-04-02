@@ -9,8 +9,7 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
-import { formatCurrency, renderCurrency } from 'lib/currency-format';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { defaultTableDateFormat } from 'lib/date';
 
@@ -19,9 +18,10 @@ import { defaultTableDateFormat } from 'lib/date';
  */
 import ReportTable from 'analytics/components/report-table';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { CurrencyContext } from 'lib/currency-context';
 import './style.scss';
 
-export default class OrdersReportTable extends Component {
+class OrdersReportTable extends Component {
 	constructor() {
 		super();
 
@@ -105,6 +105,7 @@ export default class OrdersReportTable extends Component {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const { render: renderCurrency, getCurrency } = this.context;
 
 		return map( tableData, ( row ) => {
 			const {
@@ -205,7 +206,11 @@ export default class OrdersReportTable extends Component {
 						.join( ', ' ),
 				},
 				{
-					display: formatValue( 'number', numItemsSold ),
+					display: formatValue(
+						getCurrency(),
+						'number',
+						numItemsSold
+					),
 					value: numItemsSold,
 				},
 				{
@@ -237,6 +242,8 @@ export default class OrdersReportTable extends Component {
 			coupons_count: couponsCount = 0,
 			net_revenue: netRevenue = 0,
 		} = totals;
+		const { formatCurrency, getCurrency } = this.context;
+		const currency = getCurrency();
 		return [
 			{
 				label: _n(
@@ -245,7 +252,7 @@ export default class OrdersReportTable extends Component {
 					ordersCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', ordersCount ),
+				value: formatValue( currency, 'number', ordersCount ),
 			},
 			{
 				label: _n(
@@ -254,7 +261,7 @@ export default class OrdersReportTable extends Component {
 					numNewCustomers,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', numNewCustomers ),
+				value: formatValue( currency, 'number', numNewCustomers ),
 			},
 			{
 				label: _n(
@@ -263,7 +270,7 @@ export default class OrdersReportTable extends Component {
 					numReturningCustomers,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', numReturningCustomers ),
+				value: formatValue( currency, 'number', numReturningCustomers ),
 			},
 			{
 				label: _n(
@@ -272,7 +279,7 @@ export default class OrdersReportTable extends Component {
 					products,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', products ),
+				value: formatValue( currency, 'number', products ),
 			},
 			{
 				label: _n(
@@ -281,7 +288,7 @@ export default class OrdersReportTable extends Component {
 					numItemsSold,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', numItemsSold ),
+				value: formatValue( currency, 'number', numItemsSold ),
 			},
 			{
 				label: _n(
@@ -290,7 +297,7 @@ export default class OrdersReportTable extends Component {
 					couponsCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', couponsCount ),
+				value: formatValue( currency, 'number', couponsCount ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
@@ -348,3 +355,7 @@ export default class OrdersReportTable extends Component {
 		);
 	}
 }
+
+OrdersReportTable.contextType = CurrencyContext;
+
+export default OrdersReportTable;

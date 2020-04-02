@@ -17,8 +17,7 @@ import {
 	getDateParamsFromQuery,
 } from 'lib/date';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { calculateDelta, formatValue } from 'lib/number-format';
-import { formatCurrency } from 'lib/currency-format';
+import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
@@ -37,6 +36,7 @@ import {
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
+import { CurrencyContext } from 'lib/currency-context';
 
 const { performanceIndicators: indicators } = getSetting( 'dataEndpoints', {
 	performanceIndicators: '',
@@ -141,6 +141,8 @@ class StorePerformance extends Component {
 			compare === 'previous_period'
 				? __( 'Previous Period:', 'woocommerce-admin' )
 				: __( 'Previous Year:', 'woocommerce-admin' );
+		const { formatCurrency, getCurrency } = this.context;
+		const currency = getCurrency();
 		return (
 			<SummaryList>
 				{ () =>
@@ -178,12 +180,14 @@ class StorePerformance extends Component {
 						const primaryValue = isCurrency
 							? formatCurrency( primaryItem.value )
 							: formatValue(
+									currency,
 									primaryItem.format,
 									primaryItem.value
 							  );
 						const secondaryValue = isCurrency
 							? formatCurrency( secondaryItem.value )
 							: formatValue(
+									currency,
 									secondaryItem.format,
 									secondaryItem.value
 							  );
@@ -229,6 +233,9 @@ class StorePerformance extends Component {
 		);
 	}
 }
+
+StorePerformance.contextType = CurrencyContext;
+
 export default compose(
 	withSelect( ( select, props ) => {
 		const { hiddenBlocks, query } = props;

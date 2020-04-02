@@ -1,3 +1,10 @@
+# 3.0.0 (unreleased)
+
+## Breaking changes
+- Currency is now a factory function instead of a class.
+
+- Add getCurrency method to retrieve currency config.
+
 # 2.0.0
 
 ## Breaking changes

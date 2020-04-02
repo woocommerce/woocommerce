@@ -10,7 +10,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
@@ -18,10 +18,11 @@ import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
  */
 import ReportTable from 'analytics/components/report-table';
 import { isLowStock } from './utils';
+import { CurrencyContext } from 'lib/currency-context';
 
 const stockStatuses = getSetting( 'stockStatuses', {} );
 
-export default class StockReportTable extends Component {
+class StockReportTable extends Component {
 	constructor() {
 		super();
 
@@ -126,7 +127,11 @@ export default class StockReportTable extends Component {
 				},
 				{
 					display: manageStock
-						? formatValue( 'number', stockQuantity )
+						? formatValue(
+								this.context.getCurrency(),
+								'number',
+								stockQuantity
+						  )
 						: __( 'N/A', 'woocommerce-admin' ),
 					value: stockQuantity,
 				},
@@ -142,6 +147,7 @@ export default class StockReportTable extends Component {
 			instock = 0,
 			onbackorder = 0,
 		} = totals;
+		const currency = this.context.getCurrency();
 		return [
 			{
 				label: _n(
@@ -150,23 +156,23 @@ export default class StockReportTable extends Component {
 					products,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', products ),
+				value: formatValue( currency, 'number', products ),
 			},
 			{
 				label: __( 'out of stock', outofstock, 'woocommerce-admin' ),
-				value: formatValue( 'number', outofstock ),
+				value: formatValue( currency, 'number', outofstock ),
 			},
 			{
 				label: __( 'low stock', lowstock, 'woocommerce-admin' ),
-				value: formatValue( 'number', lowstock ),
+				value: formatValue( 'currency, number', lowstock ),
 			},
 			{
 				label: __( 'on backorder', onbackorder, 'woocommerce-admin' ),
-				value: formatValue( 'number', onbackorder ),
+				value: formatValue( currency, 'number', onbackorder ),
 			},
 			{
 				label: __( 'in stock', instock, 'woocommerce-admin' ),
-				value: formatValue( 'number', instock ),
+				value: formatValue( currency, 'number', instock ),
 			},
 		];
 	}
@@ -200,3 +206,7 @@ export default class StockReportTable extends Component {
 		);
 	}
 }
+
+StockReportTable.contextType = CurrencyContext;
+
+export default StockReportTable;

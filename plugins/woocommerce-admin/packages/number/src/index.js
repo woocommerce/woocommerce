@@ -20,16 +20,16 @@ export function numberFormat(
 		return '';
 	}
 
-	precision = parseInt( precision, 10 );
+	let parsedPrecision = parseInt( precision, 10 );
 
-	if ( isNaN( precision ) ) {
+	if ( isNaN( parsedPrecision ) ) {
 		const [ , decimals ] = number.toString().split( '.' );
-		precision = decimals ? decimals.length : 0;
+		parsedPrecision = decimals ? decimals.length : 0;
 	}
 
 	return numberFormatter(
 		number,
-		precision,
+		parsedPrecision,
 		decimalSeparator,
 		thousandSeparator
 	);

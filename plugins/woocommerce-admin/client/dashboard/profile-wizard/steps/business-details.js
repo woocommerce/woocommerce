@@ -11,11 +11,8 @@ import { keys, get, pickBy } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { formatValue } from 'lib/number-format';
-import {
-	getSetting,
-	CURRENCY as currency,
-} from '@woocommerce/wc-admin-settings';
+import { formatValue } from '@woocommerce/number';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -30,10 +27,10 @@ import {
 } from '@woocommerce/components';
 import withWCApiSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import { formatCurrency } from 'lib/currency-format';
 import Plugins from 'dashboard/task-list/tasks/steps/plugins';
 import { pluginNames } from 'wc-api/onboarding/constants';
 import { getCurrencyRegion } from 'dashboard/utils';
+import { CurrencyContext } from 'lib/currency-context';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
@@ -95,11 +92,12 @@ class BusinessDetails extends Component {
 			selling_venues: sellingVenues,
 		} = values;
 		const businessExtensions = this.getBusinessExtensions( values );
+		const { getCurrency } = this.context;
 
 		recordEvent( 'storeprofiler_store_business_details_continue', {
 			product_number: productCount,
 			already_selling: sellingVenues,
-			currency: currency.code,
+			currency: getCurrency().code,
 			revenue,
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
@@ -247,7 +245,8 @@ class BusinessDetails extends Component {
 	}
 
 	numberFormat( value ) {
-		return formatValue( 'number', value );
+		const { getCurrency } = this.context;
+		return formatValue( getCurrency(), 'number', value );
 	}
 
 	getNumberRangeString( min, max = false, format = this.numberFormat ) {
@@ -409,6 +408,7 @@ class BusinessDetails extends Component {
 
 	render() {
 		const { isInstallingExtensions, extensionInstallError } = this.state;
+		const { formatCurrency } = this.context;
 		const productCountOptions = [
 			{
 				key: '0',
@@ -683,6 +683,8 @@ class BusinessDetails extends Component {
 		);
 	}
 }
+
+BusinessDetails.contextType = CurrencyContext;
 
 export default compose(
 	withWCApiSelect( ( select ) => {

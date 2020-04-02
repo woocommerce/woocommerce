@@ -9,14 +9,9 @@ import { map } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import {
-	formatCurrency,
-	getCurrencyFormatDecimal,
-	renderCurrency,
-} from 'lib/currency-format';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
-import { formatValue } from 'lib/number-format';
+import { formatValue } from '@woocommerce/number';
 
 /**
  * Internal dependencies
@@ -24,12 +19,14 @@ import { formatValue } from 'lib/number-format';
 import CategoryBreacrumbs from './breadcrumbs';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
+import { CurrencyContext } from 'lib/currency-context';
 
 class CategoriesReportTable extends Component {
 	constructor( props ) {
 		super( props );
 
 		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
 	}
 
 	getHeadersContent() {
@@ -71,6 +68,13 @@ class CategoriesReportTable extends Component {
 	}
 
 	getRowsContent( categoryStats ) {
+		const {
+			render: renderCurrency,
+			formatDecimal: getCurrencyFormatDecimal,
+			getCurrency,
+		} = this.context;
+		const currency = getCurrency();
+
 		return map( categoryStats, ( categoryStat ) => {
 			const {
 				category_id: categoryId,
@@ -95,7 +99,7 @@ class CategoriesReportTable extends Component {
 					value: category && category.name,
 				},
 				{
-					display: formatValue( 'number', itemsSold ),
+					display: formatValue( currency, 'number', itemsSold ),
 					value: itemsSold,
 				},
 				{
@@ -115,13 +119,13 @@ class CategoriesReportTable extends Component {
 							) }
 							type="wc-admin"
 						>
-							{ formatValue( 'number', productsCount ) }
+							{ formatValue( currency, 'number', productsCount ) }
 						</Link>
 					),
 					value: productsCount,
 				},
 				{
-					display: formatValue( 'number', ordersCount ),
+					display: formatValue( currency, 'number', ordersCount ),
 					value: ordersCount,
 				},
 			];
@@ -129,7 +133,13 @@ class CategoriesReportTable extends Component {
 	}
 
 	getSummary( totals, totalResults = 0 ) {
-		const { items_sold: itemsSold = 0, net_revenue: netRevenue = 0, orders_count: ordersCount = 0 } = totals;
+		const {
+			items_sold: itemsSold = 0,
+			net_revenue: netRevenue = 0,
+			orders_count: ordersCount = 0,
+		} = totals;
+		const { formatCurrency, getCurrency } = this.context;
+		const currency = getCurrency();
 		return [
 			{
 				label: _n(
@@ -138,7 +148,7 @@ class CategoriesReportTable extends Component {
 					totalResults,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', totalResults ),
+				value: formatValue( currency, 'number', totalResults ),
 			},
 			{
 				label: _n(
@@ -147,7 +157,7 @@ class CategoriesReportTable extends Component {
 					itemsSold,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', itemsSold ),
+				value: formatValue( currency, 'number', itemsSold ),
 			},
 			{
 				label: __( 'net sales', 'woocommerce-admin' ),
@@ -160,7 +170,7 @@ class CategoriesReportTable extends Component {
 					ordersCount,
 					'woocommerce-admin'
 				),
-				value: formatValue( 'number', ordersCount ),
+				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];
 	}
@@ -206,6 +216,8 @@ class CategoriesReportTable extends Component {
 		);
 	}
 }
+
+CategoriesReportTable.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {

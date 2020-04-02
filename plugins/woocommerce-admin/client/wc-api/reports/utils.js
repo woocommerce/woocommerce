@@ -17,7 +17,6 @@ import {
 	getActiveFiltersFromQuery,
 	getUrlKey,
 } from '@woocommerce/navigation';
-import { formatCurrency } from 'lib/currency-format';
 
 /**
  * Internal dependencies
@@ -388,9 +387,10 @@ export function getReportChartData( options ) {
  * Returns a formatting function or string to be used by d3-format
  *
  * @param  {string} type Type of number, 'currency', 'number', 'percent', 'average'
+ * @param  {Function} formatCurrency format currency function
  * @return {string|Function}  returns a number format based on the type or an overriding formatting function
  */
-export function getTooltipValueFormat( type ) {
+export function getTooltipValueFormat( type, formatCurrency ) {
 	switch ( type ) {
 		case 'currency':
 			return formatCurrency;

@@ -20,7 +20,6 @@ import {
 	OrderStatus,
 	Section,
 } from '@woocommerce/components';
-import { formatCurrency } from 'lib/currency-format';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
@@ -34,6 +33,7 @@ import ActivityOutboundLink from '../activity-outbound-link';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import { DEFAULT_ACTIONABLE_STATUSES } from 'analytics/settings/config';
 import withSelect from 'wc-api/with-select';
+import { CurrencyContext } from 'lib/currency-context';
 
 class OrdersPanel extends Component {
 	renderEmptyCard() {
@@ -85,6 +85,7 @@ class OrdersPanel extends Component {
 
 	renderOrders() {
 		const { orders } = this.props;
+		const Currency = this.context;
 
 		if ( orders.length === 0 ) {
 			return this.renderEmptyCard();
@@ -194,7 +195,7 @@ class OrdersPanel extends Component {
 									productsCount
 								) }
 							</span>
-							<span>{ formatCurrency( total ) }</span>
+							<span>{ Currency.formatCurrency( total ) }</span>
 						</div>
 					}
 					actions={
@@ -303,6 +304,8 @@ OrdersPanel.defaultProps = {
 	isError: false,
 	isRequesting: false,
 };
+
+OrdersPanel.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {
