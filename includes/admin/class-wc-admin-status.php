@@ -348,6 +348,8 @@ class WC_Admin_Status {
 	 * @return void
 	 */
 	private static function output_plugins_info( $plugins, $untested_plugins ) {
+		$wc_version = Constants::get_constant( 'WC_VERSION' );
+
 		foreach ( $plugins as $plugin ) {
 			if ( ! empty( $plugin['name'] ) ) {
 				// Link the plugin name to the plugin url if available.
@@ -357,25 +359,24 @@ class WC_Admin_Status {
 				}
 
 				$has_newer_version = false;
+				$version_string    = $plugin['version'];
 				$network_string    = '';
 				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
-						$has_newer_version = true;
+						/* translators: 1: current version. 2: latest version */
+						$version_string = sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $plugin['version'], $plugin['version_latest'] );
 					}
 
 					if ( false !== $plugin['network_activated'] ) {
-						$network_string = ' &ndash; <strong style="color:black;">' . esc_html__( 'Network enabled', 'woocommerce' ) . '</strong>';
+						$network_string = ' &ndash; <strong style="color: black;">' . esc_html__( 'Network enabled', 'woocommerce' ) . '</strong>';
 					}
 				}
 				$untested_string = '';
 				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
-					$untested_string = ' &ndash; <strong style="color:red;">';
+					$untested_string = ' &ndash; <strong style="color: #a00;">';
 
-					if ( $has_newer_version ) {
-						$untested_string .= esc_html__( 'This version is not tested with the active version of WooCommerce (update is available)', 'woocommerce' );
-					} else {
-						$untested_string .= esc_html__( 'This version is not tested with the active version of WooCommerce', 'woocommerce' );
-					}
+					/* translators: %s: version */
+					$untested_string .= esc_html( sprintf( __( 'Installed version not tested with active version of WooCommerce %s', 'woocommerce' ), $wc_version ) );
 
 					$untested_string .= '</strong>';
 				}
@@ -387,7 +388,7 @@ class WC_Admin_Status {
 						<?php
 						/* translators: %s: plugin author */
 						printf( esc_html__( 'by %s', 'woocommerce' ), esc_html( $plugin['author_name'] ) );
-						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $untested_string . $network_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo ' &ndash; ' . esc_html( $version_string ) . $untested_string . $network_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						?>
 					</td>
 				</tr>
