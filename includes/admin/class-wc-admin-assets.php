@@ -70,7 +70,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Privacy Policy Guide css for back-compat.
-			if ( in_array( $screen_id, array( 'privacy-policy-guide' ) ) ) {
+			if ( isset( $_GET['wp-privacy-policy-guide'] ) || in_array( $screen_id, array( 'privacy-policy-guide' ) ) ) {
 				wp_enqueue_style( 'woocommerce_admin_privacy_styles' );
 			}
 
