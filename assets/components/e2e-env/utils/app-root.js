@@ -9,8 +9,8 @@ const getAppRoot = () => {
 
     if ( -1 < moduleDir.indexOf( 'node_modules' ) ) {
         appPath = moduleDir.split( 'node_modules' )[ 0 ];
-    } else if ( -1 < moduleDir.indexOf( 'packages/e2e-env' ) ) {
-        appPath = moduleDir.split( 'packages/e2e-env' )[ 0 ];
+    } else if ( -1 < moduleDir.indexOf( 'assets/components/e2e-env' ) ) {
+        appPath = moduleDir.split( 'assets/components/e2e-env' )[ 0 ];
     }
 
     return appPath;
