@@ -119,7 +119,6 @@ export const ShippingDataProvider = ( { children } ) => {
 	};
 
 	// emit events.
-	// @todo add emitters for shipping rate selection.
 	useEffect( () => {
 		if ( ! shippingRatesLoading && currentErrorStatus.hasError ) {
 			emitEvent(
