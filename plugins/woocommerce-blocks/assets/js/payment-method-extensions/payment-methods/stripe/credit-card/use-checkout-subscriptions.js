@@ -11,13 +11,13 @@ import { PAYMENT_METHOD_NAME } from './constants';
 import {
 	getStripeServerData,
 	getErrorMessageForTypeAndCode,
-} from '../../stripe-utils';
+} from '../stripe-utils';
 
 /**
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').EventRegistrationProps} EventRegistrationProps
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PaymentStatusProps} PaymentStatusProps
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').BillingDataProps} BillingDataProps
- * @typedef {import('../../stripe-utils/type-defs').Stripe} Stripe
+ * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
  */
 
 /**

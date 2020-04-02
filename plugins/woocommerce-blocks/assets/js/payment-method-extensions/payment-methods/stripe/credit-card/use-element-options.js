@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 
 /**
- * @typedef {import('../../stripe-utils/type-defs').StripeElementOptions} StripeElementOptions
+ * @typedef {import('../stripe-utils/type-defs').StripeElementOptions} StripeElementOptions
  */
 
 /**

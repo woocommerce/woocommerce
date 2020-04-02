@@ -8,6 +8,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Assets;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -47,12 +49,9 @@ class Cart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
-		$this->enqueue_data( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-		\Automattic\WooCommerce\Blocks\Assets::register_block_script(
-			$this->block_name . '-frontend',
-			$this->block_name . '-block-frontend'
-		);
+		$this->enqueue_data( $attributes );
+		$this->enqueue_scripts( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
 		return $content . $this->get_skeleton();
 	}
@@ -65,24 +64,31 @@ class Cart extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
+		if ( did_action( 'woocommerce_blocks_cart_enqueue_data' ) ) {
+			return;
+		}
+
 		$data_registry = Package::container()->get(
-			\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class
+			AssetDataRegistry::class
 		);
-		if ( ! empty( $attributes['checkoutPageId'] ) && ! $data_registry->exists( 'page-' . $attributes['checkoutPageId'] ) ) {
-			$permalink = get_permalink( $attributes['checkoutPageId'] );
-			if ( $permalink ) {
-				$data_registry->add( 'page-' . $attributes['checkoutPageId'], $permalink );
+
+		$block_data = [
+			'shippingCountries' => [ WC()->countries, 'get_shipping_countries' ],
+			'shippingStates'    => [ WC()->countries, 'get_shipping_country_states' ],
+		];
+
+		foreach ( $block_data as $key => $callback ) {
+			if ( ! $data_registry->exists( $key ) ) {
+				$data_registry->add( $key, call_user_func( $callback ) );
 			}
 		}
-		if ( ! $data_registry->exists( 'shippingCountries' ) ) {
-			$data_registry->add( 'shippingCountries', WC()->countries->get_shipping_countries() );
+
+		$permalink = ! empty( $attributes['checkoutPageId'] ) ? get_permalink( $attributes['checkoutPageId'] ) : false;
+
+		if ( $permalink && ! $data_registry->exists( 'page-' . $attributes['checkoutPageId'] ) ) {
+			$data_registry->add( 'page-' . $attributes['checkoutPageId'], $permalink );
 		}
-		if ( ! $data_registry->exists( 'shippingStates' ) ) {
-			$data_registry->add( 'shippingStates', WC()->countries->get_shipping_country_states() );
-		}
-		if ( ! $data_registry->exists( 'cartData' ) ) {
-			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
-		}
+
 		if ( ! $data_registry->exists( 'quantitySelectLimit' ) ) {
 			/**
 			 * Note: this filter will be deprecated if/when quantity select limits
@@ -90,8 +96,36 @@ class Cart extends AbstractBlock {
 			 *
 			 * @return {integer} $max_quantity_limit Maximum quantity of products that can be selected in the cart.
 			 */
-			$max_quantity_limit = apply_filters( 'woocommerce_maximum_quantity_selected_cart', 99 );
-			$data_registry->add( 'quantitySelectLimit', $max_quantity_limit );
+			$data_registry->add( 'quantitySelectLimit', apply_filters( 'woocommerce_maximum_quantity_selected_cart', 99 ) );
+		}
+
+		// Hydrate the following data depending on admin or frontend context.
+		if ( ! is_admin() ) {
+			$this->hydrate_from_api( $data_registry );
+		}
+
+		do_action( 'woocommerce_blocks_cart_enqueue_data' );
+	}
+
+	/**
+	 * Register/enqueue scripts used for this block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_scripts( array $attributes = [] ) {
+		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
+	}
+
+	/**
+	 * Hydrate the cart block with data from the API.
+	 *
+	 * @param AssetDataRegistry $data_registry Data registry instance.
+	 */
+	protected function hydrate_from_api( AssetDataRegistry $data_registry ) {
+		if ( ! $data_registry->exists( 'cartData' ) ) {
+			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
 		}
 	}
 

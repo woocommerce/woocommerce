@@ -6,12 +6,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { PAYMENT_METHOD_NAME, StripeCreditCard } from './stripe';
 import { stripePromise } from '../stripe-utils';
+import { StripeCreditCard } from './payment-method';
+import { PAYMENT_METHOD_NAME } from './constants';
 
 const EditPlaceHolder = () => <div>TODO: Card edit preview soon...</div>;
 
-export const stripeCcPaymentMethod = {
+const stripeCcPaymentMethod = {
 	id: PAYMENT_METHOD_NAME,
 	label: (
 		<strong>
@@ -26,3 +27,5 @@ export const stripeCcPaymentMethod = {
 		'woo-gutenberg-products-block'
 	),
 };
+
+export default stripeCcPaymentMethod;

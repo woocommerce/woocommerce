@@ -1,8 +1,8 @@
 /**
- * @typedef {import('../../stripe-utils/type-defs').StripePaymentItem} StripePaymentItem
- * @typedef {import('../../stripe-utils/type-defs').StripeShippingOption} StripeShippingOption
- * @typedef {import('../../stripe-utils/type-defs').StripeShippingAddress} StripeShippingAddress
- * @typedef {import('../../stripe-utils/type-defs').StripePaymentResponse} StripePaymentResponse
+ * @typedef {import('../stripe-utils/type-defs').StripePaymentItem} StripePaymentItem
+ * @typedef {import('../stripe-utils/type-defs').StripeShippingOption} StripeShippingOption
+ * @typedef {import('../stripe-utils/type-defs').StripeShippingAddress} StripeShippingAddress
+ * @typedef {import('../stripe-utils/type-defs').StripePaymentResponse} StripePaymentResponse
  * @typedef {import('@woocommerce/type-defs/cart').CartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
