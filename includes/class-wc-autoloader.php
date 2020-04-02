@@ -90,6 +90,8 @@ class WC_Autoloader {
 			$path = $this->include_path . 'log-handlers/';
 		} elseif ( 0 === strpos( $class, 'wc_integration' ) ) {
 			$path = $this->include_path . 'integrations/' . substr( str_replace( '_', '-', $class ), 15 ) . '/';
+		} elseif ( 0 === strpos( $class, 'wc_notes_' ) ) {
+			$path = $this->include_path . 'admin/notes/';
 		}
 
 		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {

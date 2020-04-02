@@ -8,6 +8,8 @@
  * @version  2.5.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -250,12 +252,14 @@ function woocommerce_product_loop() {
  * @return string
  */
 function wc_generator_tag( $gen, $type ) {
+	$version = Constants::get_constant( 'WC_VERSION' );
+
 	switch ( $type ) {
 		case 'html':
-			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '">';
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $version ) . '">';
 			break;
 		case 'xhtml':
-			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( WC_VERSION ) . '" />';
+			$gen .= "\n" . '<meta name="generator" content="WooCommerce ' . esc_attr( $version ) . '" />';
 			break;
 	}
 	return $gen;
@@ -1158,7 +1162,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
 
 if ( ! function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
 	/**
-	 * Insert the opening anchor tag for products in the loop.
+	 * Insert the closing anchor tag for products in the loop.
 	 */
 	function woocommerce_template_loop_product_link_close() {
 		echo '</a>';

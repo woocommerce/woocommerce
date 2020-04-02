@@ -130,16 +130,12 @@ const completeOldSetupWizard = async () => {
 
 	// Fill out recommended section details
 	// Turn off Storefront Theme option
-	// await page.waitForSelector( '#wc_recommended_storefront_theme', { visible: true } );
-	// await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
+	await page.waitForSelector( '#wc_recommended_storefront_theme', { visible: true } );
+	await page.$eval( '#wc_recommended_storefront_theme', elem => elem.click() );
 
 	// Turn off Automated Taxes option
 	await page.waitForSelector( '#wc_recommended_automated_taxes', { visible: true } );
 	await page.$eval( '#wc_recommended_automated_taxes', elem => elem.click() );
-
-	// Turn off WooCommerce Admin option
-	await page.waitForSelector( '#wc_recommended_wc_admin', { visible: true } );
-	await page.$eval( '#wc_recommended_wc_admin', elem => elem.click() );
 
 	// Turn off Mailchimp option
 	await page.waitForSelector( '#wc_recommended_mailchimp', { visible: true } );
@@ -319,4 +315,9 @@ const createVariableProduct = async () => {
 	return variablePostIdValue;
 };
 
-export { completeOldSetupWizard, createSimpleProduct, createVariableProduct };
+export {
+	completeOldSetupWizard,
+	createSimpleProduct,
+	createVariableProduct,
+	verifyAndPublish,
+};

@@ -29,6 +29,7 @@ class Packages {
 	protected static $packages = array(
 		'woocommerce-blocks'   => '\\Automattic\\WooCommerce\\Blocks\\Package',
 		'woocommerce-rest-api' => '\\Automattic\\WooCommerce\\RestApi\\Package',
+		'woocommerce-admin'    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
 	);
 
 	/**

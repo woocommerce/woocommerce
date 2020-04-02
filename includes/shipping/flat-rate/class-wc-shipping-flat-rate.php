@@ -55,10 +55,15 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * Evaluate a cost from a sum/string.
 	 *
 	 * @param  string $sum Sum of shipping.
-	 * @param  array  $args Args.
+	 * @param  array  $args Args, must contain `cost` and `qty` keys. Having `array()` as default is for back compat reasons.
 	 * @return string
 	 */
 	protected function evaluate_cost( $sum, $args = array() ) {
+		// Add warning for subclasses.
+		if ( ! is_array( $args ) || ! array_key_exists( 'qty', $args ) || ! array_key_exists( 'cost', $args ) ) {
+			wc_doing_it_wrong( __FUNCTION__, '$args must contain `cost` and `qty` keys.', '4.0.1' );
+		}
+
 		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
 
 		// Allow 3rd parties to process shipping cost arguments.
@@ -264,7 +269,14 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
 		// Thrown an error on the front end if the evaluate_cost will fail.
-		if ( false === $this->evaluate_cost( $value ) ) {
+		$dummy_cost = $this->evaluate_cost(
+			$value,
+			array(
+				'cost' => 1,
+				'qty'  => 1,
+			)
+		);
+		if ( false === $dummy_cost ) {
 			throw new Exception( WC_Eval_Math::$last_error );
 		}
 		return $value;

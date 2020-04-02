@@ -39,7 +39,7 @@ describe( 'Single Product Page', () => {
 	} );
 } );
 
-describe( 'Variable Product Page', () => {
+describe.skip( 'Variable Product Page', () => {
 	beforeAll( async () => {
 		await StoreOwnerFlow.login();
 		variablePostIdValue = await createVariableProduct();
