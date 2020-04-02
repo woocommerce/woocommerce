@@ -11,10 +11,14 @@ use Automattic\WooCommerce\Blocks\Assets as OldAssets;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\BackCompatAssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Assets\PaymentMethodAssets;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Library;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\RestApi;
-use Automattic\WooCommerce\Blocks\PaymentMethodIntegrations\Stripe;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\Stripe;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
+
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -86,12 +90,27 @@ class Bootstrap {
 					: new AssetDataRegistry( $asset_api );
 			}
 		);
+		$this->container->register(
+			PaymentMethodRegistry::class,
+			function( Container $container ) {
+				return new PaymentMethodRegistry();
+			}
+		);
+		$this->container->register(
+			PaymentMethodAssets::class,
+			function( Container $container ) {
+				$payment_method_registry = $container->get( PaymentMethodRegistry::class );
+				$asset_data_registry     = $container->get( AssetDataRegistry::class );
+				return new PaymentMethodAssets( $payment_method_registry, $asset_data_registry );
+			}
+		);
 
 		// load AssetDataRegistry.
 		$this->container->get( AssetDataRegistry::class );
 
-		// @todo this will eventually get moved into the relevant payment
-		// extensions
+		// load PaymentMethodAssets.
+		$this->container->get( PaymentMethodAssets::class );
+
 		$this->load_payment_method_integrations();
 
 		Library::init();
@@ -179,21 +198,31 @@ class Bootstrap {
 		$this->container->register(
 			Stripe::class,
 			function( Container $container ) {
-				$asset_data_registry = $container->get( AssetDataRegistry::class );
-				$asset_api           = $container->get( AssetApi::class );
-				return new Stripe( $asset_data_registry, $asset_api );
+				$asset_api = $container->get( AssetApi::class );
+				return new Stripe( $asset_api );
+			}
+		);
+		// cheque registration.
+		$this->container->register(
+			Cheque::class,
+			function( Container $container ) {
+				$asset_api = $container->get( AssetApi::class );
+				return new Cheque( $asset_api );
 			}
 		);
 		add_action(
-			'plugins_loaded',
-			function() {
-				if ( class_exists( 'WC_Stripe' ) ) {
-					// initialize hooking into blocks.
-					$stripe = $this->container->get( Stripe::class );
-					$stripe->register_assets();
+			'woocommerce_blocks_payment_method_type_registration',
+			function( $payment_method_registry ) {
+				// This is temporarily registering Stripe until it's moved to the extension.
+				if ( class_exists( 'WC_Stripe' ) && ! $payment_method_registry->is_registered( 'stripe' ) ) {
+					$payment_method_registry->register(
+						$this->container->get( Stripe::class )
+					);
 				}
-			},
-			15
+				$payment_method_registry->register(
+					$this->container->get( Cheque::class )
+				);
+			}
 		);
 	}
 }

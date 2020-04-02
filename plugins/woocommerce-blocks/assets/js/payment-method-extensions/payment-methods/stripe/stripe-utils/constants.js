@@ -1,5 +1,3 @@
-export const PAYMENT_METHOD_NAME = 'stripe';
-
 export const errorTypes = {
 	INVALID_EMAIL: 'email_invalid',
 	INVALID_REQUEST: 'invalid_request_error',

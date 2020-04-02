@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Assets\PaymentMethodAssets;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,7 +42,6 @@ class Checkout extends AbstractBlock {
 		);
 	}
 
-
 	/**
 	 * Append frontend scripts when rendering the block.
 	 *
@@ -50,9 +50,9 @@ class Checkout extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
-		$this->enqueue_data( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
-		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend' );
+		$this->enqueue_data( $attributes );
+		$this->enqueue_scripts( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
 		return $content . $this->get_skeleton();
 	}
@@ -100,6 +100,21 @@ class Checkout extends AbstractBlock {
 			$this->hydrate_from_api( $data_registry );
 			$this->hydrate_customer_payment_methods( $data_registry );
 		}
+
+		Package::container()->get( PaymentMethodAssets::class )->register_payment_method_data();
+	}
+
+	/**
+	 * Register/enqueue scripts used for this block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_scripts( array $attributes = [] ) {
+		$dependencies = Package::container()->get( PaymentMethodAssets::class )->get_all_registered_payment_method_script_handles();
+
+		Assets::register_block_script( $this->block_name . '-frontend', $this->block_name . '-block-frontend', $dependencies );
 	}
 
 	/**

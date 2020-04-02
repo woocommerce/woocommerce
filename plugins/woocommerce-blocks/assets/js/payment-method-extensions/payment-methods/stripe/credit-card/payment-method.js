@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
-import { getStripeServerData, stripePromise } from '../../stripe-utils';
+import { getStripeServerData, stripePromise } from '../stripe-utils';
 import { ccSvg } from './cc';
 import { useCheckoutSubscriptions } from './use-checkout-subscriptions';
 import { InlineCard, CardElements } from './elements';
@@ -15,8 +15,8 @@ import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
- * @typedef {import('../../stripe-utils/type-defs').Stripe} Stripe
- * @typedef {import('../../stripe-utils/type-defs').StripePaymentRequest} StripePaymentRequest
+ * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
+ * @typedef {import('../stripe-utils/type-defs').StripePaymentRequest} StripePaymentRequest
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
  */
 

@@ -56,6 +56,18 @@ abstract class AbstractBlock {
 		$this->enqueue_data();
 	}
 
+	/**
+	 * Append frontend scripts when rendering the block.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Rendered block type output.
+	 */
+	public function render( $attributes = array(), $content = '' ) {
+		$this->enqueue_data( $attributes );
+		$this->enqueue_scripts( $attributes );
+		return $content;
+	}
 
 	/**
 	 * Extra data passed through from server to client for block.
@@ -65,6 +77,15 @@ abstract class AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
+		// noop. Child classes should override this if needed.
+	}
+
+	/**
+	 * Register/enqueue scripts used for this block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 */
+	protected function enqueue_scripts( array $attributes = [] ) {
 		// noop. Child classes should override this if needed.
 	}
 }

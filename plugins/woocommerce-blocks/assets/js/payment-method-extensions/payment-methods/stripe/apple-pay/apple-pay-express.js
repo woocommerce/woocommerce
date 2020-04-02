@@ -19,7 +19,7 @@ import {
 	canDoApplePay,
 	getTotalPaymentItem,
 	stripePromise,
-} from '../../stripe-utils';
+} from '../stripe-utils';
 
 /**
  * External dependencies
@@ -33,8 +33,8 @@ import {
 import { __ } from '@wordpress/i18n';
 
 /**
- * @typedef {import('../../stripe-utils/type-defs').Stripe} Stripe
- * @typedef {import('../../stripe-utils/type-defs').StripePaymentRequest} StripePaymentRequest
+ * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
+ * @typedef {import('../stripe-utils/type-defs').StripePaymentRequest} StripePaymentRequest
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
  */
 

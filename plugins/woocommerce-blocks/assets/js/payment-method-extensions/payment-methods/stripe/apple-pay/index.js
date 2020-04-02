@@ -1,16 +1,14 @@
 /**
  * Internal dependencies
  */
-import {
-	PAYMENT_METHOD_NAME,
-	ApplePayExpress,
-	applePayImage,
-} from './apple-pay';
+import { PAYMENT_METHOD_NAME } from './constants';
+import { ApplePayExpress } from './apple-pay-express';
+import { applePayImage } from './apple-pay-preview';
 import { stripePromise } from '../stripe-utils';
 
 const ApplePayPreview = () => <img src={ applePayImage } alt="" />;
 
-export const ApplePayConfig = {
+const ApplePayPaymentMethod = {
 	id: PAYMENT_METHOD_NAME,
 	content: <ApplePayExpress />,
 	edit: <ApplePayPreview />,
@@ -35,3 +33,5 @@ export const ApplePayConfig = {
 		} );
 	} ),
 };
+
+export default ApplePayPaymentMethod;
