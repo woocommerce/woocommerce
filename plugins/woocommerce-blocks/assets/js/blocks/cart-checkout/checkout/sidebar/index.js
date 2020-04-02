@@ -10,6 +10,7 @@ import {
 	TotalsShippingItem,
 	TotalsTaxesItem,
 } from '@woocommerce/base-components/cart-checkout';
+import { useShippingDataContext } from '@woocommerce/base-context';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import {
 	COUPONS_ENABLED,
@@ -33,6 +34,8 @@ const CheckoutSidebar = ( {
 		isApplyingCoupon,
 		isRemovingCoupon,
 	} = useStoreCartCoupons();
+
+	const { needsShipping } = useShippingDataContext();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
@@ -47,13 +50,15 @@ const CheckoutSidebar = ( {
 				removeCoupon={ removeCoupon }
 				values={ cartTotals }
 			/>
-			<TotalsShippingItem
-				currency={ totalsCurrency }
-				noResultsMessage={ null }
-				isCheckout={ true }
-				showCalculator={ false }
-				values={ cartTotals }
-			/>
+			{ needsShipping && (
+				<TotalsShippingItem
+					currency={ totalsCurrency }
+					noResultsMessage={ null }
+					isCheckout={ true }
+					showCalculator={ false }
+					values={ cartTotals }
+				/>
+			) }
 			{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
 				<TotalsTaxesItem
 					currency={ totalsCurrency }
