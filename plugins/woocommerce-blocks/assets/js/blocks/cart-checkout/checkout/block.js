@@ -20,11 +20,11 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import {
 	CheckoutProvider,
-	useValidationContext,
 	useCheckoutContext,
 	useEditorContext,
 	useShippingDataContext,
 	useBillingDataContext,
+	useValidationContext,
 } from '@woocommerce/base-context';
 import {
 	ExpressCheckoutFormControl,
@@ -58,33 +58,21 @@ const Checkout = ( {
 	cartCoupons = [],
 	cartItems = [],
 	cartTotals = {},
-	shippingRates = [],
 	scrollToTop,
+	shippingRates = [],
 } ) => {
 	const { isEditor } = useEditorContext();
-	const { hasOrder } = useCheckoutContext();
+	const { hasOrder, onCheckoutCompleteError } = useCheckoutContext();
+	const { showAllValidationErrors } = useValidationContext();
 	const {
 		shippingRatesLoading,
 		shippingAddress,
 		setShippingAddress,
 	} = useShippingDataContext();
 	const { billingData, setBillingData } = useBillingDataContext();
-	const {
-		hasValidationErrors,
-		showAllValidationErrors,
-	} = useValidationContext();
 
 	const [ contactFields, setContactFields ] = useState( {} );
 	const [ shippingAsBilling, setShippingAsBilling ] = useState( true );
-
-	const validateSubmit = () => {
-		if ( hasValidationErrors() ) {
-			showAllValidationErrors();
-			scrollToTop( { focusableSelector: 'input:invalid' } );
-			return false;
-		}
-		return true;
-	};
 
 	const renderShippingRatesControlOption = ( option ) => ( {
 		label: decodeEntities( option.name ),
@@ -126,9 +114,21 @@ const Checkout = ( {
 	);
 	useEffect( () => {
 		if ( shippingAsBilling ) {
-			setBillingData( shippingAddress );
+			setBillingData( { ...shippingAddress, shippingAsBilling } );
+		} else {
+			setBillingData( { shippingAsBilling } );
 		}
 	}, [ shippingAsBilling, setBillingData ] );
+
+	useEffect( () => {
+		const unsubscribeCompleteError = onCheckoutCompleteError( () => {
+			showAllValidationErrors();
+			scrollToTop( { focusableSelector: 'input:invalid' } );
+		} );
+		return () => {
+			unsubscribeCompleteError();
+		};
+	}, [ onCheckoutCompleteError ] );
 
 	if ( ! isEditor && ! hasOrder ) {
 		return <CheckoutOrderError />;
@@ -167,6 +167,7 @@ const Checkout = ( {
 							) }
 						>
 							<ValidatedTextInput
+								id="email"
 								type="email"
 								label={ __(
 									'Email address',
@@ -208,6 +209,7 @@ const Checkout = ( {
 								) }
 							>
 								<AddressForm
+									id="shipping"
 									onChange={ setShippingFields }
 									values={ shippingAddress }
 									fields={ Object.keys( addressFields ) }
@@ -215,6 +217,7 @@ const Checkout = ( {
 								/>
 								{ attributes.showPhoneField && (
 									<ValidatedTextInput
+										id="phone"
 										type="tel"
 										label={
 											attributes.requirePhoneField
@@ -267,6 +270,7 @@ const Checkout = ( {
 								) }
 							>
 								<AddressForm
+									id="billing"
 									onChange={ setBillingData }
 									type="billing"
 									values={ billingData }
@@ -365,7 +369,7 @@ const Checkout = ( {
 								) }
 							/>
 						) }
-						<PlaceOrderButton validateSubmit={ validateSubmit } />
+						<PlaceOrderButton />
 					</div>
 					{ attributes.showPolicyLinks && <Policies /> }
 				</Main>

@@ -8,6 +8,7 @@ import {
 	useShippingDataContext,
 	useBillingDataContext,
 	usePaymentMethodDataContext,
+	useValidationContext,
 } from '@woocommerce/base-context';
 import { useEffect, useRef, useCallback } from '@wordpress/element';
 import { useStoreNotices } from '@woocommerce/base-hooks';
@@ -18,26 +19,57 @@ import { useStoreNotices } from '@woocommerce/base-hooks';
  * Subscribes to checkout context and triggers processing via the API.
  */
 const CheckoutProcessor = () => {
-	const { onCheckoutProcessing, dispatchActions } = useCheckoutContext();
+	const {
+		hasError,
+		onCheckoutProcessing,
+		dispatchActions,
+	} = useCheckoutContext();
+	const { hasValidationErrors } = useValidationContext();
 	const { shippingAddress } = useShippingDataContext();
 	const { billingData } = useBillingDataContext();
-	const { activePaymentMethod } = usePaymentMethodDataContext();
-	const { addErrorNotice } = useStoreNotices();
+	const {
+		activePaymentMethod,
+		currentStatus: currentPaymentStatus,
+		errorMessage,
+	} = usePaymentMethodDataContext();
+	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
 	const currentShippingAddress = useRef( shippingAddress );
+
+	const withErrors = hasValidationErrors();
+	const paidAndWithoutErrors =
+		! hasError && ! withErrors && currentPaymentStatus.isSuccessful;
 
 	useEffect( () => {
 		currentBillingData.current = billingData;
 		currentShippingAddress.current = shippingAddress;
 	}, [ billingData, shippingAddress ] );
 
+	useEffect( () => {
+		if ( errorMessage ) {
+			addErrorNotice( errorMessage, {
+				id: 'payment-method-error',
+			} );
+		} else {
+			removeNotice( 'payment-method-error' );
+		}
+	}, [ errorMessage ] );
+
+	const checkValidation = useCallback( () => {
+		return ! withErrors;
+	}, [ withErrors ] );
+
 	/**
 	 * Process an order via the /wc/store/checkout endpoint.
 	 *
 	 * @return {boolean} True if everything was successful.
 	 */
-	const processCheckout = useCallback( async () => {
-		await triggerFetch( {
+	useEffect( () => {
+		if ( ! paidAndWithoutErrors ) {
+			return;
+		}
+
+		triggerFetch( {
 			path: '/wc/store/checkout',
 			method: 'POST',
 			data: {
@@ -79,8 +111,6 @@ const CheckoutProcessor = () => {
 					dispatchActions.setRedirectUrl(
 						response.payment_result.redirect_url
 					);
-
-					// @todo do we need to trigger more handling here?
 				} );
 			} )
 			.catch( ( error ) => {
@@ -88,24 +118,20 @@ const CheckoutProcessor = () => {
 					id: 'checkout',
 				} );
 			} );
-
-		return true;
 	}, [
 		addErrorNotice,
 		activePaymentMethod,
 		currentBillingData,
 		currentShippingAddress,
+		paidAndWithoutErrors,
 	] );
 
-	/**
-	 * When the checkout is processing, process the order.
-	 */
 	useEffect( () => {
-		const unsubscribeProcessing = onCheckoutProcessing( processCheckout );
+		const unsubscribeProcessing = onCheckoutProcessing( checkValidation );
 		return () => {
 			unsubscribeProcessing();
 		};
-	}, [ onCheckoutProcessing, processCheckout ] );
+	}, [ onCheckoutProcessing, checkValidation ] );
 
 	return null;
 };

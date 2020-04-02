@@ -24,6 +24,7 @@ import {
 	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
+import { useValidationContext } from '../validation';
 
 /**
  * @typedef {import('@woocommerce/type-defs/checkout').CheckoutDispatchActions} CheckoutDispatchActions
@@ -89,6 +90,7 @@ export const CheckoutStateProvider = ( {
 	const [ checkoutState, dispatch ] = useReducer( reducer, DEFAULT_STATE );
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
+	const { setValidationErrors } = useValidationContext();
 	// set observers on ref so it's always current.
 	useEffect( () => {
 		currentObservers.current = observers;
@@ -136,14 +138,13 @@ export const CheckoutStateProvider = ( {
 				{}
 			).then( ( response ) => {
 				if ( response !== true ) {
-					// @todo handle any validation error property values in the
-					// response.
+					setValidationErrors( response );
 					dispatchActions.setHasError();
 				}
 				dispatch( actions.setComplete() );
 			} );
 		}
-		if ( checkoutState.isComplete ) {
+		if ( status === STATUS.COMPLETE ) {
 			if ( checkoutState.hasError ) {
 				emitEvent(
 					currentObservers.current,

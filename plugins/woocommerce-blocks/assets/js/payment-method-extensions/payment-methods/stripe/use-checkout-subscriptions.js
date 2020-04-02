@@ -122,6 +122,7 @@ export const useCheckoutSubscriptions = (
 				setSourceId( response.source.id );
 				return true;
 			} catch ( e ) {
+				paymentStatus.setPaymentStatus().error( e );
 				return e;
 			}
 		};

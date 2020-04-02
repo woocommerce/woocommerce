@@ -14,6 +14,7 @@ import {
 import { useValidationContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 
 /**
  * Internal dependencies
@@ -53,8 +54,10 @@ const validateShippingCountry = (
  * Checkout address form.
  */
 const AddressForm = ( {
+	id,
 	fields = Object.keys( defaultAddressFields ),
 	fieldConfig = {},
+	instanceId,
 	onChange,
 	type = 'shipping',
 	values,
@@ -92,8 +95,11 @@ const AddressForm = ( {
 		setValidationErrors,
 		clearValidationError,
 	] );
+
+	id = id || instanceId;
+
 	return (
-		<div className="wc-block-address-form">
+		<div id={ id } className="wc-block-address-form">
 			{ sortedAddressFields.map( ( field ) => {
 				if ( field.hidden ) {
 					return null;
@@ -107,6 +113,7 @@ const AddressForm = ( {
 					return (
 						<Tag
 							key={ field.key }
+							id={ `${ id }-${ field.key }` }
 							label={
 								field.required
 									? field.label
@@ -142,6 +149,7 @@ const AddressForm = ( {
 					return (
 						<Tag
 							key={ field.key }
+							id={ `${ id }-${ field.key }` }
 							country={ values.country }
 							label={
 								field.required
@@ -165,6 +173,7 @@ const AddressForm = ( {
 				return (
 					<ValidatedTextInput
 						key={ field.key }
+						id={ `${ id }-${ field.key }` }
 						className={ `wc-block-address-form__${ field.key }` }
 						label={
 							field.required ? field.label : field.optionalLabel
@@ -196,4 +205,4 @@ AddressForm.propTypes = {
 	type: PropTypes.oneOf( [ 'billing', 'shipping' ] ),
 };
 
-export default AddressForm;
+export default withInstanceId( AddressForm );

@@ -13,7 +13,11 @@ const ValidationContext = createContext( {
 	setValidationErrors: ( errors ) => void errors,
 	clearValidationError: ( property ) => void property,
 	clearAllValidationErrors: () => void null,
-	getValidationErrorId: ( inputId ) => inputId,
+	hideValidationError: () => void null,
+	showValidationError: () => void null,
+	showAllValidationErrors: () => void null,
+	hasValidationErrors: () => false,
+	getValidationErrorId: ( errorId ) => errorId,
 } );
 
 /**
@@ -168,11 +172,11 @@ export const ValidationContextProvider = ( { children } ) => {
 		setValidationErrors,
 		clearValidationError,
 		clearAllValidationErrors,
-		getValidationErrorId,
 		hideValidationError,
 		showValidationError,
 		showAllValidationErrors,
 		hasValidationErrors,
+		getValidationErrorId,
 	};
 	return (
 		<ValidationContext.Provider value={ context }>
