@@ -95,7 +95,7 @@
 		"@wordpress/is-shallow-equal": "1.7.0",
 		"@wordpress/jest-preset-default": "5.3.1",
 		"@wordpress/scripts": "6.2.0",
-		"autoprefixer": "9.7.4",
+		"autoprefixer": "9.7.5",
 		"babel-core": "7.0.0-bridge.0",
 		"babel-eslint": "10.1.0",
 		"babel-loader": "8.0.6",
