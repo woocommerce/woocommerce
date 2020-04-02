@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@woocommerce/base-components/cart-checkout';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
-
+import { useCheckoutContext } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
@@ -16,11 +16,14 @@ import { MastercardLogo, VisaLogo } from './payment-logos'; // @todo we want to 
  * Checkout button rendered in the full cart page.
  */
 const CheckoutButton = ( { link } ) => {
+	const { isCalculating } = useCheckoutContext();
+
 	return (
 		<div className="wc-block-cart__submit-container">
 			<Button
 				className="wc-block-cart__submit-button"
 				href={ link || CHECKOUT_URL }
+				disabled={ isCalculating }
 			>
 				{ __( 'Proceed to Checkout', 'woo-gutenberg-products-block' ) }
 			</Button>
