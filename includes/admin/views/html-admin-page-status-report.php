@@ -869,7 +869,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				<?php
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
 					/* translators: 1: current version. 2: latest version */
-					echo sprintf( esc_html__( '%1$s (update to version %2$s is available)', 'woocommerce' ), esc_html( $theme['version'] ), esc_html( $theme['version_latest'] ) );
+					echo esc_html( sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $theme['version'], $theme['version_latest'] ) );
 				} else {
 					echo esc_html( $theme['version'] );
 				}
