@@ -9,7 +9,7 @@ DELAY_SEC=10
 # Counter for the loop that checks if the Docker container had been built
 count=0
 
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8084/ready/)" != "200" ]]
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8084/?pagename=ready)" != "200" ]]
 
 do
   echo "$(date) - Docker container is still being built"
