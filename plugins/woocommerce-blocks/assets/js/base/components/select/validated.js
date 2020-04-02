@@ -52,6 +52,13 @@ const ValidatedSelect = ( {
 		validateSelect();
 	}, [ value ] );
 
+	// Remove validation errors when unmounted.
+	useEffect( () => {
+		return () => {
+			clearValidationError( errorId );
+		};
+	}, [] );
+
 	const error = getValidationError( errorId ) || {};
 
 	return (

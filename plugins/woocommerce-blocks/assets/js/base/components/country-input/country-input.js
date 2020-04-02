@@ -14,6 +14,7 @@ import { ValidatedSelect } from '../select';
 const CountryInput = ( {
 	className,
 	countries,
+	id,
 	label,
 	onChange,
 	value = '',
@@ -33,6 +34,7 @@ const CountryInput = ( {
 	return (
 		<div className={ classnames( className, 'wc-block-country-input' ) }>
 			<ValidatedSelect
+				id={ id }
 				label={ label }
 				onChange={ onChange }
 				options={ options }
@@ -72,6 +74,7 @@ CountryInput.propTypes = {
 	countries: PropTypes.objectOf( PropTypes.string ).isRequired,
 	onChange: PropTypes.func.isRequired,
 	className: PropTypes.string,
+	id: PropTypes.string,
 	label: PropTypes.string,
 	value: PropTypes.string,
 	autoComplete: PropTypes.string,

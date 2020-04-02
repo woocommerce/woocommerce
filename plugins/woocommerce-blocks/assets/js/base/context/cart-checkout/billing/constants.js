@@ -25,6 +25,7 @@ export const DEFAULT_BILLING_DATA = {
 	country: '',
 	email: '',
 	phone: '',
+	shippingAsBilling: true,
 };
 
 /**

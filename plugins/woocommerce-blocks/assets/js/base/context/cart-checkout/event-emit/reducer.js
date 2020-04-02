@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { omit, uniqueId } from 'lodash';
+import { uniqueId } from 'lodash';
 
 export const TYPES = {
 	ADD_EVENT_CALLBACK: 'add_event_callback',
@@ -33,19 +33,19 @@ export const actions = {
  * @param {Object} action Incoming action object
  */
 export const reducer = ( state = {}, { type, eventType, id, callback } ) => {
+	const newEvents = new Map( state[ eventType ] );
 	switch ( type ) {
 		case TYPES.ADD_EVENT_CALLBACK:
+			newEvents.set( id, callback );
 			return {
 				...state,
-				[ eventType ]: {
-					...state[ eventType ],
-					[ id ]: callback,
-				},
+				[ eventType ]: newEvents,
 			};
 		case TYPES.REMOVE_EVENT_CALLBACK:
+			newEvents.delete( id );
 			return {
 				...state,
-				[ eventType ]: omit( state[ eventType ], [ id ] ),
+				[ eventType ]: newEvents,
 			};
 	}
 	return state;

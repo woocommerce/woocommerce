@@ -53,6 +53,7 @@ const reducer = (
 			return {
 				...state,
 				currentStatus: PROCESSING,
+				errorMessage: '',
 			};
 		case COMPLETE:
 			return {
