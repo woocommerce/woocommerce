@@ -16,7 +16,6 @@ import {
 import {
 	COUPONS_ENABLED,
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
-	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { Card, CardBody } from 'wordpress-components';
@@ -57,6 +56,7 @@ const Cart = ( { attributes } ) => {
 		cartIsLoading,
 		cartItemsCount,
 		cartItemErrors,
+		cartNeedsShipping,
 	} = useStoreCart();
 
 	const {
@@ -119,7 +119,7 @@ const Cart = ( { attributes } ) => {
 							removeCoupon={ removeCoupon }
 							values={ cartTotals }
 						/>
-						{ SHIPPING_ENABLED && (
+						{ cartNeedsShipping && (
 							<TotalsShippingItem
 								showCalculator={ isShippingCalculatorEnabled }
 								showRatesWithoutAddress={

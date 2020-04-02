@@ -30,7 +30,6 @@ import {
 	ExpressCheckoutFormControl,
 	PaymentMethods,
 } from '@woocommerce/base-components/payment-methods';
-import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	Sidebar,
@@ -68,6 +67,7 @@ const Checkout = ( {
 		shippingRatesLoading,
 		shippingAddress,
 		setShippingAddress,
+		needsShipping,
 	} = useShippingDataContext();
 	const { billingData, setBillingData } = useBillingDataContext();
 
@@ -87,7 +87,7 @@ const Checkout = ( {
 		secondaryDescription: decodeEntities( option.delivery_time ),
 	} );
 
-	const showBillingFields = ! SHIPPING_ENABLED || ! shippingAsBilling;
+	const showBillingFields = ! needsShipping || ! shippingAsBilling;
 	const addressFields = {
 		...defaultAddressFields,
 		company: {
@@ -195,7 +195,7 @@ const Checkout = ( {
 								}
 							/>
 						</FormStep>
-						{ SHIPPING_ENABLED && (
+						{ needsShipping && (
 							<FormStep
 								id="shipping-fields"
 								className="wc-block-checkout__shipping-fields"
@@ -279,7 +279,7 @@ const Checkout = ( {
 								/>
 							</FormStep>
 						) }
-						{ SHIPPING_ENABLED && (
+						{ needsShipping && (
 							<FormStep
 								id="shipping-option"
 								className="wc-block-checkout__shipping-option"
