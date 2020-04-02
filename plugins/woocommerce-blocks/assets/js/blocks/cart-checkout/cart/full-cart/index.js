@@ -20,7 +20,11 @@ import {
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 import { Card, CardBody } from 'wordpress-components';
-import { useStoreCartCoupons, useStoreCart } from '@woocommerce/base-hooks';
+import {
+	useStoreCartCoupons,
+	useStoreCart,
+	useStoreNotices,
+} from '@woocommerce/base-hooks';
 import classnames from 'classnames';
 import {
 	Sidebar,
@@ -28,6 +32,8 @@ import {
 	Main,
 } from '@woocommerce/base-components/sidebar-layout';
 import { getSetting } from '@woocommerce/settings';
+import { useEffect } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -50,6 +56,7 @@ const Cart = ( { attributes } ) => {
 		cartTotals,
 		cartIsLoading,
 		cartItemsCount,
+		cartItemErrors,
 	} = useStoreCart();
 
 	const {
@@ -59,6 +66,19 @@ const Cart = ( { attributes } ) => {
 		isRemovingCoupon,
 		appliedCoupons,
 	} = useStoreCartCoupons();
+
+	const { addErrorNotice, removeNotice } = useStoreNotices();
+
+	// Ensures any cart errors listed in the API response get shown.
+	useEffect( () => {
+		removeNotice( 'cart-item-error' );
+		cartItemErrors.forEach( ( error ) => {
+			addErrorNotice( decodeEntities( error.message ), {
+				isDismissible: false,
+				id: 'cart-item-error',
+			} );
+		} );
+	}, [ cartItemErrors ] );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 

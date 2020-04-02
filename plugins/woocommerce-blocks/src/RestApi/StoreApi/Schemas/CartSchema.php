@@ -183,6 +183,16 @@ class CartSchema extends AbstractSchema {
 					]
 				),
 			],
+			'errors'           => [
+				'description' => __( 'List of cart item errors, for example, items in the cart which are out of stock.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( ( new ErrorSchema() )->get_properties() ),
+				],
+			],
 		];
 	}
 
@@ -226,6 +236,7 @@ class CartSchema extends AbstractSchema {
 					'tax_lines'          => $this->get_tax_lines( $cart ),
 				]
 			),
+			'errors'           => $this->get_cart_errors( $cart ),
 		];
 	}
 
@@ -247,5 +258,19 @@ class CartSchema extends AbstractSchema {
 		}
 
 		return $tax_lines;
+	}
+
+	/**
+	 * Get cart validation errors.
+	 *
+	 * @param \WC_Cart $cart Cart class instance.
+	 * @return array
+	 */
+	protected function get_cart_errors( $cart ) {
+		$schema     = new ErrorSchema();
+		$controller = new CartController();
+		$errors     = $controller->get_cart_item_errors();
+
+		return array_values( array_map( [ $schema, 'get_item_response' ], $errors ) );
 	}
 }
