@@ -118,7 +118,7 @@
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"husky": "2.4.1",
 		"ignore-loader": "0.1.2",
-		"jest": "25.1.0",
+		"jest": "25.2.4",
 		"jest-puppeteer": "4.4.0",
 		"lint-staged": "9.5.0",
 		"merge-config": "2.0.0",
