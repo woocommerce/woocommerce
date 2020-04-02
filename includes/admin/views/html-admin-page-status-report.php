@@ -867,10 +867,11 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The installed version of the current active theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				echo esc_html( $theme['version'] );
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
-					/* translators: %s: theme latest version */
-					echo ' &ndash; <strong style="color:red;">' . sprintf( esc_html__( '%s is available', 'woocommerce' ), esc_html( $theme['version_latest'] ) ) . '</strong>';
+					/* translators: 1: current version. 2: latest version */
+					echo sprintf( esc_html__( '%1$s (update to version %2$s is available)', 'woocommerce' ), esc_html( $theme['version'] ), esc_html( $theme['version_latest'] ) );
+				} else {
+					echo esc_html( $theme['version'] );
 				}
 				?>
 			</td>
