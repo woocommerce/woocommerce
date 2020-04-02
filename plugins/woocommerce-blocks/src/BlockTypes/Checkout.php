@@ -155,13 +155,15 @@ class Checkout extends AbstractBlock {
 						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
 							<span></span>
 						</fieldset>
-						<div class="wc-block-checkout__actions">
-							<button class="components-button button wc-block-button wc-block-components-checkout-place-order-button">&nbsp;</button>
-						</div>
 					</form>
 				</div>
 				<div class="wc-block-sidebar wc-block-checkout__sidebar">
 					<div class="components-card"></div>
+				</div>
+				<div class="wc-block-main">
+					<div class="wc-block-checkout__actions">
+						<button class="components-button button wc-block-button wc-block-components-checkout-place-order-button">&nbsp;</button>
+					</div>
 				</div>
 			</div>
 		';
