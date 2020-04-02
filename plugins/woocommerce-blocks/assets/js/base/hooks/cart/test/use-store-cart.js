@@ -32,6 +32,7 @@ describe( 'useStoreCart', () => {
 		cartNeedsShipping: previewCart.needs_shipping,
 		cartTotals: previewCart.totals,
 		cartIsLoading: false,
+		cartItemErrors: [],
 		cartErrors: [],
 		shippingRates: previewCart.shipping_rates,
 		shippingAddress: {

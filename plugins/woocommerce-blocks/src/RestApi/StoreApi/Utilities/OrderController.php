@@ -106,17 +106,14 @@ class OrderController {
 	/**
 	 * Create order line items.
 	 *
-	 * @internal Knowing if items changed between the order and cart can be complex. Line items are ok because there is a
-	 * hash, but no hash exists for other line item types. Having a normalized set of data between cart and order, or
-	 * additional hashes, would be useful in the future and to help refactor this code. In the meantime, we're relying
-	 * on custom hashes in $this->draft_order to track if things changed.
-	 *
 	 * @param \WC_Order $order The order object to update.
 	 */
 	protected function update_line_items_from_cart( \WC_Order $order ) {
 		$cart_controller = new CartController();
-		$cart            = $cart_controller->get_cart_instance();
-		$cart_hashes     = $cart_controller->get_cart_hashes();
+		$cart_controller->validate_cart_items();
+
+		$cart        = $cart_controller->get_cart_instance();
+		$cart_hashes = $cart_controller->get_cart_hashes();
 
 		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
 			$order->remove_order_items( 'line_item' );

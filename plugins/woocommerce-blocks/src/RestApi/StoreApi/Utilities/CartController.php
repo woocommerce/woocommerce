@@ -63,17 +63,9 @@ class CartController {
 		if ( ! $product->is_purchasable() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_product_is_not_purchasable',
-				__( 'This product cannot be purchased.', 'woo-gutenberg-products-block' ),
-				403
-			);
-		}
-
-		if ( $product->is_sold_individually() && $existing_cart_id ) {
-			throw new RouteException(
-				'woocommerce_rest_cart_product_sold_individually',
 				sprintf(
 					/* translators: %s: product name */
-					__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
+					__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
 					$product->get_name()
 				),
 				403
@@ -93,11 +85,10 @@ class CartController {
 		}
 
 		if ( $product->managing_stock() ) {
-			$cart_product_quantities   = wc()->cart->get_cart_item_quantities();
-			$stock_controller_id       = $product->get_stock_managed_by_id();
-			$stock_controller_quantity = isset( $cart_product_quantities[ $stock_controller_id ] ) ? $cart_product_quantities[ $stock_controller_id ] : 0;
+			$qty_remaining = $this->get_remaining_stock_for_product( $product );
+			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
 
-			if ( ! $product->has_enough_stock( $stock_controller_quantity + $request['quantity'] ) ) {
+			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
 				throw new RouteException(
 					'woocommerce_rest_cart_product_no_stock',
 					sprintf(
@@ -112,7 +103,19 @@ class CartController {
 		}
 
 		if ( $existing_cart_id ) {
+			if ( $product->is_sold_individually() ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_product_sold_individually',
+					sprintf(
+						/* translators: %s: product name */
+						__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
+						$product->get_name()
+					),
+					403
+				);
+			}
 			wc()->cart->set_quantity( $existing_cart_id, $request['quantity'] + wc()->cart->cart_contents[ $existing_cart_id ]['quantity'], true );
+
 			return $existing_cart_id;
 		}
 
@@ -146,6 +149,140 @@ class CartController {
 		);
 
 		return $cart_id;
+	}
+
+	/**
+	 * Validate all items in the cart and check for errors.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 */
+	public function validate_cart_items() {
+		$cart_items = $this->get_cart_items();
+
+		foreach ( $cart_items as $cart_item_key => $cart_item ) {
+			$product = $cart_item['data'];
+
+			if ( ! $product instanceof \WC_Product ) {
+				continue;
+			}
+
+			$this->validate_cart_item( $product );
+		}
+	}
+
+	/**
+	 * Validate all items in the cart and get a list of errors.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 */
+	public function get_cart_item_errors() {
+		$errors     = [];
+		$cart_items = $this->get_cart_items();
+
+		foreach ( $cart_items as $cart_item_key => $cart_item ) {
+			$product = $cart_item['data'];
+
+			if ( ! $product instanceof \WC_Product ) {
+				continue;
+			}
+
+			try {
+				$this->validate_cart_item( $product );
+			} catch ( RouteException $error ) {
+				$errors[] = new \WP_Error( $error->getErrorCode(), $error->getMessage() );
+			}
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Validates an existing cart item and returns any errors.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param \WC_Product $product Product object associated with the cart item.
+	 */
+	public function validate_cart_item( \WC_Product $product ) {
+		if ( ! $product->is_purchasable() ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_is_not_purchasable',
+				sprintf(
+					/* translators: %s: product name */
+					__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
+			);
+		}
+
+		if ( ! $product->is_in_stock() ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_no_stock',
+				sprintf(
+					/* translators: %s: product name */
+					__( '&quot;%s&quot; is out of stock and cannot be purchased.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
+			);
+		}
+
+		if ( $product->managing_stock() ) {
+			$qty_remaining = $this->get_remaining_stock_for_product( $product );
+			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+
+			if ( $qty_remaining < $qty_in_cart ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_product_no_stock',
+					sprintf(
+						/* translators: 1: quantity in stock, 2: product name  */
+						_n(
+							'There is only %1$s unit of &quot;%2$s&quot; in stock.',
+							'There are only %1$s units of &quot;%2$s&quot; in stock.',
+							$product->get_stock_quantity(),
+							'woo-gutenberg-products-block'
+						),
+						wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product ),
+						$product->get_name()
+					),
+					403
+				);
+			}
+		}
+	}
+
+	/**
+	 * Gets the qty of a product across line items.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return int
+	 */
+	protected function get_product_quantity_in_cart( $product ) {
+		$product_quantities = wc()->cart->get_cart_item_quantities();
+		$product_id         = $product->get_stock_managed_by_id();
+
+		return isset( $product_quantities[ $product_id ] ) ? $product_quantities[ $product_id ] : 0;
+	}
+
+	/**
+	 * Gets remaining stock for a product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return int
+	 */
+	protected function get_remaining_stock_for_product( $product ) {
+		// @todo Remove once min support for WC reaches 4.0.0.
+		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
+			$reserve_stock_controller = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
+		} else {
+			$reserve_stock_controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
+		}
+
+		$draft_order  = WC()->session->get( 'store_api_draft_order', 0 );
+		$qty_reserved = $reserve_stock_controller->get_reserved_stock( $product, $draft_order );
+
+		return $product->get_stock_quantity() - $qty_reserved;
 	}
 
 	/**

@@ -60,7 +60,7 @@ final class ReserveStock {
 						'woocommerce_product_out_of_stock',
 						sprintf(
 							/* translators: %s: product name */
-							__( '%s is out of stock and cannot be purchased.', 'woo-gutenberg-products-block' ),
+							__( '&quot;%s&quot; is out of stock and cannot be purchased.', 'woo-gutenberg-products-block' ),
 							$product->get_name()
 						),
 						403

@@ -5,6 +5,16 @@ import { __ } from '@wordpress/i18n';
 import { CART_URL } from '@woocommerce/block-settings';
 import { Icon, removeCart } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
+import { decodeEntities } from '@wordpress/html-entities';
+
+/**
+ * Internal dependencies
+ */
+import {
+	PRODUCT_OUT_OF_STOCK,
+	PRODUCT_NOT_PURCHASABLE,
+	PRODUCT_NOT_ENOUGH_STOCK,
+} from './constants';
 
 /**
  * When an order was not created for the checkout, for example, when an item
@@ -18,7 +28,7 @@ const CheckoutError = () => {
 	const errorData = {
 		code: checkoutData.code || 'unknown',
 		message:
-			checkoutData.message ||
+			decodeEntities( checkoutData.message ) ||
 			__(
 				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
 				'woo-gutenberg-products-block'
@@ -48,7 +58,11 @@ const CheckoutError = () => {
 const ErrorTitle = ( { errorData } ) => {
 	let heading = __( 'Checkout error', 'woo-gutenberg-products-block' );
 
-	if ( errorData.code === 'woocommerce_product_out_of_stock' ) {
+	if (
+		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
+		errorData.code === PRODUCT_NOT_PURCHASABLE ||
+		errorData.code === PRODUCT_OUT_OF_STOCK
+	) {
 		heading = __(
 			'There is a problem with your cart',
 			'woo-gutenberg-products-block'
@@ -68,7 +82,11 @@ const ErrorTitle = ( { errorData } ) => {
 const ErrorMessage = ( { errorData } ) => {
 	let message = errorData.message;
 
-	if ( errorData.code === 'woocommerce_product_out_of_stock' ) {
+	if (
+		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
+		errorData.code === PRODUCT_NOT_PURCHASABLE ||
+		errorData.code === PRODUCT_OUT_OF_STOCK
+	) {
 		message =
 			message +
 			' ' +
@@ -90,7 +108,11 @@ const ErrorButton = ( { errorData } ) => {
 	let buttonText = __( 'Retry', 'woo-gutenberg-products-block' );
 	let buttonUrl = 'javascript:window.location.reload(true)';
 
-	if ( errorData.code === 'woocommerce_product_out_of_stock' ) {
+	if (
+		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
+		errorData.code === PRODUCT_NOT_PURCHASABLE ||
+		errorData.code === PRODUCT_OUT_OF_STOCK
+	) {
 		buttonText = __( 'Edit your cart', 'woo-gutenberg-products-block' );
 		buttonUrl = CART_URL;
 	}

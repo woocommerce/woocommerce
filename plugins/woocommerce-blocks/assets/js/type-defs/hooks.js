@@ -20,6 +20,7 @@
  *                                                   the cart.
  * @property {boolean}             cartNeedsShipping True when the cart will
  *                                                   require shipping.
+ * @property {Array}               cartItemErrors    Item validation errors.
  * @property {Object}              cartTotals        Cart and line total
  *                                                   amounts.
  * @property {boolean}             cartIsLoading     True when cart data is
