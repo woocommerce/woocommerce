@@ -410,7 +410,7 @@ class WC_Checkout {
 			/**
 			 * Action hook fired after an order is created.
 			 *
-			 * @since 4.0.0
+			 * @since 4.1.0
 			 */
 			do_action( 'woocommerce_checkout_order_created', $order );
 
@@ -421,7 +421,7 @@ class WC_Checkout {
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
 				 *
-				 * @since 4.0.0
+				 * @since 4.1.0
 				 */
 				do_action( 'woocommerce_checkout_order_exception', $order );
 			}

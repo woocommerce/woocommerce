@@ -304,7 +304,7 @@ function wc_get_held_stock_quantity( WC_Product $product, $exclude_order_id = 0 
 	 * Filter: woocommerce_hold_stock_for_checkout
 	 * Allows enable/disable hold stock functionality on checkout.
 	 *
-	 * @since 4.0.0
+	 * @since 4.1.0
 	 * @param bool $enabled Default to true if managing stock globally.
 	 */
 	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
@@ -319,7 +319,7 @@ function wc_get_held_stock_quantity( WC_Product $product, $exclude_order_id = 0 
  *
  * @throws ReserveStockException If reserve stock fails.
  *
- * @since 4.0.0
+ * @since 4.1.0
  * @param \WC_Order|int $order Order ID or instance.
  */
 function wc_reserve_stock_for_order( $order ) {
@@ -327,7 +327,7 @@ function wc_reserve_stock_for_order( $order ) {
 	 * Filter: woocommerce_hold_stock_for_checkout
 	 * Allows enable/disable hold stock functionality on checkout.
 	 *
-	 * @since 4.0.0
+	 * @since @since 4.1.0
 	 * @param bool $enabled Default to true if managing stock globally.
 	 */
 	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
@@ -343,9 +343,9 @@ function wc_reserve_stock_for_order( $order ) {
 add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' );
 
 /**
- * Release held stock if any for an order.
+ * Release held stock for an order.
  *
- * @since 4.0.0
+ * @since 4.1.0
  * @param \WC_Order|int $order Order ID or instance.
  */
 function wc_release_stock_for_order( $order ) {
@@ -353,7 +353,7 @@ function wc_release_stock_for_order( $order ) {
 	 * Filter: woocommerce_hold_stock_for_checkout
 	 * Allows enable/disable hold stock functionality on checkout.
 	 *
-	 * @since 4.0.0
+	 * @since 4.1.0
 	 * @param bool $enabled Default to true if managing stock globally.
 	 */
 	if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
@@ -367,6 +367,7 @@ function wc_release_stock_for_order( $order ) {
 	}
 }
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );
+add_action( 'woocommerce_payment_complete', 'wc_release_stock_for_order' );
 add_action( 'woocommerce_order_status_cancelled', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_completed', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );

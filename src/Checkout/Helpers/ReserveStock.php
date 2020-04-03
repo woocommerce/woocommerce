@@ -57,10 +57,10 @@ final class ReserveStock {
 
 				if ( ! $product->is_in_stock() ) {
 					throw new ReserveStockException(
-						'product_out_of_stock',
+						'woocommerce_product_out_of_stock',
 						sprintf(
 							/* translators: %s: product name */
-							__( '%s is out of stock and cannot be purchased.', 'woocommerce' ),
+							__( '&quot;%s&quot; is out of stock and cannot be purchased.', 'woocommerce' ),
 							$product->get_name()
 						),
 						403
@@ -140,7 +140,7 @@ final class ReserveStock {
 		if ( ! $result ) {
 			$product = wc_get_product( $product_id );
 			throw new ReserveStockException(
-				'product_not_enough_stock',
+				'woocommerce_product_not_enough_stock',
 				sprintf(
 					/* translators: %s: product name */
 					__( 'Not enough units of %s are available in stock to fulfil this order.', 'woocommerce' ),
