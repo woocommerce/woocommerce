@@ -137,7 +137,7 @@ const Checkout = ( {
 	return (
 		<>
 			<SidebarLayout className="wc-block-checkout">
-				<Main>
+				<Main className="wc-block-checkout__main">
 					<ExpressCheckoutFormControl />
 					<CheckoutForm>
 						<FormStep
@@ -359,7 +359,7 @@ const Checkout = ( {
 						cartTotals={ cartTotals }
 					/>
 				</Sidebar>
-				<Main>
+				<Main className="wc-block-checkout__main-totals">
 					<div className="wc-block-checkout__actions">
 						{ attributes.showReturnToCart && (
 							<ReturnToCartButton

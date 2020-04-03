@@ -154,7 +154,7 @@ class Checkout extends AbstractBlock {
 	protected function get_skeleton() {
 		return '
 			<div class="wc-block-sidebar-layout wc-block-checkout wc-block-checkout--is-loading wc-block-checkout--skeleton" aria-hidden="true">
-				<div class="wc-block-main">
+				<div class="wc-block-main wc-block-checkout__main">
 					<div class="wc-block-component-express-checkout"></div>
 					<div class="wc-block-component-express-checkout-continue-rule"><span></span></div>
 					<form class="wc-block-checkout-form">
@@ -175,7 +175,7 @@ class Checkout extends AbstractBlock {
 				<div class="wc-block-sidebar wc-block-checkout__sidebar">
 					<div class="components-card"></div>
 				</div>
-				<div class="wc-block-main">
+				<div class="wc-block-main wc-block-checkout__main-totals">
 					<div class="wc-block-checkout__actions">
 						<button class="components-button button wc-block-button wc-block-components-checkout-place-order-button">&nbsp;</button>
 					</div>

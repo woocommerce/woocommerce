@@ -8,9 +8,13 @@ $line-offset-from-circle-size: 8px;
 .wc-block-checkout-form fieldset.wc-block-checkout-step {
 	position: relative;
 	border: none;
-	padding: 0 $gap-larger $gap-larger $gap-larger;
+	padding: 0 0 $gap-larger $gap-larger;
 	background: none;
 	margin: 0;
+
+	@include breakpoint( ">782px" ) {
+		padding-right: $gap-larger;
+	}
 }
 
 .wc-block-checkout-step__heading {
