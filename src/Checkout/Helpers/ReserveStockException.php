@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Checkout\Helpers;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * ReserveStockException class.
  */
