@@ -13,16 +13,22 @@ describe( 'Testing emitters', () => {
 		observerB = jest.fn().mockReturnValue( true );
 		observerPromiseWithResolvedValue = jest.fn().mockResolvedValue( 10 );
 		observerMocks = new Map( [
-			[ 'observerA', observerA ],
-			[ 'observerB', observerB ],
-			[ 'observerReturnValue', jest.fn().mockReturnValue( 10 ) ],
+			[ 'observerA', { priority: 10, callback: observerA } ],
+			[ 'observerB', { priority: 10, callback: observerB } ],
+			[
+				'observerReturnValue',
+				{ priority: 10, callback: jest.fn().mockReturnValue( 10 ) },
+			],
 			[
 				'observerPromiseWithReject',
-				jest.fn().mockRejectedValue( 'an error' ),
+				{
+					priority: 10,
+					callback: jest.fn().mockRejectedValue( 'an error' ),
+				},
 			],
 			[
 				'observerPromiseWithResolvedValue',
-				observerPromiseWithResolvedValue,
+				{ priority: 10, callback: observerPromiseWithResolvedValue },
 			],
 		] );
 	} );
@@ -55,5 +61,21 @@ describe( 'Testing emitters', () => {
 				expect( response ).toBe( 10 );
 			}
 		);
+	} );
+	describe( 'Test Priority', () => {
+		it( 'executes observers in expected order by priority', async () => {
+			const a = jest.fn();
+			const b = jest.fn().mockReturnValue( false );
+			const observers = {
+				test: new Map( [
+					[ 'observerA', { priority: 200, callback: a } ],
+					[ 'observerB', { priority: 10, callback: b } ],
+				] ),
+			};
+			await emitEventWithAbort( observers, 'test', 'foo' );
+			expect( console ).not.toHaveErrored();
+			expect( a ).toHaveBeenCalledTimes( 1 );
+			expect( b ).not.toHaveBeenCalled();
+		} );
 	} );
 } );

@@ -1,3 +1,11 @@
+const getObserversByPriority = ( observers, eventType ) => {
+	return observers[ eventType ]
+		? Array.from( observers[ eventType ].values() ).sort( ( a, b ) => {
+				return b.priority - a.priority;
+		  } )
+		: [];
+};
+
 /**
  * Emits events on registered observers for the provided type and passes along
  * the provided data.
@@ -15,12 +23,10 @@
  *                   executed.
  */
 export const emitEvent = async ( observers, eventType, data ) => {
-	const observersByType = observers[ eventType ]
-		? observers[ eventType ].values()
-		: [];
+	const observersByType = getObserversByPriority( observers, eventType );
 	for ( const observer of observersByType ) {
 		try {
-			await Promise.resolve( observer( data ) );
+			await Promise.resolve( observer.callback( data ) );
 		} catch ( e ) {
 			// we don't care about errors blocking execution, but will
 			// console.error for troubleshooting.
@@ -45,12 +51,10 @@ export const emitEvent = async ( observers, eventType, data ) => {
  *                   return value of the aborted observer.
  */
 export const emitEventWithAbort = async ( observers, eventType, data ) => {
-	const observersByType = observers[ eventType ]
-		? observers[ eventType ].values()
-		: [];
+	const observersByType = getObserversByPriority( observers, eventType );
 	for ( const observer of observersByType ) {
 		try {
-			const response = await Promise.resolve( observer( data ) );
+			const response = await Promise.resolve( observer.callback( data ) );
 			if ( response !== true ) {
 				return response;
 			}

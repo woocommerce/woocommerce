@@ -6,6 +6,7 @@ import { TYPES, DEFAULT_STATE, STATUS } from './constants';
 const {
 	SET_PRISTINE,
 	SET_PROCESSING,
+	SET_PROCESSING_COMPLETE,
 	SET_REDIRECT_URL,
 	SET_COMPLETE,
 	SET_HAS_ERROR,
@@ -15,7 +16,14 @@ const {
 	SET_ORDER_ID,
 } = TYPES;
 
-const { PRISTINE, IDLE, CALCULATING, PROCESSING, COMPLETE } = STATUS;
+const {
+	PRISTINE,
+	IDLE,
+	CALCULATING,
+	PROCESSING,
+	PROCESSING_COMPLETE,
+	COMPLETE,
+} = STATUS;
 
 /**
  * Reducer for the checkout state
@@ -76,6 +84,23 @@ export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
 					? newState
 					: { ...newState, hasError: false };
 			break;
+		case SET_PROCESSING_COMPLETE:
+			status = PROCESSING_COMPLETE;
+			nextStatus = state.status;
+			if ( state.status === CALCULATING ) {
+				status = CALCULATING;
+				nextStatus = PROCESSING_COMPLETE;
+			}
+			newState =
+				status !== state.status
+					? {
+							...state,
+							status,
+							nextStatus,
+							hasError: false,
+					  }
+					: state;
+			break;
 		case SET_HAS_ERROR:
 			newState = state.hasError
 				? state
@@ -84,7 +109,8 @@ export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
 						hasError: true,
 				  };
 			newState =
-				state.status === PROCESSING
+				state.status === PROCESSING ||
+				state.status === PROCESSING_COMPLETE
 					? {
 							...newState,
 							status: IDLE,

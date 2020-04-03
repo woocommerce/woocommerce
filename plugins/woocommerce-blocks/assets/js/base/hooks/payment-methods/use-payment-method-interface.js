@@ -97,6 +97,10 @@ export const usePaymentMethodInterface = () => {
 		currentStatus,
 		activePaymentMethod,
 		setActivePaymentMethod,
+		onPaymentProcessing,
+		onPaymentSuccess,
+		onPaymentFail,
+		onPaymentError,
 	} = usePaymentMethodDataContext();
 	const {
 		shippingErrorStatus,
@@ -179,6 +183,10 @@ export const usePaymentMethodInterface = () => {
 			onShippingRateFail,
 			onShippingRateSelectSuccess,
 			onShippingRateSelectFail,
+			onPaymentProcessing,
+			onPaymentSuccess,
+			onPaymentFail,
+			onPaymentError,
 		},
 		components: {
 			ValidationInputError,

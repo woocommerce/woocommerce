@@ -131,8 +131,8 @@
  * @property {function()}               processing
  * @property {function()}               completed
  * @property {function(string)}         error
- * @property {function(string, Object)} failed
- * @property {function(Object,Object)}  success
+ * @property {function(string, Object, Object=)} failed
+ * @property {function(Object=,Object=)}  success
  */
 
 /**
@@ -175,70 +175,77 @@
  * @property {boolean}                     expressPaymentMethodsInitialized True when all registered
  *                                                                          express payment methods
  *                                                                          have been initialized.
+ * @property {function(function())}        onPaymentProcessing              Event registration
+ *                                                                          callback for registering
+ *                                                                          observers for the
+ *                                                                          payment processing
+ *                                                                          event.
+ * @property {function(function())}        onPaymentSuccess                 Event registration
+ *                                                                          callback for registering
+ *                                                                          observers for the
+ *                                                                          successful payment
+ *                                                                          event.
+ * @property {function(function())}        onPaymentFail                    Event registration
+ *                                                                          callback for registering
+ *                                                                          observers for the
+ *                                                                          failed payment event.
+ * @property {function(function())}        onPaymentError                   Event registration
+ *                                                                          callback for registering
+ *                                                                          observers for the
+ *                                                                          payment error event.
  */
 
 /**
  * @typedef {Object} CheckoutDataContext
  *
- * @property {string}                  submitLabel        The label to use for
- *                                                        the submit checkout
- *                                                        button.
- * @property {function()}              onSubmit           The callback to
- *                                                        register with the
- *                                                        checkout submit
- *                                                        button.
- * @property {boolean}                 isComplete         True when checkout is
- *                                                        complete and ready for
- *                                                        redirect.
- * @property {boolean}                 isIdle             True when the checkout
- *                                                        state has changed and
- *                                                        checkout has no
- *                                                        activity.
- * @property {boolean}                 isProcessing       True when checkout has
- *                                                        been submitted and is
- *                                                        being processed by the
- *                                                        server.
- * @property {boolean}                 isCalculating      True when something in
- *                                                        the checkout is
- *                                                        resulting in totals
- *                                                        being calculated.
- * @property {boolean}                 hasError           True when the checkout
- *                                                        is in an error state.
- *                                                        Whatever caused the
- *                                                        error
- *                                                        (validation/payment
- *                                                        method) will likely
- *                                                        have triggered a
- *                                                        notice.
- * @property {string}                  redirectUrl        This is the url that
- *                                                        checkout will redirect
- *                                                        to when it's ready.
- * @property {function(function())}    onCheckoutCompleteSuccess Used to register a
- *                                                        callback that will
- *                                                        fire when the checkout
- *                                                        is marked complete
- *                                                        successfully.
- * @property {function(function())}    onCheckoutCompleteError Used to register
- *                                                        a callback that will
- *                                                        fire when the checkout
- *                                                        is marked complete and
- *                                                        has an error.
- * @property {function(function())}    onCheckoutProcessing Used to register a
- *                                                        callback that will
- *                                                        fire when the checkout
- *                                                        has been submitted
- *                                                        before being sent off
- *                                                        to the server.
- * @property {CheckoutDispatchActions} dispatchActions    Various actions that
- *                                                        can be dispatched for
- *                                                        the checkout context
- *                                                        data.
- * @property {number}                  orderId            This is the ID for the
- *                                                        draft order if one exists.
- * @property {boolean}                 hasOrder           True when the checkout has
- *                                                        a draft order from the API.
- * @property {boolean}                 isCart             When true, means the provider is providing
- *                                                        data for the cart.
+ * @property {string}                       submitLabel               The label to use for the
+ *                                                                    submit checkout button.
+ * @property {function()}                   onSubmit                  The callback to register with
+ *                                                                    the checkout submit button.
+ * @property {boolean}                      isComplete                True when checkout is complete
+ *                                                                    and ready for redirect.
+ * @property {boolean}                      isProcessingComplete      True when checkout processing
+ *                                                                    is complete.
+ * @property {boolean}                      isIdle                    True when the checkout state
+ *                                                                    has changed and checkout has
+ *                                                                    no activity.
+ * @property {boolean}                      isProcessing              True when checkout has been
+ *                                                                    submitted and is being
+ *                                                                    processed by the server.
+ * @property {boolean}                      isCalculating             True when something in the
+ *                                                                    checkout is resulting in
+ *                                                                    totals being calculated.
+ * @property {boolean}                      hasError                  True when the checkout is in
+ *                                                                    an error state. Whatever
+ *                                                                    caused the error
+ *                                                                    (validation/payment method)
+ *                                                                    will likely have triggered a
+ *                                                                    notice.
+ * @property {string}                       redirectUrl               This is the url that checkout
+ *                                                                    will redirect to when it's
+ *                                                                    ready.
+ * @property {function(function(),number=)} onCheckoutCompleteSuccess Used to register a callback
+ *                                                                    that will fire when the
+ *                                                                    checkout is marked complete
+ *                                                                    successfully.
+ * @property {function(function(),number=)} onCheckoutCompleteError   Used to register a callback
+ *                                                                    that will fire when the
+ *                                                                    checkout is marked complete
+ *                                                                    and has an error.
+ * @property {function(function(),number=)} onCheckoutProcessing      Used to register a callback
+ *                                                                    that will fire when the
+ *                                                                    checkout has been submitted
+ *                                                                    before being sent off to the
+ *                                                                    server.
+ * @property {CheckoutDispatchActions}      dispatchActions           Various actions that can be
+ *                                                                    dispatched for the checkout
+ *                                                                    context data.
+ * @property {number}                       orderId                   This is the ID for the draft
+ *                                                                    order if one exists.
+ * @property {boolean}                      hasOrder                  True when the checkout has a
+ *                                                                    draft order from the API.
+ * @property {boolean}                      isCart                    When true, means the provider
+ *                                                                    is providing data for the cart.
  */
 
 /**
@@ -255,7 +262,7 @@
  *
  * @property {function(string):Object}  getValidationError       Return validation error for the
  *                                                               given property.
- * @property {function(Object<Object>)} setValidationErrors      Receive an object of properties and
+ * @property {function(Object)}         setValidationErrors      Receive an object of properties and
  *                                                               error messages as strings and adds
  *                                                               to the validation error state.
  * @property {function(string)}         clearValidationError     Clears a validation error for the
