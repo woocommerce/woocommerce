@@ -40,7 +40,16 @@ export const DEFAULT_PAYMENT_DATA = {
  * @type {PaymentMethodDataContext}
  */
 export const DEFAULT_PAYMENT_METHOD_DATA = {
-	setPaymentStatus: () => void null,
+	setPaymentStatus: () => ( {
+		started: () => void null,
+		processing: () => void null,
+		completed: () => void null,
+		error: ( errorMessage ) => void errorMessage,
+		failed: ( errorMessage, paymentMethodData ) =>
+			void [ errorMessage, paymentMethodData ],
+		success: ( paymentMethodData, billingData ) =>
+			void [ paymentMethodData, billingData ],
+	} ),
 	currentStatus: {
 		isPristine: true,
 		isStarted: false,
@@ -60,4 +69,7 @@ export const DEFAULT_PAYMENT_METHOD_DATA = {
 	expressPaymentMethods: {},
 	paymentMethodsInitialized: false,
 	expressPaymentMethodsInitialized: false,
+	onPaymentProcessing: () => void null,
+	onPaymentSuccess: () => void null,
+	onPaymentFail: () => void null,
 };

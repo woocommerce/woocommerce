@@ -22,7 +22,10 @@ const CheckoutProcessor = () => {
 	const {
 		hasError,
 		onCheckoutProcessing,
+		onCheckoutCompleteSuccess,
 		dispatchActions,
+		redirectUrl,
+		isProcessingComplete: checkoutIsProcessingComplete,
 	} = useCheckoutContext();
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingAddress } = useShippingDataContext();
@@ -38,7 +41,10 @@ const CheckoutProcessor = () => {
 
 	const withErrors = hasValidationErrors();
 	const paidAndWithoutErrors =
-		! hasError && ! withErrors && currentPaymentStatus.isSuccessful;
+		! hasError &&
+		! withErrors &&
+		currentPaymentStatus.isSuccessful &&
+		checkoutIsProcessingComplete;
 
 	useEffect( () => {
 		currentBillingData.current = billingData;
@@ -59,16 +65,7 @@ const CheckoutProcessor = () => {
 		return ! withErrors;
 	}, [ withErrors ] );
 
-	/**
-	 * Process an order via the /wc/store/checkout endpoint.
-	 *
-	 * @return {boolean} True if everything was successful.
-	 */
-	useEffect( () => {
-		if ( ! paidAndWithoutErrors ) {
-			return;
-		}
-
+	const processOrder = useCallback( () => {
 		triggerFetch( {
 			path: '/wc/store/checkout',
 			method: 'POST',
@@ -106,32 +103,54 @@ const CheckoutProcessor = () => {
 								}
 							);
 						}
+						dispatchActions.setHasError();
 					}
 
 					dispatchActions.setRedirectUrl(
 						response.payment_result.redirect_url
 					);
+					dispatchActions.setComplete();
 				} );
 			} )
 			.catch( ( error ) => {
 				addErrorNotice( error.message, {
 					id: 'checkout',
 				} );
+				dispatchActions.setHasError();
+				dispatchActions.setComplete();
 			} );
 	}, [
 		addErrorNotice,
 		activePaymentMethod,
 		currentBillingData,
 		currentShippingAddress,
-		paidAndWithoutErrors,
+	] );
+	// setup checkout processing event observers.
+	useEffect( () => {
+		const unsubscribeValidation = onCheckoutProcessing(
+			checkValidation,
+			0
+		);
+		const unsubscribeRedirect = onCheckoutCompleteSuccess( () => {
+			window.location.href = redirectUrl;
+		}, 999 );
+		return () => {
+			unsubscribeValidation();
+			unsubscribeRedirect();
+		};
+	}, [
+		onCheckoutProcessing,
+		onCheckoutCompleteSuccess,
+		checkValidation,
+		redirectUrl,
 	] );
 
+	// process order if conditions are good.
 	useEffect( () => {
-		const unsubscribeProcessing = onCheckoutProcessing( checkValidation );
-		return () => {
-			unsubscribeProcessing();
-		};
-	}, [ onCheckoutProcessing, checkValidation ] );
+		if ( paidAndWithoutErrors ) {
+			processOrder();
+		}
+	}, [ processOrder, paidAndWithoutErrors ] );
 
 	return null;
 };

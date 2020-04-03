@@ -12,6 +12,7 @@ export const STATUS = {
 	CALCULATING: 'calculating',
 	PROCESSING: 'processing',
 	COMPLETE: 'complete',
+	PROCESSING_COMPLETE: 'processing_complete',
 };
 
 const checkoutData = getSetting( 'checkoutData', { order_id: 0 } );
@@ -31,6 +32,7 @@ export const TYPES = {
 	SET_PRISTINE: 'set_pristine',
 	SET_REDIRECT_URL: 'set_redirect_url',
 	SET_COMPLETE: 'set_checkout_complete',
+	SET_PROCESSING_COMPLETE: 'set_processing_complete',
 	SET_PROCESSING: 'set_checkout_is_processing',
 	SET_HAS_ERROR: 'set_checkout_has_error',
 	SET_NO_ERROR: 'set_checkout_no_error',

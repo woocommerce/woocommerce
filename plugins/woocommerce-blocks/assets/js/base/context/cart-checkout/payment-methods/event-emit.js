@@ -2,22 +2,22 @@
  * Internal dependencies
  */
 import {
-	emitterCallback,
 	reducer,
 	emitEvent,
 	emitEventWithAbort,
+	emitterCallback,
 } from '../event-emit';
 
 const EMIT_TYPES = {
-	CHECKOUT_COMPLETE_WITH_SUCCESS: 'checkout_complete',
-	CHECKOUT_COMPLETE_WITH_ERROR: 'checkout_complete_error',
-	CHECKOUT_PROCESSING: 'checkout_processing',
+	PAYMENT_PROCESSING: 'payment_processing',
+	PAYMENT_SUCCESS: 'payment_success',
+	PAYMENT_FAIL: 'payment_fail',
+	PAYMENT_HAS_ERROR: 'payment_has_error',
 };
 
 /**
  * Receives a reducer dispatcher and returns an object with the
- * onCheckoutComplete callback registration function for the checkout emit
- * events.
+ * various event emitters for the payment processing events.
  *
  * Calling the event registration function with the callback will register it
  * for the event emitter and will return a dispatcher for removing the
@@ -25,21 +25,17 @@ const EMIT_TYPES = {
  *
  * @param {Function} dispatcher The emitter reducer dispatcher.
  *
- * @return {Object} An object with the `onCheckoutComplete` emmitter registration
+ * @return {Object} An object with the various payment event emitter
+ *                  registration functions
  */
 const emitterSubscribers = ( dispatcher ) => ( {
-	onCheckoutCompleteSuccess: emitterCallback(
-		EMIT_TYPES.CHECKOUT_COMPLETE_WITH_SUCCESS,
+	onPaymentProcessing: emitterCallback(
+		EMIT_TYPES.PAYMENT_PROCESSING,
 		dispatcher
 	),
-	onCheckoutCompleteError: emitterCallback(
-		EMIT_TYPES.CHECKOUT_COMPLETE_WITH_ERROR,
-		dispatcher
-	),
-	onCheckoutProcessing: emitterCallback(
-		EMIT_TYPES.CHECKOUT_PROCESSING,
-		dispatcher
-	),
+	onPaymentSuccess: emitterCallback( EMIT_TYPES.PAYMENT_SUCCESS, dispatcher ),
+	onPaymentFail: emitterCallback( EMIT_TYPES.PAYMENT_FAIL, dispatcher ),
+	onPaymentError: emitterCallback( EMIT_TYPES.PAYMENT_ERROR, dispatcher ),
 } );
 
 export {

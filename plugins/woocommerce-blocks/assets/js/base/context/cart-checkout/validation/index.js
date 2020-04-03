@@ -72,6 +72,9 @@ export const ValidationContextProvider = ( { children } ) => {
 	 *                           validation error message displayed to the user.
 	 */
 	const setValidationErrors = ( newErrors ) => {
+		if ( ! newErrors ) {
+			return;
+		}
 		// all values must be a string.
 		newErrors = pickBy(
 			newErrors,

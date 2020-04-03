@@ -5,6 +5,7 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,9 +17,25 @@ const settings = getSetting( 'cheque_data', {} );
 
 const EditPlaceHolder = () => <div>TODO: Edit preview soon...</div>;
 
-const Content = ( props ) => {
-	const { activePaymentMethod } = props;
+/**
+ * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
+ */
 
+/**
+ * Cheque content component
+ *
+ * @param {RegisteredPaymentMethodProps|Object} props Incoming props
+ */
+const Content = ( { activePaymentMethod, eventRegistration } ) => {
+	// hook into payment processing event.
+	useEffect( () => {
+		const unsubscribeProcessing = eventRegistration.onPaymentProcessing(
+			() => true
+		);
+		return () => {
+			unsubscribeProcessing();
+		};
+	}, [ eventRegistration.onPaymentProcessing ] );
 	return activePaymentMethod === PAYMENT_METHOD_NAME ? (
 		<div>{ decodeEntities( settings.description || '' ) }</div>
 	) : null;

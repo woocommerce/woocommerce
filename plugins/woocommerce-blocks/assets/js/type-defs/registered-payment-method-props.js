@@ -117,27 +117,27 @@
  */
 
 /**
+ * @typedef PreparedCartTotalItem
+ *
+ * @property {string} label  The label for the total item.
+ * @property {number} value  The value for the total item.
+ */
+
+/**
  * @typedef BillingDataProps
  *
- * @property {BillingData}     billingData               The address used for
- *                                                       billing.
- * @property {Function}        setBillingData            Used to set the cart
- *                                                       billing address.
- * @property {Object}          order                     The order object for
- *                                                       the purchase.
- * @property {boolean}         orderLoading              True if the order is
- *                                                       being loaded.
- * @property {CartTotalItem}   cartTotal                 The total item for
- *                                                       the cart.
- * @property {SiteCurrency}    currency                  Currency object.
- * @property {CartTotalItem[]} cartTotalItems            The various subtotal
- *                                                       amounts.
- * @property {boolean}         displayPricesIncludingTax True means that the
- *                                                       site is configured
- *                                                       to display prices
- *                                                       including tax.
- * @property {string[]}        appliedCoupons            All the coupons that
- *                                                       were applied.
+ * @property {BillingData}             billingData               The address used for billing.
+ * @property {Function}                setBillingData            Used to set the cart billing
+ *                                                               address.
+ * @property {Object}                  order                     The order object for the purchase.
+ * @property {boolean}                 orderLoading              True if the order is being loaded.
+ * @property {PreparedCartTotalItem}   cartTotal                 The total item for the cart.
+ * @property {SiteCurrency}            currency                  Currency object.
+ * @property {PreparedCartTotalItem[]} cartTotalItems            The various subtotal amounts.
+ * @property {boolean}                 displayPricesIncludingTax True means that the site is
+ *                                                               configured to display prices
+ *                                                               including tax.
+ * @property {string[]}                appliedCoupons            All the coupons that were applied.
  */
 
 /**
@@ -166,6 +166,18 @@
  * @property {function()}           onShippingRateSelectFail    Used to subscribe callbacks that
  *                                                              will fire after selecting a shipping
  *                                                              rate unsuccessfully.
+ * @property {function(function())} onPaymentProcessing         Event registration callback for
+ *                                                              registering observers for the
+ *                                                              payment processing event.
+ * @property {function(function())} onPaymentSuccess            Event registration callback for
+ *                                                              registering observers for the
+ *                                                              successful payment event.
+ * @property {function(function())} onPaymentFail               Event registration callback for
+ *                                                              registering observers for the
+ *                                                              failed payment event.
+ * @property {function(function())} onPaymentError              Event registration callback for
+ *                                                              registering observers for the
+ *                                                              payment error event.
  */
 
 /**
