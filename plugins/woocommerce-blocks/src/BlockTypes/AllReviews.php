@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Blocks\Assets;
+
 /**
  * AllReviews class.
  */
@@ -37,15 +39,11 @@ class AllReviews extends AbstractBlock {
 	}
 
 	/**
-	 * Append frontend scripts when rendering the Product Categories List block.
+	 * Register/enqueue scripts used for this block.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $content    Block content. Default empty string.
-	 * @return string Rendered block type output.
+	 * @param array $attributes  Any attributes that currently are available from the block.
 	 */
-	public function render( $attributes = array(), $content = '' ) {
-		\Automattic\WooCommerce\Blocks\Assets::register_block_script( 'reviews-frontend' );
-
-		return $content;
+	protected function enqueue_scripts( array $attributes = [] ) {
+		Assets::register_block_script( 'reviews-frontend' );
 	}
 }

@@ -29,6 +29,13 @@ abstract class AbstractBlock {
 	protected $block_name = '';
 
 	/**
+	 * Tracks if assets have been enqueued.
+	 *
+	 * @var boolean
+	 */
+	protected $enqueued_assets = false;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -50,23 +57,41 @@ abstract class AbstractBlock {
 	}
 
 	/**
-	 * Will enqueue any editor assets a block needs to load
-	 */
-	public function enqueue_editor_assets() {
-		$this->enqueue_data();
-	}
-
-	/**
 	 * Append frontend scripts when rendering the block.
 	 *
 	 * @param array  $attributes Block attributes. Default empty array.
 	 * @param string $content    Block content. Default empty string.
 	 * @return string Rendered block type output.
 	 */
-	public function render( $attributes = array(), $content = '' ) {
+	public function render( $attributes = [], $content = '' ) {
+		$this->enqueue_assets( $attributes );
+		return $content;
+	}
+
+	/**
+	 * Enqueue assets used for rendering the block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 */
+	public function enqueue_assets( array $attributes = [] ) {
+		if ( $this->enqueued_assets ) {
+			return;
+		}
 		$this->enqueue_data( $attributes );
 		$this->enqueue_scripts( $attributes );
-		return $content;
+		$this->enqueued_assets = true;
+	}
+
+	/**
+	 * Enqueue assets used for rendering the block in editor context.
+	 *
+	 * This is needed if a block is not yet within the post content--`render` and `enqueue_assets` may not have ran.
+	 */
+	public function enqueue_editor_assets() {
+		if ( $this->enqueued_assets ) {
+			return;
+		}
+		$this->enqueue_data();
 	}
 
 	/**

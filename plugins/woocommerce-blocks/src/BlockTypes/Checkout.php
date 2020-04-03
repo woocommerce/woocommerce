@@ -51,8 +51,7 @@ class Checkout extends AbstractBlock {
 	 */
 	public function render( $attributes = array(), $content = '' ) {
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
-		$this->enqueue_data( $attributes );
-		$this->enqueue_scripts( $attributes );
+		$this->enqueue_assets( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
 		return $content . $this->get_skeleton();
 	}
