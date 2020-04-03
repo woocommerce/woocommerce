@@ -73,7 +73,6 @@ const addTableColumn = ( reportTableData ) => {
 		'revenue',
 		'products',
 		'orders',
-		'products',
 		'categories',
 		'coupons',
 		'taxes',
