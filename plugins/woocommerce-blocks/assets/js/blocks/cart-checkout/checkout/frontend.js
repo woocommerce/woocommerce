@@ -23,6 +23,8 @@ import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
 import EmptyCart from './empty-cart/index.js';
 
+const reloadPage = () => void window.location.reload( true );
+
 /**
  * Wrapper component for the checkout block.
  *
@@ -49,13 +51,15 @@ const CheckoutFrontend = ( props ) => {
 					) }
 					text={ __experimentalCreateInterpolateElement(
 						__(
-							'The checkout has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+							'The checkout has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist.',
 							'woo-gutenberg-products-block'
 						),
 						{
-							a: (
-								// eslint-disable-next-line jsx-a11y/anchor-has-content
-								<a href="." />
+							button: (
+								<button
+									className="wp-block-link-button"
+									onClick={ reloadPage }
+								/>
 							),
 						}
 					) }
@@ -109,13 +113,15 @@ const getErrorBoundaryProps = () => {
 		header: __( 'Something went wrong…', 'woo-gutenberg-products-block' ),
 		text: __experimentalCreateInterpolateElement(
 			__(
-				'The checkout has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+				'The checkout has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist.',
 				'woo-gutenberg-products-block'
 			),
 			{
-				a: (
-					// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
-					<a href="javascript:window.location.reload(true)" />
+				button: (
+					<button
+						className="wp-block-link-button"
+						onClick={ reloadPage }
+					/>
 				),
 			}
 		),

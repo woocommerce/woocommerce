@@ -90,8 +90,10 @@
 	padding: 0;
 	border: 0;
 
+	color: inherit;
 	font-size: inherit;
 	font-weight: normal;
+	text-decoration: underline;
 
 	background: transparent;
 	&:hover {

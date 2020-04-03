@@ -24,6 +24,8 @@ import FullCart from './full-cart';
 import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
 
+const reloadPage = () => void window.location.reload( true );
+
 /**
  * Renders the frontend block within the cart provider.
  */
@@ -92,13 +94,15 @@ const getErrorBoundaryProps = () => {
 		header: __( 'Something went wrong…', 'woo-gutenberg-products-block' ),
 		text: __experimentalCreateInterpolateElement(
 			__(
-				'The cart has encountered an unexpected error. <a>Try reloading the page</a>. If the error persists, please get in touch with us so we can assist.',
+				'The cart has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist.',
 				'woo-gutenberg-products-block'
 			),
 			{
-				a: (
-					// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
-					<a href="javascript:window.location.reload(true)" />
+				button: (
+					<button
+						className="wp-block-link-button"
+						onClick={ reloadPage }
+					/>
 				),
 			}
 		),
