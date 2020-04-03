@@ -50,8 +50,7 @@ class Cart extends AbstractBlock {
 	 */
 	public function render( $attributes = array(), $content = '' ) {
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-		$this->enqueue_data( $attributes );
-		$this->enqueue_scripts( $attributes );
+		$this->enqueue_assets( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
 		return $content . $this->get_skeleton();
 	}
@@ -64,10 +63,6 @@ class Cart extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		if ( did_action( 'woocommerce_blocks_cart_enqueue_data' ) ) {
-			return;
-		}
-
 		$data_registry = Package::container()->get(
 			AssetDataRegistry::class
 		);
