@@ -119,6 +119,12 @@
 
 	.components-button {
 		padding: 4px;
+
+		/*!rtl:ignore*/
+		.rtl & .dashicons-arrow-left-alt2,
+		.rtl & .dashicons-arrow-right-alt2 {
+			transform: scaleX(-1);
+		}
 	}
 
 	.woocommerce-store-alerts__pagination-label {

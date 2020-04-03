@@ -373,6 +373,11 @@ $inner-border: $core-grey-light-500;
 		margin-right: 3px;
 		fill: currentColor;
 
+		/*!rtl:ignore*/
+		.rtl &.gridicons-arrow-right {
+			transform: scaleX(-1);
+		}
+
 		&.gridicons-arrow-up {
 			transform: rotate(45deg);
 		}
