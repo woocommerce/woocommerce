@@ -367,7 +367,7 @@ function wc_release_stock_for_order( $order ) {
 	}
 }
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );
-add_action( 'woocommerce_payment_complete', 'wc_release_stock_for_order' );
+add_action( 'woocommerce_payment_complete', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_cancelled', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_completed', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );
