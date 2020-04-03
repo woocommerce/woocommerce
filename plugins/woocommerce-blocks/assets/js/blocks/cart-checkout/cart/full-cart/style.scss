@@ -70,9 +70,6 @@ table.wc-block-cart-items {
 				margin-top: 0.5em;
 				text-transform: none;
 				white-space: nowrap;
-				// Temporary - this is not yet a link or "link button".
-				// May not be needed when remove is hooked up to API properly.
-				text-decoration: underline;
 			}
 			.wc-block-cart-item__remove-icon {
 				@include link-button;
