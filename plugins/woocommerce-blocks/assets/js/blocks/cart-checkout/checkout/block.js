@@ -61,7 +61,11 @@ const Checkout = ( {
 	shippingRates = [],
 } ) => {
 	const { isEditor } = useEditorContext();
-	const { hasOrder, onCheckoutCompleteError } = useCheckoutContext();
+	const {
+		hasOrder,
+		hasError: checkoutHasError,
+		isComplete: checkoutIsComplete,
+	} = useCheckoutContext();
 	const { showAllValidationErrors } = useValidationContext();
 	const {
 		shippingRatesLoading,
@@ -121,14 +125,11 @@ const Checkout = ( {
 	}, [ shippingAsBilling, setBillingData ] );
 
 	useEffect( () => {
-		const unsubscribeCompleteError = onCheckoutCompleteError( () => {
+		if ( checkoutIsComplete && checkoutHasError ) {
 			showAllValidationErrors();
 			scrollToTop( { focusableSelector: 'input:invalid' } );
-		} );
-		return () => {
-			unsubscribeCompleteError();
-		};
-	}, [ onCheckoutCompleteError ] );
+		}
+	}, [ checkoutIsComplete, checkoutHasError ] );
 
 	if ( ! isEditor && ! hasOrder ) {
 		return <CheckoutOrderError />;
