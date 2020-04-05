@@ -6,6 +6,8 @@
  * @since   3.8.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -45,7 +47,7 @@ class WC_WCCOM_Site_Installer_Requirements_Check {
 	 * @return bool
 	 */
 	private static function met_wp_cron_requirement() {
-		return ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON );
+		return ! Constants::is_true( 'DISABLE_WP_CRON' );
 	}
 
 	/**

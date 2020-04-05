@@ -6,6 +6,8 @@
  * @version 3.0.0
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -140,6 +142,12 @@ class WC_Install {
 			'wc_update_390_change_geolocation_database_update_cron',
 			'wc_update_390_db_version',
 		),
+		'4.0.0' => array(
+			'wc_update_product_lookup_tables',
+			'wc_update_400_increase_size_of_column',
+			'wc_update_400_db_version',
+			'wc_reset_action_scheduler_migration_status',
+		),
 	);
 
 	/**
@@ -148,6 +156,7 @@ class WC_Install {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
+		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -162,7 +171,7 @@ class WC_Install {
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
+		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
@@ -177,6 +186,20 @@ class WC_Install {
 		$blog_id = get_current_blog_id();
 
 		add_action( 'wp_' . $blog_id . '_wc_updater_cron', array( __CLASS__, 'run_manual_database_update' ) );
+	}
+
+	/**
+	 * Add WC Admin based db update notice.
+	 *
+	 * @since 4.0.0
+	 */
+	public static function wc_admin_db_update_notice() {
+		if (
+			WC()->is_wc_admin_active() &&
+			false !== get_option( 'woocommerce_admin_install_timestamp' )
+		) {
+			new WC_Notes_Run_Db_Update();
+		}
 	}
 
 	/**
@@ -240,7 +263,7 @@ class WC_Install {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
-			WC_Admin_Notices::add_notice( 'update' );
+			WC_Admin_Notices::add_notice( 'update', true );
 		}
 	}
 
@@ -312,7 +335,7 @@ class WC_Install {
 	 * @since  3.2.0
 	 * @return boolean
 	 */
-	private static function is_new_install() {
+	public static function is_new_install() {
 		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
 
 		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
@@ -340,7 +363,7 @@ class WC_Install {
 	 */
 	private static function maybe_enable_setup_wizard() {
 		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
-			WC_Admin_Notices::add_notice( 'install' );
+			WC_Admin_Notices::add_notice( 'install', true );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
 	}
@@ -355,7 +378,7 @@ class WC_Install {
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
 				self::update();
 			} else {
-				WC_Admin_Notices::add_notice( 'update' );
+				WC_Admin_Notices::add_notice( 'update', true );
 			}
 		} else {
 			self::update_db_version();
@@ -422,7 +445,7 @@ class WC_Install {
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
-		$schedules['monthly'] = array(
+		$schedules['monthly']     = array(
 			'interval' => 2635200,
 			'display'  => __( 'Monthly', 'woocommerce' ),
 		);
@@ -455,7 +478,11 @@ class WC_Install {
 			wp_schedule_single_event( time() + ( absint( $held_duration ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 		}
 
-		wp_schedule_event( time(), 'daily', 'woocommerce_cleanup_personal_data' );
+		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
+		// so it doesn't occur in the same request. WooCommerce Admin also schedules
+		// a daily cron that gets lost due to a race condition. WC_Privacy's background
+		// processing instance updates the cron schedule from within a cron job.
+		wp_schedule_event( time() + 10, 'daily', 'woocommerce_cleanup_personal_data' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_logs' );
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
@@ -895,14 +922,16 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `sku` varchar(100) NULL default '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
-  `min_price` decimal(10,2) NULL default NULL,
-  `max_price` decimal(10,2) NULL default NULL,
+  `min_price` decimal(19,4) NULL default NULL,
+  `max_price` decimal(19,4) NULL default NULL,
   `onsale` tinyint(1) NULL default 0,
   `stock_quantity` double NULL default NULL,
   `stock_status` varchar(100) NULL default 'instock',
   `rating_count` bigint(20) NULL default 0,
   `average_rating` decimal(3,2) NULL default 0.00,
   `total_sales` bigint(20) NULL default 0,
+  `tax_status` varchar(100) NULL default 'taxable',
+  `tax_class` varchar(100) NULL default '',
   PRIMARY KEY  (`product_id`),
   KEY `virtual` (`virtual`),
   KEY `downloadable` (`downloadable`),

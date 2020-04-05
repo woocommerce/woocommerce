@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.6.0
+ * @version 4.0.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -41,6 +41,7 @@ if ( $max_value && $min_value === $max_value ) {
 			value="<?php echo esc_attr( $input_value ); ?>"
 			title="<?php echo esc_attr_x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ); ?>"
 			size="4"
+			placeholder="<?php echo esc_attr( $placeholder ); ?>"
 			inputmode="<?php echo esc_attr( $inputmode ); ?>" />
 		<?php do_action( 'woocommerce_after_quantity_input_field' ); ?>
 	</div>

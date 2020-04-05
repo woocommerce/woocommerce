@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.9.0';
+	public $version = '4.1.0';
 
 	/**
 	 * The single instance of the class.
@@ -446,9 +446,9 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
 		/**
-		 * Libraries
+		 * Libraries and packages.
 		 */
-		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
+		include_once WC_ABSPATH . 'packages/action-scheduler/action-scheduler.php';
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
@@ -881,5 +881,15 @@ final class WooCommerce {
 			'https://github.com/woocommerce/woocommerce/releases'
 		);
 		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
+	}
+
+	/**
+	 * Is the WooCommerce Admin actively included in the WooCommerce core?
+	 * Based on presence of a basic WC Admin function.
+	 *
+	 * @return boolean
+	 */
+	public function is_wc_admin_active() {
+		return function_exists( 'wc_admin_url' );
 	}
 }

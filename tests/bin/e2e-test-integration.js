@@ -2,6 +2,7 @@
 
 const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
+const { useJestPuppeteerConfig } = require( 'puppeteer-utils' );
 
 program
 	.usage( '<file ...> [options]' )
@@ -15,7 +16,11 @@ const testEnvVars = {
 };
 
 if ( program.dev ) {
-	testEnvVars.JEST_PUPPETEER_CONFIG = 'tests/e2e-tests/config/jest-puppeteer.dev.config.js';
+	testEnvVars.PUPPETEER_HEADLESS = 'false';
+	testEnvVars.PUPPETEER_SLOWMO = '50';
+
+	delete testEnvVars.JEST_PUPPETEER_CONFIG;
+	useJestPuppeteerConfig();
 }
 
 const envVars = Object.assign( {}, process.env, testEnvVars );

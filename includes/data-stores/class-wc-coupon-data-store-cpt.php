@@ -55,6 +55,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
+	 * The updated coupon properties
+	 *
+	 * @since 4.1.0
+	 * @var array
+	 */
+	protected $updated_props = array();
+
+	/**
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0
@@ -499,6 +507,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', true ) ) {
 			return null;
+		}
+
+		// Make sure we have usage_count meta key for this coupon because its required for `$query_for_usages`.
+		// We are not directly modifying `$query_for_usages` to allow for `usage_count` not present only keep that query simple.
+		if ( ! metadata_exists( 'post', $coupon->get_id(), 'usage_count' ) ) {
+			$coupon->set_usage_count( $coupon->get_usage_count() ); // Use `get_usage_count` here to write default value, which may changed by a filter.
+			$coupon->save();
 		}
 
 		$query_for_usages = $wpdb->prepare(

@@ -10,6 +10,8 @@
  * @package WooCommerce/Classes
  */
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -38,7 +40,7 @@ class WC_Tracker {
 	 */
 	public static function send_tracking_data( $override = false ) {
 		// Don't trigger this on AJAX Requests.
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		if ( Constants::is_true( 'DOING_AJAX' ) ) {
 			return;
 		}
 
@@ -85,6 +87,28 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Test whether this site is a staging site according to the Jetpack criteria.
+	 *
+	 * With Jetpack 8.1+, Jetpack::is_staging_site has been deprecated.
+	 * \Automattic\Jetpack\Status::is_staging_site is the replacement.
+	 * However, there are version of JP where \Automattic\Jetpack\Status exists, but does *not* contain is_staging_site method,
+	 * so with those, code still needs to use the previous check as a fallback.
+	 *
+	 * @return bool
+	 */
+	private static function is_jetpack_staging_site() {
+		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
+			// Preferred way of checking with Jetpack 8.1+.
+			$jp_status = new \Automattic\Jetpack\Status();
+			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+				return $jp_status->is_staging_site();
+			}
+		}
+
+		return ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() );
+	}
+
+	/**
 	 * Get all the tracking data.
 	 *
 	 * @return array
@@ -109,9 +133,10 @@ class WC_Tracker {
 		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
 
 		// Jetpack & WooCommerce Connect.
-		$data['jetpack_version']    = defined( 'JETPACK__VERSION' ) ? JETPACK__VERSION : 'none';
+
+		$data['jetpack_version']    = Constants::is_defined( 'JETPACK__VERSION' ) ? Constants::get_constant( 'JETPACK__VERSION' ) : 'none';
 		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
-		$data['jetpack_is_staging'] = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_staging_site' ) && Jetpack::is_staging_site() ) ? 'yes' : 'no';
+		$data['jetpack_is_staging'] = self::is_jetpack_staging_site() ? 'yes' : 'no';
 		$data['connect_installed']  = class_exists( 'WC_Connect_Loader' ) ? 'yes' : 'no';
 		$data['connect_active']     = ( class_exists( 'WC_Connect_Loader' ) && wp_next_scheduled( 'wc_connect_fetch_service_schemas' ) ) ? 'yes' : 'no';
 		$data['helper_connected']   = self::get_helper_connected();
@@ -137,6 +162,9 @@ class WC_Tracker {
 
 		// Template overrides.
 		$data['admin_user_agents'] = self::get_admin_user_agents();
+
+		// Cart & checkout tech (blocks or shortcodes).
+		$data['cart_checkout'] = self::get_cart_checkout_info();
 
 		return apply_filters( 'woocommerce_tracker_data', $data );
 	}
@@ -595,6 +623,63 @@ class WC_Tracker {
 		}
 
 		return array_merge( $min_max, $processing_min_max );
+	}
+
+	/**
+	 * Search a specific post for text content.
+	 *
+	 * @param integer $post_id The id of the post to search.
+	 * @param string  $text    The text to search for.
+	 * @return string 'Yes' if post contains $text (otherwise 'No').
+	 */
+	public static function post_contains_text( $post_id, $text ) {
+		global $wpdb;
+
+		// Search for the text anywhere in the post.
+		$wildcarded = "%{$text}%";
+
+		$result = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT COUNT( * ) FROM {$wpdb->prefix}posts
+				WHERE ID=%d
+				AND {$wpdb->prefix}posts.post_content LIKE %s
+				",
+				array( $post_id, $wildcarded )
+			)
+		);
+
+		return ( '0' !== $result ) ? 'Yes' : 'No';
+	}
+
+	/**
+	 * Get info about the cart & checkout pages.
+	 *
+	 * @return array
+	 */
+	public static function get_cart_checkout_info() {
+		global $wpdb;
+
+		$cart_page_id     = wc_get_page_id( 'cart' );
+		$checkout_page_id = wc_get_page_id( 'checkout' );
+		return array(
+			'cart_page_contains_cart_block'             => self::post_contains_text(
+				$cart_page_id,
+				'<!-- wp:woocommerce/cart'
+			),
+			'cart_page_contains_cart_shortcode'         => self::post_contains_text(
+				$cart_page_id,
+				'[woocommerce_cart]'
+			),
+			'checkout_page_contains_checkout_block'     => self::post_contains_text(
+				$checkout_page_id,
+				'<!-- wp:woocommerce/checkout'
+			),
+			'checkout_page_contains_checkout_shortcode' => self::post_contains_text(
+				$checkout_page_id,
+				'[woocommerce_checkout]'
+			),
+		);
 	}
 }
 

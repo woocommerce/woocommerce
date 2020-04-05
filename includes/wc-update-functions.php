@@ -2063,6 +2063,7 @@ function wc_update_390_move_maxmind_database() {
 	$uploads_dir = wp_upload_dir();
 	$new_path    = trailingslashit( $uploads_dir['basedir'] ) . 'woocommerce_uploads/' . $prefix . '-GeoLite2-Country.mmdb';
 	$new_path    = apply_filters( 'woocommerce_geolocation_local_database_path', $new_path, 2 );
+	$new_path    = apply_filters( 'woocommerce_maxmind_geolocation_database_path', $new_path );
 
 	@rename( $old_path, $new_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 }
@@ -2080,4 +2081,32 @@ function wc_update_390_change_geolocation_database_update_cron() {
  */
 function wc_update_390_db_version() {
 	WC_Install::update_db_version( '3.9.0' );
+}
+
+/**
+ * Increase column size
+ */
+function wc_update_400_increase_size_of_column() {
+	global $wpdb;
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_product_meta_lookup MODIFY COLUMN `min_price` decimal(19,4) NULL default NULL" );
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_product_meta_lookup MODIFY COLUMN `max_price` decimal(19,4) NULL default NULL" );
+}
+
+/**
+ * Reset ActionScheduler migration status. Needs AS >= 3.0 shipped with WC >= 4.0.
+ */
+function wc_reset_action_scheduler_migration_status() {
+	if (
+		class_exists( 'ActionScheduler_DataController' ) &&
+		method_exists( 'ActionScheduler_DataController', 'mark_migration_incomplete' )
+	) {
+		\ActionScheduler_DataController::mark_migration_incomplete();
+	}
+}
+
+/**
+ * Update DB version.
+ */
+function wc_update_400_db_version() {
+	WC_Install::update_db_version( '4.0.0' );
 }
