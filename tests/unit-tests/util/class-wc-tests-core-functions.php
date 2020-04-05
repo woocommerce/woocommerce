@@ -570,6 +570,72 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests the wc_tokenize_path function.
+	 */
+	public function test_wc_tokenize_path() {
+		$path = wc_tokenize_path( ABSPATH . '/test', array() );
+		$this->assertEquals( ABSPATH . '/test', $path );
+
+		$path = wc_tokenize_path(
+			ABSPATH . '/test',
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
+		$this->assertEquals( '{{ABSPATH}}/test', $path );
+
+		$path = wc_tokenize_path(
+			ABSPATH . '/test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+			)
+		);
+		$this->assertEquals( ABSPATH . '/test', $path );
+
+		$path = wc_tokenize_path(
+			WP_CONTENT_DIR . '/test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+				'ABSPATH'        => ABSPATH,
+			)
+		);
+		$this->assertEquals( '{{WP_CONTENT_DIR}}/test', $path );
+	}
+
+	/**
+	 * Tests the wc_untokenize_path function.
+	 */
+	public function test_wc_untokenize_path() {
+		$path = wc_untokenize_path( '{{ABSPATH}}/test', array() );
+		$this->assertEquals( '{{ABSPATH}}/test', $path );
+
+		$path = wc_untokenize_path(
+			'{{ABSPATH}}/test',
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
+		$this->assertEquals( ABSPATH . '/test', $path );
+
+		$path = wc_untokenize_path(
+			'{{ABSPATH}}/test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+			)
+		);
+		$this->assertEquals( '{{ABSPATH}}/test', $path );
+
+		$path = wc_untokenize_path(
+			'{{WP_CONTENT_DIR}}/test',
+			array(
+				'WP_CONTENT_DIR' => WP_CONTENT_DIR,
+				'ABSPATH'        => ABSPATH,
+			)
+		);
+		$this->assertEquals( WP_CONTENT_DIR . '/test', $path );
+	}
+
+	/**
 	 * Test wc_get_template.
 	 *
 	 * @expectedIncorrectUsage wc_get_template
