@@ -151,6 +151,42 @@ function wc_update_order( $args ) {
 }
 
 /**
+ * Given a path, this will convert any of the subpaths into their corresponding tokens.
+ *
+ * @since 4.1.0
+ * @param string $path The absolute path to tokenize.
+ * @param array  $path_tokens An array keyed with the token, containing paths that should be replaced.
+ * @return string The tokenized path.
+ */
+function wc_tokenize_path( $path, $path_tokens ) {
+	foreach ( $path_tokens as $token => $token_path ) {
+		if ( 0 !== strpos( $path, $token_path ) ) {
+			continue;
+		}
+
+		$path = str_replace( $token_path, '{{' . $token . '}}', $path );
+	}
+
+	return $path;
+}
+
+/**
+ * Given a tokenized path, this will expand the tokens to their full path.
+ *
+ * @since 4.1.0
+ * @param string $path The absolute path to expand.
+ * @param array  $path_tokens An array keyed with the token, containing paths that should be expanded.
+ * @return string The absolute path.
+ */
+function wc_untokenize_path( $path, $path_tokens ) {
+	foreach ( $path_tokens as $token => $token_path ) {
+		$path = str_replace( '{{' . $token . '}}', $token_path, $path );
+	}
+
+	return $path;
+}
+
+/**
  * Get template part (for templates like the shop-loop).
  *
  * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
@@ -188,20 +224,23 @@ function wc_get_template_part( $slug, $name = '' ) {
 		}
 
 		// Don't cache the absolute path so that it can be shared between web servers with different paths.
-		if ( 0 === strpos( $template, ABSPATH ) ) {
-			$template = str_replace( ABSPATH, '{{ABSPATH}}', $template );
-		}
+		$cache_path = wc_tokenize_path(
+			$template,
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
 
-		if ( 0 === strpos( $template, WC_ABSPATH ) ) {
-			$template = str_replace( WC_ABSPATH, '{{WC_ABSPATH}}', $template );
-		}
-
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+		wp_cache_set( $cache_key, $cache_path, 'woocommerce' );
+	} else {
+		// Make sure that the absolute path to the template is resolved.
+		$template = wc_untokenize_path(
+			$template,
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
 	}
-
-	// Make sure that the absolute path to the template is resolved.
-	$template = str_replace( '{{ABSPATH}}', ABSPATH, $template );
-	$template = str_replace( '{{WC_ABSPATH}}', WC_ABSPATH, $template );
 
 	// Allow 3rd party plugins to filter template file from their plugin.
 	$template = apply_filters( 'wc_get_template_part', $template, $slug, $name );
@@ -227,16 +266,23 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		$template = wc_locate_template( $template_name, $template_path, $default_path );
 
 		// Don't cache the absolute path so that it can be shared between web servers with different paths.
-		if ( 0 === strpos( $template, ABSPATH ) ) {
-			// Use a token that we can easily replace.
-			$template = str_replace( ABSPATH, '{{ABSPATH}}', $template );
-		}
+		$cache_path = wc_tokenize_path(
+			$template,
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
 
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+		wp_cache_set( $cache_key, $cache_path, 'woocommerce' );
+	} else {
+		// Make sure that the absolute path to the template is resolved.
+		$template = wc_untokenize_path(
+			$template,
+			array(
+				'ABSPATH' => ABSPATH,
+			)
+		);
 	}
-
-	// Make sure that the absolute path to the template is resolved.
-	$template = str_replace( '{{ABSPATH}}', ABSPATH, $template );
 
 	// Allow 3rd party plugin filter template file from their plugin.
 	$filter_template = apply_filters( 'wc_get_template', $template, $template_name, $args, $template_path, $default_path );
