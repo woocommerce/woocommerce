@@ -159,6 +159,25 @@ function wc_update_order( $args ) {
  * @return string The tokenized path.
  */
 function wc_tokenize_path( $path, $path_tokens ) {
+	// Order most to least specific so that the token can encompass as much of the path as possible.
+	uasort(
+		$path_tokens,
+		function ( $a, $b ) {
+			$a = strlen( $a );
+			$b = strlen( $b );
+
+			if ( $a > $b ) {
+				return -1;
+			}
+
+			if ( $b > $a ) {
+				return 1;
+			}
+
+			return 0;
+		}
+	);
+
 	foreach ( $path_tokens as $token => $token_path ) {
 		if ( 0 !== strpos( $path, $token_path ) ) {
 			continue;
