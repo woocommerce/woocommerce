@@ -652,16 +652,103 @@ class WC_Tracker {
 		return ( '0' !== $result ) ? 'Yes' : 'No';
 	}
 
+	// @todo what's the best way to set up the array_filter in woo PHP version?
+
+	/**
+	 * Return true if specified block is checkout block.
+	 *
+	 * @param object $block Block object (as returned in array from parse_blocks()).
+	 * @return boolean
+	 */
+	public static function is_checkout_block( $block ) {
+		return 'woocommerce/checkout' === $block['blockName'];
+	}
+
+	/**
+	 * Return true if specified block is checkout block.
+	 *
+	 * @param object $block Block object (as returned in array from parse_blocks()).
+	 * @return boolean
+	 */
+	public static function is_cart_block( $block ) {
+		return 'woocommerce/cart' === $block['blockName'];
+	}
+
+	/**
+	 * Get blocks from a woocommerce page.
+	 *
+	 * @param string $woo_page_name A woocommerce page e.g. `checkout` or `cart`.
+	 * @return array Array of blocks as returned by parse_blocks().
+	 */
+	private static function get_blocks_from_page( $woo_page_name ) {
+		// Will expose this as a param later.
+		$page_id = wc_get_page_id( $woo_page_name );
+
+		$page = get_post( $page_id );
+		if ( ! $page ) {
+			return array();
+		}
+
+		// Parse blocks out of checkout page.
+		$blocks = parse_blocks( $page->post_content );
+		if ( ! $blocks ) {
+			return array();
+		}
+
+		return $blocks;
+	}
+
+	/**
+	 * Get customised attributes for the checkout block.
+	 *
+	 * Note this only returns attributes that do not have default values;
+	 * i.e. attributes that the merchant has customised.
+	 *
+	 * @return array Block attribute values.
+	 */
+	private static function get_block_attributes_from_checkout_page() {
+		$blocks = self::get_blocks_from_page( 'checkout' );
+
+		// Get checkout block(s).
+		$checkout_blocks = array_filter( $blocks, array( __CLASS__, 'is_checkout_block' ) );
+		if ( ! $checkout_blocks || ! count( $checkout_blocks ) ) {
+			return array();
+		}
+
+		// Return any customised attributes from the first block.
+		return $checkout_blocks[0]['attrs'];
+	}
+
+	/**
+	 * Get customised attributes for the cart block.
+	 *
+	 * Note this only returns attributes that do not have default values;
+	 * i.e. attributes that the merchant has customised.
+	 *
+	 * @return array Block attribute values.
+	 */
+	private static function get_block_attributes_from_cart_page() {
+		$blocks = self::get_blocks_from_page( 'cart' );
+
+		// Get cart block(s).
+		$cart_blocks = array_filter( $blocks, array( __CLASS__, 'is_cart_block' ) );
+		if ( ! $cart_blocks || ! count( $cart_blocks ) ) {
+			return array();
+		}
+
+		// Return any customised attributes from the first block.
+		return $cart_blocks[0]['attrs'];
+	}
+
 	/**
 	 * Get info about the cart & checkout pages.
 	 *
 	 * @return array
 	 */
 	public static function get_cart_checkout_info() {
-		global $wpdb;
-
 		$cart_page_id     = wc_get_page_id( 'cart' );
 		$checkout_page_id = wc_get_page_id( 'checkout' );
+
 		return array(
 			'cart_page_contains_cart_block'             => self::post_contains_text(
 				$cart_page_id,
@@ -671,6 +758,7 @@ class WC_Tracker {
 				$cart_page_id,
 				'[woocommerce_cart]'
 			),
+			'cart_block_attributes'                     => self::get_block_attributes_from_cart_page(),
 			'checkout_page_contains_checkout_block'     => self::post_contains_text(
 				$checkout_page_id,
 				'<!-- wp:woocommerce/checkout'
@@ -679,6 +767,7 @@ class WC_Tracker {
 				$checkout_page_id,
 				'[woocommerce_checkout]'
 			),
+			'checkout_block_attributes'                 => self::get_block_attributes_from_checkout_page(),
 		);
 	}
 }
