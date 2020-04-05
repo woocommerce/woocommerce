@@ -355,6 +355,14 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 		}
 
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$meta_query[] = array(
+				'key'     => '_stock_status',
+				'value'   => 'outofstock',
+				'compare' => 'NOT LIKE',
+			);
+		}
+
 		$meta_query     = new WP_Meta_Query( $meta_query );
 		$tax_query      = new WP_Tax_Query( $tax_query );
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );

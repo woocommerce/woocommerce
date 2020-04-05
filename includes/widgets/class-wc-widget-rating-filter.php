@@ -51,6 +51,14 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			}
 		}
 
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$meta_query[] = array(
+				'key'     => '_stock_status',
+				'value'   => 'outofstock',
+				'compare' => 'NOT LIKE',
+			);
+		}
+
 		// Set new rating filter.
 		$product_visibility_terms = wc_get_product_visibility_term_ids();
 		$tax_query[]              = array(
