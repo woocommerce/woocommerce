@@ -206,6 +206,31 @@ function wc_untokenize_path( $path, $path_tokens ) {
 }
 
 /**
+ * Fetches an array containing all of the configurable path constants to be used in tokenization.
+ *
+ * @return array The key is the define and the path is the constant.
+ */
+function wc_get_path_define_tokens() {
+	$defines = array(
+		'ABSPATH',
+		'WC_ABSPATH',
+		'WP_CONTENT_DIR',
+		'WP_PLUGIN_DIR',
+		'PLUGINDIR',
+		'WP_THEME_DIR',
+	);
+
+	$path_tokens = array();
+	foreach ( $defines as $define ) {
+		if ( defined( $define ) ) {
+			$path_tokens[ $define ] = constant( $define );
+		}
+	}
+
+	return apply_filters( 'wc_get_path_define_tokens', $path_tokens );
+}
+
+/**
  * Get template part (for templates like the shop-loop).
  *
  * WC_TEMPLATE_DEBUG_MODE will prevent overrides in themes from taking priority.
@@ -243,22 +268,12 @@ function wc_get_template_part( $slug, $name = '' ) {
 		}
 
 		// Don't cache the absolute path so that it can be shared between web servers with different paths.
-		$cache_path = wc_tokenize_path(
-			$template,
-			array(
-				'ABSPATH' => ABSPATH,
-			)
-		);
+		$cache_path = wc_tokenize_path( $template, wc_get_path_define_tokens() );
 
 		wp_cache_set( $cache_key, $cache_path, 'woocommerce' );
 	} else {
 		// Make sure that the absolute path to the template is resolved.
-		$template = wc_untokenize_path(
-			$template,
-			array(
-				'ABSPATH' => ABSPATH,
-			)
-		);
+		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
@@ -285,22 +300,12 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		$template = wc_locate_template( $template_name, $template_path, $default_path );
 
 		// Don't cache the absolute path so that it can be shared between web servers with different paths.
-		$cache_path = wc_tokenize_path(
-			$template,
-			array(
-				'ABSPATH' => ABSPATH,
-			)
-		);
+		$cache_path = wc_tokenize_path( $template, wc_get_path_define_tokens() );
 
 		wp_cache_set( $cache_key, $cache_path, 'woocommerce' );
 	} else {
 		// Make sure that the absolute path to the template is resolved.
-		$template = wc_untokenize_path(
-			$template,
-			array(
-				'ABSPATH' => ABSPATH,
-			)
-		);
+		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.

@@ -636,6 +636,15 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests the wc_get_path_define_tokens function.
+	 */
+	public function test_wc_get_path_define_tokens() {
+		$defines = wc_get_path_define_tokens();
+		$this->assertArrayHasKey( 'ABSPATH', $defines );
+		$this->assertEquals( ABSPATH, $defines['ABSPATH'] );
+	}
+
+	/**
 	 * Test wc_get_template.
 	 *
 	 * @expectedIncorrectUsage wc_get_template
