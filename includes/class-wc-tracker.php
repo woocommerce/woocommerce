@@ -686,11 +686,13 @@ class WC_Tracker {
 		$page_blocks = self::get_all_blocks_from_page( $woo_page_name );
 
 		// Get any instances of the specified block.
-		return array_filter(
-			$page_blocks,
-			function ( $block ) {
-				return $block_name !== $block['blockName'];
-			}
+		return array_values(
+			array_filter(
+				$page_blocks,
+				function ( $block ) use ( $block_name ) {
+					return ( $block_name === $block['blockName'] );
+				}
+			)
 		);
 	}
 
