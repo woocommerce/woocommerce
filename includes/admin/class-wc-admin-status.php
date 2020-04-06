@@ -338,4 +338,62 @@ class WC_Admin_Status {
 			exit();
 		}
 	}
+
+	/**
+	 * Prints the information about plugins for the system status report.
+	 * Used for both active and inactive plugins sections.
+	 *
+	 * @param array $plugins List of plugins to display.
+	 * @param array $untested_plugins List of plugins that haven't been tested with the current WooCommerce version.
+	 * @return void
+	 */
+	private static function output_plugins_info( $plugins, $untested_plugins ) {
+		$wc_version = Constants::get_constant( 'WC_VERSION' );
+
+		foreach ( $plugins as $plugin ) {
+			if ( ! empty( $plugin['name'] ) ) {
+				// Link the plugin name to the plugin url if available.
+				$plugin_name = esc_html( $plugin['name'] );
+				if ( ! empty( $plugin['url'] ) ) {
+					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+				}
+
+				$has_newer_version = false;
+				$version_string    = $plugin['version'];
+				$network_string    = '';
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
+						/* translators: 1: current version. 2: latest version */
+						$version_string = sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $plugin['version'], $plugin['version_latest'] );
+					}
+
+					if ( false !== $plugin['network_activated'] ) {
+						$network_string = ' &ndash; <strong style="color: black;">' . esc_html__( 'Network enabled', 'woocommerce' ) . '</strong>';
+					}
+				}
+				$untested_string = '';
+				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
+					$untested_string = ' &ndash; <strong style="color: #a00;">';
+
+					/* translators: %s: version */
+					$untested_string .= esc_html( sprintf( __( 'Installed version not tested with active version of WooCommerce %s', 'woocommerce' ), $wc_version ) );
+
+					$untested_string .= '</strong>';
+				}
+				?>
+				<tr>
+					<td><?php echo wp_kses_post( $plugin_name ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td>
+						<?php
+						/* translators: %s: plugin author */
+						printf( esc_html__( 'by %s', 'woocommerce' ), esc_html( $plugin['author_name'] ) );
+						echo ' &ndash; ' . esc_html( $version_string ) . $untested_string . $network_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						?>
+					</td>
+				</tr>
+				<?php
+			}
+		}
+	}
 }
