@@ -40,15 +40,16 @@ const preparePaymentData = ( paymentData ) => {
  */
 const CheckoutProcessor = () => {
 	const {
-		hasError,
+		hasError: checkoutHasError,
 		onCheckoutProcessing,
 		onCheckoutCompleteSuccess,
 		dispatchActions,
 		redirectUrl,
+		isProcessing: checkoutIsProcessing,
 		isProcessingComplete: checkoutIsProcessingComplete,
 	} = useCheckoutContext();
 	const { hasValidationErrors } = useValidationContext();
-	const { shippingAddress } = useShippingDataContext();
+	const { shippingAddress, shippingErrorStatus } = useShippingDataContext();
 	const { billingData } = useBillingDataContext();
 	const {
 		activePaymentMethod,
@@ -60,10 +61,28 @@ const CheckoutProcessor = () => {
 	const currentBillingData = useRef( billingData );
 	const currentShippingAddress = useRef( shippingAddress );
 
-	const withErrors = hasValidationErrors();
+	const checkoutWillHaveError =
+		hasValidationErrors ||
+		currentPaymentStatus.hasError ||
+		shippingErrorStatus.hasError;
+
+	useEffect( () => {
+		if (
+			checkoutWillHaveError !== checkoutHasError &&
+			( checkoutIsProcessing || checkoutIsProcessingComplete )
+		) {
+			dispatchActions.setHasError( checkoutWillHaveError );
+		}
+	}, [
+		checkoutWillHaveError,
+		checkoutHasError,
+		checkoutIsProcessing,
+		checkoutIsProcessingComplete,
+	] );
+
 	const paidAndWithoutErrors =
-		! hasError &&
-		! withErrors &&
+		! checkoutHasError &&
+		! checkoutWillHaveError &&
 		currentPaymentStatus.isSuccessful &&
 		checkoutIsProcessingComplete;
 
@@ -83,8 +102,47 @@ const CheckoutProcessor = () => {
 	}, [ errorMessage ] );
 
 	const checkValidation = useCallback( () => {
-		return ! withErrors;
-	}, [ withErrors ] );
+		if ( hasValidationErrors ) {
+			return {
+				errorMessage: __(
+					'Some input fields are invalid.',
+					'woo-gutenberg-products-block'
+				),
+			};
+		}
+		if ( currentPaymentStatus.hasError ) {
+			return {
+				errorMessage: __(
+					'There was a problem with your payment option.',
+					'woo-gutenberg-products-block'
+				),
+			};
+		}
+		if ( shippingErrorStatus.hasError ) {
+			return {
+				errorMessage: __(
+					'There was a problem with your shipping option.',
+					'woo-gutenberg-products-block'
+				),
+			};
+		}
+
+		return true;
+	}, [
+		hasValidationErrors,
+		currentPaymentStatus.hasError,
+		shippingErrorStatus.hasError,
+	] );
+
+	useEffect( () => {
+		const unsubscribeProcessing = onCheckoutProcessing(
+			checkValidation,
+			0
+		);
+		return () => {
+			unsubscribeProcessing();
+		};
+	}, [ onCheckoutProcessing, checkValidation ] );
 
 	const processOrder = useCallback( () => {
 		triggerFetch( {
@@ -148,23 +206,13 @@ const CheckoutProcessor = () => {
 	] );
 	// setup checkout processing event observers.
 	useEffect( () => {
-		const unsubscribeValidation = onCheckoutProcessing(
-			checkValidation,
-			0
-		);
 		const unsubscribeRedirect = onCheckoutCompleteSuccess( () => {
 			window.location.href = redirectUrl;
 		}, 999 );
 		return () => {
-			unsubscribeValidation();
 			unsubscribeRedirect();
 		};
-	}, [
-		onCheckoutProcessing,
-		onCheckoutCompleteSuccess,
-		checkValidation,
-		redirectUrl,
-	] );
+	}, [ onCheckoutProcessing, onCheckoutCompleteSuccess, redirectUrl ] );
 
 	// process order if conditions are good.
 	useEffect( () => {

@@ -75,7 +75,9 @@ const Checkout = ( {
 	} = useShippingDataContext();
 	const { billingData, setBillingData } = useBillingDataContext();
 
-	const [ shippingAsBilling, setShippingAsBilling ] = useState( true );
+	const [ shippingAsBilling, setShippingAsBilling ] = useState(
+		needsShipping
+	);
 
 	const renderShippingRatesControlOption = ( option ) => ( {
 		label: decodeEntities( option.name ),

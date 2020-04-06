@@ -16,7 +16,7 @@ const ValidationContext = createContext( {
 	hideValidationError: () => void null,
 	showValidationError: () => void null,
 	showAllValidationErrors: () => void null,
-	hasValidationErrors: () => false,
+	hasValidationErrors: false,
 	getValidationErrorId: ( errorId ) => errorId,
 } );
 
@@ -146,15 +146,6 @@ export const ValidationContextProvider = ( { children } ) => {
 	};
 
 	/**
-	 * Allows checking if the current context has at least one validation error.
-	 *
-	 * @return {boolean} Whether there is at least one error.
-	 */
-	const hasValidationErrors = () => {
-		return Object.keys( validationErrors ).length > 0;
-	};
-
-	/**
 	 * Provides an id for the validation error that can be used to fill out
 	 * aria-describedby attribute values.
 	 *
@@ -178,7 +169,7 @@ export const ValidationContextProvider = ( { children } ) => {
 		hideValidationError,
 		showValidationError,
 		showAllValidationErrors,
-		hasValidationErrors,
+		hasValidationErrors: Object.keys( validationErrors ).length > 0,
 		getValidationErrorId,
 	};
 	return (

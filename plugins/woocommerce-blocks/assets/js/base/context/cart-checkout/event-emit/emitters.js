@@ -24,9 +24,15 @@ const getObserversByPriority = ( observers, eventType ) => {
  */
 export const emitEvent = async ( observers, eventType, data ) => {
 	const observersByType = getObserversByPriority( observers, eventType );
+	const observerResponses = [];
 	for ( const observer of observersByType ) {
 		try {
-			await Promise.resolve( observer.callback( data ) );
+			const observerResponse = await Promise.resolve(
+				observer.callback( data )
+			);
+			if ( typeof observerResponse === 'object' ) {
+				observerResponses.push( observerResponse );
+			}
 		} catch ( e ) {
 			// we don't care about errors blocking execution, but will
 			// console.error for troubleshooting.
@@ -34,7 +40,7 @@ export const emitEvent = async ( observers, eventType, data ) => {
 			console.error( e );
 		}
 	}
-	return true;
+	return observerResponses.length ? observerResponses : true;
 };
 
 /**

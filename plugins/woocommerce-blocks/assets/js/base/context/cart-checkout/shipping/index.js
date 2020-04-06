@@ -6,6 +6,7 @@ import {
 	useContext,
 	useReducer,
 	useEffect,
+	useMemo,
 	useRef,
 } from '@wordpress/element';
 import {
@@ -109,14 +110,17 @@ export const ShippingDataProvider = ( { children } ) => {
 		}
 	}, [ isSelectingRate ] );
 
-	const currentErrorStatus = {
-		isPristine: shippingErrorStatus === NONE,
-		isValid: shippingErrorStatus === NONE,
-		hasInvalidAddress: shippingErrorStatus === INVALID_ADDRESS,
-		hasError:
-			shippingErrorStatus === UNKNOWN ||
-			shippingErrorStatus === INVALID_ADDRESS,
-	};
+	const currentErrorStatus = useMemo(
+		() => ( {
+			isPristine: shippingErrorStatus === NONE,
+			isValid: shippingErrorStatus === NONE,
+			hasInvalidAddress: shippingErrorStatus === INVALID_ADDRESS,
+			hasError:
+				shippingErrorStatus === UNKNOWN ||
+				shippingErrorStatus === INVALID_ADDRESS,
+		} ),
+		[ shippingErrorStatus ]
+	);
 
 	// emit events.
 	useEffect( () => {
@@ -124,7 +128,7 @@ export const ShippingDataProvider = ( { children } ) => {
 			emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_FAIL,
-				shippingErrorStatus
+				currentErrorStatus
 			);
 		} else if ( ! shippingRatesLoading && shippingRates ) {
 			emitEvent(
@@ -133,12 +137,7 @@ export const ShippingDataProvider = ( { children } ) => {
 				shippingRates
 			);
 		}
-	}, [
-		shippingRates,
-		shippingRatesLoading,
-		currentErrorStatus,
-		shippingErrorStatus,
-	] );
+	}, [ shippingRates, shippingRatesLoading, currentErrorStatus ] );
 
 	// emit shipping rate selection events.
 	useEffect( () => {
@@ -146,7 +145,7 @@ export const ShippingDataProvider = ( { children } ) => {
 			emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_FAIL,
-				shippingErrorStatus
+				currentErrorStatus
 			);
 		} else if ( ! isSelectingRate && selectedRates ) {
 			emitEvent(
@@ -155,23 +154,13 @@ export const ShippingDataProvider = ( { children } ) => {
 				selectedRates
 			);
 		}
-	}, [
-		selectedRates,
-		isSelectingRate,
-		currentErrorStatus,
-		shippingErrorStatus,
-	] );
-
-	// dispatch checkout error if there's a shipping error.
-	useEffect( () => {
-		dispatchActions.setHasError( currentErrorStatus.hasError );
-	}, [ currentErrorStatus.hasError, dispatchActions.setHasError ] );
+	}, [ selectedRates, isSelectingRate, currentErrorStatus ] );
 
 	/**
 	 * @type {ShippingDataContext}
 	 */
 	const ShippingData = {
-		shippingErrorStatus,
+		shippingErrorStatus: currentErrorStatus,
 		dispatchErrorStatus,
 		shippingErrorTypes: ERROR_TYPES,
 		shippingRates,

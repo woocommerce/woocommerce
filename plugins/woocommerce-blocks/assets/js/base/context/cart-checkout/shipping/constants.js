@@ -32,7 +32,12 @@ export const DEFAULT_SHIPPING_ADDRESS = {
  * @type {ShippingDataContext}
  */
 export const DEFAULT_SHIPPING_CONTEXT_DATA = {
-	shippingErrorStatus: ERROR_TYPES.NONE,
+	shippingErrorStatus: {
+		isPristine: true,
+		isValid: false,
+		hasInvalidAddress: false,
+		hasError: false,
+	},
 	dispatchErrorStatus: () => null,
 	shippingErrorTypes: ERROR_TYPES,
 	shippingRates: [],

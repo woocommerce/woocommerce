@@ -34,9 +34,9 @@ export const useStoreNotices = () => {
 				void createNotice( 'success', text, {
 					...noticeProps,
 				} ),
-			removeNotices: ( type = null ) => {
+			removeNotices: ( status = null ) => {
 				notices.map( ( notice ) => {
-					if ( type === null || notice.status === type ) {
+					if ( status === null || notice.status === status ) {
 						removeNotice( notice.id );
 					}
 					return true;
@@ -47,7 +47,7 @@ export const useStoreNotices = () => {
 				createSnackbarNotice( text, noticeProps );
 			},
 		} ),
-		[ createNotice, createSnackbarNotice ]
+		[ createNotice, createSnackbarNotice, notices ]
 	);
 
 	return {

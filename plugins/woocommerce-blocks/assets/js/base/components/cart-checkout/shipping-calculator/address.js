@@ -29,10 +29,7 @@ const ShippingCalculatorAddress = ( {
 
 	const validateSubmit = () => {
 		showAllValidationErrors();
-		if ( hasValidationErrors() ) {
-			return false;
-		}
-		return true;
+		return ! hasValidationErrors;
 	};
 
 	// Make all fields optional except 'country'.
