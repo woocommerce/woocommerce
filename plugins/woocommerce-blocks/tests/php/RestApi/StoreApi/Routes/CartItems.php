@@ -212,8 +212,8 @@ class CartItems extends TestCase {
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartItemSchema();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\CartItems( $schema );
+		$routes     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController() );
+		$controller = $routes->get( 'cart-items' );
 		$cart       = wc()->cart->get_cart();
 		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		$data       = $response->get_data();
@@ -238,10 +238,10 @@ class CartItems extends TestCase {
 	 * Tests schema of both products in cart to cover as much schema as possible.
 	 */
 	public function test_schema_matches_response() {
-		$cart       = wc()->cart->get_cart();
-		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartItemSchema();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\CartItems( $schema );
+		$routes     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController() );
+		$controller = $routes->get( 'cart-items' );
 		$schema     = $controller->get_item_schema();
+		$cart       = wc()->cart->get_cart();
 		$validate   = new ValidateSchema( $schema );
 
 		// Simple product.

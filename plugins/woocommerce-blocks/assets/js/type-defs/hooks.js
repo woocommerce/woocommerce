@@ -42,6 +42,17 @@
  */
 
 /**
+ * @typedef {Object} StoreCartItemAddToCart
+ *
+ * @property {number}   cartQuantity           The quantity of the item in the
+ *                                             cart.
+ * @property {boolean}  addingToCart           Whether the cart item is still
+ *                                             being added or not.
+ * @property {boolean}  cartIsLoading          Whether the cart is being loaded.
+ * @property {Function} addToCart              Callback for adding a cart item.
+ */
+
+/**
  * @typedef {Object} StoreCartItemQuantity
  *
  * @property {number}   quantity               The quantity of the item in the

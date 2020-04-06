@@ -17,27 +17,13 @@ use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductSummary;
  *
  * @since 2.5.0
  */
-class CartItemSchema extends AbstractSchema {
+class CartItemSchema extends ProductSchema {
 	/**
 	 * The schema item name.
 	 *
 	 * @var string
 	 */
 	protected $title = 'cart_item';
-
-	/**
-	 * We use product schema for line item price info.
-	 *
-	 * @var ProductSchema
-	 */
-	protected $product_schema;
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->product_schema = new ProductSchema();
-	}
 
 	/**
 	 * Cart schema properties.
@@ -56,18 +42,13 @@ class CartItemSchema extends AbstractSchema {
 				'description' => __( 'The cart item product or variation ID.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
-				'arg_options' => [
-					'sanitize_callback' => 'absint',
-					'validate_callback' => [ $this, 'product_id_exists' ],
-				],
+				'readonly'    => true,
 			],
 			'quantity'            => [
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit' ],
-				'arg_options' => [
-					'sanitize_callback' => 'wc_stock_amount',
-				],
+				'readonly'    => true,
 			],
 			'name'                => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
@@ -79,16 +60,19 @@ class CartItemSchema extends AbstractSchema {
 				'description' => __( 'A short summary (or excerpt from the full description) for the product in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
 			],
 			'short_description'   => [
 				'description' => __( 'Product short description in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
 			],
 			'description'         => [
 				'description' => __( 'Product full description in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
 			],
 			'sku'                 => [
 				'description' => __( 'Stock keeping unit, if applicable.', 'woo-gutenberg-products-block' ),
@@ -133,38 +117,45 @@ class CartItemSchema extends AbstractSchema {
 							'description' => __( 'Image ID.', 'woo-gutenberg-products-block' ),
 							'type'        => 'integer',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'src'       => [
 							'description' => __( 'Full size image URL.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'thumbnail' => [
 							'description' => __( 'Thumbnail URL.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'srcset'    => [
 							'description' => __( 'Thumbnail srcset for responsive images.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'sizes'     => [
 							'description' => __( 'Thumbnail sizes for responsive images.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'name'      => [
 							'description' => __( 'Image name.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'alt'       => [
 							'description' => __( 'Image alternative text.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 					],
 				],
@@ -173,6 +164,7 @@ class CartItemSchema extends AbstractSchema {
 				'description' => __( 'Chosen attributes (for variations).', 'woo-gutenberg-products-block' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
 					'properties' => [
@@ -180,11 +172,13 @@ class CartItemSchema extends AbstractSchema {
 							'description' => __( 'Variation attribute name.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 						'value'     => [
 							'description' => __( 'Variation attribute value.', 'woo-gutenberg-products-block' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
 						],
 					],
 				],
@@ -309,17 +303,6 @@ class CartItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Check given ID exists,
-	 *
-	 * @param integer $product_id Product ID.
-	 * @return bool
-	 */
-	public function product_id_exists( $product_id ) {
-		$post = get_post( (int) $product_id );
-		return $post && in_array( $post->post_type, [ 'product', 'product_variation' ], true );
-	}
-
-	/**
 	 * Convert a WooCommerce cart item to an object suitable for the response.
 	 *
 	 * @param array $cart_item Cart item array.
@@ -343,7 +326,7 @@ class CartItemSchema extends AbstractSchema {
 			'permalink'           => $product->get_permalink(),
 			'images'              => ( new ProductImages() )->images_to_array( $product ),
 			'variation'           => $this->format_variation_data( $cart_item['variation'], $product ),
-			'prices'              => (object) $this->get_prices( $product, get_option( 'woocommerce_tax_display_cart' ), wc_stock_amount( $cart_item['quantity'] ) ),
+			'prices'              => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
 			'totals'              => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
@@ -357,20 +340,16 @@ class CartItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get an array of pricing data for the product line item.
+	 * Get an array of pricing data.
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @param string      $tax_display_mode If returned prices are incl or excl of tax.
-	 * @param int         $qty Line item quantity of this product.
 	 * @return array
 	 */
-	public function get_prices( \WC_Product $product, $tax_display_mode = '', $qty = 1 ) {
-		$prices           = $this->get_store_currency_response();
-		$tax_display_mode = in_array( $tax_display_mode, [ 'incl', 'excl' ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
-		$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
-
-		// Get individual product prices from product schema.
-		$prices = $this->product_schema->get_prices( $product, $tax_display_mode );
+	protected function prepare_product_price_response( \WC_Product $product, $tax_display_mode = '' ) {
+		$tax_display_mode = $this->get_tax_display_mode( $tax_display_mode );
+		$price_function   = $this->get_price_function_from_tax_display_mode( $tax_display_mode );
+		$prices           = parent::prepare_product_price_response( $product, $tax_display_mode );
 
 		// Add raw prices (prices with greater precision).
 		$prices['raw_prices'] = [
@@ -407,27 +386,6 @@ class CartItemSchema extends AbstractSchema {
 
 		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $draft_order );
 		return $product->get_stock_quantity() - $reserved_stock;
-	}
-
-	/**
-	 * If a product has low stock, return the remaining stock amount for display.
-	 *
-	 * Note; unlike the products API, this also factors in draft orders so the results are more up to date.
-	 *
-	 * @param \WC_Product $product Product instance.
-	 * @return integer|null
-	 */
-	protected function get_low_stock_remaining( \WC_Product $product ) {
-		$remaining_stock = $this->get_remaining_stock( $product );
-
-		if (
-			null !== $remaining_stock
-			&& $remaining_stock <= wc_get_low_stock_amount( $product )
-		) {
-			return $remaining_stock;
-		}
-
-		return null;
 	}
 
 	/**

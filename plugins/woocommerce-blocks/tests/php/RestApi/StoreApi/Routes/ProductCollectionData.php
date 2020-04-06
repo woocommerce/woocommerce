@@ -163,8 +163,8 @@ class ProductCollectionData extends TestCase {
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductCollectionDataSchema();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductCollectionData( $schema );
+		$routes     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController() );
+		$controller = $routes->get( 'product-collection-data' );
 		$params     = $controller->get_collection_params();
 
 		$this->assertArrayHasKey( 'calculate_price_range', $params );
@@ -177,8 +177,11 @@ class ProductCollectionData extends TestCase {
 	 */
 	public function test_schema_matches_response() {
 		ProductHelper::create_variation_product();
-		$schema     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\ProductCollectionDataSchema();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\ProductCollectionData( $schema );
+
+		$routes     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController() );
+		$controller = $routes->get( 'product-collection-data' );
+		$schema     = $controller->get_item_schema();
+
 		$request    = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
 		$request->set_param( 'calculate_price_range', true );
 		$request->set_param(
@@ -192,7 +195,6 @@ class ProductCollectionData extends TestCase {
 		);
 		$request->set_param( 'calculate_rating_counts', true );
 		$response = $this->server->dispatch( $request );
-		$schema   = $controller->get_item_schema();
 		$validate = new ValidateSchema( $schema );
 
 		$diff = $validate->get_diff_from_object( $response->get_data() );

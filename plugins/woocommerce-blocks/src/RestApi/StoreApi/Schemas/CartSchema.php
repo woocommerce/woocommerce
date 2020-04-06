@@ -25,6 +25,64 @@ class CartSchema extends AbstractSchema {
 	protected $title = 'cart';
 
 	/**
+	 * Item schema instance.
+	 *
+	 * @var CartItemSchema
+	 */
+	protected $item_schema;
+
+	/**
+	 * Coupon schema instance.
+	 *
+	 * @var CartCouponSchema
+	 */
+	protected $coupon_schema;
+
+	/**
+	 * Shipping rates schema instance.
+	 *
+	 * @var CartShippingRateSchema
+	 */
+	protected $shipping_rate_schema;
+
+	/**
+	 * Shipping address schema instance.
+	 *
+	 * @var ShippingAddressSchema
+	 */
+	protected $shipping_address_schema;
+
+	/**
+	 * Error schema instance.
+	 *
+	 * @var ErrorSchema
+	 */
+	protected $error_schema;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param CartItemSchema         $item_schema Item schema instance.
+	 * @param CartCouponSchema       $coupon_schema Coupon schema instance.
+	 * @param CartShippingRateSchema $shipping_rate_schema Shipping rates schema instance.
+	 * @param ShippingAddressSchema  $shipping_address_schema Shipping address schema instance.
+	 * @param ErrorSchema            $error_schema Error schema instance.
+	 */
+	public function __construct(
+		CartItemSchema $item_schema,
+		CartCouponSchema $coupon_schema,
+		CartShippingRateSchema $shipping_rate_schema,
+		ShippingAddressSchema $shipping_address_schema,
+		ErrorSchema $error_schema
+	) {
+		$this->item_schema             = $item_schema;
+		$this->coupon_schema           = $coupon_schema;
+		$this->shipping_rate_schema    = $shipping_rate_schema;
+		$this->shipping_address_schema = $shipping_address_schema;
+		$this->error_schema            = $error_schema;
+	}
+
+	/**
 	 * Cart schema properties.
 	 *
 	 * @return array
@@ -38,7 +96,7 @@ class CartSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new CartCouponSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->coupon_schema->get_properties() ),
 				],
 			],
 			'shipping_rates'   => [
@@ -48,7 +106,7 @@ class CartSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new CartShippingRateSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->shipping_rate_schema->get_properties() ),
 				],
 			],
 			'shipping_address' => [
@@ -58,7 +116,7 @@ class CartSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new ShippingAddressSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->shipping_address_schema->get_properties() ),
 				],
 			],
 			'items'            => [
@@ -68,7 +126,7 @@ class CartSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new CartItemSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->item_schema->get_properties() ),
 				],
 			],
 			'items_count'      => [
@@ -190,7 +248,7 @@ class CartSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new ErrorSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->error_schema->get_properties() ),
 				],
 			],
 		];
@@ -203,18 +261,14 @@ class CartSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $cart ) {
-		$controller              = new CartController();
-		$cart_coupon_schema      = new CartCouponSchema();
-		$cart_item_schema        = new CartItemSchema();
-		$shipping_rate_schema    = new CartShippingRateSchema();
-		$shipping_address_schema = ( new ShippingAddressSchema() )->get_item_response( WC()->customer );
-		$context                 = 'edit';
+		$controller = new CartController();
+		$context    = 'edit';
 
 		return [
-			'coupons'          => array_values( array_map( [ $cart_coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
-			'shipping_rates'   => array_values( array_map( [ $shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ),
-			'shipping_address' => $shipping_address_schema,
-			'items'            => array_values( array_map( [ $cart_item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
+			'coupons'          => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
+			'shipping_rates'   => array_values( array_map( [ $this->shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ),
+			'shipping_address' => $this->shipping_address_schema->get_item_response( WC()->customer ),
+			'items'            => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
 			'items_count'      => $cart->get_cart_contents_count(),
 			'items_weight'     => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
 			'needs_shipping'   => $cart->needs_shipping(),
@@ -267,10 +321,9 @@ class CartSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_cart_errors( $cart ) {
-		$schema     = new ErrorSchema();
 		$controller = new CartController();
 		$errors     = $controller->get_cart_item_errors();
 
-		return array_values( array_map( [ $schema, 'get_item_response' ], $errors ) );
+		return array_values( array_map( [ $this->error_schema, 'get_item_response' ], $errors ) );
 	}
 }

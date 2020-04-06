@@ -23,6 +23,31 @@ class CheckoutSchema extends AbstractSchema {
 	protected $title = 'checkout';
 
 	/**
+	 * Billing address schema instance.
+	 *
+	 * @var BillingAddressSchema
+	 */
+	protected $billing_address_schema;
+
+	/**
+	 * Shipping address schema instance.
+	 *
+	 * @var ShippingAddressSchema
+	 */
+	protected $shipping_address_schema;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param BillingAddressSchema  $billing_address_schema Billing address schema instance.
+	 * @param ShippingAddressSchema $shipping_address_schema Shipping address schema instance.
+	 */
+	public function __construct( BillingAddressSchema $billing_address_schema, ShippingAddressSchema $shipping_address_schema ) {
+		$this->billing_address_schema  = $billing_address_schema;
+		$this->shipping_address_schema = $shipping_address_schema;
+	}
+
+	/**
 	 * Checkout schema properties.
 	 *
 	 * @return array
@@ -56,13 +81,13 @@ class CheckoutSchema extends AbstractSchema {
 				'description' => __( 'Billing address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => ( new BillingAddressSchema() )->get_properties(),
+				'properties'  => $this->billing_address_schema->get_properties(),
 			],
 			'shipping_address' => [
 				'description' => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => ( new ShippingAddressSchema() )->get_properties(),
+				'properties'  => $this->shipping_address_schema->get_properties(),
 			],
 			'payment_method'   => [
 				'description' => __( 'The ID of the payment method being used to process the payment.', 'woo-gutenberg-products-block' ),
@@ -129,8 +154,8 @@ class CheckoutSchema extends AbstractSchema {
 			'status'           => $order->get_status(),
 			'order_key'        => $order->get_order_key(),
 			'customer_note'    => $order->get_customer_note(),
-			'billing_address'  => ( new BillingAddressSchema() )->get_item_response( $order ),
-			'shipping_address' => ( new ShippingAddressSchema() )->get_item_response( $order ),
+			'billing_address'  => $this->billing_address_schema->get_item_response( $order ),
+			'shipping_address' => $this->shipping_address_schema->get_item_response( $order ),
 			'payment_method'   => $order->get_payment_method(),
 			'payment_result'   => [
 				'payment_status'  => $payment_result->status,
