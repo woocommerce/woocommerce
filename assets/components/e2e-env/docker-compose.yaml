@@ -41,6 +41,7 @@ services:
     build:
         context: ./docker/wp-cli
     restart: on-failure
+    user: xfs
     environment:
         WORDPRESS_PORT: ${WORDPRESS_PORT}
         WORDPRESS_HOST: wordpress-www:80
