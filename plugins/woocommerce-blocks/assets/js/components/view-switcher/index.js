@@ -41,8 +41,15 @@ const ViewSwitcher = ( {
 							isPrimary={ currentView === view.value }
 							isLarge
 							aria-pressed={ currentView === view.value }
+							onMouseDown={ () => {
+								if ( currentView !== view.value ) {
+									setCurrentView( view.value );
+								}
+							} }
 							onClick={ () => {
-								setCurrentView( view.value );
+								if ( currentView !== view.value ) {
+									setCurrentView( view.value );
+								}
 							} }
 						>
 							{ view.name }
