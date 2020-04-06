@@ -20,7 +20,7 @@ class WC_Products_Tracking {
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
-		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10, 1 );
+		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
 	}
 
 	/**

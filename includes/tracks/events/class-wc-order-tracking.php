@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
  * This class adds actions to track usage of a WooCommerce Order.
  */
 class WC_Order_Tracking {
+
 	/**
 	 * Init tracking.
 	 */
@@ -25,9 +26,9 @@ class WC_Order_Tracking {
 	 */
 	public function track_order_viewed( $order ) {
 		$properties = array(
-			'current_status'   => $order->get_status(),
-			'date_created'     => $order->get_date_created()->format( DateTime::ATOM ),
-			'payment_method'   => $order->get_payment_method(),
+			'current_status' => $order->get_status(),
+			'date_created'   => $order->get_date_created()->format( DateTime::ATOM ),
+			'payment_method' => $order->get_payment_method(),
 		);
 
 		WC_Tracks::record_event( 'single_order_view', $properties );
