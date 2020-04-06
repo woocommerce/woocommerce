@@ -71,7 +71,6 @@ class WC_Tests_Order extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => 'tax_1',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 

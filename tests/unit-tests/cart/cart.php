@@ -2027,13 +2027,11 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'tax_rate_compound' => '0',
 			'tax_rate_shipping' => '1',
 			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '10percent',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 71.50 );
-		$product->set_tax_class( '10percent' );
 		$product->save();
 
 		WC_Helper_Coupon::create_coupon(
