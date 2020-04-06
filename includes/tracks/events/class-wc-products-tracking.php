@@ -51,7 +51,7 @@ class WC_Products_Tracking {
 	public function track_product_updated_client_side( $post ) {
 		wc_enqueue_js(
 			"
-			if ( $( 'h1.wp-heading-inline' ).text().trim() === 'Edit product') {
+			if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
 				var initialStockValue = $( '#_stock' ).val();
 				var hasRecordedEvent = false;
 
