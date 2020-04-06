@@ -151,3 +151,7 @@
 .wc-blocks-credit-card-images {
 	padding-top: $gap-small;
 }
+
+.wc-block-components-checkout-payment-methods * {
+	pointer-events: all; // Overrides parent disabled component in editor context
+}
