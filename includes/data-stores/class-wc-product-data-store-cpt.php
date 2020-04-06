@@ -881,8 +881,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"
 			SELECT posts.ID as id, posts.post_parent as parent_id
 			FROM {$wpdb->posts} AS posts
@@ -900,8 +900,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 			GROUP BY posts.ID
 			"
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -1603,7 +1603,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			foreach ( $search_terms as $search_term ) {
 				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) )", $like, $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) )", $like, $like, $like, $like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$searchand         = ' AND ';
 			}
 
@@ -2061,5 +2061,24 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return 'product_id';
 		}
 		return '';
+	}
+
+	/**
+	 * Returns query statement for getting current `_stock` of a product.
+	 *
+	 * @internal MAX function below is used to make sure result is a scalar.
+	 * @param int $product_id Product ID.
+	 * @return string|void Query statement.
+	 */
+	public function get_query_for_stock( $product_id ) {
+		global $wpdb;
+		return $wpdb->prepare(
+			"
+			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
+			WHERE meta_table.meta_key = '_stock'
+			AND meta_table.post_id = %d
+			",
+			$product_id
+		);
 	}
 }
