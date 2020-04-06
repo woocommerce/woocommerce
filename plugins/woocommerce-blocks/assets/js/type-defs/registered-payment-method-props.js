@@ -74,19 +74,6 @@
  */
 
 /**
- * @typedef PaymentStatusProps
- *
- * @property {PaymentMethodCurrentStatus} currentStatus    Various status state
- *                                                         indicators for the
- *                                                         payment method based
- *                                                         on it's current
- *                                                         status.
- * @property {PaymentStatusDispatch}      setPaymentStatus Used to dispatch
- *                                                         various payment
- *                                                         status updates.
- */
-
-/**
  * @typedef ShippingStatusProps
  *
  * @property {string}             shippingErrorStatus Current error status for
@@ -194,22 +181,22 @@
  *
  * @typedef {Object} RegisteredPaymentMethodProps
  *
- * @property {CheckoutStatusProps}       checkoutStatus            The current checkout status exposed
+ * @property {CheckoutStatusProps}        checkoutStatus           The current checkout status exposed
  *                                                                 as various boolean state.
- * @property {PaymentStatusProps}        paymentStatus             Various payment status helpers.
- * @property {ShippingStatusProps}       shippingStatus            Various shipping status helpers.
- * @property {ShippingDataProps}         shippingData              Various data related to shipping.
- * @property {BillingDataProps}          billing                   Various billing data items.
- * @property {EventRegistrationProps}    eventRegistration         Various event registration helpers
+ * @property {PaymentMethodCurrentStatus} paymentStatus            Various payment status helpers.
+ * @property {ShippingStatusProps}        shippingStatus           Various shipping status helpers.
+ * @property {ShippingDataProps}          shippingData             Various data related to shipping.
+ * @property {BillingDataProps}           billing                  Various billing data items.
+ * @property {EventRegistrationProps}     eventRegistration        Various event registration helpers
  *                                                                 for subscribing callbacks for
  *                                                                 events.
- * @property {Function}                  [onSubmit]                Used to trigger checkout
+ * @property {Function}                   [onSubmit]               Used to trigger checkout
  *                                                                 processing.
- * @property {string}                    [activePaymentMethod]     Indicates what the active payment
+ * @property {string}                     [activePaymentMethod]    Indicates what the active payment
  *                                                                 method is.
- * @property {function( string )}        [setActivePaymentMethod]  Used to set the active payment
+ * @property {function( string )}         [setActivePaymentMethod] Used to set the active payment
  *                                                                 method.
- * @property {ComponentProps}            components                Components exposed to payment
+ * @property {ComponentProps}             components               Components exposed to payment
  *                                                                 methods for use.
  */
 

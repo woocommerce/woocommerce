@@ -93,7 +93,6 @@ export const usePaymentMethodInterface = () => {
 		onSubmit,
 	} = useCheckoutContext();
 	const {
-		setPaymentStatus,
 		currentStatus,
 		activePaymentMethod,
 		setActivePaymentMethod,
@@ -147,10 +146,7 @@ export const usePaymentMethodInterface = () => {
 			isIdle,
 			isProcessing,
 		},
-		paymentStatus: {
-			currentStatus,
-			setPaymentStatus,
-		},
+		paymentStatus: currentStatus,
 		shippingStatus: {
 			shippingErrorStatus,
 			shippingErrorTypes,
