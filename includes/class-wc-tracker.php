@@ -652,28 +652,6 @@ class WC_Tracker {
 		return ( '0' !== $result ) ? 'Yes' : 'No';
 	}
 
-	// @todo what's the best way to set up the array_filter in woo PHP version?
-
-	/**
-	 * Return true if specified block is checkout block.
-	 *
-	 * @param object $block Block object (as returned in array from parse_blocks()).
-	 * @return boolean
-	 */
-	public static function is_checkout_block( $block ) {
-		return 'woocommerce/checkout' === $block['blockName'];
-	}
-
-	/**
-	 * Return true if specified block is checkout block.
-	 *
-	 * @param object $block Block object (as returned in array from parse_blocks()).
-	 * @return boolean
-	 */
-	public static function is_cart_block( $block ) {
-		return 'woocommerce/cart' === $block['blockName'];
-	}
-
 	/**
 	 * Get blocks from a woocommerce page.
 	 *
@@ -710,7 +688,12 @@ class WC_Tracker {
 		$blocks = self::get_blocks_from_page( 'checkout' );
 
 		// Get checkout block(s).
-		$checkout_blocks = array_filter( $blocks, array( __CLASS__, 'is_checkout_block' ) );
+		$checkout_blocks = array_filter(
+			$blocks,
+			function ( $block ) {
+				return 'woocommerce/checkout' === $block['blockName'];
+			}
+		);
 		if ( ! $checkout_blocks || ! count( $checkout_blocks ) ) {
 			return array();
 		}
@@ -731,7 +714,12 @@ class WC_Tracker {
 		$blocks = self::get_blocks_from_page( 'cart' );
 
 		// Get cart block(s).
-		$cart_blocks = array_filter( $blocks, array( __CLASS__, 'is_cart_block' ) );
+		$cart_blocks = array_filter(
+			$blocks,
+			function ( $block ) {
+				return 'woocommerce/cart' === $block['blockName'];
+			}
+		);
 		if ( ! $cart_blocks || ! count( $cart_blocks ) ) {
 			return array();
 		}
