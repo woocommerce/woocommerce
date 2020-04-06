@@ -659,7 +659,6 @@ class WC_Tracker {
 	 * @return array Array of blocks as returned by parse_blocks().
 	 */
 	private static function get_blocks_from_page( $woo_page_name ) {
-		// Will expose this as a param later.
 		$page_id = wc_get_page_id( $woo_page_name );
 
 		$page = get_post( $page_id );
@@ -667,7 +666,6 @@ class WC_Tracker {
 			return array();
 		}
 
-		// Parse blocks out of checkout page.
 		$blocks = parse_blocks( $page->post_content );
 		if ( ! $blocks ) {
 			return array();
