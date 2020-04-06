@@ -207,6 +207,33 @@ export function* removeCoupon( couponCode ) {
 }
 
 /**
+ * Adds an item to the cart:
+ * - Calls API to add item.
+ * - If successful, yields action to add item from store.
+ * - If error, yields action to store error.
+ *
+ * @param {number} productId Product ID to add to cart.
+ * @param {number} quantity Number of product ID being added to cart.
+ */
+export function* addItemToCart( productId, quantity = 1 ) {
+	try {
+		const { response } = yield apiFetchWithHeaders( {
+			path: `/wc/store/cart/add-item`,
+			method: 'POST',
+			data: {
+				id: productId,
+				quantity,
+			},
+			cache: 'no-store',
+		} );
+
+		yield receiveCart( response );
+	} catch ( error ) {
+		yield receiveError( error );
+	}
+}
+
+/**
  * Removes specified item from the cart:
  * - Calls API to remove item.
  * - If successful, yields action to remove item from store.

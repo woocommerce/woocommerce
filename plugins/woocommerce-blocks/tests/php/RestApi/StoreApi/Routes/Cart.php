@@ -351,8 +351,8 @@ class Cart extends TestCase {
 	 * Test conversion of cart item to rest response.
 	 */
 	public function test_prepare_item_for_response() {
-		$schema    = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartSchema();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Cart( $schema );
+		$routes     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController() );
+		$controller = $routes->get( 'cart' );
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
 		$data       = $response->get_data();
@@ -370,8 +370,9 @@ class Cart extends TestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_schema_matches_response() {
-		$schema    = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Schemas\CartSchema();
-		$controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\Cart( $schema );
+		$routes     = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController() );
+		$controller = $routes->get( 'cart' );
+		$schema     = $controller->get_item_schema();
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();

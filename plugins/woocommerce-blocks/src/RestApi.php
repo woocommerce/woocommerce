@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\Blocks;
 
 defined( 'ABSPATH' ) || exit;
 
+use \Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController;
+use \Automattic\WooCommerce\Blocks\RestApi\StoreApi\SchemaController;
+
 /**
  * RestApi class.
  */
@@ -19,7 +22,6 @@ class RestApi {
 	 */
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ), 10 );
-		add_action( 'rest_api_init', array( '\Automattic\WooCommerce\Blocks\RestApi\StoreApi\RoutesController', 'register_routes' ), 10 );
 		add_filter( 'rest_authentication_errors', array( __CLASS__, 'maybe_init_cart_session' ), 1 );
 		add_filter( 'rest_authentication_errors', array( __CLASS__, 'store_api_authentication' ) );
 	}
@@ -28,12 +30,18 @@ class RestApi {
 	 * Register REST API routes.
 	 */
 	public static function register_rest_routes() {
+		// Init the REST API.
 		$controllers = self::get_controllers();
 
 		foreach ( $controllers as $name => $class ) {
 			$instance = new $class();
 			$instance->register_routes();
 		}
+
+		// Init the Store API.
+		$schemas = new SchemaController();
+		$routes  = new RoutesController( $schemas );
+		$routes->register_routes();
 	}
 
 	/**

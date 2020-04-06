@@ -23,6 +23,54 @@ class OrderSchema extends AbstractSchema {
 	protected $title = 'order';
 
 	/**
+	 * Item schema instance.
+	 *
+	 * @var OrderItemSchema
+	 */
+	public $item_schema;
+
+	/**
+	 * Coupon schema instance.
+	 *
+	 * @var OrderCouponSchema
+	 */
+	public $coupon_schema;
+
+	/**
+	 * Billing address schema instance.
+	 *
+	 * @var BillingAddressSchema
+	 */
+	public $billing_address_schema;
+
+	/**
+	 * Shipping address schema instance.
+	 *
+	 * @var ShippingAddressSchema
+	 */
+	public $shipping_address_schema;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param OrderItemSchema       $item_schema Item schema instance.
+	 * @param OrderCouponSchema     $coupon_schema Coupon schema instance.
+	 * @param BillingAddressSchema  $billing_address_schema Billing address schema instance.
+	 * @param ShippingAddressSchema $shipping_address_schema Shipping address schema instance.
+	 */
+	public function __construct(
+		OrderItemSchema $item_schema,
+		OrderCouponSchema $coupon_schema,
+		BillingAddressSchema $billing_address_schema,
+		ShippingAddressSchema $shipping_address_schema
+	) {
+		$this->item_schema             = $item_schema;
+		$this->coupon_schema           = $coupon_schema;
+		$this->billing_address_schema  = $billing_address_schema;
+		$this->shipping_address_schema = $shipping_address_schema;
+	}
+
+	/**
 	 * Order schema properties.
 	 *
 	 * @return array
@@ -156,70 +204,13 @@ class OrderSchema extends AbstractSchema {
 				'description' => __( 'Billing address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => [
-					'first_name' => [
-						'description' => __( 'First name', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'last_name'  => [
-						'description' => __( 'Last name', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'company'    => [
-						'description' => __( 'Company', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'address_1'  => [
-						'description' => __( 'Address', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'address_2'  => [
-						'description' => __( 'Apartment, suite, etc.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'city'       => [
-						'description' => __( 'City', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'state'      => [
-						'description' => __( 'State/County code, or name of the state, county, province, or district.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'postcode'   => [
-						'description' => __( 'Postal code', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'country'    => [
-						'description' => __( 'Country/Region code in ISO 3166-1 alpha-2 format.', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'email'      => [
-						'description' => __( 'Email', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'format'      => 'email',
-						'context'     => [ 'view', 'edit' ],
-					],
-					'phone'      => [
-						'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
-						'type'        => 'string',
-						'context'     => [ 'view', 'edit' ],
-					],
-				],
+				'properties'  => $this->force_schema_readonly( $this->billing_address_schema->get_properties() ),
 			],
 			'shipping_address'   => [
 				'description' => __( 'Shipping address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => $this->force_schema_readonly( ( new ShippingAddressSchema() )->get_properties() ),
+				'properties'  => $this->force_schema_readonly( $this->shipping_address_schema->get_properties() ),
 			],
 			'coupons'            => [
 				'description' => __( 'List of applied coupons.', 'woo-gutenberg-products-block' ),
@@ -228,7 +219,7 @@ class OrderSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new CartCouponSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->coupon_schema->get_properties() ),
 				],
 			],
 			'items'              => [
@@ -238,7 +229,7 @@ class OrderSchema extends AbstractSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => $this->force_schema_readonly( ( new OrderItemSchema() )->get_properties() ),
+					'properties' => $this->force_schema_readonly( $this->item_schema->get_properties() ),
 				],
 			],
 			'totals'             => [
@@ -345,8 +336,6 @@ class OrderSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( \WC_Order $order ) {
-		$order_item_schema   = new OrderItemSchema();
-		$order_coupon_schema = new OrderCouponSchema();
 		return [
 			'id'                 => $order->get_id(),
 			'number'             => $order->get_order_number(),
@@ -361,24 +350,10 @@ class OrderSchema extends AbstractSchema {
 				'customer_user_agent' => $order->get_customer_user_agent(),
 			],
 			'customer_note'      => $order->get_customer_note(),
-			'billing_address'    => (object) $this->prepare_html_response(
-				[
-					'first_name' => $order->get_billing_first_name(),
-					'last_name'  => $order->get_billing_last_name(),
-					'company'    => $order->get_billing_company(),
-					'address_1'  => $order->get_billing_address_1(),
-					'address_2'  => $order->get_billing_address_2(),
-					'city'       => $order->get_billing_city(),
-					'state'      => $order->get_billing_state(),
-					'postcode'   => $order->get_billing_postcode(),
-					'country'    => $order->get_billing_country(),
-					'email'      => $order->get_billing_email(),
-					'phone'      => $order->get_billing_phone(),
-				]
-			),
-			'shipping_address'   => ( new ShippingAddressSchema() )->get_item_response( $order ),
-			'coupons'            => array_values( array_map( [ $order_coupon_schema, 'get_item_response' ], $order->get_items( 'coupon' ) ) ),
-			'items'              => array_values( array_map( [ $order_item_schema, 'get_item_response' ], $order->get_items( 'line_item' ) ) ),
+			'billing_address'    => $this->billing_address_schema->get_item_response( $order ),
+			'shipping_address'   => $this->shipping_address_schema->get_item_response( $order ),
+			'coupons'            => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], $order->get_items( 'coupon' ) ) ),
+			'items'              => array_values( array_map( [ $this->item_schema, 'get_item_response' ], $order->get_items( 'line_item' ) ) ),
 			'totals'             => (object) array_merge(
 				$this->get_store_currency_response(),
 				[
