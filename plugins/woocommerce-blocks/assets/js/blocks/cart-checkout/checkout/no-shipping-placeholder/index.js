@@ -11,14 +11,14 @@ import { ADMIN_URL } from '@woocommerce/settings';
  */
 import './style.scss';
 
-const NoShipping = () => {
+const NoShippingPlaceholder = () => {
 	return (
 		<Placeholder
 			icon={ <Icon srcElement={ truck } /> }
 			label={ __( 'Shipping options', 'woo-gutenberg-products-block' ) }
-			className="wc-block-checkout__no-shipping"
+			className="wc-block-checkout__no-shipping-placeholder"
 		>
-			<span className="wc-block-checkout__no-shipping-description">
+			<span className="wc-block-checkout__no-shipping-placeholder-description">
 				{ __(
 					'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
 					'woo-gutenberg-products-block'
@@ -39,4 +39,4 @@ const NoShipping = () => {
 	);
 };
 
-export default NoShipping;
+export default NoShippingPlaceholder;

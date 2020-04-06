@@ -1,5 +1,9 @@
-.components-placeholder.wc-block-checkout__no-shipping {
+.components-placeholder.wc-block-checkout__no-shipping-placeholder {
 	margin-bottom: $gap;
+
+	* {
+		pointer-events: all; // Overrides parent disabled component in editor context
+	}
 
 	.components-placeholder__fieldset {
 		display: block;
@@ -9,7 +13,7 @@
 			color: $white;
 		}
 
-		.wc-block-checkout__no-shipping-description {
+		.wc-block-checkout__no-shipping-placeholder-description {
 			display: block;
 			margin: 0.25em 0 1em 0;
 			font-size: 13px;

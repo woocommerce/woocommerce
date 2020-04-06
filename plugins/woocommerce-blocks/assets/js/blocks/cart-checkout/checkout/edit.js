@@ -14,6 +14,7 @@ import {
 	CheckboxControl,
 	SelectControl,
 	Notice,
+	Disabled,
 } from '@wordpress/components';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import {
@@ -293,15 +294,19 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 						'woo-gutenberg-products-block'
 					) }
 				>
-					<Block
-						attributes={ attributes }
-						cartItems={ previewCart.items }
-						cartTotals={ previewCart.totals }
-						isEditor={ true }
-						shippingRates={
-							SHIPPING_METHODS_EXIST ? previewShippingRates : []
-						}
-					/>
+					<Disabled>
+						<Block
+							attributes={ attributes }
+							cartItems={ previewCart.items }
+							cartTotals={ previewCart.totals }
+							isEditor={ true }
+							shippingRates={
+								SHIPPING_METHODS_EXIST
+									? previewShippingRates
+									: []
+							}
+						/>
+					</Disabled>
 				</BlockErrorBoundary>
 			</div>
 		</EditorProvider>

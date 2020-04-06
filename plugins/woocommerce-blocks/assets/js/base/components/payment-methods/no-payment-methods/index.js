@@ -34,9 +34,9 @@ const NoPaymentMethodsPlaceholder = () => {
 		<Placeholder
 			icon={ <Icon srcElement={ card } /> }
 			label={ __( 'Payment methods', 'woo-gutenberg-products-block' ) }
-			className="wc-block-checkout__no-payment-methods"
+			className="wc-block-checkout__no-payment-methods-placeholder"
 		>
-			<span className="wc-block-checkout__no-payment-methods-description">
+			<span className="wc-block-checkout__no-payment-methods-placeholder-description">
 				{ __(
 					'Your store does not have any payment methods configured that support the checkout block. Once you have configured a compatible payment method (e.g. Stripe) it will be shown here.',
 					'woo-gutenberg-products-block'

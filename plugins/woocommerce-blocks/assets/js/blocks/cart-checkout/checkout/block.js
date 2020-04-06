@@ -8,7 +8,6 @@ import {
 	AddressForm,
 	FormStep,
 	CheckoutForm,
-	NoShipping,
 	PlaceOrderButton,
 	Policies,
 	ReturnToCartButton,
@@ -42,8 +41,9 @@ import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 /**
  * Internal dependencies
  */
-import CheckoutSidebar from './sidebar/index.js';
-import CheckoutOrderError from './checkout-order-error/index.js';
+import CheckoutSidebar from './sidebar';
+import CheckoutOrderError from './checkout-order-error';
+import NoShippingPlaceholder from './no-shipping-placeholder';
 import './style.scss';
 
 const Block = ( props ) => (
@@ -294,7 +294,7 @@ const Checkout = ( {
 								) }
 							>
 								{ shippingRates.length === 0 && isEditor ? (
-									<NoShipping />
+									<NoShippingPlaceholder />
 								) : (
 									<ShippingRatesControl
 										address={
