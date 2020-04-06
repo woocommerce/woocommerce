@@ -363,4 +363,91 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$order->apply_coupon( 'test-coupon-2' );
 		$this->assertEquals( '599.00', $order->get_total(), $order->get_total() );
 	}
+
+	/**
+	 * Test a rounding issue on order totals when the order includes a percentage coupon and taxable and non-taxable items
+	 * See: #25091.
+	 */
+	public function test_inclusive_tax_rounding_on_totals() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '5.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '2',
+				'tax_rate_compound' => '1',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$product_1->set_regular_price( 3.17 );
+		$product_1->save();
+		$product_1 = wc_get_product( $product_1->get_id() );
+
+		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_2->set_regular_price( 6.13 );
+		$product_2->save();
+		$product_2 = wc_get_product( $product_2->get_id() );
+
+		$product_3 = WC_Helper_Product::create_simple_product();
+		$product_3->set_regular_price( 9.53 );
+		$product_3->set_tax_status( 'none' );
+		$product_3->save();
+		$product_3 = wc_get_product( $product_3->get_id() );
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'test-coupon-1' );
+		$coupon->set_amount( 10 );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->save();
+
+
+		$order = wc_create_order(
+			array(
+				'status'        => 'pending',
+				'customer_id'   => 1,
+				'customer_note' => '',
+				'total'         => '',
+			)
+		);
+
+		$order->add_product( $product_1 );
+		$order->add_product( $product_2 );
+		$order->add_product( $product_3 );
+
+		$order->calculate_totals( true );
+
+		$order->apply_coupon( $coupon->get_code() );
+
+		$applied_coupons = $order->get_items( 'coupon' );
+		$applied_coupon  = current( $applied_coupons );
+
+		$this->assertEquals( '16.95', $order->get_total() );
+		$this->assertEquals( '1.73', $order->get_total_tax() );
+		$this->assertEquals( '1.69', $order->get_discount_total() );
+
+		$this->assertEquals( '1.69', $applied_coupon->get_discount() );
+	}
 }
