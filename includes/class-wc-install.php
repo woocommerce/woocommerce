@@ -145,8 +145,8 @@ class WC_Install {
 		'4.0.0' => array(
 			'wc_update_product_lookup_tables',
 			'wc_update_400_increase_size_of_column',
+			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
-			'wc_reset_action_scheduler_migration_status',
 		),
 	);
 
