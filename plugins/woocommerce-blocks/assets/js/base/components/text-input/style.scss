@@ -69,4 +69,8 @@
 	&.has-error label {
 		color: $error-red;
 	}
+
+	&:only-child {
+		margin-bottom: 0;
+	}
 }

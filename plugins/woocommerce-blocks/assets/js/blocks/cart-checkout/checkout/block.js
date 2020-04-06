@@ -75,7 +75,6 @@ const Checkout = ( {
 	} = useShippingDataContext();
 	const { billingData, setBillingData } = useBillingDataContext();
 
-	const [ contactFields, setContactFields ] = useState( {} );
 	const [ shippingAsBilling, setShippingAsBilling ] = useState( true );
 
 	const renderShippingRatesControlOption = ( option ) => ( {
@@ -180,20 +179,6 @@ const Checkout = ( {
 									setBillingData( { email: newValue } )
 								}
 								required={ true }
-							/>
-							<CheckboxControl
-								className="wc-block-checkout__keep-updated"
-								label={ __(
-									'Keep me up to date on news and exclusive offers',
-									'woo-gutenberg-products-block'
-								) }
-								checked={ contactFields.keepUpdated }
-								onChange={ () =>
-									setContactFields( {
-										...contactFields,
-										keepUpdated: ! contactFields.keepUpdated,
-									} )
-								}
 							/>
 						</FormStep>
 						{ needsShipping && (
