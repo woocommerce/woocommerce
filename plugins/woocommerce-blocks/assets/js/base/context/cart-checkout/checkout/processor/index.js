@@ -14,6 +14,26 @@ import { useEffect, useRef, useCallback } from '@wordpress/element';
 import { useStoreNotices } from '@woocommerce/base-hooks';
 
 /**
+ * @typedef {import('@woocommerce/type-defs/payments').PaymentDataItem} PaymentDataItem
+ */
+
+/**
+ * Utility function for preparing payment data for the request.
+ *
+ * @param {Object} paymentData Arbitrary payment data provided by the payment
+ *                             method.
+ *
+ * @return {PaymentDataItem[]} Returns the payment data as an array of
+ *                                 PaymentDataItem objects.
+ */
+const preparePaymentData = ( paymentData ) => {
+	return Object.keys( paymentData ).map( ( property ) => {
+		const value = paymentData[ property ];
+		return { key: property, value };
+	}, [] );
+};
+
+/**
  * CheckoutProcessor component. @todo Needs to consume all contexts.
  *
  * Subscribes to checkout context and triggers processing via the API.
@@ -34,6 +54,7 @@ const CheckoutProcessor = () => {
 		activePaymentMethod,
 		currentStatus: currentPaymentStatus,
 		errorMessage,
+		paymentMethodData,
 	} = usePaymentMethodDataContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
@@ -71,8 +92,7 @@ const CheckoutProcessor = () => {
 			method: 'POST',
 			data: {
 				payment_method: activePaymentMethod,
-				// @todo Hook this up to payment method data.
-				payment_data: [],
+				payment_data: preparePaymentData( paymentMethodData ),
 				billing_address: currentBillingData.current,
 				shipping_address: currentShippingAddress.current,
 				customer_note: '',
@@ -124,6 +144,7 @@ const CheckoutProcessor = () => {
 		activePaymentMethod,
 		currentBillingData,
 		currentShippingAddress,
+		paymentMethodData,
 	] );
 	// setup checkout processing event observers.
 	useEffect( () => {
