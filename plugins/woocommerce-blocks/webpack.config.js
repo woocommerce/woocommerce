@@ -10,6 +10,7 @@ const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const FORCE_MAP = process.env.FORCE_MAP || false;
 const FallbackModuleDirectoryPlugin = require( './bin/fallback-module-directory-webpack-plugin' );
 const {
 	getAlias,
@@ -35,7 +36,7 @@ const baseConfig = {
 	watchOptions: {
 		ignored: /node_modules/,
 	},
-	devtool: NODE_ENV === 'development' ? 'source-map' : false,
+	devtool: NODE_ENV === 'development' || FORCE_MAP ? 'source-map' : false,
 };
 
 const CoreConfig = {
