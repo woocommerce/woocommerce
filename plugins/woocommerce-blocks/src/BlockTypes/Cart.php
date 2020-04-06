@@ -52,6 +52,15 @@ class Cart extends AbstractBlock {
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
 		$this->enqueue_assets( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
+
+		// Add placeholder element to footer to push content for the sticky bar on mobile.
+		add_action(
+			'wp_footer',
+			function() {
+				echo '<div class="wc-block-cart__submit-container-push"></div>';
+			}
+		);
+
 		return $content . $this->get_skeleton();
 	}
 

@@ -233,7 +233,10 @@ table.wc-block-cart-items {
 		padding: $gap;
 		position: fixed;
 		width: 100%;
-		z-index: 1;
+		z-index: 9999;
+	}
+	.wc-block-cart__submit-container-push {
+		height: 100px;
 	}
 }
 .wc-block-cart-coupon-list {
