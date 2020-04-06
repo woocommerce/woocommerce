@@ -193,6 +193,13 @@
  *                                                                          callback for registering
  *                                                                          observers for the
  *                                                                          payment error event.
+ * @property {function(string)}            setExpressPaymentError           A function used by
+ *                                                                          express payment methods
+ *                                                                          to indicate an error
+ *                                                                          for checkout to handle.
+ *                                                                          It receives an error
+ *                                                                          message string. Does not
+ *                                                                          change payment status.
  */
 
 /**
