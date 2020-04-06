@@ -33,10 +33,10 @@ class WC_Settings_General extends WC_Settings_Page {
 	 */
 	protected function get_settings_for_default_section() {
 
-		$currency_code_options = get_woocommerce_currencies();
+		$currency_code_options = $this->get_currencies();
 
 		foreach ( $currency_code_options as $code => $name ) {
-			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
+			$currency_code_options[ $code ] = $name . ' (' . $this->get_currency_symbol( $code ) . ')';
 		}
 
 		$settings =
@@ -292,6 +292,26 @@ class WC_Settings_General extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_general_settings', $settings );
+	}
+
+	/**
+	 * Wrapper for get_woocommerce_currencies, created to ease unit testing.
+	 *
+	 * @return array
+	 */
+	protected function get_currencies() {
+		return get_woocommerce_currencies();
+	}
+
+	/**
+	 * Wrapper for get_currency_symbol, created to ease unit testing.
+	 *
+	 * @param string $code Currency code to get the symbol for.
+	 *
+	 * @return string
+	 */
+	protected function get_currency_symbol( $code ) {
+		return get_woocommerce_currency_symbol( $code );
 	}
 
 	/**
