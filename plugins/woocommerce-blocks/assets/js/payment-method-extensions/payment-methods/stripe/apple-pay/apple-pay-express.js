@@ -116,10 +116,7 @@ const ApplePayExpressComponent = ( {
 		}
 		// otherwise we just update it (but only if payment processing hasn't
 		// already started).
-		if (
-			! paymentStatus.currentStatus.isPristine &&
-			currentPaymentRequest.current
-		) {
+		if ( ! paymentStatus.isPristine && currentPaymentRequest.current ) {
 			updatePaymentRequest( {
 				// @ts-ignore
 				paymentRequest: currentPaymentRequest.current,
@@ -134,7 +131,7 @@ const ApplePayExpressComponent = ( {
 		shippingData.shippingAddress.country,
 		shippingData.needsShipping,
 		billing.cartTotalItems,
-		paymentStatus.currentStatus.isPristine,
+		paymentStatus.isPristine,
 		stripe,
 	] );
 
@@ -185,7 +182,7 @@ const ApplePayExpressComponent = ( {
 		const handlers = eventHandlers.current;
 		if (
 			typeof handlers.shippingAddressChange === 'function' &&
-			currentPaymentStatus.current.currentStatus.isProcessing
+			currentPaymentStatus.current.isProcessing
 		) {
 			handlers.shippingAddressChange.updateWith( {
 				status: forSuccess ? 'success' : 'fail',
@@ -204,7 +201,7 @@ const ApplePayExpressComponent = ( {
 		const handlers = eventHandlers.current;
 		if (
 			typeof handlers.shippingOptionsChange === 'function' &&
-			currentPaymentStatus.current.currentStatus.isProcessing
+			currentPaymentStatus.current.isProcessing
 		) {
 			const updateObject = forSuccess
 				? {
@@ -227,7 +224,7 @@ const ApplePayExpressComponent = ( {
 		const handlers = eventHandlers.current;
 		if (
 			typeof handlers.sourceEvent === 'function' &&
-			currentPaymentStatus.current.currentStatus.isSuccessful
+			currentPaymentStatus.current.isSuccessful
 		) {
 			if ( forSuccess ) {
 				completePayment( handlers.sourceEvent );
