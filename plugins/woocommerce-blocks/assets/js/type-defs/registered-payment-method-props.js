@@ -198,6 +198,10 @@
  *                                                                 method.
  * @property {ComponentProps}             components               Components exposed to payment
  *                                                                 methods for use.
+ * @property {function(string)}          [setExpressPaymentError]  For setting an error (error
+ *                                                                 message string) for express
+ *                                                                 payment methods. Does not change
+ *                                                                 payment status.
  */
 
 export {};

@@ -25,12 +25,7 @@ import { __ } from '@wordpress/i18n';
  *
  * @param {RegisteredPaymentMethodProps} props Incoming props
  */
-const CreditCardComponent = ( {
-	paymentStatus,
-	billing,
-	eventRegistration,
-	components,
-} ) => {
+const CreditCardComponent = ( { billing, eventRegistration, components } ) => {
 	const { ValidationInputError, CheckboxControl } = components;
 	const [ sourceId, setSourceId ] = useState( 0 );
 	const stripe = useStripe();
@@ -38,7 +33,6 @@ const CreditCardComponent = ( {
 	const elements = useElements();
 	const onStripeError = useCheckoutSubscriptions(
 		eventRegistration,
-		paymentStatus,
 		billing,
 		sourceId,
 		setSourceId,

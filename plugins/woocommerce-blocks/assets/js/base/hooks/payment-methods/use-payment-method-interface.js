@@ -100,6 +100,7 @@ export const usePaymentMethodInterface = () => {
 		onPaymentSuccess,
 		onPaymentFail,
 		onPaymentError,
+		setExpressPaymentError,
 	} = usePaymentMethodDataContext();
 	const {
 		shippingErrorStatus,
@@ -191,5 +192,6 @@ export const usePaymentMethodInterface = () => {
 		onSubmit,
 		activePaymentMethod,
 		setActivePaymentMethod,
+		setExpressPaymentError,
 	};
 };

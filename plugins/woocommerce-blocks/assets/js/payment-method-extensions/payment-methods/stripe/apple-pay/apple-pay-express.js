@@ -68,6 +68,7 @@ const ApplePayExpressComponent = ( {
 	onSubmit,
 	activePaymentMethod,
 	setActivePaymentMethod,
+	setExpressPaymentError,
 } ) => {
 	/**
 	 * @type {[ StripePaymentRequest|null, function( StripePaymentRequest ):StripePaymentRequest|null]}
@@ -76,6 +77,7 @@ const ApplePayExpressComponent = ( {
 	const [ paymentRequest, setPaymentRequest ] = useState( null );
 	const stripe = useStripe();
 	const [ canMakePayment, setCanMakePayment ] = useState( false );
+	const [ applePayProcessing, setApplePayProcessing ] = useState( false );
 	const eventHandlers = useRef( DEFAULT_STRIPE_EVENT_HANDLERS );
 	const currentBilling = useRef( billing );
 	const currentShipping = useRef( shippingData );
@@ -116,7 +118,11 @@ const ApplePayExpressComponent = ( {
 		}
 		// otherwise we just update it (but only if payment processing hasn't
 		// already started).
-		if ( ! paymentStatus.isPristine && currentPaymentRequest.current ) {
+		if (
+			! paymentStatus.isPristine &&
+			! applePayProcessing &&
+			currentPaymentRequest.current
+		) {
 			updatePaymentRequest( {
 				// @ts-ignore
 				paymentRequest: currentPaymentRequest.current,
@@ -133,6 +139,7 @@ const ApplePayExpressComponent = ( {
 		billing.cartTotalItems,
 		paymentStatus.isPristine,
 		stripe,
+		applePayProcessing,
 	] );
 
 	// whenever paymentRequest changes, then we need to update whether
@@ -148,33 +155,28 @@ const ApplePayExpressComponent = ( {
 	// kick off payment processing.
 	const onButtonClick = () => {
 		setActivePaymentMethod( PAYMENT_METHOD_NAME );
-		currentPaymentStatus.current.setPaymentStatus().processing();
+		setExpressPaymentError( '' );
+		setApplePayProcessing( true );
 	};
 
 	const abortPayment = ( paymentMethod, message ) => {
 		paymentMethod.complete( 'fail' );
-		currentPaymentStatus.current
-			.setPaymentStatus()
-			.failed(
+		setApplePayProcessing( false );
+		return {
+			fail: {
 				message,
-				getBillingData( paymentMethod ),
-				getPaymentMethodData( paymentMethod, PAYMENT_METHOD_NAME )
-			);
+				billingData: getBillingData( paymentMethod ),
+				paymentMethodData: getPaymentMethodData(
+					paymentMethod,
+					PAYMENT_METHOD_NAME
+				),
+			},
+		};
 	};
 
 	const completePayment = ( paymentMethod ) => {
 		paymentMethod.complete( 'success' );
-		currentPaymentStatus.current.setPaymentStatus().completed();
-	};
-
-	const processPayment = ( paymentMethod ) => {
-		currentPaymentStatus.current
-			.setPaymentStatus()
-			.success(
-				getBillingData( paymentMethod ),
-				getPaymentMethodData( paymentMethod, PAYMENT_METHOD_NAME )
-			);
-		onSubmit();
+		setApplePayProcessing( false );
 	};
 
 	// event callbacks.
@@ -182,7 +184,7 @@ const ApplePayExpressComponent = ( {
 		const handlers = eventHandlers.current;
 		if (
 			typeof handlers.shippingAddressChange === 'function' &&
-			currentPaymentStatus.current.isProcessing
+			applePayProcessing
 		) {
 			handlers.shippingAddressChange.updateWith( {
 				status: forSuccess ? 'success' : 'fail',
@@ -201,7 +203,7 @@ const ApplePayExpressComponent = ( {
 		const handlers = eventHandlers.current;
 		if (
 			typeof handlers.shippingOptionsChange === 'function' &&
-			currentPaymentStatus.current.isProcessing
+			applePayProcessing
 		) {
 			const updateObject = forSuccess
 				? {
@@ -220,11 +222,28 @@ const ApplePayExpressComponent = ( {
 		}
 	};
 
+	const onPaymentProcessing = () => {
+		const handlers = eventHandlers.current;
+		if (
+			typeof handlers.sourceEvent === 'function' &&
+			applePayProcessing
+		) {
+			return {
+				billingData: getBillingData( handlers.sourceEvent ),
+				paymentMethodData: getPaymentMethodData(
+					handlers.sourceEvent,
+					PAYMENT_METHOD_NAME
+				),
+			};
+		}
+		return true;
+	};
+
 	const onCheckoutComplete = ( forSuccess = true ) => () => {
 		const handlers = eventHandlers.current;
 		if (
 			typeof handlers.sourceEvent === 'function' &&
-			currentPaymentStatus.current.isSuccessful
+			applePayProcessing
 		) {
 			if ( forSuccess ) {
 				completePayment( handlers.sourceEvent );
@@ -256,11 +275,7 @@ const ApplePayExpressComponent = ( {
 					! getStripeServerData().allowPrepaidCard &&
 					paymentMethod.source.card.funding
 				) {
-					// @todo this error message can be converted to use wp.i18n
-					// and be inline.
-					abortPayment(
-						paymentMethod,
-						// eslint-disable-next-line no-undef
+					setExpressPaymentError(
 						__(
 							"Sorry, we're not accepting prepaid cards at this time.",
 							'woocommerce-gateway-stripe'
@@ -269,7 +284,7 @@ const ApplePayExpressComponent = ( {
 					return;
 				}
 				eventHandlers.current.sourceEvent = paymentMethod;
-				processPayment( paymentMethod );
+				onSubmit();
 			} );
 		}
 	}, [ paymentRequest, canMakePayment ] );
@@ -290,6 +305,9 @@ const ApplePayExpressComponent = ( {
 			const unsubscribeShippingRateSelectFail = subscriber.onShippingRateSelectFail(
 				onShippingRatesEvent( false )
 			);
+			const unsubscribePaymentProcessing = subscriber.onPaymentProcessing(
+				onPaymentProcessing
+			);
 			const unsubscribeCheckoutCompleteSuccess = subscriber.onCheckoutCompleteSuccess(
 				onCheckoutComplete()
 			);
@@ -299,6 +317,7 @@ const ApplePayExpressComponent = ( {
 			return () => {
 				unsubscribeCheckoutCompleteFail();
 				unsubscribeCheckoutCompleteSuccess();
+				unsubscribePaymentProcessing();
 				unsubscribeShippingRateFail();
 				unsubscribeShippingRateSuccess();
 				unsubscribeShippingRateSelectSuccess();

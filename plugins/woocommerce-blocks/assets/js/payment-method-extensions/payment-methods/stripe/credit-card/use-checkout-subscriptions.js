@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { CardElement, CardNumberElement } from '@stripe/react-stripe-js';
 
 /**
@@ -18,6 +18,7 @@ import {
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PaymentStatusProps} PaymentStatusProps
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').BillingDataProps} BillingDataProps
  * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
+ * @typedef {import('react').Dispatch<number>} SourceIdDispatch
  */
 
 /**
@@ -25,13 +26,11 @@ import {
  *
  * @param {EventRegistrationProps}     eventRegistration Event registration
  *                                                       functions.
- * @param {PaymentStatusProps}         paymentStatus     Various payment status
- *                                                       helpers.
  * @param {BillingDataProps}           billing           Various billing data
  *                                                       items.
  * @param {number}                     sourceId          Current set stripe
  *                                                       source id.
- * @param {function(number):undefined} setSourceId       Setter for stripe
+ * @param {SourceIdDispatch}           setSourceId       Setter for stripe
  *                                                       source id.
  * @param {boolean}                    shouldSavePayment Whether to save the
  *                                                       payment or not.
@@ -42,7 +41,6 @@ import {
  */
 export const useCheckoutSubscriptions = (
 	eventRegistration,
-	paymentStatus,
 	billing,
 	sourceId,
 	setSourceId,
@@ -50,6 +48,7 @@ export const useCheckoutSubscriptions = (
 	stripe,
 	elements
 ) => {
+	const [ error, setError ] = useState( '' );
 	const onStripeError = useRef( ( event ) => {
 		return event;
 	} );
@@ -60,8 +59,8 @@ export const useCheckoutSubscriptions = (
 			const code = event.error.code || '';
 			let message = getErrorMessageForTypeAndCode( type, code );
 			message = message || event.error.message;
-			paymentStatus.setPaymentStatus().error( message );
-			return {};
+			setError( error );
+			return message;
 		};
 		const createSource = async ( ownerInfo ) => {
 			const elementToGet = getStripeServerData().inline_cc_form
@@ -77,17 +76,24 @@ export const useCheckoutSubscriptions = (
 		};
 		const onSubmit = async () => {
 			try {
-				paymentStatus.setPaymentStatus().processing();
 				const { billingData } = billing;
+				// if there's an error return that.
+				if ( error ) {
+					return {
+						errorMessage: error,
+					};
+				}
 				// use token if it's set.
 				if ( sourceId !== 0 ) {
-					paymentStatus.setPaymentStatus().success( billingData, {
-						paymentMethod: PAYMENT_METHOD_NAME,
-						paymentRequestType: 'cc',
-						sourceId,
-						shouldSavePayment,
-					} );
-					return true;
+					return {
+						paymentMethodData: {
+							paymentMethod: PAYMENT_METHOD_NAME,
+							paymentRequestType: 'cc',
+							sourceId,
+							shouldSavePayment,
+						},
+						billingData,
+					};
 				}
 				const ownerInfo = {
 					address: {
@@ -111,51 +117,42 @@ export const useCheckoutSubscriptions = (
 
 				const response = await createSource( ownerInfo );
 				if ( response.error ) {
-					return onStripeError.current( response );
+					return {
+						errorMessage: onStripeError.current( response ),
+					};
 				}
-				paymentStatus.setPaymentStatus().success( billingData, {
-					sourceId: response.source.id,
-					paymentMethod: PAYMENT_METHOD_NAME,
-					paymentRequestType: 'cc',
-					shouldSavePayment,
-				} );
 				setSourceId( response.source.id );
-				return true;
+				return {
+					paymentMethodData: {
+						sourceId: response.source.id,
+						paymentMethod: PAYMENT_METHOD_NAME,
+						paymentRequestType: 'cc',
+						shouldSavePayment,
+					},
+					billingData,
+				};
 			} catch ( e ) {
-				paymentStatus.setPaymentStatus().error( e );
-				return e;
+				return {
+					errorMessage: e,
+				};
 			}
 		};
-		const onComplete = () => {
-			paymentStatus.setPaymentStatus().completed();
-		};
-		const onError = () => {
-			paymentStatus.setPaymentStatus().started();
-		};
-		const unsubscribeProcessing = eventRegistration.onCheckoutProcessing(
+		const unsubscribeProcessing = eventRegistration.onPaymentProcessing(
 			onSubmit
-		);
-		const unsubscribeCheckoutComplete = eventRegistration.onCheckoutCompleteSuccess(
-			onComplete
-		);
-		const unsubscribeCheckoutCompleteError = eventRegistration.onCheckoutCompleteError(
-			onError
 		);
 		return () => {
 			unsubscribeProcessing();
-			unsubscribeCheckoutComplete();
-			unsubscribeCheckoutCompleteError();
 		};
 	}, [
 		eventRegistration.onCheckoutProcessing,
 		eventRegistration.onCheckoutCompleteSuccess,
 		eventRegistration.onCheckoutCompleteError,
-		paymentStatus.setPaymentStatus,
 		stripe,
 		sourceId,
 		billing.billingData,
 		setSourceId,
 		shouldSavePayment,
+		error,
 	] );
 	return onStripeError.current;
 };

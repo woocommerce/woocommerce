@@ -3,7 +3,7 @@
  * @typedef {import('../stripe-utils/type-defs').StripeShippingOption} StripeShippingOption
  * @typedef {import('../stripe-utils/type-defs').StripeShippingAddress} StripeShippingAddress
  * @typedef {import('../stripe-utils/type-defs').StripePaymentResponse} StripePaymentResponse
- * @typedef {import('@woocommerce/type-defs/cart').CartTotalItem} CartTotalItem
+ * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PreparedCartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
  * @typedef {import('@woocommerce/type-defs/cart').CartBillingAddress} CartBillingAddress

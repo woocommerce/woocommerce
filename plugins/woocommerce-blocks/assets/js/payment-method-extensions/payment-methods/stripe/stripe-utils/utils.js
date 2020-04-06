@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
  * @typedef {import('./type-defs').StripeServerData} StripeServerData
  * @typedef {import('./type-defs').StripePaymentItem} StripePaymentItem
  * @typedef {import('./type-defs').StripePaymentRequest} StripePaymentRequest
- * @typedef {import('@woocommerce/type-defs/cart').CartTotalItem} CartTotalItem
+ * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PreparedCartTotalItem} CartTotalItem
  */
 
 // @todo this can't be in the file because the block might not show up unless it's

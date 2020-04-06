@@ -44,6 +44,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
+import { useStoreNotices } from '@woocommerce/base-hooks';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
@@ -136,7 +137,17 @@ export const PaymentMethodDataProvider = ( {
 		}
 	);
 	const { setValidationErrors } = useValidationContext();
+	const { addErrorNotice, removeNotice } = useStoreNotices();
 
+	const setExpressPaymentError = ( message ) => {
+		addErrorNotice( message, {
+			context: 'wc/express-payment-area',
+			id: 'wc-express-payment-error',
+		} );
+		if ( ! message ) {
+			removeNotice( 'wc-express-payment-error' );
+		}
+	};
 	// ensure observers are always current.
 	useEffect( () => {
 		currentObservers.current = observers;
@@ -270,7 +281,8 @@ export const PaymentMethodDataProvider = ( {
 				} else if ( isFailResponse( response ) ) {
 					setPaymentStatus().failed(
 						response.fail.errorMessage,
-						response.fail.paymentMethodData
+						response.fail.paymentMethodData,
+						response.fail.billingData
 					);
 				} else if ( isErrorResponse( response ) ) {
 					setPaymentStatus().error( response.errorMessage );
@@ -325,6 +337,7 @@ export const PaymentMethodDataProvider = ( {
 		expressPaymentMethods: paymentStatus.expressPaymentMethods,
 		paymentMethodsInitialized,
 		expressPaymentMethodsInitialized,
+		setExpressPaymentError,
 	};
 	return (
 		<PaymentMethodDataContext.Provider value={ paymentData }>
