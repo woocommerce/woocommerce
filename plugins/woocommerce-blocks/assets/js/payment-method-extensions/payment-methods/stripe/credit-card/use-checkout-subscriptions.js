@@ -89,7 +89,7 @@ export const useCheckoutSubscriptions = (
 						paymentMethodData: {
 							paymentMethod: PAYMENT_METHOD_NAME,
 							paymentRequestType: 'cc',
-							sourceId,
+							stripe_source: sourceId,
 							shouldSavePayment,
 						},
 						billingData,
@@ -124,7 +124,7 @@ export const useCheckoutSubscriptions = (
 				setSourceId( response.source.id );
 				return {
 					paymentMethodData: {
-						sourceId: response.source.id,
+						stripe_source: response.source.id,
 						paymentMethod: PAYMENT_METHOD_NAME,
 						paymentRequestType: 'cc',
 						shouldSavePayment,
