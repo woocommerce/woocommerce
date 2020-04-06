@@ -46,8 +46,10 @@ jobs:
     fast_finish: true
     include:
         - name: E2E Tests
-          script:
-            - npm explore @woocommerce/e2e-env -- npm run docker:up
-            - composer install
-            - npm run build
-            - npm explore @woocommerce/e2e-env -- npm run test:e2e
+    script:
+        - composer require wp-cli/i18n-command
+        - npm run build
+        - npm explore @woocommerce/e2e-env -- npm run docker:up
+        - npm explore @woocommerce/e2e-env -- npm run test:e2e
+    after_script:
+        - npm explore @woocommerce/e2e-env -- npm run docker:down
