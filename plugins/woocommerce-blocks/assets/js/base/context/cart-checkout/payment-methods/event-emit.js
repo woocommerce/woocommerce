@@ -12,7 +12,7 @@ const EMIT_TYPES = {
 	PAYMENT_PROCESSING: 'payment_processing',
 	PAYMENT_SUCCESS: 'payment_success',
 	PAYMENT_FAIL: 'payment_fail',
-	PAYMENT_HAS_ERROR: 'payment_has_error',
+	PAYMENT_ERROR: 'payment_error',
 };
 
 /**

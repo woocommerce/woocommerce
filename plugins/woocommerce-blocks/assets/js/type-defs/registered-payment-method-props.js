@@ -5,6 +5,7 @@
  * @typedef {import('@woocommerce/type-defs/billing').BillingData} BillingData
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodCurrentStatus} PaymentMethodCurrentStatus
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
+ * @typedef {import('@woocommerce/type-defs/contexts').ShippingErrorStatus} ShippingErrorStatus
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingErrorTypes} ShippingErrorTypes
  * @typedef {import('@woocommerce/type-defs/settings').WooCommerceSiteCurrency} SiteCurrency
  */
@@ -76,11 +77,11 @@
 /**
  * @typedef ShippingStatusProps
  *
- * @property {string}             shippingErrorStatus Current error status for
- *                                                    shipping.
- * @property {ShippingErrorTypes} shippingErrorTypes  An object containing all
- *                                                    the possible types for
- *                                                    shipping error status.
+ * @property {ShippingErrorStatus} shippingErrorStatus Current error status for
+ *                                                     shipping.
+ * @property {ShippingErrorTypes}  shippingErrorTypes  An object containing all
+ *                                                     the possible types for
+ *                                                     shipping error status.
  */
 
 /**

@@ -10,6 +10,7 @@ import {
 	useEffect,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useStoreNotices } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -21,7 +22,6 @@ import {
 	EMIT_TYPES,
 	emitterSubscribers,
 	emitEvent,
-	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
 import { useValidationContext } from '../validation';
@@ -93,6 +93,8 @@ export const CheckoutStateProvider = ( {
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
 	const { setValidationErrors } = useValidationContext();
+	const { addErrorNotice, removeNotices } = useStoreNotices();
+
 	// set observers on ref so it's always current.
 	useEffect( () => {
 		currentObservers.current = observers;
@@ -135,22 +137,31 @@ export const CheckoutStateProvider = ( {
 
 	// emit events.
 	useEffect( () => {
-		const status = checkoutState.status;
+		const { hasError, status } = checkoutState;
 		if ( status === STATUS.PROCESSING ) {
-			emitEventWithAbort(
+			removeNotices( 'error' );
+			emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.CHECKOUT_PROCESSING,
 				{}
 			).then( ( response ) => {
-				if ( response !== true ) {
-					setValidationErrors( response );
-					dispatchActions.setHasError();
+				if ( response !== true || hasError ) {
+					if ( Array.isArray( response ) ) {
+						response.forEach(
+							( { errorMessage, validationErrors } ) => {
+								addErrorNotice( errorMessage );
+								setValidationErrors( validationErrors );
+							}
+						);
+					}
+					dispatch( actions.setComplete() );
+				} else {
+					dispatch( actions.setProcessingComplete() );
 				}
-				dispatch( actions.setProcessingComplete() );
 			} );
 		}
 		if ( status === STATUS.COMPLETE ) {
-			if ( checkoutState.hasError ) {
+			if ( hasError ) {
 				emitEvent(
 					currentObservers.current,
 					EMIT_TYPES.CHECKOUT_COMPLETE_WITH_ERROR,
@@ -164,13 +175,7 @@ export const CheckoutStateProvider = ( {
 				);
 			}
 		}
-	}, [
-		checkoutState.status,
-		checkoutState.hasError,
-		checkoutState.isComplete,
-		checkoutState.redirectUrl,
-		setValidationErrors,
-	] );
+	}, [ checkoutState.status, checkoutState.hasError, setValidationErrors ] );
 
 	const onSubmit = () => {
 		dispatch( actions.setProcessing() );

@@ -11,7 +11,7 @@ import {
 
 const StoreNoticesContext = createContext( {
 	notices: [],
-	createNotice: () => void null,
+	createNotice: ( status, text, props ) => void { status, text, props },
 	createSnackBarNotice: () => void null,
 	removeNotice: () => void null,
 	context: 'wc/core',
