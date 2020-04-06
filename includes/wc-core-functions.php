@@ -213,9 +213,9 @@ function wc_untokenize_path( $path, $path_tokens ) {
 function wc_get_path_define_tokens() {
 	$defines = array(
 		'ABSPATH',
-		'WC_ABSPATH',
 		'WP_CONTENT_DIR',
 		'WP_PLUGIN_DIR',
+		'WPMU_PLUGIN_DIR',
 		'PLUGINDIR',
 		'WP_THEME_DIR',
 	);
