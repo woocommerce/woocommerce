@@ -1356,9 +1356,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( 'set' === $operation ) {
 			$new_stock = wc_stock_amount( $stock_quantity );
+
+			// Generate SQL.
+			$sql = $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+				$new_stock,
+				$product_id_with_stock
+			);
 		} else {
-			// @todo: potential race condition.
-			// Read current stock level and lock the row. If the lock can't be acquired, don't wait.
 			$current_stock = wc_stock_amount(
 				$wpdb->get_var(
 					$wpdb->prepare(
@@ -1368,25 +1373,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				)
 			);
 
-			// Calculate new value.
+			// Calculate new value for filter below. Set multiplier to subtract or add the meta_value.
 			switch ( $operation ) {
 				case 'increase':
 					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					$multiplier = 1;
 					break;
 				default:
 					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					$multiplier = -1;
 					break;
 			}
+
+			// Generate SQL.
+			$sql = $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = meta_value %+f WHERE post_id = %d AND meta_key='_stock'",
+				wc_stock_amount( $stock_quantity ) * $multiplier, // This will either subtract or add depending on operation.
+				$product_id_with_stock
+			);
 		}
 
-		// Generate SQL.
-		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-			$new_stock,
-			$product_id_with_stock
-		);
-
-		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $new_stock, 'set' );
+		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $new_stock, $operation );
 
 		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 
