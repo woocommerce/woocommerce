@@ -20,7 +20,7 @@ import { Card } from '@woocommerce/components';
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
 import withSelect from 'wc-api/with-select';
-import WelcomeImage from './images/welcome.png';
+import WelcomeImage from './images/welcome.svg';
 
 class WelcomeCard extends Component {
 	constructor( props ) {
@@ -79,4 +79,3 @@ export default compose(
 		};
 	} )
 )( WelcomeCard );
-
