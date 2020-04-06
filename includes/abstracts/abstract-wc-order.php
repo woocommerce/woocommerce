@@ -676,7 +676,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	protected function set_total_tax( $value ) {
-		$this->set_prop( 'total_tax', wc_format_decimal( $value ) );
+		// We round here because this is a total entry, as opposed to line items in other setters.
+		$this->set_prop( 'total_tax', wc_format_decimal( wc_round_tax_total( $value ) ) );
 	}
 
 	/**
@@ -1586,11 +1587,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
-				$tax_amount = (float) $tax;
-
-				if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-					$tax_amount = wc_round_tax_total( $tax_amount );
-				}
+				$tax_amount = $this->round_line_tax( $tax, false );
 
 				$cart_taxes[ $tax_rate_id ] = isset( $cart_taxes[ $tax_rate_id ] ) ? $cart_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
 			}
@@ -1632,8 +1629,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
-		$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
+		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
+		$this->set_cart_tax( array_sum( $cart_taxes ) );
 		$this->save();
 	}
 

@@ -2010,6 +2010,55 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test rounding with fees as described in Github issue 25629.
+	 */
+	public function test_rounding_with_fees_25629() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		WC()->cart->empty_cart();
+		$tax_rate    = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'TAX10',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 71.50 );
+		$product->save();
+
+		WC_Helper_Coupon::create_coupon(
+			'3percent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => 3,
+			)
+		);
+
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_fee_1_5_to_cart' ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( '3percent' );
+		WC()->cart->calculate_totals();
+		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_fee_1_5_to_cart' ) );
+
+		$this->assertEquals( 70.86, WC()->cart->get_total( 'edit' ) );
+	}
+
+	/**
+	 * Helper function. Adds 1.5 taxable fees to cart.
+	 */
+	public function add_fee_1_5_to_cart() {
+		WC()->cart->add_fee( 'Dummy fee', 1.5 / 1.1, true );
+	}
+
+	/**
 	 * Change tax class.
 	 *
 	 * @return string
