@@ -658,7 +658,7 @@ class WC_Tracker {
 	 * @param string $woo_page_name A woocommerce page e.g. `checkout` or `cart`.
 	 * @return array Array of blocks as returned by parse_blocks().
 	 */
-	private static function get_blocks_from_page( $woo_page_name ) {
+	private static function get_all_blocks_from_page( $woo_page_name ) {
 		$page_id = wc_get_page_id( $woo_page_name );
 
 		$page = get_post( $page_id );
@@ -675,55 +675,49 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get customised attributes for the checkout block.
+	 * Get all instances of the specified block on a specific woo page
+	 * (e.g. `cart` or `checkout` page).
 	 *
-	 * Note this only returns attributes that do not have default values;
-	 * i.e. attributes that the merchant has customised.
-	 *
-	 * @return array Block attribute values.
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
+	 * @param string $woo_page_name The woo page to search, e.g. `cart`.
+	 * @return array Array of blocks as returned by parse_blocks().
 	 */
-	private static function get_block_attributes_from_checkout_page() {
-		$blocks = self::get_blocks_from_page( 'checkout' );
+	private static function get_blocks_from_page( $block_name, $woo_page_name ) {
+		$page_blocks = self::get_all_blocks_from_page( $woo_page_name );
 
-		// Get checkout block(s).
-		$checkout_blocks = array_filter(
-			$blocks,
+		// Get any instances of the specified block.
+		return array_filter(
+			$page_blocks,
 			function ( $block ) {
-				return 'woocommerce/checkout' === $block['blockName'];
+				return $block_name !== $block['blockName'];
 			}
 		);
-		if ( ! $checkout_blocks || ! count( $checkout_blocks ) ) {
-			return array();
-		}
-
-		// Return any customised attributes from the first block.
-		return $checkout_blocks[0]['attrs'];
 	}
 
 	/**
-	 * Get customised attributes for the cart block.
+	 * Get tracker data for a specific block type on a woocommerce page.
 	 *
-	 * Note this only returns attributes that do not have default values;
-	 * i.e. attributes that the merchant has customised.
-	 *
-	 * @return array Block attribute values.
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/cart`.
+	 * @param string $woo_page_name The woo page to search, e.g. `cart`.
+	 * @return array Associative array of tracker data with keys:
+	 * - page_contains_block
+	 * - block_attributes
 	 */
-	private static function get_block_attributes_from_cart_page() {
-		$blocks = self::get_blocks_from_page( 'cart' );
+	public static function get_block_tracker_data( $block_name, $woo_page_name ) {
+		$blocks = self::get_blocks_from_page( $block_name, $woo_page_name );
 
-		// Get cart block(s).
-		$cart_blocks = array_filter(
-			$blocks,
-			function ( $block ) {
-				return 'woocommerce/cart' === $block['blockName'];
-			}
-		);
-		if ( ! $cart_blocks || ! count( $cart_blocks ) ) {
-			return array();
+		$block_present = false;
+		$attributes    = array();
+		if ( $blocks && count( $blocks ) ) {
+			// Return any customised attributes from the first block.
+			$block_present = true;
+			$attributes    = $blocks[0]['attrs'];
 		}
 
-		// Return any customised attributes from the first block.
-		return $cart_blocks[0]['attrs'];
+		return array(
+			'page_contains_block' => $block_present ? 'Yes' : 'No',
+			'block_attributes'    => $attributes,
+		);
 	}
 
 	/**
@@ -735,25 +729,23 @@ class WC_Tracker {
 		$cart_page_id     = wc_get_page_id( 'cart' );
 		$checkout_page_id = wc_get_page_id( 'checkout' );
 
+		$cart_block_data     = self::get_block_tracker_data( 'woocommerce/cart', 'cart' );
+		$checkout_block_data = self::get_block_tracker_data( 'woocommerce/checkout', 'checkout' );
+
 		return array(
-			'cart_page_contains_cart_block'             => self::post_contains_text(
-				$cart_page_id,
-				'<!-- wp:woocommerce/cart'
-			),
 			'cart_page_contains_cart_shortcode'         => self::post_contains_text(
 				$cart_page_id,
 				'[woocommerce_cart]'
-			),
-			'cart_block_attributes'                     => self::get_block_attributes_from_cart_page(),
-			'checkout_page_contains_checkout_block'     => self::post_contains_text(
-				$checkout_page_id,
-				'<!-- wp:woocommerce/checkout'
 			),
 			'checkout_page_contains_checkout_shortcode' => self::post_contains_text(
 				$checkout_page_id,
 				'[woocommerce_checkout]'
 			),
-			'checkout_block_attributes'                 => self::get_block_attributes_from_checkout_page(),
+
+			'cart_page_contains_cart_block'             => $cart_block_data['page_contains_block'],
+			'cart_block_attributes'                     => $cart_block_data['block_attributes'],
+			'checkout_page_contains_checkout_block'     => $checkout_block_data['page_contains_block'],
+			'checkout_block_attributes'                 => $checkout_block_data['block_attributes'],
 		);
 	}
 }
