@@ -1520,4 +1520,56 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
 	}
+
+	/**
+	 * Test if total_sales count gets updated for canceled orders.
+	 */
+	public function test_wc_decrease_total_sales_counts() {
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		$order = new WC_Order( $order_id );
+		$order->update_status( 'processing' );
+
+		$this->assertEquals( 3, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		$order->update_status( 'cancelled' );
+
+		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
+	}
+
+	/**
+	 * Test if total_sales count gets updated for deleted orders.
+	 */
+	public function test_wc_decrease_deleted_total_sales_counts() {
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		$order = new WC_Order( $order_id );
+		$order->update_status( 'processing' );
+
+		$this->assertEquals( 3, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		wp_delete_post( $order_id, true );
+
+		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
+	}
 }
