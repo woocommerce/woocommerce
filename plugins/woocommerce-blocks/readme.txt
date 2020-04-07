@@ -116,6 +116,9 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.5.16 - 2020-04-07 =
+- Performance: Use the latest version of Jetpack Autoloader. #2132
+
 = 2.5.15 - 2020-03-31 =
 - Fix broken product grid blocks styles in old versions of WordPress. #2000
 
