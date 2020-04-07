@@ -176,7 +176,7 @@ class OrderSchema extends AbstractSchema {
 				'readonly'    => true,
 				'properties'  => [
 					'customer_id'         => [
-						'description' => __( 'Customer ID if registered. Will return 0 for guest orders.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Customer ID if registered. Will return 0 for guests.', 'woo-gutenberg-products-block' ),
 						'type'        => 'integer',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,

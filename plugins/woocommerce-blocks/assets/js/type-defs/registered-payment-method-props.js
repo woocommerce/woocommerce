@@ -126,6 +126,7 @@
  *                                                               configured to display prices
  *                                                               including tax.
  * @property {string[]}                appliedCoupons            All the coupons that were applied.
+ * @property {number}                  customerId                The customer Id the order belongs to.
  */
 
 /**

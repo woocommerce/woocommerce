@@ -27,9 +27,12 @@ import { __ } from '@wordpress/i18n';
  */
 const CreditCardComponent = ( { billing, eventRegistration, components } ) => {
 	const { ValidationInputError, CheckboxControl } = components;
+	const { customerId } = billing;
 	const [ sourceId, setSourceId ] = useState( 0 );
 	const stripe = useStripe();
-	const [ shouldSavePayment, setShouldSavePayment ] = useState( true );
+	const [ shouldSavePayment, setShouldSavePayment ] = useState(
+		customerId ? true : false
+	);
 	const elements = useElements();
 	const onStripeError = useCheckoutSubscriptions(
 		eventRegistration,
@@ -60,15 +63,19 @@ const CreditCardComponent = ( { billing, eventRegistration, components } ) => {
 	return (
 		<>
 			{ renderedCardElement }
-			<CheckboxControl
-				className="wc-block-checkout__save-card-info"
-				label={ __(
-					'Save payment information to my account for future purchases.',
-					'woo-gutenberg-products-block'
-				) }
-				checked={ shouldSavePayment }
-				onChange={ () => setShouldSavePayment( ! shouldSavePayment ) }
-			/>
+			{ customerId > 0 && (
+				<CheckboxControl
+					className="wc-block-checkout__save-card-info"
+					label={ __(
+						'Save payment information to my account for future purchases.',
+						'woo-gutenberg-products-block'
+					) }
+					checked={ shouldSavePayment }
+					onChange={ () =>
+						setShouldSavePayment( ! shouldSavePayment )
+					}
+				/>
+			) }
 			<img
 				src={ ccSvg }
 				alt={ __(

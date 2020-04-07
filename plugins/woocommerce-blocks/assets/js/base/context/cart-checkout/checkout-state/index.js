@@ -202,6 +202,7 @@ export const CheckoutStateProvider = ( {
 		isCart,
 		orderId: checkoutState.orderId,
 		hasOrder: !! checkoutState.orderId,
+		customerId: checkoutState.customerId,
 	};
 	return (
 		<CheckoutContext.Provider value={ checkoutData }>
