@@ -350,18 +350,20 @@ class WC_Countries {
 	/**
 	 * Gets an array of countries in the EU.
 	 *
-	 * @param  string $deprecated Function used to return VAT countries based on this.
+	 * @param  string $type Type of countries to retrieve. Blank for EU member countries. eu_vat for EU VAT countries.
 	 * @return string[]
 	 */
-	public function get_european_union_countries( $deprecated = '' ) {
+	public function get_european_union_countries( $type = '' ) {
 		$countries = array( 'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HU', 'HR', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK' );
 
-		if ( ! empty( $deprecated ) ) {
-			wc_deprecated_argument( 'type', '4.0.0', 'Use the WC_Countries::get_vat_countries method instead.' );
-			$countries = $this->get_vat_countries();
+		if ( 'eu_vat' === $type ) {
+			$countries[] = 'MC';
+			$countries[] = 'IM';
+			//The UK is still part of the EU VAT zone
+			$countries[] = 'GB';
 		}
 
-		return apply_filters( 'woocommerce_european_union_countries', $countries, $deprecated );
+		return apply_filters( 'woocommerce_european_union_countries', $countries, $type );
 	}
 
 	/**
