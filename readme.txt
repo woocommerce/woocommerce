@@ -187,6 +187,7 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
 * Enhancement - Changed show password icon color to a darker grey hue. #25625
 * Enhancement - Use new Setup Wizard for all users. #26016
+* Tweak - Show notice for WP min version to WP 5.2. #26094
 * Tweak - Improve the string for untested WooCommerce extensions in the system status page to avoid confusion. #25904
 * Tweak - Updated KZT (₸) symbol. #25609
 * Tweak - Trim whitespaces and strip slashes from MaxMind License Key. #25466
