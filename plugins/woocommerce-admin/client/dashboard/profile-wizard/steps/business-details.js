@@ -75,6 +75,8 @@ class BusinessDetails extends Component {
 
 		this.onContinue = this.onContinue.bind( this );
 		this.validate = this.validate.bind( this );
+		this.getNumberRangeString = this.getNumberRangeString.bind( this );
+		this.numberFormat = this.numberFormat.bind( this );
 	}
 
 	async onContinue( values ) {
