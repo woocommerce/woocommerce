@@ -6,6 +6,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { useDebounce } from 'use-debounce';
+import { useCheckoutContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -31,6 +32,8 @@ import { useStoreCart } from './use-store-cart';
 export const useStoreCartItemQuantity = ( cartItem ) => {
 	const { key: cartItemKey = '', quantity: cartItemQuantity = 1 } = cartItem;
 	const { cartErrors } = useStoreCart();
+	const { dispatchActions } = useCheckoutContext();
+
 	// Store quantity in hook state. This is used to keep the UI
 	// updated while server request is updated.
 	const [ quantity, changeQuantity ] = useState( cartItemQuantity );
@@ -40,17 +43,29 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 		storeKey
 	);
 
-	const isPending = useSelect(
+	const isPendingQuantity = useSelect(
 		( select ) => {
 			if ( ! cartItemKey ) {
 				return false;
 			}
+
 			const store = select( storeKey );
-			return store.isItemQuantityPending( cartItemKey );
+			return store.isItemPendingQuantity( cartItemKey );
 		},
 		[ cartItemKey ]
 	);
 
+	const isPendingDelete = useSelect(
+		( select ) => {
+			if ( ! cartItemKey ) {
+				return false;
+			}
+
+			const store = select( storeKey );
+			return store.isItemPendingDelete( cartItemKey );
+		},
+		[ cartItemKey ]
+	);
 	const removeItem = () => {
 		return cartItemKey ? removeItemFromCart( cartItemKey ) : false;
 	};
@@ -62,9 +77,29 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 			changeCartItemQuantity( cartItemKey, debouncedQuantity );
 		}
 	}, [ debouncedQuantity, cartItemKey ] );
+	useEffect( () => {
+		if ( isPendingQuantity ) {
+			dispatchActions.incrementCalculating();
+		} else {
+			dispatchActions.decrementCalculating();
+		}
+	}, [ isPendingQuantity ] );
+
+	useEffect( () => {
+		if ( isPendingDelete ) {
+			dispatchActions.incrementCalculating();
+		} else if ( ! isPendingDelete && cartErrors.length ) {
+			dispatchActions.decrementCalculating();
+		}
+		return () => {
+			if ( isPendingDelete ) {
+				dispatchActions.decrementCalculating();
+			}
+		};
+	}, [ isPendingDelete ] );
 
 	return {
-		isPending,
+		isPendingDelete,
 		quantity,
 		changeQuantity,
 		removeItem,

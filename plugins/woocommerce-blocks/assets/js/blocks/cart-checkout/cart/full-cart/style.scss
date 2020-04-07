@@ -91,6 +91,12 @@ table.wc-block-cart-items {
 				display: block;
 			}
 		}
+
+		&.is-disabled {
+			opacity: 0.5;
+			pointer-events: none;
+			transition: opacity 200ms ease;
+		}
 	}
 }
 
