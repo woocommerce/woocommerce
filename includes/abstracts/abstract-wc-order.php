@@ -1092,13 +1092,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private function get_billing_and_current_user_aliases( $billing_email ) {
 		$emails = array( $billing_email );
 		if ( get_current_user_id() ) {
-			$emails[]   = wp_get_current_user()->user_email;
+			$emails[] = wp_get_current_user()->user_email;
 		}
-		$emails = array_unique(
+		$emails              = array_unique(
 			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
 		);
 		$customer_data_store = WC_Data_Store::load( 'customer' );
-		$user_ids = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		$user_ids            = $customer_data_store->get_user_ids_for_billing_email( $emails );
 		return array_merge( $user_ids, $emails );
 	}
 
@@ -1320,7 +1320,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
 					$item = $this->get_item( $item_id, false );
 
-					if ( 'taxable' !== $item->get_tax_status() || !wc_tax_enabled() ) {
+					if ( 'taxable' !== $item->get_tax_status() || ! wc_tax_enabled() ) {
 						continue;
 					}
 
@@ -1672,19 +1672,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-    $cart_subtotal     = 0;
+		$cart_subtotal     = 0;
 		$cart_total        = 0;
 		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-    // Sum line item costs without rounding
+		// Sum line item costs without rounding.
 		foreach ( $this->get_items() as $item ) {
 			$cart_subtotal += $item->get_subtotal();
 			$cart_total    += $item->get_total();
 		}
-    
+
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
 			$shipping_total += round( $shipping->get_total(), wc_get_price_decimals() );
