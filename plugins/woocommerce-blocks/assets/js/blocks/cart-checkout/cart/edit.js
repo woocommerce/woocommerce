@@ -23,7 +23,7 @@ import {
 import { useSelect } from '@wordpress/data';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { getAdminLink } from '@woocommerce/settings';
-
+import { previewCart } from '@woocommerce/resource-previews';
 /**
  * Internal dependencies
  */
@@ -208,7 +208,9 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 									) }
 								>
 									<Disabled>
-										<EditorProvider>
+										<EditorProvider
+											previewCart={ previewCart }
+										>
 											<CartProvider>
 												<FullCart
 													attributes={ attributes }
