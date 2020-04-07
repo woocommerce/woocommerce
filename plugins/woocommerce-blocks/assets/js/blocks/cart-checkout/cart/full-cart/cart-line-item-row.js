@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
@@ -86,7 +87,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 		quantity,
 		changeQuantity,
 		removeItem,
-		isPending: itemQuantityDisabled,
+		isPendingDelete,
 	} = useStoreCartItemQuantity( lineItem );
 
 	const currency = getCurrency( prices );
@@ -102,7 +103,11 @@ const CartLineItemRow = ( { lineItem } ) => {
 	const firstImage = images.length ? images[ 0 ] : {};
 
 	return (
-		<tr className="wc-block-cart-items__row">
+		<tr
+			className={ classnames( 'wc-block-cart-items__row', {
+				'is-disabled': isPendingDelete,
+			} ) }
+		>
 			{ /* If the image has no alt text, this link is unnecessary and can be hidden. */ }
 			<td
 				className="wc-block-cart-item__image"
@@ -114,13 +119,17 @@ const CartLineItemRow = ( { lineItem } ) => {
 				</a>
 			</td>
 			<td className="wc-block-cart-item__product">
-				<ProductName permalink={ permalink } name={ name } />
+				<ProductName
+					permalink={ permalink }
+					name={ name }
+					disabled={ isPendingDelete }
+				/>
 				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
 				<ProductMetadata summary={ summary } variation={ variation } />
 			</td>
 			<td className="wc-block-cart-item__quantity">
 				<QuantitySelector
-					disabled={ itemQuantityDisabled }
+					disabled={ isPendingDelete }
 					quantity={ quantity }
 					maximum={ getMaximumQuantity(
 						backOrdersAllowed,
@@ -130,14 +139,13 @@ const CartLineItemRow = ( { lineItem } ) => {
 					itemName={ name }
 				/>
 				<button
-					disabled={ itemQuantityDisabled }
 					className="wc-block-cart-item__remove-link"
 					onClick={ removeItem }
+					disabled={ isPendingDelete }
 				>
 					{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
 				</button>
 				<button
-					disabled={ itemQuantityDisabled }
 					className="wc-block-cart-item__remove-icon"
 					onClick={ removeItem }
 				>

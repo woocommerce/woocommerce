@@ -24,11 +24,6 @@ const cartItemsReducer = ( state = [], action ) => {
 				}
 				return cartItem;
 			} );
-
-		case types.RECEIVE_REMOVED_ITEM:
-			return state.filter( ( cartItem ) => {
-				return cartItem.key !== action.cartItemKey;
-			} );
 	}
 	return state;
 };
@@ -43,7 +38,8 @@ const cartItemsReducer = ( state = [], action ) => {
  */
 const reducer = (
 	state = {
-		cartItemsQuantityPending: [],
+		cartItemsPendingQuantity: [],
+		cartItemsPendingDelete: [],
 		cartData: {
 			coupons: [],
 			shippingRates: [],
@@ -129,24 +125,34 @@ const reducer = (
 			};
 			break;
 
-		case types.ITEM_QUANTITY_PENDING:
+		case types.ITEM_PENDING_QUANTITY:
 			// Remove key by default - handles isQuantityPending==false
 			// and prevents duplicates when isQuantityPending===true.
-			const newPendingKeys = state.cartItemsQuantityPending.filter(
+			const keysPendingQuantity = state.cartItemsPendingQuantity.filter(
 				( key ) => key !== action.cartItemKey
 			);
-			if ( action.isQuantityPending ) {
-				newPendingKeys.push( action.cartItemKey );
+			if ( action.isPendingQuantity ) {
+				keysPendingQuantity.push( action.cartItemKey );
 			}
 			state = {
 				...state,
-				cartItemsQuantityPending: newPendingKeys,
+				cartItemsPendingQuantity: keysPendingQuantity,
 			};
 			break;
-
+		case types.RECEIVE_REMOVED_ITEM:
+			const keysPendingDelete = state.cartItemsPendingDelete.filter(
+				( key ) => key !== action.cartItemKey
+			);
+			if ( action.isPendingDelete ) {
+				keysPendingDelete.push( action.cartItemKey );
+			}
+			state = {
+				...state,
+				cartItemsPendingDelete: keysPendingDelete,
+			};
+			break;
 		// Delegate to cartItemsReducer.
 		case types.RECEIVE_CART_ITEM:
-		case types.RECEIVE_REMOVED_ITEM:
 			state = {
 				...state,
 				errors: [],
