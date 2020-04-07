@@ -31,13 +31,7 @@ const reloadPage = () => void window.location.reload( true );
  * @param {Object} props Props for the block.
  */
 const CheckoutFrontend = ( props ) => {
-	const {
-		cartCoupons,
-		cartItems,
-		cartTotals,
-		shippingRates,
-		cartIsLoading,
-	} = useStoreCart();
+	const { cartItems, cartIsLoading } = useStoreCart();
 
 	return (
 		<>
@@ -67,13 +61,7 @@ const CheckoutFrontend = ( props ) => {
 				>
 					<StoreNoticesProvider context="wc/checkout">
 						<ValidationContextProvider>
-							<Block
-								{ ...props }
-								cartCoupons={ cartCoupons }
-								cartItems={ cartItems }
-								cartTotals={ cartTotals }
-								shippingRates={ shippingRates }
-							/>
+							<Block { ...props } />
 						</ValidationContextProvider>
 					</StoreNoticesProvider>
 				</BlockErrorBoundary>

@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import FeedbackPrompt from '@woocommerce/block-components/feedback-prompt';
-import {
-	previewCart,
-	previewShippingRates,
-} from '@woocommerce/resource-previews';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -20,13 +16,13 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
 import {
 	PRIVACY_URL,
 	TERMS_URL,
-	SHIPPING_METHODS_EXIST,
 	CHECKOUT_PAGE_ID,
 } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -273,7 +269,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 const CheckoutEditor = ( { attributes, setAttributes } ) => {
 	const { className } = attributes;
 	return (
-		<EditorProvider>
+		<EditorProvider previewCart={ previewCart }>
 			<div className={ className }>
 				<BlockSettings
 					attributes={ attributes }
@@ -295,17 +291,7 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 					) }
 				>
 					<Disabled>
-						<Block
-							attributes={ attributes }
-							cartItems={ previewCart.items }
-							cartTotals={ previewCart.totals }
-							isEditor={ true }
-							shippingRates={
-								SHIPPING_METHODS_EXIST
-									? previewShippingRates
-									: []
-							}
-						/>
+						<Block attributes={ attributes } />
 					</Disabled>
 				</BlockErrorBoundary>
 			</div>

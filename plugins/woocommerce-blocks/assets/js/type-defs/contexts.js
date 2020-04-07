@@ -2,6 +2,7 @@
  * @typedef {import('./billing').BillingData} BillingData
  * @typedef {import('./cart').CartShippingOption} CartShippingOption
  * @typedef {import('./cart').CartShippingAddress} CartShippingAddress
+ * @typedef {import('./cart').CartData} CartData
  * @typedef {import('./checkout').CheckoutDispatchActions} CheckoutDispatchActions
  */
 
@@ -273,6 +274,8 @@
  *                                                        the editor context
  *                                                        (true) or not (false).
  * @property {number}                  currentPostId      The post ID being edited.
+ * @property {CartData}                previewCart        Object containing preview
+ *                                                        data for the editor.
  */
 
 /**
