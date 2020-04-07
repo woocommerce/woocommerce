@@ -262,6 +262,8 @@
  *                                                                    draft order from the API.
  * @property {boolean}                      isCart                    When true, means the provider
  *                                                                    is providing data for the cart.
+ * @property {number}                       customerId                This is the ID of the customer
+ *                                                                    the draft order belongs to.
  */
 
 /**

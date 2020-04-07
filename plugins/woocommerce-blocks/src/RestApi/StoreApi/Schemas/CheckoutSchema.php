@@ -77,6 +77,12 @@ class CheckoutSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 			],
+			'customer_id'      => [
+				'description' => __( 'Customer ID if registered. Will return 0 for guests.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'billing_address'  => [
 				'description' => __( 'Billing address.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
@@ -154,6 +160,7 @@ class CheckoutSchema extends AbstractSchema {
 			'status'           => $order->get_status(),
 			'order_key'        => $order->get_order_key(),
 			'customer_note'    => $order->get_customer_note(),
+			'customer_id'      => $order->get_customer_id(),
 			'billing_address'  => $this->billing_address_schema->get_item_response( $order ),
 			'shipping_address' => $this->shipping_address_schema->get_item_response( $order ),
 			'payment_method'   => $order->get_payment_method(),

@@ -15,7 +15,10 @@ export const STATUS = {
 	PROCESSING_COMPLETE: 'processing_complete',
 };
 
-const checkoutData = getSetting( 'checkoutData', { order_id: 0 } );
+const checkoutData = getSetting( 'checkoutData', {
+	order_id: 0,
+	customer_id: 0,
+} );
 
 export const DEFAULT_STATE = {
 	redirectUrl: '',
@@ -26,6 +29,7 @@ export const DEFAULT_STATE = {
 	hasError: false,
 	calculatingCount: 0,
 	orderId: checkoutData.order_id,
+	customerId: checkoutData.customer_id,
 };
 
 export const TYPES = {
