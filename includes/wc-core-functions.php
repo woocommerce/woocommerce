@@ -227,7 +227,7 @@ function wc_get_path_define_tokens() {
 		}
 	}
 
-	return apply_filters( 'wc_get_path_define_tokens', $path_tokens );
+	return apply_filters( 'woocommerce_get_path_define_tokens', $path_tokens );
 }
 
 /**
