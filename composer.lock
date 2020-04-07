@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28d6b301b701cac76bf626f6eca7bdc3",
+    "content-hash": "c6614272bcca35438d16632daecaff0a",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v1.3.2",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "301c2fbcf070d4f0147753447616b6e982bda09e"
+                "reference": "3bcbe1ae19febd6beeb181cf11af0bf0b7abe7e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/301c2fbcf070d4f0147753447616b6e982bda09e",
-                "reference": "301c2fbcf070d4f0147753447616b6e982bda09e",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/3bcbe1ae19febd6beeb181cf11af0bf0b7abe7e7",
+                "reference": "3bcbe1ae19febd6beeb181cf11af0bf0b7abe7e7",
                 "shasum": ""
             },
             "require": {
@@ -40,7 +40,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "time": "2019-09-24T06:39:29+00:00"
+            "time": "2020-03-26T07:57:53+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -465,20 +465,20 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v2.5.15",
+            "version": "v2.5.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "7f06902c5557b9673ffb5682035f4ed5f4af430f"
+                "reference": "3bd91b669247000fd3f5277954701d0b148d3f1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/7f06902c5557b9673ffb5682035f4ed5f4af430f",
-                "reference": "7f06902c5557b9673ffb5682035f4ed5f4af430f",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/3bd91b669247000fd3f5277954701d0b148d3f1a",
+                "reference": "3bd91b669247000fd3f5277954701d0b148d3f1a",
                 "shasum": ""
             },
             "require": {
-                "automattic/jetpack-autoloader": "1.3.2",
+                "automattic/jetpack-autoloader": "^1.6.0",
                 "composer/installers": "1.7.0"
             },
             "require-dev": {
@@ -508,7 +508,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-03-31T12:36:20+00:00"
+            "time": "2020-04-07T11:47:19+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -2923,6 +2923,5 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    },
-    "plugin-api-version": "1.1.0"
+    }
 }
