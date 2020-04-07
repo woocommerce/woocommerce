@@ -447,6 +447,45 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the total amount of tax for line items.
+	 *
+	 * @return float
+	 */
+	public function get_subtotal_tax() {
+		$total = 0;
+		foreach ( $this->get_items() as $item ) {
+			$total += wc_remove_number_precision( self::round_line_tax( wc_add_number_precision( $item->get_subtotal_tax() ) ) );
+		}
+		return $total;
+	}
+
+	/**
+	 * Get the total amount of fees.
+	 *
+	 * @return float
+	 */
+	public function get_fee_total() {
+		$total = 0;
+		foreach ( $this->get_fees() as $item ) {
+			$total += $item->get_total();
+		}
+		return $total;
+	}
+
+	/**
+	 * Get the total tax of fees.
+	 *
+	 * @return float
+	 */
+	public function get_fee_tax() {
+		$total = 0;
+		foreach ( $this->get_fees() as $item ) {
+			$total += $item->get_total_tax();
+		}
+		return $total;
+	}
+
+	/**
 	 * Get taxes, merged by code, formatted ready for output.
 	 *
 	 * @return array
@@ -1325,7 +1364,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 
 					$taxes = array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), $this->get_prices_include_tax() ) );
-					if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					if ( ! self::round_at_subtotal() ) {
 						$taxes = wc_round_tax_total( $taxes );
 					}
 
@@ -1598,7 +1637,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
 				$tax_amount = (float) $tax;
 
-				if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+				if ( ! self::round_at_subtotal() ) {
 					$tax_amount = wc_round_tax_total( $tax_amount );
 				}
 
