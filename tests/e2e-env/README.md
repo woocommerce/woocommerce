@@ -6,6 +6,7 @@ A reusable and extendable E2E testing environment for WooCommerce extensions.
 
 ```bash
 npm install @woocommerce/e2e-env --save
+npm install jest --global
 ```
 
 ## Configuration

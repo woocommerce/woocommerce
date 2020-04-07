@@ -23,6 +23,6 @@ do
   fi
 done
 
-echo "$(date) - Docker container had been built successfully"
-
-npm run test:e2e
+if [[ $count -gt 0 ]]; then
+  echo "$(date) - Docker container had been built successfully"
+fi
