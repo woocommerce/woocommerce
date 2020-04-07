@@ -42,9 +42,9 @@ matrix:
   include:
   - name: "Coding standard check"
     php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "E2E tests"
+  - name: "E2E Tests"
     php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "Unit tests code coverage"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1

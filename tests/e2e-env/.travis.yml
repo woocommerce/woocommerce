@@ -2,8 +2,6 @@ version: ~> 1.0
 
 language: php
 
-dist: trusty
-
 sudo: false
 
 cache:
@@ -43,9 +41,9 @@ before_script:
         fi
 
 jobs:
-    fast_finish: true
-    include:
-        - name: E2E Tests
+  fast_finish: true
+  include:
+    - name: "E2E Tests"
     script:
         - composer require wp-cli/i18n-command
         - npm run build
