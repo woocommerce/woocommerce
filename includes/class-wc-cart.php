@@ -1256,34 +1256,28 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
-		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping()->calculate_shipping( $this->get_shipping_packages() ) ) : array();
-
-		$shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
-		$merged_taxes   = array();
-		foreach ( $shipping_taxes as $taxes ) {
-			foreach ( $taxes as $tax_id => $tax_amount ) {
-				if ( ! isset( $merged_taxes[ $tax_id ] ) ) {
-					$merged_taxes[ $tax_id ] = 0;
-				}
-				$merged_taxes[ $tax_id ] += $tax_amount;
-			}
-		}
+		$this->shipping_methods = $this->get_chosen_shipping_methods( $this->get_shipping_packages( true ) );
+		$shipping_taxes         = wc_array_merge_recursive_numeric( wp_list_pluck( $this->shipping_methods, 'taxes' ) );
 
 		$this->set_shipping_total( array_sum( wp_list_pluck( $this->shipping_methods, 'cost' ) ) );
-		$this->set_shipping_tax( array_sum( $merged_taxes ) );
-		$this->set_shipping_taxes( $merged_taxes );
+		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
+		$this->set_shipping_taxes( $shipping_taxes );
 
 		return $this->shipping_methods;
 	}
 
 	/**
-	 * Given a set of packages with rates, get the chosen ones only.
+	 * Given a set of packages with rates, get the chosen rates only.
 	 *
 	 * @since 3.2.0
 	 * @param array $calculated_shipping_packages Array of packages.
 	 * @return array
 	 */
 	protected function get_chosen_shipping_methods( $calculated_shipping_packages = array() ) {
+		if ( empty( $calculated_shipping_packages ) ) {
+			return array();
+		}
+
 		$chosen_methods = array();
 		// Get chosen methods for each package to get our totals.
 		foreach ( $calculated_shipping_packages as $key => $package ) {
@@ -1292,6 +1286,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$chosen_methods[ $key ] = $package['rates'][ $chosen_method ];
 			}
 		}
+
 		return $chosen_methods;
 	}
 
@@ -1328,10 +1323,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * through the filter and break it up.
 	 *
 	 * @since 1.5.4
-	 * @return array of cart items
+	 *
+	 * @param bool $calculate_rates Should rates for the packages also be returned.
+	 * @return array Shipping packages which contain lists of items, the destination, and rates.
 	 */
-	public function get_shipping_packages() {
-		return apply_filters(
+	public function get_shipping_packages( $calculate_rates = false ) {
+		// If there is nothing to ship, no packages should be returned.
+		if ( ! $this->needs_shipping() ) {
+			return array();
+		}
+
+		// Get an array of packages. By default, the entire cart is a single package.
+		$packages = apply_filters(
 			'woocommerce_cart_shipping_packages',
 			array(
 				array(
@@ -1354,6 +1357,13 @@ class WC_Cart extends WC_Legacy_Cart {
 				),
 			)
 		);
+
+		// Add an index/ID to each package in the array using the key.
+		foreach ( $packages as $key => $package ) {
+			$packages[ $key ]['package_id'] = $key;
+		}
+
+		return $calculate_rates ? WC()->shipping()->calculate_shipping( $packages ) : $packages;
 	}
 
 	/**
@@ -1481,7 +1491,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( 0 < $coupon_usage_limit && 0 === get_current_user_id() ) {
 					// For guest, usage per user has not been enforced yet. Enforce it now.
 					$coupon_data_store = $coupon->get_data_store();
-					$billing_email = strtolower( sanitize_email( $billing_email ) );
+					$billing_email     = strtolower( sanitize_email( $billing_email ) );
 					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
 						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
 					}
