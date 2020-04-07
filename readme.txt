@@ -183,7 +183,6 @@ INTERESTED IN DEVELOPMENT?
 
 **WooCommerce**
 * Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.0 #26057
-* Enhancement - Update dependency woocommerce/woocommerce-blocks to v2.5.15. #26043
 * Enhancement - Updated jetpack-autoloader to 1.6 and woocommerce-blocks to 2.5.16. #26099
 * Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
 * Enhancement - Changed show password icon color to a darker grey hue. #25625
