@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2959ea86936fa65d0ea8f25e4f0e7fdb",
+    "content-hash": "18fc7a15ab7921e538dea77490edd41b",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v1.3.5",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "efa1cec37282cf60efaf57724ae2532c7c21bf94"
+                "reference": "3bcbe1ae19febd6beeb181cf11af0bf0b7abe7e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/efa1cec37282cf60efaf57724ae2532c7c21bf94",
-                "reference": "efa1cec37282cf60efaf57724ae2532c7c21bf94",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/3bcbe1ae19febd6beeb181cf11af0bf0b7abe7e7",
+                "reference": "3bcbe1ae19febd6beeb181cf11af0bf0b7abe7e7",
                 "shasum": ""
             },
             "require": {
@@ -40,7 +40,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "time": "2019-11-25T12:37:57+00:00"
+            "time": "2020-03-26T07:57:53+00:00"
         }
     ],
     "packages-dev": [
