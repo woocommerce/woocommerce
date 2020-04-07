@@ -1,14 +1,8 @@
-/**
- * External dependencies
- */
-const { jestConfig } = require( 'puppeteer-utils' );
-const modifiedConfig = jestConfig;
-const afterEnvSetup = modifiedConfig.setupFilesAfterEnv;
+const path = require( 'path' );
+const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-env' );
 
-afterEnvSetup.push( '<rootDir>/tests/e2e-tests/config/jest.setup.js');
-modifiedConfig.setupFilesAfterEnv = afterEnvSetup;
-
-// Sort test path alphabetically. This is needed so that `activate-and-setup` tests run first
-modifiedConfig.testSequencer = '<rootDir>/tests/e2e-tests/config/jest-custom-sequencer.js';
-
-module.exports = modifiedConfig;
+module.exports = {
+	...baseE2Econfig,
+	// Specify the path of your project's E2E tests here.
+	roots: [ path.resolve( __dirname, '../specs' ) ],
+};

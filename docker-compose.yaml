@@ -5,10 +5,10 @@ services:
   wordpress-www:
     volumes:
       # This path is relative to the first config file
-      # which is in assets/components/e2e-env or node_modules/@woocommerce/e2e-env
-      - "../../../:/var/www/html/wp-content/plugins/woocommerce"
+      # which is in tests/e2e-env or node_modules/@woocommerce/e2e-env
+      - "../../:/var/www/html/wp-content/plugins/woocommerce"
 
   wordpress-cli:
     volumes:
-      - "../../../:/var/www/html/wp-content/plugins/woocommerce"
+      - "../../:/var/www/html/wp-content/plugins/woocommerce"
 

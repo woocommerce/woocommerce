@@ -2,7 +2,7 @@ version: ~> 1.0
 
 import:
   # This path will differ for projects using the published package.
-  - source: assets/components/e2e-env/.travis.yml
+  - source: tests/e2e-env/.travis.yml
   # Merge the package config first.
     mode: deep_merge_prepend
 
@@ -45,13 +45,6 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "E2E tests"
     php: 7.4
-    script:
-      - composer require wp-cli/i18n-command
-      - npm run build
-      - npm explore @woocommerce/e2e-env -- npm run docker:up
-      - bash tests/bin/run-e2e-CI.sh
-    after_script:
-      - npm explore @woocommerce/e2e-env -- npm run docker:down
   - name: "Unit tests code coverage"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
