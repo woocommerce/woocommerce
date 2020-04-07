@@ -240,7 +240,6 @@ const Checkout = ( {
 									onChange={ ( isChecked ) =>
 										setShippingAsBilling( isChecked )
 									}
-									required={ attributes.requirePhoneField }
 								/>
 							</FormStep>
 						) }
