@@ -9,34 +9,24 @@
  */
 
 // Support for indented bullet-lists.
-.wp-suggested-text ul,
 .policy-text ul {
 	list-style: disc;
 }
 
-.wp-suggested-text ol,
 .policy-text ol {
 	list-style: decimal;
 }
 
-.wp-suggested-text ul li,
-.wp-suggested-text ol li,
 .policy-text ul li,
 .policy-text ol li {
 	margin-left: 2em;
 }
 
 // Pre-5.4 support for italics.
-.branch-4-9 .wp-suggested-text ul,
-.branch-4-9 .wp-suggested-text ol,
-.branch-5 .wp-suggested-text ul,
-.branch-5 .wp-suggested-text ol,
-.branch-5-1 .wp-suggested-text ul,
-.branch-5-1 .wp-suggested-text ol,
-.branch-5-2 .wp-suggested-text ul,
-.branch-5-2 .wp-suggested-text ol,
-.branch-5-3 .wp-suggested-text ul,
-.branch-5-3 .wp-suggested-text ol {
+.branch-5-2 .policy-text ul,
+.branch-5-2 .policy-text ol,
+.branch-5-3 .policy-text ul,
+.branch-5-3 .policy-text ol {
 	font-style: italic;
 }
 
