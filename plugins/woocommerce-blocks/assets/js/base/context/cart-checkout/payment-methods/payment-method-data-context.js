@@ -45,7 +45,6 @@ import {
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
 import { useStoreNotices } from '@woocommerce/base-hooks';
-import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
@@ -120,25 +119,7 @@ export const PaymentMethodDataProvider = ( {
 	);
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
-
-	const { isEditor } = useEditorContext();
-	const previewSavedPaymentOptions = {
-		cc: [
-			{
-				method: {
-					gateway: 'stripe',
-					last4: '1234',
-					brand: 'Visa',
-				},
-				expires: '12/20',
-				is_default: true,
-				tokenId: 1,
-			},
-		],
-	};
-	const customerPaymentMethods = isEditor
-		? previewSavedPaymentOptions
-		: getSetting( 'customerPaymentMethods', {} );
+	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
 	const [ paymentStatus, dispatch ] = useReducer(
 		reducer,
 		DEFAULT_PAYMENT_DATA
