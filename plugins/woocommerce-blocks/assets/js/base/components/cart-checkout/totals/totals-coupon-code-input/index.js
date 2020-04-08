@@ -21,7 +21,7 @@ import './style.scss';
 const TotalsCouponCodeInput = ( {
 	instanceId,
 	isLoading = false,
-	initialOpen,
+	initialOpen = false,
 	onSubmit = () => {},
 } ) => {
 	const [ couponValue, setCouponValue ] = useState( '' );

@@ -22,7 +22,10 @@ import { useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
-import { previewCart } from '@woocommerce/resource-previews';
+import {
+	previewCart,
+	checkoutBlockPreview,
+} from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -267,7 +270,12 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 };
 
 const CheckoutEditor = ( { attributes, setAttributes } ) => {
-	const { className } = attributes;
+	const { className, isPreview } = attributes;
+
+	if ( isPreview ) {
+		return checkoutBlockPreview;
+	}
+
 	return (
 		<EditorProvider previewCart={ previewCart }>
 			<div className={ className }>

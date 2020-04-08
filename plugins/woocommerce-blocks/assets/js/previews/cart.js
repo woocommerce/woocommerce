@@ -2,13 +2,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { SHIPPING_METHODS_EXIST } from '@woocommerce/block-settings';
+import {
+	SHIPPING_METHODS_EXIST,
+	WC_BLOCKS_ASSET_URL,
+} from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
-import productPicture from './product-image';
 import { previewShippingRates } from './shipping-rates';
+
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
 // https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/master/src/RestApi/StoreApi#cart-api
@@ -39,8 +42,8 @@ export const previewCart = {
 			images: [
 				{
 					id: 10,
-					src: productPicture,
-					thumbnail: productPicture,
+					src: WC_BLOCKS_ASSET_URL + 'img/beanie.jpg',
+					thumbnail: WC_BLOCKS_ASSET_URL + 'img/beanie.jpg',
 					srcset: '',
 					sizes: '',
 					name: '',
@@ -111,8 +114,8 @@ export const previewCart = {
 			images: [
 				{
 					id: 11,
-					src: productPicture,
-					thumbnail: productPicture,
+					src: WC_BLOCKS_ASSET_URL + 'img/cap.jpg',
+					thumbnail: WC_BLOCKS_ASSET_URL + 'img/cap.jpg',
 					srcset: '',
 					sizes: '',
 					name: '',
@@ -175,10 +178,10 @@ export const previewCart = {
 		total_fees_tax: '0',
 		total_discount: '0',
 		total_discount_tax: '0',
-		total_shipping: '0',
+		total_shipping: '200',
 		total_shipping_tax: '0',
 		total_tax: '0',
-		total_price: '3000',
+		total_price: '3200',
 		tax_lines: [],
 	},
 };

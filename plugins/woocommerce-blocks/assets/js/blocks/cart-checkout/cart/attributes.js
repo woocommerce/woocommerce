@@ -7,6 +7,11 @@ import {
 } from '@woocommerce/block-settings';
 
 const blockAttributes = {
+	isPreview: {
+		type: 'boolean',
+		default: false,
+		save: false,
+	},
 	isShippingCalculatorEnabled: {
 		type: 'boolean',
 		default: IS_SHIPPING_CALCULATOR_ENABLED,

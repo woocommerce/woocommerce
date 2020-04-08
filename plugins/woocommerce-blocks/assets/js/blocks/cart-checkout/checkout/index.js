@@ -32,7 +32,9 @@ const settings = {
 		multiple: false,
 	},
 	example: {
-		attributes: {},
+		attributes: {
+			isPreview: true,
+		},
 	},
 	attributes: blockAttributes,
 	edit,

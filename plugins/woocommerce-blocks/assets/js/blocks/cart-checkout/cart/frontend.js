@@ -6,49 +6,18 @@ import {
 	withStoreCartApiHydration,
 } from '@woocommerce/block-hocs';
 import { __ } from '@wordpress/i18n';
-import { useStoreCart } from '@woocommerce/base-hooks';
-import { RawHTML } from '@wordpress/element';
-import LoadingMask from '@woocommerce/base-components/loading-mask';
-import {
-	StoreNoticesProvider,
-	ValidationContextProvider,
-	CartProvider,
-} from '@woocommerce/base-context';
+import { StoreNoticesProvider } from '@woocommerce/base-context';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 
 /**
  * Internal dependencies
  */
-import FullCart from './full-cart';
+import Block from './block.js';
 import blockAttributes from './attributes';
 import renderFrontend from '../../../utils/render-frontend.js';
 
 const reloadPage = () => void window.location.reload( true );
-
-/**
- * Renders the frontend block within the cart provider.
- */
-const Block = ( { emptyCart, attributes } ) => {
-	const { cartItems, cartIsLoading } = useStoreCart();
-
-	return (
-		<>
-			{ ! cartIsLoading && cartItems.length === 0 ? (
-				<RawHTML>{ emptyCart }</RawHTML>
-			) : (
-				<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
-					<ValidationContextProvider>
-						<CartProvider>
-							<FullCart attributes={ attributes } />
-						</CartProvider>
-					</ValidationContextProvider>
-				</LoadingMask>
-			) }
-		</>
-	);
-};
-
 /**
  * Wrapper component to supply API data and show empty cart view as needed.
  *

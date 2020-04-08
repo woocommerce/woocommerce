@@ -51,11 +51,13 @@ import CheckoutOrderError from './checkout-order-error';
 import NoShippingPlaceholder from './no-shipping-placeholder';
 import './style.scss';
 
-const Block = ( props ) => (
-	<CheckoutProvider>
-		<Checkout { ...props } />
-	</CheckoutProvider>
-);
+const Block = ( props ) => {
+	return (
+		<CheckoutProvider>
+			<Checkout { ...props } />
+		</CheckoutProvider>
+	);
+};
 
 const Checkout = ( { attributes, scrollToTop } ) => {
 	const { isEditor } = useEditorContext();

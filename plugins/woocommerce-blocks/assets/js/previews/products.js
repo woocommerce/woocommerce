@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import productPicture from './product-image';
+import { WC_BLOCKS_ASSET_URL } from '@woocommerce/block-settings';
 
 const shortDescription = __(
 	'Fly your WordPress banner with this beauty! Deck out your office space or add it to your kids walls. This banner will spruce up any space it’s hung!',
@@ -30,8 +26,8 @@ export const previewProducts = [
 		images: [
 			{
 				id: 1,
-				src: productPicture,
-				thumbnail: productPicture,
+				src: WC_BLOCKS_ASSET_URL + 'img/pennant.jpg',
+				thumbnail: WC_BLOCKS_ASSET_URL + 'img/pennant.jpg',
 				name: 'pennant-1.jpg',
 				alt: 'WordPress Pennant',
 				srcset: '',

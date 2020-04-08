@@ -12,7 +12,6 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import edit from './edit';
-import { example } from './example';
 import './style.scss';
 import blockAttributes from './attributes';
 
@@ -33,7 +32,11 @@ const settings = {
 		html: false,
 		multiple: false,
 	},
-	example,
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+	},
 	attributes: blockAttributes,
 	edit,
 
