@@ -15,6 +15,7 @@ import { getQuery } from '@woocommerce/navigation';
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 import { Stepper } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 class Square extends Component {
 	constructor( props ) {
@@ -43,12 +44,17 @@ class Square extends Component {
 	}
 
 	async connect() {
-		const { createNotice, options, updateOptions } = this.props;
+		const {
+			createNotice,
+			hasCbdIndustry,
+			options,
+			updateOptions,
+		} = this.props;
 		this.setState( { isPending: true } );
 
 		updateOptions( {
-			woocommerce_stripe_settings: {
-				...options.woocommerce_stripe_settings,
+			woocommerce_square_credit_card_settings: {
+				...options.woocommerce_square_credit_card_settings,
 				enabled: 'yes',
 			},
 		} );
@@ -59,6 +65,13 @@ class Square extends Component {
 		);
 
 		try {
+			let newWindow = null;
+			if ( hasCbdIndustry ) {
+				// It's necessary to declare the new tab before the async call,
+				// otherwise, it won't be possible to open it.
+				newWindow = window.open( '/', '_blank' );
+			}
+
 			const result = await apiFetch( {
 				path: WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-square',
 				method: 'POST',
@@ -67,14 +80,26 @@ class Square extends Component {
 			if ( ! result || ! result.connectUrl ) {
 				this.setState( { isPending: false } );
 				createNotice( 'error', errorMessage );
+				if ( hasCbdIndustry ) {
+					newWindow.close();
+				}
 				return;
 			}
 
 			this.setState( { isPending: true } );
-			window.location = result.connectUrl;
+			this.redirect( result.connectUrl, newWindow );
 		} catch ( error ) {
 			this.setState( { isPending: false } );
 			createNotice( 'error', errorMessage );
+		}
+	}
+
+	redirect( connectUrl, newWindow ) {
+		if ( newWindow ) {
+			newWindow.location.href = connectUrl;
+			window.location = getAdminLink( 'admin.php?page=wc-admin' );
+		} else {
+			window.location = connectUrl;
 		}
 	}
 
@@ -121,9 +146,13 @@ class Square extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const { getOptions, isGetOptionsRequesting } = select( 'wc-api' );
-		const options = getOptions( [ 'woocommerce_stripe_settings' ] );
+		const options = getOptions( [
+			'woocommerce_square_credit_card_settings',
+		] );
 		const optionsIsRequesting = Boolean(
-			isGetOptionsRequesting( [ 'woocommerce_stripe_settings' ] )
+			isGetOptionsRequesting( [
+				'woocommerce_square_credit_card_settings',
+			] )
 		);
 
 		return {

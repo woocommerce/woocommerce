@@ -505,7 +505,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		if ( 'US' === WC()->countries->get_base_country() ) {
 			$profile = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
 			if ( ! empty( $profile['industry'] ) ) {
-				$has_cbd_industry = array_search( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ) );
+				$has_cbd_industry = in_array( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ), true );
 			}
 		}
 
