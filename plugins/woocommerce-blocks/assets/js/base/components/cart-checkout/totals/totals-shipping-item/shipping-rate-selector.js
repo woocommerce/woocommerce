@@ -33,9 +33,9 @@ const ShippingRateSelector = ( {
 		<fieldset className="wc-block-totals__shipping-options-fieldset">
 			<legend className="screen-reader-text">
 				{ hasRates
-					? __( 'Shipping methods', 'woo-gutenberg-products-block' )
+					? __( 'Shipping options', 'woo-gutenberg-products-block' )
 					: __(
-							'Choose a shipping method',
+							'Choose a shipping option',
 							'woo-gutenberg-products-block'
 					  ) }
 			</legend>
