@@ -150,7 +150,7 @@
 		"npm": "6.14.4"
 	},
 	"dependencies": {
-		"@stripe/react-stripe-js": "1.1.0",
+		"@stripe/react-stripe-js": "1.1.2",
 		"@stripe/stripe-js": "1.2.0",
 		"@woocommerce/components": "4.0.0",
 		"@wordpress/notices": "2.0.0",
