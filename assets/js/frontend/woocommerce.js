@@ -81,7 +81,7 @@ jQuery( function( $ ) {
 
 	// Show password visiblity hover icon on woocommerce forms
 	$( '.woocommerce form .woocommerce-Input[type="password"]' ).wrap( '<span class="password-input"></span>' );
-	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
+	$( '.password-input' ).prepend( '<span class="show-password-input"></span>' );
 
 	$( '.show-password-input' ).click(
 		function() {
