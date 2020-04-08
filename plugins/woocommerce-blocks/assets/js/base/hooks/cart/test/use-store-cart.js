@@ -34,13 +34,15 @@ describe( 'useStoreCart', () => {
 		cartIsLoading: false,
 		cartItemErrors: [],
 		cartErrors: [],
-		shippingRates: previewCart.shipping_rates,
 		shippingAddress: {
 			country: '',
 			state: '',
 			city: '',
 			postcode: '',
 		},
+		shippingRates: previewCart.shipping_rates,
+		shippingRatesLoading: false,
+		hasShippingAddress: false,
 	};
 
 	const mockCartItems = [ { key: '1', id: 1, name: 'Lorem Ipsum' } ];
@@ -67,11 +69,13 @@ describe( 'useStoreCart', () => {
 		cartItemsCount: 1,
 		cartItemsWeight: 10,
 		cartNeedsShipping: true,
-		shippingAddress: mockShippingAddress,
-		shippingRates: [],
 		cartTotals: mockCartTotals,
 		cartIsLoading: mockCartIsLoading,
 		cartErrors: mockCartErrors,
+		shippingAddress: mockShippingAddress,
+		shippingRates: [],
+		shippingRatesLoading: false,
+		hasShippingAddress: false,
 	};
 
 	const getWrappedComponents = ( Component ) => (
@@ -94,6 +98,7 @@ describe( 'useStoreCart', () => {
 				hasFinishedResolution: jest
 					.fn()
 					.mockReturnValue( ! mockCartIsLoading ),
+				areShippingRatesLoading: jest.fn().mockReturnValue( false ),
 			},
 		};
 		registry.registerStore( storeKey, {
