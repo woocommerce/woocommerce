@@ -1212,7 +1212,7 @@ return array(
 		'TR30' => __( 'Hakkari', 'woocommerce' ),
 		'TR31' => __( 'Hatay', 'woocommerce' ),
 		'TR32' => __( 'Isparta', 'woocommerce' ),
-		'TR33' => __( '&#304;&#231;el', 'woocommerce' ),
+		'TR33' => __( 'Mersin', 'woocommerce' ),
 		'TR34' => __( '&#304;stanbul', 'woocommerce' ),
 		'TR35' => __( '&#304;zmir', 'woocommerce' ),
 		'TR36' => __( 'Kars', 'woocommerce' ),
