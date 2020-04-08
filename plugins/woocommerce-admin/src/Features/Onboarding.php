@@ -946,7 +946,7 @@ class Onboarding {
 		$new_value = ! $previous;
 
 		wc_admin_record_tracks_event(
-			'wcadmin_storeprofiler_toggled',
+			'storeprofiler_toggled',
 			array(
 				'previous'  => $previous,
 				'new_value' => $new_value,
