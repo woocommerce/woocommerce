@@ -23,8 +23,16 @@ class InstalledExtensions {
 	public static function get_data() {
 		$data = [];
 
-		$mailchimp = self::get_mailchimp_extension_data();
-		$facebook = self::get_facebook_extension_data();
+		$automatewoo = self::get_automatewoo_extension_data();
+		$mailchimp   = self::get_mailchimp_extension_data();
+		$facebook    = self::get_facebook_extension_data();
+		$google      = self::get_google_extension_data();
+		$hubspot     = self::get_hubspot_extension_data();
+		$amazon_ebay = self::get_amazon_ebay_extension_data();
+
+		if ( $automatewoo ) {
+			$data[] = $automatewoo;
+		}
 
 		if ( $mailchimp ) {
 			$data[] = $mailchimp;
@@ -32,6 +40,18 @@ class InstalledExtensions {
 
 		if ( $facebook ) {
 			$data[] = $facebook;
+		}
+
+		if ( $google ) {
+			$data[] = $google;
+		}
+
+		if ( $hubspot ) {
+			$data[] = $hubspot;
+		}
+
+		if ( $amazon_ebay ) {
+			$data[] = $amazon_ebay;
 		}
 
 		return $data;
@@ -44,9 +64,37 @@ class InstalledExtensions {
 	 */
 	public static function get_allowed_plugins() {
 		return [
+			'automatewoo',
 			'mailchimp-for-woocommerce',
 			'facebook-for-woocommerce',
+			'kliken-marketing-for-google',
+			'hubwoo-integration',
+			'codistoconnect',
 		];
+	}
+
+	/**
+	 * Get AutomateWoo extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_automatewoo_extension_data() {
+		$slug = 'automatewoo';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = plugins_url( 'images/marketing/automatewoo.svg', WC_ADMIN_PLUGIN_FILE );
+
+		if ( 'activated' === $data['status'] && function_exists( 'AW' ) ) {
+			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings' );
+			$data['docsUrl']     = 'https://automatewoo.com/docs/';
+			$data['status']      = 'configured'; // Currently no configuration step.
+		}
+
+		return $data;
 	}
 
 	/**
@@ -61,7 +109,7 @@ class InstalledExtensions {
 			return false;
 		}
 
-		$data = self::get_extension_base_data( $slug );
+		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = plugins_url( 'images/marketing/mailchimp.svg', WC_ADMIN_PLUGIN_FILE );
 
 		if ( 'activated' === $data['status'] && function_exists( 'mailchimp_is_configured' ) ) {
@@ -79,7 +127,7 @@ class InstalledExtensions {
 	/**
 	 * Get Facebook extension data.
 	 *
-	 * @return bool
+	 * @return array|bool
 	 */
 	protected static function get_facebook_extension_data() {
 		$slug = 'facebook-for-woocommerce';
@@ -88,7 +136,7 @@ class InstalledExtensions {
 			return false;
 		}
 
-		$data = self::get_extension_base_data( $slug );
+		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = plugins_url( 'images/marketing/facebook.svg', WC_ADMIN_PLUGIN_FILE );
 
 		if ( 'activated' === $data['status'] && function_exists( 'facebook_for_woocommerce' ) ) {
@@ -99,7 +147,100 @@ class InstalledExtensions {
 			}
 
 			$data['settingsUrl'] = facebook_for_woocommerce()->get_settings_url();
-			$data['docsUrl'] = facebook_for_woocommerce()->get_documentation_url();
+			$data['docsUrl']     = facebook_for_woocommerce()->get_documentation_url();
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Google extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_google_extension_data() {
+		$slug = 'kliken-marketing-for-google';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = plugins_url( 'images/marketing/google.svg', WC_ADMIN_PLUGIN_FILE );
+
+		if ( 'activated' === $data['status'] && function_exists( 'kk_wc_plugin' ) && class_exists( '\Kliken\WcPlugin\Helper' ) ) {
+
+			$kliken_settings = \Kliken\WcPlugin\Helper::get_plugin_options();
+
+			// Use same check as the Kliken Get Started Page.
+			if ( \Kliken\WcPlugin\Helper::is_valid_account_id( $kliken_settings['account_id'] ) ) {
+				$data['status'] = 'configured';
+			}
+
+			$data['settingsUrl'] = admin_url( 'admin.php?page=wc-settings&tab=integration&section=kk_wcintegration' );
+			$data['docsUrl']     = 'https://docs.woocommerce.com/document/google-ads/';
+			$data['supportUrl']  = 'https://www.kliken.com/support.html';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Hubspot extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_hubspot_extension_data() {
+		$slug = 'hubwoo-integration';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = plugins_url( 'images/marketing/hubspot.svg', WC_ADMIN_PLUGIN_FILE );
+
+		if ( 'activated' === $data['status'] && class_exists( '\Hubwoo' ) ) {
+
+			// Use same check as HubWoo admin.
+			if ( \Hubwoo::is_setup_completed() ) {
+				$data['status'] = 'configured';
+			}
+
+			$data['settingsUrl'] = admin_url( 'admin.php?page=hubwoo' );
+			$data['docsUrl']     = 'https://docs.makewebbetter.com/hubspot-woocommerce-integration/';
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get Amazon / Ebay extension data.
+	 *
+	 * @return array|bool
+	 */
+	protected static function get_amazon_ebay_extension_data() {
+		$slug = 'codistoconnect';
+
+		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
+			return false;
+		}
+
+		$data         = self::get_extension_base_data( $slug );
+		$data['icon'] = plugins_url( 'images/marketing/amazon-ebay.svg', WC_ADMIN_PLUGIN_FILE );
+
+		if ( 'activated' === $data['status'] && class_exists( '\CodistoConnect' ) ) {
+
+			$codisto_merchantid = get_option( 'codisto_merchantid' );
+
+			// Use same check as codisto admin tabs.
+			if ( is_numeric( $codisto_merchantid ) ) {
+				$data['status'] = 'configured';
+			}
+
+			$data['settingsUrl'] = admin_url( 'admin.php?page=codisto-settings' );
+			$data['docsUrl']     = 'https://docs.woocommerce.com/document/getting-started-with-woocommerce-amazon-ebay-integration/';
+			$data['supportUrl']  = 'https://get.codisto.help/hc/en-us/categories/204467528';
 		}
 
 		return $data;
