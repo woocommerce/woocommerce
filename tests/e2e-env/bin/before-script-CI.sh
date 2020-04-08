@@ -17,3 +17,5 @@ fi
 if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
   composer install
 fi
+
+npm install jest --global
