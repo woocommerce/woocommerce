@@ -13,7 +13,7 @@ const StoreNoticesContext = createContext( {
 	notices: [],
 	createNotice: ( status, text, props ) => void { status, text, props },
 	createSnackBarNotice: () => void null,
-	removeNotice: () => void null,
+	removeNotice: ( id ) => void id,
 	context: 'wc/core',
 } );
 
