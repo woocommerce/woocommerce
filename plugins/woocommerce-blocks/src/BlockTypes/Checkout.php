@@ -50,10 +50,24 @@ class Checkout extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
+		if ( $this->is_checkout_endpoint() ) {
+			// @todo Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
+			// legacy shortcode instead and do not render block.
+			return '[woocommerce_checkout]';
+		}
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
 		$this->enqueue_assets( $attributes );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
 		return $content . $this->get_skeleton();
+	}
+
+	/**
+	 * Check if we're viewing a checkout page endpoint, rather than the main checkout page itself.
+	 *
+	 * @return boolean
+	 */
+	protected function is_checkout_endpoint() {
+		return is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'order-received' );
 	}
 
 	/**
