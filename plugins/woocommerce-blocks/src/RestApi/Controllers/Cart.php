@@ -201,7 +201,6 @@ class Cart extends WP_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_cart_error', __( 'Quantity cannot be empty.', 'woo-gutenberg-products-block' ) );
 		}
 
-		// @todo handle variations
 		$result = $this->add_to_cart( $product_id, $quantity, $variation_id );
 
 		if ( is_wp_error( $result ) ) {

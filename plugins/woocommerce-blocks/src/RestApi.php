@@ -100,7 +100,6 @@ class RestApi {
 	 *
 	 * Note: We load the session here early so guest nonces are in place.
 	 *
-	 * @todo check compat < WC 3.6. Make specific to cart endpoint.
 	 * @param mixed $return Value being filtered.
 	 * @return mixed
 	 */
@@ -108,13 +107,16 @@ class RestApi {
 		$wc_instance = wc();
 		// if WooCommerce instance isn't available or already have an
 		// authentication error, just return.
-		if ( ! method_exists( $wc_instance, 'initialize_session' ) || \is_wp_error( $return ) ) {
+		if ( ! method_exists( $wc_instance, 'initialize_session' ) || \is_wp_error( $return ) || ! self::is_request_to_store_api() ) {
 			return $return;
 		}
 		$wc_instance->frontend_includes();
 		$wc_instance->initialize_session();
 		$wc_instance->initialize_cart();
-		$wc_instance->cart->get_cart();
+
+		// Ensure cart is up to date.
+		$wc_instance->cart->calculate_shipping();
+		$wc_instance->cart->calculate_totals();
 
 		return $return;
 	}
