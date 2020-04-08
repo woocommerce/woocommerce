@@ -81,12 +81,17 @@ export const ShippingDataProvider = ( { children } ) => {
 		selectedShippingRates: selectedRates,
 		isSelectingRate,
 	} = useSelectShippingRate( shippingRates );
-	const onShippingRateSuccess = emitterSubscribers( subscriber ).onSuccess;
-	const onShippingRateFail = emitterSubscribers( subscriber ).onFail;
-	const onShippingRateSelectSuccess = emitterSubscribers( subscriber )
-		.onSelectSuccess;
-	const onShippingRateSelectFail = emitterSubscribers( subscriber )
-		.onShippingRateSelectFail;
+	const eventSubscribers = useMemo(
+		() => ( {
+			onShippingRateSuccess: emitterSubscribers( subscriber ).onSuccess,
+			onShippingRateFail: emitterSubscribers( subscriber ).onFail,
+			onShippingRateSelectSuccess: emitterSubscribers( subscriber )
+				.onSelectSuccess,
+			onShippingRateSelectFail: emitterSubscribers( subscriber )
+				.onSelectFail,
+		} ),
+		[ subscriber ]
+	);
 
 	// set observers on ref so it's always current.
 	useEffect( () => {
@@ -132,14 +137,22 @@ export const ShippingDataProvider = ( { children } ) => {
 				EMIT_TYPES.SHIPPING_RATES_FAIL,
 				currentErrorStatus
 			);
-		} else if ( ! shippingRatesLoading && shippingRates ) {
+		}
+	}, [ shippingRates, shippingRatesLoading, currentErrorStatus.hasError ] );
+
+	useEffect( () => {
+		if (
+			! shippingRatesLoading &&
+			shippingRates &&
+			! currentErrorStatus.hasError
+		) {
 			emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_SUCCESS,
 				shippingRates
 			);
 		}
-	}, [ shippingRates, shippingRatesLoading, currentErrorStatus ] );
+	}, [ shippingRates, shippingRatesLoading, currentErrorStatus.hasError ] );
 
 	// emit shipping rate selection events.
 	useEffect( () => {
@@ -149,14 +162,22 @@ export const ShippingDataProvider = ( { children } ) => {
 				EMIT_TYPES.SHIPPING_RATE_SELECT_FAIL,
 				currentErrorStatus
 			);
-		} else if ( ! isSelectingRate && selectedRates ) {
+		}
+	}, [ selectedRates, isSelectingRate, currentErrorStatus.hasError ] );
+
+	useEffect( () => {
+		if (
+			! isSelectingRate &&
+			selectedRates &&
+			! currentErrorStatus.hasError
+		) {
 			emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_SUCCESS,
 				selectedRates
 			);
 		}
-	}, [ selectedRates, isSelectingRate, currentErrorStatus ] );
+	}, [ selectedRates, isSelectingRate, currentErrorStatus.hasError ] );
 
 	/**
 	 * @type {ShippingDataContext}
@@ -170,12 +191,14 @@ export const ShippingDataProvider = ( { children } ) => {
 		shippingRatesLoading,
 		selectedRates,
 		setSelectedRates,
+		isSelectingRate,
 		shippingAddress,
 		setShippingAddress,
-		onShippingRateSuccess,
-		onShippingRateFail,
-		onShippingRateSelectSuccess,
-		onShippingRateSelectFail,
+		onShippingRateSuccess: eventSubscribers.onShippingRateSuccess,
+		onShippingRateFail: eventSubscribers.onShippingRateFail,
+		onShippingRateSelectSuccess:
+			eventSubscribers.onShippingRateSelectSuccess,
+		onShippingRateSelectFail: eventSubscribers.onShippingRateSelectFail,
 		needsShipping,
 	};
 	return (

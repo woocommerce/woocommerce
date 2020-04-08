@@ -14,6 +14,8 @@ use Exception;
 use WC_Stripe_Payment_Request;
 use WC_Stripe_Helper;
 use Automattic\WooCommerce\Blocks\Assets\Api;
+use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
+use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 
 /**
  * Stripe payment method integration
@@ -49,6 +51,7 @@ final class Stripe extends AbstractPaymentMethodType {
 	 */
 	public function __construct( Api $asset_api ) {
 		$this->asset_api = $asset_api;
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', [ $this, 'add_payment_request_order_meta' ], 8, 2 );
 	}
 
 	/**
@@ -176,5 +179,21 @@ final class Stripe extends AbstractPaymentMethodType {
 	 */
 	private function get_button_locale() {
 		return apply_filters( 'wc_stripe_payment_request_button_locale', substr( get_locale(), 0, 2 ) );
+	}
+
+	/**
+	 * Add payment request data to the order meta as hooked on the
+	 * woocommerce_rest_checkout_process_payment_with_context action.
+	 *
+	 * @param PaymentContext $context Holds context for the payment.
+	 * @param PaymentResult  $result  Result object for the payment.
+	 */
+	public function add_payment_request_order_meta( PaymentContext $context, PaymentResult $result ) {
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$post_data = $_POST;
+		$_POST     = $context->payment_data;
+
+		WC_Stripe_Payment_Request::add_order_meta( $context->order->id, $context->payment_data );
+		$_POST = $post_data;
 	}
 }

@@ -10,9 +10,9 @@ import {
  * Internal dependencies
  */
 import stripeCcPaymentMethod from './credit-card';
-import ApplePayPaymentMethod from './apple-pay';
+import PaymentRequestPaymentMethod from './payment-request';
 
 registerPaymentMethod( ( Config ) => new Config( stripeCcPaymentMethod ) );
 registerExpressPaymentMethod(
-	( Config ) => new Config( ApplePayPaymentMethod )
+	( Config ) => new Config( PaymentRequestPaymentMethod )
 );

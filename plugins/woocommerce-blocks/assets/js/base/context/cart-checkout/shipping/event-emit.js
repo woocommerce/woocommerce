@@ -25,11 +25,11 @@ const emitterSubscribers = ( dispatcher ) => ( {
 	onSuccess: emitterCallback( EMIT_TYPES.SHIPPING_RATES_SUCCESS, dispatcher ),
 	onFail: emitterCallback( EMIT_TYPES.SHIPPING_RATES_FAIL, dispatcher ),
 	onSelectSuccess: emitterCallback(
-		EMIT_TYPES.SHIPPING_RATES_SELECT_SUCCESS,
+		EMIT_TYPES.SHIPPING_RATE_SELECT_SUCCESS,
 		dispatcher
 	),
 	onSelectFail: emitterCallback(
-		EMIT_TYPES.SHIPPING_RATES_SELECT_FAIL,
+		EMIT_TYPES.SHIPPING_RATE_SELECT_FAIL,
 		dispatcher
 	),
 } );

@@ -41,14 +41,14 @@ export const CheckoutProvider = ( {
 			submitLabel={ submitLabel }
 		>
 			<BillingDataProvider>
-				<PaymentMethodDataProvider
-					activePaymentMethod={ initialActivePaymentMethod }
-				>
-					<ShippingDataProvider>
+				<ShippingDataProvider>
+					<PaymentMethodDataProvider
+						activePaymentMethod={ initialActivePaymentMethod }
+					>
 						{ children }
 						<CheckoutProcessor />
-					</ShippingDataProvider>
-				</PaymentMethodDataProvider>
+					</PaymentMethodDataProvider>
+				</ShippingDataProvider>
 			</BillingDataProvider>
 		</CheckoutStateProvider>
 	);

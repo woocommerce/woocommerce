@@ -357,7 +357,16 @@ class Checkout extends AbstractRoute {
 	 * @return string
 	 */
 	protected function get_request_payment_method_id( \WP_REST_Request $request ) {
-		$payment_method = wc_clean( wp_unslash( $request['payment_method'] ) );
+		$payment_data = $this->get_request_payment_data( $request );
+		// allows for payment methods to override the payment method
+		// automatically set by checkout if necessary (typically when a gateway)
+		// may have multiple payment methods for the same gateway.
+		$payment_method = isset( $payment_data['payment_method'] )
+			? $payment_data['payment_method']
+			: null;
+		$payment_method = null === $payment_method
+			? wc_clean( wp_unslash( $request['payment_method'] ) )
+			: $payment_method;
 		$valid_methods  = WC()->payment_gateways->get_payment_gateway_ids();
 
 		if ( empty( $payment_method ) ) {
@@ -414,8 +423,10 @@ class Checkout extends AbstractRoute {
 	 * @return array
 	 */
 	protected function get_request_payment_data( \WP_REST_Request $request ) {
-		$payment_data = [];
-
+		static $payment_data = [];
+		if ( ! empty( $payment_data ) ) {
+			return $payment_data;
+		}
 		if ( ! empty( $request['payment_data'] ) ) {
 			foreach ( $request['payment_data'] as $data ) {
 				$payment_data[ sanitize_key( $data['key'] ) ] = wc_clean( $data['value'] );

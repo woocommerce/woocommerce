@@ -56,21 +56,26 @@ const CheckoutProcessor = () => {
 		currentStatus: currentPaymentStatus,
 		errorMessage,
 		paymentMethodData,
+		expressPaymentMethods,
 	} = usePaymentMethodDataContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
 	const currentShippingAddress = useRef( shippingAddress );
 	const [ isProcessingOrder, setIsProcessingOrder ] = useState( false );
+	const expressPaymentMethodActive = Object.keys(
+		expressPaymentMethods
+	).includes( activePaymentMethod );
 
 	const checkoutWillHaveError =
-		hasValidationErrors ||
+		( hasValidationErrors && ! expressPaymentMethodActive ) ||
 		currentPaymentStatus.hasError ||
 		shippingErrorStatus.hasError;
 
 	useEffect( () => {
 		if (
 			checkoutWillHaveError !== checkoutHasError &&
-			( checkoutIsProcessing || checkoutIsProcessingComplete )
+			( checkoutIsProcessing || checkoutIsProcessingComplete ) &&
+			! expressPaymentMethodActive
 		) {
 			dispatchActions.setHasError( checkoutWillHaveError );
 		}
@@ -79,6 +84,7 @@ const CheckoutProcessor = () => {
 		checkoutHasError,
 		checkoutIsProcessing,
 		checkoutIsProcessingComplete,
+		expressPaymentMethodActive,
 	] );
 
 	const paidAndWithoutErrors =
@@ -136,14 +142,16 @@ const CheckoutProcessor = () => {
 	] );
 
 	useEffect( () => {
-		const unsubscribeProcessing = onCheckoutProcessing(
-			checkValidation,
-			0
-		);
+		let unsubscribeProcessing;
+		if ( ! expressPaymentMethodActive ) {
+			unsubscribeProcessing = onCheckoutProcessing( checkValidation, 0 );
+		}
 		return () => {
-			unsubscribeProcessing();
+			if ( ! expressPaymentMethodActive ) {
+				unsubscribeProcessing();
+			}
 		};
-	}, [ onCheckoutProcessing, checkValidation ] );
+	}, [ onCheckoutProcessing, checkValidation, expressPaymentMethodActive ] );
 
 	const processOrder = useCallback( () => {
 		setIsProcessingOrder( true );
@@ -209,14 +217,7 @@ const CheckoutProcessor = () => {
 				dispatchActions.setComplete();
 				setIsProcessingOrder( false );
 			} );
-	}, [
-		addErrorNotice,
-		removeNotice,
-		activePaymentMethod,
-		currentBillingData,
-		currentShippingAddress,
-		paymentMethodData,
-	] );
+	}, [ addErrorNotice, removeNotice, activePaymentMethod, paymentMethodData ] );
 	// setup checkout processing event observers.
 	useEffect( () => {
 		const unsubscribeRedirect = onCheckoutCompleteSuccess( () => {
@@ -225,7 +226,7 @@ const CheckoutProcessor = () => {
 		return () => {
 			unsubscribeRedirect();
 		};
-	}, [ onCheckoutProcessing, onCheckoutCompleteSuccess, redirectUrl ] );
+	}, [ onCheckoutCompleteSuccess, redirectUrl ] );
 
 	// process order if conditions are good.
 	useEffect( () => {

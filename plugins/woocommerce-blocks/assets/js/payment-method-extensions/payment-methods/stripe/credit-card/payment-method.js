@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
-import { getStripeServerData, stripePromise } from '../stripe-utils';
+import { getStripeServerData } from '../stripe-utils';
 import { ccSvg } from './cc';
 import { useCheckoutSubscriptions } from './use-checkout-subscriptions';
 import { InlineCard, CardElements } from './elements';
@@ -90,10 +90,10 @@ const CreditCardComponent = ( { billing, eventRegistration, components } ) => {
 
 export const StripeCreditCard = ( props ) => {
 	const { locale } = getStripeServerData().button;
-	const { activePaymentMethod } = props;
+	const { activePaymentMethod, stripe } = props;
 
 	return activePaymentMethod === PAYMENT_METHOD_NAME ? (
-		<Elements stripe={ stripePromise } locale={ locale }>
+		<Elements stripe={ stripe } locale={ locale }>
 			<CreditCardComponent { ...props } />
 		</Elements>
 	) : null;
