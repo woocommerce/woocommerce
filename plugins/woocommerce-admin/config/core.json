@@ -9,6 +9,6 @@
 		"onboarding": true,
 	  	"shipping-label-banner": true,
 		"store-alerts": true,
-		"wcpay": false
+		"wcpay": true
 	}
 }
