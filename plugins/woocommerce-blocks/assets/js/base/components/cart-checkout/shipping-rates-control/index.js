@@ -6,6 +6,10 @@ import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { speak } from '@wordpress/a11y';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
+import {
+	getShippingRatesPackageCount,
+	getShippingRatesRateCount,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -25,11 +29,8 @@ const ShippingRatesControl = ( {
 		if ( shippingRatesLoading ) {
 			return;
 		}
-		const packages = shippingRates.length;
-		const shippingOptions = shippingRates.reduce(
-			( acc, shippingRate ) => acc + shippingRate.shipping_rates.length,
-			0
-		);
+		const packages = getShippingRatesPackageCount( shippingRates );
+		const shippingOptions = getShippingRatesRateCount( shippingRates );
 		if ( shippingOptions === 0 ) {
 			speak(
 				__(
