@@ -25,7 +25,7 @@ class WC_Order_Tracking {
 	 * @param WC_Order $order Order.
 	 */
 	public function track_order_viewed( $order ) {
-		if ( ! $order->get_id() ) {
+		if ( ! $order instanceof WC_Order || ! $order->get_id() ) {
 			return;
 		}
 		$properties = array(
