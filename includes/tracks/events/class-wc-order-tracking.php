@@ -22,12 +22,15 @@ class WC_Order_Tracking {
 	/**
 	 * Send a Tracks event when an order is viewed.
 	 *
-	 * @param object $order Order.
+	 * @param WC_Order $order Order.
 	 */
 	public function track_order_viewed( $order ) {
+		if ( ! $order->get_id() ) {
+			return;
+		}
 		$properties = array(
 			'current_status' => $order->get_status(),
-			'date_created'   => $order->get_date_created()->format( DateTime::ATOM ),
+			'date_created'   => $order->get_date_created() ? $order->get_date_created()->format( DateTime::ATOM ) : '',
 			'payment_method' => $order->get_payment_method(),
 		);
 
