@@ -1,12 +1,12 @@
 /**
- * @typedef {import('../stripe-utils/type-defs').StripePaymentItem} StripePaymentItem
- * @typedef {import('../stripe-utils/type-defs').StripeShippingOption} StripeShippingOption
- * @typedef {import('../stripe-utils/type-defs').StripeShippingAddress} StripeShippingAddress
- * @typedef {import('../stripe-utils/type-defs').StripePaymentResponse} StripePaymentResponse
+ * @typedef {import('./type-defs').StripePaymentItem} StripePaymentItem
+ * @typedef {import('./type-defs').StripeShippingOption} StripeShippingOption
+ * @typedef {import('./type-defs').StripeShippingAddress} StripeShippingAddress
+ * @typedef {import('./type-defs').StripePaymentResponse} StripePaymentResponse
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PreparedCartTotalItem} CartTotalItem
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingOption} CartShippingOption
  * @typedef {import('@woocommerce/type-defs/cart').CartShippingAddress} CartShippingAddress
- * @typedef {import('@woocommerce/type-defs/cart').CartBillingAddress} CartBillingAddress
+ * @typedef {import('@woocommerce/type-defs/billing').BillingData} CartBillingAddress
  */
 
 /**
@@ -38,12 +38,15 @@ const normalizeLineItems = ( cartTotalItems, pending = false ) => {
  * @return {StripeShippingOption[]}  An array of Stripe shipping option items.
  */
 const normalizeShippingOptions = ( shippingOptions ) => {
-	return shippingOptions.map( ( shippingOption ) => {
+	// @todo, note this currently does not handle multiple packages and this
+	// will need to be dealt with in a followup.
+	const rates = shippingOptions[ 0 ].shipping_rates;
+	return rates.map( ( rate ) => {
 		return {
-			id: shippingOption.rate_id,
-			label: shippingOption.name,
-			detail: shippingOption.description,
-			amount: parseInt( shippingOption.price, 10 ),
+			id: rate.rate_id,
+			label: rate.name,
+			detail: rate.description,
+			amount: parseInt( rate.price, 10 ),
 		};
 	} );
 };
@@ -58,7 +61,7 @@ const normalizeShippingOptions = ( shippingOptions ) => {
  * the cart.
  */
 const normalizeShippingAddressForCheckout = ( shippingAddress ) => {
-	return {
+	const address = {
 		first_name: shippingAddress.recipient
 			.split( ' ' )
 			.slice( 0, 1 )
@@ -79,8 +82,9 @@ const normalizeShippingAddressForCheckout = ( shippingAddress ) => {
 		city: shippingAddress.city,
 		state: shippingAddress.region,
 		country: shippingAddress.country,
-		postcode: shippingAddress.postalCode,
+		postcode: shippingAddress.postalCode.replace( ' ', '' ),
 	};
+	return address;
 };
 
 /**
@@ -93,7 +97,7 @@ const normalizeShippingAddressForCheckout = ( shippingAddress ) => {
  * @return {string[]}  An array of ids (in this case will just be one)
  */
 const normalizeShippingOptionSelectionsForCheckout = ( shippingOption ) => {
-	return [ shippingOption.id ];
+	return shippingOption.id;
 };
 
 /**
@@ -159,6 +163,16 @@ const getPaymentMethodData = ( paymentResponse, paymentRequestType ) => {
 	};
 };
 
+const getShippingData = ( paymentResponse ) => {
+	return paymentResponse.shippingAddress
+		? {
+				address: normalizeShippingAddressForCheckout(
+					paymentResponse.shippingAddress
+				),
+		  }
+		: null;
+};
+
 export {
 	normalizeLineItems,
 	normalizeShippingOptions,
@@ -166,4 +180,5 @@ export {
 	normalizeShippingOptionSelectionsForCheckout,
 	getBillingData,
 	getPaymentMethodData,
+	getShippingData,
 };

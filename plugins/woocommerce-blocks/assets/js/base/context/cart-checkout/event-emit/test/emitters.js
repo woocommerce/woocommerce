@@ -74,8 +74,8 @@ describe( 'Testing emitters', () => {
 			};
 			await emitEventWithAbort( observers, 'test', 'foo' );
 			expect( console ).not.toHaveErrored();
-			expect( a ).toHaveBeenCalledTimes( 1 );
-			expect( b ).not.toHaveBeenCalled();
+			expect( b ).toHaveBeenCalledTimes( 1 );
+			expect( a ).not.toHaveBeenCalled();
 		} );
 	} );
 } );

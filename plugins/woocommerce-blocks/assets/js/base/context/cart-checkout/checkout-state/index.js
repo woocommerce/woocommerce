@@ -139,7 +139,7 @@ export const CheckoutStateProvider = ( {
 
 	// emit events.
 	useEffect( () => {
-		const { hasError, status } = checkoutState;
+		const { status } = checkoutState;
 		if ( status === STATUS.PROCESSING ) {
 			removeNotices( 'error' );
 			emitEvent(
@@ -147,7 +147,7 @@ export const CheckoutStateProvider = ( {
 				EMIT_TYPES.CHECKOUT_PROCESSING,
 				{}
 			).then( ( response ) => {
-				if ( response !== true || hasError ) {
+				if ( response !== true ) {
 					if ( Array.isArray( response ) ) {
 						response.forEach(
 							( { errorMessage, validationErrors } ) => {
@@ -162,8 +162,11 @@ export const CheckoutStateProvider = ( {
 				}
 			} );
 		}
-		if ( status === STATUS.COMPLETE ) {
-			if ( hasError ) {
+	}, [ checkoutState.status, setValidationErrors ] );
+
+	useEffect( () => {
+		if ( checkoutState.status === STATUS.COMPLETE ) {
+			if ( checkoutState.hasError ) {
 				emitEvent(
 					currentObservers.current,
 					EMIT_TYPES.CHECKOUT_COMPLETE_WITH_ERROR,
@@ -177,7 +180,7 @@ export const CheckoutStateProvider = ( {
 				);
 			}
 		}
-	}, [ checkoutState.status, checkoutState.hasError, setValidationErrors ] );
+	}, [ checkoutState.status, checkoutState.hasError ] );
 
 	const onSubmit = () => {
 		dispatch( actions.setProcessing() );

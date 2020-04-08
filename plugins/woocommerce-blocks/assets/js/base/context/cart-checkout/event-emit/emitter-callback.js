@@ -5,7 +5,7 @@ import { actions } from './reducer';
 
 export const emitterCallback = ( type, dispatcher ) => (
 	callback,
-	priority
+	priority = 10
 ) => {
 	const action = actions.addEventCallback( type, callback, priority );
 	dispatcher( action );

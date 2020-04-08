@@ -21,6 +21,7 @@ import {
 } from './use-payment-method-registration';
 import { useBillingDataContext } from '../billing';
 import { useCheckoutContext } from '../checkout-state';
+import { useShippingDataContext } from '../shipping';
 import {
 	EMIT_TYPES,
 	emitterSubscribers,
@@ -52,6 +53,7 @@ import { useStoreNotices } from '@woocommerce/base-hooks';
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatchers} PaymentStatusDispatchers
  * @typedef {import('@woocommerce/type-defs/billing').BillingData} BillingData
  * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
+ * @typedef {import('@woocommerce/type-defs/contexts').ShippingDataResponse} ShippingDataResponse
  */
 
 const {
@@ -125,10 +127,13 @@ export const PaymentMethodDataProvider = ( {
 		reducer,
 		DEFAULT_PAYMENT_DATA
 	);
-	const setActivePaymentMethod = ( paymentMethodSlug ) => {
-		setActive( paymentMethodSlug );
-		dispatch( statusOnly( PRISTINE ) );
-	};
+	const setActivePaymentMethod = useCallback(
+		( paymentMethodSlug ) => {
+			setActive( paymentMethodSlug );
+			dispatch( statusOnly( PRISTINE ) );
+		},
+		[ setActive, dispatch ]
+	);
 	const paymentMethodsInitialized = usePaymentMethods( ( paymentMethod ) =>
 		dispatch( setRegisteredPaymentMethod( paymentMethod ) )
 	);
@@ -139,13 +144,15 @@ export const PaymentMethodDataProvider = ( {
 	);
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
+	const { setShippingAddress } = useShippingDataContext();
 
 	const setExpressPaymentError = ( message ) => {
-		addErrorNotice( message, {
-			context: 'wc/express-payment-area',
-			id: 'wc-express-payment-error',
-		} );
-		if ( ! message ) {
+		if ( message ) {
+			addErrorNotice( message, {
+				context: 'wc/express-payment-area',
+				id: 'wc-express-payment-error',
+			} );
+		} else {
 			removeNotice( 'wc-express-payment-error' );
 		}
 	};
@@ -185,8 +192,8 @@ export const PaymentMethodDataProvider = ( {
 		[ paymentStatus.currentStatus ]
 	);
 
-	// flip payment to processing if checkout processing is complete and there
-	// are no errors.
+	// flip payment to processing if checkout processing is complete, there are
+	// no errors, and payment status is started.
 	useEffect( () => {
 		if (
 			checkoutIsProcessingComplete &&
@@ -252,12 +259,21 @@ export const PaymentMethodDataProvider = ( {
 				);
 			},
 			/**
-			 * @param {Object}           [paymentMethodData] Arbitrary payment method data to
-			 *                                               accompany the checkout.
-			 * @param {BillingData|null} [billingData]       The billing data accompanying the
-			 *                                               payment method.
+			 * @param {Object} [paymentMethodData] Arbitrary payment method data to
+			 * accompany the checkout.
+			 * @param {BillingData|null} [billingData] The billing data accompanying the
+			 * payment method.
+			 * @param {ShippingDataResponse|null} [shippingData] The shipping data accompanying the
+			 * payment method.
 			 */
-			success: ( paymentMethodData = {}, billingData = null ) => {
+			success: (
+				paymentMethodData = {},
+				billingData = null,
+				shippingData = null
+			) => {
+				if ( shippingData !== null && shippingData?.address ) {
+					setShippingAddress( shippingData.address );
+				}
 				if ( billingData ) {
 					setBillingData( billingData );
 				}
@@ -287,7 +303,8 @@ export const PaymentMethodDataProvider = ( {
 				if ( isSuccessResponse( response ) ) {
 					setPaymentStatus().success(
 						response.paymentMethodData,
-						response.billingData
+						response.billingData,
+						response.shippingData
 					);
 				} else if ( isFailResponse( response ) ) {
 					setPaymentStatus().failed(

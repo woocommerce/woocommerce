@@ -96,6 +96,8 @@
  * @property {Function}             setSelectedRates     A function for setting
  *                                                       selected rates
  *                                                       (recieves id)
+ * @property {boolean}              isSelectingRate      True when rates are
+ *                                                       being selected.
  * @property {CartShippingAddress}  shippingAddress      The current set
  *                                                       shipping address.
  * @property {Function}             setShippingAddress   A function for setting

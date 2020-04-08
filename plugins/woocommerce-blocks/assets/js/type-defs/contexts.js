@@ -39,6 +39,8 @@
  *                                                        that are selected.
  * @property {Function}             setSelectedRates      A function for setting
  *                                                        the selected rates.
+ * @property {boolean}              isSelectingRate       True when rate is being
+ *                                                        selected.
  * @property {CartShippingAddress}  shippingAddress       The current set
  *                                                        address for shipping.
  * @property {function()}           setShippingAddress    A function for setting
@@ -126,6 +128,13 @@
  */
 
 /**
+ * @typedef {Object} ShippingDataResponse
+ *
+ * @property {CartShippingAddress} address      The address selected for
+ *                                              shipping.
+ */
+
+/**
  * A Saved Customer Payment methods object
  *
  * This is an object where the keys are payment gateway slugs and the values
@@ -137,12 +146,12 @@
 /**
  * @typedef {Object} PaymentStatusDispatchers
  *
- * @property {function()}               started
- * @property {function()}               processing
- * @property {function()}               completed
- * @property {function(string)}         error
+ * @property {function()}                        started
+ * @property {function()}                        processing
+ * @property {function()}                        completed
+ * @property {function(string)}                  error
  * @property {function(string, Object, Object=)} failed
- * @property {function(Object=,Object=)}  success
+ * @property {function(Object=,Object=,Object=)} success
  */
 
 /**

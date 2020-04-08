@@ -6,11 +6,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { stripePromise } from '../stripe-utils';
+import { loadStripe } from '../stripe-utils';
 import { StripeCreditCard } from './payment-method';
 import { PAYMENT_METHOD_NAME } from './constants';
 
 const EditPlaceHolder = () => <div>TODO: Card edit preview soon...</div>;
+
+const stripePromise = loadStripe();
 
 const stripeCcPaymentMethod = {
 	id: PAYMENT_METHOD_NAME,
@@ -19,7 +21,7 @@ const stripeCcPaymentMethod = {
 			{ __( 'Credit/Debit Card', 'woo-gutenberg-products-block' ) }
 		</strong>
 	),
-	content: <StripeCreditCard />,
+	content: <StripeCreditCard stripe={ stripePromise } />,
 	edit: <EditPlaceHolder />,
 	canMakePayment: stripePromise,
 	ariaLabel: __(
