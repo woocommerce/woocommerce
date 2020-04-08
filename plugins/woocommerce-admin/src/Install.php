@@ -396,12 +396,23 @@ class Install {
 						array(
 							'per_page' => 1,
 							'hook'     => 'woocommerce_run_update_callback',
-							'search'   => json_encode( array( $update_callback ) ),
+							'search'   => wp_json_encode( array( $update_callback ) ),
 							'group'    => 'woocommerce-db-updates',
+							'status'   => 'pending',
 						)
 					);
 
-					if ( empty( $pending_jobs ) ) {
+					$complete_jobs = WC()->queue()->search(
+						array(
+							'per_page' => 1,
+							'hook'     => 'woocommerce_run_update_callback',
+							'search'   => wp_json_encode( array( $update_callback ) ),
+							'group'    => 'woocommerce-db-updates',
+							'status'   => 'complete',
+						)
+					);
+
+					if ( empty( $pending_jobs ) && empty( $complete_jobs ) ) {
 						WC()->queue()->schedule_single(
 							time() + $loop,
 							'woocommerce_run_update_callback',
