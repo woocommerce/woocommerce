@@ -16,14 +16,7 @@ const {
 	SET_ORDER_ID,
 } = TYPES;
 
-const {
-	PRISTINE,
-	IDLE,
-	CALCULATING,
-	PROCESSING,
-	PROCESSING_COMPLETE,
-	COMPLETE,
-} = STATUS;
+const { PRISTINE, IDLE, PROCESSING, PROCESSING_COMPLETE, COMPLETE } = STATUS;
 
 /**
  * Reducer for the checkout state
@@ -32,7 +25,7 @@ const {
  * @param {Object} action Incoming action object.
  */
 export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
-	let status, nextStatus, newState;
+	let newState;
 	switch ( type ) {
 		case SET_PRISTINE:
 			newState = DEFAULT_STATE;
@@ -47,34 +40,20 @@ export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
 					: state;
 			break;
 		case SET_COMPLETE:
-			status = COMPLETE;
-			nextStatus = state.status;
-			if ( state.status === CALCULATING ) {
-				status = CALCULATING;
-				nextStatus = COMPLETE;
-			}
 			newState =
-				status !== state.status
+				state.status !== COMPLETE
 					? {
 							...state,
-							status,
-							nextStatus,
+							status: COMPLETE,
 					  }
 					: state;
 			break;
 		case SET_PROCESSING:
-			status = PROCESSING;
-			nextStatus = state.status;
-			if ( state.status === CALCULATING ) {
-				status = CALCULATING;
-				nextStatus = PROCESSING;
-			}
 			newState =
-				status !== state.status
+				state.status !== PROCESSING
 					? {
 							...state,
-							status,
-							nextStatus,
+							status: PROCESSING,
 							hasError: false,
 					  }
 					: state;
@@ -85,18 +64,11 @@ export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
 					: { ...newState, hasError: false };
 			break;
 		case SET_PROCESSING_COMPLETE:
-			status = PROCESSING_COMPLETE;
-			nextStatus = state.status;
-			if ( state.status === CALCULATING ) {
-				status = CALCULATING;
-				nextStatus = PROCESSING_COMPLETE;
-			}
 			newState =
-				status !== state.status
+				state.status !== SET_PROCESSING_COMPLETE
 					? {
 							...state,
-							status,
-							nextStatus,
+							status: PROCESSING_COMPLETE,
 							hasError: false,
 					  }
 					: state;
@@ -128,22 +100,12 @@ export const reducer = ( state = DEFAULT_STATE, { url, type, orderId } ) => {
 		case INCREMENT_CALCULATING:
 			newState = {
 				...state,
-				status: CALCULATING,
-				nextStatus: state.status,
 				calculatingCount: state.calculatingCount + 1,
 			};
 			break;
 		case DECREMENT_CALCULATING:
-			status = CALCULATING;
-			nextStatus = state.status;
-			if ( state.calculatingCount <= 1 ) {
-				status = state.nextStatus;
-				nextStatus = IDLE;
-			}
 			newState = {
 				...state,
-				status,
-				nextStatus,
 				calculatingCount: Math.max( 0, state.calculatingCount - 1 ),
 			};
 			break;

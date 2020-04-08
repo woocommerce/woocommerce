@@ -23,10 +23,6 @@
  * @property {string} PRISTINE            Checkout is in it's initialized state.
  * @property {string} IDLE                When checkout state has changed but
  *                                        there is no activity happening.
- * @property {string} CALCULATING         When something in the checkout results
- *                                        in the totals being recalculated,
- *                                        this will be the state while
- *                                        calculating is happening.
  * @property {string} PROCESSING          This is the state when the checkout
  *                                        button has been pressed and the
  *                                        checkout data has been sent to the

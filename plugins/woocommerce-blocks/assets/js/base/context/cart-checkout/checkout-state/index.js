@@ -95,6 +95,8 @@ export const CheckoutStateProvider = ( {
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotices } = useStoreNotices();
 
+	const isCalculating = checkoutState.calculatingCount > 0;
+
 	// set observers on ref so it's always current.
 	useEffect( () => {
 		currentObservers.current = observers;
@@ -189,7 +191,7 @@ export const CheckoutStateProvider = ( {
 		onSubmit,
 		isComplete: checkoutState.status === STATUS.COMPLETE,
 		isIdle: checkoutState.status === STATUS.IDLE,
-		isCalculating: checkoutState.status === STATUS.CALCULATING,
+		isCalculating,
 		isProcessing: checkoutState.status === STATUS.PROCESSING,
 		isProcessingComplete:
 			checkoutState.status === STATUS.PROCESSING_COMPLETE,

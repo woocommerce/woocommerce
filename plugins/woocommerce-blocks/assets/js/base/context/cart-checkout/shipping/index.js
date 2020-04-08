@@ -40,10 +40,10 @@ const { NONE, INVALID_ADDRESS, UNKNOWN } = ERROR_TYPES;
  * @param {Object} action The incoming action.
  */
 const errorStatusReducer = ( state, { type } ) => {
-	if ( Object.keys( ERROR_TYPES ).includes( type ) ) {
-		return state;
+	if ( Object.values( ERROR_TYPES ).includes( type ) ) {
+		return type;
 	}
-	return type;
+	return state;
 };
 
 const ShippingDataContext = createContext( DEFAULT_SHIPPING_CONTEXT_DATA );

@@ -9,7 +9,6 @@ import { getSetting } from '@woocommerce/settings';
 export const STATUS = {
 	PRISTINE: 'pristine',
 	IDLE: 'idle',
-	CALCULATING: 'calculating',
 	PROCESSING: 'processing',
 	COMPLETE: 'complete',
 	PROCESSING_COMPLETE: 'processing_complete',
@@ -23,9 +22,6 @@ const checkoutData = getSetting( 'checkoutData', {
 export const DEFAULT_STATE = {
 	redirectUrl: '',
 	status: STATUS.PRISTINE,
-	// this is used by the reducer to set what status the state will
-	// take after calculating is complete.
-	nextStatus: STATUS.IDLE,
 	hasError: false,
 	calculatingCount: 0,
 	orderId: checkoutData.order_id,
