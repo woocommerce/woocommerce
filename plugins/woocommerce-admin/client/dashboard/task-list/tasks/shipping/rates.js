@@ -27,6 +27,11 @@ class ShippingRates extends Component {
 	}
 
 	getShippingMethods( zone, type = null ) {
+		// Sometimes the wc/v3/shipping/zones response does not include a methods attribute, return early if so.
+		if ( ! zone || ! zone.methods || ! Array.isArray( zone.methods ) ) {
+			return [];
+		}
+
 		if ( ! type ) {
 			return zone.methods;
 		}
