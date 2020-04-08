@@ -9,7 +9,7 @@ import {
 } from '@woocommerce/base-components/cart-checkout';
 import PropTypes from 'prop-types';
 import { useState } from '@wordpress/element';
-import { useShippingRates } from '@woocommerce/base-hooks';
+import { useStoreCart } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -32,14 +32,12 @@ const TotalsShippingItem = ( {
 	const [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] = useState(
 		false
 	);
-	const defaultAddressFields = [ 'country', 'state', 'city', 'postcode' ];
 	const {
 		shippingRates,
-		shippingAddress,
 		shippingRatesLoading,
 		hasShippingAddress,
-		setShippingAddress,
-	} = useShippingRates();
+		shippingAddress,
+	} = useStoreCart();
 	const totalShippingValue = DISPLAY_CART_PRICES_INCLUDING_TAX
 		? parseInt( values.total_shipping, 10 ) +
 		  parseInt( values.total_shipping_tax, 10 )
@@ -80,12 +78,9 @@ const TotalsShippingItem = ( {
 					<>
 						{ showCalculator && isShippingCalculatorOpen && (
 							<ShippingCalculator
-								onUpdate={ ( newAddress ) => {
-									setShippingAddress( newAddress );
+								onUpdate={ () => {
 									setIsShippingCalculatorOpen( false );
 								} }
-								address={ shippingAddress }
-								addressFields={ defaultAddressFields }
 							/>
 						) }
 					</>
@@ -119,12 +114,9 @@ const TotalsShippingItem = ( {
 						) }
 						{ showCalculator && isShippingCalculatorOpen && (
 							<ShippingCalculator
-								onUpdate={ ( newAddress ) => {
-									setShippingAddress( newAddress );
+								onUpdate={ () => {
 									setIsShippingCalculatorOpen( false );
 								} }
-								address={ shippingAddress }
-								addressFields={ defaultAddressFields }
 							/>
 						) }
 					</>

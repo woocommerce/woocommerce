@@ -33,6 +33,8 @@ export const defaultCartData = {
 		country: '',
 	},
 	shippingRates: [],
+	shippingRatesLoading: false,
+	hasShippingAddress: false,
 };
 
 /**
@@ -68,13 +70,15 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 					cartTotals: previewCart.totals,
 					cartIsLoading: false,
 					cartErrors: [],
-					shippingRates: previewCart.shipping_rates,
 					shippingAddress: {
 						country: '',
 						state: '',
 						city: '',
 						postcode: '',
 					},
+					shippingRates: previewCart.shipping_rates,
+					shippingRatesLoading: false,
+					hasShippingAddress: false,
 				};
 			}
 
@@ -85,10 +89,10 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			const cartIsLoading = ! store.hasFinishedResolution(
 				'getCartData'
 			);
+			const shippingRatesLoading = store.areShippingRatesLoading();
+
 			return {
 				cartCoupons: cartData.coupons,
-				shippingRates: cartData.shippingRates,
-				shippingAddress: cartData.shippingAddress,
 				cartItems: cartData.items,
 				cartItemsCount: cartData.itemsCount,
 				cartItemsWeight: cartData.itemsWeight,
@@ -97,6 +101,10 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 				cartTotals,
 				cartIsLoading,
 				cartErrors,
+				shippingAddress: cartData.shippingAddress,
+				shippingRates: cartData.shippingRates,
+				shippingRatesLoading,
+				hasShippingAddress: !! cartData.shippingAddress.country,
 			};
 		},
 		[ shouldSelect ]

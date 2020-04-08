@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { useShippingDataContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -9,13 +10,18 @@ import PropTypes from 'prop-types';
 import ShippingCalculatorAddress from './address';
 import './style.scss';
 
-const ShippingCalculator = ( { onUpdate, address, addressFields } ) => {
+const ShippingCalculator = ( {
+	onUpdate = () => {},
+	addressFields = [ 'country', 'state', 'city', 'postcode' ],
+} ) => {
+	const { shippingAddress, setShippingAddress } = useShippingDataContext();
 	return (
 		<div className="wc-block-cart__shipping-calculator">
 			<ShippingCalculatorAddress
-				address={ address }
+				address={ shippingAddress }
 				addressFields={ addressFields }
 				onUpdate={ ( newAddress ) => {
+					setShippingAddress( newAddress );
 					onUpdate( newAddress );
 				} }
 			/>
@@ -24,9 +30,8 @@ const ShippingCalculator = ( { onUpdate, address, addressFields } ) => {
 };
 
 ShippingCalculator.propTypes = {
-	onUpdate: PropTypes.func.isRequired,
-	address: PropTypes.object.isRequired,
-	addressFields: PropTypes.array.isRequired,
+	onUpdate: PropTypes.func,
+	addressFields: PropTypes.array,
 };
 
 export default ShippingCalculator;

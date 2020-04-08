@@ -6,27 +6,32 @@
 /**
  * @typedef {Object} StoreCart
  *
- * @property {Array}               cartCoupons       An array of coupons applied
- *                                                   to the cart.
- * @property {Array}               shippingRates     array of selected shipping
- *                                                   rates
- * @property {CartShippingAddress} shippingAddress   Shipping address for the
- *                                                   cart.
- * @property {Array}               cartItems         An array of items in the
- *                                                   cart.
- * @property {number}              cartItemsCount    The number of items in the
- *                                                   cart.
- * @property {number}              cartItemsWeight   The weight of all items in
- *                                                   the cart.
- * @property {boolean}             cartNeedsShipping True when the cart will
- *                                                   require shipping.
- * @property {Array}               cartItemErrors    Item validation errors.
- * @property {Object}              cartTotals        Cart and line total
- *                                                   amounts.
- * @property {boolean}             cartIsLoading     True when cart data is
- *                                                   being loaded.
- * @property {Array}               cartErrors        An array of errors thrown
- *                                                   by the cart.
+ * @property {Array}               cartCoupons          An array of coupons applied
+ *                                                      to the cart.
+ * @property {Array}               cartItems            An array of items in the
+ *                                                      cart.
+ * @property {number}              cartItemsCount       The number of items in the
+ *                                                      cart.
+ * @property {number}              cartItemsWeight      The weight of all items in
+ *                                                      the cart.
+ * @property {boolean}             cartNeedsShipping    True when the cart will
+ *                                                      require shipping.
+ * @property {Array}               cartItemErrors       Item validation errors.
+ * @property {Object}              cartTotals           Cart and line total
+ *                                                      amounts.
+ * @property {boolean}             cartIsLoading        True when cart data is
+ *                                                      being loaded.
+ * @property {Array}               cartErrors           An array of errors thrown
+ *                                                      by the cart.
+ * @property {CartShippingAddress} shippingAddress      Shipping address for the
+ *                                                      cart.
+ * @property {Array}               shippingRates        array of selected shipping
+ *                                                      rates.
+ * @property {boolean}             shippingRatesLoading Whether or not the
+ *                                                      shipping rates are
+ *                                                      being loaded.
+ * @property {boolean}             hasShippingAddress   Whether or not the cart
+ *                                                      has a shipping address yet.
  */
 
 /**

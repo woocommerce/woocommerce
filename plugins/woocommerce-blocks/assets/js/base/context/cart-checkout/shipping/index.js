@@ -11,7 +11,6 @@ import {
 } from '@wordpress/element';
 import {
 	useShippingAddress,
-	useShippingRates,
 	useStoreCart,
 	useSelectShippingRate,
 } from '@woocommerce/base-hooks';
@@ -65,7 +64,11 @@ export const useShippingDataContext = () => {
  */
 export const ShippingDataProvider = ( { children } ) => {
 	const { dispatchActions } = useCheckoutContext();
-	const { cartNeedsShipping: needsShipping } = useStoreCart();
+	const {
+		cartNeedsShipping: needsShipping,
+		shippingRates,
+		shippingRatesLoading,
+	} = useStoreCart();
 	const [ shippingErrorStatus, dispatchErrorStatus ] = useReducer(
 		errorStatusReducer,
 		NONE
@@ -73,7 +76,6 @@ export const ShippingDataProvider = ( { children } ) => {
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const { shippingAddress, setShippingAddress } = useShippingAddress();
 	const currentObservers = useRef( observers );
-	const { shippingRates, shippingRatesLoading } = useShippingRates();
 	const {
 		selectShippingRate: setSelectedRates,
 		selectedShippingRates: selectedRates,
