@@ -1,9 +1,5 @@
 version: ~> 1.0
 
-language: php
-
-sudo: false
-
 cache:
     directories:
         - vendor
@@ -11,40 +7,18 @@ cache:
         - $HOME/.npm
         - $HOME/.composer/cache
 
-branches:
-    only:
-        - master
-        - /release\/.*/
-
 before_install:
     - timedatectl
     - nvm install --latest-npm
 
-before_script:
-    - export PATH="$HOME/.composer/vendor/bin:$PATH"
-    - npm install
-    - |
-        if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
-          phpenv config-rm xdebug.ini
-        else
-          echo "xdebug.ini does not exist"
-        fi
-    - |
-        if [[ ! -z "$WP_VERSION" ]] ; then
-          composer install --no-dev
-          npm explore @woocommerce/e2e-env -- npm run install-wp-tests -- wc_e2e_tests root ' ' localhost $WP_VERSION
-          composer global require "phpunit/phpunit=4.8.*|5.7.*"
-        fi
-    - |
-        if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
-          composer install
-        fi
-
 jobs:
   fast_finish: true
   include:
-    - name: "E2E Tests"
+    - name: "Core E2E Tests"
+    php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0
     script:
+        - bash bin/before-script-CI.sh
         - composer require wp-cli/i18n-command
         - npm run build
         - npm explore @woocommerce/e2e-env -- npm run docker:up
