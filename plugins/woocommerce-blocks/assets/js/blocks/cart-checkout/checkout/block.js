@@ -25,7 +25,7 @@ import {
 	useBillingDataContext,
 	useValidationContext,
 } from '@woocommerce/base-context';
-import { useStoreCart } from '@woocommerce/base-hooks';
+import { useStoreCart, usePaymentMethods } from '@woocommerce/base-hooks';
 import {
 	ExpressCheckoutFormControl,
 	PaymentMethods,
@@ -46,6 +46,10 @@ import CheckoutSidebar from './sidebar';
 import CheckoutOrderError from './checkout-order-error';
 import NoShippingPlaceholder from './no-shipping-placeholder';
 import './style.scss';
+import {
+	getShippingRatesPackageCount,
+	getShippingRatesRateCount,
+} from './utils';
 
 const Block = ( props ) => (
 	<CheckoutProvider>
@@ -55,12 +59,7 @@ const Block = ( props ) => (
 
 const Checkout = ( { attributes, scrollToTop } ) => {
 	const { isEditor } = useEditorContext();
-	const {
-		cartItems,
-		cartTotals,
-		shippingRates,
-		cartCoupons,
-	} = useStoreCart();
+	const { cartItems, cartTotals, cartCoupons } = useStoreCart();
 	const {
 		hasOrder,
 		hasError: checkoutHasError,
@@ -68,12 +67,14 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 	} = useCheckoutContext();
 	const { showAllValidationErrors } = useValidationContext();
 	const {
+		shippingRates,
 		shippingRatesLoading,
 		shippingAddress,
 		setShippingAddress,
 		needsShipping,
 	} = useShippingDataContext();
 	const { billingData, setBillingData } = useBillingDataContext();
+	const { paymentMethods } = usePaymentMethods();
 
 	const [ shippingAsBilling, setShippingAsBilling ] = useState(
 		needsShipping
@@ -274,12 +275,19 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 									'Shipping options',
 									'woo-gutenberg-products-block'
 								) }
-								description={ __(
-									'Select a shipping method below.',
-									'woo-gutenberg-products-block'
-								) }
+								description={
+									getShippingRatesRateCount( shippingRates ) >
+									1
+										? __(
+												'Select shipping options below.',
+												'woo-gutenberg-products-block'
+										  )
+										: ''
+								}
 							>
-								{ shippingRates.length === 0 && isEditor ? (
+								{ getShippingRatesPackageCount(
+									shippingRates
+								) === 0 && isEditor ? (
 									<NoShippingPlaceholder />
 								) : (
 									<ShippingRatesControl
@@ -330,10 +338,14 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 								'Payment method',
 								'woo-gutenberg-products-block'
 							) }
-							description={ __(
-								'Select a payment method below.',
-								'woo-gutenberg-products-block'
-							) }
+							description={
+								Object.keys( paymentMethods ).length > 1
+									? __(
+											'Select a payment method below.',
+											'woo-gutenberg-products-block'
+									  )
+									: ''
+							}
 						>
 							<PaymentMethods />
 						</FormStep>
