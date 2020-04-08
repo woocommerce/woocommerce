@@ -17,7 +17,7 @@ const layoutContextConfig = {
 const parentBlockConfig = { parentName: 'woocommerce/all-products' };
 
 /**
- * The All Products Block. @todo
+ * The All Products Block.
  */
 class Block extends Component {
 	static propTypes = {

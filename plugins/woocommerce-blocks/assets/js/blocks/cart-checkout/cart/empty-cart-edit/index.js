@@ -15,7 +15,7 @@ import './style.scss';
 /**
  * Component to handle edit mode for the Cart block when cart is empty.
  */
-const EmptyCart = ( { hidden } ) => {
+const EmptyCartEdit = ( { hidden } ) => {
 	// We need to always render `<InnerBlocks>` in the editor.
 	// Otherwise, if the user saves the page without having
 	// triggered the 'Empty Cart' view, inner blocks would not
@@ -91,8 +91,8 @@ const EmptyCart = ( { hidden } ) => {
 	);
 };
 
-EmptyCart.propTypes = {
+EmptyCartEdit.propTypes = {
 	hidden: PropTypes.bool,
 };
 
-export default EmptyCart;
+export default EmptyCartEdit;

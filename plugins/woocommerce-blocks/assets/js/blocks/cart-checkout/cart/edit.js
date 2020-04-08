@@ -23,12 +23,13 @@ import {
 import { useSelect } from '@wordpress/data';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { getAdminLink } from '@woocommerce/settings';
-import { previewCart } from '@woocommerce/resource-previews';
+import { previewCart, cartBlockPreview } from '@woocommerce/resource-previews';
+
 /**
  * Internal dependencies
  */
-import FullCart from './full-cart';
-import EmptyCart from './empty-cart';
+import Block from './block.js';
+import EmptyCartEdit from './empty-cart-edit';
 import './editor.scss';
 
 const BlockSettings = ( { attributes, setAttributes } ) => {
@@ -164,6 +165,10 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
  * Component to handle edit mode of "Cart Block".
  */
 const CartEditor = ( { className, attributes, setAttributes } ) => {
+	if ( attributes.isPreview ) {
+		return cartBlockPreview;
+	}
+
 	return (
 		<div className={ className }>
 			<ViewSwitcher
@@ -183,7 +188,21 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 				] }
 				defaultView={ 'full' }
 				render={ ( currentView ) => (
-					<>
+					<BlockErrorBoundary
+						header={ __(
+							'Cart Block Error',
+							'woo-gutenberg-products-block'
+						) }
+						text={ __(
+							'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
+							'woo-gutenberg-products-block'
+						) }
+						showErrorMessage={ true }
+						errorMessagePrefix={ __(
+							'Error message:',
+							'woo-gutenberg-products-block'
+						) }
+					>
 						{ currentView === 'full' && (
 							<>
 								{ SHIPPING_ENABLED && (
@@ -192,53 +211,17 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 										setAttributes={ setAttributes }
 									/>
 								) }
-								<BlockErrorBoundary
-									header={ __(
-										'Cart Block Error',
-										'woo-gutenberg-products-block'
-									) }
-									text={ __(
-										'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
-										'woo-gutenberg-products-block'
-									) }
-									showErrorMessage={ true }
-									errorMessagePrefix={ __(
-										'Error message:',
-										'woo-gutenberg-products-block'
-									) }
-								>
-									<Disabled>
-										<EditorProvider
-											previewCart={ previewCart }
-										>
-											<CartProvider>
-												<FullCart
-													attributes={ attributes }
-												/>
-											</CartProvider>
-										</EditorProvider>
-									</Disabled>
-								</BlockErrorBoundary>
+								<Disabled>
+									<EditorProvider previewCart={ previewCart }>
+										<CartProvider>
+											<Block attributes={ attributes } />
+										</CartProvider>
+									</EditorProvider>
+								</Disabled>
 							</>
 						) }
-						<BlockErrorBoundary
-							header={ __(
-								'Cart Block Error',
-								'woo-gutenberg-products-block'
-							) }
-							text={ __(
-								'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
-								'woo-gutenberg-products-block'
-							) }
-							showErrorMessage={ true }
-							errorMessagePrefix={ __(
-								'Error message:',
-								'woo-gutenberg-products-block'
-							) }
-						>
-							<EmptyCart hidden={ currentView === 'full' } />
-						</BlockErrorBoundary>
-					</>
+						<EmptyCartEdit hidden={ currentView === 'full' } />
+					</BlockErrorBoundary>
 				) }
 			/>
 		</div>
