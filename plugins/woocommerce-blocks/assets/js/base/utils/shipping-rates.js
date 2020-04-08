@@ -4,7 +4,7 @@
  * @param {Array} shippingRates Shipping rates and packages array.
  */
 export const getShippingRatesPackageCount = ( shippingRates ) => {
-	return Object.keys( shippingRates ).length;
+	return shippingRates.length;
 };
 
 /**
