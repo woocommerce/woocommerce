@@ -297,18 +297,12 @@ class CustomizableDashboard extends Component {
 	}
 
 	render() {
-		const {
-			query,
-			taskListHidden,
-			taskListComplete,
-			doThisLater,
-		} = this.props;
+		const { query, taskListHidden, taskListComplete } = this.props;
 
 		const isTaskListEnabled = isOnboardingEnabled() && ! taskListHidden;
 
 		const isDashboardShown =
-			! isTaskListEnabled ||
-			( ! query.task && ( doThisLater || taskListComplete ) );
+			! isTaskListEnabled || ( ! query.task && taskListComplete );
 
 		return (
 			<Fragment>
@@ -344,7 +338,6 @@ export default compose(
 			const options = getOptions( [
 				'woocommerce_task_list_complete',
 				'woocommerce_task_list_hidden',
-				'woocommerce_task_list_do_this_later',
 			] );
 			withSelectData.taskListHidden =
 				get( options, [ 'woocommerce_task_list_hidden' ], 'no' ) ===
@@ -352,11 +345,6 @@ export default compose(
 			withSelectData.taskListComplete = get(
 				options,
 				[ 'woocommerce_task_list_complete' ],
-				false
-			);
-			withSelectData.doThisLater = get(
-				options,
-				[ 'woocommerce_task_list_do_this_later' ],
 				false
 			);
 			withSelectData.requesting =

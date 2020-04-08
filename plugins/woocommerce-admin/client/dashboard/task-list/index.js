@@ -52,7 +52,12 @@ class TaskDashboard extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { completedTaskKeys, incompleteTasks, query, updateOptions } = this.props;
+		const {
+			completedTaskKeys,
+			incompleteTasks,
+			query,
+			updateOptions,
+		} = this.props;
 		const {
 			completedTaskKeys: prevCompletedTaskKeys,
 			incompleteTasks: prevIncompleteTasks,
@@ -78,7 +83,11 @@ class TaskDashboard extends Component {
 	}
 
 	possiblyTrackCompletedTasks() {
-		const { completedTaskKeys, trackedCompletedTasks, updateOptions } = this.props;
+		const {
+			completedTaskKeys,
+			trackedCompletedTasks,
+			updateOptions,
+		} = this.props;
 
 		if ( ! isEqual( trackedCompletedTasks, completedTaskKeys ) ) {
 			updateOptions( {
@@ -320,25 +329,7 @@ class TaskDashboard extends Component {
 		} );
 	};
 
-	onDoThisLater = () => {
-		const completedTaskKeys = this.getTasks()
-			.filter( ( x ) => x.completed )
-			.map( ( x ) => x.key );
-
-		recordEvent( 'tasklist_skip', {
-			completed_tasks_count: completedTaskKeys.length,
-			completed_tasks: completedTaskKeys,
-			reason: 'later',
-		} );
-
-		this.props.updateOptions( {
-			woocommerce_task_list_do_this_later: true,
-		} );
-	};
-
 	renderSkipActions() {
-		const { doThisLater } = this.props;
-
 		return (
 			<div className="skip-actions">
 				<Button
@@ -348,16 +339,6 @@ class TaskDashboard extends Component {
 				>
 					{ __( 'Skip store setup', 'woocommerce-admin' ) }
 				</Button>
-				{ ! doThisLater && ' | ' }
-				{ ! doThisLater && (
-					<Button
-						isLink
-						className="is-secondary"
-						onClick={ this.onDoThisLater }
-					>
-						{ __( "I'll do this later", 'woocommerce-admin' ) }
-					</Button>
-				) }
 			</div>
 		);
 	}
@@ -438,7 +419,6 @@ export default compose(
 			'woocommerce_task_list_prompt_shown',
 			'woocommerce_task_list_welcome_modal_dismissed',
 			'woocommerce_task_list_hidden',
-			'woocommerce_task_list_do_this_later',
 			'woocommerce_task_list_tracked_completed_tasks',
 		] );
 		const promptShown = get(
@@ -454,11 +434,6 @@ export default compose(
 		const taskListPayments = getOptions( [
 			'woocommerce_task_list_payments',
 		] );
-		const doThisLater = get(
-			options,
-			[ 'woocommerce_task_list_do_this_later' ],
-			false
-		);
 		const trackedCompletedTasks = get(
 			options,
 			[ 'woocommerce_task_list_tracked_completed_tasks' ],
@@ -469,7 +444,9 @@ export default compose(
 			options: getOptions( [ 'woocommerce_task_list_payments' ] ),
 			query: props.query,
 		} );
-		const completedTaskKeys = tasks.filter( task => task.completed ).map( task => task.key );
+		const completedTaskKeys = tasks
+			.filter( ( task ) => task.completed )
+			.map( ( task ) => task.key );
 		const incompleteTasks = tasks.filter(
 			( task ) => task.visible && ! task.completed
 		);
@@ -480,7 +457,6 @@ export default compose(
 			promptShown,
 			taskListPayments,
 			isJetpackConnected: isJetpackConnected(),
-			doThisLater,
 			incompleteTasks,
 			trackedCompletedTasks,
 			completedTaskKeys,
