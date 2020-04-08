@@ -10,7 +10,7 @@ import {
 	usePaymentMethodDataContext,
 	useValidationContext,
 } from '@woocommerce/base-context';
-import { useEffect, useRef, useCallback } from '@wordpress/element';
+import { useEffect, useRef, useCallback, useState } from '@wordpress/element';
 import { useStoreNotices } from '@woocommerce/base-hooks';
 
 /**
@@ -60,6 +60,7 @@ const CheckoutProcessor = () => {
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
 	const currentShippingAddress = useRef( shippingAddress );
+	const [ isProcessingOrder, setIsProcessingOrder ] = useState( false );
 
 	const checkoutWillHaveError =
 		hasValidationErrors ||
@@ -145,6 +146,8 @@ const CheckoutProcessor = () => {
 	}, [ onCheckoutProcessing, checkValidation ] );
 
 	const processOrder = useCallback( () => {
+		setIsProcessingOrder( true );
+		removeNotice( 'checkout' );
 		triggerFetch( {
 			path: '/wc/store/checkout',
 			method: 'POST',
@@ -173,7 +176,7 @@ const CheckoutProcessor = () => {
 						} else {
 							addErrorNotice(
 								__(
-									'Something went wrong. Please check your payment details and try again.',
+									'Something went wrong. Please contact us to get assistance.',
 									'woo-gutenberg-products-block'
 								),
 								{
@@ -182,23 +185,33 @@ const CheckoutProcessor = () => {
 							);
 						}
 						dispatchActions.setHasError();
+					} else {
+						dispatchActions.setRedirectUrl(
+							response.payment_result.redirect_url
+						);
 					}
 
-					dispatchActions.setRedirectUrl(
-						response.payment_result.redirect_url
-					);
 					dispatchActions.setComplete();
+					setIsProcessingOrder( false );
 				} );
 			} )
 			.catch( ( error ) => {
-				addErrorNotice( error.message, {
+				const message =
+					error.message ||
+					__(
+						'Something went wrong. Please contact us to get assistance.',
+						'woo-gutenberg-products-block'
+					);
+				addErrorNotice( message, {
 					id: 'checkout',
 				} );
 				dispatchActions.setHasError();
 				dispatchActions.setComplete();
+				setIsProcessingOrder( false );
 			} );
 	}, [
 		addErrorNotice,
+		removeNotice,
 		activePaymentMethod,
 		currentBillingData,
 		currentShippingAddress,
@@ -216,10 +229,10 @@ const CheckoutProcessor = () => {
 
 	// process order if conditions are good.
 	useEffect( () => {
-		if ( paidAndWithoutErrors ) {
+		if ( paidAndWithoutErrors && ! isProcessingOrder ) {
 			processOrder();
 		}
-	}, [ processOrder, paidAndWithoutErrors ] );
+	}, [ processOrder, paidAndWithoutErrors, isProcessingOrder ] );
 
 	return null;
 };
