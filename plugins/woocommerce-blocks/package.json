@@ -135,7 +135,7 @@
 		"request-promise": "4.2.5",
 		"rimraf": "3.0.2",
 		"sass-loader": "7.3.1",
-		"source-map-explorer": "^2.4.2",
+		"source-map-explorer": "2.4.2",
 		"stylelint": "12.0.1",
 		"stylelint-config-wordpress": "13.1.0",
 		"typescript": "3.8.3",
