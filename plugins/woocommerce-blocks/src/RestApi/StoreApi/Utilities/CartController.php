@@ -272,7 +272,7 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		// @todo Remove once min support for WC reaches 4.0.0.
+		// @todo Remove once min support for WC reaches 4.1.0.
 		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
 			$reserve_stock_controller = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
 		} else {
@@ -364,22 +364,27 @@ class CartController {
 	}
 
 	/**
-	 * Get shipping packages from the cart and format as required.
+	 * Get shipping packages from the cart with calculated shipping rates.
 	 *
-	 * @param bool  $calculate_rates Should rates for the packages also be returned.
-	 * @param array $destination Pass an address to override the package destination before calculation.
+	 * @todo this can be refactored once https://github.com/woocommerce/woocommerce/pull/26101 lands.
+	 *
+	 * @param bool $calculate_rates Should rates for the packages also be returned.
 	 * @return array
 	 */
-	public function get_shipping_packages( $calculate_rates = true, $destination = [] ) {
-		$cart     = $this->get_cart_instance();
+	public function get_shipping_packages( $calculate_rates = true ) {
+		$cart = $this->get_cart_instance();
+
+		// See if we need to calculate anything.
+		if ( ! $cart->needs_shipping() ) {
+			return [];
+		}
+
 		$packages = $cart->get_shipping_packages();
 
 		// Add package ID to array.
 		foreach ( $packages as $key => $package ) {
-			$packages[ $key ]['package_id'] = $key;
-
-			if ( ! empty( $destination ) ) {
-				$packages[ $key ]['destination'] = $destination;
+			if ( ! isset( $packages[ $key ]['package_id'] ) ) {
+				$packages[ $key ]['package_id'] = $key;
 			}
 		}
 

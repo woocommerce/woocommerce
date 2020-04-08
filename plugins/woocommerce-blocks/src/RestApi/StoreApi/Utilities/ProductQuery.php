@@ -408,11 +408,6 @@ class ProductQuery {
 	 * @return boolean
 	 */
 	protected function adjust_price_filters_for_displayed_taxes() {
-		// Requires lookup table data. @todo Update this with the correct version once core patch is accepted.
-		if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.10', '<' ) ) {
-			return false;
-		}
-
 		$display  = get_option( 'woocommerce_tax_display_shop' );
 		$database = wc_prices_include_tax() ? 'incl' : 'excl';
 

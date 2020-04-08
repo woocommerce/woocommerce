@@ -377,7 +377,7 @@ class CartItemSchema extends ProductSchema {
 
 		$draft_order = WC()->session->get( 'store_api_draft_order', 0 );
 
-		// @todo Remove once min support for WC reaches 4.0.0.
+		// @todo Remove once min support for WC reaches 4.1.0.
 		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
 			$reserve_stock = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
 		} else {

@@ -425,18 +425,22 @@ class OrderSchema extends AbstractSchema {
 	/**
 	 * Get the total amount of tax for line items.
 	 *
-	 * Needed because orders do not hold this total like carts.
-	 *
-	 * @todo In the future this could be added to the core WC_Order class to better match the WC_Cart class.
+	 * @todo Remove once https://github.com/woocommerce/woocommerce/pull/26101 is merged and released in core.
 	 *
 	 * @param \WC_Order $order Order class instance.
 	 * @return float
 	 */
 	protected function get_subtotal_tax( \WC_Order $order ) {
+		if ( method_exists( $order, 'get_subtotal_tax' ) ) {
+			return $order->get_subtotal_tax();
+		}
+
 		$total = 0;
+
 		foreach ( $order->get_items() as $item ) {
 			$total += $item->get_subtotal_tax();
 		}
+
 		return $total;
 	}
 	/**
@@ -444,12 +448,16 @@ class OrderSchema extends AbstractSchema {
 	 *
 	 * Needed because orders do not hold this total like carts.
 	 *
-	 * @todo In the future this could be added to the core WC_Order class to better match the WC_Cart class.
+	 * @todo Remove once https://github.com/woocommerce/woocommerce/pull/26101 is merged and released in core.
 	 *
 	 * @param \WC_Order $order Order class instance.
 	 * @return float
 	 */
 	protected function get_fee_total( \WC_Order $order ) {
+		if ( method_exists( $order, 'get_fee_total' ) ) {
+			return $order->get_fee_total();
+		}
+
 		$total = 0;
 		foreach ( $order->get_fees() as $item ) {
 			$total += $item->get_total();
@@ -462,12 +470,16 @@ class OrderSchema extends AbstractSchema {
 	 *
 	 * Needed because orders do not hold this total like carts.
 	 *
-	 * @todo In the future this could be added to the core WC_Order class to better match the WC_Cart class.
+	 * @todo Remove once https://github.com/woocommerce/woocommerce/pull/26101 is merged and released in core.
 	 *
 	 * @param \WC_Order $order Order class instance.
 	 * @return float
 	 */
 	protected function get_fee_tax( \WC_Order $order ) {
+		if ( method_exists( $order, 'get_fee_tax' ) ) {
+			return $order->get_fee_tax();
+		}
+
 		$total = 0;
 		foreach ( $order->get_fees() as $item ) {
 			$total += $item->get_total_tax();

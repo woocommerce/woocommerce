@@ -152,7 +152,28 @@ class OrderController {
 	 * @param \WC_Order $order The order object to update.
 	 */
 	protected function update_addresses_from_cart( \WC_Order $order ) {
-		$order->set_props( WC()->customer->get_billing() );
-		$order->set_props( WC()->customer->get_shipping() );
+		$customer_billing = WC()->customer->get_billing();
+		$customer_billing = array_combine(
+			array_map(
+				function( $key ) {
+					return 'billing_' . $key;
+				},
+				array_keys( $customer_billing )
+			),
+			$customer_billing
+		);
+		$order->set_props( $customer_billing );
+
+		$customer_shipping = WC()->customer->get_shipping();
+		$customer_shipping = array_combine(
+			array_map(
+				function( $key ) {
+					return 'shipping_' . $key;
+				},
+				array_keys( $customer_shipping )
+			),
+			$customer_shipping
+		);
+		$order->set_props( $customer_shipping );
 	}
 }
