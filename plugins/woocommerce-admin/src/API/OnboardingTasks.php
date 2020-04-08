@@ -252,11 +252,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	private static function get_homepage_template( $post_id ) {
 		$products = wp_count_posts( 'product' );
 		if ( $products->publish >= 4 ) {
-			$images  = self::sideload_homepage_images( $post_id, 1 );
-			$image_1 = ! empty( $images[0] ) ? $images[0] : '';
-			$cover   = self::get_homepage_cover_block( $image_1 );
-
-			return $cover . '
+			$images   = self::sideload_homepage_images( $post_id, 1 );
+			$image_1  = ! empty( $images[0] ) ? $images[0] : '';
+			$template = self::get_homepage_cover_block( $image_1 ) . '
 				<!-- wp:heading {"align":"center"} -->
 				<h2 style="text-align:center">' . __( 'Shop by Category', 'woocommerce-admin' ) . '</h2>
 				<!-- /wp:heading -->
@@ -288,15 +286,20 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				<div class="wp-block-woocommerce-product-best-sellers">[products limit="4" columns="4" best_selling="1"]</div>
 				<!-- /wp:woocommerce/product-best-sellers -->
 			';
+
+			/**
+			 * Modify the template/content of the default homepage.
+			 *
+			 * @param string $template The default homepage template.
+			 */
+			return apply_filters( 'woocommerce_admin_onboarding_homepage_template', $template );
 		}
 
-		$images  = self::sideload_homepage_images( $post_id, 3 );
-		$image_1 = ! empty( $images[0] ) ? $images[0] : '';
-		$image_2 = ! empty( $images[1] ) ? $images[1] : '';
-		$image_3 = ! empty( $images[2] ) ? $images[2] : '';
-		$cover   = self::get_homepage_cover_block( $image_1 );
-
-		return $cover . '
+		$images   = self::sideload_homepage_images( $post_id, 3 );
+		$image_1  = ! empty( $images[0] ) ? $images[0] : '';
+		$image_2  = ! empty( $images[1] ) ? $images[1] : '';
+		$image_3  = ! empty( $images[2] ) ? $images[2] : '';
+		$template = self::get_homepage_cover_block( $image_1 ) . '
 		<!-- wp:heading {"align":"center"} -->
 		<h2 style="text-align:center">' . __( 'New Products', 'woocommerce-admin' ) . '</h2>
 		<!-- /wp:heading -->
@@ -308,6 +311,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		self::get_homepage_media_block( $image_3, 'right' ) . '
 
 		<!-- wp:woocommerce/featured-product /-->';
+
+		/** This filter is documented in src/API/OnboardingTasks.php. */
+		return apply_filters( 'woocommerce_admin_onboarding_homepage_template', $template );
 	}
 
 	/**

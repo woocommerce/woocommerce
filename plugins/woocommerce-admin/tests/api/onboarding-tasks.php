@@ -65,4 +65,24 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( get_option( 'woocommerce_onboarding_homepage_post_id' ), $data['post_id'] );
 		$this->assertEquals( htmlspecialchars_decode( get_edit_post_link( get_option( 'woocommerce_onboarding_homepage_post_id' ) ) ), $data['edit_post_link'] );
 	}
+
+	/**
+	 * Test that the default homepage template can be filtered.
+	 */
+	public function test_homepage_template_can_be_filtered() {
+		wp_set_current_user( $this->user );
+
+		add_filter(
+			'woocommerce_admin_onboarding_homepage_template',
+			function ( $template ) {
+				return 'Custom post content';
+			}
+		);
+
+		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/create_homepage' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 'Custom post content', get_the_content( null, null, $data['post_id'] ) );
+	}
 }
