@@ -167,8 +167,14 @@ export function* applyCoupon( couponCode ) {
 		yield receiveCart( response );
 		yield receiveApplyingCoupon( '' );
 	} catch ( error ) {
-		// Store the error message in state.
 		yield receiveError( error );
+		yield receiveApplyingCoupon( '' );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
+
 		// Re-throw the error.
 		throw error;
 	}
@@ -199,10 +205,14 @@ export function* removeCoupon( couponCode ) {
 		yield receiveCart( response );
 		yield receiveRemovingCoupon( '' );
 	} catch ( error ) {
-		// Store the error message in state.
 		yield receiveError( error );
-		// Finished handling the coupon.
 		yield receiveRemovingCoupon( '' );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
+
 		// Re-throw the error.
 		throw error;
 	}
@@ -234,6 +244,11 @@ export function* addItemToCart( productId, quantity = 1 ) {
 		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
 	}
 }
 
@@ -259,6 +274,11 @@ export function* removeItemFromCart( cartItemKey ) {
 		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
 	}
 	yield itemIsPendingDelete( cartItemKey, false );
 }
@@ -293,6 +313,11 @@ export function* changeCartItemQuantity( cartItemKey, quantity ) {
 		yield receiveCart( response );
 	} catch ( error ) {
 		yield receiveError( error );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
 	}
 	yield itemIsPendingQuantity( cartItemKey, false );
 }
@@ -319,6 +344,12 @@ export function* selectShippingRate( rateId, packageId = 0 ) {
 	} catch ( error ) {
 		yield receiveError( error );
 		yield shippingRatesBeingSelected( false );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
+
 		// Re-throw the error.
 		throw error;
 	}
@@ -346,6 +377,12 @@ export function* updateShippingAddress( address ) {
 	} catch ( error ) {
 		yield receiveError( error );
 		yield shippingRatesAreResolving( false );
+
+		// If updated cart state was returned, also update that.
+		if ( error.data?.cart ) {
+			yield receiveCart( error.data.cart );
+		}
+
 		// rethrow error.
 		throw error;
 	}

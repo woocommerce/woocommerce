@@ -14,16 +14,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
 /**
  * CartUpdateItem class.
  */
-class CartUpdateItem extends AbstractRoute {
-	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
+class CartUpdateItem extends AbstractCartRoute {
 	/**
 	 * Get the path of this REST route.
 	 *
@@ -71,7 +62,7 @@ class CartUpdateItem extends AbstractRoute {
 		$cart_item  = $controller->get_cart_item( $request['key'] );
 
 		if ( ! $cart_item ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item no longer exists or is invalid.', 'woo-gutenberg-products-block' ), 409 );
 		}
 
 		if ( isset( $request['quantity'] ) ) {

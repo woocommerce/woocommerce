@@ -14,16 +14,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
 /**
  * CartAddItem class.
  */
-class CartAddItem extends AbstractRoute {
-	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
+class CartAddItem extends AbstractCartRoute {
 	/**
 	 * Get the path of this REST route.
 	 *
