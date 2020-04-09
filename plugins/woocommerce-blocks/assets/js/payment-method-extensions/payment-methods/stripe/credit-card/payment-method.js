@@ -3,7 +3,6 @@
  */
 import { PAYMENT_METHOD_NAME } from './constants';
 import { getStripeServerData } from '../stripe-utils';
-import { ccSvg } from './cc';
 import { useCheckoutSubscriptions } from './use-checkout-subscriptions';
 import { InlineCard, CardElements } from './elements';
 
@@ -76,14 +75,18 @@ const CreditCardComponent = ( { billing, eventRegistration, components } ) => {
 					}
 				/>
 			) }
-			<img
-				src={ ccSvg }
-				alt={ __(
-					'Accepted cards for processing',
-					'woo-gutenberg-products-block'
+			<div className="wc-blocks-credit-card-images">
+				{ Object.entries( getStripeServerData().icons ).map(
+					( [ id, { url, alt } ] ) => (
+						<img
+							src={ url }
+							alt={ alt }
+							key={ id }
+							className={ `wc-blocks-credit-${ id }-icon wc-blocks-credit-cart-icon` }
+						/>
+					)
 				) }
-				className="wc-blocks-credit-card-images"
-			/>
+			</div>
 		</>
 	);
 };

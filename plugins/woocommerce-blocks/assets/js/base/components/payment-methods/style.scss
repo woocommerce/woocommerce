@@ -150,6 +150,17 @@
 
 .wc-blocks-credit-card-images {
 	padding-top: $gap-small;
+	display: flex;
+
+	.wc-blocks-credit-cart-icon {
+		height: 18px;
+		width: auto;
+		margin-right: $gap-small;
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
 }
 
 .wc-block-components-checkout-payment-methods * {
