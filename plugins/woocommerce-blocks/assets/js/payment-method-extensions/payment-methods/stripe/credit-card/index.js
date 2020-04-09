@@ -23,7 +23,7 @@ const stripeCcPaymentMethod = {
 	),
 	content: <StripeCreditCard stripe={ stripePromise } />,
 	edit: <EditPlaceHolder />,
-	canMakePayment: stripePromise,
+	canMakePayment: () => stripePromise,
 	ariaLabel: __(
 		'Stripe Credit Card payment method',
 		'woo-gutenberg-products-block'

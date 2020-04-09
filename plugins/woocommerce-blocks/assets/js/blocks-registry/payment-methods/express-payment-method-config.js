@@ -22,9 +22,9 @@ export default class ExpressPaymentMethodConfig {
 		}
 		assertValidElement( config.content, 'content' );
 		assertValidElement( config.edit, 'edit' );
-		if ( ! ( config.canMakePayment instanceof Promise ) ) {
+		if ( typeof config.canMakePayment !== 'function' ) {
 			throw new TypeError(
-				'The canMakePayment property for the express payment method must be a promise.'
+				'The canMakePayment property for the express payment method must be a function.'
 			);
 		}
 	};

@@ -6,7 +6,11 @@ import {
 	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { useEditorContext } from '@woocommerce/base-context';
+import {
+	useEditorContext,
+	useShippingDataContext,
+} from '@woocommerce/base-context';
+import { useStoreCart } from '@woocommerce/base-hooks';
 
 const usePaymentMethodRegistration = (
 	dispatcher,
@@ -14,9 +18,24 @@ const usePaymentMethodRegistration = (
 ) => {
 	const { isEditor } = useEditorContext();
 	const [ isInitialized, setIsInitialized ] = useState( false );
+	const { shippingAddress } = useShippingDataContext();
+	const { cartTotals, cartNeedsShipping } = useStoreCart();
+	const canPayArgument = useRef( {
+		cartTotals,
+		cartNeedsShipping,
+		shippingAddress,
+	} );
 	const countPaymentMethodsInitializing = useRef(
 		Object.keys( registeredPaymentMethods ).length
 	);
+
+	useEffect( () => {
+		canPayArgument.current = {
+			cartTotals,
+			cartNeedsShipping,
+			shippingAddress,
+		};
+	}, [ cartTotals, cartNeedsShipping, shippingAddress ] );
 
 	useEffect( () => {
 		// if all payment methods are initialized then bail.
@@ -41,7 +60,9 @@ const usePaymentMethodRegistration = (
 			if ( isEditor ) {
 				updatePaymentMethods( current );
 			} else {
-				current.canMakePayment
+				Promise.resolve(
+					current.canMakePayment( canPayArgument.current )
+				)
 					.then( ( canPay ) => {
 						updatePaymentMethods( current, canPay );
 					} )
