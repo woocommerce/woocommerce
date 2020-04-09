@@ -31,7 +31,7 @@ class Library {
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( __CLASS__, 'register_draft_order_post_status' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( __CLASS__, 'append_draft_order_post_status' ) );
 		add_action( 'woocommerce_cleanup_draft_orders', array( __CLASS__, 'delete_expired_draft_orders' ) );
-		add_action( 'woocommerce_rest_checkout_process_payment_with_context', array( __CLASS__, 'process_legacy_payment' ), 10, 2 );
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', array( __CLASS__, 'process_legacy_payment' ), 999, 2 );
 	}
 
 	/**

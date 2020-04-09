@@ -20,7 +20,7 @@ export const registerPaymentMethod = ( paymentMethodCreator ) => {
 	);
 	const paymentMethodConfig = paymentMethodCreator( PaymentMethodConfig );
 	if ( paymentMethodConfig instanceof PaymentMethodConfig ) {
-		paymentMethods[ paymentMethodConfig.id ] = paymentMethodConfig;
+		paymentMethods[ paymentMethodConfig.name ] = paymentMethodConfig;
 	}
 };
 
@@ -33,7 +33,7 @@ export const registerExpressPaymentMethod = ( expressPaymentMethodCreator ) => {
 		ExpressPaymentMethodConfig
 	);
 	if ( paymentMethodConfig instanceof ExpressPaymentMethodConfig ) {
-		expressPaymentMethods[ paymentMethodConfig.id ] = paymentMethodConfig;
+		expressPaymentMethods[ paymentMethodConfig.name ] = paymentMethodConfig;
 	}
 };
 

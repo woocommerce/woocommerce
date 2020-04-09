@@ -10,7 +10,13 @@ import {
 	usePaymentMethodDataContext,
 	useValidationContext,
 } from '@woocommerce/base-context';
-import { useEffect, useRef, useCallback, useState } from '@wordpress/element';
+import {
+	useEffect,
+	useRef,
+	useCallback,
+	useState,
+	useMemo,
+} from '@wordpress/element';
 import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
 
 /**
@@ -58,6 +64,7 @@ const CheckoutProcessor = () => {
 		errorMessage,
 		paymentMethodData,
 		expressPaymentMethods,
+		paymentMethods,
 	} = usePaymentMethodDataContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
@@ -66,6 +73,11 @@ const CheckoutProcessor = () => {
 	const expressPaymentMethodActive = Object.keys(
 		expressPaymentMethods
 	).includes( activePaymentMethod );
+
+	const paymentMethodId = useMemo( () => {
+		const merged = { ...expressPaymentMethods, ...paymentMethods };
+		return merged?.[ activePaymentMethod ]?.paymentMethodId;
+	}, [ activePaymentMethod, expressPaymentMethods, paymentMethods ] );
 
 	const checkoutWillHaveError =
 		( hasValidationErrors && ! expressPaymentMethodActive ) ||
@@ -165,7 +177,7 @@ const CheckoutProcessor = () => {
 		if ( cartNeedsPayment ) {
 			data = {
 				...data,
-				payment_method: activePaymentMethod,
+				payment_method: paymentMethodId,
 				payment_data: preparePaymentData( paymentMethodData ),
 			};
 		}
@@ -227,7 +239,7 @@ const CheckoutProcessor = () => {
 	}, [
 		addErrorNotice,
 		removeNotice,
-		activePaymentMethod,
+		paymentMethodId,
 		paymentMethodData,
 		cartNeedsPayment,
 	] );

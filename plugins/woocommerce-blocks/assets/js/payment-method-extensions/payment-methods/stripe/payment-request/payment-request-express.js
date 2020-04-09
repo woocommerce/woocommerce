@@ -1,10 +1,7 @@
 /**
  * Internal dependencies
  */
-import {
-	DEFAULT_STRIPE_EVENT_HANDLERS,
-	PAYMENT_METHOD_NAME,
-} from './constants';
+import { DEFAULT_STRIPE_EVENT_HANDLERS } from './constants';
 import {
 	getStripeServerData,
 	getPaymentRequest,
@@ -57,9 +54,9 @@ const PaymentRequestExpressComponent = ( {
 	billing,
 	eventRegistration,
 	onSubmit,
-	activePaymentMethod,
-	setActivePaymentMethod,
 	setExpressPaymentError,
+	onClick,
+	onClose,
 } ) => {
 	/**
 	 * @type {[ StripePaymentRequest|null, function( StripePaymentRequest ):StripePaymentRequest|null]}
@@ -75,9 +72,6 @@ const PaymentRequestExpressComponent = ( {
 	const currentBilling = useRef( billing );
 	const currentShipping = useRef( shippingData );
 	const currentPaymentRequest = useRef( paymentRequest );
-	// for keeping track of what the active payment method was before this
-	// payment button was clicked.
-	const originalActivePaymentMethod = useRef( activePaymentMethod );
 
 	// update refs when any change.
 	useEffect( () => {
@@ -143,11 +137,10 @@ const PaymentRequestExpressComponent = ( {
 
 	// kick off payment processing.
 	const onButtonClick = () => {
-		originalActivePaymentMethod.current = activePaymentMethod;
-		setActivePaymentMethod( PAYMENT_METHOD_NAME );
 		setIsProcessing( true );
 		setIsFinished( false );
 		setExpressPaymentError( '' );
+		onClick();
 	};
 
 	const abortPayment = ( paymentMethod, message ) => {
@@ -284,15 +277,10 @@ const PaymentRequestExpressComponent = ( {
 			paymentRequest.on( 'cancel', () => {
 				setIsFinished( true );
 				setIsProcessing( false );
-				setActivePaymentMethod( originalActivePaymentMethod.current );
+				onClose();
 			} );
 		}
-	}, [
-		paymentRequest,
-		canMakePayment,
-		isProcessing,
-		setActivePaymentMethod,
-	] );
+	}, [ paymentRequest, canMakePayment, isProcessing, onClose ] );
 
 	// subscribe to events.
 	useEffect( () => {

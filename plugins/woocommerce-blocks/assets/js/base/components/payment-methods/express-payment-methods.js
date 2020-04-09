@@ -5,16 +5,39 @@ import {
 	useExpressPaymentMethods,
 	usePaymentMethodInterface,
 } from '@woocommerce/base-hooks';
-import { cloneElement, isValidElement } from '@wordpress/element';
-import { useEditorContext } from '@woocommerce/base-context';
+import {
+	cloneElement,
+	isValidElement,
+	useCallback,
+	useRef,
+} from '@wordpress/element';
+import {
+	useEditorContext,
+	usePaymentMethodDataContext,
+} from '@woocommerce/base-context';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
+	const {
+		setActivePaymentMethod,
+		activePaymentMethod,
+		setPaymentStatus,
+	} = usePaymentMethodDataContext();
 	const paymentMethodInterface = usePaymentMethodInterface();
-	// not implementing isInitialized here because it's utilized further
-	// up in the tree for express payment methods. We won't even get here if
-	// there's no payment methods after initialization.
 	const { paymentMethods } = useExpressPaymentMethods();
+	const previousActivePaymentMethod = useRef( activePaymentMethod );
+
+	const onExpressPaymentClick = useCallback(
+		( paymentMethodId ) => () => {
+			previousActivePaymentMethod.current = activePaymentMethod;
+			setPaymentStatus().started();
+			setActivePaymentMethod( paymentMethodId );
+		},
+		[ setActivePaymentMethod, setPaymentStatus, activePaymentMethod ]
+	);
+	const onExpressPaymentClose = useCallback( () => {
+		setActivePaymentMethod( previousActivePaymentMethod.current );
+	}, [ setActivePaymentMethod ] );
 	const paymentMethodIds = Object.keys( paymentMethods );
 	const content =
 		paymentMethodIds.length > 0 ? (
@@ -26,6 +49,8 @@ const ExpressPaymentMethods = () => {
 					<li key={ id } id={ `express-payment-method-${ id }` }>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
+							onClick: onExpressPaymentClick( id ),
+							onClose: onExpressPaymentClose,
 						} ) }
 					</li>
 				) : null;

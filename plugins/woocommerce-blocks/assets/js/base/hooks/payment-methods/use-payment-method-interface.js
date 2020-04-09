@@ -96,7 +96,6 @@ export const usePaymentMethodInterface = () => {
 	const {
 		currentStatus,
 		activePaymentMethod,
-		setActivePaymentMethod,
 		onPaymentProcessing,
 		onPaymentSuccess,
 		onPaymentFail,
@@ -195,7 +194,6 @@ export const usePaymentMethodInterface = () => {
 		},
 		onSubmit,
 		activePaymentMethod,
-		setActivePaymentMethod,
 		setExpressPaymentError,
 	};
 };
