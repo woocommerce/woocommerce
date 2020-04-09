@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { formatPrice } from '@woocommerce/base-utils';
+import { __experimentalCreateInterpolateElement } from 'wordpress-element';
+import { __ } from '@wordpress/i18n';
+import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import PropTypes from 'prop-types';
 
 /**
@@ -15,7 +16,7 @@ import './style.scss';
  *
  * @param {Object} props            Incoming props.
  * @param {Object} props.currency   Currency object.
- * @param {number} props.saleAmount Currency object.
+ * @param {number} props.saleAmount Discounted amount.
  *
  * @return {*} The component.
  */
@@ -25,10 +26,17 @@ const ProductSaleBadge = ( { currency, saleAmount } ) => {
 	}
 	return (
 		<div className="wc-block-sale-badge">
-			{ sprintf(
-				/* translators: %s discount amount */
-				__( 'Save %s!', 'woo-gutenberg-products-block' ),
-				formatPrice( saleAmount, currency )
+			{ __experimentalCreateInterpolateElement(
+				/* translators: <price/> will be replaced by the discount amount */
+				__( 'Save <price/>!', 'woo-gutenberg-products-block' ),
+				{
+					price: (
+						<FormattedMonetaryAmount
+							currency={ currency }
+							value={ saleAmount }
+						/>
+					),
+				}
 			) }
 		</div>
 	);
