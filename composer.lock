@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "db4f7986ab4045e064a14fa578bd4120",
+    "content-hash": "c6614272bcca35438d16632daecaff0a",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -418,16 +418,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "dev-build/1.1.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "c738dca"
+                "reference": "c738dca7c27be4e3fcc511a164e8facf23ef4721"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/c738dca",
-                "reference": "c738dca",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/c738dca7c27be4e3fcc511a164e8facf23ef4721",
+                "reference": "c738dca7c27be4e3fcc511a164e8facf23ef4721",
                 "shasum": ""
             },
             "require": {
@@ -2914,9 +2914,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "woocommerce/woocommerce-admin": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
