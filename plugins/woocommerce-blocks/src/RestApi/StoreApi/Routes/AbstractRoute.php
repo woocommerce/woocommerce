@@ -72,9 +72,9 @@ abstract class AbstractRoute implements RouteInterface {
 				$response->header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 			}
 		} catch ( RouteException $error ) {
-			$response = new \WP_Error( $error->getErrorCode(), $error->getMessage(), [ 'status' => $error->getCode() ] );
+			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode() );
 		} catch ( \Exception $error ) {
-			$response = new \WP_Error( 'unknown_server_error', $error->getMessage(), [ 'status' => '500' ] );
+			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
 		}
 		return $response;
 	}
@@ -153,6 +153,18 @@ abstract class AbstractRoute implements RouteInterface {
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
 		throw new RouteException( 'woocommerce_rest_invalid_endpoint', __( 'Method not implemented', 'woo-gutenberg-products-block' ), 404 );
+	}
+
+	/**
+	 * Get route response when something went wrong.
+	 *
+	 * @param string $error_code String based error code.
+	 * @param string $error_message User facing error message.
+	 * @param int    $http_status_code HTTP status. Defaults to 500.
+	 * @return \WP_Error WP Error object.
+	 */
+	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500 ) {
+		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
 	}
 
 	/**

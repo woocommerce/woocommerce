@@ -107,7 +107,7 @@ class Cart extends TestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 409, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cart_invalid_key', $data['code'] );
 	}
 
@@ -136,7 +136,7 @@ class Cart extends TestCase {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 409, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cart_invalid_key', $data['code'] );
 	}
 
@@ -331,7 +331,7 @@ class Cart extends TestCase {
 		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
-		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 403, $response->get_status() );
 
 		// Applied coupon.
 		$request = new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon' );

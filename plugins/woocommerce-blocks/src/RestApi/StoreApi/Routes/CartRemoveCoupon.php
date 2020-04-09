@@ -14,16 +14,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
 /**
  * CartRemoveCoupon class.
  */
-class CartRemoveCoupon extends AbstractRoute {
-	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
+class CartRemoveCoupon extends AbstractCartRoute {
 	/**
 	 * Get the path of this REST route.
 	 *
@@ -69,9 +60,14 @@ class CartRemoveCoupon extends AbstractRoute {
 		$controller  = new CartController();
 		$cart        = $controller->get_cart_instance();
 		$coupon_code = wc_format_coupon_code( $request['code'] );
+		$coupon      = new \WC_Coupon( $coupon_code );
+
+		if ( $coupon->get_code() !== $coupon_code || ! $coupon->is_valid() ) {
+			throw new RouteException( 'woocommerce_rest_cart_coupon_error', __( 'Invalid coupon code.', 'woo-gutenberg-products-block' ), 403 );
+		}
 
 		if ( ! $controller->has_coupon( $coupon_code ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woo-gutenberg-products-block' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon cannot be removed because it is not already applied to the cart.', 'woo-gutenberg-products-block' ), 409 );
 		}
 
 		$cart = $controller->get_cart_instance();

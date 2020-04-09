@@ -14,16 +14,7 @@ use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\CartController;
 /**
  * CartSelectShippingRate class.
  */
-class CartSelectShippingRate extends AbstractRoute {
-	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
+class CartSelectShippingRate extends AbstractCartRoute {
 	/**
 	 * Get the path of this REST route.
 	 *
