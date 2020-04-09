@@ -352,6 +352,7 @@ export default compose(
 			getActivePlugins,
 			getOptions,
 			getUpdateOptionsError,
+			isJetpackConnected,
 			isUpdateOptionsRequesting,
 		} = select( 'wc-api' );
 
@@ -378,6 +379,7 @@ export default compose(
 		const methods = getPaymentMethods( {
 			activePlugins,
 			countryCode,
+			isJetpackConnected: isJetpackConnected(),
 			options,
 			profileItems,
 		} );
