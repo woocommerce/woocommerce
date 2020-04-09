@@ -104,7 +104,7 @@ class Cart extends AbstractBlock {
 		}
 
 		// Hydrate the following data depending on admin or frontend context.
-		if ( ! is_admin() ) {
+		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
 			$this->hydrate_from_api( $data_registry );
 		}
 
