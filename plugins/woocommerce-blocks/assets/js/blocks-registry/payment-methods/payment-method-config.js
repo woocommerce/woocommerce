@@ -35,9 +35,9 @@ export default class PaymentMethodConfig {
 				'The ariaLabel for the payment method must be a string'
 			);
 		}
-		if ( ! ( config.canMakePayment instanceof Promise ) ) {
+		if ( typeof config.canMakePayment !== 'function' ) {
 			throw new TypeError(
-				'The canMakePayment property for the payment method must be a promise.'
+				'The canMakePayment property for the payment method must be a function.'
 			);
 		}
 	};

@@ -11,7 +11,6 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
-import { defaultPromise } from '../../utils';
 
 const settings = getSetting( 'cheque_data', {} );
 
@@ -53,7 +52,7 @@ const offlineChequePaymentMethod = {
 	),
 	content: <Content />,
 	edit: <EditPlaceHolder />,
-	canMakePayment: defaultPromise,
+	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
 		settings.title || __( 'Check Payment', 'woo-gutenberg-products-block' )
 	),
