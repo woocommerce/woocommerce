@@ -109,7 +109,9 @@ class Checkout extends AbstractBlock {
 				$methods_exist = wc_get_shipping_method_count() > 0;
 				$data_registry->add( 'shippingMethodsExist', $methods_exist );
 			}
-		} else {
+		}
+
+		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
 			$this->hydrate_from_api( $data_registry );
 			$this->hydrate_customer_payment_methods( $data_registry );
 		}
