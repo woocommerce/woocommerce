@@ -198,8 +198,6 @@
  *                                                                 processing.
  * @property {string}                     [activePaymentMethod]    Indicates what the active payment
  *                                                                 method is.
- * @property {function( string )}         [setActivePaymentMethod] Used to set the active payment
- *                                                                 method.
  * @property {ComponentProps}             components               Components exposed to payment
  *                                                                 methods for use.
  * @property {function(string)}          [setExpressPaymentError]  For setting an error (error

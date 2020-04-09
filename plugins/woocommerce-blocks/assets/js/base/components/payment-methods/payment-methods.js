@@ -28,14 +28,14 @@ import SavedPaymentMethodOptions from './saved-payment-method-options';
 /**
  * Returns a payment method for the given context.
  *
- * @param {string} id The payment method slug to return.
+ * @param {string} name The payment method slug to return.
  * @param {Object} paymentMethods The current registered payment methods
  * @param {boolean} isEditor Whether in the editor context (true) or not (false).
  *
- * @return {Object} The payment method matching the id for the given context.
+ * @return {Object} The payment method matching the name for the given context.
  */
-const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
-	let paymentMethod = paymentMethods[ id ] || null;
+const getPaymentMethod = ( name, paymentMethods, isEditor ) => {
+	let paymentMethod = paymentMethods[ name ] || null;
 	if ( paymentMethod ) {
 		paymentMethod = isEditor ? paymentMethod.edit : paymentMethod.content;
 	}
@@ -49,12 +49,14 @@ const getPaymentMethod = ( id, paymentMethods, isEditor ) => {
  */
 const PaymentMethods = () => {
 	const { isEditor } = useEditorContext();
-	const { customerPaymentMethods = {} } = usePaymentMethodDataContext();
+	const {
+		customerPaymentMethods = {},
+		setActivePaymentMethod,
+	} = usePaymentMethodDataContext();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
 	const currentPaymentMethods = useRef( paymentMethods );
 	const {
 		activePaymentMethod,
-		setActivePaymentMethod,
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
 	const currentPaymentMethodInterface = useRef( paymentMethodInterface );
@@ -93,16 +95,18 @@ const PaymentMethods = () => {
 		<Tabs
 			className="wc-block-components-checkout-payment-methods"
 			onSelect={ ( tabName ) => setActivePaymentMethod( tabName ) }
-			tabs={ Object.keys( currentPaymentMethods.current ).map( ( id ) => {
-				const { label, ariaLabel } = currentPaymentMethods.current[
-					id
-				];
-				return {
-					name: id,
-					title: () => label,
-					ariaLabel,
-				};
-			} ) }
+			tabs={ Object.keys( currentPaymentMethods.current ).map(
+				( name ) => {
+					const { label, ariaLabel } = currentPaymentMethods.current[
+						name
+					];
+					return {
+						name,
+						title: () => label,
+						ariaLabel,
+					};
+				}
+			) }
 			initialTabName={ activePaymentMethod }
 			ariaLabel={ __(
 				'Payment Methods',

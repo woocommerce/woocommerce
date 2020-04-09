@@ -79,8 +79,8 @@ export const usePaymentMethodDataContext = () => {
 const isSuccessResponse = ( response ) => {
 	return (
 		( typeof response === 'object' &&
-			typeof response.billingData !== 'undefined' &&
-			typeof response.paymentMethodData !== 'undefined' ) ||
+			typeof response.fail === 'undefined' &&
+			typeof response.errorMessage === 'undefined' ) ||
 		response === true
 	);
 };
@@ -123,7 +123,7 @@ export const PaymentMethodDataProvider = ( {
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
 	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
-	const [ paymentStatus, dispatch ] = useReducer(
+	const [ paymentData, dispatch ] = useReducer(
 		reducer,
 		DEFAULT_PAYMENT_DATA
 	);
@@ -179,17 +179,17 @@ export const PaymentMethodDataProvider = ( {
 
 	const currentStatus = useMemo(
 		() => ( {
-			isPristine: paymentStatus.currentStatus === PRISTINE,
-			isStarted: paymentStatus.currentStatus === STARTED,
-			isProcessing: paymentStatus.currentStatus === PROCESSING,
+			isPristine: paymentData.currentStatus === PRISTINE,
+			isStarted: paymentData.currentStatus === STARTED,
+			isProcessing: paymentData.currentStatus === PROCESSING,
 			isFinished: [ ERROR, FAILED, SUCCESS ].includes(
-				paymentStatus.currentStatus
+				paymentData.currentStatus
 			),
-			hasError: paymentStatus.currentStatus === ERROR,
-			hasFailed: paymentStatus.currentStatus === FAILED,
-			isSuccessful: paymentStatus.currentStatus === SUCCESS,
+			hasError: paymentData.currentStatus === ERROR,
+			hasFailed: paymentData.currentStatus === FAILED,
+			isSuccessful: paymentData.currentStatus === SUCCESS,
 		} ),
-		[ paymentStatus.currentStatus ]
+		[ paymentData.currentStatus ]
 	);
 
 	// flip payment to processing if checkout processing is complete, there are
@@ -212,20 +212,20 @@ export const PaymentMethodDataProvider = ( {
 
 	// set initial active payment method if it's undefined.
 	useEffect( () => {
-		const paymentMethodKeys = Object.keys( paymentStatus.paymentMethods );
+		const paymentMethodKeys = Object.keys( paymentData.paymentMethods );
 		if (
 			paymentMethodsInitialized &&
 			! activePaymentMethod &&
 			paymentMethodKeys.length > 0
 		) {
 			setActivePaymentMethod(
-				Object.keys( paymentStatus.paymentMethods )[ 0 ]
+				Object.keys( paymentData.paymentMethods )[ 0 ]
 			);
 		}
 	}, [
 		activePaymentMethod,
 		paymentMethodsInitialized,
-		paymentStatus.paymentMethods,
+		paymentData.paymentMethods,
 	] );
 
 	/**
@@ -348,12 +348,12 @@ export const PaymentMethodDataProvider = ( {
 	/**
 	 * @type {PaymentMethodDataContext}
 	 */
-	const paymentData = {
+	const paymentContextData = {
 		setPaymentStatus,
 		currentStatus,
 		paymentStatuses: STATUS,
-		paymentMethodData: paymentStatus.paymentMethodData,
-		errorMessage: paymentStatus.errorMessage,
+		paymentMethodData: paymentData.paymentMethodData,
+		errorMessage: paymentData.errorMessage,
 		activePaymentMethod,
 		setActivePaymentMethod,
 		onPaymentProcessing,
@@ -361,14 +361,14 @@ export const PaymentMethodDataProvider = ( {
 		onPaymentFail,
 		onPaymentError,
 		customerPaymentMethods,
-		paymentMethods: paymentStatus.paymentMethods,
-		expressPaymentMethods: paymentStatus.expressPaymentMethods,
+		paymentMethods: paymentData.paymentMethods,
+		expressPaymentMethods: paymentData.expressPaymentMethods,
 		paymentMethodsInitialized,
 		expressPaymentMethodsInitialized,
 		setExpressPaymentError,
 	};
 	return (
-		<PaymentMethodDataContext.Provider value={ paymentData }>
+		<PaymentMethodDataContext.Provider value={ paymentContextData }>
 			{ children }
 		</PaymentMethodDataContext.Provider>
 	);

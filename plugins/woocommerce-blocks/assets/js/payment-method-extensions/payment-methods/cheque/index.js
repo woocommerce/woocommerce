@@ -41,7 +41,7 @@ const Content = ( { activePaymentMethod, eventRegistration } ) => {
 };
 
 const offlineChequePaymentMethod = {
-	id: PAYMENT_METHOD_NAME,
+	name: PAYMENT_METHOD_NAME,
 	label: (
 		<strong>
 			{ decodeEntities(

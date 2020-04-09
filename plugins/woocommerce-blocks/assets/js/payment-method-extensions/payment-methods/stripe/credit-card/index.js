@@ -15,7 +15,7 @@ const EditPlaceHolder = () => <div>TODO: Card edit preview soon...</div>;
 const stripePromise = loadStripe();
 
 const stripeCcPaymentMethod = {
-	id: PAYMENT_METHOD_NAME,
+	name: PAYMENT_METHOD_NAME,
 	label: (
 		<strong>
 			{ __( 'Credit/Debit Card', 'woo-gutenberg-products-block' ) }
