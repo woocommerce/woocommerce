@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c6614272bcca35438d16632daecaff0a",
+    "content-hash": "db4f7986ab4045e064a14fa578bd4120",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -330,16 +330,16 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.4.37",
+            "version": "v3.4.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "e1b3e1a0621d6e48ee46092b4c7d8280f746b3c5"
+                "reference": "9ccf6e78077a3fc1596e6c7b5958008965a11518"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/e1b3e1a0621d6e48ee46092b4c7d8280f746b3c5",
-                "reference": "e1b3e1a0621d6e48ee46092b4c7d8280f746b3c5",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/9ccf6e78077a3fc1596e6c7b5958008965a11518",
+                "reference": "9ccf6e78077a3fc1596e6c7b5958008965a11518",
                 "shasum": ""
             },
             "require": {
@@ -379,7 +379,7 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "time": "2020-01-01T11:03:25+00:00"
+            "time": "2020-03-16T08:31:04+00:00"
         },
         {
             "name": "woocommerce/action-scheduler",
@@ -418,20 +418,20 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "v1.1.0",
+            "version": "dev-build/1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "3e50fe40022b626e6117b77514274b66947d80af"
+                "reference": "c738dca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/3e50fe40022b626e6117b77514274b66947d80af",
-                "reference": "3e50fe40022b626e6117b77514274b66947d80af",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/c738dca",
+                "reference": "c738dca",
                 "shasum": ""
             },
             "require": {
-                "automattic/jetpack-autoloader": "^1.2.0",
+                "automattic/jetpack-autoloader": "^1.6.0",
                 "composer/installers": "1.7.0",
                 "php": ">=5.6|>=7.0"
             },
@@ -461,7 +461,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-04-01T19:19:28+00:00"
+            "time": "2020-04-08T23:44:56+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -799,16 +799,16 @@
         },
         {
             "name": "mck89/peast",
-            "version": "v1.10.1",
+            "version": "v1.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mck89/peast.git",
-                "reference": "461fbe96212ac1b511f527fd11b942e976429398"
+                "reference": "6d1100f39f684c9e004f808b27f6c824b083d8d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mck89/peast/zipball/461fbe96212ac1b511f527fd11b942e976429398",
-                "reference": "461fbe96212ac1b511f527fd11b942e976429398",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/6d1100f39f684c9e004f808b27f6c824b083d8d8",
+                "reference": "6d1100f39f684c9e004f808b27f6c824b083d8d8",
                 "shasum": ""
             },
             "require": {
@@ -820,7 +820,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.10.1-dev"
+                    "dev-master": "1.10.3-dev"
                 }
             },
             "autoload": {
@@ -840,7 +840,7 @@
                 }
             ],
             "description": "Peast is PHP library that generates AST for JavaScript code",
-            "time": "2019-12-22T16:46:42+00:00"
+            "time": "2020-04-03T09:06:20+00:00"
         },
         {
             "name": "mustache/mustache",
@@ -1351,16 +1351,16 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "v1.10.2",
+            "version": "v1.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "b4400efc9d206e83138e2bb97ed7f5b14b831cd9"
+                "reference": "451c3cd1418cf640de218914901e51b064abb093"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/b4400efc9d206e83138e2bb97ed7f5b14b831cd9",
-                "reference": "b4400efc9d206e83138e2bb97ed7f5b14b831cd9",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/451c3cd1418cf640de218914901e51b064abb093",
+                "reference": "451c3cd1418cf640de218914901e51b064abb093",
                 "shasum": ""
             },
             "require": {
@@ -1410,7 +1410,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2020-01-20T15:57:02+00:00"
+            "time": "2020-03-05T15:02:03+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -2416,16 +2416,16 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v3.4.37",
+            "version": "v3.4.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "a90a9d3b9f458a5cdeabfa4090b20c000ca3962f"
+                "reference": "5ec813ccafa8164ef21757e8c725d3a57da59200"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/a90a9d3b9f458a5cdeabfa4090b20c000ca3962f",
-                "reference": "a90a9d3b9f458a5cdeabfa4090b20c000ca3962f",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/5ec813ccafa8164ef21757e8c725d3a57da59200",
+                "reference": "5ec813ccafa8164ef21757e8c725d3a57da59200",
                 "shasum": ""
             },
             "require": {
@@ -2461,20 +2461,20 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
-            "time": "2020-01-01T11:03:25+00:00"
+            "time": "2020-02-14T07:34:21+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "fbdeaec0df06cf3d51c93de80c7eb76e271f5a38"
+                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/fbdeaec0df06cf3d51c93de80c7eb76e271f5a38",
-                "reference": "fbdeaec0df06cf3d51c93de80c7eb76e271f5a38",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
                 "shasum": ""
             },
             "require": {
@@ -2486,7 +2486,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -2519,7 +2519,7 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-02-27T09:26:54+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -2914,7 +2914,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "woocommerce/woocommerce-admin": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
