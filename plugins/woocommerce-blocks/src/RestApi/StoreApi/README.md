@@ -428,6 +428,7 @@ Example response:
 	],
 	"items_count": 3,
 	"items_weight": 0,
+	"needs_payment": true,
 	"needs_shipping": true,
 	"totals": {
 		"currency_code": "GBP",
