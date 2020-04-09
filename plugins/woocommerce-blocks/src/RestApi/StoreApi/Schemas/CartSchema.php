@@ -141,6 +141,12 @@ class CartSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'needs_payment'    => [
+				'description' => __( 'True if the cart needs payment. False for carts with only free products and no shipping costs.', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'needs_shipping'   => [
 				'description' => __( 'True if the cart needs shipping. False for carts with only digital goods or stores with no shipping methods set-up.', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
@@ -271,6 +277,7 @@ class CartSchema extends AbstractSchema {
 			'items'            => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
 			'items_count'      => $cart->get_cart_contents_count(),
 			'items_weight'     => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
+			'needs_payment'    => $cart->needs_payment(),
 			'needs_shipping'   => $cart->needs_shipping(),
 			'totals'           => (object) array_merge(
 				$this->get_store_currency_response(),

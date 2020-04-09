@@ -304,7 +304,9 @@ class Checkout extends AbstractRoute {
 	protected function process_without_payment( \WC_Order $order, \WP_REST_Request $request ) {
 		$order->payment_complete();
 
-		return new PaymentResult( 'success' );
+		$result = new PaymentResult( 'success' );
+		$result->set_redirect_url( $order->get_checkout_order_received_url() );
+		return $result;
 	}
 
 	/**

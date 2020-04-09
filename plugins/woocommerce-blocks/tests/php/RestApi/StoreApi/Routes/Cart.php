@@ -75,6 +75,7 @@ class Cart extends TestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 3, $data['items_count'] );
 		$this->assertEquals( 2, count( $data['items'] ) );
+		$this->assertEquals( true, $data['needs_payment'] );
 		$this->assertEquals( true, $data['needs_shipping'] );
 		$this->assertEquals( '30', $data['items_weight'] );
 
@@ -361,6 +362,7 @@ class Cart extends TestCase {
 		$this->assertArrayHasKey( 'items', $data );
 		$this->assertArrayHasKey( 'shipping_rates', $data );
 		$this->assertArrayHasKey( 'coupons', $data );
+		$this->assertArrayHasKey( 'needs_payment', $data );
 		$this->assertArrayHasKey( 'needs_shipping', $data );
 		$this->assertArrayHasKey( 'items_weight', $data );
 		$this->assertArrayHasKey( 'totals', $data );

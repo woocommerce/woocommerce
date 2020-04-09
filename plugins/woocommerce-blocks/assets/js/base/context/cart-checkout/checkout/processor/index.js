@@ -11,7 +11,7 @@ import {
 	useValidationContext,
 } from '@woocommerce/base-context';
 import { useEffect, useRef, useCallback, useState } from '@wordpress/element';
-import { useStoreNotices } from '@woocommerce/base-hooks';
+import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
 
 /**
  * @typedef {import('@woocommerce/type-defs/payments').PaymentDataItem} PaymentDataItem
@@ -51,6 +51,7 @@ const CheckoutProcessor = () => {
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingAddress, shippingErrorStatus } = useShippingDataContext();
 	const { billingData } = useBillingDataContext();
+	const { cartNeedsPayment } = useStoreCart();
 	const {
 		activePaymentMethod,
 		currentStatus: currentPaymentStatus,
@@ -90,7 +91,7 @@ const CheckoutProcessor = () => {
 	const paidAndWithoutErrors =
 		! checkoutHasError &&
 		! checkoutWillHaveError &&
-		currentPaymentStatus.isSuccessful &&
+		( currentPaymentStatus.isSuccessful || ! cartNeedsPayment ) &&
 		checkoutIsProcessingComplete;
 
 	useEffect( () => {
@@ -156,16 +157,22 @@ const CheckoutProcessor = () => {
 	const processOrder = useCallback( () => {
 		setIsProcessingOrder( true );
 		removeNotice( 'checkout' );
+		let data = {
+			billing_address: currentBillingData.current,
+			shipping_address: currentShippingAddress.current,
+			customer_note: '',
+		};
+		if ( cartNeedsPayment ) {
+			data = {
+				...data,
+				payment_method: activePaymentMethod,
+				payment_data: preparePaymentData( paymentMethodData ),
+			};
+		}
 		triggerFetch( {
 			path: '/wc/store/checkout',
 			method: 'POST',
-			data: {
-				payment_method: activePaymentMethod,
-				payment_data: preparePaymentData( paymentMethodData ),
-				billing_address: currentBillingData.current,
-				shipping_address: currentShippingAddress.current,
-				customer_note: '',
-			},
+			data,
 			cache: 'no-store',
 			parse: false,
 		} )
@@ -217,7 +224,13 @@ const CheckoutProcessor = () => {
 				dispatchActions.setComplete();
 				setIsProcessingOrder( false );
 			} );
-	}, [ addErrorNotice, removeNotice, activePaymentMethod, paymentMethodData ] );
+	}, [
+		addErrorNotice,
+		removeNotice,
+		activePaymentMethod,
+		paymentMethodData,
+		cartNeedsPayment,
+	] );
 	// setup checkout processing event observers.
 	useEffect( () => {
 		const unsubscribeRedirect = onCheckoutCompleteSuccess( () => {

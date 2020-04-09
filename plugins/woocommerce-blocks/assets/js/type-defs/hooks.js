@@ -14,6 +14,8 @@
  *                                                      cart.
  * @property {number}              cartItemsWeight      The weight of all items in
  *                                                      the cart.
+ * @property {boolean}             cartNeedsPayment     True when the cart will
+ *                                                      require payment.
  * @property {boolean}             cartNeedsShipping    True when the cart will
  *                                                      require shipping.
  * @property {Array}               cartItemErrors       Item validation errors.
