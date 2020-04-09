@@ -88,7 +88,8 @@ table.wc-block-cart-items {
 			font-size: 16px;
 			line-height: 19px;
 
-			.wc-block-formatted-money-amount {
+			.wc-block-product-price,
+			.wc-block-product-price--regular {
 				display: block;
 			}
 		}
