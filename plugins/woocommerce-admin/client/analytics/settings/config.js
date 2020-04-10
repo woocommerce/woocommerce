@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import interpolateComponents from 'interpolate-components';
-import { ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
+import { getSetting, ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -25,8 +25,8 @@ export const DEFAULT_ORDER_STATUSES = [
 export const DEFAULT_DATE_RANGE = 'period=month&compare=previous_year';
 
 const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
-	.filter( status => status !== 'refunded' )
-	.map( key => {
+	.filter( ( status ) => status !== 'refunded' )
+	.map( ( key ) => {
 		return {
 			value: key,
 			label: ORDER_STATUSES[ key ],
@@ -37,25 +37,46 @@ const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
 		};
 	} );
 
+const unregisteredOrderStatuses = getSetting( 'unregisteredOrderStatuses', {} );
+
+const orderStatusOptions = [
+	{
+		key: 'defaultStatuses',
+		options: filteredOrderStatuses.filter( ( status ) =>
+			DEFAULT_ORDER_STATUSES.includes( status.value )
+		),
+	},
+	{
+		key: 'customStatuses',
+		label: __( 'Custom Statuses', 'woocommerce-admin' ),
+		options: filteredOrderStatuses.filter(
+			( status ) => ! DEFAULT_ORDER_STATUSES.includes( status.value )
+		),
+	},
+	{
+		key: 'unregisteredStatuses',
+		label: __( 'Unregistered Statuses', 'woocommerce-admin' ),
+		options: Object.keys( unregisteredOrderStatuses ).map( ( key ) => {
+			return {
+				value: key,
+				label: key,
+				description: sprintf(
+					__(
+						'Exclude the %s status from reports',
+						'woocommerce-admin'
+					),
+					key
+				),
+			};
+		} ),
+	},
+];
+
 export const config = applyFilters( SETTINGS_FILTER, {
 	woocommerce_excluded_report_order_statuses: {
 		label: __( 'Excluded Statuses:', 'woocommerce-admin' ),
 		inputType: 'checkboxGroup',
-		options: [
-			{
-				key: 'defaultStatuses',
-				options: filteredOrderStatuses.filter( status =>
-					DEFAULT_ORDER_STATUSES.includes( status.value )
-				),
-			},
-			{
-				key: 'customStatuses',
-				label: __( 'Custom Statuses', 'woocommerce-admin' ),
-				options: filteredOrderStatuses.filter(
-					status => ! DEFAULT_ORDER_STATUSES.includes( status.value )
-				),
-			},
-		],
+		options: orderStatusOptions,
 		helpText: interpolateComponents( {
 			mixedString: __(
 				'Orders with these statuses are excluded from the totals in your reports. ' +
@@ -71,21 +92,7 @@ export const config = applyFilters( SETTINGS_FILTER, {
 	woocommerce_actionable_order_statuses: {
 		label: __( 'Actionable Statuses:', 'woocommerce-admin' ),
 		inputType: 'checkboxGroup',
-		options: [
-			{
-				key: 'defaultStatuses',
-				options: filteredOrderStatuses.filter( status =>
-					DEFAULT_ORDER_STATUSES.includes( status.value )
-				),
-			},
-			{
-				key: 'customStatuses',
-				label: __( 'Custom Statuses', 'woocommerce-admin' ),
-				options: filteredOrderStatuses.filter(
-					status => ! DEFAULT_ORDER_STATUSES.includes( status.value )
-				),
-			},
-		],
+		options: orderStatusOptions,
 		helpText: __(
 			'Orders with these statuses require action on behalf of the store admin.' +
 				'These orders will show up in the Orders tab under the activity panel.',

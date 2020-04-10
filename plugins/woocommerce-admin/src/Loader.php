@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin;
 
 use \_WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 
 /**
  * Loader Class.
@@ -73,8 +74,6 @@ class Loader {
 		add_action( 'in_admin_header', array( __CLASS__, 'embed_page_header' ) );
 		add_filter( 'woocommerce_settings_groups', array( __CLASS__, 'add_settings_group' ) );
 		add_filter( 'woocommerce_settings-wc_admin', array( __CLASS__, 'add_settings' ) );
-		add_filter( 'option_woocommerce_actionable_order_statuses', array( __CLASS__, 'filter_invalid_statuses' ) );
-		add_filter( 'option_woocommerce_excluded_report_order_statuses', array( __CLASS__, 'filter_invalid_statuses' ) );
 		add_action( 'admin_head', array( __CLASS__, 'remove_notices' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_before_notices' ), -9999 );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_after_notices' ), PHP_INT_MAX );
@@ -724,6 +723,9 @@ class Loader {
 		// WooCommerce Branding is an example of this - so pass through the translation of
 		// 'WooCommerce' to wcSettings.
 		$settings['woocommerceTranslation'] = __( 'WooCommerce', 'woocommerce-admin' );
+		// We may have synced orders with a now-unregistered status.
+		// E.g An extension that added statuses is now inactive or removed.
+		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
@@ -761,6 +763,21 @@ class Loader {
 	}
 
 	/**
+	 * Get all order statuses present in analytics tables that aren't registered.
+	 *
+	 * @return array Unregistered order statuses.
+	 */
+	public static function get_unregistered_order_statuses() {
+		$registered_statuses   = wc_get_order_statuses();
+		$all_synced_statuses   = OrdersDataStore::get_all_statuses();
+		$unregistered_statuses = array_diff( $all_synced_statuses, array_keys( $registered_statuses ) );
+		$formatted_status_keys = self::get_order_statuses( array_fill_keys( $unregistered_statuses, '' ) );
+		$formatted_statuses    = array_keys( $formatted_status_keys );
+
+		return array_combine( $formatted_statuses, $formatted_statuses );
+	}
+
+	/**
 	 * Register the admin settings for use in the WC REST API
 	 *
 	 * @param array $groups Array of setting groups.
@@ -782,7 +799,10 @@ class Loader {
 	 * @return array
 	 */
 	public static function add_settings( $settings ) {
-		$statuses   = self::get_order_statuses( wc_get_order_statuses() );
+		$unregistered_statuses = self::get_unregistered_order_statuses();
+		$registered_statuses   = self::get_order_statuses( wc_get_order_statuses() );
+		$all_statuses          = array_merge( $unregistered_statuses, $registered_statuses );
+
 		$settings[] = array(
 			'id'          => 'woocommerce_excluded_report_order_statuses',
 			'option_key'  => 'woocommerce_excluded_report_order_statuses',
@@ -790,7 +810,7 @@ class Loader {
 			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce-admin' ),
 			'default'     => array( 'pending', 'cancelled', 'failed' ),
 			'type'        => 'multiselect',
-			'options'     => $statuses,
+			'options'     => $all_statuses,
 		);
 		$settings[] = array(
 			'id'          => 'woocommerce_actionable_order_statuses',
@@ -799,7 +819,7 @@ class Loader {
 			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce-admin' ),
 			'default'     => array( 'processing', 'on-hold' ),
 			'type'        => 'multiselect',
-			'options'     => $statuses,
+			'options'     => $all_statuses,
 		);
 		$settings[] = array(
 			'id'          => 'woocommerce_default_date_range',
@@ -810,21 +830,6 @@ class Loader {
 			'type'        => 'text',
 		);
 		return $settings;
-	}
-
-	/**
-	 * Filter invalid statuses from saved settings to avoid removed statuses throwing errors.
-	 *
-	 * @param array|null $value Saved order statuses.
-	 * @return array|null
-	 */
-	public static function filter_invalid_statuses( $value ) {
-		if ( is_array( $value ) ) {
-			$valid_statuses = array_keys( self::get_order_statuses( wc_get_order_statuses() ) );
-			$value          = array_intersect( $value, $valid_statuses );
-		}
-
-		return $value;
 	}
 
 	/**

@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use \Automattic\WooCommerce\Admin\API\Reports\Cache;
 
 /**
  * API\Reports\Orders\DataStore.
@@ -430,6 +431,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 		return $coupons;
+	}
+
+	/**
+	 * Get all statuses that have been synced.
+	 *
+	 * @return array Unique order statuses.
+	 */
+	public static function get_all_statuses() {
+		global $wpdb;
+
+		$cache_key = 'orders-all-statuses';
+		$statuses  = Cache::get( $cache_key );
+
+		if ( false === $statuses ) {
+			$table_name = self::get_db_table_name();
+			$statuses   = $wpdb->get_col(
+				"SELECT DISTINCT status FROM {$table_name}"
+			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+			Cache::set( $cache_key, $statuses );
+		}
+
+		return $statuses;
 	}
 
 	/**
