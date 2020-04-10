@@ -359,7 +359,7 @@ class WC_Countries {
 		if ( 'eu_vat' === $type ) {
 			$countries[] = 'MC';
 			$countries[] = 'IM';
-			//The UK is still part of the EU VAT zone
+			// The UK is still part of the EU VAT zone.
 			$countries[] = 'GB';
 		}
 
