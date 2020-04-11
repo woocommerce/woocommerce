@@ -828,6 +828,18 @@ return array(
 		'PJY' => __( 'Putrajaya', 'woocommerce' ),
 		'KUL' => __( 'Kuala Lumpur', 'woocommerce' ),
 	),
+	'MZ' => array( // Mozambique provinces.
+		'MZ-P'   => __( 'Cabo Delgado', 'woocommerce' ),
+		'MZ-G'   => __( 'Gaza', 'woocommerce' ),
+		'MZ-I'   => __( 'Inhambane', 'woocommerce' ),
+		'MZ-B'	 => __( 'Manica', 'woocommerce' ),
+		'MZ-L'   => __( 'Maputo', 'woocommerce' ),
+		'MZ-N'   => __( 'Nampula', 'woocommerce' ),
+		'MZ-A'   => __( 'Niassa', 'woocommerce' ),
+		'MZ-S'   => __( 'Sofala', 'woocommerce' ),
+		'MZ-T'   => __( 'Tete', 'woocommerce' ),
+		'MZ-Q'   => __( 'Zambézia', 'woocommerce' ),
+	),	
 	'NG' => array( // Nigerian provinces.
 		'AB' => __( 'Abia', 'woocommerce' ),
 		'FC' => __( 'Abuja', 'woocommerce' ),
