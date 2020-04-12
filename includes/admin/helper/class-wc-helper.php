@@ -1527,12 +1527,6 @@ class WC_Helper {
 
 		$active_woo_plugins = array_intersect_key( $woo_plugins, array_flip( $active_plugins ) );
 
-		if ( count( $active_woo_plugins ) > 0 ) {
-			/* translators: %s: helper screen url */
-			$notice = __( '<a href="%s">Connect your store</a> to WooCommerce.com to receive extensions updates and support.', 'woocommerce' );
-			$notice = sprintf( $notice, admin_url( 'admin.php?page=wc-addons&section=helper' ) );
-			echo '<div class="updated woocommerce-message"><p>' . wp_kses_post( $notice ) . '</p></div>';
-		}
 	}
 
 	/**
