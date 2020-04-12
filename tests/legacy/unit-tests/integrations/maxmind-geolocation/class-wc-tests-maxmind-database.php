@@ -126,7 +126,7 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 
 		if ( 'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=testing_license&suffix=tar.gz' === $url ) {
 			// We need to copy the file to where the request is supposed to have streamed it.
-			copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/GeoLite2-Country.tar.gz', $request['filename'] );
+			$this->file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/GeoLite2-Country.tar.gz', $request['filename'] );
 
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),

@@ -99,4 +99,27 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$message = $message ? $message : "We're all doomed!";
 		throw new Exception( $message, $code );
 	}
+
+
+	/**
+	 * Copies a file, temporarily disabling the code hacker.
+	 * Use this instead of "copy" in tests for compatibility with the code hacker.
+	 *
+	 * TODO: Investigate why invoking "copy" within a test with the code hacker active causes the test to fail.
+	 *
+	 * @param string   $source Path to the source file.
+	 * @param string   $dest The destination path.
+	 * @param resource $context [optional] A valid context resource created with stream_context_create.
+	 * @return bool true on success or false on failure.
+	 */
+	public function file_copy( $source, $dest, $context = null ) {
+		if ( CodeHacker::is_enabled() ) {
+			CodeHacker::restore();
+			$result = copy( $source, $dest, $context );
+			CodeHacker::enable();
+			return $result;
+		} else {
+			return copy( $source, $dest, $context );
+		}
+	}
 }

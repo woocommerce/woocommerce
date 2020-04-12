@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Runner\BeforeTestHook;
+use PHPUnit\Runner\AfterTestHook;
 
 /**
  * Helper to use the CodeHacker class in PHPUnit.
@@ -44,18 +45,36 @@ use PHPUnit\Runner\BeforeTestHook;
  *    Parameters specified after the class name will be passed to the class constructor.
  *    Hacks defined as class annotations will be applied to all tests.
  */
-final class CodeHackerTestHook implements BeforeTestHook {
+final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
+
+	public function __construct() {
+		include_once __DIR__ . '/code-hacker.php';
+	}
+
+	public function executeAfterTest( string $test, float $time ): void {
+		CodeHacker::restore();
+	}
 
 	public function executeBeforeTest( string $test ): void {
-		$parts       = explode( '::', $test );
+		/**
+		 * Possible formats of $test:
+		 * TestClass::TestMethod
+		 * TestClass::TestMethod with data set #...
+		 * Warning
+		 */
+		$parts = explode( '::', $test );
+		if ( count( $parts ) < 2 ) {
+			return;
+		}
 		$class_name  = $parts[0];
-		$method_name = $parts[1];
+		$method_name = explode( ' ', $parts[1] )[0];
 
 		// Make code hacker class and individual hack classes visible
-		include_once __DIR__ . '/code-hacker.php';
 		foreach ( glob( __DIR__ . '/hacks/*.php' ) as $hack_class_file ) {
 			include_once $hack_class_file;
 		}
+
+		CodeHacker::clear_hacks();
 
 		$this->execute_before_methods( $class_name, $method_name );
 

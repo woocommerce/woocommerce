@@ -33,9 +33,29 @@ class CodeHacker {
 
 	private static $hacks = array();
 
+	private static $enabled = false;
+
 	public static function enable() {
-		stream_wrapper_unregister( self::PROTOCOL );
-		stream_wrapper_register( self::PROTOCOL, __CLASS__ );
+		if ( ! self::$enabled ) {
+			stream_wrapper_unregister( self::PROTOCOL );
+			stream_wrapper_register( self::PROTOCOL, __CLASS__ );
+			self::$enabled = true;
+		}
+	}
+
+	public static function restore() {
+		if ( self::$enabled ) {
+			stream_wrapper_restore( self::PROTOCOL );
+			self::$enabled = false;
+		}
+	}
+
+	public static function clear_hacks() {
+		self::$hacks = array();
+	}
+
+	public static function is_enabled() {
+		return self::$enabled;
 	}
 
 	public static function add_hack( $hack ) {
@@ -98,6 +118,7 @@ class CodeHacker {
 
 
 	public function stream_close() {
+		// echo "***** CLOSE HANDLE: " . $this->handle . " \n";
 		fclose( $this->handle );
 	}
 

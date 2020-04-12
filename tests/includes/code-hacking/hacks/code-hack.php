@@ -39,6 +39,16 @@ abstract class CodeHack {
 	}
 
 	/**
+	 * Return the type of a given token.
+	 *
+	 * @param mixed $token Token to check.
+	 * @return mixed|null Type of token (see https://www.php.net/manual/en/tokens.php), or null if it's a character.
+	 */
+	protected function token_type_of( $token ) {
+		return is_array( $token ) ? $token[0] : null;
+	}
+
+	/**
 	 * Converts a token to its string representation.
 	 *
 	 * @param $token Token to convert.

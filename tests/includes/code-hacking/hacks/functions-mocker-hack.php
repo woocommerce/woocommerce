@@ -14,6 +14,13 @@ require_once __DIR__ . '/code-hack.php';
  */
 final class FunctionsMockerHack extends CodeHack {
 
+	private static $non_global_function_tokens = array(
+		T_PAAMAYIM_NEKUDOTAYIM,
+		T_DOUBLE_COLON,
+		T_OBJECT_OPERATOR,
+		T_FUNCTION,
+	);
+
 	/**
 	 * FunctionsMockerHack constructor.
 	 *
@@ -35,16 +42,19 @@ final class FunctionsMockerHack extends CodeHack {
 	}
 
 	public function hack( $code, $path ) {
-		$tokens                            = $this->tokenize( $code );
-		$code                              = '';
-		$previous_token_is_object_operator = false;
+		$tokens = $this->tokenize( $code );
+		$code   = '';
+		$previous_token_is_non_global_function_qualifier = false;
 
 		foreach ( $tokens as $token ) {
-			if ( $this->is_token_of_type( $token, T_STRING ) && ! $previous_token_is_object_operator && in_array( $token[1], $this->mocked_methods ) ) {
+			$token_type = $this->token_type_of( $token );
+			if ( T_WHITESPACE === $token_type ) {
+				$code .= $this->token_to_string( $token );
+			} elseif ( T_STRING === $token_type && ! $previous_token_is_non_global_function_qualifier && in_array( $token[1], $this->mocked_methods ) ) {
 				$code .= "{$this->mock_class}::{$token[1]}";
 			} else {
-				$code                             .= $this->token_to_string( $token );
-				$previous_token_is_object_operator = $this->is_token_of_type( $token, T_DOUBLE_COLON ) || $this->is_token_of_type( $token, T_OBJECT_OPERATOR );
+				$code .= $this->token_to_string( $token );
+				$previous_token_is_non_global_function_qualifier = in_array( $token_type, self::$non_global_function_tokens );
 			}
 		}
 
