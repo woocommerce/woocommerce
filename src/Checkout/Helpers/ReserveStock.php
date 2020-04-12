@@ -80,7 +80,7 @@ final class ReserveStock {
 			 * Filter: woocommerce_reserve_stock_for_products
 			 * Allows to filter the product ids and the quantity to reserve stock.
 			 *
-			 * @since @since 4.1.0
+			 * @since 4.1.0
 			 * @param array     $rows An array with ordered product id as key and quantity as value.
 			 * @param \WC_Order $order Order object.
 			 * @param int       $minutes How long to reserve stock in minutes.
