@@ -1276,9 +1276,9 @@ class WC_Admin_Setup_Wizard {
 			$zone->set_zone_order( 0 );
 			$zone->add_location( WC()->countries->get_base_country(), 'country' );
 			$zone_id = $zone->save();
-			$settings =  array();
+			$settings = array();
 			if ( ! empty( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) ) { // WPCS: input var ok.
-				$settings = $_POST['shipping_zones']['domestic'][ $domestic_method ];
+				$settings = wc_clean( wp_unslash( $_POST['shipping_zones']['domestic'][ $domestic_method ] ) );
 			}
 			// Save chosen shipping method settings (using REST controller for convenience).
 			$request = new WP_REST_Request( 'POST', "/wc/v3/shipping/zones/{$zone_id}/methods" );
@@ -1291,14 +1291,15 @@ class WC_Admin_Setup_Wizard {
 					)
 				)
 			);
+
 			rest_do_request( $request );
 		}
 
 		// If enabled, set the selected method for the "rest of world" zone.
 		if ( $setup_intl ) {
-			$settings =  array();
+			$settings = array();
 			if ( ! empty( $_POST['shipping_zones']['intl'][ $intl_method ] ) ) { // WPCS: input var ok.
-				$settings = $_POST['shipping_zones']['intl'][ $intl_method ];
+				$settings = wc_clean( wp_unslash( $_POST['shipping_zones']['intl'][ $intl_method ] ) );
 			}
 			// Save chosen shipping method settings (using REST controller for convenience).
 			$request = new WP_REST_Request( 'POST', '/wc/v3/shipping/zones/0/methods' );
@@ -1311,6 +1312,7 @@ class WC_Admin_Setup_Wizard {
 					)
 				)
 			);
+
 			rest_do_request( $request );
 		}
 
