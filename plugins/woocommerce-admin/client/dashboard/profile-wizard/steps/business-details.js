@@ -626,30 +626,34 @@ class BusinessDetails extends Component {
 										'brick-mortar-other',
 									].includes( values.selling_venues ) && (
 										<Fragment>
-											<SelectControl
-												label={ __(
-													'Which platform is the store using?',
-													'woocommerce-admin'
-												) }
-												options={ otherPlatformOptions }
-												required
-												{ ...getInputProps(
-													'other_platform'
-												) }
-											/>
-											{ values.other_platform ===
-												'other' && (
-												<TextControl
+											<div className="business-competitors">
+												<SelectControl
 													label={ __(
-														'What is the platform name?',
+														'Which platform is the store using?',
 														'woocommerce-admin'
 													) }
+													options={
+														otherPlatformOptions
+													}
 													required
 													{ ...getInputProps(
-														'other_platform_name'
+														'other_platform'
 													) }
 												/>
-											) }
+												{ values.other_platform ===
+													'other' && (
+													<TextControl
+														label={ __(
+															'What is the platform name?',
+															'woocommerce-admin'
+														) }
+														required
+														{ ...getInputProps(
+															'other_platform_name'
+														) }
+													/>
+												) }
+											</div>
 										</Fragment>
 									) }
 

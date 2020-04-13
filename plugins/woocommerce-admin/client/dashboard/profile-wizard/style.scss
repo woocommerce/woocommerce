@@ -27,6 +27,10 @@
 			max-width: 100%;
 			justify-content: center;
 		}
+
+		.business-competitors .woocommerce-select-control__listbox {
+			max-height: unset;
+		}
 	}
 
 	.woocommerce-profile-wizard__card-actions {
