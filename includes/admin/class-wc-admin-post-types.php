@@ -86,9 +86,11 @@ class WC_Admin_Post_Types {
 			$screen_id = isset( $screen, $screen->id ) ? $screen->id : '';
 		}
 
-		if ( ! empty( $_REQUEST['screen'] ) ) { // WPCS: input var ok.
-			$screen_id = wc_clean( wp_unslash( $_REQUEST['screen'] ) ); // WPCS: input var ok, sanitization ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_REQUEST['screen'] ) ) {
+			$screen_id = wc_clean( wp_unslash( $_REQUEST['screen'] ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		switch ( $screen_id ) {
 			case 'edit-shop_order':
@@ -307,7 +309,8 @@ class WC_Admin_Post_Types {
 		}
 
 		// Check nonce.
-		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) || ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) { // WPCS: input var ok, sanitization ok.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		if ( ! isset( $_REQUEST['woocommerce_quick_edit_nonce'] ) || ! wp_verify_nonce( $_REQUEST['woocommerce_quick_edit_nonce'], 'woocommerce_quick_edit_nonce' ) ) {
 			return $post_id;
 		}
 
@@ -330,6 +333,8 @@ class WC_Admin_Post_Types {
 	 * @param WC_Product $product Product object.
 	 */
 	private function quick_edit_save( $post_id, $product ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
 		$data_store        = $product->get_data_store();
 		$old_regular_price = $product->get_regular_price();
 		$old_sale_price    = $product->get_sale_price();
@@ -344,14 +349,15 @@ class WC_Admin_Post_Types {
 		);
 
 		foreach ( $input_to_props as $input_var => $prop ) {
-			if ( isset( $_REQUEST[ $input_var ] ) ) { // WPCS: input var ok, sanitization ok.
-				$product->{"set_{$prop}"}( wc_clean( wp_unslash( $_REQUEST[ $input_var ] ) ) ); // WPCS: input var ok, sanitization ok.
+			if ( isset( $_REQUEST[ $input_var ] ) ) {
+				$product->{"set_{$prop}"}( wc_clean( wp_unslash( $_REQUEST[ $input_var ] ) ) );
 			}
 		}
 
-		if ( isset( $_REQUEST['_sku'] ) ) { // WPCS: input var ok, sanitization ok.
-			$sku     = $product->get_sku();
-			$new_sku = (string) wc_clean( $_REQUEST['_sku'] ); // WPCS: input var ok, sanitization ok.
+		if ( isset( $_REQUEST['_sku'] ) ) {
+			$sku = $product->get_sku();
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$new_sku = (string) wc_clean( $_REQUEST['_sku'] );
 
 			if ( $new_sku !== $sku ) {
 				if ( ! empty( $new_sku ) ) {
@@ -365,27 +371,30 @@ class WC_Admin_Post_Types {
 			}
 		}
 
-		if ( ! empty( $_REQUEST['_shipping_class'] ) ) { // WPCS: input var ok, sanitization ok.
-			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) { // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
 				$product->set_shipping_class_id( 0 );
 			} else {
-				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) ); // WPCS: input var ok, sanitization ok.
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
 
-		$product->set_featured( isset( $_REQUEST['_featured'] ) ); // WPCS: input var ok, sanitization ok.
+		$product->set_featured( isset( $_REQUEST['_featured'] ) );
 
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
 
-			if ( isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
-				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] ); // WPCS: input var ok, sanitization ok.
+			if ( isset( $_REQUEST['_regular_price'] ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] );
 				$product->set_regular_price( $new_regular_price );
 			} else {
 				$new_regular_price = null;
 			}
-			if ( isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
-				$new_sale_price = ( '' === $_REQUEST['_sale_price'] ) ? '' : wc_format_decimal( $_REQUEST['_sale_price'] ); // WPCS: input var ok, sanitization ok.
+			if ( isset( $_REQUEST['_sale_price'] ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+				$new_sale_price = ( '' === $_REQUEST['_sale_price'] ) ? '' : wc_format_decimal( $_REQUEST['_sale_price'] );
 				$product->set_sale_price( $new_sale_price );
 			} else {
 				$new_sale_price = null;
@@ -407,10 +416,12 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle Stock Data.
-		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no'; // WPCS: input var ok, sanitization ok.
-		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no'; // WPCS: input var ok, sanitization ok.
-		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock'; // WPCS: input var ok, sanitization ok.
-		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_stock'] ) && is_numeric( wp_unslash( $_REQUEST['_stock'] ) ) ? wc_stock_amount( wp_unslash( $_REQUEST['_stock'] ) ) : ''; // WPCS: input var ok, sanitization ok.
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
+		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
+		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
+		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_stock'] ) && is_numeric( wp_unslash( $_REQUEST['_stock'] ) ) ? wc_stock_amount( wp_unslash( $_REQUEST['_stock'] ) ) : '';
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$product->set_manage_stock( $manage_stock );
 		$product->set_backorders( $backorders );
@@ -440,6 +451,8 @@ class WC_Admin_Post_Types {
 		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
+
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -449,58 +462,62 @@ class WC_Admin_Post_Types {
 	 * @param WC_Product $product Product object.
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+
 		$data_store        = $product->get_data_store();
 		$old_regular_price = $product->get_regular_price();
 		$old_sale_price    = $product->get_sale_price();
-		$data              = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
+		$data              = wp_unslash( $_REQUEST );
 
-		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) { // WPCS: input var ok, sanitization ok.
-			$product->set_weight( wc_clean( wp_unslash( $_REQUEST['_weight'] ) ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) {
+			$product->set_weight( wc_clean( wp_unslash( $_REQUEST['_weight'] ) ) );
 		}
 
-		if ( ! empty( $_REQUEST['change_dimensions'] ) ) { // WPCS: input var ok, sanitization ok.
-			if ( isset( $_REQUEST['_length'] ) ) { // WPCS: input var ok, sanitization ok.
-				$product->set_length( wc_clean( wp_unslash( $_REQUEST['_length'] ) ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['change_dimensions'] ) ) {
+			if ( isset( $_REQUEST['_length'] ) ) {
+				$product->set_length( wc_clean( wp_unslash( $_REQUEST['_length'] ) ) );
 			}
-			if ( isset( $_REQUEST['_width'] ) ) { // WPCS: input var ok, sanitization ok.
-				$product->set_width( wc_clean( wp_unslash( $_REQUEST['_width'] ) ) ); // WPCS: input var ok, sanitization ok.
+			if ( isset( $_REQUEST['_width'] ) ) {
+				$product->set_width( wc_clean( wp_unslash( $_REQUEST['_width'] ) ) );
 			}
-			if ( isset( $_REQUEST['_height'] ) ) { // WPCS: input var ok, sanitization ok.
-				$product->set_height( wc_clean( wp_unslash( $_REQUEST['_height'] ) ) ); // WPCS: input var ok, sanitization ok.
+			if ( isset( $_REQUEST['_height'] ) ) {
+				$product->set_height( wc_clean( wp_unslash( $_REQUEST['_height'] ) ) );
 			}
 		}
 
-		if ( ! empty( $_REQUEST['_tax_status'] ) ) { // WPCS: input var ok, sanitization ok.
-			$product->set_tax_status( wc_clean( $_REQUEST['_tax_status'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_tax_status'] ) ) {
+			$product->set_tax_status( wc_clean( $_REQUEST['_tax_status'] ) );
 		}
 
-		if ( ! empty( $_REQUEST['_tax_class'] ) ) { // WPCS: input var ok, sanitization ok.
-			$tax_class = wc_clean( wp_unslash( $_REQUEST['_tax_class'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_tax_class'] ) ) {
+			$tax_class = wc_clean( wp_unslash( $_REQUEST['_tax_class'] ) );
 			if ( 'standard' === $tax_class ) {
 				$tax_class = '';
 			}
 			$product->set_tax_class( $tax_class );
 		}
 
-		if ( ! empty( $_REQUEST['_shipping_class'] ) ) { // WPCS: input var ok, sanitization ok.
-			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) { // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_shipping_class'] ) ) {
+			if ( '_no_shipping_class' === $_REQUEST['_shipping_class'] ) {
 				$product->set_shipping_class_id( 0 );
 			} else {
-				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) ); // WPCS: input var ok, sanitization ok.
+				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $_REQUEST['_shipping_class'] ) );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
 
-		if ( ! empty( $_REQUEST['_visibility'] ) ) { // WPCS: input var ok, sanitization ok.
-			$product->set_catalog_visibility( wc_clean( $_REQUEST['_visibility'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_visibility'] ) ) {
+			$product->set_catalog_visibility( wc_clean( $_REQUEST['_visibility'] ) );
 		}
 
-		if ( ! empty( $_REQUEST['_featured'] ) ) { // WPCS: input var ok, sanitization ok.
-			$product->set_featured( wp_unslash( $_REQUEST['_featured'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_featured'] ) ) {
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$product->set_featured( wp_unslash( $_REQUEST['_featured'] ) );
+			// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
-		if ( ! empty( $_REQUEST['_sold_individually'] ) ) { // WPCS: input var ok, sanitization ok.
-			if ( 'yes' === $_REQUEST['_sold_individually'] ) { // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_sold_individually'] ) ) {
+			if ( 'yes' === $_REQUEST['_sold_individually'] ) {
 				$product->set_sold_individually( 'yes' );
 			} else {
 				$product->set_sold_individually( '' );
@@ -520,9 +537,9 @@ class WC_Admin_Post_Types {
 		if ( $can_product_type_change_price ) {
 			$price_changed = false;
 
-			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
-				$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
-				$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
+			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) {
+				$change_regular_price = absint( $_REQUEST['change_regular_price'] );
+				$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) );
 				$is_percentage        = (bool) strstr( $raw_regular_price, '%' );
 				$regular_price        = wc_format_decimal( $raw_regular_price );
 
@@ -558,9 +575,9 @@ class WC_Admin_Post_Types {
 				}
 			}
 
-			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
-				$change_sale_price = absint( $_REQUEST['change_sale_price'] ); // WPCS: input var ok, sanitization ok.
-				$raw_sale_price    = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
+			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) {
+				$change_sale_price = absint( $_REQUEST['change_sale_price'] );
+				$raw_sale_price    = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) );
 				$is_percentage     = (bool) strstr( $raw_sale_price, '%' );
 				$sale_price        = wc_format_decimal( $raw_sale_price );
 
@@ -618,16 +635,16 @@ class WC_Admin_Post_Types {
 		$was_managing_stock = $product->get_manage_stock() ? 'yes' : 'no';
 		$stock_status       = $product->get_stock_status();
 		$backorders         = $product->get_backorders();
-		$backorders         = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders; // WPCS: input var ok, sanitization ok.
-		$stock_status       = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status; // WPCS: input var ok, sanitization ok.
+		$backorders         = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
+		$stock_status       = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
-		if ( ! empty( $_REQUEST['_manage_stock'] ) ) { // WPCS: input var ok, sanitization ok.
-			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no'; // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
+			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
 		} else {
 			$manage_stock = $was_managing_stock;
 		}
 
-		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) && isset( $_REQUEST['_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity(); // WPCS: input var ok, sanitization ok.
+		$stock_amount = 'yes' === $manage_stock && ! empty( $_REQUEST['change_stock'] ) && isset( $_REQUEST['_stock'] ) ? wc_stock_amount( $_REQUEST['_stock'] ) : $product->get_stock_quantity();
 
 		$product->set_manage_stock( $manage_stock );
 		$product->set_backorders( $backorders );
@@ -672,6 +689,8 @@ class WC_Admin_Post_Types {
 		$product->save();
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
+
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 	}
 
 	/**
@@ -719,11 +738,13 @@ class WC_Admin_Post_Types {
 	 * @param WP_Post $post Current post object.
 	 */
 	public function edit_form_after_title( $post ) {
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
-			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // WPCS: XSS ok. ?></textarea>
+			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; ?></textarea>
 			<?php
 		}
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -802,7 +823,8 @@ class WC_Admin_Post_Types {
 	 * @return array
 	 */
 	public function upload_dir( $pathdata ) {
-		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) { // WPCS: CSRF ok, input var ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) {
 
 			if ( empty( $pathdata['subdir'] ) ) {
 				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
@@ -817,6 +839,7 @@ class WC_Admin_Post_Types {
 			}
 		}
 		return $pathdata;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -830,7 +853,8 @@ class WC_Admin_Post_Types {
 	 * @since 4.0
 	 */
 	public function update_filename( $full_filename, $ext, $dir ) {
-		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) { // WPCS: CSRF ok, input var ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) {
 			return $full_filename;
 		}
 
@@ -843,6 +867,7 @@ class WC_Admin_Post_Types {
 		}
 
 		return $this->unique_filename( $full_filename, $ext );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
@@ -862,11 +887,11 @@ class WC_Admin_Post_Types {
 			return $full_filename;
 		}
 
-		$suffix = strtolower( wp_generate_password( $length_to_prepend, false, false ) );
+		$suffix   = strtolower( wp_generate_password( $length_to_prepend, false, false ) );
 		$filename = $full_filename;
 
 		if ( strlen( $ext ) > 0 ) {
-			$filename  = substr( $filename, 0, strlen( $filename ) - strlen( $ext ) );
+			$filename = substr( $filename, 0, strlen( $filename ) - strlen( $ext ) );
 		}
 
 		$full_filename = str_replace(
