@@ -1,7 +1,9 @@
 <?php
 
+namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
+
 /**
- * Base class to define hacks for CodeHacker.
+ * Base class to define Hacks for CodeHacker.
  *
  * This class is included for convenience only, any class having a 'public function hack($code, $path)'
  * can be used as a hack class for CodeHacker.

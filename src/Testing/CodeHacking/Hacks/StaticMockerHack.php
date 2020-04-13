@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__ . '/code-hack.php';
+namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
+
+use ReflectionMethod;
+use ReflectionClass;
 
 /**
  * Hack to mock public static methods and properties.

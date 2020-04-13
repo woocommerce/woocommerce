@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/code-hack.php';
+namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
 
 /**
  * Code hack to bypass finals.

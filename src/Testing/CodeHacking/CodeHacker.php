@@ -1,5 +1,7 @@
 <?php
 
+namespace Automattic\WooCommerce\Testing\CodeHacking;
+
 /**
  * CodeHacker - allows to hack (alter on the fly) the content of PHP code files.
  *
@@ -60,7 +62,7 @@ class CodeHacker {
 
 	public static function add_hack( $hack ) {
 		if ( ! is_callable( $hack ) && ! is_object( $hack ) ) {
-			throw new Exception( "hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
+			throw new Exception( "Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
 		}
 
 		// TODO: Check that callbacks have at least two parameters (if they have more, they must be optional); and that objects have a "process" method with the same condition.

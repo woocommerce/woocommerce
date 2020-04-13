@@ -1,7 +1,13 @@
 <?php
 
+namespace Automattic\WooCommerce\Testing\CodeHacking;
+
 use PHPUnit\Runner\BeforeTestHook;
 use PHPUnit\Runner\AfterTestHook;
+use PHPUnit\Util\Test;
+use ReflectionClass;
+use ReflectionMethod;
+use Exception;
 
 /**
  * Helper to use the CodeHacker class in PHPUnit.
@@ -11,10 +17,13 @@ use PHPUnit\Runner\AfterTestHook;
  * 1. Add this to phpunit.xml:
 *
  *    <extensions>
- *      <extension class="CodeHackerTestHook" file="path/to/code-hacker-test-hook.php" />
+ *      <extension class="CodeHackerTestHook" />
  *    </extensions>
  *
  * 2. Add the following to the test classes:
+ *
+ *    use Automattic\WooCommerce\Testing\CodeHacking\CodeHacker;
+ *    use Automattic\WooCommerce\Testing\CodeHacking\Hacks\...
  *
  *    public static function before_all($method_name) {
  *      CodeHacker::add_hack(...);
@@ -27,7 +36,8 @@ use PHPUnit\Runner\AfterTestHook;
  *    You can also define a test-specific 'before_{$test_method_name}' hook.
  *    If both exist, first 'before_all' will be executed, then the test-specific one.
  *
- * 3. Additionally, you can register hacks via class/method annotations:
+ * 3. Additionally, you can register hacks via class/method annotations
+ *    (note that then you don't need the `use`s anymore):
  *
  *    /**
  *     * @hack HackClassName param1 param2
@@ -47,10 +57,6 @@ use PHPUnit\Runner\AfterTestHook;
  */
 final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 
-	public function __construct() {
-		include_once __DIR__ . '/code-hacker.php';
-	}
-
 	public function executeAfterTest( string $test, float $time ): void {
 		CodeHacker::restore();
 	}
@@ -68,11 +74,6 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 		}
 		$class_name  = $parts[0];
 		$method_name = explode( ' ', $parts[1] )[0];
-
-		// Make code hacker class and individual hack classes visible
-		foreach ( glob( __DIR__ . '/hacks/*.php' ) as $hack_class_file ) {
-			include_once $hack_class_file;
-		}
 
 		CodeHacker::clear_hacks();
 
@@ -93,7 +94,7 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 	 * @throws Exception
 	 */
 	private function add_hacks_from_annotations( $reflection_object ) {
-		$annotations = \PHPUnit\Util\Test::parseAnnotations( $reflection_object->getDocComment() );
+		$annotations = Test::parseAnnotations( $reflection_object->getDocComment() );
 		$hacks_added = false;
 
 		foreach ( $annotations as $id => $annotation_instances ) {
@@ -106,6 +107,10 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 				$params = $matches[0];
 
 				$hack_class = array_shift( $params );
+				if(false === strpos( $hack_class, '\\' )) {
+					$hack_class = __NAMESPACE__ . '\\Hacks\\' . $hack_class;
+				}
+
 				if ( ! class_exists( $hack_class ) ) {
 					$original_hack_class = $hack_class;
 					$hack_class         .= 'Hack';
