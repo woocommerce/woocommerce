@@ -430,23 +430,7 @@ class WC_Admin_Post_Types {
 			$product->set_stock_quantity( $stock_amount );
 		}
 
-		// Apply product type constraints to stock status.
-		if ( $product->is_type( 'external' ) ) {
-			// External products are always in stock.
-			$product->set_stock_status( 'instock' );
-		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
-			// Stock status is determined by children.
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( ! $product->get_manage_stock() ) {
-					$child->set_stock_status( $stock_status );
-					$child->save();
-				}
-			}
-			$product = WC_Product_Variable::sync( $product, false );
-		} else {
-			$product->set_stock_status( $stock_status );
-		}
+		$product = $this->update_stock_status( $product, $stock_status );
 
 		$product->save();
 
@@ -464,10 +448,7 @@ class WC_Admin_Post_Types {
 	public function bulk_edit_save( $post_id, $product ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
-		$data_store        = $product->get_data_store();
-		$old_regular_price = $product->get_regular_price();
-		$old_sale_price    = $product->get_sale_price();
-		$data              = wp_unslash( $_REQUEST );
+		$data_store = $product->get_data_store();
 
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) {
 			$product->set_weight( wc_clean( wp_unslash( $_REQUEST['_weight'] ) ) );
@@ -535,93 +516,10 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( $can_product_type_change_price ) {
-			$price_changed = false;
+			$regular_price_changed = $this->set_new_price( $product, 'regular' );
+			$sale_price_changed    = $this->set_new_price( $product, 'sale' );
 
-			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) {
-				$change_regular_price = absint( $_REQUEST['change_regular_price'] );
-				$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) );
-				$is_percentage        = (bool) strstr( $raw_regular_price, '%' );
-				$regular_price        = wc_format_decimal( $raw_regular_price );
-
-				switch ( $change_regular_price ) {
-					case 1:
-						$new_price = $regular_price;
-						break;
-					case 2:
-						if ( $is_percentage ) {
-							$percent   = $regular_price / 100;
-							$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
-						} else {
-							$new_price = $old_regular_price + $regular_price;
-						}
-						break;
-					case 3:
-						if ( $is_percentage ) {
-							$percent   = $regular_price / 100;
-							$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
-						} else {
-							$new_price = max( 0, $old_regular_price - $regular_price );
-						}
-						break;
-
-					default:
-						break;
-				}
-
-				if ( isset( $new_price ) && $new_price !== $old_regular_price ) {
-					$price_changed = true;
-					$new_price     = round( $new_price, wc_get_price_decimals() );
-					$product->set_regular_price( $new_price );
-				}
-			}
-
-			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) {
-				$change_sale_price = absint( $_REQUEST['change_sale_price'] );
-				$raw_sale_price    = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) );
-				$is_percentage     = (bool) strstr( $raw_sale_price, '%' );
-				$sale_price        = wc_format_decimal( $raw_sale_price );
-
-				switch ( $change_sale_price ) {
-					case 1:
-						$new_price = $sale_price;
-						break;
-					case 2:
-						if ( $is_percentage ) {
-							$percent   = $sale_price / 100;
-							$new_price = $old_sale_price + ( $old_sale_price * $percent );
-						} else {
-							$new_price = $old_sale_price + $sale_price;
-						}
-						break;
-					case 3:
-						if ( $is_percentage ) {
-							$percent   = $sale_price / 100;
-							$new_price = max( 0, $old_sale_price - ( $old_sale_price * $percent ) );
-						} else {
-							$new_price = max( 0, $old_sale_price - $sale_price );
-						}
-						break;
-					case 4:
-						if ( $is_percentage ) {
-							$percent   = $sale_price / 100;
-							$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
-						} else {
-							$new_price = max( 0, $product->regular_price - $sale_price );
-						}
-						break;
-
-					default:
-						break;
-				}
-
-				if ( isset( $new_price ) && $new_price !== $old_sale_price ) {
-					$price_changed = true;
-					$new_price     = ! empty( $new_price ) || '0' === $new_price ? round( $new_price, wc_get_price_decimals() ) : '';
-					$product->set_sale_price( $new_price );
-				}
-			}
-
-			if ( $price_changed ) {
+			if ( $regular_price_changed || $sale_price_changed ) {
 				$product->set_date_on_sale_to( '' );
 				$product->set_date_on_sale_from( '' );
 
@@ -668,23 +566,7 @@ class WC_Admin_Post_Types {
 			$product->set_manage_stock( 'no' );
 		}
 
-		// Apply product type constraints to stock status.
-		if ( $product->is_type( 'external' ) ) {
-			// External products are always in stock.
-			$product->set_stock_status( 'instock' );
-		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
-			// Stock status is determined by children.
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( ! $product->get_manage_stock() ) {
-					$child->set_stock_status( $stock_status );
-					$child->save();
-				}
-			}
-			$product = WC_Product_Variable::sync( $product, false );
-		} else {
-			$product->set_stock_status( $stock_status );
-		}
+		$product = $this->update_stock_status( $product, $stock_status );
 
 		$product->save();
 
@@ -985,6 +867,107 @@ class WC_Admin_Post_Types {
 		}
 
 		return $post_states;
+	}
+
+	/**
+	 * Apply product type constraints to stock status.
+	 *
+	 * @param WC_Product $product The product whose stock status will be adjusted.
+	 * @param string     $stock_status The stock status to use for adjustment.
+	 * @return WC_Product The supplied product, or the synced product if it was a variable product.
+	 */
+	private function update_stock_status( $product, $stock_status ) {
+		if ( $product->is_type( 'external' ) ) {
+			// External products are always in stock.
+			$product->set_stock_status( 'instock' );
+		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+			// Stock status is determined by children.
+			foreach ( $product->get_children() as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( ! $product->get_manage_stock() ) {
+					$child->set_stock_status( $stock_status );
+					$child->save();
+				}
+			}
+			$product = WC_Product_Variable::sync( $product, false );
+		} else {
+			$product->set_stock_status( $stock_status );
+		}
+
+		return $product;
+	}
+
+	/**
+	 * Set the new regular or sale price if requested.
+	 *
+	 * @param WC_Product $product The product to set the new price for.
+	 * @param string     $price_type 'regular' or 'sale'.
+	 * @return bool true if a new price has been set, false otherwise.
+	 */
+	private function set_new_price( $product, $price_type ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
+		if ( empty( $_REQUEST[ "change_{$price_type}_price" ] ) || ! isset( $_REQUEST[ "_{$price_type}_price" ] ) ) {
+			return false;
+		}
+
+		$old_price     = $product->{"get_{$price_type}_price"}();
+		$price_changed = false;
+
+		$change_price  = absint( $_REQUEST[ "change_{$price_type}_price" ] );
+		$raw_price     = wc_clean( wp_unslash( $_REQUEST[ "_{$price_type}_price" ] ) );
+		$is_percentage = (bool) strstr( $raw_price, '%' );
+		$price         = wc_format_decimal( $raw_price );
+
+		switch ( $change_price ) {
+			case 1:
+				$new_price = $price;
+				break;
+			case 2:
+				if ( $is_percentage ) {
+					$percent   = $price / 100;
+					$new_price = $old_price + ( round( $old_price * $percent, wc_get_price_decimals() ) );
+				} else {
+					$new_price = $old_price + $price;
+				}
+				break;
+			case 3:
+				if ( $is_percentage ) {
+					$percent   = $price / 100;
+					$new_price = max( 0, $old_price - ( round( $old_price * $percent, wc_get_price_decimals() ) ) );
+				} else {
+					$new_price = max( 0, $old_price - $price );
+				}
+				break;
+			case 4:
+				if ( 'sale' !== $price_type ) {
+					break;
+				}
+				if ( $is_percentage ) {
+					$percent   = $price / 100;
+					$new_price = max( 0, $product->regular_price - ( round( $product->regular_price * $percent, wc_get_price_decimals() ) ) );
+				} else {
+					$new_price = max( 0, $product->regular_price - $price );
+				}
+				break;
+
+			default:
+				break;
+		}
+
+		if ( isset( $new_price ) && $new_price !== $old_price ) {
+			$price_changed = true;
+			if ( 'sale' === $price_type && empty( $new_price ) && '0' !== $new_price ) {
+				$new_price = '';
+			} else {
+				$new_price = round( $new_price, wc_get_price_decimals() );
+			}
+			$product->{"set_{$price_type}_price"}( $new_price );
+		}
+
+		return $price_changed;
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	}
 }
 
