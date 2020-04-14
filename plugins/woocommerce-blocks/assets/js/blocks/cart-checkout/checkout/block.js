@@ -28,6 +28,7 @@ import {
 	useShippingDataContext,
 	useBillingDataContext,
 	useValidationContext,
+	StoreNoticesProvider,
 } from '@woocommerce/base-context';
 import { useStoreCart, usePaymentMethods } from '@woocommerce/base-hooks';
 import {
@@ -355,7 +356,9 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 										: ''
 								}
 							>
-								<PaymentMethods />
+								<StoreNoticesProvider context="wc/payment-area">
+									<PaymentMethods />
+								</StoreNoticesProvider>
 							</FormStep>
 						) }
 					</CheckoutForm>

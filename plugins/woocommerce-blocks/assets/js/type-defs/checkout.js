@@ -7,8 +7,9 @@
  *                                                           redirectUrl to the given value.
  * @property {function(boolean=)}       setHasError          Dispatches an action that sets the
  *                                                           checkout status to having an error.
- * @property {function()}               setComplete          Dispatches an action that sets the
- *                                                           checkout status to complete.
+ * @property {function(Object)}         setAfterProcessing   Dispatches an action that sets the
+ *                                                           checkout status to after processing and
+ *                                                           also sets the response data accordingly.
  * @property {function()}               incrementCalculating Dispatches an action that increments
  *                                                           the calculating state for checkout by one.
  * @property {function()}               decrementCalculating Dispatches an action that decrements
@@ -20,18 +21,20 @@
 /**
  * @typedef {Object} CheckoutStatusConstants
  *
- * @property {string} PRISTINE            Checkout is in it's initialized state.
- * @property {string} IDLE                When checkout state has changed but
- *                                        there is no activity happening.
- * @property {string} PROCESSING          This is the state when the checkout
- *                                        button has been pressed and the
- *                                        checkout data has been sent to the
- *                                        server for processing.
- * @property {string} PROCESSING_COMPLETE This is the state when the checkout
- *                                        processing has been completed.
- * @property {string} COMPLETE            This is the status when the server has
- *                                        completed processing the data
- *                                        successfully.
+ * @property {string} PRISTINE                   Checkout is in it's initialized state.
+ * @property {string} IDLE                       When checkout state has changed but there is no
+ *                                               activity happening.
+ * @property {string} BEFORE_PROCESSING          This is the state before checkout processing
+ *                                               begins after the checkout button has been
+ *                                               pressed/submitted.
+ * @property {string} PROCESSING                 After BEFORE_PROCESSING status emitters have
+ *                                               finished successfully. Payment processing is
+ *                                               started on this checkout status.
+ * @property {string} AFTER_PROCESSING           After server side checkout processing is completed
+ *                                               this status is set.
+ * @property {string} COMPLETE                   After the AFTER_PROCESSING event emitters have
+ *                                               completed. This status triggers the checkout
+ *                                               redirect.
  */
 
 export {};
