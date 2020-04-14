@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	SHIPPING_METHODS_EXIST,
 	WC_BLOCKS_ASSET_URL,
+	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
 
 /**
@@ -164,7 +165,7 @@ export const previewCart = {
 	items_count: 3,
 	items_weight: 0,
 	needs_payment: true,
-	needs_shipping: true,
+	needs_shipping: SHIPPING_ENABLED,
 	totals: {
 		currency_code: 'USD',
 		currency_symbol: '$',
