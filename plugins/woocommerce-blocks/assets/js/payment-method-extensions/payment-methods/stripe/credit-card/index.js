@@ -10,9 +10,11 @@ import { loadStripe } from '../stripe-utils';
 import { StripeCreditCard } from './payment-method';
 import { PAYMENT_METHOD_NAME } from './constants';
 
-const EditPlaceHolder = () => <div>TODO: Card edit preview soon...</div>;
-
 const stripePromise = loadStripe();
+
+const Edit = ( props ) => {
+	return <StripeCreditCard stripe={ stripePromise } { ...props } />;
+};
 
 const stripeCcPaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
@@ -22,7 +24,7 @@ const stripeCcPaymentMethod = {
 		</strong>
 	),
 	content: <StripeCreditCard stripe={ stripePromise } />,
-	edit: <EditPlaceHolder />,
+	edit: <Edit />,
 	canMakePayment: () => stripePromise,
 	ariaLabel: __(
 		'Stripe Credit Card payment method',
