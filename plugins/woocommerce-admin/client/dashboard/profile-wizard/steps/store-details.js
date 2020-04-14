@@ -131,7 +131,11 @@ class StoreDetails extends Component {
 		 *
 		 * This comment may be removed when a refactor to wp.data datatores is complete.
 		 */
-		if ( region !== 'US' ) {
+		if (
+			region !== 'US' &&
+			profileItems.industry &&
+			profileItems.industry.length
+		) {
 			const cbdSlug = 'cbd-other-hemp-derived-products';
 			const trimmedIndustries = profileItems.industry.filter(
 				( industry ) => {
