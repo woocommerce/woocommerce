@@ -89,14 +89,22 @@
 	margin: 0;
 	padding: 0;
 	border: 0;
+	border-radius: 0;
 
-	color: inherit;
+	box-shadow: none;
+	display: inline;
+	font-family: inherit;
 	font-size: inherit;
-	font-weight: normal;
+	font-weight: inherit;
+	letter-spacing: inherit;
 	text-decoration: underline;
+	text-transform: none;
+	vertical-align: baseline;
 
 	background: transparent;
-	&:hover {
+	&:hover,
+	&:focus,
+	&:active {
 		background: transparent;
 	}
 }

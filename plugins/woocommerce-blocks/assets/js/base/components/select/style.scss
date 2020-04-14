@@ -16,6 +16,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{  2 * $gap });
+		white-space: nowrap;
 
 		@media screen and (prefers-reduced-motion: reduce) {
 			transition: none;
@@ -50,6 +51,7 @@
 		padding: $gap-large $gap $gap-smallest;
 		text-overflow: ellipsis;
 		text-transform: none;
+		white-space: nowrap;
 		width: 100%;
 
 		&:hover,

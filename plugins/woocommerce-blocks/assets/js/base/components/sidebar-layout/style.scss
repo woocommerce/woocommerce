@@ -29,28 +29,28 @@
 				margin-right: 0;
 			}
 		}
+	}
 
-		> .components-panel__body-title,
-		.components-panel__body-toggle {
-			&,
-			&:hover,
-			&:focus,
-			&:active {
-				background-color: transparent;
-				color: inherit;
-			}
+	.components-panel__body-title,
+	.components-panel__body-toggle {
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: transparent;
+			color: inherit;
 		}
+	}
 
-		.components-panel__body-toggle {
-			font-weight: normal;
-			font-size: inherit;
-			padding-left: 0;
-			padding-right: 36px;
+	.components-panel__body-toggle {
+		font-weight: normal;
+		font-size: inherit;
+		padding-left: 0;
+		padding-right: 36px;
 
-			&.components-button,
-			&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
-				color: inherit;
-			}
+		&.components-button,
+		&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
+			color: inherit;
 		}
 	}
 }

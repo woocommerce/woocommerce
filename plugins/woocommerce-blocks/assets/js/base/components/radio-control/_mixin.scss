@@ -2,7 +2,7 @@
 	.wc-block-radio-control__option {
 		border-bottom: 1px solid $core-grey-light-600;
 		display: block;
-		padding: $gap-small $gap-small 0 ($gap-larger * 2);
+		padding: $gap-small $gap-small 0 $gap-large;
 		position: relative;
 	}
 
@@ -18,13 +18,10 @@
 		border-bottom: 0;
 	}
 
-	.wc-block-radio-control {
-		.wc-block-radio-control__input {
-			margin: 0 0 0 -8px;
-			left: $gap-larger;
-			position: absolute;
-			top: $gap;
-		}
+	.wc-block-radio-control__input {
+		left: 0;
+		position: absolute;
+		top: $gap;
 	}
 
 	.wc-block-radio-control__label,
