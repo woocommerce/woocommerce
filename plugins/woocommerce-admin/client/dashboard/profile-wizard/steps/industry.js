@@ -12,11 +12,13 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce Dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { H, Card, TextControl } from '@woocommerce/components';
+import { getCurrencyRegion } from 'dashboard/utils';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
@@ -25,11 +27,38 @@ const onboarding = getSetting( 'onboarding', {} );
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
+		let selected = profileItems.industry || [];
+
+		/**
+		 * @todo Remove block on `updateProfileItems` refactor to wp.data dataStores.
+		 *
+		 * The following block is a side effect of wc-api not being truly async
+		 * and is a temporary fix until a refactor to wp.data can take place.
+		 *
+		 * Calls to `updateProfileItems` in the previous screen happen async
+		 * and won't be updated in wc-api's state when this component is initialized.
+		 * As such, we need to make sure cbd is not initialized as selected when a
+		 * user has changed location to non-US based.
+		 */
+		const { locationSettings } = props;
+		const region = getCurrencyRegion(
+			locationSettings.woocommerce_default_country
+		);
+
+		if ( region !== 'US' ) {
+			const cbdSlug = 'cbd-other-hemp-derived-products';
+			selected = selected.filter( ( industry ) => {
+				return cbdSlug !== industry && cbdSlug !== industry.slug;
+			} );
+		}
+		/**
+		 * End block to be removed after refactor.
+		 */
 
 		super();
 		this.state = {
 			error: null,
-			selected: profileItems.industry || [],
+			selected,
 			textInputListContent: {},
 		};
 		this.onContinue = this.onContinue.bind( this );
@@ -130,6 +159,18 @@ class Industry extends Component {
 	render() {
 		const { industries } = onboarding;
 		const { error, selected, textInputListContent } = this.state;
+		const { locationSettings } = this.props;
+		const region = getCurrencyRegion(
+			locationSettings.woocommerce_default_country
+		);
+		const industryKeys = Object.keys( industries );
+
+		const filteredIndustryKeys =
+			region === 'US'
+				? industryKeys
+				: industryKeys.filter(
+						( slug ) => slug !== 'cbd-other-hemp-derived-products'
+				  );
 
 		return (
 			<Fragment>
@@ -144,7 +185,7 @@ class Industry extends Component {
 				</p>
 				<Card>
 					<div className="woocommerce-profile-wizard__checkbox-group">
-						{ Object.keys( industries ).map( ( slug ) => {
+						{ filteredIndustryKeys.map( ( slug ) => {
 							const selectedIndustry = find( selected, { slug } );
 
 							return (
@@ -209,10 +250,13 @@ class Industry extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: locationSettings = {} } = getSettings( 'general' );
 
 		return {
 			isError: Boolean( getProfileItemsError() ),
 			profileItems: getProfileItems(),
+			locationSettings,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

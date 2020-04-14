@@ -86,6 +86,7 @@ class StoreDetails extends Component {
 			updateProfileItems,
 			isProfileItemsError,
 			updateAndPersistSettingsForGroup,
+			profileItems,
 		} = this.props;
 
 		const currencySettings = this.deriveCurrencySettings(
@@ -117,7 +118,30 @@ class StoreDetails extends Component {
 			},
 		} );
 
-		await updateProfileItems( { setup_client: values.isClient } );
+		const profileItemsToUpdate = { setup_client: values.isClient };
+		const region = getCurrencyRegion( values.countryState );
+
+		/**
+		 * If a user has already selected cdb industry and returns to change to a
+		 * non US store, remove cbd industry.
+		 *
+		 * NOTE: the following call to `updateProfileItems` does not respect the
+		 * `await` and performs an update aysnchronously. This means the following
+		 * screen may not be initialized with correct profile settings.
+		 *
+		 * This comment may be removed when a refactor to wp.data datatores is complete.
+		 */
+		if ( region !== 'US' ) {
+			const cbdSlug = 'cbd-other-hemp-derived-products';
+			const trimmedIndustries = profileItems.industry.filter(
+				( industry ) => {
+					return cbdSlug !== industry && cbdSlug !== industry.slug;
+				}
+			);
+			profileItemsToUpdate.industry = trimmedIndustries;
+		}
+
+		await updateProfileItems( profileItemsToUpdate );
 
 		if ( ! isSettingsError && ! isProfileItemsError ) {
 			goToNextStep();
