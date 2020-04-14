@@ -47,12 +47,12 @@ const preparePaymentData = ( paymentData ) => {
 const CheckoutProcessor = () => {
 	const {
 		hasError: checkoutHasError,
-		onCheckoutProcessing,
-		onCheckoutCompleteSuccess,
+		onCheckoutBeforeProcessing,
 		dispatchActions,
 		redirectUrl,
 		isProcessing: checkoutIsProcessing,
-		isProcessingComplete: checkoutIsProcessingComplete,
+		isBeforeProcessing: checkoutIsBeforeProcessing,
+		isComplete: checkoutIsComplete,
 	} = useCheckoutContext();
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingAddress, shippingErrorStatus } = useShippingDataContext();
@@ -69,6 +69,7 @@ const CheckoutProcessor = () => {
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
 	const currentShippingAddress = useRef( shippingAddress );
+	const currentRedirectUrl = useRef( redirectUrl );
 	const [ isProcessingOrder, setIsProcessingOrder ] = useState( false );
 	const expressPaymentMethodActive = Object.keys(
 		expressPaymentMethods
@@ -87,7 +88,7 @@ const CheckoutProcessor = () => {
 	useEffect( () => {
 		if (
 			checkoutWillHaveError !== checkoutHasError &&
-			( checkoutIsProcessing || checkoutIsProcessingComplete ) &&
+			( checkoutIsProcessing || checkoutIsBeforeProcessing ) &&
 			! expressPaymentMethodActive
 		) {
 			dispatchActions.setHasError( checkoutWillHaveError );
@@ -96,7 +97,7 @@ const CheckoutProcessor = () => {
 		checkoutWillHaveError,
 		checkoutHasError,
 		checkoutIsProcessing,
-		checkoutIsProcessingComplete,
+		checkoutIsBeforeProcessing,
 		expressPaymentMethodActive,
 	] );
 
@@ -104,12 +105,13 @@ const CheckoutProcessor = () => {
 		! checkoutHasError &&
 		! checkoutWillHaveError &&
 		( currentPaymentStatus.isSuccessful || ! cartNeedsPayment ) &&
-		checkoutIsProcessingComplete;
+		checkoutIsProcessing;
 
 	useEffect( () => {
 		currentBillingData.current = billingData;
 		currentShippingAddress.current = shippingAddress;
-	}, [ billingData, shippingAddress ] );
+		currentRedirectUrl.current = redirectUrl;
+	}, [ billingData, shippingAddress, redirectUrl ] );
 
 	useEffect( () => {
 		if ( errorMessage ) {
@@ -157,14 +159,21 @@ const CheckoutProcessor = () => {
 	useEffect( () => {
 		let unsubscribeProcessing;
 		if ( ! expressPaymentMethodActive ) {
-			unsubscribeProcessing = onCheckoutProcessing( checkValidation, 0 );
+			unsubscribeProcessing = onCheckoutBeforeProcessing(
+				checkValidation,
+				0
+			);
 		}
 		return () => {
 			if ( ! expressPaymentMethodActive ) {
 				unsubscribeProcessing();
 			}
 		};
-	}, [ onCheckoutProcessing, checkValidation, expressPaymentMethodActive ] );
+	}, [
+		onCheckoutBeforeProcessing,
+		checkValidation,
+		expressPaymentMethodActive,
+	] );
 
 	const processOrder = useCallback( () => {
 		setIsProcessingOrder( true );
@@ -212,29 +221,17 @@ const CheckoutProcessor = () => {
 							);
 						}
 						dispatchActions.setHasError();
-					} else {
-						dispatchActions.setRedirectUrl(
-							response.payment_result.redirect_url
-						);
 					}
-
-					dispatchActions.setComplete();
+					dispatchActions.setAfterProcessing( response );
 					setIsProcessingOrder( false );
 				} );
 			} )
 			.catch( ( error ) => {
-				const message =
-					error.message ||
-					__(
-						'Something went wrong. Please contact us to get assistance.',
-						'woo-gutenberg-products-block'
-					);
-				addErrorNotice( message, {
-					id: 'checkout',
+				error.json().then( function( response ) {
+					dispatchActions.setHasError();
+					dispatchActions.setAfterProcessing( response );
+					setIsProcessingOrder( false );
 				} );
-				dispatchActions.setHasError();
-				dispatchActions.setComplete();
-				setIsProcessingOrder( false );
 			} );
 	}, [
 		addErrorNotice,
@@ -243,15 +240,12 @@ const CheckoutProcessor = () => {
 		paymentMethodData,
 		cartNeedsPayment,
 	] );
-	// setup checkout processing event observers.
+	// redirect when checkout is complete and there is a redirect url.
 	useEffect( () => {
-		const unsubscribeRedirect = onCheckoutCompleteSuccess( () => {
-			window.location.href = redirectUrl;
-		}, 999 );
-		return () => {
-			unsubscribeRedirect();
-		};
-	}, [ onCheckoutCompleteSuccess, redirectUrl ] );
+		if ( currentRedirectUrl.current ) {
+			window.location.href = currentRedirectUrl.current;
+		}
+	}, [ checkoutIsComplete ] );
 
 	// process order if conditions are good.
 	useEffect( () => {

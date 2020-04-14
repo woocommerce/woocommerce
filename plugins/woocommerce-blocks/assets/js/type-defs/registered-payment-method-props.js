@@ -8,6 +8,8 @@
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingErrorStatus} ShippingErrorStatus
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingErrorTypes} ShippingErrorTypes
  * @typedef {import('@woocommerce/type-defs/settings').WooCommerceSiteCurrency} SiteCurrency
+ * @typedef {import('@woocommerce/type-defs/hooks').EmitResponseTypes} EmitResponseTypes
+ * @typedef {import('@woocommerce/type-defs/hooks').NoticeContexts} NoticeContexts
  */
 
 /**
@@ -134,13 +136,13 @@
 /**
  * @typedef EventRegistrationProps
  *
- * @property {function(function())} onCheckoutCompleteSuccess   Used to subscribe callbacks firing
- *                                                              when checkout has completed
+ * @property {function(function())} onCheckoutAfterProcessingWithSuccess Used to subscribe callbacks
+ *                                                              firing when checkout has completed
  *                                                              processing successfully.
- * @property {function(function())} onCheckoutCompleteError     Used to subscribe callbacks firing
- *                                                              when checkout has completed
+ * @property {function(function())} onCheckoutAfterProcessingWithError Used to subscribe callbacks
+ *                                                              firing when checkout has completed
  *                                                              processing with an error.
- * @property {function(function())} onCheckoutProcessing        Used to subscribe callbacks that
+ * @property {function(function())} onCheckoutBeforeProcessing  Used to subscribe callbacks that
  *                                                              will fire when checkout begins
  *                                                              processing (as a part of the
  *                                                              processing process).
@@ -160,15 +162,6 @@
  * @property {function(function())} onPaymentProcessing         Event registration callback for
  *                                                              registering observers for the
  *                                                              payment processing event.
- * @property {function(function())} onPaymentSuccess            Event registration callback for
- *                                                              registering observers for the
- *                                                              successful payment event.
- * @property {function(function())} onPaymentFail               Event registration callback for
- *                                                              registering observers for the
- *                                                              failed payment event.
- * @property {function(function())} onPaymentError              Event registration callback for
- *                                                              registering observers for the
- *                                                              payment error event.
  */
 
 /**
@@ -178,6 +171,16 @@
  *                                                           errors
  * @property {function(Object):Object} CheckboxControl       A checkbox control, usually used for
  *                                                           saved payment method functionality
+ */
+
+/**
+ * @typedef EmitResponseProps
+ *
+ * @property {EmitResponseTypes} responseTypes  Response types that can be returned from emitter
+ *                                              observers.
+ * @property {NoticeContexts}    noticeContexts Available contexts that can be returned as the value
+ *                                              for the messageContext property on the object
+ *                                              returned from an emitter observer.
  */
 
 /**
@@ -194,13 +197,15 @@
  * @property {EventRegistrationProps}     eventRegistration        Various event registration helpers
  *                                                                 for subscribing callbacks for
  *                                                                 events.
+ * @property {EmitResponseProps}          emitResponse             Utilities for usage in event
+ *                                                                 observer response objects.
  * @property {Function}                   [onSubmit]               Used to trigger checkout
  *                                                                 processing.
  * @property {string}                     [activePaymentMethod]    Indicates what the active payment
  *                                                                 method is.
  * @property {ComponentProps}             components               Components exposed to payment
  *                                                                 methods for use.
- * @property {function(string)}          [setExpressPaymentError]  For setting an error (error
+ * @property {function(string)}           [setExpressPaymentError] For setting an error (error
  *                                                                 message string) for express
  *                                                                 payment methods. Does not change
  *                                                                 payment status.

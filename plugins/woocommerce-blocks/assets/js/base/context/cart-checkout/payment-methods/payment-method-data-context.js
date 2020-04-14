@@ -25,7 +25,6 @@ import { useShippingDataContext } from '../shipping';
 import {
 	EMIT_TYPES,
 	emitterSubscribers,
-	emitEvent,
 	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
@@ -45,7 +44,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
-import { useStoreNotices } from '@woocommerce/base-hooks';
+import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
@@ -76,23 +75,6 @@ export const usePaymentMethodDataContext = () => {
 	return useContext( PaymentMethodDataContext );
 };
 
-const isSuccessResponse = ( response ) => {
-	return (
-		( typeof response === 'object' &&
-			typeof response.fail === 'undefined' &&
-			typeof response.errorMessage === 'undefined' ) ||
-		response === true
-	);
-};
-
-const isFailResponse = ( response ) => {
-	return response && typeof response.fail === 'object';
-};
-
-const isErrorResponse = ( response ) => {
-	return response && typeof response.errorMessage !== 'undefined';
-};
-
 /**
  * PaymentMethodDataProvider is automatically included in the
  * CheckoutDataProvider.
@@ -112,11 +94,16 @@ export const PaymentMethodDataProvider = ( {
 } ) => {
 	const { setBillingData } = useBillingDataContext();
 	const {
-		isComplete: checkoutIsComplete,
-		isProcessingComplete: checkoutIsProcessingComplete,
+		isProcessing: checkoutIsProcessing,
+		isIdle: checkoutIsIdle,
 		isCalculating: checkoutIsCalculating,
 		hasError: checkoutHasError,
 	} = useCheckoutContext();
+	const {
+		isSuccessResponse,
+		isErrorResponse,
+		isFailResponse,
+	} = useEmitResponse();
 	const [ activePaymentMethod, setActive ] = useState(
 		initialActivePaymentMethod
 	);
@@ -164,18 +151,6 @@ export const PaymentMethodDataProvider = ( {
 		() => emitterSubscribers( subscriber ).onPaymentProcessing,
 		[ subscriber ]
 	);
-	const onPaymentSuccess = useMemo(
-		() => emitterSubscribers( subscriber ).onPaymentSuccess,
-		[ subscriber ]
-	);
-	const onPaymentFail = useMemo(
-		() => emitterSubscribers( subscriber ).onPaymentFail,
-		[ subscriber ]
-	);
-	const onPaymentError = useMemo(
-		() => emitterSubscribers( subscriber ).onPaymentError,
-		[ subscriber ]
-	);
 
 	const currentStatus = useMemo(
 		() => ( {
@@ -196,7 +171,7 @@ export const PaymentMethodDataProvider = ( {
 	// no errors, and payment status is started.
 	useEffect( () => {
 		if (
-			checkoutIsProcessingComplete &&
+			checkoutIsProcessing &&
 			! checkoutHasError &&
 			! checkoutIsCalculating &&
 			! currentStatus.isFinished
@@ -204,11 +179,16 @@ export const PaymentMethodDataProvider = ( {
 			setPaymentStatus().processing();
 		}
 	}, [
-		checkoutIsProcessingComplete,
+		checkoutIsProcessing,
 		checkoutHasError,
 		checkoutIsCalculating,
 		currentStatus.isFinished,
 	] );
+
+	// when checkout is returned to idle, set payment status to pristine.
+	useEffect( () => {
+		dispatch( statusOnly( PRISTINE ) );
+	}, [ checkoutIsIdle ] );
 
 	// set initial active payment method if it's undefined.
 	useEffect( () => {
@@ -289,9 +269,8 @@ export const PaymentMethodDataProvider = ( {
 
 	// emit events.
 	useEffect( () => {
-		// Note: the nature of this event emitter is that it will bail on a
-		// successful payment (that is an observer hooked in that returns an
-		// object in the shape of a successful payment). However, this still
+		// Note: the nature of this event emitter is that it will bail on any
+		// observer that returns a response that !== true. However, this still
 		// allows for other observers that return true for continuing through
 		// to the next observer (or bailing if there's a problem).
 		if ( currentStatus.isProcessing ) {
@@ -302,48 +281,29 @@ export const PaymentMethodDataProvider = ( {
 			).then( ( response ) => {
 				if ( isSuccessResponse( response ) ) {
 					setPaymentStatus().success(
-						response.paymentMethodData,
-						response.billingData,
-						response.shippingData
+						response?.meta?.paymentMethodData,
+						response?.meta?.billingData,
+						response?.meta?.shippingData
 					);
 				} else if ( isFailResponse( response ) ) {
+					addErrorNotice( response.message, {
+						context: 'wc/payment-area',
+					} );
 					setPaymentStatus().failed(
-						response.fail.errorMessage,
-						response.fail.paymentMethodData,
-						response.fail.billingData
+						response.message,
+						response?.meta?.paymentMethodData,
+						response?.meta?.billingData
 					);
 				} else if ( isErrorResponse( response ) ) {
-					setPaymentStatus().error( response.errorMessage );
-					setValidationErrors( response.validationErrors );
+					addErrorNotice( response.message, {
+						context: 'wc/payment-area',
+					} );
+					setPaymentStatus().error( response.message );
+					setValidationErrors( response?.validationErrors );
 				}
 			} );
 		}
-		if (
-			currentStatus.isSuccessful &&
-			checkoutIsComplete &&
-			! checkoutHasError
-		) {
-			emitEvent(
-				currentObservers.current,
-				EMIT_TYPES.PAYMENT_SUCCESS,
-				{}
-			).then( () => {
-				setPaymentStatus().completed();
-			} );
-		}
-		if ( currentStatus.hasFailed ) {
-			emitEvent( currentObservers.current, EMIT_TYPES.PAYMENT_FAIL, {} );
-		}
-		if ( currentStatus.hasError ) {
-			emitEvent( currentObservers.current, EMIT_TYPES.PAYMENT_ERROR, {} );
-		}
-	}, [
-		currentStatus,
-		setValidationErrors,
-		setPaymentStatus,
-		checkoutIsComplete,
-		checkoutHasError,
-	] );
+	}, [ currentStatus, setValidationErrors, setPaymentStatus ] );
 
 	/**
 	 * @type {PaymentMethodDataContext}
@@ -357,9 +317,6 @@ export const PaymentMethodDataProvider = ( {
 		activePaymentMethod,
 		setActivePaymentMethod,
 		onPaymentProcessing,
-		onPaymentSuccess,
-		onPaymentFail,
-		onPaymentError,
 		customerPaymentMethods,
 		paymentMethods: paymentData.paymentMethods,
 		expressPaymentMethods: paymentData.expressPaymentMethods,

@@ -166,9 +166,31 @@ class CheckoutSchema extends AbstractSchema {
 			'payment_method'   => $order->get_payment_method(),
 			'payment_result'   => [
 				'payment_status'  => $payment_result->status,
-				'payment_details' => $payment_result->payment_details,
+				'payment_details' => $this->prepare_payment_details_for_response( $payment_result->payment_details ),
 				'redirect_url'    => $payment_result->redirect_url,
 			],
 		];
+	}
+
+	/**
+	 * This prepares the payment details for the response so it's following the
+	 * schema where it's an array of objects.
+	 *
+	 * @param array $payment_details An array of payment details from the processed payment.
+	 *
+	 * @return array An array of objects where each object has the key and value
+	 *               as distinct properties.
+	 */
+	protected function prepare_payment_details_for_response( array $payment_details ) {
+		return array_map(
+			function( $key, $value ) {
+				return (object) [
+					'key'   => $key,
+					'value' => $value,
+				];
+			},
+			array_keys( $payment_details ),
+			$payment_details
+		);
 	}
 }

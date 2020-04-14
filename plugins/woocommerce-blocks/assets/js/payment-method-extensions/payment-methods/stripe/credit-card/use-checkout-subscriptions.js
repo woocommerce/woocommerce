@@ -12,11 +12,12 @@ import {
 	getStripeServerData,
 	getErrorMessageForTypeAndCode,
 } from '../stripe-utils';
+import { usePaymentIntents } from './use-payment-intents';
 
 /**
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').EventRegistrationProps} EventRegistrationProps
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PaymentStatusProps} PaymentStatusProps
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').BillingDataProps} BillingDataProps
+ * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').EmitResponseProps} EmitResponseProps
  * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
  * @typedef {import('react').Dispatch<number>} SourceIdDispatch
  */
@@ -24,16 +25,13 @@ import {
 /**
  * A custom hook for the Stripe processing and event observer logic.
  *
- * @param {EventRegistrationProps}     eventRegistration Event registration
- *                                                       functions.
- * @param {BillingDataProps}           billing           Various billing data
- *                                                       items.
- * @param {number}                     sourceId          Current set stripe
- *                                                       source id.
- * @param {SourceIdDispatch}           setSourceId       Setter for stripe
- *                                                       source id.
- * @param {boolean}                    shouldSavePayment Whether to save the
- *                                                       payment or not.
+ * @param {EventRegistrationProps}     eventRegistration Event registration functions.
+ * @param {EmitResponseProps}          emitResponse      Various helpers for usage with observer
+ *                                                       response objects.
+ * @param {BillingDataProps}           billing           Various billing data items.
+ * @param {number}                     sourceId          Current set stripe source id.
+ * @param {SourceIdDispatch}           setSourceId       Setter for stripe source id.
+ * @param {boolean}                    shouldSavePayment Whether to save the payment or not.
  * @param {Stripe}                     stripe            The stripe.js object.
  * @param {Object}                     elements          Stripe Elements object.
  *
@@ -45,6 +43,7 @@ export const useCheckoutSubscriptions = (
 	sourceId,
 	setSourceId,
 	shouldSavePayment,
+	emitResponse,
 	stripe,
 	elements
 ) => {
@@ -52,6 +51,11 @@ export const useCheckoutSubscriptions = (
 	const onStripeError = useRef( ( event ) => {
 		return event;
 	} );
+	usePaymentIntents(
+		stripe,
+		eventRegistration.onCheckoutAfterProcessingWithSuccess,
+		emitResponse
+	);
 	// hook into and register callbacks for events.
 	useEffect( () => {
 		onStripeError.current = ( event ) => {
@@ -80,19 +84,23 @@ export const useCheckoutSubscriptions = (
 				// if there's an error return that.
 				if ( error ) {
 					return {
-						errorMessage: error,
+						type: emitResponse.responseTypes.ERROR,
+						message: error,
 					};
 				}
 				// use token if it's set.
 				if ( sourceId !== 0 ) {
 					return {
-						paymentMethodData: {
-							paymentMethod: PAYMENT_METHOD_NAME,
-							paymentRequestType: 'cc',
-							stripe_source: sourceId,
-							shouldSavePayment,
+						type: emitResponse.responseTypes.SUCCESS,
+						meta: {
+							paymentMethodData: {
+								paymentMethod: PAYMENT_METHOD_NAME,
+								paymentRequestType: 'cc',
+								stripe_source: sourceId,
+								shouldSavePayment,
+							},
+							billingData,
 						},
-						billingData,
 					};
 				}
 				const ownerInfo = {
@@ -118,35 +126,54 @@ export const useCheckoutSubscriptions = (
 				const response = await createSource( ownerInfo );
 				if ( response.error ) {
 					return {
-						errorMessage: onStripeError.current( response ),
+						type: emitResponse.responseTypes.ERROR,
+						message: onStripeError.current( response ),
 					};
 				}
 				setSourceId( response.source.id );
 				return {
-					paymentMethodData: {
-						stripe_source: response.source.id,
-						paymentMethod: PAYMENT_METHOD_NAME,
-						paymentRequestType: 'cc',
-						shouldSavePayment,
+					type: emitResponse.responseTypes.SUCCESS,
+					meta: {
+						paymentMethodData: {
+							stripe_source: response.source.id,
+							paymentMethod: PAYMENT_METHOD_NAME,
+							paymentRequestType: 'cc',
+							shouldSavePayment,
+						},
+						billingData,
 					},
-					billingData,
 				};
 			} catch ( e ) {
 				return {
-					errorMessage: e,
+					type: emitResponse.responseTypes.ERROR,
+					message: e,
 				};
 			}
+		};
+		const onError = ( { processingResponse } ) => {
+			if ( processingResponse?.paymentDetails?.errorMessage ) {
+				return {
+					type: emitResponse.responseTypes.ERROR,
+					message: processingResponse.paymentDetails.errorMessage,
+					messageContext: emitResponse.noticeContexts.PAYMENTS,
+				};
+			}
+			// leave for checkout to handle.
+			return null;
 		};
 		const unsubscribeProcessing = eventRegistration.onPaymentProcessing(
 			onSubmit
 		);
+		const unsubscribeAfterProcessing = eventRegistration.onCheckoutAfterProcessingWithError(
+			onError
+		);
 		return () => {
 			unsubscribeProcessing();
+			unsubscribeAfterProcessing();
 		};
 	}, [
-		eventRegistration.onCheckoutProcessing,
-		eventRegistration.onCheckoutCompleteSuccess,
-		eventRegistration.onCheckoutCompleteError,
+		eventRegistration.onPaymentProcessing,
+		eventRegistration.onCheckoutAfterProcessingWithError,
 		stripe,
 		sourceId,
 		billing.billingData,

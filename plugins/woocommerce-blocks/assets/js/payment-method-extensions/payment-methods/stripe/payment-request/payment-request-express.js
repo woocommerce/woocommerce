@@ -55,6 +55,7 @@ const PaymentRequestExpressComponent = ( {
 	eventRegistration,
 	onSubmit,
 	setExpressPaymentError,
+	emitResponse,
 	onClick,
 	onClose,
 } ) => {
@@ -210,29 +211,48 @@ const PaymentRequestExpressComponent = ( {
 		const handlers = eventHandlers.current;
 		if ( handlers.sourceEvent && isProcessing ) {
 			const response = {
-				billingData: getBillingData( handlers.sourceEvent ),
-				paymentMethodData: getPaymentMethodData(
-					handlers.sourceEvent,
-					paymentRequestType
-				),
-				shippingData: getShippingData( handlers.sourceEvent ),
+				type: emitResponse.responseTypes.SUCCESS,
+				meta: {
+					billingData: getBillingData( handlers.sourceEvent ),
+					paymentMethodData: getPaymentMethodData(
+						handlers.sourceEvent,
+						paymentRequestType
+					),
+					shippingData: getShippingData( handlers.sourceEvent ),
+				},
 			};
 			return response;
 		}
-		return true;
+		return { type: emitResponse.responseTypes.SUCCESS };
 	};
 
-	const onCheckoutComplete = ( forSuccess = true ) => () => {
+	const onCheckoutComplete = ( checkoutResponse ) => {
 		const handlers = eventHandlers.current;
+		let response = { type: emitResponse.responseTypes.SUCCESS };
 		if ( handlers.sourceEvent && isProcessing ) {
-			if ( forSuccess ) {
+			const { paymentStatus, paymentDetails } = checkoutResponse;
+			if ( paymentStatus === emitResponse.responseTypes.SUCCESS ) {
 				completePayment( handlers.sourceEvent );
-			} else {
-				abortPayment( handlers.sourceEvent );
+			}
+			if (
+				paymentStatus === emitResponse.responseTypes.ERROR ||
+				paymentStatus === emitResponse.responseTypes.FAIL
+			) {
+				const paymentResponse = abortPayment(
+					handlers.sourceEvent,
+					paymentDetails?.errorMessage
+				);
+				response = {
+					type: emitResponse.responseTypes.ERROR,
+					message: paymentResponse.message,
+					messageContext:
+						emitResponse.noticeContexts.EXPRESS_PAYMENTS,
+					retry: true,
+				};
 			}
 			handlers.sourceEvent = null;
 		}
-		return true;
+		return response;
 	};
 
 	// when canMakePayment is true, then we set listeners on payment request for
@@ -301,11 +321,11 @@ const PaymentRequestExpressComponent = ( {
 			const unsubscribePaymentProcessing = subscriber.onPaymentProcessing(
 				onPaymentProcessing
 			);
-			const unsubscribeCheckoutCompleteSuccess = subscriber.onCheckoutCompleteSuccess(
-				onCheckoutComplete()
+			const unsubscribeCheckoutCompleteSuccess = subscriber.onCheckoutAfterProcessingWithSuccess(
+				onCheckoutComplete
 			);
-			const unsubscribeCheckoutCompleteFail = subscriber.onCheckoutCompleteError(
-				onCheckoutComplete( false )
+			const unsubscribeCheckoutCompleteFail = subscriber.onCheckoutAfterProcessingWithError(
+				onCheckoutComplete
 			);
 			return () => {
 				unsubscribeCheckoutCompleteFail();
@@ -326,8 +346,8 @@ const PaymentRequestExpressComponent = ( {
 		eventRegistration.onShippingRateSelectSuccess,
 		eventRegistration.onShippingRateSelectFail,
 		eventRegistration.onPaymentProcessing,
-		eventRegistration.onCheckoutCompleteSuccess,
-		eventRegistration.onCheckoutCompleteError,
+		eventRegistration.onCheckoutAfterProcessingWithSuccess,
+		eventRegistration.onCheckoutAfterProcessingWithError,
 	] );
 
 	// locale is not a valid value for the paymentRequestButton style.

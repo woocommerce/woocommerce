@@ -10,9 +10,6 @@ import {
 
 const EMIT_TYPES = {
 	PAYMENT_PROCESSING: 'payment_processing',
-	PAYMENT_SUCCESS: 'payment_success',
-	PAYMENT_FAIL: 'payment_fail',
-	PAYMENT_ERROR: 'payment_error',
 };
 
 /**
@@ -33,9 +30,6 @@ const emitterSubscribers = ( dispatcher ) => ( {
 		EMIT_TYPES.PAYMENT_PROCESSING,
 		dispatcher
 	),
-	onPaymentSuccess: emitterCallback( EMIT_TYPES.PAYMENT_SUCCESS, dispatcher ),
-	onPaymentFail: emitterCallback( EMIT_TYPES.PAYMENT_FAIL, dispatcher ),
-	onPaymentError: emitterCallback( EMIT_TYPES.PAYMENT_ERROR, dispatcher ),
 } );
 
 export {

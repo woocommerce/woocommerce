@@ -56,6 +56,19 @@ class PaymentContext {
 	}
 
 	/**
+	 * Retrieve the payment method instance for the current set payment method.
+	 *
+	 * @return {\WC_Payment_Gateway|null} An instance of the payment gateway if it exists.
+	 */
+	public function get_payment_method_instance() {
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		if ( ! isset( $available_gateways[ $this->payment_method ] ) ) {
+			return;
+		}
+		return $available_gateways[ $this->payment_method ];
+	}
+
+	/**
 	 * Set the order context.
 	 *
 	 * @param \WC_Order $order Order object.

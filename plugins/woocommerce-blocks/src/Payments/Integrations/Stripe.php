@@ -52,6 +52,7 @@ final class Stripe extends AbstractPaymentMethodType {
 	public function __construct( Api $asset_api ) {
 		$this->asset_api = $asset_api;
 		add_action( 'woocommerce_rest_checkout_process_payment_with_context', [ $this, 'add_payment_request_order_meta' ], 8, 2 );
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', [ $this, 'add_stripe_intents' ], 9999, 2 );
 	}
 
 	/**
@@ -227,7 +228,7 @@ final class Stripe extends AbstractPaymentMethodType {
 	 * @param PaymentContext $context Holds context for the payment.
 	 * @param PaymentResult  $result  Result object for the payment.
 	 */
-	public function add_payment_request_order_meta( PaymentContext $context, PaymentResult $result ) {
+	public function add_payment_request_order_meta( PaymentContext $context, PaymentResult &$result ) {
 		$data = $context->payment_data;
 		if ( ! empty( $data['payment_request_type'] ) && 'stripe' === $context->payment_method ) {
 			// phpcs:ignore WordPress.Security.NonceVerification
@@ -235,6 +236,51 @@ final class Stripe extends AbstractPaymentMethodType {
 			$_POST     = $context->payment_data;
 			WC_Stripe_Payment_Request::add_order_meta( $context->order->id, $context->payment_data );
 			$_POST = $post_data;
+		}
+
+		// hook into stripe error processing so that we can capture the error to
+		// payment details (which is added to notices and thus not helpful for
+		// this context).
+		if ( 'stripe' === $context->payment_method ) {
+			add_action(
+				'wc_gateway_stripe_process_payment_error',
+				function( $error ) use ( &$result ) {
+					$payment_details                 = $result->payment_details;
+					$payment_details['errorMessage'] = $error->getLocalizedMessage();
+					$result->set_payment_details( $payment_details );
+				}
+			);
+		}
+	}
+
+	/**
+	 * Handles any potential stripe intents on the order that need handled.
+	 *
+	 * This is configured to execute after legacy payment processing has
+	 * happened on the woocommerce_rest_checkout_process_payment_with_context
+	 * action hook.
+	 *
+	 * @param PaymentContext $context Holds context for the payment.
+	 * @param PaymentResult  $result  Result object for the payment.
+	 */
+	public function add_stripe_intents( PaymentContext $context, PaymentResult &$result ) {
+		if ( 'stripe' === $context->payment_method
+			&& (
+				! empty( $result->payment_details['payment_intent_secret'] )
+				|| ! empty( $result->payment_details['setup_intent_secret'] )
+			)
+		) {
+			$payment_details                          = $result->payment_details;
+			$payment_details['verification_endpoint'] = add_query_arg(
+				[
+					'order'       => $context->order->get_id(),
+					'nonce'       => wp_create_nonce( 'wc_stripe_confirm_pi' ),
+					'redirect_to' => rawurlencode( $result->redirect_url ),
+				],
+				home_url() . \WC_Ajax::get_endpoint( 'wc_stripe_verify_intent' )
+			);
+			$result->set_payment_details( $payment_details );
+			$result->set_status( 'success' );
 		}
 	}
 }

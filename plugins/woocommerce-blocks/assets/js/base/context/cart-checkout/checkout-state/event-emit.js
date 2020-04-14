@@ -9,14 +9,16 @@ import {
 } from '../event-emit';
 
 const EMIT_TYPES = {
-	CHECKOUT_COMPLETE_WITH_SUCCESS: 'checkout_complete',
-	CHECKOUT_COMPLETE_WITH_ERROR: 'checkout_complete_error',
-	CHECKOUT_PROCESSING: 'checkout_processing',
+	CHECKOUT_BEFORE_PROCESSING: 'checkout_before_processing',
+	CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS:
+		'checkout_after_processing_with_success',
+	CHECKOUT_AFTER_PROCESSING_WITH_ERROR:
+		'checkout_after_processing_with_error',
 };
 
 /**
  * Receives a reducer dispatcher and returns an object with the
- * onCheckoutComplete callback registration function for the checkout emit
+ * callback registration function for the checkout emit
  * events.
  *
  * Calling the event registration function with the callback will register it
@@ -25,19 +27,19 @@ const EMIT_TYPES = {
  *
  * @param {Function} dispatcher The emitter reducer dispatcher.
  *
- * @return {Object} An object with the `onCheckoutComplete` emmitter registration
+ * @return {Object} An object with the checkout emmitter registration
  */
 const emitterSubscribers = ( dispatcher ) => ( {
-	onCheckoutCompleteSuccess: emitterCallback(
-		EMIT_TYPES.CHECKOUT_COMPLETE_WITH_SUCCESS,
+	onCheckoutAfterProcessingWithSuccess: emitterCallback(
+		EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS,
 		dispatcher
 	),
-	onCheckoutCompleteError: emitterCallback(
-		EMIT_TYPES.CHECKOUT_COMPLETE_WITH_ERROR,
+	onCheckoutAfterProcessingWithError: emitterCallback(
+		EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
 		dispatcher
 	),
-	onCheckoutProcessing: emitterCallback(
-		EMIT_TYPES.CHECKOUT_PROCESSING,
+	onCheckoutBeforeProcessing: emitterCallback(
+		EMIT_TYPES.CHECKOUT_BEFORE_PROCESSING,
 		dispatcher
 	),
 } );

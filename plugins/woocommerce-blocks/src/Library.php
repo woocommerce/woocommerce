@@ -231,13 +231,12 @@ class Library {
 		$_POST = $context->payment_data;
 
 		// Call the process payment method of the chosen gatway.
-		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$payment_method_object = $context->get_payment_method_instance();
 
-		if ( ! isset( $available_gateways[ $context->payment_method ] ) ) {
+		if ( ! $payment_method_object instanceof \WC_Payment_Gateway ) {
 			return;
 		}
 
-		$payment_method_object = $available_gateways[ $context->payment_method ];
 		$payment_method_object->validate_fields();
 
 		if ( 0 !== wc_notice_count( 'error' ) ) {
@@ -250,9 +249,14 @@ class Library {
 		// Restore $_POST data.
 		$_POST = $post_data;
 
+		// Clear notices so they don't show up in the block.
+		wc_clear_notices();
+
 		// Handle result.
 		$result->set_status( isset( $gateway_result['result'] ) && 'success' === $gateway_result['result'] ? 'success' : 'failure' );
-		$result->set_payment_details( [] );
+
+		// set payment_details from result.
+		$result->set_payment_details( array_merge( $result->payment_details, $gateway_result ) );
 		$result->set_redirect_url( $gateway_result['redirect'] );
 	}
 }

@@ -10,18 +10,19 @@ import {
 	useEffect,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useStoreNotices } from '@woocommerce/base-hooks';
+import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import { actions } from './actions';
-import { reducer } from './reducer';
+import { reducer, prepareResponseData } from './reducer';
 import { DEFAULT_STATE, STATUS } from './constants';
 import {
 	EMIT_TYPES,
 	emitterSubscribers,
 	emitEvent,
+	emitEventWithAbort,
 	reducer as emitReducer,
 } from './event-emit';
 import { useValidationContext } from '../validation';
@@ -38,18 +39,20 @@ const CheckoutContext = createContext( {
 	isIdle: false,
 	isCalculating: false,
 	isProcessing: false,
-	isProcessingComplete: false,
+	isBeforeProcessing: false,
+	isAfterProcessing: false,
 	hasError: false,
 	redirectUrl: '',
 	orderId: 0,
-	onCheckoutCompleteSuccess: ( callback ) => void callback,
-	onCheckoutCompleteError: ( callback ) => void callback,
-	onCheckoutProcessing: ( callback ) => void callback,
+	customerId: 0,
+	onCheckoutAfterProcessingWithSuccess: ( callback ) => void callback,
+	onCheckoutAfterProcessingWithError: ( callback ) => void callback,
+	onCheckoutBeforeProcessing: ( callback ) => void callback,
 	dispatchActions: {
 		resetCheckout: () => void null,
 		setRedirectUrl: ( url ) => void url,
 		setHasError: ( hasError ) => void hasError,
-		setComplete: () => void null,
+		setAfterProcessing: ( response ) => void response,
 		incrementCalculating: () => void null,
 		decrementCalculating: () => void null,
 		setOrderId: ( id ) => void id,
@@ -94,23 +97,30 @@ export const CheckoutStateProvider = ( {
 	const currentObservers = useRef( observers );
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotices } = useStoreNotices();
-
 	const isCalculating = checkoutState.calculatingCount > 0;
+	const {
+		isSuccessResponse,
+		isErrorResponse,
+		isFailResponse,
+	} = useEmitResponse();
 
 	// set observers on ref so it's always current.
 	useEffect( () => {
 		currentObservers.current = observers;
 	}, [ observers ] );
-	const onCheckoutCompleteSuccess = useMemo(
-		() => emitterSubscribers( subscriber ).onCheckoutCompleteSuccess,
+	const onCheckoutAfterProcessingWithSuccess = useMemo(
+		() =>
+			emitterSubscribers( subscriber )
+				.onCheckoutAfterProcessingWithSuccess,
 		[ subscriber ]
 	);
-	const onCheckoutCompleteError = useMemo(
-		() => emitterSubscribers( subscriber ).onCheckoutCompleteError,
+	const onCheckoutAfterProcessingWithError = useMemo(
+		() =>
+			emitterSubscribers( subscriber ).onCheckoutAfterProcessingWithError,
 		[ subscriber ]
 	);
-	const onCheckoutProcessing = useMemo(
-		() => emitterSubscribers( subscriber ).onCheckoutProcessing,
+	const onCheckoutBeforeProcessing = useMemo(
+		() => emitterSubscribers( subscriber ).onCheckoutBeforeProcessing,
 		[ subscriber ]
 	);
 
@@ -130,8 +140,25 @@ export const CheckoutStateProvider = ( {
 				void dispatch( actions.decrementCalculating() ),
 			setOrderId: ( orderId ) =>
 				void dispatch( actions.setOrderId( orderId ) ),
-			setComplete: () => {
-				void dispatch( actions.setComplete() );
+			setAfterProcessing: ( response ) => {
+				if ( response.payment_result ) {
+					if (
+						// eslint-disable-next-line camelcase
+						response.payment_result?.redirect_url
+					) {
+						dispatch(
+							actions.setRedirectUrl(
+								response.payment_result.redirect_url
+							)
+						);
+					}
+					dispatch(
+						actions.setProcessingResponse(
+							prepareResponseData( response.payment_result )
+						)
+					);
+				}
+				void dispatch( actions.setAfterProcessing() );
 			},
 		} ),
 		[]
@@ -140,11 +167,11 @@ export const CheckoutStateProvider = ( {
 	// emit events.
 	useEffect( () => {
 		const { status } = checkoutState;
-		if ( status === STATUS.PROCESSING ) {
+		if ( status === STATUS.BEFORE_PROCESSING ) {
 			removeNotices( 'error' );
 			emitEvent(
 				currentObservers.current,
-				EMIT_TYPES.CHECKOUT_PROCESSING,
+				EMIT_TYPES.CHECKOUT_BEFORE_PROCESSING,
 				{}
 			).then( ( response ) => {
 				if ( response !== true ) {
@@ -156,34 +183,109 @@ export const CheckoutStateProvider = ( {
 							}
 						);
 					}
-					dispatch( actions.setComplete() );
+					dispatch( actions.setIdle() );
 				} else {
-					dispatch( actions.setProcessingComplete() );
+					dispatch( actions.setProcessing() );
 				}
 			} );
 		}
 	}, [ checkoutState.status, setValidationErrors ] );
 
 	useEffect( () => {
-		if ( checkoutState.status === STATUS.COMPLETE ) {
+		if ( checkoutState.status === STATUS.AFTER_PROCESSING ) {
+			const data = {
+				redirectUrl: checkoutState.redirectUrl,
+				orderId: checkoutState.orderId,
+				customerId: checkoutState.customerId,
+				customerNote: checkoutState.customerNote,
+				processingResponse: checkoutState.processingResponse,
+			};
 			if ( checkoutState.hasError ) {
-				emitEvent(
+				// allow payment methods or other things to customize the error
+				// with a fallback if nothing customizes it.
+				emitEventWithAbort(
 					currentObservers.current,
-					EMIT_TYPES.CHECKOUT_COMPLETE_WITH_ERROR,
-					{}
-				);
+					EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_ERROR,
+					data
+				).then( ( response ) => {
+					if (
+						isErrorResponse( response ) ||
+						isFailResponse( response )
+					) {
+						if ( response.message ) {
+							const errorOptions = response.messageContext
+								? { context: response.messageContext }
+								: undefined;
+							addErrorNotice( response.message, errorOptions );
+						}
+						// irrecoverable error so set complete
+						if (
+							typeof response.retry !== 'undefined' &&
+							response.retry !== true
+						) {
+							dispatch( actions.setComplete( response ) );
+						} else {
+							dispatch( actions.setIdle() );
+						}
+					} else {
+						// no error handling in place by anything so let's fall
+						// back to default
+						const message =
+							data.processingResponse.message ||
+							__(
+								'Something went wrong. Please contact us to get assistance.',
+								'woo-gutenberg-products-block'
+							);
+						addErrorNotice( message, {
+							id: 'checkout',
+						} );
+						dispatch( actions.setIdle() );
+					}
+				} );
 			} else {
-				emitEvent(
+				emitEventWithAbort(
 					currentObservers.current,
-					EMIT_TYPES.CHECKOUT_COMPLETE_WITH_SUCCESS,
-					{}
-				);
+					EMIT_TYPES.CHECKOUT_AFTER_PROCESSING_WITH_SUCCESS,
+					data
+				).then( ( response ) => {
+					if ( isSuccessResponse( response ) ) {
+						dispatch( actions.setComplete( response ) );
+					}
+					if (
+						isErrorResponse( response ) ||
+						isFailResponse( response )
+					) {
+						if ( response.message ) {
+							const errorOptions = response.messageContext
+								? { context: response.messageContext }
+								: undefined;
+							addErrorNotice( response.message, errorOptions );
+						}
+						if ( ! response.retry ) {
+							dispatch( actions.setComplete( response ) );
+						} else {
+							// this will set an error which will end up
+							// triggering the onCheckoutAfterProcessingWithErrors emitter.
+							// and then setting checkout to IDLE state.
+							dispatch( actions.setHasError( true ) );
+						}
+					}
+				} );
 			}
 		}
-	}, [ checkoutState.status, checkoutState.hasError ] );
+	}, [
+		checkoutState.status,
+		checkoutState.hasError,
+		checkoutState.redirectUrl,
+		checkoutState.orderId,
+		checkoutState.customerId,
+		checkoutState.customerNote,
+		checkoutState.processingResponse,
+		dispatchActions,
+	] );
 
 	const onSubmit = () => {
-		dispatch( actions.setProcessing() );
+		dispatch( actions.setBeforeProcessing() );
 	};
 
 	/**
@@ -196,13 +298,13 @@ export const CheckoutStateProvider = ( {
 		isIdle: checkoutState.status === STATUS.IDLE,
 		isCalculating,
 		isProcessing: checkoutState.status === STATUS.PROCESSING,
-		isProcessingComplete:
-			checkoutState.status === STATUS.PROCESSING_COMPLETE,
+		isBeforeProcessing: checkoutState.status === STATUS.BEFORE_PROCESSING,
+		isAfterProcessing: checkoutState.status === STATUS.AFTER_PROCESSING,
 		hasError: checkoutState.hasError,
 		redirectUrl: checkoutState.redirectUrl,
-		onCheckoutCompleteSuccess,
-		onCheckoutCompleteError,
-		onCheckoutProcessing,
+		onCheckoutAfterProcessingWithSuccess,
+		onCheckoutAfterProcessingWithError,
+		onCheckoutBeforeProcessing,
 		dispatchActions,
 		isCart,
 		orderId: checkoutState.orderId,
