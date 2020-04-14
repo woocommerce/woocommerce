@@ -1,0 +1,13 @@
+name: Draft release process
+on: 
+  release:
+    types: [created]
+jobs:
+  build:
+    name: Draft release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
