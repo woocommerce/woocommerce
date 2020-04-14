@@ -31,7 +31,8 @@ jQuery(
 				menu_order     = $wc_inline_data.find( '.menu_order' ).text(),
 				tax_status     = $wc_inline_data.find( '.tax_status' ).text(),
 				tax_class      = $wc_inline_data.find( '.tax_class' ).text(),
-				backorders     = $wc_inline_data.find( '.backorders' ).text();
+				backorders     = $wc_inline_data.find( '.backorders' ).text(),
+				product_type   = $wc_inline_data.find( '.product_type' ).text();
 
 				var formatted_regular_price = regular_price.replace( '.', woocommerce_admin.mon_decimal_point ),
 				formatted_sale_price        = sale_price.replace( '.', woocommerce_admin.mon_decimal_point );
@@ -58,10 +59,14 @@ jQuery(
 					'select[name="_backorders"] option'
 				).removeAttr( 'selected' );
 
+				var is_variable_product = 'variable' === product_type;
+				$( 'select[name="_stock_status"] ~ .quick-edit-warning', '.inline-edit-row' ).toggle( is_variable_product );
+				$( 'select[name="_stock_status"] option[value="' + (is_variable_product ? '' : stock_status) + '"]', '.inline-edit-row' )
+					.attr( 'selected', 'selected' );
+
 				$( 'select[name="_tax_status"] option[value="' + tax_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 				$( 'select[name="_tax_class"] option[value="' + tax_class + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 				$( 'select[name="_visibility"] option[value="' + visibility + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
-				$( 'select[name="_stock_status"] option[value="' + stock_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 				$( 'select[name="_backorders"] option[value="' + backorders + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 
 				if ( 'yes' === featured ) {
@@ -71,8 +76,7 @@ jQuery(
 				}
 
 				// Conditional display.
-				var product_type   = $wc_inline_data.find( '.product_type' ).text(),
-				product_is_virtual = $wc_inline_data.find( '.product_is_virtual' ).text();
+				var product_is_virtual = $wc_inline_data.find( '.product_is_virtual' ).text();
 
 				var product_supports_stock_status = 'external' !== product_type;
 				var product_supports_stock_fields = 'external' !== product_type && 'grouped' !== product_type;

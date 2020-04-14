@@ -417,9 +417,14 @@ class WC_Admin_Post_Types {
 
 		// Handle Stock Data.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$manage_stock = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
-		$backorders   = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
-		$stock_status = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : 'instock';
+		$manage_stock            = ! empty( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
+		$backorders              = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : 'no';
+		$stock_status_in_request = ! empty( $_REQUEST['_stock_status'] );
+		if ( $stock_status_in_request ) {
+			$stock_status = wc_clean( $_REQUEST['_stock_status'] );
+		} else {
+			$stock_status = $product->is_type( 'variable' ) ? null : 'instock';
+		}
 		$stock_amount = 'yes' === $manage_stock && isset( $_REQUEST['_stock'] ) && is_numeric( wp_unslash( $_REQUEST['_stock'] ) ) ? wc_stock_amount( wp_unslash( $_REQUEST['_stock'] ) ) : '';
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
@@ -531,10 +536,8 @@ class WC_Admin_Post_Types {
 
 		// Handle Stock Data.
 		$was_managing_stock = $product->get_manage_stock() ? 'yes' : 'no';
-		$stock_status       = $product->get_stock_status();
 		$backorders         = $product->get_backorders();
 		$backorders         = ! empty( $_REQUEST['_backorders'] ) ? wc_clean( $_REQUEST['_backorders'] ) : $backorders;
-		$stock_status       = ! empty( $_REQUEST['_stock_status'] ) ? wc_clean( $_REQUEST['_stock_status'] ) : $stock_status;
 
 		if ( ! empty( $_REQUEST['_manage_stock'] ) ) {
 			$manage_stock = 'yes' === wc_clean( $_REQUEST['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
@@ -566,7 +569,8 @@ class WC_Admin_Post_Types {
 			$product->set_manage_stock( 'no' );
 		}
 
-		$product = $this->update_stock_status( $product, $stock_status );
+		$stock_status = empty( $_REQUEST['_stock_status'] ) ? null : wc_clean( $_REQUEST['_stock_status'] );
+		$product      = $this->update_stock_status( $product, $stock_status );
 
 		$product->save();
 
@@ -872,26 +876,28 @@ class WC_Admin_Post_Types {
 	/**
 	 * Apply product type constraints to stock status.
 	 *
-	 * @param WC_Product $product The product whose stock status will be adjusted.
-	 * @param string     $stock_status The stock status to use for adjustment.
+	 * @param WC_Product  $product The product whose stock status will be adjusted.
+	 * @param string|null $stock_status The stock status to use for adjustment, or null if no new stock status has been supplied in the request.
 	 * @return WC_Product The supplied product, or the synced product if it was a variable product.
 	 */
 	private function update_stock_status( $product, $stock_status ) {
 		if ( $product->is_type( 'external' ) ) {
 			// External products are always in stock.
 			$product->set_stock_status( 'instock' );
-		} elseif ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
-			// Stock status is determined by children.
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( ! $product->get_manage_stock() ) {
-					$child->set_stock_status( $stock_status );
-					$child->save();
+		} elseif ( isset( $stock_status ) ) {
+			if ( $product->is_type( 'variable' ) && ! $product->get_manage_stock() ) {
+				// Stock status is determined by children.
+				foreach ( $product->get_children() as $child_id ) {
+					$child = wc_get_product( $child_id );
+					if ( ! $product->get_manage_stock() ) {
+						$child->set_stock_status( $stock_status );
+						$child->save();
+					}
 				}
+				$product = WC_Product_Variable::sync( $product, false );
+			} else {
+				$product->set_stock_status( $stock_status );
 			}
-			$product = WC_Product_Variable::sync( $product, false );
-		} else {
-			$product->set_stock_status( $stock_status );
 		}
 
 		return $product;
