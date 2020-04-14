@@ -165,8 +165,8 @@ const stableFrontEndEntry = {
 };
 
 const experimentalFrontEndEntry = {
-	checkout: './assets/js/blocks/cart-checkout/checkout/frontend.js',
 	cart: './assets/js/blocks/cart-checkout/cart/frontend.js',
+	checkout: './assets/js/blocks/cart-checkout/checkout/frontend.js',
 };
 
 const frontEndEntry =

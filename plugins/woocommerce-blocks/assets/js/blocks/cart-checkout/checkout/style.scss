@@ -7,8 +7,19 @@
 	margin-top: $gap;
 }
 
-.wc-block-checkout .wc-block-shipping-rates-control__package:not(:first-of-type) {
-	margin-top: $gap-larger;
+.wc-block-checkout__shipping-option {
+	.wc-block-radio-control__option {
+		padding-left: $gap-larger * 2;
+	}
+
+	.wc-block-radio-control__input {
+		margin: 0 0 0 -8px;
+		left: $gap-larger;
+	}
+
+	.wc-block-shipping-rates-control__package:not(:first-of-type) {
+		margin-top: $gap-larger;
+	}
 }
 
 .wc-block-checkout__sidebar {

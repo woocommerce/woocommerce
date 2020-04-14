@@ -16,42 +16,18 @@ fieldset.wc-block-totals__shipping-options-fieldset {
 	}
 
 	.wc-block-radio-control__option {
-		padding-left: $gap-large;
-
 		&:last-child {
 			border-bottom: none;
 		}
 	}
-
-	.wc-block-radio-control__input {
-		left: 0;
-		margin: 0;
-	}
 }
 
-.wc-block-cart__sidebar {
-	.wc-block-totals__change-address-button {
-		background: transparent;
-		border: 0;
-		border-radius: 0;
-		box-shadow: none;
-		color: inherit;
-		font-family: inherit;
-		font-weight: inherit;
-		display: inline;
-		font-weight: inherit;
-		letter-spacing: inherit;
-		margin: 0;
-		padding: 0;
-		text-decoration: underline;
-		text-transform: none;
-		vertical-align: middle;
+.wc-block-totals__change-address-button {
+	@include link-button;
 
-		&:hover,
-		&:focus,
-		&:active {
-			background: transparent;
-			opacity: 0.8;
-		}
+	&:hover,
+	&:focus,
+	&:active {
+		opacity: 0.8;
 	}
 }
