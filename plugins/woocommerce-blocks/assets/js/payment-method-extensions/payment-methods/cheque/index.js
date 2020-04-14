@@ -14,8 +14,6 @@ import { PAYMENT_METHOD_NAME } from './constants';
 
 const settings = getSetting( 'cheque_data', {} );
 
-const EditPlaceHolder = () => <div>TODO: Edit preview soon...</div>;
-
 /**
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
  */
@@ -40,6 +38,10 @@ const Content = ( { activePaymentMethod, eventRegistration } ) => {
 	) : null;
 };
 
+const Edit = ( props ) => {
+	return <Content { ...props } />;
+};
+
 const offlineChequePaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
 	label: (
@@ -51,7 +53,7 @@ const offlineChequePaymentMethod = {
 		</strong>
 	),
 	content: <Content />,
-	edit: <EditPlaceHolder />,
+	edit: <Edit />,
 	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
 		settings.title || __( 'Check Payment', 'woo-gutenberg-products-block' )
