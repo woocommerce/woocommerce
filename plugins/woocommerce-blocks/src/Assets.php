@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\WooCommerce\Blocks\Assets\PaymentMethodAssets;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -72,7 +74,8 @@ class Assets {
 		self::register_script( 'wc-active-filters', plugins_url( self::get_block_asset_build_path( 'active-filters' ), __DIR__ ), $block_dependencies );
 
 		if ( WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
-			self::register_script( 'wc-checkout-block', plugins_url( self::get_block_asset_build_path( 'checkout' ), __DIR__ ), $block_dependencies );
+			$payment_method_handles = Package::container()->get( PaymentMethodAssets::class )->get_all_registered_payment_method_script_handles();
+			self::register_script( 'wc-checkout-block', plugins_url( self::get_block_asset_build_path( 'checkout' ), __DIR__ ), array_merge( $block_dependencies, $payment_method_handles ) );
 			self::register_script( 'wc-cart-block', plugins_url( self::get_block_asset_build_path( 'cart' ), __DIR__ ), $block_dependencies );
 		}
 	}

@@ -10,8 +10,8 @@ const {
 	PROCESSING,
 	PRISTINE,
 	COMPLETE,
-	SET_REGISTERED_PAYMENT_METHOD,
-	SET_REGISTERED_EXPRESS_PAYMENT_METHOD,
+	SET_REGISTERED_PAYMENT_METHODS,
+	SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
 } = ACTION_TYPES;
 
 /**
@@ -22,7 +22,7 @@ const {
  */
 const reducer = (
 	state = DEFAULT_PAYMENT_DATA,
-	{ type, paymentMethodData, errorMessage, paymentMethod }
+	{ type, paymentMethodData, errorMessage, paymentMethods }
 ) => {
 	switch ( type ) {
 		case STARTED:
@@ -87,20 +87,20 @@ const reducer = (
 					...state.expressPaymentMethods,
 				},
 			};
-		case SET_REGISTERED_PAYMENT_METHOD:
+		case SET_REGISTERED_PAYMENT_METHODS:
 			return {
 				...state,
 				paymentMethods: {
 					...state.paymentMethods,
-					[ paymentMethod.name ]: paymentMethod,
+					...paymentMethods,
 				},
 			};
-		case SET_REGISTERED_EXPRESS_PAYMENT_METHOD:
+		case SET_REGISTERED_EXPRESS_PAYMENT_METHODS:
 			return {
 				...state,
 				expressPaymentMethods: {
 					...state.expressPaymentMethods,
-					[ paymentMethod.name ]: paymentMethod,
+					...paymentMethods,
 				},
 			};
 	}

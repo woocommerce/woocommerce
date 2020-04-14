@@ -77,12 +77,10 @@ final class Stripe extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		wp_register_script( 'stripe', 'https://js.stripe.com/v3/', '', '3.0', true );
-
 		$this->asset_api->register_script(
 			'wc-payment-method-stripe',
 			'build/wc-payment-method-stripe.js',
-			[ 'stripe' ]
+			[]
 		);
 
 		return [ 'wc-payment-method-stripe' ];

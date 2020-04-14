@@ -12,8 +12,8 @@ import {
 	error,
 	failed,
 	success,
-	setRegisteredPaymentMethod,
-	setRegisteredExpressPaymentMethod,
+	setRegisteredPaymentMethods,
+	setRegisteredExpressPaymentMethods,
 } from './actions';
 import {
 	usePaymentMethods,
@@ -121,12 +121,12 @@ export const PaymentMethodDataProvider = ( {
 		},
 		[ setActive, dispatch ]
 	);
-	const paymentMethodsInitialized = usePaymentMethods( ( paymentMethod ) =>
-		dispatch( setRegisteredPaymentMethod( paymentMethod ) )
+	const paymentMethodsInitialized = usePaymentMethods( ( paymentMethods ) =>
+		dispatch( setRegisteredPaymentMethods( paymentMethods ) )
 	);
 	const expressPaymentMethodsInitialized = useExpressPaymentMethods(
-		( paymentMethod ) => {
-			dispatch( setRegisteredExpressPaymentMethod( paymentMethod ) );
+		( paymentMethods ) => {
+			dispatch( setRegisteredExpressPaymentMethods( paymentMethods ) );
 		}
 	);
 	const { setValidationErrors } = useValidationContext();
