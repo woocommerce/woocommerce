@@ -382,9 +382,14 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11
  */
 function wc_get_low_stock_amount( WC_Product $product ) {
 	if ( $product->is_type( 'variation' ) ) {
-		$product = wc_get_product( $product->get_parent_id() );
+		$parent_product = wc_get_product( $product->get_parent_id() );
+		$low_stock_amount = $parent_product->get_low_stock_amount();
+	} else {
+		$low_stock_amount = $product->get_low_stock_amount();
 	}
-	$low_stock_amount = $product->get_low_stock_amount();
+	
+	$low_stock_amount = apply_filters('woocommerce_get_low_stock_amount', $low_stock_amount, $product);
+	
 	if ( '' === $low_stock_amount ) {
 		$low_stock_amount = get_option( 'woocommerce_notify_low_stock_amount', 2 );
 	}
