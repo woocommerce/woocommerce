@@ -11,8 +11,8 @@ const {
 	ERROR,
 	FAILED,
 	SUCCESS,
-	SET_REGISTERED_PAYMENT_METHOD,
-	SET_REGISTERED_EXPRESS_PAYMENT_METHOD,
+	SET_REGISTERED_PAYMENT_METHODS,
+	SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
 } = ACTION_TYPES;
 
 /**
@@ -81,22 +81,22 @@ export const success = ( { paymentMethodData } ) => ( {
  * Used to dispatch an action for updating a registered payment method in the
  * state.
  *
- * @param {Object} paymentMethod Payment method to register.
+ * @param {Object} paymentMethods Payment methods to register.
  * @return {Object} An action object.
  */
-export const setRegisteredPaymentMethod = ( paymentMethod ) => ( {
-	type: SET_REGISTERED_PAYMENT_METHOD,
-	paymentMethod,
+export const setRegisteredPaymentMethods = ( paymentMethods ) => ( {
+	type: SET_REGISTERED_PAYMENT_METHODS,
+	paymentMethods,
 } );
 
 /**
  * Used to dispatch an action for updating a registered express payment
  * method in the state.
  *
- * @param {Object} paymentMethod Payment method to register.
+ * @param {Object} paymentMethods Payment methods to register.
  * @return {Object} An action object.
  */
-export const setRegisteredExpressPaymentMethod = ( paymentMethod ) => ( {
-	type: SET_REGISTERED_EXPRESS_PAYMENT_METHOD,
-	paymentMethod,
+export const setRegisteredExpressPaymentMethods = ( paymentMethods ) => ( {
+	type: SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+	paymentMethods,
 } );

@@ -14,9 +14,9 @@ export const STATUS = {
 
 export const ACTION_TYPES = {
 	...STATUS,
-	SET_REGISTERED_PAYMENT_METHOD: 'set_registered_payment_method',
-	SET_REGISTERED_EXPRESS_PAYMENT_METHOD:
-		'set_registered_express_payment_method',
+	SET_REGISTERED_PAYMENT_METHODS: 'set_registered_payment_methods',
+	SET_REGISTERED_EXPRESS_PAYMENT_METHODS:
+		'set_registered_express_payment_methods',
 };
 
 /**

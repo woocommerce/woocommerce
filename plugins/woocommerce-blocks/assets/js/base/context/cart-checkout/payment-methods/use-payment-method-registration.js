@@ -12,12 +12,35 @@ import {
 } from '@woocommerce/base-context';
 import { useStoreCart } from '@woocommerce/base-hooks';
 
+/**
+ * This hook handles initializing registered payment methods and exposing all
+ * registered payment methods that can be used in the current environment (via
+ * the payment method's `canMakePayment` property).
+ *
+ * @param  {function(Object):undefined} dispatcher               A dispatcher for setting registered
+ *                                                               payment methods to an external
+ *                                                               state.
+ * @param  {Object}                     registeredPaymentMethods Registered payment methods to
+ *                                                               process.
+ *
+ * @return {boolean} Whether the payment methods have been initialized or not. True when all payment
+ *                   methods have been initialized.
+ */
 const usePaymentMethodRegistration = (
 	dispatcher,
 	registeredPaymentMethods
 ) => {
 	const { isEditor } = useEditorContext();
 	const [ isInitialized, setIsInitialized ] = useState( false );
+
+	/**
+	 * @type {Object} initializedMethodsDefault Used to hold payment methods that have been
+	 *                                          initialized.
+	 */
+	const [
+		initializedPaymentMethods,
+		setInitializedPaymentMethods,
+	] = useState( {} );
 	const { shippingAddress } = useShippingDataContext();
 	const { cartTotals, cartNeedsShipping } = useStoreCart();
 	const canPayArgument = useRef( {
@@ -29,6 +52,13 @@ const usePaymentMethodRegistration = (
 		Object.keys( registeredPaymentMethods ).length
 	);
 
+	const setInitializedPaymentMethod = ( paymentMethod ) => {
+		setInitializedPaymentMethods( ( paymentMethods ) => ( {
+			...paymentMethods,
+			[ paymentMethod.name ]: paymentMethod,
+		} ) );
+	};
+
 	useEffect( () => {
 		canPayArgument.current = {
 			cartTotals,
@@ -37,6 +67,9 @@ const usePaymentMethodRegistration = (
 		};
 	}, [ cartTotals, cartNeedsShipping, shippingAddress ] );
 
+	// Handles initialization of all payment methods.
+	// Note: registeredPaymentMethods is not a dependency because this will not
+	// change in the life of the hook, it comes from an externally set value.
 	useEffect( () => {
 		// if all payment methods are initialized then bail.
 		if ( isInitialized ) {
@@ -44,7 +77,7 @@ const usePaymentMethodRegistration = (
 		}
 		const updatePaymentMethods = ( current, canPay = true ) => {
 			if ( canPay ) {
-				dispatcher( current );
+				setInitializedPaymentMethod( current );
 			}
 			// update the initialized count
 			countPaymentMethodsInitializing.current--;
@@ -54,8 +87,8 @@ const usePaymentMethodRegistration = (
 			}
 		};
 		// loop through payment methods and see what the state is
-		for ( const paymentMethodId in registeredPaymentMethods ) {
-			const current = registeredPaymentMethods[ paymentMethodId ];
+		for ( const paymentMethodName in registeredPaymentMethods ) {
+			const current = registeredPaymentMethods[ paymentMethodName ];
 			// if in editor context then we bypass can pay check.
 			if ( isEditor ) {
 				updatePaymentMethods( current );
@@ -77,6 +110,26 @@ const usePaymentMethodRegistration = (
 			}
 		}
 	}, [ isInitialized, isEditor ] );
+
+	// once all payment methods have been initialized, resort to be in the same
+	// order as registered and then set via the dispatcher.
+	// Note: registeredPaymentMethods is not a dependency because this will not
+	// change in the life of the hook, it comes from an externally set value.
+	useEffect( () => {
+		if ( isInitialized ) {
+			const reSortByRegisteredOrder = () => {
+				const newSet = {};
+				for ( const paymentMethodName in registeredPaymentMethods ) {
+					if ( initializedPaymentMethods[ paymentMethodName ] ) {
+						newSet[ paymentMethodName ] =
+							initializedPaymentMethods[ paymentMethodName ];
+					}
+				}
+				return newSet;
+			};
+			dispatcher( reSortByRegisteredOrder() );
+		}
+	}, [ isInitialized, initializedPaymentMethods ] );
 
 	return isInitialized;
 };
