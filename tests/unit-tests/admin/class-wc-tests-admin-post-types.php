@@ -51,7 +51,6 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 
 		$request_data = array(
 			"woocommerce_{$edit_type}"     => '1',
-			'change_stock'                 => '',
 			'_stock_status'                => $change_stock_request_value,
 			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
 		);
