@@ -7,6 +7,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useValidationContext } from '@woocommerce/base-context';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -59,7 +60,10 @@ export const useStoreCartCoupons = () => {
 					} )
 					.catch( ( error ) => {
 						setValidationErrors( {
-							coupon: { message: error.message, hidden: false },
+							coupon: {
+								message: decodeEntities( error.message ),
+								hidden: false,
+							},
 						} );
 						// Finished handling the coupon.
 						receiveApplyingCoupon( '' );
