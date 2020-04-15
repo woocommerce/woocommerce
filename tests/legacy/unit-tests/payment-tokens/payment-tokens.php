@@ -17,8 +17,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		wp_set_current_user( $this->user_id );
+		$this->user_id = $this->login_as_role( 'shop_manager' );
 	}
 
 	/**

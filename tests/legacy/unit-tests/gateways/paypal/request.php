@@ -355,12 +355,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	 */
 	public function test_request_url() {
 		// User set up.
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		$this->login_as_administrator();
 
 		// wc_tax_enabled(), wc_prices_include_tax() and WC_Gateway_Paypal_Request::prepare_line_items() determine if
 		// shipping tax should be included, these are the correct options.
