@@ -17,7 +17,6 @@ cache:
 
 # Test main supported versions of PHP against latest WP.
 php:
-  - 5.6
   - 7.0
   - 7.1
   - 7.2
@@ -51,7 +50,7 @@ matrix:
     php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
   - name: "Minimum requirements"
-    php: 5.6
+    php: 7.0
     env: WP_VERSION=5.0 WP_MULTISITE=0
   allow_failures:
   - php: 7.4
