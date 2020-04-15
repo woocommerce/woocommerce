@@ -86,9 +86,10 @@ class WC_Tracks {
 		if ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key ) {
 			return false;
 		}
+		$prefixed_event_name = self::PREFIX . $event_name;
 
 		$data = array(
-			'_en' => self::PREFIX . $event_name,
+			'_en' => $prefixed_event_name,
 			'_ts' => WC_Tracks_Client::build_timestamp(),
 		);
 
@@ -96,7 +97,14 @@ class WC_Tracks {
 		$identity       = WC_Tracks_Client::get_identity( $user->ID );
 		$blog_details   = self::get_blog_details( $user->ID );
 
-		$event_obj = new WC_Tracks_Event( array_merge( $data, $server_details, $identity, $blog_details, $properties ) );
+		// Allow event props to be filtered to enable adding site-wide props.
+		$filtered_properties = apply_filters( 'woocommerce_tracks_event_properties', $properties, $prefixed_event_name );
+
+		// Delete _ui and _ut protected properties.
+		unset( $filtered_properties['_ui'] );
+		unset( $filtered_properties['_ut'] );
+
+		$event_obj = new WC_Tracks_Event( array_merge( $data, $server_details, $identity, $blog_details, $filtered_properties ) );
 
 		if ( is_wp_error( $event_obj->error ) ) {
 			return $event_obj->error;

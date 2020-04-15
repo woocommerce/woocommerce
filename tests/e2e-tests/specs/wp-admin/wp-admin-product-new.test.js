@@ -60,10 +60,7 @@ describe( 'Add New Simple Product Page', () => {
 	} );
 } );
 
-describe( 'Add New Variable Product Page', () => {
-	beforeAll( async () => {
-		await StoreOwnerFlow.login();
-	} );
+describe.skip( 'Add New Variable Product Page', () => {
 	it( 'can create product with variations', async () => {
 		// Go to "add product" page
 		await StoreOwnerFlow.openNewProduct();
@@ -94,6 +91,7 @@ describe( 'Add New Variable Product Page', () => {
 
 		// Wait for attribute form to save (triggers 2 UI blocks)
 		await uiUnblocked();
+		await page.waitFor( 1000 );
 		await uiUnblocked();
 
 		// Create variations from attributes

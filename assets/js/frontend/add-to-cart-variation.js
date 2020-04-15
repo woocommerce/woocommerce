@@ -253,10 +253,10 @@
 
 		// Hide or show qty input
 		if ( variation.is_sold_individually === 'yes' ) {
-			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' );
+			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).change();
 			$qty.hide();
 		} else {
-			$qty.find( 'input.qty' ).attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty );
+			$qty.find( 'input.qty' ).attr( 'min', variation.min_qty ).attr( 'max', variation.max_qty ).val( variation.min_qty ).change();
 			$qty.show();
 		}
 

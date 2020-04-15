@@ -66,6 +66,7 @@ function wc_has_notice( $message, $notice_type = 'success' ) {
  * Add and store a notice.
  *
  * @since 2.1
+ * @version 3.9.0
  * @param string $message     The text to display in the notice.
  * @param string $notice_type Optional. The name of the notice type - either error, success or notice.
  * @param array  $data        Optional notice data.
@@ -83,10 +84,14 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
-	$notices[ $notice_type ][] = array(
-		'notice' => apply_filters( 'woocommerce_add_' . $notice_type, $message ),
-		'data'   => $data,
-	);
+	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+
+	if ( ! empty( $message ) ) {
+		$notices[ $notice_type ][] = array(
+			'notice' => apply_filters( 'woocommerce_add_' . $notice_type, $message ),
+			'data'   => $data,
+		);
+	}
 
 	WC()->session->set( 'wc_notices', $notices );
 }
@@ -171,6 +176,7 @@ function wc_print_notices( $return = false ) {
  * Print a single notice immediately.
  *
  * @since 2.1
+ * @version 3.9.0
  * @param string $message The text to display in the notice.
  * @param string $notice_type Optional. The singular name of the notice type - either error, success or notice.
  * @param array  $data        Optional notice data. @since 3.9.0.
@@ -200,6 +206,7 @@ function wc_print_notice( $message, $notice_type = 'success', $data = array() ) 
  * Returns all queued notices, optionally filtered by a notice type.
  *
  * @since  2.1
+ * @version 3.9.0
  * @param  string $notice_type Optional. The singular name of the notice type - either error, success or notice.
  * @return array[]
  */

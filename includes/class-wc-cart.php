@@ -448,7 +448,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_subtotal_tax( $value ) {
-		$this->totals['subtotal_tax'] = wc_round_tax_total( $value );
+		$this->totals['subtotal_tax'] = $value;
 	}
 
 	/**
@@ -458,7 +458,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_discount_total( $value ) {
-		$this->totals['discount_total'] = wc_cart_round_discount( $value, wc_get_price_decimals() );
+		$this->totals['discount_total'] = $value;
 	}
 
 	/**
@@ -468,7 +468,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_discount_tax( $value ) {
-		$this->totals['discount_tax'] = wc_round_tax_total( $value );
+		$this->totals['discount_tax'] = $value;
 	}
 
 	/**
@@ -488,7 +488,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_shipping_tax( $value ) {
-		$this->totals['shipping_tax'] = wc_round_tax_total( $value );
+		$this->totals['shipping_tax'] = $value;
 	}
 
 	/**
@@ -508,7 +508,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_cart_contents_tax( $value ) {
-		$this->totals['cart_contents_tax'] = wc_round_tax_total( $value );
+		$this->totals['cart_contents_tax'] = $value;
 	}
 
 	/**
@@ -528,6 +528,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_total_tax( $value ) {
+		// We round here because this is a total entry, as opposed to line items in other setters.
 		$this->totals['total_tax'] = wc_round_tax_total( $value );
 	}
 
@@ -548,7 +549,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $value Value to set.
 	 */
 	public function set_fee_tax( $value ) {
-		$this->totals['fee_tax'] = wc_round_tax_total( $value );
+		$this->totals['fee_tax'] = $value;
 	}
 
 	/**
@@ -764,7 +765,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function check_cart_item_stock() {
 		$error                    = new WP_Error();
 		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$hold_stock_minutes       = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
 		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
@@ -783,7 +783,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// Check stock based on all items in the cart and consider any held stock within pending orders.
-			$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $current_session_order_id ) : 0;
+			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
 			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
@@ -1475,6 +1475,16 @@ class WC_Cart extends WC_Legacy_Cart {
 				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! $this->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 					$this->remove_coupon( $code );
+				}
+
+				$coupon_usage_limit = $coupon->get_usage_limit_per_user();
+				if ( 0 < $coupon_usage_limit && 0 === get_current_user_id() ) {
+					// For guest, usage per user has not been enforced yet. Enforce it now.
+					$coupon_data_store = $coupon->get_data_store();
+					$billing_email = strtolower( sanitize_email( $billing_email ) );
+					if ( $coupon_data_store && $coupon_data_store->get_usage_by_email( $coupon, $billing_email ) >= $coupon_usage_limit ) {
+						$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED );
+					}
 				}
 			}
 		}

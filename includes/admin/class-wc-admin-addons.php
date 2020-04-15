@@ -6,6 +6,8 @@
  * @version  2.5.0
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -489,7 +491,7 @@ class WC_Admin_Addons {
 		return array(
 			'wccom-site'          => site_url(),
 			'wccom-back'          => rawurlencode( $back_admin_path ),
-			'wccom-woo-version'   => WC_VERSION,
+			'wccom-woo-version'   => Constants::get_constant( 'WC_VERSION' ),
 			'wccom-connect-nonce' => wp_create_nonce( 'connect' ),
 		);
 	}

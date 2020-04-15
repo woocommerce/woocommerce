@@ -1,10 +1,10 @@
 === WooCommerce ===
 Contributors: automattic, mikejolley, jameskoster, claudiosanches, kloon, rodrigosprimo, peterfabian1000, vedjain, jamosova, obliviousharmony
-Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, woo
+Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce
 Requires at least: 5.0
-Tested up to: 5.3
+Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 3.8.1
+Stable tag: 4.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,95 +179,52 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.9.0 - 2020-01-07 =
+= 4.1.0 - 2020-05-05 =
 
-* Enhancement - Added a "Show" button next to the password field on the login fields. #24915
-* Enhancement - New WooCommerce Onboarding experience (shows to only 10% of new users). #24991
-* Enhancement - Introduced Payment Gateway API to support "pay button". #25000
-* Enhancement - Includes WooCommerce Blocks 2.5.3, introducing an "All Products" block, a new block listing products using client side rendering (requires WordPress 5.3), and more. #25181
-* Tweak - Updated PayPal standard "Thank you" page message to comply with PayPal Guidelines. #24756
-* Tweak - Account for non-EU countries that collect VAT and rename tax to VAT on the frontend. #24999
-* Tweak - Cache checkout fragments and update DOM on change only. #24227
-* Tweak - Eliminate extra update order AJAX request on checkout page load. #24271
-* Tweak - Prevent billing address from being updated on shipping update. #24374
-* Tweak - Added a tooltip in the "Coupon expity date" field. #24749
-* Tweak - Make phone numbers clickable in emails. #24786
-* Tweak - Prevent PHP warnings in tracker if order doesn't have a created date yet. #24846
-* Tweak - Capitalize "T" in "Move to Trash" phrase on order page in wp-admin to be consistent with product and coupon pages. #24867
-* Tweak - Changed `wp_cache` invalidation from using increment to using microtime. #24961
-* Tweak - Made the usage tracking link on the setup wizard more transparent. #25026
-* Tweak - Fixed menu highlight of My Account page when browsing "Add payment method" page. #25041
-* Tweak - Prevent creating products before registering related post types and taxonomies. #25049
-* Tweak - Include processing orders in tracker data when opted in. #25071
-* Tweak - Centralize check for default themes to fix Storefront appearance in the Setup Wizard. #25216
-* Tweak - Adds a WordPress version check before recommending the WooCommerce Admin plugin during setup. #25260
-* Fix - Honor tax rounding preference in edit item and refund flows. #24208
-* Fix - Prevent incorrect number of decimal points in prices. #24281
-* Fix - Fixed initial support for Gutenberg's Experimental Legacy Widget block. #24292
-* Fix - Fix overriding of query when using orderby on archives with a static homepage. #24683
-* Fix - Use of `wp_unslash()` function when escaping admin settings values. #24793
-* Fix - Do not set the tracking cookie when doing ajax requests. #24798
-* Fix - Display button to delete images from product galleries in the admin when using a mobile device. #24840
-* Fix - Fixed order note's date format. #24843
-* Fix - Refactored `WC_Order_Factory::get_order()` to remove function deprecated in PHP 7.0. #24852
-* Fix - Fixed product stock status changes on Bulk Edit save when "Enable stock management" is disabled. #24876
-* Fix - Fixed default country code fallback in wc_get_customer_default_location(). #24884
-* Fix - Fixed misleading message for Shipping options in cart. #24914
-* Fix - Customizer not loading when viewing from WordPress.com. #24935
-* Fix - Prevent notice when a variable product has no images. #24986
-* Fix - Adjusted the slug generation for duplicated variable products to prevent performance degradation when using templates. #25064
-* Fix - Added appropriate minification to photoswipe.css. #25074
-* Fix - Corrected the sorting behavior for the "products" shortcode when manually sorting products. #25084
-* Fix - Fixed invalid backlinks for in-app purchases. #25098
-* Fix - Corrected the media element player initialization for product variation descriptions. #25103
-* Fix - Enable WooCommerce.com Site API on installations not using permalink. #25131
-* Fix - WooCommerce.com Site API now returns success if the plugin was previously installed. #25140
-* Fix - WooCommerce.com Site API checks to `move_product` case to make sure result array contains `folder_exists` item and doesn't return a warning. #25160
-* Fix - Ensure that categories containing only private products are selectable in the product exporter. #25132
-* Fix - Prevent variable product parents from being added to orders. #25162
-* Fix - Use sorting settings as a default to product shortcodes. #25180
-* Fix - Applied setup wizard CSS fixes to the respective WP versions. #25197
-* Fix - Fixed "account erasure request" URL in WordPress 5.3. #25208
-* Fix - Ensure all cache get removed on webhook deletion. #25164
-* Fix - Adjusted the checkout email validation regex to be more accurate. #25251
-* Template - Introduced `woocommerce_product_related_products_heading` filter. #25059
-* Template - Introduced `woocommerce_before_lost_password_confirmation_message` and `woocommerce_after_lost_password_confirmation_message` hooks. #25096
-* REST API - Fixed `date_created` and `date_created_gmt` for customers v2. #25181
-* REST API - Fixed Restored "Total post count" section on System Status endpoint v2 and v3. #25181
-* REST API - Filter empty objects from results before loop. #25181
-* Dev - Introduce new PHP 7.0 minimum requirement.
-* Dev - Introduce new WordPress 5.0 minimum requirement.
-* Dev - Check for max discount to be "-ve" to prevent overwriting refunded fee amount. #24341
-* Dev - Add unload event to the checkout page to prevent reloading during checkout after placing an order. #24609
-* Dev - Only toggle form field description if element exists. #24752
-* Dev - Introduced `woocommerce_{$export_type}_export_delimiter` filter to change separator string while exporting CSV files. #24759
-* Dev - Introduced `woocommerce_after_order_refund_item_name` hook. #24760
-* Dev - Introduced `woocommerce_kses_notice_allowed_tags` filter. #24849
-* Dev - Introduced `woocommerce_shipping_not_enabled_on_cart_html` filter. #24914
-* Dev - Introduced `woocommerce_show_invalid_variations_notice` filter. #24934
-* Dev - Introduced `woocommerce_upsells_order` filter. #25017
-* Dev - Introduced `woocommerce_before_settings_{current_tab}` and `woocommerce_after_settings_{current_tab}` hooks. #25028
-* Dev - Included third parameter `$order` to `woocommerce_order_get_formatted_billing_address` and `woocommerce_order_get_formatted_shipping_address` filters. #24870
-* Dev - Pass the `$clear_persistent_cart` variable to the `woocommerce_before_cart_emptied` and `woocommerce_cart_emptied actions`. #24930
-* Dev - Made variables in `assets/css/_variables.scss` default. #24822
-* Dev - Refactor to use the same rounding logic in orders and cart. #24828
-* Dev - Add order note immediately after status change before the `woocommerce_order_status_changed action. #24879
-* Dev - Added support for custom attributes in `wc_placeholder_img()`. #24937
-* Dev - Added initial support for inline notices on checkout. #25001
-* Dev - Introduced wc_get_product_object() helper. #25031
-* Dev - Pass the correct `$this->updated_props` variable to the `woocommerce_coupon_object_updated_props` action's second paramater. #25077
-* Dev - Remove a few calls to `func_get_args()` and `call_user_func_array()` with the spread operator for better code legibility and performance gains. #25101
-- Dev - New `woocommerce_valid_order_statuses_for_payment` hook that triggers when an order is paid. Use this new hook instead of `woocommerce_order_status_changed` or *woocommerce_order_status_{old_status}}_to_{new_status}` to trigger code for payment completion. #25158
-* Dev - Ability to exclude certain product types from product search calls. #25162
-* Dev - Raise exception when `WC_Product_Variation` is instantiated with an ID that belongs to an object that is not a variation. #25178
-* Localization - Add subdivisions of Laos. #24765
-* Localization - Fixed translatable string in WooCommerce's libraries. #24892 #24894
-* Localization - Fixed translatable string comments for translators. #24928
-* Localization - Add postcode validation for Slovenia. #25174
+**WooCommerce**
+* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.0 #26057
+* Enhancement - Updated jetpack-autoloader to 1.6 and woocommerce-blocks to 2.5.16. #26099
+* Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
+* Enhancement - Changed show password icon color to a darker grey hue. #25625
+* Enhancement - Use new Setup Wizard for all users. #26016
+* Tweak - Show notice for WP min version to WP 5.2. #26094
+* Tweak - Improve the string for untested WooCommerce extensions in the system status page to avoid confusion. #25904
+* Tweak - Updated KZT (₸) symbol. #25609
+* Tweak - Trim whitespaces and strip slashes from MaxMind License Key. #25466
+* Tweak - Updated "Help" tabs documentation. #25826
+* Tweak - Update serbian currency symbol to рсд from дин. #25885
+* Fix - Password visibility toggle to hide password again from text. #25627
+* Fix - Undefined property error when attempting to modify the coupon post meta. #25755
+* Fix - Remove some of the individual rounding logic to make sure we round at certain places only. #25800
+* Fix - Order totals calculation if the order contains taxable and non-taxable products and percentage coupons. #25092
+* Fix - Wording for cancelled order email. #25316
+* Fix - Removed guided tour videos link on setup wizard (since current link only redirects to the docs). #25823
+* Fix - Add RTL style to the onboarding wizard. #25835
+* Fix - Trigger change and set val to qty on the frontend so that it properly updates event handlers. #25903
+* Fix - Corrected the way percent coupons apply remainders across the order. #25943
+* Fix - Clarified the error messaging for WooCommerce.com package update failures. #26034
+* Fix - Enforce per user usage limit check for a coupon on guest users based on email. #26066
+* Fix - Remove elements with style=display:none explicitly to address a regression causing broken email html. #26075
+* Dev - Added woocommerce_can_restock_refunded_items filter. #25728
+* Dev - Added woocommerce_order_get_tax_location filter. #25727
+* Dev - Updated stock handling to prevent race conditions when orders come in at the same time. #25708
+* Dev - Updated /myaccount/form-login.php to use consistent kebab-case class names for woocommerce-form-row. #25668
+* Dev - Add filter woocommerce_product_upsells_products_heading to allow heading modification without having to override the template file. #25628
+* Dev - Added woocommerce_order_get_tax_location filter. #25727
+* Dev - Added the get_woocommerce_currency_symbols function to allow develops to get an array of all the currency symbol registered with WooCommerce. #25733
+* Dev - Changed string typed label_class to array in checkout fields.
+* Dev - Added "woocommerce_emogrifier" action before the content of the emails is "emogrified". #25801
+* Dev - Add Ability to Filter Event Props. #25851
+* Dev - Updated the unit test install script to support paths to MySQL sockets that contain spaces. #25923
+* Dev - Made the default test source folders support the system tmp folder. #25923
+* Dev - Add cart & checkout block/shortcode info to tracker data. #25932
+* Dev - Make WC_Product_Data_Store_CPT::update_product_stock operations atomic. #26039
+* Dev - Adds usage data for the of cart & checkout blocks (currently in development in WooCommmerce Blocks plugin) to the WC Tracker snapshot. #26084
+* Dev - Implement some additional tracks for coupons, orders, and products. #26085
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
 == Upgrade Notice ==
 
-= 3.0 =
-3.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.
+= 4.0 =
+4.0 is a major update. Make a full site backup, update your theme and extensions, and [review update best practices](https://docs.woocommerce.com/document/how-to-update-your-site) before upgrading.

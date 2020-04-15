@@ -10,6 +10,8 @@
  * @package     WooCommerce/Classes/Payment
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -68,11 +70,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->description  = trim( $this->description );
 		}
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
-		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
@@ -84,6 +85,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
 				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 			}
+		}
+
+		if ( 'yes' === $this->enabled ) {
+			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
 		}
 	}
 
@@ -250,7 +255,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Check if this gateway is enabled and available in the user's country.
+	 * Check if this gateway is available in the user's country based on currency.
 	 *
 	 * @return bool
 	 */
@@ -447,9 +452,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version = Constants::get_constant( 'WC_VERSION' );
 
-		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), WC_VERSION, true );
+		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
 	}
 
 	/**
@@ -461,7 +467,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function order_received_text( $text, $order ) {
-		if ( $this->id === $order->get_payment_method() ) {
+		if ( $order && $this->id === $order->get_payment_method() ) {
 			return esc_html__( 'Thank you for your payment. Your transaction has been completed, and a receipt for your purchase has been emailed to you. Log into your PayPal account to view transaction details.', 'woocommerce' );
 		}
 

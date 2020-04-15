@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.9.0';
+	public $version = '4.1.0';
 
 	/**
 	 * The single instance of the class.
@@ -230,7 +230,7 @@ final class WooCommerce {
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.0' );
-		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.0' );
+		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
 	}
 
@@ -246,6 +246,7 @@ final class WooCommerce {
 			'order_itemmeta'         => 'woocommerce_order_itemmeta',
 			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
 			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+			'wc_reserved_stock'      => 'wc_reserved_stock',
 		);
 
 		foreach ( $tables as $name => $table ) {
@@ -446,9 +447,9 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
 		/**
-		 * Libraries
+		 * Libraries and packages.
 		 */
-		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
+		include_once WC_ABSPATH . 'packages/action-scheduler/action-scheduler.php';
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
@@ -881,5 +882,15 @@ final class WooCommerce {
 			'https://github.com/woocommerce/woocommerce/releases'
 		);
 		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
+	}
+
+	/**
+	 * Is the WooCommerce Admin actively included in the WooCommerce core?
+	 * Based on presence of a basic WC Admin function.
+	 *
+	 * @return boolean
+	 */
+	public function is_wc_admin_active() {
+		return function_exists( 'wc_admin_url' );
 	}
 }

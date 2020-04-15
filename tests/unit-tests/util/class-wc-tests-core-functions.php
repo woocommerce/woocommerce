@@ -6,6 +6,8 @@
  * @since 2.2
  */
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Core function unit tests.
  */
@@ -494,11 +496,11 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_maybe_define_constant() {
-		$this->assertFalse( defined( 'WC_TESTING_DEFINE_FUNCTION' ) );
+		$this->assertFalse( Constants::is_defined( 'WC_TESTING_DEFINE_FUNCTION' ) );
 
 		// Check if defined.
 		wc_maybe_define_constant( 'WC_TESTING_DEFINE_FUNCTION', true );
-		$this->assertTrue( defined( 'WC_TESTING_DEFINE_FUNCTION' ) );
+		$this->assertTrue( Constants::is_defined( 'WC_TESTING_DEFINE_FUNCTION' ) );
 
 		// Check value.
 		wc_maybe_define_constant( 'WC_TESTING_DEFINE_FUNCTION', false );

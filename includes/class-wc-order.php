@@ -374,7 +374,7 @@ class WC_Order extends WC_Abstract_Order {
 
 					// Work out if this was for a payment, and trigger a payment_status hook instead.
 					if (
-						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ) ), true )
+						in_array( $status_transition['from'], apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $this ), true )
 						&& in_array( $status_transition['to'], wc_get_is_paid_statuses(), true )
 					) {
 						/**
@@ -2058,5 +2058,16 @@ class WC_Order extends WC_Abstract_Order {
 		$this->add_order_item_totals_total_row( $total_rows, $tax_display );
 
 		return apply_filters( 'woocommerce_get_order_item_totals', $total_rows, $this, $tax_display );
+	}
+
+	/**
+	 * Check if order has been created via admin, checkout, or in another way.
+	 *
+	 * @since 4.0.0
+	 * @param string $modus Way of creating the order to test for.
+	 * @return bool
+	 */
+	public function is_created_via( $modus ) {
+		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
 	}
 }

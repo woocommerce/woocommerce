@@ -8,6 +8,8 @@
  * @package WooCommerce/Classes/Shipping
  */
 
+use Automattic\Jetpack\Constants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -163,7 +165,7 @@ class WC_Shipping {
 			$matched_zone_notice = sprintf( __( 'Customer matched zone "%s"', 'woocommerce' ), $shipping_zone->get_zone_name() );
 
 			// Debug output.
-			if ( $debug_mode && ! defined( 'WOOCOMMERCE_CHECKOUT' ) && ! defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
+			if ( $debug_mode && ! Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) && ! Constants::is_defined( 'WC_DOING_AJAX' ) && ! wc_has_notice( $matched_zone_notice ) ) {
 				wc_add_notice( $matched_zone_notice );
 			}
 		} else {
@@ -277,33 +279,19 @@ class WC_Shipping {
 	/**
 	 * See if package is shippable.
 	 *
-	 * Packages must have a valid destination to be shipped.
+	 * Packages are shippable until proven otherwise e.g. after getting a shipping country.
 	 *
 	 * @param  array $package Package of cart items.
 	 * @return bool
 	 */
 	public function is_package_shippable( $package ) {
+		// Packages are shippable until proven otherwise.
 		if ( empty( $package['destination']['country'] ) ) {
-			return false;
-		}
-		$country = $package['destination']['country'];
-
-		$countries = array_keys( WC()->countries->get_shipping_countries() );
-		if ( ! in_array( $country, $countries, true ) ) {
-			return false;
+			return true;
 		}
 
-		$states = WC()->countries->get_states( $country );
-		if ( is_array( $states ) && ! isset( $states[ $package['destination']['state'] ] ) ) {
-			return false;
-		}
-
-		$postcode = wc_format_postcode( $package['destination']['postcode'], $country );
-		if ( ! WC_Validation::is_postcode( $postcode, $country ) ) {
-			return false;
-		}
-
-		return true;
+		$allowed = array_keys( WC()->countries->get_shipping_countries() );
+		return in_array( $package['destination']['country'], $allowed, true );
 	}
 
 	/**

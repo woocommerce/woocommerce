@@ -50,7 +50,7 @@ jQuery( function( $ ) {
 			this.$checkout_form.on( 'change', '#ship-to-different-address input', this.ship_to_different_address );
 
 			// Trigger events
-			this.init_ship_to_different_address();
+			this.$checkout_form.find( '#ship-to-different-address input' ).change();
 			this.init_payment_methods();
 
 			// Update on page load
@@ -135,10 +135,7 @@ jQuery( function( $ ) {
 			}
 		},
 		init_checkout: function() {
-			// Fire updated_checkout event after existing ready event handlers.
-			$( function() {
-				$( document.body ).trigger( 'updated_checkout' );
-			} );
+			$( document.body ).trigger( 'update_checkout' );
 		},
 		maybe_input_changed: function( e ) {
 			if ( wc_checkout_form.dirtyInput ) {
@@ -183,31 +180,10 @@ jQuery( function( $ ) {
 				wc_checkout_form.trigger_update_checkout();
 			}
 		},
-		init_ship_to_different_address: function() {
-			var $checkbox = $( '#ship-to-different-address input' );
-
-			if ( ! $checkbox.prop( 'checked' ) ) {
-				var $billing = $( 'div.woocommerce-billing-fields' );
-
-				// Find shipping field values that diverge from billing.
-				var $differentFields = $( 'div.shipping_address' ).find( 'input, select' ).filter( function() {
-					$( this ).attr( 'id' ).replace( 'shipping', 'billing' );
-					var id = $( this ).attr( 'id' ).replace( 'shipping', 'billing' );
-					return $( this ).val() !== $billing.find( '#' + id ).val();
-				} );
-
-				if ( $differentFields.length > 0 ) {
-					$checkbox.prop( 'checked', true );
-				}
-			}
-
-			$( 'div.shipping_address' ).toggle( $checkbox.prop( 'checked' ) );
-		},
 		ship_to_different_address: function() {
+			$( 'div.shipping_address' ).hide();
 			if ( $( this ).is( ':checked' ) ) {
 				$( 'div.shipping_address' ).slideDown();
-			} else {
-				$( 'div.shipping_address' ).slideUp();
 			}
 		},
 		reset_update_checkout_timer: function() {
@@ -381,7 +357,7 @@ jQuery( function( $ ) {
 							}
 						}
 					});
-					
+
 					// Always update the fragments
 					if ( data && data.fragments ) {
 						$.each( data.fragments, function ( key, value ) {
@@ -538,7 +514,7 @@ jQuery( function( $ ) {
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
 						try {
-							if ( 'success' === result.result ) {
+							if ( 'success' === result.result && $form.triggerHandler( 'checkout_place_order_success' ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {

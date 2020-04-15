@@ -274,7 +274,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		if ( in_array( 'date_completed', $updated_props, true ) ) {
 			$value = $order->get_date_completed( 'edit' );
-			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+			// In 2.6.x date_completed was stored as _completed_date in local mysql format.
 			update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 		}
 
