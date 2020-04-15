@@ -299,6 +299,10 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 					} );
 					setPaymentStatus().error( response.message );
 					setValidationErrors( response?.validationErrors );
+				} else {
+					// otherwise there are no payment methods doing anything so
+					// just consider success
+					setPaymentStatus().success();
 				}
 			} );
 		}
