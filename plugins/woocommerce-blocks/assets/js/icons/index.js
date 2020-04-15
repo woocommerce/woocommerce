@@ -5,6 +5,7 @@ export { default as bill } from './library/bill';
 export { default as card } from './library/card';
 export { default as cart } from './library/cart';
 export { default as comment } from './library/comment';
+export { default as done } from './library/done';
 export { default as discussion } from './library/discussion';
 export { default as exclamation } from './library/exclamation';
 export { default as external } from './library/external';

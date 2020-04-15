@@ -27,12 +27,14 @@ const FormStep = ( {
 	legend,
 	description,
 	children,
+	disabled = false,
 	stepHeadingContent = () => {},
 } ) => {
 	return (
 		<fieldset
 			className={ classnames( className, 'wc-block-checkout-step' ) }
 			id={ id }
+			disabled={ disabled }
 		>
 			<legend className="screen-reader-text">{ legend || title }</legend>
 			<StepHeading
@@ -56,6 +58,7 @@ FormStep.propTypes = {
 	description: PropTypes.string,
 	children: PropTypes.node,
 	stepHeadingContent: PropTypes.func,
+	disabled: PropTypes.bool,
 	legend: PropTypes.string,
 };
 

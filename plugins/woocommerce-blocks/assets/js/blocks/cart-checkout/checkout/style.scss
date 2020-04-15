@@ -136,6 +136,15 @@
 		border-radius: 3px;
 		height: auto;
 		margin-left: auto;
+
+		.wc-block-components-button__text {
+			line-height: 24px;
+
+			> svg {
+				fill: $white;
+				vertical-align: top;
+			}
+		}
 	}
 }
 

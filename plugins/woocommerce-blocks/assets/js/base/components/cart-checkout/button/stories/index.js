@@ -4,7 +4,7 @@
 import Button from '../';
 
 export default {
-	title: 'WooCommerce Blocks/@base-components/Button',
+	title: 'WooCommerce Blocks/@base-components/cart-checkout/Button',
 	component: Button,
 };
 
