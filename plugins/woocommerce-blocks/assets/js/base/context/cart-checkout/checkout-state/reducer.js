@@ -101,7 +101,7 @@ export const reducer = (
 					? {
 							...state,
 							status: COMPLETE,
-							redirectUrl: data.redirectUrl || state.redirectUrl,
+							redirectUrl: data?.redirectUrl || state.redirectUrl,
 					  }
 					: state;
 			break;

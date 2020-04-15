@@ -250,8 +250,7 @@ export const CheckoutStateProvider = ( {
 				).then( ( response ) => {
 					if ( isSuccessResponse( response ) ) {
 						dispatch( actions.setComplete( response ) );
-					}
-					if (
+					} else if (
 						isErrorResponse( response ) ||
 						isFailResponse( response )
 					) {
@@ -269,6 +268,10 @@ export const CheckoutStateProvider = ( {
 							// and then setting checkout to IDLE state.
 							dispatch( actions.setHasError( true ) );
 						}
+					} else {
+						// nothing hooked in had any response type so let's just
+						// consider successful
+						dispatch( actions.setComplete() );
 					}
 				} );
 			}
