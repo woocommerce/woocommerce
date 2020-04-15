@@ -17,6 +17,10 @@ $line-offset-from-circle-size: 8px;
 	}
 }
 
+.wc-block-checkout-form fieldset.wc-block-checkout-step:disabled {
+	opacity: 0.6;
+}
+
 .wc-block-checkout-step__heading {
 	display: flex;
 	justify-content: space-between;

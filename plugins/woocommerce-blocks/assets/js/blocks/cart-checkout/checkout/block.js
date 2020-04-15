@@ -72,6 +72,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		hasOrder,
 		hasError: checkoutHasError,
 		isIdle: checkoutIsIdle,
+		isProcessing: checkoutIsProcessing,
 	} = useCheckoutContext();
 	const { showAllValidationErrors } = useValidationContext();
 	const {
@@ -153,6 +154,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 					<CheckoutForm>
 						<FormStep
 							id="contact-fields"
+							disabled={ checkoutIsProcessing }
 							className="wc-block-checkout__contact-fields"
 							title={ __(
 								'Contact information',
@@ -195,6 +197,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						{ needsShipping && (
 							<FormStep
 								id="shipping-fields"
+								disabled={ checkoutIsProcessing }
 								className="wc-block-checkout__shipping-fields"
 								title={ __(
 									'Shipping address',
@@ -255,6 +258,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						{ showBillingFields && (
 							<FormStep
 								id="billing-fields"
+								disabled={ checkoutIsProcessing }
 								className="wc-block-checkout__billing-fields"
 								title={ __(
 									'Billing address',
@@ -278,6 +282,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						{ needsShipping && (
 							<FormStep
 								id="shipping-option"
+								disabled={ checkoutIsProcessing }
 								className="wc-block-checkout__shipping-option"
 								title={ __(
 									'Shipping options',
@@ -342,6 +347,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						{ cartNeedsPayment && (
 							<FormStep
 								id="payment-method"
+								disabled={ checkoutIsProcessing }
 								className="wc-block-checkout__payment-method"
 								title={ __(
 									'Payment method',
