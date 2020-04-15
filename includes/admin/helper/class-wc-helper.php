@@ -1467,8 +1467,6 @@ class WC_Helper {
 		$screen    = get_current_screen();
 		$screen_id = $screen ? $screen->id : '';
 
-		self::_prompt_helper_connect( $screen_id );
-
 		if ( 'update-core' !== $screen_id ) {
 			return;
 		}
@@ -1483,50 +1481,6 @@ class WC_Helper {
 		if ( ! empty( $notice ) ) {
 			echo '<div class="updated woocommerce-message"><p>' . $notice . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
-	}
-
-	/**
-	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
-	 *
-	 * @param string $screen_id Current screen ID.
-	 */
-	private static function _prompt_helper_connect( $screen_id ) {
-		if ( apply_filters( 'woocommerce_helper_suppress_connect_notice', false ) ) {
-			return;
-		}
-
-		$screens   = wc_get_screen_ids();
-		$screens[] = 'plugins';
-
-		if ( ! in_array( $screen_id, $screens, true ) ) {
-			return;
-		}
-
-		// Don't show the notice on the Helper screens.
-		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
-
-		if ( $screen_addons === $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' === $_REQUEST['section'] ) {
-			return;
-		}
-
-		// We believe we have an active connection.
-		$auth = WC_Helper_Options::get( 'auth' );
-		if ( ! empty( $auth['access_token'] ) ) {
-			return;
-		}
-
-		$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
-		if ( empty( $active_plugins ) ) {
-			return;
-		}
-
-		$woo_plugins = self::get_local_woo_plugins();
-		if ( empty( $woo_plugins ) ) {
-			return;
-		}
-
-		$active_woo_plugins = array_intersect_key( $woo_plugins, array_flip( $active_plugins ) );
-
 	}
 
 	/**
