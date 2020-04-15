@@ -51,7 +51,8 @@ export const defaultCartData = {
  * @return {StoreCart} Object containing cart data.
  */
 export const useStoreCart = ( options = { shouldSelect: true } ) => {
-	const { isEditor, previewCart } = useEditorContext();
+	const { isEditor, previewData } = useEditorContext();
+	const previewCart = previewData?.previewCart || {};
 	const { shouldSelect } = options;
 
 	const results = useSelect(

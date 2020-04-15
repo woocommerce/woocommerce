@@ -24,6 +24,7 @@ import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
 import {
 	previewCart,
+	previewSavedPaymentMethods,
 	checkoutBlockPreview,
 } from '@woocommerce/resource-previews';
 
@@ -277,7 +278,9 @@ const CheckoutEditor = ( { attributes, setAttributes } ) => {
 	}
 
 	return (
-		<EditorProvider previewCart={ previewCart }>
+		<EditorProvider
+			previewData={ { previewCart, previewSavedPaymentMethods } }
+		>
 			<div className={ className }>
 				<BlockSettings
 					attributes={ attributes }

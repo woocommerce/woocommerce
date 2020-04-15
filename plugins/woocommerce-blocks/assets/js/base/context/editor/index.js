@@ -12,7 +12,7 @@ import { useSelect } from '@wordpress/data';
 const EditorContext = createContext( {
 	isEditor: false,
 	currentPostId: 0,
-	previewCart: {},
+	previewData: {},
 } );
 
 /**
@@ -25,15 +25,15 @@ export const useEditorContext = () => {
 /**
  * Editor provider
  *
- * @param {Object}          props                 Incoming props for the provider.
- * @param {*}               props.children        The children being wrapped.
- * @param {CartData|Object} [props.previewCart]   The preview data for editor.
- * @param {number}          [props.currentPostId] The post being edited.
+ * @param {Object} props                 Incoming props for the provider.
+ * @param {*}      props.children        The children being wrapped.
+ * @param {Object} [props.previewData]   The preview data for editor.
+ * @param {number} [props.currentPostId] The post being edited.
  */
 export const EditorProvider = ( {
 	children,
 	currentPostId = 0,
-	previewCart = {},
+	previewData = {},
 } ) => {
 	/**
 	 * @type {number} editingPostId
@@ -55,7 +55,7 @@ export const EditorProvider = ( {
 	const editorData = {
 		isEditor: true,
 		currentPostId: editingPostId,
-		previewCart,
+		previewData,
 	};
 
 	return (

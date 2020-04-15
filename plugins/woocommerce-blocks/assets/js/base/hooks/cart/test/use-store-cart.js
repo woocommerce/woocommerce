@@ -160,7 +160,7 @@ describe( 'useStoreCart', () => {
 		beforeEach( () => {
 			mockBaseContext.useEditorContext.mockReturnValue( {
 				isEditor: true,
-				previewCart,
+				previewData: { previewCart },
 			} );
 		} );
 
