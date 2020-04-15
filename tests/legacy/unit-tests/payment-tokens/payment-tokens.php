@@ -1,11 +1,20 @@
 <?php
+/**
+ * Payment_Tokens class file.
+ *
+ * @package WooCommerce\Tests\Payment_Tokens
+ */
 
 /**
  * Class Payment_Tokens
- * @package WooCommerce\Tests\Payment_Tokens
  */
 class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 
+	/**
+	 * Setup the test case.
+	 *
+	 * @see WC_Unit_Test_Case::setUp()
+	 */
 	public function setUp() {
 		parent::setUp();
 		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
@@ -16,7 +25,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting tokens associated with an order.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_get_order_tokens() {
+	public function test_wc_payment_tokens_get_order_tokens() {
 		$order = WC_Helper_Order::create_order();
 		$this->assertEmpty( WC_Payment_Tokens::get_order_tokens( $order->get_id() ) );
 
@@ -31,7 +40,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting tokens associated with a user and no gateway ID.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_get_customer_tokens_no_gateway() {
+	public function test_wc_payment_tokens_get_customer_tokens_no_gateway() {
 		$this->assertEmpty( WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -49,7 +58,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting tokens associated with a user and for a specific gateway.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_get_customer_tokens_with_gateway() {
+	public function test_wc_payment_tokens_get_customer_tokens_with_gateway() {
 		$this->assertEmpty( WC_Payment_Tokens::get_customer_tokens( $this->user_id ) );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -74,7 +83,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting a customers default token.
 	 * @since 2.6.0
 	 */
-	function test_wc_get_customer_default_token() {
+	public function test_wc_get_customer_default_token() {
 		$token = WC_Helper_Payment_Token::create_cc_token();
 		$token->set_user_id( $this->user_id );
 		$token->set_gateway_id( 'bacs' );
@@ -99,7 +108,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * @group failing
 	 * @since 2.6.0
 	 */
-	function test_wc_get_customer_default_token_returns_first_created_when_no_default_token_set() {
+	public function test_wc_get_customer_default_token_returns_first_created_when_no_default_token_set() {
 		$token = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token->set_gateway_id( 'bacs' );
 		$token->save();
@@ -118,7 +127,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting a token by ID.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_get() {
+	public function test_wc_payment_tokens_get() {
 		$token     = WC_Helper_Payment_Token::create_cc_token();
 		$token_id  = $token->get_id();
 		$get_token = WC_Payment_Tokens::get( $token_id );
@@ -129,7 +138,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test deleting a token by ID.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_delete() {
+	public function test_wc_payment_tokens_delete() {
 		$token    = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
 
@@ -143,7 +152,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test getting a token's type by ID.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_get_type_by_id() {
+	public function test_wc_payment_tokens_get_type_by_id() {
 		$token    = WC_Helper_Payment_Token::create_cc_token();
 		$token_id = $token->get_id();
 		$this->assertEquals( 'CC', WC_Payment_Tokens::get_token_type_by_id( $token_id ) );
@@ -153,7 +162,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 	 * Test setting a users default token.
 	 * @since 2.6.0
 	 */
-	function test_wc_payment_tokens_set_users_default() {
+	public function test_wc_payment_tokens_set_users_default() {
 		$token    = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
 		$token_id = $token->get_id();
 		$token->save();
@@ -162,7 +171,7 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		$token_id_2 = $token2->get_id();
 		$token2->save();
 
-		$this->assertTrue( $token->is_default() ); // first created is default
+		$this->assertTrue( $token->is_default() ); // first created is default.
 		$this->assertFalse( $token2->is_default() );
 
 		WC_Payment_Tokens::set_users_default( $this->user_id, $token_id_2 );

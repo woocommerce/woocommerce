@@ -371,6 +371,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			// woocommerce_calc_taxes, woocommerce_prices_include_tax, $shipping_tax_included values.
 			array( 'no', 'no', false ),
 			array( 'yes', 'no', false ),
+			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 			// array( 'no',  'yes',  false ), // this is not a valid option due to definition of wc_prices_include_tax().
 			array( 'yes', 'yes', true ),
 		);
@@ -399,7 +400,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			// Many items in order -> forced to use one line item -> shipping tax included.
 			$this->check_large_order( true, $testmode );
 
-			// Test removing tags from line item name
+			// Test removing tags from line item name.
 			$this->check_product_title_containing_html( $testmode );
 
 			// Test amount < 0.
