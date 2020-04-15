@@ -11,16 +11,25 @@ program
 	.option( '--dev', 'Development mode' )
 	.parse( process.argv );
 
+const appPath = getAppPath();
+
+const nodeConfigDirs = [
+	path.resolve( __dirname, '../config' ),
+];
+
+if ( appPath ) {
+	nodeConfigDirs.unshift(
+		path.resolve( appPath, 'tests/e2e-tests/config' )
+	);
+}
+
 const testEnvVars = {
 	NODE_ENV: 'test:e2e',
 	JEST_PUPPETEER_CONFIG: path.resolve(
 		__dirname,
 		'../config/jest-puppeteer.config.js'
 	),
-	NODE_CONFIG_DIR: path.resolve(
-		__dirname,
-		'../config'
-	),
+	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
 };
 
 let jestCommand = 'jest';
@@ -42,7 +51,6 @@ if ( program.dev ) {
 
 const envVars = Object.assign( {}, process.env, testEnvVars );
 
-const appPath = getAppPath();
 let configPath = path.resolve( __dirname, '../config/jest.config.js' );
 
 // Look for a Jest config in the dependent app's path.
