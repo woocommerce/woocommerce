@@ -59,7 +59,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 
 		$controller  = new CartController();
 		$cart        = $controller->get_cart_instance();
-		$coupon_code = wc_format_coupon_code( $request['code'] );
+		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
 
 		try {
 			$controller->apply_coupon( $coupon_code );
