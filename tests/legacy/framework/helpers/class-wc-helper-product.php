@@ -28,12 +28,13 @@ class WC_Helper_Product {
 	 * Create simple product.
 	 *
 	 * @since 2.3
-	 * @param bool $save Save or return object.
+	 * @param bool  $save Save or return object.
+	 * @param array $props Properties to be set in the new product, as an associative array.
 	 * @return WC_Product_Simple
 	 */
-	public static function create_simple_product( $save = true ) {
-		$product = new WC_Product_Simple();
-		$product->set_props(
+	public static function create_simple_product( $save = true, $props = array() ) {
+		$product       = new WC_Product_Simple();
+		$default_props =
 			array(
 				'name'          => 'Dummy Product',
 				'regular_price' => 10,
@@ -45,8 +46,9 @@ class WC_Helper_Product {
 				'virtual'       => false,
 				'stock_status'  => 'instock',
 				'weight'        => '1.1',
-			)
-		);
+			);
+
+		$product->set_props( array_merge( $default_props, $props ) );
 
 		if ( $save ) {
 			$product->save();
