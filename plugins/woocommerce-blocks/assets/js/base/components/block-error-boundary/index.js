@@ -11,7 +11,7 @@ import BlockError from './block-error';
 import './style.scss';
 
 class BlockErrorBoundary extends Component {
-	state = { hasError: false };
+	state = { errorMessage: '', hasError: false };
 
 	static getDerivedStateFromError( error ) {
 		if (

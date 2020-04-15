@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	getPaymentMethods,
 	getExpressPaymentMethods,
@@ -11,6 +12,7 @@ import {
 	useShippingDataContext,
 } from '@woocommerce/base-context';
 import { useStoreCart } from '@woocommerce/base-hooks';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 
 /**
  * This hook handles initializing registered payment methods and exposing all
@@ -75,7 +77,7 @@ const usePaymentMethodRegistration = (
 		if ( isInitialized ) {
 			return;
 		}
-		const updatePaymentMethods = ( current, canPay = true ) => {
+		const updatePaymentMethod = ( current, canPay = true ) => {
 			if ( canPay ) {
 				setInitializedPaymentMethod( current );
 			}
@@ -91,21 +93,32 @@ const usePaymentMethodRegistration = (
 			const current = registeredPaymentMethods[ paymentMethodName ];
 			// if in editor context then we bypass can pay check.
 			if ( isEditor ) {
-				updatePaymentMethods( current );
+				updatePaymentMethod( current );
 			} else {
 				Promise.resolve(
 					current.canMakePayment( canPayArgument.current )
 				)
 					.then( ( canPay ) => {
-						updatePaymentMethods( current, canPay );
+						if ( canPay.error ) {
+							throw new Error( canPay.error.message );
+						} else {
+							updatePaymentMethod( current, canPay );
+						}
 					} )
 					.catch( ( error ) => {
-						// @todo, would be a good place to use the checkout error
-						// hooks here? Or maybe throw and catch by error boundary?
-						throw new Error(
-							'Problem with payment method initialization' +
-								( error.message || '' )
-						);
+						updatePaymentMethod( current, false );
+						if ( CURRENT_USER_IS_ADMIN ) {
+							throw new Error(
+								sprintf(
+									__(
+										// translators: %s is the error method returned by the payment method.
+										'Problem with payment method initialization: %s',
+										'woo-gutenberg-products-block'
+									),
+									error.message
+								)
+							);
+						}
 					} );
 			}
 		}
