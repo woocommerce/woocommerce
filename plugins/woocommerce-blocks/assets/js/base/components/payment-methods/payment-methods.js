@@ -24,6 +24,7 @@ import {
 import Tabs from '../tabs';
 import NoPaymentMethods from './no-payment-methods';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
+import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 
 /**
  * Returns a payment method for the given context.
@@ -75,12 +76,14 @@ const PaymentMethods = () => {
 				currentPaymentMethods.current,
 				isEditor
 			);
-			return paymentMethod
-				? cloneElement( paymentMethod, {
+			return paymentMethod ? (
+				<PaymentMethodErrorBoundary isEditor={ isEditor }>
+					{ cloneElement( paymentMethod, {
 						activePaymentMethod,
 						...currentPaymentMethodInterface.current,
-				  } )
-				: null;
+					} ) }
+				</PaymentMethodErrorBoundary>
+			) : null;
 		},
 		[ isEditor, activePaymentMethod ]
 	);
