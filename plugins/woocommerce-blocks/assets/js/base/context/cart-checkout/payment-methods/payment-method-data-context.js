@@ -45,6 +45,7 @@ import {
 } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
 import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
+import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').PaymentMethodDataContext} PaymentMethodDataContext
@@ -85,13 +86,8 @@ export const usePaymentMethodDataContext = () => {
  * @param {Object} props                     Incoming props for provider
  * @param {Object} props.children            The wrapped components in this
  *                                           provider.
- * @param {string} props.activePaymentMethod The initial active payment method
- *                                           to set for the context.
  */
-export const PaymentMethodDataProvider = ( {
-	children,
-	activePaymentMethod: initialActivePaymentMethod,
-} ) => {
+export const PaymentMethodDataProvider = ( { children } ) => {
 	const { setBillingData } = useBillingDataContext();
 	const {
 		isProcessing: checkoutIsProcessing,
@@ -104,12 +100,15 @@ export const PaymentMethodDataProvider = ( {
 		isErrorResponse,
 		isFailResponse,
 	} = useEmitResponse();
-	const [ activePaymentMethod, setActive ] = useState(
-		initialActivePaymentMethod
-	);
+	const [ activePaymentMethod, setActive ] = useState( '' );
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
 	const currentObservers = useRef( observers );
-	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
+
+	const { isEditor, previewData } = useEditorContext();
+	const customerPaymentMethods =
+		isEditor && previewData?.previewSavedPaymentMethods
+			? previewData?.previewSavedPaymentMethods
+			: getSetting( 'customerPaymentMethods', {} );
 	const [ paymentData, dispatch ] = useReducer(
 		reducer,
 		DEFAULT_PAYMENT_DATA

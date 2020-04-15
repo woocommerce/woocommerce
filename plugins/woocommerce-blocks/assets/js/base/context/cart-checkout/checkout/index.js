@@ -19,9 +19,6 @@ import CheckoutProcessor from './processor';
  *
  * @param {Object}  props                       Incoming props for the provider.
  * @param {Object}  props.children              The children being wrapped.
- * @param {string}  [props.activePaymentMethod] Can be used to initialize what the
- *                                              initial active payment method will
- *                                              be.
  * @param {string}  [props.redirectUrl]         Initialize what the checkout will
  *                                              redirect to after successful
  *                                              submit.
@@ -30,7 +27,6 @@ import CheckoutProcessor from './processor';
  */
 export const CheckoutProvider = ( {
 	children,
-	activePaymentMethod: initialActivePaymentMethod,
 	redirectUrl,
 	submitLabel = __( 'Place Order', 'woo-gutenberg-products-block' ),
 } ) => {
@@ -42,9 +38,7 @@ export const CheckoutProvider = ( {
 		>
 			<BillingDataProvider>
 				<ShippingDataProvider>
-					<PaymentMethodDataProvider
-						activePaymentMethod={ initialActivePaymentMethod }
-					>
+					<PaymentMethodDataProvider>
 						{ children }
 						<CheckoutProcessor />
 					</PaymentMethodDataProvider>

@@ -212,7 +212,9 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 									/>
 								) }
 								<Disabled>
-									<EditorProvider previewCart={ previewCart }>
+									<EditorProvider
+										previewData={ { previewCart } }
+									>
 										<CartProvider>
 											<Block attributes={ attributes } />
 										</CartProvider>
