@@ -12,7 +12,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import { useStoreCart } from '../cart/use-store-cart';
-import { useThrowError } from '../use-throw-error';
+import { useStoreNotices } from '../use-store-notices';
 import { pluckAddress } from '../../utils';
 
 const shouldUpdateStore = ( oldAddress, newAddress ) =>
@@ -23,7 +23,7 @@ export const useShippingAddress = () => {
 	const [ shippingAddress, setShippingAddress ] = useState( initialAddress );
 	const [ debouncedShippingAddress ] = useDebounce( shippingAddress, 400 );
 	const { updateShippingAddress } = useDispatch( storeKey );
-	const throwError = useThrowError();
+	const { addErrorNotice } = useStoreNotices();
 
 	// Note, we're intentionally not using initialAddress as a dependency here
 	// so that the stale (previous) value is being used for comparison.
@@ -34,8 +34,9 @@ export const useShippingAddress = () => {
 		) {
 			updateShippingAddress( debouncedShippingAddress ).catch(
 				( error ) => {
-					// error is non-recoverable so throw
-					throwError( error );
+					addErrorNotice( error.message, {
+						id: 'shipping-form',
+					} );
 				}
 			);
 		}
