@@ -26,7 +26,7 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
-# Additional tests against stable PHP (min version is 5.6)
+# Additional tests against stable PHP (min version is 7.0)
 # and code coverage report.
 matrix:
   fast_finish: true
