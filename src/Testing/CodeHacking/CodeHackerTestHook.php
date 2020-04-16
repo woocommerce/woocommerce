@@ -1,4 +1,11 @@
 <?php
+/**
+ * CodeHackerTestHook class file.
+ *
+ * @package WooCommerce/Testing
+ */
+
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing, PHPCompatibility.FunctionDeclarations
 
 namespace Automattic\WooCommerce\Testing\CodeHacking;
 
@@ -91,14 +98,14 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 	 *
 	 * @param object $reflection_object The class or method reflection object whose doc comment will be parsed.
 	 * @return bool True if at least one valid @hack annotation was found.
-	 * @throws Exception
+	 * @throws Exception Class specified in @hack directive doesn't exist.
 	 */
 	private function add_hacks_from_annotations( $reflection_object ) {
 		$annotations = Test::parseAnnotations( $reflection_object->getDocComment() );
 		$hacks_added = false;
 
 		foreach ( $annotations as $id => $annotation_instances ) {
-			if ( $id !== 'hack' ) {
+			if ( 'hack' !== $id ) {
 				continue;
 			}
 
@@ -107,7 +114,7 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 				$params = $matches[0];
 
 				$hack_class = array_shift( $params );
-				if(false === strpos( $hack_class, '\\' )) {
+				if ( false === strpos( $hack_class, '\\' ) ) {
 					$hack_class = __NAMESPACE__ . '\\Hacks\\' . $hack_class;
 				}
 
@@ -132,7 +139,7 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 	 *
 	 * @param string $class_name Test class name.
 	 * @param string $method_name Test method name.
-	 * @throws ReflectionException
+	 * @throws ReflectionException Error when instatiating a ReflectionClass.
 	 */
 	private function execute_before_methods( $class_name, $method_name ) {
 		$methods = array( 'before_all', "before_{$method_name}" );
@@ -154,3 +161,5 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 		}
 	}
 }
+
+// phpcs:enable Squiz.Commenting.FunctionComment.Missing, PHPCompatibility.FunctionDeclarations

@@ -1,6 +1,18 @@
 <?php
+/**
+ * CodeHacker class file.
+ *
+ * @package WooCommerce/Testing
+ */
+
+//phpcs:disable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+//phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors.Discouraged
 
 namespace Automattic\WooCommerce\Testing\CodeHacking;
+
+use \ReflectionObject;
+use \ReflectionFunction;
+use \ReflectionException;
 
 /**
  * CodeHacker - allows to hack (alter on the fly) the content of PHP code files.
@@ -24,19 +36,19 @@ class CodeHacker {
 
 	const PROTOCOL = 'file';
 
-	/** @var resource|null */
 	public $context;
 
-	/** @var resource|null */
 	private $handle;
 
-	/** @var array|null */
-	private static $pathWhitelist = array();
+	private static $path_white_list = array();
 
 	private static $hacks = array();
 
 	private static $enabled = false;
 
+	/**
+	 * Enable the code hacker.
+	 */
 	public static function enable() {
 		if ( ! self::$enabled ) {
 			stream_wrapper_unregister( self::PROTOCOL );
@@ -45,6 +57,9 @@ class CodeHacker {
 		}
 	}
 
+	/**
+	 * Disable the code hacker.
+	 */
 	public static function restore() {
 		if ( self::$enabled ) {
 			stream_wrapper_restore( self::PROTOCOL );
@@ -52,26 +67,65 @@ class CodeHacker {
 		}
 	}
 
+	/**
+	 * Unregister all the registered hacks.
+	 */
 	public static function clear_hacks() {
 		self::$hacks = array();
 	}
 
+	/**
+	 * Check if the code hacker is enabled.
+	 *
+	 * @return bool True if the code hacker is enabled.
+	 */
 	public static function is_enabled() {
 		return self::$enabled;
 	}
 
+	/**
+	 * Register a new hack.
+	 *
+	 * @param mixed $hack A function with signature "hack($code, $path)" or an object containing a method with that signature.
+	 * @throws \Exception Invalid input.
+	 */
 	public static function add_hack( $hack ) {
 		if ( ! is_callable( $hack ) && ! is_object( $hack ) ) {
-			throw new Exception( "Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
+			throw new \Exception( "Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
 		}
 
-		// TODO: Check that callbacks have at least two parameters (if they have more, they must be optional); and that objects have a "process" method with the same condition.
+		if ( ! self::is_valid_hack_callback( $hack ) && ! self::is_valid_hack_object( $hack ) ) {
+			throw new \Exception( "CodeHacker::addhack: hacks must be either a function with a 'hack(\$code,\$path)' signature, or an object containing a public method 'hack' with that signature. " );
+		}
 
 		self::$hacks[] = $hack;
 	}
 
-	public static function setWhitelist( array $pathWhitelist ) {
-		self::$pathWhitelist = $pathWhitelist;
+	private static function is_valid_hack_callback( $callback ) {
+		return is_callable( $callback ) && 2 === ( new ReflectionFunction( $callback ) )->getNumberOfRequiredParameters();
+	}
+
+	private static function is_valid_hack_object( $callback ) {
+		if ( ! is_object( $callback ) ) {
+			return false;
+		}
+
+		$ro = new ReflectionObject( ( $callback ) );
+		try {
+			$rm = $ro->getMethod( 'hack' );
+			return $rm->isPublic() && ! $rm->isStatic() && 2 === $rm->getNumberOfRequiredParameters();
+		} catch ( ReflectionException $exception ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Set the white list of files to hack. If note set, all the PHP files will be hacked.
+	 *
+	 * @param array $path_white_list Paths of the files to hack, can be relative paths.
+	 */
+	public static function set_white_list( array $path_white_list ) {
+		self::$path_white_list = $path_white_list;
 	}
 
 
@@ -89,7 +143,7 @@ class CodeHacker {
 
 
 	public function dir_readdir() {
-		 return readdir( $this->handle );
+		return readdir( $this->handle );
 	}
 
 
@@ -104,8 +158,8 @@ class CodeHacker {
 	}
 
 
-	public function rename( $pathFrom, $pathTo ) {
-		return $this->native( 'rename', $pathFrom, $pathTo, $this->context );
+	public function rename( $path_from, $path_to ) {
+		return $this->native( 'rename', $path_from, $path_to, $this->context );
 	}
 
 
@@ -114,13 +168,11 @@ class CodeHacker {
 	}
 
 
-	public function stream_cast( $castAs ) {
+	public function stream_cast( $cast_as ) {
 		return $this->handle;
 	}
 
-
 	public function stream_close() {
-		// echo "***** CLOSE HANDLE: " . $this->handle . " \n";
 		fclose( $this->handle );
 	}
 
@@ -159,11 +211,11 @@ class CodeHacker {
 	}
 
 
-	public function stream_open( $path, $mode, $options, &$openedPath ) {
-		$usePath = (bool) ( $options & STREAM_USE_PATH );
-		if ( $mode === 'rb' && self::pathInWhitelist( $path ) && pathinfo( $path, PATHINFO_EXTENSION ) === 'php' ) {
-			$content = $this->native( 'file_get_contents', $path, $usePath, $this->context );
-			if ( $content === false ) {
+	public function stream_open( $path, $mode, $options, &$opened_path ) {
+		$use_path = (bool) ( $options & STREAM_USE_PATH );
+		if ( 'rb' === $mode && self::path_in_white_list( $path ) && 'php' === pathinfo( $path, PATHINFO_EXTENSION ) ) {
+			$content = $this->native( 'file_get_contents', $path, $use_path, $this->context );
+			if ( false === $content ) {
 				return false;
 			}
 			$modified = self::hack( $content, $path );
@@ -175,8 +227,8 @@ class CodeHacker {
 			}
 		}
 		$this->handle = $this->context
-			? $this->native( 'fopen', $path, $mode, $usePath, $this->context )
-			: $this->native( 'fopen', $path, $mode, $usePath );
+			? $this->native( 'fopen', $path, $mode, $use_path, $this->context )
+			: $this->native( 'fopen', $path, $mode, $use_path );
 		return (bool) $this->handle;
 	}
 
@@ -196,17 +248,17 @@ class CodeHacker {
 
 
 	public function stream_stat() {
-		 return fstat( $this->handle );
+		return fstat( $this->handle );
 	}
 
 
 	public function stream_tell() {
-		 return ftell( $this->handle );
+		return ftell( $this->handle );
 	}
 
 
-	public function stream_truncate( $newSize ) {
-		return ftruncate( $this->handle, $newSize );
+	public function stream_truncate( $new_size ) {
+		return ftruncate( $this->handle, $new_size );
 	}
 
 
@@ -250,15 +302,19 @@ class CodeHacker {
 	}
 
 
-	private static function pathInWhitelist( $path ) {
-		if ( empty( self::$pathWhitelist ) ) {
+	private static function path_in_white_list( $path ) {
+		if ( empty( self::$path_white_list ) ) {
 			return true;
 		}
-		foreach ( self::$pathWhitelist as $whitelistItem ) {
-			if ( substr( $path, -strlen( $whitelistItem ) ) === $whitelistItem ) {
+		foreach ( self::$path_white_list as $white_list_item ) {
+			if ( substr( $path, -strlen( $white_list_item ) ) === $white_list_item ) {
 				return true;
 			}
 		}
 		return false;
 	}
 }
+
+//phpcs:enable Squiz.Commenting.FunctionComment.Missing, Squiz.Commenting.VariableComment.Missing
+//phpcs:enable WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors.Discouraged
+

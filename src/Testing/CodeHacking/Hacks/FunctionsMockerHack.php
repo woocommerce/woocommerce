@@ -1,4 +1,11 @@
 <?php
+/**
+ * FunctionsMockerHack class file.
+ *
+ * @package WooCommerce/Testing
+ */
+
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
 
@@ -17,6 +24,11 @@ use ReflectionClass;
  */
 final class FunctionsMockerHack extends CodeHack {
 
+	/**
+	 * Tokens that precede a non-standalone-function identifier.
+	 *
+	 * @var array
+	 */
 	private static $non_global_function_tokens = array(
 		T_PAAMAYIM_NEKUDOTAYIM,
 		T_DOUBLE_COLON,
@@ -28,9 +40,9 @@ final class FunctionsMockerHack extends CodeHack {
 	 * FunctionsMockerHack constructor.
 	 *
 	 * @param string $mock_class Name of the class containing function mocks as public static methods.
-	 * @throws ReflectionException
+	 * @throws ReflectionException Error when instantiating ReflectionClass.
 	 */
-	public function __construct( string $mock_class ) {
+	public function __construct( $mock_class ) {
 		$this->mock_class = $mock_class;
 
 		$rc = new ReflectionClass( $mock_class );
@@ -53,14 +65,16 @@ final class FunctionsMockerHack extends CodeHack {
 			$token_type = $this->token_type_of( $token );
 			if ( T_WHITESPACE === $token_type ) {
 				$code .= $this->token_to_string( $token );
-			} elseif ( T_STRING === $token_type && ! $previous_token_is_non_global_function_qualifier && in_array( $token[1], $this->mocked_methods ) ) {
+			} elseif ( T_STRING === $token_type && ! $previous_token_is_non_global_function_qualifier && in_array( $token[1], $this->mocked_methods, true ) ) {
 				$code .= "{$this->mock_class}::{$token[1]}";
 			} else {
 				$code .= $this->token_to_string( $token );
-				$previous_token_is_non_global_function_qualifier = in_array( $token_type, self::$non_global_function_tokens );
+				$previous_token_is_non_global_function_qualifier = in_array( $token_type, self::$non_global_function_tokens, true );
 			}
 		}
 
 		return $code;
 	}
 }
+
+// phpcs:enable Squiz.Commenting.FunctionComment.Missing

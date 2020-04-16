@@ -1,4 +1,11 @@
 <?php
+/**
+ * StaticMockerHack class file.
+ *
+ * @package WooCommerce/Testing
+ */
+
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
 
@@ -26,9 +33,9 @@ final class StaticMockerHack extends CodeHack {
 	 *
 	 * @param string $source_class Name of the original class (the one having the members to be mocked).
 	 * @param string $mock_class Name of the mock class (the one having the replacement mock members).
-	 * @throws ReflectionException
+	 * @throws ReflectionException Error when instantiating ReflectionClass.
 	 */
-	public function __construct( string $source_class, string $mock_class ) {
+	public function __construct( $source_class, $mock_class ) {
 		$this->source_class = $source_class;
 		$this->target_class = $mock_class;
 
@@ -61,12 +68,13 @@ final class StaticMockerHack extends CodeHack {
 			$code          = '';
 			$current_token = null;
 
+			// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 			while ( $current_token = current( $tokens ) ) {
 				if ( $this->is_token_of_type( $current_token, T_STRING ) && $this->source_class === $current_token[1] ) {
 					$next_token = next( $tokens );
 					if ( $this->is_token_of_type( $next_token, T_DOUBLE_COLON ) ) {
 						$called_member = next( $tokens )[1];
-						if ( in_array( $called_member, $this->members_implemented_in_mock ) ) {
+						if ( in_array( $called_member, $this->members_implemented_in_mock, true ) ) {
 							// Reference to source class member that exists in mock class, replace.
 							$code .= "{$this->target_class}::{$called_member}";
 						} else {
@@ -88,3 +96,5 @@ final class StaticMockerHack extends CodeHack {
 		return $code;
 	}
 }
+
+// phpcs:enable Squiz.Commenting.FunctionComment.Missing

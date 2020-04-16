@@ -1,4 +1,11 @@
 <?php
+/**
+ * BypassFinalsHack class file.
+ *
+ * @package WooCommerce/Testing
+ */
+
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
 
@@ -21,3 +28,5 @@ final class BypassFinalsHack extends CodeHack {
 		return $code;
 	}
 }
+
+// phpcs:enable Squiz.Commenting.FunctionComment.Missing

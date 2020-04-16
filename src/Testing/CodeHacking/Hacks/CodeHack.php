@@ -1,4 +1,9 @@
 <?php
+/**
+ * CodeHack class file.
+ *
+ * @package WooCommerce/Testing
+ */
 
 namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
 
@@ -26,6 +31,7 @@ abstract class CodeHack {
 	 * @return array Tokenized code.
 	 */
 	protected function tokenize( $code ) {
+		//phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters, PHPCompatibility.Constants.NewConstants
 		return PHP_VERSION_ID >= 70000 ? token_get_all( $code, TOKEN_PARSE ) : token_get_all( $code );
 	}
 
@@ -33,7 +39,7 @@ abstract class CodeHack {
 	 * Check if a token is of a given type.
 	 *
 	 * @param mixed $token Token to check.
-	 * @param int   $type Type of token to check (see https://www.php.net/manual/en/tokens.php)
+	 * @param int   $type Type of token to check (see https://www.php.net/manual/en/tokens.php).
 	 * @return bool True if it's a token of the given type, false otherwise.
 	 */
 	protected function is_token_of_type( $token, $type ) {
@@ -53,7 +59,7 @@ abstract class CodeHack {
 	/**
 	 * Converts a token to its string representation.
 	 *
-	 * @param $token Token to convert.
+	 * @param mixed $token Token to convert.
 	 * @return mixed String representation of the token.
 	 */
 	protected function token_to_string( $token ) {
@@ -70,7 +76,7 @@ abstract class CodeHack {
 	 */
 	protected function string_ends_with( $haystack, $needle ) {
 		$length = strlen( $needle );
-		if ( $length == 0 ) {
+		if ( 0 === $length ) {
 			return true;
 		}
 
