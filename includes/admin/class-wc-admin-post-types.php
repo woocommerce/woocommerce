@@ -959,11 +959,12 @@ class WC_Admin_Post_Types {
 				if ( 'sale' !== $price_type ) {
 					break;
 				}
+				$regular_price = $product->get_regular_price();
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
-					$new_price = max( 0, $product->regular_price - ( round( $product->regular_price * $percent, wc_get_price_decimals() ) ) );
+					$new_price = max( 0, $regular_price - ( round( $regular_price * $percent, wc_get_price_decimals() ) ) );
 				} else {
-					$new_price = max( 0, $product->regular_price - $price );
+					$new_price = max( 0, $regular_price - $price );
 				}
 				break;
 
