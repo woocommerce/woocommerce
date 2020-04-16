@@ -276,19 +276,27 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	public function test_get_image_should_return_product_image() {
 		$product = new WC_Product();
 		$image   = $this->set_product_image( $product );
+		$html    = '<img width="186" height="144" src="' . $image['url'] . '" class="%s" alt="" />';
+
+		// Check for lazy loading introduced by WP 5.5.
+		if ( function_exists( 'wp_lazy_loading_enabled' ) ) {
+			if ( wp_lazy_loading_enabled( 'img', 'wp_get_attachment_image' ) ) {
+				$html = str_replace( '/>', 'loading="lazy" />', $html );
+			}
+		}
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			sprintf( $html, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$product->get_image()
 		);
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-single size-single" alt="" />',
+			sprintf( $html, 'attachment-single size-single' ),
 			$product->get_image( 'single' )
 		);
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="custom-class" alt="" />',
+			sprintf( $html, 'custom-class' ),
 			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
 
@@ -303,19 +311,27 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$variations       = $variable_product->get_children();
 		$variation_1      = wc_get_product( $variations[0] );
 		$image            = $this->set_product_image( $variable_product );
+		$html             = '<img width="186" height="144" src="' . $image['url'] . '" class="%s" alt="" />';
+
+		// Check for lazy loading introduced by WP 5.5.
+		if ( function_exists( 'wp_lazy_loading_enabled' ) ) {
+			if ( wp_lazy_loading_enabled( 'img', 'wp_get_attachment_image' ) ) {
+				$html = str_replace( '/>', 'loading="lazy" />', $html );
+			}
+		}
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			sprintf( $html, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$variation_1->get_image()
 		);
 
-		$this->assertContains(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-single size-single" alt="" />',
+		$this->assertEquals(
+			sprintf( $html, 'attachment-single size-single' ),
 			$variation_1->get_image( 'single' )
 		);
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="custom-class" alt="" />',
+			sprintf( $html, 'custom-class' ),
 			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
 
