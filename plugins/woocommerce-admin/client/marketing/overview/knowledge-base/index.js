@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { Spinner } from '@wordpress/components';
@@ -11,7 +11,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, Pagination } from '@woocommerce/components';
+import { Card, Pagination, EmptyContent } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -109,30 +109,54 @@ class KnowledgeBase extends Component {
 		const { posts, isLoading } = this.props;
 		const { page, animate } = this.state;
 
+		const renderEmpty = () => {
+			const title = __(
+				'There was an error loading knowledge base posts. Please check again later.',
+				'woocommerce-admin'
+			);
+
+			return (
+				<EmptyContent
+					title={ title }
+					illustrationWidth={ 250 }
+					actionLabel=""
+				/>
+			);
+		};
+
+		const renderPosts = () => {
+			return (
+				<div className="woocommerce-marketing-knowledgebase-card__posts">
+					<Slider animationKey={ page } animate={ animate }>
+						{ this.getCurrentSlide() }
+					</Slider>
+					<Pagination
+						page={ page }
+						perPage={ 2 }
+						total={ posts.length }
+						onPageChange={ this.onPaginationPageChange }
+						showPagePicker={ false }
+						showPerPagePicker={ false }
+						showPageArrowsLabel={ false }
+					/>
+				</div>
+			)
+		};
+
+		const renderCardBody = () => {
+			if ( isLoading ) {
+				return <Spinner />;
+			}
+			return posts.length === 0 ? renderEmpty() : renderPosts();
+		};
+
 		return (
 			<Card
 				title={ __( 'WooCommerce knowledge base', 'woocommerce-admin' ) }
 				description={ __( 'Learn the ins and outs of successful marketing from the experts at WooCommerce.', 'woocommerce-admin' ) }
 				className="woocommerce-marketing-knowledgebase-card"
 			>
-				<Fragment>
-					{ isLoading ? <Spinner /> : (
-						<div className="woocommerce-marketing-knowledgebase-card__posts">
-							<Slider animationKey={ page } animate={ animate }>
-								{ this.getCurrentSlide() }
-							</Slider>
-							<Pagination
-								page={ page }
-								perPage={ 2 }
-								total={ posts.length }
-								onPageChange={ this.onPaginationPageChange }
-								showPagePicker={ false }
-								showPerPagePicker={ false }
-								showPageArrowsLabel={ false }
-							/>
-						</div>
-					) }
-				</Fragment>
+				{ renderCardBody() }
 			</Card>
 		)
 	}
