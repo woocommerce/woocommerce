@@ -239,9 +239,8 @@ class Library {
 
 		$payment_method_object->validate_fields();
 
-		if ( 0 !== wc_notice_count( 'error' ) ) {
-			return;
-		}
+		// If errors were thrown, we need to abort.
+		self::convert_notices_to_exceptions();
 
 		// Process Payment.
 		$gateway_result = $payment_method_object->process_payment( $context->order->get_id() );
@@ -249,7 +248,8 @@ class Library {
 		// Restore $_POST data.
 		$_POST = $post_data;
 
-		// Clear notices so they don't show up in the block.
+		// If `process_payment` added notices, clear them. Notices are not displayed from the API -- payment should fail,
+		// and a generic notice will be shown instead if payment failed.
 		wc_clear_notices();
 
 		// Handle result.
@@ -258,5 +258,30 @@ class Library {
 		// set payment_details from result.
 		$result->set_payment_details( array_merge( $result->payment_details, $gateway_result ) );
 		$result->set_redirect_url( $gateway_result['redirect'] );
+	}
+
+	/**
+	 * Convert notices to Exceptions.
+	 *
+	 * Payment methods may add error notices during validate_fields call to prevent checkout. Since we're not rendering
+	 * notices at all, we need to convert them to exceptions.
+	 *
+	 * This method will find the first error message and thrown an exception instead.
+	 *
+	 * @throws \Exception If an error notice is detected, Exception is thrown.
+	 */
+	protected static function convert_notices_to_exceptions() {
+		if ( 0 === wc_notice_count( 'error' ) ) {
+			return;
+		}
+
+		$error_notices = wc_get_notices( 'error' );
+
+		// Prevent notices from being output later on.
+		wc_clear_notices();
+
+		foreach ( $error_notices as $error_notice ) {
+			throw new \Exception( $error_notice['notice'] );
+		}
 	}
 }

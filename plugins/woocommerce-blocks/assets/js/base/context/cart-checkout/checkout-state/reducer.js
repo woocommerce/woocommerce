@@ -33,6 +33,8 @@ const {
  *
  * @param {Object}        data                 The value of `payment_result` from the checkout
  *                                             processing endpoint response.
+ * @param {string}        data.message         If there was a general error message it will appear
+ *                                             on this property.
  * @param {string}        data.payment_status  The payment status. One of 'success', 'failure',
  *                                             'pending', 'error'.
  * @param {Array<Object>} data.payment_details An array of Objects with a 'key' property that is a
@@ -44,6 +46,7 @@ const {
  */
 export const prepareResponseData = ( data ) => {
 	const responseData = {
+		message: data?.message || '',
 		paymentStatus: data.payment_status,
 		paymentDetails: {},
 	};
