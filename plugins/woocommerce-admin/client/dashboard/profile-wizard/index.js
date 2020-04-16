@@ -10,8 +10,8 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { updateQueryString } from '@woocommerce/navigation';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -29,14 +29,13 @@ import withSelect from 'wc-api/with-select';
 import './style.scss';
 
 class ProfileWizard extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( props ) {
+		super( props );
 		this.state = {
 			cartRedirectUrl: null,
 		};
 
-		const { activePlugins = [] } = getSetting( 'onboarding', {} );
-		this.activePlugins = activePlugins;
+		this.activePlugins = props.activePlugins;
 		this.goToNextStep = this.goToNextStep.bind( this );
 	}
 
@@ -232,6 +231,7 @@ export default compose(
 		const { getNotes, getProfileItems, getProfileItemsError } = select(
 			'wc-api'
 		);
+		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
 		const notesQuery = {
 			page: 1,
@@ -240,11 +240,13 @@ export default compose(
 			status: 'unactioned',
 		};
 		const notes = getNotes( notesQuery );
+		const activePlugins = getActivePlugins();
 
 		return {
 			isError: Boolean( getProfileItemsError() ),
 			notes,
 			profileItems: getProfileItems(),
+			activePlugins,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

@@ -11,14 +11,14 @@ import { filter } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { Card, H } from '@woocommerce/components';
+import { Card, H, Plugins } from '@woocommerce/components';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import Logo from './logo';
 import ManagementIcon from './images/management';
-import Plugins from 'dashboard/task-list/tasks/steps/plugins';
 import SalesTaxIcon from './images/sales_tax';
 import ShippingLabels from './images/shipping_labels';
 import SpeedIcon from './images/speed';
@@ -56,7 +56,8 @@ class Benefits extends Component {
 
 		if (
 			isPending &&
-			! isRequesting && ! isInstalling &&
+			! isRequesting &&
+			! isInstalling &&
 			( prevProps.isRequesting || prevState.isInstalling )
 		) {
 			goToNextStep();
@@ -262,10 +263,11 @@ export default compose(
 	withSelect( ( select ) => {
 		const {
 			getProfileItemsError,
-			getActivePlugins,
 			getProfileItems,
 			isGetProfileItemsRequesting,
 		} = select( 'wc-api' );
+
+		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 		const activePlugins = getActivePlugins();

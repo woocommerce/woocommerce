@@ -14,7 +14,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { Card, List, MenuItem, EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -113,11 +113,11 @@ class TaskDashboard extends Component {
 	}
 
 	getPluginsInformation() {
-		const { isJetpackConnected } = this.props;
-		const { activePlugins, installedPlugins } = getSetting(
-			'onboarding',
-			{}
-		);
+		const {
+			isJetpackConnected,
+			activePlugins,
+			installedPlugins,
+		} = this.props;
 		return {
 			wcs_installed: installedPlugins.includes( 'woocommerce-services' ),
 			wcs_active: activePlugins.includes( 'woocommerce-services' ),
@@ -410,8 +410,11 @@ class TaskDashboard extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getProfileItems, getOptions, isJetpackConnected } = select(
+		const { getProfileItems, getOptions } = select(
 			'wc-api'
+		);
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
 		);
 		const profileItems = getProfileItems();
 
@@ -450,6 +453,8 @@ export default compose(
 		const incompleteTasks = tasks.filter(
 			( task ) => task.visible && ! task.completed
 		);
+		const activePlugins = getActivePlugins();
+		const installedPlugins = getInstalledPlugins();
 
 		return {
 			modalDismissed,
@@ -460,6 +465,8 @@ export default compose(
 			incompleteTasks,
 			trackedCompletedTasks,
 			completedTaskKeys,
+			activePlugins,
+			installedPlugins,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

@@ -13,7 +13,7 @@ import { applyFilters } from '@wordpress/hooks';
  * WooCommerce dependencies
  */
 import { H } from '@woocommerce/components';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME, withPluginsHydration } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -32,6 +32,12 @@ import {
 } from 'lib/date';
 import ReportFilters from 'analytics/components/report-filters';
 
+const HydratedTaskList = withPluginsHydration( {
+	...window.wcSettings.plugins,
+	jetpackStatus: window.wcSettings.dataEndpoints.jetpackStatus,
+} )(
+	TaskList
+);
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
@@ -307,7 +313,10 @@ class CustomizableDashboard extends Component {
 		return (
 			<Fragment>
 				{ isTaskListEnabled && (
-					<TaskList query={ query } inline={ isDashboardShown } />
+					<HydratedTaskList
+						query={ query }
+						inline={ isDashboardShown }
+					/>
 				) }
 				{ isDashboardShown && this.renderDashboardReports() }
 			</Fragment>

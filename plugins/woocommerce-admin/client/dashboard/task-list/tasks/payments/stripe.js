@@ -18,6 +18,7 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { getQuery } from '@woocommerce/navigation';
 import { WCS_NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -451,12 +452,13 @@ class Stripe extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const {
-			getActivePlugins,
 			getOptions,
 			getOptionsError,
-			isJetpackConnected,
 			isUpdateOptionsRequesting,
 		} = select( 'wc-api' );
+		const { getActivePlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
+		);
 		const options = getOptions( [
 			'woocommerce_stripe_settings',
 			'woocommerce_default_country',

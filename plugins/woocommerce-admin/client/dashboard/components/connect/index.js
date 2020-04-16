@@ -6,12 +6,12 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import withSelect from 'wc-api/with-select';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 class Connect extends Component {
 	constructor( props ) {
@@ -47,11 +47,18 @@ class Connect extends Component {
 		return (
 			<Fragment>
 				{ hasErrors ? (
-					<Button isPrimary onClick={ () => window.location.reload() }>
+					<Button
+						isPrimary
+						onClick={ () => window.location.reload() }
+					>
 						{ __( 'Retry', 'woocommerce-admin' ) }
 					</Button>
 				) : (
-					<Button disabled={ isRequesting } isPrimary onClick={ this.connectJetpack }>
+					<Button
+						disabled={ isRequesting }
+						isPrimary
+						onClick={ this.connectJetpack }
+					>
 						{ __( 'Connect', 'woocommerce-admin' ) }
 					</Button>
 				) }
@@ -112,15 +119,15 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const {
 			getJetpackConnectUrl,
-			isGetJetpackConnectUrlRequesting,
-			getJetpackConnectUrlError,
-		} = select( 'wc-api' );
+			isPluginsRequesting,
+			getPluginsError,
+		} = select( PLUGINS_STORE_NAME );
 
 		const queryArgs = {
 			redirect_url: props.redirectUrl || window.location.href,
 		};
-		const isRequesting = isGetJetpackConnectUrlRequesting( queryArgs );
-		const error = getJetpackConnectUrlError( queryArgs );
+		const isRequesting = isPluginsRequesting( 'getJetpackConnectUrl' );
+		const error = getPluginsError( 'getJetpackConnectUrl' ) || '';
 		const jetpackConnectUrl = getJetpackConnectUrl( queryArgs );
 
 		return {

@@ -16,6 +16,7 @@ import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getQuery } from '@woocommerce/navigation';
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 class PayPal extends Component {
 	constructor( props ) {
@@ -290,9 +291,8 @@ PayPal.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getActivePlugins, getOptions, isGetOptionsRequesting } = select(
-			'wc-api'
-		);
+		const { getOptions, isGetOptionsRequesting } = select( 'wc-api' );
+		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 		const options = getOptions( [ 'woocommerce_ppec_paypal_settings' ] );
 		const isOptionsRequesting = Boolean(
 			isGetOptionsRequesting( [ 'woocommerce_ppec_paypal_settings' ] )

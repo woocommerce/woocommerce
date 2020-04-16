@@ -12,14 +12,26 @@ import CustomizableDashboard from './customizable';
 import ProfileWizard from './profile-wizard';
 import withSelect from 'wc-api/with-select';
 import { isOnboardingEnabled } from 'dashboard/utils';
-import { withSettingsHydration } from '@woocommerce/data';
+import { withSettingsHydration, withPluginsHydration } from '@woocommerce/data';
 
 let PossiblyHydratedProfileWizard = ProfileWizard;
 
-if ( window.wcSettings.preloadSettings && window.wcSettings.preloadSettings.general ) {
+if (
+	window.wcSettings.preloadSettings &&
+	window.wcSettings.preloadSettings.general
+) {
 	PossiblyHydratedProfileWizard = withSettingsHydration( 'general', {
 		general: window.wcSettings.preloadSettings.general,
-	} )( ProfileWizard );
+	} )( PossiblyHydratedProfileWizard );
+}
+
+if ( window.wcSettings.plugins ) {
+	PossiblyHydratedProfileWizard = withPluginsHydration(
+		{
+			...window.wcSettings.plugins,
+			jetpackStatus: window.wcSettings.dataEndpoints.jetpackStatus,
+		}
+	)( PossiblyHydratedProfileWizard );
 }
 
 class Dashboard extends Component {

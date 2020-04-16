@@ -11,6 +11,11 @@ import PropTypes from 'prop-types';
 import { get, isArray } from 'lodash';
 
 /**
+ * WooCommerce dependencies
+ */
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
 import '../style.scss';
@@ -22,6 +27,7 @@ import { withDispatch } from '@wordpress/data';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
+const wcsPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {
 	constructor( props ) {
@@ -53,60 +59,7 @@ export class ShippingBanner extends Component {
 		}
 	}
 
-	componentDidUpdate( prevProps ) {
-		const { activatePlugins, wcsPluginSlug } = this.props;
-
-		if ( this.justInstalledWcs( prevProps ) ) {
-			activatePlugins( [ wcsPluginSlug ] );
-		}
-		if ( this.justActivatedWcs( prevProps ) ) {
-			this.acceptTosAndGetWCSAssets();
-		}
-	}
-
-	justInstalledWcs( prevProps ) {
-		const { installedPlugins, wcsPluginSlug } = this.props;
-		const wcsNowInstalled = installedPlugins.includes( wcsPluginSlug );
-		const wcsPrevInstalled = prevProps.installedPlugins.includes(
-			wcsPluginSlug
-		);
-		return wcsNowInstalled && ! wcsPrevInstalled;
-	}
-
-	justActivatedWcs( prevProps ) {
-		const { activatedPlugins, wcsPluginSlug } = this.props;
-		const wcsNowActivated = activatedPlugins.includes( wcsPluginSlug );
-		const wcsPrevActivated = prevProps.activatedPlugins.includes(
-			wcsPluginSlug
-		);
-		return wcsNowActivated && ! wcsPrevActivated;
-	}
-
-	hasActivationError = () => {
-		return Boolean( this.props.activationErrors.length );
-	};
-
-	hasInstallationError = () => {
-		return Boolean( this.props.installationErrors.length );
-	};
-
-	isSetupError = () => {
-		return (
-			this.hasActivationError() ||
-			this.hasInstallationError() ||
-			this.state.wcsSetupError
-		);
-	};
-
-	setupErrorReason = () => {
-		if ( this.hasInstallationError() ) {
-			return setupErrorTypes.INSTALL;
-		}
-		if ( this.hasActivationError() ) {
-			return setupErrorTypes.ACTIVATE;
-		}
-		return setupErrorTypes.SETUP;
-	};
+	isSetupError = () => this.state.wcsSetupError;
 
 	closeDismissModal = () => {
 		this.setState( { isDismissModalOpen: false } );
@@ -125,7 +78,7 @@ export class ShippingBanner extends Component {
 	};
 
 	createShippingLabelClicked = () => {
-		const { wcsPluginSlug, activePlugins } = this.props;
+		const { activePlugins } = this.props;
 		this.setState( { isShippingLabelButtonBusy: true } );
 		this.trackElementClicked( 'shipping_banner_create_label' );
 		if ( ! activePlugins.includes( wcsPluginSlug ) ) {
@@ -135,13 +88,31 @@ export class ShippingBanner extends Component {
 		}
 	};
 
-	installAndActivatePlugins( pluginSlug ) {
+	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const { installPlugins, isRequesting } = this.props;
+		const { installPlugin, activatePlugins, isRequesting } = this.props;
 		if ( isRequesting ) {
 			return false;
 		}
-		installPlugins( [ pluginSlug ] );
+		const install = await installPlugin( pluginSlug );
+		if ( install.status !== 'success' ) {
+			this.setState( {
+				setupErrorReason: setupErrorTypes.INSTALL,
+				wcsSetupError: true,
+			} );
+			return;
+		}
+
+		const activation = await activatePlugins( [ pluginSlug ] );
+		if ( activation.status !== 'success' ) {
+			this.setState( {
+				setupErrorReason: setupErrorTypes.ACTIVATE,
+				wcsSetupError: true,
+			} );
+			return;
+		}
+
+		this.acceptTosAndGetWCSAssets();
 	}
 
 	woocommerceServiceLinkClicked = () => {
@@ -149,7 +120,7 @@ export class ShippingBanner extends Component {
 	};
 
 	trackBannerEvent = ( eventName, customProps = {} ) => {
-		const { activePlugins, isJetpackConnected, wcsPluginSlug } = this.props;
+		const { activePlugins, isJetpackConnected } = this.props;
 		recordEvent( eventName, {
 			banner_name: 'wcadmin_install_wcs_prompt',
 			jetpack_installed: activePlugins.includes( 'jetpack' ),
@@ -277,7 +248,7 @@ export class ShippingBanner extends Component {
 	}
 
 	getInstallText = () => {
-		const { activePlugins, wcsPluginSlug } = this.props;
+		const { activePlugins } = this.props;
 		if ( activePlugins.includes( wcsPluginSlug ) ) {
 			// If WCS is active, then the only remaining step is to agree to the ToS.
 			return __(
@@ -447,7 +418,7 @@ export class ShippingBanner extends Component {
 						</p>
 						<SetupNotice
 							isSetupError={ this.isSetupError() }
-							errorReason={ this.setupErrorReason() }
+							errorReason={ this.setupErrorReason }
 						/>
 					</div>
 					<Button
@@ -487,70 +458,38 @@ export class ShippingBanner extends Component {
 ShippingBanner.propTypes = {
 	itemsCount: PropTypes.number.isRequired,
 	isJetpackConnected: PropTypes.bool.isRequired,
-	activatedPlugins: PropTypes.array.isRequired,
 	activePlugins: PropTypes.array.isRequired,
-	installedPlugins: PropTypes.array.isRequired,
-	wcsPluginSlug: PropTypes.string.isRequired,
-	activationErrors: PropTypes.array.isRequired,
-	installationErrors: PropTypes.array.isRequired,
 	activatePlugins: PropTypes.func.isRequired,
-	installPlugins: PropTypes.func.isRequired,
+	installPlugin: PropTypes.func.isRequired,
 	isRequesting: PropTypes.bool.isRequired,
 };
 
 export default compose(
 	withSelect( ( select ) => {
-		const wcsPluginSlug = 'woocommerce-services';
 		const {
-			getActivePlugins,
-			getPluginInstallations,
-			getPluginActivations,
-			getPluginActivationErrors,
-			getPluginInstallationErrors,
+			isPluginsRequesting,
 			isJetpackConnected,
-			isPluginActivateRequesting,
-			isPluginInstallRequesting,
-		} = select( 'wc-api' );
+			getActivePlugins,
+		} = select( PLUGINS_STORE_NAME );
 
 		const isRequesting =
-			isPluginActivateRequesting() || isPluginInstallRequesting();
-		const allInstallationErrors = getPluginInstallationErrors( [
-			wcsPluginSlug,
-		] );
-		const installedPlugins = Object.keys(
-			getPluginInstallations( [ wcsPluginSlug ] )
-		);
-		const allActivationErrors = getPluginActivationErrors( [
-			wcsPluginSlug,
-		] );
-		const activatedPlugins = Object.keys(
-			getPluginActivations( [ wcsPluginSlug ] )
-		);
-		const activationErrors = [];
-		const installationErrors = [];
-		Object.keys( allActivationErrors ).map( ( plugin ) =>
-			activationErrors.push( allActivationErrors[ plugin ].message )
-		);
-		Object.keys( allInstallationErrors ).map( ( plugin ) =>
-			installationErrors.push( allInstallationErrors[ plugin ].message )
-		);
+			isPluginsRequesting( 'activatePlugins' ) ||
+			isPluginsRequesting( 'installPlugin' );
+
 		return {
-			activePlugins: getActivePlugins(),
-			isJetpackConnected: isJetpackConnected(),
 			isRequesting,
-			installedPlugins,
-			activatedPlugins,
-			wcsPluginSlug,
-			activationErrors,
-			installationErrors,
+			isJetpackConnected: isJetpackConnected(),
+			activePlugins: getActivePlugins(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { activatePlugins, installPlugins } = dispatch( 'wc-api' );
+		const { activatePlugins, installPlugin } = dispatch(
+			PLUGINS_STORE_NAME
+		);
 
 		return {
 			activatePlugins,
-			installPlugins,
+			installPlugin,
 		};
 	} )
 )( ShippingBanner );

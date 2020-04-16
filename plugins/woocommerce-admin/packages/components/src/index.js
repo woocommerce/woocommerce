@@ -30,6 +30,7 @@ export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
 export { default as Pagination } from './pagination';
+export { default as Plugins } from './plugins';
 export { default as ProductImage } from './product-image';
 export { default as ProductRating } from './rating/product';
 export { default as Rating } from './rating';

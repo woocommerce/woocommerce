@@ -676,6 +676,9 @@ class Loader {
 		}
 
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array( '/wc/v3' ) );
+		if ( class_exists( 'Jetpack' ) ) {
+			$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
+		}
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
 				array_values( $preload_data_endpoints ),
@@ -719,6 +722,10 @@ class Loader {
 		$settings['siteUrl']           = site_url();
 		$settings['onboardingEnabled'] = self::is_onboarding_enabled();
 		$settings['dateFormat']        = get_option( 'date_format' );
+		$settings['plugins'] = array(
+			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
+			'activePlugins' => Onboarding::get_active_plugins(),
+		);
 		// Plugins that depend on changing the translation work on the server but not the client -
 		// WooCommerce Branding is an example of this - so pass through the translation of
 		// 'WooCommerce' to wcSettings.

@@ -12,21 +12,20 @@ import { withDispatch, withSelect } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, H, Link, Stepper } from '@woocommerce/components';
+import { Card, H, Link, Stepper, Plugins } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	getAdminLink,
 	getSetting,
 	setSetting,
 } from '@woocommerce/wc-admin-settings';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import Connect from './steps/connect';
+import Connect from 'dashboard/components/connect';
 import { getCountryCode } from 'dashboard/utils';
-import Plugins from './steps/plugins';
 import StoreLocation from './steps/location';
 import withWCApiSelect from 'wc-api/with-select';
 import { recordEvent, queueRecordEvent } from 'lib/tracks';
@@ -476,10 +475,11 @@ class Tax extends Component {
 
 export default compose(
 	withWCApiSelect( ( select ) => {
-		const { getActivePlugins, getOptions, isJetpackConnected } = select(
-			'wc-api'
-		);
+		const { getOptions } = select( 'wc-api' );
 
+		const { getActivePlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
+		);
 		const activePlugins = getActivePlugins();
 		const pluginsToActivate = difference(
 			[ 'jetpack', 'woocommerce-services' ],

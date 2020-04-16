@@ -134,7 +134,6 @@ class Onboarding {
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
-		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
@@ -528,20 +527,6 @@ class Onboarding {
 		$options[] = 'general';
 
 		return $options;
-	}
-
-	/**
-	 * Preload data from API endpoints.
-	 *
-	 * @param array $endpoints Array of preloaded endpoints.
-	 * @return array
-	 */
-	public function add_preload_endpoints( $endpoints ) {
-		if ( ! class_exists( 'Jetpack' ) ) {
-			return $endpoints;
-		}
-		$endpoints['jetpackStatus'] = '/jetpack/v4/connection';
-		return $endpoints;
 	}
 
 	/**

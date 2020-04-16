@@ -5,6 +5,7 @@
 - Fix styling of `<Search />` component "clear all" button.
 - Add state classes to `<TextControlWithAffixes />` component.
 - Fix `<AnimationSlider />` example code.
+- Add `<Plugins />` component for installation of plugins.
 
 # 4.0.0
 

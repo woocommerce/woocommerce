@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { setLocaleData } from '@wordpress/i18n';
+import { registerStore } from '@wordpress/data';
 
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
 // likely run into this.
@@ -14,7 +15,7 @@ global.wp = {
 
 global.wc = {};
 
-const wordPressPackages = [ 'element', 'date' ];
+const wordPressPackages = [ 'element', 'date', 'data' ];
 
 const wooCommercePackages = [
 	'components',
@@ -23,6 +24,7 @@ const wooCommercePackages = [
 	'date',
 	'navigation',
 	'number',
+	'data',
 ];
 
 // aliases
@@ -60,6 +62,7 @@ global.wcSettings = {
 		woocommerce_actionable_order_statuses: [],
 		woocommerce_excluded_report_order_statuses: [],
 	},
+	dataEndpoints: {},
 };
 
 wordPressPackages.forEach( ( lib ) => {
@@ -81,3 +84,14 @@ setLocaleData(
 	{ '': { domain: 'woocommerce-admin', lang: 'en_US' } },
 	'woocommerce-admin'
 );
+
+// Mock core/notices store for components dispatching core notices
+registerStore( 'core/notices', {
+	reducer: () => {
+		return {};
+	},
+	actions: {
+		createNotice: () => {},
+	},
+	selectors: {},
+} );

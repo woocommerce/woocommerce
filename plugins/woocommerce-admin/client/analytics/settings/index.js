@@ -36,46 +36,47 @@ const Settings = ( { createNotice, query } ) => {
 	} = useSettings( 'wc_admin', [ 'wcAdminSettings' ] );
 	const hasSaved = useRef( false );
 
-	useEffect(
-		() => {
-			function warnIfUnsavedChanges( event ) {
-				if ( isDirty ) {
-					event.returnValue = __(
-						'You have unsaved changes. If you proceed, they will be lost.',
-						'woocommerce-admin'
-					);
-					return event.returnValue;
-				}
+	useEffect( () => {
+		function warnIfUnsavedChanges( event ) {
+			if ( isDirty ) {
+				event.returnValue = __(
+					'You have unsaved changes. If you proceed, they will be lost.',
+					'woocommerce-admin'
+				);
+				return event.returnValue;
 			}
-			window.addEventListener( 'beforeunload', warnIfUnsavedChanges );
-			return () => window.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
-		},
-		[ isDirty ]
-	);
+		}
+		window.addEventListener( 'beforeunload', warnIfUnsavedChanges );
+		return () =>
+			window.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
+	}, [ isDirty ] );
 
-	useEffect(
-		() => {
-			if ( isRequesting ) {
-				hasSaved.current = true;
-				return;
+	useEffect( () => {
+		if ( isRequesting ) {
+			hasSaved.current = true;
+			return;
+		}
+		if ( ! isRequesting && hasSaved.current ) {
+			if ( ! settingsError ) {
+				createNotice(
+					'success',
+					__(
+						'Your settings have been successfully saved.',
+						'woocommerce-admin'
+					)
+				);
+			} else {
+				createNotice(
+					'error',
+					__(
+						'There was an error saving your settings.  Please try again.',
+						'woocommerce-admin'
+					)
+				);
 			}
-			if ( ! isRequesting && hasSaved.current ) {
-				if ( ! settingsError ) {
-					createNotice(
-						'success',
-						__( 'Your settings have been successfully saved.', 'woocommerce-admin' )
-					);
-				} else {
-					createNotice(
-						'error',
-						__( 'There was an error saving your settings.  Please try again.', 'woocommerce-admin' )
-					);
-				}
-				hasSaved.current = false;
-			}
-		},
-		[ isRequesting, settingsError, createNotice ]
-	);
+			hasSaved.current = false;
+		}
+	}, [ isRequesting, settingsError, createNotice ] );
 
 	const resetDefaults = () => {
 		if (
@@ -87,10 +88,13 @@ const Settings = ( { createNotice, query } ) => {
 				)
 			)
 		) {
-			const resetSettings = Object.keys( config ).reduce( ( result, setting ) => {
-				result[ setting ] = config[ setting ].defaultValue;
-				return result;
-			}, {} );
+			const resetSettings = Object.keys( config ).reduce(
+				( result, setting ) => {
+					result[ setting ] = config[ setting ].defaultValue;
+					return result;
+				},
+				{}
+			);
 
 			updateAndPersistSettings( 'wcAdminSettings', resetSettings );
 			recordEvent( 'analytics_settings_reset_defaults' );
@@ -111,7 +115,7 @@ const Settings = ( { createNotice, query } ) => {
 		window.wpNavMenuUrlUpdate( query );
 	};
 
-	const handleInputChange = e => {
+	const handleInputChange = ( e ) => {
 		const { checked, name, type, value } = e.target;
 		const nextSettings = { ...wcAdminSettings };
 
@@ -119,7 +123,9 @@ const Settings = ( { createNotice, query } ) => {
 			if ( checked ) {
 				nextSettings[ name ] = [ ...nextSettings[ name ], value ];
 			} else {
-				nextSettings[ name ] = nextSettings[ name ].filter( v => v !== value );
+				nextSettings[ name ] = nextSettings[ name ].filter(
+					( v ) => v !== value
+				);
 			}
 		} else {
 			nextSettings[ name ] = value;
@@ -129,9 +135,11 @@ const Settings = ( { createNotice, query } ) => {
 
 	return (
 		<Fragment>
-			<SectionHeader title={ __( 'Analytics Settings', 'woocommerce-admin' ) } />
+			<SectionHeader
+				title={ __( 'Analytics Settings', 'woocommerce-admin' ) }
+			/>
 			<div className="woocommerce-settings__wrapper">
-				{ Object.keys( config ).map( setting => (
+				{ Object.keys( config ).map( ( setting ) => (
 					<Setting
 						handleChange={ handleInputChange }
 						value={ wcAdminSettings[ setting ] }
@@ -144,7 +152,11 @@ const Settings = ( { createNotice, query } ) => {
 					<Button isDefault onClick={ resetDefaults }>
 						{ __( 'Reset Defaults', 'woocommerce-admin' ) }
 					</Button>
-					<Button isPrimary isBusy={ isRequesting } onClick={ saveChanges }>
+					<Button
+						isPrimary
+						isBusy={ isRequesting }
+						onClick={ saveChanges }
+					>
 						{ __( 'Save Settings', 'woocommerce-admin' ) }
 					</Button>
 				</div>
@@ -161,7 +173,7 @@ const Settings = ( { createNotice, query } ) => {
 };
 
 export default compose(
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

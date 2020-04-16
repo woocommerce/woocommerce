@@ -24,10 +24,10 @@ import {
 	SelectControl,
 	Form,
 	TextControl,
+	Plugins,
 } from '@woocommerce/components';
 import withWCApiSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import Plugins from 'dashboard/task-list/tasks/steps/plugins';
 import { pluginNames } from 'wc-api/onboarding/constants';
 import { getCurrencyRegion } from 'dashboard/utils';
 import { CurrencyContext } from 'lib/currency-context';

@@ -11,12 +11,13 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card, H } from '@woocommerce/components';
+import { Card, H, Plugins } from '@woocommerce/components';
 import {
 	getHistory,
 	getNewPath,
 	updateQueryString,
 } from '@woocommerce/navigation';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -24,7 +25,6 @@ import {
 import { recordEvent } from 'lib/tracks';
 import { getCountryCode } from 'dashboard/utils';
 import withSelect from 'wc-api/with-select';
-import Plugins from '../steps/plugins';
 import { pluginNames } from 'wc-api/onboarding/constants';
 import { getPaymentMethods } from './methods';
 
@@ -349,13 +349,14 @@ export default compose(
 	withSelect( ( select ) => {
 		const {
 			getProfileItems,
-			getActivePlugins,
 			getOptions,
 			getUpdateOptionsError,
-			isJetpackConnected,
 			isUpdateOptionsRequesting,
 		} = select( 'wc-api' );
 
+		const { getActivePlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
+		);
 		const activePlugins = getActivePlugins();
 		const profileItems = getProfileItems();
 		const options = getOptions( [
