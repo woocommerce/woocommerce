@@ -141,6 +141,17 @@ export const CheckoutStateProvider = ( {
 			setOrderId: ( orderId ) =>
 				void dispatch( actions.setOrderId( orderId ) ),
 			setAfterProcessing: ( response ) => {
+				// capture general error message if this is an error response.
+				if (
+					! response.payment_result &&
+					response.message &&
+					response?.data?.status !== 200
+				) {
+					response.payment_result = {
+						...response.payment_result,
+						message: response.message,
+					};
+				}
 				if ( response.payment_result ) {
 					if (
 						// eslint-disable-next-line camelcase
@@ -231,7 +242,7 @@ export const CheckoutStateProvider = ( {
 						// no error handling in place by anything so let's fall
 						// back to default
 						const message =
-							data.processingResponse.message ||
+							data.processingResponse?.message ||
 							__(
 								'Something went wrong. Please contact us to get assistance.',
 								'woo-gutenberg-products-block'
