@@ -52,6 +52,22 @@ After you've made your updates, you're ready to commit:
 3. Create your commit. Write a descriptive, but short first line (e.g. "Reports: Reticulate the splines"), and add more details below. If your commit addresses a github issue, reference it by number here (e.g. "This commit fixes issue #123 by reticulating all the splines.")
 4. Push the branch up to your local fork, then create a PR via the GitHub web interface.
 
+## PHP Unit tests
+
+### Setting up PHP unit tests using VVV
+
+1. SSH into the Vagrant box:
+    1. `cd` down to the Vagrant root (where `www` lives) 
+    2. `vagrant ssh`
+2. `cd /srv/www/<name of wp install>/woocommerce-admin`
+3. `bin/install-wp-tests.sh wc-admin-tests root root`
+
+### Running tests
+
+1. SSH into the Vagrant box (`vagrant ssh`)
+2. `cd /srv/www/<name of wp install>/woocommerce-admin`
+3. `./vendor/bin/phpunit` to actually run the test suite
+
 ## Helper Scripts
 
 There are a number of helper scripts exposed via our `package.json` (below list is not exhaustive, you can view the [`package.json` file directly to see all](https://github.com/woocommerce/woocommerce-admin/blob/master/package.json)):
