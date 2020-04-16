@@ -400,7 +400,6 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 			)
 		);
 
-
 		$product_1 = WC_Helper_Product::create_simple_product();
 		$product_1->set_regular_price( 3.17 );
 		$product_1->save();
@@ -422,7 +421,6 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$coupon->set_amount( 10 );
 		$coupon->set_discount_type( 'percent' );
 		$coupon->save();
-
 
 		$order = wc_create_order(
 			array(

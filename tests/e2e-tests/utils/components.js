@@ -36,38 +36,11 @@ const completeOnboardingWizard = async () => {
 		// Click on "Yes please" button to move to the next step
 		page.click( 'button[name=save_step]', { text: 'Yes please' } ),
 
-		// Wait for the "Start setting up your WooCommerce store" section to load
+		// Wait for "Where is your store based?" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	] );
 
 	// Store Details section
-
-	// Wait for "Proceed without Jetpack & WooCommerce Services" option to appear and click on it
-	await page.waitForSelector( '.woocommerce-profile-wizard__skip.is-link' );
-	await expect( page ).toMatchElement(
-		'.woocommerce-profile-wizard__skip.is-link', { text: 'Proceed without Jetpack & WooCommerce Services' }
-	);
-
-	// Click on "Yes please" button to move to the next step
-	await page.click( '.woocommerce-profile-wizard__skip.is-link', { text: 'Proceed without Jetpack & WooCommerce Services' } );
-
-	// Wait for usage tracking pop-up window to appear
-	await page.waitForSelector( '.components-modal__header-heading' );
-	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Build a Better WooCommerce' }
-	);
-
-	await page.waitForSelector( '.components-checkbox-control__input' );
-	// Verify that checkbox next to "Yes, count me in!" is not selected
-	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
-
-	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( '.woocommerce-profile-wizard__usage-modal button.is-primary' ),
-
-		// Wait for "Where is your store based?" section to load
-		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	] );
 
 	// Fill store's address - first line
 	await expect( page ).toFill( '#inspector-text-control-0', config.get( 'addresses.admin.store.addressfirstline' ) );
@@ -90,9 +63,22 @@ const completeOnboardingWizard = async () => {
 	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
+	// Click on "Continue" button to move to the next step
+	await page.click( 'button.is-primary', { text: 'Continue' } );
+
+	// Wait for usage tracking pop-up window to appear
+	await page.waitForSelector( '.components-modal__header-heading' );
+	await expect( page ).toMatchElement(
+		'.components-modal__header-heading', { text: 'Build a Better WooCommerce' }
+	);
+
+	// Query for "Continue" buttons
+	const continueButtons = await page.$$( 'button.is-primary' );
+	expect( continueButtons ).toHaveLength( 2 );
+
 	await Promise.all( [
-		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
+		// Click on "Continue" button of the usage pop-up window to move to the next step
+		continueButtons[1].click(),
 
 		// Wait for "In which industry does the store operate?" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -171,11 +157,11 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		page.click( 'button.woocommerce-profile-wizard__continue' ),
+		page.click( 'button.is-primary' ),
 
 		// Wait for "Theme" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -185,8 +171,26 @@ const completeOnboardingWizard = async () => {
 
 	// Wait for "Continue with my active theme" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
-	// Click on "Continue with my active theme" button to move to the next step
-	await page.click( 'button.is-primary' );
+
+	await Promise.all( [
+		// Click on "Continue with my active theme" button to move to the next step
+		page.click( 'button.is-primary' ),
+
+		// Wait for "Enhance your store with WooCommerce Services" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Benefits section
+
+	// Wait for Benefits section to appear
+	await page.waitForSelector( '.woocommerce-profile-wizard__header-title' );
+
+	// Wait for "No thanks" button to become active
+	await page.waitForSelector( 'button.is-default:not(:disabled)' );
+	// Click on "No thanks" button to move to the next step
+	await page.click( 'button.is-default' );
+
+	// End of onboarding wizard
 
 	// Wait for "Woo-hoo almost there" window to appear
 	await page.waitForSelector( '.components-modal__header-heading' );
