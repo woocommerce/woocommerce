@@ -11,17 +11,6 @@
 class WC_Tests_Packages extends WC_Unit_Test_Case {
 
 	/**
-	 * Setup test class.
-	 *
-	 * @return void
-	 */
-	public function setUp() {
-		if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
-			$this->markTestSkipped( 'Packages are disabled unless running PHP 5.6+' );
-		}
-	}
-
-	/**
 	 * Test packages exist - this requires composer install to have ran.
 	 */
 	public function test_packages_exist() {
