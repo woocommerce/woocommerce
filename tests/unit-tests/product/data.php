@@ -278,17 +278,17 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$image   = $this->set_product_image( $product );
 		$needle  = 'width="186" height="144" src="' . $image['url'] . '" class="%s"';
 
-		$this->assertStringContainsString(
+		$this->assertContains(
 			sprintf( $needle, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$product->get_image()
 		);
 
-		$this->assertStringContainsString(
+		$this->assertContains(
 			sprintf( $needle, 'attachment-single size-single' ),
 			$product->get_image( 'single' )
 		);
 
-		$this->assertStringContainsString(
+		$this->assertContains(
 			sprintf( $needle, 'custom-class' ),
 			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
@@ -306,17 +306,17 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$image            = $this->set_product_image( $variable_product );
 		$needle           = 'width="186" height="144" src="' . $image['url'] . '" class="%s"';
 
-		$this->assertStringContainsString(
+		$this->assertContains(
 			sprintf( $needle, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$variation_1->get_image()
 		);
 
-		$this->assertStringContainsString(
+		$this->assertContains(
 			sprintf( $needle, 'attachment-single size-single' ),
 			$variation_1->get_image( 'single' )
 		);
 
-		$this->assertStringContainsString(
+		$this->assertContains(
 			sprintf( $needle, 'custom-class' ),
 			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
