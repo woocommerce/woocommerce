@@ -1,19 +1,18 @@
-# Payment Method Integration for the Checkout Block
+# Payment Method Integration for the Checkout Block <!-- omit in toc -->
 
 The checkout block has an API interface for payment methods to integrate that consists of both a server side and client side implementation.
 
 > **Note:** This API is fairly stable, but we're still really early in the checkout block release plan so it _is_ possible this might slightly change as more payment methods are integrated and we discover areas needing improvement. So monitoring this API will be needed.
 
-**Table of Contents**
+## Table of Contents <!-- omit in toc -->
 
-- [Payment Method Integration for the Checkout Block](#payment-method-integration-for-the-checkout-block)
-  - [Client Side integration](#client-side-integration)
-    - [Express payment methods - `registerExpressPaymentMethod( paymentMethodCreator )`](#express-payment-methods---registerexpresspaymentmethod-paymentmethodcreator-)
-    - [Payment Methods - `registerPaymentMethod( paymentMethodCreator )`](#payment-methods---registerpaymentmethod-paymentmethodcreator-)
-    - [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
-  - [Server Side Integration](#server-side-integration)
-    - [Processing Payment](#processing-payment)
-    - [Registering Assets](#registering-assets)
+- [Client Side integration](#client-side-integration)
+  - [Express payment methods - `registerExpressPaymentMethod( paymentMethodCreator )`](#express-payment-methods---registerexpresspaymentmethod-paymentmethodcreator-)
+  - [Payment Methods - `registerPaymentMethod( paymentMethodCreator )`](#payment-methods---registerpaymentmethod-paymentmethodcreator-)
+  - [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
+- [Server Side Integration](#server-side-integration)
+  - [Processing Payment](#processing-payment)
+  - [Registering Assets](#registering-assets)
 
 ## Client Side integration
 
