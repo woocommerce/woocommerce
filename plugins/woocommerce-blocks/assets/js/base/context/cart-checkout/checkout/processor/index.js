@@ -57,7 +57,7 @@ const CheckoutProcessor = () => {
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingAddress, shippingErrorStatus } = useShippingDataContext();
 	const { billingData } = useBillingDataContext();
-	const { cartNeedsPayment } = useStoreCart();
+	const { cartNeedsPayment, receiveCart } = useStoreCart();
 	const {
 		activePaymentMethod,
 		currentStatus: currentPaymentStatus,
@@ -228,6 +228,10 @@ const CheckoutProcessor = () => {
 			} )
 			.catch( ( error ) => {
 				error.json().then( function( response ) {
+					// If updated cart state was returned, also update that.
+					if ( response.data?.cart ) {
+						receiveCart( response.data.cart );
+					}
 					dispatchActions.setHasError();
 					dispatchActions.setAfterProcessing( response );
 					setIsProcessingOrder( false );

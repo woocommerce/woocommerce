@@ -34,6 +34,8 @@
  *                                                      being loaded.
  * @property {boolean}             hasShippingAddress   Whether or not the cart
  *                                                      has a shipping address yet.
+ * @property {function}            receiveCart          Dispatcher to receive
+ *                                                      updated cart.
  */
 
 /**

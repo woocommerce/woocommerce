@@ -67,15 +67,14 @@ const Cart = ( { attributes } ) => {
 		appliedCoupons,
 	} = useStoreCartCoupons();
 
-	const { addErrorNotice, removeNotice } = useStoreNotices();
+	const { addErrorNotice } = useStoreNotices();
 
 	// Ensures any cart errors listed in the API response get shown.
 	useEffect( () => {
-		removeNotice( 'cart-item-error' );
 		cartItemErrors.forEach( ( error ) => {
 			addErrorNotice( decodeEntities( error.message ), {
-				isDismissible: false,
-				id: 'cart-item-error',
+				isDismissible: true,
+				id: error.code,
 			} );
 		} );
 	}, [ cartItemErrors ] );

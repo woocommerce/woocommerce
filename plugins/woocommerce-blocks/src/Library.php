@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\NoticeHandler;
 
 /**
  * Library class.
@@ -240,7 +241,7 @@ class Library {
 		$payment_method_object->validate_fields();
 
 		// If errors were thrown, we need to abort.
-		self::convert_notices_to_exceptions();
+		NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_payment_error' );
 
 		// Process Payment.
 		$gateway_result = $payment_method_object->process_payment( $context->order->get_id() );
@@ -258,30 +259,5 @@ class Library {
 		// set payment_details from result.
 		$result->set_payment_details( array_merge( $result->payment_details, $gateway_result ) );
 		$result->set_redirect_url( $gateway_result['redirect'] );
-	}
-
-	/**
-	 * Convert notices to Exceptions.
-	 *
-	 * Payment methods may add error notices during validate_fields call to prevent checkout. Since we're not rendering
-	 * notices at all, we need to convert them to exceptions.
-	 *
-	 * This method will find the first error message and thrown an exception instead.
-	 *
-	 * @throws \Exception If an error notice is detected, Exception is thrown.
-	 */
-	protected static function convert_notices_to_exceptions() {
-		if ( 0 === wc_notice_count( 'error' ) ) {
-			return;
-		}
-
-		$error_notices = wc_get_notices( 'error' );
-
-		// Prevent notices from being output later on.
-		wc_clear_notices();
-
-		foreach ( $error_notices as $error_notice ) {
-			throw new \Exception( $error_notice['notice'] );
-		}
 	}
 }

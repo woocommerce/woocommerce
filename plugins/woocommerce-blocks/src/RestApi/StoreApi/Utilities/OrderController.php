@@ -98,6 +98,100 @@ class OrderController {
 	}
 
 	/**
+	 * Final validation ran before payment is taken.
+	 *
+	 * By this point we have an order populated with customer data and items.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	public function validate_order_before_payment( \WC_Order $order ) {
+		$coupons = $order->get_coupon_codes();
+
+		$coupon_errors = [];
+
+		foreach ( $coupons as $coupon_code ) {
+			$coupon = new \WC_Coupon( $coupon_code );
+
+			try {
+				$this->validate_coupon_email_restriction( $coupon, $order );
+			} catch ( \Exception $error ) {
+				$coupon_errors[ $coupon_code ] = $error->getMessage();
+			}
+			try {
+				$this->validate_coupon_usage_limit( $coupon, $order );
+			} catch ( \Exception $error ) {
+				$coupon_errors[ $coupon_code ] = $error->getMessage();
+			}
+		}
+
+		if ( $coupon_errors ) {
+			// Remove all coupons that were not valid.
+			foreach ( $coupon_errors as $coupon_code => $message ) {
+				wc()->cart->remove_coupon( $coupon_code );
+			}
+
+			// Recalculate totals.
+			wc()->cart->calculate_totals();
+
+			// Re-sync order with cart.
+			$this->update_order_from_cart( $order );
+
+			// Return exception so customer can review before payment.
+			throw new RouteException(
+				'woocommerce_rest_cart_coupon_errors',
+				sprintf(
+					// Translators: %s Coupon codes.
+					__( 'Invalid coupons were removed from the cart: "%s"', 'woo-gutenberg-products-block' ),
+					implode( '", "', array_keys( $coupon_errors ) )
+				),
+				409,
+				[
+					'removed_coupons' => $coupon_errors,
+				]
+			);
+		}
+	}
+
+	/**
+	 * Check email restrictions of a coupon against the order.
+	 *
+	 * @throws \Exception Exception if invalid data is detected.
+	 *
+	 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+	 * @param \WC_Order  $order Order object.
+	 */
+	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, $order ) {
+		$restrictions = $coupon->get_email_restrictions();
+
+		if ( ! empty( $restrictions ) && $order->get_billing_email() && ! wc()->cart->is_coupon_emails_allowed( [ $order->get_billing_email() ], $restrictions ) ) {
+			throw new \Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
+		}
+	}
+
+	/**
+	 * Check usage restrictions of a coupon against the order.
+	 *
+	 * @throws \Exception Exception if invalid data is detected.
+	 *
+	 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+	 * @param \WC_Order  $order Order object.
+	 */
+	protected function validate_coupon_usage_limit( \WC_Coupon $coupon, $order ) {
+		$coupon_usage_limit = $coupon->get_usage_limit_per_user();
+
+		if ( $coupon_usage_limit > 0 ) {
+			$data_store  = $coupon->get_data_store();
+			$usage_count = $order->get_customer_id() ? $data_store->get_usage_by_user_id( $coupon, $order->get_customer_id() ) : $data_store->get_usage_by_email( $coupon, $order->get_billing_email() );
+
+			if ( $usage_count >= $coupon_usage_limit ) {
+				throw new \Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
+			}
+		}
+	}
+
+	/**
 	 * Changes default order status to draft for orders created via this API.
 	 *
 	 * @return string
@@ -113,38 +207,36 @@ class OrderController {
 	 */
 	protected function update_line_items_from_cart( \WC_Order $order ) {
 		$cart_controller = new CartController();
-		$cart_controller->validate_cart_items();
-
-		$cart        = $cart_controller->get_cart_instance();
-		$cart_hashes = $cart_controller->get_cart_hashes();
+		$cart            = $cart_controller->get_cart_instance();
+		$cart_hashes     = $cart_controller->get_cart_hashes();
 
 		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
-			$order->remove_order_items( 'line_item' );
 			$order->set_cart_hash( $cart_hashes['line_items'] );
+			$order->remove_order_items( 'line_item' );
 			WC()->checkout->create_order_line_items( $order, $cart );
 		}
 
-		if ( $order->get_meta_data( 'shipping_hash' ) !== $cart_hashes['shipping'] ) {
+		if ( $order->get_meta_data( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
+			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
 			$order->remove_order_items( 'shipping' );
-			$order->update_meta_data( 'shipping_hash', $cart_hashes['shipping'] );
 			WC()->checkout->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 		}
 
-		if ( $order->get_meta_data( 'coupons_hash' ) !== $cart_hashes['coupons'] ) {
+		if ( $order->get_meta_data( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
 			$order->remove_order_items( 'coupon' );
-			$order->update_meta_data( 'coupons_hash', $cart_hashes['coupons'] );
+			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
 			WC()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta_data( 'fees_hash' ) !== $cart_hashes['fees'] ) {
+		if ( $order->get_meta_data( '_fees_hash' ) !== $cart_hashes['fees'] ) {
+			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
 			$order->remove_order_items( 'fee' );
-			$order->update_meta_data( 'fees_hash', $cart_hashes['fees'] );
 			WC()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta_data( 'taxes_hash' ) !== $cart_hashes['taxes'] ) {
+		if ( $order->get_meta_data( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
+			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
 			$order->remove_order_items( 'tax' );
-			$order->update_meta_data( 'taxes_hash', $cart_hashes['taxes'] );
 			WC()->checkout->create_order_tax_lines( $order, $cart );
 		}
 	}

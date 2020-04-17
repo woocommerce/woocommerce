@@ -30,9 +30,10 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param string $error_code String based error code.
 	 * @param string $error_message User facing error message.
 	 * @param int    $http_status_code HTTP status. Defaults to 500.
+	 * @param array  $additional_data  Extra data (key value pairs) to expose in the error response.
 	 * @return \WP_Error WP Error object.
 	 */
-	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500 ) {
+	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
 		switch ( $http_status_code ) {
 			case 409:
 				// If there was a conflict, return the cart so the client can resolve it.
@@ -42,10 +43,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				return new \WP_Error(
 					$error_code,
 					$error_message,
-					[
-						'status' => $http_status_code,
-						'cart'   => $this->schema->get_item_response( $cart ),
-					]
+					array_merge(
+						$additional_data,
+						[
+							'status' => $http_status_code,
+							'cart'   => $this->schema->get_item_response( $cart ),
+						]
+					)
 				);
 		}
 		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );

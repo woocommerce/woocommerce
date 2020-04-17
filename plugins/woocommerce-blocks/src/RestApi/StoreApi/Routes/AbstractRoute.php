@@ -72,7 +72,7 @@ abstract class AbstractRoute implements RouteInterface {
 				$response->header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 			}
 		} catch ( RouteException $error ) {
-			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode() );
+			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( \Exception $error ) {
 			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
 		}
@@ -161,10 +161,11 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @param string $error_code String based error code.
 	 * @param string $error_message User facing error message.
 	 * @param int    $http_status_code HTTP status. Defaults to 500.
+	 * @param array  $additional_data  Extra data (key value pairs) to expose in the error response.
 	 * @return \WP_Error WP Error object.
 	 */
-	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500 ) {
-		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
+	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
+		return new \WP_Error( $error_code, $error_message, array_merge( $additional_data, [ 'status' => $http_status_code ] ) );
 	}
 
 	/**

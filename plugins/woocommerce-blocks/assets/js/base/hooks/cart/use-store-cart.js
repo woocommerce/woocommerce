@@ -36,6 +36,7 @@ export const defaultCartData = {
 	shippingRates: [],
 	shippingRatesLoading: false,
 	hasShippingAddress: false,
+	receiveCart: () => {},
 };
 
 /**
@@ -56,7 +57,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 	const { shouldSelect } = options;
 
 	const results = useSelect(
-		( select ) => {
+		( select, { dispatch } ) => {
 			if ( ! shouldSelect ) {
 				return defaultCartData;
 			}
@@ -82,6 +83,10 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 					shippingRates: previewCart.shipping_rates,
 					shippingRatesLoading: false,
 					hasShippingAddress: false,
+					receiveCart:
+						typeof previewCart?.receiveCart === 'function'
+							? previewCart.receiveCart
+							: () => {},
 				};
 			}
 
@@ -93,6 +98,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 				'getCartData'
 			);
 			const shippingRatesLoading = store.areShippingRatesLoading();
+			const { receiveCart } = dispatch( storeKey );
 
 			return {
 				cartCoupons: cartData.coupons,
@@ -109,6 +115,7 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 				shippingRates: cartData.shippingRates,
 				shippingRatesLoading,
 				hasShippingAddress: !! cartData.shippingAddress.country,
+				receiveCart,
 			};
 		},
 		[ shouldSelect ]
