@@ -228,7 +228,13 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 			$data[] = $attribute;
 		}
 
-		return rest_ensure_response( $data );
+		$response = rest_ensure_response( $data );
+
+		// This API call always returns all product attributes due to retrieval from the object cache.
+		$response->header( 'X-WP-Total', count( $data ) );
+		$response->header( 'X-WP-TotalPages', 1 );
+
+		return $response;
 	}
 
 	/**
