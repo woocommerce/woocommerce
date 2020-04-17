@@ -266,7 +266,7 @@ class InstalledExtensions {
 			'slug'        => $slug,
 			'status'      => $status,
 			'name'        => $plugin_data['Name'],
-			'description' => $plugin_data['Description'],
+			'description' => html_entity_decode( wp_trim_words( $plugin_data['Description'], 20 ) ),
 			'supportUrl'  => 'https://woocommerce.com/my-account/create-a-ticket/',
 		];
 	}

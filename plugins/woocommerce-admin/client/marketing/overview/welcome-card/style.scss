@@ -5,6 +5,12 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		flex-wrap: wrap;
+		padding: 22px;
+
+		@include breakpoint( '>600px' ) {
+			flex-wrap: nowrap;
+		}
 
 		@include breakpoint( '>960px' ) {
 			padding: 32px 108px;
@@ -46,14 +52,20 @@
 	}
 
 	h3 {
-		font-size: 24px;
-		line-height: 32px;
+		font-size: 20px;
+		line-height: 26px;
 		font-weight: normal;
-		margin-left: 20px;
+		text-align: center;
+		margin: 1em 0 0;
 
-		@include breakpoint( '<960px' ) {
-			font-size: 20px;
-			line-height: 26px;
+		@include breakpoint( '>600px' ) {
+			text-align: left;
+			margin: 0 0 0 20px;
+		}
+
+		@include breakpoint( '>960px' ) {
+			font-size: 24px;
+			line-height: 32px;
 		}
 	}
 

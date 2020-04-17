@@ -138,14 +138,16 @@ class InstalledExtensionRow extends Component {
 		return (
 			<div className="woocommerce-marketing-installed-extensions-card__item">
 				<ProductIcon src={ icon } />
-				<div className="woocommerce-marketing-installed-extensions-card__item-text">
-					<h4>{ name }</h4>
-					{ status === 'configured' || (
-						<p className="woocommerce-marketing-installed-extensions-card__item-description">{ description }</p>
-					) }
-				</div>
-				<div className="woocommerce-marketing-installed-extensions-card__item-actions">
-					{ actions }
+				<div className="woocommerce-marketing-installed-extensions-card__item-text-and-actions">
+					<div className="woocommerce-marketing-installed-extensions-card__item-text">
+						<h4>{ name }</h4>
+						{ status === 'configured' || (
+							<p className="woocommerce-marketing-installed-extensions-card__item-description">{ description }</p>
+						) }
+					</div>
+					<div className="woocommerce-marketing-installed-extensions-card__item-actions">
+						{ actions }
+					</div>
 				</div>
 			</div>
 		)
