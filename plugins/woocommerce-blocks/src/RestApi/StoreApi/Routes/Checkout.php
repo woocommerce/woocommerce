@@ -39,6 +39,25 @@ class Checkout extends AbstractRoute {
 	}
 
 	/**
+	 * Enforce nonces for all checkout endpoints.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_Error|\WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		$response = null;
+		try {
+			$this->check_nonce( $request );
+			$response = parent::get_response( $request );
+		} catch ( RouteException $error ) {
+			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode() );
+		} catch ( \Exception $error ) {
+			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
+		}
+		return $response;
+	}
+
+	/**
 	 * Get method arguments for this REST route.
 	 *
 	 * @return array An array of endpoints.

@@ -159,7 +159,9 @@ class Checkout extends AbstractBlock {
 			$data_registry->add( 'cartData', WC()->api->get_endpoint_data( '/wc/store/cart' ) );
 		}
 		if ( ! $data_registry->exists( 'checkoutData' ) ) {
+			add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 			$data_registry->add( 'checkoutData', WC()->api->get_endpoint_data( '/wc/store/checkout' ) );
+			remove_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 		}
 	}
 
