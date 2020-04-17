@@ -79,7 +79,7 @@ jobs:
         - name: E2E Tests
           script:
               - npm ci
-              - npm run docker:up
+              - npm run test:e2e:up
               - composer install
               - npm run build:e2e-test
               - npm run test:e2e
