@@ -187,7 +187,7 @@
 		"grunt": "1.1.0",
 		"grunt-checktextdomain": "1.0.1",
 		"grunt-wp-i18n": "1.0.3",
-		"husky": "4.2.3",
+		"husky": "4.2.5",
 		"lerna": "3.20.2",
 		"lint-staged": "10.1.4",
 		"locutus": "2.0.11",
