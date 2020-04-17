@@ -93,6 +93,8 @@ class WC_Admin_Notices {
 	public static function reset_admin_notices() {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
+		}
+		if ( ! self::is_uploads_directory_is_public() ) {
 			self::add_notice( 'uploads_directory_is_public' );
 		}
 		self::add_notice( 'template_files' );
