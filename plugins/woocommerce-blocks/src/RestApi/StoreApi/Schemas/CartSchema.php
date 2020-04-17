@@ -268,7 +268,9 @@ class CartSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $cart ) {
 		$controller = new CartController();
-		$context    = 'edit';
+
+		// Get cart errors first so if recalculations are performed, it's reflected in the response.
+		$cart_errors = $this->get_cart_errors( $cart );
 
 		return [
 			'coupons'          => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
@@ -292,12 +294,12 @@ class CartSchema extends AbstractSchema {
 					'total_shipping_tax' => $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ),
 
 					// Explicitly request context='edit'; default ('view') will render total as markup.
-					'total_price'        => $this->prepare_money_response( $cart->get_total( $context ), wc_get_price_decimals() ),
+					'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), wc_get_price_decimals() ),
 					'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), wc_get_price_decimals() ),
 					'tax_lines'          => $this->get_tax_lines( $cart ),
 				]
 			),
-			'errors'           => $this->get_cart_errors( $cart ),
+			'errors'           => $cart_errors,
 		];
 	}
 
@@ -328,9 +330,10 @@ class CartSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_cart_errors( $cart ) {
-		$controller = new CartController();
-		$errors     = $controller->get_cart_item_errors();
+		$controller    = new CartController();
+		$item_errors   = $controller->get_cart_item_errors();
+		$coupon_errors = $controller->get_cart_coupon_errors();
 
-		return array_values( array_map( [ $this->error_schema, 'get_item_response' ], $errors ) );
+		return array_values( array_map( [ $this->error_schema, 'get_item_response' ], array_merge( $item_errors, $coupon_errors ) ) );
 	}
 }

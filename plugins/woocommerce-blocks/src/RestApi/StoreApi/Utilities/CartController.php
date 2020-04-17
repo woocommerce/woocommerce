@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\NoticeHandler;
 
 /**
  * Woo Cart Controller class.
@@ -43,64 +44,16 @@ class CartController {
 
 		$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
 		$product = $this->get_product_for_cart( $request );
-
-		if ( $product->is_type( 'variation' ) ) {
-			$product_id   = $product->get_parent_id();
-			$variation_id = $product->get_id();
-		} else {
-			$product_id   = $product->get_id();
-			$variation_id = 0;
-		}
-
-		$cart_id          = wc()->cart->generate_cart_id(
-			$product_id,
-			$variation_id,
+		$cart_id = wc()->cart->generate_cart_id(
+			$this->get_product_id( $product ),
+			$this->get_variation_id( $product ),
 			$request['variation'],
 			$request['cart_item_data']
 		);
+
+		$this->validate_add_to_cart( $product, $request );
+
 		$existing_cart_id = wc()->cart->find_product_in_cart( $cart_id );
-
-		if ( ! $product->is_purchasable() ) {
-			throw new RouteException(
-				'woocommerce_rest_cart_product_is_not_purchasable',
-				sprintf(
-					/* translators: %s: product name */
-					__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
-					$product->get_name()
-				),
-				403
-			);
-		}
-
-		if ( ! $product->is_in_stock() ) {
-			throw new RouteException(
-				'woocommerce_rest_cart_product_no_stock',
-				sprintf(
-					/* translators: %s: product name */
-					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
-					$product->get_name()
-				),
-				403
-			);
-		}
-
-		if ( $product->managing_stock() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
-
-			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
-				throw new RouteException(
-					'woocommerce_rest_cart_product_no_stock',
-					sprintf(
-						/* translators: 1: product name 2: quantity in stock */
-						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
-						$product->get_name(),
-						wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product )
-					),
-					403
-				);
-			}
-		}
 
 		if ( $existing_cart_id ) {
 			if ( $product->is_sold_individually() ) {
@@ -125,8 +78,8 @@ class CartController {
 				$request['cart_item_data'],
 				array(
 					'key'          => $cart_id,
-					'product_id'   => $product_id,
-					'variation_id' => $variation_id,
+					'product_id'   => $this->get_product_id( $product ),
+					'variation_id' => $this->get_variation_id( $product ),
 					'variation'    => $request['variation'],
 					'quantity'     => $request['quantity'],
 					'data'         => $product,
@@ -141,9 +94,9 @@ class CartController {
 		do_action(
 			'woocommerce_add_to_cart',
 			$cart_id,
-			$product_id,
+			$this->get_product_id( $product ),
 			$request['quantity'],
-			$variation_id,
+			$this->get_variation_id( $product ),
 			$request['variation'],
 			$request['cart_item_data']
 		);
@@ -191,6 +144,83 @@ class CartController {
 	 * Validate all items in the cart and check for errors.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param \WC_Product $product Product object associated with the cart item.
+	 * @param array       $request Add to cart request params.
+	 */
+	public function validate_add_to_cart( \WC_Product $product, $request ) {
+		if ( ! $product->is_purchasable() ) {
+			$this->throw_default_product_exception( $product );
+		}
+
+		if ( ! $product->is_in_stock() ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_no_stock',
+				sprintf(
+					/* translators: %s: product name */
+					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
+			);
+		}
+
+		if ( $product->managing_stock() ) {
+			$qty_remaining = $this->get_remaining_stock_for_product( $product );
+			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+
+			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_product_no_stock',
+					sprintf(
+						/* translators: 1: product name 2: quantity in stock */
+						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
+						$product->get_name(),
+						wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product )
+					),
+					403
+				);
+			}
+		}
+
+		/**
+		 * Hook: woocommerce_add_to_cart_validation (legacy).
+		 *
+		 * Allow 3rd parties to validate if an item can be added to the cart. This is a legacy hook from Woo core.
+		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
+		 * notices and convert to exceptions instead.
+		 */
+		$passed_validation = apply_filters(
+			'woocommerce_add_to_cart_validation',
+			true,
+			$this->get_product_id( $product ),
+			$request['quantity'],
+			$this->get_variation_id( $product ),
+			$request['variation']
+		);
+
+		if ( ! $passed_validation ) {
+			// Validation did not pass - see if an error notice was thrown.
+			NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_add_to_cart_error' );
+
+			// If no notice was thrown, throw the default notice instead.
+			$this->throw_default_product_exception( $product );
+		}
+
+		/**
+		 * Fire action to validate add to cart. Functions hooking into this should throw an \Exception to prevent
+		 * add to cart from occuring.
+		 *
+		 * @param \WC_Product $product Product object being added to the cart.
+		 * @param array       $request Add to cart request params including id, quantity, and variation attributes.
+		 */
+		do_action( 'wooocommerce_store_api_validate_add_to_cart', $product, $request );
+	}
+
+	/**
+	 * Validate all items in the cart and check for errors.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
 	 */
 	public function validate_cart_items() {
 		$cart_items = $this->get_cart_items();
@@ -198,26 +228,16 @@ class CartController {
 		foreach ( $cart_items as $cart_item_key => $cart_item ) {
 			$this->validate_cart_item( $cart_item );
 		}
-	}
 
-	/**
-	 * Validate all items in the cart and get a list of errors.
-	 *
-	 * @throws RouteException Exception if invalid data is detected.
-	 */
-	public function get_cart_item_errors() {
-		$errors     = [];
-		$cart_items = $this->get_cart_items();
-
-		foreach ( $cart_items as $cart_item_key => $cart_item ) {
-			try {
-				$this->validate_cart_item( $cart_item );
-			} catch ( RouteException $error ) {
-				$errors[] = new \WP_Error( $error->getErrorCode(), $error->getMessage() );
-			}
-		}
-
-		return $errors;
+		/**
+		 * Hook: woocommerce_check_cart_items
+		 *
+		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
+		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
+		 * notices and convert to exceptions instead.
+		 */
+		do_action( 'woocommerce_check_cart_items' );
+		NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_cart_item_error' );
 	}
 
 	/**
@@ -225,9 +245,9 @@ class CartController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
-	 * @param array $cart_item Cart item data.
+	 * @param array $cart_item Cart item array.
 	 */
-	protected function validate_cart_item( $cart_item ) {
+	public function validate_cart_item( $cart_item ) {
 		$product = $cart_item['data'];
 
 		if ( ! $product instanceof \WC_Product ) {
@@ -235,15 +255,7 @@ class CartController {
 		}
 
 		if ( ! $product->is_purchasable() ) {
-			throw new RouteException(
-				'woocommerce_rest_cart_product_is_not_purchasable',
-				sprintf(
-					/* translators: %s: product name */
-					__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
-					$product->get_name()
-				),
-				403
-			);
+			$this->throw_default_product_exception( $product );
 		}
 
 		if ( $product->is_sold_individually() && $cart_item['quantity'] > 1 ) {
@@ -292,39 +304,70 @@ class CartController {
 				);
 			}
 		}
+
+		/**
+		 * Fire action to validate add to cart. Functions hooking into this should throw an \Exception to prevent
+		 * add to cart from occuring.
+		 *
+		 * @param \WC_Product $product Product object being added to the cart.
+		 * @param array       $cart_item Cart item array.
+		 */
+		do_action( 'wooocommerce_store_api_validate_cart_item', $product, $cart_item );
 	}
 
 	/**
-	 * Gets the qty of a product across line items.
+	 * Validate all coupons in the cart and check for errors.
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @return int
+	 * @throws RouteException Exception if invalid data is detected.
 	 */
-	protected function get_product_quantity_in_cart( $product ) {
-		$product_quantities = wc()->cart->get_cart_item_quantities();
-		$product_id         = $product->get_stock_managed_by_id();
+	public function validate_cart_coupons() {
+		$cart_coupons = $this->get_cart_coupons();
 
-		return isset( $product_quantities[ $product_id ] ) ? $product_quantities[ $product_id ] : 0;
+		foreach ( $cart_coupons as $code ) {
+			$coupon = new \WC_Coupon( $code );
+			$this->validate_cart_coupon( $coupon );
+		}
 	}
 
 	/**
-	 * Gets remaining stock for a product.
+	 * Validate all items in the cart and get a list of errors.
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @return int
+	 * @throws RouteException Exception if invalid data is detected.
 	 */
-	protected function get_remaining_stock_for_product( $product ) {
-		// @todo Remove once min support for WC reaches 4.1.0.
-		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
-			$reserve_stock_controller = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
-		} else {
-			$reserve_stock_controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
+	public function get_cart_item_errors() {
+		$errors     = [];
+		$cart_items = $this->get_cart_items();
+
+		foreach ( $cart_items as $cart_item_key => $cart_item ) {
+			try {
+				$this->validate_cart_item( $cart_item );
+			} catch ( RouteException $error ) {
+				$errors[] = new \WP_Error( $error->getErrorCode(), $error->getMessage() );
+			}
 		}
 
-		$draft_order  = WC()->session->get( 'store_api_draft_order', 0 );
-		$qty_reserved = $reserve_stock_controller->get_reserved_stock( $product, $draft_order );
+		return $errors;
+	}
 
-		return $product->get_stock_quantity() - $qty_reserved;
+	/**
+	 * Validate all items in the cart and get a list of errors.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 */
+	public function get_cart_coupon_errors() {
+		$errors       = [];
+		$cart_coupons = $this->get_cart_coupons();
+
+		foreach ( $cart_coupons as $code ) {
+			try {
+				$coupon = new \WC_Coupon( $code );
+				$this->validate_cart_coupon( $coupon );
+			} catch ( RouteException $error ) {
+				$errors[] = new \WP_Error( $error->getErrorCode(), $error->getMessage() );
+			}
+		}
+
+		return $errors;
 	}
 
 	/**
@@ -370,11 +413,11 @@ class CartController {
 	 */
 	public function get_cart_hashes() {
 		return [
-			'line_items' => WC()->cart->get_cart_hash(),
-			'shipping'   => md5( wp_json_encode( WC()->cart->shipping_methods ) ),
-			'fees'       => md5( wp_json_encode( WC()->cart->get_fees() ) ),
-			'coupons'    => md5( wp_json_encode( WC()->cart->get_applied_coupons() ) ),
-			'taxes'      => md5( wp_json_encode( WC()->cart->get_taxes() ) ),
+			'line_items' => wc()->cart->get_cart_hash(),
+			'shipping'   => md5( wp_json_encode( wc()->cart->shipping_methods ) ),
+			'fees'       => md5( wp_json_encode( wc()->cart->get_fees() ) ),
+			'coupons'    => md5( wp_json_encode( wc()->cart->get_applied_coupons() ) ),
+			'taxes'      => md5( wp_json_encode( wc()->cart->get_taxes() ) ),
 		];
 	}
 
@@ -430,7 +473,7 @@ class CartController {
 			}
 		}
 
-		return $calculate_rates ? WC()->shipping()->calculate_shipping( $packages ) : $packages;
+		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
 	}
 
 	/**
@@ -441,10 +484,10 @@ class CartController {
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
 		$cart                        = $this->get_cart_instance();
-		$session_data                = WC()->session->get( 'chosen_shipping_methods' ) ? WC()->session->get( 'chosen_shipping_methods' ) : [];
+		$session_data                = wc()->session->get( 'chosen_shipping_methods' ) ? wc()->session->get( 'chosen_shipping_methods' ) : [];
 		$session_data[ $package_id ] = $rate_id;
 
-		WC()->session->set( 'chosen_shipping_methods', $session_data );
+		wc()->session->set( 'chosen_shipping_methods', $session_data );
 	}
 
 	/**
@@ -490,7 +533,7 @@ class CartController {
 		if ( ! $coupon->is_valid() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
-				$coupon->get_error_message(),
+				wp_strip_all_tags( $coupon->get_error_message() ),
 				403
 			);
 		}
@@ -534,6 +577,63 @@ class CartController {
 	}
 
 	/**
+	 * Validates an existing cart coupon and returns any errors.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+	 */
+	protected function validate_cart_coupon( \WC_Coupon $coupon ) {
+		if ( ! $coupon->is_valid() ) {
+			wc()->cart->remove_coupon( $coupon->get_code() );
+			wc()->cart->calculate_totals();
+			throw new RouteException(
+				'woocommerce_rest_cart_coupon_error',
+				sprintf(
+					// translators: %1$s coupon code, %2$s reason.
+					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woo-gutenberg-products-block' ),
+					$coupon->get_code(),
+					wp_strip_all_tags( $coupon->get_error_message() )
+				),
+				409
+			);
+		}
+	}
+
+	/**
+	 * Gets the qty of a product across line items.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return int
+	 */
+	protected function get_product_quantity_in_cart( $product ) {
+		$product_quantities = wc()->cart->get_cart_item_quantities();
+		$product_id         = $product->get_stock_managed_by_id();
+
+		return isset( $product_quantities[ $product_id ] ) ? $product_quantities[ $product_id ] : 0;
+	}
+
+	/**
+	 * Gets remaining stock for a product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return int
+	 */
+	protected function get_remaining_stock_for_product( $product ) {
+		// @todo Remove once min support for WC reaches 4.1.0.
+		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
+			$reserve_stock_controller = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
+		} else {
+			$reserve_stock_controller = new \Automattic\WooCommerce\Blocks\RestApi\StoreApi\Utilities\ReserveStock();
+		}
+
+		$draft_order  = wc()->session->get( 'store_api_draft_order', 0 );
+		$qty_reserved = $reserve_stock_controller->get_reserved_stock( $product, $draft_order );
+
+		return $product->get_stock_quantity() - $qty_reserved;
+	}
+
+	/**
 	 * Get a product object to be added to the cart.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
@@ -553,6 +653,45 @@ class CartController {
 		}
 
 		return $product;
+	}
+
+	/**
+	 * For a given product, get the product ID.
+	 *
+	 * @param \WC_Product $product Product object associated with the cart item.
+	 * @return int
+	 */
+	protected function get_product_id( \WC_Product $product ) {
+		return $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+	}
+
+	/**
+	 * For a given product, get the variation ID.
+	 *
+	 * @param \WC_Product $product Product object associated with the cart item.
+	 * @return int
+	 */
+	protected function get_variation_id( \WC_Product $product ) {
+		return $product->is_type( 'variation' ) ? $product->get_id() : 0;
+	}
+
+	/**
+	 * Default exception thrown when an item cannot be added to the cart.
+	 *
+	 * @throws RouteException Exception with code woocommerce_rest_cart_product_is_not_purchasable.
+	 *
+	 * @param \WC_Product $product Product object associated with the cart item.
+	 */
+	protected function throw_default_product_exception( \WC_Product $product ) {
+		throw new RouteException(
+			'woocommerce_rest_cart_product_is_not_purchasable',
+			sprintf(
+				/* translators: %s: product name */
+				__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
+				$product->get_name()
+			),
+			403
+		);
 	}
 
 	/**

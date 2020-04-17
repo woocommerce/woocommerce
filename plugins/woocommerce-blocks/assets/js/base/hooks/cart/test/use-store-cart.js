@@ -24,6 +24,8 @@ jest.mock( '@woocommerce/block-data', () => ( {
 describe( 'useStoreCart', () => {
 	let registry, renderer;
 
+	const receiveCartMock = () => {};
+
 	const previewCartData = {
 		cartCoupons: previewCart.coupons,
 		cartItems: previewCart.items,
@@ -79,6 +81,7 @@ describe( 'useStoreCart', () => {
 		shippingRates: [],
 		shippingRatesLoading: false,
 		hasShippingAddress: false,
+		receiveCart: undefined,
 	};
 
 	const getWrappedComponents = ( Component ) => (
@@ -88,8 +91,8 @@ describe( 'useStoreCart', () => {
 	);
 
 	const getTestComponent = ( options ) => () => {
-		const results = useStoreCart( options );
-		return <div results={ results } />;
+		const { receiveCart, ...results } = useStoreCart( options );
+		return <div results={ results } receiveCart={ receiveCart } />;
 	};
 
 	const setUpMocks = () => {
@@ -136,9 +139,15 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			const { results } = renderer.root.findByType( 'div' ).props;
-
-			expect( results ).toEqual( defaultCartData );
+			const { results, receiveCart } = renderer.root.findByType(
+				'div'
+			).props;
+			const {
+				receiveCart: defaultReceiveCart,
+				...remaining
+			} = defaultCartData;
+			expect( results ).toEqual( remaining );
+			expect( receiveCart ).toEqual( defaultReceiveCart );
 		} );
 
 		it( 'return store data when shouldSelect is true', () => {
@@ -150,9 +159,12 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			const { results } = renderer.root.findByType( 'div' ).props;
+			const { results, receiveCart } = renderer.root.findByType(
+				'div'
+			).props;
 
 			expect( results ).toEqual( mockStoreCartData );
+			expect( receiveCart ).toBeUndefined();
 		} );
 	} );
 
@@ -160,7 +172,12 @@ describe( 'useStoreCart', () => {
 		beforeEach( () => {
 			mockBaseContext.useEditorContext.mockReturnValue( {
 				isEditor: true,
-				previewData: { previewCart },
+				previewData: {
+					previewCart: {
+						...previewCart,
+						receiveCart: receiveCartMock,
+					},
+				},
 			} );
 		} );
 
@@ -173,9 +190,12 @@ describe( 'useStoreCart', () => {
 				);
 			} );
 
-			const { results } = renderer.root.findByType( 'div' ).props;
+			const { results, receiveCart } = renderer.root.findByType(
+				'div'
+			).props;
 
 			expect( results ).toEqual( previewCartData );
+			expect( receiveCart ).toEqual( receiveCartMock );
 		} );
 	} );
 } );

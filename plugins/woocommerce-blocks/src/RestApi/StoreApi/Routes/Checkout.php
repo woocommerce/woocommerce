@@ -163,7 +163,16 @@ class Checkout extends AbstractRoute {
 			);
 		}
 
+		// Ensure order still matches cart.
+		$order_controller->update_order_from_cart( $order_object );
+
+		// If any form fields were posted, update the order.
 		$this->update_order_from_request( $order_object, $request );
+
+		// Check order is still valid.
+		$order_controller->validate_order_before_payment( $order_object );
+
+		// Persist customer address data to account.
 		$order_controller->sync_customer_data_with_order( $order_object );
 
 		if ( ! $order_object->needs_payment() ) {
@@ -196,6 +205,37 @@ class Checkout extends AbstractRoute {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Get route response when something went wrong.
+	 *
+	 * @param string $error_code String based error code.
+	 * @param string $error_message User facing error message.
+	 * @param int    $http_status_code HTTP status. Defaults to 500.
+	 * @param array  $additional_data  Extra data (key value pairs) to expose in the error response.
+	 * @return \WP_Error WP Error object.
+	 */
+	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
+		switch ( $http_status_code ) {
+			case 409:
+				// If there was a conflict, return the cart so the client can resolve it.
+				$controller = new CartController();
+				$cart       = $controller->get_cart_instance();
+
+				return new \WP_Error(
+					$error_code,
+					$error_message,
+					array_merge(
+						$additional_data,
+						[
+							'status' => $http_status_code,
+							'cart'   => wc()->api->get_endpoint_data( '/wc/store/cart' ),
+						]
+					)
+				);
+		}
+		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
 	}
 
 	/**
@@ -246,13 +286,19 @@ class Checkout extends AbstractRoute {
 	 * Create or update a draft order based on the cart.
 	 *
 	 * @throws RouteException On error.
+	 *
 	 * @return \WC_Order Order object.
 	 */
 	protected function create_or_update_draft_order() {
+		$cart_controller  = new CartController();
 		$order_controller = new OrderController();
 		$reserve_stock    = \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ? new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() : new ReserveStock();
 		$order_object     = $this->get_draft_order_object( $this->get_draft_order_id() );
 		$created          = false;
+
+		// Validate items etc are allowed in the order before it gets created.
+		$cart_controller->validate_cart_items();
+		$cart_controller->validate_cart_coupons();
 
 		if ( ! $order_object ) {
 			$order_object = $order_controller->create_order_from_cart();

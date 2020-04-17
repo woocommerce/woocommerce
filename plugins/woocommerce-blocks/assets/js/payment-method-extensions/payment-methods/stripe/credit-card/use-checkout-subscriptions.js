@@ -158,8 +158,8 @@ export const useCheckoutSubscriptions = (
 					messageContext: emitResponse.noticeContexts.PAYMENTS,
 				};
 			}
-			// leave for checkout to handle.
-			return null;
+			// so we don't break the observers.
+			return true;
 		};
 		const unsubscribeProcessing = eventRegistration.onPaymentProcessing(
 			onSubmit

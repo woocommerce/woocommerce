@@ -15,7 +15,16 @@ import {
 	PRODUCT_NOT_PURCHASABLE,
 	PRODUCT_NOT_ENOUGH_STOCK,
 	PRODUCT_SOLD_INDIVIDUALLY,
+	GENERIC_CART_ITEM_ERROR,
 } from './constants';
+
+const cartItemErrorCodes = [
+	PRODUCT_OUT_OF_STOCK,
+	PRODUCT_NOT_PURCHASABLE,
+	PRODUCT_NOT_ENOUGH_STOCK,
+	PRODUCT_SOLD_INDIVIDUALLY,
+	GENERIC_CART_ITEM_ERROR,
+];
 
 /**
  * When an order was not created for the checkout, for example, when an item
@@ -59,12 +68,7 @@ const CheckoutError = () => {
 const ErrorTitle = ( { errorData } ) => {
 	let heading = __( 'Checkout error', 'woo-gutenberg-products-block' );
 
-	if (
-		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
-		errorData.code === PRODUCT_NOT_PURCHASABLE ||
-		errorData.code === PRODUCT_OUT_OF_STOCK ||
-		errorData.code === PRODUCT_SOLD_INDIVIDUALLY
-	) {
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
 		heading = __(
 			'There is a problem with your cart',
 			'woo-gutenberg-products-block'
@@ -84,12 +88,7 @@ const ErrorTitle = ( { errorData } ) => {
 const ErrorMessage = ( { errorData } ) => {
 	let message = errorData.message;
 
-	if (
-		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
-		errorData.code === PRODUCT_NOT_PURCHASABLE ||
-		errorData.code === PRODUCT_OUT_OF_STOCK ||
-		errorData.code === PRODUCT_SOLD_INDIVIDUALLY
-	) {
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
 		message =
 			message +
 			' ' +
@@ -111,12 +110,7 @@ const ErrorButton = ( { errorData } ) => {
 	let buttonText = __( 'Retry', 'woo-gutenberg-products-block' );
 	let buttonUrl = 'javascript:window.location.reload(true)';
 
-	if (
-		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
-		errorData.code === PRODUCT_NOT_PURCHASABLE ||
-		errorData.code === PRODUCT_OUT_OF_STOCK ||
-		errorData.code === PRODUCT_SOLD_INDIVIDUALLY
-	) {
+	if ( cartItemErrorCodes.includes( errorData.code ) ) {
 		buttonText = __( 'Edit your cart', 'woo-gutenberg-products-block' );
 		buttonUrl = CART_URL;
 	}
