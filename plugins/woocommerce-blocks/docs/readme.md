@@ -16,3 +16,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 -   [Releasing New Versions](releases/readme.md)
 -   [WordPress Update Testing Checklist](releases/wordpress-update-testing-checklist.md)
+
+**API documentation**
+
+-   [Store API documentation](../src/RestApi/StoreApi/README.md)

@@ -92,7 +92,7 @@ abstract class AbstractRoute implements RouteInterface {
 	protected function check_nonce( \WP_REST_Request $request ) {
 		$nonce = $request->get_header( 'X-WC-Store-API-Nonce' );
 
-		if ( defined( 'WOOCOMMERCE_STORE_API_DISABLE_NONCE_CHECKS' ) && WOOCOMMERCE_STORE_API_DISABLE_NONCE_CHECKS ) {
+		if ( apply_filters( 'woocommerce_store_api_disable_nonce_check', false ) ) {
 			return;
 		}
 

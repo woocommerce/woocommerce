@@ -45,7 +45,7 @@ class CartUpdateShipping extends AbstractRoute {
 				'callback' => [ $this, 'get_response' ],
 				'args'     => [
 					'first_name' => [
-						'description'       => __( 'First name', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Customer first name.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
@@ -53,7 +53,7 @@ class CartUpdateShipping extends AbstractRoute {
 
 					],
 					'last_name'  => [
-						'description'       => __( 'Last name', 'woo-gutenberg-products-block' ),
+						'description'       => __( 'Customer last name.', 'woo-gutenberg-products-block' ),
 						'type'              => 'string',
 						'default'           => '',
 						'sanitize_callback' => 'wc_clean',
