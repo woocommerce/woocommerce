@@ -59,14 +59,9 @@ class CartUpdateItem extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$controller = new CartController();
 		$cart       = $controller->get_cart_instance();
-		$cart_item  = $controller->get_cart_item( $request['key'] );
-
-		if ( ! $cart_item ) {
-			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item no longer exists or is invalid.', 'woo-gutenberg-products-block' ), 409 );
-		}
 
 		if ( isset( $request['quantity'] ) ) {
-			$cart->set_quantity( $request['key'], $request['quantity'] );
+			$controller->set_cart_item_quantity( $request['key'], $request['quantity'] );
 		}
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );

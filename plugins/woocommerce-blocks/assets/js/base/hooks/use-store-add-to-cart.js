@@ -35,26 +35,26 @@ const getQuantityFromCartItems = ( cartItems, productId ) => {
  *                                  to add to cart functionality.
  */
 export const useStoreAddToCart = ( productId ) => {
-	const [ addingToCart, setAddingToCart ] = useState( false );
+	const { addItemToCart } = useDispatch( storeKey );
 	const { cartItems, cartIsLoading } = useStoreCart();
+
+	const [ addingToCart, setAddingToCart ] = useState( false );
 	const currentCartItemQuantity = useRef(
 		getQuantityFromCartItems( cartItems, productId )
 	);
-	const { addItemToCart } = useDispatch( storeKey );
 
 	const addToCart = () => {
 		setAddingToCart( true );
-		addItemToCart( productId );
+		addItemToCart( productId ).finally( () => {
+			setAddingToCart( false );
+		} );
 	};
 
 	useEffect( () => {
-		if ( addingToCart ) {
-			const quantity = getQuantityFromCartItems( cartItems, productId );
+		const quantity = getQuantityFromCartItems( cartItems, productId );
 
-			if ( quantity !== currentCartItemQuantity.current ) {
-				currentCartItemQuantity.current = quantity;
-				setAddingToCart( false );
-			}
+		if ( quantity !== currentCartItemQuantity.current ) {
+			currentCartItemQuantity.current = quantity;
 		}
 	}, [ cartItems, productId ] );
 
