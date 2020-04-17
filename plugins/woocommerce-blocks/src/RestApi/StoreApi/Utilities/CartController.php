@@ -152,6 +152,42 @@ class CartController {
 	}
 
 	/**
+	 * Based on core `set_quantity` method, but validates if an item is sold individually first.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param string  $item_id Cart item id.
+	 * @param integer $quantity Cart quantity.
+	 */
+	public function set_cart_item_quantity( $item_id, $quantity = 1 ) {
+		$cart_item = $this->get_cart_item( $item_id );
+
+		if ( ! $cart_item ) {
+			throw new RouteException( 'woocommerce_rest_cart_invalid_key', __( 'Cart item does not exist.', 'woo-gutenberg-products-block' ), 404 );
+		}
+
+		$product = $cart_item['data'];
+
+		if ( ! $product instanceof \WC_Product ) {
+			throw new RouteException( 'woocommerce_rest_cart_invalid_product', __( 'Cart item is invalid.', 'woo-gutenberg-products-block' ), 404 );
+		}
+
+		if ( $product->is_sold_individually() && $quantity > 1 ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_sold_individually',
+				sprintf(
+					/* translators: %s: product name */
+					__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
+			);
+		}
+
+		wc()->cart->set_quantity( $item_id, $quantity );
+	}
+
+	/**
 	 * Validate all items in the cart and check for errors.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
@@ -160,13 +196,7 @@ class CartController {
 		$cart_items = $this->get_cart_items();
 
 		foreach ( $cart_items as $cart_item_key => $cart_item ) {
-			$product = $cart_item['data'];
-
-			if ( ! $product instanceof \WC_Product ) {
-				continue;
-			}
-
-			$this->validate_cart_item( $product );
+			$this->validate_cart_item( $cart_item );
 		}
 	}
 
@@ -180,14 +210,8 @@ class CartController {
 		$cart_items = $this->get_cart_items();
 
 		foreach ( $cart_items as $cart_item_key => $cart_item ) {
-			$product = $cart_item['data'];
-
-			if ( ! $product instanceof \WC_Product ) {
-				continue;
-			}
-
 			try {
-				$this->validate_cart_item( $product );
+				$this->validate_cart_item( $cart_item );
 			} catch ( RouteException $error ) {
 				$errors[] = new \WP_Error( $error->getErrorCode(), $error->getMessage() );
 			}
@@ -201,15 +225,33 @@ class CartController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
-	 * @param \WC_Product $product Product object associated with the cart item.
+	 * @param array $cart_item Cart item data.
 	 */
-	public function validate_cart_item( \WC_Product $product ) {
+	protected function validate_cart_item( $cart_item ) {
+		$product = $cart_item['data'];
+
+		if ( ! $product instanceof \WC_Product ) {
+			return;
+		}
+
 		if ( ! $product->is_purchasable() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_product_is_not_purchasable',
 				sprintf(
 					/* translators: %s: product name */
 					__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
+					$product->get_name()
+				),
+				403
+			);
+		}
+
+		if ( $product->is_sold_individually() && $cart_item['quantity'] > 1 ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_product_sold_individually',
+				sprintf(
+					/* translators: %s: product name */
+					__( 'There are too many &quot;%s&quot; in the cart. Only 1 can be purchased.', 'woo-gutenberg-products-block' ),
 					$product->get_name()
 				),
 				403

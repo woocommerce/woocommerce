@@ -14,6 +14,7 @@ import {
 	PRODUCT_OUT_OF_STOCK,
 	PRODUCT_NOT_PURCHASABLE,
 	PRODUCT_NOT_ENOUGH_STOCK,
+	PRODUCT_SOLD_INDIVIDUALLY,
 } from './constants';
 
 /**
@@ -61,7 +62,8 @@ const ErrorTitle = ( { errorData } ) => {
 	if (
 		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
 		errorData.code === PRODUCT_NOT_PURCHASABLE ||
-		errorData.code === PRODUCT_OUT_OF_STOCK
+		errorData.code === PRODUCT_OUT_OF_STOCK ||
+		errorData.code === PRODUCT_SOLD_INDIVIDUALLY
 	) {
 		heading = __(
 			'There is a problem with your cart',
@@ -85,7 +87,8 @@ const ErrorMessage = ( { errorData } ) => {
 	if (
 		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
 		errorData.code === PRODUCT_NOT_PURCHASABLE ||
-		errorData.code === PRODUCT_OUT_OF_STOCK
+		errorData.code === PRODUCT_OUT_OF_STOCK ||
+		errorData.code === PRODUCT_SOLD_INDIVIDUALLY
 	) {
 		message =
 			message +
@@ -111,7 +114,8 @@ const ErrorButton = ( { errorData } ) => {
 	if (
 		errorData.code === PRODUCT_NOT_ENOUGH_STOCK ||
 		errorData.code === PRODUCT_NOT_PURCHASABLE ||
-		errorData.code === PRODUCT_OUT_OF_STOCK
+		errorData.code === PRODUCT_OUT_OF_STOCK ||
+		errorData.code === PRODUCT_SOLD_INDIVIDUALLY
 	) {
 		buttonText = __( 'Edit your cart', 'woo-gutenberg-products-block' );
 		buttonUrl = CART_URL;

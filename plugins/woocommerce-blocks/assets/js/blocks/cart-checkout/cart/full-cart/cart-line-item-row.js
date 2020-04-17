@@ -28,11 +28,21 @@ import Dinero from 'dinero.js';
  * @param {boolean}     backOrdersAllowed Whether to allow backorders or not.
  * @param {number|null} lowStockAmount    If present the number of stock
  *                                        remaining.
+ * @param {boolean}     soldIndividually  Whether an item is sold individually or not.
  *
  * @return {number} The maximum number value for the quantity input.
  */
-const getMaximumQuantity = ( backOrdersAllowed, lowStockAmount ) => {
+const getMaximumQuantity = (
+	backOrdersAllowed,
+	lowStockAmount,
+	soldIndividually
+) => {
+	if ( soldIndividually ) {
+		return 1;
+	}
+
 	const maxQuantityLimit = getSetting( 'quantitySelectLimit', 99 );
+
 	if ( backOrdersAllowed || ! lowStockAmount ) {
 		return maxQuantityLimit;
 	}
@@ -59,6 +69,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 		summary = '',
 		low_stock_remaining: lowStockRemaining = null,
 		backorders_allowed: backOrdersAllowed = false,
+		sold_individually: soldIndividually = false,
 		permalink = '',
 		images = [],
 		variation = [],
@@ -133,7 +144,8 @@ const CartLineItemRow = ( { lineItem } ) => {
 					quantity={ quantity }
 					maximum={ getMaximumQuantity(
 						backOrdersAllowed,
-						lowStockRemaining
+						lowStockRemaining,
+						soldIndividually
 					) }
 					onChange={ changeQuantity }
 					itemName={ name }
