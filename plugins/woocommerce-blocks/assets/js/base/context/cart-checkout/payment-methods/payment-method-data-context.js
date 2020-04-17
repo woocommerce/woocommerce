@@ -99,6 +99,7 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		isSuccessResponse,
 		isErrorResponse,
 		isFailResponse,
+		noticeContexts,
 	} = useEmitResponse();
 	const [ activePaymentMethod, setActive ] = useState( '' );
 	const [ observers, subscriber ] = useReducer( emitReducer, {} );
@@ -285,17 +286,19 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 						response?.meta?.shippingData
 					);
 				} else if ( isFailResponse( response ) ) {
-					addErrorNotice( response.message, {
-						context: 'wc/payment-area',
+					addErrorNotice( response?.message, {
+						context:
+							response?.messageContext || noticeContexts.PAYMENTS,
 					} );
 					setPaymentStatus().failed(
-						response.message,
+						response?.message,
 						response?.meta?.paymentMethodData,
 						response?.meta?.billingData
 					);
 				} else if ( isErrorResponse( response ) ) {
-					addErrorNotice( response.message, {
-						context: 'wc/payment-area',
+					addErrorNotice( response?.message, {
+						context:
+							response?.messageContext || noticeContexts.PAYMENTS,
 					} );
 					setPaymentStatus().error( response.message );
 					setValidationErrors( response?.validationErrors );
