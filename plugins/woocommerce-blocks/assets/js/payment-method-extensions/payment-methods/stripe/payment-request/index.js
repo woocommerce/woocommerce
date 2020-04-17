@@ -22,7 +22,6 @@ const PaymentRequestPaymentMethod = {
 			}
 			// do a test payment request to check if payment request payment can be
 			// done.
-			// @todo, initial country and currency needs to server.
 			const paymentRequest = stripe.paymentRequest( {
 				total: {
 					label: 'Test total',
