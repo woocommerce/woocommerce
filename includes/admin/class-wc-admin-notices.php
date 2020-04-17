@@ -39,6 +39,7 @@ class WC_Admin_Notices {
 		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
 		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
 		'redirect_download_method'     => 'redirect_download_method_notice',
+		'uploads_directory_is_public'  => 'uploads_directory_is_public_notice',
 	);
 
 	/**
@@ -92,6 +93,7 @@ class WC_Admin_Notices {
 	public static function reset_admin_notices() {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
+			self::add_notice( 'uploads_directory_is_public' );
 		}
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
@@ -489,6 +491,20 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Notice about uploads directory begin public.
+	 *
+	 * @since 4.2.0
+	 */
+	public static function uploads_directory_is_public_notice() {
+		if ( ! self::is_uploads_directory_is_public() || get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_public_notice', true ) ) {
+			self::remove_notice( 'uploads_directory_is_public' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-public.php';
+	}
+
+	/**
 	 * Determine if the store is running SSL.
 	 *
 	 * @return bool Flag SSL enabled.
@@ -529,6 +545,32 @@ class WC_Admin_Notices {
 	 */
 	public static function theme_check_notice() {
 		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
+	}
+
+	/**
+	 * Check if uploads directory is public.
+	 *
+	 * @since 4.2.0
+	 * @return bool
+	 */
+	protected static function is_uploads_directory_is_public() {
+		$uploads = wp_upload_dir( null, true );
+
+		// Skip if returns an error.
+		if ( $uploads['error'] ) {
+			return true;
+		}
+
+		// Check for uploads root.
+		$baseurl_response = wp_safe_remote_get( $uploads['baseurl'] );
+		$baseurl_code     = intval( wp_remote_retrieve_response_code( $baseurl_response ) );
+
+		// Check for latest uploads sub directory.
+		// Double check in case the uploads root is only protected by an index.php or index.html file.
+		$url_response = wp_safe_remote_get( $uploads['url'] );
+		$url_code     = intval( wp_remote_retrieve_response_code( $url_response ) );
+
+		return 200 === $baseurl_code && 200 === $url_code;
 	}
 }
 
