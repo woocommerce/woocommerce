@@ -50,11 +50,6 @@ class OrderController {
 	 * @param \WC_Order $order The order object to update.
 	 */
 	public function update_order_from_cart( \WC_Order $order ) {
-		// Ensure cart is current.
-		wc()->cart->calculate_shipping();
-		wc()->cart->calculate_totals();
-
-		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
