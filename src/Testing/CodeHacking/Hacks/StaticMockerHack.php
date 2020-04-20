@@ -25,19 +25,31 @@ use ReflectionClass;
  * Invocations of public static members from the original class that exist in the mock class
  * will be replaced with invocations of the same members for the mock class.
  * Invocations of members not existing in the mock class will be left unmodified.
+ *
+ * If the mock class defines a __callStatic method you can pass the $replace_always constructor argument
+ * as true.
  */
 final class StaticMockerHack extends CodeHack {
+
+	// phpcs:ignore Squiz.Commenting.VariableComment.Missing
+	private $replace_always = false;
 
 	/**
 	 * StaticMockerHack constructor.
 	 *
 	 * @param string $source_class Name of the original class (the one having the members to be mocked).
 	 * @param string $mock_class Name of the mock class (the one having the replacement mock members).
+	 * @param bool   $replace_always If true, all method invocations will be always be redirected to the mock class.
 	 * @throws ReflectionException Error when instantiating ReflectionClass.
 	 */
-	public function __construct( $source_class, $mock_class ) {
+	public function __construct( $source_class, $mock_class, $replace_always = false ) {
 		$this->source_class = $source_class;
 		$this->target_class = $mock_class;
+
+		if ( $replace_always ) {
+			$this->replace_always = true;
+			return;
+		}
 
 		$rc = new ReflectionClass( $mock_class );
 
@@ -74,8 +86,8 @@ final class StaticMockerHack extends CodeHack {
 					$next_token = next( $tokens );
 					if ( $this->is_token_of_type( $next_token, T_DOUBLE_COLON ) ) {
 						$called_member = next( $tokens )[1];
-						if ( in_array( $called_member, $this->members_implemented_in_mock, true ) ) {
-							// Reference to source class member that exists in mock class, replace.
+						if ( $this->replace_always || in_array( $called_member, $this->members_implemented_in_mock, true ) ) {
+							// Reference to source class member that exists in mock class, or replace always requested: replace.
 							$code .= "{$this->target_class}::{$called_member}";
 						} else {
 							// Reference to source class member that does NOT exists in mock class, leave unchanged.

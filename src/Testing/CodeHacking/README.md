@@ -132,6 +132,40 @@ The `CodeHacker` class is actually [a streamWrapper class](https://www.php.net/m
 
 The `CodeHackerTestHook` then uses reflection to find `before_` methods and `@hack` anotations, putting everything in place right before the tests are executed.
 
+## Workaround for static mocking of already loaded code: the `StaticWrapper`
+
+Before the test hooks that configure the code hacker run there's already a significant amount of code files already loaded, as a result of WooCommerce being loaded and initialized within the unit tests bootstrap files. These code file can't be hacked using the described approach, and therefore require to _hack the hack_.
+
+A workaround for a particular case is provided. If you need to register a `StaticMockerHack` for a class that has been already loaded (you will notice because registering the hack the usual way does nothing), do the following instead:
+
+1. Add the class name (NOT the file name) to the array returned by `tests/classes-that-need-static-wrapper.php`.
+
+2. Configure the mock using `StaticWrapper::set_mock_class_for`.
+
+```
+class WC_Tests_Admin_Hello_Worlder extends WC_Unit_Test_Case {
+
+	public function test_say_hello() {
+		FunctionsMock::$_option_value = 'MSX world';
+
+		StaticWrapper::set_mock_class_for('Logger', 'LoggerMock');
+
+		$sut    = new WC_Admin_Hello_Worlder();
+		$actual = $sut->say_hello( 'Nestor' );
+
+		$this->assertEquals( 'Hello Nestor, welcome to MSX world!', $actual );
+		$this->assertEquals( 'site_name', FunctionsMock::$_option_requested );
+		$this->assertEquals( 'Nestor', LoggerMock::$_logged );
+	}
+}
+```
+
+Note that in this case you don't explicitly interact with the code hacker, neither directly nor by using `@hack` annotations.
+
+Under the hood this is hacking all the classes in the list with a "clean" `StaticWrapper`-derived class; here "clean" means that all static methods are redirected to the original class via `__callStatic`. This hacking happens at the beginning of the bootstrapping process, when nothing from WooCommerce has been loaded yet. Later on `StaticWrapper::set_mock_class_for` can be used at any time to selectively mock any static method in the class.
+
+Alternatively, you can configure mock functions instead of a mock class. See the source of `StaticWrapper` for more details.
+
 ## Note on `copy` in tests
 
 For some reason tests using `copy` to copy files will fail if the code hacker is active. As a workaround, the new `file_copy` method defined in `WC_Unit_Test_Case` should be used instead (it temporarily disables the code hacker and then performs the copy operation). This is something to investigate.

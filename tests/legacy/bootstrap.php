@@ -6,6 +6,10 @@
  * @package WooCommerce Tests
  */
 
+use Automattic\WooCommerce\Testing\CodeHacking\CodeHacker;
+use Automattic\WooCommerce\Testing\CodeHacking\StaticWrapper;
+use Automattic\WooCommerce\Testing\CodeHacking\Hacks\StaticMockerHack;
+
 /**
  * Class WC_Unit_Tests_Bootstrap
  */
@@ -30,6 +34,23 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function __construct() {
 
+		$this->tests_dir  = dirname( __FILE__ );
+		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
+
+		$hacking_base = $this->plugin_dir . '/src/Testing/CodeHacking';
+		require_once $hacking_base . '/StaticWrapper.php';
+		require_once $hacking_base . '/CodeHacker.php';
+		require_once $hacking_base . '/Hacks/CodeHack.php';
+		require_once $hacking_base . '/Hacks/StaticMockerHack.php';
+
+		// Define a static wrapper for all the classes that need it.
+		$classes_that_need_static_wrapper = include_once __DIR__ . '/classes-that-need-static-wrapper.php';
+		foreach ( $classes_that_need_static_wrapper as $class ) {
+			$wrapper_class = StaticWrapper::define_for( $class );
+			CodeHacker::add_hack( new StaticMockerHack( $class, $wrapper_class, true ) );
+		}
+		CodeHacker::enable();
+
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
 
@@ -40,8 +61,6 @@ class WC_Unit_Tests_Bootstrap {
 		}
 		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
-		$this->tests_dir    = dirname( __FILE__ );
-		$this->plugin_dir   = dirname( dirname( $this->tests_dir ) );
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : sys_get_temp_dir() . '/wordpress-tests-lib';
 
 		// load test function so tests_add_filter() is available.
