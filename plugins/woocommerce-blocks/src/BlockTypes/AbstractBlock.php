@@ -59,12 +59,12 @@ abstract class AbstractBlock {
 	/**
 	 * Append frontend scripts when rendering the block.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $content    Block content. Default empty string.
+	 * @param array|\WP_Block $attributes Block attributes, or an instance of a WP_Block. Defaults to an empty array.
+	 * @param string          $content    Block content. Default empty string.
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = [], $content = '' ) {
-		$this->enqueue_assets( $attributes );
+		$this->enqueue_assets( is_a( $attributes, '\WP_Block' ) ? $attributes->attributes : $attributes );
 		return $content;
 	}
 

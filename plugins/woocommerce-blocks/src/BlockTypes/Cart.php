@@ -44,13 +44,13 @@ class Cart extends AbstractBlock {
 	/**
 	 * Append frontend scripts when rendering the Cart block.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $content    Block content. Default empty string.
+	 * @param array|\WP_Block $attributes Block attributes, or an instance of a WP_Block. Defaults to an empty array.
+	 * @param string          $content    Block content. Default empty string.
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-		$this->enqueue_assets( $attributes );
+		$this->enqueue_assets( is_a( $attributes, '\WP_Block' ) ? $attributes->attributes : $attributes );
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
 
 		// Add placeholder element to footer to push content for the sticky bar on mobile.
