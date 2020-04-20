@@ -182,8 +182,12 @@ class Bootstrap {
 		$allowed_flags = [ 'experimental', 'stable' ];
 		$flag          = getenv( 'WOOCOMMERCE_BLOCKS_PHASE' );
 		if ( ! in_array( $flag, $allowed_flags, true ) ) {
+			if ( file_exists( __DIR__ . '/../../blocks.ini' ) ) {
 				$woo_options = parse_ini_file( __DIR__ . '/../../blocks.ini' );
 				$flag        = is_array( $woo_options ) && 'experimental' === $woo_options['woocommerce_blocks_phase'] ? 'experimental' : 'stable';
+			} else {
+				$flag = 'stable';
+			}
 		}
 		define( 'WOOCOMMERCE_BLOCKS_PHASE', $flag );
 	}

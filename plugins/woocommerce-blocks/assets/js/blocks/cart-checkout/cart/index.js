@@ -66,6 +66,4 @@ const settings = {
 	},
 };
 
-if ( process.env.WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
-	registerBlockType( 'woocommerce/cart', settings );
-}
+registerBlockType( 'woocommerce/cart', settings );
