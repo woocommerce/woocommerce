@@ -61,7 +61,6 @@ const CheckoutProcessor = () => {
 	const {
 		activePaymentMethod,
 		currentStatus: currentPaymentStatus,
-		errorMessage,
 		paymentMethodData,
 		expressPaymentMethods,
 		paymentMethods,
@@ -112,16 +111,6 @@ const CheckoutProcessor = () => {
 		currentShippingAddress.current = shippingAddress;
 		currentRedirectUrl.current = redirectUrl;
 	}, [ billingData, shippingAddress, redirectUrl ] );
-
-	useEffect( () => {
-		if ( errorMessage ) {
-			addErrorNotice( errorMessage, {
-				id: 'payment-method-error',
-			} );
-		} else {
-			removeNotice( 'payment-method-error' );
-		}
-	}, [ errorMessage ] );
 
 	const checkValidation = useCallback( () => {
 		if ( hasValidationErrors ) {
