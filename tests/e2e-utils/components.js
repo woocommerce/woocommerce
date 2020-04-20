@@ -6,8 +6,6 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from './flows';
-import modelRegistry from './factories';
-import { SimpleProduct } from '@woocommerce/model-factories';
 import { clickTab, uiUnblocked, verifyCheckboxIsUnset } from './page-utils';
 
 const config = require( 'config' );
@@ -71,7 +69,7 @@ const completeOnboardingWizard = async () => {
 	// Wait for usage tracking pop-up window to appear
 	await page.waitForSelector( '.components-modal__header-heading' );
 	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Build a better WooCommerce' }
+		'.components-modal__header-heading', { text: 'Build a Better WooCommerce' }
 	);
 
 	// Query for "Continue" buttons
@@ -90,10 +88,10 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the industries checkboxes
 	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( industryCheckboxes ).toHaveLength( 10 );
+	expect( industryCheckboxes ).toHaveLength( 8 );
 
 	// Select all industries including "Other"
-	for ( let i = 0; i < 10; i++ ) {
+	for ( let i = 0; i < 8; i++ ) {
 		await industryCheckboxes[i].click();
 	}
 
@@ -115,19 +113,19 @@ const completeOnboardingWizard = async () => {
 
 	// Query for the product types checkboxes
 	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
-	expect( productTypesCheckboxes ).toHaveLength( 8 );
+	expect( productTypesCheckboxes ).toHaveLength( 6 );
 
 	// Select Physical and Downloadable products
-	for ( let i = 1; i < 2; i++ ) {
+	for ( let i = 0; i < 2; i++ ) {
 		await productTypesCheckboxes[i].click();
 	}
 
 	// Wait for "Continue" button to become active
-	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
 
 	await Promise.all( [
 		// Click on "Continue" button to move to the next step
-		page.click( 'button.is-primary' ),
+		page.click( 'button.woocommerce-profile-wizard__continue' ),
 
 		// Wait for "Tell us about your business" section to load
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -141,17 +139,22 @@ const completeOnboardingWizard = async () => {
 
 	// Fill the number of products you plan to sell
 	await selectControls[0].click();
-	await page.waitForSelector( '.woocommerce-select-control__control' );
+	await page.waitForSelector( '.woocommerce-select-control__listbox' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.numberofproducts' ) } );
 
 	// Fill currently selling elsewhere
 	await selectControls[1].click();
-	await page.waitForSelector( '.woocommerce-select-control__control' );
+	await page.waitForSelector( '.woocommerce-select-control__listbox' );
 	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
 
-	// Disable business extension downloads
-	const pluginToggle = await page.$( '.woocommerce-business-extensions .components-checkbox-control__input-container' );
-	pluginToggle.click();
+	// Query for the plugin upload toggles
+	const pluginToggles = await page.$$( '.components-form-toggle__input' );
+	expect( pluginToggles ).toHaveLength( 3 );
+
+	// Disable Market on Facebook, Mailchimp and Google Shopping download
+	for ( let i = 0; i < 3; i++ ) {
+		await pluginToggles[i].click();
+	}
 
 	// Wait for "Continue" button to become active
 	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
@@ -183,9 +186,9 @@ const completeOnboardingWizard = async () => {
 	await page.waitForSelector( '.woocommerce-profile-wizard__header-title' );
 
 	// Wait for "No thanks" button to become active
-	await page.waitForSelector( 'button.is-secondary:not(:disabled)' );
+	await page.waitForSelector( 'button.is-default:not(:disabled)' );
 	// Click on "No thanks" button to move to the next step
-	await page.click( 'button.is-secondary' );
+	await page.click( 'button.is-default' );
 
 	// End of onboarding wizard
 
@@ -344,11 +347,22 @@ const completeOldSetupWizard = async () => {
  * Create simple product.
  */
 const createSimpleProduct = async () => {
-	const product = await modelRegistry.getFactory( SimpleProduct ).create( {
-		name: simpleProductName,
-		regularPrice: '9.99'
-	} );
-	return product.id;
+	// Go to "add product" page
+	await StoreOwnerFlow.openNewProduct();
+
+	// Make sure we're on the add order page
+	await expect( page.title() ).resolves.toMatch( 'Add new product' );
+
+	// Set product data
+	await expect( page ).toFill( '#title', simpleProductName );
+	await clickTab( 'General' );
+	await expect( page ).toFill( '#_regular_price', '9.99' );
+
+	await verifyAndPublish();
+
+	const simplePostId = await page.$( '#post_ID' );
+	let simplePostIdValue = ( await ( await simplePostId.getProperty( 'value' ) ).jsonValue() );
+	return simplePostIdValue;
 } ;
 
 /**

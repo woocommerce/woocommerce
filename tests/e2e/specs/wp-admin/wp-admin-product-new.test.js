@@ -5,8 +5,11 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { clickTab, uiUnblocked } from '../../utils';
+import {
+	StoreOwnerFlow,
+	clickTab,
+	uiUnblocked
+} from '@woocommerce/e2e-utils';
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );

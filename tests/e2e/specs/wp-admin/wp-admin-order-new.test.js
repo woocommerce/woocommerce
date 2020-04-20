@@ -5,8 +5,10 @@
 /**
  * Internal dependencies
  */
-import { StoreOwnerFlow } from '../../utils/flows';
-import { verifyPublishAndTrash } from '../../utils';
+import {
+	StoreOwnerFlow,
+	verifyPublishAndTrash
+} from '@woocommerce/e2e-utils';
 
 describe( 'Add New Order Page', () => {
 	beforeAll( async () => {

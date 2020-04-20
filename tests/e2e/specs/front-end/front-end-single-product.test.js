@@ -9,6 +9,14 @@ import { createSimpleProduct, createVariableProduct } from '../../utils/componen
 import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 import { uiUnblocked } from '../../utils';
 
+import {
+	CustomerFlow,
+	StoreOwnerFlow,
+	createSimpleProduct,
+	createVariableProduct,
+	uiUnblocked
+} from '@woocommerce/e2e-utils';
+
 let simplePostIdValue;
 let variablePostIdValue;
 const config = require( 'config' );

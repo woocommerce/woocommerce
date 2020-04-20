@@ -1,0 +1,23 @@
+{
+    "name": "@woocommerce/e2e-utils",
+    "version": "1.0.0",
+    "description": "End-To-End (E2E) test utils for WooCommerce",
+    "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e-utils/README.md",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/woocommerce/woocommerce.git"
+    },
+    "license": "GPL-3.0+",
+    "main": "index.js",
+    "dependencies": {
+      "@babel/cli": "^7.8.3",
+      "@babel/core": "^7.8.3",
+      "@babel/preset-env": "^7.8.3",
+      "@slack/web-api": "^5.6.0",
+      "@wordpress/e2e-test-utils": "^3.0.0",
+      "config": "^3.2.4",
+      "eslint": "6.7.2",
+      "jest": "^24.9.0",
+      "puppeteer": "^2.0.0"
+    }
+  }
