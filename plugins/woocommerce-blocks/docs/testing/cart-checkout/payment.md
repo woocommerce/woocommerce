@@ -28,12 +28,12 @@ Unsupported:
 
 ## What to test
 
-If no payment method is set up:
+If no payment method is set up: <!-- heading -->
 
 - [ ] An error will show up in the frontend, saying that no payment method is available.
 - [ ] In the editor, you will be prompted to set up a payment method.
 
-If you have a payment method available:
+If you have a payment method available: <!-- heading -->
 
 - [ ] You should be able to perform a successful checkout with Check payments.
 - [ ] You should be able to perform a successful checkout credit card payment using this cart `4242424242424242`
