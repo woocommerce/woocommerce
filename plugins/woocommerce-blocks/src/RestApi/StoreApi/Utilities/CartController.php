@@ -568,6 +568,8 @@ class CartController {
 			foreach ( $coupons_to_remove as $code ) {
 				$cart->remove_coupon( $code );
 			}
+
+			$applied_coupons = array_diff( $applied_coupons, $coupons_to_remove );
 		}
 
 		$applied_coupons[] = $coupon_code;
