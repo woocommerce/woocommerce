@@ -2842,7 +2842,7 @@ class WC_API_Products extends WC_API_Resource {
 	 */
 	public function create_product_attribute_term( $attribute_id, $data ) {
 		global $wpdb;
-
+		$attribute_id = absint( $attribute_id );
 		try {
 			if ( ! isset( $data['product_attribute_term'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_product_attribute_term_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'product_attribute_term' ), 400 );
