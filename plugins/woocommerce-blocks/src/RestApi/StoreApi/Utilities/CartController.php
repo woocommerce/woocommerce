@@ -165,7 +165,7 @@ class CartController {
 			);
 		}
 
-		if ( $product->managing_stock() ) {
+		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
 			$qty_remaining = $this->get_remaining_stock_for_product( $product );
 			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
 
@@ -176,7 +176,7 @@ class CartController {
 						/* translators: 1: product name 2: quantity in stock */
 						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
 						$product->get_name(),
-						wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product )
+						wc_format_stock_quantity_for_display( $qty_remaining, $product )
 					),
 					403
 				);
@@ -228,6 +228,10 @@ class CartController {
 		foreach ( $cart_items as $cart_item_key => $cart_item ) {
 			$this->validate_cart_item( $cart_item );
 		}
+
+		// Before running the woocommerce_check_cart_items hook, unhook validation from the core cart.
+		remove_action( 'woocommerce_check_cart_items', array( wc()->cart, 'check_cart_items' ), 1 );
+		remove_action( 'woocommerce_check_cart_items', array( wc()->cart, 'check_cart_coupons' ), 1 );
 
 		/**
 		 * Hook: woocommerce_check_cart_items
@@ -282,7 +286,7 @@ class CartController {
 			);
 		}
 
-		if ( $product->managing_stock() ) {
+		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
 			$qty_remaining = $this->get_remaining_stock_for_product( $product );
 			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
 
@@ -294,10 +298,10 @@ class CartController {
 						_n(
 							'There is only %1$s unit of &quot;%2$s&quot; in stock.',
 							'There are only %1$s units of &quot;%2$s&quot; in stock.',
-							$product->get_stock_quantity(),
+							$qty_remaining,
 							'woo-gutenberg-products-block'
 						),
-						wc_format_stock_quantity_for_display( $product->get_stock_quantity(), $product ),
+						wc_format_stock_quantity_for_display( $qty_remaining, $product ),
 						$product->get_name()
 					),
 					403

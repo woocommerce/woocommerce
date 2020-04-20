@@ -8,7 +8,6 @@ import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import { getCurrency } from '@woocommerce/base-utils';
 import { useStoreCartItemQuantity } from '@woocommerce/base-hooks';
 import { Icon, trash } from '@woocommerce/icons';
-import { getSetting } from '@woocommerce/settings';
 import {
 	ProductImage,
 	ProductLowStockBadge,
@@ -22,32 +21,6 @@ import Dinero from 'dinero.js';
 /**
  * @typedef {import('@woocommerce/type-defs/cart').CartItem} CartItem
  */
-
-/**
- *
- * @param {boolean}     backOrdersAllowed Whether to allow backorders or not.
- * @param {number|null} lowStockAmount    If present the number of stock
- *                                        remaining.
- * @param {boolean}     soldIndividually  Whether an item is sold individually or not.
- *
- * @return {number} The maximum number value for the quantity input.
- */
-const getMaximumQuantity = (
-	backOrdersAllowed,
-	lowStockAmount,
-	soldIndividually
-) => {
-	if ( soldIndividually ) {
-		return 1;
-	}
-
-	const maxQuantityLimit = getSetting( 'quantitySelectLimit', 99 );
-
-	if ( backOrdersAllowed || ! lowStockAmount ) {
-		return maxQuantityLimit;
-	}
-	return Math.min( lowStockAmount, maxQuantityLimit );
-};
 
 /**
  * Convert a Dinero object with precision to store currency minor unit.
@@ -68,8 +41,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 		name = '',
 		summary = '',
 		low_stock_remaining: lowStockRemaining = null,
-		backorders_allowed: backOrdersAllowed = false,
-		sold_individually: soldIndividually = false,
+		quantity_limit: quantityLimit = 99,
 		permalink = '',
 		images = [],
 		variation = [],
@@ -142,11 +114,7 @@ const CartLineItemRow = ( { lineItem } ) => {
 				<QuantitySelector
 					disabled={ isPendingDelete }
 					quantity={ quantity }
-					maximum={ getMaximumQuantity(
-						backOrdersAllowed,
-						lowStockRemaining,
-						soldIndividually
-					) }
+					maximum={ quantityLimit }
 					onChange={ changeQuantity }
 					itemName={ name }
 				/>

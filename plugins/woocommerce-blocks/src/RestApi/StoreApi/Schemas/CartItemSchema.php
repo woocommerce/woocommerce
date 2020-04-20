@@ -50,6 +50,12 @@ class CartItemSchema extends ProductSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'quantity_limit'      => [
+				'description' => __( 'The maximum quantity than can be added to the cart at once.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'name'                => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
@@ -315,6 +321,7 @@ class CartItemSchema extends ProductSchema {
 			'key'                 => $cart_item['key'],
 			'id'                  => $product->get_id(),
 			'quantity'            => wc_stock_amount( $cart_item['quantity'] ),
+			'quantity_limit'      => $this->get_product_quantity_limit( $product ),
 			'name'                => $this->prepare_html_response( $product->get_title() ),
 			'summary'             => $this->prepare_html_response( ( new ProductSummary( $product ) )->get_summary( 150 ) ),
 			'short_description'   => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
@@ -337,6 +344,24 @@ class CartItemSchema extends ProductSchema {
 				]
 			),
 		];
+	}
+
+	/**
+	 * Get the quantity limit for an item in the cart.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return int
+	 */
+	protected function get_product_quantity_limit( \WC_Product $product ) {
+		$limits = [ 99 ];
+
+		if ( $product->is_sold_individually() ) {
+			$limits[] = 1;
+		} elseif ( ! $product->backorders_allowed() ) {
+			$limits[] = $this->get_remaining_stock( $product );
+		}
+
+		return apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
 	}
 
 	/**
