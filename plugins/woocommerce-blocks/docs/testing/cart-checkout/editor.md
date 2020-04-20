@@ -2,7 +2,7 @@
 
 # Editor experience
 
-- [ ] You should be able to add, and only one Cart or Checkout block to a page.
+- [ ] You should be able to add one and only one Cart or Checkout block to a page.
 - [ ] The preview in the inserter should show a skeleton of how the block structure should look like.
 - [ ] When inserting any of the blocks, it should have some data already in it.
 - [ ] You should not be able to interact directly with the block (except for some sections).

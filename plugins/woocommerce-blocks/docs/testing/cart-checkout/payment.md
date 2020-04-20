@@ -21,7 +21,7 @@ To test Express payment methods there are some special requirements like
 - To test Microsoft Pay you will need to have Edge installed.
 - You will also need to be on a supported country, to better verify your compatibility visit
   [this page](https://stripe.com/docs/stripe-js/elements/payment-request-button#react-overview)
-  You should see if you're on a supported platform or not
+  You should see if you're on a supported platform or not.
 
 Unsupported:
 ![](https://i.imgur.com/EpkFrat.png).
