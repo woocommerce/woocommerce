@@ -93,16 +93,6 @@ class Cart extends AbstractBlock {
 			$data_registry->add( 'page-' . $attributes['checkoutPageId'], $permalink );
 		}
 
-		if ( ! $data_registry->exists( 'quantitySelectLimit' ) ) {
-			/**
-			 * Note: this filter will be deprecated if/when quantity select limits
-			 * are added at the product level.
-			 *
-			 * @return {integer} $max_quantity_limit Maximum quantity of products that can be selected in the cart.
-			 */
-			$data_registry->add( 'quantitySelectLimit', apply_filters( 'woocommerce_maximum_quantity_selected_cart', 99 ) );
-		}
-
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
 			$this->hydrate_from_api( $data_registry );
