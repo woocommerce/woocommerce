@@ -127,11 +127,8 @@ class Library {
 			$blocks[] = 'PriceFilter';
 			$blocks[] = 'AttributeFilter';
 			$blocks[] = 'ActiveFilters';
-
-			if ( WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
-				$blocks[] = 'Checkout';
-				$blocks[] = 'Cart';
-			}
+			$blocks[] = 'Checkout';
+			$blocks[] = 'Cart';
 		}
 		foreach ( $blocks as $class ) {
 			$class    = __NAMESPACE__ . '\\BlockTypes\\' . $class;
