@@ -12,6 +12,7 @@ taxes (if you have any), shipping and so on.
 
 - [ ] Create pages with Cart and Checkout blocks.
 - [ ] Set the continue to checkout link your Cart settings to the Checkout page you created.
+- [ ] In Woocommerce -> Settings -> Advanced, set the new pages to your default Cart and Checkout.
 - [ ] Add some products to your cart.
 - [ ] Mix in a limited stock product or a coupon.
 - [ ] Continue to checkout.
