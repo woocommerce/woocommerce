@@ -2291,9 +2291,6 @@ function wc_load_cart() {
 
 	WC()->initialize_session();
 	WC()->initialize_cart();
-
-	// Make sure cart is loaded from session.
-	WC()->cart->get_cart();
 }
 
 /**
