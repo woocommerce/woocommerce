@@ -80,6 +80,8 @@ class CartSelectShippingRate extends AbstractCartRoute {
 				throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
 			}
 		}
+
+		$cart->calculate_shipping();
 		$cart->calculate_totals();
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );

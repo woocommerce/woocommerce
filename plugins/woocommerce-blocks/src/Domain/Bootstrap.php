@@ -12,13 +12,12 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\BackCompatAssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\PaymentMethodAssets;
-use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Library;
-use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\RestApi;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Stripe;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
-
+use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\RestApi;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -65,14 +64,40 @@ class Bootstrap {
 		}
 
 		$this->remove_core_blocks();
-
-		if ( ! $this->is_built() ) {
-			$this->add_build_notice();
-		}
-
+		$this->add_build_notice();
 		$this->define_feature_flag();
+		$this->define_tables();
 
-		// register core dependencies with the container.
+		Library::init();
+		RestApi::init();
+
+		if ( ! wc()->is_rest_api_request() ) {
+			$this->init_block_assets();
+			$this->init_payment_method_assets();
+			OldAssets::init();
+		}
+	}
+	/**
+	 * Define tables in $wpdb;
+	 */
+	protected function define_tables() {
+		global $wpdb;
+
+		// List of tables without prefixes.
+		$tables = array(
+			'wc_reserved_stock' => 'wc_reserved_stock',
+		);
+
+		foreach ( $tables as $name => $table ) {
+			$wpdb->$name    = $wpdb->prefix . $table;
+			$wpdb->tables[] = $table;
+		}
+	}
+
+	/**
+	 * Add asset classes to the container during init.
+	 */
+	protected function init_block_assets() {
 		$this->container->register(
 			AssetApi::class,
 			function ( Container $container ) {
@@ -90,6 +115,14 @@ class Bootstrap {
 					: new AssetDataRegistry( $asset_api );
 			}
 		);
+		// load AssetDataRegistry.
+		$this->container->get( AssetDataRegistry::class );
+	}
+
+	/**
+	 * Add payment method classes to the container during init.
+	 */
+	protected function init_payment_method_assets() {
 		$this->container->register(
 			PaymentMethodRegistry::class,
 			function( Container $container ) {
@@ -104,18 +137,10 @@ class Bootstrap {
 				return new PaymentMethodAssets( $payment_method_registry, $asset_data_registry );
 			}
 		);
-
-		// load AssetDataRegistry.
-		$this->container->get( AssetDataRegistry::class );
-
 		// load PaymentMethodAssets.
 		$this->container->get( PaymentMethodAssets::class );
 
 		$this->load_payment_method_integrations();
-
-		Library::init();
-		OldAssets::init();
-		RestApi::init();
 	}
 
 	/**
@@ -142,6 +167,9 @@ class Bootstrap {
 	 * Add a notice stating that the build has not been done yet.
 	 */
 	protected function add_build_notice() {
+		if ( $this->is_built() ) {
+			return;
+		}
 		add_action(
 			'admin_notices',
 			function() {
@@ -224,5 +252,6 @@ class Bootstrap {
 				);
 			}
 		);
+		add_action( 'init', [ $this->container->get( PaymentMethodRegistry::class ), 'initialize' ] );
 	}
 }
