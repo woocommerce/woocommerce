@@ -34,6 +34,9 @@ export const useStoreNotices = () => {
 				void createNotice( 'success', text, {
 					...noticeProps,
 				} ),
+			hasNoticesOfType: ( type ) => {
+				return notices.some( ( notice ) => notice.type === type );
+			},
 			removeNotices: ( status = null ) => {
 				notices.map( ( notice ) => {
 					if ( status === null || notice.status === status ) {

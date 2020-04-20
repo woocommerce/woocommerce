@@ -30,7 +30,11 @@ import {
 	useValidationContext,
 	StoreNoticesProvider,
 } from '@woocommerce/base-context';
-import { useStoreCart, usePaymentMethods } from '@woocommerce/base-hooks';
+import {
+	useStoreCart,
+	usePaymentMethods,
+	useStoreNotices,
+} from '@woocommerce/base-hooks';
 import {
 	ExpressCheckoutFormControl,
 	PaymentMethods,
@@ -74,7 +78,10 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		isIdle: checkoutIsIdle,
 		isProcessing: checkoutIsProcessing,
 	} = useCheckoutContext();
-	const { showAllValidationErrors } = useValidationContext();
+	const {
+		hasValidationErrors,
+		showAllValidationErrors,
+	} = useValidationContext();
 	const {
 		shippingRates,
 		shippingRatesLoading,
@@ -84,6 +91,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 	} = useShippingDataContext();
 	const { billingData, setBillingData } = useBillingDataContext();
 	const { paymentMethods } = usePaymentMethods();
+	const { hasNoticesOfType } = useStoreNotices();
 
 	const [ shippingAsBilling, setShippingAsBilling ] = useState(
 		needsShipping
@@ -135,12 +143,16 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		}
 	}, [ shippingAsBilling, setBillingData ] );
 
+	const hasErrorsToDisplay =
+		checkoutIsIdle &&
+		checkoutHasError &&
+		( hasValidationErrors || hasNoticesOfType( 'default' ) );
 	useEffect( () => {
-		if ( checkoutIsIdle && checkoutHasError ) {
+		if ( hasErrorsToDisplay ) {
 			showAllValidationErrors();
 			scrollToTop( { focusableSelector: 'input:invalid' } );
 		}
-	}, [ checkoutIsIdle, checkoutHasError ] );
+	}, [ hasErrorsToDisplay ] );
 
 	if ( ! isEditor && ! hasOrder ) {
 		return <CheckoutOrderError />;
