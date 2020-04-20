@@ -2285,8 +2285,15 @@ function wc_load_cart() {
 		return;
 	}
 
+	// Ensure dependencies are loaded in all contexts.
+	include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+	include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
+
 	WC()->initialize_session();
 	WC()->initialize_cart();
+
+	// Make sure cart is loaded from session.
+	WC()->cart->get_cart();
 }
 
 /**
