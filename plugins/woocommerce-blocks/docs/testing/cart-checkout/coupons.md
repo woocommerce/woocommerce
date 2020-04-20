@@ -14,11 +14,11 @@ You will need to setup some types of coupon in order to test this.
 
 ## What to test
 
-With coupons disabled:
+With coupons disabled: <!-- heading -->
 
 - [ ] You should not see the add coupon section in your cart and checkout and in the editor.
 
-With coupons enabled:
+With coupons enabled: <!-- heading -->
 
 - [ ] You can apply coupons in both Cart and Checkout blocks.
 - [ ] A valid coupon `coupon` should reduce your totals.
