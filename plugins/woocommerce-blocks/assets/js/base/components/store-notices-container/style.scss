@@ -27,19 +27,19 @@
 
 .components-snackbar-list {
 	position: fixed;
-	bottom: 100px;
-	left: 100px;
+	bottom: 20px;
+	left: 16px;
+	width: auto;
 
-	@include breakpoint( "<600px" ) {
+	@include breakpoint( "<782px" ) {
 		position: fixed;
 		top: 10px;
 		left: 0;
 		bottom: auto;
-		width: fit-content;
 	}
 
 	.components-snackbar-list__notice-container {
-		@include breakpoint( "<600px" ) {
+		@include breakpoint( "<782px" ) {
 			margin-left: 10px;
 			margin-right: 10px;
 		}
