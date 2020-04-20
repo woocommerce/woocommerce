@@ -64,7 +64,7 @@ class WCPay extends Component {
 		try {
 			// Fetch the business verification (connect) URL (Stripe KYC) from the backend
 			const result = await apiFetch( {
-				path: WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-wcpay',
+				path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
 				method: 'POST',
 			} );
 

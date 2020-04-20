@@ -124,6 +124,7 @@ class Onboarding {
 	private function add_filters() {
 		// Rest API hooks need to run before is_admin() checks.
 		add_filter( 'woocommerce_rest_prepare_themes', array( $this, 'add_uploaded_theme_data' ) );
+		add_filter( 'woocommerce_admin_plugins_whitelist', array( $this, 'get_onboarding_allowed_plugins' ), 10, 2 );
 
 		if ( ! is_admin() ) {
 			return;
@@ -463,8 +464,6 @@ class Onboarding {
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete.
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
-			$settings['onboarding']['activePlugins']            = self::get_active_plugins();
-			$settings['onboarding']['installedPlugins']         = PluginsHelper::get_installed_plugin_slugs();
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
 			$settings['onboarding']['connectNonce']             = wp_create_nonce( 'connect' );
@@ -574,11 +573,13 @@ class Onboarding {
 	/**
 	 * Gets an array of plugins that can be installed & activated via the onboarding wizard.
 	 *
+	 * @param array $plugins Array of plugin slugs to be allowed.
+	 *
 	 * @return array
 	 * @todo Handle edgecase of where installed plugins may have versioned folder names (i.e. `jetpack-master/jetpack.php`).
 	 */
-	public static function get_allowed_plugins() {
-		return apply_filters(
+	public static function get_onboarding_allowed_plugins( $plugins ) {
+		$onboarding_plugins = apply_filters(
 			'woocommerce_admin_onboarding_plugins_whitelist',
 			array(
 				'facebook-for-woocommerce'            => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
@@ -596,15 +597,7 @@ class Onboarding {
 				'woocommerce-payments'                => 'woocommerce-payments/woocommerce-payments.php',
 			)
 		);
-	}
-
-	/**
-	 * Get a list of active plugins, relevent to the onboarding wizard.
-	 *
-	 * @return array
-	 */
-	public static function get_active_plugins() {
-		return array_values( array_intersect( PluginsHelper::get_active_plugin_slugs(), array_keys( self::get_allowed_plugins() ) ) );
+		return array_merge( $plugins, $onboarding_plugins );
 	}
 
 	/**

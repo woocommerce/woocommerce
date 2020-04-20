@@ -1,24 +1,23 @@
 <?php
 /**
- * Onboarding Plugins REST API Test
+ * Plugins REST API Test
  *
  * @package WooCommerce Admin\Tests\API
  */
 
-use \Automattic\WooCommerce\Admin\API\OnboardingPlugins;
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
+use \Automattic\WooCommerce\Admin\API\Plugins;
 
 /**
- * WC Tests API Onboarding Plugins
+ * WC Tests API Plugins
  */
-class WC_Tests_API_Onboarding_Plugins extends WC_REST_Unit_Test_Case {
+class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc-admin/onboarding/plugins';
+	protected $endpoint = '/wc-admin/plugins';
 
 	/**
 	 * Setup test data. Called before every test.
@@ -95,7 +94,7 @@ class WC_Tests_API_Onboarding_Plugins extends WC_REST_Unit_Test_Case {
 		);
 		$response       = $this->server->dispatch( $request );
 		$data           = $response->get_data();
-		$active_plugins = Onboarding::get_active_plugins();
+		$active_plugins = Plugins::get_active_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( 'facebook-for-woocommerce', $data['activatedPlugins'] );

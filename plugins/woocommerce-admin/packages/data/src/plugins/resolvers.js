@@ -21,7 +21,7 @@ import {
 export function* getActivePlugins() {
 	yield setIsRequesting( 'getActivePlugins', true );
 	try {
-		const url = WC_ADMIN_NAMESPACE + '/onboarding/plugins/active';
+		const url = WC_ADMIN_NAMESPACE + '/plugins/active';
 		const results = yield apiFetch( {
 			path: url,
 			method: 'GET',
@@ -37,7 +37,7 @@ export function* getInstalledPlugins() {
 	yield setIsRequesting( 'getInstalledPlugins', true );
 
 	try {
-		const url = WC_ADMIN_NAMESPACE + '/onboarding/plugins/installed';
+		const url = WC_ADMIN_NAMESPACE + '/plugins/installed';
 		const results = yield apiFetch( {
 			path: url,
 			method: 'GET',
@@ -72,7 +72,7 @@ export function* getJetpackConnectUrl( query ) {
 
 	try {
 		const url = addQueryArgs(
-			WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-jetpack',
+			WC_ADMIN_NAMESPACE + '/plugins/connect-jetpack',
 			query
 		);
 		const results = yield apiFetch( {

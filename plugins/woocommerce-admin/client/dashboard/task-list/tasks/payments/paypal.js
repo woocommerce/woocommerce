@@ -86,7 +86,7 @@ class PayPal extends Component {
 		this.setState( { isPending: true } );
 		try {
 			const result = await apiFetch( {
-				path: WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-paypal',
+				path: WC_ADMIN_NAMESPACE + '/plugins/connect-paypal',
 				method: 'POST',
 			} );
 			if ( ! result || ! result.connectUrl ) {

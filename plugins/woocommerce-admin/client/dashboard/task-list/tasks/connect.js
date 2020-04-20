@@ -66,7 +66,7 @@ class Connect extends Component {
 	async request() {
 		try {
 			const connectResponse = await apiFetch( {
-				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/request-wccom-connect`,
+				path: `${ WC_ADMIN_NAMESPACE }/plugins/request-wccom-connect`,
 				method: 'POST',
 			} );
 			if ( connectResponse && connectResponse.connectAction ) {
@@ -83,7 +83,7 @@ class Connect extends Component {
 		const { query } = this.props;
 		try {
 			const connectResponse = await apiFetch( {
-				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/finish-wccom-connect`,
+				path: `${ WC_ADMIN_NAMESPACE }/plugins/finish-wccom-connect`,
 				method: 'POST',
 				data: {
 					request_token: query.request_token,

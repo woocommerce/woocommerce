@@ -134,7 +134,7 @@ class WC_Admin_Notes_WooCommerce_Payments {
 
 		if ( self::NOTE_NAME === $note->get_name() ) {
 			$install_request = array( 'plugin' => self::PLUGIN_SLUG );
-			$installer       = new \Automattic\WooCommerce\Admin\API\OnboardingPlugins();
+			$installer       = new \Automattic\WooCommerce\Admin\API\Plugins();
 			$result          = $installer->install_plugin( $install_request );
 
 			if ( is_wp_error( $result ) ) {

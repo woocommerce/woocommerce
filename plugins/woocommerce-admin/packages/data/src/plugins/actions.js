@@ -94,7 +94,7 @@ export function* installPlugin( plugin ) {
 
 	try {
 		const results = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/install`,
+			path: `${ WC_ADMIN_NAMESPACE }/plugins/install`,
 			method: 'POST',
 			data: { plugin },
 		} );
@@ -117,7 +117,7 @@ export function* activatePlugins( plugins ) {
 
 	try {
 		const results = yield apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/activate`,
+			path: `${ WC_ADMIN_NAMESPACE }/plugins/activate`,
 			method: 'POST',
 			data: { plugins: plugins.join( ',' ) },
 		} );

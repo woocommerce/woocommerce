@@ -73,7 +73,7 @@ class Square extends Component {
 			}
 
 			const result = await apiFetch( {
-				path: WC_ADMIN_NAMESPACE + '/onboarding/plugins/connect-square',
+				path: WC_ADMIN_NAMESPACE + '/plugins/connect-square',
 				method: 'POST',
 			} );
 

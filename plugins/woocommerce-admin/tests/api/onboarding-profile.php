@@ -161,7 +161,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 	public function test_default_params() {
 		$endpoints = array(
 			'/wc-admin/onboarding/profile',
-			'/wc-admin/onboarding/plugins',
+			'/wc-admin/plugins',
 		);
 
 		foreach ( $endpoints as $endpoint ) {

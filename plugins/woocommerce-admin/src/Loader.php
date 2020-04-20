@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Admin;
 use \_WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Plugins;
 
 /**
  * Loader Class.
@@ -724,7 +725,7 @@ class Loader {
 		$settings['dateFormat']        = get_option( 'date_format' );
 		$settings['plugins'] = array(
 			'installedPlugins' => PluginsHelper::get_installed_plugin_slugs(),
-			'activePlugins' => Onboarding::get_active_plugins(),
+			'activePlugins' => Plugins::get_active_plugins(),
 		);
 		// Plugins that depend on changing the translation work on the server but not the client -
 		// WooCommerce Branding is an example of this - so pass through the translation of

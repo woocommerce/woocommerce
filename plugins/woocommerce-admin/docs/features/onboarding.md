@@ -15,16 +15,16 @@ To enable the new onboarding experience manually, log-in to `wp-admin`, and go t
 
 ## New REST API endpoints
 
-To power the new onboarding flow client side, new REST API endpoints have been introduced. These are purpose built endpoints that exist under the `/wc-admin/onboarding/` namespace, and are not meant to be shipped in the core rest API package. The source is stored in `src/API/OnboardingPlugins.php`, `src/API/OnboardingProfile.php`, and `src/API/OnboardingTasks.php` respectively.
+To power the new onboarding flow client side, new REST API endpoints have been introduced. These are purpose built endpoints that exist under the `/wc-admin/onboarding/` namespace, and are not meant to be shipped in the core rest API package. The source is stored in `src/API/Plugins.php`, `src/API/OnboardingProfile.php`, and `src/API/OnboardingTasks.php` respectively.
 
-* POST `/wc-admin/onboarding/plugins/install` - Installs a requested plugin, if present in the `woocommerce_admin_onboarding_plugins_whitelist` array.
-* GET `/wc-admin/onboarding/plugins/active` - Returns a list of the currently active plugins.
-* POST `/wc-admin/onboarding/plugins/activate` - Activates the requested plugins,  if present in the `woocommerce_admin_onboarding_plugins_whitelist` array. Multiple plugins can be passed to activate at once.
-* GET `/wc-admin/onboarding/plugins/connect-jetpack` - Generates a URL for connecting to Jetpack. A `redirect_url` is accepted, which is used upon a successful connection.
-* POST `/wc-admin/onboarding/plugins/request-wccom-connect` - Generates a URL for the WooCommerce.com connection process.
-* POST `/wc-admin/onboarding/plugins/finish-wccom-connect` - Finishes the WooCommerce.com connection process by storing the received access token.
-* POST `/wc-admin/onboarding/plugins/connect-paypal` - Generates a URL for connecting to PayPal during the payments task.
-* POST `/wc-admin/onboarding/plugins/connect-square` - Generates a URL for connecting to Square during the payments task.
+* POST `/wc-admin/plugins/install` - Installs a requested plugin, if present in the `woocommerce_admin_plugins_whitelist` array.
+* GET `/wc-admin/plugins/active` - Returns a list of the currently active plugins.
+* POST `/wc-admin/plugins/activate` - Activates the requested plugins,  if present in the `woocommerce_admin_plugins_whitelist` array. Multiple plugins can be passed to activate at once.
+* GET `/wc-admin/plugins/connect-jetpack` - Generates a URL for connecting to Jetpack. A `redirect_url` is accepted, which is used upon a successful connection.
+* POST `/wc-admin/plugins/request-wccom-connect` - Generates a URL for the WooCommerce.com connection process.
+* POST `/wc-admin/plugins/finish-wccom-connect` - Finishes the WooCommerce.com connection process by storing the received access token.
+* POST `/wc-admin/plugins/connect-paypal` - Generates a URL for connecting to PayPal during the payments task.
+* POST `/wc-admin/plugins/connect-square` - Generates a URL for connecting to Square during the payments task.
 * GET `/wc-admin/onboarding/profile` - Returns the information gathered during the profile wizard. See the `woocommerce_onboarding_profile_properties` array for a list of fields.
 * POST `/wc-admin/onboarding/profile` - Sets data for the profile wizard. See the `woocommerce_onboarding_profile_properties` array for a list of fields.
 * POST `/wc-admin/onboarding/tasks/import_sample_products` - Used for importing sample products during the appearance task.
@@ -66,7 +66,7 @@ We also use existing options from WooCommerce Core or extensions like WooCommerc
 
 During the profile wizard, merchants can select paid product type extensions (like WooCommerce Memberships) or a paid theme. To make installation easier and to finish purchasing, it is necessary to make a [WooCommerce.com connection](https://docs.woocommerce.com/document/managing-woocommerce-com-subscriptions/). We also prompt users to connect on the task list if they chose extensions in the profile wizard, but did not finish connecting.
 
-To make the connection from the new onboarding experience possible, we build our own connection endpoints [/wc-admin/onboarding/plugins/request-wccom-connect](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L298-L355) and [/wc-admin/onboarding/plugins/finish-wccom-connect](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L357-L417).
+To make the connection from the new onboarding experience possible, we build our own connection endpoints [/wc-admin/plugins/request-wccom-connect](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L298-L355) and [/wc-admin/plugins/finish-wccom-connect](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L357-L417).
 
 Both of these endpoints use WooCommerce Core's `WC_Helper_API` directly. The main difference with our connection (compared to the connection on the subscriptions page) is the addition of two additional query string parameters:
 
@@ -79,7 +79,7 @@ To disconnect from WooCommerce.com, go to `WooCommerce > Extensions > WooCommerc
 
 Using Jetpack & WooCommerce Services allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a Jetpack connected site. Search the MGS & the Feld  Guide for additional resources on testing Jetpack with local setups.
 
-We have a special Jetpack connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we have a custom Jetpack connection endpoint [/wc-admin/onboarding/plugins/connect-jetpack](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L273-L296).
+We have a special Jetpack connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we have a custom Jetpack connection endpoint [/wc-admin/plugins/connect-jetpack](https://github.com/woocommerce/woocommerce-admin/blob/61b771c2643c24334ea062ab3521073beaf50019/src/API/OnboardingPlugins.php#L273-L296).
 
 We use Jetpack's `build_connect_url` function directly, but add the following two query parameters:
 
