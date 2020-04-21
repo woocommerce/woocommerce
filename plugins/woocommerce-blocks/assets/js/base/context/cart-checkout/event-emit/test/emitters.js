@@ -43,29 +43,61 @@ describe( 'Testing emitters', () => {
 		} );
 	} );
 	describe( 'Testing emitEventWithAbort()', () => {
-		it(
-			'aborts on non truthy value and does not invoke remaining ' +
-				'observers',
-			async () => {
-				const observers = { test: observerMocks };
-				const response = await emitEventWithAbort(
-					observers,
-					'test',
-					'foo'
-				);
-				expect( console ).not.toHaveErrored();
-				expect( observerB ).toHaveBeenCalledTimes( 1 );
-				expect(
-					observerPromiseWithResolvedValue
-				).not.toHaveBeenCalled();
-				expect( response ).toBe( 10 );
-			}
-		);
+		it( 'does not abort on any return value other than an object with a type property', async () => {
+			observerMocks.delete( 'observerPromiseWithReject' );
+			const observers = { test: observerMocks };
+			const response = await emitEventWithAbort(
+				observers,
+				'test',
+				'foo'
+			);
+			expect( console ).not.toHaveErrored();
+			expect( observerB ).toHaveBeenCalledTimes( 1 );
+			expect( observerPromiseWithResolvedValue ).toHaveBeenCalled();
+			expect( response ).toBe( true );
+		} );
+		it( 'Aborts on a return value with an object that has a type property', async () => {
+			const validObjectResponse = jest
+				.fn()
+				.mockReturnValue( { type: 'success' } );
+			observerMocks.set( 'observerValidObject', {
+				priority: 5,
+				callback: validObjectResponse,
+			} );
+			observerMocks.delete( 'observerPromiseWithReject' );
+			const observers = { test: observerMocks };
+			const response = await emitEventWithAbort(
+				observers,
+				'test',
+				'foo'
+			);
+			expect( console ).not.toHaveErrored();
+			expect( validObjectResponse ).toHaveBeenCalledTimes( 1 );
+			expect( observerPromiseWithResolvedValue ).not.toHaveBeenCalled();
+			expect( response ).toEqual( { type: 'success' } );
+		} );
+		it( 'throws an error on an object returned from observer without a type property', async () => {
+			const failingObjectResponse = jest.fn().mockReturnValue( {} );
+			observerMocks.set( 'observerInvalidObject', {
+				priority: 5,
+				callback: failingObjectResponse,
+			} );
+			const observers = { test: observerMocks };
+			const response = await emitEventWithAbort(
+				observers,
+				'test',
+				'foo'
+			);
+			expect( console ).toHaveErrored();
+			expect( failingObjectResponse ).toHaveBeenCalledTimes( 1 );
+			expect( observerPromiseWithResolvedValue ).not.toHaveBeenCalled();
+			expect( response ).toEqual( { type: 'error' } );
+		} );
 	} );
 	describe( 'Test Priority', () => {
 		it( 'executes observers in expected order by priority', async () => {
 			const a = jest.fn();
-			const b = jest.fn().mockReturnValue( false );
+			const b = jest.fn().mockReturnValue( { type: 'error' } );
 			const observers = {
 				test: new Map( [
 					[ 'observerA', { priority: 200, callback: a } ],
