@@ -62,6 +62,10 @@ class ProfileWizard extends Component {
 
 		if ( prevStep !== step ) {
 			window.document.documentElement.scrollTop = 0;
+
+			recordEvent( 'storeprofiler_step_view', {
+				step: this.getCurrentStep().key,
+			} );
 		}
 	}
 
@@ -72,6 +76,10 @@ class ProfileWizard extends Component {
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );
 		document.body.classList.add( 'woocommerce-admin-full-screen' );
+
+		recordEvent( 'storeprofiler_step_view', {
+			step: this.getCurrentStep().key,
+		} );
 
 		// Track plugins if already installed.
 		if (

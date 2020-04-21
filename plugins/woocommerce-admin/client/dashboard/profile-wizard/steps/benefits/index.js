@@ -46,6 +46,10 @@ class Benefits extends Component {
 			this.pluginsToInstall.push( 'woocommerce-services' );
 		}
 
+		recordEvent( 'storeprofiler_plugins_to_install', {
+			plugins: this.pluginsToInstall,
+		} );
+
 		this.startPluginInstall = this.startPluginInstall.bind( this );
 		this.skipPluginInstall = this.skipPluginInstall.bind( this );
 	}
