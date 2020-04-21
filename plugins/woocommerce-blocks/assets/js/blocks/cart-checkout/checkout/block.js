@@ -120,7 +120,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		},
 		address_2: {
 			...defaultAddressFields.address_2,
-			hidden: ! attributes.showAddress2Field,
+			hidden: ! attributes.showApartmentField,
 		},
 	};
 

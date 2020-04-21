@@ -12,7 +12,7 @@ const blockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
-	showAddress2Field: {
+	showApartmentField: {
 		type: 'boolean',
 		default: true,
 	},
