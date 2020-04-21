@@ -6,6 +6,8 @@
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { useEditorContext } from '@woocommerce/base-context';
+import { decodeEntities } from '@wordpress/html-entities';
+import { mapValues } from 'lodash';
 
 /**
  * @constant
@@ -99,6 +101,10 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 			);
 			const shippingRatesLoading = store.areShippingRatesLoading();
 			const { receiveCart } = dispatch( storeKey );
+			const shippingAddress = mapValues(
+				cartData.shippingAddress,
+				( value ) => decodeEntities( value )
+			);
 
 			return {
 				cartCoupons: cartData.coupons,
@@ -111,10 +117,10 @@ export const useStoreCart = ( options = { shouldSelect: true } ) => {
 				cartTotals,
 				cartIsLoading,
 				cartErrors,
-				shippingAddress: cartData.shippingAddress,
+				shippingAddress,
 				shippingRates: cartData.shippingRates,
 				shippingRatesLoading,
-				hasShippingAddress: !! cartData.shippingAddress.country,
+				hasShippingAddress: !! shippingAddress.country,
 				receiveCart,
 			};
 		},
