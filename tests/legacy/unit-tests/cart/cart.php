@@ -2084,7 +2084,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			$variation['variation_id'],
 			array(
 				'attribute_pa_size'   => 'huge',
-				'attribute_pa_color'  => 'red',
+				'attribute_pa_colour'  => 'red',
 				'attribute_pa_number' => '2',
 			)
 		);
