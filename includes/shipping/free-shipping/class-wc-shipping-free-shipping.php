@@ -107,6 +107,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			),
 			'ignore_discounts' => array(
 				'title'       => __( 'Coupons discounts', 'woocommerce' ),
+				'label'       => __( 'Don\'t ignore coupons discounts', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => __( 'If checked, Free shipping will still be offered even if the cart amount after coupon is applied is less than the minimum required.', 'woocommerce' ),
 				'default'     => 'no',
