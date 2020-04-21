@@ -1,13 +1,13 @@
-  import { CustomerFlow, StoreOwnerFlow } from './flows';
+import { CustomerFlow, StoreOwnerFlow } from './flows';
 
-  import {
+import {
 	completeOldSetupWizard,
 	createSimpleProduct,
 	createVariableProduct,
 	verifyAndPublish,
-  } from './components';
+} from './components';
 
-  import {
+import {
 	clearAndFillInput,
 	clickTab,
 	settingsPageSaveChanges,
@@ -19,16 +19,16 @@
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
 	verifyValueOfInputField,
-  } from './page-utils';
+} from './page-utils';
 
-  module.exports = {
-  CustomerFlow,
-  StoreOwnerFlow,
+module.exports = {
+	CustomerFlow,
+	StoreOwnerFlow,
 	completeOldSetupWizard,
 	createSimpleProduct,
 	createVariableProduct,
-  verifyAndPublish,
-  clearAndFillInput,
+	verifyAndPublish,
+	clearAndFillInput,
 	clickTab,
 	settingsPageSaveChanges,
 	permalinkSettingsPageSaveChanges,
@@ -39,4 +39,4 @@
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
 	verifyValueOfInputField
-  }
+}
