@@ -32,7 +32,7 @@ class WC_Query {
 	 *
 	 * @var array
 	 */
-	private static $_chosen_attributes;
+	private static $chosen_attributes;
 
 	/**
 	 * Constructor for the query class. Hooks in methods.
@@ -54,7 +54,8 @@ class WC_Query {
 	 * Get any errors from querystring.
 	 */
 	public function get_errors() {
-		$error = ! empty( $_GET['wc_error'] ) ? sanitize_text_field( wp_unslash( $_GET['wc_error'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$error = ! empty( $_GET['wc_error'] ) ? sanitize_text_field( wp_unslash( $_GET['wc_error'] ) ) : '';
 
 		if ( $error && ! wc_has_notice( $error, 'error' ) ) {
 			wc_add_notice( $error, 'error' );
@@ -217,14 +218,16 @@ class WC_Query {
 	public function parse_request() {
 		global $wp;
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Map query vars to their keys, or get them if endpoints are not supported.
 		foreach ( $this->get_query_vars() as $key => $var ) {
-			if ( isset( $_GET[ $var ] ) ) { // WPCS: input var ok, CSRF ok.
-				$wp->query_vars[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $var ] ) ); // WPCS: input var ok, CSRF ok.
+			if ( isset( $_GET[ $var ] ) ) {
+				$wp->query_vars[ $key ] = sanitize_text_field( wp_unslash( $_GET[ $var ] ) );
 			} elseif ( isset( $wp->query_vars[ $var ] ) ) {
 				$wp->query_vars[ $key ] = $wp->query_vars[ $var ];
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -447,7 +450,8 @@ class WC_Query {
 	public function get_catalog_ordering_args( $orderby = '', $order = '' ) {
 		// Get ordering from query string unless defined.
 		if ( ! $orderby ) {
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : wc_clean( get_query_var( 'orderby' ) ); // WPCS: sanitization ok, input var ok, CSRF ok.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : wc_clean( get_query_var( 'orderby' ) );
 
 			if ( ! $orderby_value ) {
 				if ( is_search() ) {
@@ -522,12 +526,15 @@ class WC_Query {
 	public function price_filter_post_clauses( $args, $wp_query ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $wp_query->is_main_query() || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
 			return $args;
 		}
 
-		$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0; // WPCS: input var ok, CSRF ok.
-		$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX; // WPCS: input var ok, CSRF ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0;
+		$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		/**
 		 * Adjust if the store taxes are not displayed how they are stored.
@@ -666,9 +673,11 @@ class WC_Query {
 			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		// Filter by rating.
-		if ( isset( $_GET['rating_filter'] ) ) { // WPCS: input var ok, CSRF ok.
-			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) ); // WPCS: input var ok, CSRF ok, Sanitization ok.
+		if ( isset( $_GET['rating_filter'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$rating_filter = array_filter( array_map( 'absint', explode( ',', $_GET['rating_filter'] ) ) );
 			$rating_terms  = array();
 			for ( $i = 1; $i <= 5; $i ++ ) {
 				if ( in_array( $i, $rating_filter, true ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
@@ -685,6 +694,7 @@ class WC_Query {
 				);
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		if ( ! empty( $product_visibility_not_in ) ) {
 			$tax_query[] = array(
@@ -753,8 +763,9 @@ class WC_Query {
 				$term     = substr( $term, 1 );
 			}
 
-			$like  = '%' . $wpdb->esc_like( $term ) . '%';
-			$sql[] = $wpdb->prepare( "(($wpdb->posts.post_title $like_op %s) $andor_op ($wpdb->posts.post_excerpt $like_op %s) $andor_op ($wpdb->posts.post_content $like_op %s))", $like, $like, $like ); // unprepared SQL ok.
+			$like = '%' . $wpdb->esc_like( $term ) . '%';
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sql[] = $wpdb->prepare( "(($wpdb->posts.post_title $like_op %s) $andor_op ($wpdb->posts.post_excerpt $like_op %s) $andor_op ($wpdb->posts.post_content $like_op %s))", $like, $like, $like );
 		}
 
 		if ( ! empty( $sql ) && ! is_user_logged_in() ) {
@@ -770,11 +781,12 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_layered_nav_chosen_attributes() {
-		if ( ! is_array( self::$_chosen_attributes ) ) {
-			self::$_chosen_attributes = array();
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! is_array( self::$chosen_attributes ) ) {
+			self::$chosen_attributes = array();
 
-			if ( ! empty( $_GET ) ) { // WPCS: input var ok, CSRF ok.
-				foreach ( $_GET as $key => $value ) { // WPCS: input var ok, CSRF ok.
+			if ( ! empty( $_GET ) ) {
+				foreach ( $_GET as $key => $value ) {
 					if ( 0 === strpos( $key, 'filter_' ) ) {
 						$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
 						$taxonomy     = wc_attribute_taxonomy_name( $attribute );
@@ -784,14 +796,15 @@ class WC_Query {
 							continue;
 						}
 
-						$query_type                                     = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
-						self::$_chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
-						self::$_chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
+						$query_type                                    = ! empty( $_GET[ 'query_type_' . $attribute ] ) && in_array( $_GET[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $attribute ] ) ) : '';
+						self::$chosen_attributes[ $taxonomy ]['terms'] = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+						self::$chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : apply_filters( 'woocommerce_layered_nav_default_query_type', 'and' );
 					}
 				}
 			}
 		}
-		return self::$_chosen_attributes;
+		return self::$chosen_attributes;
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -804,7 +817,6 @@ class WC_Query {
 		return remove_query_arg( 'add-to-cart', $url );
 	}
 
-	// @codingStandardsIgnoreStart
 	/**
 	 * Return a meta query for filtering by rating.
 	 *
@@ -819,7 +831,7 @@ class WC_Query {
 	 * Returns a meta query to handle product visibility.
 	 *
 	 * @deprecated 3.0.0 Replaced with taxonomy.
-	 * @param string $compare (default: 'IN')
+	 * @param string $compare (default: 'IN').
 	 * @return array
 	 */
 	public function visibility_meta_query( $compare = 'IN' ) {
@@ -830,7 +842,7 @@ class WC_Query {
 	 * Returns a meta query to handle product stock status.
 	 *
 	 * @deprecated 3.0.0 Replaced with taxonomy.
-	 * @param string $status (default: 'instock')
+	 * @param string $status (default: 'instock').
 	 * @return array
 	 */
 	public function stock_status_meta_query( $status = 'instock' ) {
@@ -869,6 +881,8 @@ class WC_Query {
 	/**
 	 * Search post excerpt.
 	 *
+	 * @param string $where Where clause.
+	 *
 	 * @deprecated 3.2.0 - Not needed anymore since WordPress 4.5.
 	 */
 	public function search_post_excerpt( $where = '' ) {
@@ -878,10 +892,10 @@ class WC_Query {
 
 	/**
 	 * Remove the posts_where filter.
+	 *
 	 * @deprecated 3.2.0 - Nothing to remove anymore because search_post_excerpt() is deprecated.
 	 */
 	public function remove_posts_where() {
 		wc_deprecated_function( 'WC_Query::remove_posts_where', '3.2.0', 'Nothing to remove anymore because search_post_excerpt() is deprecated.' );
 	}
-	// @codingStandardsIgnoreEnd
 }

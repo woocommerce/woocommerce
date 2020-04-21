@@ -1990,8 +1990,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$html = '';
 
+<<<<<<< HEAD
 		$suffix = get_option( 'woocommerce_price_display_suffix' );
 		if ( $suffix && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
+=======
+		// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure, WordPress.CodeAnalysis.AssignmentInCondition.Found
+		if ( ( $suffix = get_option( 'woocommerce_price_display_suffix' ) ) && wc_tax_enabled() && 'taxable' === $this->get_tax_status() ) {
+>>>>>>> cd077dfb6... Fix code sniffer errors in some files.
 			if ( '' === $price ) {
 				$price = $this->get_price();
 			}

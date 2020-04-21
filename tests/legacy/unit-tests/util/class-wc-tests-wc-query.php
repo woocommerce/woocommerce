@@ -28,6 +28,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_has_notice( 'test', 'error' ) );
 
 		// Clean up.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		unset( $_GET['wc_error'] );
 		wc_clear_notices();
 
@@ -182,6 +183,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 * @group core-only
 	 */
 	public function test_get_catalog_ordering_args() {
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$data = array(
 			array(
 				'orderby'  => 'menu_order',
@@ -297,6 +299,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 				),
 			),
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		foreach ( $data as $test ) {
 			$result = WC()->query->get_catalog_ordering_args( $test['orderby'], $test['order'] );
@@ -310,11 +313,13 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	public function test_get_catalog_ordering_args_GET() {
 		$_GET['orderby'] = 'price-desc';
 
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$expected = array(
 			'orderby'  => 'price',
 			'order'    => 'DESC',
 			'meta_key' => '',
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		$this->assertEquals( $expected, WC()->query->get_catalog_ordering_args() );
 
@@ -341,9 +346,11 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			'include_children' => true,
 		);
 
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$query_args = array(
 			'tax_query' => array( $tax_query ),
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		WC()->query->product_query( new WP_Query( $query_args ) );
 		$tax_queries = WC_Query::get_main_tax_query();
@@ -360,9 +367,11 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			'compare' => '=',
 		);
 
+		// phpcs:disable WordPress.DB.SlowDBQuery
 		$query_args = array(
 			'meta_query' => array( $meta_query ),
 		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		WC()->query->product_query( new WP_Query( $query_args ) );
 		$meta_queries = WC_Query::get_main_meta_query();
