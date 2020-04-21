@@ -2052,6 +2052,49 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that adding a variation with URL parameter increases the quantity appropriately
+	 * as described in issue 24000.
+	 */
+	public function test_add_variation_with_url() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_pop( $variations );
+
+		// Add variation with add_to_cart_action.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check if the item is in the cart.
+		$this->assertEquals( 1, count( WC()->cart->get_cart_contents() ) );
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		// Add variation using parent id.
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_color'  => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
+
+		// Check that the second add to cart call increases the quantity of the existing cart-item.
+		$this->assertEquals( 1, count( WC()->cart->get_cart_contents() ) );
+		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
+	}
+
+	/**
 	 * Helper function. Adds 1.5 taxable fees to cart.
 	 */
 	public function add_fee_1_5_to_cart() {
