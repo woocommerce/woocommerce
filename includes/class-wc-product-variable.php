@@ -282,9 +282,10 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of available variations for the current product.
 	 *
+	 * @param bool $render_variations Allows avoiding performance bottlenecks caused by get_available_variation().
 	 * @return array
 	 */
-	public function get_available_variations() {
+	public function get_available_variations($render_variations = true) {
 
 		$variation_ids        = $this->get_children();
 		$available_variations = array();
@@ -307,10 +308,17 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			$available_variations[] = $this->get_available_variation( $variation );
+			if ( $render_variations ) {
+				$available_variations[] = $this->get_available_variation( $variation );
+			} else {
+				$available_variations[] = $variation;
+			}
+
 		}
 
-		$available_variations = array_values( array_filter( $available_variations ) );
+		if ( $render_variations ) {
+			$available_variations = array_values( array_filter( $available_variations ) );
+		}
 
 		return $available_variations;
 	}
