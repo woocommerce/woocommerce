@@ -5,10 +5,6 @@
 /**
  * Internal dependencies
  */
-import { createSimpleProduct, createVariableProduct } from '../../utils/components';
-import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
-import { uiUnblocked } from '../../utils';
-
 import {
 	CustomerFlow,
 	StoreOwnerFlow,
