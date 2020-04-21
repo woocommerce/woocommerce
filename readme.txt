@@ -207,7 +207,6 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Remove elements with style=display:none explicitly to address a regression causing broken email html. #26075
 * Dev - Added woocommerce_can_restock_refunded_items filter. #25728
 * Dev - Added woocommerce_order_get_tax_location filter. #25727
-* Dev - Updated stock handling to prevent race conditions when orders come in at the same time. #25708
 * Dev - Updated /myaccount/form-login.php to use consistent kebab-case class names for woocommerce-form-row. #25668
 * Dev - Add filter woocommerce_product_upsells_products_heading to allow heading modification without having to override the template file. #25628
 * Dev - Added woocommerce_order_get_tax_location filter. #25727
