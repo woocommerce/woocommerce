@@ -111,22 +111,8 @@ class Shipping extends Component {
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { countryCode, settings } = this.props;
-		const {
-			woocommerce_store_address: storeAddress,
-			woocommerce_default_country: defaultCountry,
-			woocommerce_store_postcode: storePostcode,
-		} = settings;
+		const { countryCode } = this.props;
 		const { step } = this.state;
-
-		if (
-			step === 'store_location' &&
-			storeAddress &&
-			defaultCountry &&
-			storePostcode
-		) {
-			this.completeStep();
-		}
 
 		if (
 			step === 'rates' &&
@@ -187,6 +173,7 @@ class Shipping extends Component {
 				),
 				content: (
 					<StoreLocation
+						{ ...this.props }
 						onComplete={ ( values ) => {
 							const country = getCountryCode(
 								values.countryState
@@ -196,7 +183,6 @@ class Shipping extends Component {
 							} );
 							this.completeStep();
 						} }
-						{ ...this.props }
 					/>
 				),
 				visible: true,
@@ -357,9 +343,13 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
+		const { updateAndPersistSettingsForGroup } = dispatch(
+			SETTINGS_STORE_NAME
+		);
 
 		return {
 			createNotice,
+			updateAndPersistSettingsForGroup,
 		};
 	} )
 )( Shipping );

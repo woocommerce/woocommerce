@@ -48,6 +48,9 @@ class Tax extends Component {
 		this.configureTaxRates = this.configureTaxRates.bind( this );
 		this.updateAutomatedTax = this.updateAutomatedTax.bind( this );
 		this.setIsPending = this.setIsPending.bind( this );
+		this.shouldShowSuccessScreen = this.shouldShowSuccessScreen.bind(
+			this
+		);
 	}
 
 	componentDidMount() {
@@ -58,42 +61,53 @@ class Tax extends Component {
 		this.setState( this.initialState );
 	}
 
-	componentDidUpdate( prevProps ) {
+	shouldShowSuccessScreen() {
+		const { stepIndex } = this.state;
 		const {
-			generalSettings,
 			isJetpackConnected,
 			pluginsToActivate,
-			taxSettings,
+			generalSettings,
 		} = this.props;
 		const {
-			woocommerce_calc_taxes: calcTaxes,
 			woocommerce_store_address: storeAddress,
 			woocommerce_default_country: defaultCountry,
 			woocommerce_store_postcode: storePostCode,
 		} = generalSettings;
-		const { stepIndex } = this.state;
-		const currentStep = this.getSteps()[ stepIndex ];
-		const currentStepKey = currentStep && currentStep.key;
 		const isCompleteAddress = Boolean(
 			storeAddress && defaultCountry && storePostCode
 		);
-
-		// Show the success screen if all requirements are satisfied from the beginning.
-		if (
+		return (
 			stepIndex !== null &&
-			! pluginsToActivate.length &&
 			isCompleteAddress &&
+			! pluginsToActivate.length &&
 			isJetpackConnected &&
 			this.isTaxJarSupported()
-		) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( { stepIndex: null } );
-			/* eslint-enable react/no-did-update-set-state */
-			return;
-		}
+		);
+	}
 
-		if ( currentStepKey === 'store_location' && isCompleteAddress ) {
-			this.completeStep();
+	componentDidUpdate( prevProps ) {
+		const {
+			generalSettings,
+			isJetpackConnected,
+			taxSettings,
+			isGeneralSettingsRequesting,
+		} = this.props;
+		const { woocommerce_calc_taxes: calcTaxes } = generalSettings;
+		const { stepIndex } = this.state;
+		const currentStep = this.getSteps()[ stepIndex ];
+		const currentStepKey = currentStep && currentStep.key;
+
+		// If general settings have stopped requesting, check if we should show success screen.
+		if (
+			prevProps.isGeneralSettingsRequesting &&
+			! isGeneralSettingsRequesting
+		) {
+			if ( this.shouldShowSuccessScreen() ) {
+				/* eslint-disable react/no-did-update-set-state */
+				this.setState( { stepIndex: null } );
+				/* eslint-enable react/no-did-update-set-state */
+				return;
+			}
 		}
 
 		if (
@@ -151,7 +165,7 @@ class Tax extends Component {
 		}
 	}
 
-	configureTaxRates() {
+	async configureTaxRates() {
 		const {
 			generalSettings,
 			updateAndPersistSettingsForGroup,
@@ -159,40 +173,38 @@ class Tax extends Component {
 
 		if ( generalSettings.woocommerce_calc_taxes !== 'yes' ) {
 			this.setState( { isPending: true } );
-			updateAndPersistSettingsForGroup( 'general', {
+			await updateAndPersistSettingsForGroup( 'general', {
 				general: {
 					woocommerce_calc_taxes: 'yes',
 				},
 			} );
-		} else {
-			window.location = getAdminLink(
-				'admin.php?page=wc-settings&tab=tax&section=standard&wc_onboarding_active_task=tax'
-			);
 		}
+
+		window.location = getAdminLink(
+			'admin.php?page=wc-settings&tab=tax&section=standard&wc_onboarding_active_task=tax'
+		);
 	}
 
-	updateAutomatedTax() {
-		const {
-			createNotice,
-			isGeneralSettingsError,
-			isTaxSettingsError,
-			updateAndPersistSettingsForGroup,
-		} = this.props;
+	async updateAutomatedTax() {
+		const { createNotice, updateAndPersistSettingsForGroup } = this.props;
 		const { automatedTaxEnabled } = this.state;
 
-		updateAndPersistSettingsForGroup( 'tax', {
+		await updateAndPersistSettingsForGroup( 'tax', {
 			tax: {
 				wc_connect_taxes_enabled: automatedTaxEnabled ? 'yes' : 'no',
 			},
 		} );
 
-		updateAndPersistSettingsForGroup( 'general', {
+		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
 				woocommerce_calc_taxes: 'yes',
 			},
 		} );
 
-		if ( ! isTaxSettingsError && ! isGeneralSettingsError ) {
+		if (
+			! this.props.isTaxSettingsError &&
+			! this.props.isGeneralSettingsError
+		) {
 			// @todo This is a workaround to force the task to mark as complete.
 			// This should probably be updated to use wc-api so we can fetch tax rates.
 			setSetting( 'onboarding', {
@@ -252,7 +264,12 @@ class Tax extends Component {
 							recordEvent( 'tasklist_tax_set_location', {
 								country,
 							} );
-							this.completeStep();
+							if ( this.shouldShowSuccessScreen() ) {
+								this.setState( { stepIndex: null } );
+								// Only complete step if another update hasn't already shown succes screen.
+							} else if ( this.state.stepIndex !== null ) {
+								this.completeStep();
+							}
 						} }
 						isSettingsRequesting={ isGeneralSettingsRequesting }
 						settings={ generalSettings }
