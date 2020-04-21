@@ -2,6 +2,6 @@
 
 exports[`Checkout Block can be created 1`] = `
 "<!-- wp:woocommerce/checkout -->
-<div class=\\"wp-block-woocommerce-checkout is-loading\\" data-show-company-field=\\"false\\" data-require-company-field=\\"false\\" data-show-address-2-field=\\"true\\" data-show-phone-field=\\"true\\" data-require-phone-field=\\"false\\" data-show-policy-links=\\"true\\" data-show-return-to-cart=\\"true\\" data-cart-page-id=\\"0\\"></div>
+<div class=\\"wp-block-woocommerce-checkout is-loading\\" data-show-company-field=\\"false\\" data-require-company-field=\\"false\\" data-show-apartment-field=\\"true\\" data-show-phone-field=\\"true\\" data-require-phone-field=\\"false\\" data-show-policy-links=\\"true\\" data-show-return-to-cart=\\"true\\" data-cart-page-id=\\"0\\"></div>
 <!-- /wp:woocommerce/checkout -->"
 `;

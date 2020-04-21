@@ -37,7 +37,7 @@ import './editor.scss';
 const BlockSettings = ( { attributes, setAttributes } ) => {
 	const {
 		showCompanyField,
-		showAddress2Field,
+		showApartmentField,
 		showPhoneField,
 		requireCompanyField,
 		requirePhoneField,
@@ -122,10 +122,10 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 						'Apartment, suite, etc.',
 						'woo-gutenberg-products-block'
 					) }
-					checked={ showAddress2Field }
+					checked={ showApartmentField }
 					onChange={ () =>
 						setAttributes( {
-							showAddress2Field: ! showAddress2Field,
+							showApartmentField: ! showApartmentField,
 						} )
 					}
 				/>
