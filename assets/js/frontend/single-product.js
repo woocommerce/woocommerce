@@ -9,7 +9,7 @@ jQuery( function( $ ) {
 	$( 'body' )
 		// Tabs
 		.on( 'init', '.wc-tabs-wrapper, .woocommerce-tabs', function() {
-			$( '.wc-tab, .woocommerce-tabs .panel:not(.panel .panel)' ).hide();
+			$( this ).find( '.wc-tab, .woocommerce-tabs .panel:not(.panel .panel)' ).hide();
 
 			var hash  = window.location.hash;
 			var url   = window.location.href;
