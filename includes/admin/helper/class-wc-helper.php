@@ -1149,6 +1149,8 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		// Reset plugin cache before retrieving plugin list.
+		wp_clean_plugins_cache();
 		$plugins     = get_plugins();
 		$woo_plugins = array();
 
