@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Product_Attributes_Controller;
+use WC_REST_Product_Attributes_Controller;
 
 /**
  * REST API Product Attributes controller class.

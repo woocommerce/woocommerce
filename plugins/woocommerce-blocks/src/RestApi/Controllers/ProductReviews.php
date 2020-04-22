@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Controller;
+use WC_REST_Controller;
 
 /**
  * REST API Product Reviews controller class.

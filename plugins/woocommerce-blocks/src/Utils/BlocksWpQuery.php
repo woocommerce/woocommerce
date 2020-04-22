@@ -9,7 +9,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Utils;
 
-use \WP_Query;
+use WP_Query;
 
 defined( 'ABSPATH' ) || exit;
 

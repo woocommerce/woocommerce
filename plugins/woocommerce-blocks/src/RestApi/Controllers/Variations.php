@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Product_Variations_Controller;
+use WC_REST_Product_Variations_Controller;
 
 /**
  * REST API variations controller class.
