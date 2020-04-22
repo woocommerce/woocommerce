@@ -275,7 +275,7 @@ class CartSchema extends AbstractSchema {
 		return [
 			'coupons'          => array_values( array_map( [ $this->coupon_schema, 'get_item_response' ], array_filter( $cart->get_applied_coupons() ) ) ),
 			'shipping_rates'   => array_values( array_map( [ $this->shipping_rate_schema, 'get_item_response' ], $controller->get_shipping_packages() ) ),
-			'shipping_address' => $this->shipping_address_schema->get_item_response( WC()->customer ),
+			'shipping_address' => $this->shipping_address_schema->get_item_response( wc()->customer ),
 			'items'            => array_values( array_map( [ $this->item_schema, 'get_item_response' ], array_filter( $cart->get_cart() ) ) ),
 			'items_count'      => $cart->get_cart_contents_count(),
 			'items_weight'     => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),

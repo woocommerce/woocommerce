@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import { TAXES_ENABLED } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -11,6 +12,10 @@ import TotalsItem from '../totals-item';
 
 const TotalsTaxesItem = ( { currency, values } ) => {
 	const { total_tax: totalTax } = values;
+
+	if ( ! TAXES_ENABLED ) {
+		return null;
+	}
 
 	return (
 		<TotalsItem

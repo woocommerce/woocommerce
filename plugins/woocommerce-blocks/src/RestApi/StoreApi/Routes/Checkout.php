@@ -244,7 +244,7 @@ class Checkout extends AbstractRoute {
 	 * @return array
 	 */
 	protected function get_draft_order_id() {
-		return WC()->session->get( 'store_api_draft_order', 0 );
+		return wc()->session->get( 'store_api_draft_order', 0 );
 	}
 
 	/**
@@ -253,7 +253,7 @@ class Checkout extends AbstractRoute {
 	 * @param integer $order_id Draft order ID.
 	 */
 	protected function set_draft_order_id( $order_id ) {
-		WC()->session->set( 'store_api_draft_order', $order_id );
+		wc()->session->set( 'store_api_draft_order', $order_id );
 	}
 
 	/**
@@ -275,7 +275,7 @@ class Checkout extends AbstractRoute {
 		}
 
 		// Pending and failed orders can be retried if the cart hasn't changed.
-		if ( $draft_order_object->needs_payment() && $draft_order_object->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+		if ( $draft_order_object->needs_payment() && $draft_order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
 			return $draft_order_object;
 		}
 
@@ -427,7 +427,7 @@ class Checkout extends AbstractRoute {
 		$payment_method = isset( $request['payment_method'] )
 			? wc_clean( wp_unslash( $request['payment_method'] ) )
 			: '';
-		$valid_methods  = WC()->payment_gateways->get_payment_gateway_ids();
+		$valid_methods  = wc()->payment_gateways->get_payment_gateway_ids();
 
 		if ( empty( $payment_method ) ) {
 			throw new RouteException(
@@ -461,7 +461,7 @@ class Checkout extends AbstractRoute {
 	 */
 	protected function get_request_payment_method( \WP_REST_Request $request ) {
 		$payment_method        = $this->get_request_payment_method_id( $request );
-		$gateways              = WC()->payment_gateways->payment_gateways();
+		$gateways              = wc()->payment_gateways->payment_gateways();
 		$payment_method_object = isset( $gateways[ $payment_method ] ) ? $gateways[ $payment_method ] : false;
 
 		// The abstract gateway is available method uses the cart global, so instead, check enabled directly.

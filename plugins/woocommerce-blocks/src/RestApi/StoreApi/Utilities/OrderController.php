@@ -24,7 +24,7 @@ class OrderController {
 	 * @return \WC_Order A new order object.
 	 */
 	public function create_order_from_cart() {
-		if ( WC()->cart->is_empty() ) {
+		if ( wc()->cart->is_empty() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_empty',
 				__( 'Cannot create order from empty cart.', 'woo-gutenberg-products-block' ),
@@ -50,6 +50,11 @@ class OrderController {
 	 * @param \WC_Order $order The order object to update.
 	 */
 	public function update_order_from_cart( \WC_Order $order ) {
+		// Ensure cart is current.
+		wc()->cart->calculate_shipping();
+		wc()->cart->calculate_totals();
+
+		// Update the current order to match the current cart.
 		$this->update_line_items_from_cart( $order );
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
@@ -57,7 +62,7 @@ class OrderController {
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->update_meta_data( 'is_vat_exempt', WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no' );
+		$order->update_meta_data( 'is_vat_exempt', wc()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no' );
 		$order->calculate_totals();
 	}
 
@@ -213,31 +218,31 @@ class OrderController {
 		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
 			$order->set_cart_hash( $cart_hashes['line_items'] );
 			$order->remove_order_items( 'line_item' );
-			WC()->checkout->create_order_line_items( $order, $cart );
+			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
 		if ( $order->get_meta_data( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
 			$order->remove_order_items( 'shipping' );
-			WC()->checkout->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 		}
 
 		if ( $order->get_meta_data( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
 			$order->remove_order_items( 'coupon' );
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
-			WC()->checkout->create_order_coupon_lines( $order, $cart );
+			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta_data( '_fees_hash' ) !== $cart_hashes['fees'] ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
 			$order->remove_order_items( 'fee' );
-			WC()->checkout->create_order_fee_lines( $order, $cart );
+			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta_data( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
 			$order->remove_order_items( 'tax' );
-			WC()->checkout->create_order_tax_lines( $order, $cart );
+			wc()->checkout->create_order_tax_lines( $order, $cart );
 		}
 	}
 
@@ -247,7 +252,7 @@ class OrderController {
 	 * @param \WC_Order $order The order object to update.
 	 */
 	protected function update_addresses_from_cart( \WC_Order $order ) {
-		$customer_billing = WC()->customer->get_billing();
+		$customer_billing = wc()->customer->get_billing();
 		$customer_billing = array_combine(
 			array_map(
 				function( $key ) {
@@ -259,7 +264,7 @@ class OrderController {
 		);
 		$order->set_props( $customer_billing );
 
-		$customer_shipping = WC()->customer->get_shipping();
+		$customer_shipping = wc()->customer->get_shipping();
 		$customer_shipping = array_combine(
 			array_map(
 				function( $key ) {
