@@ -177,3 +177,22 @@ export const getTerms = ( attribute ) => {
 		),
 	} );
 };
+
+/**
+ * Given a page object and an array of page, format the title.
+ *
+ * @param  {Object} page           Page object.
+ * @param  {Object} page.title     Page title object.
+ * @param  {string} page.title.raw Page title.
+ * @param  {string} page.slug      Page slug.
+ * @param  {Array}  pages          Array of all pages.
+ * @return {string}                Formatted page title to display.
+ */
+export const formatTitle = ( page, pages ) => {
+	if ( ! page.title.raw ) {
+		return page.slug;
+	}
+	const isUnique =
+		pages.filter( ( p ) => p.title.raw === page.title.raw ).length === 1;
+	return page.title.raw + ( ! isUnique ? ` - ${ page.slug }` : '' );
+};
