@@ -104,20 +104,12 @@ class RestApi {
 	 * @return mixed
 	 */
 	public static function maybe_init_cart_session( $return ) {
-		$wc_instance = wc();
-		// if WooCommerce instance isn't available or already have an
-		// authentication error, just return.
-		if ( ! method_exists( $wc_instance, 'initialize_session' ) || \is_wp_error( $return ) || ! self::is_request_to_store_api() ) {
-			return $return;
+		if ( function_exists( 'wc_load_cart' ) && ! \is_wp_error( $return ) && self::is_request_to_store_api() ) {
+			// @todo Load Dependencies for wc_load_cart(). See https://github.com/woocommerce/woocommerce/pull/26219
+			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+			include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
+			wc_load_cart();
 		}
-		$wc_instance->frontend_includes();
-		$wc_instance->initialize_session();
-		$wc_instance->initialize_cart();
-
-		// Ensure cart is up to date.
-		$wc_instance->cart->calculate_shipping();
-		$wc_instance->cart->calculate_totals();
-
 		return $return;
 	}
 

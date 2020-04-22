@@ -127,6 +127,7 @@ class Assets {
 				'isLargeCatalog'                => $product_counts->publish > 100,
 				'limitTags'                     => $tag_count > 100,
 				'hasTags'                       => $tag_count > 0,
+				'taxesEnabled'                  => wc_tax_enabled(),
 				'couponsEnabled'                => wc_coupons_enabled(),
 				'shippingEnabled'               => wc_shipping_enabled(),
 				'displayShopPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),

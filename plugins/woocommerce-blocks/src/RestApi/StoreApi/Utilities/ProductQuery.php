@@ -205,7 +205,7 @@ class ProductQuery {
 		$orderby = $request->get_param( 'orderby' );
 		$order   = $request->get_param( 'order' );
 
-		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
+		$ordering_args   = wc()->query->get_catalog_ordering_args( $orderby, $order );
 		$args['orderby'] = $ordering_args['orderby'];
 		$args['order']   = $ordering_args['order'];
 

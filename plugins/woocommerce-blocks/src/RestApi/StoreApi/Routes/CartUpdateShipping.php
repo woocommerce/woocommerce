@@ -125,7 +125,7 @@ class CartUpdateShipping extends AbstractRoute {
 		$request    = $this->validate_shipping_address( $request );
 
 		// Update customer session.
-		WC()->customer->set_props(
+		wc()->customer->set_props(
 			array(
 				'shipping_first_name' => isset( $request['first_name'] ) ? $request['first_name'] : null,
 				'shipping_last_name'  => isset( $request['last_name'] ) ? $request['last_name'] : null,
@@ -137,7 +137,7 @@ class CartUpdateShipping extends AbstractRoute {
 				'shipping_address_2'  => isset( $request['address_2'] ) ? $request['address_2'] : null,
 			)
 		);
-		WC()->customer->save();
+		wc()->customer->save();
 
 		$cart->calculate_shipping();
 		$cart->calculate_totals();
@@ -153,7 +153,7 @@ class CartUpdateShipping extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function validate_shipping_address( $request ) {
-		$valid_countries = WC()->countries->get_shipping_countries();
+		$valid_countries = wc()->countries->get_shipping_countries();
 
 		if ( empty( $request['country'] ) ) {
 			throw new RouteException(
@@ -188,7 +188,7 @@ class CartUpdateShipping extends AbstractRoute {
 		$request['postcode'] = $request['postcode'] ? wc_format_postcode( $request['postcode'], $request['country'] ) : null;
 
 		if ( ! empty( $request['state'] ) ) {
-			$valid_states = WC()->countries->get_states( $request['country'] );
+			$valid_states = wc()->countries->get_states( $request['country'] );
 
 			if ( is_array( $valid_states ) && count( $valid_states ) > 0 ) {
 				$valid_state_values = array_map( 'wc_strtoupper', array_flip( array_map( 'wc_strtoupper', $valid_states ) ) );
