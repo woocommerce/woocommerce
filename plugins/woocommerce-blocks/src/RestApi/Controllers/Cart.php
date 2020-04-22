@@ -12,9 +12,9 @@ namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WP_Error;
-use \WP_REST_Server;
-use \WP_REST_Controller;
+use WP_Error;
+use WP_REST_Server;
+use WP_REST_Controller;
 
 /**
  * Cart API.

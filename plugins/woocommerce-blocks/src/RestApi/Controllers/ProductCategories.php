@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Product_Categories_Controller;
+use WC_REST_Product_Categories_Controller;
 
 /**
  * REST API Product Categories controller class.
