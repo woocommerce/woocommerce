@@ -152,6 +152,18 @@ class WC_Admin_Note extends \WC_Data {
 	*/
 
 	/**
+	 * Returns all data for this object.
+	 *
+	 * Override \WC_Data::get_data() to avoid errantly including meta data
+	 * from ID collisions with the posts table.
+	 *
+	 * @return array
+	 */
+	public function get_data() {
+		return array_merge( array( 'id' => $this->get_id() ), $this->data );
+	}
+
+	/**
 	 * Get note name.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.

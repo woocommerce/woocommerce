@@ -126,6 +126,18 @@ export default compose(
 			orderby: 'date',
 			order: 'desc',
 			status: 'unactioned',
+			_fields: [
+				'id',
+				'name',
+				'title',
+				'content',
+				'type',
+				'icon',
+				'status',
+				'actions',
+				'date_created',
+				'date_created_gmt',
+			],
 		};
 
 		const notes = getNotes( inboxQuery );
