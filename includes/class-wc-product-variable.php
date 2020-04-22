@@ -282,10 +282,10 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of available variations for the current product.
 	 *
-	 * @param bool $render_variations Allows avoiding performance bottlenecks caused by get_available_variation().
+	 * @param bool $render_variations Prepares a data array for each variant for output in the add to cart form. Pass `false` to only return the available variations as objects.
 	 * @return array
 	 */
-	public function get_available_variations($render_variations = true) {
+	public function get_available_variations( $render_variations = true ) {
 
 		$variation_ids        = $this->get_children();
 		$available_variations = array();
