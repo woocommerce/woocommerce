@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p class="woocommerce-result-count">
 	<?php
 	// phpcs:disable WordPress.Security
-	if ( 1 === $total ) {
+	if ( 1 === intval( $total ) ) {
 		_e( 'Showing the single result', 'woocommerce' );
 	} elseif ( $total <= $per_page || -1 === $per_page ) {
 		/* translators: %d: total results */
