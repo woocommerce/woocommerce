@@ -79,10 +79,14 @@ class AnalyticsDashboard {
 	 * Registers dashboard page.
 	 */
 	public function register_page() {
+		$features = wc_admin_get_feature_config();
+		$id = $features['homepage'] ? 'woocommerce-home' : 'woocommerce-dashboard';
+		$title = $features['homepage'] ? __( 'Home', 'woocommerce-admin' ) : __( 'Dashboard', 'woocommerce-admin' );
+
 		wc_admin_register_page(
 			array(
-				'id'     => 'woocommerce-dashboard',
-				'title'  => __( 'Dashboard', 'woocommerce-admin' ),
+				'id'     => $id,
+				'title'  => $title,
 				'parent' => 'woocommerce',
 				'path'   => self::MENU_SLUG,
 			)

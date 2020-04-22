@@ -22,6 +22,7 @@ import {
 import AnalyticsReport, { getReports } from 'analytics/report';
 import AnalyticsSettings from 'analytics/settings';
 import Dashboard from 'dashboard';
+import Homepage from 'homepage';
 import DevDocs from 'devdocs';
 import MarketingOverview from 'marketing/overview';
 
@@ -55,7 +56,10 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'analytics-dashboard' ] ) {
+	if (
+		window.wcAdminFeatures[ 'analytics-dashboard' ] &&
+		! window.wcAdminFeatures.homepage
+	) {
 		pages.push( {
 			container: Dashboard,
 			path: '/',
@@ -67,7 +71,38 @@ export const getPages = () => {
 		} );
 	}
 
+	if ( window.wcAdminFeatures.homepage ) {
+		pages.push( {
+			container: Homepage,
+			path: '/',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Home', 'woocommerce-admin' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+		} );
+	}
+
 	if ( window.wcAdminFeatures.analytics ) {
+		if ( window.wcAdminFeatures.homepage ) {
+			pages.push( {
+				container: Dashboard,
+				path: '/analytics/overview',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					[
+						'/analytics/overview',
+						__( 'Analytics', 'woocommerce-admin' ),
+					],
+					__( 'Overview', 'woocommerce-admin' ),
+				],
+				wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-overview',
+			} );
+		}
+		const ReportWpOpenMenu = `toplevel_page_wc-admin-path--analytics-${
+			window.wcAdminFeatures.homepage ? 'overview' : 'revenue'
+		}`;
+
 		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
@@ -79,7 +114,7 @@ export const getPages = () => {
 				],
 				__( 'Settings', 'woocommerce-admin' ),
 			],
-			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
+			wpOpenMenu: ReportWpOpenMenu,
 		} );
 		pages.push( {
 			container: AnalyticsReport,
@@ -109,7 +144,7 @@ export const getPages = () => {
 					report.title,
 				];
 			},
-			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
+			wpOpenMenu: ReportWpOpenMenu,
 		} );
 	}
 
