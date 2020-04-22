@@ -8,7 +8,6 @@ import {
 	PanelBody,
 	ToggleControl,
 	CheckboxControl,
-	SelectControl,
 	Notice,
 	Disabled,
 } from '@wordpress/components';
@@ -18,10 +17,11 @@ import {
 	TERMS_URL,
 	CHECKOUT_PAGE_ID,
 } from '@woocommerce/block-settings';
-import { useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
+import { useRef } from '@wordpress/element';
 import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
+import PageSelector from '@woocommerce/block-components/page-selector';
 import {
 	previewCart,
 	previewSavedPaymentMethods,
@@ -46,16 +46,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 		cartPageId,
 	} = attributes;
 	const { currentPostId } = useEditorContext();
-	const pages =
-		useSelect( ( select ) => {
-			return select( 'core' ).getEntityRecords( 'postType', 'page', {
-				status: 'publish',
-				orderby: 'title',
-				order: 'asc',
-				per_page: 100,
-			} );
-		}, [] ) || null;
-
+	const { current: savedCartPageId } = useRef( cartPageId );
 	return (
 		<InspectorControls>
 			{ currentPostId !== CHECKOUT_PAGE_ID && (
@@ -226,40 +217,29 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 						} )
 					}
 				/>
-				{ showReturnToCart &&
-					( currentPostId !== CHECKOUT_PAGE_ID || !! cartPageId ) &&
-					pages && (
-						<SelectControl
-							label={ __(
-								'Link to',
-								'woo-gutenberg-products-block'
-							) }
-							value={ cartPageId }
-							options={ [
-								...[
-									{
-										label: __(
-											'WooCommerce Cart Page',
-											'woo-gutenberg-products-block'
-										),
-										value: 0,
-									},
-								],
-								...Object.values( pages ).map( ( page ) => {
-									return {
-										label: page.title.raw,
-										value: parseInt( page.id, 10 ),
-									};
-								} ),
-							] }
-							onChange={ ( value ) =>
-								setAttributes( {
-									cartPageId: parseInt( value, 10 ),
-								} )
-							}
-						/>
-					) }
 			</PanelBody>
+			{ showReturnToCart &&
+				! (
+					currentPostId === CHECKOUT_PAGE_ID && savedCartPageId === 0
+				) && (
+					<PageSelector
+						pageId={ cartPageId }
+						setPageId={ ( id ) =>
+							setAttributes( { cartPageId: id } )
+						}
+						labels={ {
+							title: __(
+								'Return to Cart button',
+								'woo-gutenberg-products-block'
+							),
+							default: __(
+								'WooCommerce Cart Page',
+								'woo-gutenberg-products-block'
+							),
+						} }
+					/>
+				) }
+
 			<FeedbackPrompt
 				text={ __(
 					'We are currently working on improving our cart and checkout blocks, providing merchants with the tools and customization options they need.',
