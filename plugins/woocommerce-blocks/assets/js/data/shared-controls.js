@@ -35,10 +35,14 @@ export const controls = {
 					} );
 				} )
 				.catch( ( errorResponse ) => {
-					// Parse error response before rejecting it.
-					errorResponse.json().then( ( error ) => {
-						reject( error );
-					} );
+					if ( typeof errorResponse.json === 'function' ) {
+						// Parse error response before rejecting it.
+						errorResponse.json().then( ( error ) => {
+							reject( error );
+						} );
+					} else {
+						reject( errorResponse.message );
+					}
 				} );
 		} );
 	},
