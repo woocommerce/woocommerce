@@ -35,7 +35,7 @@ class WC_Admin {
 		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
 
 		// Add body class for WP 5.3+ compatibility.
-		add_filter( 'admin_body_class', array( $this, 'include_admin_body_classes' ) );
+		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ) );
 	}
 
 	/**
