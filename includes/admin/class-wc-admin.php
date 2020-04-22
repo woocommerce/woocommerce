@@ -318,17 +318,17 @@ class WC_Admin {
 	 * @param  String  $classes
 	 * @return String
 	 */
-	public function include_admin_body_classes( $classes ) {
+	public function include_admin_body_class( $classes ) {
 
-		// Add WP 5.3+ compatibility class.
-		if ( strpos( $classes, 'wc-wp-version-gte-53' ) !== false ) {
+		if ( false !== strpos( $classes, 'wc-wp-version-gte-53' ) ) {
 			return $classes;
 		}
 
 		global $wp_version;
 		$version_parts = explode( '-', $wp_version );
-		$version       = sizeof( $version_parts ) > 1 ? $version_parts[ 0 ] : $wp_version;
+		$version       = count( $version_parts ) > 1 ? $version_parts[0] : $wp_version;
 
+		// Add WP 5.3+ compatibility class.
 		if ( $wp_version && version_compare( $version, '5.3', '>=' ) ) {
 			$classes .= ' wc-wp-version-gte-53';
 		}
