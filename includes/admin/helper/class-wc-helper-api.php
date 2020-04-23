@@ -141,6 +141,19 @@ class WC_Helper_API {
 	}
 
 	/**
+	 * Wrapper for self::request().
+	 *
+	 * @param string $endpoint The helper API endpoint to request.
+	 * @param array  $args Arguments passed to wp_remote_request().
+	 *
+	 * @return array The response object from wp_safe_remote_request().
+	 */
+	public static function put( $endpoint, $args = array() ) {
+		$args['method'] = 'PUT';
+		return self::request( $endpoint, $args );
+	}
+
+	/**
 	 * Using the API base, form a request URL from a given endpoint.
 	 *
 	 * @param string $endpoint The endpoint to request.
