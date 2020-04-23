@@ -97,10 +97,11 @@ class WC_Helper_API {
 			$args['headers'] = array();
 		}
 
-		$args['headers'] = array(
+		$headers         = array(
 			'Authorization'   => 'Bearer ' . $auth['access_token'],
 			'X-Woo-Signature' => $signature,
 		);
+		$args['headers'] = wp_parse_args( $headers, $args['headers'] );
 
 		$url = add_query_arg(
 			array(
