@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import { StoreOwnerFlow } from '../../utils/flows';
-import { completeOldSetupWizard } from '../../utils/components';
+import { completeOldSetupWizard, completeOnboardingWizard } from '../../utils/components';
 import {
 	permalinkSettingsPageSaveChanges,
 	setCheckbox,
@@ -47,26 +47,31 @@ describe( 'Store owner can go through store Setup Wizard', () => {
 		] );
 		if ( setupWizardNotice ) {
 			await StoreOwnerFlow.runSetupWizard();
-
-			// Check if the New Setup Wizard Notice (since 3.9) is visible on the screen.
-			// If yes - continue with the old Setup Wizard.
-			// If not - the test will continue with the old wizard by default.
-			const newSetupWizardNotice = await Promise.race( [
-				new Promise( resolve => setTimeout( () => resolve(), 1000) ), // resolves without value after 1s
-				page.waitForSelector( '.wc-setup-step__new_onboarding-wrapper', { visible: true } )
-			] );
-			if ( newSetupWizardNotice ) {
-				// Continue with the old setup wizard
-				await Promise.all( [
-					// Click on "Continue with the old setup wizard" footer link to start the old setup wizard
-					page.$eval( '.wc-setup-footer-links', elem => elem.click() ),
-
-					// Wait for the store setup section to load
-					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-				] );
-			}
-			await completeOldSetupWizard();
+			await completeOnboardingWizard();
 		}
+	} );
+} );
+
+describe( 'Store owner can go through setup Task List', () => {
+	it( 'can setup shipping', async () => {
+		// Query for all tasks on the list
+		const taskListItems = await page.$$( '.woocommerce-list__item-title' );
+		expect( taskListItems ).toHaveLength( 5 );
+
+		await Promise.all( [
+			// Click on "Set up shipping" task to move to the next step
+			taskListItems[2].click(),
+
+			// Wait for shipping setup section to load
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+
+		// Wait for "Proceed" button to become active
+		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+
+		// Click on "Proceed" button to save shipping settings
+		await page.click( 'button.is-primary' );
+		await page.waitFor( 3000 );
 	} );
 } );
 

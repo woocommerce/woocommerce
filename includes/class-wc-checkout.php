@@ -272,7 +272,7 @@ class WC_Checkout {
 			foreach ( $fields as $single_field_type => $field ) {
 				if ( empty( $field['label'] ) && ! empty( $field['placeholder'] ) ) {
 					$this->fields[ $field_type ][ $single_field_type ]['label']       = $field['placeholder'];
-					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = 'screen-reader-text';
+					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = array( 'screen-reader-text' );
 				}
 			}
 		}
@@ -370,25 +370,13 @@ class WC_Checkout {
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
-			$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
-			$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
-			$order->set_shipping_total( WC()->cart->get_shipping_total() );
-			$order->set_discount_total( WC()->cart->get_discount_total() );
-			$order->set_discount_tax( WC()->cart->get_discount_tax() );
-			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
-			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
-			$order->set_total( WC()->cart->get_total( 'edit' ) );
-			$this->create_order_line_items( $order, WC()->cart );
-			$this->create_order_fee_lines( $order, WC()->cart );
-			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
-			$this->create_order_tax_lines( $order, WC()->cart );
-			$this->create_order_coupon_lines( $order, WC()->cart );
+			$this->set_data_from_cart( $order );
 
 			/**
 			 * Action hook to adjust order before save.
@@ -411,6 +399,28 @@ class WC_Checkout {
 		}
 	}
 
+	/**
+	 * Copy line items, tax, totals data from cart to order.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @throws Exception When unable to create order.
+	 */
+	public function set_data_from_cart( &$order ) {
+		$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
+		$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
+		$order->set_shipping_total( WC()->cart->get_shipping_total() );
+		$order->set_discount_total( WC()->cart->get_discount_total() );
+		$order->set_discount_tax( WC()->cart->get_discount_tax() );
+		$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
+		$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
+		$order->set_total( WC()->cart->get_total( 'edit' ) );
+		$this->create_order_line_items( $order, WC()->cart );
+		$this->create_order_fee_lines( $order, WC()->cart );
+		$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+		$this->create_order_tax_lines( $order, WC()->cart );
+		$this->create_order_coupon_lines( $order, WC()->cart );
+	}
 	/**
 	 * Add line items to the order.
 	 *

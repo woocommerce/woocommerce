@@ -683,6 +683,10 @@ function wc_refund_payment( $order, $amount, $reason = '' ) {
  * @param array    $refunded_line_items Refunded items list.
  */
 function wc_restock_refunded_items( $order, $refunded_line_items ) {
+	if ( ! apply_filters( 'woocommerce_can_restock_refunded_items', true, $order, $refunded_line_items ) ) {
+		return;
+	}
+
 	$line_items = $order->get_items();
 
 	foreach ( $line_items as $item_id => $item ) {

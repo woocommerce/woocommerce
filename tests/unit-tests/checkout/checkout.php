@@ -121,6 +121,65 @@ class WC_Tests_Checkout extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test when `usage_count` meta is deleted for some reason.
+	 *
+	 * @throws Exception When unable to create order.
+	 */
+	public function test_create_order_with_usage_limit_deleted() {
+		$coupon_code = 'coupon4one';
+		$coupon_data_store = WC_Data_Store::load( 'coupon' );
+		$coupon = WC_Helper_Coupon::create_coupon(
+			$coupon_code,
+			array( 'usage_limit' => 1 )
+		);
+
+		delete_post_meta( $coupon->get_id(), 'usage_count' );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		$checkout = WC_Checkout::instance();
+		$order_id = $checkout->create_order(
+			array(
+				'billing_email' => 'a@b.com',
+				'payment_method' => 'dummy_payment_gateway',
+			)
+		);
+		$this->assertNotWPError( $order_id );
+		$this->assertEquals( $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ), 1 );
+	}
+
+	/**
+	 * Test usage limit for guest users uasge limit per user is set.
+	 *
+	 * @throws Exception When unable to create order.
+	 */
+	public function test_usage_limit_per_user_for_guest() {
+		wp_set_current_user( 0 );
+		wc_clear_notices();
+		$coupon_code = 'coupon4one';
+		$coupon = WC_Helper_Coupon::create_coupon(
+			$coupon_code,
+			array( 'usage_limit_per_user' => 1 )
+		);
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		$checkout = WC_Checkout::instance();
+		$posted_data = array(
+			'billing_email' => 'a@b.com',
+			'payment_method' => 'dummy_payment_gateway',
+		);
+		$order_id = $checkout->create_order( $posted_data );
+		$this->assertNotWPError( $order_id );
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+		WC()->cart->check_customer_coupons( $posted_data );
+		$this->assertTrue( wc_has_notice( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ), 'error' ) );
+	}
+
+	/**
 	 * Helper function to return 0.01.
 	 *
 	 * @return float

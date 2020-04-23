@@ -27,6 +27,7 @@
         "country": "United States (US)",
         "addressfirstline": "addr 1",
         "addresssecondline": "addr 2",
+        "countryandstate": "United States (US) -- California",
         "city": "San Francisco",
         "state": "CA",
         "postcode": "94107"
@@ -57,6 +58,18 @@
         "state": "CA",
         "postcode": "94107"
       }
+    }
+  },
+  "onboardingwizard": {
+    "industry": "Test industry",
+    "numberofproducts": "1 - 10",
+    "sellingelsewhere": "No"
+  },
+  "settings": {
+    "shipping": {
+      "zonename": "United States",
+      "zoneregions": "United States (US)",
+      "shippingmethod": "Free shipping"
     }
   }
 }

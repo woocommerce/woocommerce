@@ -563,7 +563,13 @@ class WC_Email extends WC_Settings_API {
 			if ( $this->supports_emogrifier() && class_exists( $emogrifier_class ) ) {
 				try {
 					$emogrifier = new $emogrifier_class( $content, $css );
+
+					do_action( 'woocommerce_emogrifier', $emogrifier, $this );
+
 					$content    = $emogrifier->emogrify();
+					$html_prune = \Pelago\Emogrifier\HtmlProcessor\HtmlPruner::fromHtml( $content );
+					$html_prune->removeElementsWithDisplayNone();
+					$content    = $html_prune->render();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();
 					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );

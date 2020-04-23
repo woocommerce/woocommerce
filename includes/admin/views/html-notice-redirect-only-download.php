@@ -15,8 +15,15 @@ defined( 'ABSPATH' ) || exit;
 		echo wp_kses_post(
 			sprintf(
 				/* translators: %s: Link to settings page. */
-				__( 'Your store is configured to serve digital products using "Redirect only" method. This method is deprecated, <a href="%s">please switch to  a different method instead.</a>', 'woocommerce' ),
-				'/wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable'
+				__( 'Your store is configured to serve digital products using "Redirect only" method. This method is deprecated, <a href="%s">please switch to  a different method instead.</a><br><em>If you use a remote server for downloadable files (such as Google Drive, Dropbox, Amazon S3), the right method will automatically be used, so select any of the other options to make this notice go away.</em>', 'woocommerce' ),
+				add_query_arg(
+					array(
+						'page'    => 'wc-settings',
+						'tab'     => 'products',
+						'section' => 'downloadable',
+					),
+					admin_url( 'admin.php' )
+				)
 			)
 		);
 		?>

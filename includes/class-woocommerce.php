@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '4.0.0';
+	public $version = '4.1.0';
 
 	/**
 	 * The single instance of the class.
@@ -230,7 +230,7 @@ final class WooCommerce {
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.0' );
-		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.0' );
+		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
 	}
 

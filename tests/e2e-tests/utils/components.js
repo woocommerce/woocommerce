@@ -24,6 +24,187 @@ const verifyAndPublish = async () => {
 };
 
 /**
+ * Complete onboarding wizard.
+ */
+const completeOnboardingWizard = async () => {
+	// Wait for "Yes please" button to appear and click on it
+	await page.waitForSelector( 'button[name=save_step]' );
+	await expect( page ).toMatchElement(
+		'button[name=save_step]', { text: 'Yes please' }
+	);
+	await Promise.all( [
+		// Click on "Yes please" button to move to the next step
+		page.click( 'button[name=save_step]', { text: 'Yes please' } ),
+
+		// Wait for "Where is your store based?" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Store Details section
+
+	// Fill store's address - first line
+	await expect( page ).toFill( '#inspector-text-control-0', config.get( 'addresses.admin.store.addressfirstline' ) );
+
+	// Fill store's address - second line
+	await expect( page ).toFill( '#inspector-text-control-1', config.get( 'addresses.admin.store.addresssecondline' ) );
+
+	// Fill country and state where the store is located
+	await expect( page ).toFill( '.woocommerce-select-control__control-input', config.get( 'addresses.admin.store.countryandstate' ) );
+
+	// Fill the city where the store is located
+	await expect( page ).toFill( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
+
+	// Fill postcode of the store
+	await expect( page ).toFill( '#inspector-text-control-3', config.get( 'addresses.admin.store.postcode' ) );
+
+	// Verify that checkbox next to "I'm setting up a store for a client" is not selected
+	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
+
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+
+	// Click on "Continue" button to move to the next step
+	await page.click( 'button.is-primary', { text: 'Continue' } );
+
+	// Wait for usage tracking pop-up window to appear
+	await page.waitForSelector( '.components-modal__header-heading' );
+	await expect( page ).toMatchElement(
+		'.components-modal__header-heading', { text: 'Build a Better WooCommerce' }
+	);
+
+	// Query for "Continue" buttons
+	const continueButtons = await page.$$( 'button.is-primary' );
+	expect( continueButtons ).toHaveLength( 2 );
+
+	await Promise.all( [
+		// Click on "Continue" button of the usage pop-up window to move to the next step
+		continueButtons[1].click(),
+
+		// Wait for "In which industry does the store operate?" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Industry section
+
+	// Query for the industries checkboxes
+	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
+	expect( industryCheckboxes ).toHaveLength( 8 );
+
+	// Select all industries including "Other"
+	for ( let i = 0; i < 8; i++ ) {
+		await industryCheckboxes[i].click();
+	}
+
+	// Fill "Other" industry
+	await expect( page ).toFill( '.components-text-control__input', config.get( 'onboardingwizard.industry' ) );
+
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		page.click( 'button.is-primary' ),
+
+		// Wait for "What type of products will be listed?" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Product types section
+
+	// Query for the product types checkboxes
+	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
+	expect( productTypesCheckboxes ).toHaveLength( 6 );
+
+	// Select Physical and Downloadable products
+	for ( let i = 0; i < 2; i++ ) {
+		await productTypesCheckboxes[i].click();
+	}
+
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.woocommerce-profile-wizard__continue:not(:disabled)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		page.click( 'button.woocommerce-profile-wizard__continue' ),
+
+		// Wait for "Tell us about your business" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Business Details section
+
+	// Query for the <SelectControl>s
+	const selectControls = await page.$$( '.woocommerce-select-control' );
+	expect( selectControls ).toHaveLength( 2 );
+
+	// Fill the number of products you plan to sell
+	await selectControls[0].click();
+	await page.waitForSelector( '.woocommerce-select-control__listbox' );
+	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.numberofproducts' ) } );
+
+	// Fill currently selling elsewhere
+	await selectControls[1].click();
+	await page.waitForSelector( '.woocommerce-select-control__listbox' );
+	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
+
+	// Query for the plugin upload toggles
+	const pluginToggles = await page.$$( '.components-form-toggle__input' );
+	expect( pluginToggles ).toHaveLength( 3 );
+
+	// Disable Market on Facebook, Mailchimp and Google Shopping download
+	for ( let i = 0; i < 3; i++ ) {
+		await pluginToggles[i].click();
+	}
+
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+
+	await Promise.all( [
+		// Click on "Continue" button to move to the next step
+		page.click( 'button.is-primary' ),
+
+		// Wait for "Theme" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Theme section
+
+	// Wait for "Continue with my active theme" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+
+	await Promise.all( [
+		// Click on "Continue with my active theme" button to move to the next step
+		page.click( 'button.is-primary' ),
+
+		// Wait for "Enhance your store with WooCommerce Services" section to load
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+
+	// Benefits section
+
+	// Wait for Benefits section to appear
+	await page.waitForSelector( '.woocommerce-profile-wizard__header-title' );
+
+	// Wait for "No thanks" button to become active
+	await page.waitForSelector( 'button.is-default:not(:disabled)' );
+	// Click on "No thanks" button to move to the next step
+	await page.click( 'button.is-default' );
+
+	// End of onboarding wizard
+
+	// Wait for "Woo-hoo almost there" window to appear
+	await page.waitForSelector( '.components-modal__header-heading' );
+	await expect( page ).toMatchElement(
+		'.components-modal__header-heading', { text: 'Woo hoo - you\'re almost there!' }
+	);
+
+	// Wait for "Continue" button to become active
+	await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+	// Click on "Continue" button to move to the next step
+	await page.click( 'button.is-primary:not(:disabled)' );
+};
+
+/**
  * Complete old setup wizard.
  */
 const completeOldSetupWizard = async () => {
@@ -317,6 +498,7 @@ const createVariableProduct = async () => {
 
 export {
 	completeOldSetupWizard,
+	completeOnboardingWizard,
 	createSimpleProduct,
 	createVariableProduct,
 	verifyAndPublish,

@@ -50,7 +50,7 @@ class WC_Site_Tracking {
 	public static function enqueue_scripts() {
 
 		// Add w.js to the page.
-		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
+		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array( 'wp-hooks' ), gmdate( 'YW' ), false );
 
 		// Expose tracking via a function in the wcTracks global namespace directly before wc_print_js.
 		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
@@ -70,6 +70,11 @@ class WC_Site_Tracking {
 				var eventProperties = properties || {};
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
+				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
+					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
+					delete( eventProperties._ui );
+					delete( eventProperties._ut );
+				}
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
@@ -113,6 +118,8 @@ class WC_Site_Tracking {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-settings-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-status-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupons-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-order-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupon-tracking.php';
 
 		$tracking_classes = array(
 			'WC_Admin_Setup_Wizard_Tracking',
@@ -123,6 +130,8 @@ class WC_Site_Tracking {
 			'WC_Settings_Tracking',
 			'WC_Status_Tracking',
 			'WC_Coupons_Tracking',
+			'WC_Order_Tracking',
+			'WC_Coupon_Tracking',
 		);
 
 		foreach ( $tracking_classes as $tracking_class ) {

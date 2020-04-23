@@ -162,19 +162,9 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_wc_admin_onboarding() {
-		if ( ! $this->should_show_wc_admin() && ! $this->is_wc_admin_active() ) {
-			return false;
-		}
-
-		$ab_test = get_option( 'woocommerce_setup_ab_wc_admin_onboarding' );
-
-		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
-		if ( ! $ab_test ) {
-			$ab_test = 1 !== rand( 1, 2 ) ? 'a' : 'b'; // 50% of users. b gets the new experience.
-			update_option( 'woocommerce_setup_ab_wc_admin_onboarding', $ab_test );
-		}
-
-		return 'b' === $ab_test;
+		// As of WooCommerce 4.1, all new sites should use the latest OBW from wc-admin package.
+		// This filter will allow for forcing the old wizard while we migrate e2e tests.
+		return ! apply_filters( 'woocommerce_setup_wizard_force_legacy', false );
 	}
 
 	/**
@@ -226,6 +216,7 @@ class WC_Admin_Setup_Wizard {
 		);
 		wp_enqueue_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), $version );
 		wp_enqueue_style( 'wc-setup', WC()->plugin_url() . '/assets/css/wc-setup.css', array( 'dashicons', 'install' ), $version );
+		wp_style_add_data( 'wc-setup', 'rtl', 'replace' );
 
 		wp_register_script( 'wc-setup', WC()->plugin_url() . '/assets/js/admin/wc-setup' . $suffix . '.js', array( 'jquery', 'wc-enhanced-select', 'jquery-blockui', 'wp-util', 'jquery-tiptip', 'backbone', 'wc-backbone-modal' ), $version );
 		wp_localize_script(
@@ -404,12 +395,11 @@ class WC_Admin_Setup_Wizard {
 	 * Setup Wizard Footer.
 	 */
 	public function setup_wizard_footer() {
+		$current_step = $this->step;
 		?>
-			<?php if ( 'new_onboarding' === $this->step ) : ?>
-				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Continue with the old setup wizard', 'woocommerce' ); ?></a>
-			<?php elseif ( 'store_setup' === $this->step ) : ?>
+			<?php if ( 'new_onboarding' === $current_step || 'store-setup' === $current_step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Not right now', 'woocommerce' ); ?></a>
-			<?php elseif ( 'recommended' === $this->step || 'activate' === $this->step ) : ?>
+			<?php elseif ( 'recommended' === $current_step || 'activate' === $current_step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			<?php do_action( 'woocommerce_setup_footer' ); ?>
@@ -2462,12 +2452,10 @@ class WC_Admin_Setup_Wizard {
 		WC_Admin_Notices::remove_notice( 'install', true );
 
 		$user_email   = $this->get_current_user_email();
-		$videos_url   = 'https://docs.woocommerce.com/document/woocommerce-guided-tour-videos/?utm_source=setupwizard&utm_medium=product&utm_content=videos&utm_campaign=woocommerceplugin';
 		$docs_url     = 'https://docs.woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
 		$help_text    = sprintf(
-			/* translators: %1$s: link to videos, %2$s: link to docs */
-			__( 'Watch our <a href="%1$s" target="_blank">guided tour videos</a> to learn more about WooCommerce, and visit WooCommerce.com to learn more about <a href="%2$s" target="_blank">getting started</a>.', 'woocommerce' ),
-			$videos_url,
+			/* translators: %1$s: link to docs */
+			__( 'Visit WooCommerce.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$docs_url
 		);
 		?>
