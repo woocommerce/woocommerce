@@ -437,4 +437,76 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 
 		WC()->query->remove_ordering_args();
 	}
+
+	/**
+	 * Setup for a test for adjust_posts.
+	 *
+	 * @param bool $with_nav_filtering_data Should WC_Query::get_layered_nav_chosen_attributes return filtering data?.
+	 *
+	 * @return array An array where the first element is the instance of WC_Query, and the second is an array of sample products created.
+	 */
+	private function setup_adjust_posts_test( $with_nav_filtering_data ) {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		if ( $with_nav_filtering_data ) {
+			$nav_filtering_data = array( 'pa_something' => array( 'terms' => array( 'foo', 'bar' ) ) );
+		} else {
+			$nav_filtering_data = array();
+		}
+
+		$products    = array();
+		$product_ids = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			array_push( $products, $product );
+			array_push( $product_ids, $product->get_id() );
+		}
+
+		$products[0]->set_stock_status( 'outofstock' );
+
+		$sut = $this
+			->getMockBuilder( WC_Query::class )
+			->setMethods( array( 'get_current_post_ids', 'get_layered_nav_chosen_attributes_inst' ) )
+			->getMock();
+
+		$sut->method( 'get_current_post_ids' )->willReturn( $product_ids );
+		$sut->method( 'get_layered_nav_chosen_attributes_inst' )->willReturn( $nav_filtering_data );
+
+		return array( $sut, $products );
+	}
+
+	/**
+	 * @testdox adjust_posts should do nothing when there are no nav filtering attributes in the request.
+	 */
+	public function test_adjust_posts_count_without_nav_filtering_attributes() {
+		list($sut, $products) = $this->setup_adjust_posts_test( false );
+
+		$products[0]->set_stock_status( 'outofstock' );
+		$products[0]->save();
+
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34 ) );
+		foreach ( $products as $product ) {
+			$this->assertNull( wc_get_loop_product_visibility( $product->get_id() ) );
+		}
+	}
+
+	/**
+	 * @testdox adjust_posts should return the number of visible products, and create product visibility loop variables, then there are nav filtering attributes in the request.
+	 */
+	public function test_adjust_posts_count_with_nav_filtering_attributes() {
+		list($sut, $products) = $this->setup_adjust_posts_test( true );
+
+		$products[0]->set_stock_status( 'outofstock' );
+		$products[0]->save();
+		$products[1]->set_stock_status( 'outofstock' );
+		$products[1]->save();
+
+		$this->assertEquals( 3, $sut->adjust_posts_count( 34 ) );
+		$this->assertEquals( 3, wc_get_loop_prop( 'total' ) );
+		$this->assertEquals( false, wc_get_loop_product_visibility( $products[0]->get_id() ) );
+		$this->assertEquals( false, wc_get_loop_product_visibility( $products[1]->get_id() ) );
+		foreach ( array_slice( $products, 2 ) as $product ) {
+			$this->assertEquals( true, wc_get_loop_product_visibility( $product->get_id() ) );
+		}
+	}
 }

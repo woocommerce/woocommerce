@@ -1501,6 +1501,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool
 	 */
 	public function is_visible() {
+		$visible = $this->is_visible_core();
+		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
+	}
+
+	/**
+	 * Returns whether or not the product is visible in the catalog (doesn't trigger filters).
+	 *
+	 * @return bool
+	 */
+	protected function is_visible_core() {
 		$visible = 'visible' === $this->get_catalog_visibility() || ( is_search() && 'search' === $this->get_catalog_visibility() ) || ( ! is_search() && 'catalog' === $this->get_catalog_visibility() );
 
 		if ( 'trash' === $this->get_status() ) {
@@ -1521,7 +1531,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$visible = false;
 		}
 
-		return apply_filters( 'woocommerce_product_is_visible', $visible, $this->get_id() );
+		return $visible;
 	}
 
 	/**

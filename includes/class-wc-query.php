@@ -45,6 +45,7 @@ class WC_Query {
 			add_action( 'parse_request', array( $this, 'parse_request' ), 0 );
 			add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 			add_filter( 'the_posts', array( $this, 'remove_product_query_filters' ) );
+			add_filter( 'found_posts', array( $this, 'adjust_posts_count' ) );
 			add_filter( 'get_pagenum_link', array( $this, 'remove_add_to_cart_pagination' ), 10, 1 );
 		}
 		$this->init_query_vars();
@@ -364,6 +365,59 @@ class WC_Query {
 		$this->remove_ordering_args();
 		remove_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
 		return $posts;
+	}
+
+	/**
+	 * When the request is filtering by attributes via layered nav plugin we need to adjust the total posts count
+	 * to account for variable products having stock in some variations but not in others.
+	 * We do that by just checking if each product is visible.
+	 *
+	 * We also cache the post visibility so that it isn't checked again when displaying the posts list.
+	 *
+	 * @param int $count Original posts count, as supplied by the found_posts filter.
+	 *
+	 * @return int Adjusted posts count.
+	 */
+	public function adjust_posts_count( $count ) {
+		if ( empty( $this->get_layered_nav_chosen_attributes_inst() ) ) {
+			return $count;
+		}
+
+		$post_ids = $this->get_current_post_ids();
+		$count    = 0;
+		foreach ( $post_ids as $id ) {
+			$product = wc_get_product( $id );
+			if ( ! is_object( $product ) ) {
+				continue;
+			}
+			if ( $product->is_visible() ) {
+				wc_set_loop_product_visibility( $id, true );
+				$count++;
+			} else {
+				wc_set_loop_product_visibility( $id, false );
+			}
+		}
+
+		wc_set_loop_prop( 'total', $count );
+		return $count;
+	}
+
+	/**
+	 * Instance version of get_layered_nav_chosen_attributes, needed for unit tests.
+	 *
+	 * @return array
+	 */
+	protected function get_layered_nav_chosen_attributes_inst() {
+		return self::get_layered_nav_chosen_attributes();
+	}
+
+	/**
+	 * Get the ids of the posts found in the current WP loop.
+	 *
+	 * @return array Array of post ids.
+	 */
+	protected function get_current_post_ids() {
+		return $GLOBALS['wp_query']->posts;
 	}
 
 	/**

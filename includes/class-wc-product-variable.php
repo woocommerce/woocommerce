@@ -572,6 +572,68 @@ class WC_Product_Variable extends WC_Product {
 		return true;
 	}
 
+	/**
+	 * Returns whether or not the product is visible in the catalog (doesn't trigger filters).
+	 *
+	 * @return bool
+	 */
+	protected function is_visible_core() {
+		if ( ! $this->parent_is_visible_core() ) {
+			return false;
+		}
+
+		$query_filters = $this->get_layered_nav_chosen_attributes();
+		if ( empty( $query_filters ) ) {
+			return true;
+		}
+
+		/**
+		 * If there are attribute filters in the request, a variable product will be visible
+		 * only if at least one of the corresponding variations is visible (for OR filtering)
+		 * or if all of them are (for AND filtering).
+		 *
+		 * Note that for "Any..." variations the attribute value will be empty, these must be
+		 * always included in the result and hence the '' === $value check.
+		 */
+
+		$filter_attribute = array_keys( $query_filters )[0];
+		$temp             = array_values( $query_filters )[0];
+		$filter_values    = $temp['terms'];
+		$filter_type      = $temp['query_type'];
+
+		$attributes = array();
+		foreach ( $this->get_available_variations() as $variation ) {
+			foreach ( $variation['attributes'] as $attribute => $value ) {
+				$attribute = substr( $attribute, strlen( 'attribute_' ) );
+				if ( $attribute === $filter_attribute && ( '' === $value || in_array( $value, $filter_values, true ) ) && ! in_array( $value, $attributes, true ) ) {
+					array_push( $attributes, $value );
+				}
+			}
+		}
+
+		return ( 'or' === $filter_type && count( $attributes ) > 0 ) || ( count( $attributes ) === count( $filter_values ) );
+	}
+
+	/**
+	 * What does is_visible_core in the parent class say?
+	 * This method exists to ease unit testing.
+	 *
+	 * @return bool
+	 */
+	protected function parent_is_visible_core() {
+		return parent::is_visible_core();
+	}
+
+	/**
+	 * Get an array of attributes and terms selected with the layered nav widget.
+	 * This method exists to ease unit testing.
+	 *
+	 * @return array
+	 */
+	protected function get_layered_nav_chosen_attributes() {
+		return WC()->query::get_layered_nav_chosen_attributes();
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Sync with child variations.

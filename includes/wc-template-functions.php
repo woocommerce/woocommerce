@@ -239,6 +239,27 @@ function wc_set_loop_prop( $prop, $value = '' ) {
 }
 
 /**
+ * Set the current visbility for a product in the woocommerce_loop global.
+ *
+ * @param int  $product_id Product it to cache visbiility for.
+ * @param bool $value The poduct visibility value to cache.
+ */
+function wc_set_loop_product_visibility( $product_id, $value ) {
+	wc_set_loop_prop( "product_visibility_$product_id", $value );
+}
+
+/**
+ * Gets the cached current visibility for a product from the woocommerce_loop global.
+ *
+ * @param int $product_id Product id to get the cached visibility for.
+ *
+ * @return bool|null The cached product visibility, or null if on visibility has been cached for that product.
+ */
+function wc_get_loop_product_visibility( $product_id ) {
+	return wc_get_loop_prop( "product_visibility_$product_id", null );
+}
+
+/**
  * Should the WooCommerce loop be displayed?
  *
  * This will return true if we have posts (products) or if we have subcats to display.
@@ -247,7 +268,7 @@ function wc_set_loop_prop( $prop, $value = '' ) {
  * @return bool
  */
 function woocommerce_product_loop() {
-	return have_posts() || 'products' !== woocommerce_get_loop_display_mode();
+	return wc_get_loop_prop( 'total' ) > 0 || 'products' !== woocommerce_get_loop_display_mode();
 }
 
 /**

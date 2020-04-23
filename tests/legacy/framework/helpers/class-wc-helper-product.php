@@ -103,14 +103,19 @@ class WC_Helper_Product {
 	}
 
 	/**
-	 * Create a dummy variation product.
+	 * Create a dummy variation product or configure an existing product object with dummy data.
+	 *
 	 *
 	 * @since 2.3
-	 *
+	 * @param WC_Product_Variable|null $product Product object to configure, or null to create a new one.
 	 * @return WC_Product_Variable
 	 */
-	public static function create_variation_product() {
-		$product = new WC_Product_Variable();
+	public static function create_variation_product( $product = null ) {
+		$is_new_product = is_null( $product );
+		if ( $is_new_product ) {
+			$product = new WC_Product_Variable();
+		}
+
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
@@ -209,7 +214,12 @@ class WC_Helper_Product {
 		);
 		$variation_4->save();
 
-		return wc_get_product( $product->get_id() );
+		if ( $is_new_product ) {
+			return wc_get_product( $product->get_id() );
+		}
+
+		$product->set_children( array( $variation_1->get_id(), $variation_2->get_id(), $variation_3->get_id(), $variation_4->get_id() ) );
+		return $product;
 	}
 
 	/**
