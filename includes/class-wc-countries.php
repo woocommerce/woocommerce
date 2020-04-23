@@ -944,6 +944,16 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'GH' => array(
+						'postcode' => array(
+							'label'    => __( 'Postcode', 'woocommerce' ),
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label' => __( 'State', 'woocommerce' ),
+						),
+					),
 					'GP' => array(
 						'state' => array(
 							'required' => false,
