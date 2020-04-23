@@ -149,7 +149,7 @@ class Onboarding {
 
 		if ( 'wc-setup' === $current_page ) {
 			delete_transient( '_wc_activation_redirect' );
-			wp_safe_redirect( wc_admin_url() );
+			wp_safe_redirect( wc_admin_url( '&reset_profiler=1' ) );
 		}
 	}
 
