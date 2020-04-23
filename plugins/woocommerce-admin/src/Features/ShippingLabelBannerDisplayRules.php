@@ -96,28 +96,9 @@ class ShippingLabelBannerDisplayRules {
 	}
 
 	/**
-	 * Determines whether or not the banner should be displayed.
-	 */
-	public function should_display_banner() {
-		if ( ! $this->should_allow_banner() ) {
-			return false;
-		}
-		$ab_test = get_option( 'woocommerce_shipping_prompt_ab' );
-
-		// If it doesn't exist yet, generate it for later use and save it, so we always show the same to this user.
-		if ( ! $ab_test ) {
-			$ab_test = 1 !== wp_rand( 1, 4 ) ? 'a' : 'b'; // 25% of users. b gets the prompt.
-			update_option( 'woocommerce_shipping_prompt_ab', $ab_test, false );
-		}
-
-		return 'b' === $ab_test;
-	}
-
-
-	/**
 	 * Determines whether banner is eligible for display (does not include a/b logic).
 	 */
-	public function should_allow_banner() {
+	public function should_display_banner() {
 		return $this->banner_not_dismissed() &&
 			$this->jetpack_installed_and_active() &&
 			$this->jetpack_up_to_date() &&
