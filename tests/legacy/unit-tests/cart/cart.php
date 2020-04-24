@@ -2074,7 +2074,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
 
 		// Check if the item is in the cart.
-		$this->assertEquals( 1, count( WC()->cart->get_cart_contents() ) );
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 
 		// Add variation using parent id.
@@ -2090,7 +2090,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 
 		// Check that the second add to cart call increases the quantity of the existing cart-item.
-		$this->assertEquals( 1, count( WC()->cart->get_cart_contents() ) );
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
 	}
 
