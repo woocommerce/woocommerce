@@ -946,12 +946,11 @@ class WC_Countries {
 					),
 					'GH' => array(
 						'postcode' => array(
-							'label'    => __( 'Postcode', 'woocommerce' ),
 							'required' => false,
 							'hidden'   => true,
 						),
 						'state'    => array(
-							'label' => __( 'State', 'woocommerce' ),
+							'label' => __( 'Region', 'woocommerce' ),
 						),
 					),
 					'GP' => array(
