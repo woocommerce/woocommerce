@@ -39,11 +39,11 @@ tests/cli/composer.lock
 tests/cli/composer.json
 tests/cli/vendor
 
-# Unit tests
+# Test suite
 /tmp
 /tests/bin/tmp
-/tests/e2e-tests/config/local-*.json
-/tests/e2e-tests/config/local.json
+/tests/e2e/local-*.json
+/tests/e2e/local.json
 
 # Logs
 /logs

@@ -13,8 +13,8 @@
     "build": "grunt && npm run makepot",
     "build-watch": "grunt watch",
     "lint:js": "eslint assets/js --ext=js",
-    "test:e2e": "./tests/bin/e2e-test-integration.js",
-    "test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
+    "test:e2e": "cross-env NODE_ENV=development jest",
+    "test:e2e-dev": "cross-env NODE_ENV=development WOOCOMMERCE_E2E_DEBUG=true jest",
     "makepot": "composer run-script makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
@@ -31,7 +31,6 @@
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "commander": "4.1.1",
     "config": "3.3.1",
     "cross-env": "6.0.3",
     "eslint": "6.8.0",

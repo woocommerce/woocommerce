@@ -52,7 +52,7 @@
 	</rule>
 
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
-		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
+		<exclude-pattern>tests/e2e/</exclude-pattern>
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">

@@ -208,7 +208,7 @@ module.exports = function( grunt ) {
 				stderr: true
 			},
 			e2e_test: {
-				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
+				command: 'npm run --silent test:single tests/e2e/' + grunt.option( 'file' )
 			},
 			e2e_tests: {
 				command: 'npm run --silent test'
