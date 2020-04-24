@@ -58,6 +58,9 @@ class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
 		$expected_database = sys_get_temp_dir() . '/GeoLite2-Country_20200100/GeoLite2-Country.mmdb';
 
 		$result = $database_service->download_database( 'testing_license' );
+		if ( is_wp_error( $result ) ) {
+			$this->fail( $result->get_error_message() );
+		}
 
 		$this->assertEquals( $expected_database, $result );
 
