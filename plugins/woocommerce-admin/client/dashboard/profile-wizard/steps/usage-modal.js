@@ -97,7 +97,7 @@ class UsageModal extends Component {
 		return (
 			<Modal
 				title={ __(
-					'Build a Better WooCommerce',
+					'Build a better WooCommerce',
 					'woocommerce-admin'
 				) }
 				onRequestClose={ () => this.props.onClose() }

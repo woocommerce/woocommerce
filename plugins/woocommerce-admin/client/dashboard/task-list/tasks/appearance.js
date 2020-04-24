@@ -153,7 +153,7 @@ class Appearance extends Component {
 					createNotice(
 						'error',
 						__(
-							'There was an error importing some of the demo products.',
+							'There was an error importing some of the sample products.',
 							'woocommerce-admin'
 						)
 					);
@@ -161,7 +161,7 @@ class Appearance extends Component {
 					createNotice(
 						'success',
 						__(
-							'All demo products have been imported.',
+							'All sample products have been imported.',
 							'woocommerce-admin'
 						)
 					);
@@ -266,7 +266,7 @@ class Appearance extends Component {
 		const steps = [
 			{
 				key: 'import',
-				label: __( 'Import demo products', 'woocommerce-admin' ),
+				label: __( 'Import sample products', 'woocommerce-admin' ),
 				description: __(
 					'We’ll add some products that will make it easier to see what your store looks like',
 					'woocommerce-admin'
