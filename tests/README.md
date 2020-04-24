@@ -46,7 +46,7 @@ The tests will execute and you'll be presented with a summary.
 
 You can run specific tests by providing the path and filename to the test class:
 
-    $ vendor/bin/phpunit tests/unit-tests/importer/product.php
+    $ vendor/bin/phpunit tests/legacy/unit-tests/importer/product.php
 
 A text code coverage summary can be displayed using the `--coverage-text` option:
 

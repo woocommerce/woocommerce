@@ -41,7 +41,7 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_constants() {
-		$this->assertEquals( str_replace( 'tests/unit-tests/core/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
+		$this->assertEquals( str_replace( 'tests/legacy/unit-tests/core/', '', plugin_dir_path( __FILE__ ) ) . 'woocommerce.php', WC_PLUGIN_FILE );
 		$this->assertEquals( $this->wc->version, Constants::get_constant( 'WC_VERSION' ) );
 		$this->assertEquals( WC_VERSION, WOOCOMMERCE_VERSION );
 		$this->assertEquals( 6, WC_ROUNDING_PRECISION );
