@@ -129,6 +129,9 @@ const CartLineItemRow = ( { lineItem } ) => {
 					className="wc-block-cart-item__remove-icon"
 					onClick={ removeItem }
 				>
+					<span className="screen-reader-text">
+						{ __( 'Remove item', 'woo-gutenberg-products-block' ) }
+					</span>
 					<Icon srcElement={ trash } />
 				</button>
 			</td>
