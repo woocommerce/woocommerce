@@ -7,6 +7,7 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { useDebounce } from 'use-debounce';
 import { useCheckoutContext } from '@woocommerce/base-context';
+import { triggerFragmentRefresh } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -66,17 +67,25 @@ export const useStoreCartItemQuantity = ( cartItem ) => {
 		},
 		[ cartItemKey ]
 	);
+
 	const removeItem = () => {
-		return cartItemKey ? removeItemFromCart( cartItemKey ) : false;
+		return cartItemKey
+			? removeItemFromCart( cartItemKey ).then( () => {
+					triggerFragmentRefresh();
+			  } )
+			: false;
 	};
 
 	// Observe debounced quantity value, fire action to update server on change.
 	useEffect( () => {
 		// Don't run it if quantity didn't change but it was set for the first time.
 		if ( cartItemKey && Number.isFinite( previousDebouncedQuantity ) ) {
-			changeCartItemQuantity( cartItemKey, debouncedQuantity );
+			changeCartItemQuantity( cartItemKey, debouncedQuantity ).then(
+				triggerFragmentRefresh
+			);
 		}
 	}, [ debouncedQuantity, cartItemKey ] );
+
 	useEffect( () => {
 		if ( isPendingQuantity ) {
 			dispatchActions.incrementCalculating();
