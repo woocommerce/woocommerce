@@ -2059,6 +2059,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
 		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
 
 		$product    = WC_Helper_Product::create_variation_product();
 		$variations = $product->get_available_variations();
@@ -2109,6 +2110,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
 		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
 
 		$product    = WC_Helper_Product::create_variation_product();
 		$variations = $product->get_available_variations();
@@ -2139,6 +2141,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
 		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
 
 		$product    = WC_Helper_Product::create_variation_product();
 		$variations = $product->get_available_variations();
