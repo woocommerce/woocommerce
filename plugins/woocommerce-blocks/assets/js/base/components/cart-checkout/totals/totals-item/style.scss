@@ -1,7 +1,7 @@
 .wc-block-totals-table-item {
 	display: flex;
 	flex-wrap: wrap;
-	padding: 15px 0;
+	padding: 0.625em 0;
 	width: 100%;
 }
 
@@ -15,5 +15,6 @@
 }
 
 .wc-block-totals-table-item__description {
+	@include font-size(14);
 	width: 100%;
 }

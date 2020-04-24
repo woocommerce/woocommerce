@@ -1,5 +1,4 @@
 .wc-block-product-name {
-	color: $core-grey-dark-600;
-	font-size: 16px;
-	display: block;
+	@include font-size(16);
+	@include wrapBreakWord();
 }

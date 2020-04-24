@@ -1,11 +1,21 @@
 .wc-block-cart {
 	color: $core-grey-dark-600;
 
+	h2 {
+		@include font-size(20);
+		font-weight: normal;
+	}
+
 	.wc-block-cart__item-count {
 		float: right;
 	}
+
 	.wc-block-cart__shipping-calculator {
 		white-space: nowrap;
+	}
+
+	.wc-block-product-name {
+		color: inherit;
 	}
 }
 
@@ -25,7 +35,7 @@ table.wc-block-cart-items {
 	border-bottom: 1px solid $core-grey-light-600;
 
 	th {
-		padding: 0.5rem $gap 0.5rem 0;
+		padding: 0.25rem $gap 0.25rem 0;
 		white-space: nowrap;
 		border-collapse: collapse;
 	}
@@ -40,7 +50,9 @@ table.wc-block-cart-items {
 		padding-right: 0;
 	}
 	.wc-block-cart-items__header {
+		@include font-size(12);
 		text-transform: uppercase;
+
 		.wc-block-cart-items__header-image {
 			width: 100px;
 		}
@@ -64,11 +76,9 @@ table.wc-block-cart-items {
 		.wc-block-cart-item__quantity {
 			.wc-block-cart-item__remove-link {
 				@include link-button;
+				@include font-size(12);
 
 				color: $core-grey-dark-400;
-				font-size: 12px;
-				line-height: 12px;
-				margin-top: 0.5em;
 				text-transform: none;
 				white-space: nowrap;
 			}
@@ -84,9 +94,9 @@ table.wc-block-cart-items {
 			}
 		}
 		.wc-block-cart-item__total {
+			@include font-size(16);
 			text-align: right;
-			font-size: 16px;
-			line-height: 19px;
+			line-height: 1.25;
 
 			.wc-block-product-price,
 			.wc-block-product-price--regular {
@@ -201,6 +211,7 @@ table.wc-block-cart-items {
 				grid-column-end: 4;
 				grid-row-start: 1;
 				justify-self: stretch;
+				margin-right: 24px;
 				padding-bottom: $gap;
 			}
 			.wc-block-cart-item__quantity {
@@ -247,6 +258,19 @@ table.wc-block-cart-items {
 		height: 100px;
 	}
 }
+
+@include breakpoint( ">782px" ) {
+	.wc-block-cart {
+		.wc-block-radio-control__option {
+			padding-left: $gap-large;
+		}
+
+		.wc-block-radio-control__input {
+			left: 0;
+		}
+	}
+}
+
 .wc-block-cart-coupon-list {
 	list-style: none;
 	margin: 0;

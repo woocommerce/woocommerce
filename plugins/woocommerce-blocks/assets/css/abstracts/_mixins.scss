@@ -108,3 +108,13 @@
 		background: transparent;
 	}
 }
+
+// Makes sure long words are broken if they overflow the container.
+@mixin wrapBreakWord {
+	// This is the current standard, works in most browsers.
+	overflow-wrap: anywhere;
+	// Safari supports word-break.
+	word-break: break-word;
+	// IE11 doesn't support overflow-wrap neither word-break: break-word, so we fallback to -ms-work-break: break-all.
+	-ms-word-break: break-all;
+}

@@ -29,19 +29,17 @@ $line-offset-from-circle-size: 8px;
 	margin-bottom: $gap-smaller;
 }
 
-// @todo: remove the parent class once we dial the specification down.
-.wc-block-checkout-step__heading .wc-block-checkout-step__title {
-	font-size: 16px;
-	line-height: 24px;
+.wc-block-checkout-step__title {
+	@include font-size(16);
+	line-height: 1.5;
 	color: $gray-80;
 	font-weight: 400;
 	margin: 0 $gap-small 0 0;
 }
 
-// @todo: remove the parent class once we dial the specification down.
-.wc-block-checkout-step .wc-block-checkout-step__heading-content {
-	font-size: 12px;
-	line-height: 24px;
+.wc-block-checkout-step__heading-content {
+	@include font-size(12);
+	line-height: 2;
 	color: $gray-80;
 
 	a {
@@ -49,16 +47,16 @@ $line-offset-from-circle-size: 8px;
 		color: $gray-80;
 	}
 }
+
 .wc-block-checkout-step__description {
-	font-size: 14px;
-	line-height: 20px;
+	@include font-size(14);
+	line-height: 1.25;
 	color: $gray-60;
-	// @todo: delete this after we remove placeholders
-	display: block;
-	margin-bottom: $gap-large;
+	margin-bottom: $gap;
 }
 
 .wc-block-checkout-step::before {
+	@include font-size(14);
 	counter-increment: checkout-step;
 	content: counter(checkout-step);
 	position: absolute;
@@ -68,7 +66,6 @@ $line-offset-from-circle-size: 8px;
 	top: 0;
 	background: $gray-20;
 	color: $white;
-	font-size: 14px;
 	line-height: $circle-size;
 	text-align: center;
 	border-radius: $circle-size / 2;

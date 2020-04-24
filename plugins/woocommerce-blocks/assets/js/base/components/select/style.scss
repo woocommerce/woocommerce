@@ -4,11 +4,11 @@
 	margin-bottom: $gap-large;
 
 	label {
+		@include font-size(16);
 		position: absolute;
 		transform: translateY(#{$gap-small});
 		transform-origin: top left;
 		transition: all 200ms ease;
-		font-size: 16px;
 		line-height: 22px;
 		color: $gray-50;
 		z-index: 1;
@@ -38,13 +38,13 @@
 	}
 
 	.components-custom-select-control__button {
+		@include font-size(16);
 		background-color: #fff;
 		box-shadow: none;
 		color: $input-text-active;
 		font-family: inherit;
-		font-size: 16px;
 		font-weight: normal;
-		height: 48px;
+		height: 3em;
 		letter-spacing: inherit;
 		line-height: 1;
 		overflow: hidden;
@@ -62,15 +62,24 @@
 		}
 	}
 
+	.components-custom-select-control__button-icon {
+		right: #{$gap - 4px};
+	}
+
 	.components-custom-select-control__menu {
 		background-color: #fff;
 		margin: 0;
 		max-height: 300px;
 		overflow: auto;
+
+		// Required by IE11.
+		&:empty {
+			display: none;
+		}
 	}
 
 	.components-custom-select-control__item {
-		font-size: 16px;
+		@include font-size(16);
 		margin-left: 0;
 		padding-left: $gap;
 	}

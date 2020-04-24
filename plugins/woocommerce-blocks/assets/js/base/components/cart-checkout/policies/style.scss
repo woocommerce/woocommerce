@@ -1,5 +1,6 @@
 .editor-styles-wrapper .wc-block-components-checkout-policies,
 .wc-block-components-checkout-policies {
+	@include font-size(12);
 	text-align: center;
 	list-style: none outside;
 	line-height: 1;
@@ -18,6 +19,6 @@
 	a {
 		padding: 0 0.25em;
 		text-decoration: underline;
-		color: $gray-60;
+		color: $black;
 	}
 }

@@ -1,11 +1,11 @@
-.button.wc-block-components-button {
+.button.wc-block-components-button:not(.is-link) {
 	align-items: center;
 	background-color: $black;
 	color: $white;
 	display: flex;
 	font-size: inherit;
 	font-weight: bold;
-	height: 48px; // same height as text-input
+	height: 3em; // 16px * 3em = 48px, same height as text-input
 	justify-content: center;
 	line-height: 1;
 	padding: 0 $gap-small;

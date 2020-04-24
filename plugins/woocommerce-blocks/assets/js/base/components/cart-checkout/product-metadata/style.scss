@@ -1,5 +1,5 @@
 .wc-block-product-metadata {
+	@include font-size(12);
 	color: $core-grey-dark-400;
-	font-size: 12px;
 	margin-top: 0.25em;
 }
