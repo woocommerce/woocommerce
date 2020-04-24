@@ -130,6 +130,7 @@ class Assets {
 				'taxesEnabled'                  => wc_tax_enabled(),
 				'couponsEnabled'                => wc_coupons_enabled(),
 				'shippingEnabled'               => wc_shipping_enabled(),
+				'displayItemizedTaxes'          => 'itemized' === get_option( 'woocommerce_tax_total_display' ),
 				'displayShopPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 				'displayCartPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_cart' ),
 				'showAvatars'                   => '1' === get_option( 'show_avatars' ),
