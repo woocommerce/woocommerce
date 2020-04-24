@@ -21,15 +21,6 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
  */
 class Checkout extends AbstractRoute {
 	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
-	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string
@@ -45,6 +36,7 @@ class Checkout extends AbstractRoute {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$this->maybe_load_cart();
 		$response = null;
 		try {
 			$this->check_nonce( $request );

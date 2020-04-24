@@ -53,21 +53,33 @@ class SchemaController {
 	protected function initialize() {
 		$this->schemas = [
 			'cart'                    => new Schemas\CartSchema(
-				new Schemas\CartItemSchema(),
+				new Schemas\CartItemSchema(
+					new Schemas\ImageAttachmentSchema()
+				),
 				new Schemas\CartCouponSchema(),
 				new Schemas\CartShippingRateSchema(),
 				new Schemas\ShippingAddressSchema(),
 				new Schemas\ErrorSchema()
 			),
 			'cart-coupon'             => new Schemas\CartCouponSchema(),
-			'cart-item'               => new Schemas\CartItemSchema(),
+			'cart-item'               => new Schemas\CartItemSchema(
+				new Schemas\ImageAttachmentSchema()
+			),
 			'checkout'                => new Schemas\CheckoutSchema(
 				new Schemas\BillingAddressSchema(),
 				new Schemas\ShippingAddressSchema()
 			),
-			'product'                 => new Schemas\ProductSchema(),
+			'product'                 => new Schemas\ProductSchema(
+				new Schemas\ImageAttachmentSchema()
+			),
 			'product-attribute'       => new Schemas\ProductAttributeSchema(),
+			'product-category'        => new Schemas\ProductCategorySchema(
+				new Schemas\ImageAttachmentSchema()
+			),
 			'product-collection-data' => new Schemas\ProductCollectionDataSchema(),
+			'product-review'          => new Schemas\ProductReviewSchema(
+				new Schemas\ImageAttachmentSchema()
+			),
 			'term'                    => new Schemas\TermSchema(),
 		];
 	}

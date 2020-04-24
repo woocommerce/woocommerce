@@ -17,15 +17,6 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
  */
 class CartCoupons extends AbstractRoute {
 	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
-	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string

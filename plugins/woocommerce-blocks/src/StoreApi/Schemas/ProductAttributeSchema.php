@@ -65,6 +65,12 @@ class ProductAttributeSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
+			'count'        => array(
+				'description' => __( 'Number of terms in the attribute taxonomy.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 		];
 	}
 
@@ -82,6 +88,7 @@ class ProductAttributeSchema extends AbstractSchema {
 			'type'         => $attribute->type,
 			'order'        => $attribute->order_by,
 			'has_archives' => $attribute->has_archives,
+			'count'        => (int) \wp_count_terms( $attribute->slug ),
 		];
 	}
 }

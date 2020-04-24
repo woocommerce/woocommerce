@@ -19,15 +19,6 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductQueryFilters;
  */
 class ProductCollectionData extends AbstractRoute {
 	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
-	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string

@@ -16,21 +16,13 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
  */
 abstract class AbstractCartRoute extends AbstractRoute {
 	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace() {
-		return 'wc/store';
-	}
-
-	/**
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$this->maybe_load_cart();
 		$this->maybe_recalculate_totals();
 		return parent::get_response( $request );
 	}
