@@ -2154,6 +2154,12 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		WC_Form_Handler::add_to_cart_action( false );
 		$notices = WC()->session->get( 'wc_notices', array() );
 
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_colour'] );
+		unset( $_REQUEST['attribute_pa_number'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
 		// Check if the item is in the cart.
 		$this->assertCount( 1, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
