@@ -47,7 +47,7 @@ export const useStoreCartCoupons = () => {
 								sprintf(
 									// translators: %s coupon code.
 									__(
-										'Coupon code "%s" has been applied to your cart',
+										'Coupon code "%s" has been applied to your cart.',
 										'woo-gutenberg-products-block'
 									),
 									couponCode
@@ -78,7 +78,7 @@ export const useStoreCartCoupons = () => {
 								sprintf(
 									// translators: %s coupon code.
 									__(
-										'Coupon code "%s" has been removed from your cart',
+										'Coupon code "%s" has been removed from your cart.',
 										'woo-gutenberg-products-block'
 									),
 									couponCode

@@ -166,3 +166,24 @@
 .wc-block-components-checkout-payment-methods * {
 	pointer-events: all; // Overrides parent disabled component in editor context
 }
+
+@include breakpoint( "<782px" ) {
+	.wc-block-card-elements {
+		flex-wrap: wrap;
+	}
+
+	.wc-block-gateway-container.wc-card-number-element {
+		flex-basis: 100%;
+	}
+
+	.wc-block-gateway-container.wc-card-expiry-element {
+		flex-basis: calc(50% - #{$gap-smaller});
+		margin-left: 0;
+		margin-right: $gap-smaller;
+	}
+
+	.wc-block-gateway-container.wc-card-cvc-element {
+		flex-basis: calc(50% - #{$gap-smaller});
+		margin-left: $gap-smaller;
+	}
+}

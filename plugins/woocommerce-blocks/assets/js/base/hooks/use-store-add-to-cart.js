@@ -3,7 +3,6 @@
  */
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { find } from 'lodash';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
@@ -19,7 +18,7 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
  * @return {number} Quantity in the cart.
  */
 const getQuantityFromCartItems = ( cartItems, productId ) => {
-	const productItem = find( cartItems, { id: productId } );
+	const productItem = cartItems.find( ( { id } ) => id === productId );
 
 	return productItem ? productItem.quantity : 0;
 };

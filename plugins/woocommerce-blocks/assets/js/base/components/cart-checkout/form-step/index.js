@@ -42,9 +42,9 @@ const FormStep = ( {
 				stepHeadingContent={ stepHeadingContent() }
 			/>
 			{ !! description && (
-				<span className="wc-block-checkout-step__description">
+				<p className="wc-block-checkout-step__description">
 					{ description }
-				</span>
+				</p>
 			) }
 			<div className="wc-block-checkout-step__content">{ children }</div>
 		</fieldset>
