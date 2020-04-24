@@ -2077,6 +2077,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertCount( 1, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
 
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+
 		// Add variation using parent id.
 		WC()->cart->add_to_cart(
 			$product->get_id(),
@@ -2088,10 +2091,14 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 				'attribute_pa_number' => '2',
 			)
 		);
+		$notices = WC()->session->get( 'wc_notices', array() );
 
 		// Check that the second add to cart call increases the quantity of the existing cart-item.
 		$this->assertCount( 1, WC()->cart->get_cart_contents() );
 		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
 	}
 
 	/**
