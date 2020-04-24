@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\RestApi\Utilities;
 
 use PHPUnit\Framework\TestCase;
 use \WC_Helper_Product as ProductHelper;
-use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductSummary;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductSummary;
 
 /**
  * ProductSummary Utility Tests.

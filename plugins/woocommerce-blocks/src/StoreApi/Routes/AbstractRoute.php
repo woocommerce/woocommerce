@@ -33,6 +33,15 @@ abstract class AbstractRoute implements RouteInterface {
 	}
 
 	/**
+	 * Get the namespace for this route.
+	 *
+	 * @return string
+	 */
+	public function get_namespace() {
+		return 'wc/store';
+	}
+
+	/**
 	 * Get item schema properties.
 	 *
 	 * @return array
@@ -258,5 +267,17 @@ abstract class AbstractRoute implements RouteInterface {
 		return array(
 			'context' => $this->get_context_param(),
 		);
+	}
+
+	/**
+	 * Makes the cart and sessions available to a route by loading them from core.
+	 */
+	protected function maybe_load_cart() {
+		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
+			// @todo Load Dependencies for wc_load_cart(). See https://github.com/woocommerce/woocommerce/pull/26219
+			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+			include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
+			wc_load_cart();
+		}
 	}
 }

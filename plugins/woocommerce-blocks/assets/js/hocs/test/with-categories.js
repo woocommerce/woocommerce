@@ -18,7 +18,10 @@ jest.mock( '../../base/utils/errors', () => ( {
 	formatError: jest.fn(),
 } ) );
 
-const mockCategories = [ { id: 1, name: 'Clothing' }, { id: 2, name: 'Food' } ];
+const mockCategories = [
+	{ id: 1, name: 'Clothing' },
+	{ id: 2, name: 'Food' },
+];
 const TestComponent = withCategories( ( props ) => {
 	return (
 		<div
@@ -48,10 +51,6 @@ describe( 'withCategories Component', () => {
 
 		it( 'getCategories is called on mount', () => {
 			const { getCategories } = mockUtils;
-
-			expect( getCategories ).toHaveBeenCalledWith( {
-				show_review_count: false,
-			} );
 			expect( getCategories ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );

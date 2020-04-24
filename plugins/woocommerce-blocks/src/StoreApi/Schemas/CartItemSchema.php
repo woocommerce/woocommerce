@@ -9,8 +9,7 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductImages;
-use Automattic\WooCommerce\Blocks\RestApi\Utilities\ProductSummary;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductSummary;
 
 /**
  * CartItemSchema class.
@@ -24,6 +23,22 @@ class CartItemSchema extends ProductSchema {
 	 * @var string
 	 */
 	protected $title = 'cart_item';
+
+	/**
+	 * Image attachment schema instance.
+	 *
+	 * @var ImageAttachmentSchema
+	 */
+	protected $image_attachment_schema;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param ImageAttachmentSchema $image_attachment_schema Image attachment schema instance.
+	 */
+	public function __construct( ImageAttachmentSchema $image_attachment_schema ) {
+		$this->image_attachment_schema = $image_attachment_schema;
+	}
 
 	/**
 	 * Cart schema properties.
@@ -118,52 +133,7 @@ class CartItemSchema extends ProductSchema {
 				'readonly'    => true,
 				'items'       => [
 					'type'       => 'object',
-					'properties' => [
-						'id'        => [
-							'description' => __( 'Image ID.', 'woo-gutenberg-products-block' ),
-							'type'        => 'integer',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'src'       => [
-							'description' => __( 'Full size image URL.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'format'      => 'uri',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'thumbnail' => [
-							'description' => __( 'Thumbnail URL.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'format'      => 'uri',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'srcset'    => [
-							'description' => __( 'Thumbnail srcset for responsive images.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'sizes'     => [
-							'description' => __( 'Thumbnail sizes for responsive images.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'name'      => [
-							'description' => __( 'Image name.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'alt'       => [
-							'description' => __( 'Image alternative text.', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-					],
+					'properties' => $this->image_attachment_schema->get_properties(),
 				],
 			],
 			'variation'           => [
@@ -331,7 +301,7 @@ class CartItemSchema extends ProductSchema {
 			'backorders_allowed'  => (bool) $product->backorders_allowed(),
 			'sold_individually'   => $product->is_sold_individually(),
 			'permalink'           => $product->get_permalink(),
-			'images'              => ( new ProductImages() )->images_to_array( $product ),
+			'images'              => $this->get_images( $product ),
 			'variation'           => $this->format_variation_data( $cart_item['variation'], $product ),
 			'prices'              => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
 			'totals'              => (object) array_merge(

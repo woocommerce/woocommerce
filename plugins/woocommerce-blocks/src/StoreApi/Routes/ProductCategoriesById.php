@@ -1,6 +1,6 @@
 <?php
 /**
- * Products route.
+ * Product Category route.
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  * @package WooCommerce/Blocks
@@ -11,16 +11,16 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * ProductsById class.
+ * ProductCategoriesById class.
  */
-class ProductsById extends AbstractRoute {
+class ProductCategoriesById extends AbstractRoute {
 	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string
 	 */
 	public function get_path() {
-		return '/products/(?P<id>[\d]+)';
+		return '/products/categories/(?P<id>[\d]+)';
 	}
 
 	/**
@@ -59,12 +59,13 @@ class ProductsById extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$object = wc_get_product( (int) $request['id'] );
+		$object = get_term( (int) $request['id'], 'product_cat' );
 
-		if ( ! $object || 0 === $object->get_id() ) {
-			throw new RouteException( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woo-gutenberg-products-block' ), 404 );
+		if ( ! $object || 0 === $object->id ) {
+			throw new RouteException( 'woocommerce_rest_category_invalid_id', __( 'Invalid category ID.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
-		return rest_ensure_response( $this->schema->get_item_response( $object ) );
+		$data = $this->prepare_item_for_response( $object, $request );
+		return rest_ensure_response( $data );
 	}
 }

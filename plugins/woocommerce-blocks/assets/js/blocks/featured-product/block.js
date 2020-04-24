@@ -316,7 +316,7 @@ const FeaturedProduct = ( {
 						<div
 							className="wc-block-featured-product__description"
 							dangerouslySetInnerHTML={ {
-								__html: product.description,
+								__html: product.summary,
 							} }
 						/>
 					) }
@@ -353,11 +353,11 @@ const FeaturedProduct = ( {
 				<RichText.Content
 					tagName="a"
 					className={ buttonClasses }
-					href={ product.url }
+					href={ product.permalink }
 					title={ attributes.linkText }
 					style={ buttonStyle }
 					value={ attributes.linkText }
-					target={ product.url }
+					target={ product.permalink }
 				/>
 			</div>
 		) : (

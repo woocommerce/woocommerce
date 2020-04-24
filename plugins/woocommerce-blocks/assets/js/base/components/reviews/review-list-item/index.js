@@ -27,8 +27,8 @@ function getReviewImage( review, imageType, isLoading ) {
 			{ imageType === 'product' ? (
 				<img
 					aria-hidden="true"
-					alt=""
-					src={ review.product_picture || '' }
+					alt={ review.product_image?.alt || '' }
+					src={ review.product_image?.src || '' }
 					className="wc-block-review-list-item__image"
 					width="48"
 					height="48"

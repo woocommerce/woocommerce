@@ -53,6 +53,12 @@ class TermSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
+			'parent'      => array(
+				'description' => __( 'Parent term ID, if applicable.', 'woo-gutenberg-products-block' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 			'count'       => array(
 				'description' => __( 'Number of objects (posts of any type) assigned to the term.', 'woo-gutenberg-products-block' ),
 				'type'        => 'integer',
@@ -72,8 +78,9 @@ class TermSchema extends AbstractSchema {
 		return [
 			'id'          => (int) $term->term_id,
 			'name'        => $this->prepare_html_response( $term->name ),
-			'description' => $this->prepare_html_response( $term->description ),
 			'slug'        => $term->slug,
+			'description' => $this->prepare_html_response( $term->description ),
+			'parent'      => (int) $term->parent,
 			'count'       => (int) $term->count,
 		];
 	}

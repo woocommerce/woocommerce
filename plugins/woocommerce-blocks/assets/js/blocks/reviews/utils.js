@@ -30,7 +30,7 @@ export const getSortArgs = ( sortValue ) => {
 export const getReviews = ( args ) => {
 	return apiFetch( {
 		path:
-			'/wc/blocks/products/reviews?' +
+			'/wc/store/products/reviews?' +
 			Object.entries( args )
 				.map( ( arg ) => arg.join( '=' ) )
 				.join( '&' ),

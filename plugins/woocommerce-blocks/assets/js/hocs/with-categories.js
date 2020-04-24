@@ -34,9 +34,7 @@ const withCategories = createHigherOrderComponent( ( OriginalComponent ) => {
 		loadCategories() {
 			this.setState( { loading: true } );
 
-			getCategories( {
-				show_review_count: this.props.showReviewCount || false,
-			} )
+			getCategories()
 				.then( ( categories ) => {
 					this.setState( {
 						categories,
