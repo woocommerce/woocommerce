@@ -907,7 +907,7 @@ class WC_Form_Handler {
 			}
 
 			// Merge variation attributes and posted attributes.
-			$posted_and_variation_attributes = array_merge( $posted_attributes, $variation_attributes );
+			$posted_and_variation_attributes = array_merge( $variation_attributes, $posted_attributes );
 
 			// If no variation ID is set, attempt to get a variation ID from posted attributes.
 			if ( empty( $variation_id ) ) {
