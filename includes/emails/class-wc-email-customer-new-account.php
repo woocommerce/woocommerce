@@ -24,6 +24,13 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 	class WC_Email_Customer_New_Account extends WC_Email {
 
 		/**
+		 * User object.
+		 *
+		 * @var \WP_User
+		 */
+		public $object;
+
+		/**
 		 * User login name.
 		 *
 		 * @var string
@@ -52,18 +59,47 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		public $password_generated;
 
 		/**
-		 * Constructor.
+		 * Initialize email id.
 		 */
-		public function __construct() {
-			$this->id             = 'customer_new_account';
-			$this->customer_email = true;
-			$this->title          = __( 'New account', 'woocommerce' );
-			$this->description    = __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.', 'woocommerce' );
-			$this->template_html  = 'emails/customer-new-account.php';
-			$this->template_plain = 'emails/plain/customer-new-account.php';
+		protected function init_id() {
+			$this->id = 'customer_new_account';
+		}
 
-			// Call parent constructor.
-			parent::__construct();
+		/**
+		 * Initialize title.
+		 */
+		protected function init_title() {
+			$this->title = __( 'New account', 'woocommerce' );
+		}
+
+		/**
+		 * Initialize description.
+		 */
+		protected function init_description() {
+			$this->description = __( 'Customer "new account" emails are sent to the customer when a customer signs up via checkout or account pages.', 'woocommerce' );
+		}
+
+		/**
+		 * Initialize template html.
+		 */
+		protected function init_template_html() {
+			$this->template_html = 'emails/customer-new-account.php';
+		}
+
+		/**
+		 * Initialize template plain.
+		 */
+		protected function init_template_plain() {
+			$this->template_plain = 'emails/plain/customer-new-account.php';
+		}
+
+		/**
+		 * True when the email notification is sent to customers.
+		 *
+		 * @var bool
+		 */
+		protected function init_customer_email() {
+			$this->customer_email = true;
 		}
 
 		/**
@@ -114,46 +150,40 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		}
 
 		/**
-		 * Get content html.
+		 * Get arguments for get_content_html method.
 		 *
-		 * @return string
+		 * @return array
 		 */
-		public function get_content_html() {
-			return wc_get_template_html(
-				$this->template_html,
-				array(
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'user_login'         => $this->user_login,
-					'user_pass'          => $this->user_pass,
-					'blogname'           => $this->get_blogname(),
-					'password_generated' => $this->password_generated,
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
-				)
+		public function get_content_html_args() {
+			return array(
+				'email_heading'      => $this->get_heading(),
+				'additional_content' => $this->get_additional_content(),
+				'user_login'         => $this->user_login,
+				'user_pass'          => $this->user_pass,
+				'blogname'           => $this->get_blogname(),
+				'password_generated' => $this->password_generated,
+				'sent_to_admin'      => false,
+				'plain_text'         => true,
+				'email'              => $this,
 			);
 		}
 
 		/**
-		 * Get content plain.
+		 * Get arguments for get_content_plain method.
 		 *
-		 * @return string
+		 * @return array
 		 */
-		public function get_content_plain() {
-			return wc_get_template_html(
-				$this->template_plain,
-				array(
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'user_login'         => $this->user_login,
-					'user_pass'          => $this->user_pass,
-					'blogname'           => $this->get_blogname(),
-					'password_generated' => $this->password_generated,
-					'sent_to_admin'      => false,
-					'plain_text'         => true,
-					'email'              => $this,
-				)
+		public function get_content_plain_args() {
+			return array(
+				'email_heading'      => $this->get_heading(),
+				'additional_content' => $this->get_additional_content(),
+				'user_login'         => $this->user_login,
+				'user_pass'          => $this->user_pass,
+				'blogname'           => $this->get_blogname(),
+				'password_generated' => $this->password_generated,
+				'sent_to_admin'      => false,
+				'plain_text'         => false,
+				'email'              => $this,
 			);
 		}
 

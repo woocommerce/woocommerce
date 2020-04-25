@@ -22,25 +22,98 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Invoice extends WC_Email {
+		/**
+		 * Order.
+		 *
+		 * @var \WC_Order
+		 */
+		public $object;
 
 		/**
-		 * Constructor.
+		 * Initialize placeholders.
+		 *
+		 * @param array $placeholders contains placeholder keys and values.
 		 */
-		public function __construct() {
-			$this->id             = 'customer_invoice';
-			$this->customer_email = true;
-			$this->title          = __( 'Customer invoice / Order details', 'woocommerce' );
-			$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
-			$this->template_html  = 'emails/customer-invoice.php';
-			$this->template_plain = 'emails/plain/customer-invoice.php';
-			$this->placeholders   = array(
-				'{order_date}'   => '',
-				'{order_number}' => '',
+		protected function init_placeholders( array $placeholders = array() ) {
+			parent::init_placeholders(
+				array(
+					'{order_date}' => '',
+					'{order_number}' => '',
+				)
 			);
+		}
 
-			// Call parent constructor.
-			parent::__construct();
+		/**
+		 * Fill placeholders with already available data. Use this method when object already has set all necessary
+		 * properties and data available to be filled in placeholders. trigger method is the right place.
+		 */
+		protected function fill_placeholders() {
+			parent::fill_placeholders();
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
+		}
 
+		/**
+		 * Initialize email id.
+		 */
+		protected function init_id() {
+			$this->id = 'customer_invoice';
+		}
+
+		/**
+		 * Initialize title.
+		 */
+		protected function init_title() {
+			$this->title = __( 'Customer invoice / Order details', 'woocommerce' );
+		}
+
+		/**
+		 * Initialize description.
+		 */
+		protected function init_description() {
+			$this->description = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
+		}
+
+		/**
+		 * Initialize template html.
+		 */
+		protected function init_template_html() {
+			$this->template_html = 'emails/customer-invoice.php';
+		}
+
+		/**
+		 * Initialize template plain.
+		 */
+		protected function init_template_plain() {
+			$this->template_plain = 'emails/plain/customer-invoice.php';
+		}
+
+		/**
+		 * Initialize valid recipient.
+		 */
+		protected function init_recipient() {
+			if ( $this->object instanceof \WC_Order ) {
+				$this->recipient = $this->object->get_billing_email();
+			} else {
+				parent::init_recipient();
+			}
+		}
+
+		/**
+		 * True when the email notification is sent to customers.
+		 *
+		 * @var bool
+		 */
+		protected function init_customer_email() {
+			$this->customer_email = true;
+		}
+
+		/**
+		 * True when the email notification is sent manually only.
+		 *
+		 * @var bool
+		 */
+		protected function init_manual() {
 			$this->manual = true;
 		}
 
@@ -118,21 +191,21 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * @param int      $order_id The order ID.
-		 * @param WC_Order $order Order object.
+		 * @param int           $order_id The order ID.
+		 * @param WC_Order|null $order Order object.
 		 */
-		public function trigger( $order_id, $order = false ) {
+		public function trigger( $order_id, \WC_Order $order = null ) {
 			$this->setup_locale();
 
-			if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
-				$order = wc_get_order( $order_id );
+			if ( ! empty( $order ) ) {
+				$this->object = $order;
+			} elseif ( ! empty( (int) $order_id ) ) {
+				$this->object = wc_get_order( $order_id );
 			}
 
-			if ( is_a( $order, 'WC_Order' ) ) {
-				$this->object                         = $order;
-				$this->recipient                      = $this->object->get_billing_email();
-				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
-				$this->placeholders['{order_number}'] = $this->object->get_order_number();
+			if ( $this->object instanceof \WC_Order ) {
+				$this->init_recipient();
+				$this->fill_placeholders();
 			}
 
 			if ( $this->get_recipient() ) {
@@ -143,40 +216,34 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		}
 
 		/**
-		 * Get content html.
+		 * Get arguments for get_content_html method.
 		 *
-		 * @return string
+		 * @return array
 		 */
-		public function get_content_html() {
-			return wc_get_template_html(
-				$this->template_html,
-				array(
-					'order'              => $this->object,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
-				)
+		public function get_content_html_args() {
+			return array(
+				'order'              => $this->object,
+				'email_heading'      => $this->get_heading(),
+				'additional_content' => $this->get_additional_content(),
+				'sent_to_admin'      => false,
+				'plain_text'         => false,
+				'email'              => $this,
 			);
 		}
 
 		/**
-		 * Get content plain.
+		 * Get arguments for get_content_plain method.
 		 *
-		 * @return string
+		 * @return array
 		 */
-		public function get_content_plain() {
-			return wc_get_template_html(
-				$this->template_plain,
-				array(
-					'order'              => $this->object,
-					'email_heading'      => $this->get_heading(),
-					'additional_content' => $this->get_additional_content(),
-					'sent_to_admin'      => false,
-					'plain_text'         => true,
-					'email'              => $this,
-				)
+		public function get_content_plain_args() {
+			return array(
+				'order'              => $this->object,
+				'email_heading'      => $this->get_heading(),
+				'additional_content' => $this->get_additional_content(),
+				'sent_to_admin'      => false,
+				'plain_text'         => true,
+				'email'              => $this,
 			);
 		}
 
@@ -184,8 +251,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
-			/* translators: %s: list of placeholders */
-			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
+			$placeholder_text  = $this->get_available_placeholders_text( $this->placeholders );
 			$this->form_fields = array(
 				'subject'            => array(
 					'title'       => __( 'Subject', 'woocommerce' ),

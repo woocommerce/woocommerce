@@ -22,6 +22,12 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_Reset_Password extends WC_Email {
+		/**
+		 * User object.
+		 *
+		 * @var \WP_User
+		 */
+		public $object;
 
 		/**
 		 * User ID.
@@ -52,24 +58,54 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		public $reset_key;
 
 		/**
-		 * Constructor.
+		 * Initialize email id.
 		 */
-		public function __construct() {
+		protected function init_id() {
+			$this->id = 'customer_reset_password';
+		}
 
-			$this->id             = 'customer_reset_password';
-			$this->customer_email = true;
+		/**
+		 * Initialize title.
+		 */
+		protected function init_title() {
+			$this->title = __( 'Reset password', 'woocommerce' );
+		}
 
-			$this->title       = __( 'Reset password', 'woocommerce' );
+		/**
+		 * Initialize description.
+		 */
+		protected function init_description() {
 			$this->description = __( 'Customer "reset password" emails are sent when customers reset their passwords.', 'woocommerce' );
+		}
 
-			$this->template_html  = 'emails/customer-reset-password.php';
+		/**
+		 * Initialize template html.
+		 */
+		protected function init_template_html() {
+			$this->template_html = 'emails/customer-reset-password.php';
+		}
+
+		/**
+		 * Initialize template plain.
+		 */
+		protected function init_template_plain() {
 			$this->template_plain = 'emails/plain/customer-reset-password.php';
+		}
 
-			// Trigger.
+		/**
+		 * True when the email notification is sent to customers.
+		 *
+		 * @var bool
+		 */
+		protected function init_customer_email() {
+			$this->customer_email = true;
+		}
+
+		/**
+		 * Instance specific hooks
+		 */
+		protected function hooks() {
 			add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
-
-			// Call parent constructor.
-			parent::__construct();
 		}
 
 		/**
@@ -118,46 +154,40 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		}
 
 		/**
-		 * Get content html.
+		 * Get arguments for get_content_html method.
 		 *
-		 * @return string
+		 * @return array
 		 */
-		public function get_content_html() {
-			return wc_get_template_html(
-				$this->template_html,
-				array(
-					'email_heading'      => $this->get_heading(),
-					'user_id'            => $this->user_id,
-					'user_login'         => $this->user_login,
-					'reset_key'          => $this->reset_key,
-					'blogname'           => $this->get_blogname(),
-					'additional_content' => $this->get_additional_content(),
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
-				)
+		public function get_content_html_args() {
+			return array(
+				'email_heading'      => $this->get_heading(),
+				'user_id'            => $this->user_id,
+				'user_login'         => $this->user_login,
+				'reset_key'          => $this->reset_key,
+				'blogname'           => $this->get_blogname(),
+				'additional_content' => $this->get_additional_content(),
+				'sent_to_admin'      => false,
+				'plain_text'         => false,
+				'email'              => $this,
 			);
 		}
 
 		/**
-		 * Get content plain.
+		 * Get arguments for get_content_plain method.
 		 *
-		 * @return string
+		 * @return array
 		 */
-		public function get_content_plain() {
-			return wc_get_template_html(
-				$this->template_plain,
-				array(
-					'email_heading'      => $this->get_heading(),
-					'user_id'            => $this->user_id,
-					'user_login'         => $this->user_login,
-					'reset_key'          => $this->reset_key,
-					'blogname'           => $this->get_blogname(),
-					'additional_content' => $this->get_additional_content(),
-					'sent_to_admin'      => false,
-					'plain_text'         => true,
-					'email'              => $this,
-				)
+		public function get_content_plain_args() {
+			return array(
+				'email_heading'      => $this->get_heading(),
+				'user_id'            => $this->user_id,
+				'user_login'         => $this->user_login,
+				'reset_key'          => $this->reset_key,
+				'blogname'           => $this->get_blogname(),
+				'additional_content' => $this->get_additional_content(),
+				'sent_to_admin'      => false,
+				'plain_text'         => true,
+				'email'              => $this,
 			);
 		}
 

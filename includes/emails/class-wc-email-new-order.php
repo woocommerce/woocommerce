@@ -22,22 +22,83 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 	 * @extends     WC_Email
 	 */
 	class WC_Email_New_Order extends WC_Email {
+		/**
+		 * Order.
+		 *
+		 * @var \WC_Order
+		 */
+		public $object;
 
 		/**
-		 * Constructor.
+		 * Initialize placeholders.
+		 *
+		 * @param array $placeholders contains placeholder keys and values.
 		 */
-		public function __construct() {
-			$this->id             = 'new_order';
-			$this->title          = __( 'New order', 'woocommerce' );
-			$this->description    = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
-			$this->template_html  = 'emails/admin-new-order.php';
-			$this->template_plain = 'emails/plain/admin-new-order.php';
-			$this->placeholders   = array(
-				'{order_date}'   => '',
-				'{order_number}' => '',
+		protected function init_placeholders( array $placeholders = array() ) {
+			parent::init_placeholders(
+				array(
+					'{order_date}' => '',
+					'{order_number}' => '',
+				)
 			);
+		}
 
-			// Triggers for this email.
+		/**
+		 * Fill placeholders with already available data. Use this method when object already has set all necessary
+		 * properties and data available to be filled in placeholders. trigger method is the right place.
+		 */
+		protected function fill_placeholders() {
+			parent::fill_placeholders();
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
+		}
+
+		/**
+		 * Initialize email id.
+		 */
+		protected function init_id() {
+			$this->id = 'new_order';
+		}
+
+		/**
+		 * Initialize title.
+		 */
+		protected function init_title() {
+			$this->title = __( 'New order', 'woocommerce' );
+		}
+
+		/**
+		 * Initialize description.
+		 */
+		protected function init_description() {
+			$this->description = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
+		}
+
+		/**
+		 * Initialize template html.
+		 */
+		protected function init_template_html() {
+			$this->template_html = 'emails/admin-new-order.php';
+		}
+
+		/**
+		 * Initialize template plain.
+		 */
+		protected function init_template_plain() {
+			$this->template_plain = 'emails/plain/admin-new-order.php';
+		}
+
+		/**
+		 * Initialize valid recipient.
+		 */
+		protected function init_recipient() {
+			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+		}
+
+		/**
+		 * Instance specific hooks
+		 */
+		protected function hooks() {
 			add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_pending_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
@@ -47,12 +108,6 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			add_action( 'woocommerce_order_status_cancelled_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_cancelled_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_cancelled_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
-
-			// Call parent constructor.
-			parent::__construct();
-
-			// Other settings.
-			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
 		}
 
 		/**
@@ -153,8 +208,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
-			/* translators: %s: list of placeholders */
-			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' );
+			$placeholder_text  = $this->get_available_placeholders_text( $this->placeholders );
 			$this->form_fields = array(
 				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),

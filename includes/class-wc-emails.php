@@ -231,6 +231,17 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_New_Account']      = include 'emails/class-wc-email-customer-new-account.php';
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
+
+		/**
+		 * Initialize hooks in objects by invoking init_hook method. No email instance shouldn't have initialized
+		 * actions / filters before this moment. Now overriding emails through filter 'woocommerce_email_classes'
+		 * doesn't require remove_action on each particular action / filter it attaches to
+		 */
+		foreach ( $this->emails as $email ) {
+			if ( method_exists( $email, 'init_hooks' ) ) {
+				$email->init_hooks();
+			}
+		}
 	}
 
 	/**

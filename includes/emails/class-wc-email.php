@@ -95,6 +95,13 @@ class WC_Email extends WC_Settings_API {
 	public $template_base;
 
 	/**
+	 * Email type. Like 'html', 'plain', 'multipart'.
+	 *
+	 * @var string
+	 */
+	public $email_type;
+
+	/**
 	 * Recipients for the email.
 	 *
 	 * @var string
@@ -102,7 +109,7 @@ class WC_Email extends WC_Settings_API {
 	public $recipient;
 
 	/**
-	 * Object this email is for, for example a customer, product, or email.
+	 * Object this email is for, for example a customer, order, product, or email.
 	 *
 	 * @var object|bool
 	 */
@@ -141,7 +148,7 @@ class WC_Email extends WC_Settings_API {
 	 *
 	 * @var bool
 	 */
-	protected $customer_email = false;
+	protected $customer_email;
 
 	/**
 	 *  List of preg* regular expression patterns to search for,
@@ -228,29 +235,149 @@ class WC_Email extends WC_Settings_API {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Find/replace.
-		$this->placeholders = array_merge(
-			array(
-				'{site_title}'   => $this->get_blogname(),
-				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
-			),
-			$this->placeholders
-		);
-
-		// Init settings.
+		$this->init_placeholders();
 		$this->init_form_fields();
 		$this->init_settings();
+		$this->init_props();
+	}
 
-		// Default template base if not declared in child constructor.
-		if ( is_null( $this->template_base ) ) {
-			$this->template_base = WC()->plugin_path() . '/templates/';
-		}
+	/**
+	 * Initialize placeholders.
+	 *
+	 * @param array $placeholders contains placeholder keys and values.
+	 */
+	protected function init_placeholders( array $placeholders = array() ) {
+		$this->placeholders = array_merge(
+			array(
+				'{site_title}'   => '',
+				'{site_address}' => '',
+			),
+			$placeholders
+		);
+	}
 
+	/**
+	 * Fill placeholders with already available data. Use this method when object already has set all necessary
+	 * properties and data available to be filled in placeholders. trigger method is the right place.
+	 */
+	protected function fill_placeholders() {
+		$this->placeholders['{site_title']   = $this->get_blogname();
+		$this->placeholders['{site_address'] = wp_parse_url( home_url(), PHP_URL_HOST );
+	}
+
+	/**
+	 * Initialize object props. Method provides easy override for child class instance.
+	 */
+	protected function init_props() {
+		$this->init_id();
+		$this->init_title();
+		$this->init_description();
+		$this->init_template_html();
+		$this->init_template_plain();
+		$this->init_template_base();
+		$this->init_email_type();
+		$this->init_enabled();
+		$this->init_recipient();
+		$this->init_customer_email();
+		$this->init_manual();
+	}
+
+	/**
+	 * Initialize email id.
+	 */
+	protected function init_id() {
+		$this->id = '';
+	}
+
+	/**
+	 * Initialize title.
+	 */
+	protected function init_title() {
+		$this->title = '';
+	}
+
+	/**
+	 * Initialize description.
+	 */
+	protected function init_description() {
+		$this->description = '';
+	}
+
+	/**
+	 * Initialize template html.
+	 */
+	protected function init_template_html() {
+		$this->template_html = '';
+	}
+
+	/**
+	 * Initialize template plain.
+	 */
+	protected function init_template_plain() {
+		$this->template_plain = '';
+	}
+
+	/**
+	 * Initialize template base path.
+	 */
+	protected function init_template_base() {
+		$this->template_base = WC()->plugin_path() . '/templates/';
+	}
+
+	/**
+	 * Initialize email type.
+	 */
+	protected function init_email_type() {
 		$this->email_type = $this->get_option( 'email_type' );
-		$this->enabled    = $this->get_option( 'enabled' );
+	}
 
+	/**
+	 * Initialize email enabled property.
+	 */
+	protected function init_enabled() {
+		$this->enabled = $this->get_option( 'enabled' );
+	}
+
+	/**
+	 * Initialize valid recipient.
+	 */
+	protected function init_recipient() {
+		$this->recipient = '';
+	}
+
+	/**
+	 * True when the email notification is sent to customers.
+	 *
+	 * @var bool
+	 */
+	protected function init_customer_email() {
+		$this->customer_email = false;
+	}
+
+	/**
+	 * True when the email notification is sent manually only.
+	 *
+	 * @var bool
+	 */
+	protected function init_manual() {
+		$this->manual = false;
+	}
+
+	/**
+	 * Set initial hooks for each email and invoke hooks method to add child instance specific hooks.
+	 */
+	public function init_hooks() {
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		$this->hooks();
+	}
+
+	/**
+	 * Instance specific hooks
+	 */
+	protected function hooks() {
+
 	}
 
 	/**
@@ -410,11 +537,22 @@ class WC_Email extends WC_Settings_API {
 		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
 
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
-			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			if (
+				$this->object && $this->object->get_billing_email() &&
+				( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
+				$header .= sprintf(
+					"Reply-to: %s %s <%s>\r\n",
+					$this->object->get_billing_first_name(),
+					$this->object->get_billing_last_name(),
+					$this->object->get_billing_email()
+				);
 			}
 		} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+			$header .= sprintf(
+				"Reply-to: %s <%s>\r\n",
+				$this->get_from_name(),
+				$this->get_from_address()
+			);
 		}
 
 		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object, $this );
@@ -594,20 +732,56 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Get the email content in plain text format.
-	 *
-	 * @return string
-	 */
-	public function get_content_plain() {
-		return ''; }
-
-	/**
 	 * Get the email content in HTML format.
 	 *
 	 * @return string
 	 */
 	public function get_content_html() {
-		return ''; }
+		return wc_get_template_html(
+			$this->template_html,
+			apply_filters(
+				'woocommerce_email_content_html_args',
+				$this->get_content_html_args(),
+				$this->object,
+				$this
+			)
+		);
+	}
+
+	/**
+	 * Get arguments for get_content_html method.
+	 *
+	 * @return array
+	 */
+	public function get_content_html_args() {
+		return array();
+	}
+
+	/**
+	 * Get the email content in plain text format.
+	 *
+	 * @return string
+	 */
+	public function get_content_plain() {
+		return wc_get_template_html(
+			$this->template_plain,
+			apply_filters(
+				'woocommerce_email_content_plain_args',
+				$this->get_content_plain_args(),
+				$this->object,
+				$this
+			)
+		);
+	}
+
+	/**
+	 * Get arguments for get_content_plain method.
+	 *
+	 * @return array
+	 */
+	public function get_content_plain_args() {
+		return array();
+	}
 
 	/**
 	 * Get the from name for outgoing emails.
@@ -662,8 +836,7 @@ class WC_Email extends WC_Settings_API {
 	 * Initialise Settings Form Fields - these are generic email options most will use.
 	 */
 	public function init_form_fields() {
-		/* translators: %s: list of placeholders */
-		$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
+		$placeholder_text = $this->get_available_placeholders_text( $this->placeholders );
 		$this->form_fields = array(
 			'enabled'            => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
@@ -709,6 +882,22 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Format string with placeholders keys to use in help tooltip.
+	 *
+	 * @param array $placeholders associative array with placeholders keys and values.
+	 *
+	 * @return string
+	 */
+	public function get_available_placeholders_text( array $placeholders = array() ) {
+		$keys                   = array_keys( $placeholders );
+		$formatted_placeholders = '<code>' . esc_html( implode( '</code>, <code>', $keys ) ) . '</code>';
+
+		/* translators: %s: list of placeholders */
+
+		return sprintf( __( 'Available placeholders: %s', 'woocommerce' ), $formatted_placeholders );
+	}
+
+	/**
 	 * Email type options.
 	 *
 	 * @return array
@@ -749,14 +938,16 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_template( $type ) {
-		$type = basename( $type );
-
-		if ( 'template_html' === $type ) {
-			return $this->template_html;
-		} elseif ( 'template_plain' === $type ) {
-			return $this->template_plain;
+		switch ( basename( $type ) ) {
+			case 'template_html':
+				return $this->template_html;
+				break;
+			case 'template_plain':
+				return $this->template_plain;
+				break;
+			default:
+				return '';
 		}
-		return '';
 	}
 
 	/**
