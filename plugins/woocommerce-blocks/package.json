@@ -141,7 +141,7 @@
 		"webpack": "4.42.0",
 		"webpack-cli": "3.3.11",
 		"webpack-rtl-plugin": "2.0.0",
-		"woocommerce": "git+https://github.com/woocommerce/woocommerce.git",
+		"woocommerce": "git+https://github.com/woocommerce/woocommerce.git#release/4.1",
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
