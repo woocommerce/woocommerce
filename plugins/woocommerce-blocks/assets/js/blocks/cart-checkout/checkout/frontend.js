@@ -20,7 +20,10 @@ import { __experimentalCreateInterpolateElement } from 'wordpress-element';
  */
 import Block from './block.js';
 import blockAttributes from './attributes';
-import renderFrontend from '../../../utils/render-frontend.js';
+import {
+	getAttributesFromDataset,
+	renderFrontend,
+} from '../../../utils/render-frontend.js';
 import EmptyCart from './empty-cart/index.js';
 
 const reloadPage = () => void window.location.reload( true );
@@ -71,28 +74,8 @@ const CheckoutFrontend = ( props ) => {
 };
 
 const getProps = ( el ) => {
-	const attributes = {};
-
-	Object.keys( blockAttributes ).forEach( ( key ) => {
-		if ( typeof el.dataset[ key ] !== 'undefined' ) {
-			switch ( blockAttributes[ key ].type ) {
-				case 'boolean':
-					attributes[ key ] = el.dataset[ key ] !== 'false';
-					break;
-				case 'number':
-					attributes[ key ] = parseInt( el.dataset[ key ], 10 );
-					break;
-				default:
-					attributes[ key ] = el.dataset[ key ];
-					break;
-			}
-		} else {
-			attributes[ key ] = blockAttributes[ key ].default;
-		}
-	} );
-
 	return {
-		attributes,
+		attributes: getAttributesFromDataset( blockAttributes, el.dataset ),
 	};
 };
 

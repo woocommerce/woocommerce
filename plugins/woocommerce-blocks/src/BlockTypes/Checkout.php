@@ -54,10 +54,13 @@ class Checkout extends AbstractBlock {
 			// legacy shortcode instead and do not render block.
 			return '[woocommerce_checkout]';
 		}
+		$block_attributes = is_a( $attributes, '\WP_Block' ) ? $attributes->attributes : $attributes;
+
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before' );
-		$this->enqueue_assets( is_a( $attributes, '\WP_Block' ) ? $attributes->attributes : $attributes );
+		$this->enqueue_assets( $block_attributes );
 		do_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_after' );
-		return $content . $this->get_skeleton();
+
+		return $this->inject_html_data_attributes( $content . $this->get_skeleton(), $block_attributes );
 	}
 
 	/**
