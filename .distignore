@@ -3,8 +3,6 @@
 *.lock
 *.md
 *.zip
-apigen.neon
-apigen/
 babel.config.js
 bin/
 build/
