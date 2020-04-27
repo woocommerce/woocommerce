@@ -313,7 +313,6 @@ class WC_Product_Variable extends WC_Product {
 			} else {
 				$available_variations[] = $variation;
 			}
-
 		}
 
 		if ( $render_variations ) {
