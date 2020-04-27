@@ -5,6 +5,12 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { decodeEntities } from '@wordpress/html-entities';
+
+/**
+ * Internal dependencies
+ */
+import { useStoreNotices } from './use-store-notices';
 
 /**
  * @typedef {import('@woocommerce/type-defs/hooks').StoreCartItemAddToCart} StoreCartItemAddToCart
@@ -36,6 +42,7 @@ const getQuantityFromCartItems = ( cartItems, productId ) => {
 export const useStoreAddToCart = ( productId ) => {
 	const { addItemToCart } = useDispatch( storeKey );
 	const { cartItems, cartIsLoading } = useStoreCart();
+	const { addErrorNotice, removeNotice } = useStoreNotices();
 
 	const [ addingToCart, setAddingToCart ] = useState( false );
 	const currentCartItemQuantity = useRef(
@@ -44,9 +51,22 @@ export const useStoreAddToCart = ( productId ) => {
 
 	const addToCart = () => {
 		setAddingToCart( true );
-		addItemToCart( productId ).finally( () => {
-			setAddingToCart( false );
-		} );
+		addItemToCart( productId )
+			.then( ( result ) => {
+				if ( result === true ) {
+					removeNotice( 'add-to-cart' );
+				}
+			} )
+			.catch( ( error ) => {
+				addErrorNotice( decodeEntities( error.message ), {
+					context: 'wc/all-products',
+					id: 'add-to-cart',
+					isDismissible: true,
+				} );
+			} )
+			.finally( () => {
+				setAddingToCart( false );
+			} );
 	};
 
 	useEffect( () => {
