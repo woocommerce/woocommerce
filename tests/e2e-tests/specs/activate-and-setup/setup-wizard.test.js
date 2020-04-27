@@ -66,10 +66,28 @@ describe( 'Store owner can go through setup Task List', () => {
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		] );
 
-		// Wait for "Proceed" button to become active
+		// Query for store location fields
+		const storeLocationFields = await page.$$( '.components-text-control__input' );
+		expect( storeLocationFields ).toHaveLength( 5 );
+
+		// Verify that store location is set
+		await Promise.all( [
+			expect( page ).toMatchElement( storeLocationFields[0], { text: config.get( 'addresses.admin.store.addressfirstline' ) } ),
+			expect( page ).toMatchElement( storeLocationFields[1], { text: config.get( 'addresses.admin.store.addresssecondline' ) } ),
+			expect( page ).toMatchElement( storeLocationFields[2], { text: config.get( 'addresses.admin.store.countryandstate' ) } ),
+			expect( page ).toMatchElement( storeLocationFields[3], { text: config.get( 'addresses.admin.store.city' ) } ),
+			expect( page ).toMatchElement( storeLocationFields[4], { text: config.get( 'addresses.admin.store.postcode' ) } ),
+		] );
+
+		// Wait for "Continue" button to become active
+		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+		// Click on "Continue" button to move to the shipping cost section
+		await page.click( 'button.is-primary' );
+
+		// Wait for "Complete task" button to become active
 		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
 
-		// Click on "Proceed" button to save shipping settings
+		// Click on "Complete task" button to save shipping settings
 		await page.click( 'button.is-primary' );
 		await page.waitFor( 3000 );
 	} );
