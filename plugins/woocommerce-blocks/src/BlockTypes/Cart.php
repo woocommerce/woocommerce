@@ -49,8 +49,10 @@ class Cart extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render( $attributes = array(), $content = '' ) {
+		$block_attributes = is_a( $attributes, '\WP_Block' ) ? $attributes->attributes : $attributes;
+
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-		$this->enqueue_assets( is_a( $attributes, '\WP_Block' ) ? $attributes->attributes : $attributes );
+		$this->enqueue_assets( $block_attributes );
 		do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
 
 		// Add placeholder element to footer to push content for the sticky bar on mobile.
@@ -61,7 +63,7 @@ class Cart extends AbstractBlock {
 			}
 		);
 
-		return $content . $this->get_skeleton();
+		return $this->inject_html_data_attributes( $content . $this->get_skeleton(), $block_attributes );
 	}
 
 	/**

@@ -95,6 +95,36 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Injects block attributes into the block.
+	 *
+	 * @param string $content HTML content to inject into.
+	 * @param array  $attributes Key value pairs of attributes.
+	 * @return string Rendered block with data attributes.
+	 */
+	protected function inject_html_data_attributes( $content, array $attributes ) {
+		return preg_replace( '/<div /', '<div ' . $this->get_html_data_attributes( $attributes ), $content, 1 );
+	}
+
+	/**
+	 * Converts block attributes to HTML data attributes.
+	 *
+	 * @param array $attributes Key value pairs of attributes.
+	 * @return string Rendered HTML attributes.
+	 */
+	protected function get_html_data_attributes( array $attributes ) {
+		$data = [];
+
+		foreach ( $attributes as $key => $value ) {
+			if ( is_bool( $value ) ) {
+				$value = $value ? 'true' : 'false';
+			}
+			$data[] = 'data-' . esc_attr( strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) ) ) . '="' . esc_attr( $value ) . '"';
+		}
+
+		return implode( ' ', $data );
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.

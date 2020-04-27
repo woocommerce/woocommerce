@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, card } from '@woocommerce/icons';
-import { kebabCase } from 'lodash';
 import classnames from 'classnames';
 
 /**
@@ -42,21 +41,9 @@ const settings = {
 	 * Save the props to post content.
 	 */
 	save( { attributes } ) {
-		const data = {};
-
-		Object.keys( blockAttributes ).forEach( ( key ) => {
-			if (
-				blockAttributes[ key ].save !== false &&
-				typeof attributes[ key ] !== 'undefined'
-			) {
-				data[ 'data-' + kebabCase( key ) ] = attributes[ key ];
-			}
-		} );
-
 		return (
 			<div
 				className={ classnames( 'is-loading', attributes.className ) }
-				{ ...data }
 			/>
 		);
 	},
