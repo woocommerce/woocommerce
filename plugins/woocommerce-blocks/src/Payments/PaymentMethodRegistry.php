@@ -115,4 +115,53 @@ final class PaymentMethodRegistry {
 	public function is_registered( $name ) {
 		return isset( $this->registered_payment_methods[ $name ] );
 	}
+
+	/**
+	 * Retrieves all registered payment methods that are also active.
+	 *
+	 * @return PaymentMethodTypeInterface[]
+	 */
+	public function get_all_active_registered() {
+		return array_filter(
+			$this->get_all_registered(),
+			function( $payment_method ) {
+				return $payment_method->is_active();
+			}
+		);
+	}
+
+	/**
+	 * Gets an array of all registered payment method script handles.
+	 *
+	 * @return string[]
+	 */
+	public function get_all_registered_script_handles() {
+		$script_handles  = [];
+		$payment_methods = $this->get_all_active_registered();
+
+		foreach ( $payment_methods as $payment_method ) {
+			$script_handles = array_merge(
+				$script_handles,
+				is_admin() ? $payment_method->get_payment_method_script_handles_for_admin() : $payment_method->get_payment_method_script_handles()
+			);
+		}
+
+		return array_unique( array_filter( $script_handles ) );
+	}
+
+	/**
+	 * Gets an array of all registered payment method script data.
+	 *
+	 * @return array
+	 */
+	public function get_all_registered_script_data() {
+		$script_data     = [];
+		$payment_methods = $this->get_all_active_registered();
+
+		foreach ( $payment_methods as $payment_method ) {
+			$script_data[ $payment_method->get_name() . '_data' ] = $payment_method->get_payment_method_data();
+		}
+
+		return array_filter( $script_data );
+	}
 }

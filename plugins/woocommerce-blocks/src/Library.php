@@ -9,8 +9,6 @@ namespace Automattic\WooCommerce\Blocks;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-
 /**
  * Library class.
  */
@@ -21,7 +19,6 @@ class Library {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_blocks' ) );
-		add_action( 'init', array( __CLASS__, 'register_payment_methods' ) );
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
 		add_action( 'init', array( __CLASS__, 'maybe_create_tables' ) );
 		add_action( 'init', array( __CLASS__, 'maybe_create_cronjobs' ) );
@@ -131,13 +128,6 @@ class Library {
 			$instance = new $class();
 			$instance->register_block_type();
 		}
-	}
-
-	/**
-	 * Register payment methods.
-	 */
-	public static function register_payment_methods() {
-		Package::container()->get( PaymentMethodRegistry::class )->initialize();
 	}
 
 	/**

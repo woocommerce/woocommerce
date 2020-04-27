@@ -7,9 +7,9 @@
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Assets\PaymentMethodAssets;
-
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * Assets class.
@@ -72,8 +72,7 @@ class Assets {
 		self::register_script( 'wc-price-filter', plugins_url( self::get_block_asset_build_path( 'price-filter' ), __DIR__ ), $block_dependencies );
 		self::register_script( 'wc-attribute-filter', plugins_url( self::get_block_asset_build_path( 'attribute-filter' ), __DIR__ ), $block_dependencies );
 		self::register_script( 'wc-active-filters', plugins_url( self::get_block_asset_build_path( 'active-filters' ), __DIR__ ), $block_dependencies );
-		$payment_method_handles = Package::container()->get( PaymentMethodAssets::class )->get_all_registered_payment_method_script_handles();
-		self::register_script( 'wc-checkout-block', plugins_url( self::get_block_asset_build_path( 'checkout' ), __DIR__ ), array_merge( $block_dependencies, $payment_method_handles ) );
+		self::register_script( 'wc-checkout-block', plugins_url( self::get_block_asset_build_path( 'checkout' ), __DIR__ ), $block_dependencies );
 		self::register_script( 'wc-cart-block', plugins_url( self::get_block_asset_build_path( 'cart' ), __DIR__ ), $block_dependencies );
 	}
 
@@ -141,7 +140,7 @@ class Assets {
 				'isShippingCostHidden'          => filter_var( get_option( 'woocommerce_shipping_cost_requires_address' ), FILTER_VALIDATE_BOOLEAN ),
 				'wcBlocksAssetUrl'              => plugins_url( 'assets/', __DIR__ ),
 				'restApiRoutes'                 => [
-					'/wc/store' => array_keys( \Automattic\WooCommerce\Blocks\RestApi::get_routes_from_namespace( 'wc/store' ) ),
+					'/wc/store' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store' ) ),
 				],
 				'storeApiNonce'                 => wp_create_nonce( 'wc_store_api' ),
 				'homeUrl'                       => esc_url( home_url( '/' ) ),
@@ -215,7 +214,7 @@ class Assets {
 			$version = self::get_file_version( $relative_src );
 		}
 
-		wp_register_script( $handle, $src, $dependencies, $version, true );
+		wp_register_script( $handle, $src, apply_filters( 'woocommerce_blocks_register_script_dependencies', $dependencies, $handle ), $version, true );
 
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', dirname( __DIR__ ) . '/languages' );
