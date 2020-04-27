@@ -23,7 +23,7 @@ import { getCountryCode, getCurrencyRegion } from 'dashboard/utils';
 import {
 	StoreAddress,
 	validateStoreAddress,
-} from '../../components/settings/general/store-address';
+} from 'dashboard/components/settings/general/store-address';
 import UsageModal from './usage-modal';
 import withWCApiSelect from 'wc-api/with-select';
 import { CurrencyContext } from 'lib/currency-context';

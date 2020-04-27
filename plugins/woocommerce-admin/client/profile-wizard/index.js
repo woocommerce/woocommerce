@@ -11,7 +11,11 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { updateQueryString } from '@woocommerce/navigation';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	PLUGINS_STORE_NAME,
+	withSettingsHydration,
+	withPluginsHydration,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -234,7 +238,24 @@ class ProfileWizard extends Component {
 	}
 }
 
+const hydrateSettings = ( window.wcSettings.preloadSettings && window.wcSettings.preloadSettings.general );
+
 export default compose(
+	(
+		hydrateSettings
+		? withSettingsHydration( 'general', {
+			general: window.wcSettings.preloadSettings.general,
+		} )
+		: () => ( {} )
+	),
+	( 
+		window.wcSettings.plugins
+		? withPluginsHydration( {
+			...window.wcSettings.plugins,
+			jetpackStatus: window.wcSettings.dataEndpoints.jetpackStatus,
+		} )
+		: () => ( {} )
+	),
 	withSelect( ( select ) => {
 		const { getNotes, getProfileItems, getProfileItemsError } = select(
 			'wc-api'

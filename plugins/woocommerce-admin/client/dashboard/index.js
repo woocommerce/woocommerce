@@ -9,28 +9,20 @@ import { compose } from '@wordpress/compose';
  */
 import './style.scss';
 import CustomizableDashboard from './customizable';
-import ProfileWizard from './profile-wizard';
+import ProfileWizard from '../profile-wizard';
 import withSelect from 'wc-api/with-select';
 import { isOnboardingEnabled } from 'dashboard/utils';
-import { withSettingsHydration } from '@woocommerce/data';
-
-let PossiblyHydratedProfileWizard = ProfileWizard;
-
-if (
-	window.wcSettings.preloadSettings &&
-	window.wcSettings.preloadSettings.general
-) {
-	PossiblyHydratedProfileWizard = withSettingsHydration( 'general', {
-		general: window.wcSettings.preloadSettings.general,
-	} )( PossiblyHydratedProfileWizard );
-}
 
 class Dashboard extends Component {
 	render() {
 		const { path, profileItems, query } = this.props;
 
-		if ( isOnboardingEnabled() && ! profileItems.completed ) {
-			return <PossiblyHydratedProfileWizard query={ query } />;
+		if (
+			isOnboardingEnabled() &&
+			! profileItems.completed &&
+			! window.wcAdminFeatures.homepage
+		) {
+			return <ProfileWizard query={ query } />;
 		}
 
 		if ( window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] ) {
