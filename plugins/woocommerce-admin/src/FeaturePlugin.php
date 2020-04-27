@@ -258,7 +258,7 @@ class FeaturePlugin {
 	 */
 	public function deactivate_self() {
 		deactivate_plugins( plugin_basename( WC_ADMIN_PLUGIN_FILE ) );
-		unset( $_GET['activate'] );
+		unset( $_GET['activate'] ); // phpcs:ignore CSRF ok.
 	}
 
 	/**

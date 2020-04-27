@@ -1,0 +1,19 @@
+.woocommerce-navigation {
+	position: fixed;
+	top: $admin-bar-height;
+	left: 0;
+	width: 160px;
+	height: 100%;
+	background: $core-grey-dark-800;
+}
+
+.woocommerce-navigation__menu-item {
+	padding: $gap-smaller 0;
+}
+
+.has-woocommerce-navigation {
+	#adminmenuwrap,
+	#adminmenuback {
+		display: none !important;
+	}
+}
