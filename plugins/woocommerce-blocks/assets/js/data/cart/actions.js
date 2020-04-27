@@ -226,6 +226,7 @@ export function* removeCoupon( couponCode ) {
  * - If successful, yields action to add item from store.
  * - If error, yields action to store error.
  *
+ * @throws Will throw an error if there is an API problem.
  * @param {number} productId Product ID to add to cart.
  * @param {number} quantity Number of product ID being added to cart.
  */
@@ -249,7 +250,12 @@ export function* addItemToCart( productId, quantity = 1 ) {
 		if ( error.data?.cart ) {
 			yield receiveCart( error.data.cart );
 		}
+
+		// Re-throw the error.
+		throw error;
 	}
+
+	return true;
 }
 
 /**
