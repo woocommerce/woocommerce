@@ -20,7 +20,6 @@ cache:
 
 # Test main supported versions of PHP against latest WP.
 php:
-  - 5.6
   - 7.0
   - 7.1
   - 7.2
@@ -30,7 +29,7 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
-# Additional tests against stable PHP (min version is 5.6)
+# Additional tests against stable PHP (min version is 7.0)
 # and code coverage report.
 matrix:
   fast_finish: true
@@ -55,8 +54,17 @@ matrix:
   - name: "WooCommerce unit tests using WordPress nightly"
     php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
-  - name: "Minimum requirements"
-    php: 5.6
+  - name: "WP latest - 1"
+    php: 7.2
+    env: WP_VERSION=5.3 WP_MULTISITE=0
+  - name: "WP latest - 2"
+    php: 7.2
+    env: WP_VERSION=5.2 WP_MULTISITE=0
+  - name: "WP 5.1"
+    php: 7.2
+    env: WP_VERSION=5.1 WP_MULTISITE=0
+  - name: "WP 5.0"
+    php: 7.0
     env: WP_VERSION=5.0 WP_MULTISITE=0
   allow_failures:
   - php: 7.4

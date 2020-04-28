@@ -276,19 +276,20 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	public function test_get_image_should_return_product_image() {
 		$product = new WC_Product();
 		$image   = $this->set_product_image( $product );
+		$needle  = 'width="186" height="144" src="' . $image['url'] . '" class="%s"';
 
-		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+		$this->assertContains(
+			sprintf( $needle, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$product->get_image()
 		);
 
-		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-single size-single" alt="" />',
+		$this->assertContains(
+			sprintf( $needle, 'attachment-single size-single' ),
 			$product->get_image( 'single' )
 		);
 
-		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="custom-class" alt="" />',
+		$this->assertContains(
+			sprintf( $needle, 'custom-class' ),
 			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
 
@@ -303,19 +304,20 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$variations       = $variable_product->get_children();
 		$variation_1      = wc_get_product( $variations[0] );
 		$image            = $this->set_product_image( $variable_product );
+		$needle           = 'width="186" height="144" src="' . $image['url'] . '" class="%s"';
 
-		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+		$this->assertContains(
+			sprintf( $needle, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$variation_1->get_image()
 		);
 
 		$this->assertContains(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="attachment-single size-single" alt="" />',
+			sprintf( $needle, 'attachment-single size-single' ),
 			$variation_1->get_image( 'single' )
 		);
 
-		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image['url'] . '" class="custom-class" alt="" />',
+		$this->assertContains(
+			sprintf( $needle, 'custom-class' ),
 			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
 
