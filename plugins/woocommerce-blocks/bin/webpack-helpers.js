@@ -481,6 +481,8 @@ const getPaymentMethodsExtensionConfig = ( options = {} ) => {
 				'./assets/js/payment-method-extensions/payment-methods/stripe/index.js',
 			'wc-payment-method-cheque':
 				'./assets/js/payment-method-extensions/payment-methods/cheque/index.js',
+			'wc-payment-method-paypal':
+				'./assets/js/payment-method-extensions/payment-methods/paypal/index.js',
 		},
 		output: {
 			devtoolNamespace: 'wc',
