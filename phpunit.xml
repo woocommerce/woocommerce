@@ -11,6 +11,7 @@
 	<testsuites>
 		<testsuite name="WooCommerce Test Suite">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+			<directory suffix=".php">./tests/php</directory>
 		</testsuite>
 	</testsuites>
 	<filter>
