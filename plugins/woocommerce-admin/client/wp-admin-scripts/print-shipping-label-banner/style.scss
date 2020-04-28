@@ -40,6 +40,10 @@
 		text-decoration: none;
 		text-shadow: none;
 		overflow: visible;
+		&:hover {
+			background-color: #ff3997;
+			border-color: #ff3997;
+		}
 	}
 
 	.notice-dismiss {
