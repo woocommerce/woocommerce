@@ -453,7 +453,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'expiry_date' => array(
 					'description' => __( 'UTC DateTime when the coupon expires.', 'woocommerce-rest-api' ),
-					'type'        => 'string',
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'usage_count' => array(
