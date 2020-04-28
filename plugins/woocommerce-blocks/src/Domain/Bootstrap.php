@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\BackCompatAssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Library;
+use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\RestApi;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
@@ -73,6 +74,7 @@ class Bootstrap {
 			$this->add_build_notice();
 			$this->define_feature_flag();
 			$this->container->get( AssetDataRegistry::class );
+			$this->container->get( Installer::class );
 			BlockAssets::init();
 		}
 
@@ -180,6 +182,12 @@ class Bootstrap {
 			RestApi::class,
 			function ( Container $container ) {
 				return new RestApi();
+			}
+		);
+		$this->container->register(
+			Installer::class,
+			function ( Container $container ) {
+				return new Installer();
 			}
 		);
 	}

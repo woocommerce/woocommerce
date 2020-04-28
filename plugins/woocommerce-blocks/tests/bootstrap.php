@@ -97,7 +97,8 @@ function wc_install_core() {
 	include wc_dir() . '/uninstall.php';
 	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
 	wp_roles();
-	echo esc_html( 'Installing WooCommerce...' . PHP_EOL );
+	echo esc_html( 'Installing WooCommerce Blocks...' . PHP_EOL );
+	\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Installer::class )->maybe_create_tables();
 }
 
 /**
