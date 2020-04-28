@@ -39,7 +39,7 @@ if ( appPath ) {
 
     if ( 'up' === command ) {
         // Look for an initialization script in the dependent app.
-        const appInitFile = path.resolve( appPath, 'tests/e2e-tests/docker/initialize.sh' );
+        const appInitFile = path.resolve( appPath, 'tests/e2e/docker/initialize.sh' );
 
         // If found, copy it into the wp-cli Docker context so
         // it gets picked up by the entrypoint script.

@@ -41,13 +41,14 @@ matrix:
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0
     script:
-        - bash tests/e2e-env/bin/before-script-CI.sh
+        - bash tests/e2e/env/bin/before-script-CI.sh
         - composer require wp-cli/i18n-command
+        - npm install
         - npm run build
-        - npm explore @woocommerce/e2e-env -- npm run docker:up
-        - npm explore @woocommerce/e2e-env -- npm run test:e2e
+        - npm run docker:up
+        - npm run test:e2e
     after_script:
-        - npm explore @woocommerce/e2e-env -- npm run docker:down
+        - npm run docker:down
   - name: "Unit tests code coverage"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1

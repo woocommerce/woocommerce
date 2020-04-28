@@ -19,7 +19,7 @@ let jestTimeoutInMilliSeconds = 30000;
 // Use `await jestPuppeteer.debug()` in test code to pause execution.
 if (
 	process.env.JEST_PUPPETEER_CONFIG ===
-	'tests/e2e-tests/config/jest-puppeteer.dev.config.js'
+	'tests/e2e/config/jest-puppeteer.dev.config.js'
 ) {
 	jestTimeoutInMilliSeconds = 120000;
 }

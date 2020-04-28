@@ -84,7 +84,7 @@ module.exports = {
 };
 ```
 
-**NOTE:** Your project's Jest config file is expected to found at: `tests/e2e-tests/config/jest.config.js`.
+**NOTE:** Your project's Jest config file is expected to found at: `tests/e2e/config/jest.config.js`.
 
 ### Webpack Config
 
@@ -109,14 +109,14 @@ module.exports = {
 The E2E environment will look for a `docker-compose.yaml` file in your project root. This will be combined with the base Docker config in the package. This is where you'll map your local project files into the Docker container(s).
 
 ```yaml
-version: '3.3'
+version: '3.7'
 
 services:
 
   wordpress-www:
     volumes:
       # This path is relative to the first config file
-      # which is in node_modules/@woocommerce/e2e-env
+      # which is in node_modules/@woocommerce/e2e/env
       - "../../../:/var/www/html/wp-content/plugins/your-project-here"
 
   wordpress-cli:
@@ -126,7 +126,7 @@ services:
 
 #### Docker Container Initialization Script
 
-You can provide an initialization script that will run in the WP-CLI Docker container. Place an executable file at `tests/e2e-tests/docker/initialize.sh` in your project and it will be copied into the container and executed. While you can run any commands you wish, the intent here is to use WP-CLI to set up your testing environment. E.g.:
+You can provide an initialization script that will run in the WP-CLI Docker container. Place an executable file at `tests/e2e/docker/initialize.sh` in your project and it will be copied into the container and executed. While you can run any commands you wish, the intent here is to use WP-CLI to set up your testing environment. E.g.:
 
 ```
 #!/bin/bash

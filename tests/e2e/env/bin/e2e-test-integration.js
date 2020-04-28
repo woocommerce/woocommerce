@@ -19,7 +19,7 @@ const nodeConfigDirs = [
 
 if ( appPath ) {
 	nodeConfigDirs.unshift(
-		path.resolve( appPath, 'tests/e2e-tests/config' )
+		path.resolve( appPath, 'tests/e2e/config' )
 	);
 }
 
@@ -55,7 +55,7 @@ let configPath = path.resolve( __dirname, '../config/jest.config.js' );
 
 // Look for a Jest config in the dependent app's path.
 if ( appPath ) {
-	const appConfig = path.resolve( appPath, 'tests/e2e-tests/config/jest.config.js' );
+	const appConfig = path.resolve( appPath, 'tests/e2e/config/jest.config.js' );
 
 	if ( fs.existsSync( appConfig ) ) {
 		configPath = appConfig;

@@ -1,1 +1,0 @@
-FROM wordpress:latest

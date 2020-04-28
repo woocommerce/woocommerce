@@ -28,7 +28,7 @@
     "@babel/preset-env": "7.9.0",
     "@babel/register": "7.9.0",
     "@jest/test-sequencer": "^25.0.0",
-    "@woocommerce/e2e-env": "file:tests/e2e-env",
+    "@woocommerce/e2e-env": "file:tests/e2e/env",
     "@wordpress/e2e-test-utils": "4.3.1",
     "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
