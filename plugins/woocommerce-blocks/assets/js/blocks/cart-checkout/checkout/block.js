@@ -347,13 +347,6 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 										}
 									/>
 								) }
-								{ /*@todo This is not implemented*/ }
-								<CheckboxControl
-									className="wc-block-checkout__add-note"
-									label="Add order notes?"
-									checked={ false }
-									onChange={ () => null }
-								/>
 							</FormStep>
 						) }
 						{ cartNeedsPayment && (
