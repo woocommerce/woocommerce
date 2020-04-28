@@ -20,8 +20,6 @@ class Library {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_blocks' ) );
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
-		add_action( 'init', array( __CLASS__, 'maybe_create_tables' ) );
-		add_action( 'init', array( __CLASS__, 'maybe_create_cronjobs' ) );
 		add_filter( 'wc_order_statuses', array( __CLASS__, 'register_draft_order_status' ) );
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( __CLASS__, 'register_draft_order_post_status' ) );
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', array( __CLASS__, 'append_draft_order_post_status' ) );
@@ -42,52 +40,6 @@ class Library {
 		foreach ( $tables as $name => $table ) {
 			$wpdb->$name    = $wpdb->prefix . $table;
 			$wpdb->tables[] = $table;
-		}
-	}
-
-	/**
-	 * Set up the database tables which the plugin needs to function.
-	 */
-	public static function maybe_create_tables() {
-		$db_version = get_option( 'wc_blocks_db_version', 0 );
-
-		if ( version_compare( $db_version, \Automattic\WooCommerce\Blocks\Package::get_version(), '>=' ) ) {
-			return;
-		}
-
-		global $wpdb;
-
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		$wpdb->hide_errors();
-		$collate = '';
-
-		if ( $wpdb->has_cap( 'collation' ) ) {
-			$collate = $wpdb->get_charset_collate();
-		}
-
-		dbDelta(
-			"
-			CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
-				`order_id` bigint(20) NOT NULL,
-				`product_id` bigint(20) NOT NULL,
-				`stock_quantity` double NOT NULL DEFAULT 0,
-				`timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-				`expires` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-				PRIMARY KEY  (`order_id`, `product_id`)
-			) $collate;
-			"
-		);
-
-		update_option( 'wc_blocks_db_version', \Automattic\WooCommerce\Blocks\Package::get_version() );
-	}
-
-	/**
-	 * Maybe create cron events.
-	 */
-	public static function maybe_create_cronjobs() {
-		if ( function_exists( 'as_next_scheduled_action' ) && false === as_next_scheduled_action( 'woocommerce_cleanup_draft_orders' ) ) {
-			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, 'woocommerce_cleanup_draft_orders' );
 		}
 	}
 
