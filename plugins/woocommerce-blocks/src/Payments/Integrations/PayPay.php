@@ -1,6 +1,6 @@
 <?php
 /**
- * Cheque (core) gateway implementation.
+ * PayPal Standard (core) gateway implementation.
  *
  * @package WooCommerce/Blocks
  * @since $VID:$
@@ -14,17 +14,17 @@ use WC_Stripe_Helper;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 
 /**
- * Cheque payment method integration
+ * PayPal Standard payment method integration
  *
  * @since $VID:$
  */
-final class Cheque extends AbstractPaymentMethodType {
+final class PayPal extends AbstractPaymentMethodType {
 	/**
 	 * Payment method name defined by payment methods extending this class.
 	 *
 	 * @var string
 	 */
-	protected $name = 'cheque';
+	protected $name = 'paypal';
 
 	/**
 	 * Settings from the WP options table
@@ -53,7 +53,7 @@ final class Cheque extends AbstractPaymentMethodType {
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_cheque_settings', [] );
+		$this->settings = get_option( 'woocommerce_paypal_settings', [] );
 	}
 
 	/**
@@ -72,10 +72,10 @@ final class Cheque extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles() {
 		$this->asset_api->register_script(
-			'wc-payment-method-cheque',
-			'build/wc-payment-method-cheque.js'
+			'wc-payment-method-paypal',
+			'build/wc-payment-method-paypal.js'
 		);
-		return [ 'wc-payment-method-cheque' ];
+		return [ 'wc-payment-method-paypal' ];
 	}
 
 	/**

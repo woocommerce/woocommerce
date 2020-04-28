@@ -13,6 +13,7 @@
 			outline-offset: -1px;
 			text-align: center;
 			transition: box-shadow 0.1s linear;
+			box-shadow: inset 0 -2px $core-grey-light-600;
 			&.is-active {
 				box-shadow: inset 0 -3px $black;
 				font-weight: 600;
@@ -26,6 +27,12 @@
 			.wc-block-components-tabs__item-content {
 				width: fit-content;
 				display: inline-block;
+
+				img {
+					max-height: 1.2em;
+					position: relative;
+					margin: -0.1em 0;
+				}
 			}
 		}
 	}

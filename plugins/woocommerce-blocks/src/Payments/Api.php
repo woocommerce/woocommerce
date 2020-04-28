@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Stripe;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 
 /**
  *  The Api class provides an interface to payment method registration.
@@ -99,6 +100,9 @@ class Api {
 		}
 		$payment_method_registry->register(
 			Package::container()->get( Cheque::class )
+		);
+		$payment_method_registry->register(
+			Package::container()->get( PayPal::class )
 		);
 	}
 
