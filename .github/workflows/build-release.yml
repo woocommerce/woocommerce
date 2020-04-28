@@ -21,5 +21,5 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ${{ steps.build.outputs.zip_path }}
-          asset_name: ${{ github.event.repository.name }}.zip
+          asset_name: woocommerce.zip
           asset_content_type: application/zip
