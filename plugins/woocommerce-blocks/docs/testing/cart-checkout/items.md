@@ -15,5 +15,11 @@
 - [ ] You should not be able to change "sold individually" items quantity.
 - [ ] Items that have quantity lower than the threshold should show "x Left in stock".
 	- [ ] You should not be able to increase that item quantity to above that is left in stock.
-- [ ] If you try to increase an item quantity to above its stock quantity, you get an error.
+- [ ] If you try to increase an item quantity to above its stock quantity, you get an error. **Note:** This is not something that can be tested with a single browser instance. To test you need to do the following:
+  - [ ] Set a stock of 4 on an item.
+  - [ ] Open tabs in two different browsers (so you have two different sessions in play).
+  - [ ] In both browsers add 1 of that item into the cart.
+  - [ ] In both browsers, load the cart (block).
+  - [ ] In one browser, increase the quantity of that item to the maximum you can.
+  - [ ] In the other browser, try increasing the quantity. An error should appear.
 - [ ] You should be able to remove an item.
