@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 /**
  * CartUpdateShipping class.
  */
-class CartUpdateShipping extends AbstractRoute {
+class CartUpdateShipping extends AbstractCartRoute {
 	/**
 	 * Get the namespace for this route.
 	 *
