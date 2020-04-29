@@ -2,11 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * Internal dependencies
- */
-import { getSetting } from '../shared';
+import { getSetting } from '@woocommerce/settings';
 
 // Cache for the initial nonce initialized from hydration.
 let nonce = getSetting( 'storeApiNonce' );
