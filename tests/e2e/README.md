@@ -72,7 +72,7 @@ During the process of Docker building a container with test site for running tes
 }
 ```
 
-If you changed either site URL or one of the users details in the  `docker-compose.yaml` file, you'd need to copy the content of the `default.json`, paste it to `test:e2e.json` and edit it further there to match your own setup. 
+If you changed either site URL or one of the users details in the  `docker-compose.yaml` file, you'd need to copy the content of the `default.json`, paste it to `test-e2e.json` and edit it further there to match your own setup. 
 
 ### Jest test sequencer
 
@@ -94,7 +94,7 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 
 - Run `npm run build`
 
-- Run the following command to build the test site using Docker: `docker-compose up` and watch the site being built. Note that it may take a few minutes the first time you do that. The process is considered completed when the messages letting you know that WordPress was installed, WooCommerce was activated and users created will be displayed:
+- Run the following command to build the test site using Docker: `npm run docker:up` and watch the site being built. Note that it may take a few minutes the first time you do that. The process is considered completed when the messages letting you know that WordPress was installed, WooCommerce was activated and users created will be displayed:
 
 ```
 wordpress-cli_1             | Success: WordPress installed successfully.
@@ -212,13 +212,5 @@ For Puppeteer debugging, follow [Google's documentation](https://developers.goog
 ### How to stop and restart Docker
 
 - Press `Ctrl+C` in the terminal window where the containers are running 
-- Stop the container(s) using the following command: `docker-compose down`
-- Restart the containers using the following command: `docker-compose up`
-
-### How to stop Docker and do a clean restart
-
-Steps below will allow building a brand new site with a clean DB and no data as it was built initially:
-
-- Press `Ctrl+C` in the terminal window where the containers are running 
-- Stop the container(s) and delete all volumes using the following command: `docker-compose down -v`
-- Restart the containers using the following command: `docker-compose up --build`
+- Stop the container(s) using the following command: `npm run docker:down`
+- Restart the containers using the following command: `npm run docker:up`

@@ -24,7 +24,7 @@ if ( appPath ) {
 }
 
 const testEnvVars = {
-	NODE_ENV: 'test:e2e',
+	NODE_ENV: 'test-e2e',
 	JEST_PUPPETEER_CONFIG: path.resolve(
 		__dirname,
 		'../config/jest-puppeteer.config.js'
