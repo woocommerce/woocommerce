@@ -8,7 +8,7 @@ import { useEffect, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { loadStripe } from '../stripe-utils';
-import { StripeCreditCard } from './payment-method';
+import { StripeCreditCard, getStripeCreditCardIcons } from './payment-method';
 import { PAYMENT_METHOD_NAME } from './constants';
 
 const stripePromise = loadStripe();
@@ -32,15 +32,24 @@ const StripeComponent = ( props ) => {
 	return <StripeCreditCard stripe={ stripePromise } { ...props } />;
 };
 
+const StripeLabel = ( { components = {} } ) => {
+	const { PaymentMethodIcons } = components;
+
+	if ( ! PaymentMethodIcons || cardIcons.length === 0 ) {
+		return __( 'Credit/Debit Card', 'woo-gutenberg-products-block' );
+	}
+
+	return <PaymentMethodIcons icons={ cardIcons } />;
+};
+
+const cardIcons = getStripeCreditCardIcons();
+
 const stripeCcPaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
-	label: (
-		<strong>
-			{ __( 'Credit/Debit Card', 'woo-gutenberg-products-block' ) }
-		</strong>
-	),
+	label: <StripeLabel />,
 	content: <StripeComponent />,
 	edit: <StripeComponent />,
+	icons: cardIcons,
 	canMakePayment: () => stripePromise,
 	ariaLabel: __(
 		'Stripe Credit Card payment method',

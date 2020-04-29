@@ -55,6 +55,7 @@ class Api {
 		add_action( 'init', array( $this->payment_method_registry, 'initialize' ) );
 		add_filter( 'woocommerce_blocks_register_script_dependencies', array( $this, 'add_payment_method_script_dependencies' ), 10, 2 );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
+		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_payment_method_integrations' ) );
 		add_action( 'woocommerce_rest_checkout_process_payment_with_context', array( $this, 'process_legacy_payment' ), 999, 2 );
 	}
@@ -67,7 +68,7 @@ class Api {
 	 * @return array
 	 */
 	public function add_payment_method_script_dependencies( $dependencies, $handle ) {
-		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend' ], true ) ) {
+		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend' ], true ) ) {
 			return $dependencies;
 		}
 		return array_merge( $dependencies, $this->payment_method_registry->get_all_registered_script_handles() );

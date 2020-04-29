@@ -23,6 +23,18 @@ export const assertValidElement = ( element, elementName ) => {
 	}
 };
 
+export const assertValidElementOrString = ( element, elementName ) => {
+	if (
+		element !== null &&
+		! isValidElement( element ) &&
+		typeof element !== 'string'
+	) {
+		throw new TypeError(
+			`The ${ elementName } property for the payment method must be a React element, a string, or null.`
+		);
+	}
+};
+
 export const assertConfigHasProperties = (
 	config,
 	expectedProperties = []

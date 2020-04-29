@@ -189,30 +189,30 @@ final class Stripe extends AbstractPaymentMethodType {
 	private function get_icons() {
 		$icons_src = [
 			'visa'       => [
-				'url' => WC_STRIPE_PLUGIN_URL . '/assets/images/visa.svg',
+				'src' => WC_STRIPE_PLUGIN_URL . '/assets/images/visa.svg',
 				'alt' => __( 'Visa', 'woo-gutenberg-products-block' ),
 			],
 			'amex'       => [
-				'url' => WC_STRIPE_PLUGIN_URL . '/assets/images/amex.svg',
+				'src' => WC_STRIPE_PLUGIN_URL . '/assets/images/amex.svg',
 				'alt' => __( 'American Express', 'woo-gutenberg-products-block' ),
 			],
 			'mastercard' => [
-				'url' => WC_STRIPE_PLUGIN_URL . '/assets/images/mastercard.svg',
+				'src' => WC_STRIPE_PLUGIN_URL . '/assets/images/mastercard.svg',
 				'alt' => __( 'Mastercard', 'woo-gutenberg-products-block' ),
 			],
 		];
 
 		if ( 'USD' === get_woocommerce_currency() ) {
 			$icons_src['discover'] = [
-				'url' => WC_STRIPE_PLUGIN_URL . '/assets/images/discover.svg',
+				'src' => WC_STRIPE_PLUGIN_URL . '/assets/images/discover.svg',
 				'alt' => __( 'Discover', 'woo-gutenberg-products-block' ),
 			];
 			$icons_src['jcb']      = [
-				'url' => WC_STRIPE_PLUGIN_URL . '/assets/images/jcb.svg',
+				'src' => WC_STRIPE_PLUGIN_URL . '/assets/images/jcb.svg',
 				'alt' => __( 'JCB', 'woo-gutenberg-products-block' ),
 			];
 			$icons_src['diners']   = [
-				'url' => WC_STRIPE_PLUGIN_URL . '/assets/images/diners.svg',
+				'src' => WC_STRIPE_PLUGIN_URL . '/assets/images/diners.svg',
 				'alt' => __( 'Diners', 'woo-gutenberg-products-block' ),
 			];
 		}

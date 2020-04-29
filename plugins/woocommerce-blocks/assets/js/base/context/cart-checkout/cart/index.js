@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { ShippingDataProvider } from '../shipping';
 import { CheckoutStateProvider } from '../checkout-state';
+import { PaymentMethodDataProvider } from '../payment-methods';
 
 /**
  * Cart provider
@@ -33,7 +34,11 @@ export const CartProvider = ( {
 			isCart={ true }
 			submitLabel={ submitLabel }
 		>
-			<ShippingDataProvider>{ children }</ShippingDataProvider>
+			<ShippingDataProvider>
+				<PaymentMethodDataProvider>
+					{ children }
+				</PaymentMethodDataProvider>
+			</ShippingDataProvider>
 		</CheckoutStateProvider>
 	);
 };

@@ -15,4 +15,5 @@ export { default as ReturnToCartButton } from './return-to-cart-button';
 export { default as ShippingCalculator } from './shipping-calculator';
 export { default as ShippingLocation } from './shipping-location';
 export { default as ShippingRatesControl } from './shipping-rates-control';
+export { default as PaymentMethodIcons } from './payment-method-icons';
 export * from './totals/index.js';

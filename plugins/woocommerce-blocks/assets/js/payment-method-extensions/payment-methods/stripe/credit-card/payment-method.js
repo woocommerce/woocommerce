@@ -81,18 +81,6 @@ const CreditCardComponent = ( {
 					}
 				/>
 			) }
-			<div className="wc-blocks-credit-card-images">
-				{ Object.entries( getStripeServerData().icons ).map(
-					( [ id, { url, alt } ] ) => (
-						<img
-							src={ url }
-							alt={ alt }
-							key={ id }
-							className={ `wc-blocks-credit-${ id }-icon wc-blocks-credit-cart-icon` }
-						/>
-					)
-				) }
-			</div>
 		</>
 	);
 };
@@ -106,4 +94,16 @@ export const StripeCreditCard = ( props ) => {
 			<CreditCardComponent { ...props } />
 		</Elements>
 	) : null;
+};
+
+export const getStripeCreditCardIcons = () => {
+	return Object.entries( getStripeServerData().icons ).map(
+		( [ id, { src, alt } ] ) => {
+			return {
+				id,
+				src,
+				alt,
+			};
+		}
+	);
 };

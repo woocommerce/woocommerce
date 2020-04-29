@@ -27,18 +27,16 @@ const Content = () => {
 const paypalPaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
 	label: (
-		<strong>
-			<img
-				src={ `${ WC_ASSET_URL }/images/paypal.png` }
-				alt={ decodeEntities(
-					settings.title ||
-						__( 'PayPal', 'woo-gutenberg-products-block' )
-				) }
-			/>
-		</strong>
+		<img
+			src={ `${ WC_ASSET_URL }/images/paypal.png` }
+			alt={ decodeEntities(
+				settings.title || __( 'PayPal', 'woo-gutenberg-products-block' )
+			) }
+		/>
 	),
 	content: <Content />,
 	edit: <Content />,
+	icons: null,
 	canMakePayment: () => true,
 	ariaLabel: decodeEntities(
 		settings.title ||
