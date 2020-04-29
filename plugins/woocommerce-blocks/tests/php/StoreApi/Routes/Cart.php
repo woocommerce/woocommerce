@@ -332,7 +332,7 @@ class Cart extends TestCase {
 		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 400, $response->get_status() );
 
 		// Applied coupon.
 		$request = new WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon' );

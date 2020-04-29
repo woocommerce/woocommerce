@@ -106,7 +106,7 @@ abstract class AbstractRoute implements RouteInterface {
 		}
 
 		if ( null === $nonce ) {
-			throw new RouteException( 'woocommerce_rest_missing_nonce', __( 'Missing the X-WC-Store-API-Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 403 );
+			throw new RouteException( 'woocommerce_rest_missing_nonce', __( 'Missing the X-WC-Store-API-Nonce header. This endpoint requires a valid nonce.', 'woo-gutenberg-products-block' ), 401 );
 		}
 
 		$valid_nonce = wp_verify_nonce( $nonce, 'wc_store_api' );

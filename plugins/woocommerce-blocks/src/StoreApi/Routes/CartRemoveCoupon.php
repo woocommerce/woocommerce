@@ -63,7 +63,7 @@ class CartRemoveCoupon extends AbstractCartRoute {
 		$coupon      = new \WC_Coupon( $coupon_code );
 
 		if ( $coupon->get_code() !== $coupon_code || ! $coupon->is_valid() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_error', __( 'Invalid coupon code.', 'woo-gutenberg-products-block' ), 403 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_error', __( 'Invalid coupon code.', 'woo-gutenberg-products-block' ), 400 );
 		}
 
 		if ( ! $controller->has_coupon( $coupon_code ) ) {

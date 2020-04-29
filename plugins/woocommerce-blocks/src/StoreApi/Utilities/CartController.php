@@ -64,7 +64,7 @@ class CartController {
 						__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
 						$product->get_name()
 					),
-					403
+					400
 				);
 			}
 			wc()->cart->set_quantity( $existing_cart_id, $request['quantity'] + wc()->cart->cart_contents[ $existing_cart_id ]['quantity'], true );
@@ -133,7 +133,7 @@ class CartController {
 					__( '"%s" is already inside your cart.', 'woo-gutenberg-products-block' ),
 					$product->get_name()
 				),
-				403
+				400
 			);
 		}
 
@@ -161,7 +161,7 @@ class CartController {
 					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
 					$product->get_name()
 				),
-				403
+				400
 			);
 		}
 
@@ -178,7 +178,7 @@ class CartController {
 						$product->get_name(),
 						wc_format_stock_quantity_for_display( $qty_remaining, $product )
 					),
-					403
+					400
 				);
 			}
 		}
@@ -270,7 +270,7 @@ class CartController {
 					__( 'There are too many &quot;%s&quot; in the cart. Only 1 can be purchased.', 'woo-gutenberg-products-block' ),
 					$product->get_name()
 				),
-				403
+				400
 			);
 		}
 
@@ -282,7 +282,7 @@ class CartController {
 					__( '&quot;%s&quot; is out of stock and cannot be purchased.', 'woo-gutenberg-products-block' ),
 					$product->get_name()
 				),
-				403
+				400
 			);
 		}
 
@@ -304,7 +304,7 @@ class CartController {
 						wc_format_stock_quantity_for_display( $qty_remaining, $product ),
 						$product->get_name()
 					),
-					403
+					400
 				);
 			}
 		}
@@ -518,7 +518,7 @@ class CartController {
 					__( '"%s" is an invalid coupon code.', 'woo-gutenberg-products-block' ),
 					esc_html( $coupon_code )
 				),
-				403
+				400
 			);
 		}
 
@@ -530,7 +530,7 @@ class CartController {
 					__( 'Coupon code "%s" has already been applied.', 'woo-gutenberg-products-block' ),
 					esc_html( $coupon_code )
 				),
-				403
+				400
 			);
 		}
 
@@ -538,7 +538,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				wp_strip_all_tags( $coupon->get_error_message() ),
-				403
+				400
 			);
 		}
 
@@ -561,7 +561,7 @@ class CartController {
 						__( '"%s" has already been applied and cannot be used in conjunction with other coupons.', 'woo-gutenberg-products-block' ),
 						$code
 					),
-					403
+					400
 				);
 			}
 		}
@@ -654,7 +654,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				__( 'This product cannot be added to the cart.', 'woo-gutenberg-products-block' ),
-				403
+				400
 			);
 		}
 
@@ -696,7 +696,7 @@ class CartController {
 				__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
 				$product->get_name()
 			),
-			403
+			400
 		);
 	}
 
@@ -903,7 +903,7 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_parent_product',
 				__( 'This product cannot be added to the cart.', 'woo-gutenberg-products-block' ),
-				403
+				400
 			);
 		}
 
