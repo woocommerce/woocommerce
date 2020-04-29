@@ -71,12 +71,15 @@
 		background: #fff;
 		border: 2px solid currentColor;
 		border-radius: 50%;
+		// Use box-shadow to apply an extra border to the quantity.
+		// This distinguishes it from the product image.
+		box-shadow: 0 0 0 2px #fff;
 		display: flex;
 		min-height: 22px;
 		position: absolute;
 		justify-content: center;
-		right: -6px;
-		top: #{$gap - 6px};
+		right: -11px;
+		top: #{$gap - 11px};
 		min-width: 22px;
 	}
 
