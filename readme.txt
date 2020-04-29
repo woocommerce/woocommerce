@@ -182,7 +182,8 @@ INTERESTED IN DEVELOPMENT?
 = 4.1.0 - 2020-05-05 =
 
 **WooCommerce**
-* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.1 #26330
+* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.1. #26330
+* Enhancement - Update dependency woocommerce/action-scheduler to v3.1.5.
 * Enhancement - Updated jetpack-autoloader to 1.6 and woocommerce-blocks to 2.5.16. #26099
 * Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
 * Enhancement - Changed show password icon color to a darker grey hue. #25625
