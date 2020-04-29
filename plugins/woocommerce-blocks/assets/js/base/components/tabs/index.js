@@ -64,7 +64,7 @@ const Tabs = ( {
 						ariaLabel={ tab.ariaLabel || null }
 						onClick={ () => handleClick( tab.name ) }
 					>
-						{ tab.title() }
+						{ tab.title }
 					</TabButton>
 				) ) }
 			</div>

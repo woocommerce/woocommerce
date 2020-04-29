@@ -27,11 +27,23 @@
 			.wc-block-components-tabs__item-content {
 				width: fit-content;
 				display: inline-block;
+				font-weight: bold;
+				line-height: 1em;
 
-				img {
-					max-height: 1.2em;
-					position: relative;
-					margin: -0.1em 0;
+				> img,
+				> svg {
+					height: 1.2em;
+					vertical-align: middle;
+					margin: 0.2em 0 -0.2em;
+				}
+
+				.wc-block-cart__payment-method-icons {
+					margin: 0.2em 0 -0.2em;
+
+					.wc-blocks-payment-method-icon {
+						height: 1.2em;
+						vertical-align: middle;
+					}
 				}
 			}
 		}

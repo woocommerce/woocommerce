@@ -3,15 +3,27 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { Button } from '@woocommerce/base-components/cart-checkout';
+import {
+	Button,
+	PaymentMethodIcons,
+} from '@woocommerce/base-components/cart-checkout';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import { useCheckoutContext } from '@woocommerce/base-context';
+import { usePaymentMethods } from '@woocommerce/base-hooks';
+
 /**
  * Internal dependencies
  */
-import { AmericanExpressLogo } from './american-express-logo';
 import './style.scss';
-import { MastercardLogo, VisaLogo } from './payment-logos'; // @todo we want to import this from `@automattic/composite-checkout` when it's published in NPM
+
+const getIconsFromPaymentMethods = ( paymentMethods ) => {
+	return Object.values( paymentMethods ).reduce( ( acc, paymentMethod ) => {
+		if ( paymentMethod.icons !== null ) {
+			acc = acc.concat( paymentMethod.icons );
+		}
+		return acc;
+	}, [] );
+};
 
 /**
  * Checkout button rendered in the full cart page.
@@ -19,6 +31,7 @@ import { MastercardLogo, VisaLogo } from './payment-logos'; // @todo we want to 
 const CheckoutButton = ( { link } ) => {
 	const { isCalculating } = useCheckoutContext();
 	const [ showSpinner, setShowSpinner ] = useState( false );
+	const { paymentMethods } = usePaymentMethods();
 
 	return (
 		<div className="wc-block-cart__submit-container">
@@ -31,11 +44,9 @@ const CheckoutButton = ( { link } ) => {
 			>
 				{ __( 'Proceed to Checkout', 'woo-gutenberg-products-block' ) }
 			</Button>
-			<div className="wc-block-cart__payment-methods">
-				<MastercardLogo />
-				<AmericanExpressLogo />
-				<VisaLogo />
-			</div>
+			<PaymentMethodIcons
+				icons={ getIconsFromPaymentMethods( paymentMethods ) }
+			/>
 		</div>
 	);
 };

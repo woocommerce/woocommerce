@@ -1,0 +1,14 @@
+.wc-block-cart__payment-method-icons {
+	display: block;
+	text-align: center;
+	margin: $gap 0 0;
+
+	.wc-blocks-payment-method-icon {
+		display: inline-block;
+		margin: 1px 2px;
+		padding: 0;
+		width: auto;
+		height: 26px;
+		vertical-align: middle;
+	}
+}

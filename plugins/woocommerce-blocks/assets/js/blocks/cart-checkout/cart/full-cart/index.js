@@ -37,7 +37,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 /**
  * Internal dependencies
  */
-import CheckoutButton from './checkout-button';
+import CheckoutButton from '../checkout-button';
 import CartLineItemsTitle from './cart-line-items-title';
 import CartLineItemsTable from './cart-line-items-table';
 

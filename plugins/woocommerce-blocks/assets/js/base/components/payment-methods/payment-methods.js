@@ -17,6 +17,7 @@ import {
 	useEditorContext,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
+import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
@@ -105,7 +106,12 @@ const PaymentMethods = () => {
 					];
 					return {
 						name,
-						title: () => label,
+						title:
+							typeof label === 'string'
+								? label
+								: cloneElement( label, {
+										components: { PaymentMethodIcons },
+								  } ),
 						ariaLabel,
 					};
 				}

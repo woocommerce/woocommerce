@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { assertConfigHasProperties, assertValidElement } from './assertions';
+import {
+	assertConfigHasProperties,
+	assertValidElement,
+	assertValidElementOrString,
+} from './assertions';
 
 export default class PaymentMethodConfig {
 	constructor( config ) {
@@ -11,6 +15,7 @@ export default class PaymentMethodConfig {
 		this.label = config.label;
 		this.ariaLabel = config.ariaLabel;
 		this.content = config.content;
+		this.icons = config.icons;
 		this.edit = config.edit;
 		this.canMakePayment = config.canMakePayment;
 		this.paymentMethodId = config.paymentMethodId || this.name;
@@ -31,6 +36,15 @@ export default class PaymentMethodConfig {
 			);
 		}
 		if (
+			typeof config.icons !== 'undefined' &&
+			! Array.isArray( config.icons ) &&
+			config.icons !== null
+		) {
+			throw new Error(
+				'The icons property for the payment method must be an array or null.'
+			);
+		}
+		if (
 			typeof config.paymentMethodId !== 'string' &&
 			typeof config.paymentMethodId !== 'undefined'
 		) {
@@ -38,7 +52,7 @@ export default class PaymentMethodConfig {
 				'The paymentMethodId property for the payment method must be a string or undefined (in which case it will be the value of the name property).'
 			);
 		}
-		assertValidElement( config.label, 'label' );
+		assertValidElementOrString( config.label, 'label' );
 		assertValidElement( config.content, 'content' );
 		assertValidElement( config.edit, 'edit' );
 		if ( typeof config.ariaLabel !== 'string' ) {
