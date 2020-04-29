@@ -100,6 +100,8 @@ if ( $show_downloads ) {
 	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
 </section>
 
+<?php do_action( 'woocommerce_after_order_details', $order ); ?>
+
 <?php
 if ( $show_customer_details ) {
 	wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) );
