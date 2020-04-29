@@ -182,7 +182,7 @@ INTERESTED IN DEVELOPMENT?
 = 4.1.0 - 2020-05-05 =
 
 **WooCommerce**
-* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.0 #26057
+* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.1 #26330
 * Enhancement - Updated jetpack-autoloader to 1.6 and woocommerce-blocks to 2.5.16. #26099
 * Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
 * Enhancement - Changed show password icon color to a darker grey hue. #25625
@@ -205,6 +205,9 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Clarified the error messaging for WooCommerce.com package update failures. #26034
 * Fix - Enforce per user usage limit check for a coupon on guest users based on email. #26066
 * Fix - Remove elements with style=display:none explicitly to address a regression causing broken email html. #26075
+* Fix - Add validation for page templates before loading.
+* Fix - Revert deprecation of $type parameter on the WC_Countries get_european_union_countries method. #26107
+* Fix - Reset plugin cache before retrieving plugin list on Subscriptions tab to improve subscriptions update stability. #26247
 * Dev - Added woocommerce_can_restock_refunded_items filter. #25728
 * Dev - Added woocommerce_order_get_tax_location filter. #25727
 * Dev - Updated /myaccount/form-login.php to use consistent kebab-case class names for woocommerce-form-row. #25668
