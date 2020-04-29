@@ -66,8 +66,18 @@ describe( 'Store owner can go through setup Task List', () => {
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		] );
 
+		// Query for store location fields
+		const storeLocationFields = await page.$$( '.components-text-control__input' );
+		expect( storeLocationFields ).toHaveLength( 4 );
+
+		// Wait for "Continue" button to become active
+		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+		// Click on "Continue" button to move to the shipping cost section
+		await page.click( 'button.is-primary' );
+
 		// Wait for "Proceed" button to become active
 		await page.waitForSelector( 'button.is-primary:not(:disabled)' );
+		await page.waitFor( 3000 );
 
 		// Click on "Proceed" button to save shipping settings
 		await page.click( 'button.is-primary' );
