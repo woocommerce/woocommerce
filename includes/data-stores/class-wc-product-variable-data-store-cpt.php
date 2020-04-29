@@ -190,7 +190,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
 					$values     = array_unique(
 						$wpdb->get_col(
-							$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
+							$wpdb->prepare(
 								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
 								$query_args
 							)
@@ -200,7 +200,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$values = array();
 				}
 
-				// Empty value indicates that all options for given attribute are available.
+				// Empty value inicates that all options for given attribute are available.
 				if ( in_array( null, $values, true ) || in_array( '', $values, true ) || empty( $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(), $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
 					// Get custom attributes (non taxonomy) as defined.
