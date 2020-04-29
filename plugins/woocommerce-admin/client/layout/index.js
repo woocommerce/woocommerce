@@ -3,7 +3,7 @@
  */
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { Component } from '@wordpress/element';
+import { Component, lazy, Suspense } from '@wordpress/element';
 import { Router, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, isFunction } from 'lodash';
@@ -11,7 +11,7 @@ import { get, isFunction } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { useFilters } from '@woocommerce/components';
+import { useFilters, Spinner } from '@woocommerce/components';
 import { getHistory } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { PLUGINS_STORE_NAME, withPluginsHydration } from '@woocommerce/data';
@@ -25,7 +25,9 @@ import Header from 'header';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
 import TransientNotices from './transient-notices';
-import StoreAlerts from './store-alerts';
+const StoreAlerts = lazy( () =>
+	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
+);
 import { REPORTS_FILTER } from 'analytics/report';
 
 export class PrimaryLayout extends Component {
@@ -36,7 +38,11 @@ export class PrimaryLayout extends Component {
 				className="woocommerce-layout__primary"
 				id="woocommerce-layout__primary"
 			>
-				{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
+				{ window.wcAdminFeatures[ 'store-alerts' ] && (
+					<Suspense fallback={ <Spinner /> }>
+						<StoreAlerts />
+					</Suspense>
+				) }
 				<Notices />
 				{ children }
 			</div>
@@ -129,7 +135,10 @@ class _Layout extends Component {
 _Layout.propTypes = {
 	isEmbedded: PropTypes.bool,
 	page: PropTypes.shape( {
-		container: PropTypes.func,
+		container: PropTypes.oneOfType( [
+			PropTypes.func,
+			PropTypes.object, // Support React.lazy
+		] ),
 		path: PropTypes.string,
 		breadcrumbs: PropTypes.oneOfType( [
 			PropTypes.func,

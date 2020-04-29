@@ -145,16 +145,16 @@ class ShippingLabelBanner {
 		$rtl = is_rtl() ? '-rtl' : '';
 		wp_enqueue_style(
 			'print-shipping-label-banner-style',
-			Loader::get_url( "print-shipping-label-banner/style{$rtl}.css" ),
+			Loader::get_url( "print-shipping-label-banner/style{$rtl}", 'css' ),
 			array( 'wp-components' ),
-			Loader::get_file_version( 'print-shipping-label-banner/style.css' )
+			Loader::get_file_version( 'css' )
 		);
 
 		wp_enqueue_script(
 			'print-shipping-label-banner',
-			Loader::get_url( 'wp-admin-scripts/print-shipping-label-banner.js' ),
+			Loader::get_url( 'wp-admin-scripts/print-shipping-label-banner', 'js' ),
 			array( 'wp-i18n', 'wp-data', 'wp-element', 'moment', 'wp-api-fetch', WC_ADMIN_APP ),
-			Loader::get_file_version( 'wp-admin-scripts/print-shipping-label-banner.js' ),
+			Loader::get_file_version( 'js' ),
 			true
 		);
 

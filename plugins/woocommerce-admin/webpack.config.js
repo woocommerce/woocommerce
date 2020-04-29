@@ -8,6 +8,11 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { DefinePlugin } = require( 'webpack' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const FixStyleOnlyEntriesPlugin = require( 'webpack-fix-style-only-entries' );
+const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
+	.BundleAnalyzerPlugin;
+const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
+const TerserPlugin = require( 'terser-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './unminify' );
 
 /**
  * WordPress dependencies
@@ -93,10 +98,11 @@ const webpackConfig = {
 	output: {
 		filename: ( data ) => {
 			return wpAdminScripts.includes( data.chunk.name )
-				? './dist/wp-admin-scripts/[name].js'
-				: './dist/[name]/index.js';
+				? `wp-admin-scripts/[name].min.js`
+				: `[name]/index.min.js`;
 		},
-		path: __dirname,
+		chunkFilename: `chunks/[name].[chunkhash].min.js`,
+		path: path.join( __dirname, 'dist' ),
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'this',
 	},
@@ -219,23 +225,37 @@ const webpackConfig = {
 			},
 		} ),
 		new WebpackRTLPlugin( {
-			filename: './dist/[name]/style-rtl.css',
+			filename: './[name]/style-rtl.css',
 			minify: {
 				safe: true,
 			},
 		} ),
 		new MiniCssExtractPlugin( {
-			filename: './dist/[name]/style.css',
+			filename: './[name]/style.css',
 		} ),
 		new CopyWebpackPlugin(
 			wcAdminPackages.map( ( packageName ) => ( {
 				from: `./packages/${ packageName }/build-style/*.css`,
-				to: `./dist/${ packageName }/`,
+				to: `./${ packageName }/`,
 				flatten: true,
 				transform: ( content ) => content,
 			} ) )
 		),
-	],
+		new MomentTimezoneDataPlugin( {
+			startYear: 2000, // This strips out timezone data before the year 2000 to make a smaller file.
+		} ),
+		process.env.ANALYZE && new BundleAnalyzerPlugin(),
+		new UnminifyWebpackPlugin( {
+			test: /\.js($|\?)/i,
+			mainEntry: 'app/index.min.js',
+		} ),
+	].filter( Boolean ),
+	optimization: {
+		minimize: NODE_ENV !== 'development',
+		minimizer: [
+			new TerserPlugin(),
+		],
+	},
 };
 
 if ( webpackConfig.mode !== 'production' ) {

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, createElement } from '@wordpress/element';
+import { Component, Suspense, lazy } from '@wordpress/element';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
@@ -15,16 +15,30 @@ import {
 	getPersistedQuery,
 	getHistory,
 } from '@woocommerce/navigation';
+import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import AnalyticsReport, { getReports } from 'analytics/report';
-import AnalyticsSettings from 'analytics/settings';
-import Dashboard from 'dashboard';
-import Homepage from 'homepage';
-import DevDocs from 'devdocs';
-import MarketingOverview from 'marketing/overview';
+const AnalyticsReport = lazy( () =>
+	import( /* webpackChunkName: "analytics-report" */ 'analytics/report' )
+);
+const AnalyticsSettings = lazy( () =>
+	import( /* webpackChunkName: "analytics-settings" */ 'analytics/settings' )
+);
+const Dashboard = lazy( () =>
+	import( /* webpackChunkName: "dashboard" */ 'dashboard' )
+);
+const DevDocs = lazy( () =>
+	import( /* webpackChunkName: "devdocs" */ 'devdocs' )
+);
+const Homepage = lazy( () =>
+	import( /* webpackChunkName: "homepage" */ 'homepage' )
+);
+const MarketingOverview = lazy( () =>
+	import( /* webpackChunkName: "marketing-overview" */ 'marketing/overview' )
+);
+import getReports from 'analytics/report/get-reports';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
@@ -204,12 +218,16 @@ export class Controller extends Component {
 
 		window.wpNavMenuUrlUpdate( query );
 		window.wpNavMenuClassChange( page, url );
-		return createElement( page.container, {
-			params,
-			path: url,
-			pathMatch: page.path,
-			query,
-		} );
+		return (
+			<Suspense fallback={ <Spinner /> }>
+				<page.container
+					params={ params }
+					path={ url }
+					pathMatch={ page.path }
+					query={ query }
+				/>
+			</Suspense>
+		);
 	}
 }
 

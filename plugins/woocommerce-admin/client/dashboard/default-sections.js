@@ -3,13 +3,39 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { lazy, Suspense } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import DashboardCharts from './dashboard-charts';
-import Leaderboards from './leaderboards';
-import StorePerformance from './store-performance';
+import { Spinner } from '@woocommerce/components';
+const LazyDashboardCharts = lazy( () =>
+	import( /* webpackChunkName: "dashboard-charts" */ './dashboard-charts' )
+);
+const LazyLeaderboards = lazy( () =>
+	import( /* webpackChunkName: "leaderboards" */ './leaderboards' )
+);
+const LazyStorePerformance = lazy( () =>
+	import( /* webpackChunkName: "store-performance" */ './store-performance' )
+);
+
+const DashboardCharts = ( props ) => (
+	<Suspense fallback={ <Spinner /> }>
+		<LazyDashboardCharts { ...props } />
+	</Suspense>
+);
+
+const Leaderboards = ( props ) => (
+	<Suspense fallback={ <Spinner /> }>
+		<LazyLeaderboards { ...props } />
+	</Suspense>
+);
+
+const StorePerformance = ( props ) => (
+	<Suspense fallback={ <Spinner /> }>
+		<LazyStorePerformance { ...props } />
+	</Suspense>
+);
 
 const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
 

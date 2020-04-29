@@ -13,6 +13,10 @@ import Navigation from './navigation';
 import 'wc-api/wp-data-store';
 import { withSettingsHydration } from '@woocommerce/data';
 
+// Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
+// eslint-disable-next-line no-undef,camelcase
+__webpack_public_path__ = global.wcAdminAssets.path;
+
 const appRoot = document.getElementById( 'root' );
 const navigationRoot = document.getElementById( 'woocommerce-embedded-navigation' );
 const settingsGroup = 'wc_admin';

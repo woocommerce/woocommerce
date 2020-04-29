@@ -2,17 +2,30 @@
  * External dependencies
  */
 import { compose } from '@wordpress/compose';
+import { Suspense, lazy } from '@wordpress/element';
+
+/**
+ * WooCommerce dependencies
+ */
+import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import ProfileWizard from '../profile-wizard';
 import withSelect from 'wc-api/with-select';
 import { isOnboardingEnabled } from 'dashboard/utils';
 
+const ProfileWizard = lazy( () =>
+	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
+);
+
 const Homepage = ( { profileItems, query } ) => {
 	if ( isOnboardingEnabled() && ! profileItems.completed ) {
-		return <ProfileWizard query={ query } />;
+		return (
+			<Suspense fallback={ <Spinner /> }>
+				<ProfileWizard query={ query } />
+			</Suspense>
+		);
 	}
 
 	return <div>Hello World</div>;

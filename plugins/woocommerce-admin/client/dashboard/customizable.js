@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component, Fragment, Suspense, lazy } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial, get } from 'lodash';
 import { IconButton, Icon, Dropdown, Button } from '@wordpress/components';
@@ -12,7 +12,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * WooCommerce dependencies
  */
-import { H } from '@woocommerce/components';
+import { H, Spinner } from '@woocommerce/components';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -23,7 +23,6 @@ import defaultSections from './default-sections';
 import Section from './section';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import TaskList from './task-list';
 import { isOnboardingEnabled } from 'dashboard/utils';
 import {
 	getCurrentDates,
@@ -31,6 +30,10 @@ import {
 	isoDateFormat,
 } from 'lib/date';
 import ReportFilters from 'analytics/components/report-filters';
+
+const TaskList = lazy( () =>
+	import( /* webpackChunkName: "task-list" */ './task-list' )
+);
 
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
@@ -307,10 +310,12 @@ class CustomizableDashboard extends Component {
 		return (
 			<Fragment>
 				{ isTaskListEnabled && (
-					<TaskList
-						query={ query }
-						inline={ isDashboardShown }
-					/>
+					<Suspense fallback={ <Spinner /> }>
+						<TaskList
+							query={ query }
+							inline={ isDashboardShown }
+						/>
+					</Suspense>
 				) }
 				{ isDashboardShown && this.renderDashboardReports() }
 			</Fragment>

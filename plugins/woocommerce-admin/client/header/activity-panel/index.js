@@ -4,29 +4,39 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import clickOutside from 'react-click-outside';
-import { Component } from '@wordpress/element';
-import Gridicon from 'gridicons';
+import { Component, lazy, Suspense } from '@wordpress/element';
 import { IconButton, NavigableMenu } from '@wordpress/components';
 import { partial, uniqueId, find } from 'lodash';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import PagesIcon from 'gridicons/dist/pages';
+import CrossIcon from 'gridicons/dist/cross-small';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
-import { H, Section } from '@woocommerce/components';
+import { H, Section, Spinner } from '@woocommerce/components';
 import {
 	getUnreadNotes,
 	getUnreadOrders,
 	getUnapprovedReviews,
 	getUnreadStock,
 } from './unread-indicators';
-import InboxPanel from './panels/inbox';
-import OrdersPanel from './panels/orders';
-import StockPanel from './panels/stock';
+const InboxPanel = lazy( () =>
+	import( /* webpackChunkName: "activity-panels-inbox" */ './panels/inbox' )
+);
+const OrdersPanel = lazy( () =>
+	import( /* webpackChunkName: "activity-panels-orders" */ './panels/orders' )
+);
+const StockPanel = lazy( () =>
+	import( /* webpackChunkName: "activity-panels-stock" */ './panels/stock' )
+);
+const ReviewsPanel = lazy( () =>
+	import( /* webpackChunkName: "activity-panels-inbox" */ './panels/reviews' )
+);
+
 import { recordEvent } from 'lib/tracks';
-import ReviewsPanel from './panels/reviews';
 import withSelect from 'wc-api/with-select';
 
 const manageStock = getSetting( 'manageStock', 'no' );
@@ -109,14 +119,16 @@ class ActivityPanel extends Component {
 			{
 				name: 'orders',
 				title: __( 'Orders', 'woocommerce-admin' ),
-				icon: <Gridicon icon="pages" />,
+				icon: <PagesIcon />,
 				unread: hasUnreadOrders,
 			},
 			manageStock === 'yes'
 				? {
 						name: 'stock',
 						title: __( 'Stock', 'woocommerce-admin' ),
-						icon: <i className="material-icons-outlined">widgets</i>,
+						icon: (
+							<i className="material-icons-outlined">widgets</i>
+						),
 						unread: hasUnreadStock,
 				  }
 				: null,
@@ -124,7 +136,11 @@ class ActivityPanel extends Component {
 				? {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),
-						icon: <i className="material-icons-outlined">star_border</i>,
+						icon: (
+							<i className="material-icons-outlined">
+								star_border
+							</i>
+						),
 						unread: hasUnapprovedReviews,
 				  }
 				: null,
@@ -184,7 +200,9 @@ class ActivityPanel extends Component {
 					key={ 'activity-panel-' + currentTab }
 					id={ 'activity-panel-' + currentTab }
 				>
-					{ this.getPanelContent( currentTab ) }
+					<Suspense fallback={ <Spinner /> }>
+						{ this.getPanelContent( currentTab ) }
+					</Suspense>
 				</div>
 			</div>
 		);
@@ -260,7 +278,7 @@ class ActivityPanel extends Component {
 						onClick={ this.toggleMobile }
 						icon={
 							mobileOpen ? (
-								<Gridicon icon="cross-small" />
+								<CrossIcon />
 							) : (
 								<ActivityPanelToggleBubble
 									hasUnread={ hasUnread }

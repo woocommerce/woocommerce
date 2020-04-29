@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
@@ -13,21 +11,11 @@ import { find } from 'lodash';
  */
 import { useFilters } from '@woocommerce/components';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import OrdersReport from './orders';
-import ProductsReport from './products';
-import RevenueReport from './revenue';
-import CategoriesReport from './categories';
-import CouponsReport from './coupons';
-import TaxesReport from './taxes';
-import DownloadsReport from './downloads';
-import StockReport from './stock';
-import CustomersReport from './customers';
 import ReportError from 'analytics/components/report-error';
 import { searchItemsByString } from 'wc-api/items/utils';
 import withSelect from 'wc-api/with-select';
@@ -35,68 +23,9 @@ import {
 	CurrencyContext,
 	getFilteredCurrencyInstance,
 } from 'lib/currency-context';
+import getReports from './get-reports';
 
 export const REPORTS_FILTER = 'woocommerce_admin_reports_list';
-const manageStock = getSetting( 'manageStock', 'no' );
-
-export const getReports = () => {
-	const reports = [
-		{
-			report: 'revenue',
-			title: __( 'Revenue', 'woocommerce-admin' ),
-			component: RevenueReport,
-		},
-		{
-			report: 'products',
-			title: __( 'Products', 'woocommerce-admin' ),
-			component: ProductsReport,
-		},
-		{
-			report: 'orders',
-			title: __( 'Orders', 'woocommerce-admin' ),
-			component: OrdersReport,
-		},
-		{
-			report: 'categories',
-			title: __( 'Categories', 'woocommerce-admin' ),
-			component: CategoriesReport,
-		},
-		{
-			report: 'coupons',
-			title: __( 'Coupons', 'woocommerce-admin' ),
-			component: CouponsReport,
-		},
-		{
-			report: 'taxes',
-			title: __( 'Taxes', 'woocommerce-admin' ),
-			component: TaxesReport,
-		},
-		{
-			report: 'downloads',
-			title: __( 'Downloads', 'woocommerce-admin' ),
-			component: DownloadsReport,
-		},
-		manageStock === 'yes'
-			? {
-					report: 'stock',
-					title: __( 'Stock', 'woocommerce-admin' ),
-					component: StockReport,
-			  }
-			: null,
-		{
-			report: 'customers',
-			title: __( 'Customers', 'woocommerce-admin' ),
-			component: CustomersReport,
-		},
-		{
-			report: 'downloads',
-			title: __( 'Downloads', 'woocommerce-admin' ),
-			component: DownloadsReport,
-		},
-	].filter( Boolean );
-
-	return applyFilters( REPORTS_FILTER, reports );
-};
 
 /**
  * The Customers Report will not have the `report` param supplied by the router/
