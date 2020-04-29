@@ -28,6 +28,11 @@
 	.wc-block-coupon-code .components-button {
 		opacity: 1;
 	}
+
+	.wc-block-cart__submit-container {
+		box-shadow: none;
+		position: static;
+	}
 }
 
 @include breakpoint( "<782px" ) {
