@@ -90,7 +90,7 @@ final class ReserveStock {
 							__( '&quot;%s&quot; is out of stock and cannot be purchased.', 'woo-gutenberg-products-block' ),
 							$product->get_name()
 						),
-						403
+						400
 					);
 				}
 
@@ -184,7 +184,7 @@ final class ReserveStock {
 					__( 'Not enough units of %s are available in stock to fulfil this order.', 'woo-gutenberg-products-block' ),
 					$product ? $product->get_name() : '#' . $product_id
 				),
-				403
+				400
 			);
 		}
 	}

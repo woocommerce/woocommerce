@@ -259,7 +259,7 @@ If a cart action cannot be performed, an error response will be returned. This w
   "code": "woocommerce_rest_cart_invalid_product",
   "message": "This product cannot be added to the cart.",
   "data": {
-    "status": 403
+    "status": 400
   }
 }
 ```

@@ -148,7 +148,7 @@ class CartItems extends TestCase {
 		);
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 400, $response->get_status() );
 	}
 
 	/**
