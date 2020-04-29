@@ -6,6 +6,11 @@
 		font-weight: normal;
 	}
 
+	.wc-block-cart__main,
+	.wc-block-cart__sidebar .components-card__body.is-size-medium {
+		padding-top: 1.3em;
+	}
+
 	.wc-block-cart__item-count {
 		float: right;
 	}
