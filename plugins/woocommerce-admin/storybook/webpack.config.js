@@ -2,11 +2,22 @@
  * External dependencies
  */
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const path = require( 'path' );
 
 /**
  * External dependencies
  */
 const wcAdminWebpackConfig = require( '../webpack.config.js' );
+
+const wcAdminPackages = [
+	'components',
+	'csv-export',
+	'currency',
+	'date',
+	'navigation',
+	'number',
+	'data',
+];
 
 module.exports = ( { config: storybookConfig } ) => {
 	storybookConfig.module.rules.push(
@@ -19,6 +30,12 @@ module.exports = ( { config: storybookConfig } ) => {
 	);
 
 	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
+
+	wcAdminPackages.forEach( ( name ) => {
+		storybookConfig.resolve.alias[
+			`@woocommerce/${ name }`
+		] = path.resolve( __dirname, `../packages/${ name }/src` );
+	} );
 
 	storybookConfig.plugins.push(
 		new MiniCssExtractPlugin( {
