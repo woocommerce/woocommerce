@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createContext, useContext, useState } from '@wordpress/element';
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useState,
+} from '@wordpress/element';
 import { omit, pickBy } from 'lodash';
 
 /**
@@ -71,22 +76,25 @@ export const ValidationContextProvider = ( { children } ) => {
 	 *                           validation error is for and values are the
 	 *                           validation error message displayed to the user.
 	 */
-	const setValidationErrors = ( newErrors ) => {
-		if ( ! newErrors ) {
-			return;
-		}
-		// all values must be a string.
-		newErrors = pickBy(
-			newErrors,
-			( { message } ) => typeof message === 'string'
-		);
-		if ( Object.values( newErrors ).length > 0 ) {
-			updateValidationErrors( ( prevErrors ) => ( {
-				...prevErrors,
-				...newErrors,
-			} ) );
-		}
-	};
+	const setValidationErrors = useCallback(
+		( newErrors ) => {
+			if ( ! newErrors ) {
+				return;
+			}
+			// all values must be a string.
+			newErrors = pickBy(
+				newErrors,
+				( { message } ) => typeof message === 'string'
+			);
+			if ( Object.values( newErrors ).length > 0 ) {
+				updateValidationErrors( ( prevErrors ) => ( {
+					...prevErrors,
+					...newErrors,
+				} ) );
+			}
+		},
+		[ updateValidationErrors ]
+	);
 
 	const updateValidationError = ( property, newError ) => {
 		updateValidationErrors( ( prevErrors ) => {

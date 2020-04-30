@@ -13,7 +13,7 @@ const StoreNoticesContext = createContext( {
 	notices: [],
 	createNotice: ( status, text, props ) => void { status, text, props },
 	createSnackBarNotice: () => void null,
-	removeNotice: ( id ) => void id,
+	removeNotice: ( id, ctxt ) => void { id, ctxt },
 	context: 'wc/core',
 } );
 
@@ -50,8 +50,8 @@ export const StoreNoticesProvider = ( {
 	);
 
 	const removeNoticeWithContext = useCallback(
-		( id ) => {
-			removeNotice( id, context );
+		( id, ctxt = context ) => {
+			removeNotice( id, ctxt );
 		},
 		[ createNotice, context ]
 	);
