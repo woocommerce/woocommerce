@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
  * Internal dependencies
  */
 import { ShippingDataProvider } from '../shipping';
@@ -15,25 +10,15 @@ import { PaymentMethodDataProvider } from '../payment-methods';
  * This wraps the Cart and provides an api interface for the Cart to
  * children via various hooks.
  *
- * @param {Object}  props                     Incoming props for the provider.
- * @param {Object}  [props.children]          The children being wrapped.
- * @param {string}  [props.redirectUrl]       Initialize what the cart will
- *                                            redirect to after successful
- *                                            submit.
- * @param {string}  [props.submitLabel]       What will be used for the cart
- *                                            submit button label.
+ * @param {Object}  props               Incoming props for the provider.
+ * @param {Object}  [props.children]    The children being wrapped.
+ * @param {string}  [props.redirectUrl] Initialize what the cart will
+ *                                      redirect to after successful
+ *                                      submit.
  */
-export const CartProvider = ( {
-	children,
-	redirectUrl,
-	submitLabel = __( 'Proceed to Checkout', 'woo-gutenberg-products-block' ),
-} ) => {
+export const CartProvider = ( { children, redirectUrl } ) => {
 	return (
-		<CheckoutStateProvider
-			redirectUrl={ redirectUrl }
-			isCart={ true }
-			submitLabel={ submitLabel }
-		>
+		<CheckoutStateProvider redirectUrl={ redirectUrl } isCart={ true }>
 			<ShippingDataProvider>
 				<PaymentMethodDataProvider>
 					{ children }

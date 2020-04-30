@@ -33,8 +33,6 @@ import { useValidationContext } from '../validation';
  */
 
 const CheckoutContext = createContext( {
-	submitLabel: '',
-	onSubmit: () => void null,
 	isComplete: false,
 	isIdle: false,
 	isCalculating: false,
@@ -45,6 +43,7 @@ const CheckoutContext = createContext( {
 	redirectUrl: '',
 	orderId: 0,
 	customerId: 0,
+	onSubmit: () => void null,
 	onCheckoutAfterProcessingWithSuccess: ( callback ) => void callback,
 	onCheckoutAfterProcessingWithError: ( callback ) => void callback,
 	onCheckoutBeforeProcessing: ( callback ) => void callback,
@@ -78,8 +77,6 @@ export const useCheckoutContext = () => {
  * @param {string}  props.redirectUrl         Initialize what the checkout will
  *                                            redirect to after successful
  *                                            submit.
- * @param {string}  props.submitLabel         What will be used for the checkout
- *                                            submit button label.
  * @param {boolean} props.isCart              If context provider is being used
  *                                            in cart context.
  */
@@ -87,7 +84,6 @@ export const CheckoutStateProvider = ( {
 	children,
 	redirectUrl,
 	isCart = false,
-	submitLabel = __( 'Place Order', 'woo-gutenberg-product-block' ),
 } ) => {
 	// note, this is done intentionally so that the default state now has
 	// the redirectUrl for when checkout is reset to PRISTINE state.
@@ -306,7 +302,6 @@ export const CheckoutStateProvider = ( {
 	 * @type {CheckoutDataContext}
 	 */
 	const checkoutData = {
-		submitLabel,
 		onSubmit,
 		isComplete: checkoutState.status === STATUS.COMPLETE,
 		isIdle: checkoutState.status === STATUS.IDLE,

@@ -34,6 +34,10 @@ const paypalPaymentMethod = {
 			) }
 		/>
 	),
+	placeOrderButtonLabel: __(
+		'Proceed to PayPal',
+		'woo-gutenberg-products-block'
+	),
 	content: <Content />,
 	edit: <Content />,
 	icons: null,

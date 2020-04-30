@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
  * Internal dependencies
  */
 import { PaymentMethodDataProvider } from '../payment-methods';
@@ -17,25 +12,15 @@ import CheckoutProcessor from './processor';
  * This wraps the checkout and provides an api interface for the checkout to
  * children via various hooks.
  *
- * @param {Object}  props                       Incoming props for the provider.
- * @param {Object}  props.children              The children being wrapped.
- * @param {string}  [props.redirectUrl]         Initialize what the checkout will
- *                                              redirect to after successful
- *                                              submit.
- * @param {string}  [props.submitLabel]         What will be used for the checkout
- *                                              submit button label.
+ * @param {Object}  props               Incoming props for the provider.
+ * @param {Object}  props.children      The children being wrapped.
+ * @param {string}  [props.redirectUrl] Initialize what the checkout will
+ *                                      redirect to after successful
+ *                                      submit.
  */
-export const CheckoutProvider = ( {
-	children,
-	redirectUrl,
-	submitLabel = __( 'Place Order', 'woo-gutenberg-products-block' ),
-} ) => {
+export const CheckoutProvider = ( { children, redirectUrl } ) => {
 	return (
-		<CheckoutStateProvider
-			redirectUrl={ redirectUrl }
-			isCart={ false }
-			submitLabel={ submitLabel }
-		>
+		<CheckoutStateProvider redirectUrl={ redirectUrl } isCart={ false }>
 			<BillingDataProvider>
 				<ShippingDataProvider>
 					<PaymentMethodDataProvider>
