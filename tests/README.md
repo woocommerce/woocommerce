@@ -54,6 +54,7 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
 ### Writing Tests
 
+* There are two different PHPUnit directories, `tests/legacy` and `tests/php`. The `tests/legacy` directory contains all of the tests for code in the `includes` directory, and the `tests/php` directory is a PSR-4 namespaced directory for tests of code in the `src` directory.
 * Each test file should roughly correspond to an associated source file, e.g. the `formatting/functions.php` test file covers code in the `wc-formatting-functions.php` file
 * Each test method should cover a single method or function with one or more assertions
 * A single method or function can have multiple associated test methods if it's a large or complex method
