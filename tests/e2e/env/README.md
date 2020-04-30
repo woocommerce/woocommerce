@@ -141,17 +141,24 @@ wp post create --post_type=page --post_status=publish --post_title='Ready' --pos
 
 ### Travis CI
 
-The E2E environment includes a base `.travis.yml` file that sets up a WordPress testing environment and defines a job for running E2E tests. Opt in to [Travis Build Config Imports](https://docs.travis-ci.com/user/build-config-imports/) using `version: ~> 1.0` in your config file.
+Add the following to the appropriate sections of your `.travis.yml` config file.
 
 ```yaml
 version: ~> 1.0
 
-import:
-  - source: node_modules/@woocommerce/e2e-environment/.travis.yml
-    mode: deep_merge_prepend # Merge the package config first.
+  include:
+    - name: "Core E2E Tests"
+    php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CORE_E2E=1
 
 ....
+
+script:
+  - npm explore @woocommerce/e2e-environment -- npm run test:e2e-CI
+
 ```
+
+Use `[[ ${RUN_CORE_E2E} == 1 ]]` in your bash scripts to test for the core e2e test run.
 
 ## Usage
 
