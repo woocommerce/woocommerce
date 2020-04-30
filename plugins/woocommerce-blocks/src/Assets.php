@@ -132,6 +132,7 @@ class Assets {
 				'displayItemizedTaxes'          => 'itemized' === get_option( 'woocommerce_tax_total_display' ),
 				'displayShopPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 				'displayCartPricesIncludingTax' => 'incl' === get_option( 'woocommerce_tax_display_cart' ),
+				'checkoutShowLoginReminder'     => 'yes' === get_option( 'woocommerce_enable_checkout_login_reminder' ),
 				'showAvatars'                   => '1' === get_option( 'show_avatars' ),
 				'reviewRatingsEnabled'          => wc_review_ratings_enabled(),
 				'productCount'                  => array_sum( (array) $product_counts ),

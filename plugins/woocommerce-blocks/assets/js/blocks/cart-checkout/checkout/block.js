@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment, useState, useCallback, useEffect } from '@wordpress/element';
+import { useState, useCallback, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import defaultAddressFields from '@woocommerce/base-components/cart-checkout/address-form/default-address-fields';
 import {
@@ -47,6 +47,7 @@ import {
 } from '@woocommerce/base-components/sidebar-layout';
 import { getSetting } from '@woocommerce/settings';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
+import { CHECKOUT_SHOW_LOGIN_REMINDER } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -158,6 +159,19 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		return <CheckoutOrderError />;
 	}
 
+	const loginPrompt = () =>
+		CHECKOUT_SHOW_LOGIN_REMINDER && (
+			<>
+				{ __(
+					'Already have an account? ',
+					'woo-gutenberg-products-block'
+				) }
+				<a href="/wp-login.php">
+					{ __( 'Log in.', 'woo-gutenberg-products-block' ) }
+				</a>
+			</>
+		);
+
 	return (
 		<>
 			<SidebarLayout className="wc-block-checkout">
@@ -176,20 +190,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 								"We'll use this email to send you details and updates about your order.",
 								'woo-gutenberg-products-block'
 							) }
-							stepHeadingContent={ () => (
-								<Fragment>
-									{ __(
-										'Already have an account? ',
-										'woo-gutenberg-products-block'
-									) }
-									<a href="/wp-login.php">
-										{ __(
-											'Log in.',
-											'woo-gutenberg-products-block'
-										) }
-									</a>
-								</Fragment>
-							) }
+							stepHeadingContent={ loginPrompt }
 						>
 							<ValidatedTextInput
 								id="email"
