@@ -14,9 +14,9 @@
 		}
 
 		.wc-block-checkout__no-payment-methods-placeholder-description {
+			@include font-size(13);
 			display: block;
 			margin: 0.25em 0 1em 0;
-			font-size: 13px;
 		}
 	}
 }

@@ -8,6 +8,27 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
  */
 
 /**
+ * Returns the CSS value of the specified property in the document element.
+ *
+ * @param {string} property     Name of the property to retrieve the style
+ *                              value from.
+ * @param {string} defaultValue Fallback value if the value for the property
+ *                              could not be retrieved.
+ *
+ * @return {string} The style value of that property in the document element.
+ */
+const getDocumentStyle = ( property, defaultValue ) => {
+	let documentStyle = {};
+	if (
+		typeof window === 'object' &&
+		typeof window.getComputedStyle === 'function'
+	) {
+		documentStyle = window.getComputedStyle( document.documentElement );
+	}
+	return documentStyle[ property ] || defaultValue;
+};
+
+/**
  * Default options for the stripe elements.
  */
 const elementOptions = {
@@ -15,7 +36,8 @@ const elementOptions = {
 		base: {
 			iconColor: '#666EE8',
 			color: '#31325F',
-			fontSize: '15px',
+			fontSize: getDocumentStyle( 'fontSize', '16px' ),
+			lineHeight: 1.375, // With a font-size of 16px, line-height will be 22px.
 			'::placeholder': {
 				color: '#fff',
 			},
