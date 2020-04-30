@@ -1,9 +1,9 @@
-// Rem output with px fallback
+// Converts a font-size in px to rem and optionally sets a relative line-height.
 @mixin font-size($sizeValue: 16, $lineHeight: false ) {
 	font-size: $sizeValue + px;
 	font-size: ($sizeValue / 16) + rem;
 	@if ($lineHeight) {
-		line-height: $lineHeight;
+		line-height: $lineHeight / $sizeValue;
 	}
 }
 
@@ -117,4 +117,8 @@
 	word-break: break-word;
 	// IE11 doesn't support overflow-wrap neither word-break: break-word, so we fallback to -ms-work-break: break-all.
 	-ms-word-break: break-all;
+}
+
+@function rem($size, $base: 16px ) {
+	@return $size / $base * 1rem;
 }

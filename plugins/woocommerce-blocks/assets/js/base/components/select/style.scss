@@ -1,15 +1,14 @@
 .wc-block-select {
-	height: 48px;
+	height: 3em;
 	position: relative;
 	margin-bottom: $gap-large;
 
 	label {
-		@include font-size(16);
+		@include font-size(16, 22);
 		position: absolute;
-		transform: translateY(#{$gap-small});
+		transform: translateY(0.75em);
 		transform-origin: top left;
 		transition: all 200ms ease;
-		line-height: 22px;
 		color: $gray-50;
 		z-index: 1;
 		margin: 0 $gap;
@@ -48,7 +47,7 @@
 		letter-spacing: inherit;
 		line-height: 1;
 		overflow: hidden;
-		padding: $gap-large $gap $gap-smallest;
+		padding: rem($gap-large) $gap rem($gap-smallest);
 		text-overflow: ellipsis;
 		text-transform: none;
 		white-space: nowrap;

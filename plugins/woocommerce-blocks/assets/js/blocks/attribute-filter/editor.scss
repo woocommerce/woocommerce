@@ -13,7 +13,7 @@
 		display: block; /* Disable flex box */
 
 		p {
-			font-size: 14px;
+			@include font-size(14);
 		}
 	}
 	.woocommerce-search-list__search {
@@ -22,11 +22,10 @@
 		padding-top: 0;
 	}
 	.wc-block-attribute-filter__add_attribute_button {
+		@include font-size(14, 24);
 		margin: 0 0 1em;
-		line-height: 24px;
 		vertical-align: middle;
 		height: auto;
-		font-size: 14px;
 		padding: 0.5em 1em;
 
 		svg {

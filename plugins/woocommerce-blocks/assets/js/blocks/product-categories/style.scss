@@ -63,16 +63,16 @@
 	display: flex;
 	align-items: center;
 	text-decoration: none;
-	font-size: 13px;
+	@include font-size(13);
 	margin: 0;
 	border: none;
 	cursor: pointer;
 	background: none;
-	padding: 8px;
+	padding: rem(8, 13);
 	color: #555d66;
 	position: relative;
 	overflow: hidden;
-	border-radius: 4px;
+	border-radius: rem(4, 13);
 	svg {
 		fill: currentColor;
 		outline: none;

@@ -69,17 +69,16 @@
 	}
 
 	.wc-block-gateway-input {
+		@include font-size(16, 22);
 		background-color: #fff;
 		padding: $gap-small $gap;
 		border-radius: 4px;
 		border: 1px solid $input-border-gray;
 		width: 100%;
-		font-size: 16px;
-		line-height: 22px;
 		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
-		height: 48px;
+		height: 3em;
 		color: $input-text-active;
 
 		&:focus {
@@ -92,13 +91,12 @@
 	}
 
 	label {
+		@include font-size(16, 22);
 		position: absolute;
-		transform: translateY(#{$gap-small});
+		transform: translateY(0.75em);
 		left: 0;
 		top: 0;
 		transform-origin: top left;
-		font-size: 16px;
-		line-height: 22px;
 		color: $gray-50;
 		transition: transform 200ms ease;
 		margin: 0 $gap;
@@ -130,7 +128,7 @@
 
 	.wc-block-gateway-input.focused.empty,
 	.wc-block-gateway-input:not(.empty) {
-		padding: $gap-large $gap $gap-smallest;
+		padding: rem($gap-large) $gap rem($gap-smallest);
 		& + label {
 			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}

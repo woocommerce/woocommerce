@@ -6,7 +6,7 @@
 	label {
 		@include font-size(16);
 		position: absolute;
-		transform: translateY(#{$gap-small});
+		transform: translateY(0.75em);
 		left: 0;
 		top: 0;
 		transform-origin: top left;
@@ -57,7 +57,7 @@
 	&.is-active input[type="url"],
 	&.is-active input[type="text"],
 	&.is-active input[type="email"] {
-		padding: $gap-large $gap $gap-smallest;
+		padding: rem($gap-large) $gap rem($gap-smallest);
 	}
 
 	&.has-error input {

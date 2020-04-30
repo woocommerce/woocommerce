@@ -8,10 +8,10 @@
 		flex-grow: 1;
 	}
 	.wc-block-product-search__button {
+		@include font-size(13);
 		display: flex;
 		align-items: center;
 		text-decoration: none;
-		font-size: 13px;
 		margin: 0 0 0 6px;
 		border: none;
 		cursor: pointer;
