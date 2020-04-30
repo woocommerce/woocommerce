@@ -17,7 +17,8 @@ $hidden_order_itemmeta = apply_filters(
 		'method_id',
 		'cost',
 		'_reduced_stock',
-	)
+	),
+	$item
 );
 ?><div class="view">
 	<?php if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
