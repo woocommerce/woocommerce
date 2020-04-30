@@ -16,12 +16,6 @@ jobs:
   include:
     - name: "Core E2E Tests"
     php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0
-    script:
-        - bash bin/before-script-CI.sh
-        - composer require wp-cli/i18n-command
-        - npm run build
-        - npm explore @woocommerce/e2e-environment -- npm run docker:up
-        - npm explore @woocommerce/e2e-environment -- npm run test:e2e
-    after_script:
-        - npm explore @woocommerce/e2e-environment -- npm run docker:down
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CORE_E2E=1
+script:
+    - npm explore @woocommerce/e2e-environment -- npm run test:e2e-CI

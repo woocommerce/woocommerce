@@ -1,5 +1,10 @@
 version: ~> 1.0
 
+# This path will differ for projects using the published package.
+import:
+  - source: tests/e2e/env/.travis.yml
+    mode: deep_merge_prepend
+
 language: php
 dist: xenial
 
@@ -8,15 +13,6 @@ services:
   - xvfb
   - mysql
   - docker
-
-sudo: false
-
-cache:
-  directories:
-    - vendor
-    - node_modules
-    - $HOME/.npm
-    - $HOME/.composer/cache
 
 # Test main supported versions of PHP against latest WP.
 php:
@@ -31,24 +27,11 @@ env:
 
 # Additional tests against stable PHP (min version is 7.0)
 # and code coverage report.
-matrix:
-  fast_finish: true
+jobs:
   include:
   - name: "Coding standard check"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "E2E Tests"
-    php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0
-    script:
-        - bash tests/e2e/env/bin/before-script-CI.sh
-        - composer require wp-cli/i18n-command
-        - npm install
-        - npm run build
-        - npm run docker:up
-        - npm run test:e2e
-    after_script:
-        - npm run docker:down
   - name: "Unit tests code coverage"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
