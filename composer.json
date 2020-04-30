@@ -43,6 +43,11 @@
       "Automattic\\WooCommerce\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Automattic\\WooCommerce\\Tests\\": "tests/php/"
+    }
+  },
   "scripts": {
     "post-install-cmd": [
       "sh ./bin/package-update.sh"
