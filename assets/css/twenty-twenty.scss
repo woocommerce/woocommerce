@@ -2058,6 +2058,10 @@ a.reset_variations {
  */
 .woocommerce {
 
+	&.single-product .product section {
+		float: left;
+	}
+
 	section {
 		padding-top: 2rem;
 		padding-bottom: 0;
