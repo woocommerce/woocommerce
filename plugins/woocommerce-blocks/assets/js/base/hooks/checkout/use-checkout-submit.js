@@ -1,12 +1,39 @@
 /**
  * External dependencies
  */
-import { useCheckoutContext } from '@woocommerce/base-context';
+import { __ } from '@wordpress/i18n';
+import {
+	useCheckoutContext,
+	usePaymentMethodDataContext,
+} from '@woocommerce/base-context';
+import { usePaymentMethods } from '@woocommerce/base-hooks';
 
 /**
- * Returns the submitLabel and onSubmit interface from the checkout context
+ * Returns the submitButtonText, onSubmit interface from the checkout context,
+ * and an indication of submission status.
  */
 export const useCheckoutSubmit = () => {
-	const { submitLabel, onSubmit } = useCheckoutContext();
-	return { submitLabel, onSubmit };
+	const {
+		onSubmit,
+		isCalculating,
+		isBeforeProcessing,
+		isProcessing,
+		isAfterProcessing,
+		isComplete,
+		hasError,
+	} = useCheckoutContext();
+	const { paymentMethods } = usePaymentMethods();
+	const { activePaymentMethod } = usePaymentMethodDataContext();
+	const paymentMethod = paymentMethods[ activePaymentMethod ] || {};
+
+	return {
+		submitButtonText:
+			paymentMethod?.placeOrderButtonLabel ||
+			__( 'Place Order', 'woo-gutenberg-products-block' ),
+		onSubmit,
+		isCalculating,
+		waitingForProcessing:
+			isProcessing || isAfterProcessing || isBeforeProcessing,
+		waitingForRedirect: isComplete && ! hasError,
+	};
 };

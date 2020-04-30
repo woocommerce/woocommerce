@@ -9,13 +9,19 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
  */
 import { useCheckoutSubmit } from '../use-checkout-submit';
 
-const mockSubmitLabel = 'Submit!';
 const mockUseCheckoutContext = {
-	submitLabel: mockSubmitLabel,
 	onSubmit: jest.fn(),
+};
+const mockUsePaymentMethodDataContext = {};
+const mockUsePaymentMethods = {
+	paymentMethods: {},
 };
 jest.mock( '@woocommerce/base-context', () => ( {
 	useCheckoutContext: () => mockUseCheckoutContext,
+	usePaymentMethodDataContext: () => mockUsePaymentMethodDataContext,
+} ) );
+jest.mock( '@woocommerce/base-hooks', () => ( {
+	usePaymentMethods: () => mockUsePaymentMethods,
 } ) );
 
 describe( 'useCheckoutSubmit', () => {
@@ -35,20 +41,6 @@ describe( 'useCheckoutSubmit', () => {
 	beforeEach( () => {
 		registry = createRegistry();
 		renderer = null;
-	} );
-
-	it( 'submitLabel matches the value provided by the checkout context', () => {
-		const TestComponent = getTestComponent();
-
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent )
-			);
-		} );
-
-		const { submitLabel } = renderer.root.findByType( 'div' ).props;
-
-		expect( submitLabel ).toBe( mockSubmitLabel );
 	} );
 
 	it( 'onSubmit calls the correct action in the checkout context', () => {

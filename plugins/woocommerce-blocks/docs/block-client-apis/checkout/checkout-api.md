@@ -83,14 +83,12 @@ The payment method data context exposes the api interfaces for the following thi
 
 This context is the main one. Internally via the `<CheckoutProvider>` it handles wrapping children in `<ShippingMethodDataProvider>`, `<BillingDataProvider>` and `<PaymentMethodDataProvider>`. So the checkout components just need to be wrapped by `<CheckoutProvider>`.
 
-The provider receives two props:
+The provider receives the following props:
 
 -   `redirectUrl`: A string, this is used to indicate where the checkout redirects to when it is complete. This is optional and can be used to set a default url to redirect to.
--   `submitLabel`: This allows for customizing the checkout submit button label. It defaults to `Place Order`.
 
 Via `useCheckoutContext`, the following are exposed:
 
--   `submitLabel`: This is whatever label was passed via the provider.
 -   `onSubmit`: This is a callback to be invoked either by submitting the checkout button, or by express payment methods to start checkout processing after they have finished their initialization process when their button has been clicked.
 -   `isComplete`: True when checkout has finished processing and the subscribed checkout processing callbacks have all been invoked along with a successful processing of the checkout by the server.
 -   `isIdle`: When the checkout status is `IDLE` this flag is true. Checkout will be this status after any change to checkout state after the block is loaded. It will also be this status when retrying a purchase is possible after processing happens with an error.

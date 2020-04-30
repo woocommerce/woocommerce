@@ -211,8 +211,6 @@
 /**
  * @typedef {Object} CheckoutDataContext
  *
- * @property {string}                       submitLabel                The label to use for the
- *                                                                     submit checkout button.
  * @property {function()}                   onSubmit                   The callback to register with
  *                                                                     the checkout submit button.
  * @property {boolean}                      isComplete                 True when checkout is complete
