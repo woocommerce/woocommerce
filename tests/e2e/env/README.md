@@ -5,20 +5,20 @@ A reusable and extendable E2E testing environment for WooCommerce extensions.
 ## Installation
 
 ```bash
-npm install @woocommerce/e2e-env --save
+npm install @woocommerce/e2e-environment --save
 npm install jest --global
 ```
 
 ## Configuration
 
-The `@woocommerce/e2e-env` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it contains several files to serve as the base for a Docker container and Travis CI setup.
+The `@woocommerce/e2e-environment` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it contains several files to serve as the base for a Docker container and Travis CI setup.
 
 ### Babel Config
 
 Extend your project's Babel config to contain the expected presets for E2E testing.
 
 ```js
-const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-env' );
+const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = function( api ) {
 	api.cache( true );
@@ -39,7 +39,7 @@ module.exports = function( api ) {
 The E2E environment uses Puppeteer for headless browser testing, which uses certain globals variables. Avoid ES Lint errors by extending the config.
 
 ```js
-const { esLintConfig: baseConfig } = require( '@woocommerce/e2e-env' );
+const { esLintConfig: baseConfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = {
 	...baseConfig,
@@ -75,7 +75,7 @@ The E2E environment uses Jest as a test runner. Extending the base config is nee
 
 ```js
 const path = require( 'path' );
-const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-env' );
+const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = {
 	...baseE2Econfig,
@@ -91,7 +91,7 @@ module.exports = {
 The E2E environment provides a `@woocommerce/e2e-tests` alias for easy use of the WooCommerce E2E test helpers.
 
 ```js
-const { webpackAlias: coreE2EAlias } = require( '@woocommerce/e2e-env' );
+const { webpackAlias: coreE2EAlias } = require( '@woocommerce/e2e-environment' );
 
 module.exports = {
 	....
@@ -147,7 +147,7 @@ The E2E environment includes a base `.travis.yml` file that sets up a WordPress 
 version: ~> 1.0
 
 import:
-  - source: node_modules/@woocommerce/e2e-env/.travis.yml
+  - source: node_modules/@woocommerce/e2e-environment/.travis.yml
     mode: deep_merge_prepend # Merge the package config first.
 
 ....
@@ -158,18 +158,18 @@ import:
 Start Docker
 
 ```bash
-npm explore @woocommerce/e2e-env -- npm run docker:up
+npm explore @woocommerce/e2e-environment -- npm run docker:up
 ```
 
 Run E2E Tests
 
 ```bash
-npm explore @woocommerce/e2e-env -- npm run test:e2e
-npm explore @woocommerce/e2e-env -- npm run test:e2e-dev
+npm explore @woocommerce/e2e-environment -- npm run test:e2e
+npm explore @woocommerce/e2e-environment -- npm run test:e2e-dev
 ```
 
 Stop Docker
 
 ```bash
-npm explore @woocommerce/e2e-env -- npm run docker:down
+npm explore @woocommerce/e2e-environment -- npm run docker:down
 ```

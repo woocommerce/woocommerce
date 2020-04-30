@@ -1,5 +1,5 @@
 const path = require( 'path' );
-const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-env' );
+const { jestConfig: baseE2Econfig } = require( '@woocommerce/e2e-environment' );
 
 module.exports = {
 	...baseE2Econfig,

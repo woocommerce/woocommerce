@@ -1,5 +1,5 @@
 {
-  "name": "@woocommerce/e2e-env",
+  "name": "@woocommerce/e2e-environment",
   "version": "1.0.0",
   "description": "WooCommerce End to End Testing Environment Configuration.",
   "author": "Automattic",
@@ -10,7 +10,7 @@
     "e2e",
     "puppeteer"
   ],
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e-env/README.md",
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/env/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/woocommerce/woocommerce.git"

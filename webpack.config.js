@@ -1,4 +1,4 @@
-const { webpackAlias: coreE2EAlias } = require( '@woocommerce/e2e-env' );
+const { webpackAlias: coreE2EAlias } = require( '@woocommerce/e2e-environment' );
 
 module.exports = {
 	resolve: {

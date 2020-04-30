@@ -5,7 +5,7 @@ const getAppRoot = () => {
     // Typically will be in node_modules/, but WooCommerce
     // uses a local file path (tests/e2e/env).
     let appPath = false;
-    const moduleDir = path.dirname( require.resolve( '@woocommerce/e2e-env' ) );
+    const moduleDir = path.dirname( require.resolve( '@woocommerce/e2e-environment' ) );
 
     if ( -1 < moduleDir.indexOf( 'node_modules' ) ) {
         appPath = moduleDir.split( 'node_modules' )[ 0 ];

@@ -10,7 +10,7 @@ fi
 
 if [[ ! -z "$WP_VERSION" ]] ; then
   composer install --no-dev
-  npm explore @woocommerce/e2e-env -- npm run install-wp-tests -- wc_e2e_tests root ' ' localhost $WP_VERSION
+  npm explore @woocommerce/e2e-environment -- npm run install-wp-tests -- wc_e2e_tests root ' ' localhost $WP_VERSION
   composer global require "phpunit/phpunit=4.8.*|5.7.*"
 fi
 
