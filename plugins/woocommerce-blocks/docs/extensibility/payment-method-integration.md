@@ -96,7 +96,7 @@ The options you feed the configuration instance are the same as those for expres
 
 -   `label`: This should be a react node that will be used to output the label for the tab in the payment methods are. For example it might be `<strong>Credit/Debit Cart</strong>` or you might output images.
 -   `ariaLabel`: This is the label that will be read out via screen-readers when the payment method is selected.
-- `placeOrderButtonLabel`: : This is an optional label which will change the default "Place Order" button text to something else when the payment method is selected.
+- `placeOrderButtonLabel`: This is an optional label which will change the default "Place Order" button text to something else when the payment method is selected.
 
 ### Props Fed to Payment Method Nodes
 
