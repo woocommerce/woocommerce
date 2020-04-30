@@ -313,9 +313,10 @@ class WC_Admin {
 	/**
 	 * Include admin classes.
 	 *
-	 * @since  4.1.1
+	 * @since 4.1.1
 	 *
-	 * @param  String  $classes
+	 * @param String $classes
+	 *
 	 * @return String
 	 */
 	public function include_admin_body_class( $classes ) {
