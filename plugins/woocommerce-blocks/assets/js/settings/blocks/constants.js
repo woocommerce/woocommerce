@@ -59,6 +59,11 @@ export const SHIPPING_METHODS_EXIST = getSetting(
 	false
 );
 
+export const CHECKOUT_SHOW_LOGIN_REMINDER = getSetting(
+	'checkoutShowLoginReminder',
+	true
+);
+
 const defaultPage = {
 	id: 0,
 	title: '',
