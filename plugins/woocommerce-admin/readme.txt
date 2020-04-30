@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activi
 Requires at least: 5.3.0
 Tested up to: 5.3.2
 Requires PHP: 5.6.20
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/license.txt
 
@@ -70,6 +70,11 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 1.1.1 2020-04-28 =
+- Fix: Storefront should show at top of theme options in onboarding wizard. #4187
+- Tweak: Remove Stripe auto-connect from payment task. #4164
+- Tweak: Hide suggested extensions in Marketing Tab if opted out of "Marketplace Suggestions"
 
 = 1.1.0 2020-04-20 =
 - Tweak: Added link to "go shopping" button #3712
