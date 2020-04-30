@@ -27,8 +27,6 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 	} = cartItem;
 
 	const currency = getCurrency( prices );
-	const regularPrice = parseInt( prices.regular_price, 10 );
-	const purchasePrice = parseInt( prices.price, 10 );
 	const linePrice = Dinero( {
 		amount: parseInt( prices.raw_prices.price, 10 ),
 		precision: parseInt( prices.raw_prices.precision, 10 ),
@@ -40,7 +38,6 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 	return (
 		<div className="wc-block-order-summary-item">
 			<div className="wc-block-order-summary-item__image">
-				<ProductImage image={ images.length ? images[ 0 ] : {} } />
 				<div className="wc-block-order-summary-item__quantity">
 					<Label
 						label={ quantity }
@@ -51,6 +48,7 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 						) }
 					/>
 				</div>
+				<ProductImage image={ images.length ? images[ 0 ] : {} } />
 			</div>
 			<div className="wc-block-order-summary-item__description">
 				<div className="wc-block-order-summary-item__header">
@@ -59,13 +57,6 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 						className="wc-block-order-summary-item__total-price"
 						currency={ currency }
 						value={ linePrice }
-					/>
-				</div>
-				<div className="wc-block-order-summary-item__prices">
-					<ProductPrice
-						currency={ currency }
-						regularValue={ regularPrice }
-						value={ purchasePrice }
 					/>
 				</div>
 				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
