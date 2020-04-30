@@ -315,7 +315,7 @@ class WC_Admin {
 	 *
 	 * @since 4.1.1
 	 *
-	 * @param String $classes
+	 * @param String $classes Body classes string.
 	 *
 	 * @return String
 	 */
