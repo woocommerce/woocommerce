@@ -56,7 +56,7 @@ function wc_blocks_install() {
  * Adds WooCommerce testing framework classes.
  */
 function wc_test_includes() {
-	$wc_tests_framework_base_dir = wc_dir() . '/tests';
+	$wc_tests_framework_base_dir = wc_dir() . '/tests/legacy';
 	// WooCommerce test classes.
 	// Framework.
 	require_once $wc_tests_framework_base_dir . '/framework/class-wc-unit-test-factory.php';
