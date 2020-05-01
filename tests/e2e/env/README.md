@@ -149,7 +149,7 @@ version: ~> 1.0
   include:
     - name: "Core E2E Tests"
     php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CORE_E2E=1
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
 
 ....
 
@@ -158,7 +158,7 @@ script:
 
 ```
 
-Use `[[ ${RUN_CORE_E2E} == 1 ]]` in your bash scripts to test for the core e2e test run.
+Use `[[ ${RUN_E2E} == 1 ]]` in your bash scripts to test for the core e2e test run.
 
 ## Usage
 

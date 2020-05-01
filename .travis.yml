@@ -37,7 +37,11 @@ jobs:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "Core E2E Tests"
     php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CORE_E2E=1
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    script:
+      - composer require wp-cli/i18n-command
+      - npm run build
+      - npm explore @woocommerce/e2e-environment -- npm run test:e2e-CI
   - name: "Unit tests code coverage"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
@@ -81,7 +85,6 @@ before_script:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 
 script:
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e-CI
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
 
