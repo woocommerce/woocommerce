@@ -104,8 +104,10 @@
 	.wc-block-order-summary-item__description {
 		padding-left: $gap-large;
 		padding-top: $gap;
+		padding-bottom: $gap;
 		line-height: $gap-large;
 
+		p,
 		.wc-block-product-metadata {
 			line-height: $gap;
 			margin-top: #{ ( $gap-large - $gap ) / 2 };
