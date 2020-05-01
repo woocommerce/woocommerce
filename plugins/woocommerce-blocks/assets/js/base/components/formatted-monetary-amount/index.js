@@ -41,9 +41,13 @@ const FormattedMonetaryAmount = ( {
 	onValueChange,
 	...props
 } ) => {
+	if ( value === '-' ) {
+		return null;
+	}
+
 	const priceValue = value / 10 ** currency.minorUnit;
 
-	if ( ! Number.isFinite( priceValue ) && priceValue === '-' ) {
+	if ( ! Number.isFinite( priceValue ) ) {
 		return null;
 	}
 
