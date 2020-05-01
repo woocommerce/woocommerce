@@ -259,7 +259,6 @@ beforeAll( async () => {
 	await trashExistingPosts();
 	await trashExistingProducts();
 	await setupBrowser();
-	await importSampleProducts();
 } );
 
 afterEach( async () => {

@@ -41,7 +41,11 @@ jobs:
     script:
       - composer require wp-cli/i18n-command
       - npm run build
-      - npm explore @woocommerce/e2e-environment -- npm run test:e2e-CI
+      - npm install jest --global
+      - npm run docker:up
+      - npm run test:e2e
+    after_script:
+      - npm run docker:down
   - name: "Unit tests code coverage"
     php: 7.4
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
