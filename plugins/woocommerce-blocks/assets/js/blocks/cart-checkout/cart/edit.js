@@ -141,6 +141,11 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 
 /**
  * Component to handle edit mode of "Cart Block".
+ *
+ * Note: We need to always render `<InnerBlocks>` in the editor. Otherwise,
+ *       if the user saves the page without having triggered the 'Empty Cart'
+ *       view, inner blocks would not be saved and they wouldn't be visible
+ *       in the frontend.
  */
 const CartEditor = ( { className, attributes, setAttributes } ) => {
 	if ( attributes.isPreview ) {
@@ -194,9 +199,10 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 										</CartProvider>
 									</Disabled>
 								</EditorProvider>
+								<EmptyCartEdit hidden={ true } />
 							</>
 						) }
-						<EmptyCartEdit hidden={ currentView === 'full' } />
+						{ currentView === 'empty' && <EmptyCartEdit /> }
 					</BlockErrorBoundary>
 				) }
 			/>
