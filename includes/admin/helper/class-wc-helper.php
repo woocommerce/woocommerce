@@ -1149,9 +1149,17 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		// Reset plugin cache before retrieving plugin list.
-		wp_clean_plugins_cache();
-		$plugins     = get_plugins();
+		$plugins = get_plugins();
+
+		/**
+		 * Check if plugins have WC headers, if not then clear cache and fetch again.
+		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call.
+		 */
+		$first_plugin = array_keys( $plugins )[0];
+		if ( $first_plugin && ! array_key_exists( 'Woo', $plugins[ $first_plugin ] ) ) {
+			wp_clean_plugins_cache( false );
+			$plugins = get_plugins();
+		}
 		$woo_plugins = array();
 
 		// Backwards compatibility for woothemes_queue_update().
