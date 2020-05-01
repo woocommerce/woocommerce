@@ -30,6 +30,9 @@ const TotalsDiscountItem = ( {
 	}
 
 	const discountTaxValue = parseInt( totalDiscountTax, 10 );
+	const discountTotalValue = DISPLAY_CART_PRICES_INCLUDING_TAX
+		? discountValue + discountTaxValue
+		: discountValue;
 
 	return (
 		<TotalsItem
@@ -69,12 +72,12 @@ const TotalsDiscountItem = ( {
 					</LoadingMask>
 				)
 			}
-			label={ __( 'Discount', 'woo-gutenberg-products-block' ) }
-			value={
-				( DISPLAY_CART_PRICES_INCLUDING_TAX
-					? discountValue + discountTaxValue
-					: discountValue ) * -1
+			label={
+				!! discountTotalValue
+					? __( 'Discount', 'woo-gutenberg-products-block' )
+					: __( 'Coupons', 'woo-gutenberg-products-block' )
 			}
+			value={ discountTotalValue ? discountTotalValue * -1 : '-' }
 		/>
 	);
 };
