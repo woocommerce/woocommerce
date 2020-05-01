@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { getSetting } from '@woocommerce/settings';
+
+/**
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
@@ -27,7 +32,7 @@ const PaymentRequestPaymentMethod = {
 					label: 'Test total',
 					amount: 1000,
 				},
-				country: cartData?.shippingAddress?.country,
+				country: getSetting( 'baseLocation', {} )?.country,
 				// eslint-disable-next-line camelcase
 				currency: cartData?.cartTotals?.currency_code?.toLowerCase(),
 			} );
