@@ -23,8 +23,8 @@ _Outcome_: **You are equipped to ship a release!**
 
 #### Ensure release development is complete
 
--   For _major_ and _minor_ releases, we use ZenHub.
--   For _patch_ releases, we use GitHub milestones - [example](https://github.com/woocommerce/woocommerce-gutenberg-products-block/milestone/41).
+-   Github milestones are used for all releases. We do releases every two weeks from the latest release milestone - [example](https://github.com/woocommerce/woocommerce-gutenberg-products-block/milestone/43)
+-   If a patch release is needed, then the milestone for the patch release is created and a decision will be made whether it just includes `cherry-picked` changes, or all the changes currently slated from the current release milestone. If the latter, then all the issues and pulls in the current release milestone are moved to the patch release, and the the release is built from the patch release branch rebased on master. In **most cases**, patch releases will involve cherry-picking.
 -   Ensure all issues/PRs intended for this release are merged, closed and linked to release.
 -   All PRs should have changelog entry, or `skip-changelog` tag.
 -   Check with the team to confirm any outstanding or in progress work.
@@ -44,15 +44,34 @@ _Outcome_: **Team is aware of release and in agreement about what fixes & featur
 -   Make release branch (if needed).
     -   For _major_ and _minor_ releases, create branch: `release/X.X`.
     -   For _patch_ releases, the branch should already exist.
--   Ensure your local checkout is updated to the tip of the release branch.
--   For _patch_ releases, cherry pick relevant PRs into the release branch:
-    -   If PR is already labelled `status: cherry-picked 🍒` then continue to next PR.
-    -   Ideally, use GitHub Hub to cherry pick the PR - `hub cherry-pick {PR-COMMIT-URL}`.
-    -   If there are serious conflicts or extensive differences between `master` and release branch, you may need to take more care:
-        -   Manually cherry pick individual commits using git - `git cherry-pick {COMMIT-HASH}`.
-        -   Or in some cases, manually craft a new PR with appropriate changes, targeting release branch.
-    -   Push the release branch to origin (so changes are in GitHub repo).
-    -   Label the PR: `status: cherry-picked 🍒`.
+
+### Patch releases against latest master
+
+If it's determined a patch release will include the latest master:
+
+- Ensure your local checkout is updated to the tip of the release branch.
+- Rebase the release branch for the patch release against master.
+- Move all closed issues and pulls from the current release milestone into the patch release milestone.
+- Push the release branch to origin (so changes are in GitHub repo).
+
+### Patch releases with cherry-picking.
+
+This is for releases where just fixes specific to the branch are released and not the latest changes in master.
+
+- Ensure your local checkout is updated to the tip of the release branch.
+- Cherry pick relevant PRs into the release branch:
+-   If PR is already labelled `status: cherry-picked 🍒` then continue to next PR.
+-   Ideally, use GitHub Hub to cherry pick the PR - `hub cherry-pick {PR-COMMIT-URL}`.
+-   If there are serious conflicts or extensive differences between `master` and release branch, you may need to take more care:
+    -   Manually cherry pick individual commits using git - `git cherry-pick {COMMIT-HASH}`.
+    -   Or in some cases, manually craft a new PR with appropriate changes, targeting release branch.
+-   Push the release branch to origin (so changes are in GitHub repo).
+-   Label the PR: `status: cherry-picked 🍒`.
+    
+### Minor/Major releases
+
+- Ensure your local checkout is updated to the tip of the release branch.
+
 
 _Outcome_: **Release branch has all relevant changes merged & pushed.**
 
@@ -62,7 +81,6 @@ _Outcome_: **Release branch has all relevant changes merged & pushed.**
 
 -   Run changelog script `$ npm run changelog` to get changelog txt for readme. Changelog content will be output to screen by script.
     -   The above script will automatically generate changelog entries from a milestone (you will be asked about the milestone name in the script).
-    -   If you want to pull changelog entries from a Zenhub release instead, use `$ npm run changelog:zenhub` and follow instructions.
 -   Add changelog section for release, e.g. [`= 2.5.11 - 2020-01-20 =`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/74a41881bfa456a2167a52aaeb4871352255e328).
 -   Copy-paste the changelog content into `readme.txt`.
 -   Make any other changes to readme as needed - e.g. support versions changing, new blocks.
@@ -124,8 +142,9 @@ _Outcome_: **Customers can install/update via WPORG; WPORG plugin page is up to 
 
 #### Clean up release milestone / Zenhub
 
--   For _patch_ releases, close the milestone in GitHub.
--   For _major_ & _minor_ releases - tbc
+-   Edit the milestone and add the current date as the due date (this basically is used for easy reference of when the milestone was completed).
+-   Close the milestone.
+-   If you didn't release a patch release, create a milestone for the next minor release.
 
 ## Appendix: Versions
 
