@@ -1153,13 +1153,15 @@ class WC_Helper {
 
 		/**
 		 * Check if plugins have WC headers, if not then clear cache and fetch again.
-		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call.
+		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call -- for example when WC is activated/updated.
+		 * Also, get_plugins call is expensive so we should clear this cache very conservatively.
 		 */
 		$first_plugin = array_keys( $plugins )[0];
 		if ( $first_plugin && ! array_key_exists( 'Woo', $plugins[ $first_plugin ] ) ) {
 			wp_clean_plugins_cache( false );
 			$plugins = get_plugins();
 		}
+
 		$woo_plugins = array();
 
 		// Backwards compatibility for woothemes_queue_update().
