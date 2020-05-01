@@ -27,6 +27,7 @@ import {
 	useStripe,
 } from '@stripe/react-stripe-js';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
@@ -94,7 +95,7 @@ const PaymentRequestExpressComponent = ( {
 				getPaymentRequest( {
 					total: billing.cartTotal,
 					currencyCode: billing.currency.code.toLowerCase(),
-					countryCode: shippingData.shippingAddress.country,
+					countryCode: getSetting( 'baseLocation', {} )?.country,
 					shippingRequired: shippingData.needsShipping,
 					cartTotalItems: billing.cartTotalItems,
 					stripe,
@@ -115,7 +116,6 @@ const PaymentRequestExpressComponent = ( {
 	}, [
 		billing.cartTotal,
 		billing.currency.code,
-		shippingData.shippingAddress.country,
 		shippingData.needsShipping,
 		billing.cartTotalItems,
 		stripe,

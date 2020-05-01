@@ -152,6 +152,7 @@ class Assets {
 					'privacy'  => self::format_page_resource( $page_ids['privacy'] ),
 					'terms'    => self::format_page_resource( $page_ids['terms'] ),
 				],
+				'baseLocation'                  => wc_get_base_location(),
 			]
 		);
 	}
