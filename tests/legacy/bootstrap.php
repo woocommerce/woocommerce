@@ -44,6 +44,15 @@ class WC_Unit_Tests_Bootstrap {
 		$this->plugin_dir   = dirname( dirname( $this->tests_dir ) );
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : sys_get_temp_dir() . '/wordpress-tests-lib';
 
+		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+			define( 'WP_PLUGIN_DIR', $this->plugin_dir );
+		}
+
+		if ( file_exists( WP_PLUGIN_DIR . '/sample-woo-plugin.php' ) ) {
+			unlink( WP_PLUGIN_DIR . '/sample-woo-plugin.php' );
+		}
+		copy( __DIR__ . '/data/sample-woo-plugin.php', WP_PLUGIN_DIR . '/sample-woo-plugin.php' );
+
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
