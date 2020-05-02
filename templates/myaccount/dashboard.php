@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p>
 	<?php
 	$dashboard_desc = __( 'From your account dashboard you can view your <a href="%1$s">recent orders</a>, manage your <a href="%2$s">billing address</a>, and <a href="%3$s">edit your password and account details</a>.', 'woocommerce' );
-	if ( get_option( 'woocommerce_ship_to_countries' ) !== 'disabled' ) {
+	if ( wc_shipping_enabled() ) {
 		$dashboard_desc = __( 'From your account dashboard you can view your <a href="%1$s">recent orders</a>, manage your <a href="%2$s">shipping and billing addresses</a>, and <a href="%3$s">edit your password and account details</a>.', 'woocommerce' );
 	}
 	printf(
