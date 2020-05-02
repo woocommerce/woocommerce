@@ -95,16 +95,11 @@ function wc_get_account_menu_items() {
 		'customer-logout' => get_option( 'woocommerce_logout_endpoint', 'customer-logout' ),
 	);
 
-	$edit_address = __( 'Address', 'woocommerce' );
-	if ( get_option( 'woocommerce_ship_to_countries' ) !== 'disabled' ) {
-		$edit_address = __( 'Addresses', 'woocommerce' );
-	}
-
 	$items = array(
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
-		'edit-address'    => $edit_address,
+		'edit-address'    => _n( 'Address', 'Addresses', (int) wc_shipping_enabled(), 'woocommerce' ),
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Logout', 'woocommerce' ),
