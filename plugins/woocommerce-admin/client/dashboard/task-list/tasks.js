@@ -51,6 +51,11 @@ export function getAllTasks( {
 		[ 'woocommerce_task_list_payments', 'completed' ],
 		false
 	);
+	const paymentsSkipped = get(
+		options,
+		[ 'woocommerce_task_list_payments', 'skipped' ],
+		false
+	);
 
 	const tasks = [
 		{
@@ -143,9 +148,9 @@ export function getAllTasks( {
 			),
 			icon: 'payment',
 			container: <Payments />,
-			completed: paymentsCompleted,
+			completed: paymentsCompleted || paymentsSkipped,
 			onClick: () => {
-				if ( paymentsCompleted ) {
+				if ( paymentsCompleted || paymentsSkipped ) {
 					window.location = getAdminLink(
 						'admin.php?page=wc-settings&tab=checkout'
 					);
