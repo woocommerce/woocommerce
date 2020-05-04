@@ -2,5 +2,5 @@
 	@include font-size(16);
 	@include wrapBreakWord();
 	display: block;
-	width: max-content;
+	max-width: max-content;
 }
