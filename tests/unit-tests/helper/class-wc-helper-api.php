@@ -21,6 +21,16 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the url method returns the correct WooCommerce.com path.
+	 *
+	 * @return void
+	 */
+	public function test_api_url() {
+		$url = WC_Helper_API::url( '/test-path' );
+		$this->assertEquals( 'https://woocommerce.com/wp-json/helper/1.0/test-path', $url );
+	}
+
+	/**
 	 * Test a GET request through the WC_Helper_API.
 	 *
 	 * @return void
@@ -72,21 +82,21 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	protected function mock_http_responses( $request, $url ) {
 		$mocked_response = false;
 
-		if ( 'GET' === $request['method'] && 'https://woocommerce.com/wp-json/helper/1.0/test-get' === $url ) {
+		if ( 'GET' === $request['method'] && WC_Helper_API::url( 'test-get' ) === $url ) {
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
 			);
 		}
 
-		if ( 'POST' === $request['method'] && 'https://woocommerce.com/wp-json/helper/1.0/test-post' === $url ) {
+		if ( 'POST' === $request['method'] && WC_Helper_API::url( 'test-post' ) === $url ) {
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
 			);
 		}
 
-		if ( 'PUT' === $request['method'] && 'https://woocommerce.com/wp-json/helper/1.0/test-put' === $url ) {
+		if ( 'PUT' === $request['method'] && WC_Helper_API::url( 'test-put' ) === $url ) {
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
