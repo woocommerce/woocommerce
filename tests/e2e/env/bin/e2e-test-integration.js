@@ -30,6 +30,7 @@ const testEnvVars = {
 		'../config/jest-puppeteer.config.js'
 	),
 	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
+	node_config_dev: program.dev ? 'yes' : 'no',
 };
 
 let jestCommand = 'jest';
@@ -41,10 +42,6 @@ const jestArgs = [
 ];
 
 if ( program.dev ) {
-	testEnvVars.JEST_PUPPETEER_CONFIG = path.resolve(
-		__dirname,
-		'../config/jest-puppeteer.dev.config.js'
-	);
 	jestCommand = 'npx';
 	jestArgs.unshift( 'ndb', 'jest' );
 }
