@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -17,7 +18,7 @@ const ProductName = ( { name, permalink, disabled } ) => {
 			href={ permalink }
 			tabIndex={ disabled ? -1 : 0 }
 		>
-			{ name }
+			{ decodeEntities( name ) }
 		</a>
 	);
 };
