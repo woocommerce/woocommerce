@@ -152,6 +152,8 @@ class Assets {
 					'privacy'  => self::format_page_resource( $page_ids['privacy'] ),
 					'terms'    => self::format_page_resource( $page_ids['terms'] ),
 				],
+				'checkoutAllowsGuest'           => 'yes' === get_option( 'woocommerce_enable_guest_checkout' ),
+				'checkoutAllowsSignup'          => 'yes' === get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
 				'baseLocation'                  => wc_get_base_location(),
 			]
 		);

@@ -89,3 +89,9 @@ export const TERMS_PAGE_NAME = storePages.terms.title;
 
 export const CART_PAGE_ID = storePages.cart.id;
 export const CART_URL = storePages.cart.permalink;
+
+export const CHECKOUT_ALLOWS_GUEST = getSetting( 'checkoutAllowsGuest', false );
+export const CHECKOUT_ALLOWS_SIGNUP = getSetting(
+	'checkoutAllowsSignup',
+	false
+);

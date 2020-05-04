@@ -47,7 +47,10 @@ import {
 } from '@woocommerce/base-components/sidebar-layout';
 import { getSetting } from '@woocommerce/settings';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
-import { CHECKOUT_SHOW_LOGIN_REMINDER } from '@woocommerce/block-settings';
+import {
+	CHECKOUT_SHOW_LOGIN_REMINDER,
+	CHECKOUT_ALLOWS_GUEST,
+} from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -78,6 +81,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		hasError: checkoutHasError,
 		isIdle: checkoutIsIdle,
 		isProcessing: checkoutIsProcessing,
+		customerId,
 	} = useCheckoutContext();
 	const {
 		hasValidationErrors,
@@ -159,14 +163,36 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		return <CheckoutOrderError />;
 	}
 
+	const loginToCheckoutUrl = `/wp-login.php?redirect_to=${ encodeURIComponent(
+		window.location.href
+	) }`;
+
+	if ( ! customerId && ! CHECKOUT_ALLOWS_GUEST ) {
+		return (
+			<>
+				{ __(
+					'You must be logged in to checkout. ',
+					'woo-gutenberg-products-block'
+				) }
+				<a href={ loginToCheckoutUrl }>
+					{ __(
+						'Click here to log in.',
+						'woo-gutenberg-products-block'
+					) }
+				</a>
+			</>
+		);
+	}
+
 	const loginPrompt = () =>
-		CHECKOUT_SHOW_LOGIN_REMINDER && (
+		CHECKOUT_SHOW_LOGIN_REMINDER &&
+		! customerId && (
 			<>
 				{ __(
 					'Already have an account? ',
 					'woo-gutenberg-products-block'
 				) }
-				<a href="/wp-login.php">
+				<a href={ loginToCheckoutUrl }>
 					{ __( 'Log in.', 'woo-gutenberg-products-block' ) }
 				</a>
 			</>
