@@ -62,7 +62,30 @@ global.wcSettings = {
 		woocommerce_actionable_order_statuses: [],
 		woocommerce_excluded_report_order_statuses: [],
 	},
-	dataEndpoints: {},
+	dataEndpoints: {
+		performanceIndicators: [
+			{
+				chart: 'total_sales',
+				label: 'Total Sales',
+				stat: 'revenue/total_sales',
+			},
+			{
+				chart: 'net_revenue',
+				label: 'Net Sales',
+				stat: 'revenue/net_revenue',
+			},
+			{
+				chart: 'orders_count',
+				label: 'Orders',
+				stat: 'orders/orders_count',
+			},
+			{
+				chart: 'items_sold',
+				label: 'Items Sold',
+				stat: 'products/items_sold',
+			},
+		],
+	},
 };
 
 wordPressPackages.forEach( ( lib ) => {

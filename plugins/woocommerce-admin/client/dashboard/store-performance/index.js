@@ -39,7 +39,7 @@ import { recordEvent } from 'lib/tracks';
 import { CurrencyContext } from 'lib/currency-context';
 
 const { performanceIndicators: indicators } = getSetting( 'dataEndpoints', {
-	performanceIndicators: '',
+	performanceIndicators: [],
 } );
 
 class StorePerformance extends Component {
