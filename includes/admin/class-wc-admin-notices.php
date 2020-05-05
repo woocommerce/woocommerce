@@ -498,7 +498,7 @@ class WC_Admin_Notices {
 	 * @since 4.2.0
 	 */
 	public static function uploads_directory_is_public_notice() {
-		if ( ! self::is_uploads_directory_public() || get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_public_notice', true ) ) {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_public_notice', true ) || ! self::is_uploads_directory_public() ) {
 			self::remove_notice( 'uploads_directory_is_public' );
 			return;
 		}
