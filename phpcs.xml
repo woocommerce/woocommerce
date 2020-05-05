@@ -58,5 +58,6 @@
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>i18n/</exclude-pattern>
 		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php</exclude-pattern>
 	</rule>
 </ruleset>
