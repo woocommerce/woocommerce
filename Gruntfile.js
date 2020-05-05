@@ -188,6 +188,7 @@ module.exports = function( grunt ) {
 			},
 			js: {
 				files: [
+					'GruntFile.js',
 					'<%= dirs.js %>/admin/*js',
 					'<%= dirs.js %>/frontend/*js',
 					'!<%= dirs.js %>/admin/*.min.js',
