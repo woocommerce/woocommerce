@@ -572,7 +572,7 @@ class WC_Admin_Notices {
 		$url_response = wp_safe_remote_get( $uploads['url'] );
 		$url_code     = intval( wp_remote_retrieve_response_code( $url_response ) );
 
-		return 200 === $baseurl_code && 200 === $url_code;
+		return 200 === $baseurl_code || 200 === $url_code;
 	}
 }
 
