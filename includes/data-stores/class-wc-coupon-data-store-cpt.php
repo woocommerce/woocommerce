@@ -69,7 +69,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param WC_Coupon $coupon Coupon object.
 	 */
 	public function create( &$coupon ) {
-		$coupon->set_date_created( time() );
+		if ( ! $coupon->get_date_created( 'edit' ) ) {
+			$coupon->set_date_created( time() );
+		}
 
 		$coupon_id = wp_insert_post(
 			apply_filters(
