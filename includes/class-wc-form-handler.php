@@ -876,6 +876,8 @@ class WC_Form_Handler {
 			// If the $product_id was in fact a variation ID, update the variables.
 			if ( $adding_to_cart->is_type( 'variation' ) ) {
 				$variation_attributes = $adding_to_cart->get_variation_attributes();
+				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
+				$variation_attributes = array_filter( $variation_attributes );
 				$variation_id   = $product_id;
 				$product_id     = $adding_to_cart->get_parent_id();
 				$adding_to_cart = wc_get_product( $product_id );
