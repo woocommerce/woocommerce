@@ -239,6 +239,8 @@ INTERESTED IN DEVELOPMENT?
 * Performance - speed up indicators endpoint response. #3997
 * Performance - only query requested stat totals in reports. #4009
 * Performance - only query necessary data in Orders Panel. #3969
+* Tweak - Marketing hub inherits the Marketplace suggestions setting from WooCommerce > Settings > Advanced > WooCommerce.com. #4194
+* Tweak - Usage tracking for extension recommendations in the marketing hub to inherit usages tracking opt-in during OBW.
 * Tweak - Update form example to better format the form return data #3706
 * Tweak - Added link to "go shopping" button #3712
 * Tweak - Onboarding - Use full width template for homepage in stores using Storefront #3846
