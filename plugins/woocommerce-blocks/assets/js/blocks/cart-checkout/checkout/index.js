@@ -22,7 +22,7 @@ const settings = {
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display the checkout experience for customers.',
+		'Display a checkout form so your customers can submit orders.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {
