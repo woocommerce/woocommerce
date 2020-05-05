@@ -31,6 +31,7 @@ const testEnvVars = {
 	),
 	NODE_CONFIG_DIR: nodeConfigDirs.join( ':' ),
 	node_config_dev: program.dev ? 'yes' : 'no',
+	jest_test_timeout: program.dev ? 120000 : 30000,
 };
 
 let jestCommand = 'jest';

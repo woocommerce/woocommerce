@@ -22,9 +22,10 @@ module.exports = {
 
 	// The glob patterns Jest uses to detect test files
 	testMatch: [ '**/*.(test|spec).js' ],
-
 	// Sort test path alphabetically. This is needed so that `activate-and-setup` tests run first
 	testSequencer: '<rootDir>/config/jest-custom-sequencer.js',
+	// Set the test timeout in milliseconds.
+	testTimeout: parseInt( global.process.env.jest_test_timeout ),
 
 	transformIgnorePatterns: [ 'node_modules/(?!(woocommerce)/)' ],
 };

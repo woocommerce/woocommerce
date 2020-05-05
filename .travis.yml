@@ -6,7 +6,6 @@ dist: xenial
 cache:
     directories:
         - vendor
-        - npm
         - $HOME/.composer/cache
 
 # Since Xenial services are not started by default, we need to instruct it below to start.
