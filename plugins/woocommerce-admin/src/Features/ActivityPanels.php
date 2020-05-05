@@ -9,7 +9,6 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Settings_Notes;
 
 /**
  * Contains backend logic for the activity panel feature.
@@ -46,7 +45,6 @@ class ActivityPanels {
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
-		add_action( 'woocommerce_admin_updated', array( $this, 'woocommerce_updated_note' ) );
 		add_action( 'woocommerce_update_product', array( __CLASS__, 'clear_low_out_of_stock_count_transient' ) );
 	}
 
@@ -116,12 +114,5 @@ class ActivityPanels {
 		$settings['alertCount']  = WC_Admin_Notes::get_notes_count( array( 'error', 'update' ), array( 'unactioned' ) );
 		$settings['hasLowStock'] = $this->has_low_stock_products();
 		return $settings;
-	}
-
-	/**
-	 * Things to do after WooCommerce updates.
-	 */
-	public function woocommerce_updated_note() {
-		WC_Admin_Notes_Settings_Notes::add_notes_for_settings_that_have_moved();
 	}
 }

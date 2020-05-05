@@ -5,7 +5,8 @@
  * @package WooCommerce\Tests\Notes
  */
 
-use Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note;
 
 /**
  * Class WC_Tests_Notes_Data_Store
@@ -83,5 +84,118 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE', $note->get_title() );
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_CONTENT', $note->get_content() );
+	}
+
+	/**
+	 * Tests that the delete_notes_with_name method works when a single name is
+	 * passed in.
+	 */
+	public function test_delete_notes_with_single_name() {
+		$note_name_to_delete = 'PHPUNIT_TEST_NOTE_TO_DELETE_' . gmdate( 'U' );
+		$note_name_to_keep   = 'PHPUNIT_TEST_NOTE_TO_KEEP_' . gmdate( 'U' );
+		$note_names          = array(
+			$note_name_to_delete,
+			$note_name_to_keep,
+		);
+
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		// Create notes.
+		foreach ( $note_names as $note_name ) {
+			for ( $i = 0; $i < 3; $i++ ) {
+				$note = new WC_Admin_Note();
+				$note->set_name( $note_name );
+				$note->set_title( 'PHPUNIT_TEST_NOTE' );
+				$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
+				$note->save();
+			}
+		}
+
+		// Make sure that we know that the notes were added properly.
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_delete ) )
+		);
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_keep ) )
+		);
+
+		// Delete the notes.
+		WC_Admin_Notes::delete_notes_with_name( $note_name_to_delete );
+
+		// Make sure the notes were deleted.
+		$this->assertEquals(
+			0,
+			count( $data_store->get_notes_with_name( $note_name_to_delete ) )
+		);
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_keep ) )
+		);
+	}
+
+	/**
+	 * Tests that the delete_notes_with_name method works when multiple names
+	 * are passed in.
+	 */
+	public function test_delete_notes_with_multiple_names() {
+		$note_name_to_delete_1 = 'PHPUNIT_TEST_NOTE_TO_DELETE_1_' . gmdate( 'U' );
+		$note_name_to_delete_2 = 'PHPUNIT_TEST_NOTE_TO_DELETE_2_' . gmdate( 'U' );
+		$note_name_to_keep     = 'PHPUNIT_TEST_NOTE_TO_KEEP_' . gmdate( 'U' );
+		$note_names            = array(
+			$note_name_to_delete_1,
+			$note_name_to_delete_2,
+			$note_name_to_keep,
+		);
+
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		// Create notes.
+		foreach ( $note_names as $note_name ) {
+			for ( $i = 0; $i < 3; $i++ ) {
+				$note = new WC_Admin_Note();
+				$note->set_name( $note_name );
+				$note->set_title( 'PHPUNIT_TEST_NOTE' );
+				$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
+				$note->save();
+			}
+		}
+
+		// Make sure that we know that the notes were added properly.
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_delete_1 ) )
+		);
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_delete_2 ) )
+		);
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_keep ) )
+		);
+
+		// Delete the notes.
+		WC_Admin_Notes::delete_notes_with_name(
+			array(
+				$note_name_to_delete_1,
+				$note_name_to_delete_2,
+			)
+		);
+
+		// Make sure the notes were deleted.
+		$this->assertEquals(
+			0,
+			count( $data_store->get_notes_with_name( $note_name_to_delete_1 ) )
+		);
+		$this->assertEquals(
+			0,
+			count( $data_store->get_notes_with_name( $note_name_to_delete_2 ) )
+		);
+		$this->assertEquals(
+			3,
+			count( $data_store->get_notes_with_name( $note_name_to_keep ) )
+		);
 	}
 }

@@ -10,8 +10,8 @@ namespace Automattic\WooCommerce\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Historical_Data;
-use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Welcome_Message;
 
 /**
  * Install Class.
@@ -40,7 +40,7 @@ class Install {
 			'wc_admin_update_0251_remove_unsnooze_action',
 			'wc_admin_update_0251_db_version',
 		),
-		'1.1.0' => array(
+		'1.1.0'  => array(
 			'wc_admin_update_110_remove_facebook_note',
 		),
 	);
@@ -158,6 +158,7 @@ class Install {
 
 		self::create_tables();
 		self::create_events();
+		self::delete_obsolete_notes();
 		self::create_notes();
 		self::maybe_update_db_version();
 
@@ -448,8 +449,33 @@ class Install {
 		if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 			wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
 		}
-		// @todo This is potentially redundant when the core package exists.
+		// Note: this is potentially redundant when the core package exists.
 		wp_schedule_single_event( time() + 10, 'generate_category_lookup_table' );
+	}
+
+	/**
+	 * Delete obsolete notes.
+	 */
+	protected static function delete_obsolete_notes() {
+		$obsolete_notes_names = array(
+			'wc-admin-welcome-note',
+			'wc-admin-store-notice-setting-moved',
+			'wc-admin-store-notice-giving-feedback',
+		);
+
+		$additional_obsolete_notes_names = apply_filters(
+			'woocommerce_admin_obsolete_notes_names',
+			array()
+		);
+
+		if ( is_array( $additional_obsolete_notes_names ) ) {
+			$obsolete_notes_names = array_merge(
+				$obsolete_notes_names,
+				$additional_obsolete_notes_names
+			);
+		}
+
+		WC_Admin_Notes::delete_notes_with_name( $obsolete_notes_names );
 	}
 
 	/**
@@ -457,7 +483,6 @@ class Install {
 	 */
 	protected static function create_notes() {
 		WC_Admin_Notes_Historical_Data::add_note();
-		WC_Admin_Notes_Welcome_Message::add_welcome_note();
 	}
 
 	/**
@@ -471,7 +496,9 @@ class Install {
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // WPCS: unprepared SQL ok.
+			/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+			/* phpcs:enable */
 		}
 	}
 }

@@ -89,14 +89,23 @@ class WC_Admin_Notes {
 	/**
 	 * Deletes admin notes with a given name.
 	 *
-	 * @param string $name Name to search for.
+	 * @param string|array $names Name(s) to search for.
 	 */
-	public static function delete_notes_with_name( $name ) {
+	public static function delete_notes_with_name( $names ) {
+		if ( is_string( $names ) ) {
+			$names = array( $names );
+		} elseif ( ! is_array( $names ) ) {
+			return;
+		}
+
 		$data_store = \WC_Data_Store::load( 'admin-note' );
-		$note_ids   = $data_store->get_notes_with_name( $name );
-		foreach ( (array) $note_ids as $note_id ) {
-			$note = new WC_Admin_Note( $note_id );
-			$note->delete();
+
+		foreach ( $names as $name ) {
+			$note_ids = $data_store->get_notes_with_name( $name );
+			foreach ( (array) $note_ids as $note_id ) {
+				$note = new WC_Admin_Note( $note_id );
+				$note->delete();
+			}
 		}
 	}
 
