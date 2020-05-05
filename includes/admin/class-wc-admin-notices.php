@@ -28,18 +28,18 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                      => 'install_notice',
-		'update'                       => 'update_notice',
-		'template_files'               => 'template_file_check_notice',
-		'legacy_shipping'              => 'legacy_shipping_notice',
-		'no_shipping_methods'          => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'      => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table'    => 'regenerating_lookup_table_notice',
-		'no_secure_connection'         => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
-		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
-		'redirect_download_method'     => 'redirect_download_method_notice',
-		'uploads_directory_is_public'  => 'uploads_directory_is_public_notice',
+		'install'                          => 'install_notice',
+		'update'                           => 'update_notice',
+		'template_files'                   => 'template_file_check_notice',
+		'legacy_shipping'                  => 'legacy_shipping_notice',
+		'no_shipping_methods'              => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'          => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'        => 'regenerating_lookup_table_notice',
+		'no_secure_connection'             => 'secure_connection_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE     => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
+		'redirect_download_method'         => 'redirect_download_method_notice',
+		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
 	);
 
 	/**
@@ -94,8 +94,8 @@ class WC_Admin_Notices {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
-		if ( ! self::is_uploads_directory_public() ) {
-			self::add_notice( 'uploads_directory_is_public' );
+		if ( ! self::is_uploads_directory_protected() ) {
+			self::add_notice( 'uploads_directory_is_unprotected' );
 		}
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
@@ -493,17 +493,17 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Notice about uploads directory begin public.
+	 * Notice about uploads directory begin unprotected.
 	 *
 	 * @since 4.2.0
 	 */
-	public static function uploads_directory_is_public_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_public_notice', true ) || ! self::is_uploads_directory_public() ) {
-			self::remove_notice( 'uploads_directory_is_public' );
+	public static function uploads_directory_is_unprotected_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_unprotected_notice', true ) || self::is_uploads_directory_protected() ) {
+			self::remove_notice( 'uploads_directory_is_unprotected' );
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-public.php';
+		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-unprotected.php';
 	}
 
 	/**
@@ -550,29 +550,58 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Check if uploads directory is public.
+	 * Check if uploads directory is protected.
 	 *
 	 * @since 4.2.0
 	 * @return bool
 	 */
-	protected static function is_uploads_directory_public() {
+	protected static function is_uploads_directory_protected() {
+		$cache_key = '_woocommerce_upload_directory_status';
+		$status    = get_transient( $cache_key );
+
+		// Check for cache.
+		if ( false !== $status ) {
+			return 'protected' === $status;
+		}
+
+		// Get uploads directory data and allows to get created if doesn't exists.
 		$uploads = wp_upload_dir( null, true );
 
 		// Skip if returns an error.
 		if ( $uploads['error'] ) {
-			return true;
+			return false;
 		}
 
-		// Check for uploads root.
-		$baseurl_response = wp_safe_remote_get( $uploads['baseurl'] );
-		$baseurl_code     = intval( wp_remote_retrieve_response_code( $baseurl_response ) );
+		// Allow us to easily interact with the filesystem.
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		WP_Filesystem();
+		global $wp_filesystem;
 
-		// Check for latest uploads sub directory.
-		// Double check in case the uploads root is only protected by an index.php or index.html file.
-		$url_response = wp_safe_remote_get( $uploads['url'] );
-		$url_code     = intval( wp_remote_retrieve_response_code( $url_response ) );
+		$is_protected  = false;
+		$test_dir      = 'woocommerce-uploads-test';
+		$test_dir_path = trailingslashit( $uploads['basedir'] ) . $test_dir;
 
-		return 200 === $baseurl_code || 200 === $url_code;
+		// Clean up the test directory before we start.
+		if ( $wp_filesystem->exists( $test_dir_path ) ) {
+			$wp_filesystem->delete( $test_dir_path );
+		}
+
+		// Create a new directory to check in case the uploads root is only protected by an index.php or index.html file.
+		if ( $wp_filesystem->mkdir( $test_dir_path ) ) {
+			$response         = wp_safe_remote_get( $uploads['baseurl'] . '/' . $test_dir );
+			$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
+			$response_content = wp_remote_retrieve_body( $response );
+
+			// Check if returns 200 with empty content in case there's some index.html,
+			// and check for non-200 codes in case the directory is protected.
+			$is_protected = 200 === $response_code && empty( $response_content ) || 200 !== $response_code;
+
+			// Remove test directory.
+			$wp_filesystem->delete( $test_dir_path );
+			set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', 1 * DAY_IN_SECONDS );
+		}
+
+		return $is_protected;
 	}
 }
 
