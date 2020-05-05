@@ -94,7 +94,7 @@ class WC_Admin_Notices {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
-		if ( ! self::is_uploads_directory_is_public() ) {
+		if ( ! self::is_uploads_directory_public() ) {
 			self::add_notice( 'uploads_directory_is_public' );
 		}
 		self::add_notice( 'template_files' );
@@ -498,7 +498,7 @@ class WC_Admin_Notices {
 	 * @since 4.2.0
 	 */
 	public static function uploads_directory_is_public_notice() {
-		if ( ! self::is_uploads_directory_is_public() || get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_public_notice', true ) ) {
+		if ( ! self::is_uploads_directory_public() || get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_public_notice', true ) ) {
 			self::remove_notice( 'uploads_directory_is_public' );
 			return;
 		}
@@ -555,7 +555,7 @@ class WC_Admin_Notices {
 	 * @since 4.2.0
 	 * @return bool
 	 */
-	protected static function is_uploads_directory_is_public() {
+	protected static function is_uploads_directory_public() {
 		$uploads = wp_upload_dir( null, true );
 
 		// Skip if returns an error.
