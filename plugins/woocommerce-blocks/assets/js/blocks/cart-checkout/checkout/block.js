@@ -400,15 +400,6 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 							</FormStep>
 						) }
 					</CheckoutForm>
-				</Main>
-				<Sidebar className="wc-block-checkout__sidebar">
-					<CheckoutSidebar
-						cartCoupons={ cartCoupons }
-						cartItems={ cartItems }
-						cartTotals={ cartTotals }
-					/>
-				</Sidebar>
-				<Main className="wc-block-checkout__main-totals">
 					<div className="wc-block-checkout__actions">
 						{ attributes.showReturnToCart && (
 							<ReturnToCartButton
@@ -422,6 +413,13 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 					</div>
 					{ attributes.showPolicyLinks && <Policies /> }
 				</Main>
+				<Sidebar className="wc-block-checkout__sidebar">
+					<CheckoutSidebar
+						cartCoupons={ cartCoupons }
+						cartItems={ cartItems }
+						cartTotals={ cartTotals }
+					/>
+				</Sidebar>
 			</SidebarLayout>
 		</>
 	);
