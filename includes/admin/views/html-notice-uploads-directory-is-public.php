@@ -23,7 +23,7 @@ if ( $uploads['error'] ) {
 		echo wp_kses_post(
 			sprintf(
 				/* translators: 1: uploads directory path 2: documentation URL */
-				__( 'Your store\'s uploads directory (<code>%1$s</code>) is public. We highly recommend serving your entire website over an HTTPS connection to help keep customer data secure. <a href="%2$s">Learn more here.</a>', 'woocommerce' ),
+				__( 'Your store\'s uploads directory (<code>%1$s</code>) is public. We highly recommend securing your uploads directory against indexing. <a href="%2$s">Learn more here.</a>', 'woocommerce' ),
 				$uploads['basedir'],
 				'https://docs.woocommerce.com/document/ssl-and-https/'
 			)
