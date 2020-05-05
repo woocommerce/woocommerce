@@ -588,7 +588,7 @@ class WC_Admin_Notices {
 
 		// Create a new directory to check in case the uploads root is only protected by an index.php or index.html file.
 		if ( $wp_filesystem->mkdir( $test_dir_path ) ) {
-			$response         = wp_safe_remote_get( $uploads['baseurl'] . '/' . $test_dir );
+			$response         = wp_remote_get( $uploads['baseurl'] . '/' . $test_dir );
 			$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
 			$response_content = wp_remote_retrieve_body( $response );
 
