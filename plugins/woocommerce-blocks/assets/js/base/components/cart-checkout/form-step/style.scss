@@ -12,8 +12,8 @@ $line-offset-from-circle-size: 8px;
 	background: none;
 	margin: 0;
 
-	@include breakpoint( ">782px" ) {
-		padding-right: $gap-larger;
+	.is-large & {
+		padding-right: $gap-large;
 	}
 }
 

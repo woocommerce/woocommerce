@@ -2,17 +2,18 @@
 	display: flex;
 	flex-wrap: wrap;
 	margin: 0 auto $gap;
+	position: relative;
 
 	.wc-block-main {
 		margin: 0;
-		padding-right: $gap-largest;
+		padding-right: percentage($gap-largest / 1060px); // ~1060px is the default width of the content area in Storefront.
 		width: 65%;
 	}
 }
 
 .wc-block-sidebar {
 	margin: 0;
-	padding-left: $gap-largest;
+	padding-left: percentage($gap-largest / 1060px);
 	width: 35%;
 
 	// Reset Gutenberg <Panel> styles when used in the sidebar.
@@ -60,8 +61,10 @@
 	}
 }
 
-@include breakpoint( "<782px" ) {
-	.wc-block-sidebar-layout {
+.is-medium,
+.is-small,
+.is-mobile {
+	&.wc-block-sidebar-layout {
 		flex-direction: column;
 		margin: 0 0 $gap;
 

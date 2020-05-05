@@ -34,11 +34,3 @@
 		position: static;
 	}
 }
-
-@include breakpoint( "<782px" ) {
-	.editor-styles-wrapper {
-		table td.wc-block-cart-item__total {
-			vertical-align: bottom;
-		}
-	}
-}

@@ -179,9 +179,10 @@ table.wc-block-cart-items {
 	display: flex;
 }
 
-// Mobile styles.
-@include breakpoint( "<782px" ) {
-	.wc-block-cart {
+.is-medium,
+.is-small,
+.is-mobile {
+	&.wc-block-cart {
 		.wc-block-sidebar {
 			.wc-block-cart__totals-title {
 				display: none;
@@ -247,7 +248,9 @@ table.wc-block-cart-items {
 			}
 		}
 	}
+}
 
+@include breakpoint( "<782px" ) {
 	// Submit button is sticky to bottom of screen on mobile.
 	.wc-block-cart__submit-container {
 		background: $white;
@@ -264,15 +267,13 @@ table.wc-block-cart-items {
 	}
 }
 
-@include breakpoint( ">782px" ) {
-	.wc-block-cart {
-		.wc-block-radio-control__option {
-			padding-left: $gap-large;
-		}
+.is-large.wc-block-cart {
+	.wc-block-radio-control__option {
+		padding-left: $gap-large;
+	}
 
-		.wc-block-radio-control__input {
-			left: 0;
-		}
+	.wc-block-radio-control__input {
+		left: 0;
 	}
 }
 
