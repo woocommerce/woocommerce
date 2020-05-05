@@ -2169,6 +2169,40 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that adding a varition via URL parameter fails when an 'any' attribute is missing.
+	 */
+	public function test_add_variation_by_url_fails_with_missing_any_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_shift( $variations );
+
+		// Attempt adding variation with add_to_cart_action, without specifying attribute_pa_colour.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['attribute_pa_number'] = '0';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_number'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Verify that there is nothing in the cart.
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		// Check that the notices contain an error message about an invalid colour.
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$this->assertEquals( 'colour is a required field', $notices['error'][0]['notice'] );
+	}
+
+	/**
 	 * Helper function. Adds 1.5 taxable fees to cart.
 	 */
 	public function add_fee_1_5_to_cart() {
