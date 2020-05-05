@@ -45,6 +45,7 @@ jQuery(function( $ ) {
 		$( 'input[name="_stock"]', '.inline-edit-row' ).val( stock );
 		$( 'input[name="menu_order"]', '.inline-edit-row' ).val( menu_order );
 
+		// eslint-disable-next-line max-len
 		$( 'select[name="_tax_status"] option, select[name="_tax_class"] option, select[name="_visibility"] option, select[name="_stock_status"] option, select[name="_backorders"] option' ).removeAttr( 'selected' );
 
 		$( 'select[name="_tax_status"] option[value="' + tax_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
