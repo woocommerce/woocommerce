@@ -384,16 +384,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.1.5",
+            "version": "v3.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "84e8ecba7d4f542f85fae7663e90eede1858b41b"
+                "reference": "93451c8b1061010f0dcf1ac50da7e4b44d119fb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/84e8ecba7d4f542f85fae7663e90eede1858b41b",
-                "reference": "84e8ecba7d4f542f85fae7663e90eede1858b41b",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/93451c8b1061010f0dcf1ac50da7e4b44d119fb1",
+                "reference": "93451c8b1061010f0dcf1ac50da7e4b44d119fb1",
                 "shasum": ""
             },
             "require-dev": {
@@ -415,7 +415,7 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
-            "time": "2020-04-29T16:19:22+00:00"
+            "time": "2020-05-05T13:26:04+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
@@ -423,12 +423,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "79e78bb8b71fa0c0b0a77efee5474b46d62c1a76"
+                "reference": "ac862f831eced0e6a3692539a24c738d5aafc4ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/79e78bb8b71fa0c0b0a77efee5474b46d62c1a76",
-                "reference": "79e78bb8b71fa0c0b0a77efee5474b46d62c1a76",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/ac862f831eced0e6a3692539a24c738d5aafc4ee",
+                "reference": "ac862f831eced0e6a3692539a24c738d5aafc4ee",
                 "shasum": ""
             },
             "require": {
@@ -462,7 +462,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-04-28T22:16:15+00:00"
+            "time": "2020-05-05T14:47:41+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
