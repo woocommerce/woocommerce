@@ -193,7 +193,7 @@ module.exports = function( grunt ) {
 					'!<%= dirs.js %>/admin/*.min.js',
 					'!<%= dirs.js %>/frontend/*.min.js'
 				],
-				tasks: ['uglify']
+				tasks: ['eslint','uglify']
 			}
 		},
 
@@ -303,6 +303,7 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'js', [
+		'eslint',
 		'uglify:admin',
 		'uglify:frontend'
 	]);
