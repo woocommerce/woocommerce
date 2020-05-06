@@ -6,6 +6,7 @@ export { default as PlaceOrderButton } from './place-order-button';
 export { default as Policies } from './policies';
 export { default as ProductImage } from './product-image';
 export { default as ProductLowStockBadge } from './product-low-stock-badge';
+export { default as ProductSummary } from './product-summary';
 export { default as ProductMetadata } from './product-metadata';
 export { default as ProductName } from './product-name';
 export { default as ProductPrice } from './product-price';

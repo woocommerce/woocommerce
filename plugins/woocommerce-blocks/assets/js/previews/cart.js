@@ -25,10 +25,6 @@ export const previewCart = {
 			id: 1,
 			quantity: 2,
 			name: __( 'Beanie', 'woo-gutenberg-products-block' ),
-			summary: __(
-				'Warm hat for winter',
-				'woo-gutenberg-products-block'
-			),
 			short_description: __(
 				'Warm hat for winter',
 				'woo-gutenberg-products-block'
@@ -98,10 +94,6 @@ export const previewCart = {
 			id: 2,
 			quantity: 1,
 			name: __( 'Cap', 'woo-gutenberg-products-block' ),
-			summary: __(
-				'Lightweight baseball cap',
-				'woo-gutenberg-products-block'
-			),
 			short_description: __(
 				'Lightweight baseball cap',
 				'woo-gutenberg-products-block'

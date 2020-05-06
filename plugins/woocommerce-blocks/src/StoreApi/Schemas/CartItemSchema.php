@@ -9,8 +9,6 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductSummary;
-
 /**
  * CartItemSchema class.
  *
@@ -73,12 +71,6 @@ class CartItemSchema extends ProductSchema {
 			],
 			'name'                => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
-			'summary'             => [
-				'description' => __( 'A short summary (or excerpt from the full description) for the product in HTML format.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
@@ -293,7 +285,6 @@ class CartItemSchema extends ProductSchema {
 			'quantity'            => wc_stock_amount( $cart_item['quantity'] ),
 			'quantity_limit'      => $this->get_product_quantity_limit( $product ),
 			'name'                => $this->prepare_html_response( $product->get_title() ),
-			'summary'             => $this->prepare_html_response( ( new ProductSummary( $product ) )->get_summary( 150 ) ),
 			'short_description'   => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
 			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
 			'sku'                 => $this->prepare_html_response( $product->get_sku() ),

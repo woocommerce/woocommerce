@@ -36,7 +36,6 @@ const state = {
 				id: 19,
 				quantity: 1,
 				name: 'Album',
-				summary: '<p>This is a simple, virtual product.</p>',
 				short_description: '<p>This is a simple, virtual product.</p>',
 				description:
 					'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>',
@@ -77,7 +76,6 @@ const state = {
 				id: 11,
 				quantity: 1,
 				name: 'Beanie',
-				summary: '<p>This is a simple product.</p>',
 				short_description: '<p>This is a simple product.</p>',
 				description:
 					'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>',

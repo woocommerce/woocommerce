@@ -316,7 +316,7 @@ const FeaturedProduct = ( {
 						<div
 							className="wc-block-featured-product__description"
 							dangerouslySetInnerHTML={ {
-								__html: product.summary,
+								__html: product.short_description,
 							} }
 						/>
 					) }
