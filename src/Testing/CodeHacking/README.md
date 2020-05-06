@@ -166,9 +166,11 @@ Under the hood this is hacking all the classes in the list with a "clean" `Stati
 
 Alternatively, you can configure mock functions instead of a mock class. See the source of `StaticWrapper` for more details.
 
-## Note on `copy` in tests
+## Temporarily disabling the code hacker
 
-For some reason tests using `copy` to copy files will fail if the code hacker is active. As a workaround, the new `file_copy` method defined in `WC_Unit_Test_Case` should be used instead (it temporarily disables the code hacker and then performs the copy operation). This is something to investigate.
+In a few rare cases the code hacker will cause problems with tests that do write operations on the local filesystem. In these cases it is possible to temporarily disable the code hacker using `self::disable_code_hacker()` and `self::reenable_code_hacker()` in the test (these methods are defined in `WC_Unit_Test_Case`). These methods are carefully written so that they won't enable the code hacker if it wasn't enabled when the test started, and there's a disabling requests count in place to ensure that the code hacker isn't enabled before it should.
+
+One of these cases is the usage of the `copy` command to copy files. Since this function is used in a few tests, a convenience `file_copy` method is defined in `WC_Unit_Test_Case`; it just temporarily disables the hacker, does the copy, and reenables the hacker.
 
 ## An important note
 

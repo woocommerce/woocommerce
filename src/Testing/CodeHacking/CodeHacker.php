@@ -64,6 +64,13 @@ class CodeHacker {
 	private static $hacks = array();
 
 	/**
+	 * Registered persistent hacks.
+	 *
+	 * @var array
+	 */
+	private static $persistent_hacks = array();
+
+	/**
 	 * Is the code hacker enabled?.
 	 *
 	 * @var bool
@@ -84,7 +91,7 @@ class CodeHacker {
 	/**
 	 * Disable the code hacker.
 	 */
-	public static function restore() {
+	public static function disable() {
 		if ( self::$enabled ) {
 			stream_wrapper_restore( self::PROTOCOL );
 			self::$enabled = false;
@@ -92,10 +99,10 @@ class CodeHacker {
 	}
 
 	/**
-	 * Unregister all the registered hacks.
+	 * Unregister all the non-persistent registered hacks.
 	 */
 	public static function clear_hacks() {
-		self::$hacks = array();
+		self::$hacks = self::$persistent_hacks;
 	}
 
 	/**
@@ -108,12 +115,22 @@ class CodeHacker {
 	}
 
 	/**
+	 * Check if persistent hacks have been registered.
+	 *
+	 * @return bool True if persistent hacks have been registered.
+	 */
+	public static function has_persistent_hacks() {
+		return count( self::$persistent_hacks ) > 0;
+	}
+
+	/**
 	 * Register a new hack.
 	 *
 	 * @param mixed $hack A function with signature "hack($code, $path)" or an object containing a method with that signature.
+	 * @param bool  $persistent If true, the hack will be registered as persistent (so that clear_hacks will not clear it).
 	 * @throws \Exception Invalid input.
 	 */
-	public static function add_hack( $hack ) {
+	public static function add_hack( $hack, $persistent = false ) {
 		if ( ! is_callable( $hack ) && ! is_object( $hack ) ) {
 			throw new \Exception( "Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
 		}
@@ -122,6 +139,9 @@ class CodeHacker {
 			throw new \Exception( "CodeHacker::addhack: hacks must be either a function with a 'hack(\$code,\$path)' signature, or an object containing a public method 'hack' with that signature. " );
 		}
 
+		if ( $persistent ) {
+			self::$persistent_hacks[] = $hack;
+		}
 		self::$hacks[] = $hack;
 	}
 

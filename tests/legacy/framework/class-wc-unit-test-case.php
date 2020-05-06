@@ -25,6 +25,37 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	protected $factory;
 
 	/**
+	 * @var int Keeps the count of how many times disable_code_hacker has been invoked.
+	 */
+	private static $code_hacker_temporary_disables_requested = 0;
+
+	/**
+	 * Increase the count of Code Hacker disable requests, and effectively disable it if the count was zero.
+	 * Does nothing if the code hacker wasn't enabled when the test suite started running.
+	 */
+	protected static function disable_code_hacker() {
+		if ( CodeHacker::is_enabled() ) {
+			CodeHacker::disable();
+			self::$code_hacker_temporary_disables_requested = 1;
+		} elseif ( self::$code_hacker_temporary_disables_requested > 0 ) {
+			self::$code_hacker_temporary_disables_requested++;
+		}
+	}
+
+	/**
+	 * Decrease the count of Code Hacker disable requests, and effectively re-enable it if the count reaches zero.
+	 * Does nothing if the count is already zero.
+	 */
+	protected static function reenable_code_hacker() {
+		if ( self::$code_hacker_temporary_disables_requested > 0 ) {
+			self::$code_hacker_temporary_disables_requested--;
+			if ( 0 === self::$code_hacker_temporary_disables_requested ) {
+				CodeHacker::enable();
+			}
+		}
+	}
+
+	/**
 	 * Setup test case.
 	 *
 	 * @since 2.2
@@ -113,14 +144,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @param string $dest The destination path.
 	 * @return bool true on success or false on failure.
 	 */
-	public function file_copy( $source, $dest ) {
-		if ( CodeHacker::is_enabled() ) {
-			CodeHacker::restore();
-			$result = copy( $source, $dest );
-			CodeHacker::enable();
-			return $result;
-		} else {
-			return copy( $source, $dest );
-		}
+	public static function file_copy( $source, $dest ) {
+		self::disable_code_hacker();
+		$result = copy( $source, $dest );
+		self::reenable_code_hacker();
+		return $result;
 	}
 }

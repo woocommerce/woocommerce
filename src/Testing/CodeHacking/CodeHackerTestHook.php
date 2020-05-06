@@ -65,7 +65,9 @@ use Exception;
 final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 
 	public function executeAfterTest( string $test, float $time ): void {
-		CodeHacker::restore();
+		if ( ! CodeHacker::has_persistent_hacks() ) {
+			CodeHacker::disable();
+		}
 	}
 
 	public function executeBeforeTest( string $test ): void {
@@ -88,7 +90,7 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 
 		$has_class_annotation_hacks = $this->add_hacks_from_annotations( new ReflectionClass( $class_name ) );
 		$has_method_annotaion_hacks = $this->add_hacks_from_annotations( new ReflectionMethod( $class_name, $method_name ) );
-		if ( $has_class_annotation_hacks || $has_method_annotaion_hacks ) {
+		if ( $has_class_annotation_hacks || $has_method_annotaion_hacks || CodeHacker::has_persistent_hacks() ) {
 			CodeHacker::enable();
 		}
 	}

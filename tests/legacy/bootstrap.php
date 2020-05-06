@@ -47,7 +47,7 @@ class WC_Unit_Tests_Bootstrap {
 		$classes_that_need_static_wrapper = include_once __DIR__ . '/classes-that-need-static-wrapper.php';
 		foreach ( $classes_that_need_static_wrapper as $class ) {
 			$wrapper_class = StaticWrapper::define_for( $class );
-			CodeHacker::add_hack( new StaticMockerHack( $class, $wrapper_class, true ) );
+			CodeHacker::add_hack( new StaticMockerHack( $class, $wrapper_class, true ), true );
 		}
 		CodeHacker::enable();
 
