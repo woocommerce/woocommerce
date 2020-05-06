@@ -184,6 +184,7 @@
 		"eslint-plugin-jest": "23.8.2",
 		"eslint-plugin-jsx-a11y": "6.2.3",
 		"eslint-plugin-react": "7.19.0",
+		"eslint-plugin-testing-library": "^3.1.0",
 		"eslint-plugin-wpcalypso": "4.1.0",
 		"fs-extra": "8.1.0",
 		"grunt": "1.1.0",
