@@ -22,7 +22,8 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 		permalink,
 		prices,
 		quantity,
-		summary,
+		short_description: shortDescription,
+		description: fullDescription,
 		variation,
 	} = cartItem;
 
@@ -60,7 +61,11 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 					/>
 				</div>
 				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
-				<ProductMetadata summary={ summary } variation={ variation } />
+				<ProductMetadata
+					shortDescription={ shortDescription }
+					fullDescription={ fullDescription }
+					variation={ variation }
+				/>
 			</div>
 		</div>
 	);

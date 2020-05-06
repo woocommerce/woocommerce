@@ -7,7 +7,11 @@ import PropTypes from 'prop-types';
 /**
  * Returns a formatted element containing variation details.
  */
-const ProductVariationData = ( { variation } ) => {
+const ProductVariationData = ( { variation = [] } ) => {
+	if ( ! variation ) {
+		return null;
+	}
+
 	const variationsText = variation
 		.map( ( v ) => {
 			if ( v.attribute ) {

@@ -39,7 +39,8 @@ const getAmountFromRawPrice = ( priceObject, currency ) => {
 const CartLineItemRow = ( { lineItem } ) => {
 	const {
 		name = '',
-		summary = '',
+		short_description: shortDescription = '',
+		description: fullDescription = '',
 		low_stock_remaining: lowStockRemaining = null,
 		quantity_limit: quantityLimit = 99,
 		permalink = '',
@@ -108,7 +109,11 @@ const CartLineItemRow = ( { lineItem } ) => {
 					disabled={ isPendingDelete }
 				/>
 				<ProductLowStockBadge lowStockRemaining={ lowStockRemaining } />
-				<ProductMetadata summary={ summary } variation={ variation } />
+				<ProductMetadata
+					shortDescription={ shortDescription }
+					fullDescription={ fullDescription }
+					variation={ variation }
+				/>
 			</td>
 			<td className="wc-block-cart-item__quantity">
 				<QuantitySelector

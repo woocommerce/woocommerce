@@ -9,8 +9,6 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductSummary;
-
 /**
  * ProductSchema class.
  *
@@ -75,11 +73,6 @@ class ProductSchema extends AbstractSchema {
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
-			],
-			'summary'             => [
-				'description' => __( 'A short summary (or excerpt from the full description) for the product in HTML format.', 'woo-gutenberg-products-block' ),
-				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
 			],
 			'short_description'   => [
 				'description' => __( 'Product short description in HTML format.', 'woo-gutenberg-products-block' ),
@@ -245,7 +238,6 @@ class ProductSchema extends AbstractSchema {
 			'variation'           => $this->prepare_html_response( $product->is_type( 'variation' ) ? wc_get_formatted_variation( $product, true, true, false ) : '' ),
 			'permalink'           => $product->get_permalink(),
 			'sku'                 => $this->prepare_html_response( $product->get_sku() ),
-			'summary'             => $this->prepare_html_response( ( new ProductSummary( $product ) )->get_summary( 150 ) ),
 			'short_description'   => $this->prepare_html_response( wc_format_content( $product->get_short_description() ) ),
 			'description'         => $this->prepare_html_response( wc_format_content( $product->get_description() ) ),
 			'on_sale'             => $product->is_on_sale(),

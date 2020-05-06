@@ -1,26 +1,34 @@
 /**
  * External dependencies
  */
-import { RawHTML } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
 import ProductVariationData from '../product-variation-data';
+import ProductSummary from '../product-summary';
 import './style.scss';
 
-const ProductMetadata = ( { summary, variation } ) => {
+const ProductMetadata = ( {
+	shortDescription = '',
+	fullDescription = '',
+	variation = [],
+} ) => {
 	return (
 		<div className="wc-block-product-metadata">
-			{ summary && <RawHTML>{ summary }</RawHTML> }
-			{ variation && <ProductVariationData variation={ variation } /> }
+			<ProductSummary
+				shortDescription={ shortDescription }
+				fullDescription={ fullDescription }
+			/>
+			<ProductVariationData variation={ variation } />
 		</div>
 	);
 };
 
 ProductMetadata.propTypes = {
-	summary: PropTypes.string,
+	shortDescription: PropTypes.string,
+	fullDescription: PropTypes.string,
 	variation: PropTypes.array,
 };
 
