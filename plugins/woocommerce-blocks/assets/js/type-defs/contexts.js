@@ -43,7 +43,7 @@
  *                                                        selected.
  * @property {CartShippingAddress}  shippingAddress       The current set
  *                                                        address for shipping.
- * @property {function()}           setShippingAddress    A function for setting
+ * @property {Function}             setShippingAddress    A function for setting
  *                                                        the shipping address.
  * @property {function()}           onShippingRateSuccess Used to register a
  *                                                        callback to be invoked
