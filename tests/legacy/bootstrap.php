@@ -41,7 +41,7 @@ class WC_Unit_Tests_Bootstrap {
 		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
 		$this->tests_dir    = dirname( __FILE__ );
-		$this->plugin_dir   = dirname( $this->tests_dir );
+		$this->plugin_dir   = dirname( dirname( $this->tests_dir ) );
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : sys_get_temp_dir() . '/wordpress-tests-lib';
 
 		// load test function so tests_add_filter() is available.
