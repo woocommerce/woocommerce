@@ -67,7 +67,11 @@ export const CardElements = ( {
 	onChange,
 	inputErrorComponent: ValidationInputError,
 } ) => {
-	const [ isEmpty, setIsEmpty ] = useState( true );
+	const [ isEmpty, setIsEmpty ] = useState( {
+		cardNumber: true,
+		cardExpiry: true,
+		cardCvc: true,
+	} );
 	const {
 		options: cardNumOptions,
 		onActive: cardNumOnActive,
@@ -86,25 +90,25 @@ export const CardElements = ( {
 		error: cardCvcError,
 		setError: cardCvcSetError,
 	} = useElementOptions();
-	const errorCallback = ( errorSetter ) => ( event ) => {
+	const errorCallback = ( errorSetter, elementId ) => ( event ) => {
 		if ( event.error ) {
 			errorSetter( event.error.message );
 		} else {
 			errorSetter( '' );
 		}
-		setIsEmpty( event.empty );
+		setIsEmpty( { ...isEmpty, [ elementId ]: event.empty } );
 		onChange( event );
 	};
 	return (
 		<div className="wc-block-card-elements">
 			<div className="wc-block-gateway-container wc-card-number-element">
 				<CardNumberElement
-					onChange={ errorCallback( cardNumSetError ) }
+					onChange={ errorCallback( cardNumSetError, 'cardNumber' ) }
 					options={ cardNumOptions }
 					className={ baseTextInputStyles }
 					id="wc-stripe-card-number-element"
-					onFocus={ () => cardNumOnActive( isEmpty ) }
-					onBlur={ () => cardNumOnActive( isEmpty ) }
+					onFocus={ () => cardNumOnActive( isEmpty.cardNumber ) }
+					onBlur={ () => cardNumOnActive( isEmpty.cardNumber ) }
 				/>
 				<label htmlFor="wc-stripe-card-number-element">
 					{ __( 'Card Number', 'woo-gutenberg-product-blocks' ) }
@@ -113,11 +117,14 @@ export const CardElements = ( {
 			</div>
 			<div className="wc-block-gateway-container wc-card-expiry-element">
 				<CardExpiryElement
-					onChange={ errorCallback( cardExpirySetError ) }
+					onChange={ errorCallback(
+						cardExpirySetError,
+						'cardExpiry'
+					) }
 					options={ cardExpiryOptions }
 					className={ baseTextInputStyles }
-					onFocus={ () => cardExpiryOnActive( isEmpty ) }
-					onBlur={ () => cardExpiryOnActive( isEmpty ) }
+					onFocus={ () => cardExpiryOnActive( isEmpty.cardExpiry ) }
+					onBlur={ () => cardExpiryOnActive( isEmpty.cardExpiry ) }
 					id="wc-stripe-card-expiry-element"
 				/>
 				<label htmlFor="wc-stripe-card-expiry-element">
@@ -127,11 +134,11 @@ export const CardElements = ( {
 			</div>
 			<div className="wc-block-gateway-container wc-card-cvc-element">
 				<CardCvcElement
-					onChange={ errorCallback( cardCvcSetError ) }
+					onChange={ errorCallback( cardCvcSetError, 'cardCvc' ) }
 					options={ cardCvcOptions }
 					className={ baseTextInputStyles }
-					onFocus={ () => cardCvcOnActive( isEmpty ) }
-					onBlur={ () => cardCvcOnActive( isEmpty ) }
+					onFocus={ () => cardCvcOnActive( isEmpty.cardCvc ) }
+					onBlur={ () => cardCvcOnActive( isEmpty.cardCvc ) }
 					id="wc-stripe-card-code-element"
 				/>
 				<label htmlFor="wc-stripe-card-code-element">

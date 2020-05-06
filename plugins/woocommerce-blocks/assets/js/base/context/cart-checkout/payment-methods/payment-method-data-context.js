@@ -290,22 +290,30 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 						response?.meta?.shippingData
 					);
 				} else if ( isFailResponse( response ) ) {
-					addErrorNotice( response?.message, {
-						id: 'wc-payment-error',
-						context:
-							response?.messageContext || noticeContexts.PAYMENTS,
-					} );
+					if ( response.message && response.message.length ) {
+						addErrorNotice( response.message, {
+							id: 'wc-payment-error',
+							isDismissible: false,
+							context:
+								response?.messageContext ||
+								noticeContexts.PAYMENTS,
+						} );
+					}
 					setPaymentStatus().failed(
 						response?.message,
 						response?.meta?.paymentMethodData,
 						response?.meta?.billingData
 					);
 				} else if ( isErrorResponse( response ) ) {
-					addErrorNotice( response?.message, {
-						id: 'wc-payment-error',
-						context:
-							response?.messageContext || noticeContexts.PAYMENTS,
-					} );
+					if ( response.message && response.message.length ) {
+						addErrorNotice( response.message, {
+							id: 'wc-payment-error',
+							isDismissible: false,
+							context:
+								response?.messageContext ||
+								noticeContexts.PAYMENTS,
+						} );
+					}
 					setPaymentStatus().error( response.message );
 					setValidationErrors( response?.validationErrors );
 				} else {
