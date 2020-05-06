@@ -22,6 +22,7 @@ const ValidatedTextInput = ( {
 	ariaDescribedBy,
 	errorId,
 	validateOnMount = true,
+	focusOnMount = false,
 	onChange,
 	showError = true,
 	...rest
@@ -52,6 +53,12 @@ const ValidatedTextInput = ( {
 			} );
 		}
 	};
+
+	useEffect( () => {
+		if ( focusOnMount ) {
+			inputRef.current.focus();
+		}
+	}, [ focusOnMount ] );
 
 	useEffect( () => {
 		if ( validateOnMount ) {
@@ -103,6 +110,7 @@ ValidatedTextInput.propTypes = {
 	ariaDescribedBy: PropTypes.string,
 	errorId: PropTypes.string,
 	validateOnMount: PropTypes.bool,
+	focusOnMount: PropTypes.bool,
 	showError: PropTypes.bool,
 };
 
