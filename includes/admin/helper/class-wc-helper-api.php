@@ -97,10 +97,11 @@ class WC_Helper_API {
 			$args['headers'] = array();
 		}
 
-		$args['headers'] = array(
+		$headers         = array(
 			'Authorization'   => 'Bearer ' . $auth['access_token'],
 			'X-Woo-Signature' => $signature,
 		);
+		$args['headers'] = wp_parse_args( $headers, $args['headers'] );
 
 		$url = add_query_arg(
 			array(
@@ -136,6 +137,19 @@ class WC_Helper_API {
 	 */
 	public static function post( $endpoint, $args = array() ) {
 		$args['method'] = 'POST';
+		return self::request( $endpoint, $args );
+	}
+
+	/**
+	 * Wrapper for self::request().
+	 *
+	 * @param string $endpoint The helper API endpoint to request.
+	 * @param array  $args Arguments passed to wp_remote_request().
+	 *
+	 * @return array The response object from wp_safe_remote_request().
+	 */
+	public static function put( $endpoint, $args = array() ) {
+		$args['method'] = 'PUT';
 		return self::request( $endpoint, $args );
 	}
 
