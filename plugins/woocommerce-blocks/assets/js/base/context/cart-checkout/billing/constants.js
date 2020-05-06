@@ -27,7 +27,6 @@ export const DEFAULT_BILLING_DATA = {
 	country: '',
 	email: '',
 	phone: '',
-	shippingAsBilling: true,
 };
 
 const billingAddress = mapValues( checkoutData.billing_address, ( value ) =>

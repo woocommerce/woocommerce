@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from 'react';
 import { useValidationContext } from '@woocommerce/base-context';
+import { useShallowEqual } from '@woocommerce/base-hooks';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
@@ -30,13 +31,18 @@ const ValidatedSelect = ( {
 } ) => {
 	const selectId = id || 'select-' + instanceId;
 	errorId = errorId || selectId;
+
+	// Prevents re-renders when value is an object, e.g. {key: "NY", name: "New York"}
+	const currentValue = useShallowEqual( value );
+
 	const {
 		getValidationError,
 		setValidationErrors,
 		clearValidationError,
 	} = useValidationContext();
+
 	const validateSelect = () => {
-		if ( ! required || value ) {
+		if ( ! required || currentValue ) {
 			clearValidationError( errorId );
 		} else {
 			setValidationErrors( {
@@ -50,14 +56,14 @@ const ValidatedSelect = ( {
 
 	useEffect( () => {
 		validateSelect();
-	}, [ value ] );
+	}, [ currentValue ] );
 
 	// Remove validation errors when unmounted.
 	useEffect( () => {
 		return () => {
 			clearValidationError( errorId );
 		};
-	}, [] );
+	}, [ errorId ] );
 
 	const error = getValidationError( errorId ) || {};
 
@@ -68,7 +74,7 @@ const ValidatedSelect = ( {
 				'has-error': error.message && ! error.hidden,
 			} ) }
 			feedback={ <ValidationInputError propertyName={ errorId } /> }
-			value={ value }
+			value={ currentValue }
 			{ ...rest }
 		/>
 	);

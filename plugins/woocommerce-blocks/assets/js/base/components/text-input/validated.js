@@ -37,6 +37,7 @@ const ValidatedTextInput = ( {
 
 	const textInputId = id || 'textinput-' + instanceId;
 	errorId = errorId || textInputId;
+
 	const validateInput = ( errorsHidden = true ) => {
 		if ( inputRef.current.checkValidity() ) {
 			clearValidationError( errorId );
@@ -63,7 +64,7 @@ const ValidatedTextInput = ( {
 		return () => {
 			clearValidationError( errorId );
 		};
-	}, [] );
+	}, [ errorId ] );
 
 	const errorMessage = getValidationError( errorId ) || {};
 	const hasError = errorMessage.message && ! errorMessage.hidden;
