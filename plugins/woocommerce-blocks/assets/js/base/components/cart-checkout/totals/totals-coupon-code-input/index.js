@@ -85,6 +85,7 @@ const TotalsCouponCodeInput = ( {
 								setCouponValue( newCouponValue );
 							} }
 							validateOnMount={ false }
+							focusOnMount={ true }
 							showError={ false }
 						/>
 						<Button
