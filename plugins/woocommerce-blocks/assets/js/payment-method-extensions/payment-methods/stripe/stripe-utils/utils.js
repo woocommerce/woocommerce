@@ -174,15 +174,15 @@ const getErrorMessageForCode = ( code ) => {
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INVALID_EXPIRY_MONTH ]: __(
-			"The card's expiration month is invalid.",
+			'The card expiration month is invalid.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INVALID_EXPIRY_YEAR ]: __(
-			"The card's expiration year is invalid.",
+			'The card expiration year is invalid.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INVALID_CVC ]: __(
-			"The card's security code is invalid.",
+			'The card security code is invalid.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INCORRECT_NUMBER ]: __(
@@ -194,11 +194,11 @@ const getErrorMessageForCode = ( code ) => {
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INCOMPLETE_CVC ]: __(
-			"The card's security code is incomplete.",
+			'The card security code is incomplete.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INCOMPLETE_EXPIRY ]: __(
-			"The card's expiration date is incomplete.",
+			'The card expiration date is incomplete.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.EXPIRED_CARD ]: __(
@@ -206,15 +206,15 @@ const getErrorMessageForCode = ( code ) => {
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INCORRECT_CVC ]: __(
-			"The card's security code is incorrect.",
+			'The card security code is incorrect.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INCORRECT_ZIP ]: __(
-			"The card's zip code failed validation.",
+			'The card zip code failed validation.',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.INVALID_EXPIRY_YEAR_PAST ]: __(
-			"The card's expiration year is in the past",
+			'The card expiration year is in the past',
 			'woocommerce-gateway-stripe'
 		),
 		[ errorCodes.CARD_DECLINED ]: __(
@@ -230,7 +230,7 @@ const getErrorMessageForCode = ( code ) => {
 			'woocommerce-gateway-stripe'
 		),
 	};
-	return messages[ code ] || '';
+	return messages[ code ] || null;
 };
 
 const getErrorMessageForTypeAndCode = ( type, code = '' ) => {
@@ -246,10 +246,11 @@ const getErrorMessageForTypeAndCode = ( type, code = '' ) => {
 				'woo-gutenberg-product-blocks'
 			);
 		case errorTypes.CARD_ERROR:
-		case errorTypes.VALIDATION_ERROR:
 			return getErrorMessageForCode( code );
+		case errorTypes.VALIDATION_ERROR:
+			return ''; // These are shown inline.
 	}
-	return '';
+	return null;
 };
 
 export {

@@ -74,9 +74,9 @@
  * @property {string} country                          Two-letter ISO code for
  *                                                     the country on the card.
  * @property {number} exp_month                        Two-digit number for
- *                                                     card's expiry month.
+ *                                                     card expiry month.
  * @property {number} exp_year                         Two-digit number for
- *                                                     card's expiry year.
+ *                                                     card expiry year.
  * @property {string} fingerprint                      Uniquely identifies this
  *                                                     particular card number
  * @property {string} funding                          The card funding type
