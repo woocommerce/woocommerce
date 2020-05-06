@@ -76,6 +76,7 @@ class ProfileWizard extends Component {
 	componentDidMount() {
 		const { profileItems, updateProfileItems } = this.props;
 
+		document.body.classList.remove( 'woocommerce-admin-is-loading' );
 		document.documentElement.classList.remove( 'wp-toolbar' );
 		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );

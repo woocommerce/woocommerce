@@ -667,9 +667,17 @@ class Loader {
 			$classes[] = 'woocommerce-embed-page';
 		}
 
-		// Some routes or features like onboarding hide the wp-admin navigation and masterbar. Setting `woocommerce_admin_is_loading` to true allows us
-		// to premeptively hide these elements while the JS app loads. This class is removed when `<Layout />` is rendered.
-		if ( self::is_admin_page() && apply_filters( 'woocommerce_admin_is_loading', false ) ) {
+		/**
+		 * Some routes or features like onboarding hide the wp-admin navigation and masterbar.
+		 * Setting `woocommerce_admin_is_loading` to true allows us to premeptively hide these
+		 * elements while the JS app loads.
+		 * This class needs to be removed by those feature components (like <ProfileWizard />).
+		 *
+		 * @param bool $is_loading If WooCommerce Admin is loading a fullscreen view.
+		 */
+		$is_loading = apply_filters( 'woocommerce_admin_is_loading', false );
+
+		if ( self::is_admin_page() && $is_loading ) {
 			$classes[] = 'woocommerce-admin-is-loading';
 		}
 
