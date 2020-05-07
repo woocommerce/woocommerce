@@ -466,12 +466,15 @@ class WC_Form_Handler {
 
 			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
 				wc_add_notice(
-					/* translators: %d number of seconds */
-					_n(
-						'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
-						'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
-						$delay,
-						'woocommerce'
+					sprintf(
+						/* translators: %d number of seconds */
+						_n(
+							'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
+							'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
+							$delay,
+							'woocommerce'
+						),
+						$delay
 					),
 					'error'
 				);
