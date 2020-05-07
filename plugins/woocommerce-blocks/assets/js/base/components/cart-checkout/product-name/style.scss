@@ -1,6 +1,6 @@
 .wc-block-product-name {
-	@include font-size(16);
-	@include wrapBreakWord();
+	@include font-size(16px);
+	@include wrap-break-word();
 	display: block;
 	max-width: max-content;
 }

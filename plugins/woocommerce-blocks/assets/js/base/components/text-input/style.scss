@@ -4,7 +4,7 @@
 	white-space: nowrap;
 
 	label {
-		@include font-size(16);
+		@include font-size(16px);
 		position: absolute;
 		transform: translateY(0.75em);
 		left: 0;
@@ -35,7 +35,7 @@
 	input[type="url"],
 	input[type="text"],
 	input[type="email"] {
-		@include font-size(16);
+		@include font-size(16px);
 		background-color: #fff;
 		padding: $gap-small $gap;
 		border-radius: 4px;

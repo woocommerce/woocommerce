@@ -4,7 +4,7 @@
 	margin-bottom: $gap-large;
 
 	label {
-		@include font-size(16, 22);
+		@include font-size(16px, 22px);
 		position: absolute;
 		transform: translateY(0.75em);
 		transform-origin: top left;
@@ -37,7 +37,7 @@
 	}
 
 	.components-custom-select-control__button {
-		@include font-size(16);
+		@include font-size(16px);
 		background-color: #fff;
 		box-shadow: none;
 		color: $input-text-active;
@@ -78,7 +78,7 @@
 	}
 
 	.components-custom-select-control__item {
-		@include font-size(16);
+		@include font-size(16px);
 		margin-left: 0;
 		padding-left: $gap;
 	}

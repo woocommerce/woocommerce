@@ -24,11 +24,11 @@
 		display: block; /* Disable flex box */
 
 		p {
-			@include font-size(14);
+			@include font-size(14px);
 		}
 	}
 	.wc-block-price-slider__add_product_button {
-		@include font-size(14, 24);
+		@include font-size(14px, 24px);
 		margin: 0 0 1em;
 		vertical-align: middle;
 		height: auto;

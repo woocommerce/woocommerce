@@ -69,7 +69,7 @@
 	}
 
 	.wc-block-gateway-input {
-		@include font-size(16, 22);
+		@include font-size(16px, 22px);
 		background-color: #fff;
 		padding: $gap-small $gap;
 		border-radius: 4px;
@@ -91,7 +91,7 @@
 	}
 
 	label {
-		@include font-size(16, 22);
+		@include font-size(16px, 22px);
 		position: absolute;
 		transform: translateY(0.75em);
 		left: 0;

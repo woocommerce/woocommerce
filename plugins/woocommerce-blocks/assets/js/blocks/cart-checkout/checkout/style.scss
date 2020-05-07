@@ -84,7 +84,7 @@
 	}
 
 	.wc-block-order-summary-item__quantity {
-		@include font-size(11);
+		@include font-size(11px);
 		align-items: center;
 		background: #fff;
 		border: 2px solid currentColor;
