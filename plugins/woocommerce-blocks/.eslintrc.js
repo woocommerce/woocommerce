@@ -3,6 +3,7 @@ module.exports = {
 		'plugin:@wordpress/eslint-plugin/recommended',
 		'prettier',
 		'plugin:jest/recommended',
+		'plugin:react-hooks/recommended',
 	],
 	env: {
 		'jest/globals': true,
