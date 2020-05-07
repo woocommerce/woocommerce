@@ -21,6 +21,16 @@ class List extends Component {
 		}
 	}
 
+	getItemLinkType( item ) {
+		const { href, linkType } = item;
+
+		if ( linkType ) {
+			return linkType;
+		}
+
+		return href ? 'external' : null;
+	}
+
 	render() {
 		const { className, items } = this.props;
 		const listClassName = classnames( 'woocommerce-list', className );
@@ -34,6 +44,7 @@ class List extends Component {
 						className: itemClasses,
 						content,
 						href,
+						listItemTag,
 						onClick,
 						target,
 						title,
@@ -57,8 +68,9 @@ class List extends Component {
 						onKeyDown: ( e ) =>
 							hasAction ? this.handleKeyDown( e, onClick ) : null,
 						target: href ? target : null,
-						type: href ? 'external' : null,
+						type: this.getItemLinkType( item ),
 						href,
+						'data-list-item-tag': listItemTag,
 					};
 
 					return (
