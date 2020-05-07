@@ -419,9 +419,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			$images[] = array(
 				'id'                => 0,
 				'date_created'      => wc_rest_prepare_date_response( current_time( 'mysql' ), false ), // Default to now.
-				'date_created_gmt'  => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ), // Default to now.
+				'date_created_gmt'  => wc_rest_prepare_date_response( time() ), // Default to now.
 				'date_modified'     => wc_rest_prepare_date_response( current_time( 'mysql' ), false ),
-				'date_modified_gmt' => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( time() ),
 				'src'               => wc_placeholder_img_src(),
 				'name'              => __( 'Placeholder', 'woocommerce-rest-api' ),
 				'alt'               => __( 'Placeholder', 'woocommerce-rest-api' ),
