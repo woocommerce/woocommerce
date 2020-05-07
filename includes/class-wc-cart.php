@@ -363,7 +363,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function display_prices_including_tax() {
 		$customer_exempt = $this->get_customer() && $this->get_customer()->get_is_vat_exempt();
 
-		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->tax_display_cart && ! $customer_exempt );
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->is_tax_displayed() && ! $customer_exempt );
 	}
 
 	/*
