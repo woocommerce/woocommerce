@@ -76,16 +76,19 @@ function getBuildPath( file, buildFolder ) {
  */
 function buildFiles( files ) {
 	// Reduce files into a unique sets of javaScript files and scss packages.
-	const buildPaths = files.reduce( ( accumulator, filePath ) => {
-		if ( isJsFile( filePath ) ) {
-			accumulator.jsFiles.add( filePath );
-		} else if ( isScssFile( filePath ) ) {
-			const pkgName = getPackageName( filePath );
-			const pkgPath = path.resolve( PACKAGES_DIR, pkgName );
-			accumulator.scssPackagePaths.add( pkgPath );
-		}
-		return accumulator;
-	}, { jsFiles: new Set(), scssPackagePaths: new Set() } );
+	const buildPaths = files.reduce(
+		( accumulator, filePath ) => {
+			if ( isJsFile( filePath ) ) {
+				accumulator.jsFiles.add( filePath );
+			} else if ( isScssFile( filePath ) ) {
+				const pkgName = getPackageName( filePath );
+				const pkgPath = path.resolve( PACKAGES_DIR, pkgName );
+				accumulator.scssPackagePaths.add( pkgPath );
+			}
+			return accumulator;
+		},
+		{ jsFiles: new Set(), scssPackagePaths: new Set() }
+	);
 
 	buildPaths.jsFiles.forEach( buildJsFile );
 	buildPaths.scssPackagePaths.forEach( buildPackageScss );
@@ -116,26 +119,32 @@ function buildPackageScss( packagePath ) {
 }
 
 function buildScssFile( styleFile ) {
-	const outputFile = getBuildPath( styleFile.replace( '.scss', '.css' ), BUILD_DIR.style );
-	const outputFileRTL = getBuildPath( styleFile.replace( '.scss', '-rtl.css' ), BUILD_DIR.style );
+	const outputFile = getBuildPath(
+		styleFile.replace( '.scss', '.css' ),
+		BUILD_DIR.style
+	);
+	const outputFileRTL = getBuildPath(
+		styleFile.replace( '.scss', '-rtl.css' ),
+		BUILD_DIR.style
+	);
 	mkdirp.sync( path.dirname( outputFile ) );
 	const builtSass = sass.renderSync( {
 		file: styleFile,
-		includePaths: [ path.resolve( __dirname, '../../client/stylesheets/abstracts' ) ],
-		data: (
-			[
-				'colors',
-				'variables',
-				'breakpoints',
-				'mixins',
-			].map( ( imported ) => `@import "_${ imported }";` ).join( ' ' ) +
-			fs.readFileSync( styleFile, 'utf8' )
-		),
+		includePaths: [
+			path.resolve( __dirname, '../../client/stylesheets/abstracts' ),
+		],
+		data:
+			[ 'colors', 'variables', 'breakpoints', 'mixins' ]
+				.map( ( imported ) => `@import "_${ imported }";` )
+				.join( ' ' ) + fs.readFileSync( styleFile, 'utf8' ),
 	} );
 
 	const postCSSSync = ( callback ) => {
 		postcss( require( './post-css-config' ) )
-			.process( builtSass.css, { from: 'src/app.css', to: 'dest/app.css' } )
+			.process( builtSass.css, {
+				from: 'src/app.css',
+				to: 'dest/app.css',
+			} )
 			.then( ( result ) => callback( null, result ) );
 	};
 
@@ -147,9 +156,8 @@ function buildScssFile( styleFile ) {
 
 	const result = deasync( postCSSSync )();
 	fs.writeFileSync( outputFile, result.css );
-
 	const resultRTL = deasync( postCSSRTLSync )( result );
-	fs.writeFileSync( outputFileRTL, resultRTL );
+	fs.writeFileSync( outputFileRTL, resultRTL.css );
 }
 
 /**
@@ -169,7 +177,13 @@ function buildJsFileFor( file, silent, environment ) {
 	mkdirp.sync( path.dirname( destPath ) );
 	const transformed = babel.transformFileSync( file, babelOptions );
 	fs.writeFileSync( destPath + '.map', JSON.stringify( transformed.map ) );
-	fs.writeFileSync( destPath, transformed.code + '\n//# sourceMappingURL=' + path.basename( destPath ) + '.map' );
+	fs.writeFileSync(
+		destPath,
+		transformed.code +
+			'\n//# sourceMappingURL=' +
+			path.basename( destPath ) +
+			'.map'
+	);
 
 	if ( ! silent ) {
 		process.stdout.write(
@@ -214,7 +228,6 @@ if ( files.length ) {
 	buildFiles( files );
 } else {
 	process.stdout.write( chalk.inverse( '>> Building packages \n' ) );
-	getPackages()
-		.forEach( buildPackage );
+	getPackages().forEach( buildPackage );
 	process.stdout.write( '\n' );
 }
