@@ -541,8 +541,11 @@
 
 .woocommerce-message {
 	position: relative;
-	border-left-color: #cc99c2 !important;
 	overflow: hidden;
+
+	&.updated {
+		border-left-color: #cc99c2 !important;
+	}
 
 	a.skip,
 	a.docs {
