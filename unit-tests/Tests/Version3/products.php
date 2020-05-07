@@ -59,6 +59,59 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting trashed products.
+	 */
+	public function test_get_trashed_products() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$data_store = WC_Data_Store::load( 'product' );
+		$data_store->delete( $product );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'status' => 'trash' ) );
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $products ) );
+		$this->assertEquals( $product->get_name(), $products[0]['name'] );
+		$this->assertEquals( $product->get_id(), $products[0]['id'] );
+	}
+
+	/**
+	 * Trashed products should not be returned by default.
+	 */
+	public function test_get_trashed_products_not_returned_by_default() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$data_store = WC_Data_Store::load( 'product' );
+		$data_store->delete( $product );
+
+		$response = $this->server->dispatch(
+			new WP_REST_Request( 'GET', '/wc/v3/products' )
+		);
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, count( $products ) );
+	}
+
+	/**
+	 * Trashed product can be fetched directly.
+	 */
+	public function test_get_trashed_products_returned_by_id() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$data_store = WC_Data_Store::load( 'product' );
+		$data_store->delete( $product );
+
+		$response = $this->server->dispatch(
+			new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() )
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
 	 * Test getting products without permission.
 	 *
 	 * @since 3.5.0
