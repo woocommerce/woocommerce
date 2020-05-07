@@ -2,7 +2,7 @@
 	color: $core-grey-dark-600;
 
 	h2 {
-		@include font-size(20);
+		@include font-size(20px);
 		font-weight: normal;
 	}
 
@@ -55,7 +55,7 @@ table.wc-block-cart-items {
 		padding-right: 0;
 	}
 	.wc-block-cart-items__header {
-		@include font-size(12);
+		@include font-size(12px);
 		text-transform: uppercase;
 
 		.wc-block-cart-items__header-image {
@@ -81,7 +81,7 @@ table.wc-block-cart-items {
 		.wc-block-cart-item__quantity {
 			.wc-block-cart-item__remove-link {
 				@include link-button;
-				@include font-size(12);
+				@include font-size(12px);
 
 				color: $core-grey-dark-400;
 				text-transform: none;
@@ -99,7 +99,7 @@ table.wc-block-cart-items {
 			}
 		}
 		.wc-block-cart-item__total {
-			@include font-size(16);
+			@include font-size(16px);
 			text-align: right;
 			line-height: 1.25;
 

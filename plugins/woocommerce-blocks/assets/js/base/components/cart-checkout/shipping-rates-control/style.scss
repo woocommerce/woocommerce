@@ -3,9 +3,9 @@
 }
 
 .wc-block-shipping-rates-control__package-items {
+	@include font-size(14px);
 	color: $core-grey-dark-400;
 	display: block;
-	font-size: 0.875em;
 	list-style: none;
 	margin: 0 0 $gap-small;
 	padding: 0;

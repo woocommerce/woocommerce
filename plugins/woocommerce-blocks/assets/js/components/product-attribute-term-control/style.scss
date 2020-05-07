@@ -24,7 +24,9 @@
 	}
 
 	&.is-not-active {
-		@include hover-state {
+		&:hover,
+		&:active,
+		&:focus {
 			background: $white;
 		}
 	}

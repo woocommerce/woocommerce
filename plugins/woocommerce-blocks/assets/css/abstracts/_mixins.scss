@@ -1,17 +1,9 @@
 // Converts a font-size in px to rem and optionally sets a relative line-height.
-@mixin font-size($sizeValue: 16, $lineHeight: false ) {
-	font-size: $sizeValue + px;
-	font-size: ($sizeValue / 16) + rem;
+@mixin font-size($sizeValue: 16px, $lineHeight: false) {
+	font-size: ($sizeValue / 16px) * 1rem;
+
 	@if ($lineHeight) {
 		line-height: $lineHeight / $sizeValue;
-	}
-}
-
-@mixin hover-state {
-	&:hover,
-	&:active,
-	&:focus {
-		@content;
 	}
 }
 
@@ -52,16 +44,7 @@
 	}
 }
 
-// Adds animation to transforms
-@mixin animate-transform( $duration: 0.2s ) {
-	transition: transform ease $duration;
-
-	@media screen and (prefers-reduced-motion: reduce) {
-		transition: none;
-	}
-}
-
-// Hide an element from sighted users, but availble to screen reader users.
+// Hide an element from sighted users, but available to screen reader users.
 @mixin visually-hidden() {
 	clip: rect(1px, 1px, 1px, 1px);
 	clip-path: inset(50%);
@@ -72,16 +55,6 @@
 	/* Many screen reader and browser combinations announce broken words as they would appear visually. */
 	overflow-wrap: normal !important;
 	word-wrap: normal !important;
-}
-
-// Unhide a visually hidden element
-@mixin visually-shown() {
-	clip: auto;
-	clip-path: none;
-	height: auto;
-	width: auto;
-	margin: unset;
-	overflow: hidden;
 }
 
 // Reset <button> style so we can use link style for action buttons.
@@ -110,7 +83,7 @@
 }
 
 // Makes sure long words are broken if they overflow the container.
-@mixin wrapBreakWord {
+@mixin wrap-break-word() {
 	// This is the current standard, works in most browsers.
 	overflow-wrap: anywhere;
 	// Safari supports word-break.
@@ -119,6 +92,7 @@
 	-ms-word-break: break-all;
 }
 
-@function rem($size, $base: 16px ) {
+// Converts a px unit to rem.
+@function rem($size, $base: 16px) {
 	@return $size / $base * 1rem;
 }
