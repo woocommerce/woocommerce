@@ -20,13 +20,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "@wordpress/api-fetch": "^3.14.0",
     "create-hmac": "1.1.7",
+    "fishery": "^0.3.0",
     "oauth-1.0a": "2.2.6"
   },
   "devDependencies": {
     "@types/create-hmac": "1.1.0",
     "@types/jest": "25.2.1",
     "@types/node": "13.13.5",
+    "@types/wordpress__api-fetch": "^3.2.2",
     "@typescript-eslint/eslint-plugin": "2.31.0",
     "@typescript-eslint/parser": "2.31.0",
     "@wordpress/eslint-plugin": "5.1.0",

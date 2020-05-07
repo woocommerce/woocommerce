@@ -7,8 +7,10 @@ describe( 'createSignatureMiddleware', () => {
 		middlewareFunction(
 			{ url: 'https://test-api', method: 'GET', headers: {} },
 			( options ) => {
-				expect( options.headers ).toHaveProperty( 'Authorization' );
-				expect( options.headers.Authorization ).toMatch(
+				const headers = options.headers as { Authorization?: string };
+
+				expect( headers ).toHaveProperty( 'Authorization' );
+				expect( headers.Authorization ).toMatch(
 					'Basic dGVzdDpzZWNyZXQ='
 				);
 				return Promise.resolve();
@@ -20,11 +22,13 @@ describe( 'createSignatureMiddleware', () => {
 		middlewareFunction(
 			{ url: 'http://test-api', method: 'GET', headers: {} },
 			( options ) => {
-				expect( options.headers ).toHaveProperty( 'Authorization' );
-				expect( options.headers.Authorization ).toMatch( /^OAuth / );
+				const headers = options.headers as { Authorization?: string };
+
+				expect( headers ).toHaveProperty( 'Authorization' );
+				expect( headers.Authorization ).toMatch( /^OAuth / );
 
 				// Parse the authorization header so we can validate its structure.
-				const rawArgs = options.headers.Authorization.split( ', ' );
+				const rawArgs = headers.Authorization!.split( ', ' );
 				const oauthArgs: { [ key: string ]: string } = {};
 				for ( const arg of rawArgs ) {
 					const m = arg.match( /([A-Za-z0-9_]+)="([^"]+)"/ );

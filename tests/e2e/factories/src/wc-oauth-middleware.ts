@@ -1,5 +1,6 @@
 import OAuth from 'oauth-1.0a';
 import createHmac from 'create-hmac';
+import { APIFetchOptions, Middleware } from '@wordpress/api-fetch';
 
 /**
  * Creates the OAuth object that can be used to sign the request.
@@ -23,19 +24,6 @@ function createOAuth( consumerKey: string, consumerSecret: string ): OAuth {
 }
 
 /**
- * This type reflects the Request type that apiFetch expects us to use.
- * Since we're only using it in this middleware, I think its fine
- * keeping it local to this file.
- */
-type Request = {
-	url: string;
-	method: string;
-	headers: {
-		[ key: string ]: string;
-	};
-};
-
-/**
  * Applies a middleware that signs requests with using a WooCommerce OAuth key.
  *
  * @param {string} consumerKey
@@ -44,15 +32,15 @@ type Request = {
 export function createSignatureMiddleware(
 	consumerKey: string,
 	consumerSecret: string
-) {
+): Middleware {
 	function middleware(
-		options: Request,
-		next: ( options: Request ) => Promise< any >
+		options: APIFetchOptions,
+		next: ( options: APIFetchOptions ) => Promise< any >
 	): Promise< any > {
 		const { headers = {} } = options;
 
 		let authHeader = '';
-		if ( options.url.startsWith( 'https' ) ) {
+		if ( options.url!.startsWith( 'https' ) ) {
 			authHeader =
 				'Basic ' +
 				Buffer.from( consumerKey + ':' + consumerSecret ).toString(
@@ -61,8 +49,8 @@ export function createSignatureMiddleware(
 		} else {
 			authHeader = middleware.oauth.toHeader(
 				middleware.oauth.authorize( {
-					url: options.url,
-					method: options.method,
+					url: options.url!,
+					method: options.method!,
 				} )
 			).Authorization;
 		}
