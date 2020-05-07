@@ -170,7 +170,7 @@ class Checkout extends AbstractBlock {
 	 */
 	protected function get_skeleton() {
 		return '
-			<div class="wc-block-sidebar-layout wc-block-checkout wc-block-checkout--is-loading wc-block-checkout--skeleton is-large" aria-hidden="true">
+			<div class="wc-block-skeleton wc-block-sidebar-layout wc-block-checkout wc-block-checkout--is-loading wc-block-checkout--skeleton hidden" aria-hidden="true">
 				<div class="wc-block-main wc-block-checkout__main">
 					<div class="wc-block-component-express-checkout"></div>
 					<div class="wc-block-component-express-checkout-continue-rule"><span></span></div>
@@ -198,7 +198,7 @@ class Checkout extends AbstractBlock {
 					</div>
 				</div>
 			</div>
-		';
+		' . $this->get_skeleton_inline_script();
 	}
 
 	/**

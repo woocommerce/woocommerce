@@ -143,4 +143,37 @@ abstract class AbstractBlock {
 	protected function enqueue_scripts( array $attributes = [] ) {
 		// noop. Child classes should override this if needed.
 	}
+
+	/**
+	 * Script to append the correct sizing class to a block skeleton.
+	 *
+	 * @return string
+	 */
+	protected function get_skeleton_inline_script() {
+		return "<script>
+			const containers = document.querySelectorAll( 'div.wc-block-skeleton' );
+
+			if ( containers.length ) {
+				Array.prototype.forEach.call( containers, function( el, i ) {
+					const w = el.offsetWidth;
+					let classname = '';
+
+					if ( w > 700 )
+						classname = 'is-large';
+					else if ( w > 520 )
+						classname = 'is-medium';
+					else if ( w > 400 )
+						classname = 'is-small';
+					else
+						classname = 'is-mobile';
+
+					if ( ! el.classList.contains( classname ) )  {
+						el.classList.add( classname );
+					}
+
+					el.classList.remove( 'hidden' );
+				} );
+			}
+		</script>";
+	}
 }
