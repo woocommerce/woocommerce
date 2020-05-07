@@ -12,6 +12,7 @@
   "scripts": {
     "build": "grunt && npm run makepot",
     "build-watch": "grunt watch",
+    "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
     "test:e2e": "./tests/bin/e2e-test-integration.js",
     "test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
