@@ -564,42 +564,18 @@ class WC_Admin_Notices {
 			return 'protected' === $status;
 		}
 
-		// Get uploads directory data and allows to get created if doesn't exists.
-		$uploads = wp_upload_dir( null, true );
+		// Get only data from the uploads directory.
+		$uploads = wp_get_upload_dir();
 
-		// Skip if returns an error.
-		if ( $uploads['error'] ) {
-			return false;
-		}
+		// Check for the "uploads/woocommerce_uploads" directory.
+		$response         = wp_remote_get( $uploads['baseurl'] . '/woocommerce_uploads' );
+		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
+		$response_content = wp_remote_retrieve_body( $response );
 
-		// Allow us to easily interact with the filesystem.
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		WP_Filesystem();
-		global $wp_filesystem;
-
-		$is_protected  = false;
-		$test_dir      = 'woocommerce-uploads-test';
-		$test_dir_path = trailingslashit( $uploads['basedir'] ) . $test_dir;
-
-		// Clean up the test directory before we start.
-		if ( $wp_filesystem->exists( $test_dir_path ) ) {
-			$wp_filesystem->delete( $test_dir_path );
-		}
-
-		// Create a new directory to check in case the uploads root is only protected by an index.php or index.html file.
-		if ( $wp_filesystem->mkdir( $test_dir_path ) ) {
-			$response         = wp_remote_get( $uploads['baseurl'] . '/' . $test_dir );
-			$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
-			$response_content = wp_remote_retrieve_body( $response );
-
-			// Check if returns 200 with empty content in case there's some index.html,
-			// and check for non-200 codes in case the directory is protected.
-			$is_protected = 200 === $response_code && empty( $response_content ) || 200 !== $response_code;
-
-			// Remove test directory.
-			$wp_filesystem->delete( $test_dir_path );
-			set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', 1 * DAY_IN_SECONDS );
-		}
+		// Check if returns 200 with empty content in case can open an index.html file,
+		// and check for non-200 codes in case the directory is protected.
+		$is_protected = ( 200 === $response_code && empty( $response_content ) ) || ( 200 !== $response_code );
+		set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', 1 * DAY_IN_SECONDS );
 
 		return $is_protected;
 	}
