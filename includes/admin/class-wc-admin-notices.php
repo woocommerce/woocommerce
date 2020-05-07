@@ -568,7 +568,7 @@ class WC_Admin_Notices {
 		$uploads = wp_get_upload_dir();
 
 		// Check for the "uploads/woocommerce_uploads" directory.
-		$response         = wp_remote_get( $uploads['baseurl'] . '/woocommerce_uploads' );
+		$response         = wp_safe_remote_get( esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads' ) );
 		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
 		$response_content = wp_remote_retrieve_body( $response );
 
