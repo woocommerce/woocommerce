@@ -17,11 +17,22 @@ class WC_Products_Tracking {
 	 * Init tracking.
 	 */
 	public function init() {
+		add_action( 'load-edit.php', array( $this, 'track_products_view' ), 10 );
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
 	}
+
+	/**
+	 * Send a Tracks event when the Products page is viewed.
+	 */
+	public function track_products_view() {
+		if ( isset( $_GET['post_type'] ) && 'product' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			WC_Tracks::record_event( 'products_view' );
+		}
+	}
+
 
 	/**
 	 * Send a Tracks event when a product is updated.
