@@ -215,11 +215,32 @@ module.exports = function( grunt ) {
 			},
 			contributors: {
 				command: [
-					'echo "Generating contributor list since <%= fromDate %>"',
+					'echo "<h2>WooCommerce Admin</h2>" > contributors.md',
+					'echo "Generating contributor list for WC Admin since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-admin --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
+					'echo "<h2>WooCommerce Blocks</h2>" >> contributors.md',
+					'echo "Generating contributor list for WC Blocks since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-gutenberg-products-block' +
+					' --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format html' +
+					' --sortOrder desc --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
+					'echo "<h2>Action Scheduler</h2>" >> contributors.md',
+					'echo "Generating contributor list for Action Scheduler since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo action-scheduler --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
+					'echo "<h2>REST API</h2>" >> contributors.md',
+					'echo "Generating contributor list for REST API since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-rest-api --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
+					'echo "<h2>WooCommerce core</h2>" >> contributors.md',
+					'echo "Generating contributor list for WC core since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
-					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
-					' --showlogin true --sha <%= sha %> --filter renovate-bot > contributors.md'
-				].join( '&&' )
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md'
+				].join('&&')
 			}
 		},
 
@@ -230,17 +251,12 @@ module.exports = function( grunt ) {
 						{
 							config: 'fromDate',
 							type: 'input',
-							message: 'What date (YYYY-MM-DD) should we get contributions since?'
-						},
-						{
-							config: 'sha',
-							type: 'input',
-							message: 'What branch should we get contributors from?'
+							message: 'What date (YYYY-MM-DD) should we get contributions since? (i.e. date of previous release)'
 						},
 						{
 							config: 'authToken',
 							type: 'input',
-							message: '(optional) Provide a personal access token.' +
+							message: 'Provide a personal access token (you must).' +
 							' This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
 						}
 					]
