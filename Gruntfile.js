@@ -215,31 +215,32 @@ module.exports = function( grunt ) {
 			},
 			contributors: {
 				command: [
-					'echo "<h2>WooCommerce Admin</h2>" > contributors.md',
+					'echo "<h2>WooCommerce Admin</h2>" > contributors.html',
 					'echo "Generating contributor list for WC Admin since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-admin --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
-					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
-					'echo "<h2>WooCommerce Blocks</h2>" >> contributors.md',
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
+					'echo "<h2>WooCommerce Blocks</h2>" >> contributors.html',
 					'echo "Generating contributor list for WC Blocks since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-gutenberg-products-block' +
 					' --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format html' +
-					' --sortOrder desc --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
-					'echo "<h2>Action Scheduler</h2>" >> contributors.md',
+					' --sortOrder desc --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
+					'echo "<h2>Action Scheduler</h2>" >> contributors.html',
 					'echo "Generating contributor list for Action Scheduler since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo action-scheduler --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
-					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
-					'echo "<h2>REST API</h2>" >> contributors.md',
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
+					'echo "<h2>REST API</h2>" >> contributors.html',
 					'echo "Generating contributor list for REST API since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-rest-api --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
-					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md',
-					'echo "<h2>WooCommerce core</h2>" >> contributors.md',
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
+					'echo "<h2>WooCommerce core</h2>" >> contributors.html',
 					'echo "Generating contributor list for WC core since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
-					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.md'
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
+					'echo "Output generated to contributors.html."',
 				].join('&&')
 			}
 		},
