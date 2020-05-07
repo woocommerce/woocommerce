@@ -1,0 +1,35 @@
+{
+  "name": "@woocommerce/e2e-factories",
+  "version": "0.1.0",
+  "author": "Automattic",
+  "description": "Factories for generating test data for use in WooCommerce End-To-End tests.",
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/factories/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woocommerce/woocommerce.git"
+  },
+  "keywords": [
+    "woocommerce",
+    "e2e"
+  ],
+  "license": "GPL-3.0+",
+  "main": "dist/index.js",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "25.2.1",
+    "@types/node": "13.13.5",
+    "@typescript-eslint/eslint-plugin": "2.31.0",
+    "@typescript-eslint/parser": "2.31.0",
+    "@wordpress/eslint-plugin": "5.1.0",
+    "eslint": "6.8.0",
+    "eslint-plugin-jest": "23.9.0",
+    "jest": "25.5.4",
+    "ts-jest": "25.5.0",
+    "typescript": "3.8.3"
+  }
+}

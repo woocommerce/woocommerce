@@ -1,4 +1,7 @@
 *.min.js
+/node_modules
+/vendor
+/packages
 
 /assets/js/accounting/**
 /assets/js/flexslider/**
@@ -19,3 +22,5 @@
 /assets/js/stupidtable/**
 /assets/js/zeroclipboard/**
 /assets/js/zoom/**
+
+/tests/e2e/factories/
