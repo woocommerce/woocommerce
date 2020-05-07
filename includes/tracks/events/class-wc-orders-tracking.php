@@ -32,6 +32,11 @@ class WC_Orders_Tracking {
 	 * @param array  $search_fields Fields that were used in the original search.
 	 */
 	public function track_order_search( $order_ids, $term, $search_fields ) {
+		// Since `woocommerce_shop_order_search_results` can run in the front-end context, exit if get_current_screen isn't defined.
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return $order_ids;
+		}
+
 		$screen = get_current_screen();
 
 		// We only want to record this track when the filter is executed on the order listing page.
