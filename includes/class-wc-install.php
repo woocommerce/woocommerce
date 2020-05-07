@@ -1206,15 +1206,12 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 				'file'    => 'index.html',
 				'content' => '',
 			),
-		);
-
-		if ( 'redirect' !== $download_method ) {
-			$files[] = array(
+			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			);
-		}
+				'content' => 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all',
+			),
+		);
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
