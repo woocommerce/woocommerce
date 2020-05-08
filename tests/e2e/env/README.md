@@ -154,8 +154,13 @@ version: ~> 1.0
 ....
 
 script:
-  - npm explore @woocommerce/e2e-environment -- npm run test:e2e-CI
+  - npm install jest --global
+  - npm explore @woocommerce/e2e-environment -- npm run test:e2e
 
+....
+
+after_script:
+  - npm explore @woocommerce/e2e-environment -- npm run docker:down
 ```
 
 Use `[[ ${RUN_E2E} == 1 ]]` in your bash scripts to test for the core e2e test run.
