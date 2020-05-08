@@ -71,41 +71,25 @@ class Install {
 
 		// Add wc-admin report tables to list of WooCommerce tables.
 		add_filter( 'woocommerce_install_get_tables', array( __CLASS__, 'add_tables' ) );
-
-		// Migrate option names by filtering their default values.
-		// This attaches a targeted filter for each migrated option name that will retreive
-		// the old value and use it as the default for the new option. This default
-		// will be used in the first retreival of the new option.
-		foreach ( self::$migrated_options as $new_option => $old_option ) {
-			add_filter( "default_option_{$new_option}", array( __CLASS__, 'handle_option_migration' ), 10, 2 );
-		}
 	}
 
 	/**
 	 * Migrate option values to their new keys/names.
-	 *
-	 * @param mixed  $default Default value for the option.
-	 * @param string $new_option Option name.
-	 * @return mixed Migrated option value.
 	 */
-	public static function handle_option_migration( $default, $new_option ) {
-		if ( isset( self::$migrated_options[ $new_option ] ) ) {
-			wc_maybe_define_constant( 'WC_ADMIN_MIGRATING_OPTIONS', true );
+	public static function migrate_options() {
+		wc_maybe_define_constant( 'WC_ADMIN_MIGRATING_OPTIONS', true );
 
-			// Avoid infinite loops - this filter is applied in add_option(), update_option(), and get_option().
-			remove_filter( "default_option_{$new_option}", array( __CLASS__, 'handle_option_migration' ), 10, 2 );
+		foreach ( self::$migrated_options as $new_option => $old_option ) {
+			$old_option_value = get_option( $old_option, false );
 
-			// Migrate the old option value.
-			$old_option_name  = self::$migrated_options[ $new_option ];
-			$old_option_value = get_option( $old_option_name, $default );
+			// Continue if no option value was previously set.
+			if ( false === $old_option_value ) {
+				continue;
+			}
 
 			update_option( $new_option, $old_option_value );
-			delete_option( $old_option_name );
-
-			return $old_option_value;
+			delete_option( $old_option );
 		}
-
-		return $default;
 	}
 
 	/**
@@ -157,6 +141,7 @@ class Install {
 		set_transient( 'wc_admin_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_ADMIN_INSTALLING', true );
 
+		self::migrate_options();
 		self::create_tables();
 		self::create_events();
 		self::delete_obsolete_notes();
