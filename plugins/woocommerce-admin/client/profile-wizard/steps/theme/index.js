@@ -313,7 +313,9 @@ class Theme extends Component {
 		const allThemes = [
 			...themes.filter(
 				( theme ) =>
-					theme.has_woocommerce_support || theme.slug === activeTheme
+					theme &&
+					( theme.has_woocommerce_support ||
+						theme.slug === activeTheme )
 			),
 			...uploadedThemes,
 		];
