@@ -9,7 +9,7 @@ import { InlineCard, CardElements } from './elements';
 /**
  * External dependencies
  */
-import { Elements, useElements, useStripe } from '@stripe/react-stripe-js';
+import { Elements, useStripe } from '@stripe/react-stripe-js';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
@@ -32,12 +32,11 @@ const CreditCardComponent = ( {
 } ) => {
 	const { ValidationInputError, CheckboxControl } = components;
 	const { customerId } = billing;
-	const [ sourceId, setSourceId ] = useState( 0 );
+	const [ sourceId, setSourceId ] = useState( '' );
 	const stripe = useStripe();
 	const [ shouldSavePayment, setShouldSavePayment ] = useState(
 		customerId ? true : false
 	);
-	const elements = useElements();
 	const onStripeError = useCheckoutSubscriptions(
 		eventRegistration,
 		billing,
@@ -45,8 +44,7 @@ const CreditCardComponent = ( {
 		setSourceId,
 		shouldSavePayment,
 		emitResponse,
-		stripe,
-		elements
+		stripe
 	);
 	const onChange = ( paymentEvent ) => {
 		if ( paymentEvent.error ) {
