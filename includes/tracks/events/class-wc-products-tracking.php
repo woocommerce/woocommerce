@@ -28,8 +28,23 @@ class WC_Products_Tracking {
 	 * Send a Tracks event when the Products page is viewed.
 	 */
 	public function track_products_view() {
-		if ( isset( $_GET['post_type'] ) && 'product' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// We only record Tracks event when no `_wp_http_referer` query arg is set, since
+		// when searching, the request gets sent from the browser twice,
+		// once with the `_wp_http_referer` and once without it.
+		//
+		// Otherwise, we would double-record the view and search events.
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if ( isset( $_GET['post_type'] )
+			&& 'product' === wp_unslash( $_GET['post_type'] )
+			&& ! isset( $_GET['_wp_http_referer'] ) ) {
+			// phpcs:enable
+
 			WC_Tracks::record_event( 'products_view' );
+
+			if ( isset( $_GET['s'] ) ) {
+				WC_Tracks::record_event( 'products_search' );
+			}
 		}
 	}
 
