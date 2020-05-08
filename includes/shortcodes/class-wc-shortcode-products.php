@@ -6,6 +6,8 @@
  * @version  3.2.4
  */
 
+use Automattic\WooCommerce\Loop;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -48,16 +50,24 @@ class WC_Shortcode_Products {
 	protected $custom_visibility = false;
 
 	/**
+	 * @var Loop Reference to the instance of the Loop class.
+	 */
+	protected $loop;
+
+	/**
 	 * Initialize shortcode.
 	 *
 	 * @since 3.2.0
-	 * @param array  $attributes Shortcode attributes.
-	 * @param string $type       Shortcode type.
+	 * @param array     $attributes Shortcode attributes.
+	 * @param string    $type       Shortcode type.
+	 * @param Loop|null $loop       Usually null, a mocked instance of Loop can be passed for unit testing.
 	 */
-	public function __construct( $attributes = array(), $type = 'products' ) {
+	public function __construct( $attributes = array(), $type = 'products', $loop = null ) {
 		$this->type       = $type;
 		$this->attributes = $this->parse_attributes( $attributes );
 		$this->query_args = $this->parse_query_args();
+
+		$this->loop = is_null( $loop ) ? Loop::get_instance() : $loop;
 	}
 
 	/**
@@ -623,7 +633,7 @@ class WC_Shortcode_Products {
 			}
 
 			// Setup the loop.
-			wc_setup_loop(
+			$this->loop->setup_loop(
 				array(
 					'columns'      => $columns,
 					'name'         => $this->type,
@@ -646,9 +656,9 @@ class WC_Shortcode_Products {
 				do_action( 'woocommerce_before_shop_loop' );
 			}
 
-			woocommerce_product_loop_start();
+			$this->loop->product_loop_start();
 
-			if ( wc_get_loop_prop( 'total' ) ) {
+			if ( $this->loop->get_loop_prop( 'total' ) ) {
 				foreach ( $products->ids as $product_id ) {
 					$GLOBALS['post'] = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					setup_postdata( $GLOBALS['post'] );
@@ -665,7 +675,7 @@ class WC_Shortcode_Products {
 			}
 
 			$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			woocommerce_product_loop_end();
+			$this->loop->product_loop_end();
 
 			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
 			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
@@ -675,7 +685,7 @@ class WC_Shortcode_Products {
 			do_action( "woocommerce_shortcode_after_{$this->type}_loop", $this->attributes );
 
 			wp_reset_postdata();
-			wc_reset_loop();
+			$this->loop->reset_loop();
 		} else {
 			do_action( "woocommerce_shortcode_{$this->type}_loop_no_results", $this->attributes );
 		}

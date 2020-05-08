@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Loop;
+
 /**
  * Breadcrumb class.
  */
@@ -19,6 +21,20 @@ class WC_Breadcrumb {
 	 * @var array
 	 */
 	protected $crumbs = array();
+
+	/**
+	 * @var Loop Reference to the instance of the Loop class.
+	 */
+	protected $loop;
+
+	/**
+	 * Create an instance of the class.
+	 *
+	 * @param string $loop Usually null, a mocked instance of Loop can be passed for unit testing.
+	 */
+	public function __construct( $loop = null ) {
+		$this->loop = is_null( $loop ) ? Loop::get_instance() : $loop;
+	}
 
 	/**
 	 * Add a crumb so we don't get lost.
@@ -371,7 +387,7 @@ class WC_Breadcrumb {
 	 * Add a breadcrumb for pagination.
 	 */
 	protected function paged_trail() {
-		if ( get_query_var( 'paged' ) && 'subcategories' !== woocommerce_get_loop_display_mode() ) {
+		if ( get_query_var( 'paged' ) && 'subcategories' !== $this->loop->get_loop_display_mode() ) {
 			/* translators: %d: page number */
 			$this->add_crumb( sprintf( __( 'Page %d', 'woocommerce' ), get_query_var( 'paged' ) ) );
 		}

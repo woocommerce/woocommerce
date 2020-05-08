@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Loop;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -154,55 +155,21 @@ add_action( 'the_post', 'wc_setup_product_data' );
  *
  * @since 3.3.0
  * @param array $args Args to pass into the global.
+ * @deprecated Use setup_loop in Loop class instead.
  */
 function wc_setup_loop( $args = array() ) {
-	$default_args = array(
-		'loop'         => 0,
-		'columns'      => wc_get_default_products_per_row(),
-		'name'         => '',
-		'is_shortcode' => false,
-		'is_paginated' => true,
-		'is_search'    => false,
-		'is_filtered'  => false,
-		'total'        => 0,
-		'total_pages'  => 0,
-		'per_page'     => 0,
-		'current_page' => 1,
-	);
-
-	// If this is a main WC query, use global args as defaults.
-	if ( $GLOBALS['wp_query']->get( 'wc_query' ) ) {
-		$default_args = array_merge(
-			$default_args,
-			array(
-				'is_search'    => $GLOBALS['wp_query']->is_search(),
-				'is_filtered'  => is_filtered(),
-				'total'        => $GLOBALS['wp_query']->found_posts,
-				'total_pages'  => $GLOBALS['wp_query']->max_num_pages,
-				'per_page'     => $GLOBALS['wp_query']->get( 'posts_per_page' ),
-				'current_page' => max( 1, $GLOBALS['wp_query']->get( 'paged', 1 ) ),
-			)
-		);
-	}
-
-	// Merge any existing values.
-	if ( isset( $GLOBALS['woocommerce_loop'] ) ) {
-		$default_args = array_merge( $default_args, $GLOBALS['woocommerce_loop'] );
-	}
-
-	$GLOBALS['woocommerce_loop'] = wp_parse_args( $args, $default_args );
+	Loop::get_instance()->setup_loop( $args );
 }
-add_action( 'woocommerce_before_shop_loop', 'wc_setup_loop' );
 
 /**
  * Resets the woocommerce_loop global.
  *
  * @since 3.3.0
+ * @deprecated Use reset_loop in Loop class instead.
  */
 function wc_reset_loop() {
-	unset( $GLOBALS['woocommerce_loop'] );
+	Loop::get_instance()->reset_loop();
 }
-add_action( 'woocommerce_after_shop_loop', 'woocommerce_reset_loop', 999 );
 
 /**
  * Gets a property from the woocommerce_loop global.
@@ -211,11 +178,10 @@ add_action( 'woocommerce_after_shop_loop', 'woocommerce_reset_loop', 999 );
  * @param string $prop Prop to get.
  * @param string $default Default if the prop does not exist.
  * @return mixed
+ * @deprecated Use get_loop_prop in Loop class instead.
  */
 function wc_get_loop_prop( $prop, $default = '' ) {
-	wc_setup_loop(); // Ensure shop loop is setup.
-
-	return isset( $GLOBALS['woocommerce_loop'], $GLOBALS['woocommerce_loop'][ $prop ] ) ? $GLOBALS['woocommerce_loop'][ $prop ] : $default;
+	return Loop::get_instance()->get_loop_prop( $prop, $default );
 }
 
 /**
@@ -224,12 +190,10 @@ function wc_get_loop_prop( $prop, $default = '' ) {
  * @since 3.3.0
  * @param string $prop Prop to set.
  * @param string $value Value to set.
+ * @deprecated Use get_loop_prop in Loop class instead.
  */
 function wc_set_loop_prop( $prop, $value = '' ) {
-	if ( ! isset( $GLOBALS['woocommerce_loop'] ) ) {
-		wc_setup_loop();
-	}
-	$GLOBALS['woocommerce_loop'][ $prop ] = $value;
+	Loop::get_instance()->set_loop_prop( $prop, $value );
 }
 
 /**
@@ -239,9 +203,10 @@ function wc_set_loop_prop( $prop, $value = '' ) {
  *
  * @since 3.4.0
  * @return bool
+ * @deprecated Use in_product_loop in Loop class instead.
  */
 function woocommerce_product_loop() {
-	return have_posts() || 'products' !== woocommerce_get_loop_display_mode();
+	return Loop::get_instance()->in_product_loop();
 }
 
 /**
@@ -417,23 +382,10 @@ add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
  *
  * @since 2.6.0
  * @return string
+ * @deprecated Use get_loop_class in Loop class instead.
  */
 function wc_get_loop_class() {
-	$loop_index = wc_get_loop_prop( 'loop', 0 );
-	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
-
-	$loop_index ++;
-	wc_set_loop_prop( 'loop', $loop_index );
-
-	if ( 0 === ( $loop_index - 1 ) % $columns || 1 === $columns ) {
-		return 'first';
-	}
-
-	if ( 0 === $loop_index % $columns ) {
-		return 'last';
-	}
-
-	return '';
+	return Loop::get_instance()->get_loop_class();
 }
 
 
@@ -448,10 +400,12 @@ function wc_get_loop_class() {
  * @return array
  */
 function wc_get_product_cat_class( $class = '', $category = null ) {
+	$loop = Loop::get_instance();
+
 	$classes   = is_array( $class ) ? $class : array_map( 'trim', explode( ' ', $class ) );
 	$classes[] = 'product-category';
 	$classes[] = 'product';
-	$classes[] = wc_get_loop_class();
+	$classes[] = $loop->get_loop_class();
 	$classes   = apply_filters( 'product_cat_class', $classes, $class, $category );
 
 	return array_unique( array_filter( $classes ) );
@@ -479,8 +433,10 @@ function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 		return $classes;
 	}
 
+	$loop = Loop::get_instance();
+
 	$classes[] = 'product';
-	$classes[] = wc_get_loop_class();
+	$classes[] = $loop->get_loop_class();
 	$classes[] = $product->get_stock_status();
 
 	if ( $product->is_on_sale() ) {
@@ -927,6 +883,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 	 * without hooks or modifying core templates.
 	 */
 	function woocommerce_content() {
+		$loop = Loop::get_instance();
 
 		if ( is_singular( 'product' ) ) {
 
@@ -946,20 +903,20 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 			<?php do_action( 'woocommerce_archive_description' ); ?>
 
-			<?php if ( woocommerce_product_loop() ) : ?>
+			<?php if ( $loop->in_product_loop() ) : ?>
 
 				<?php do_action( 'woocommerce_before_shop_loop' ); ?>
 
-				<?php woocommerce_product_loop_start(); ?>
+				<?php $loop->product_loop_start(); ?>
 
-				<?php if ( wc_get_loop_prop( 'total' ) ) : ?>
+				<?php if ( $loop->get_loop_prop( 'total' ) ) : ?>
 					<?php while ( have_posts() ) : ?>
 						<?php the_post(); ?>
 						<?php wc_get_template_part( 'content', 'product' ); ?>
 					<?php endwhile; ?>
 				<?php endif; ?>
 
-				<?php woocommerce_product_loop_end(); ?>
+				<?php $loop->product_loop_end(); ?>
 
 				<?php do_action( 'woocommerce_after_shop_loop' ); ?>
 
@@ -1076,21 +1033,10 @@ if ( ! function_exists( 'woocommerce_product_loop_start' ) ) {
 	 *
 	 * @param bool $echo Should echo?.
 	 * @return string
+	 * @deprecated Use product_loop_start in Loop class instead.
 	 */
 	function woocommerce_product_loop_start( $echo = true ) {
-		ob_start();
-
-		wc_set_loop_prop( 'loop', 0 );
-
-		wc_get_template( 'loop/loop-start.php' );
-
-		$loop_start = apply_filters( 'woocommerce_product_loop_start', ob_get_clean() );
-
-		if ( $echo ) {
-			echo $loop_start; // WPCS: XSS ok.
-		} else {
-			return $loop_start;
-		}
+		Loop::get_instance()->product_loop_start( $echo );
 	}
 }
 
@@ -1101,19 +1047,10 @@ if ( ! function_exists( 'woocommerce_product_loop_end' ) ) {
 	 *
 	 * @param bool $echo Should echo?.
 	 * @return string
+	 * @deprecated Use product_loop_end in Loop class instead.
 	 */
 	function woocommerce_product_loop_end( $echo = true ) {
-		ob_start();
-
-		wc_get_template( 'loop/loop-end.php' );
-
-		$loop_end = apply_filters( 'woocommerce_product_loop_end', ob_get_clean() );
-
-		if ( $echo ) {
-			echo $loop_end; // WPCS: XSS ok.
-		} else {
-			return $loop_end;
-		}
+		Loop::get_instance()->product_loop_end( $echo );
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
@@ -1332,13 +1269,15 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 	 * Output the result count text (Showing x - x of x results).
 	 */
 	function woocommerce_result_count() {
-		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
+		$loop = Loop::get_instance();
+
+		if ( ! $loop->get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
 		$args = array(
-			'total'    => wc_get_loop_prop( 'total' ),
-			'per_page' => wc_get_loop_prop( 'per_page' ),
-			'current'  => wc_get_loop_prop( 'current_page' ),
+			'total'    => $loop->get_loop_prop( 'total' ),
+			'per_page' => $loop->get_loop_prop( 'per_page' ),
+			'current'  => $loop->get_loop_prop( 'current_page' ),
 		);
 
 		wc_get_template( 'loop/result-count.php', $args );
@@ -1351,7 +1290,9 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 	 * Output the product sorting options.
 	 */
 	function woocommerce_catalog_ordering() {
-		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
+		$loop = Loop::get_instance();
+
+		if ( ! $loop->get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
 		$show_default_orderby    = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
@@ -1367,10 +1308,10 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			)
 		);
 
-		$default_orderby = wc_get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
+		$default_orderby = $loop->get_loop_prop( 'is_search' ) ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
 		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby; // WPCS: sanitization ok, input var ok, CSRF ok.
 
-		if ( wc_get_loop_prop( 'is_search' ) ) {
+		if ( $loop->get_loop_prop( 'is_search' ) ) {
 			$catalog_orderby_options = array_merge( array( 'relevance' => __( 'Relevance', 'woocommerce' ) ), $catalog_orderby_options );
 
 			unset( $catalog_orderby_options['menu_order'] );
@@ -1405,18 +1346,20 @@ if ( ! function_exists( 'woocommerce_pagination' ) ) {
 	 * Output the pagination.
 	 */
 	function woocommerce_pagination() {
-		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
+		$loop = Loop::get_instance();
+
+		if ( ! $loop->get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
 
 		$args = array(
-			'total'   => wc_get_loop_prop( 'total_pages' ),
-			'current' => wc_get_loop_prop( 'current_page' ),
+			'total'   => $loop->get_loop_prop( 'total_pages' ),
+			'current' => $loop->get_loop_prop( 'current_page' ),
 			'base'    => esc_url_raw( add_query_arg( 'product-page', '%#%', false ) ),
 			'format'  => '?product-page=%#%',
 		);
 
-		if ( ! wc_get_loop_prop( 'is_shortcode' ) ) {
+		if ( ! $loop->get_loop_prop( 'is_shortcode' ) ) {
 			$args['format'] = '';
 			$args['base']   = esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
 		}
@@ -2266,9 +2209,11 @@ if ( ! function_exists( 'woocommerce_products_will_display' ) ) {
 	 * @return bool
 	 */
 	function woocommerce_products_will_display() {
-		$display_type = woocommerce_get_loop_display_mode();
+		$loop = Loop::get_instance();
 
-		return 0 < wc_get_loop_prop( 'total', 0 ) && 'subcategories' !== $display_type;
+		$display_type = $loop->get_loop_display_mode();
+
+		return 0 < $loop->get_loop_prop( 'total', 0 ) && 'subcategories' !== $display_type;
 	}
 }
 
@@ -2279,43 +2224,10 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 	 *
 	 * @since 3.3.0
 	 * @return string Either products, subcategories, or both, based on current page.
+	 * @deprecated Use get_loop_prop in Loop class instead.Use get_loop_prop in Loop class instead.
 	 */
 	function woocommerce_get_loop_display_mode() {
-		// Only return products when filtering things.
-		if ( wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
-			return 'products';
-		}
-
-		$parent_id    = 0;
-		$display_type = '';
-
-		if ( is_shop() ) {
-			$display_type = get_option( 'woocommerce_shop_page_display', '' );
-		} elseif ( is_product_category() ) {
-			$parent_id    = get_queried_object_id();
-			$display_type = get_term_meta( $parent_id, 'display_type', true );
-			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
-		}
-
-		if ( ( ! is_shop() || 'subcategories' !== $display_type ) && 1 < wc_get_loop_prop( 'current_page' ) ) {
-			return 'products';
-		}
-
-		// Ensure valid value.
-		if ( '' === $display_type || ! in_array( $display_type, array( 'products', 'subcategories', 'both' ), true ) ) {
-			$display_type = 'products';
-		}
-
-		// If we're showing categories, ensure we actually have something to show.
-		if ( in_array( $display_type, array( 'subcategories', 'both' ), true ) ) {
-			$subcategories = woocommerce_get_product_subcategories( $parent_id );
-
-			if ( empty( $subcategories ) ) {
-				$display_type = 'products';
-			}
-		}
-
-		return $display_type;
+		return Loop::get_instance()->get_loop_display_mode();
 	}
 }
 
@@ -2329,11 +2241,13 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 	 * @return string
 	 */
 	function woocommerce_maybe_show_product_subcategories( $loop_html = '' ) {
-		if ( wc_get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
+		$loop = Loop::get_instance();
+
+		if ( $loop->get_loop_prop( 'is_shortcode' ) && ! WC_Template_Loader::in_content_filter() ) {
 			return $loop_html;
 		}
 
-		$display_type = woocommerce_get_loop_display_mode();
+		$display_type = $loop->get_loop_display_mode();
 
 		// If displaying categories, append to the loop.
 		if ( 'subcategories' === $display_type || 'both' === $display_type ) {
@@ -2346,9 +2260,9 @@ if ( ! function_exists( 'woocommerce_maybe_show_product_subcategories' ) ) {
 			$loop_html .= ob_get_clean();
 
 			if ( 'subcategories' === $display_type ) {
-				wc_set_loop_prop( 'total', 0 );
+				$loop->set_loop_prop( 'total', 0 );
 
-				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops.  @todo Remove in future major version.
+				// This removes pagination and products from display for themes not using get_loop_prop in their product loops.  @todo Remove in future major version.
 				global $wp_query;
 
 				if ( $wp_query->is_main_query() ) {
@@ -2379,6 +2293,8 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 	 * @return null|boolean
 	 */
 	function woocommerce_product_subcategories( $args = array() ) {
+		$loop = Loop::get_instance();
+
 		$defaults = array(
 			'before'        => '',
 			'after'         => '',
@@ -2399,10 +2315,10 @@ if ( ! function_exists( 'woocommerce_product_subcategories' ) ) {
 			return true;
 		} else {
 			// Output nothing. woocommerce_maybe_show_product_subcategories will handle the output of cats.
-			$display_type = woocommerce_get_loop_display_mode();
+			$display_type = $loop->get_loop_display_mode();
 
 			if ( 'subcategories' === $display_type ) {
-				// This removes pagination and products from display for themes not using wc_get_loop_prop in their product loops. @todo Remove in future major version.
+				// This removes pagination and products from display for themes not using get_loop_prop in their product loops. @todo Remove in future major version.
 				global $wp_query;
 
 				if ( $wp_query->is_main_query() ) {
@@ -3658,7 +3574,7 @@ if ( ! function_exists( 'woocommerce_reset_loop' ) ) {
 	 * @deprecated 3.3
 	 */
 	function woocommerce_reset_loop() {
-		wc_reset_loop();
+		Loop::get_instance()->reset_loop();
 	}
 }
 

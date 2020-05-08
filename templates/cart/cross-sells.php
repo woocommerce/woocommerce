@@ -17,13 +17,17 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Loop;
+
 if ( $cross_sells ) : ?>
 
 	<div class="cross-sells">
 
 		<h2><?php esc_html_e( 'You may be interested in&hellip;', 'woocommerce' ); ?></h2>
 
-		<?php woocommerce_product_loop_start(); ?>
+		<?php $loop = Loop::get_instance(); ?>
+
+		<?php $loop->product_loop_start(); ?>
 
 			<?php foreach ( $cross_sells as $cross_sell ) : ?>
 
@@ -37,7 +41,7 @@ if ( $cross_sells ) : ?>
 
 			<?php endforeach; ?>
 
-		<?php woocommerce_product_loop_end(); ?>
+		<?php $loop->product_loop_end(); ?>
 
 	</div>
 	<?php

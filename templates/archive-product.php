@@ -17,6 +17,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Loop;
+
 get_header( 'shop' );
 
 /**
@@ -27,6 +29,8 @@ get_header( 'shop' );
  * @hooked WC_Structured_Data::generate_website_data() - 30
  */
 do_action( 'woocommerce_before_main_content' );
+
+$loop = Loop::get_instance();
 
 ?>
 <header class="woocommerce-products-header">
@@ -45,7 +49,7 @@ do_action( 'woocommerce_before_main_content' );
 	?>
 </header>
 <?php
-if ( woocommerce_product_loop() ) {
+if ( $loop->in_product_loop() ) {
 
 	/**
 	 * Hook: woocommerce_before_shop_loop.
@@ -56,9 +60,9 @@ if ( woocommerce_product_loop() ) {
 	 */
 	do_action( 'woocommerce_before_shop_loop' );
 
-	woocommerce_product_loop_start();
+	$loop->product_loop_start();
 
-	if ( wc_get_loop_prop( 'total' ) ) {
+	if ( $loop->get_loop_prop( 'total' ) ) {
 		while ( have_posts() ) {
 			the_post();
 
@@ -71,7 +75,7 @@ if ( woocommerce_product_loop() ) {
 		}
 	}
 
-	woocommerce_product_loop_end();
+	$loop->product_loop_end();
 
 	/**
 	 * Hook: woocommerce_after_shop_loop.

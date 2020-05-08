@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Loop;
+
 /**
  * Main WooCommerce Class.
  *
@@ -154,6 +156,7 @@ final class WooCommerce {
 		$this->define_constants();
 		$this->define_tables();
 		$this->includes();
+		$this->init_singletons();
 		$this->init_hooks();
 	}
 
@@ -470,6 +473,10 @@ final class WooCommerce {
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
 		$this->api->init();
+	}
+
+	private function init_singletons() {
+		Loop::get_instance();
 	}
 
 	/**

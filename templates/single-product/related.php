@@ -19,19 +19,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Loop;
+
 if ( $related_products ) : ?>
 
 	<section class="related products">
 
 		<?php
+		$loop    = Loop::get_instance();
 		$heading = apply_filters( 'woocommerce_product_related_products_heading', __( 'Related products', 'woocommerce' ) );
 
 		if ( $heading ) :
 			?>
 			<h2><?php echo esc_html( $heading ); ?></h2>
 		<?php endif; ?>
-		
-		<?php woocommerce_product_loop_start(); ?>
+
+		<?php $loop->product_loop_start(); ?>
 
 			<?php foreach ( $related_products as $related_product ) : ?>
 
@@ -45,7 +48,7 @@ if ( $related_products ) : ?>
 
 			<?php endforeach; ?>
 
-		<?php woocommerce_product_loop_end(); ?>
+		<?php $loop->product_loop_end(); ?>
 
 	</section>
 	<?php

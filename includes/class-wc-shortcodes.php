@@ -150,6 +150,8 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function product_categories( $atts ) {
+		$loop = Loop::get_instance();
+
 		if ( isset( $atts['number'] ) ) {
 			$atts['limit'] = $atts['number'];
 		}
@@ -210,13 +212,13 @@ class WC_Shortcodes {
 
 		$columns = absint( $atts['columns'] );
 
-		wc_set_loop_prop( 'columns', $columns );
-		wc_set_loop_prop( 'is_shortcode', true );
+		$loop->set_loop_prop( 'columns', $columns );
+		$loop->set_loop_prop( 'is_shortcode', true );
 
 		ob_start();
 
 		if ( $product_categories ) {
-			woocommerce_product_loop_start();
+			$loop->product_loop_start();
 
 			foreach ( $product_categories as $category ) {
 				wc_get_template(
@@ -227,10 +229,10 @@ class WC_Shortcodes {
 				);
 			}
 
-			woocommerce_product_loop_end();
+			$loop->product_loop_end();
 		}
 
-		woocommerce_reset_loop();
+		$loop->reset_loop();
 
 		return '<div class="woocommerce columns-' . $columns . '">' . ob_get_clean() . '</div>';
 	}

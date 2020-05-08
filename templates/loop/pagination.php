@@ -19,8 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$total   = isset( $total ) ? $total : wc_get_loop_prop( 'total_pages' );
-$current = isset( $current ) ? $current : wc_get_loop_prop( 'current_page' );
+use Automattic\WooCommerce\Loop;
+
+$loop    = Loop::get_instance();
+$total   = isset( $total ) ? $total : $loop->get_loop_prop( 'total_pages' );
+$current = isset( $current ) ? $current : $loop->get_loop_prop( 'current_page' );
 $base    = isset( $base ) ? $base : esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
 $format  = isset( $format ) ? $format : '';
 

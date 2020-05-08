@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Loop;
+
 if ( $upsells ) : ?>
 
 	<section class="up-sells upsells products">
@@ -30,7 +32,9 @@ if ( $upsells ) : ?>
 			<h2><?php echo esc_html( $heading ); ?></h2>
 		<?php endif; ?>
 
-		<?php woocommerce_product_loop_start(); ?>
+		<?php $loop = Loop::get_instance(); ?>
+
+		<?php $loop->product_loop_start(); ?>
 
 			<?php foreach ( $upsells as $upsell ) : ?>
 
@@ -44,7 +48,7 @@ if ( $upsells ) : ?>
 
 			<?php endforeach; ?>
 
-		<?php woocommerce_product_loop_end(); ?>
+		<?php $loop->product_loop_end(); ?>
 
 	</section>
 

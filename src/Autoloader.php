@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once dirname( __DIR__ ) . '/src/Loop.php';
+
 /**
  * Autoloader class.
  *
