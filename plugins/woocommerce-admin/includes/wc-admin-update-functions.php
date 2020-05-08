@@ -84,3 +84,10 @@ function wc_admin_update_0251_db_version() {
 function wc_admin_update_110_remove_facebook_note() {
 	WC_Admin_Notes::delete_notes_with_name( 'wc-admin-facebook-extension' );
 }
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_110_db_version() {
+	Installer::update_db_version( '1.1.0' );
+}
