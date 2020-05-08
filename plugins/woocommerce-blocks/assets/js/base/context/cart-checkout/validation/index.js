@@ -102,7 +102,7 @@ export const ValidationContextProvider = ( { children } ) => {
 	 *                           validation error is for and values are the
 	 *                           validation error message displayed to the user.
 	 */
-	const setValidationErrors = ( newErrors ) => {
+	const setValidationErrors = useCallback( ( newErrors ) => {
 		if ( ! newErrors ) {
 			return;
 		}
@@ -124,7 +124,7 @@ export const ValidationContextProvider = ( { children } ) => {
 				...newErrors,
 			};
 		} );
-	};
+	}, [] );
 
 	/**
 	 * Used to update a validation error.
