@@ -35,14 +35,22 @@ class WC_Products_Tracking {
 		// Otherwise, we would double-record the view and search events.
 
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
-		if ( isset( $_GET['post_type'] )
+		if (
+			isset( $_GET['post_type'] )
 			&& 'product' === wp_unslash( $_GET['post_type'] )
-			&& ! isset( $_GET['_wp_http_referer'] ) ) {
+			&& ! isset( $_GET['_wp_http_referer'] )
+		) {
 			// phpcs:enable
 
 			WC_Tracks::record_event( 'products_view' );
 
-			if ( isset( $_GET['s'] ) ) {
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+			if (
+				isset( $_GET['s'] )
+				&& 0 < strlen( sanitize_text_field( wp_unslash( $_GET['s'] ) ) )
+			) {
+				// phpcs:enable
+
 				WC_Tracks::record_event( 'products_search' );
 			}
 		}
