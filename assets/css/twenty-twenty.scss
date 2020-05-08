@@ -924,6 +924,8 @@ a.reset_variations {
 .related.products,
 .up-sells {
 
+	clear: both;
+
 	ul.products {
 		display: flex;
 		justify-content: space-evenly;
