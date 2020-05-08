@@ -69,7 +69,7 @@ class InstalledExtensions {
 			'facebook-for-woocommerce',
 			'kliken-marketing-for-google',
 			'hubwoo-integration',
-			'codistoconnect',
+			'woocommerce-amazon-ebay-integration',
 		];
 	}
 
@@ -179,7 +179,6 @@ class InstalledExtensions {
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=wc-settings&tab=integration&section=kk_wcintegration' );
 			$data['docsUrl']     = 'https://docs.woocommerce.com/document/google-ads/';
-			$data['supportUrl']  = 'https://www.kliken.com/support.html';
 		}
 
 		return $data;
@@ -220,7 +219,7 @@ class InstalledExtensions {
 	 * @return array|bool
 	 */
 	protected static function get_amazon_ebay_extension_data() {
-		$slug = 'codistoconnect';
+		$slug = 'woocommerce-amazon-ebay-integration';
 
 		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
 			return false;
@@ -240,7 +239,6 @@ class InstalledExtensions {
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=codisto-settings' );
 			$data['docsUrl']     = 'https://docs.woocommerce.com/document/getting-started-with-woocommerce-amazon-ebay-integration/';
-			$data['supportUrl']  = 'https://get.codisto.help/hc/en-us/categories/204467528';
 		}
 
 		return $data;
