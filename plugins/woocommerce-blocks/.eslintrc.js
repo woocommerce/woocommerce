@@ -10,6 +10,7 @@ module.exports = {
 	},
 	globals: {
 		wcSettings: 'readonly',
+		wcStoreApiNonce: 'readonly',
 		page: true,
 		browser: true,
 		context: true,

@@ -1,4 +1,4 @@
 /**
  * Internal dependencies
  */
-export * from './constants';
+import './store-api-nonce';

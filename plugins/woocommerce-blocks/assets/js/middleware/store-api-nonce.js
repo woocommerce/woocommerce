@@ -2,10 +2,10 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { getSetting } from '@woocommerce/settings';
 
+// @ts-ignore wcStoreApiNonce is window global
 // Cache for the initial nonce initialized from hydration.
-let nonce = getSetting( 'storeApiNonce' );
+let nonce = wcStoreApiNonce || '';
 
 /**
  * Returns whether or not this is a non GET wc/store API request.

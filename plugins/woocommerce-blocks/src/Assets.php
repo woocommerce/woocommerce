@@ -44,11 +44,18 @@ class Assets {
 		wp_style_add_data( 'wc-block-style', 'rtl', 'replace' );
 
 		// Shared libraries and components across all blocks.
-		self::register_script( 'wc-blocks-data-store', plugins_url( 'build/wc-blocks-data.js', __DIR__ ), [], false );
+		self::register_script( 'wc-blocks-middleware', plugins_url( 'build/wc-blocks-middleware.js', __DIR__ ), [], false );
+		self::register_script( 'wc-blocks-data-store', plugins_url( 'build/wc-blocks-data.js', __DIR__ ), [ 'wc-blocks-middleware' ], false );
 		self::register_script( 'wc-blocks', plugins_url( self::get_block_asset_build_path( 'blocks' ), __DIR__ ), [], false );
 		self::register_script( 'wc-vendors', plugins_url( self::get_block_asset_build_path( 'vendors' ), __DIR__ ), [], false );
-
 		self::register_script( 'wc-blocks-registry', plugins_url( 'build/wc-blocks-registry.js', __DIR__ ), [], false );
+
+		// Inline data.
+		wp_add_inline_script(
+			'wc-blocks-middleware',
+			"var wcStoreApiNonce = '" . esc_js( wp_create_nonce( 'wc_store_api' ) ) . "';",
+			'before'
+		);
 
 		// Individual blocks.
 		$block_dependencies = array( 'wc-vendors', 'wc-blocks' );
@@ -143,7 +150,6 @@ class Assets {
 				'restApiRoutes'                 => [
 					'/wc/store' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store' ) ),
 				],
-				'storeApiNonce'                 => wp_create_nonce( 'wc_store_api' ),
 				'homeUrl'                       => esc_url( home_url( '/' ) ),
 				'storePages'                    => [
 					'shop'     => self::format_page_resource( $page_ids['shop'] ),
