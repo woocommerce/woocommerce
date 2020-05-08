@@ -76,4 +76,4 @@ Code coverage is available on [Codecov](https://codecov.io/gh/woocommerce/woocom
 
 ## WooCommerce E2E Tests
 
-See [e2e-tests README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e-tests) to learn how to setup testing environment for running e2e tests and run them. 
+See [e2e README](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) to learn how to setup testing environment for running e2e tests and run them. 
