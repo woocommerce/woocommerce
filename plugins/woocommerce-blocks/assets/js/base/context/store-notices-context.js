@@ -9,14 +9,23 @@ import {
 	SnackbarNoticesContainer,
 } from '@woocommerce/base-components/store-notices-container';
 
+/**
+ * @typedef {import('@woocommerce/type-defs/contexts').NoticeContext} NoticeContext
+ */
+
 const StoreNoticesContext = createContext( {
 	notices: [],
 	createNotice: ( status, text, props ) => void { status, text, props },
-	createSnackBarNotice: () => void null,
+	createSnackbarNotice: ( content, options ) => void { content, options },
 	removeNotice: ( id, ctxt ) => void { id, ctxt },
 	context: 'wc/core',
 } );
 
+/**
+ * Returns the notices context values.
+ *
+ * @return {NoticeContext} The notice context value from the notice context.
+ */
 export const useStoreNoticesContext = () => {
 	return useContext( StoreNoticesContext );
 };
@@ -53,7 +62,7 @@ export const StoreNoticesProvider = ( {
 		( id, ctxt = context ) => {
 			removeNotice( id, ctxt );
 		},
-		[ createNotice, context ]
+		[ removeNotice, context ]
 	);
 
 	const createSnackbarNotice = useCallback(

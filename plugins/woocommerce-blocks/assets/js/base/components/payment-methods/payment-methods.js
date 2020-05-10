@@ -64,7 +64,7 @@ const PaymentMethods = () => {
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
 	const currentPaymentMethodInterface = useRef( paymentMethodInterface );
-	const [ selectedToken, setSelectedToken ] = useState( 0 );
+	const [ selectedToken, setSelectedToken ] = useState( '0' );
 	const { noticeContexts } = useEmitResponse();
 	const { removeNotice } = useStoreNotices();
 
@@ -146,7 +146,7 @@ const PaymentMethods = () => {
 	);
 
 	return Object.keys( customerPaymentMethods ).length > 0 &&
-		selectedToken !== 0
+		selectedToken !== '0'
 		? renderedSavedPaymentOptions
 		: renderedTabsAndSavedPaymentOptions;
 };

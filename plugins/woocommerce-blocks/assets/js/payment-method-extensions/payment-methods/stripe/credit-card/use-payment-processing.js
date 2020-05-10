@@ -84,7 +84,7 @@ export const usePaymentProcessing = (
 					};
 				}
 				// use token if it's set.
-				if ( parseInt( sourceId, 10 ) !== 0 ) {
+				if ( sourceId !== '' && sourceId !== '0' ) {
 					return {
 						type: emitResponse.responseTypes.SUCCESS,
 						meta: {

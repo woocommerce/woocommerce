@@ -173,7 +173,7 @@ export const CheckoutStateProvider = ( {
 
 	// emit events.
 	useEffect( () => {
-		const { status } = checkoutState;
+		const status = checkoutState.status;
 		if ( status === STATUS.BEFORE_PROCESSING ) {
 			removeNotices( 'error' );
 			emitEvent(
@@ -196,7 +196,13 @@ export const CheckoutStateProvider = ( {
 				}
 			} );
 		}
-	}, [ checkoutState.status, setValidationErrors ] );
+	}, [
+		checkoutState.status,
+		setValidationErrors,
+		addErrorNotice,
+		removeNotices,
+		dispatch,
+	] );
 
 	useEffect( () => {
 		if ( checkoutState.status === STATUS.AFTER_PROCESSING ) {
@@ -292,6 +298,10 @@ export const CheckoutStateProvider = ( {
 		checkoutState.customerNote,
 		checkoutState.processingResponse,
 		dispatchActions,
+		addErrorNotice,
+		isErrorResponse,
+		isFailResponse,
+		isSuccessResponse,
 	] );
 
 	const onSubmit = () => {

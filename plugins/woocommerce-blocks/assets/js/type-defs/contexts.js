@@ -305,4 +305,28 @@
  * @property {boolean}                  hasValidationErrors      True if there is at least one error.
  */
 
+/**
+ * @typedef StoreNoticeObject
+ *
+ * @property {string} type   The type of notice.
+ * @property {string} status The status of the notice.
+ * @property {string} id     The id of the notice.
+ */
+
+/**
+ * @typedef NoticeContext
+ *
+ * @property {Array<StoreNoticeObject>}              notices              An array of notice
+ *                                                                        objects.
+ * @property {function(string,string,any):undefined} createNotice         Creates a notice for the
+ *                                                                        given arguments.
+ * @property {function(string, any):undefined}       createSnackbarNotice Creates a snackbar notice
+ *                                                                        type.
+ * @property {function(string,string=):undefined}    removeNotice         Removes a notice with the
+ *                                                                        given id and context
+ * @property {string}                                context              The current context
+ *                                                                        identifier for the notice
+ *                                                                        provider
+ */
+
 export {};

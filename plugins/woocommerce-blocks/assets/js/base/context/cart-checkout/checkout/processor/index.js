@@ -100,6 +100,7 @@ const CheckoutProcessor = () => {
 		checkoutIsProcessing,
 		checkoutIsBeforeProcessing,
 		expressPaymentMethodActive,
+		dispatchActions,
 	] );
 
 	const paidAndWithoutErrors =
@@ -234,6 +235,8 @@ const CheckoutProcessor = () => {
 		paymentMethodId,
 		paymentMethodData,
 		cartNeedsPayment,
+		receiveCart,
+		dispatchActions,
 	] );
 	// redirect when checkout is complete and there is a redirect url.
 	useEffect( () => {
