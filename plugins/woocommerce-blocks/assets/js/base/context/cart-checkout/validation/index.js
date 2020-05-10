@@ -81,19 +81,22 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * @param {string} property  The name of the property to clear if exists in
 	 *                           validation error state.
 	 */
-	const clearValidationError = ( property ) => {
+	const clearValidationError = useCallback( ( property ) => {
 		updateValidationErrors( ( prevErrors ) => {
 			if ( ! prevErrors[ property ] ) {
 				return prevErrors;
 			}
 			return omit( prevErrors, [ property ] );
 		} );
-	};
+	}, [] );
 
 	/**
 	 * Clears the entire validation error state.
 	 */
-	const clearAllValidationErrors = () => void updateValidationErrors( {} );
+	const clearAllValidationErrors = useCallback(
+		() => void updateValidationErrors( {} ),
+		[]
+	);
 
 	/**
 	 * Used to record new validation errors in the state.
@@ -132,7 +135,7 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * @param {string} property The name of the property to update.
 	 * @param {Object} newError New validation error object.
 	 */
-	const updateValidationError = ( property, newError ) => {
+	const updateValidationError = useCallback( ( property, newError ) => {
 		updateValidationErrors( ( prevErrors ) => {
 			if ( ! prevErrors.hasOwnProperty( property ) ) {
 				return prevErrors;
@@ -148,7 +151,7 @@ export const ValidationContextProvider = ( { children } ) => {
 						[ property ]: updatedError,
 				  };
 		} );
-	};
+	}, [] );
 
 	/**
 	 * Given a property name and if an associated error exists, it sets its
@@ -157,10 +160,13 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * @param {string} property  The name of the property to set the `hidden`
 	 *                           value to true.
 	 */
-	const hideValidationError = ( property ) =>
-		void updateValidationError( property, {
-			hidden: true,
-		} );
+	const hideValidationError = useCallback(
+		( property ) =>
+			void updateValidationError( property, {
+				hidden: true,
+			} ),
+		[ updateValidationError ]
+	);
 
 	/**
 	 * Given a property name and if an associated error exists, it sets its
@@ -169,36 +175,42 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * @param {string} property  The name of the property to set the `hidden`
 	 *                           value to false.
 	 */
-	const showValidationError = ( property ) =>
-		void updateValidationError( property, {
-			hidden: false,
-		} );
+	const showValidationError = useCallback(
+		( property ) =>
+			void updateValidationError( property, {
+				hidden: false,
+			} ),
+		[ updateValidationError ]
+	);
 
 	/**
 	 * Sets the `hidden` value of all errors to `false`.
 	 */
-	const showAllValidationErrors = () =>
-		void updateValidationErrors( ( prevErrors ) => {
-			const updatedErrors = {};
+	const showAllValidationErrors = useCallback(
+		() =>
+			void updateValidationErrors( ( prevErrors ) => {
+				const updatedErrors = {};
 
-			Object.keys( prevErrors ).forEach( ( property ) => {
-				if ( prevErrors[ property ].hidden ) {
-					updatedErrors[ property ] = {
-						...prevErrors[ property ],
-						hidden: false,
-					};
+				Object.keys( prevErrors ).forEach( ( property ) => {
+					if ( prevErrors[ property ].hidden ) {
+						updatedErrors[ property ] = {
+							...prevErrors[ property ],
+							hidden: false,
+						};
+					}
+				} );
+
+				if ( Object.values( updatedErrors ).length === 0 ) {
+					return prevErrors;
 				}
-			} );
 
-			if ( Object.values( updatedErrors ).length === 0 ) {
-				return prevErrors;
-			}
-
-			return {
-				...prevErrors,
-				...updatedErrors,
-			};
-		} );
+				return {
+					...prevErrors,
+					...updatedErrors,
+				};
+			} ),
+		[]
+	);
 
 	const context = {
 		getValidationError,

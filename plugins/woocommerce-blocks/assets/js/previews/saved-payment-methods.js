@@ -8,7 +8,7 @@ export const previewSavedPaymentMethods = {
 			},
 			expires: '12/20',
 			is_default: false,
-			tokenId: 1,
+			tokenId: '1',
 		},
 	],
 };

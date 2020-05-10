@@ -170,47 +170,6 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		[ paymentData.currentStatus ]
 	);
 
-	// flip payment to processing if checkout processing is complete, there are
-	// no errors, and payment status is started.
-	useEffect( () => {
-		if (
-			checkoutIsProcessing &&
-			! checkoutHasError &&
-			! checkoutIsCalculating &&
-			! currentStatus.isFinished
-		) {
-			setPaymentStatus().processing();
-		}
-	}, [
-		checkoutIsProcessing,
-		checkoutHasError,
-		checkoutIsCalculating,
-		currentStatus.isFinished,
-	] );
-
-	// when checkout is returned to idle, set payment status to pristine.
-	useEffect( () => {
-		dispatch( statusOnly( PRISTINE ) );
-	}, [ checkoutIsIdle ] );
-
-	// set initial active payment method if it's undefined.
-	useEffect( () => {
-		const paymentMethodKeys = Object.keys( paymentData.paymentMethods );
-		if (
-			paymentMethodsInitialized &&
-			! activePaymentMethod &&
-			paymentMethodKeys.length > 0
-		) {
-			setActivePaymentMethod(
-				Object.keys( paymentData.paymentMethods )[ 0 ]
-			);
-		}
-	}, [
-		activePaymentMethod,
-		paymentMethodsInitialized,
-		paymentData.paymentMethods,
-	] );
-
 	/**
 	 * @type {PaymentStatusDispatch}
 	 */
@@ -267,8 +226,51 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 				);
 			},
 		} ),
-		[ dispatch ]
+		[ dispatch, setBillingData, setShippingAddress ]
 	);
+
+	// flip payment to processing if checkout processing is complete, there are
+	// no errors, and payment status is started.
+	useEffect( () => {
+		if (
+			checkoutIsProcessing &&
+			! checkoutHasError &&
+			! checkoutIsCalculating &&
+			! currentStatus.isFinished
+		) {
+			setPaymentStatus().processing();
+		}
+	}, [
+		checkoutIsProcessing,
+		checkoutHasError,
+		checkoutIsCalculating,
+		currentStatus.isFinished,
+		setPaymentStatus,
+	] );
+
+	// when checkout is returned to idle, set payment status to pristine.
+	useEffect( () => {
+		dispatch( statusOnly( PRISTINE ) );
+	}, [ checkoutIsIdle ] );
+
+	// set initial active payment method if it's undefined.
+	useEffect( () => {
+		const paymentMethodKeys = Object.keys( paymentData.paymentMethods );
+		if (
+			paymentMethodsInitialized &&
+			! activePaymentMethod &&
+			paymentMethodKeys.length > 0
+		) {
+			setActivePaymentMethod(
+				Object.keys( paymentData.paymentMethods )[ 0 ]
+			);
+		}
+	}, [
+		activePaymentMethod,
+		paymentMethodsInitialized,
+		paymentData.paymentMethods,
+		setActivePaymentMethod,
+	] );
 
 	// emit events.
 	useEffect( () => {
@@ -323,7 +325,17 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 				}
 			} );
 		}
-	}, [ currentStatus.isProcessing, setValidationErrors, setPaymentStatus ] );
+	}, [
+		currentStatus.isProcessing,
+		setValidationErrors,
+		setPaymentStatus,
+		removeNotice,
+		noticeContexts.PAYMENTS,
+		isSuccessResponse,
+		isFailResponse,
+		isErrorResponse,
+		addErrorNotice,
+	] );
 
 	/**
 	 * @type {PaymentMethodDataContext}

@@ -50,7 +50,7 @@ const CreditCardComponent = ( {
 		if ( paymentEvent.error ) {
 			onStripeError( paymentEvent );
 		}
-		setSourceId( 0 );
+		setSourceId( '0' );
 	};
 	const renderedCardElement = getStripeServerData().inline_cc_form ? (
 		<InlineCard
