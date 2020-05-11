@@ -5,8 +5,8 @@
  * Description: The WooCommerce core REST API, installed as a feature plugin for development and testing purposes. Requires WooCommerce 3.7+ and PHP 5.3+.
  * Author: Automattic
  * Author URI: https://woocommerce.com
- * Version: 1.0.7
- * Requires PHP: 5.6
+ * Version: 1.0.8
+ * Requires PHP: 7.0
  * License: GPLv3
  *
  * @package Automattic/WooCommerce/RestApi
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
+if ( version_compare( PHP_VERSION, '7.0.0', '<' ) ) {
 	return;
 }
 

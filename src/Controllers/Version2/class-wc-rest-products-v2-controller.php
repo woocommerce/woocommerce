@@ -419,9 +419,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			$images[] = array(
 				'id'                => 0,
 				'date_created'      => wc_rest_prepare_date_response( current_time( 'mysql' ), false ), // Default to now.
-				'date_created_gmt'  => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ), // Default to now.
+				'date_created_gmt'  => wc_rest_prepare_date_response( time() ), // Default to now.
 				'date_modified'     => wc_rest_prepare_date_response( current_time( 'mysql' ), false ),
-				'date_modified_gmt' => wc_rest_prepare_date_response( current_time( 'timestamp', true ) ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( time() ),
 				'src'               => wc_placeholder_img_src(),
 				'name'              => __( 'Placeholder', 'woocommerce-rest-api' ),
 				'alt'               => __( 'Placeholder', 'woocommerce-rest-api' ),
@@ -2115,7 +2115,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array( 'any', 'future' ), array_keys( get_post_statuses() ) ),
+			'enum'              => array_merge( array( 'any', 'future', 'trash' ), array_keys( get_post_statuses() ) ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

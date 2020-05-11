@@ -113,11 +113,11 @@ class Bootstrap {
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
 		// WooCommerce Core Testing Framework.
-		require_once $this->wc_tests_dir . '/framework/class-wc-unit-test-factory.php';
-		require_once $this->wc_tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
-		require_once $this->wc_tests_dir . '/includes/wp-http-testcase.php';
-		require_once $this->wc_tests_dir . '/framework/class-wc-unit-test-case.php';
-		require_once $this->wc_tests_dir . '/framework/class-wc-rest-unit-test-case.php';
+		require_once $this->wc_tests_dir . '/legacy/framework/class-wc-unit-test-factory.php';
+		require_once $this->wc_tests_dir . '/legacy/framework/vendor/class-wp-test-spy-rest-server.php';
+		require_once $this->wc_tests_dir . '/legacy/includes/wp-http-testcase.php';
+		require_once $this->wc_tests_dir . '/legacy/framework/class-wc-unit-test-case.php';
+		require_once $this->wc_tests_dir . '/legacy/framework/class-wc-rest-unit-test-case.php';
 
 		require_once $this->tests_dir . '/Helpers/AdminNotesHelper.php';
 		require_once $this->tests_dir . '/Helpers/CouponHelper.php';
