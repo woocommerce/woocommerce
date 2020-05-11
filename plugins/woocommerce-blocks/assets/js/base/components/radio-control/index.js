@@ -32,7 +32,12 @@ const RadioControl = ( {
 						name={ `radio-control-${ radioControlId }` }
 						checked={ option.value === selected }
 						option={ option }
-						onChange={ onChange }
+						onChange={ ( value ) => {
+							onChange( value );
+							if ( typeof option.onChange === 'function' ) {
+								option.onChange( value );
+							}
+						} }
 					/>
 				) ) }
 			</div>

@@ -248,10 +248,13 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		setPaymentStatus,
 	] );
 
-	// when checkout is returned to idle, set payment status to pristine.
+	// When checkout is returned to idle, set payment status to pristine
+	// but only if payment status is already not finished.
 	useEffect( () => {
-		dispatch( statusOnly( PRISTINE ) );
-	}, [ checkoutIsIdle ] );
+		if ( ! currentStatus.isSuccessful ) {
+			dispatch( statusOnly( PRISTINE ) );
+		}
+	}, [ checkoutIsIdle, currentStatus.isSuccessful ] );
 
 	// set initial active payment method if it's undefined.
 	useEffect( () => {
