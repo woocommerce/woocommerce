@@ -215,7 +215,13 @@ module.exports = function( grunt ) {
 			},
 			contributors: {
 				command: [
-					'echo "<h2>WooCommerce Admin</h2>" > contributors.html',
+					'echo "<h2>WooCommerce core</h2>" > contributors.html',
+					'echo "Generating contributor list for WC core since <%= fromDate %>"',
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
+					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
+					'echo "Output generated to contributors.html."',
+					'echo "<h2>WooCommerce Admin</h2>" >> contributors.html',
 					'echo "Generating contributor list for WC Admin since <%= fromDate %>"',
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-admin --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
@@ -235,12 +241,6 @@ module.exports = function( grunt ) {
 					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce-rest-api --fromDate <%= fromDate %>' +
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
 					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
-					'echo "<h2>WooCommerce core</h2>" >> contributors.html',
-					'echo "Generating contributor list for WC core since <%= fromDate %>"',
-					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
-					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
-					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
-					'echo "Output generated to contributors.html."',
 				].join( '&&' )
 			}
 		},
