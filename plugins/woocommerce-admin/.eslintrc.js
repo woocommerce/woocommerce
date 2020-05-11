@@ -4,6 +4,7 @@ module.exports = {
 		'prettier',
 		'plugin:testing-library/recommended',
 		'plugin:testing-library/react',
+		'plugin:jest-dom/recommended',
 	],
 	env: {
 		'jest/globals': true,
@@ -11,7 +12,7 @@ module.exports = {
 	globals: {
 		wcSettings: true,
 	},
-	plugins: [ 'jest', 'testing-library' ],
+	plugins: [ 'jest', 'jest-dom', 'testing-library' ],
 	rules: {
 		'@wordpress/dependency-group': 'off',
 		'valid-jsdoc': 'off',
