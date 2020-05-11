@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "265265cc587459cc670e28108c87c9aa",
+    "content-hash": "7eeb045064d70f87a84b44d48ff56b3b",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -388,12 +388,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "84e8ecba7d4f542f85fae7663e90eede1858b41b"
+                "reference": "93451c8b1061010f0dcf1ac50da7e4b44d119fb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/84e8ecba7d4f542f85fae7663e90eede1858b41b",
-                "reference": "84e8ecba7d4f542f85fae7663e90eede1858b41b",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/93451c8b1061010f0dcf1ac50da7e4b44d119fb1",
+                "reference": "93451c8b1061010f0dcf1ac50da7e4b44d119fb1",
                 "shasum": ""
             },
             "require-dev": {
@@ -423,12 +423,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "79e78bb8b71fa0c0b0a77efee5474b46d62c1a76"
+                "reference": "ac862f831eced0e6a3692539a24c738d5aafc4ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/79e78bb8b71fa0c0b0a77efee5474b46d62c1a76",
-                "reference": "79e78bb8b71fa0c0b0a77efee5474b46d62c1a76",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/ac862f831eced0e6a3692539a24c738d5aafc4ee",
+                "reference": "ac862f831eced0e6a3692539a24c738d5aafc4ee",
                 "shasum": ""
             },
             "require": {
@@ -513,16 +513,16 @@
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
-            "version": "1.0.7",
+            "version": "1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "49162ec26a25bd0c6efc0f3452b113cdfff0a823"
+                "reference": "0756027c669bb5749554ee58b9416cbdcceaa752"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/49162ec26a25bd0c6efc0f3452b113cdfff0a823",
-                "reference": "49162ec26a25bd0c6efc0f3452b113cdfff0a823",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/0756027c669bb5749554ee58b9416cbdcceaa752",
+                "reference": "0756027c669bb5749554ee58b9416cbdcceaa752",
                 "shasum": ""
             },
             "require": {
@@ -549,7 +549,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2020-01-28T21:04:51+00:00"
+            "time": "2020-05-11T14:54:30+00:00"
         }
     ],
     "packages-dev": [
@@ -2463,16 +2463,16 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.15.0",
+            "version": "v1.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
+                "reference": "1aab00e39cebaef4d8652497f46c15c1b7e45294"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
-                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/1aab00e39cebaef4d8652497f46c15c1b7e45294",
+                "reference": "1aab00e39cebaef4d8652497f46c15c1b7e45294",
                 "shasum": ""
             },
             "require": {
@@ -2484,7 +2484,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.15-dev"
+                    "dev-master": "1.16-dev"
                 }
             },
             "autoload": {
@@ -2517,7 +2517,7 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2020-02-27T09:26:54+00:00"
+            "time": "2020-05-08T16:50:20+00:00"
         },
         {
             "name": "theseer/tokenizer",
