@@ -54,7 +54,7 @@ We recommend using Docker for running tests locally in order for the test enviro
 
 ### Environment Variables
 
-During the process of Docker building a container with test site for running tests, site URL is being set. Admin and customer users are also being created in advance with details specified in the `docker-compose.yaml` file. As a result, there is `./tests/e2e-tests/config/default.json` file that contains pre-set variables needed to run the test:
+During the process of Docker building a container with test site for running tests, site URL is being set. Admin and customer users are also being created in advance with details specified in the `docker-compose.yaml` file. As a result, there is `./tests/e2e/config/default.json` file that contains pre-set variables needed to run the test:
 
 ```
 {
@@ -89,6 +89,8 @@ Setup Wizard e2e test (located in `activate-and-setup` directory) will run befor
 - `git checkout master` or checkout the branch where you need to run tests 
 
 - Run `npm install`
+
+- Run `npm install jest --global`
 
 - Run `composer install --no-dev`
 
@@ -132,14 +134,14 @@ Tests are being run headless by default. However, sometimes it's useful to obser
 npm run test:e2e-dev
 ```
 
-The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by editing `PUPPETEER_SLOWMO` variable in `./tests/bin/e2e-test-integration.js` file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
+The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations so we can better see what is happening in the browser. You can adjust the SlowMo value by copying `/tests/e2e/env/config/jest.puppetee.config.js` to `/tests/e2e/config` and editing the value in that file. The default `PUPPETEER_SLOWMO=50` means test actions will be slowed down by 50 milliseconds.
 
 ### How to run an individual test
 
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npm run test:e2e ./tests/e2e-tests/specs/wp-admin/wp-admin-product-new.test.js
+npm run test:e2e ./tests/e2e/specs/wp-admin/wp-admin-product-new.test.js
 ``` 
 
 ### How to skip tests
@@ -159,7 +161,7 @@ it.only( 'Can make sure WooCommerce is activated. If not, activate it', async ()
 As a result, when you run `setup-wizard.test.js`, only the login and activate tests will run. The rest will be skipped. You should see the following in the terminal:
 
 ```
- PASS  tests/e2e-tests/specs/activate-and-setup/setup-wizard.test.js (11.927s)
+ PASS  tests/e2e/specs/activate-and-setup/setup-wizard.test.js (11.927s)
   Store owner can login and make sure WooCommerce is activated
     ✓ Can login (7189ms)
     ✓ Can make sure WooCommerce is activated. If not, activate it (1187ms)
@@ -196,7 +198,7 @@ We use the following tools to write e2e tests:
 - [jest-puppeteer](https://github.com/smooth-code/jest-puppeteer) – provides all required configuration to run tests using Puppeteer
 - [expect-puppeteer](https://github.com/smooth-code/jest-puppeteer/tree/master/packages/expect-puppeteer) – assertion library for Puppeteer
 
-Tests are kept in `tests/e2e-tests/specs` folder. 
+Tests are kept in `tests/e2e/specs` folder.
 
 The following packages are being used to write tests:
 
