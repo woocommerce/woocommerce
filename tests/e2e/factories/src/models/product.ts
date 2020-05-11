@@ -1,8 +1,11 @@
-export class Product {
-	public readonly id: number|null = -1;
-	public readonly name: string = '';
+import { Model } from './model';
+import { DeepPartial } from 'fishery';
 
-	public constructor( args?: Partial< Product > ) {
+export class Product extends Model {
+	public readonly Name: string = '';
+
+	public constructor( args?: DeepPartial< Product > ) {
+		super();
 		Object.assign( this, args );
 	}
 }

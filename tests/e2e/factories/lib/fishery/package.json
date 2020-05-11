@@ -1,0 +1,62 @@
+{
+  "name": "fishery",
+  "version": "0.3.0",
+  "description": "A library for setting up JavaScript factories to help build objects as test data, with full TypeScript support",
+  "keywords": [
+    "factories",
+    "testing",
+    "typescript",
+    "factory_bot",
+    "factorybot",
+    "mock",
+    "test data"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "../../../../../../../Open Source/fishery/node_modules/.bin/tsc -p tsconfig.build.json",
+    "test": "../../../../../../../Open Source/fishery/node_modules/.bin/jest",
+    "testinit": "../../../../../../../Open Source/fishery/node_modules/.bin/jest --init",
+    "pretty": "../../../../../../../Open Source/fishery/node_modules/.bin/prettier --write '{*,.*,lib/**/*}.{ts,json,md}'",
+    "verifyPretty": "../../../../../../../Open Source/fishery/node_modules/.bin/prettier --check '{*,.*,lib/**/*}.{ts,json,md}'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thoughtbot/fishery.git"
+  },
+  "author": "Stephen Hanson <shanson@thoughtbot.com> (https://shanson.co)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thoughtbot/fishery/issues"
+  },
+  "homepage": "https://github.com/thoughtbot/fishery#readme",
+  "prettier": {
+    "useTabs": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "semi": true,
+    "overrides": [
+      {
+        "files": "**/package.json",
+        "options": {
+          "parser": "json-stringify"
+        }
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.12",
+    "@types/lodash.merge": "^4.6.6",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "lodash.merge": "^4.6.2"
+  }
+}
