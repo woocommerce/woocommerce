@@ -241,7 +241,7 @@ module.exports = function( grunt ) {
 					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format html --sortOrder desc' +
 					' --showlogin true --filter "renovate-bot,apps/renovate,renovate,renovate[bot]" >> contributors.html',
 					'echo "Output generated to contributors.html."',
-				].join('&&')
+				].join( '&&' )
 			}
 		},
 
