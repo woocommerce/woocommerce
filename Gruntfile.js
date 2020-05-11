@@ -198,23 +198,6 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		// Exec shell commands.
-		shell: {
-			options: {
-				stdout: true,
-				stderr: true
-			},
-			e2e_test: {
-				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
-			},
-			e2e_tests: {
-				command: 'npm run --silent test'
-			},
-			e2e_tests_grep: {
-				command: 'npm run --silent test:grep "' + grunt.option( 'grep' ) + '"'
-			},
-		},
-
 		// PHP Code Sniffer.
 		phpcs: {
 			options: {
@@ -250,7 +233,6 @@ module.exports = function( grunt ) {
 
 	// Load NPM tasks to be used here.
 	grunt.loadNpmTasks( 'grunt-sass' );
-	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-phpcs' );
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
@@ -298,17 +280,5 @@ module.exports = function( grunt ) {
 	// Only an alias to 'default' task.
 	grunt.registerTask( 'dev', [
 		'default'
-	]);
-
-	grunt.registerTask( 'e2e-tests', [
-		'shell:e2e_tests'
-	]);
-
-	grunt.registerTask( 'e2e-tests-grep', [
-		'shell:e2e_tests_grep'
-	]);
-
-	grunt.registerTask( 'e2e-test', [
-		'shell:e2e_test'
 	]);
 };
