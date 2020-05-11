@@ -9,64 +9,45 @@
 /**
  * @typedef {Object} BillingDataContext
  *
- * @property {BillingData} billingData    The current billing data, including
- *                                        address and email.
+ * @property {BillingData} billingData    The current billing data, including address and email.
  * @property {Function}    setBillingData A function for setting billing data.
  */
 
 /**
  * @typedef {Object} ShippingDataContext
  *
- * @property {ShippingErrorStatus}  shippingErrorStatus   The current error
- *                                                        status for shipping
- *                                                        rates.
- * @property {Function}             dispatchErrorStatus   A function for
- *                                                        dispatching a shipping
- *                                                        rate error status.
- * @property {ShippingErrorTypes}   shippingErrorTypes    The error type
- *                                                        constants for the
- *                                                        shipping rate error
- *                                                        status.
- * @property {CartShippingOption[]} shippingRates         An array of available
- *                                                        shipping rates.
- * @property {Function}             setShippingRates      Used to set the
- *                                                        available shipping
- *                                                        rates.
- * @property {boolean}              shippingRatesLoading  Whether or not the
- *                                                        shipping rates are
- *                                                        being loaded.
- * @property {string[]}             selectedRates         The ids of the rates
- *                                                        that are selected.
- * @property {Function}             setSelectedRates      A function for setting
- *                                                        the selected rates.
- * @property {boolean}              isSelectingRate       True when rate is being
- *                                                        selected.
- * @property {CartShippingAddress}  shippingAddress       The current set
- *                                                        address for shipping.
- * @property {Function}             setShippingAddress    A function for setting
- *                                                        the shipping address.
- * @property {function()}           onShippingRateSuccess Used to register a
- *                                                        callback to be invoked
- *                                                        when shipping rates
- *                                                        are retrieved
- *                                                        successfully.
- * @property {function()}           onShippingRateSelectSuccess Used to register
- *                                                        a callback to be
- *                                                        invoked when shipping
- *                                                        rate is selected
- *                                                        successfully.
- * @property {function()}           onShippingRateSelectFail Used to register a
- *                                                        callback to be invoked
- *                                                        when shipping rate is
- *                                                        selected unsuccessfully
- * @property {function()}           onShippingRateFail    Used to register a
- *                                                        callback to be invoked
- *                                                        when there is an
- *                                                        error with retrieving
- *                                                        shipping rates.
- * @property {boolean}              needsShipping         True if the cart has
- *                                                        items requiring
- *                                                        shipping.
+ * @property {ShippingErrorStatus}  shippingErrorStatus         The current shipping error status.
+ * @property {Function}             dispatchErrorStatus         A function for dispatching a
+ *                                                              shipping rate error status.
+ * @property {ShippingErrorTypes}   shippingErrorTypes          The error type constants for the
+ *                                                              shipping rate error status.
+ * @property {CartShippingOption[]} shippingRates               An array of available shipping rates.
+ * @property {Function}             setShippingRates            Used to set the available shipping
+ *                                                              rates.
+ * @property {boolean}              shippingRatesLoading        Whether or not the shipping rates
+ *                                                              are being loaded.
+ * @property {string[]}             selectedRates               The ids of the rates that are
+ *                                                              selected.
+ * @property {Function}             setSelectedRates            Function for setting the selected
+ *                                                              rates.
+ * @property {boolean}              isSelectingRate             True when rate is being selected.
+ * @property {CartShippingAddress}  shippingAddress             The current set address for shipping.
+ * @property {Function}             setShippingAddress          Function for setting the shipping
+ *                                                              address.
+ * @property {function()}           onShippingRateSuccess       Used to register a callback to be
+ *                                                              invoked when shipping rates are
+ *                                                              retrieved.
+ * @property {function()}           onShippingRateSelectSuccess Used to register a callback to be
+ *                                                              invoked when shipping rate is
+ *                                                              selected.
+ * @property {function()}           onShippingRateSelectFail    Used to register a callback to be
+ *                                                              invoked when shipping rate is
+ *                                                              selected unsuccessfully
+ * @property {function()}           onShippingRateFail          Used to register a callback to be
+ *                                                              invoked when there is an error with
+ *                                                              retrieving shipping rates.
+ * @property {boolean}              needsShipping               True if the cart has items requiring
+ *                                                              shipping.
  */
 
 /**
@@ -82,10 +63,9 @@
  * @typedef {Object} ShippingErrorTypes
  *
  * @property {string} NONE            No shipping error.
- * @property {string} INVALID_ADDRESS Error due to an invalid address for
- *                                    calculating shipping.
- * @property {string} UNKNOWN         When an unknown error has occurred in
- *                                    calculating/retrieving shipping rates.
+ * @property {string} INVALID_ADDRESS Error due to an invalid address for calculating shipping.
+ * @property {string} UNKNOWN         When an unknown error has occurred in calculating/retrieving
+ *                                    shipping rates.
  */
 
 /**
@@ -94,22 +74,17 @@
  * This contains status information for the current active payment method in
  * the checkout.
  *
- * @property {boolean} isPristine   If true then the payment method state in
- *                                  checkout is pristine.
- * @property {boolean} isStarted    If true then the payment method has been
- *                                  initialized and has started.
- * @property {boolean} isProcessing If true then the payment method is
- *                                  processing payment.
- * @property {boolean} isFinished   If true then the payment method is in a
- *                                  finished state (which may mean it's status
- *                                  is either error, failed, or success)
- * @property {boolean} hasError     If true then the payment method is in an
- *                                  error state.
- * @property {boolean} hasFailed    If true then the payment method has failed
- *                                  (usually indicates a problem with the
- *                                  payment method used, not logic error)
- * @property {boolean} isSuccessful If true then the payment method has
- *                                  completed it's processing successfully.
+ * @property {boolean} isPristine   If true then the payment method state in checkout is pristine.
+ * @property {boolean} isStarted    If true then the payment method has been initialized and has
+ *                                  started.
+ * @property {boolean} isProcessing If true then the payment method is processing payment.
+ * @property {boolean} isFinished   If true then the payment method is in a finished state (which
+ *                                  may mean it's status is either error, failed, or success).
+ * @property {boolean} hasError     If true then the payment method is in an error state.
+ * @property {boolean} hasFailed    If true then the payment method has failed (usually indicates a
+ *                                  problem with the  payment method used, not logic error)
+ * @property {boolean} isSuccessful If true then the payment method has  completed it's processing
+ *                                  successfully.
  */
 
 /**
@@ -117,28 +92,25 @@
  *
  * @typedef {Object} CustomerPaymentMethod
  *
- * @property {Object}  method     The payment method object (varies on what it
- *                                might contain)
+ * @property {Object}  method     The payment method object (varies on what it might contain)
  * @property {string}  expires    Short form of expiry for payment method.
- * @property {boolean} is_default Whether it is the default payment method of
- *                                the customer or not.
+ * @property {boolean} is_default Whether it is the default payment method of the customer or not.
  * @property {number}  tokenId    The id of the saved payment method.
- * @property {Object}  actions    Varies, actions that can be done to interact
- *                                with the payment method.
+ * @property {Object}  actions    Varies, actions that can be done to interact with the payment
+ *                                method.
  */
 
 /**
  * @typedef {Object} ShippingDataResponse
  *
- * @property {CartShippingAddress} address      The address selected for
- *                                              shipping.
+ * @property {CartShippingAddress} address The address selected for shipping.
  */
 
 /**
  * A Saved Customer Payment methods object
  *
- * This is an object where the keys are payment gateway slugs and the values
- * Are an array of CustomerPaymentMethod objects.
+ * This is an object where the keys are payment gateway slugs and the values are an array of
+ * CustomerPaymentMethod objects.
  *
  * @typedef {Object} SavedCustomerPaymentMethods
  */
@@ -229,7 +201,7 @@
  *                                                                     processed. Note, payment
  *                                                                     related processing happens
  *                                                                     during this state. When
- *                                                                     payemnt status is success,
+ *                                                                     payment status is success,
  *                                                                     processing happens on the
  *                                                                     server.
  * @property {boolean}                      isCalculating              True when something in the
@@ -273,12 +245,10 @@
 /**
  * @typedef {Object} EditorDataContext
  *
- * @property {boolean}                 isEditor           Indicates whether in
- *                                                        the editor context
- *                                                        (true) or not (false).
+ * @property {boolean}                 isEditor           Indicates whether in the editor context.
  * @property {number}                  currentPostId      The post ID being edited.
- * @property {Object}                  previewData        Object containing preview
- *                                                        data for the editor.
+ * @property {Object}                  previewData        Object containing preview data for the
+ *                                                        editor.
  */
 
 /**
@@ -327,6 +297,17 @@
  * @property {string}                                context              The current context
  *                                                                        identifier for the notice
  *                                                                        provider
+ */
+
+/**
+ * @typedef {Object} ContainerWidthContext
+ *
+ * @property {boolean} hasContainerWidth  True once the class name has been derived.
+ * @property {string}  containerClassName The class name derived from the width of the container.
+ * @property {boolean} isMobile           True if the derived container width is mobile.
+ * @property {boolean} isSmall            True if the derived container width is small.
+ * @property {boolean} isMedium           True if the derived container width is medium.
+ * @property {boolean} isLarge            True if the derived container width is large.
  */
 
 export {};

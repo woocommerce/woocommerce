@@ -18,10 +18,10 @@ import { useResizeObserver } from 'wordpress-compose';
  *
  * ```js
  * const App = () => {
- * 	const [ resizeListener, containerQueryClassName ] = useContainerQueries();
+ * 	const [ resizeListener, containerClassName ] = useContainerQueries();
  *
  * 	return (
- * 		<div className={ containerQueryClassName }>
+ * 		<div className={ containerClassName }>
  * 			{ resizeListener }
  * 			Your content here
  * 		</div>
