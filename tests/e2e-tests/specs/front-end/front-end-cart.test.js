@@ -8,11 +8,17 @@
 import { createSimpleProduct } from '../../utils/components';
 import { CustomerFlow, StoreOwnerFlow } from '../../utils/flows';
 import { uiUnblocked } from '../../utils';
+import { factories } from '@woocommerce/e2e-factories'
 
 describe( 'Cart page', () => {
 	beforeAll( async () => {
 		await StoreOwnerFlow.login();
-		await createSimpleProduct();
+
+		await factories.product.create( {
+			Name: 'Simple Product',
+			RegularPrice: '9.99',
+		} );
+
 		await StoreOwnerFlow.logout();
 	} );
 

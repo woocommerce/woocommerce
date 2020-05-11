@@ -10,14 +10,17 @@ describe( 'product-factory', () => {
 			return Promise.resolve( {
 				id: 101,
 				name: 'Test Product',
+				regular_price: '9.99',
 			} );
 		} );
 
 		const product = await factories.product.create( {
 			Name: 'Test Product',
+			RegularPrice: '9.99',
 		} );
 
 		expect( product.ID ).toEqual( 101 );
 		expect( product.Name ).toMatch( 'Test Product' );
+		expect( product.RegularPrice ).toMatch( '9.99' );
 	} );
 } );
