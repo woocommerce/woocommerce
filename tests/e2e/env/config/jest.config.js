@@ -7,7 +7,7 @@ module.exports = {
 
 	moduleNameMapper: {
 		'@woocommerce/e2e-tests/(.*)':
-			'<rootDir>/node_modules/woocommerce/tests/e2e/$1',
+			'<rootDir>/tests/e2e/$1',
 	},
 
 	preset: 'jest-puppeteer',
@@ -16,7 +16,7 @@ module.exports = {
 	// A list of paths to modules that run some code to configure or set up the testing framework
 	// before each test
 	setupFilesAfterEnv: [
-		'<rootDir>/config/jest.setup.js',
+		'<rootDir>/build/setup/jest.setup.js',
 		'expect-puppeteer',
 	],
 
