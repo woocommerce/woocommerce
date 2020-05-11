@@ -287,6 +287,7 @@ class WC_Install {
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
 		self::create_tables();
+		self::verify_base_tables();
 		self::create_options();
 		self::create_roles();
 		self::setup_environment();
@@ -301,6 +302,37 @@ class WC_Install {
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Check if all the base tables are present.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 *
+	 * @return array List of querues.
+	 */
+	public static function verify_base_tables( $modify_notice = true ) {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		$queries = dbDelta( self::get_schema(), false );
+		$missing_tables = array();
+		foreach ( $queries as $table_name => $result ) {
+			if ( "Created table $table_name" === $result ) {
+				$missing_tables[] = $table_name;
+			}
+		}
+
+		if ( 0 < count( $missing_tables ) ) {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::add_notice( 'base_tables_missing' );
+			}
+		} else {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce-db-verified', WC()->version );
+		}
+		return $missing_tables;
 	}
 
 	/**
@@ -630,8 +662,9 @@ class WC_Install {
 	 *      woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
 	 *      woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
 	 *      woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
+	 *      wc_reserved_stock - Hold reserved stock during a checkout.
 	 */
-	private static function create_tables() {
+	public static function create_tables() {
 		global $wpdb;
 
 		$wpdb->hide_errors();
