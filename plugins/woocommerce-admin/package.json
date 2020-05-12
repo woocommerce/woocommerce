@@ -119,7 +119,7 @@
 		"d3-shape": "1.3.7",
 		"d3-time-format": "2.2.3",
 		"debug": "4.1.1",
-		"dompurify": "2.0.8",
+		"dompurify": "2.0.11",
 		"emoji-flags": "1.2.0",
 		"gridicons": "3.3.1",
 		"history": "4.10.1",
