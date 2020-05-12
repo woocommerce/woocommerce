@@ -16,7 +16,8 @@
 	background: #fff;
 	border-radius: 4px;
 
-	.wc-block-quantity-selector__input {
+	// Extra label for specificity needed in the editor.
+	input.wc-block-quantity-selector__input {
 		order: 2;
 		min-width: 40px;
 		flex: 1 1 auto;

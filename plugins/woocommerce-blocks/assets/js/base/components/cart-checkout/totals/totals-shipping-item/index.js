@@ -49,11 +49,12 @@ const TotalsShippingItem = ( {
 	if ( ! hasRates && ! hasShippingAddress && ! isCheckout ) {
 		return (
 			<TotalsItem
+				className="wc-block-shipping-totals"
 				label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
 				value={
 					showCalculator ? (
 						<button
-							className="wc-block-totals__change-address-button"
+							className="wc-block-shipping-totals__change-address-button"
 							onClick={ () => {
 								setIsShippingCalculatorOpen(
 									! isShippingCalculatorOpen
@@ -90,7 +91,7 @@ const TotalsShippingItem = ( {
 	}
 
 	return (
-		<>
+		<div className="wc-block-shipping-totals">
 			<TotalsItem
 				label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
 				value={ totalShippingValue ? totalShippingValue : '' }
@@ -99,7 +100,7 @@ const TotalsShippingItem = ( {
 						<ShippingLocation address={ shippingAddress } />{ ' ' }
 						{ showCalculator && (
 							<button
-								className="wc-block-totals__change-address-button"
+								className="wc-block-shipping-totals__change-address-button"
 								onClick={ () => {
 									setIsShippingCalculatorOpen(
 										! isShippingCalculatorOpen
@@ -130,7 +131,7 @@ const TotalsShippingItem = ( {
 					shippingRatesLoading={ shippingRatesLoading }
 				/>
 			) }
-		</>
+		</div>
 	);
 };
 
