@@ -1,12 +1,12 @@
 // Added extra class and label for specificity.
-fieldset.wc-block-totals__shipping-options-fieldset {
+.wc-block-shipping-totals fieldset.wc-block-shipping-totals__fieldset {
 	background-color: transparent;
 	margin: 0;
 	padding: 0;
 	border: 0;
 }
 
-.wc-block-totals__shipping-options {
+.wc-block-shipping-totals__options {
 	.wc-block-radio-control__label,
 	.wc-block-radio-control__description,
 	.wc-block-radio-control__secondary-label,
@@ -22,8 +22,8 @@ fieldset.wc-block-totals__shipping-options-fieldset {
 	}
 }
 
-.wc-block-totals__change-address-button {
-	@include link-button;
+.wc-block-shipping-totals__change-address-button {
+	@include link-button();
 
 	&:hover,
 	&:focus,

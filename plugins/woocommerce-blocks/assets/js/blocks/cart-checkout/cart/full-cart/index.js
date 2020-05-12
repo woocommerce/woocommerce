@@ -42,7 +42,6 @@ import CartLineItemsTitle from './cart-line-items-title';
 import CartLineItemsTable from './cart-line-items-table';
 
 import './style.scss';
-import './editor.scss';
 
 /**
  * Component that renders the Cart block when user has something in cart aka "full".
