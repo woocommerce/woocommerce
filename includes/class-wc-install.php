@@ -326,11 +326,13 @@ class WC_Install {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::add_notice( 'base_tables_missing' );
 			}
+			update_option( 'woocommerce-db-missing-tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
 			}
 			update_option( 'woocommerce-db-verified', WC()->version );
+			delete_option( 'woocommerce-db-missing-tables' );
 		}
 		return $missing_tables;
 	}
