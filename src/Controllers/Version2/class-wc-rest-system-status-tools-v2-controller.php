@@ -210,7 +210,6 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			);
 		}
 
-
 		// Jetpack does the image resizing heavy lifting so you don't have to.
 		if ( ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) || ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			unset( $tools['regenerate_thumbnails'] );
@@ -469,7 +468,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 						$wpdb->prepare(
 							"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 							WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )",
-							date( 'Y-m-d', current_time( 'timestamp' ) )
+							gmdate( 'Y-m-d', current_time( 'timestamp' ) )
 						)
 					)
 				);
@@ -550,7 +549,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 			case 'verify_db_tables':
 				if ( ! method_exists( 'WC_Install', 'verify_base_tables' ) ) {
-					$message = __( 'You need WooCommerce 4.2 or newer to run this tool.', 'woocommerce' );
+					$message = __( 'You need WooCommerce 4.2 or newer to run this tool.', 'woocommerce-rest-api' );
 					$ran = false;
 					break;
 				}
