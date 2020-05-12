@@ -577,7 +577,6 @@ class WC_Product_CSV_Importer_Controller {
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
-			$field             = strtolower( $field );
 			$index             = $num_indexes ? $key : $field;
 			$headers[ $index ] = $field;
 
