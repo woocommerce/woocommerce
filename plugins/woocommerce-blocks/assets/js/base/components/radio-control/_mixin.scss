@@ -7,10 +7,9 @@
 	}
 
 	.wc-block-radio-control__option-layout {
+		display: table;
+		width: 100%;
 		border-bottom: 1px solid $core-grey-light-600;
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
 		padding-bottom: $gap-small;
 	}
 
@@ -24,6 +23,21 @@
 		top: $gap-small;
 	}
 
+	.wc-block-radio-control__label-group,
+	.wc-block-radio-control__description-group {
+		display: table-row;
+
+		> span {
+			display: table-cell;
+		}
+
+		.wc-block-radio-control__secondary-label,
+		.wc-block-radio-control__secondary-description {
+			text-align: right;
+			min-width: 50%;
+		}
+	}
+
 	.wc-block-radio-control__label,
 	.wc-block-radio-control__secondary-label {
 		line-height: 20px;
@@ -31,7 +45,6 @@
 		// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
 		line-height: unquote("max(1rem, 20px)");
 		color: $core-grey-dark-600;
-		flex-basis: 50%;
 	}
 
 	.wc-block-radio-control__description,
@@ -39,12 +52,6 @@
 		font-size: 0.875em;
 		line-height: 20px;
 		color: $core-grey-dark-400;
-		flex-basis: 50%;
-	}
-
-	.wc-block-radio-control__secondary-label,
-	.wc-block-radio-control__secondary-description {
-		text-align: right;
 	}
 }
 
