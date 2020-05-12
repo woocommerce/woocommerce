@@ -179,7 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.2.0 - 2020-05-12 =
+= 4.2.0 - 2020-06-02 =
 
 **WooCommerce**
 * Enhancement - Added Ghanaian regions to the state dropdown. #26273
@@ -214,7 +214,7 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Marketing Inbox Note #4030
 * Performance - Use Route based code splitting to reduce bundle size #4094
 * Performance - trim down inbox note API request. #3977
-* Fix - Proper display of elements in wc*admin pages when in a RTL environment. #4051
+* Fix - Proper display of elements in wc-admin pages when in a RTL environment. #4051
 * Fix - Update UX when knowledge base articles fail to retrieve #4133
 * Fix - Updated messaging after last step in OBW. #4148
 * Fix - Reset profiler when visiting old OBW URL #4166.
@@ -229,7 +229,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Guard against null themes in OBW #4244
 * Dev - Update wcadmin db version after db callback #4323
 * Dev - Only migrate options on version change #4324
-* Dev - Use PAGE_ROOT constant to reduce redundant strings #4238
+* Dev - Use `PAGE_ROOT` constant to reduce redundant strings #4238
 * Dev - Decouple Plugins DataStore from onboarding feature #4048
 * Dev - Move API out of Onboarding #4093
 * Dev - Add Profiler Step View Tracks #4141
