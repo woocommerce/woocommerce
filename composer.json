@@ -37,7 +37,8 @@
     "classmap": [
       "src/Controllers/Version1",
       "src/Controllers/Version2",
-      "src/Controllers/Version3"
+      "src/Controllers/Version3",
+      "src/Controllers/Version4"
     ],
     "psr-4": {
       "Automattic\\WooCommerce\\RestApi\\": "src"
