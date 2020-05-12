@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from 'react';
-import { InspectorControls, ServerSideRender } from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/block-editor';
+import { ServerSideRender } from '@wordpress/editor';
 import PropTypes from 'prop-types';
 import { PanelBody, ToggleControl, Placeholder } from '@wordpress/components';
 import { Icon, list } from '@woocommerce/icons';

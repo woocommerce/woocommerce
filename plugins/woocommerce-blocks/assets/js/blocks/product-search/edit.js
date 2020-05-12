@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { InspectorControls, PlainText } from '@wordpress/editor';
+import { InspectorControls, PlainText } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
 

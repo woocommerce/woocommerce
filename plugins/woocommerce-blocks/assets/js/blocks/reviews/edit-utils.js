@@ -10,7 +10,7 @@ import {
 	RangeControl,
 	SelectControl,
 } from '@wordpress/components';
-import { BlockControls } from '@wordpress/editor';
+import { BlockControls } from '@wordpress/block-editor';
 import { getAdminLink } from '@woocommerce/settings';
 import {
 	REVIEW_RATINGS_ENABLED,
