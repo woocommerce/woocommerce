@@ -122,13 +122,23 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		},
 		[ setActive, dispatch ]
 	);
-	const paymentMethodsInitialized = usePaymentMethods( ( paymentMethods ) =>
-		dispatch( setRegisteredPaymentMethods( paymentMethods ) )
+	const paymentMethodsDispatcher = useCallback(
+		( paymentMethods ) => {
+			dispatch( setRegisteredPaymentMethods( paymentMethods ) );
+		},
+		[ dispatch ]
 	);
-	const expressPaymentMethodsInitialized = useExpressPaymentMethods(
+	const expressPaymentMethodsDispatcher = useCallback(
 		( paymentMethods ) => {
 			dispatch( setRegisteredExpressPaymentMethods( paymentMethods ) );
-		}
+		},
+		[ dispatch ]
+	);
+	const paymentMethodsInitialized = usePaymentMethods(
+		paymentMethodsDispatcher
+	);
+	const expressPaymentMethodsInitialized = useExpressPaymentMethods(
+		expressPaymentMethodsDispatcher
 	);
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();

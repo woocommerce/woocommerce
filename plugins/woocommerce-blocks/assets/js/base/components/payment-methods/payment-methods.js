@@ -121,7 +121,7 @@ const PaymentMethods = () => {
 	);
 
 	if (
-		! isInitialized ||
+		isInitialized &&
 		Object.keys( currentPaymentMethods.current ).length === 0
 	) {
 		return <NoPaymentMethods />;

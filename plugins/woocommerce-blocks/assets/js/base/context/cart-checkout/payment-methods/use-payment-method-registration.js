@@ -6,13 +6,33 @@ import {
 	getPaymentMethods,
 	getExpressPaymentMethods,
 } from '@woocommerce/blocks-registry';
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import {
 	useEditorContext,
 	useShippingDataContext,
 } from '@woocommerce/base-context';
 import { useStoreCart } from '@woocommerce/base-hooks';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
+
+/**
+ * If there was an error registering a payment method, alert the admin.
+ *
+ * @param {Object} error Error object.
+ */
+const handleRegistrationError = ( error ) => {
+	if ( CURRENT_USER_IS_ADMIN ) {
+		throw new Error(
+			sprintf(
+				__(
+					// translators: %s is the error method returned by the payment method.
+					'Problem with payment method initialization: %s',
+					'woo-gutenberg-products-block'
+				),
+				error.message
+			)
+		);
+	}
+};
 
 /**
  * This hook handles initializing registered payment methods and exposing all
@@ -32,17 +52,8 @@ const usePaymentMethodRegistration = (
 	dispatcher,
 	registeredPaymentMethods
 ) => {
-	const { isEditor } = useEditorContext();
 	const [ isInitialized, setIsInitialized ] = useState( false );
-
-	/**
-	 * @type {Object} initializedMethodsDefault Used to hold payment methods that have been
-	 *                                          initialized.
-	 */
-	const [
-		initializedPaymentMethods,
-		setInitializedPaymentMethods,
-	] = useState( {} );
+	const { isEditor } = useEditorContext();
 	const { shippingAddress } = useShippingDataContext();
 	const { cartTotals, cartNeedsShipping } = useStoreCart();
 	const canPayArgument = useRef( {
@@ -50,16 +61,6 @@ const usePaymentMethodRegistration = (
 		cartNeedsShipping,
 		shippingAddress,
 	} );
-	const countPaymentMethodsInitializing = useRef(
-		Object.keys( registeredPaymentMethods ).length
-	);
-
-	const setInitializedPaymentMethod = ( paymentMethod ) => {
-		setInitializedPaymentMethods( ( paymentMethods ) => ( {
-			...paymentMethods,
-			[ paymentMethod.name ]: paymentMethod,
-		} ) );
-	};
 
 	useEffect( () => {
 		canPayArgument.current = {
@@ -69,80 +70,48 @@ const usePaymentMethodRegistration = (
 		};
 	}, [ cartTotals, cartNeedsShipping, shippingAddress ] );
 
-	// Handles initialization of all payment methods.
-	// Note: registeredPaymentMethods is not a dependency because this will not
-	// change in the life of the hook, it comes from an externally set value.
-	useEffect( () => {
-		// if all payment methods are initialized then bail.
-		if ( isInitialized ) {
-			return;
-		}
-		const updatePaymentMethod = ( current, canPay = true ) => {
-			if ( canPay ) {
-				setInitializedPaymentMethod( current );
-			}
-			// update the initialized count
-			countPaymentMethodsInitializing.current--;
-			// if count remaining less than 1, then set initialized.
-			if ( countPaymentMethodsInitializing.current < 1 ) {
-				setIsInitialized( true );
-			}
+	const resolveCanMakePayments = useCallback( async () => {
+		let initializedPaymentMethods = {},
+			canPay;
+		const setInitializedPaymentMethods = ( paymentMethod ) => {
+			initializedPaymentMethods = {
+				...initializedPaymentMethods,
+				[ paymentMethod.name ]: paymentMethod,
+			};
 		};
-		// loop through payment methods and see what the state is
 		for ( const paymentMethodName in registeredPaymentMethods ) {
 			const current = registeredPaymentMethods[ paymentMethodName ];
-			// if in editor context then we bypass can pay check.
+
 			if ( isEditor ) {
-				updatePaymentMethod( current );
-			} else {
-				Promise.resolve(
+				setInitializedPaymentMethods( current );
+				continue;
+			}
+
+			try {
+				canPay = await Promise.resolve(
 					current.canMakePayment( canPayArgument.current )
-				)
-					.then( ( canPay ) => {
-						if ( canPay.error ) {
-							throw new Error( canPay.error.message );
-						} else {
-							updatePaymentMethod( current, canPay );
-						}
-					} )
-					.catch( ( error ) => {
-						updatePaymentMethod( current, false );
-						if ( CURRENT_USER_IS_ADMIN ) {
-							throw new Error(
-								sprintf(
-									__(
-										// translators: %s is the error method returned by the payment method.
-										'Problem with payment method initialization: %s',
-										'woo-gutenberg-products-block'
-									),
-									error.message
-								)
-							);
-						}
-					} );
+				);
+				if ( canPay ) {
+					if ( canPay.error ) {
+						throw new Error( canPay.error.message );
+					}
+					setInitializedPaymentMethods( current );
+				}
+			} catch ( e ) {
+				handleRegistrationError( e );
 			}
 		}
-	}, [ isInitialized, isEditor ] );
+		// all payment methods have been initialized so dispatch and set
+		dispatcher( initializedPaymentMethods );
+		setIsInitialized( true );
+	}, [ dispatcher, isEditor, registeredPaymentMethods ] );
 
-	// once all payment methods have been initialized, resort to be in the same
-	// order as registered and then set via the dispatcher.
-	// Note: registeredPaymentMethods is not a dependency because this will not
-	// change in the life of the hook, it comes from an externally set value.
+	// if not initialized invoke the callback to kick off resolving the payments.
 	useEffect( () => {
-		if ( isInitialized ) {
-			const reSortByRegisteredOrder = () => {
-				const newSet = {};
-				for ( const paymentMethodName in registeredPaymentMethods ) {
-					if ( initializedPaymentMethods[ paymentMethodName ] ) {
-						newSet[ paymentMethodName ] =
-							initializedPaymentMethods[ paymentMethodName ];
-					}
-				}
-				return newSet;
-			};
-			dispatcher( reSortByRegisteredOrder() );
+		if ( ! isInitialized ) {
+			resolveCanMakePayments();
 		}
-	}, [ isInitialized, initializedPaymentMethods ] );
+	}, [ resolveCanMakePayments, isInitialized ] );
 
 	return isInitialized;
 };
