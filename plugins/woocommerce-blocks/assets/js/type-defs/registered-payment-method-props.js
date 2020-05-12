@@ -169,8 +169,8 @@
  *
  * @property {function(Object):Object} ValidationInputError  A container for holding validation
  *                                                           errors
- * @property {function(Object):Object} CheckboxControl       A checkbox control, usually used for
- *                                                           saved payment method functionality
+ * @property {function(Object):Object} PaymentMethodIcons    A component used for displaying payment
+ *                                                           method icons.
  */
 
 /**

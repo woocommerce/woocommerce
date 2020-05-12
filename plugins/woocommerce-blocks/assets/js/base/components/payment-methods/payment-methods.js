@@ -16,10 +16,12 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
+	useCheckoutContext,
 	useEditorContext,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
 import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
+import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 
 /**
  * Internal dependencies
@@ -56,6 +58,8 @@ const PaymentMethods = () => {
 	const {
 		customerPaymentMethods = {},
 		setActivePaymentMethod,
+		shouldSavePayment,
+		setShouldSavePayment,
 	} = usePaymentMethodDataContext();
 	const { isInitialized, paymentMethods } = usePaymentMethods();
 	const currentPaymentMethods = useRef( paymentMethods );
@@ -67,6 +71,7 @@ const PaymentMethods = () => {
 	const [ selectedToken, setSelectedToken ] = useState( '0' );
 	const { noticeContexts } = useEmitResponse();
 	const { removeNotice } = useStoreNotices();
+	const { customerId } = useCheckoutContext();
 
 	// update ref on change.
 	useEffect( () => {
@@ -81,16 +86,38 @@ const PaymentMethods = () => {
 				currentPaymentMethods.current,
 				isEditor
 			);
+			const { supports } = currentPaymentMethods.current[
+				activePaymentMethod
+			];
 			return paymentMethod ? (
 				<PaymentMethodErrorBoundary isEditor={ isEditor }>
 					{ cloneElement( paymentMethod, {
 						activePaymentMethod,
 						...currentPaymentMethodInterface.current,
 					} ) }
+					{ customerId > 0 && supports.savePaymentInfo && (
+						<CheckboxControl
+							className="wc-block-checkout__save-card-info"
+							label={ __(
+								'Save payment information to my account for future purchases.',
+								'woo-gutenberg-products-block'
+							) }
+							checked={ shouldSavePayment }
+							onChange={ () =>
+								setShouldSavePayment( ! shouldSavePayment )
+							}
+						/>
+					) }
 				</PaymentMethodErrorBoundary>
 			) : null;
 		},
-		[ isEditor, activePaymentMethod ]
+		[
+			isEditor,
+			activePaymentMethod,
+			shouldSavePayment,
+			setShouldSavePayment,
+			customerId,
+		]
 	);
 
 	if (

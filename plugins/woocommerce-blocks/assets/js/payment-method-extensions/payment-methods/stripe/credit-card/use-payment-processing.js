@@ -43,7 +43,6 @@ import { errorTypes } from '../stripe-utils/constants';
  *                                                   response objects.
  * @param {string}               sourceId            Current set stripe source id.
  * @param {SourceIdDispatch}     setSourceId         Setter for stripe source id.
- * @param {boolean}              shouldSavePayment   Whether to save the payment or not.
  * @param {EventRegistration}    onPaymentProcessing The event emitter for processing payment.
  */
 export const usePaymentProcessing = (
@@ -54,7 +53,6 @@ export const usePaymentProcessing = (
 	emitResponse,
 	sourceId,
 	setSourceId,
-	shouldSavePayment,
 	onPaymentProcessing
 ) => {
 	const elements = useElements();
@@ -92,7 +90,6 @@ export const usePaymentProcessing = (
 								paymentMethod: PAYMENT_METHOD_NAME,
 								paymentRequestType: 'cc',
 								stripe_source: sourceId,
-								shouldSavePayment,
 							},
 							billingData,
 						},
@@ -138,7 +135,6 @@ export const usePaymentProcessing = (
 							stripe_source: response.source.id,
 							paymentMethod: PAYMENT_METHOD_NAME,
 							paymentRequestType: 'cc',
-							shouldSavePayment,
 						},
 						billingData,
 					},
@@ -160,7 +156,6 @@ export const usePaymentProcessing = (
 		stripe,
 		sourceId,
 		setSourceId,
-		shouldSavePayment,
 		onStripeError,
 		error,
 		emitResponse.noticeContexts.PAYMENTS,

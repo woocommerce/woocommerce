@@ -17,14 +17,18 @@ export const ACTION_TYPES = {
 	SET_REGISTERED_PAYMENT_METHODS: 'set_registered_payment_methods',
 	SET_REGISTERED_EXPRESS_PAYMENT_METHODS:
 		'set_registered_express_payment_methods',
+	SET_SHOULD_SAVE_PAYMENT_METHOD: 'set_should_save_payment_method',
 };
 
 /**
  * @todo do typedefs for the payment event state.
  */
 
+// Note - if fields are added/shape is changed, you may want to update
+// PRISTINE reducer clause to preserve your new field.
 export const DEFAULT_PAYMENT_DATA = {
 	currentStatus: STATUS.PRISTINE,
+	shouldSavePaymentMethod: false,
 	paymentMethodData: {
 		payment_method: '',
 		// arbitrary data the payment method

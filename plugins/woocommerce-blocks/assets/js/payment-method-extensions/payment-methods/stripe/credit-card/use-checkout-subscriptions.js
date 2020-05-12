@@ -25,7 +25,6 @@ import { usePaymentProcessing } from './use-payment-processing';
  * @param {BillingDataProps}       billing           Various billing data items.
  * @param {string}                 sourceId          Current set stripe source id.
  * @param {SourceIdDispatch}       setSourceId       Setter for stripe source id.
- * @param {boolean}                shouldSavePayment Whether to save the payment or not.
  * @param {EmitResponseProps}      emitResponse      Various helpers for usage with observer
  *                                                   response objects.
  * @param {Stripe}                 stripe            The stripe.js object.
@@ -37,7 +36,6 @@ export const useCheckoutSubscriptions = (
 	billing,
 	sourceId,
 	setSourceId,
-	shouldSavePayment,
 	emitResponse,
 	stripe
 ) => {
@@ -68,7 +66,6 @@ export const useCheckoutSubscriptions = (
 		emitResponse,
 		sourceId,
 		setSourceId,
-		shouldSavePayment,
 		onPaymentProcessing
 	);
 	// hook into and register callbacks for events.

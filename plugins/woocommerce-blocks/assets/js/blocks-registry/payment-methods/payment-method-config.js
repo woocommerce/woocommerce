@@ -20,6 +20,9 @@ export default class PaymentMethodConfig {
 		this.edit = config.edit;
 		this.canMakePayment = config.canMakePayment;
 		this.paymentMethodId = config.paymentMethodId || this.name;
+		this.supports = {
+			savePaymentInfo: config?.supports?.savePaymentInfo || false,
+		};
 	}
 
 	static assertValidConfig = ( config ) => {
@@ -72,6 +75,15 @@ export default class PaymentMethodConfig {
 		if ( typeof config.canMakePayment !== 'function' ) {
 			throw new TypeError(
 				'The canMakePayment property for the payment method must be a function.'
+			);
+		}
+		if (
+			config.supports &&
+			typeof config.supports.savePaymentInfo !== 'undefined' &&
+			typeof config.supports.savePaymentInfo !== 'boolean'
+		) {
+			throw new TypeError(
+				'If the payment method includes the `supports.savePaymentInfo` property, it must be a boolean'
 			);
 		}
 	};
