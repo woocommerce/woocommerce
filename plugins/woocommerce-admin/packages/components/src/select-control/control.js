@@ -207,6 +207,7 @@ class Control extends Component {
 						'is-active': isActive,
 						'has-tags': inlineTags && hasTags,
 						'with-value': this.getInputValue().length,
+						'has-error': !! help,
 					}
 				) }
 				onClick={ () => {
