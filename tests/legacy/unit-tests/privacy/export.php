@@ -71,10 +71,11 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				array(
-					'group_id'    => 'woocommerce_customer',
-					'group_label' => 'Customer Data',
-					'item_id'     => 'user',
-					'data'        => array(
+					'group_id'          => 'woocommerce_customer',
+					'group_label'       => 'Customer Data',
+					'group_description' => 'User&#8217;s WooCommerce customer data.',
+					'item_id'           => 'user',
+					'data'              => array(
 						array(
 							'name'  => 'Billing Address 1',
 							'value' => '123 South Street',
