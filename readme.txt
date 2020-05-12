@@ -240,7 +240,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Remove Duplicate array entry #4049
 
 **Action Scheduler 3.1.6**
-* Fix - Shutdown deprecated notice changed to a warning when as_* functions called without data store initialization. #546
+* Fix - Shutdown deprecated notice changed to a warning when `as_*` functions called without data store initialization. #546
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
