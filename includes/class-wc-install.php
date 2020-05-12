@@ -762,7 +762,7 @@ class WC_Install {
 	 *
 	 * @return string
 	 */
-	private static function get_schema() {
+	public static function get_schema() {
 		global $wpdb;
 
 		$collate = '';
