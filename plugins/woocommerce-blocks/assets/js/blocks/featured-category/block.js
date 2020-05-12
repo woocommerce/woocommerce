@@ -12,7 +12,7 @@ import {
 	PanelColorSettings,
 	withColors,
 	RichText,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 import {
 	Button,
 	FocalPointPicker,
