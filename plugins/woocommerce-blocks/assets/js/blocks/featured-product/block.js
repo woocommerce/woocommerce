@@ -13,6 +13,7 @@ import {
 	withColors,
 	RichText,
 } from '@wordpress/editor';
+import { withSelect } from '@wordpress/data';
 import {
 	Button,
 	FocalPointPicker,
@@ -27,8 +28,8 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import classnames from 'classnames';
-import { Fragment } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
+import { Fragment, Component } from '@wordpress/element';
+import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { MIN_HEIGHT } from '@woocommerce/block-settings';
@@ -60,6 +61,7 @@ const FeaturedProduct = ( {
 	product,
 	setAttributes,
 	setOverlayColor,
+	triggerUrlUpdate = () => void null,
 } ) => {
 	const renderApiError = () => (
 		<ErrorPlaceholder
@@ -107,6 +109,7 @@ const FeaturedProduct = ( {
 									mediaId: 0,
 									mediaSrc: '',
 								} );
+								triggerUrlUpdate();
 							} }
 						/>
 						<Button isDefault onClick={ onDone }>
@@ -446,10 +449,66 @@ FeaturedProduct.propTypes = {
 	setOverlayColor: PropTypes.func.isRequired,
 	// from withSpokenMessages
 	debouncedSpeak: PropTypes.func.isRequired,
+	triggerUrlUpdate: PropTypes.func,
 };
 
 export default compose( [
 	withProduct,
 	withColors( { overlayColor: 'background-color' } ),
 	withSpokenMessages,
+	withSelect( ( select, { clientId }, { dispatch } ) => {
+		const Block = select( 'core/block-editor' ).getBlock( clientId );
+		const buttonBlockId = Block?.innerBlocks[ 0 ]?.clientId || '';
+		const currentButtonAttributes =
+			Block?.innerBlocks[ 0 ]?.attributes || {};
+		const updateBlockAttributes = ( attributes ) => {
+			if ( buttonBlockId ) {
+				dispatch( 'core/block-editor' ).updateBlockAttributes(
+					buttonBlockId,
+					attributes
+				);
+			}
+		};
+		return { updateBlockAttributes, currentButtonAttributes };
+	} ),
+	createHigherOrderComponent( ( ProductComponent ) => {
+		class WrappedComponent extends Component {
+			state = {
+				doUrlUpdate: false,
+			};
+			componentDidUpdate() {
+				const {
+					attributes,
+					updateBlockAttributes,
+					currentButtonAttributes,
+					product,
+				} = this.props;
+				if (
+					this.state.doUrlUpdate &&
+					! attributes.editMode &&
+					product?.permalink &&
+					currentButtonAttributes?.url &&
+					product.permalink !== currentButtonAttributes.url
+				) {
+					updateBlockAttributes( {
+						...currentButtonAttributes,
+						url: product.permalink,
+					} );
+					this.setState( { doUrlUpdate: false } );
+				}
+			}
+			triggerUrlUpdate = () => {
+				this.setState( { doUrlUpdate: true } );
+			};
+			render() {
+				return (
+					<ProductComponent
+						triggerUrlUpdate={ this.triggerUrlUpdate }
+						{ ...this.props }
+					/>
+				);
+			}
+		}
+		return WrappedComponent;
+	}, 'withUpdateButtonAttributes' ),
 ] )( FeaturedProduct );
