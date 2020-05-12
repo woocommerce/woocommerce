@@ -26,17 +26,24 @@ import { useStoreCart, useStoreNotices } from '@woocommerce/base-hooks';
 /**
  * Utility function for preparing payment data for the request.
  *
- * @param {Object} paymentData Arbitrary payment data provided by the payment
- *                             method.
+ * @param {Object}  paymentData          Arbitrary payment data provided by the payment method.
+ * @param {boolean} shouldSave           Whether to save the payment method info to user account.
+ * @param {Object}  activePaymentMethod  The current active payment method.
  *
  * @return {PaymentDataItem[]} Returns the payment data as an array of
- *                                 PaymentDataItem objects.
+ *                             PaymentDataItem objects.
  */
-const preparePaymentData = ( paymentData ) => {
-	return Object.keys( paymentData ).map( ( property ) => {
+const preparePaymentData = ( paymentData, shouldSave, activePaymentMethod ) => {
+	const apiData = Object.keys( paymentData ).map( ( property ) => {
 		const value = paymentData[ property ];
 		return { key: property, value };
 	}, [] );
+	const savePaymentMethodKey = `wc-${ activePaymentMethod }-new-payment-method`;
+	apiData.push( {
+		key: savePaymentMethodKey,
+		value: shouldSave,
+	} );
+	return apiData;
 };
 
 /**
@@ -66,6 +73,7 @@ const CheckoutProcessor = () => {
 		paymentMethodData,
 		expressPaymentMethods,
 		paymentMethods,
+		shouldSavePayment,
 	} = usePaymentMethodDataContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
@@ -179,7 +187,11 @@ const CheckoutProcessor = () => {
 			data = {
 				...data,
 				payment_method: paymentMethodId,
-				payment_data: preparePaymentData( paymentMethodData ),
+				payment_data: preparePaymentData(
+					paymentMethodData,
+					shouldSavePayment,
+					activePaymentMethod
+				),
 			};
 		}
 		triggerFetch( {
@@ -233,7 +245,9 @@ const CheckoutProcessor = () => {
 		addErrorNotice,
 		removeNotice,
 		paymentMethodId,
+		activePaymentMethod,
 		paymentMethodData,
+		shouldSavePayment,
 		cartNeedsPayment,
 		receiveCart,
 		dispatchActions,

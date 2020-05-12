@@ -12,6 +12,7 @@ const {
 	COMPLETE,
 	SET_REGISTERED_PAYMENT_METHODS,
 	SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+	SET_SHOULD_SAVE_PAYMENT_METHOD,
 } = ACTION_TYPES;
 
 /**
@@ -22,7 +23,13 @@ const {
  */
 const reducer = (
 	state = DEFAULT_PAYMENT_DATA,
-	{ type, paymentMethodData, errorMessage, paymentMethods }
+	{
+		type,
+		paymentMethodData,
+		shouldSavePaymentMethod,
+		errorMessage,
+		paymentMethods,
+	}
 ) => {
 	switch ( type ) {
 		case STARTED:
@@ -86,6 +93,7 @@ const reducer = (
 				expressPaymentMethods: {
 					...state.expressPaymentMethods,
 				},
+				shouldSavePaymentMethod: state.shouldSavePaymentMethod,
 			};
 		case SET_REGISTERED_PAYMENT_METHODS:
 			return {
@@ -102,6 +110,11 @@ const reducer = (
 					...state.expressPaymentMethods,
 					...paymentMethods,
 				},
+			};
+		case SET_SHOULD_SAVE_PAYMENT_METHOD:
+			return {
+				...state,
+				shouldSavePaymentMethod,
 			};
 	}
 	return state;

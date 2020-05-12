@@ -13,6 +13,7 @@ const {
 	SUCCESS,
 	SET_REGISTERED_PAYMENT_METHODS,
 	SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+	SET_SHOULD_SAVE_PAYMENT_METHOD,
 } = ACTION_TYPES;
 
 /**
@@ -99,4 +100,16 @@ export const setRegisteredPaymentMethods = ( paymentMethods ) => ( {
 export const setRegisteredExpressPaymentMethods = ( paymentMethods ) => ( {
 	type: SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
 	paymentMethods,
+} );
+
+/**
+ * Set a flag indicating that the payment method info (e.g. a payment card)
+ * should be saved to user account after order completion.
+ *
+ * @param {boolean} shouldSavePaymentMethod
+ * @return {Object} An action object.
+ */
+export const setShouldSavePaymentMethod = ( shouldSavePaymentMethod ) => ( {
+	type: SET_SHOULD_SAVE_PAYMENT_METHOD,
+	shouldSavePaymentMethod,
 } );

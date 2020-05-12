@@ -150,7 +150,7 @@
  *                                                                          error.
  * @property {string}                      activePaymentMethod              The active payment
  *                                                                          method slug.
- * @property {function()}                  setActivePaymentMethod           A function for setting
+ * @property {function(string)}            setActivePaymentMethod           A function for setting
  *                                                                          the active payment
  *                                                                          method.
  * @property {SavedCustomerPaymentMethods} customerPaymentMethods           Returns the customer
@@ -178,6 +178,13 @@
  *                                                                          It receives an error
  *                                                                          message string. Does not
  *                                                                          change payment status.
+ * @property {function(boolean):void}      setShouldSavePayment             A function used to set
+ *                                                                          the shouldSavePayment
+ *                                                                          value.
+ * @property {boolean}                     shouldSavePayment                True means that
+ *                                                                          the configured payment
+ *                                                                          method option is saved
+ *                                                                          for the customer.
  */
 
 /**

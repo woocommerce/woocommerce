@@ -14,6 +14,7 @@ import {
 	success,
 	setRegisteredPaymentMethods,
 	setRegisteredExpressPaymentMethods,
+	setShouldSavePaymentMethod,
 } from './actions';
 import {
 	usePaymentMethods,
@@ -132,6 +133,12 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 	const { setValidationErrors } = useValidationContext();
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 	const { setShippingAddress } = useShippingDataContext();
+	const setShouldSavePayment = useCallback(
+		( shouldSave ) => {
+			dispatch( setShouldSavePaymentMethod( shouldSave ) );
+		},
+		[ dispatch ]
+	);
 
 	const setExpressPaymentError = ( message ) => {
 		if ( message ) {
@@ -358,6 +365,8 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		paymentMethodsInitialized,
 		expressPaymentMethodsInitialized,
 		setExpressPaymentError,
+		shouldSavePayment: paymentData.shouldSavePaymentMethod,
+		setShouldSavePayment,
 	};
 	return (
 		<PaymentMethodDataContext.Provider value={ paymentContextData }>
