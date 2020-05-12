@@ -22,7 +22,7 @@ global $product;
 /**
  * Hook: woocommerce_before_single_product.
  *
- * @hooked wc_print_notices - 10
+ * @hooked woocommerce_output_all_notices - 10
  */
 do_action( 'woocommerce_before_single_product' );
 

@@ -420,6 +420,19 @@ class WC_Order extends WC_Abstract_Order {
 	*/
 
 	/**
+	 * Get basic order data in array format.
+	 *
+	 * @return array
+	 */
+	public function get_base_data() {
+		return array_merge(
+			array( 'id'     => $this->get_id() ),
+			$this->data,
+			array( 'number' => $this->get_order_number() )
+		);
+	}
+
+	/**
 	 * Get all class data in array format.
 	 *
 	 * @since 3.0.0
@@ -427,12 +440,8 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function get_data() {
 		return array_merge(
+			$this->get_base_data(),
 			array(
-				'id' => $this->get_id(),
-			),
-			$this->data,
-			array(
-				'number'         => $this->get_order_number(),
 				'meta_data'      => $this->get_meta_data(),
 				'line_items'     => $this->get_items( 'line_item' ),
 				'tax_lines'      => $this->get_items( 'tax' ),

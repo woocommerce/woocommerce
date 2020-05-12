@@ -910,6 +910,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden' => true,
 						),
 					),
 					'DK' => array(
@@ -918,6 +919,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden' => true,
 						),
 					),
 					'EE' => array(
@@ -942,6 +944,14 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+						),
+					),
+					'GH' => array(
+						'postcode' => array(
+							'required' => false,
+						),
+						'state'    => array(
+							'label' => __( 'Region', 'woocommerce' ),
 						),
 					),
 					'GP' => array(
@@ -1229,6 +1239,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden' => true,
 						),
 					),
 					'TR' => array(

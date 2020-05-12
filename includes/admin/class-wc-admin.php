@@ -33,6 +33,9 @@ class WC_Admin {
 
 		// Disable WXR export of schedule action posts.
 		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
+
+		// Add body class for WP 5.3+ compatibility.
+		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ) );
 	}
 
 	/**
@@ -305,6 +308,30 @@ class WC_Admin {
 	public function disable_webhook_post_export( $args ) {
 		$args['can_export'] = false;
 		return $args;
+	}
+
+	/**
+	 * Include admin classes.
+	 *
+	 * @since 4.2.0
+	 * @param string $classes Body classes string.
+	 * @return string
+	 */
+	public function include_admin_body_class( $classes ) {
+		if ( false !== strpos( $classes, 'wc-wp-version-gte-53' ) ) {
+			return $classes;
+		}
+
+		$raw_version   = get_bloginfo( 'version' );
+		$version_parts = explode( '-', $raw_version );
+		$version       = count( $version_parts ) > 1 ? $version_parts[0] : $raw_version;
+
+		// Add WP 5.3+ compatibility class.
+		if ( $raw_version && version_compare( $version, '5.3', '>=' ) ) {
+			$classes .= ' wc-wp-version-gte-53';
+		}
+
+		return $classes;
 	}
 }
 

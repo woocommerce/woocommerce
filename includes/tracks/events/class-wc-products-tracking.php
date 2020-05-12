@@ -17,10 +17,86 @@ class WC_Products_Tracking {
 	 * Init tracking.
 	 */
 	public function init() {
+		add_action( 'load-edit.php', array( $this, 'track_products_view' ), 10 );
+		add_action( 'load-edit-tags.php', array( $this, 'track_categories_and_tags_view' ), 10, 2 );
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
+	}
+
+	/**
+	 * Send a Tracks event when the Products page is viewed.
+	 */
+	public function track_products_view() {
+		// We only record Tracks event when no `_wp_http_referer` query arg is set, since
+		// when searching, the request gets sent from the browser twice,
+		// once with the `_wp_http_referer` and once without it.
+		//
+		// Otherwise, we would double-record the view and search events.
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			isset( $_GET['post_type'] )
+			&& 'product' === wp_unslash( $_GET['post_type'] )
+			&& ! isset( $_GET['_wp_http_referer'] )
+		) {
+			// phpcs:enable
+
+			WC_Tracks::record_event( 'products_view' );
+
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+			if (
+				isset( $_GET['s'] )
+				&& 0 < strlen( sanitize_text_field( wp_unslash( $_GET['s'] ) ) )
+			) {
+				// phpcs:enable
+
+				WC_Tracks::record_event( 'products_search' );
+			}
+		}
+	}
+
+	/**
+	 * Send a Tracks event when the Products Categories and Tags page is viewed.
+	 */
+	public function track_categories_and_tags_view() {
+		// We only record Tracks event when no `_wp_http_referer` query arg is set, since
+		// when searching, the request gets sent from the browser twice,
+		// once with the `_wp_http_referer` and once without it.
+		//
+		// Otherwise, we would double-record the view and search events.
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+		if (
+			isset( $_GET['post_type'] )
+			&& 'product' === wp_unslash( $_GET['post_type'] )
+			&& isset( $_GET['taxonomy'] )
+			&& ! isset( $_GET['_wp_http_referer'] )
+		) {
+			$taxonomy = wp_unslash( $_GET['taxonomy'] );
+			// phpcs:enable
+
+			if ( 'product_cat' === $taxonomy ) {
+				WC_Tracks::record_event( 'categories_view' );
+			} elseif ( 'product_tag' === $taxonomy ) {
+				WC_Tracks::record_event( 'tags_view' );
+			}
+
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
+			if (
+				isset( $_GET['s'] )
+				&& 0 < strlen( sanitize_text_field( wp_unslash( $_GET['s'] ) ) )
+			) {
+				// phpcs:enable
+
+				if ( 'product_cat' === $taxonomy ) {
+					WC_Tracks::record_event( 'categories_search' );
+				} elseif ( 'product_tag' === $taxonomy ) {
+					WC_Tracks::record_event( 'tags_search' );
+				}
+			}
+		}
 	}
 
 	/**

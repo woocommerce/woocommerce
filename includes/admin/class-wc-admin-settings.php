@@ -200,7 +200,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		/**
 		 * Output admin fields.
 		 *
-		 * Loops though the woocommerce options array and outputs each field.
+		 * Loops through the woocommerce options array and outputs each field.
 		 *
 		 * @param array[] $options Opens array to output.
 		 */
@@ -726,7 +726,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		/**
 		 * Save admin fields.
 		 *
-		 * Loops though the woocommerce options array and outputs each field.
+		 * Loops through the woocommerce options array and outputs each field.
 		 *
 		 * @param array $options Options array to output.
 		 * @param array $data    Optional. Data to use for saving. Defaults to $_POST.
