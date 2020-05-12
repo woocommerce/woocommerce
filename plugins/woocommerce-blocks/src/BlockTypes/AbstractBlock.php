@@ -151,12 +151,12 @@ abstract class AbstractBlock {
 	 */
 	protected function get_skeleton_inline_script() {
 		return "<script>
-			const containers = document.querySelectorAll( 'div.wc-block-skeleton' );
+			var containers = document.querySelectorAll( 'div.wc-block-skeleton' );
 
 			if ( containers.length ) {
 				Array.prototype.forEach.call( containers, function( el, i ) {
-					const w = el.offsetWidth;
-					let classname = '';
+					var w = el.offsetWidth;
+					var classname = '';
 
 					if ( w > 700 )
 						classname = 'is-large';
