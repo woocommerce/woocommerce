@@ -910,6 +910,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden' => true,
 						),
 					),
 					'DK' => array(
@@ -918,6 +919,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden' => true,
 						),
 					),
 					'EE' => array(
@@ -1229,6 +1231,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden' => true,
 						),
 					),
 					'TR' => array(
