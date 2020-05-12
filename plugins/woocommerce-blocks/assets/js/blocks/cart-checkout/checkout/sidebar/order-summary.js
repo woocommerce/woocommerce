@@ -15,7 +15,7 @@ import CheckoutOrderSummaryItem from './order-summary-item.js';
 const CheckoutOrderSummary = ( { cartItems = [] } ) => {
 	const { isLarge, hasContainerWidth } = useContainerWidthContext();
 
-	if ( hasContainerWidth ) {
+	if ( ! hasContainerWidth ) {
 		return null;
 	}
 
