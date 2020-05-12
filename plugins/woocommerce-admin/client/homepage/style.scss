@@ -1,0 +1,45 @@
+.woocommerce-page #wpcontent,
+.woocommerce-page.woocommerce_page_wc-admin #wpbody-content {
+	overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the right-hand column 'stick'
+}
+
+.woocommerce-homepage {
+	display: flex;
+	max-width: 1032px;
+	margin: 0 auto;
+	justify-content: space-between;
+
+	&.hasInbox .woocommerce-homepage-column {
+		width: calc(50% - 12px);
+		margin: 0;
+
+		@include breakpoint('<782px') {
+			width: 100%;
+			position: inherit;
+			top: auto;
+		}
+	}
+
+	@include breakpoint('<782px') {
+		margin-left: -16px;
+		margin-right: -16px;
+		flex-direction: column-reverse;
+	}
+}
+.woocommerce-homepage-column {
+	width: 50%;
+	top: 130px;
+	margin: 0 auto;
+	align-self: flex-start;
+}
+.temp-content {
+	width: 100%;
+	height: 300px;
+	margin-bottom: 24px;
+	background-color: #9acd32;
+}
+
+.is-inbox .temp-content {
+	height: 225px;
+	background-color: #6495ed;
+}

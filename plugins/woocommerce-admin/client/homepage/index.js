@@ -14,11 +14,11 @@ import { Spinner } from '@woocommerce/components';
  */
 import withSelect from 'wc-api/with-select';
 import { isOnboardingEnabled } from 'dashboard/utils';
-import StatsOverview from './stats-overview';
 
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
+import Layout from './layout';
 
 const Homepage = ( { profileItems, query } ) => {
 	if ( isOnboardingEnabled() && ! profileItems.completed ) {
@@ -29,7 +29,7 @@ const Homepage = ( { profileItems, query } ) => {
 		);
 	}
 
-	return <StatsOverview />;
+	return <Layout />;
 };
 
 export default compose(
