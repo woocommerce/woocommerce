@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7eeb045064d70f87a84b44d48ff56b3b",
+    "content-hash": "234a8d9c407edce45f8392358f1da8f1",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -380,11 +380,25 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-03-16T08:31:04+00:00"
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.1.5",
+            "version": "v3.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
@@ -415,20 +429,20 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
-            "time": "2020-04-29T16:19:22+00:00"
+            "time": "2020-05-05T13:26:04+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "v1.1.1",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "ac862f831eced0e6a3692539a24c738d5aafc4ee"
+                "reference": "aa5062218a399843e68160e1b4b884320a7530ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/ac862f831eced0e6a3692539a24c738d5aafc4ee",
-                "reference": "ac862f831eced0e6a3692539a24c738d5aafc4ee",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/aa5062218a399843e68160e1b4b884320a7530ae",
+                "reference": "aa5062218a399843e68160e1b4b884320a7530ae",
                 "shasum": ""
             },
             "require": {
@@ -462,7 +476,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2020-04-28T22:16:15+00:00"
+            "time": "2020-05-08T22:39:16+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2517,6 +2531,20 @@
                 "polyfill",
                 "portable"
             ],
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-05-08T16:50:20+00:00"
         },
         {
@@ -2921,5 +2949,6 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1"
-    }
+    },
+    "plugin-api-version": "1.1.0"
 }
