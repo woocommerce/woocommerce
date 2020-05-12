@@ -15,7 +15,8 @@
 		"*.scss",
 		"./assets/js/atomic/blocks/product/**",
 		"./assets/js/filters/**",
-		"./assets/js/settings/blocks/**"
+		"./assets/js/settings/blocks/**",
+		"./assets/js/middleware/**"
 	],
 	"repository": {
 		"type": "git",
