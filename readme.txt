@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.0
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.0.1
+Stable tag: 4.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,48 +179,68 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.1.0 - 2020-05-05 =
+= 4.2.0 - 2020-05-12 =
 
 **WooCommerce**
-* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.0 #26057
-* Enhancement - Updated jetpack-autoloader to 1.6 and woocommerce-blocks to 2.5.16. #26099
-* Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
-* Enhancement - Changed show password icon color to a darker grey hue. #25625
-* Enhancement - Use new Setup Wizard for all users. #26016
-* Tweak - Show notice for WP min version to WP 5.2. #26094
-* Tweak - Improve the string for untested WooCommerce extensions in the system status page to avoid confusion. #25904
-* Tweak - Updated KZT (₸) symbol. #25609
-* Tweak - Trim whitespaces and strip slashes from MaxMind License Key. #25466
-* Tweak - Updated "Help" tabs documentation. #25826
-* Tweak - Update serbian currency symbol to рсд from дин. #25885
-* Fix - Password visibility toggle to hide password again from text. #25627
-* Fix - Undefined property error when attempting to modify the coupon post meta. #25755
-* Fix - Remove some of the individual rounding logic to make sure we round at certain places only. #25800
-* Fix - Order totals calculation if the order contains taxable and non-taxable products and percentage coupons. #25092
-* Fix - Wording for cancelled order email. #25316
-* Fix - Removed guided tour videos link on setup wizard (since current link only redirects to the docs). #25823
-* Fix - Add RTL style to the onboarding wizard. #25835
-* Fix - Trigger change and set val to qty on the frontend so that it properly updates event handlers. #25903
-* Fix - Corrected the way percent coupons apply remainders across the order. #25943
-* Fix - Clarified the error messaging for WooCommerce.com package update failures. #26034
-* Fix - Enforce per user usage limit check for a coupon on guest users based on email. #26066
-* Fix - Remove elements with style=display:none explicitly to address a regression causing broken email html. #26075
-* Dev - Added woocommerce_can_restock_refunded_items filter. #25728
-* Dev - Added woocommerce_order_get_tax_location filter. #25727
-* Dev - Updated stock handling to prevent race conditions when orders come in at the same time. #25708
-* Dev - Updated /myaccount/form-login.php to use consistent kebab-case class names for woocommerce-form-row. #25668
-* Dev - Add filter woocommerce_product_upsells_products_heading to allow heading modification without having to override the template file. #25628
-* Dev - Added woocommerce_order_get_tax_location filter. #25727
-* Dev - Added the get_woocommerce_currency_symbols function to allow develops to get an array of all the currency symbol registered with WooCommerce. #25733
-* Dev - Changed string typed label_class to array in checkout fields.
-* Dev - Added "woocommerce_emogrifier" action before the content of the emails is "emogrified". #25801
-* Dev - Add Ability to Filter Event Props. #25851
-* Dev - Updated the unit test install script to support paths to MySQL sockets that contain spaces. #25923
-* Dev - Made the default test source folders support the system tmp folder. #25923
-* Dev - Add cart & checkout block/shortcode info to tracker data. #25932
-* Dev - Make WC_Product_Data_Store_CPT::update_product_stock operations atomic. #26039
-* Dev - Adds usage data for the of cart & checkout blocks (currently in development in WooCommmerce Blocks plugin) to the WC Tracker snapshot. #26084
-* Dev - Implement some additional tracks for coupons, orders, and products. #26085
+* Enhancement - Added Ghanaian regions to the state dropdown. #26273
+* Enhancement - Added Mozambique provinces to the state dropdown. #26162
+* Enhancement - Added notice about public uploads directory. #26207
+* Enhancement - Added support for the new group descriptions available on WordPress privacy exporters as of WP 5.3. #25575
+* Fix - Introduced a new admin body class for supporting styling issues in WP 5.3+. #26251
+* Fix - Removed case conversion of meta keys from CSV imports. #25517
+* Fix - Allow schedule coupons via CRUD. #26387
+* Fix - Password visibility toggle when password strength check fails. #26132
+* Fix - Cross-sell placement when product has no description. #26334
+* Fix - Display of the rate limit warning during payment method creation. #26411
+* Fix - Made the shipping zone matching query's `zone_id` field more specific. #26308
+* Fix - Corrected the display of RTL languages on the WooCommerce.com addons page. #26080
+* Fix - Removed the postcode field for Ghana. #26272
+* Fix - Made the hiding of state fields more explicit for Germany, Denmark, and Sweden. #25598
+* Fix - Ensured that global attribute prefixes are passed to the `woocommerce_attribute_label` filter. #26022
+* Dev - Added the customer as a third argument to the `woocommerce_matched_rates` filter. #26361
+* Dev - Introduced `woocommerce_menu_order_count` filter. #26044
+* Dev - Introduced `should_send_ajax_request.adding_to_cart `cart event to allow short-circuiting cart addition. #25760
+* Dev - Made the jQuery selector for checkout form rows less specific. #25654
+* Dev - Changed the `{site_address}` placeholder to `{site_url}` for clarity. #25630
+* Dev - Deprecated `.wp-policy-help` and replaced with with the `.privacy-policy-tutorial` and `.wp-suggested-text` classes added in WP 5.1. #26072
+
+**REST API 1.0.8**
+* Enhancement - Add support for trash status for products in V2 and V3 API. #184
+* Dev - Updated minimum PHP requirement to 7.0 to keep up with WooCommerce Core.
+* Dev - Fixed failing unit tests. #105
+
+**WooCommerce Admin 1.2.0**
+* Enhancement - Add onboarding payments note #4157 
+* Enhancement - Marketing Inbox Note #4030
+* Performance - Use Route based code splitting to reduce bundle size #4094
+* Performance - trim down inbox note API request. #3977
+* Fix - Proper display of elements in wc*admin pages when in a RTL environment. #4051
+* Fix - Update UX when knowledge base articles fail to retrieve #4133
+* Fix - Updated messaging after last step in OBW. #4148
+* Fix - Reset profiler when visiting old OBW URL #4166.
+* Fix - Dashboard flash before OBW chunk loads #4259
+* Tweak - Enable the default homepage template to be filtered #4072
+* Tweak - Create admin note if Jetpack or WooCommerce Services plugin doesn't get installed due to an error during OBW #3888
+* Tweak - Update Email Marketing note. #4167
+* Tweak - Adjust "demo products" verbiage to "Sample Products" #4184
+* Tweak - Don't reschedule imports on failed imports #4263
+* Tweak - Remove obsolete inbox messages #4182
+* Dev - Make query selector for admin alerts more specific #4289
+* Dev - Guard against null themes in OBW #4244
+* Dev - Update wcadmin db version after db callback #4323
+* Dev - Only migrate options on version change #4324
+* Dev - Use PAGE_ROOT constant to reduce redundant strings #4238
+* Dev - Decouple Plugins DataStore from onboarding feature #4048
+* Dev - Move API out of Onboarding #4093
+* Dev - Add Profiler Step View Tracks #4141
+* Dev - Add React Testing Library #4221
+* Dev - Add List and Link components to Storybook #4219
+* Dev - Cast Shipping Total to float #4042
+* Dev - Dynamic Currency with Context API #4027
+* Dev - Remove Duplicate array entry #4049
+
+**Action Scheduler 3.1.6**
+* Fix - Shutdown deprecated notice changed to a warning when as_* functions called without data store initialization. #546
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
