@@ -637,7 +637,7 @@ mark.amount {
 	}
 }
 
-.branch-5-3 {
+.wc-wp-version-gte-53 {
 
 	.woocommerce-help-tip {
 		font-size: 1.2em;
@@ -2167,7 +2167,7 @@ ul.wc_coupon_list_block {
 	}
 }
 
-.branch-5-3 {
+.wc-wp-version-gte-53 {
 
 	.widefat {
 
@@ -4123,7 +4123,7 @@ img.help_tip {
 	}
 }
 
-.branch-5-3 {
+.wc-wp-version-gte-53 {
 
 	.woocommerce {
 
@@ -6694,7 +6694,7 @@ table.bar_chart {
 	min-width: 400px !important;
 }
 
-.branch-5-3 {
+.wc-wp-version-gte-53 {
 
 	.select2-results {
 
@@ -6831,7 +6831,7 @@ table.bar_chart {
 
 	@each $name, $color in $wp_admin_colors {
 
-		&-#{$name}.branch-5-3 {
+		&-#{$name}.wc-wp-version-gte-53 {
 
 			.select2-dropdown {
 				border-color: $color;
