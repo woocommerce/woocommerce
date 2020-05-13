@@ -29,15 +29,12 @@ export const useBillingDataContext = () => {
 export const BillingDataProvider = ( { children } ) => {
 	const [ billingData, setBillingDataState ] = useState( DEFAULT_STATE );
 
-	const setBillingData = useCallback(
-		( newData ) => {
-			setBillingDataState( ( prevState ) => ( {
-				...prevState,
-				...newData,
-			} ) );
-		},
-		[ setBillingDataState ]
-	);
+	const setBillingData = useCallback( ( newData ) => {
+		setBillingDataState( ( prevState ) => ( {
+			...prevState,
+			...newData,
+		} ) );
+	}, [] );
 
 	/**
 	 * @type {BillingDataContext}
