@@ -48,9 +48,7 @@ export function getProductIdsForCart(
 	profileItems,
 	includeInstalledItems = false
 ) {
-	const productIds = [];
 	const onboarding = getSetting( 'onboarding', {} );
-	const productTypes = profileItems.product_types || [];
 
 	// The population of onboarding.productTypes only happens if the task list should be shown
 	// so bail early if it isn't present.
@@ -58,12 +56,16 @@ export function getProductIdsForCart(
 		return productIds;
 	}
 
+	const productIds = [];
+	const plugins = getSetting( 'plugins', {} );
+	const productTypes = profileItems.product_types || [];
+
 	productTypes.forEach( ( productType ) => {
 		if (
 			onboarding.productTypes[ productType ] &&
 			onboarding.productTypes[ productType ].product &&
 			( includeInstalledItems ||
-				! onboarding.installedPlugins.includes(
+				! plugins.installedPlugins.includes(
 					onboarding.productTypes[ productType ].slug
 				) )
 		) {
