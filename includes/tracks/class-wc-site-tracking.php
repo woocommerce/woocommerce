@@ -45,16 +45,17 @@ class WC_Site_Tracking {
 	}
 
 	/**
+	 * Register scripts required to record events from javascript.
+	 */
+	public static function register_scripts() {
+		wp_register_script( 'woo-tracks', 'https://stats.wp.com/w.js', array( 'wp-hooks' ), gmdate( 'YW' ), false );
+	}
+
+	/**
 	 * Add scripts required to record events from javascript.
 	 */
 	public static function enqueue_scripts() {
-
-		// Add w.js to the page.
-		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array( 'wp-hooks' ), gmdate( 'YW' ), false );
-
-		// Expose tracking via a function in the wcTracks global namespace directly before wc_print_js.
-		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
-
+		wp_enqueue_script( 'woo-tracks' );
 	}
 
 	/**
@@ -88,14 +89,51 @@ class WC_Site_Tracking {
 	}
 
 	/**
+	 * Adds a function to load tracking scripts and enable them client-side on the fly.
+	 * Note that this function does not update `woocommerce_allow_tracking` in the database
+	 * and will not persist enabled tracking across page loads.
+	 */
+	public static function add_enable_tracking_function() {
+		global $wp_scripts;
+		$woo_tracks_script = $wp_scripts->registered['woo-tracks']->src;
+
+		?>
+		<script type="text/javascript">
+			window.wcTracks.enable = function( callback = null ) {
+				window.wcTracks.isEnabled = true;
+
+				const scriptUrl = '<?php echo esc_url( $woo_tracks_script ); ?>';
+				const existingScript = document.querySelector( `script[src="${ scriptUrl }"]` );
+				if ( existingScript ) {
+					return;
+				}
+
+				const script = document.createElement('script');
+				script.src = scriptUrl;
+				document.body.append(script);
+
+				// Callback after scripts have loaded.
+				script.onload = function() {
+					if ( 'function' === typeof callback ) {
+						callback();
+					}
+				}
+			}
+		</script>
+		<?php
+	}
+
+	/**
 	 * Init tracking.
 	 */
 	public static function init() {
 
 		// Define window.wcTracks.recordEvent in case it is enabled client-side.
+		self::register_scripts();
 		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
 
 		if ( ! self::is_tracking_enabled() ) {
+			add_filter( 'admin_footer', array( __CLASS__, 'add_enable_tracking_function' ), 24 );
 			return;
 		}
 
