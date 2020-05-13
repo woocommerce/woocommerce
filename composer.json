@@ -14,7 +14,7 @@
     "maxmind-db/reader": "1.6.0",
     "pelago/emogrifier": "^3.1",
     "woocommerce/action-scheduler": "3.1.6",
-    "woocommerce/woocommerce-admin": "1.2.0",
+    "woocommerce/woocommerce-admin": "1.2.1",
     "woocommerce/woocommerce-blocks": "2.5.16",
     "woocommerce/woocommerce-rest-api": "1.0.8"
   },
