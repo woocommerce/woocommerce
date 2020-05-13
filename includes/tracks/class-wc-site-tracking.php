@@ -83,28 +83,14 @@ class WC_Site_Tracking {
 	}
 
 	/**
-	 * Add empty tracking function to admin footer when tracking is disabled in case
-	 * it's called without checking if it's defined beforehand.
-	 */
-	public static function add_empty_tracking_function() {
-		?>
-		<script type="text/javascript">
-			window.wcTracks = window.wcTracks || {};
-			window.wcTracks.recordEvent = function() {};
-		</script>
-		<?php
-	}
-
-	/**
 	 * Init tracking.
 	 */
 	public static function init() {
 
+		// Define window.wcTracks.recordEvent in case it is enabled client-side.
+		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
+
 		if ( ! self::is_tracking_enabled() ) {
-
-			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
-			add_filter( 'admin_footer', array( __CLASS__, 'add_empty_tracking_function' ), 24 );
-
 			return;
 		}
 
