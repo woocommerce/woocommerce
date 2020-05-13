@@ -27,11 +27,21 @@ const Content = () => {
 };
 
 /**
+ * Label component
+ *
+ * @param {*} props Props from payment API.
+ */
+const Label = ( props ) => {
+	const { PaymentMethodLabel } = props.components;
+	return <PaymentMethodLabel icon="checkPayment" text={ label } />;
+};
+
+/**
  * Cheque payment method config object.
  */
 const offlineChequePaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
-	label,
+	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
 	icons: null,

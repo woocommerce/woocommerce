@@ -18,6 +18,18 @@ import { useState } from '@wordpress/element';
  * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
  */
 
+export const getStripeCreditCardIcons = () => {
+	return Object.entries( getStripeServerData().icons ).map(
+		( [ id, { src, alt } ] ) => {
+			return {
+				id,
+				src,
+				alt,
+			};
+		}
+	);
+};
+
 /**
  * Stripe Credit Card component
  *
@@ -29,7 +41,7 @@ const CreditCardComponent = ( {
 	emitResponse,
 	components,
 } ) => {
-	const { ValidationInputError } = components;
+	const { ValidationInputError, PaymentMethodIcons } = components;
 	const [ sourceId, setSourceId ] = useState( '' );
 	const stripe = useStripe();
 	const onStripeError = useCheckoutSubscriptions(
@@ -46,6 +58,8 @@ const CreditCardComponent = ( {
 		}
 		setSourceId( '0' );
 	};
+	const cardIcons = getStripeCreditCardIcons();
+
 	const renderedCardElement = getStripeServerData().inline_cc_form ? (
 		<InlineCard
 			onChange={ onChange }
@@ -57,7 +71,14 @@ const CreditCardComponent = ( {
 			inputErrorComponent={ ValidationInputError }
 		/>
 	);
-	return renderedCardElement;
+	return (
+		<>
+			{ renderedCardElement }
+			{ PaymentMethodIcons && cardIcons.length && (
+				<PaymentMethodIcons icons={ cardIcons } align="left" />
+			) }
+		</>
+	);
 };
 
 export const StripeCreditCard = ( props ) => {
@@ -69,16 +90,4 @@ export const StripeCreditCard = ( props ) => {
 			<CreditCardComponent { ...props } />
 		</Elements>
 	) : null;
-};
-
-export const getStripeCreditCardIcons = () => {
-	return Object.entries( getStripeServerData().icons ).map(
-		( [ id, { src, alt } ] ) => {
-			return {
-				id,
-				src,
-				alt,
-			};
-		}
-	);
 };

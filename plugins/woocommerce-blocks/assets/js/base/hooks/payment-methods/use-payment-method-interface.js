@@ -13,7 +13,10 @@ import { useEffect, useRef } from '@wordpress/element';
 import { DISPLAY_CART_PRICES_INCLUDING_TAX } from '@woocommerce/block-settings';
 import { ValidationInputError } from '@woocommerce/base-components/validation';
 import { useEmitResponse } from '@woocommerce/base-hooks';
-import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
+import {
+	PaymentMethodIcons,
+	PaymentMethodLabel,
+} from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
@@ -187,6 +190,7 @@ export const usePaymentMethodInterface = () => {
 		components: {
 			ValidationInputError,
 			PaymentMethodIcons,
+			PaymentMethodLabel,
 		},
 		emitResponse: {
 			noticeContexts,
