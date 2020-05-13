@@ -799,7 +799,7 @@ function wc_order_search( $term ) {
 }
 
 /**
- * Increase total sales amount for each product within a paid order.
+ * Update total sales amount for each product within a paid order.
  *
  * @since 3.0.0
  * @param int $order_id Order ID.
@@ -823,7 +823,6 @@ function wc_update_total_sales_counts( $order_id ) {
 	}
 
 	$order->get_data_store()->set_recorded_sales( $order, true );
-	$order->get_data_store()->set_recorded_cancelations( $order, false );
 
 	/**
 	 * Called when sales for an order are recorded
@@ -835,52 +834,6 @@ function wc_update_total_sales_counts( $order_id ) {
 add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
-
-/**
- * Decrease total sales amount for each product within a canceled order.
- *
- * @since 4.1.0
- * @param int $order_id Order ID.
- */
-function wc_decrease_total_sales_counts( $order_id ) {
-	$order = wc_get_order( $order_id );
-
-	if ( ! $order || $order->get_data_store()->get_recorded_cancelations( $order ) ) {
-		return;
-	}
-
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
-			$product_id = $item->get_product_id();
-
-			if ( $product_id ) {
-				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'decrease' );
-			}
-		}
-	}
-
-	$order->get_data_store()->set_recorded_cancelations( $order, true );
-	$order->get_data_store()->set_recorded_sales( $order, false );
-}
-add_action( 'woocommerce_order_status_cancelled', 'wc_decrease_total_sales_counts' );
-add_action( 'woocommerce_order_status_refunded', 'wc_decrease_total_sales_counts' );
-
-/**
- * Decrease total sales amount for each product within a deleted order.
- *
- * @since 4.1.0
- * @param int $post_id Post ID.
- */
-function wc_decrease_deleted_total_sales_counts( $post_id ) {
-	$post_type = get_post_type( $post_id );
-	if ( 'shop_order' !== $post_type ) {
-		return;
-	}
-
-	wc_decrease_total_sales_counts( $post_id );
-}
-add_action( 'before_delete_post', 'wc_decrease_deleted_total_sales_counts' );
 
 /**
  * Update used coupon amount for each coupon within an order.
