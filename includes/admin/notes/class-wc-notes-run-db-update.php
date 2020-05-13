@@ -263,26 +263,22 @@ class WC_Notes_Run_Db_Update {
 	 */
 	private static function should_show_notice() {
 		if ( ! \WC_Install::needs_db_update() ) {
-			try {
-				$data_store = \WC_Data_Store::load( 'admin-note' );
-			} catch ( Exception $e ) {
-				// Bail out in case of incorrect use.
+
+			$note_id = self::get_current_notice();
+
+			// Db update not needed && note does not exist -> don't show it.
+			if ( ! $note_id ) {
 				return false;
 			}
-			$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
-			if ( ! empty( $note_ids ) ) {
-				// Db update not needed && note actioned -> don't show it.
-				$note = new WC_Admin_Note( $note_ids[0] );
-				if ( $note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
-					return false;
-				}
-			} else {
-				// Db update not needed && note does not exist -> don't show it.
+			// Db update not needed && note actioned -> don't show it.
+			$note = new WC_Admin_Note( $note_id );
+			if ( $note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
 				return false;
 			}
 		}
 
+		// Db update needed -> show notice.
 		return true;
 	}
 
