@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
@@ -24,8 +24,17 @@ const Tabs = ( {
 	id,
 } ) => {
 	const [ selected, setSelected ] = useState(
-		initialTabName || ( tabs.length > 0 ? tabs[ 0 ].name : '' )
+		() => initialTabName || ( tabs.length > 0 ? tabs[ 0 ].name : '' )
 	);
+	// Maybe set selected tab if it's empty but we have tabs or an initial tab
+	// This covers instances when the selected value isn't initialized on mount.
+	useEffect( () => {
+		if ( ! selected && tabs.length > 0 ) {
+			setSelected(
+				initialTabName || ( tabs.length > 0 ? tabs[ 0 ].name : '' )
+			);
+		}
+	}, [ selected, tabs, initialTabName ] );
 	if ( ! selected ) {
 		return null;
 	}
