@@ -9,6 +9,8 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -69,6 +71,13 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $stats_data = array();
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_filter( 'woocommerce_rest_performance_indicators_data_value', array( $this, 'format_data_value' ), 10, 5 );
+	}
+
+	/**
 	 * Register the routes for reports.
 	 */
 	public function register_routes() {
@@ -116,16 +125,9 @@ class Controller extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Get information such as allowed stats, stat labels, and endpoint data from stats reports.
-	 *
-	 * @return WP_Error|True
+	 * Get analytics report data and endpoints.
 	 */
-	private function get_indicator_data() {
-		// Data already retrieved.
-		if ( ! empty( $this->endpoints ) && ! empty( $this->labels ) && ! empty( $this->allowed_stats ) ) {
-			return true;
-		}
-
+	public function get_analytics_report_data() {
 		$request  = new \WP_REST_Request( 'GET', '/wc-analytics/reports' );
 		$response = rest_do_request( $request );
 
@@ -137,8 +139,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			return new \WP_Error( 'woocommerce_analytics_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce-admin' ) );
 		}
 
-		$endpoints     = $response->get_data();
-		$allowed_stats = array();
+		$endpoints = $response->get_data();
 
 		foreach ( $endpoints as $endpoint ) {
 			if ( '/stats' === substr( $endpoint['slug'], -6 ) ) {
@@ -162,9 +163,9 @@ class Controller extends \WC_REST_Reports_Controller {
 						continue;
 					}
 
-					$stat            = $prefix . '/' . $property_key;
-					$allowed_stats[] = $stat;
-					$stat_label      = empty( $schema_info['title'] ) ? $schema_info['description'] : $schema_info['title'];
+					$stat                  = $prefix . '/' . $property_key;
+					$this->allowed_stats[] = $stat;
+					$stat_label            = empty( $schema_info['title'] ) ? $schema_info['description'] : $schema_info['title'];
 
 					$this->labels[ $stat ]  = trim( preg_replace( '/\W+/', ' ', $stat_label ) );
 					$this->formats[ $stat ] = isset( $schema_info['format'] ) ? $schema_info['format'] : 'number';
@@ -174,8 +175,78 @@ class Controller extends \WC_REST_Reports_Controller {
 				$this->urls[ $prefix ]      = $endpoint['_links']['report'][0]['href'];
 			}
 		}
+	}
 
-		$this->allowed_stats = $allowed_stats;
+	/**
+	 * Get active Jetpack modules and endpoints.
+	 */
+	public function get_jetpack_modules_data() {
+		if ( ! class_exists( '\Jetpack_Core_Json_Api_Endpoints' ) ) {
+			return;
+		}
+
+		$request  = new \WP_REST_Request( 'GET', '/jetpack/v4/module/all' );
+		$response = rest_do_request( $request );
+		$items    = apply_filters(
+			'woocommerce_rest_performance_indicators_jetpack_items',
+			array(
+				'stats/visitors' => array(
+					'label'      => __( 'Visitors', 'woocommerce-admin' ),
+					'permission' => 'view_stats',
+					'format'     => 'number',
+					'module'     => 'stats',
+				),
+				'stats/views'    => array(
+					'label'      => __( 'Views', 'woocommerce-admin' ),
+					'permission' => 'view_stats',
+					'format'     => 'number',
+					'module'     => 'stats',
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( 200 !== $response->get_status() || empty( $items ) ) {
+			return;
+		}
+
+		$data = $response->get_data();
+
+		foreach ( $items as $item_key => $item ) {
+			if ( ! $data[ $item['module'] ] || ! $data[ $item['module'] ]['activated'] ) {
+				return;
+			}
+
+			if ( $item['permission'] && ! current_user_can( $item['permission'] ) ) {
+				return;
+			}
+
+			$stat                         = 'jetpack/' . $item_key;
+			$endpoint                     = 'jetpack/' . $item['module'];
+			$this->allowed_stats[]        = $stat;
+			$this->labels[ $stat ]        = $item['label'];
+			$this->endpoints[ $endpoint ] = '/jetpack/v4/module/' . $item['module'] . '/data';
+			$this->formats[ $stat ]       = $item['format'];
+		}
+	}
+
+	/**
+	 * Get information such as allowed stats, stat labels, and endpoint data from stats reports.
+	 *
+	 * @return WP_Error|True
+	 */
+	private function get_indicator_data() {
+		// Data already retrieved.
+		if ( ! empty( $this->endpoints ) && ! empty( $this->labels ) && ! empty( $this->allowed_stats ) ) {
+			return true;
+		}
+
+		$this->get_analytics_report_data();
+		$this->get_jetpack_modules_data();
+
 		return true;
 	}
 
@@ -254,8 +325,8 @@ class Controller extends \WC_REST_Reports_Controller {
 			)
 		);
 
-		$a = array_search( $a->stat, $stat_order );
-		$b = array_search( $b->stat, $stat_order );
+		$a = array_search( $a->stat, $stat_order, true );
+		$b = array_search( $b->stat, $stat_order, true );
 
 		if ( false === $a && false === $b ) {
 			return 0;
@@ -320,7 +391,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			$report = $pieces[0];
 			$chart  = $pieces[1];
 
-			if ( ! in_array( $stat, $this->allowed_stats ) ) {
+			if ( ! in_array( $stat, $this->allowed_stats, true ) ) {
 				continue;
 			}
 
@@ -334,7 +405,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			$format = $this->formats[ $stat ];
 			$label  = $this->labels[ $stat ];
 
-			if ( 200 !== $response->get_status() || ! isset( $data['totals'][ $chart ] ) ) {
+			if ( 200 !== $response->get_status() ) {
 				$stats[] = (object) array(
 					'stat'   => $stat,
 					'chart'  => $chart,
@@ -350,7 +421,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'chart'  => $chart,
 				'label'  => $label,
 				'format' => $format,
-				'value'  => $data['totals'][ $chart ],
+				'value'  => apply_filters( 'woocommerce_rest_performance_indicators_data_value', $data, $stat, $report, $chart, $query_args ),
 			);
 		}
 
@@ -410,14 +481,14 @@ class Controller extends \WC_REST_Reports_Controller {
 		$pieces   = $this->get_stats_parts( $object->stat );
 		$endpoint = $pieces[0];
 		$stat     = $pieces[1];
-		$url      = $this->urls[ $endpoint ];
+		$url      = isset( $this->urls[ $endpoint ] ) ? $this->urls[ $endpoint ] : '';
 
 		$links = array(
 			'api'    => array(
 				'href' => rest_url( $this->endpoints[ $endpoint ] ),
 			),
 			'report' => array(
-				'href' => ! empty( $url ) ? $url : '',
+				'href' => $url,
 			),
 		);
 
@@ -438,6 +509,45 @@ class Controller extends \WC_REST_Reports_Controller {
 			$endpoint,
 			$stat,
 		);
+	}
+
+	/**
+	 * Format the data returned from the API for given stats.
+	 *
+	 * @param array  $data Data from external endpoint.
+	 * @param string $stat Name of the stat.
+	 * @param string $report Name of the report.
+	 * @param string $chart Name of the chart.
+	 * @param array  $query_args Query args.
+	 * @return mixed
+	 */
+	public function format_data_value( $data, $stat, $report, $chart, $query_args ) {
+		if ( 'jetpack/stats' === $report ) {
+			// Get the index of the field to tally.
+			$index = array_search( $chart, $data['general']->visits->fields, true );
+			if ( ! $index ) {
+				return null;
+			}
+
+			// Loop over provided data and filter by the queried date.
+			// Note that this is currently limited to 30 days via the Jetpack API
+			// but the WordPress.com endpoint allows up to 90 days.
+			$total  = 0;
+			$before = gmdate( 'Y-m-d', strtotime( isset( $query_args['before'] ) ? $query_args['before'] : TimeInterval::default_before() ) );
+			$after  = gmdate( 'Y-m-d', strtotime( isset( $query_args['after'] ) ? $query_args['after'] : TimeInterval::default_after() ) );
+			foreach ( $data['general']->visits->data as $datum ) {
+				if ( $datum[0] >= $after && $datum[0] <= $before ) {
+					$total += $datum[ $index ];
+				}
+			}
+			return $total;
+		}
+
+		if ( isset( $data['totals'] ) && isset( $data['totals'][ $chart ] ) ) {
+			return $data['totals'][ $chart ];
+		}
+
+		return null;
 	}
 
 	/**

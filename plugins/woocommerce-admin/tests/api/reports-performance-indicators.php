@@ -28,6 +28,12 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 				'role' => 'administrator',
 			)
 		);
+
+		// Mock the Jetpack endpoints and permissions.
+		$wp_user = get_userdata( $this->user );
+		$wp_user->add_cap( 'view_stats' );
+		$this->getMockBuilder( 'Jetpack_Core_Json_Api_Endpoints' )->getMock();
+		add_filter( 'rest_post_dispatch', array( $this, 'mock_rest_responses' ), 10, 3 );
 	}
 
 	/**
@@ -44,7 +50,6 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 	 * Test getting indicators.
 	 */
 	public function test_get_indicators() {
-		global $wpdb;
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -90,16 +95,16 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before' => date( 'Y-m-d 23:59:59', $time ),
-				'after'  => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
-				'stats'  => 'orders/orders_count,downloads/download_count,test/bogus_stat',
+				'before' => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'  => gmdate( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'stats'  => 'orders/orders_count,downloads/download_count,test/bogus_stat,jetpack/stats/views',
 			)
 		);
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $reports ) );
+		$this->assertEquals( 3, count( $reports ) );
 
 		$this->assertEquals( 'orders/orders_count', $reports[0]['stat'] );
 		$this->assertEquals( 'Orders', $reports[0]['label'] );
@@ -112,13 +117,18 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$this->assertEquals( 2, $reports[1]['value'] );
 		$this->assertEquals( 'download_count', $reports[1]['chart'] );
 		$this->assertEquals( '/analytics/downloads', $response->data[1]['_links']['report'][0]['href'] );
+
+		$this->assertEquals( 'jetpack/stats/views', $reports[2]['stat'] );
+		$this->assertEquals( 'Views', $reports[2]['label'] );
+		$this->assertEquals( 10, $reports[2]['value'] );
+		$this->assertEquals( 'views', $reports[2]['chart'] );
+		$this->assertEquals( get_rest_url( null, '/jetpack/v4/module/stats/data' ), $response->data[2]['_links']['api'][0]['href'] );
 	}
 
 	/**
 	 * Test getting indicators with an empty request.
 	 */
 	public function test_get_indicators_empty_request() {
-		global $wpdb;
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -126,8 +136,8 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before' => date( 'Y-m-d 23:59:59', $time ),
-				'after'  => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'before' => gmdate( 'Y-m-d 23:59:59', $time ),
+				'after'  => gmdate( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -179,5 +189,147 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$this->assertArrayHasKey( 'stat', $properties );
 		$this->assertArrayHasKey( 'chart', $properties );
 		$this->assertArrayHasKey( 'label', $properties );
+	}
+
+	/**
+	 * Test the ability to aggregate Jetpack stats based on before and after dates.
+	 */
+	public function test_jetpack_stats_query_args() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before' => '2020-01-05 23:59:59',
+				'after'  => '2020-01-01 00:00:00',
+				'stats'  => 'jetpack/stats/views',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $reports ) );
+
+		$this->assertEquals( 'jetpack/stats/views', $reports[0]['stat'] );
+		$this->assertEquals( 'Views', $reports[0]['label'] );
+		$this->assertEquals( 18, $reports[0]['value'] );
+		$this->assertEquals( 'views', $reports[0]['chart'] );
+		$this->assertEquals( get_rest_url( null, '/jetpack/v4/module/stats/data' ), $response->data[0]['_links']['api'][0]['href'] );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before' => '2020-01-02 23:59:59',
+				'after'  => '2020-01-01 00:00:00',
+				'stats'  => 'jetpack/stats/views',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $reports ) );
+
+		$this->assertEquals( 'jetpack/stats/views', $reports[0]['stat'] );
+		$this->assertEquals( 'Views', $reports[0]['label'] );
+		$this->assertEquals( 4, $reports[0]['value'] );
+		$this->assertEquals( 'views', $reports[0]['chart'] );
+		$this->assertEquals( get_rest_url( null, '/jetpack/v4/module/stats/data' ), $response->data[0]['_links']['api'][0]['href'] );
+	}
+
+	/**
+	 * Test the ability to aggregate Jetpack stats based on default arguments.
+	 */
+	public function test_jetpack_stats_default_query_args() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'stats' => 'jetpack/stats/views',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $reports ) );
+
+		$this->assertEquals( 'jetpack/stats/views', $reports[0]['stat'] );
+		$this->assertEquals( 'Views', $reports[0]['label'] );
+		$this->assertEquals( 10, $reports[0]['value'] );
+		$this->assertEquals( 'views', $reports[0]['chart'] );
+		$this->assertEquals( get_rest_url( null, '/jetpack/v4/module/stats/data' ), $response->data[0]['_links']['api'][0]['href'] );
+	}
+
+	/**
+	 * Mock the Jetpack REST API responses since we're not really connected.
+	 *
+	 * @param WP_Rest_Response $response Response from the server.
+	 * @param WP_Rest_Server   $rest_server WP Rest Server.
+	 * @param WP_REST_Request  $request Request made to the server.
+	 *
+	 * @return WP_Rest_Response
+	 */
+	public function mock_rest_responses( $response, $rest_server, $request ) {
+		if ( 'GET' === $request->get_method() && '/jetpack/v4/module/all' === $request->get_route() ) {
+			$response->set_status( 200 );
+			$response->set_data(
+				array(
+					'stats' => array(
+						'activated' => 1,
+					),
+				)
+			);
+		}
+
+		if ( 'GET' === $request->get_method() && '/jetpack/v4/module/stats/data' === $request->get_route() ) {
+			$general                 = new \stdClass();
+			$general->visits         = new \stdClass();
+			$general->visits->fields = array(
+				'date',
+				'views',
+				'visits',
+			);
+			$general->visits->data   = array(
+				array(
+					'2020-01-01',
+					1,
+					0,
+				),
+				array(
+					'2020-01-02',
+					3,
+					0,
+				),
+				array(
+					'2020-01-03',
+					1,
+					0,
+				),
+				array(
+					'2020-01-04',
+					8,
+					0,
+				),
+				array(
+					'2020-01-05',
+					5,
+					0,
+				),
+				array(
+					gmdate( 'Y-m-d' ),
+					10,
+					0,
+				),
+			);
+			$response->set_status( 200 );
+			$response->set_data(
+				array( 'general' => $general )
+			);
+		}
+
+		return $response;
 	}
 }
