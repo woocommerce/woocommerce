@@ -222,23 +222,32 @@ class WC_Notes_Run_Db_Update {
 			)
 		);
 
+		$note_actions = array(
+			array(
+				'name'    => 'update-db_done',
+				'label'   => __( 'Thanks!', 'woocommerce' ),
+				'url'     => $hide_notices_url,
+				'status'  => 'actioned',
+				'primary' => true,
+			),
+		);
+
 		$note = new WC_Admin_Note( $note_id );
+
+		// Check if the note needs to be updated (e.g. expired nonce or different note type stored in the previous run).
+		if ( self::note_up_to_date( $note, $hide_notices_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
+			return $note_id;
+		}
+
 		$note->set_title( __( 'WooCommerce database update done', 'woocommerce' ) );
 		$note->set_content( __( 'WooCommerce database update complete. Thank you for updating to the latest version!', 'woocommerce' ) );
 
-		$actions = $note->get_actions();
-		if ( ! in_array( 'update-db_done', wp_list_pluck( $actions, 'name' ) ) ) {
-			$note->clear_actions();
-			$note->add_action(
-				'update-db_done',
-				__( 'Thanks!', 'woocommerce' ),
-				$hide_notices_url,
-				'actioned',
-				true
-			);
-
-			$note->save();
+		$note->clear_actions();
+		foreach ( $note_actions as $note_action ) {
+			$note->add_action( ...array_values( $note_action ) );
 		}
+
+		$note->save();
 	}
 
 	/**
