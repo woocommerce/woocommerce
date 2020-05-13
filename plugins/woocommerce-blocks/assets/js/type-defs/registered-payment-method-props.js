@@ -171,6 +171,8 @@
  *                                                           errors
  * @property {function(Object):Object} PaymentMethodIcons    A component used for displaying payment
  *                                                           method icons.
+ * @property {function(Object):Object} PaymentMethodLabel    A component used for displaying payment
+ *                                                           method labels, including an icon.
  */
 
 /**

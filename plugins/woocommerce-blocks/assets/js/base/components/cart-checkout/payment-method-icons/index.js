@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * Internal dependencies
  */
 import PaymentMethodIcon from './payment-method-icon';
@@ -13,15 +18,20 @@ import './style.scss';
  * @param {Object} props Component props.
  * @param {Array} props.icons  Array of icons object configs or ids as strings.
  */
-export const PaymentMethodIcons = ( { icons = [] } ) => {
+export const PaymentMethodIcons = ( { icons = [], align = 'center' } ) => {
 	const iconConfigs = normalizeIconConfig( icons );
 
 	if ( iconConfigs.length === 0 ) {
 		return null;
 	}
 
+	const containerClass = classnames( 'wc-block-cart__payment-method-icons', {
+		'wc-block-cart__payment-method-icons--align-left': align === 'left',
+		'wc-block-cart__payment-method-icons--align-right': align === 'right',
+	} );
+
 	return (
-		<div className="wc-block-cart__payment-method-icons">
+		<div className={ containerClass }>
 			{ iconConfigs.map( ( icon ) => {
 				const iconProps = {
 					...icon,

@@ -15,13 +15,14 @@ const stripePromise = loadStripe();
 
 const StripeComponent = ( props ) => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
+
 	useEffect( () => {
 		Promise.resolve( stripePromise ).then( ( { error } ) => {
 			if ( error ) {
 				setErrorMessage( error.message );
 			}
 		} );
-	}, [ stripePromise, setErrorMessage ] );
+	}, [] );
 
 	useEffect( () => {
 		if ( errorMessage ) {
@@ -32,18 +33,18 @@ const StripeComponent = ( props ) => {
 	return <StripeCreditCard stripe={ stripePromise } { ...props } />;
 };
 
-const StripeLabel = ( { components = {} } ) => {
-	const { PaymentMethodIcons } = components;
+const StripeLabel = ( props ) => {
+	const { PaymentMethodLabel } = props.components;
 
-	if ( ! PaymentMethodIcons || cardIcons.length === 0 ) {
-		return __( 'Credit/Debit Card', 'woo-gutenberg-products-block' );
-	}
-
-	return <PaymentMethodIcons icons={ cardIcons } />;
+	return (
+		<PaymentMethodLabel
+			icon="card"
+			text={ __( 'Credit / Debit Card', 'woo-gutenberg-products-block' ) }
+		/>
+	);
 };
 
 const cardIcons = getStripeCreditCardIcons();
-
 const stripeCcPaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
 	label: <StripeLabel />,
