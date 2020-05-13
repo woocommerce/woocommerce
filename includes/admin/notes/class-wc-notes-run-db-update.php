@@ -54,6 +54,16 @@ class WC_Notes_Run_Db_Update {
 			return;
 		}
 
+		if ( count( $note_ids ) > 1 ) {
+			// Remove weird duplicates. Leave the first one.
+			$current_notice = array_shift( $note_ids );
+			foreach ( $note_ids as $note_id ) {
+				$note = new WC_Admin_Note( $note_id );
+				$data_store->delete( $note );
+			}
+			return $current_notice;
+		}
+
 		return current( $note_ids );
 	}
 
