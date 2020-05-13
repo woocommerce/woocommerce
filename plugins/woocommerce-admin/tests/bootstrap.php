@@ -52,6 +52,9 @@ function wc_admin_install() {
  */
 function wc_test_includes() {
 	$wc_tests_framework_base_dir = wc_dir() . '/tests';
+	if ( ! is_dir( $wc_tests_framework_base_dir . '/framework' ) ) {
+		$wc_tests_framework_base_dir .= '/legacy';
+	}
 
 	// WooCommerce test classes.
 	// Framework.
