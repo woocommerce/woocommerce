@@ -91,11 +91,12 @@ class WC_Notes_Run_Db_Update {
 	 *
 	 * @param WC_Admin_Note $note Note to check.
 	 * @param string        $update_url  URL to check the note against.
+	 * @param array(string) $current_actions List of actions to check for.
 	 * @return bool
 	 */
-	private static function note_up_to_date( $note, $update_url ) {
+	private static function note_up_to_date( $note, $update_url, $current_actions ) {
 		$actions = $note->get_actions();
-		if ( 2 === count( array_intersect( wp_list_pluck( $actions, 'name' ), array( 'update-db_run', 'update-db_learn-more' ) ) )
+		if ( count( $current_actions ) === count( array_intersect( wp_list_pluck( $actions, 'name' ), $current_actions ) )
 			&& in_array( $update_url, wp_list_pluck( $actions, 'query' ) ) ) {
 			return true;
 		}
@@ -120,6 +121,23 @@ class WC_Notes_Run_Db_Update {
 			)
 		);
 
+		$note_actions = array(
+			array(
+				'name'    => 'update-db_run',
+				'label'   => __( 'Update WooCommerce Database', 'woocommerce' ),
+				'url'     => $update_url,
+				'status'  => 'unactioned',
+				'primary' => true,
+			),
+			array(
+				'name'    => 'update-db_learn-more',
+				'label'   => __( 'Learn more about updates', 'woocommerce' ),
+				'url'     => 'https://docs.woocommerce.com/document/how-to-update-woocommerce/',
+				'status'  => 'unactioned',
+				'primary' => false,
+			),
+		);
+
 		if ( $note_id ) {
 			$note = new WC_Admin_Note( $note_id );
 		} else {
@@ -127,7 +145,7 @@ class WC_Notes_Run_Db_Update {
 		}
 
 		// Check if the note needs to be updated (e.g. expired nonce or different note type stored in the previous run).
-		if ( self::note_up_to_date( $note, $update_url ) ) {
+		if ( self::note_up_to_date( $note, $update_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
 			return $note_id;
 		}
 
@@ -148,20 +166,9 @@ class WC_Notes_Run_Db_Update {
 
 		// Set new actions.
 		$note->clear_actions();
-		$note->add_action(
-			'update-db_run',
-			__( 'Update WooCommerce Database', 'woocommerce' ),
-			$update_url,
-			'unactioned',
-			true
-		);
-		$note->add_action(
-			'update-db_learn-more',
-			__( 'Learn more about updates', 'woocommerce' ),
-			'https://docs.woocommerce.com/document/how-to-update-woocommerce/',
-			'unactioned',
-			false
-		);
+		foreach ( $note_actions as $note_action ) {
+			$note->add_action( ...array_values( $note_action ) );
+		}
 
 		return $note->save();
 	}
