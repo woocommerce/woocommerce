@@ -19,8 +19,9 @@
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },
   "main": "index.js",
+  "module": "build-module/index.js",
   "dependencies": {
-    "@wordpress/e2e-test-utils": "^4.3.0",
+    "@wordpress/e2e-test-utils": "^4.6.0",
     "@wordpress/jest-preset-default": "^5.4.0",
     "app-root-path": "^3.0.0",
     "jest": "^25.1.0",
@@ -46,7 +47,6 @@
     "docker:ssh": "docker exec -it woocommerce_wordpress-www /bin/bash",
     "install-wp-tests": "./bin/install-wp-tests.sh",
     "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
-    "test:e2e-CI": "bash ./bin/e2e-CI.sh",
     "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
   }
 }
