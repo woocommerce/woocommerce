@@ -181,7 +181,7 @@ class WC_Notes_Run_Db_Update {
 	 * @param int $note_id Note id to update.
 	 */
 	private static function update_in_progress_notice( $note_id ) {
-		// Same actions as in includes/admin/views/html-notice-updating.php.
+		// Same actions as in includes/admin/views/html-notice-updating.php. This just redirects, performs no action, so without nonce.
 		$pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_run_update&status=pending' );
 		$cron_disabled       = Constants::is_true( 'DISABLE_WP_CRON' );
 		$cron_cta            = $cron_disabled ? __( 'You can manually run queued updates here.', 'woocommerce' ) : __( 'View progress →', 'woocommerce' );
