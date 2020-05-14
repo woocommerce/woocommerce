@@ -2109,21 +2109,6 @@ a.reset_variations {
 	}
 }
 
-ul.wc-block-grid__products {
-	display: flex;
-	align-items: stretch;
-	flex-direction: row;
-	flex-wrap: wrap;
-
-	li.wc-block-grid__product {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 5em;
-	}
-}
-
 .wc-block-grid__product {
 
 	.wc-block-grid__product-link {
