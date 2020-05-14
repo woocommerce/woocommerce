@@ -146,17 +146,17 @@
  *                                                              will fire when checkout begins
  *                                                              processing (as a part of the
  *                                                              processing process).
- * @property {function()}           onShippingRateSuccess       Used to subscribe callbacks that
+ * @property {function(function())} onShippingRateSuccess       Used to subscribe callbacks that
  *                                                              will fire when shipping rates for a
  *                                                              given address have been received
  *                                                              successfully.
- * @property {function()}           onShippingRateFail          Used to subscribe callbacks that
+ * @property {function(function())} onShippingRateFail          Used to subscribe callbacks that
  *                                                              will fire when retrieving shipping
  *                                                              rates failed.
- * @property {function()}           onShippingRateSelectSuccess Used to subscribe callbacks that
+ * @property {function(function())} onShippingRateSelectSuccess Used to subscribe callbacks that
  *                                                              will fire after selecting a
  *                                                              shipping rate successfully.
- * @property {function()}           onShippingRateSelectFail    Used to subscribe callbacks that
+ * @property {function(function())} onShippingRateSelectFail    Used to subscribe callbacks that
  *                                                              will fire after selecting a shipping
  *                                                              rate unsuccessfully.
  * @property {function(function())} onPaymentProcessing         Event registration callback for
@@ -211,6 +211,17 @@
  *                                                                 message string) for express
  *                                                                 payment methods. Does not change
  *                                                                 payment status.
+ * @property {function()}                 [onClick]                Provided to express payment
+ *                                                                 methods that should be triggered
+ *                                                                 when the payment method button
+ *                                                                 is clicked (which will signal to
+ *                                                                 checkout the payment method has
+ *                                                                 taken over payment processing)
+ * @property {function()}                 [onClose]                Provided to express payment
+ *                                                                 methods that should be triggered
+ *                                                                 when the express payment method
+ *                                                                 modal closes and control is
+ *                                                                 returned to checkout.
  */
 
 export {};

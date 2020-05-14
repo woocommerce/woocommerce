@@ -10,6 +10,7 @@ export const useStoreNotices = () => {
 		createNotice,
 		removeNotice,
 		createSnackbarNotice,
+		setIsSuppressed,
 	} = useStoreNoticesContext();
 	// Added to a ref so the surface for notices doesn't change frequently
 	// and thus can be used as dependencies on effects.
@@ -73,5 +74,6 @@ export const useStoreNotices = () => {
 		notices,
 		...noticesApi,
 		...noticeCreators,
+		setIsSuppressed,
 	};
 };

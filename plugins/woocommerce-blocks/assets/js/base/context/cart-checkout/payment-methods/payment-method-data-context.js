@@ -150,19 +150,22 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		[ dispatch ]
 	);
 
-	const setExpressPaymentError = ( message ) => {
-		if ( message ) {
-			addErrorNotice( message, {
-				context: 'wc/express-payment-area',
-				id: 'wc-express-payment-error',
-			} );
-		} else {
-			removeNotice(
-				'wc-express-payment-error',
-				'wc/express-payment-area'
-			);
-		}
-	};
+	const setExpressPaymentError = useCallback(
+		( message ) => {
+			if ( message ) {
+				addErrorNotice( message, {
+					context: 'wc/express-payment-area',
+					id: 'wc-express-payment-error',
+				} );
+			} else {
+				removeNotice(
+					'wc-express-payment-error',
+					'wc/express-payment-area'
+				);
+			}
+		},
+		[ addErrorNotice, removeNotice ]
+	);
 	// ensure observers are always current.
 	useEffect( () => {
 		currentObservers.current = observers;
@@ -230,11 +233,11 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 				billingData = null,
 				shippingData = null
 			) => {
-				if ( shippingData !== null && shippingData?.address ) {
-					setShippingAddress( shippingData.address );
-				}
 				if ( billingData ) {
 					setBillingData( billingData );
+				}
+				if ( shippingData !== null && shippingData?.address ) {
+					setShippingAddress( shippingData.address );
 				}
 				dispatch(
 					success( {

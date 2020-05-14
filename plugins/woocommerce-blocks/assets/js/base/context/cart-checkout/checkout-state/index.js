@@ -8,6 +8,7 @@ import {
 	useRef,
 	useMemo,
 	useEffect,
+	useCallback,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useStoreNotices, useEmitResponse } from '@woocommerce/base-hooks';
@@ -304,9 +305,9 @@ export const CheckoutStateProvider = ( {
 		isSuccessResponse,
 	] );
 
-	const onSubmit = () => {
+	const onSubmit = useCallback( () => {
 		dispatch( actions.setBeforeProcessing() );
-	};
+	}, [] );
 
 	/**
 	 * @type {CheckoutDataContext}

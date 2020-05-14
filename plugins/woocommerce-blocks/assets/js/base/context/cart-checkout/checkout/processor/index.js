@@ -75,7 +75,7 @@ const CheckoutProcessor = () => {
 		paymentMethods,
 		shouldSavePayment,
 	} = usePaymentMethodDataContext();
-	const { addErrorNotice, removeNotice } = useStoreNotices();
+	const { addErrorNotice, removeNotice, setIsSuppressed } = useStoreNotices();
 	const currentBillingData = useRef( billingData );
 	const currentShippingAddress = useRef( shippingAddress );
 	const currentRedirectUrl = useRef( redirectUrl );
@@ -93,6 +93,11 @@ const CheckoutProcessor = () => {
 		( hasValidationErrors && ! expressPaymentMethodActive ) ||
 		currentPaymentStatus.hasError ||
 		shippingErrorStatus.hasError;
+
+	// If express payment method is active, let's suppress notices
+	useEffect( () => {
+		setIsSuppressed( expressPaymentMethodActive );
+	}, [ expressPaymentMethodActive, setIsSuppressed ] );
 
 	useEffect( () => {
 		if (
