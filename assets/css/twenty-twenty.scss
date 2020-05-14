@@ -173,7 +173,8 @@ a.button {
 
 	.wc-block-grid__product-onsale {
 		position: absolute;
-		top: 0;
+		right: 4px;
+		top: 4px;
 		display: inline-block;
 		background: $highlights-color;
 		color: #fff;
@@ -184,6 +185,7 @@ a.button {
 		text-transform: uppercase;
 		z-index: 1;
 		font-size: 1.5rem;
+		margin: 0;
 		padding: 1rem;
 	}
 }
