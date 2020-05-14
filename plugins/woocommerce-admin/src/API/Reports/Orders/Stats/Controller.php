@@ -518,6 +518,9 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+			),
 		);
 
 		return $params;
