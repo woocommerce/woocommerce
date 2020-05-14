@@ -57,29 +57,54 @@
 	word-wrap: normal !important;
 }
 
-// Reset <button> style so we can use link style for action buttons.
-@mixin link-button() {
-	margin: 0;
-	padding: 0;
+@mixin reset-box() {
 	border: 0;
 	border-radius: 0;
+	margin: 0;
+	padding: 0;
+	vertical-align: baseline;
+}
 
-	box-shadow: none;
-	display: inline;
+@mixin reset-typography() {
+	color: inherit;
 	font-family: inherit;
 	font-size: inherit;
 	font-weight: inherit;
 	letter-spacing: inherit;
-	text-decoration: underline;
-	text-transform: none;
-	vertical-align: baseline;
+	line-height: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+}
+
+// Reset <h1>, <h2>, etc. styles as if they were text. Useful for elements that must be headings for a11y but don't need those styles.
+@mixin text-heading() {
+	@include reset-box();
+	@include reset-typography();
+	box-shadow: none;
+	display: inline;
 
 	background: transparent;
+}
+
+// Reset <button> style as if it was text. Useful for elements that must be `<button>` for a11y but don't need those styles.
+@mixin text-button() {
+	@include reset-box();
+	@include reset-typography();
+	background: transparent;
+	box-shadow: none;
+	display: inline;
+
 	&:hover,
 	&:focus,
 	&:active {
 		background: transparent;
 	}
+}
+
+// Reset <button> style so we can use link style for action buttons.
+@mixin link-button() {
+	@include text-button();
+	text-decoration: underline;
 }
 
 // Makes sure long words are broken if they overflow the container.

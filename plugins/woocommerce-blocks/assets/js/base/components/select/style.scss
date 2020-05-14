@@ -1,9 +1,10 @@
 .wc-block-select {
-	height: 3em;
+	height: rem(48px);
 	position: relative;
-	margin-bottom: $gap-large;
+	margin-bottom: rem($gap-large);
 
 	label {
+		@include reset-typography();
 		@include font-size(16px, 22px);
 		position: absolute;
 		transform: translateY(0.75em);
@@ -43,7 +44,7 @@
 		color: $input-text-active;
 		font-family: inherit;
 		font-weight: normal;
-		height: 3em;
+		height: rem(48px);
 		letter-spacing: inherit;
 		line-height: 1;
 		overflow: hidden;

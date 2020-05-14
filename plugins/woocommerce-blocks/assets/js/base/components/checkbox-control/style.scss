@@ -1,4 +1,5 @@
 .wc-block-checkbox {
+	@include reset-typography();
 	display: block;
 	position: relative;
 

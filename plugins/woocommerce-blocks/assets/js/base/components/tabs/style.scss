@@ -25,10 +25,10 @@
 				outline: 1px dotted $gray-60;
 			}
 			.wc-block-components-tabs__item-content {
+				@include font-size(16px, 16px);
 				width: fit-content;
 				display: inline-block;
 				font-weight: bold;
-				line-height: 1em;
 
 				> img,
 				> svg {
@@ -50,5 +50,6 @@
 	}
 	.wc-block-components-tabs__content {
 		padding: $gap 0;
+		text-transform: none;
 	}
 }

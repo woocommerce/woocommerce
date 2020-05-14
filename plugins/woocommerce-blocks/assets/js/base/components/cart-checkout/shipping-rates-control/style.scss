@@ -12,6 +12,7 @@
 }
 
 .wc-block-shipping-rates-control__package-item {
+	@include wrap-break-word();
 	display: inline-block;
 	margin: 0;
 	padding: 0;
