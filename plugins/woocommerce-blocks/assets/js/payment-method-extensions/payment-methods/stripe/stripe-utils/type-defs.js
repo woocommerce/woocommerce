@@ -249,18 +249,18 @@
 /**
  * @typedef {Object} StripePaymentRequest Stripe payment request object.
  *
- * @property {Function<Promise>} canMakePayment Returns a promise that resolves
- *                                              with an object detailing if a
- *                                              browser payment API is
- *                                              available.
- * @property {Function}          show           Shows the browser's payment
- *                                              interface (called automatically
- *                                              if payment request button in
- *                                              use)
- * @property {Function}          update         Used to update a PaymentRequest
- *                                              object.
- * @property {Function}          on             For registering callbacks on
- *                                              payment request events.
+ * @property {function():Promise} canMakePayment Returns a promise that resolves
+ *                                               with an object detailing if a
+ *                                               browser payment API is
+ *                                               available.
+ * @property {function()}         show           Shows the browser's payment
+ *                                               interface (called automatically
+ *                                               if payment request button in
+ *                                               use)
+ * @property {function()}         update         Used to update a PaymentRequest
+ *                                               object.
+ * @property {function()}         on             For registering callbacks on
+ *                                               payment request events.
  */
 
 /**
