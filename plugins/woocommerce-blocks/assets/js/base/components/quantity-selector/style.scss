@@ -3,6 +3,7 @@
 	padding: 0;
 	margin: 0;
 	background: none transparent;
+	box-shadow: none;
 
 	&:focus {
 		outline: 2px solid $core-grey-light-600;
@@ -18,6 +19,7 @@
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-quantity-selector__input {
+		@include font-size(16px);
 		order: 2;
 		min-width: 40px;
 		flex: 1 1 auto;
@@ -47,11 +49,11 @@
 	}
 	.wc-block-quantity-selector__button {
 		@include reset-button;
+		@include font-size(16px);
 		min-width: 30px;
 		cursor: pointer;
 		color: $core-grey-dark-700;
 		font-style: normal;
-		font-size: 1em;
 		text-align: center;
 
 		&:hover,

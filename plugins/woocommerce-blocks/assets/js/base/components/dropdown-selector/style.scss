@@ -143,7 +143,7 @@
 }
 
 .wc-block-dropdown-selector__list {
-	list-style: none;
+	background-color: #fff;
 	margin: -1px 0 0;
 	padding: 0;
 	position: absolute;
@@ -160,10 +160,10 @@
 }
 
 .wc-block-dropdown-selector__list-item {
-	background-color: #fff;
 	color: $core-grey-dark-600;
 	cursor: default;
 	font-size: 0.8em;
+	list-style: none;
 	margin: 0;
 	padding: 0 $gap-smallest;
 

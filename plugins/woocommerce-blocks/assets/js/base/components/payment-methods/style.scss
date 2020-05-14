@@ -91,6 +91,7 @@
 	}
 
 	label {
+		@include reset-typography();
 		@include font-size(16px, 22px);
 		position: absolute;
 		transform: translateY(0.75em);

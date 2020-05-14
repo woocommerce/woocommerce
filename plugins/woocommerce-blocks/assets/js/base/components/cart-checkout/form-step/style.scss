@@ -27,14 +27,14 @@ $line-offset-from-circle-size: 8px;
 	align-content: center;
 	flex-wrap: wrap;
 	margin-bottom: $gap-smaller;
-}
 
-.wc-block-checkout-step__title {
-	@include font-size(16px);
-	line-height: 1.5;
-	color: $gray-80;
-	font-weight: 400;
-	margin: 0 $gap-small 0 0;
+	.wc-block-checkout-step__title {
+		@include font-size(16px);
+		line-height: 1.5;
+		color: $gray-80;
+		font-weight: 400;
+		margin: 0 $gap-small 0 0;
+	}
 }
 
 .wc-block-checkout-step__heading-content {

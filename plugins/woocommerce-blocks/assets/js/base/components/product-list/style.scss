@@ -36,7 +36,6 @@
 .wc-block-grid__products {
 	display: flex;
 	flex-wrap: wrap;
-	list-style: none;
 	padding: 0;
 	margin: 0 (-$gap/2) $gap;
 	background-clip: padding-box;
@@ -53,6 +52,7 @@
 	border-left: $gap/2 solid transparent;
 	border-right: $gap/2 solid transparent;
 	border-bottom: $gap solid transparent;
+	list-style: none;
 }
 
 // Extra specificity to avoid editor styles on linked images.

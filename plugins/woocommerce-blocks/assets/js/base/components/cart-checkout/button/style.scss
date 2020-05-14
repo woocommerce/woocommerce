@@ -5,7 +5,7 @@
 	display: flex;
 	font-size: inherit;
 	font-weight: bold;
-	height: 3em; // 16px * 3em = 48px, same height as text-input
+	min-height: rem(48px); // 16px * 3 = 48px, same height as text-input
 	justify-content: center;
 	line-height: 1;
 	padding: 0 $gap-small;

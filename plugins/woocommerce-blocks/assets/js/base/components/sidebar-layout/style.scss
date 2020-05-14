@@ -24,6 +24,7 @@
 		&.is-opened {
 			padding-left: 0;
 			padding-right: 0;
+			padding-top: 0;
 
 			> .components-panel__body-title {
 				margin-bottom: 0;
@@ -33,26 +34,29 @@
 		}
 	}
 
-	.components-panel__body-title,
-	.components-panel__body-toggle {
-		&,
+	.components-panel__body-title {
+		@include text-heading();
+		background: transparent;
+
 		&:hover,
 		&:focus,
 		&:active {
-			background-color: transparent;
-			color: inherit;
+			background: transparent;
 		}
 	}
 
 	.components-panel__body-toggle {
+		@include reset-typography();
+		background: transparent;
 		font-weight: normal;
 		font-size: inherit;
 		padding-left: 0;
 		padding-right: 36px;
 
-		&.components-button,
-		&.components-button:focus:not(:disabled):not([aria-disabled="true"]) {
-			color: inherit;
+		&:hover,
+		&:focus,
+		&:active {
+			background: transparent;
 		}
 
 		.components-panel__arrow {
@@ -66,7 +70,7 @@
 .is-mobile {
 	&.wc-block-sidebar-layout {
 		flex-direction: column;
-		margin: 0 0 $gap;
+		margin: 0 auto $gap;
 
 		.wc-block-main {
 			padding: 0;
