@@ -7,7 +7,7 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { loadStripe } from '../stripe-utils';
+import { getStripeServerData, loadStripe } from '../stripe-utils';
 import { StripeCreditCard, getStripeCreditCardIcons } from './payment-method';
 import { PAYMENT_METHOD_NAME } from './constants';
 
@@ -22,7 +22,7 @@ const StripeComponent = ( props ) => {
 				setErrorMessage( error.message );
 			}
 		} );
-	}, [] );
+	}, [ setErrorMessage ] );
 
 	useEffect( () => {
 		if ( errorMessage ) {
@@ -57,7 +57,7 @@ const stripeCcPaymentMethod = {
 		'woo-gutenberg-products-block'
 	),
 	supports: {
-		savePaymentInfo: true,
+		savePaymentInfo: getStripeServerData().allowSavedCards,
 	},
 };
 
