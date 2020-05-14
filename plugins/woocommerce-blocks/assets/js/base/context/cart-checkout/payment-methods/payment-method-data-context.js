@@ -268,7 +268,7 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 	// When checkout is returned to idle, set payment status to pristine
 	// but only if payment status is already not finished.
 	useEffect( () => {
-		if ( ! currentStatus.isSuccessful ) {
+		if ( checkoutIsIdle && ! currentStatus.isSuccessful ) {
 			dispatch( statusOnly( PRISTINE ) );
 		}
 	}, [ checkoutIsIdle, currentStatus.isSuccessful ] );
