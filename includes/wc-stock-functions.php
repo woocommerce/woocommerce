@@ -66,10 +66,11 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
  * Update a product's stock status.
  *
  * @param  int $product_id Product ID.
- * @param  int $status     Status.
+ * @param  string $status     Status.
  */
 function wc_update_product_stock_status( $product_id, $status ) {
 	$product = wc_get_product( $product_id );
+
 	if ( $product ) {
 		$product->set_stock_status( $status );
 		$product->save();
