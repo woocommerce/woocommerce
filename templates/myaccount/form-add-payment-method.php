@@ -47,7 +47,7 @@ if ( $available_gateways ) : ?>
 				?>
 			</ul>
 
-			<?php do_action( 'woocommerce_add_payment_method_before_save' ); ?>
+			<?php do_action( 'woocommerce_add_payment_method_form_bottom' ); ?>
 
 			<div class="form-row">
 				<?php wp_nonce_field( 'woocommerce-add-payment-method', 'woocommerce-add-payment-method-nonce' ); ?>

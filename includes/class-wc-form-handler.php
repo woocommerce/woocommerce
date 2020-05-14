@@ -459,7 +459,7 @@ class WC_Form_Handler {
 				return;
 			}
 
-			if ( ! apply_filters( 'woocommerce_add_payment_method_validation', true) ) {
+			if ( ! apply_filters( 'woocommerce_add_payment_method_form_is_valid', true ) ) {
 				return;
 			}
 
