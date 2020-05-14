@@ -442,10 +442,11 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	 * Setup for a test for adjust_posts.
 	 *
 	 * @param bool $with_nav_filtering_data Should WC_Query::get_layered_nav_chosen_attributes return filtering data?.
+	 * @param bool $use_objects If true, get_current_posts will return objects with an ID property; if false, it will returns the ids.
 	 *
 	 * @return array An array where the first element is the instance of WC_Query, and the second is an array of sample products created.
 	 */
-	private function setup_adjust_posts_test( $with_nav_filtering_data ) {
+	private function setup_adjust_posts_test( $with_nav_filtering_data, $use_objects ) {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		if ( $with_nav_filtering_data ) {
@@ -455,46 +456,39 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		}
 
 		$products    = array();
-		$product_ids = array();
+		$posts = array();
 		for ( $i = 0; $i < 5; $i++ ) {
 			$product = WC_Helper_Product::create_simple_product();
 			array_push( $products, $product );
-			array_push( $product_ids, $product->get_id() );
+			$post = $use_objects ? (object)['ID' => $product->get_id()] : $product->get_id();
+			array_push( $posts, $post );
 		}
 
 		$products[0]->set_stock_status( 'outofstock' );
 
 		$sut = $this
 			->getMockBuilder( WC_Query::class )
-			->setMethods( array( 'get_current_post_ids', 'get_layered_nav_chosen_attributes_inst' ) )
+			->setMethods( array( 'get_current_posts', 'get_layered_nav_chosen_attributes_inst' ) )
 			->getMock();
 
-		$sut->method( 'get_current_post_ids' )->willReturn( $product_ids );
+		$sut->method( 'get_current_posts' )->willReturn( $posts );
 		$sut->method( 'get_layered_nav_chosen_attributes_inst' )->willReturn( $nav_filtering_data );
 
 		return array( $sut, $products );
 	}
 
 	/**
-	 * @testdox adjust_posts should do nothing when there are no nav filtering attributes in the request.
+	 * @param bool $with_nav_filtering_data Should WC_Query::get_layered_nav_chosen_attributes return filtering data?.
+	 * @param bool $use_objects If true, get_current_posts will return objects with an ID property; if false, it will returns the ids.
+	 *
+	 * @testdox adjust_posts should return the number of visible products and create product visibility loop variables
+	 * @testWith [true, true]
+	 *           [false, false]
+	 *           [true, false]
+	 *           [false, true]
 	 */
-	public function test_adjust_posts_count_without_nav_filtering_attributes() {
-		list($sut, $products) = $this->setup_adjust_posts_test( false );
-
-		$products[0]->set_stock_status( 'outofstock' );
-		$products[0]->save();
-
-		$this->assertEquals( 34, $sut->adjust_posts_count( 34 ) );
-		foreach ( $products as $product ) {
-			$this->assertNull( wc_get_loop_product_visibility( $product->get_id() ) );
-		}
-	}
-
-	/**
-	 * @testdox adjust_posts should return the number of visible products, and create product visibility loop variables, then there are nav filtering attributes in the request.
-	 */
-	public function test_adjust_posts_count_with_nav_filtering_attributes() {
-		list($sut, $products) = $this->setup_adjust_posts_test( true );
+	public function test_adjust_posts_count_with_nav_filtering_attributes( $with_nav_filtering_data, $use_objects ) {
+		list($sut, $products) = $this->setup_adjust_posts_test( $with_nav_filtering_data, $use_objects );
 
 		$products[0]->set_stock_status( 'outofstock' );
 		$products[0]->save();

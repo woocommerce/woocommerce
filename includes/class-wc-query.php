@@ -379,13 +379,10 @@ class WC_Query {
 	 * @return int Adjusted posts count.
 	 */
 	public function adjust_posts_count( $count ) {
-		if ( empty( $this->get_layered_nav_chosen_attributes_inst() ) ) {
-			return $count;
-		}
-
-		$post_ids = $this->get_current_post_ids();
-		$count    = 0;
-		foreach ( $post_ids as $id ) {
+		$posts = $this->get_current_posts();
+		$count = 0;
+		foreach ( $posts as $post ) {
+			$id      = is_object( $post ) ? $post->ID : $post;
 			$product = wc_get_product( $id );
 			if ( ! is_object( $product ) ) {
 				continue;
@@ -412,11 +409,11 @@ class WC_Query {
 	}
 
 	/**
-	 * Get the ids of the posts found in the current WP loop.
+	 * Get the posts (or the ids of the posts) found in the current WP loop.
 	 *
-	 * @return array Array of post ids.
+	 * @return array Array of posts or post ids.
 	 */
-	protected function get_current_post_ids() {
+	protected function get_current_posts() {
 		return $GLOBALS['wp_query']->posts;
 	}
 
