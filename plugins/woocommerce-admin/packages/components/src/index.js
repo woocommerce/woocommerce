@@ -48,6 +48,7 @@ export { default as Spinner } from './spinner';
 export { default as Stepper } from './stepper';
 export { default as SummaryList } from './summary';
 export { default as SummaryListPlaceholder } from './summary/placeholder';
+export { SummaryNumberPlaceholder } from './summary/placeholder';
 export { default as SummaryNumber } from './summary/number';
 export { default as Table } from './table/table';
 export { default as TableCard } from './table';

@@ -1,0 +1,50 @@
+.woocommerce-stats-overview {
+	.woocommerce-card__body {
+		padding: 0;
+	}
+	.woocommerce-summary {
+		margin: 0;
+	}
+}
+
+.woocommerce-stats-overview__more-btn {
+	display: inline-block;
+	padding: $gap;
+}
+
+.woocommerce-stats-overview__tabs {
+	.components-tab-panel__tabs {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.components-button {
+		display: block;
+		padding: $gap;
+		width: 25%;
+		margin-bottom: 4px;
+
+		@include breakpoint( '<782px' ) {
+			width: 33.33%;
+		}
+
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
+
+		&.is-active {
+			border-bottom: 4px solid $studio-blue-50;
+			// Avoid the text "jumping" when border-bottom applied.
+			margin-bottom: 0;
+		}
+
+		&:first-child {
+			text-align: left;
+		}
+
+		&:last-child {
+			text-align: right;
+		}
+	}
+}

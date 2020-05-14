@@ -2,10 +2,19 @@
  * External dependencies
  */
 import { render, fireEvent, screen } from '@testing-library/react';
+
+/**
+ * Internal dependencies
+ */
 import { StatsOverview } from '../index';
+import StatsList from '../stats-list';
 import { recordEvent } from 'lib/tracks';
 
 jest.mock( 'lib/tracks' );
+// Mock the stats list so that it can be tested separately.
+jest.mock( '../stats-list', () =>
+	jest.fn().mockImplementation( () => <div>mocked stats list</div> )
+);
 
 describe( 'StatsOverview tracking', () => {
 	it( 'should record an event when a stat is toggled', () => {
@@ -18,11 +27,13 @@ describe( 'StatsOverview tracking', () => {
 			/>
 		);
 
-		const ellipsisBtn = screen.getByTitle(
-			'Choose which values to display'
-		);
+		const ellipsisBtn = screen.getByRole( 'button', {
+			name: 'Choose which values to display',
+		} );
 		fireEvent.click( ellipsisBtn );
-		const totalSalesBtn = screen.getByText( 'Total Sales' );
+		const totalSalesBtn = screen.getByRole( 'menuitemcheckbox', {
+			name: 'Total Sales',
+		} );
 		fireEvent.click( totalSalesBtn );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
@@ -48,11 +59,13 @@ describe( 'StatsOverview toggle and persist stat preference', () => {
 			/>
 		);
 
-		const ellipsisBtn = screen.getByTitle(
-			'Choose which values to display'
-		);
+		const ellipsisBtn = screen.getByRole( 'button', {
+			name: 'Choose which values to display',
+		} );
 		fireEvent.click( ellipsisBtn );
-		const totalSalesBtn = screen.getByText( 'Total Sales' );
+		const totalSalesBtn = screen.getByRole( 'menuitemcheckbox', {
+			name: 'Total Sales',
+		} );
 		fireEvent.click( totalSalesBtn );
 
 		expect( updateCurrentUserData ).toHaveBeenCalledWith( {
@@ -64,5 +77,73 @@ describe( 'StatsOverview toggle and persist stat preference', () => {
 				],
 			},
 		} );
+	} );
+} );
+
+describe( 'StatsOverview rendering correct elements', () => {
+	it( 'should include a link to all the overview page', () => {
+		render(
+			<StatsOverview
+				userPrefs={ {
+					hiddenStats: null,
+				} }
+				updateCurrentUserData={ () => {} }
+			/>
+		);
+
+		const viewDetailedStatsLink = screen.getByText( 'View detailed stats' );
+		expect( viewDetailedStatsLink ).toBeDefined();
+		expect( viewDetailedStatsLink.href ).toBe(
+			'http://localhost/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+		);
+	} );
+} );
+
+describe( 'StatsOverview period selection', () => {
+	it( 'should have Today selected by default', () => {
+		render(
+			<StatsOverview
+				userPrefs={ {
+					hiddenStats: null,
+				} }
+				updateCurrentUserData={ () => {} }
+			/>
+		);
+
+		const todayBtn = screen.getByRole( 'tab', { name: 'Today' } );
+		expect( todayBtn.classList ).toContain( 'is-active' );
+	} );
+
+	it( 'should select a new period', () => {
+		render(
+			<StatsOverview
+				userPrefs={ {
+					hiddenStats: null,
+				} }
+				updateCurrentUserData={ () => {} }
+			/>
+		);
+
+		fireEvent.click( screen.getByRole( 'tab', { name: 'Month to date' } ) );
+
+		// Check props handed down to StatsList have the right period
+		expect( StatsList ).toHaveBeenLastCalledWith(
+			{
+				query: { compare: 'previous_period', period: 'month' },
+				stats: [
+					{
+						chart: 'total_sales',
+						label: 'Total Sales',
+						stat: 'revenue/total_sales',
+					},
+					{
+						chart: 'orders_count',
+						label: 'Orders',
+						stat: 'orders/orders_count',
+					},
+				],
+			},
+			{}
+		);
 	} );
 } );

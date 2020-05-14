@@ -5,19 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
-import moment from 'moment';
-import { find } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import {
-	getCurrentDates,
-	appendTimestamp,
-	getDateParamsFromQuery,
-} from 'lib/date';
-import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { calculateDelta, formatValue } from '@woocommerce/number';
+import { getDateParamsFromQuery } from 'lib/date';
+import { getPersistedQuery } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 
@@ -37,6 +30,7 @@ import withSelect from 'wc-api/with-select';
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
 import { CurrencyContext } from 'lib/currency-context';
+import { getIndicatorData, getIndictorValues } from './utils';
 
 const { performanceIndicators: indicators } = getSetting( 'dataEndpoints', {
 	performanceIndicators: [],
@@ -147,50 +141,19 @@ class StorePerformance extends Component {
 			<SummaryList>
 				{ () =>
 					userIndicators.map( ( indicator, i ) => {
-						const primaryItem = find(
-							primaryData.data,
-							( data ) => data.stat === indicator.stat
-						);
-						const secondaryItem = find(
-							secondaryData.data,
-							( data ) => data.stat === indicator.stat
-						);
-
-						if ( ! primaryItem || ! secondaryItem ) {
-							return null;
-						}
-
-						const href =
-							( primaryItem._links &&
-								primaryItem._links.report[ 0 ] &&
-								primaryItem._links.report[ 0 ].href ) ||
-							'';
-						const reportUrl =
-							( href &&
-								getNewPath( persistedQuery, href, {
-									chart: primaryItem.chart,
-								} ) ) ||
-							'';
-						const isCurrency = primaryItem.format === 'currency';
-
-						const delta = calculateDelta(
-							primaryItem.value,
-							secondaryItem.value
-						);
-						const primaryValue = isCurrency
-							? formatCurrency( primaryItem.value )
-							: formatValue(
-									currency,
-									primaryItem.format,
-									primaryItem.value
-							  );
-						const secondaryValue = isCurrency
-							? formatCurrency( secondaryItem.value )
-							: formatValue(
-									currency,
-									secondaryItem.format,
-									secondaryItem.value
-							  );
+						const {
+							primaryValue,
+							secondaryValue,
+							delta,
+							reportUrl,
+						} = getIndictorValues( {
+							indicator,
+							primaryData,
+							secondaryData,
+							currency,
+							formatCurrency,
+							persistedQuery,
+						} );
 
 						return (
 							<SummaryNumber
@@ -239,87 +202,27 @@ StorePerformance.contextType = CurrencyContext;
 export default compose(
 	withSelect( ( select, props ) => {
 		const { hiddenBlocks, query } = props;
-		const {
-			getReportItems,
-			getReportItemsError,
-			isReportItemsRequesting,
-		} = select( 'wc-api' );
+		const userIndicators = indicators.filter(
+			( indicator ) => ! hiddenBlocks.includes( indicator.stat )
+		);
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
-		const datesFromQuery = getCurrentDates( query, defaultDateRange );
-		const endPrimary = datesFromQuery.primary.before;
-		const endSecondary = datesFromQuery.secondary.before;
-		const userIndicators = indicators.filter(
-			( indicator ) => ! hiddenBlocks.includes( indicator.stat )
-		);
-		const statKeys = userIndicators
-			.map( ( indicator ) => indicator.stat )
-			.join( ',' );
-
-		if ( statKeys.length === 0 ) {
-			return {
-				hiddenBlocks,
-				userIndicators,
-				indicators,
-				defaultDateRange,
-			};
-		}
-
-		const primaryQuery = {
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp(
-				endPrimary,
-				endPrimary.isSame( moment(), 'day' ) ? 'now' : 'end'
-			),
-			stats: statKeys,
-		};
-
-		const secondaryQuery = {
-			after: appendTimestamp( datesFromQuery.secondary.after, 'start' ),
-			before: appendTimestamp(
-				endSecondary,
-				endSecondary.isSame( moment(), 'day' ) ? 'now' : 'end'
-			),
-			stats: statKeys,
-		};
-
-		const primaryData = getReportItems(
-			'performance-indicators',
-			primaryQuery
-		);
-		const primaryError =
-			getReportItemsError( 'performance-indicators', primaryQuery ) ||
-			null;
-		const primaryRequesting = isReportItemsRequesting(
-			'performance-indicators',
-			primaryQuery
-		);
-
-		const secondaryData = getReportItems(
-			'performance-indicators',
-			secondaryQuery
-		);
-		const secondaryError =
-			getReportItemsError( 'performance-indicators', secondaryQuery ) ||
-			null;
-		const secondaryRequesting = isReportItemsRequesting(
-			'performance-indicators',
-			secondaryQuery
-		);
-
-		return {
+		const data = {
 			hiddenBlocks,
 			userIndicators,
 			indicators,
-			primaryData,
-			primaryError,
-			primaryRequesting,
-			secondaryData,
-			secondaryError,
-			secondaryRequesting,
 			defaultDateRange,
+		};
+		if ( userIndicators.length === 0 ) {
+			return data;
+		}
+		const indicatorData = getIndicatorData( select, userIndicators, query );
+
+		return {
+			...data,
+			...indicatorData,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
