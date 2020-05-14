@@ -25,6 +25,10 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 	 * Clean up before each test.
 	 */
 	public function setUp() {
+		if ( ! WC()->is_wc_admin_active() ) {
+			$this->markTestSkipped( 'WC Admin is not active on WP versions < 5.3' );
+			return;
+		}
 		self::remove_db_update_notes();
 	}
 
