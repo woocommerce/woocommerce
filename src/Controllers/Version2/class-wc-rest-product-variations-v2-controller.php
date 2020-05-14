@@ -585,6 +585,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	public function batch_items( $request ) {
 		$items       = array_filter( $request->get_params() );
 		$params      = $request->get_url_params();
+		$query       = $request->get_query_params();
 		$product_id  = $params['product_id'];
 		$body_params = array();
 
@@ -604,6 +605,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		$request = new WP_REST_Request( $request->get_method() );
 		$request->set_body_params( $body_params );
+		$request->set_query_params( $query );
 
 		return parent::batch_items( $request );
 	}
