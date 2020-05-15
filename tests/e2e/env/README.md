@@ -15,7 +15,7 @@ The `@woocommerce/e2e-environment` package exports configuration objects that ca
 
 ### Babel Config
 
-Extend your project's `babel.config.js` to contain the expected presets for E2E testing.
+Make sure you `npm install @babel/preset-env --save` if you have not already done so. Afterwards, extend your project's `babel.config.js` to contain the expected presets for E2E testing.
 
 ```js
 const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
