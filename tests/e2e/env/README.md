@@ -15,7 +15,7 @@ The `@woocommerce/e2e-environment` package exports configuration objects that ca
 
 ### Babel Config
 
-Extend your project's Babel config to contain the expected presets for E2E testing.
+Extend your project's `babel.config.js` to contain the expected presets for E2E testing.
 
 ```js
 const { babelConfig: e2eBabelConfig } = require( '@woocommerce/e2e-environment' );
@@ -185,3 +185,7 @@ Stop Docker
 ```bash
 npm explore @woocommerce/e2e-environment -- npm run docker:down
 ```
+
+## Additional information
+
+Refer to [`tests/e2e/specs`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e/specs) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/master/tests/e2e) for general information on e2e tests.
