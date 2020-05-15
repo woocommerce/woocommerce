@@ -5,12 +5,10 @@
  * @package WooCommerce|Tests|WC_Helper.
  */
 
-namespace Automattic\WooCommerce;
-
 /**
  * Class WC_Tests_WC_Helper.
  */
-class WCHelperTest extends \WC_Unit_Test_Case {
+class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that woo plugins are loaded correctly even if incorrect cache is intially set.
