@@ -1493,9 +1493,12 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
  *
  * @since  2.6.0
  * @param  bool $include_legacy Count legacy shipping methods too.
+ * @param  bool $enabled_only   Whether non-legacy shipping methods should be
+ *                              restricted to enabled ones. It doesn't affect
+ *                              legacy shipping methods. @since 4.2.0.
  * @return int
  */
-function wc_get_shipping_method_count( $include_legacy = false ) {
+function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = false ) {
 	global $wpdb;
 
 	$transient_name    = $include_legacy ? 'wc_shipping_method_count_legacy' : 'wc_shipping_method_count';
@@ -1506,7 +1509,8 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 		return absint( $transient_value['value'] );
 	}
 
-	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE is_enabled=1" ) );
+	$where_clause = $enabled_only ? 'WHERE is_enabled=1' : '';
+	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods ${where_clause}" ) );
 
 	if ( $include_legacy ) {
 		// Count activated methods that don't support shipping zones.
