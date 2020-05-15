@@ -30,6 +30,7 @@
     * [List](components/packages/list/README.md)
     * [OrderStatus](components/packages/order-status/README.md)
     * [Pagination](components/packages/pagination/README.md)
+    * [Plugins](components/packages/plugins/README.md)
     * [ProductImage](components/packages/product-image/README.md)
     * [Rating](components/packages/rating/README.md)
     * [ScrollTo](components/packages/scroll-to/README.md)
