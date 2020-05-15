@@ -160,9 +160,9 @@
 	/**
 	 * Looks for matching variations for current selected attributes.
 	 */
-	VariationForm.prototype.onFindVariation = function( event ) {
+	VariationForm.prototype.onFindVariation = function( event, chosenAttributes ) {
 		var form              = event.data.variationForm,
-			attributes        = form.getChosenAttributes(),
+			attributes        = 'undefined' !== typeof chosenAttributes ? chosenAttributes : form.getChosenAttributes(),
 			currentAttributes = attributes.data;
 
 		if ( attributes.count === attributes.chosenCount ) {
