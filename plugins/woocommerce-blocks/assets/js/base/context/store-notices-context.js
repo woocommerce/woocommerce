@@ -23,6 +23,7 @@ const StoreNoticesContext = createContext( {
 	createNotice: ( status, text, props ) => void { status, text, props },
 	createSnackbarNotice: ( content, options ) => void { content, options },
 	removeNotice: ( id, ctxt ) => void { id, ctxt },
+	setIsSuppressed: ( val ) => void { val },
 	context: 'wc/core',
 } );
 
