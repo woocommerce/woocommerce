@@ -35,7 +35,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 	/**
 	 * Returns a list of note ids with name 'wc-update-db-reminder' from the database.
 	 *
-	 * @return array(int) List of note ids with name 'wc-update-db-reminder'.
+	 * @return array( int ) List of note ids with name 'wc-update-db-reminder'.
 	 */
 	private static function get_db_update_notes() {
 		$data_store = \WC_Data_Store::load( 'admin-note' );
