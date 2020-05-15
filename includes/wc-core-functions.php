@@ -1495,7 +1495,7 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
  * @param  bool $include_legacy Count legacy shipping methods too.
  * @param  bool $enabled_only   Whether non-legacy shipping methods should be
  *                              restricted to enabled ones. It doesn't affect
- *                              legacy shipping methods. @since 4.2.0.
+ *                              legacy shipping methods. @since 4.3.0.
  * @return int
  */
 function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = false ) {
