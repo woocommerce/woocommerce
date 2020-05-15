@@ -8,11 +8,11 @@ import {
 	useEmitResponse,
 } from '@woocommerce/base-hooks';
 import {
-	useCallback,
 	cloneElement,
 	useRef,
 	useEffect,
 	useState,
+	useCallback,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -120,7 +120,6 @@ const PaymentMethods = () => {
 			customerId,
 		]
 	);
-
 	if (
 		isInitialized &&
 		Object.keys( currentPaymentMethods.current ).length === 0
@@ -147,6 +146,7 @@ const PaymentMethods = () => {
 											.components,
 							  } ),
 					ariaLabel,
+					content: getRenderedTab( name ),
 				};
 			} ) }
 			initialTabName={ activePaymentMethod }
@@ -155,9 +155,7 @@ const PaymentMethods = () => {
 				'woo-gutenberg-products-block'
 			) }
 			id="wc-block-payment-methods"
-		>
-			{ getRenderedTab }
-		</Tabs>
+		/>
 	);
 
 	const renderedSavedPaymentOptions = (
