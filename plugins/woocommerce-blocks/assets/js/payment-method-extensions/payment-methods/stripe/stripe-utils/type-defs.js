@@ -294,6 +294,8 @@
  *                                                          inline cc
  *                                                          form or separate inputs.
  * @property {{[k:string]:CreditCardIcon}} icons            Contains supported cc icons.
+ * @property {boolean}                     allowSavedCards  Used to indicate whether saved cards
+ *                                                          can be used.
  */
 
 /**
