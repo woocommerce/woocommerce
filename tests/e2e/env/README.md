@@ -109,7 +109,7 @@ module.exports = {
 The E2E environment will look for a `docker-compose.yaml` file in your project root. This will be combined with the base Docker config in the package. This is where you'll map your local project files into the Docker container(s).
 
 ```yaml
-version: '3.7'
+version: '3.3'
 
 services:
 
