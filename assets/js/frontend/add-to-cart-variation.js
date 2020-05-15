@@ -165,7 +165,7 @@
 			attributes        = 'undefined' !== typeof chosenAttributes ? chosenAttributes : form.getChosenAttributes(),
 			currentAttributes = attributes.data;
 
-		if ( attributes.count === attributes.chosenCount ) {
+		if ( attributes.count && attributes.count === attributes.chosenCount ) {
 			if ( form.useAjax ) {
 				if ( form.xhr ) {
 					form.xhr.abort();
