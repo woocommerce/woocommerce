@@ -251,65 +251,52 @@ class WC_Notes_Run_Db_Update {
 	}
 
 	/**
-	 * Return true if db update notice should be shown, false otherwise.
-	 *
-	 * If the db needs an update, the notice should be always shown.
-	 * If the db does not need an update, but the notice has *not* been actioned (i.e. after the db update, when
-	 * store owner hasn't acknowledged the successful db update), still show the notice.
-	 * If the db does not need an update, and the notice has been actioned, then notice should *not* be shown.
-	 * The same is true if the db does not need an update and the notice does not exist.
-	 *
-	 * @return bool
-	 */
-	private static function should_show_notice() {
-		if ( ! \WC_Install::needs_db_update() ) {
-
-			$note_id = self::get_current_notice();
-
-			// Db update not needed && note does not exist -> don't show it.
-			if ( ! $note_id ) {
-				return false;
-			}
-
-			// Db update not needed && note actioned -> don't show it.
-			$note = new WC_Admin_Note( $note_id );
-			if ( $note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
-				return false;
-			}
-		}
-
-		// Db update needed or notice not actioned -> show notice.
-		return true;
-	}
-
-	/**
 	 * Prepare the correct content of the db update note to be displayed by WC Admin.
 	 *
 	 * This one gets called on each page load, so try to bail quickly.
+	 *
+	 * If the db needs an update, the notice should be always shown.
+	 * If the db does not need an update, but the notice has *not* been actioned (i.e. after the db update, when
+	 * store owner hasn't acknowledged the successful db update), still show the Thanks notice.
+	 * If the db does not need an update, and the notice has been actioned, then notice should *not* be shown.
+	 * The notice should also be hidden if the db does not need an update and the notice does not exist.
 	 */
 	public static function show_reminder() {
-		if ( ! self::should_show_notice() ) {
-			return;
-		}
+		$needs_db_update = \WC_Install::needs_db_update();
 
 		$note_id = self::get_current_notice();
+		if ( ! $needs_db_update ) {
+			// Db update not needed && note does not exist -> don't show it.
+			if ( ! $note_id ) {
+				return;
+			}
 
-		if ( \WC_Install::needs_db_update() && empty( $note_id ) ) {
-			// Db needs update && no notice exists -> create one.
-			$note_id = self::update_needed_notice();
-		}
+			$note = new WC_Admin_Note( $note_id );
+			if ( $note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
+				// Db update not needed && note actioned -> don't show it.
+				return;
+			} else {
+				// Db update not needed && notice is unactioned -> Thank you note.
+				\WC_Install::update_db_version();
+				self::update_done_notice( $note_id );
+				return;
+			}
+		} else {
+			// Db needs update &&.
+			if ( ! $note_id ) {
+				// Db needs update && no notice exists -> create one that shows Nudge to update.
+				$note_id = self::update_needed_notice();
+			}
 
-		if ( \WC_Install::needs_db_update() ) {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// Db needs update && db update is scheduled -> update note to In progress.
 				self::update_in_progress_notice( $note_id );
 			} else {
+				// Db needs update && db update is not scheduled -> Nudge to run the db update.
 				self::update_needed_notice( $note_id );
 			}
-		} else {
-			\WC_Install::update_db_version();
-			self::update_done_notice( $note_id );
 		}
 	}
 
