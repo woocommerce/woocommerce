@@ -241,16 +241,15 @@ const StoreOwnerFlow = {
 	},
 
 	logout: async () => {
-		await page.goto(baseUrl + 'wp-login.php?action=logout', {
+		// Log out link in admin bar is not visible so can't be clicked directly.
+		const logoutLinks = await page.$$eval(
+			'#wp-admin-bar-logout a',
+			( am ) => am.filter( ( e ) => e.href ).map( ( e ) => e.href )
+		);
+
+		await page.goto( logoutLinks[ 0 ], {
 			waitUntil: 'networkidle0',
-		});
-
-		await expect(page).toMatch('You are attempting to log out');
-
-		await Promise.all([
-			page.waitForNavigation({ waitUntil: 'networkidle0' }),
-			page.click('a'),
-		]);
+		} );
 	},
 
 	openAllOrdersView: async () => {
