@@ -278,7 +278,7 @@ class WC_Notes_Run_Db_Update {
 			}
 		}
 
-		// Db update needed -> show notice.
+		// Db update needed or notice not actioned -> show notice.
 		return true;
 	}
 
