@@ -1,16 +1,14 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-
+import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab';
 /**
  * Internal dependencies
  */
 import './style.scss';
-import TabButton from './tab-button';
 
 const Tabs = ( {
 	className,
@@ -18,76 +16,64 @@ const Tabs = ( {
 	tabs,
 	activeClass = 'is-active',
 	initialTabName,
-	instanceId,
 	ariaLabel = __( 'Tabbed Content', 'woo-gutenberg-products-block' ),
-	children,
+	instanceId,
 	id,
 } ) => {
-	const [ selected, setSelected ] = useState(
-		() => initialTabName || ( tabs.length > 0 ? tabs[ 0 ].name : '' )
-	);
-	// Maybe set selected tab if it's empty but we have tabs or an initial tab
-	// This covers instances when the selected value isn't initialized on mount.
-	useEffect( () => {
-		if ( ! selected && tabs.length > 0 ) {
-			setSelected(
-				initialTabName || ( tabs.length > 0 ? tabs[ 0 ].name : '' )
-			);
-		}
-	}, [ selected, tabs, initialTabName ] );
-	if ( ! selected ) {
+	const initialTab =
+		( initialTabName || !! tabs.length ) &&
+		`${ instanceId }-${ initialTabName ? initialTabName : tabs[ 0 ].name }`;
+	const tabState = useTabState( {
+		selectedId: initialTab,
+	} );
+	if ( tabs.length === 0 ) {
 		return null;
 	}
-	const handleClick = ( tabKey ) => {
-		setSelected( tabKey );
-		onSelect( tabKey );
-	};
-	const selectedTab = tabs.find( ( tab ) => tab.name === selected );
-	if ( ! selectedTab ) {
-		throw new Error( 'There is no available tab for the selected item' );
-	}
-	const selectedId = `${ instanceId }-${ selectedTab.name }`;
 	return (
-		<div
-			className={ classnames( 'wc-block-components-tabs', className ) }
-			id={ id }
-		>
-			<div
-				role="tablist"
+		<div className={ classnames( 'wc-block-components-tabs', className ) }>
+			<TabList
+				{ ...tabState }
+				id={ id }
+				className={ 'wc-block-components-tabs__list' }
 				aria-label={ ariaLabel }
-				className="wc-block-components-tabs__list"
 			>
-				{ tabs.map( ( tab ) => (
-					<TabButton
+				{ tabs.map( ( { name, title, ariaLabel: tabAriaLabel } ) => (
+					<Tab
+						{ ...tabState }
+						id={ `${ instanceId }-${ name }` }
+						manual={ true }
 						className={ classnames(
 							'wc-block-components-tabs__item',
-							tab.className,
 							{
-								[ activeClass ]: tab.name === selected,
+								[ activeClass ]:
+									// reakit uses the ID as the selectedId
+									`${ instanceId }-${ name }` ===
+									tabState.selectedId,
 							}
 						) }
-						tabId={ `${ instanceId }-${ tab.name }` }
-						aria-controls={ `${ instanceId }-${ tab.name }-view` }
-						selected={ tab.name === selected }
-						key={ tab.name }
-						ariaLabel={ tab.ariaLabel || null }
-						onClick={ () => handleClick( tab.name ) }
+						onClick={ () => onSelect( name ) }
+						type="button"
+						key={ name }
+						aria-label={ tabAriaLabel }
 					>
-						{ tab.title }
-					</TabButton>
+						<span className="wc-block-components-tabs__item-content">
+							{ title }
+						</span>
+					</Tab>
 				) ) }
-			</div>
-			{ selectedTab && (
-				<div
-					aria-labelledby={ selectedId }
-					role="tabpanel"
-					id={ `${ selectedId }-view` }
+			</TabList>
+
+			{ tabs.map( ( { name, content } ) => (
+				<TabPanel
+					{ ...tabState }
+					key={ name }
+					id={ `${ instanceId }-${ name }-view` }
+					tabId={ `${ instanceId }-${ name }` }
 					className="wc-block-components-tabs__content"
-					tabIndex={ 0 }
 				>
-					{ children( selected ) }
-				</div>
-			) }
+					{ content }
+				</TabPanel>
+			) ) }
 		</div>
 	);
 };
