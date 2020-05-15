@@ -64,3 +64,6 @@ contributors.md
 
 # Language files
 i18n/languages/woocommerce.pot
+
+# Build
+build/
