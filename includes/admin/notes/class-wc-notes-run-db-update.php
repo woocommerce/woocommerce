@@ -48,7 +48,7 @@ class WC_Notes_Run_Db_Update {
 		} catch ( Exception $e ) {
 			return;
 		}
-		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
 
 		if ( empty( $note_ids ) ) {
 			return;
@@ -89,15 +89,15 @@ class WC_Notes_Run_Db_Update {
 	 *  - actions are set up for the first 'Update database' notice, and
 	 *  - URL for note's action is equal to the given URL (to check for potential nonce update).
 	 *
-	 * @param WC_Admin_Note $note Note to check.
-	 * @param string        $update_url  URL to check the note against.
-	 * @param array(string) $current_actions List of actions to check for.
+	 * @param WC_Admin_Note   $note            Note to check.
+	 * @param string          $update_url      URL to check the note against.
+	 * @param array( string ) $current_actions List of actions to check for.
 	 * @return bool
 	 */
 	private static function note_up_to_date( $note, $update_url, $current_actions ) {
 		$actions = $note->get_actions();
 		if ( count( $current_actions ) === count( array_intersect( wp_list_pluck( $actions, 'name' ), $current_actions ) )
-			&& in_array( $update_url, wp_list_pluck( $actions, 'query' ) ) ) {
+			&& in_array( $update_url, wp_list_pluck( $actions, 'query' ), true ) ) {
 			return true;
 		}
 
@@ -302,7 +302,7 @@ class WC_Notes_Run_Db_Update {
 		if ( \WC_Install::needs_db_update() ) {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
-			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				self::update_in_progress_notice( $note_id );
 			} else {
 				self::update_needed_notice( $note_id );
