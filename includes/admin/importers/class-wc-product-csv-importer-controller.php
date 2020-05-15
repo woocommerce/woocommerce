@@ -319,6 +319,7 @@ class WC_Product_CSV_Importer_Controller {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
 			}
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			if ( ! self::is_file_valid_csv( wc_clean( wp_unslash( $_FILES['import']['name'] ) ), false ) ) {
 				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
@@ -327,7 +328,7 @@ class WC_Product_CSV_Importer_Controller {
 				'test_form' => false,
 				'mimes'     => self::get_valid_csv_filetypes(),
 			);
-			$import    = $_FILES['import']; // WPCS: sanitization ok, input var ok.
+			$import    = $_FILES['import']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			$upload    = wp_handle_upload( $import, $overrides );
 
 			if ( isset( $upload['error'] ) ) {
@@ -577,14 +578,15 @@ class WC_Product_CSV_Importer_Controller {
 
 		$headers = array();
 		foreach ( $raw_headers as $key => $field ) {
-			$field             = strtolower( $field );
+			$normalized_field  = strtolower( $field );
 			$index             = $num_indexes ? $key : $field;
-			$headers[ $index ] = $field;
+			$headers[ $index ] = $normalized_field;
 
-			if ( isset( $default_columns[ $field ] ) ) {
-				$headers[ $index ] = $default_columns[ $field ];
+			if ( isset( $default_columns[ $normalized_field ] ) ) {
+				$headers[ $index ] = $default_columns[ $normalized_field ];
 			} else {
 				foreach ( $special_columns as $regex => $special_key ) {
+					// Don't use the normalized field in the regex since meta might be case-sensitive.
 					if ( preg_match( $regex, $field, $matches ) ) {
 						$headers[ $index ] = $special_key . $matches[1];
 						break;
@@ -619,7 +621,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return string
 	 */
 	protected function sanitize_special_column_name_regex( $value ) {
-		return '/' . str_replace( array( '%d', '%s' ), '(.*)', trim( quotemeta( $value ) ) ) . '/';
+		return '/' . str_replace( array( '%d', '%s' ), '(.*)', trim( quotemeta( $value ) ) ) . '/i';
 	}
 
 	/**
