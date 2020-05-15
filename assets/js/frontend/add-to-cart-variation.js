@@ -43,7 +43,7 @@
 		// Init after gallery.
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
-			$form.trigger( 'wc_variation_form' );
+			$form.trigger( 'wc_variation_form', self );
 			self.loading = false;
 		}, 100 );
 	};
