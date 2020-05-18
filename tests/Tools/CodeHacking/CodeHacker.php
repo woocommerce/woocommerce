@@ -7,7 +7,7 @@
 
 //phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.PHP.NoSilencedErrors.Discouraged
 
-namespace Automattic\WooCommerce\Testing\CodeHacking;
+namespace Automattic\WooCommerce\Testing\Tools\CodeHacking;
 
 use \ReflectionObject;
 use \ReflectionFunction;

@@ -6,9 +6,10 @@
  * @package WooCommerce Tests
  */
 
-use Automattic\WooCommerce\Testing\CodeHacking\CodeHacker;
-use Automattic\WooCommerce\Testing\CodeHacking\StaticWrapper;
-use Automattic\WooCommerce\Testing\CodeHacking\Hacks\StaticMockerHack;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\StaticWrapper;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
+use Composer\Autoload\ClassLoader;
 
 /**
  * Class WC_Unit_Tests_Bootstrap
@@ -33,11 +34,15 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
+		$classLoader = new ClassLoader();
+		$classLoader->addPsr4("Automattic\\WooCommerce\\Testing\\Tools\\", __DIR__ . '/../Tools', false);
+		$classLoader->register();
 
+		//Includes needed to initialize the static wrapper
 		$this->tests_dir  = dirname( __FILE__ );
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
 
-		$hacking_base = $this->plugin_dir . '/src/Testing/CodeHacking';
+		$hacking_base = $this->plugin_dir . '/tests/Tools/CodeHacking';
 		require_once $hacking_base . '/StaticWrapper.php';
 		require_once $hacking_base . '/CodeHacker.php';
 		require_once $hacking_base . '/Hacks/CodeHack.php';

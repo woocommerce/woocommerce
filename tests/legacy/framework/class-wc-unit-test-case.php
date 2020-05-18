@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests
  */
 
-use Automattic\WooCommerce\Testing\CodeHacking\CodeHacker;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 
 /**
  * WC Unit Test Case.

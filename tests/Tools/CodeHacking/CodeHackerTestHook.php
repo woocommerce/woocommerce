@@ -5,7 +5,7 @@
  * @package WooCommerce/Testing
  */
 
-namespace Automattic\WooCommerce\Testing\CodeHacking;
+namespace Automattic\WooCommerce\Testing\Tools\CodeHacking;
 
 use PHPUnit\Runner\BeforeTestHook;
 use PHPUnit\Runner\AfterTestHook;
@@ -27,8 +27,8 @@ use Exception;
  *
  * 2. Add the following to the test classes:
  *
- *    use Automattic\WooCommerce\Testing\CodeHacking\CodeHacker;
- *    use Automattic\WooCommerce\Testing\CodeHacking\Hacks\...
+ *    use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+ *    use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\...
  *
  *    public static function before_all($method_name) {
  *      CodeHacker::add_hack(...);

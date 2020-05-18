@@ -5,7 +5,7 @@
  * @package WooCommerce/Testing
  */
 
-namespace Automattic\WooCommerce\Testing\CodeHacking;
+namespace Automattic\WooCommerce\Testing\Tools\CodeHacking;
 
 use ReflectionClass;
 use ReflectionMethod;
@@ -39,7 +39,7 @@ use ReflectionMethod;
  *
  * You can use 2 and 3 at the same time, functions have precedence over mock class methods in case of conflict.
  *
- * @package Automattic\WooCommerce\Testing\CodeHacking
+ * @package Automattic\WooCommerce\Testing\Tools\CodeHacking
  */
 abstract class StaticWrapper {
 

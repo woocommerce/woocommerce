@@ -5,7 +5,7 @@
  * @package WooCommerce/Testing
  */
 
-namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
+namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
 
 /**
  * Base class to define Hacks for CodeHacker.

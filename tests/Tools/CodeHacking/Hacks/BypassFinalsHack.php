@@ -7,7 +7,7 @@
 
 // phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
-namespace Automattic\WooCommerce\Testing\CodeHacking\Hacks;
+namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
 
 /**
  * Code hack to bypass finals.
