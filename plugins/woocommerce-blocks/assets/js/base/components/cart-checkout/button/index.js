@@ -15,7 +15,6 @@ import './style.scss';
  */
 const Button = ( { className, showSpinner = false, children, ...props } ) => {
 	const buttonClassName = classNames(
-		'button',
 		'wc-block-components-button',
 		className,
 		{
