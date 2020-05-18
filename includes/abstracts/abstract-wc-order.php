@@ -1532,7 +1532,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
-		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+		
+		$shipping_tax_class = apply_filters( 'woocommerce_shipping_get_tax_class', get_option( 'woocommerce_shipping_tax_class' ), $args );
 
 		if ( 'inherit' === $shipping_tax_class ) {
 			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() );
