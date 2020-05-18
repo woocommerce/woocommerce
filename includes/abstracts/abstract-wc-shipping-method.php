@@ -230,7 +230,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public function get_rates_for_package( $package ) {
 		$this->rates = array();
 		if ( $this->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $this->id, $package['ship_via'] ) ) ) {
+			do_action( 'woocommerce_before_calculate_shipping', $package, $this );
 			$this->calculate_shipping( $package );
+			do_action( 'woocommerce_after_calculate_shipping', $package, $this );
 		}
 		return $this->rates;
 	}
