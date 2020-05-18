@@ -16,7 +16,14 @@ const tracksDebug = debug( 'wc-admin:tracks' );
  */
 
 export function recordEvent( eventName, eventProperties ) {
-	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties );
+	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties, {
+		_tqk: window._tkq,
+		shouldRecord:
+			process.env.NODE_ENV !== 'development' &&
+			!! window._tkq &&
+			!! window.wcTracks &&
+			!! window.wcTracks.isEnabled,
+	} );
 
 	if (
 		! window.wcTracks ||

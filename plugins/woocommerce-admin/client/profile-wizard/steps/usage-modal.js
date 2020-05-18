@@ -25,6 +25,7 @@ class UsageModal extends Component {
 		super( props );
 		this.state = {
 			allowTracking: props.allowTracking,
+			isLoadingScripts: false,
 		};
 
 		this.onTrackingChange = this.onTrackingChange.bind( this );
@@ -36,7 +37,7 @@ class UsageModal extends Component {
 		} );
 	}
 
-	async componentDidUpdate( prevProps ) {
+	async componentDidUpdate( prevProps, prevState ) {
 		const {
 			hasErrors,
 			isRequesting,
@@ -44,8 +45,12 @@ class UsageModal extends Component {
 			onContinue,
 			createNotice,
 		} = this.props;
+		const { isLoadingScripts } = this.state;
 		const isRequestSuccessful =
-			! isRequesting && prevProps.isRequesting && ! hasErrors;
+			! isRequesting &&
+			! isLoadingScripts &&
+			( prevProps.isRequesting || prevState.isLoadingScripts ) &&
+			! hasErrors;
 		const isRequestError =
 			! isRequesting && prevProps.isRequesting && hasErrors;
 
@@ -67,10 +72,21 @@ class UsageModal extends Component {
 	}
 
 	updateTracking() {
+		const { allowTracking } = this.state;
 		const { updateOptions } = this.props;
-		const allowTracking = this.state.allowTracking ? 'yes' : 'no';
+
+		if ( allowTracking && typeof window.wcTracks.enable === 'function' ) {
+			this.setState( { isLoadingScripts: true } );
+			window.wcTracks.enable( () => {
+				this.setState( { isLoadingScripts: false } );
+			} );
+		} else if ( ! allowTracking ) {
+			window.wcTracks.isEnabled = false;
+		}
+
+		const trackingValue = allowTracking ? 'yes' : 'no';
 		updateOptions( {
-			woocommerce_allow_tracking: allowTracking,
+			woocommerce_allow_tracking: trackingValue,
 		} );
 	}
 
