@@ -102,13 +102,13 @@ class WC_Site_Tracking {
 			window.wcTracks.enable = function( callback = null ) {
 				window.wcTracks.isEnabled = true;
 
-				const scriptUrl = '<?php echo esc_url( $woo_tracks_script ); ?>';
-				const existingScript = document.querySelector( `script[src="${ scriptUrl }"]` );
+				var scriptUrl = '<?php echo esc_url( $woo_tracks_script ); ?>';
+				var existingScript = document.querySelector( `script[src="${ scriptUrl }"]` );
 				if ( existingScript ) {
 					return;
 				}
 
-				const script = document.createElement('script');
+				var script = document.createElement('script');
 				script.src = scriptUrl;
 				document.body.append(script);
 
