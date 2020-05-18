@@ -29,10 +29,14 @@ abstract class CodeHack {
 	 *
 	 * @param string $code PHP code to tokenize.
 	 * @return array Tokenized code.
+	 * @throws \Exception PHP version is less than 7.0.
 	 */
 	protected function tokenize( $code ) {
-		//phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters, PHPCompatibility.Constants.NewConstants
-		return PHP_VERSION_ID >= 70000 ? token_get_all( $code, TOKEN_PARSE ) : token_get_all( $code );
+		if ( PHP_VERSION_ID < 70000 ) {
+			throw new \Exception( 'The code hacker can be used in PHP 7.0+ only.' );
+		}
+
+		return token_get_all( $code, TOKEN_PARSE );
 	}
 
 	/**

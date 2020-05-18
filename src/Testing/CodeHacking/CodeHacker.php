@@ -31,9 +31,10 @@ use \ReflectionException;
  *
  * For using with PHPUnit, see CodeHackerTestHook.
  */
-class CodeHacker {
+final class CodeHacker {
 
-	const PROTOCOL = 'file';
+	const PROTOCOL                     = 'file';
+	const HACK_CALLBACK_ARGUMENT_COUNT = 2;
 
 	/**
 	 * Value of "context" parameter to be passed to the native PHP filesystem related functions.
@@ -132,11 +133,11 @@ class CodeHacker {
 	 */
 	public static function add_hack( $hack, $persistent = false ) {
 		if ( ! is_callable( $hack ) && ! is_object( $hack ) ) {
-			throw new \Exception( "Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
+			throw new \Exception( "CodeHacker::addhack: Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
 		}
 
 		if ( ! self::is_valid_hack_callback( $hack ) && ! self::is_valid_hack_object( $hack ) ) {
-			throw new \Exception( "CodeHacker::addhack: hacks must be either a function with a 'hack(\$code,\$path)' signature, or an object containing a public method 'hack' with that signature. " );
+			throw new \Exception( "CodeHacker::addhack: Hacks must be either a function with a 'hack(\$code,\$path)' signature, or an object containing a public method 'hack' with that signature. " );
 		}
 
 		if ( $persistent ) {
@@ -154,7 +155,7 @@ class CodeHacker {
 	 * @throws ReflectionException Error when instantiating ReflectionFunction.
 	 */
 	private static function is_valid_hack_callback( $callback ) {
-		return is_callable( $callback ) && 2 === ( new ReflectionFunction( $callback ) )->getNumberOfRequiredParameters();
+		return is_callable( $callback ) && HACK_CALLBACK_ARGUMENT_COUNT === ( new ReflectionFunction( $callback ) )->getNumberOfRequiredParameters();
 	}
 
 	/**
@@ -162,7 +163,7 @@ class CodeHacker {
 	 *
 	 * @param mixed $callback Argument to check.
 	 *
-	 * @return boolt rue if the argument is a valid hack object, false otherwise.
+	 * @return bool rue if the argument is a valid hack object, false otherwise.
 	 */
 	private static function is_valid_hack_object( $callback ) {
 		if ( ! is_object( $callback ) ) {

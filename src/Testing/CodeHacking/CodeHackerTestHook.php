@@ -5,8 +5,6 @@
  * @package WooCommerce/Testing
  */
 
-// phpcs:disable Squiz.Commenting.FunctionComment.Missing, PHPCompatibility.FunctionDeclarations
-
 namespace Automattic\WooCommerce\Testing\CodeHacking;
 
 use PHPUnit\Runner\BeforeTestHook;
@@ -64,12 +62,27 @@ use Exception;
  */
 final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 
+	// phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.voidFound
+
+	/**
+	 * Runs after each test.
+	 *
+	 * @param string $test "TestClass::TestMethod".
+	 * @param float  $time The time it took the test to run, in seconds.
+	 */
 	public function executeAfterTest( string $test, float $time ): void {
 		if ( ! CodeHacker::has_persistent_hacks() ) {
 			CodeHacker::disable();
 		}
 	}
 
+	/**
+	 * Runs before each test.
+	 *
+	 * @param string $test "TestClass::TestMethod".
+	 *
+	 * @throws \ReflectionException Thrown by execute_before_methods.
+	 */
 	public function executeBeforeTest( string $test ): void {
 		/**
 		 * Possible formats of $test:
@@ -79,7 +92,7 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 		 */
 		$parts = explode( '::', $test );
 		if ( count( $parts ) < 2 ) {
-			return;
+			return;  // "Warning" was supplied as argument
 		}
 		$class_name  = $parts[0];
 		$method_name = explode( ' ', $parts[1] )[0];
@@ -94,6 +107,8 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 			CodeHacker::enable();
 		}
 	}
+
+	// phpcs:enable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.voidFound
 
 	/**
 	 * Apply hacks defined in @hack annotations.
@@ -164,4 +179,3 @@ final class CodeHackerTestHook implements BeforeTestHook, AfterTestHook {
 	}
 }
 
-// phpcs:enable Squiz.Commenting.FunctionComment.Missing, PHPCompatibility.FunctionDeclarations
