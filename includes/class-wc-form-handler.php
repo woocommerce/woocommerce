@@ -459,6 +459,10 @@ class WC_Form_Handler {
 				return;
 			}
 
+			if ( ! apply_filters( 'woocommerce_add_payment_method_form_is_valid', true ) ) {
+				return;
+			}
+
 			// Test rate limit.
 			$current_user_id = get_current_user_id();
 			$rate_limit_id   = 'add_payment_method_' . $current_user_id;
@@ -466,12 +470,15 @@ class WC_Form_Handler {
 
 			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
 				wc_add_notice(
-					/* translators: %d number of seconds */
-					_n(
-						'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
-						'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
-						$delay,
-						'woocommerce'
+					sprintf(
+						/* translators: %d number of seconds */
+						_n(
+							'You cannot add a new payment method so soon after the previous one. Please wait for %d second.',
+							'You cannot add a new payment method so soon after the previous one. Please wait for %d seconds.',
+							$delay,
+							'woocommerce'
+						),
+						$delay
 					),
 					'error'
 				);

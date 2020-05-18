@@ -6,7 +6,6 @@
 
 	<!-- Exclude paths -->
 	<exclude-pattern>tests/cli/</exclude-pattern>
-	<exclude-pattern>tests/legacy/</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/legacy/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>
@@ -59,5 +58,6 @@
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>i18n/</exclude-pattern>
 		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php</exclude-pattern>
 	</rule>
 </ruleset>

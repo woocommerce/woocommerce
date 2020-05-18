@@ -69,7 +69,7 @@ const completeOnboardingWizard = async () => {
 	// Wait for usage tracking pop-up window to appear
 	await page.waitForSelector( '.components-modal__header-heading' );
 	await expect( page ).toMatchElement(
-		'.components-modal__header-heading', { text: 'Build a Better WooCommerce' }
+		'.components-modal__header-heading', { text: 'Build a better WooCommerce' }
 	);
 
 	// Query for "Continue" buttons

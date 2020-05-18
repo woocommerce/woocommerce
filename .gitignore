@@ -10,6 +10,7 @@ project.properties
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
+*.swp
 
 # Grunt
 node_modules/
@@ -65,3 +66,6 @@ contributors.md
 
 # Language files
 i18n/languages/woocommerce.pot
+
+# Build
+build/

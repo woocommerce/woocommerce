@@ -46,10 +46,10 @@ else
         --admin_email=${WORDPRESS_EMAIL} \
         --skip-email
     wp post create \
-    	--post_type=page \
-    	--post_status=publish \
-    	--post_title='Ready' \
-    	--post_content='E2E-tests.'
+        --post_type=page \
+        --post_status=publish \
+        --post_title='Ready' \
+        --post_content='E2E-tests.'
 fi
 
 ## Check for an initialization script.

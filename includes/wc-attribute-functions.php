@@ -185,9 +185,9 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  */
 function wc_attribute_label( $name, $product = '' ) {
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name       = wc_attribute_taxonomy_slug( $name );
+		$slug       = wc_attribute_taxonomy_slug( $name );
 		$all_labels = wc_get_attribute_taxonomy_labels();
-		$label      = isset( $all_labels[ $name ] ) ? $all_labels[ $name ] : $name;
+		$label      = isset( $all_labels[ $slug ] ) ? $all_labels[ $slug ] : $slug;
 	} elseif ( $product ) {
 		if ( $product->is_type( 'variation' ) ) {
 			$product = wc_get_product( $product->get_parent_id() );
