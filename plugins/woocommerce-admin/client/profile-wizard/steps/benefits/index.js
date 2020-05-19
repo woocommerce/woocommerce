@@ -12,11 +12,13 @@ import { filter } from 'lodash';
  * WooCommerce dependencies
  */
 import { Card, H, Plugins } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
+import Connect from 'dashboard/components/connect';
 import Logo from './logo';
 import ManagementIcon from './images/management';
 import SalesTaxIcon from './images/sales_tax';
@@ -30,8 +32,9 @@ class Benefits extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
+			isConnecting: false,
 			isInstalling: false,
-			isPending: false,
+			isActioned: false,
 		};
 
 		this.isJetpackActive = props.activePlugins.includes( 'jetpack' );
@@ -55,17 +58,25 @@ class Benefits extends Component {
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { goToNextStep, isRequesting } = this.props;
-		const { isInstalling, isPending } = this.state;
+		const { goToNextStep } = this.props;
+		const { isActioned } = this.state;
 
+		// No longer pending or updating profile items, go to next step.
 		if (
-			isPending &&
-			! isRequesting &&
-			! isInstalling &&
-			( prevProps.isRequesting || prevState.isInstalling )
+			isActioned &&
+			! this.isPending() &&
+			( prevProps.isRequesting ||
+				prevState.isConnecting ||
+				prevState.isInstalling )
 		) {
 			goToNextStep();
 		}
+	}
+
+	isPending() {
+		const { isActioned, isConnecting, isInstalling } = this.state;
+		const { isRequesting } = this.props;
+		return isActioned && ( isConnecting || isInstalling || isRequesting );
 	}
 
 	async skipPluginInstall() {
@@ -75,10 +86,9 @@ class Benefits extends Component {
 			updateProfileItems,
 		} = this.props;
 
-		this.setState( { isPending: true } );
-
 		const plugins = this.isJetpackActive ? 'skipped-wcs' : 'skipped';
 		await updateProfileItems( { plugins } );
+		this.setState( { isActioned: true } );
 
 		if ( isProfileItemsError ) {
 			createNotice(
@@ -99,10 +109,7 @@ class Benefits extends Component {
 	async startPluginInstall() {
 		const { updateProfileItems, updateOptions } = this.props;
 
-		this.setState( {
-			isInstalling: true,
-			isPending: true,
-		} );
+		this.setState( { isActioned: true, isInstalling: true } );
 
 		await updateOptions( {
 			woocommerce_setup_jetpack_opted_in: true,
@@ -191,7 +198,8 @@ class Benefits extends Component {
 	}
 
 	render() {
-		const { isInstalling, isPending } = this.state;
+		const { isConnecting, isInstalling } = this.state;
+		const { isJetpackConnected, isRequesting } = this.props;
 
 		const pluginNamesString = this.pluginsToInstall
 			.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
@@ -212,8 +220,10 @@ class Benefits extends Component {
 				<div className="woocommerce-profile-wizard__card-actions">
 					<Button
 						isPrimary
-						isBusy={ isPending && isInstalling }
-						disabled={ isPending }
+						isBusy={
+							this.isPending() && ( isInstalling || isConnecting )
+						}
+						disabled={ this.isPending() }
 						onClick={ this.startPluginInstall }
 						className="woocommerce-profile-wizard__continue"
 					>
@@ -221,8 +231,10 @@ class Benefits extends Component {
 					</Button>
 					<Button
 						isDefault
-						isBusy={ isPending && ! isInstalling }
-						disabled={ isPending }
+						isBusy={
+							this.isPending() && ! isInstalling && ! isConnecting
+						}
+						disabled={ this.isPending() }
 						className="woocommerce-profile-wizard__skip"
 						onClick={ this.skipPluginInstall }
 					>
@@ -233,12 +245,35 @@ class Benefits extends Component {
 						<Plugins
 							autoInstall
 							onComplete={ () =>
-								this.setState( { isInstalling: false } )
+								this.setState( {
+									isInstalling: false,
+									isConnecting: ! isJetpackConnected,
+								} )
 							}
 							onError={ () =>
-								this.setState( { isInstalling: false } )
+								this.setState( {
+									isInstalling: false,
+								} )
 							}
 							pluginSlugs={ this.pluginsToInstall }
+						/>
+					) }
+
+					{ /* Make sure we're finished requesting since this will auto redirect us. */ }
+					{ isConnecting && ! isJetpackConnected && ! isRequesting && (
+						<Connect
+							autoConnect
+							onConnect={ () => {
+								recordEvent(
+									'storeprofiler_jetpack_connect_redirect'
+								);
+							} }
+							onError={ () =>
+								this.setState( { isConnecting: false } )
+							}
+							redirectUrl={ getAdminLink(
+								'admin.php?page=wc-admin&reset_profiler=0'
+							) }
 						/>
 					) }
 				</div>
@@ -271,7 +306,9 @@ export default compose(
 			isGetProfileItemsRequesting,
 		} = select( 'wc-api' );
 
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
+		);
 
 		const isProfileItemsError = Boolean( getProfileItemsError() );
 		const activePlugins = getActivePlugins();
@@ -281,6 +318,7 @@ export default compose(
 			activePlugins,
 			isProfileItemsError,
 			profileItems,
+			isJetpackConnected: isJetpackConnected(),
 			isRequesting: isGetProfileItemsRequesting(),
 		};
 	} ),

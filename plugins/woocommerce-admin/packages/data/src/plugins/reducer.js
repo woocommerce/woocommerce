@@ -21,20 +21,20 @@ const plugins = (
 		type,
 		active,
 		installed,
-		added,
 		selector,
 		isRequesting,
 		error,
 		jetpackConnection,
 		redirectUrl,
 		jetpackConnectUrl,
+		replace,
 	}
 ) => {
 	switch ( type ) {
 		case TYPES.UPDATE_ACTIVE_PLUGINS:
 			state = {
 				...state,
-				active,
+				active: replace ? active : concat( state.active, active ),
 				requesting: {
 					...state.requesting,
 					getActivePlugins: false,
@@ -50,7 +50,9 @@ const plugins = (
 		case TYPES.UPDATE_INSTALLED_PLUGINS:
 			state = {
 				...state,
-				installed: added ? concat( state.installed, added ) : installed,
+				installed: replace
+					? installed
+					: concat( state.installed, installed ),
 				requesting: {
 					...state.requesting,
 					getInstalledPlugins: false,

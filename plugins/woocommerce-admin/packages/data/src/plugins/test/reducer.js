@@ -19,11 +19,17 @@ describe( 'plugins reducer', () => {
 		expect( state ).not.toBe( defaultState );
 	} );
 
-	it( 'should handle UPDATE_ACTIVE_PLUGINS', () => {
-		const state = reducer( defaultState, {
-			type: TYPES.UPDATE_ACTIVE_PLUGINS,
-			active: [ 'jetpack' ],
-		} );
+	it( 'should handle UPDATE_ACTIVE_PLUGINS with replace', () => {
+		const state = reducer(
+			{
+				active: [ 'plugins', 'to', 'overwrite' ],
+			},
+			{
+				type: TYPES.UPDATE_ACTIVE_PLUGINS,
+				active: [ 'jetpack' ],
+				replace: true,
+			}
+		);
 
 		/* eslint-disable dot-notation */
 
@@ -35,11 +41,42 @@ describe( 'plugins reducer', () => {
 		expect( state.active[ 0 ] ).toBe( 'jetpack' );
 	} );
 
-	it( 'should handle UPDATE_INSTALLED_PLUGINS', () => {
-		const state = reducer( defaultState, {
-			type: TYPES.UPDATE_INSTALLED_PLUGINS,
-			installed: [ 'jetpack' ],
-		} );
+	it( 'should handle UPDATE_ACTIVE_PLUGINS with active plugins', () => {
+		const state = reducer(
+			{
+				active: [ 'jetpack' ],
+				installed: [ 'jetpack' ],
+				requesting: {},
+				errors: {},
+			},
+			{
+				type: TYPES.UPDATE_ACTIVE_PLUGINS,
+				installed: null,
+				active: [ 'woocommerce-services' ],
+			}
+		);
+
+		/* eslint-disable dot-notation */
+
+		expect( state.requesting[ 'getActivePlugins' ] ).toBe( false );
+		expect( state.errors[ 'getActivePlugins' ] ).toBe( false );
+		/* eslint-enable dot-notation */
+
+		expect( state.active ).toHaveLength( 2 );
+		expect( state.active[ 1 ] ).toBe( 'woocommerce-services' );
+	} );
+
+	it( 'should handle UPDATE_INSTALLED_PLUGINS with replace', () => {
+		const state = reducer(
+			{
+				active: [ 'plugins', 'to', 'overwrite' ],
+			},
+			{
+				type: TYPES.UPDATE_INSTALLED_PLUGINS,
+				installed: [ 'jetpack' ],
+				replace: true,
+			}
+		);
 
 		/* eslint-disable dot-notation */
 
@@ -51,7 +88,7 @@ describe( 'plugins reducer', () => {
 		expect( state.installed[ 0 ] ).toBe( 'jetpack' );
 	} );
 
-	it( 'should handle UPDATE_INSTALLED_PLUGINS with added plugins', () => {
+	it( 'should handle UPDATE_INSTALLED_PLUGINS with installed plugins', () => {
 		const state = reducer(
 			{
 				active: [ 'jetpack' ],
@@ -61,8 +98,7 @@ describe( 'plugins reducer', () => {
 			},
 			{
 				type: TYPES.UPDATE_INSTALLED_PLUGINS,
-				installed: null,
-				added: [ 'woocommerce-services' ],
+				installed: [ 'woocommerce-services' ],
 			}
 		);
 

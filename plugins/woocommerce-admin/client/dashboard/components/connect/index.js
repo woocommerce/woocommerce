@@ -21,20 +21,44 @@ class Connect extends Component {
 		props.setIsPending( true );
 	}
 
+	componentDidMount() {
+		const { autoConnect, jetpackConnectUrl } = this.props;
+
+		if ( autoConnect && jetpackConnectUrl ) {
+			this.connectJetpack();
+		}
+	}
+
 	componentDidUpdate( prevProps ) {
-		const { createNotice, error, isRequesting, setIsPending } = this.props;
+		const {
+			autoConnect,
+			createNotice,
+			error,
+			isRequesting,
+			jetpackConnectUrl,
+			onError,
+			setIsPending,
+		} = this.props;
 
 		if ( prevProps.isRequesting && ! isRequesting ) {
 			setIsPending( false );
 		}
 
 		if ( error && error !== prevProps.error ) {
+			if ( onError ) {
+				onError();
+			}
 			createNotice( 'error', error );
+		}
+
+		if ( autoConnect && jetpackConnectUrl ) {
+			this.connectJetpack();
 		}
 	}
 
 	async connectJetpack() {
 		const { jetpackConnectUrl, onConnect } = this.props;
+
 		if ( onConnect ) {
 			onConnect();
 		}
@@ -42,7 +66,17 @@ class Connect extends Component {
 	}
 
 	render() {
-		const { hasErrors, isRequesting, onSkip, skipText } = this.props;
+		const {
+			autoConnect,
+			hasErrors,
+			isRequesting,
+			onSkip,
+			skipText,
+		} = this.props;
+
+		if ( autoConnect ) {
+			return null;
+		}
 
 		return (
 			<Fragment>
@@ -74,6 +108,10 @@ class Connect extends Component {
 
 Connect.propTypes = {
 	/**
+	 * If connection should happen automatically, or requires user confirmation.
+	 */
+	autoConnect: PropTypes.bool,
+	/**
 	 * Method to create a displayed notice.
 	 */
 	createNotice: PropTypes.func.isRequired,
@@ -94,6 +132,14 @@ Connect.propTypes = {
 	 */
 	jetpackConnectUrl: PropTypes.string,
 	/**
+	 * Called before the redirect to Jetpack.
+	 */
+	onConnect: PropTypes.func,
+	/**
+	 * Called when the plugin has an error retrieving the jetpackConnectUrl.
+	 */
+	onError: PropTypes.func,
+	/**
 	 * Called when the plugin connection is skipped.
 	 */
 	onSkip: PropTypes.func,
@@ -112,6 +158,7 @@ Connect.propTypes = {
 };
 
 Connect.defaultProps = {
+	autoConnect: false,
 	setIsPending: () => {},
 };
 

@@ -27,7 +27,7 @@ export function* getActivePlugins() {
 			method: 'GET',
 		} );
 
-		yield updateActivePlugins( results.plugins );
+		yield updateActivePlugins( results.plugins, true );
 	} catch ( error ) {
 		yield setError( 'getActivePlugins', error );
 	}
@@ -43,7 +43,7 @@ export function* getInstalledPlugins() {
 			method: 'GET',
 		} );
 
-		yield updateInstalledPlugins( results );
+		yield updateInstalledPlugins( results, true );
 	} catch ( error ) {
 		yield setError( 'getInstalledPlugins', error );
 	}

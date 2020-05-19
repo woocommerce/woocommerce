@@ -12,18 +12,19 @@ import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { pluginNames } from './constants';
 
-export function updateActivePlugins( active ) {
+export function updateActivePlugins( active, replace = false ) {
 	return {
 		type: TYPES.UPDATE_ACTIVE_PLUGINS,
 		active,
+		replace,
 	};
 }
 
-export function updateInstalledPlugins( installed, added ) {
+export function updateInstalledPlugins( installed, replace = false ) {
 	return {
 		type: TYPES.UPDATE_INSTALLED_PLUGINS,
 		installed,
-		added,
+		replace,
 	};
 }
 
