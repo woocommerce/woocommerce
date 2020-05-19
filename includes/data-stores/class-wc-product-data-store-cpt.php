@@ -1415,6 +1415,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Update a product's sale count based on the lookup table for previous orders.
+	 *
+	 * @since  4.3
+	 * @param  int $product_id Product ID.
+	 */
+	public function update_product_sales_by_lookup( $product_id ) {
+		global $wpdb;
+		$total_sales = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT count( order_product.order_item_id ) FROM {$wpdb->prefix}wc_order_product_lookup as order_product, {$wpdb->prefix}wc_order_stats as order_stats WHERE order_product.product_id = %d AND order_product.order_id = order_stats.order_id AND order_stats.status IN ( 'wc-completed', 'wc-processing', 'wc-on-hold' )",
+				$product_id
+			)
+		);
+		$this->update_product_sales( $product_id, absint( $total_sales ), 'set' );
+	}
+
+	/**
 	 * Update a product's sale count directly.
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.

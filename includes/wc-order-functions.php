@@ -807,7 +807,7 @@ function wc_order_search( $term ) {
 function wc_update_total_sales_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order || $order->get_data_store()->get_recorded_sales( $order ) ) {
+	if ( ! $order ) {
 		return;
 	}
 
@@ -816,10 +816,19 @@ function wc_update_total_sales_counts( $order_id ) {
 			$product_id = $item->get_product_id();
 
 			if ( $product_id ) {
+
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item['qty'] ), 'increase' );
+				$data_store->update_product_sales_by_lookup( $product_id );
 			}
 		}
+	}
+
+	// We should only call the action woocommerce_recorded_sales for newly recorded sales.
+	if (
+		! in_array( $order->get_status(), array( 'completed', 'processing', 'on-hold' ) ) ||
+		$order->get_data_store()->get_recorded_sales( $order )
+	) {
+		return;
 	}
 
 	$order->get_data_store()->set_recorded_sales( $order, true );
@@ -831,9 +840,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	 */
 	do_action( 'woocommerce_recorded_sales', $order_id );
 }
-add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_changed', 'wc_update_total_sales_counts' );
 
 /**
  * Update used coupon amount for each coupon within an order.
