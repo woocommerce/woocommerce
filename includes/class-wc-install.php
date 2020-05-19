@@ -696,14 +696,14 @@ class WC_Install {
 				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
 				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
 				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-			); // WPCS: unprepared SQL ok.
+			);
 			if ( 0 === (int) $fk_result->fk_count ) {
 				$wpdb->query(
 					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
-				); // WPCS: unprepared SQL ok.
+				);
 			}
 		}
 
@@ -1005,7 +1005,9 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
@@ -1031,7 +1033,8 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_roles = new WP_Roles();
 		}
 
 		// Dummy gettext calls to get strings in the catalog.
@@ -1161,7 +1164,8 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_roles = new WP_Roles();
 		}
 
 		$capabilities = self::get_core_capabilities();
