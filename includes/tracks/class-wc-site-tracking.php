@@ -115,7 +115,14 @@ class WC_Site_Tracking {
 				// Callback after scripts have loaded.
 				script.onload = function() {
 					if ( 'function' === typeof callback ) {
-						callback();
+						callback( true );
+					}
+				}
+
+				// Callback triggered if the script fails to load.
+				script.onerror = function() {
+					if ( 'function' === typeof callback ) {
+						callback( false );
 					}
 				}
 			}
