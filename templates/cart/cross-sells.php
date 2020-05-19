@@ -20,8 +20,13 @@ defined( 'ABSPATH' ) || exit;
 if ( $cross_sells ) : ?>
 
 	<div class="cross-sells">
+		<?php
+		$heading = apply_filters( 'woocommerce_product_cross_sells_products_heading', __( 'You may be interested in&hellip;', 'woocommerce' ) );
 
-		<h2><?php esc_html_e( 'You may be interested in&hellip;', 'woocommerce' ); ?></h2>
+		if ( $heading ) :
+			?>
+			<h2><?php echo esc_html( $heading ); ?></h2>
+		<?php endif; ?>
 
 		<?php woocommerce_product_loop_start(); ?>
 
