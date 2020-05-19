@@ -725,6 +725,7 @@ class WC_Install {
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				$success = $wpdb->query( $query );
 				if ( ! $success ) {
+					self::notice_db_schema_not_updated( $table_name, $wpdb->last_error );
 					return false;
 				}
 			}
@@ -1070,6 +1071,28 @@ class WC_Install {
 		return array_merge( $cqueries, $aqueries );
 
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+	}
+
+	/**
+	 * Show a database schema modification related error notice.
+	 *
+	 * @param string $table_name Table that was being created or altered.
+	 * @param string $error Error message returned by the database.
+	 */
+	private static function notice_db_schema_not_updated( $table_name, $error ) {
+		add_action(
+			'admin_notices',
+			function() use ( $table_name, $error ) {
+				echo '<div class="error"><p>';
+				printf(
+					/* translators: 1. Table name 2. Error message */
+					esc_html__( 'WooCommerce database schema update failed, update not completed. Table: %1$s, error: %2$s', 'woocommerce' ),
+					'<code>' . esc_html( $table_name ) . '</code>',
+					'<code>' . esc_html( $error ) . '</code>'
+				);
+				echo '</p></div>';
+			}
+		);
 	}
 
 	/**
