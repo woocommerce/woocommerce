@@ -28,17 +28,18 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                      => 'install_notice',
-		'update'                       => 'update_notice',
-		'template_files'               => 'template_file_check_notice',
-		'legacy_shipping'              => 'legacy_shipping_notice',
-		'no_shipping_methods'          => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'      => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table'    => 'regenerating_lookup_table_notice',
-		'no_secure_connection'         => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
-		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
-		'redirect_download_method'     => 'redirect_download_method_notice',
+		'install'                          => 'install_notice',
+		'update'                           => 'update_notice',
+		'template_files'                   => 'template_file_check_notice',
+		'legacy_shipping'                  => 'legacy_shipping_notice',
+		'no_shipping_methods'              => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'          => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'        => 'regenerating_lookup_table_notice',
+		'no_secure_connection'             => 'secure_connection_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE     => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
+		'redirect_download_method'         => 'redirect_download_method_notice',
+		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
 	);
 
 	/**
@@ -92,6 +93,9 @@ class WC_Admin_Notices {
 	public static function reset_admin_notices() {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
+		}
+		if ( ! self::is_uploads_directory_protected() ) {
+			self::add_notice( 'uploads_directory_is_unprotected' );
 		}
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
@@ -489,6 +493,20 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Notice about uploads directory begin unprotected.
+	 *
+	 * @since 4.1.1
+	 */
+	public static function uploads_directory_is_unprotected_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_unprotected_notice', true ) || self::is_uploads_directory_protected() ) {
+			self::remove_notice( 'uploads_directory_is_unprotected' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-unprotected.php';
+	}
+
+	/**
 	 * Determine if the store is running SSL.
 	 *
 	 * @return bool Flag SSL enabled.
@@ -529,6 +547,37 @@ class WC_Admin_Notices {
 	 */
 	public static function theme_check_notice() {
 		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
+	}
+
+	/**
+	 * Check if uploads directory is protected.
+	 *
+	 * @since 4.1.1
+	 * @return bool
+	 */
+	protected static function is_uploads_directory_protected() {
+		$cache_key = '_woocommerce_upload_directory_status';
+		$status    = get_transient( $cache_key );
+
+		// Check for cache.
+		if ( false !== $status ) {
+			return 'protected' === $status;
+		}
+
+		// Get only data from the uploads directory.
+		$uploads = wp_get_upload_dir();
+
+		// Check for the "uploads/woocommerce_uploads" directory.
+		$response         = wp_safe_remote_get( esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads' ) );
+		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
+		$response_content = wp_remote_retrieve_body( $response );
+
+		// Check if returns 200 with empty content in case can open an index.html file,
+		// and check for non-200 codes in case the directory is protected.
+		$is_protected = ( 200 === $response_code && empty( $response_content ) ) || ( 200 !== $response_code );
+		set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', 1 * DAY_IN_SECONDS );
+
+		return $is_protected;
 	}
 }
 
