@@ -8,7 +8,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
-    "automattic/jetpack-autoloader": "^1.6.0",
+    "automattic/jetpack-autoloader": "^1.7.0",
     "automattic/jetpack-constants": "^1.1",
     "composer/installers": "1.7.0",
     "maxmind-db/reader": "1.6.0",

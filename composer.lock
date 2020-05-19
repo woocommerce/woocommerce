@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9437422b2abdeabe59a29b92f3593480",
+    "content-hash": "94c4cc4a9a0fc2ad6758cc6c7cb069bb",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -2531,7 +2531,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-05-12T16:14:59+00:00"
+            "time": "2020-05-08T16:50:20+00:00"
         },
         {
             "name": "theseer/tokenizer",
