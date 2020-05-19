@@ -3,7 +3,7 @@
  * Admin View: Notice - Uploads directory is unprotected.
  *
  * @package WooCommerce\Admin\Notices
- * @since   4.2.0
+ * @since   4.1.1
  */
 
 defined( 'ABSPATH' ) || exit;

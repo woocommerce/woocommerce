@@ -495,7 +495,7 @@ class WC_Admin_Notices {
 	/**
 	 * Notice about uploads directory begin unprotected.
 	 *
-	 * @since 4.2.0
+	 * @since 4.1.1
 	 */
 	public static function uploads_directory_is_unprotected_notice() {
 		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_unprotected_notice', true ) || self::is_uploads_directory_protected() ) {
@@ -552,7 +552,7 @@ class WC_Admin_Notices {
 	/**
 	 * Check if uploads directory is protected.
 	 *
-	 * @since 4.2.0
+	 * @since 4.1.1
 	 * @return bool
 	 */
 	protected static function is_uploads_directory_protected() {
