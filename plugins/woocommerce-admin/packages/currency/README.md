@@ -17,7 +17,7 @@ _This package assumes that your code will run in an **ES2015+** environment. If 
 ```JS
 import Currency from '@woocommerce/currency';
 
-const storeCurrency = new Currency(); // pass store settings into constructor.
+const storeCurrency = Currency(); // pass store settings into constructor.
 
 // Formats money with a given currency symbol. Uses site's currency settings for formatting,
 // from the settings api. Defaults to symbol=`$`, precision=2, decimalSeparator=`.`, thousandSeparator=`,`

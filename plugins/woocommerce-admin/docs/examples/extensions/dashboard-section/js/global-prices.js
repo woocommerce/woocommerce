@@ -9,9 +9,7 @@ import moment from 'moment';
 import { Card, Chart } from '@woocommerce/components';
 import Currency from '@woocommerce/currency';
 
-const storeCurrency = new Currency(); // give this store settings.
-const formatCurrency = storeCurrency.formatCurrency.bind( storeCurrency );
-
+const storeCurrency = Currency();
 const data = [];
 
 for ( let i = 1; i <= 20; i++ ) {
@@ -43,7 +41,7 @@ const GlobalPrices = () => {
 				legendTotals={ { primary: average } }
 				showHeaderControls={ false }
 				valueType={ 'currency' }
-				tooltipValueFormat={ formatCurrency }
+				tooltipValueFormat={ storeCurrency.formatCurrency }
 			/>
 		</Card>
 	);

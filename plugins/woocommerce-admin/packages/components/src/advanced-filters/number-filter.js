@@ -9,6 +9,11 @@ import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
 
 /**
+ * WooCommerce dependencies
+ */
+import Currency from '@woocommerce/currency';
+
+/**
  * Internal dependencies
  */
 import TextControlWithAffixes from '../text-control-with-affixes';
@@ -37,8 +42,9 @@ class NumberFilter extends Component {
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
 		if ( inputType === 'currency' ) {
-			rangeStart = currency.formatCurrency( rangeStart );
-			rangeEnd = currency.formatCurrency( rangeEnd );
+			const { formatCurrency } = Currency( currency );
+			rangeStart = formatCurrency( rangeStart );
+			rangeEnd = formatCurrency( rangeEnd );
 		}
 
 		let filterStr = rangeStart;

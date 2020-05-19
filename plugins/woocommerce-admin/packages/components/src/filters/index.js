@@ -94,8 +94,13 @@ class ReportFilters extends Component {
 	}
 
 	getDateQuery( query ) {
-		const { period, compare, before, after } = getDateParamsFromQuery( query );
-		const { primary: primaryDate, secondary: secondaryDate } = getCurrentDates( query );
+		const { period, compare, before, after } = getDateParamsFromQuery(
+			query
+		);
+		const {
+			primary: primaryDate,
+			secondary: secondaryDate,
+		} = getCurrentDates( query );
 		return {
 			period,
 			compare,
@@ -126,7 +131,9 @@ class ReportFilters extends Component {
 						{ showDatePicker && (
 							<DateRangeFilterPicker
 								key={ JSON.stringify( query ) }
-								dateQuery={ dateQuery || this.getDateQuery( query ) }
+								dateQuery={
+									dateQuery || this.getDateQuery( query )
+								}
 								onRangeSelect={ this.onRangeSelect }
 								isoDateFormat={ isoDateFormat }
 							/>
@@ -224,15 +231,7 @@ ReportFilters.defaultProps = {
 	query: {},
 	showDatePicker: true,
 	onDateSelect: () => {},
-	currency: new Currency( {
-		code: 'USD',
-		precision: 2,
-		symbol: '$',
-		symbolPosition: 'left',
-		decimalSeparator: '.',
-		thousandSeparator: ',',
-		priceFormat: '%1$s%2$s',
-	} ),
+	currency: Currency().getCurrency(),
 };
 
 export default ReportFilters;

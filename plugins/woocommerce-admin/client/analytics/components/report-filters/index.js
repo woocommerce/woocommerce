@@ -122,7 +122,7 @@ class ReportFilters extends Component {
 			<Filters
 				query={ query }
 				siteLocale={ LOCALE.siteLocale }
-				currency={ Currency }
+				currency={ Currency.getCurrency() }
 				path={ path }
 				filters={ filters }
 				advancedFilters={ advancedFilters }

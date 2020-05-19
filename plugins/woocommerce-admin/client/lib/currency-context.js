@@ -23,7 +23,7 @@ export const getFilteredCurrencyInstance = ( query ) => {
 		config,
 		query
 	);
-	return new Currency( filteredConfig );
+	return Currency( filteredConfig );
 };
 
 export const CurrencyContext = createContext(
