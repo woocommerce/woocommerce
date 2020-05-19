@@ -208,7 +208,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Updated minimum PHP requirement to 7.0 to keep up with WooCommerce Core.
 * Dev - Fixed failing unit tests. #105
 
-**WooCommerce Admin 1.2.0**
+**WooCommerce Admin 1.2.2**
 * Enhancement - Add onboarding payments note #4157 
 * Enhancement - Marketing Inbox Note #4030
 * Performance - Use Route based code splitting to reduce bundle size #4094
