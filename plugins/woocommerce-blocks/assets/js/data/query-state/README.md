@@ -24,7 +24,7 @@ This will set a single query-state value for a given context.
 
 ### `setValueForQueryContext( context, value )`
 
-This will set the query-state for a given context.  Typically this is used to set/replace the entire query-state for a given context rather than the individual keys for the context via `setQueryValue`.
+This will set the query-state for a given context. Typically this is used to set/replace the entire query-state for a given context rather than the individual keys for the context via `setQueryValue`.
 
 | Argument  | Type   | Description                                                                                                             |
 | --------- | ------ | ----------------------------------------------------------------------------------------------------------------------- |

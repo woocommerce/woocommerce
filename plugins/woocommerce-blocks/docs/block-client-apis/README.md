@@ -10,3 +10,4 @@ For more details about extensibility points in the blocks, you can reference the
 | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | [Checkout API interface](./checkout/checkout-api.md)                     | This doc goes into some detail about some of the API specifics for the checkout block architecture.         |
 | [Checkout Flow and Events](../extensibility/checkout-flow-and-events.md) | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |
+| [Notices](./notices.md)                                                  | Explains how the notices system works and which methods are available to add an remove them.                |
