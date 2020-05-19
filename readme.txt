@@ -184,7 +184,6 @@ INTERESTED IN DEVELOPMENT?
 **WooCommerce**
 * Enhancement - Added Ghanaian regions to the state dropdown. #26273
 * Enhancement - Added Mozambique provinces to the state dropdown. #26162
-* Enhancement - Added notice about public uploads directory. #26207
 * Enhancement - Added support for the new group descriptions available on WordPress privacy exporters as of WP 5.3. #25575
 * Fix - Introduced a new admin body class for supporting styling issues in WP 5.3+. #26251
 * Fix - Removed case conversion of meta keys from CSV imports. #25517
@@ -238,9 +237,6 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Cast Shipping Total to float #4042
 * Dev - Dynamic Currency with Context API #4027
 * Dev - Remove Duplicate array entry #4049
-
-**Action Scheduler 3.1.6**
-* Fix - Shutdown deprecated notice changed to a warning when `as_*` functions called without data store initialization. #546
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
