@@ -37,6 +37,11 @@ module.exports = ( { config: storybookConfig } ) => {
 		] = path.resolve( __dirname, `../packages/${ name }/src` );
 	} );
 
+	storybookConfig.resolve.modules = [
+		path.join( __dirname, '../client' ),
+		'node_modules',
+	];
+
 	storybookConfig.plugins.push(
 		new MiniCssExtractPlugin( {
 			filename: '[name].css',
