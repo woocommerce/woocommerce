@@ -19,7 +19,7 @@ const ProductRating = ( { className, product } ) => {
 	};
 
 	const ratingText = sprintf(
-		__( 'Rated %d out of 5', 'woo-gutenberg-products-block' ),
+		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
 		rating
 	);
 

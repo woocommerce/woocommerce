@@ -137,7 +137,7 @@ function getReviewRating( review ) {
 				<span style={ starStyle }>
 					{ sprintf(
 						__(
-							'Rated %d out of 5',
+							'Rated %f out of 5',
 							'woo-gutenberg-products-block'
 						),
 						rating

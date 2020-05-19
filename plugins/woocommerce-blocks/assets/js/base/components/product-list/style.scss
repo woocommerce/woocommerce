@@ -195,6 +195,7 @@
 			position: absolute;
 			opacity: 0.5;
 			color: #aaa;
+			white-space: nowrap;
 		}
 		span {
 			overflow: hidden;
@@ -211,6 +212,7 @@
 			right: 0;
 			position: absolute;
 			color: #000;
+			white-space: nowrap;
 		}
 	}
 }
