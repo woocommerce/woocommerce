@@ -183,8 +183,9 @@ INTERESTED IN DEVELOPMENT?
 
 * Enhancement - Added notice about public uploads directory. #26207
 * Tweak - Disallow directory listing in woocommerce_uploads when "Redirect only" it's the selected download method. #26399
-* Dev - Updated WooCommerce admin version to 1.1.3 and Action Scheduler to 3.1.6.
 * Fix - Added correct handling of nonces to database update notice dismissal. #26500
+* Dev - Updated WooCommerce admin version to 1.1.3 and Action Scheduler to 3.1.6.
+* Dev - Add prop `isEnabled` and a function to dynamically enable tracks. #26493
 
 **WooCommerce Admin**
 * Tweak - Onboarding: Add Jetpack flow back to onboarding profiler. #4382
