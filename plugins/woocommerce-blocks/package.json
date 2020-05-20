@@ -77,7 +77,7 @@
 		"@storybook/addon-viewport": "5.3.18",
 		"@storybook/addons": "5.3.18",
 		"@storybook/react": "5.3.18",
-		"@types/jest": "25.2.1",
+		"@types/jest": "25.2.3",
 		"@types/react": "16.9.35",
 		"@types/wordpress__data": "4.6.7",
 		"@types/wordpress__element": "2.4.1",
