@@ -1,3 +1,6 @@
+// Set up some local color variables to make the CSS more clear
+$outer-border: $core-grey-light-700;
+
 .woocommerce-stats-overview {
 	.woocommerce-card__body {
 		padding: 0;
@@ -5,6 +8,10 @@
 	.woocommerce-summary {
 		margin: 0;
 	}
+}
+
+.woocommerce-stats-overview__footer {
+	border-top: 1px solid $outer-border;
 }
 
 .woocommerce-stats-overview__more-btn {
@@ -16,17 +23,14 @@
 	.components-tab-panel__tabs {
 		display: flex;
 		justify-content: space-between;
+		border-bottom: 1px solid $outer-border;
 	}
 
 	.components-button {
 		display: block;
 		padding: $gap;
-		width: 25%;
+		width: 33.33%;
 		margin-bottom: 4px;
-
-		@include breakpoint( '<782px' ) {
-			width: 33.33%;
-		}
 
 		&:focus {
 			outline: none;
@@ -41,10 +45,33 @@
 
 		&:first-child {
 			text-align: left;
+			padding-right: 0;
 		}
 
 		&:last-child {
 			text-align: right;
+			padding-left: 0;
 		}
+	}
+}
+
+.woocommerce-stats-overview__stats {
+	margin: 0;
+
+	.woocommerce-summary__item-container {
+		width: 50%;
+		display: inline-block;
+	}
+
+	.woocommerce-summary__item-container:nth-last-of-type(1) .woocommerce-summary__item {
+		border-bottom: none;
+	}
+
+	&.is-even .woocommerce-summary__item-container:nth-last-of-type(2) .woocommerce-summary__item {
+		border-bottom: none;
+	}
+
+	.woocommerce-summary__item-container:nth-of-type(even) .woocommerce-summary__item {
+		border-right: none;
 	}
 }

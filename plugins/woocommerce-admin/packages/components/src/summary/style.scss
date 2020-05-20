@@ -214,7 +214,7 @@ $inner-border: $core-grey-light-500;
 .woocommerce-summary__item-container {
 	margin-bottom: 0;
 
-	&:last-of-type .woocommerce-summary__item {
+	&:not(.is-homepage):last-of-type .woocommerce-summary__item {
 		// Make sure the last item always uses the outer-border color.
 		border-bottom-color: $outer-border !important;
 	}

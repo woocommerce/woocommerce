@@ -8,7 +8,6 @@ import { TabPanel } from '@wordpress/components';
 import { xor } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
 
 /**
  * WooCommerce dependencies
@@ -58,11 +57,6 @@ export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
 
 	const activeStats = stats.filter(
 		( item ) => ! hiddenStats.includes( item.stat )
-	);
-
-	const listClasses = classnames(
-		'woocommerce-summary',
-		`has-${ activeStats.length }-items`
 	);
 
 	return (
@@ -122,29 +116,29 @@ export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
 				] }
 			>
 				{ ( tab ) => (
-					<ul className={ listClasses }>
-						<StatsList
-							query={ {
-								period: tab.name,
-								compare: 'previous_period',
-							} }
-							stats={ activeStats }
-						/>
-					</ul>
+					<StatsList
+						query={ {
+							period: tab.name,
+							compare: 'previous_period',
+						} }
+						stats={ activeStats }
+					/>
 				) }
 			</TabPanel>
-			<Link
-				className="woocommerce-stats-overview__more-btn"
-				href={ getNewPath( {}, '/analytics/overview' ) }
-				type="wc-admin"
-				onClick={ () => {
-					recordEvent( 'statsoverview_indicators_click', {
-						key: 'view_detailed_stats',
-					} );
-				} }
-			>
-				{ __( 'View detailed stats' ) }
-			</Link>
+			<div className="woocommerce-stats-overview__footer">
+				<Link
+					className="woocommerce-stats-overview__more-btn"
+					href={ getNewPath( {}, '/analytics/overview' ) }
+					type="wc-admin"
+					onClick={ () => {
+						recordEvent( 'statsoverview_indicators_click', {
+							key: 'view_detailed_stats',
+						} );
+					} }
+				>
+					{ __( 'View detailed stats' ) }
+				</Link>
+			</div>
 		</Card>
 	);
 };

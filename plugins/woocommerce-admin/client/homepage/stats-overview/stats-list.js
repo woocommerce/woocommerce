@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { Fragment, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 
 /**
  * WooCommerce dependencies
@@ -42,10 +43,19 @@ export const StatsList = ( {
 	const currency = getCurrency();
 
 	return (
-		<Fragment>
+		<ul
+			className={ classnames( 'woocommerce-stats-overview__stats', {
+				'is-even': stats.length % 2 === 0,
+			} ) }
+		>
 			{ stats.map( ( item ) => {
 				if ( primaryRequesting || secondaryRequesting ) {
-					return <SummaryNumberPlaceholder key={ item.stat } />;
+					return (
+						<SummaryNumberPlaceholder
+							className="is-homepage"
+							key={ item.stat }
+						/>
+					);
 				}
 				const {
 					primaryValue,
@@ -63,6 +73,7 @@ export const StatsList = ( {
 
 				return (
 					<SummaryNumber
+						isHomepage
 						key={ item.stat }
 						href={ reportUrl }
 						label={ item.label }
@@ -81,7 +92,7 @@ export const StatsList = ( {
 					/>
 				);
 			} ) }
-		</Fragment>
+		</ul>
 	);
 };
 
