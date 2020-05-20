@@ -12,6 +12,7 @@ import interpolateComponents from 'interpolate-components';
  */
 import {
 	getSetting,
+	getAdminLink,
 	WC_ASSET_URL as wcAssetUrl,
 } from '@woocommerce/wc-admin-settings';
 import { Link } from '@woocommerce/components';
@@ -89,9 +90,10 @@ export function getPaymentMethods( {
 
 		const wcPaySettingsLink = (
 			<Link
-				href={
-					'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=woocommerce_payments'
-				}
+				href={ getAdminLink(
+					'admin.php?page=wc-settings&tab=checkout&section=woocommerce_payments'
+				) }
+				type="wp-admin"
 			>
 				{ __( 'Settings', 'woocommerce-admin' ) }
 			</Link>
