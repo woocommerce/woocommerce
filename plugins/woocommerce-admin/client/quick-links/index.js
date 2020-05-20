@@ -2,8 +2,20 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card, CardBody, CardHeader, Icon } from '@wordpress/components';
-import Gridicon from 'gridicons';
+import { Card, CardBody, CardHeader } from '@wordpress/components';
+import {
+	Icon,
+	megaphone,
+	box,
+	brush,
+	shipping,
+	percent,
+	payment,
+	pencil,
+	lifesaver,
+	external,
+	chevronRight,
+} from '@wordpress/icons';
 import { partial } from 'lodash';
 
 /**
@@ -24,63 +36,63 @@ function getItems( props ) {
 			title: __( 'Market my store', 'woocommerce-admin' ),
 			type: 'wc-admin',
 			path: 'marketing',
-			iconName: 'megaphone',
+			icon: megaphone,
 			listItemTag: 'marketing',
 		},
 		{
 			title: __( 'Add products', 'woocommerce-admin' ),
 			type: 'wp-admin',
 			path: 'post-new.php?post_type=product',
-			iconName: 'gridicons-product',
+			icon: box,
 			listItemTag: 'add-products',
 		},
 		{
 			title: __( 'Personalize my store', 'woocommerce-admin' ),
 			type: 'wp-admin',
 			path: 'customize.php',
-			iconName: 'admin-customizer',
+			icon: brush,
 			listItemTag: 'personalize-store',
 		},
 		{
 			title: __( 'Shipping settings', 'woocommerce-admin' ),
 			type: 'wc-settings',
 			tab: 'shipping',
-			iconName: 'gridicons-shipping',
+			icon: shipping,
 			listItemTag: 'shipping-settings',
 		},
 		{
 			title: __( 'Tax settings', 'woocommerce-admin' ),
 			type: 'wc-settings',
 			tab: 'tax',
-			iconName: 'gridicons-institution',
+			icon: percent,
 			listItemTag: 'tax-settings',
 		},
 		{
 			title: __( 'Payment settings', 'woocommerce-admin' ),
 			type: 'wc-settings',
 			tab: 'checkout',
-			iconName: 'gridicons-credit-card',
+			icon: payment,
 			listItemTag: 'payment-settings',
 		},
 		{
 			title: __( 'Edit store details', 'woocommerce-admin' ),
 			type: 'wc-settings',
 			tab: 'general',
-			iconName: 'store',
+			icon: pencil,
 			listItemTag: 'edit-store-details',
 		},
 		{
 			title: __( 'Get support', 'woocommerce-admin' ),
 			type: 'external',
 			href: 'https://woocommerce.com/my-account/create-a-ticket/',
-			iconName: 'sos',
+			icon: lifesaver,
 			listItemTag: 'support',
 		},
 		{
 			title: __( 'View my store', 'woocommerce-admin' ),
 			type: 'external',
 			href: props.getSetting( 'siteUrl' ),
-			iconName: 'external',
+			icon: external,
 			listItemTag: 'view-store',
 		},
 	];
@@ -106,23 +118,6 @@ function handleOnItemClick( props, event ) {
 		event.preventDefault();
 		return false;
 	}
-}
-
-function getIcon( iconName ) {
-	let icon;
-	const iconNameWithoutPrefix = iconName.substring(
-		iconName.indexOf( '-' ) + 1
-	);
-
-	if ( iconName.startsWith( 'gridicons-' ) ) {
-		icon = <Gridicon icon={ iconNameWithoutPrefix } />;
-	} else if ( iconName.startsWith( 'dashicons-' ) ) {
-		icon = <Icon icon={ iconNameWithoutPrefix } />;
-	} else {
-		icon = <Icon icon={ iconName } />;
-	}
-
-	return icon;
 }
 
 function getLinkTypeAndHref( item ) {
@@ -158,8 +153,8 @@ function getListItems( props ) {
 	return getItems( props ).map( ( item ) => {
 		return {
 			title: item.title,
-			before: getIcon( item.iconName ),
-			after: getIcon( 'arrow-right-alt2' ),
+			before: <Icon icon={ item.icon } />,
+			after: <Icon icon={ chevronRight } />,
 			...getLinkTypeAndHref( item ),
 			listItemTag: item.listItemTag,
 			onClick: partial( handleOnItemClick, props ),

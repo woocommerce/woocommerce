@@ -42,11 +42,8 @@
 				color: $foreground-color-hover;
 			}
 
-			.woocommerce-list__item-before {
-				& svg.dashicon,
-				& svg.gridicon {
-					fill: $foreground-color-hover;
-				}
+			.woocommerce-list__item-before > svg {
+				fill: $foreground-color-hover;
 			}
 		}
 
@@ -54,20 +51,11 @@
 			color: $foreground-color;
 		}
 
-		svg.dashicon,
-		svg.gridicon {
-			width: 20px;
-			height: 20px;
+		.woocommerce-list__item-before > svg {
+			fill: $foreground-color;
 		}
 
-		.woocommerce-list__item-before {
-			& svg.dashicon,
-			& svg.gridicon {
-				fill: $foreground-color;
-			}
-		}
-
-		.woocommerce-list__item-after svg.dashicon {
+		.woocommerce-list__item-after > svg {
 			fill: $chevron-color;
 		}
 	}
