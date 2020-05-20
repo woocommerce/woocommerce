@@ -1,0 +1,42 @@
+// Import the woocommerce components stylesheet
+@import "~@woocommerce/components/build-style/style.css";
+
+// Hack to hide preview overflow.
+.editor-block-preview__content {
+	overflow: hidden;
+}
+
+// Align the block icons in edit mode
+.components-placeholder__label .gridicon,
+.components-placeholder__label .material-icon {
+	margin-right: 1ch;
+	fill: currentColor;
+}
+
+// Remove the list styling, which is added back by core GB styles.
+.editor-styles-wrapper {
+	.wc-block-grid {
+		.wc-block-grid__products {
+			list-style: none;
+			margin: 0 (-$gap/2) $gap;
+
+			.wp-block-button__link {
+				color: inherit;
+			}
+
+			.wc-block-grid__product {
+				margin: 0 0 $gap-large 0;
+			}
+		}
+
+		&.components-placeholder {
+			padding: 2em 1em;
+		}
+
+		&.is-loading,
+		&.is-not-found {
+			display: block;
+		}
+	}
+}
+
