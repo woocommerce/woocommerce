@@ -2,9 +2,9 @@
 Contributors: automattic
 Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activity, notices, insights, stats, woo commerce, woocommerce
 Requires at least: 5.3.0
-Tested up to: 5.3.2
+Tested up to: 5.4.1
 Requires PHP: 5.6.20
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/license.txt
 
@@ -70,6 +70,10 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 3. Analytics
 
 == Changelog ==
+
+= 1.2.2 2020-05-18=
+- Fix: Respect tracking opt-in before new page load. #4368
+- Enhancement: Add Jetpack connection to plugin benefits step #4374
 
 = 1.2.0 2020-05--8 =
 - Enhancement: Add onboarding payments note #4157 
