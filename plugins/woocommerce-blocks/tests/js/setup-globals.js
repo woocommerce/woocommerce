@@ -4,6 +4,7 @@ global.wp = {};
 // wcSettings is required by @woocommerce/* packages
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
+	shippingMethodsExist: true,
 	countries: [],
 	currency: {
 		code: 'USD',
