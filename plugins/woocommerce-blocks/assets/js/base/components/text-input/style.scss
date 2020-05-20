@@ -14,10 +14,10 @@
 		line-height: 1.375;
 		color: $gray-50;
 		transition: transform 200ms ease;
-		margin: 0 $gap;
+		margin: 0 0 0 #{$gap + 1px};
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: calc(100% - #{  2 * $gap });
+		max-width: calc(100% - #{2 * $gap});
 
 		@media screen and (prefers-reduced-motion: reduce) {
 			transition: none;
