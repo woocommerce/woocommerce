@@ -116,7 +116,7 @@
 		"deep-freeze": "0.0.1",
 		"eslint": "6.8.0",
 		"eslint-config-prettier": "6.11.0",
-		"eslint-plugin-jest": "23.11.0",
+		"eslint-plugin-jest": "23.13.1",
 		"eslint-plugin-react-hooks": "4.0.0",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"husky": "2.4.1",
