@@ -100,7 +100,7 @@ class RevenueReportTable extends Component {
 			{
 				label: __( 'Total Sales', 'woocommerce-admin' ),
 				key: 'total_sales',
-				required: true,
+				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
