@@ -484,7 +484,6 @@ class Onboarding {
 		if ( self::should_show_profiler() || self::should_show_tasks() ) {
 			$settings['onboarding']['stripeSupportedCountries'] = self::get_stripe_supported_countries();
 			$settings['onboarding']['euCountries']              = WC()->countries->get_european_union_countries();
-			$settings['onboarding']['connectNonce']             = wp_create_nonce( 'connect' );
 			$current_user                                       = wp_get_current_user();
 			$settings['onboarding']['userEmail']                = esc_html( $current_user->user_email );
 			$settings['onboarding']['productTypes']             = self::get_allowed_product_types();

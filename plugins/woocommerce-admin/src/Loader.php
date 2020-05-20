@@ -885,6 +885,7 @@ class Loader {
 		}
 
 		$settings['allowMarketplaceSuggestions'] = WC_Marketplace_Suggestions::allow_suggestions();
+		$settings['connectNonce']                = wp_create_nonce( 'connect' );
 
 		return $settings;
 	}

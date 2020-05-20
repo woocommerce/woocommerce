@@ -5,7 +5,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { Button, Modal } from '@wordpress/components';
-import { addQueryArgs } from '@wordpress/url';
 import { find } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -13,7 +12,6 @@ import { decodeEntities } from '@wordpress/html-entities';
  * WooCommerce dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { getNewPath } from '@woocommerce/navigation';
 import { List } from '@woocommerce/components';
 
 /**
@@ -23,6 +21,7 @@ import withSelect from 'wc-api/with-select';
 import { getProductIdsForCart } from 'dashboard/utils';
 import sanitizeHTML from 'lib/sanitize-html';
 import { recordEvent } from 'lib/tracks';
+import { getInAppPurchaseUrl } from 'lib/in-app-purchase';
 
 class CartModal extends Component {
 	constructor( props ) {
@@ -45,15 +44,8 @@ class CartModal extends Component {
 			purchase_install: true,
 		} );
 
-		const { connectNonce } = getSetting( 'onboarding', {} );
-		const backPath = getNewPath( {}, '/', {} );
-
-		const url = addQueryArgs( 'https://woocommerce.com/cart', {
-			'wccom-site': getSetting( 'siteUrl' ),
-			'wccom-woo-version': getSetting( 'wcVersion' ),
+		const url = getInAppPurchaseUrl( 'https://woocommerce.com/cart', {
 			'wccom-replace-with': productIds.join( ',' ),
-			'wccom-connect-nonce': connectNonce,
-			'wccom-back': backPath,
 		} );
 
 		if ( onClickPurchaseNow ) {
