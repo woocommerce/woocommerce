@@ -26,6 +26,7 @@ class Assets {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register_assets' ) );
 		add_action( 'body_class', array( __CLASS__, 'add_theme_body_class' ), 1 );
+		add_action( 'admin_body_class', array( __CLASS__, 'add_theme_admin_body_class' ), 1 );
 		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'get_wc_block_data' ) );
 	}
 
@@ -91,6 +92,17 @@ class Assets {
 	 */
 	public static function add_theme_body_class( $classes = [] ) {
 		$classes[] = 'theme-' . get_template();
+		return $classes;
+	}
+
+	/**
+	 * Add theme class to admin body.
+	 *
+	 * @param array $classes String with the CSS classnames.
+	 * @return array Modified string of CSS classnames.
+	 */
+	public static function add_theme_admin_body_class( $classes = '' ) {
+		$classes .= ' theme-' . get_template();
 		return $classes;
 	}
 
