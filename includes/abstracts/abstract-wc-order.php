@@ -308,7 +308,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get date_created.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
 	public function get_date_created( $context = 'view' ) {
 		return $this->get_prop( 'date_created', $context );
@@ -318,7 +318,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get date_modified.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 * @return WC_DateTime|null object if the date is set or null if there is no date.
 	 */
 	public function get_date_modified( $context = 'view' ) {
 		return $this->get_prop( 'date_modified', $context );
@@ -344,7 +344,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get discount_total.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_discount_total( $context = 'view' ) {
 		return $this->get_prop( 'discount_total', $context );
@@ -354,7 +354,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get discount_tax.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_discount_tax( $context = 'view' ) {
 		return $this->get_prop( 'discount_tax', $context );
@@ -364,7 +364,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get shipping_total.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_shipping_total( $context = 'view' ) {
 		return $this->get_prop( 'shipping_total', $context );
@@ -374,7 +374,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get shipping_tax.
 	 *
 	 * @param  string $context View or edit context.
-	 * @return string
+	 * @return float
 	 */
 	public function get_shipping_tax( $context = 'view' ) {
 		return $this->get_prop( 'shipping_tax', $context );
@@ -501,7 +501,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Get user. Used by orders, not other order types like refunds.
 	 *
-	 * @return WP_User|false
+	 * @return false
 	 */
 	public function get_user() {
 		return false;
