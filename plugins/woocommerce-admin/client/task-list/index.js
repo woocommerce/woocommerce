@@ -20,7 +20,7 @@ import { PLUGINS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import './style.scss';
-import CartModal from '../components/cart-modal';
+import CartModal from 'dashboard/components/cart-modal';
 import { getAllTasks } from './tasks';
 import { recordEvent } from 'lib/tracks';
 import withSelect from 'wc-api/with-select';
@@ -410,12 +410,12 @@ class TaskDashboard extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { getProfileItems, getOptions } = select(
-			'wc-api'
-		);
-		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } = select(
-			PLUGINS_STORE_NAME
-		);
+		const { getProfileItems, getOptions } = select( 'wc-api' );
+		const {
+			getActivePlugins,
+			getInstalledPlugins,
+			isJetpackConnected,
+		} = select( PLUGINS_STORE_NAME );
 		const profileItems = getProfileItems();
 
 		const options = getOptions( [

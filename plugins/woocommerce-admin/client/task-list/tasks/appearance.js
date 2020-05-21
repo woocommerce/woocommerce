@@ -192,20 +192,24 @@ class Appearance extends Component {
 			path: '/wc-admin/onboarding/tasks/create_homepage',
 			method: 'POST',
 		} )
-			.then( response => {
+			.then( ( response ) => {
 				createNotice( response.status, response.message, {
 					actions: response.edit_post_link
 						? [
 								{
-									label: __( 'Customize', 'woocommerce-admin' ),
+									label: __(
+										'Customize',
+										'woocommerce-admin'
+									),
 									onClick: () => {
-										queueRecordEvent( 'tasklist_appearance_customize_homepage', {} );
-										window.location = `${
-											response.edit_post_link
-										}&wc_onboarding_active_task=homepage`;
+										queueRecordEvent(
+											'tasklist_appearance_customize_homepage',
+											{}
+										);
+										window.location = `${ response.edit_post_link }&wc_onboarding_active_task=homepage`;
 									},
 								},
-							]
+						  ]
 						: null,
 				} );
 
@@ -296,7 +300,11 @@ class Appearance extends Component {
 				),
 				content: (
 					<Fragment>
-						<Button isPrimary isBusy={ isPending } onClick={ this.createHomepage }>
+						<Button
+							isPrimary
+							isBusy={ isPending }
+							onClick={ this.createHomepage }
+						>
 							{ __( 'Create homepage', 'woocommerce-admin' ) }
 						</Button>
 						<Button

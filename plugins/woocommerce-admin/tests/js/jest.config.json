@@ -18,6 +18,7 @@
 		"@woocommerce/(.*)": "<rootDir>/packages/$1/src",
 		"\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/tests/js/mocks/static"
 	},
+	"restoreMocks": true,
 	"setupFiles": [
 		"<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
 		"<rootDir>/tests/js/setup-globals"
@@ -28,5 +29,7 @@
 		"<rootDir>/.*/build/",
 		"<rootDir>/.*/build-module/"
 	],
+	"timers": "real",
+	"testEnvironment": "jest-environment-jsdom-sixteen",
 	"verbose": true
 }

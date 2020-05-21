@@ -9,6 +9,10 @@
 	margin: 0 auto;
 	justify-content: space-between;
 
+	.woocommerce-task-dashboard__container {
+		width: 100%;
+	}
+
 	&.hasInbox .woocommerce-homepage-column {
 		width: calc(50% - 12px);
 		margin: 0;

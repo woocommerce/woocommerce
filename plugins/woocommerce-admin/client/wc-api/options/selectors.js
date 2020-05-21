@@ -53,7 +53,7 @@ const isGetOptionsRequesting = ( getResource ) => ( optionNames ) => {
 		getResourceName( 'options', optionNames )
 	);
 
-	if ( ! isNil( lastRequested ) && isNil( lastReceived ) ) {
+	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
 		return true;
 	}
 

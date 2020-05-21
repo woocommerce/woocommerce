@@ -32,7 +32,7 @@ import {
 import ReportFilters from 'analytics/components/report-filters';
 
 const TaskList = lazy( () =>
-	import( /* webpackChunkName: "task-list" */ './task-list' )
+	import( /* webpackChunkName: "task-list" */ '../task-list' )
 );
 
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
@@ -311,10 +311,7 @@ class CustomizableDashboard extends Component {
 			<Fragment>
 				{ isTaskListEnabled && (
 					<Suspense fallback={ <Spinner /> }>
-						<TaskList
-							query={ query }
-							inline={ isDashboardShown }
-						/>
+						<TaskList query={ query } inline={ isDashboardShown } />
 					</Suspense>
 				) }
 				{ isDashboardShown && this.renderDashboardReports() }
