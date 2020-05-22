@@ -111,6 +111,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		isIdle: checkoutIsIdle,
 		isProcessing: checkoutIsProcessing,
 		customerId,
+		onSubmit,
 	} = useCheckoutContext();
 	const {
 		hasValidationErrors,
@@ -206,7 +207,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 			<SidebarLayout className="wc-block-checkout">
 				<Main className="wc-block-checkout__main">
 					{ cartNeedsPayment && <ExpressCheckoutFormControl /> }
-					<CheckoutForm>
+					<CheckoutForm onSubmit={ onSubmit }>
 						<FormStep
 							id="contact-fields"
 							disabled={ checkoutIsProcessing }
