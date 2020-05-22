@@ -38,9 +38,11 @@ export function getPaymentMethods( {
 	options,
 	profileItems,
 } ) {
-	const stripeCountries = getSetting( 'onboarding', {
+	const settings = getSetting( 'onboarding', {
 		stripeSupportedCountries: [],
-	} ).stripeSupportedCountries;
+		wcPayIsConnected: false,
+	} );
+	const { stripeSupportedCountries, wcPayIsConnected } = settings;
 
 	const hasCbdIndustry =
 		some( profileItems.industry, {
@@ -99,11 +101,6 @@ export function getPaymentMethods( {
 			</Link>
 		);
 
-		// @todo This should check actual connection information.
-		const wcPayIsConfigured = activePlugins.includes(
-			'woocommerce-payments'
-		);
-
 		methods.push( {
 			key: 'wcpay',
 			title: __( 'WooCommerce Payments', 'woocommerce-admin' ),
@@ -115,8 +112,8 @@ export function getPaymentMethods( {
 							'on U.S. issued cards. ',
 						'woocommerce-admin'
 					) }
-					{ wcPayIsConfigured && wcPaySettingsLink }
-					{ ! wcPayIsConfigured && <p>{ tosPrompt }</p> }
+					{ wcPayIsConnected && wcPaySettingsLink }
+					{ ! wcPayIsConnected && <p>{ tosPrompt }</p> }
 					{ profileItems.setup_client && <p>{ wcPayDocPrompt }</p> }
 				</Fragment>
 			),
@@ -127,7 +124,7 @@ export function getPaymentMethods( {
 				isJetpackConnected,
 			plugins: [ 'woocommerce-payments' ],
 			container: <WCPay />,
-			isConfigured: wcPayIsConfigured,
+			isConfigured: wcPayIsConnected,
 			isEnabled:
 				options.woocommerce_woocommerce_payments_settings &&
 				options.woocommerce_woocommerce_payments_settings.enabled ===
@@ -154,7 +151,7 @@ export function getPaymentMethods( {
 			),
 			before: <img src={ wcAssetUrl + 'images/stripe.png' } alt="" />,
 			visible:
-				stripeCountries.includes( countryCode ) && ! hasCbdIndustry,
+				stripeSupportedCountries.includes( countryCode ) && ! hasCbdIndustry,
 			plugins: [ 'woocommerce-gateway-stripe' ],
 			container: <Stripe />,
 			isConfigured:

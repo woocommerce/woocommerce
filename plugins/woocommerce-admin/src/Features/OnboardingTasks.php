@@ -88,6 +88,14 @@ class OnboardingTasks {
 			return $settings;
 		}
 
+		$wc_pay_is_connected = false;
+		if ( class_exists( '\WC_Payments' ) ) {
+			$wc_payments_gateway = \WC_Payments::get_gateway();
+			$wc_pay_is_connected = method_exists( $wc_payments_gateway, 'is_connected' )
+				? $wc_payments_gateway->is_connected()
+				: false;
+		}
+
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.
 		$settings['onboarding']['automatedTaxSupportedCountries'] = self::get_automated_tax_supported_countries();
@@ -107,6 +115,7 @@ class OnboardingTasks {
 		$settings['onboarding']['stylesheet']                     = get_option( 'stylesheet' );
 		$settings['onboarding']['taxJarActivated']                = class_exists( 'WC_Taxjar' );
 		$settings['onboarding']['themeMods']                      = get_theme_mods();
+		$settings['onboarding']['wcPayIsConnected']               = $wc_pay_is_connected;
 
 		return $settings;
 	}
