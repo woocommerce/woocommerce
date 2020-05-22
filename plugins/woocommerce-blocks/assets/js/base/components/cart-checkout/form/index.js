@@ -9,9 +9,20 @@ import PropTypes from 'prop-types';
  */
 import './style.scss';
 
-const CheckoutForm = ( { className, children } ) => {
+const CheckoutForm = ( {
+	className,
+	children,
+	onSubmit = ( event ) => void event,
+} ) => {
+	const formOnSubmit = ( event ) => {
+		event.preventDefault();
+		onSubmit( event );
+	};
 	return (
-		<form className={ classnames( 'wc-block-checkout-form', className ) }>
+		<form
+			className={ classnames( 'wc-block-checkout-form', className ) }
+			onSubmit={ formOnSubmit }
+		>
 			{ children }
 		</form>
 	);
@@ -20,6 +31,7 @@ const CheckoutForm = ( { className, children } ) => {
 CheckoutForm.propTypes = {
 	className: PropTypes.string,
 	children: PropTypes.node,
+	onSubmit: PropTypes.func,
 };
 
 export default CheckoutForm;
