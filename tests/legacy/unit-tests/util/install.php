@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\Util
  */
 
+// This comment exists to prevent a Squiz.Commenting.FileComment.Missing from phpcs.
+
+require_once __DIR__ . '/helpers/class-wc-install-for-testing.php';
+
 /**
  * Class WC_Tests_Install.
  *
@@ -159,5 +163,122 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
+	}
+
+	/**
+	 * @testdox Update should complete if there are no errors when altering database schema.
+	 */
+	public function test_update_is_done_if_no_db_schema_change_errors() {
+		global $wpdb;
+
+		delete_transient( 'wc_installing' );
+		update_option( 'woocommerce_version', WC()->version );
+		update_option( 'woocommerce_db_version', WC()->version );
+		$old_version = WC()->version;
+
+		$auto_update_db_hook = function( $default_value ) {
+			return true;
+		};
+
+		add_filter( 'woocommerce_enable_auto_update_db', $auto_update_db_hook );
+
+		try {
+			WC()->version = '1000.0';
+			WC_Install_For_Testing::set_schema( 'CREATE TABLE foobar (id INT NOT NULL)' );
+			WC_Install_For_Testing::set_update_callbacks( array( '1000.0' => array( 'do_some_data_update' ) ) );
+
+			WC_Install_For_Testing::install();
+
+			$this->assertEquals( '1000.0', get_option( 'woocommerce_version' ) );
+
+			$query_result = $wpdb->query( 'SELECT COUNT(*) FROM foobar' );
+			$this->assertNotSame( false, $query_result );
+
+			$expected_scheduled = array( 'do_some_data_update' );
+			$this->assertEquals( $expected_scheduled, WC_Install_For_Testing::$scheduled_callbacks );
+
+			$this->assertNull( WC_Install_For_Testing::$error_notice_html );
+		} finally {
+			WC()->version                                = $old_version;
+			WC_Install_For_Testing::$scheduled_callbacks = array();
+
+			$wpdb->query( 'DROP TABLE foobar' );
+
+			remove_filter( 'woocommerce_enable_auto_update_db', $auto_update_db_hook );
+		}
+	}
+
+	/**
+	 * @testxdox Update shouldn't complete (remaining schema changes are skipped, no update functions are scheduled, Woo version isn't updated) if there are errors when altering database schema.
+	 */
+	public function test_update_is_not_done_if_there_are_db_schema_change_errors() {
+		global $wpdb;
+
+		delete_transient( 'wc_installing' );
+		update_option( 'woocommerce_version', WC()->version );
+		update_option( 'woocommerce_db_version', WC()->version );
+		$old_version = WC()->version;
+
+		$auto_update_db_hook = function( $default_value ) {
+			return true;
+		};
+
+		$create_table_attempts = array();
+		$query_hook            = function( $query ) use ( &$create_table_attempts ) {
+			if ( preg_match( '|CREATE .* TABLE ([^ ]*)|', $query, $matches ) ) {
+				$create_table_attempts[] = $matches[1];
+			}
+			return $query;
+		};
+
+		add_filter( 'woocommerce_enable_auto_update_db', $auto_update_db_hook );
+		add_filter( 'query', $query_hook );
+
+		try {
+			WC()->version = '1000.0';
+			WC_Install_For_Testing::set_schema( "CREATE TABLE foobar (id INT);\nCREATE TABLE fizzbuzz (id INT);" );
+			WC_Install_For_Testing::set_update_callbacks( array( '1000.0' => array( 'do_some_needed_update' ) ) );
+
+			$wpdb->query( "CREATE USER 'theuser'@'%' IDENTIFIED BY 'thepassword'" );
+			$wpdb->query( "GRANT SELECT,UPDATE,INSERT,DELETE ON *.* TO 'theuser'" );
+
+			$wpdb_for_restricted_user = new wpdb( 'theuser', 'thepassword', $wpdb->dbname, $wpdb->dbhost );
+			$wpdb_for_restricted_user->suppress_errors();
+			WC_Install_For_Testing::$wpdb_instance = $wpdb_for_restricted_user;
+
+			WC_Install_For_Testing::install();
+
+			$wpdb->suppress_errors();
+
+			// Table has effectively not been created.
+			$query_result = $wpdb->query( 'SELECT COUNT(*) FROM foobar' );
+			$this->assertSame( false, $query_result );
+
+			// Remaining schema change statements have been skipped.
+			$this->assertEquals( array( 'foobar' ), $create_table_attempts );
+
+			// Woo version has not been changed.
+			$this->assertEquals( $old_version, get_option( 'woocommerce_version' ) );
+
+			// No update functions have been scheduled.
+			$this->assertEmpty( WC_Install_For_Testing::$scheduled_callbacks );
+
+			// An error notice has been generated.
+			$expected_notice = '<div class="error"><p>WooCommerce database schema update failed, update not completed. Table: <code>foobar</code>, error: <code>Something went wrong in the database</code></p></div>';
+			$this->assertEquals( $expected_notice, WC_Install_For_Testing::$error_notice_html );
+		} finally {
+			WC()->version                                = $old_version;
+			WC_Install_For_Testing::$scheduled_callbacks = array();
+
+			$wpdb->query( 'DROP TABLE foobar' );
+			$wpdb->query( 'DROP TABLE fizzbuzz' );
+
+			$wpdb->suppress_errors( false );
+
+			$wpdb->query( "DROP USER 'theuser'" );
+
+			remove_filter( 'woocommerce_enable_auto_update_db', $auto_update_db_hook );
+			remove_filter( 'query', $query_hook );
+		}
 	}
 }

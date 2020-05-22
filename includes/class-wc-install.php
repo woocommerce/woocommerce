@@ -20,7 +20,7 @@ class WC_Install {
 	 *
 	 * @var array
 	 */
-	private static $db_updates = array(
+	protected static $db_updates = array(
 		'2.0.0' => array(
 			'wc_update_200_file_paths',
 			'wc_update_200_permalinks',
@@ -405,7 +405,7 @@ class WC_Install {
 	 * @return array
 	 */
 	public static function get_db_update_callbacks() {
-		return self::$db_updates;
+		return static::$db_updates;
 	}
 
 	/**
@@ -418,18 +418,28 @@ class WC_Install {
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					WC()->queue()->schedule_single(
-						time() + $loop,
-						'woocommerce_run_update_callback',
-						array(
-							'update_callback' => $update_callback,
-						),
-						'woocommerce-db-updates'
-					);
+					static::schedule_update_callback( time() + $loop, $update_callback );
 					$loop++;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Schedule a database update callback for later.
+	 *
+	 * @param int      $time Time when the update should be executed, in Unix epoch seconds.
+	 * @param callable $callback The callback to execute.
+	 */
+	protected static function schedule_update_callback( $time, $callback ) {
+		WC()->queue()->schedule_single(
+			$time,
+			'woocommerce_run_update_callback',
+			array(
+				'update_callback' => $callback,
+			),
+			'woocommerce-db-updates'
+		);
 	}
 
 	/**
@@ -676,7 +686,7 @@ class WC_Install {
 		}
 
 		// Get the main schema creation/alteration queries.
-		$schema                = self::get_schema();
+		$schema                = static::get_schema();
 		$schema_change_queries = array_merge_recursive( $schema_change_queries, self::get_dbdelta_queries( $schema ) );
 
 		// Execute the manual ALTER TABLE statements (if any), then the main schema creation/alteration queries.
@@ -746,23 +756,32 @@ class WC_Install {
 	 * @return bool True if all queries were executed successfully, false otherwise.
 	 */
 	private static function execute_db_schema_change_queries( $schema_change_queries ) {
+		$wpdb = static::wpdb();
+
 		foreach ( $schema_change_queries as $table_name => $queries ) {
 			foreach ( $queries as $query ) {
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				$success = $wpdb->query( $query );
 				if ( ! $success ) {
-					self::notice_db_schema_not_updated( $table_name, $wpdb->last_error );
+					static::notice_db_schema_not_updated( $table_name, $wpdb->last_error );
 					return false;
 				}
 			}
 		}
 
-		// Clear table caches.
-		delete_transient( 'wc_attribute_taxonomies' );
-
 		return true;
+	}
 
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	/**
+	 * Reference to the global $wpdb object.
+	 * This method exists to ease unit testing.
+	 *
+	 * @return wpdb The current wpdb global object.
+	 */
+	protected static function wpdb() {
+		global $wpdb;
+
+		return $wpdb;
 	}
 
 	// phpcs:ignore Generic.Commenting.Todo.TaskFound
@@ -1105,20 +1124,33 @@ class WC_Install {
 	 * @param string $table_name Table that was being created or altered.
 	 * @param string $error Error message returned by the database.
 	 */
-	private static function notice_db_schema_not_updated( $table_name, $error ) {
+	protected static function notice_db_schema_not_updated( $table_name, $error ) {
 		add_action(
 			'admin_notices',
 			function() use ( $table_name, $error ) {
-				echo '<div class="error"><p>';
-				printf(
-					/* translators: 1. Table name 2. Error message */
-					esc_html__( 'WooCommerce database schema update failed, update not completed. Table: %1$s, error: %2$s', 'woocommerce' ),
-					'<code>' . esc_html( $table_name ) . '</code>',
-					'<code>' . esc_html( $error ) . '</code>'
-				);
-				echo '</p></div>';
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo self::db_schema_not_updated_html( $table_name, $error );
 			}
 		);
+	}
+
+	/**
+	 * The HTML to use for the database schema modification related error notice.
+	 *
+	 * @param string $table_name Table that was being created or altered.
+	 * @param string $error Error message returned by the database.
+	 *
+	 * @return string The HTML for the notice.
+	 */
+	protected static function db_schema_not_updated_html( $table_name, $error ) {
+		return '<div class="error"><p>' .
+			sprintf(
+				/* translators: 1. Table name 2. Error message */
+				esc_html__( 'WooCommerce database schema update failed, update not completed. Table: %1$s, error: %2$s', 'woocommerce' ),
+				'<code>' . esc_html( $table_name ) . '</code>',
+				'<code>' . esc_html( $error ) . '</code>'
+			) .
+			'</p></div>';
 	}
 
 	/**
@@ -1137,7 +1169,7 @@ class WC_Install {
 	 *
 	 * @return string
 	 */
-	private static function get_schema() {
+	protected static function get_schema() {
 		global $wpdb;
 
 		$collate = '';
