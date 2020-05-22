@@ -679,6 +679,12 @@ class WC_Install {
 		$schema                = self::get_schema();
 		$schema_change_queries = array_merge_recursive( $schema_change_queries, self::get_dbdelta_queries( $schema ) );
 
+		// Execute the manual ALTER TABLE statements (if any), then the main schema creation/alteration queries.
+		if ( ! self::execute_db_schema_change_queries( $schema_change_queries ) ) {
+			return false;
+		}
+		$schema_change_queries = array();
+
 		// Add an index to the field comment_type to improve the response time of the query
 		// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
@@ -719,7 +725,27 @@ class WC_Install {
 			}
 		}
 
-		// We have all the required schema change commands, now execute them.
+		// Execute the extra manual ALTER TABLE statements, if any.
+		if ( ! self::execute_db_schema_change_queries( $schema_change_queries ) ) {
+			return false;
+		}
+
+		// Clear table caches.
+		delete_transient( 'wc_attribute_taxonomies' );
+
+		return true;
+
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Execute a set of database change queries. If one fails, display an error notice.
+	 *
+	 * @param array $schema_change_queries An associative array where keys are table names and values are arrays of queries.
+	 *
+	 * @return bool True if all queries were executed successfully, false otherwise.
+	 */
+	private static function execute_db_schema_change_queries( $schema_change_queries ) {
 		foreach ( $schema_change_queries as $table_name => $queries ) {
 			foreach ( $queries as $query ) {
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
