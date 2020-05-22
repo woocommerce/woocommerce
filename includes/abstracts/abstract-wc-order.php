@@ -1672,18 +1672,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function calculate_totals( $and_taxes = true ) {
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
-		$cart_subtotal     = 0;
-		$cart_total        = 0;
 		$fees_total        = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
 
-		// Sum line item costs without rounding.
-		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal += $item->get_subtotal();
-			$cart_total    += $item->get_total();
-		}
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {

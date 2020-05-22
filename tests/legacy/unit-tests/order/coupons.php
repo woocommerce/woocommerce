@@ -371,6 +371,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 	public function test_inclusive_tax_rounding_on_totals() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
 		WC_Tax::_insert_tax_rate(
 			array(
@@ -440,12 +441,9 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$order->apply_coupon( $coupon->get_code() );
 
 		$applied_coupons = $order->get_items( 'coupon' );
-		$applied_coupon  = current( $applied_coupons );
 
 		$this->assertEquals( '16.95', $order->get_total() );
 		$this->assertEquals( '1.73', $order->get_total_tax() );
 		$this->assertEquals( '1.69', $order->get_discount_total() );
-
-		$this->assertEquals( '1.69', $applied_coupon->get_discount() );
 	}
 }
