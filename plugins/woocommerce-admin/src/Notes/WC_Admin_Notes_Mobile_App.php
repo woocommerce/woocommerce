@@ -26,20 +26,12 @@ class WC_Admin_Notes_Mobile_App {
 	const NOTE_NAME = 'wc-admin-mobile-app';
 
 	/**
-	 * Possibly add mobile app note.
+	 * Get the note.
 	 */
-	public static function possibly_add_mobile_app_note() {
+	public static function get_note() {
 		// We want to show the mobile app note after day 2.
 		$two_days_in_seconds = 2 * DAY_IN_SECONDS;
 		if ( ! self::wc_admin_active_for( $two_days_in_seconds ) ) {
-			return;
-		}
-
-		$data_store = \WC_Data_Store::load( 'admin-note' );
-
-		// We already have this note? Then exit, we're done.
-		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
-		if ( ! empty( $note_ids ) ) {
 			return;
 		}
 
@@ -54,6 +46,6 @@ class WC_Admin_Notes_Mobile_App {
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/mobile/' );
-		$note->save();
+		return $note;
 	}
 }

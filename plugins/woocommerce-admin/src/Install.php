@@ -468,7 +468,7 @@ class Install {
 	 * Create notes.
 	 */
 	protected static function create_notes() {
-		WC_Admin_Notes_Historical_Data::add_note();
+		WC_Admin_Notes_Historical_Data::possibly_add_note();
 	}
 
 	/**

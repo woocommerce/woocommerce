@@ -33,4 +33,59 @@ trait NoteTraits {
 
 		return ( ( time() - $wc_admin_installed ) >= $seconds );
 	}
+
+	/**
+	 * Check if the note has been previously added.
+	 */
+	public static function note_exists() {
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
+		return ! empty( $note_ids );
+	}
+
+	/**
+	 * Checks if a note can and should be added.
+	 *
+	 * @return bool
+	 */
+	public static function can_be_added() {
+		$note = self::get_note();
+
+		if ( ! $note instanceof WC_Admin_Note ) {
+			return;
+		}
+
+		if ( self::note_exists() ) {
+			return false;
+		}
+
+		if (
+			'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) &&
+			WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING === $note->get_type()
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Add the note if it passes predefined conditions.
+	 */
+	public static function possibly_add_note() {
+		$note = self::get_note();
+
+		if ( ! self::can_be_added() ) {
+			return;
+		}
+
+		$note->save();
+	}
+
+	/**
+	 * Alias this method for backwards compatibility.
+	 */
+	public static function add_note() {
+		self::possibly_add_note();
+	}
 }

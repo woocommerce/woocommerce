@@ -17,27 +17,29 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
  * WC_Admin_Notes_Onboarding_Profiler.
  */
 class WC_Admin_Notes_Onboarding_Profiler {
+	/**
+	 * Note traits.
+	 */
+	use NoteTraits;
+
+	/**
+	 * Name of the note for use in the database.
+	 */
 	const NOTE_NAME = 'wc-admin-onboarding-profiler-reminder';
 
 	/**
 	 * Attach hooks.
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'add_reminder' ) );
+		add_action( 'admin_init', array( $this, 'possibly_add_note' ) );
 		add_action( 'update_option_' . Onboarding::PROFILE_DATA_OPTION, array( $this, 'update_status_on_complete' ), 10, 2 );
 	}
 
 	/**
-	 * Creates a note to remind store owners to complete the profiler.
+	 * Get the note.
 	 */
-	public static function add_reminder() {
+	public static function get_note() {
 		if ( ! Onboarding::should_show_profiler() ) {
-			return;
-		}
-
-		$data_store = \WC_Data_Store::load( 'admin-note' );
-		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
-		if ( ! empty( $note_ids ) ) {
 			return;
 		}
 
@@ -63,8 +65,7 @@ class WC_Admin_Notes_Onboarding_Profiler {
 			'actioned',
 			false
 		);
-
-		$note->save();
+		return $note;
 	}
 
 	/**

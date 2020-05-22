@@ -53,7 +53,7 @@ class Package {
 			self::$active_version = WC_ADMIN_VERSION_NUMBER;
 			$update_version       = new WC_Admin_Notes_Deactivate_Plugin();
 			if ( version_compare( WC_ADMIN_VERSION_NUMBER, self::VERSION, '<' ) ) {
-				$update_version::add_note();
+				$update_version::possibly_add_note();
 			} else {
 				$update_version::delete_note();
 			}

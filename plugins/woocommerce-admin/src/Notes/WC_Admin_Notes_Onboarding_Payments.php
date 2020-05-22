@@ -17,12 +17,20 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
  * WC_Admin_Notes_Onboarding_Payments.
  */
 class WC_Admin_Notes_Onboarding_Payments {
+	/**
+	 * Note traits.
+	 */
+	use NoteTraits;
+
+	/**
+	 * Name of the note for use in the database.
+	 */
 	const NOTE_NAME = 'wc-admin-onboarding-payments-reminder';
 
 	/**
-	 * Creates a note to remind store owners to set up payments.
+	 * Get the note.
 	 */
-	public static function possibly_add_onboarding_payments_note() {
+	public static function get_note() {
 		// This note should only be added if the task list is still shown.
 		if ( ! Onboarding::should_show_tasks() ) {
 			return;
@@ -51,13 +59,6 @@ class WC_Admin_Notes_Onboarding_Payments {
 			return;
 		}
 
-		// Don't add this note if previously added.
-		$data_store = \WC_Data_Store::load( 'admin-note' );
-		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
-		if ( ! empty( $note_ids ) ) {
-			return;
-		}
-
 		$note = new WC_Admin_Note();
 		$note->set_title( __( 'Start accepting payments on your store!', 'woocommerce-admin' ) );
 		$note->set_content( __( 'Take payments with the provider that’s right for you - choose from 100+ payment gateways for WooCommerce.', 'woocommerce-admin' ) );
@@ -73,7 +74,6 @@ class WC_Admin_Notes_Onboarding_Payments {
 			'actioned',
 			true
 		);
-
-		$note->save();
+		return $note;
 	}
 }

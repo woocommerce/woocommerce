@@ -24,6 +24,7 @@ class WC_Admin_Notes {
 	 */
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'schedule_unsnooze_notes' ) );
+		add_action( 'update_option_woocommerce_show_marketplace_suggestions', array( __CLASS__, 'possibly_delete_marketing_notes' ), 10, 2 );
 	}
 
 	/**
@@ -147,5 +148,29 @@ class WC_Admin_Notes {
 	 */
 	public static function clear_queued_actions() {
 		wp_clear_scheduled_hook( self::UNSNOOZE_HOOK );
+	}
+
+	/**
+	 * Delete marketing notes if marketing has been opted out.
+	 *
+	 * @param string $old_value Old value.
+	 * @param string $value New value.
+	 */
+	public static function possibly_delete_marketing_notes( $old_value, $value ) {
+		if ( 'no' !== $value ) {
+			return;
+		}
+
+		$data_store = \WC_Data_Store::load( 'admin-note' );
+		$notes      = $data_store->get_notes(
+			array(
+				'type' => array( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING ),
+			)
+		);
+
+		foreach ( $notes as $note ) {
+			$note = new WC_Admin_Note( $note->note_id );
+			$note->delete();
+		}
 	}
 }

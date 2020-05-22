@@ -17,10 +17,11 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_Note extends \WC_Data {
 
 	// Note types.
-	const E_WC_ADMIN_NOTE_ERROR         = 'error';   // used for presenting error conditions.
-	const E_WC_ADMIN_NOTE_WARNING       = 'warning'; // used for presenting warning conditions.
-	const E_WC_ADMIN_NOTE_UPDATE        = 'update';  // i.e. used when a new version is available.
-	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';    // used for presenting informational messages.
+	const E_WC_ADMIN_NOTE_ERROR         = 'error';     // used for presenting error conditions.
+	const E_WC_ADMIN_NOTE_WARNING       = 'warning';   // used for presenting warning conditions.
+	const E_WC_ADMIN_NOTE_UPDATE        = 'update';    // i.e. used when a new version is available.
+	const E_WC_ADMIN_NOTE_INFORMATIONAL = 'info';      // used for presenting informational messages.
+	const E_WC_ADMIN_NOTE_MARKETING     = 'marketing'; // used for adding marketing messages.
 
 	// Note status codes.
 	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
@@ -121,6 +122,7 @@ class WC_Admin_Note extends \WC_Data {
 			self::E_WC_ADMIN_NOTE_WARNING,
 			self::E_WC_ADMIN_NOTE_UPDATE,
 			self::E_WC_ADMIN_NOTE_INFORMATIONAL,
+			self::E_WC_ADMIN_NOTE_MARKETING,
 		);
 
 		return apply_filters( 'woocommerce_note_types', $allowed_types );

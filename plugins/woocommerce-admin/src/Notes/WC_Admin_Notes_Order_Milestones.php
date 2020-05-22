@@ -18,7 +18,7 @@ class WC_Admin_Notes_Order_Milestones {
 	/**
 	 * Name of the "other milestones" note.
 	 */
-	const ORDERS_MILESTONE_NOTE_NAME = 'wc-admin-orders-milestone';
+	const NOTE_NAME = 'wc-admin-orders-milestone';
 
 	/**
 	 * Option key name to store last order milestone.
@@ -306,7 +306,7 @@ class WC_Admin_Notes_Order_Milestones {
 		$this->set_last_milestone( $current_milestone );
 
 		// We only want one milestone note at any time.
-		WC_Admin_Notes::delete_notes_with_name( self::ORDERS_MILESTONE_NOTE_NAME );
+		WC_Admin_Notes::delete_notes_with_name( self::NOTE_NAME );
 
 		// Add the milestone note.
 		$note = new WC_Admin_Note();
@@ -316,7 +316,7 @@ class WC_Admin_Notes_Order_Milestones {
 		$note->add_action( $note_action['name'], $note_action['label'], $note_action['query'] );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'trophy' );
-		$note->set_name( self::ORDERS_MILESTONE_NOTE_NAME );
+		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->save();
 	}
