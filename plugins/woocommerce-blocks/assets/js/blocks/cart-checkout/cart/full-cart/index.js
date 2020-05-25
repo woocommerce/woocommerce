@@ -30,6 +30,7 @@ import {
 	SidebarLayout,
 	Main,
 } from '@woocommerce/base-components/sidebar-layout';
+import Title from '@woocommerce/base-components/title';
 import { getSetting } from '@woocommerce/settings';
 import { useEffect } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -96,12 +97,15 @@ const Cart = ( { attributes } ) => {
 			<Sidebar className="wc-block-cart__sidebar">
 				<Card isElevated={ true }>
 					<CardBody>
-						<h2 className="wc-block-cart__totals-title">
+						<Title
+							headingLevel="2"
+							className="wc-block-cart__totals-title"
+						>
 							{ __(
 								'Cart totals',
 								'woo-gutenberg-products-block'
 							) }
-						</h2>
+						</Title>
 						<SubtotalsItem
 							currency={ totalsCurrency }
 							values={ cartTotals }

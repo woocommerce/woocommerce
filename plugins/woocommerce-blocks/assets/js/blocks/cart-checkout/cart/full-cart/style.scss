@@ -1,11 +1,6 @@
 .wc-block-cart {
 	color: $core-grey-dark-600;
 
-	h2 {
-		@include font-size(20px);
-		font-weight: normal;
-	}
-
 	.wc-block-cart__main,
 	.wc-block-cart__sidebar .components-card__body.is-size-medium {
 		padding-top: 1.3em;

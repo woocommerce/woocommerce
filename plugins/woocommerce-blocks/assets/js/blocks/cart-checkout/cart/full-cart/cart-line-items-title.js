@@ -3,6 +3,7 @@
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import Title from '@woocommerce/base-components/title';
 
 const CartLineItemsTitle = ( {
 	title = __( 'Shopping cart', 'woo-gutenberg-products-block' ),
@@ -15,14 +16,14 @@ const CartLineItemsTitle = ( {
 	const readableHeading = `${ title } – ${ itemCountHeading }`;
 
 	return (
-		<h2 aria-label={ readableHeading }>
+		<Title headingLevel="2" aria-label={ readableHeading }>
 			<span>{ title } </span>
 			{ !! itemCount && (
 				<span className="wc-block-cart__item-count">
 					{ itemCountHeading }
 				</span>
 			) }
-		</h2>
+		</Title>
 	);
 };
 
