@@ -1,8 +1,8 @@
 === WooCommerce Blocks ===
 Contributors: automattic, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia, aljullu, mikejolley, nerrad, joshuawold, assassinateur, haszari
 Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
-Requires at least: 5.0
-Tested up to: 5.3
+Requires at least: 5.2
+Tested up to: 5.4
 Requires PHP: 5.6
 Stable tag: 2.6.0-rc1
 License: GPLv3
@@ -11,6 +11,10 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 == Description ==
 
 WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages!
+
+**Note: Feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.**
+
+Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
 **Featured Product Block**
 Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo.
