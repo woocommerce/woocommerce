@@ -41,7 +41,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			'type'              => 'integer',
 			'minimum'           => 0,
 			'maximum'           => 100,
-			'sanitize_callback' => 'intval',
+			'sanitize_callback' => [ $this, 'get_intval' ],
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -155,5 +155,15 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		$count_args = $args;
 		unset( $count_args['number'], $count_args['offset'] );
 		return (int) wp_count_terms( $taxonomy, $count_args );
+	}
+
+	/**
+	 * Wrapper of the `intval` function that only accepts one parameter.
+	 *
+	 * @param mixed $value Value to convert to an int.
+	 * @return int
+	 */
+	public function get_intval( $value ) {
+		return intval( $value );
 	}
 }
