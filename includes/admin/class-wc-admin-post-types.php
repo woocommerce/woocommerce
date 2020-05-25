@@ -88,11 +88,10 @@ class WC_Admin_Post_Types {
 			$screen_id = isset( $screen, $screen->id ) ? $screen->id : '';
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! empty( $request_data['screen'] ) ) {
-			$screen_id = wc_clean( wp_unslash( $request_data['screen'] ) );
+		$screen_data = $request_data['screen'];
+		if ( ! empty( $screen_data ) ) {
+			$screen_id = wc_clean( wp_unslash( $screen_data ) );
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		switch ( $screen_id ) {
 			case 'edit-shop_order':
@@ -337,8 +336,6 @@ class WC_Admin_Post_Types {
 	 * @param WC_Product $product Product object.
 	 */
 	private function quick_edit_save( $post_id, $product ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-
 		$request_data = $this->request_data();
 
 		$data_store        = $product->get_data_store();
@@ -423,31 +420,28 @@ class WC_Admin_Post_Types {
 
 		// Handle Stock Data.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$manage_stock            = ! empty( $request_data['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
-		$backorders              = ! empty( $request_data['_backorders'] ) ? wc_clean( $request_data['_backorders'] ) : 'no';
-		$stock_status_in_request = ! empty( $request_data['_stock_status'] );
-		if ( $stock_status_in_request ) {
+		$manage_stock = ! empty( $request_data['_manage_stock'] ) && 'grouped' !== $product->get_type() ? 'yes' : 'no';
+		$backorders   = ! empty( $request_data['_backorders'] ) ? wc_clean( $request_data['_backorders'] ) : 'no';
+		if ( ! empty( $request_data['_stock_status'] ) ) {
 			$stock_status = wc_clean( $request_data['_stock_status'] );
 		} else {
 			$stock_status = $product->is_type( 'variable' ) ? null : 'instock';
 		}
-		$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$product->set_manage_stock( $manage_stock );
 		$product->set_backorders( $backorders );
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
 			$product->set_stock_quantity( $stock_amount );
 		}
 
-		$product = $this->update_stock_status( $product, $stock_status );
+		$product = $this->maybe_update_stock_status( $product, $stock_status );
 
 		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
-
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -457,7 +451,7 @@ class WC_Admin_Post_Types {
 	 * @param WC_Product $product Product object.
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		$request_data = $this->request_data();
 
@@ -559,7 +553,7 @@ class WC_Admin_Post_Types {
 		$product->set_backorders( $backorders );
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$change_stock = empty( $request_data['change_stock'] ) ? 0 : absint( $request_data['change_stock'] );
+			$change_stock = absint( $request_data['change_stock'] );
 			switch ( $change_stock ) {
 				case 2:
 					wc_update_product_stock( $product, $stock_amount, 'increase', true );
@@ -578,13 +572,13 @@ class WC_Admin_Post_Types {
 		}
 
 		$stock_status = empty( $request_data['_stock_status'] ) ? null : wc_clean( $request_data['_stock_status'] );
-		$product      = $this->update_stock_status( $product, $stock_status );
+		$product      = $this->maybe_update_stock_status( $product, $stock_status );
 
 		$product->save();
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
 
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 	}
 
 	/**
@@ -888,7 +882,7 @@ class WC_Admin_Post_Types {
 	 * @param string|null $stock_status The stock status to use for adjustment, or null if no new stock status has been supplied in the request.
 	 * @return WC_Product The supplied product, or the synced product if it was a variable product.
 	 */
-	private function update_stock_status( $product, $stock_status ) {
+	private function maybe_update_stock_status( $product, $stock_status ) {
 		if ( $product->is_type( 'external' ) ) {
 			// External products are always in stock.
 			$product->set_stock_status( 'instock' );
@@ -974,11 +968,7 @@ class WC_Admin_Post_Types {
 
 		if ( isset( $new_price ) && $new_price !== $old_price ) {
 			$price_changed = true;
-			if ( 'sale' === $price_type && empty( $new_price ) && '0' !== $new_price ) {
-				$new_price = '';
-			} else {
-				$new_price = round( $new_price, wc_get_price_decimals() );
-			}
+			$new_price     = round( $new_price, wc_get_price_decimals() );
 			$product->{"set_{$price_type}_price"}( $new_price );
 		}
 
@@ -988,7 +978,7 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Get the cuurrent request data ($_REQUEST superglobal).
+	 * Get the current request data ($_REQUEST superglobal).
 	 * This method is added to ease unit testing.
 	 *
 	 * @return array The $_REQUEST superglobal.
