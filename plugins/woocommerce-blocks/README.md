@@ -4,7 +4,7 @@
 [![Travis](https://travis-ci.com/woocommerce/woocommerce-gutenberg-products-block.svg?branch=master)](https://travis-ci.com/woocommerce/woocommerce-gutenberg-products-block)
 [![View](https://img.shields.io/badge/Project%20Components-brightgreen.svg?style=flat)](https://woocommerce.github.io/woocommerce-gutenberg-products-block)
 
-Feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
+This is the feature plugin for WooCommerce + Gutenberg. This plugin serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the block editor.
 
 Use this plugin if you want access to the bleeding edge of available blocks for WooCommerce. However, stable blocks are bundled into WooCommerce, and can be added from the "WooCommerce" section in the block inserter.
 
@@ -14,7 +14,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
   - [Code Documentation](#code-documentation)
   - [Contributing](#contributing)
 - [Contributing](#contributing-1)
-- [Installing the stable version](#installing-the-stable-version)
+- [Installing the plugin version](#installing-the-stable-version)
 - [Installing the development version](#installing-the-development-version)
 - [Getting started with block development](#getting-started-with-block-development)
 - [Vision for the Feature](#vision-for-the-feature)
@@ -37,12 +37,12 @@ If you want to see what we're working on for future versions, or want to help ou
 
 ## Contributing
 
-## Installing the stable version
+## Installing the plugin version
 
 We release a new version of WooCommerce Blocks onto WordPress.org every few weeks, which can be used as an easier way to preview the features.
 
 1. Make sure you have WordPress 5.2+ and WooCommerce 4.0+
-2. The stable version is available on WordPress.org. [Download the stable version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
+2. The plugin version is available on WordPress.org. [Download the plugin version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
 3. Activate the plugin.
 
 ## Installing the development version
