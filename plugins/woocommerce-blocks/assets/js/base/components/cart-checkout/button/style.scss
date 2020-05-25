@@ -1,9 +1,9 @@
 .wc-block-components-button:not(.is-link) {
+	@include reset-typography();
 	align-items: center;
 	background-color: $black;
 	color: $white;
 	display: flex;
-	font-size: inherit;
 	font-weight: bold;
 	min-height: rem(48px); // 16px * 3 = 48px, same height as text-input
 	justify-content: center;
