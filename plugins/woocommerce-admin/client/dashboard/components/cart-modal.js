@@ -13,6 +13,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List } from '@woocommerce/components';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -170,8 +171,14 @@ class CartModal extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const { getProfileItems } = select( 'wc-api' );
+		const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
 		const profileItems = getProfileItems();
-		const productIds = getProductIdsForCart( profileItems );
+		const installedPlugins = getInstalledPlugins();
+		const productIds = getProductIdsForCart(
+			profileItems,
+			false,
+			installedPlugins
+		);
 
 		return { profileItems, productIds };
 	} )

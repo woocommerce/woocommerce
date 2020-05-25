@@ -28,6 +28,7 @@ export function getAllTasks( {
 	options,
 	query,
 	toggleCartModal,
+	installedPlugins,
 } ) {
 	const {
 		hasPhysicalProducts,
@@ -43,8 +44,16 @@ export function getAllTasks( {
 		shippingZonesCount: 0,
 	} );
 
-	const productIds = getProductIdsForCart( profileItems, true );
-	const remainingProductIds = getProductIdsForCart( profileItems );
+	const productIds = getProductIdsForCart(
+		profileItems,
+		true,
+		installedPlugins
+	);
+	const remainingProductIds = getProductIdsForCart(
+		profileItems,
+		false,
+		installedPlugins
+	);
 
 	const paymentsCompleted = get(
 		options,

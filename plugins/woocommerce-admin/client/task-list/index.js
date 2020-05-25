@@ -102,13 +102,19 @@ class TaskDashboard extends Component {
 	}
 
 	getTasks() {
-		const { profileItems, query, taskListPayments } = this.props;
+		const {
+			profileItems,
+			query,
+			taskListPayments,
+			installedPlugins,
+		} = this.props;
 
 		return getAllTasks( {
 			profileItems,
 			options: taskListPayments,
 			query,
 			toggleCartModal: this.toggleCartModal.bind( this ),
+			installedPlugins,
 		} ).filter( ( task ) => task.visible );
 	}
 
@@ -442,10 +448,12 @@ export default compose(
 			[ 'woocommerce_task_list_tracked_completed_tasks' ],
 			[]
 		);
+		const installedPlugins = getInstalledPlugins();
 		const tasks = getAllTasks( {
 			profileItems,
 			options: getOptions( [ 'woocommerce_task_list_payments' ] ),
 			query: props.query,
+			installedPlugins,
 		} );
 		const completedTaskKeys = tasks
 			.filter( ( task ) => task.completed )
@@ -454,7 +462,6 @@ export default compose(
 			( task ) => task.visible && ! task.completed
 		);
 		const activePlugins = getActivePlugins();
-		const installedPlugins = getInstalledPlugins();
 
 		return {
 			modalDismissed,
