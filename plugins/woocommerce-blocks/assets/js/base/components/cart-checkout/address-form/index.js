@@ -94,6 +94,7 @@ const AddressForm = ( {
 		countryValidationError,
 		setValidationErrors,
 		clearValidationError,
+		type,
 	] );
 
 	id = id || instanceId;

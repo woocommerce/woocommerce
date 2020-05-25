@@ -136,9 +136,8 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 		setShippingAsBilling,
 		showBillingFields,
 	} = useCheckoutAddress();
-	const addressFields = useMemo( () => {
+	const addressFieldsConfig = useMemo( () => {
 		return {
-			...defaultAddressFields,
 			company: {
 				...defaultAddressFields.company,
 				hidden: ! attributes.showCompanyField,
@@ -253,8 +252,10 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 									id="shipping"
 									onChange={ setShippingFields }
 									values={ shippingFields }
-									fields={ Object.keys( addressFields ) }
-									fieldConfig={ addressFields }
+									fields={ Object.keys(
+										defaultAddressFields
+									) }
+									fieldConfig={ addressFieldsConfig }
 								/>
 								{ attributes.showPhoneField && (
 									<ValidatedTextInput
@@ -311,8 +312,10 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 									onChange={ setBillingFields }
 									type="billing"
 									values={ billingFields }
-									fields={ Object.keys( addressFields ) }
-									fieldConfig={ addressFields }
+									fields={ Object.keys(
+										defaultAddressFields
+									) }
+									fieldConfig={ addressFieldsConfig }
 								/>
 							</FormStep>
 						) }
