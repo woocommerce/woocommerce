@@ -62,7 +62,10 @@ copy_dest_files() {
 	--exclude="*.config.json" \
 	--exclude=package.json \
 	--exclude=package-lock.json \
-	--exclude=none
+	--exclude=none \
+	--exclude=blocks.ini \
+	--exclude=docker-compose.yml \
+	--exclude=tsconfig.json
   output 2 "Done copying files!"
   cd "$3" || exit
 }
