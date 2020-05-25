@@ -74,7 +74,7 @@ class KnowledgeBase extends Component {
 							className="woocommerce-marketing-knowledgebase-card__post"
 							href={ post.link }
 							key={ index }
-							onClick={ this.onPostClick( this, post ) }
+							onClick={ this.onPostClick.bind( this, post ) }
 							target="_blank"
 							rel="noopener noreferrer"
 						>
