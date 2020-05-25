@@ -13,8 +13,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 - [Documentation](#documentation)
   - [Code Documentation](#code-documentation)
   - [Contributing](#contributing)
-- [Contributing](#contributing-1)
-- [Installing the plugin version](#installing-the-stable-version)
+- [Installing the plugin version](#installing-the-plugin-version)
 - [Installing the development version](#installing-the-development-version)
 - [Getting started with block development](#getting-started-with-block-development)
 - [Vision for the Feature](#vision-for-the-feature)
@@ -34,8 +33,6 @@ If you want to see what we're working on for future versions, or want to help ou
 ### Contributing
 
 - [Publishing a release](docs/releases/readme.md)
-
-## Contributing
 
 ## Installing the plugin version
 
