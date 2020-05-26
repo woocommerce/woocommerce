@@ -274,7 +274,6 @@ abstract class AbstractRoute implements RouteInterface {
 	 */
 	protected function maybe_load_cart() {
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
-			// @todo Load Dependencies for wc_load_cart(). See https://github.com/woocommerce/woocommerce/pull/26219
 			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
 			include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
 			wc_load_cart();

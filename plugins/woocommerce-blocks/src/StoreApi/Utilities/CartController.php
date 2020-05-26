@@ -626,7 +626,6 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		// @todo Remove once min support for WC reaches 4.1.0.
 		if ( \class_exists( '\Automattic\WooCommerce\Checkout\Helpers\ReserveStock' ) ) {
 			$reserve_stock_controller = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
 		} else {

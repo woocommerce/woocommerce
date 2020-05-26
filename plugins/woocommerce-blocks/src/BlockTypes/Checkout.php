@@ -50,7 +50,7 @@ class Checkout extends AbstractBlock {
 	 */
 	public function render( $attributes = array(), $content = '' ) {
 		if ( $this->is_checkout_endpoint() ) {
-			// @todo Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
+			// Note: Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
 			// legacy shortcode instead and do not render block.
 			return '[woocommerce_checkout]';
 		}
