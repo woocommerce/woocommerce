@@ -208,7 +208,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Updated minimum PHP requirement to 7.0 to keep up with WooCommerce Core.
 * Dev - Fixed failing unit tests. #105
 
-**WooCommerce Admin 1.2.2**
+**WooCommerce Admin 1.2.3**
 * Enhancement - Add onboarding payments note #4157 
 * Enhancement - Marketing Inbox Note #4030
 * Performance - Use Route based code splitting to reduce bundle size #4094
@@ -224,6 +224,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Adjust "demo products" verbiage to "Sample Products" #4184
 * Tweak - Don't reschedule imports on failed imports #4263
 * Tweak - Remove obsolete inbox messages #4182
+* Tweak - Updates to WooCommerce Payments in Setup Checklist #4293
 * Dev - Make query selector for admin alerts more specific #4289
 * Dev - Guard against null themes in OBW #4244
 * Dev - Update wcadmin db version after db callback #4323
