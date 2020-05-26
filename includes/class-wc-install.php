@@ -308,12 +308,16 @@ class WC_Install {
 	 * Check if all the base tables are present.
 	 *
 	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
 	 *
 	 * @return array List of querues.
 	 */
-	public static function verify_base_tables( $modify_notice = true ) {
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
+		if ( $execute ) {
+			self::create_tables();
+		}
 		$queries = dbDelta( self::get_schema(), false );
 		$missing_tables = array();
 		foreach ( $queries as $table_name => $result ) {
@@ -326,13 +330,13 @@ class WC_Install {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::add_notice( 'base_tables_missing' );
 			}
-			update_option( 'woocommerce-db-missing-tables', $missing_tables );
+			update_option( 'woocommerce-schema-missing-tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
 			}
-			update_option( 'woocommerce-db-verified', WC()->version );
-			delete_option( 'woocommerce-db-missing-tables' );
+			update_option( 'woocommerce-schema-version', WC()->version );
+			delete_option( 'woocommerce-schema-missing-tables' );
 		}
 		return $missing_tables;
 	}
@@ -655,6 +659,11 @@ class WC_Install {
 
 	/**
 	 * Set up the database tables which the plugin needs to function.
+	 * WARNING: If you are modifying this method, make sure that its safe to call regardless of the state of database.
+	 *
+	 * This is called from `install` method and is executed in-sync when WC is installed or updated. This can also be called optionally from `verify_base_tables`.
+	 *
+	 * TODO: Add all crucial tables that we have created from workers in the past.
 	 *
 	 * Tables:
 	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
@@ -664,7 +673,6 @@ class WC_Install {
 	 *      woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
 	 *      woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
 	 *      woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
-	 *      wc_reserved_stock - Hold reserved stock during a checkout.
 	 */
 	public static function create_tables() {
 		global $wpdb;

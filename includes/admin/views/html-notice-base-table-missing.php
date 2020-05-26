@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 	<p>
 		<?php
 		$verify_db_tool_available = array_key_exists( 'verify_db_tables', WC_Admin_Status::get_tools() );
-		$missing_tables = get_option( 'woocommerce-db-missing-tables' );
+		$missing_tables           = get_option( 'woocommerce-schema-missing-tables' );
 		if ( $verify_db_tool_available ) {
 			echo wp_kses_post(
 				sprintf(
