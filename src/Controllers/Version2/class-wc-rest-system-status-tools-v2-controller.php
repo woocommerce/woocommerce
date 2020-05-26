@@ -553,7 +553,8 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$ran = false;
 					break;
 				}
-				$missing_tables = WC_Install::verify_base_tables();
+				// Try to manually create table again.
+				$missing_tables = WC_Install::verify_base_tables( true, true );
 				if ( 0 === count( $missing_tables ) ) {
 					$message = __( 'Database verified successfully.', 'woocommerce-rest-api' );
 				} else {
