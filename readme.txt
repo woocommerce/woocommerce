@@ -185,6 +185,7 @@ INTERESTED IN DEVELOPMENT?
 * Enhancement - Added Ghanaian regions to the state dropdown. #26273
 * Enhancement - Added Mozambique provinces to the state dropdown. #26162
 * Enhancement - Added support for the new group descriptions available on WordPress privacy exporters as of WP 5.3. #25575
+* Fix - Fixed false positives when checking if uploads directory is public. #26600
 * Fix - Introduced a new admin body class for supporting styling issues in WP 5.3+. #26251
 * Fix - Removed case conversion of meta keys from CSV imports. #25517
 * Fix - Allow schedule coupons via CRUD. #26387
@@ -202,13 +203,14 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Made the jQuery selector for checkout form rows less specific. #25654
 * Dev - Changed the `{site_address}` placeholder to `{site_url}` for clarity. #25630
 * Dev - Deprecated `.wp-policy-help` and replaced with with the `.privacy-policy-tutorial` and `.wp-suggested-text` classes added in WP 5.1. #26072
+* Dev - Updated `automattic/jetpack-autoloader` to 1.7.0. #26559
 
 **REST API 1.0.8**
 * Enhancement - Add support for trash status for products in V2 and V3 API. #184
 * Dev - Updated minimum PHP requirement to 7.0 to keep up with WooCommerce Core.
 * Dev - Fixed failing unit tests. #105
 
-**WooCommerce Admin 1.2.2**
+**WooCommerce Admin 1.2.3**
 * Enhancement - Add onboarding payments note #4157 
 * Enhancement - Marketing Inbox Note #4030
 * Performance - Use Route based code splitting to reduce bundle size #4094
@@ -224,6 +226,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Adjust "demo products" verbiage to "Sample Products" #4184
 * Tweak - Don't reschedule imports on failed imports #4263
 * Tweak - Remove obsolete inbox messages #4182
+* Tweak - Updates to WooCommerce Payments in Setup Checklist #4293
 * Dev - Make query selector for admin alerts more specific #4289
 * Dev - Guard against null themes in OBW #4244
 * Dev - Update wcadmin db version after db callback #4323
