@@ -79,9 +79,6 @@ export const prepareTotalItems = ( totals, needsShipping ) => {
 	return newTotals;
 };
 
-// @todo This will expose the consistent properties used as the payment method
-// interface pulled from the various contexts exposing data for the interface.
-// @todo need to also include notices interfaces here (maybe?).
 /**
  * @return {RegisteredPaymentMethodProps} Interface to use as payment method props.
  */

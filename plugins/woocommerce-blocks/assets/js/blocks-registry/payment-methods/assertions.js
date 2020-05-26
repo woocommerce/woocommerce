@@ -7,7 +7,6 @@ export const assertValidPaymentMethodComponent = (
 	component,
 	componentName
 ) => {
-	// @todo detect if functional component (not render prop)
 	if ( typeof component !== 'function' ) {
 		throw new TypeError(
 			`The ${ componentName } property for the payment method must be a functional component`

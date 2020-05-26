@@ -34,8 +34,6 @@ const ExpressCheckoutContainer = ( { children } ) => {
 const ExpressCheckoutFormControl = () => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 
-	// determine whether we even show this
-	// @todo if in the editor we probably would want to show a placeholder maybe?
 	if (
 		! isInitialized ||
 		( isInitialized && Object.keys( paymentMethods ).length === 0 )

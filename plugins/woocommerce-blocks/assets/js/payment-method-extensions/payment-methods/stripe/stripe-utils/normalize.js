@@ -38,8 +38,6 @@ const normalizeLineItems = ( cartTotalItems, pending = false ) => {
  * @return {StripeShippingOption[]}  An array of Stripe shipping option items.
  */
 const normalizeShippingOptions = ( shippingOptions ) => {
-	// @todo, note this currently does not handle multiple packages and this
-	// will need to be dealt with in a followup.
 	const rates = shippingOptions[ 0 ].shipping_rates;
 	return rates.map( ( rate ) => {
 		return {
