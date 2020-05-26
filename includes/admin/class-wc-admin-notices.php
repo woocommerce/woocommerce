@@ -569,7 +569,7 @@ class WC_Admin_Notices {
 
 		// Check for the "uploads/woocommerce_uploads" directory.
 		$response         = wp_safe_remote_get(
-			esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads' ),
+			esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads/' ),
 			array(
 				'redirection' => 0,
 			)
