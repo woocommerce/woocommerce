@@ -674,7 +674,7 @@ class WC_Install {
 	 *      woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
 	 *      woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
 	 */
-	public static function create_tables() {
+	private static function create_tables() {
 		global $wpdb;
 
 		$wpdb->hide_errors();
@@ -770,7 +770,7 @@ class WC_Install {
 	 *
 	 * @return string
 	 */
-	public static function get_schema() {
+	private static function get_schema() {
 		global $wpdb;
 
 		$collate = '';
