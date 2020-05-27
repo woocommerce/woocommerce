@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 7.0
-Stable tag: 4.0.1
+Stable tag: 4.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,48 +179,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 4.1.0 - 2020-05-05 =
-
-**WooCommerce**
-* Enhancement - Update dependency woocommerce/woocommerce-admin to v1.1.0 #26057
-* Enhancement - Updated jetpack-autoloader to 1.6 and woocommerce-blocks to 2.5.16. #26099
-* Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
-* Enhancement - Changed show password icon color to a darker grey hue. #25625
-* Enhancement - Use new Setup Wizard for all users. #26016
-* Tweak - Show notice for WP min version to WP 5.2. #26094
-* Tweak - Improve the string for untested WooCommerce extensions in the system status page to avoid confusion. #25904
-* Tweak - Updated KZT (₸) symbol. #25609
-* Tweak - Trim whitespaces and strip slashes from MaxMind License Key. #25466
-* Tweak - Updated "Help" tabs documentation. #25826
-* Tweak - Update serbian currency symbol to рсд from дин. #25885
-* Fix - Password visibility toggle to hide password again from text. #25627
-* Fix - Undefined property error when attempting to modify the coupon post meta. #25755
-* Fix - Remove some of the individual rounding logic to make sure we round at certain places only. #25800
-* Fix - Order totals calculation if the order contains taxable and non-taxable products and percentage coupons. #25092
-* Fix - Wording for cancelled order email. #25316
-* Fix - Removed guided tour videos link on setup wizard (since current link only redirects to the docs). #25823
-* Fix - Add RTL style to the onboarding wizard. #25835
-* Fix - Trigger change and set val to qty on the frontend so that it properly updates event handlers. #25903
-* Fix - Corrected the way percent coupons apply remainders across the order. #25943
-* Fix - Clarified the error messaging for WooCommerce.com package update failures. #26034
-* Fix - Enforce per user usage limit check for a coupon on guest users based on email. #26066
-* Fix - Remove elements with style=display:none explicitly to address a regression causing broken email html. #26075
-* Dev - Added woocommerce_can_restock_refunded_items filter. #25728
-* Dev - Added woocommerce_order_get_tax_location filter. #25727
-* Dev - Updated stock handling to prevent race conditions when orders come in at the same time. #25708
-* Dev - Updated /myaccount/form-login.php to use consistent kebab-case class names for woocommerce-form-row. #25668
-* Dev - Add filter woocommerce_product_upsells_products_heading to allow heading modification without having to override the template file. #25628
-* Dev - Added woocommerce_order_get_tax_location filter. #25727
-* Dev - Added the get_woocommerce_currency_symbols function to allow develops to get an array of all the currency symbol registered with WooCommerce. #25733
-* Dev - Changed string typed label_class to array in checkout fields.
-* Dev - Added "woocommerce_emogrifier" action before the content of the emails is "emogrified". #25801
-* Dev - Add Ability to Filter Event Props. #25851
-* Dev - Updated the unit test install script to support paths to MySQL sockets that contain spaces. #25923
-* Dev - Made the default test source folders support the system tmp folder. #25923
-* Dev - Add cart & checkout block/shortcode info to tracker data. #25932
-* Dev - Make WC_Product_Data_Store_CPT::update_product_stock operations atomic. #26039
-* Dev - Adds usage data for the of cart & checkout blocks (currently in development in WooCommmerce Blocks plugin) to the WC Tracker snapshot. #26084
-* Dev - Implement some additional tracks for coupons, orders, and products. #26085
+= 4.3.0 - 2020-07-07 =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
