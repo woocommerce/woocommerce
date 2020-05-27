@@ -59,6 +59,7 @@ $line-offset-from-circle-size: 8px;
 	@include font-size(14px);
 	counter-increment: checkout-step;
 	content: counter(checkout-step);
+	content: counter(checkout-step) / "";
 	position: absolute;
 	width: $circle-size;
 	height: $circle-size;
