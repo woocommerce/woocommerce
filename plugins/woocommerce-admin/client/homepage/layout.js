@@ -16,11 +16,6 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { Spinner } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import QuickLinks from '../quick-links';
@@ -57,8 +52,8 @@ export const Layout = ( props ) => {
 		};
 	}, [] );
 
-	const { query, requestingTaskList, taskListHidden } = props;
-	const isTaskListEnabled = taskListHidden === false;
+	const { query, requestingTaskList, taskListComplete, taskListHidden } = props;
+	const isTaskListEnabled = taskListHidden === false && ! taskListComplete;
 	const isDashboardShown = ! isTaskListEnabled || ! query.task;
 
 	const renderColumns = () => {
@@ -105,11 +100,8 @@ export const Layout = ( props ) => {
 		}
 
 		return (
-			<Suspense fallback={ <Spinner /> }>
-				<TaskList
-					query={ query }
-					inline
-				/>
+			<Suspense fallback={ <TaskListPlaceholder /> }>
+				<TaskList query={ query } />
 			</Suspense>
 		);
 	};
@@ -134,6 +126,10 @@ Layout.propTypes = {
 	 */
 	requestingTaskList: PropTypes.bool.isRequired,
 	/**
+	 * If the task list has been completed.
+	 */
+	taskListComplete: PropTypes.bool,
+	/**
 	 * If the task list is hidden.
 	 */
 	taskListHidden: PropTypes.bool,
@@ -152,13 +148,16 @@ export default compose(
 
 		if ( isOnboardingEnabled() ) {
 			const options = getOptions( [
+				'woocommerce_task_list_complete',
 				'woocommerce_task_list_hidden',
 			] );
 			
 			return {
 				requestingTaskList: isGetOptionsRequesting( [
+					'woocommerce_task_list_complete',
 					'woocommerce_task_list_hidden',
 				] ),
+				taskListComplete: get( options, [ 'woocommerce_task_list_complete' ] ),
 				taskListHidden: get( options, [ 'woocommerce_task_list_hidden' ] ) === 'yes',
 			};
 		}

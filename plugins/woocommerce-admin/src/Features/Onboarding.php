@@ -500,8 +500,9 @@ class Onboarding {
 	 * @return array
 	 */
 	public function preload_options( $options ) {
-		$options[] = 'woocommerce_task_list_hidden';
+		$options[] = 'woocommerce_task_list_complete';
 		$options[] = 'woocommerce_task_list_do_this_later';
+		$options[] = 'woocommerce_task_list_hidden';
 
 		if ( ! self::should_show_tasks() && ! self::should_show_profiler() ) {
 			return $options;

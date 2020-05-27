@@ -302,7 +302,10 @@ class CustomizableDashboard extends Component {
 	render() {
 		const { query, taskListHidden, taskListComplete } = this.props;
 
-		const isTaskListEnabled = isOnboardingEnabled() && ! taskListHidden;
+		const isTaskListEnabled =
+			isOnboardingEnabled() &&
+			! taskListHidden &&
+			! window.wcAdminFeatures.homepage;
 
 		const isDashboardShown =
 			! isTaskListEnabled || ( ! query.task && taskListComplete );
@@ -311,7 +314,7 @@ class CustomizableDashboard extends Component {
 			<Fragment>
 				{ isTaskListEnabled && (
 					<Suspense fallback={ <Spinner /> }>
-						<TaskList query={ query } inline={ isDashboardShown } />
+						<TaskList query={ query } />
 					</Suspense>
 				) }
 				{ isDashboardShown && this.renderDashboardReports() }

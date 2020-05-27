@@ -77,3 +77,17 @@
 		padding-bottom: 10px;
 	}
 }
+
+.woocommerce-task-dashboard__body {
+	.woocommerce-task-dashboard__container {
+		.woocommerce-task-card {
+			.components-card__header.is-size-large {
+				padding-bottom: 12px;
+
+				.woocommerce-card__menu {
+					margin-top: 8px;
+				}
+			}
+		}
+	}
+}

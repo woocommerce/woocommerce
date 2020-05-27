@@ -68,18 +68,27 @@ export function getAllTasks( {
 
 	const tasks = [
 		{
+			key: 'store_details',
+			title: __( 'Store details', 'woocommerce-admin' ),
+			container: null,
+			onClick: () => {
+				window.location = getAdminLink(
+					'admin.php?page=wc-admin&reset_profiler=1'
+				);
+			},
+			completed: profileItems.completed,
+			visible: true,
+			time: __( '4 minutes', 'woocommerce-admin' ),
+		},
+		{
 			key: 'purchase',
 			title: __( 'Purchase & install extensions', 'woocommerce-admin' ),
-			content: __(
-				'Purchase, install, and manage your extensions directly from your dashboard',
-				'wooocommerce-admin'
-			),
-			icon: 'extension',
 			container: null,
 			onClick: () =>
 				remainingProductIds.length ? toggleCartModal() : null,
 			visible: productIds.length,
 			completed: ! remainingProductIds.length,
+			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 		{
 			key: 'connect',
@@ -87,75 +96,50 @@ export function getAllTasks( {
 				'Connect your store to WooCommerce.com',
 				'woocommerce-admin'
 			),
-			content: __(
-				'Install and manage your extensions directly from your Dashboard',
-				'wooocommerce-admin'
-			),
-			icon: 'extension',
 			container: <Connect query={ query } />,
 			visible:
 				profileItems.items_purchased && ! profileItems.wccom_connected,
 			completed: profileItems.wccom_connected,
+			time: __( '1 minute', 'woocommerce-admin' ),
 		},
 		{
 			key: 'products',
-			title: __( 'Add your first product', 'woocommerce-admin' ),
-			content: __(
-				'Add products manually, import from a sheet or migrate from another platform',
-				'wooocommerce-admin'
-			),
-			icon: 'add_box',
+			title: __( 'Add my products', 'woocommerce-admin' ),
 			container: <Products />,
 			completed: hasProducts,
 			visible: true,
+			time: __( '1 minute per product', 'woocommerce-admin' ),
 		},
 		{
 			key: 'appearance',
-			title: __( 'Personalize your store', 'woocommerce-admin' ),
-			content: __(
-				'Create a custom homepage and upload your logo',
-				'wooocommerce-admin'
-			),
-			icon: 'palette',
+			title: __( 'Personalize my store', 'woocommerce-admin' ),
 			container: <Appearance />,
 			completed: isAppearanceComplete,
 			visible: true,
+			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 		{
 			key: 'shipping',
 			title: __( 'Set up shipping', 'woocommerce-admin' ),
-			content: __(
-				'Configure some basic shipping rates to get started',
-				'wooocommerce-admin'
-			),
-			icon: 'local_shipping',
 			container: <Shipping />,
 			completed: shippingZonesCount > 0,
 			visible:
 				( profileItems.product_types &&
 					profileItems.product_types.includes( 'physical' ) ) ||
 				hasPhysicalProducts,
+			time: __( '1 minute', 'woocommerce-admin' ),
 		},
 		{
 			key: 'tax',
 			title: __( 'Set up tax', 'woocommerce-admin' ),
-			content: __(
-				'Choose how to configure tax rates - manually or automatically',
-				'wooocommerce-admin'
-			),
-			icon: 'account_balance',
 			container: <Tax />,
 			completed: isTaxComplete,
 			visible: true,
+			time: __( '1 minute', 'woocommerce-admin' ),
 		},
 		{
 			key: 'payments',
 			title: __( 'Set up payments', 'woocommerce-admin' ),
-			content: __(
-				'Select which payment providers you’d like to use and configure them',
-				'wooocommerce-admin'
-			),
-			icon: 'payment',
 			container: <Payments />,
 			completed: paymentsCompleted || paymentsSkipped,
 			onClick: () => {
@@ -168,6 +152,7 @@ export function getAllTasks( {
 				updateQueryString( { task: 'payments' } );
 			},
 			visible: true,
+			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 	];
 

@@ -18,9 +18,6 @@ const TaskListPlaceholder = ( props ) => {
 						<div className="woocommerce-card__title woocommerce-card__header-item">
 							<span className="is-placeholder" />
 						</div>
-						<div className="woocommerce-card__description woocommerce-card__header-item">
-							<span className="is-placeholder" />
-						</div>
 					</div>
 				</div>
 				<div className="woocommerce-card__body">
@@ -35,10 +32,6 @@ const TaskListPlaceholder = ( props ) => {
 										<div className="woocommerce-list__item-title">
 											<span className="is-placeholder" />
 										</div>
-										<div className="woocommerce-list__item-content">
-											<span className="is-placeholder" />
-										</div>
-										
 									</div>
 									<div className="woocommerce-list__item-after">
 										<span className="is-placeholder" />
