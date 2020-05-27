@@ -5,7 +5,7 @@
  * will be moved to the Stripe extension
  *
  * @package WooCommerce/Blocks
- * @since $VID:$
+ * @since 2.6.0
  */
 
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
@@ -20,7 +20,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 /**
  * Stripe payment method integration
  *
- * @since $VID:$
+ * @since 2.6.0
  */
 final class Stripe extends AbstractPaymentMethodType {
 	/**

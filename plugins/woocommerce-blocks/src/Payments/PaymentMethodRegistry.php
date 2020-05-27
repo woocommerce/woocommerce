@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Blocks\Payments;
 /**
  * Class used for interacting with payment method types.
  *
- * @since $VID:$
+ * @since 2.6.0
  */
 final class PaymentMethodRegistry {
 

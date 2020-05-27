@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 /**
  *  The Api class provides an interface to payment method registration.
  *
- * @since $VID:$
+ * @since 2.6.0
  */
 class Api {
 	/**
