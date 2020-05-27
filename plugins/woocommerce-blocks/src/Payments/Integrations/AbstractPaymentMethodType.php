@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodTypeInterface;
 /**
  * AbstractPaymentMethodType class.
  *
- * @since $VID:$
+ * @since 2.6.0
  */
 abstract class AbstractPaymentMethodType implements PaymentMethodTypeInterface {
 	/**

@@ -3,7 +3,7 @@
  * PayPal Standard (core) gateway implementation.
  *
  * @package WooCommerce/Blocks
- * @since $VID:$
+ * @since 2.6.0
  */
 
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
 /**
  * PayPal Standard payment method integration
  *
- * @since $VID:$
+ * @since 2.6.0
  */
 final class PayPal extends AbstractPaymentMethodType {
 	/**
