@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.2
 Tested up to: 5.4
 Requires PHP: 5.6
-Stable tag: 2.6.0-rc1
+Stable tag: 2.6.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -119,6 +119,40 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 2.6.0 - 2020-05-25 =
+**New Blocks**
+
+The Cart and Checkout blocks are released in this version for wider review and testing as a part of our consideration for including them in WooCommerce Core. You can read more [about these blocks here](https://woocommerce.wordpress.com/?p=6384).
+
+Also, note that we are aware of the increased file size for the All Products and Filter blocks frontend JavaScript. It is from some dependency changes. We will be addressing this in the next release.
+
+You can read [more about the release here](https://woocommerce.wordpress.com/?p=6577)
+
+- bug: Add placeholder to the on-sale products block when no results are found. [#1519](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1519)
+- bug: Added correct ellipsis character in Product Search block [#1672](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1672)
+- bug: If product is changed for featured product block, update the link in the button. [#1894](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1894)
+- bug: Import from `@woocommerce/settings` in `@woocommerce/block-settings` [#2330](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2330)
+- dev: Accessibility of the All Products block and filter blocks has been improved. [#1656](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1656)
+- dev: All Products Block: Update sorting labels to match frontend options [#2462](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2462)
+- dev: Change PropType validation for Icon component [#1737](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1737)
+- dev: Changed default rows and columns for product grid blocks to 3x3. [#1613](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1613)
+- dev: Check for instance of WP_Block in render_callback [#2258](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2258)
+- dev: Devs: `ENABLE_REVIEW_RATING` setting was renamed to `REVIEW_RATINGS_ENABLED` and now it also verifies reviews are enabled, to better match WooCommerce API. [#1374](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1374)
+- dev: Fix price filtering when stored prices do not match displayed prices (determined by tax settings). [#1612](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1612)
+- dev: HTML editing is no longer supported in several blocks. [#1395](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1395)
+- dev: Implement __experimentalCreateInterpolateElement for translations. [#1736](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1736)
+- dev: Load WooCommerce Core translations for 'Sale!' and some other strings if translations are unavailable for WooCommerce Blocks. [#1694](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1694)
+- dev: Prevent data hydration on REST requests [#2176](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2176)
+- dev: Show relationship between terms in the active filters block. [#1630](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1630)
+- dev: Table creation validation for install routine [#2287](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2287)
+- dev: Update the icons used in the blocks. [#1644](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1644)
+- enhancement: Add dropdown display style to Filter Products by Attribute block. [#1255](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1255)
+- enhancement: Add option to display a Filter button to Filter Products by Attribute block. [#1332](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1332)
+- enhancement: Add support for image for product categories block [#1739](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/1739)
+- enhancement: An error notice will be shown in All Product if the customer is trying to add a product above stock or sold individually. [#2278](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2278)
+- performance: Improvements to REST API performance [#2248](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2248)
+- performance: Avoid loading Assets API during REST requests [#2286](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2286)
 
 = 2.5.16 - 2020-04-07 =
 - Performance: Use the latest version of Jetpack Autoloader. #2132
@@ -312,76 +346,3 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Build: Reorganize CSS into one file for editor preview, and one file for front-end styles
 - Build: Move registration code to a new class
 - Build: Update packages
-
-= 1.4.0 - 2019-02-12 =
-
-- Feature: Added new block: "Products by Attribute"
-- Enhancement: Added the ability to resize the Featured Product block (a default and minimum height can be set by your theme)
-- Enhancement: Updated button on Featured Product block to match core button block behavior
-- Components: Added new control component `GridLayoutControl` to manage row/column layout values
-- Components: Updated `ProductAttributeControl` to list only attribute types, then once selected, list terms in that attribute
-- UX: Remove ability to change selected product in Featured Product block, to prevent "sticky" product links.
-- Fix: A product without an image will now use the placeholder image in grid-layout block previews
-- Fix: Previously, there was a PHP notice when a Featured Product has no background image
-- Fix: There is now an enforced limit on column and row counts (which can be set by your theme)
-- API: Added `attr_operator` support to products endpoint to compare product attribute terms
-- Build: Update packages
-- Build: Remove unnecessary internationalization build step
-
-= 1.3.1 - 2019-01-17 =
-
-- Fix: A CSS conflict was causing the core columns style to reset, this has been fixed and columns will display as expected now.
-- Fix: A version conflict with a JS package was causing the blocks to be broken in non-English locales. The package was updated.
-- Fix: Translations were not being loaded correctly for the JS files. We now bundle the Danish, Spanish, and French translations so that these can be used.
-
-= 1.3.0 - 2019-01-15 =
-
-- Feature: Added new blocks: "Featured Product", "Hand-picked Products", "Best Selling Products", "Newest Products", "On Sale Products", "Top Rated Products"
-- Enhancement: Create new "WooCommerce" block category, all blocks are found there now
-- Enhancement: Added a control to "Products by Category" block to control whether products need to match any selected categories or all selected categories
-- Fix: A "Products by Category" block with no category selected will no longer show all products
-- Legacy block: Remove legacy "Products" block from being shown in the block inserter (still loading the block for an existing uses)
-- Legacy block: Fix an issue with imageless products in the legacy "Products" block.
-- Components: Add new Control components `ProductControl`, `ProductsControl`, `ProductOrderbyControl`
-- Components: Update `SearchListControl` to allow selecting a single item
-- API: Add `cat_operator` support to products endpoint
-- API: Add product `description` & `short_description` to each product
-- API: Add attribute group names to each attribute
-- Build: Update packages
-- Build: Add cssnano to minify CSS
-- Build: Split out node_modules code into separate vendors files
-
-= 1.2.0 - 2018-12-04 =
-
-* Feature - Stand-alone product category block with improved category selection interface.
-* Fix - All users who can edit posts can now use these blocks thanks to a new set of API endpoints allowing view access to products, product categories, and product attributes.
-* Fix - Compatibility with WP 5.0, fixed error “Cannot read property Toolbar of undefined”.
-* Fix - Only published products are shown in previews.
-* Enhancement - Translations should now load into the block (for WP 5.0+).
-* Enhancement - Modernized build process and developer tools, and added tests for faster future development.
-
-= 1.1.2 - 2018-09-07 =
-
-* Fix - Refactor to remove withAPIData usage, as the class was removed in Gutenberg 3.7.
-
-= 1.1.1 - 2018-08-22 =
-
-* Fix - Make Newness ordering order correctly on frontend.
-* Fix - Don't cause fatal errors if WooCommerce is not active.
-
-= 1.1.0 - 2018-06-06 =
-
-* Feature - Add "Best Selling" and "Top Rated" product scopes.
-* Fix - Only enqueue scripts and styles in the site backend.
-* Fix - Remove focus checks deprecated in latest Gutenberg version.
-* Fix - Added keys to some elements to prevent React warnings.
-* Enhancement - Added custom API endpoint for more accurate block previews with orderby.
-* Performance - Refactored the way the attribute select works to prevent many concurrent API requests on sites with many attributes.
-
-= 1.0.0 - 2018-04-24 =
-
-* Initial implementation of the Gutenberg Products block.
-
-== Upgrade Notice ==
-
-= 1.0 =
