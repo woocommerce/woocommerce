@@ -148,6 +148,7 @@ const LegacyBlocksConfig = {
 			'active-filters',
 			'checkout',
 			'cart',
+			'single-product',
 		],
 	} ),
 };
@@ -171,6 +172,7 @@ const LegacyFrontendBlocksConfig = {
 			'active-filters',
 			'checkout',
 			'cart',
+			'single-product',
 		],
 	} ),
 };

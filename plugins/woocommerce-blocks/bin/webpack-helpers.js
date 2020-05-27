@@ -144,6 +144,7 @@ const stableMainEntry = {
 	'active-filters': './assets/js/blocks/active-filters/index.js',
 	'block-error-boundary':
 		'./assets/js/base/components/block-error-boundary/style.scss',
+	'single-product': './assets/js/blocks/single-product/index.js',
 };
 
 const experimentalMainEntry = {
@@ -162,6 +163,7 @@ const stableFrontEndEntry = {
 	'price-filter': './assets/js/blocks/price-filter/frontend.js',
 	'attribute-filter': './assets/js/blocks/attribute-filter/frontend.js',
 	'active-filters': './assets/js/blocks/active-filters/frontend.js',
+	'single-product': './assets/js/blocks/single-product/frontend.js',
 };
 
 const experimentalFrontEndEntry = {

@@ -75,6 +75,9 @@ class Library {
 			$blocks[] = 'Checkout';
 			$blocks[] = 'Cart';
 		}
+		if ( 'experimental' === WOOCOMMERCE_BLOCKS_PHASE ) {
+			$blocks[] = 'SingleProduct';
+		}
 		foreach ( $blocks as $class ) {
 			$class    = __NAMESPACE__ . '\\BlockTypes\\' . $class;
 			$instance = new $class();
