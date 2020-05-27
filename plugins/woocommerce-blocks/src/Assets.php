@@ -82,6 +82,10 @@ class Assets {
 		self::register_script( 'wc-active-filters', plugins_url( self::get_block_asset_build_path( 'active-filters' ), __DIR__ ), $block_dependencies );
 		self::register_script( 'wc-checkout-block', plugins_url( self::get_block_asset_build_path( 'checkout' ), __DIR__ ), $block_dependencies );
 		self::register_script( 'wc-cart-block', plugins_url( self::get_block_asset_build_path( 'cart' ), __DIR__ ), $block_dependencies );
+
+		if ( 'experimental' === WOOCOMMERCE_BLOCKS_PHASE ) {
+			self::register_script( 'wc-single-product', plugins_url( self::get_block_asset_build_path( 'single-product' ), __DIR__ ), $block_dependencies );
+		}
 	}
 
 	/**
