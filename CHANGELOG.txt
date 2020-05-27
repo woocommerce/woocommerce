@@ -1,5 +1,20 @@
 == Changelog ==
 
+= 4.1.1 - 2020-05-19 =
+
+* Enhancement - Added notice about public uploads directory. #26207
+* Tweak - Disallow directory listing in woocommerce_uploads when "Redirect only" it's the selected download method. #26399
+* Fix - Added correct handling of nonces to database update notice dismissal. #26500
+* Dev - Updated WooCommerce admin version to 1.1.3 and Action Scheduler to 3.1.6.
+* Dev - Add prop `isEnabled` and a function to dynamically enable tracks. #26493
+
+**WooCommerce Admin**
+* Tweak - Onboarding: Add Jetpack flow back to onboarding profiler. #4382
+* Fix - Respect tracking opt-in before new page load. #4368
+
+**ActionScheduler**
+* Fix - Shutdown deprecated notice changed to a warning when as_* functions called without data store initialization. #546
+
 = 4.1.0 - 2020-05-05 =
 
 **WooCommerce**
@@ -8,6 +23,7 @@
 * Enhancement - Added option to ignore discounts from cart's total amount to enable free shipping. #24776
 * Enhancement - Changed show password icon color to a darker grey hue. #25625
 * Enhancement - Use new Setup Wizard for all users. #26016
+* Security - Fixed unescaped meta data while duplicating products. Reported by Slavco.
 * Tweak - Show notice for WP min version to WP 5.2. #26094
 * Tweak - Improve the string for untested WooCommerce extensions in the system status page to avoid confusion. #25904
 * Tweak - Updated KZT (₸) symbol. #25609
