@@ -38,20 +38,18 @@ export const getAttributesFromDataset = ( blockAttributes, dataset ) => {
 /**
  * Renders a block component in the place of a specified set of selectors.
  *
- * @param {string}   selector                CSS selector to match the elements
- * to replace.
- * @param {Function} Block                   React block to use as a replacement.
- * @param {Function} [getProps]              Function to generate the props
- * object for the block.
- * @param {Function} [getErrorBoundaryProps] Function to generate the props
- * object for the error boundary.
+ * @param {Object}   props                         Render props.
+ * @param {string}   props.selector                CSS selector to match the elements to replace.
+ * @param {Function} props.Block                   React component to use as a replacement.
+ * @param {Function} [props.getProps ]             Function to generate the props object for the block.
+ * @param {Function} [props.getErrorBoundaryProps] Function to generate the props object for the error boundary.
  */
-export const renderFrontend = (
+export const renderFrontend = ( {
 	selector,
 	Block,
 	getProps = () => {},
-	getErrorBoundaryProps = () => {}
-) => {
+	getErrorBoundaryProps = () => {},
+} ) => {
 	const containers = document.querySelectorAll( selector );
 
 	if ( containers.length ) {

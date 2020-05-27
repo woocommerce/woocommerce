@@ -14,16 +14,16 @@ import {
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
+import {
+	renderFrontend,
+	getAttributesFromDataset,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
  */
 import Block from './block.js';
 import blockAttributes from './attributes';
-import {
-	getAttributesFromDataset,
-	renderFrontend,
-} from '../../../utils/render-frontend.js';
 import EmptyCart from './empty-cart/index.js';
 
 const reloadPage = () => void window.location.reload( true );
@@ -100,9 +100,11 @@ const getErrorBoundaryProps = () => {
 	};
 };
 
-renderFrontend(
-	'.wp-block-woocommerce-checkout',
-	withStoreCartApiHydration( withRestApiHydration( CheckoutFrontend ) ),
+renderFrontend( {
+	selector: '.wp-block-woocommerce-checkout',
+	Block: withStoreCartApiHydration(
+		withRestApiHydration( CheckoutFrontend )
+	),
 	getProps,
-	getErrorBoundaryProps
-);
+	getErrorBoundaryProps,
+} );
