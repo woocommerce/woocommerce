@@ -413,28 +413,10 @@ class WC_Product_Variable extends WC_Product {
 	 * @since 3.0.0
 	 */
 	public function validate_props() {
-		// Before updating, ensure stock props are all aligned. Qty and backorders are not needed if not stock managed.
+		parent::validate_props();
+
 		if ( ! $this->get_manage_stock() ) {
-			$this->set_stock_quantity( '' );
-			$this->set_backorders( 'no' );
-			$this->set_low_stock_amount( '' );
 			$this->data_store->sync_stock_status( $this );
-
-			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' !== $this->get_backorders() ) {
-			$this->set_stock_status( 'onbackorder' );
-
-			// If we are stock managing and we don't have stock, force out of stock status.
-		} elseif ( $this->get_stock_quantity() <= get_option( 'woocommerce_notify_no_stock_amount', 0 ) && 'no' === $this->get_backorders() ) {
-			$this->set_stock_status( 'outofstock' );
-
-			// If the stock level is changing and we do now have enough, force in stock status.
-		} elseif ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) && array_key_exists( 'stock_quantity', $this->get_changes() ) ) {
-			$this->set_stock_status( 'instock' );
-
-			// Otherwise revert to status the children have.
-		} else {
-			$this->set_stock_status( $this->child_is_in_stock() ? 'instock' : 'outofstock' );
 		}
 	}
 
