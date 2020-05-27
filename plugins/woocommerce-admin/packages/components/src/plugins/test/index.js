@@ -46,12 +46,14 @@ describe( 'Rendering', () => {
 
 describe( 'Installing and activating', () => {
 	let pluginsWrapper;
-	const installPlugin = jest.fn().mockReturnValue( {
-		status: 'success',
+	const installPlugins = jest.fn().mockReturnValue( {
+		success: true,
 	} );
 	const activatePlugins = jest.fn().mockReturnValue( {
-		status: 'success',
-		activePlugins: [ 'jetpack' ],
+		success: true,
+		data: {
+			activated: [ 'jetpack' ],
+		},
 	} );
 	const createNotice = jest.fn();
 	const onComplete = jest.fn();
@@ -61,18 +63,18 @@ describe( 'Installing and activating', () => {
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
 				onComplete={ onComplete }
-				installPlugin={ installPlugin }
+				installPlugins={ installPlugins }
 				activatePlugins={ activatePlugins }
 				createNotice={ createNotice }
 			/>
 		);
 	} );
 
-	it( 'should call installPlugin', async () => {
+	it( 'should call installPlugins', async () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( installPlugin ).toHaveBeenCalledWith( 'jetpack' );
+		expect( installPlugins ).toHaveBeenCalledWith( [ 'jetpack' ] );
 	} );
 
 	it( 'should call activatePlugin', async () => {
@@ -100,10 +102,14 @@ describe( 'Installing and activating', () => {
 
 describe( 'Installing and activating errors', () => {
 	let pluginsWrapper;
-	const errorMessage = 'error message';
-	const installPlugin = jest.fn().mockReturnValue( errorMessage );
+	const errors = {
+		'failed-plugin': [ 'error message' ],
+	};
+	const installPlugins = jest.fn().mockReturnValue( {
+		errors: { errors },
+	} );
 	const activatePlugins = jest.fn().mockReturnValue( {
-		status: 'failed',
+		success: false,
 	} );
 	const createNotice = jest.fn();
 	const onError = jest.fn();
@@ -113,7 +119,7 @@ describe( 'Installing and activating errors', () => {
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
 				onComplete={ () => {} }
-				installPlugin={ installPlugin }
+				installPlugins={ installPlugins }
 				activatePlugins={ activatePlugins }
 				createNotice={ createNotice }
 				onError={ onError }
@@ -132,13 +138,16 @@ describe( 'Installing and activating errors', () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( createNotice ).toHaveBeenCalledWith( 'error', errorMessage );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'error',
+			errors[ 'failed-plugin' ][ 0 ]
+		);
 	} );
 
 	it( 'should call the onError callback', async () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( onError ).toHaveBeenCalledWith( [ errorMessage ] );
+		expect( onError ).toHaveBeenCalledWith( errors );
 	} );
 } );

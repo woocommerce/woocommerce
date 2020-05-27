@@ -49,7 +49,7 @@ class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$request->set_query_params(
 			array(
-				'plugin' => 'facebook-for-woocommerce',
+				'plugins' => 'facebook-for-woocommerce',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -57,27 +57,22 @@ class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$plugins  = get_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'facebook-for-woocommerce', $data['slug'] );
-		$this->assertEquals( 'success', $data['status'] );
+		$this->assertEquals( array( 'facebook-for-woocommerce' ), $data['data']['installed'] );
+		$this->assertEquals( true, $data['success'] );
 		$this->assertArrayHasKey( 'facebook-for-woocommerce/facebook-for-woocommerce.php', $plugins );
 	}
 
 	/**
-	 * Test that installing an invalid plugin fails.
+	 * Test that installing with invalid params fails.
 	 */
-	public function test_install_invalid_plugin() {
+	public function test_install_invalid_plugins_param() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
-		$request->set_query_params(
-			array(
-				'plugin' => 'invalid-plugin-name',
-			)
-		);
+		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 'woocommerce_rest_invalid_plugin', $data['code'] );
+		$this->assertEquals( 'woocommerce_rest_invalid_plugins', $data['code'] );
 	}
 
 	/**
@@ -97,26 +92,61 @@ class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$active_plugins = Plugins::get_active_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains( 'facebook-for-woocommerce', $data['activatedPlugins'] );
-		$this->assertEquals( 'success', $data['status'] );
+		$this->assertContains( 'facebook-for-woocommerce', $data['data']['activated'] );
+		$this->assertEquals( true, $data['success'] );
 		$this->assertContains( 'facebook-for-woocommerce', $active_plugins );
 	}
 
 	/**
-	 * Test that activating an invalid plugin fails.
+	 * Test that activating with invalid params fails.
 	 */
-	public function test_activate_invalid_plugin() {
+	public function test_activate_invalid_plugins_param() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/activate' );
+		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/activate' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 'woocommerce_rest_invalid_plugins', $data['code'] );
+	}
+
+	/**
+	 * Test that installing a non-whitelisted plugin fails, but installs the whitelisted.
+	 */
+	public function test_install_non_allowed_plugins() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$request->set_query_params(
 			array(
-				'plugins' => 'invalid-plugin-name',
+				'plugins' => 'facebook-for-woocommerce,hello-dolly',
 			)
 		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 'woocommerce_rest_invalid_plugins', $data['code'] );
+		$this->assertEquals( false, $data['success'] );
+		$this->assertArrayHasKey( 'hello-dolly', $data['errors']->errors );
+		$this->assertEquals( array( 'facebook-for-woocommerce' ), $data['data']['installed'] );
+	}
+
+	/**
+	 * Test that activating a non-whitelisted plugin fails, but activates the whitelisted.
+	 */
+	public function test_activate_non_allowed_plugins() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/activate' );
+		$request->set_query_params(
+			array(
+				'plugins' => 'facebook-for-woocommerce,hello-dolly',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( false, $data['success'] );
+		$this->assertArrayHasKey( 'hello-dolly', $data['errors']->errors );
+		$this->assertEquals( array( 'facebook-for-woocommerce' ), $data['data']['activated'] );
 	}
 }
