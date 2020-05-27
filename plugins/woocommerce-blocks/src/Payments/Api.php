@@ -52,7 +52,7 @@ class Api {
 	 * Initialize class features.
 	 */
 	protected function init() {
-		add_action( 'init', array( $this->payment_method_registry, 'initialize' ) );
+		add_action( 'init', array( $this->payment_method_registry, 'initialize' ), 5 );
 		add_filter( 'woocommerce_blocks_register_script_dependencies', array( $this, 'add_payment_method_script_dependencies' ), 10, 2 );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
