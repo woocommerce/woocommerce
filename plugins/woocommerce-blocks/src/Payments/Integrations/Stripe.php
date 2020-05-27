@@ -114,6 +114,7 @@ final class Stripe extends AbstractPaymentMethodType {
 	 * @return bool True if merchant allows shopper to save card (payment method) during checkout).
 	 */
 	private function get_allow_saved_cards() {
+		$saved_cards = isset( $this->settings['saved_cards'] ) ? $this->settings['saved_cards'] : false;
 		// This assumes that Stripe supports `tokenization` - currently this is true, based on
 		// https://github.com/woocommerce/woocommerce-gateway-stripe/blob/master/includes/class-wc-gateway-stripe.php#L95 .
 		// See https://github.com/woocommerce/woocommerce-gateway-stripe/blob/ad19168b63df86176cbe35c3e95203a245687640/includes/class-wc-gateway-stripe.php#L271 and
