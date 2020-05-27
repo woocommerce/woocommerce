@@ -30,6 +30,7 @@ import withSelect from 'wc-api/with-select';
 import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
 import { recordEvent } from 'lib/tracks';
+import InstallJetpackCta from './install-jetpack-cta';
 
 const { performanceIndicators } = getSetting( 'dataEndpoints', {
 	performanceIndicators: [],
@@ -46,8 +47,9 @@ export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
 
 	const toggleStat = ( stat ) => {
 		const nextHiddenStats = xor( hiddenStats, [ stat ] );
+		userPrefs.hiddenStats = nextHiddenStats;
 		updateCurrentUserData( {
-			homepage_stats: { hiddenStats: nextHiddenStats },
+			homepage_stats: userPrefs,
 		} );
 		recordEvent( 'statsoverview_indicators_toggle', {
 			indicator_name: stat,
@@ -116,13 +118,16 @@ export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
 				] }
 			>
 				{ ( tab ) => (
-					<StatsList
-						query={ {
-							period: tab.name,
-							compare: 'previous_period',
-						} }
-						stats={ activeStats }
-					/>
+					<Fragment>
+						<InstallJetpackCta />
+						<StatsList
+							query={ {
+								period: tab.name,
+								compare: 'previous_period',
+							} }
+							stats={ activeStats }
+						/>
+					</Fragment>
 				) }
 			</TabPanel>
 			<div className="woocommerce-stats-overview__footer">

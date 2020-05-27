@@ -1,5 +1,7 @@
 // Set up some local color variables to make the CSS more clear
 $outer-border: $core-grey-light-700;
+$promo-actions-border: $core-grey-light-500;
+$action-color: #3858e9;
 
 .woocommerce-stats-overview {
 	.woocommerce-card__body {
@@ -24,33 +26,33 @@ $outer-border: $core-grey-light-700;
 		display: flex;
 		justify-content: space-between;
 		border-bottom: 1px solid $outer-border;
-	}
 
-	.components-button {
-		display: block;
-		padding: $gap;
-		width: 33.33%;
-		margin-bottom: 4px;
+		.components-button {
+			display: block;
+			padding: $gap;
+			width: 33.33%;
+			margin-bottom: 4px;
 
-		&:focus {
-			outline: none;
-			box-shadow: none;
-		}
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
 
-		&.is-active {
-			border-bottom: 4px solid $studio-blue-50;
-			// Avoid the text "jumping" when border-bottom applied.
-			margin-bottom: 0;
-		}
+			&.is-active {
+				border-bottom: 4px solid $action-color;
+				// Avoid the text "jumping" when border-bottom applied.
+				margin-bottom: 0;
+			}
 
-		&:first-child {
-			text-align: left;
-			padding-right: 0;
-		}
+			&:first-child {
+				text-align: left;
+				padding-right: 0;
+			}
 
-		&:last-child {
-			text-align: right;
-			padding-left: 0;
+			&:last-child {
+				text-align: right;
+				padding-left: 0;
+			}
 		}
 	}
 }
@@ -73,5 +75,54 @@ $outer-border: $core-grey-light-700;
 
 	.woocommerce-summary__item-container:nth-of-type(even) .woocommerce-summary__item {
 		border-right: none;
+	}
+}
+
+article.woocommerce-stats-overview__install-jetpack-promo {
+	h3 {
+		margin: 16px 24px 8px;
+	}
+	p {
+		margin: 0 24px 16px;
+	}
+	footer {
+		border-top: 1px solid $promo-actions-border;
+
+		// All of this added specificity is required because styles that
+		// need overriding are already specified at a high level.
+		.woocommerce-layout & button.components-button,
+		.woocommerce-layout & button.components-button.is-button {
+			padding: 8px 16px;
+			margin: 16px 4px;
+			height: inherit;
+			color: $action-color;
+			cursor: pointer;
+			line-height: 2;
+			border-radius: 3px;
+
+			&.is-busy {
+				background-image: linear-gradient(-45deg, lighten($action-color, 40%) 28%, #fff 0, #fff 72%, lighten($action-color, 40%) 0);
+				cursor: progress;
+				color: lighten($action-color, 20%);
+			}
+		}
+
+		.woocommerce-layout & button.components-button.is-button.is-primary {
+			margin-left: 24px;
+			background: transparent;
+			border: 1px solid $action-color;
+
+			&:hover,
+			&:focus {
+				color: $core-grey-dark-500;
+				background-color: #fafafa;
+				border-color: #999;
+			}
+
+			&.is-busy:not(:disabled) {
+				background-image: linear-gradient(-45deg, $action-color 28%, darken($action-color, 20%) 0, darken($action-color, 20%) 72%, $action-color 0) !important;
+				color: $action-color;
+			}
+		}
 	}
 }

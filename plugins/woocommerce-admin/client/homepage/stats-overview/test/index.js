@@ -15,6 +15,12 @@ jest.mock( 'lib/tracks' );
 jest.mock( '../stats-list', () =>
 	jest.fn().mockImplementation( () => <div>mocked stats list</div> )
 );
+// Mock the Install Jetpack CTA
+jest.mock( '../install-jetpack-cta', () => {
+	return jest
+		.fn()
+		.mockImplementation( () => <div>mocked install jetpack cta</div> );
+} );
 
 describe( 'StatsOverview tracking', () => {
 	it( 'should record an event when a stat is toggled', () => {
