@@ -37,8 +37,13 @@ abstract class AbstractBlock {
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $block_name Optional set block name during construct.
 	 */
-	public function __construct() {
+	public function __construct( $block_name = '' ) {
+		if ( $block_name ) {
+			$this->block_name = $block_name;
+		}
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
 
@@ -102,7 +107,7 @@ abstract class AbstractBlock {
 	 * @return string Rendered block with data attributes.
 	 */
 	protected function inject_html_data_attributes( $content, array $attributes ) {
-		return preg_replace( '/<div /', '<div ' . $this->get_html_data_attributes( $attributes ), $content, 1 );
+		return preg_replace( '/<div /', '<div ' . $this->get_html_data_attributes( $attributes ) . ' ', $content, 1 );
 	}
 
 	/**
@@ -117,6 +122,9 @@ abstract class AbstractBlock {
 		foreach ( $attributes as $key => $value ) {
 			if ( is_bool( $value ) ) {
 				$value = $value ? 'true' : 'false';
+			}
+			if ( ! is_scalar( $value ) ) {
+				$value = wp_json_encode( $value );
 			}
 			$data[] = 'data-' . esc_attr( strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) ) ) . '="' . esc_attr( $value ) . '"';
 		}
