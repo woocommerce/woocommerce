@@ -197,6 +197,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Removed the postcode field for Ghana. #26272
 * Fix - Made the hiding of state fields more explicit for Germany, Denmark, and Sweden. #25598
 * Fix - Ensured that global attribute prefixes are passed to the `woocommerce_attribute_label` filter. #26022
+* Dev - Increased WordPress minimum version to 5.2 according to policy. #26550
 * Dev - Added the customer as a third argument to the `woocommerce_matched_rates` filter. #26361
 * Dev - Introduced `woocommerce_menu_order_count` filter. #26044
 * Dev - Introduced `should_send_ajax_request.adding_to_cart `cart event to allow short-circuiting cart addition. #25760
@@ -204,6 +205,7 @@ INTERESTED IN DEVELOPMENT?
 * Dev - Changed the `{site_address}` placeholder to `{site_url}` for clarity. #25630
 * Dev - Deprecated `.wp-policy-help` and replaced with with the `.privacy-policy-tutorial` and `.wp-suggested-text` classes added in WP 5.1. #26072
 * Dev - Updated `automattic/jetpack-autoloader` to 1.7.0. #26559
+* Dev - Add a way to fetch basic object data. #26025
 
 **REST API 1.0.8**
 * Enhancement - Add support for trash status for products in V2 and V3 API. #184
