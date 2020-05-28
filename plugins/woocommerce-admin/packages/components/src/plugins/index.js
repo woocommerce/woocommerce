@@ -11,8 +11,7 @@ import { withSelect, withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
-import { pluginNames } from 'wc-api/onboarding/constants';
+import { pluginNames, PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 export class Plugins extends Component {
 	constructor() {
@@ -108,12 +107,7 @@ export class Plugins extends Component {
 	}
 
 	render() {
-		const {
-			isRequesting,
-			skipText,
-			autoInstall,
-			pluginSlugs,
-		} = this.props;
+		const { isRequesting, skipText, autoInstall, pluginSlugs } = this.props;
 		const { hasErrors } = this.state;
 
 		if ( hasErrors ) {
