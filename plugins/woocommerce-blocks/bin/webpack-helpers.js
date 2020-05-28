@@ -26,6 +26,7 @@ const requestToExternal = ( request ) => {
 		'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 		'@woocommerce/settings': [ 'wc', 'wcSettings' ],
 		'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
+		'@woocommerce/shared-context': [ 'wc', 'wcSharedContext' ],
 	};
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
@@ -38,6 +39,7 @@ const requestToHandle = ( request ) => {
 		'@woocommerce/settings': 'wc-settings',
 		'@woocommerce/block-settings': 'wc-settings',
 		'@woocommerce/block-data': 'wc-blocks-data-store',
+		'@woocommerce/shared-context': 'wc-shared-context',
 	};
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];

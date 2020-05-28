@@ -46,6 +46,7 @@ const CoreConfig = {
 		wcSettings: './assets/js/settings/shared/index.js',
 		wcBlocksData: './assets/js/data/index.js',
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
+		wcSharedContext: './assets/js/shared/context/index.js',
 	},
 	output: {
 		filename: ( chunkData ) => {
