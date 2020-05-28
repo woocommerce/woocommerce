@@ -14,7 +14,7 @@ import { recordEvent } from 'lib/tracks';
  */
 import { H, Card, Form } from '@woocommerce/components';
 import { getCurrencyData } from '@woocommerce/currency';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -25,7 +25,6 @@ import {
 	validateStoreAddress,
 } from 'dashboard/components/settings/general/store-address';
 import UsageModal from './usage-modal';
-import withWCApiSelect from 'wc-api/with-select';
 import { CurrencyContext } from 'lib/currency-context';
 
 class StoreDetails extends Component {
@@ -235,37 +234,35 @@ class StoreDetails extends Component {
 StoreDetails.contextType = CurrencyContext;
 
 export default compose(
-	withWCApiSelect( ( select ) => {
-		const { getProfileItemsError, getProfileItems } = select( 'wc-api' );
-
-		const profileItems = getProfileItems();
-		const isProfileItemsError = Boolean( getProfileItemsError() );
-
-		return {
-			isProfileItemsError,
-			profileItems,
-		};
-	} ),
 	withSelect( ( select ) => {
 		const {
 			getSettings,
 			getSettingsError,
 			isGetSettingsRequesting,
 		} = select( SETTINGS_STORE_NAME );
+		const {
+			getOnboardingError,
+			getProfileItems
+		} = select( ONBOARDING_STORE_NAME );
+
+		const profileItems = getProfileItems();
+		const isProfileItemsError = Boolean( getOnboardingError( 'updateProfileItems' ) );
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
 
 		return {
+			isProfileItemsError,
 			isSettingsError,
 			isSettingsRequesting,
+			profileItems,
 			settings,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { updateAndPersistSettingsForGroup } = dispatch(
 			SETTINGS_STORE_NAME
 		);

@@ -7,14 +7,18 @@ import { compose } from '@wordpress/compose';
 import { Button, CheckboxControl } from '@wordpress/components';
 import { includes, filter, get } from 'lodash';
 import interpolateComponents from 'interpolate-components';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
+
+/**
+ * WooCommerce dependencies
+ */
+import { getSetting } from '@woocommerce/wc-admin-settings';
+import { H, Card, Link } from '@woocommerce/components';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { H, Card, Link } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/wc-admin-settings';
-import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
 class ProductTypes extends Component {
@@ -182,15 +186,15 @@ class ProductTypes extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getOnboardingError } = select( ONBOARDING_STORE_NAME );
 
 		return {
-			isError: Boolean( getProfileItemsError() ),
+			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

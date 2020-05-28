@@ -13,7 +13,7 @@ import { filter } from 'lodash';
  */
 import { Card, H, Plugins } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { pluginNames, PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,7 +26,7 @@ import ShippingLabels from './images/shipping_labels';
 import SpeedIcon from './images/speed';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import { pluginNames } from 'wc-api/onboarding/constants';
+import { ONBOARDING_STORE_NAME } from '../../../../packages/data/src';
 
 class Benefits extends Component {
 	constructor( props ) {
@@ -301,16 +301,18 @@ class Benefits extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const {
-			getProfileItemsError,
+			getOnboardingError,
 			getProfileItems,
-			isGetProfileItemsRequesting,
-		} = select( 'wc-api' );
+			isOnboardingRequesting,
+		} = select( ONBOARDING_STORE_NAME );
 
 		const { getActivePlugins, isJetpackConnected } = select(
 			PLUGINS_STORE_NAME
 		);
 
-		const isProfileItemsError = Boolean( getProfileItemsError() );
+		const isProfileItemsError = Boolean(
+			getOnboardingError( 'updateProfileItems' )
+		);
 		const activePlugins = getActivePlugins();
 		const profileItems = getProfileItems();
 
@@ -319,7 +321,7 @@ export default compose(
 			isProfileItemsError,
 			profileItems,
 			isJetpackConnected: isJetpackConnected(),
-			isRequesting: isGetProfileItemsRequesting(),
+			isRequesting: isOnboardingRequesting( 'updateProfileItems' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

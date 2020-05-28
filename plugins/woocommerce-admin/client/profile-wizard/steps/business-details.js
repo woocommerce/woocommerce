@@ -13,7 +13,7 @@ import { keys, get, pickBy } from 'lodash';
  */
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, pluginNames, SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -28,7 +28,6 @@ import {
 } from '@woocommerce/components';
 import withWCApiSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import { pluginNames } from 'wc-api/onboarding/constants';
 import { getCurrencyRegion } from 'dashboard/utils';
 import { CurrencyContext } from 'lib/currency-context';
 
@@ -694,10 +693,10 @@ BusinessDetails.contextType = CurrencyContext;
 
 export default compose(
 	withWCApiSelect( ( select ) => {
-		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getOnboardingError } = select( ONBOARDING_STORE_NAME );
 
 		return {
-			isError: Boolean( getProfileItemsError() ),
+			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 		};
 	} ),
@@ -719,7 +718,7 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

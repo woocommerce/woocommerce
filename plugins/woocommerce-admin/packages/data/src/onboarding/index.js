@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { registerStore, select } from '@wordpress/data';
+import { select, registerStore } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
 
 /**
@@ -28,4 +28,4 @@ if ( ! storeSelectors ) {
 	} );
 }
 
-export const PLUGINS_STORE_NAME = STORE_NAME;
+export const ONBOARDING_STORE_NAME = STORE_NAME;

@@ -7,18 +7,18 @@ import { compose } from '@wordpress/compose';
 import { Button, Modal } from '@wordpress/components';
 import { find } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
+import { withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List } from '@woocommerce/components';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import withSelect from 'wc-api/with-select';
 import { getProductIdsForCart } from 'dashboard/utils';
 import sanitizeHTML from 'lib/sanitize-html';
 import { recordEvent } from 'lib/tracks';
@@ -170,8 +170,8 @@ class CartModal extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems } = select( 'wc-api' );
 		const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		const profileItems = getProfileItems();
 		const installedPlugins = getInstalledPlugins();
 		const productIds = getProductIdsForCart(

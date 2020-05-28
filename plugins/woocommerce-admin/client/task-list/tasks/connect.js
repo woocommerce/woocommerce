@@ -12,6 +12,7 @@ import { omit } from 'lodash';
  * WooCommerce dependencies
  */
 import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -127,15 +128,15 @@ class Connect extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItemsError } = select( 'wc-api' );
+		const { getOnboardingError } = select( ONBOARDING_STORE_NAME );
 
-		const isProfileItemsError = Boolean( getProfileItemsError() );
+		const isProfileItemsError = Boolean( getOnboardingError( 'updateProfileItems' ) );
 
 		return { isProfileItemsError };
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		return {
 			createNotice,
 			updateProfileItems,

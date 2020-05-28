@@ -12,7 +12,7 @@ import { withDispatch } from '@wordpress/data';
  * WooCommerce Dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -249,18 +249,18 @@ class Industry extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getProfileItemsError } = select( 'wc-api' );
+		const { getProfileItems, getOnboardingError } = select( ONBOARDING_STORE_NAME );
 		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { general: locationSettings = {} } = getSettings( 'general' );
 
 		return {
-			isError: Boolean( getProfileItemsError() ),
+			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
 			profileItems: getProfileItems(),
 			locationSettings,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateProfileItems } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

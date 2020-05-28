@@ -3,11 +3,17 @@
  */
 import { compose } from '@wordpress/compose';
 import { Suspense, lazy } from '@wordpress/element';
+import { identity } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
+import { getSetting } from '@woocommerce/wc-admin-settings';
 import { Spinner } from '@woocommerce/components';
+import {
+	ONBOARDING_STORE_NAME,
+	withOnboardingHydration,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -33,12 +39,15 @@ const Homepage = ( { profileItems, query } ) => {
 };
 
 export default compose(
+	getSetting( 'onboarding', {} ).profile
+		? withOnboardingHydration( getSetting( 'onboarding', {} ).profile )
+		: identity,
 	withSelect( ( select ) => {
 		if ( ! isOnboardingEnabled() ) {
 			return;
 		}
 
-		const { getProfileItems } = select( 'wc-api' );
+		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		const profileItems = getProfileItems();
 
 		return { profileItems };
