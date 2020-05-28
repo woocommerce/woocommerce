@@ -1,4 +1,3 @@
-/* jshint node:true */
 module.exports = function( grunt ) {
 	'use strict';
 	var sass = require( 'node-sass' );
@@ -14,12 +13,9 @@ module.exports = function( grunt ) {
 			php: 'includes'
 		},
 
-		// JavaScript linting with JSHint.
-		jshint: {
-			options: {
-				jshintrc: '.jshintrc'
-			},
-			all: [
+		// JavaScript linting with ESLint.
+		eslint: {
+			src: [
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'<%= dirs.js %>/frontend/*.js',
@@ -192,12 +188,13 @@ module.exports = function( grunt ) {
 			},
 			js: {
 				files: [
+					'GruntFile.js',
 					'<%= dirs.js %>/admin/*js',
 					'<%= dirs.js %>/frontend/*js',
 					'!<%= dirs.js %>/admin/*.min.js',
 					'!<%= dirs.js %>/frontend/*.min.js'
 				],
-				tasks: ['jshint', 'uglify']
+				tasks: ['eslint','uglify']
 			}
 		},
 
@@ -291,7 +288,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+	grunt.loadNpmTasks( 'gruntify-eslint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
@@ -307,7 +304,7 @@ module.exports = function( grunt ) {
 	]);
 
 	grunt.registerTask( 'js', [
-		'jshint',
+		'eslint',
 		'uglify:admin',
 		'uglify:frontend'
 	]);

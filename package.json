@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "4.0.0",
+  "version": "4.3.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -12,9 +12,12 @@
   "scripts": {
     "build": "grunt && npm run makepot",
     "build-watch": "grunt watch",
+    "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
-    "test:e2e": "./tests/bin/e2e-test-integration.js",
-    "test:e2e-dev": "./tests/bin/e2e-test-integration.js --dev",
+    "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
+    "docker:down": "npm explore @woocommerce/e2e-environment -- npm run docker:down",
+    "test:e2e": "npm explore @woocommerce/e2e-environment -- npm run test:e2e",
+    "test:e2e-dev": "npm explore @woocommerce/e2e-environment -- npm run test:e2e-dev",
     "makepot": "composer run-script makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
@@ -26,6 +29,7 @@
     "@babel/preset-env": "7.9.0",
     "@babel/register": "7.9.0",
     "@jest/test-sequencer": "^25.0.0",
+    "@woocommerce/e2e-environment": "file:tests/e2e/env",
     "@wordpress/e2e-test-utils": "4.3.1",
     "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
@@ -43,7 +47,6 @@
     "grunt-contrib-concat": "1.0.1",
     "grunt-contrib-copy": "1.0.0",
     "grunt-contrib-cssmin": "3.0.0",
-    "grunt-contrib-jshint": "2.1.0",
     "grunt-contrib-uglify": "4.0.1",
     "grunt-contrib-watch": "1.1.0",
     "grunt-phpcs": "0.4.0",
@@ -53,7 +56,8 @@
     "grunt-sass": "3.1.0",
     "grunt-shell": "3.0.1",
     "grunt-stylelint": "0.14.0",
-    "husky": "4.2.1",
+    "gruntify-eslint": "5.0.0",
+    "husky": "4.2.5",
     "istanbul": "1.0.0-alpha.2",
     "jest": "25.1.0",
     "jest-puppeteer": "4.4.0",
@@ -65,6 +69,8 @@
     "puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "stylelint": "12.0.1",
     "stylelint-config-wordpress": "16.0.0",
+    "webpack": "4.41.6",
+    "webpack-cli": "3.3.11",
     "wp-textdomain": "^1.0.1"
   },
   "engines": {
