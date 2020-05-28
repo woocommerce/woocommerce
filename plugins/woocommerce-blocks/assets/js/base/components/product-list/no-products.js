@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useProductLayoutContext } from '@woocommerce/base-context';
+import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
 import { Icon, notice } from '@woocommerce/icons';
 
 const NoProducts = () => {
-	const { layoutStyleClassPrefix } = useProductLayoutContext();
+	const { layoutStyleClassPrefix } = useInnerBlockConfigurationContext();
 	return (
 		<div className={ `${ layoutStyleClassPrefix }__no-products` }>
 			<Icon

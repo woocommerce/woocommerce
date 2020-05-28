@@ -16,7 +16,7 @@ import {
 	useQueryStateByKey,
 } from '@woocommerce/base-hooks';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
-import { useProductLayoutContext } from '@woocommerce/base-context';
+import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
 import { speak } from '@wordpress/a11y';
 
 /**
@@ -114,7 +114,7 @@ const ProductList = ( {
 	const { products, totalProducts, productsLoading } = useStoreProducts(
 		queryState
 	);
-	const { layoutStyleClassPrefix } = useProductLayoutContext();
+	const { layoutStyleClassPrefix } = useInnerBlockConfigurationContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
 
 	// These are possible filters.

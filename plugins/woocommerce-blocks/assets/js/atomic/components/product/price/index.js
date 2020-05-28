@@ -2,12 +2,12 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useProductLayoutContext } from '@woocommerce/base-context';
+import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
 
 const ProductPrice = ( { className, product } ) => {
-	const { layoutStyleClassPrefix } = useProductLayoutContext();
+	const { layoutStyleClassPrefix } = useInnerBlockConfigurationContext();
 	const prices = product.prices || {};
 	const currency = getCurrencyFromPriceResponse( prices );
 

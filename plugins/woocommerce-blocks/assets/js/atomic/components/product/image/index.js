@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Fragment, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/block-settings';
-import { useProductLayoutContext } from '@woocommerce/base-context';
+import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
 
 /**
  * Internal dependencies
@@ -56,7 +56,7 @@ const ProductImage = ( {
 	saleBadgeAlign = 'right',
 } ) => {
 	const [ imageLoaded, setImageLoaded ] = useState( false );
-	const { layoutStyleClassPrefix } = useProductLayoutContext();
+	const { layoutStyleClassPrefix } = useInnerBlockConfigurationContext();
 	const image =
 		product.images && product.images.length ? product.images[ 0 ] : null;
 
