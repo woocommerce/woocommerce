@@ -122,7 +122,7 @@ export default compose(
 		const inboxQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
-			type: 'info,warning',
+			type: QUERY_DEFAULTS.noteTypes,
 			orderby: 'date',
 			order: 'desc',
 			status: 'unactioned',

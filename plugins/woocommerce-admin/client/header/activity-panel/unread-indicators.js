@@ -8,6 +8,7 @@ import { SETTINGS_STORE_NAME } from '@woocommerce/data';
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from 'analytics/settings/config';
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 
 export function getUnreadNotes( select ) {
 	const {
@@ -23,7 +24,7 @@ export function getUnreadNotes( select ) {
 	const notesQuery = {
 		page: 1,
 		per_page: 1,
-		type: 'info,warning',
+		type: QUERY_DEFAULTS.noteTypes,
 		orderby: 'date',
 		order: 'desc',
 	};
