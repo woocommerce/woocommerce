@@ -90,6 +90,8 @@ class Onboarding {
 		// Track the onboarding toggle event earlier so they are captured before redirecting.
 		add_action( 'add_option_' . self::OPT_IN_OPTION, array( $this, 'track_onboarding_toggle' ), 1, 2 );
 		add_action( 'update_option_' . self::OPT_IN_OPTION, array( $this, 'track_onboarding_toggle' ), 1, 2 );
+		add_action( 'update_option_' . self::PROFILE_DATA_OPTION, array( $this, 'send_profile_data_on_update' ), 10, 2 );
+		add_action( 'woocommerce_helper_connected', array( $this, 'send_profile_data_on_connect' ) );
 
 		if ( ! Loader::is_onboarding_enabled() ) {
 			add_action( 'current_screen', array( $this, 'update_help_tab' ), 60 );
@@ -139,6 +141,92 @@ class Onboarding {
 		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
+	}
+
+	/**
+	 * Send profile data to WooCommerce.com.
+	 */
+	public static function send_profile_data() {
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return;
+		}
+
+		if ( ! class_exists( '\WC_Helper_API' ) || ! method_exists( '\WC_Helper_API', 'put' ) ) {
+			return;
+		}
+
+		if ( ! class_exists( '\WC_Helper_Options' ) ) {
+			return;
+		}
+
+		$auth = \WC_Helper_Options::get( 'auth' );
+		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
+			return false;
+		}
+
+		$profile       = get_option( self::PROFILE_DATA_OPTION, array() );
+		$base_location = wc_get_base_location();
+		$defaults      = array(
+			'plugins'             => 'skipped',
+			'industry'            => array(),
+			'product_types'       => array(),
+			'product_count'       => '0',
+			'selling_venues'      => 'no',
+			'revenue'             => 'none',
+			'other_platform'      => 'none',
+			'business_extensions' => array(),
+			'theme'               => get_stylesheet(),
+			'setup_client'        => false,
+			'store_location'      => $base_location['country'],
+			'default_currency'    => get_woocommerce_currency(),
+		);
+
+		// Prepare industries as an array of slugs if they are in array format.
+		if ( isset( $profile['industry'] ) && is_array( $profile['industry'] ) ) {
+			$industry_slugs = array();
+			foreach ( $profile['industry'] as $industry ) {
+				$industry_slugs[] = is_array( $industry ) ? $industry['slug'] : $industry;
+			}
+			$profile['industry'] = $industry_slugs;
+		}
+		$body = wp_parse_args( $profile, $defaults );
+
+		\WC_Helper_API::put(
+			'profile',
+			array(
+				'authenticated' => true,
+				'body'          => wp_json_encode( $body ),
+				'headers'       => array(
+					'Content-Type' => 'application/json',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Send profiler data on profiler change to completion.
+	 *
+	 * @param array $old_value Previous value.
+	 * @param array $value Current value.
+	 */
+	public static function send_profile_data_on_update( $old_value, $value ) {
+		if ( ! isset( $value['completed'] ) || ! $value['completed'] ) {
+			return;
+		}
+
+		self::send_profile_data();
+	}
+
+	/**
+	 * Send profiler data after a site is connected.
+	 */
+	public static function send_profile_data_on_connect() {
+		$profile = get_option( self::PROFILE_DATA_OPTION, array() );
+		if ( ! isset( $profile['completed'] ) || ! $profile['completed'] ) {
+			return;
+		}
+
+		self::send_profile_data();
 	}
 
 	/**
