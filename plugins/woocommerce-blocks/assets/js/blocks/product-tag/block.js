@@ -202,7 +202,7 @@ class ProductsByTagBlock extends Component {
 							this.setChangedAttributes( { tagOperator: value } )
 						}
 					/>
-					<Button isDefault onClick={ onDone }>
+					<Button isPrimary onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 					<Button
