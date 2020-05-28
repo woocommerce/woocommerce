@@ -46,3 +46,17 @@
 		margin: -$gap 0 $gap-small;
 	}
 }
+
+// Adds border to placeholder lists, so they can be distinguished from the white background.
+.components-placeholder .woocommerce-search-list__list {
+	border: 1px solid $core-grey-light-500;
+}
+
+// Work-around to make the SearchList component work fine with the last versions of @wordpress/components.
+// Ideally it should be possible to remove this once this issue is fixed in WC Admin:
+// https://github.com/woocommerce/woocommerce-admin/issues/4349
+.components-placeholder .woocommerce-search-list__list .woocommerce-search-list__item {
+	border-radius: 0;
+	height: auto;
+	text-align: left;
+}

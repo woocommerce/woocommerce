@@ -214,7 +214,7 @@ const FeaturedCategory = ( {
 						} }
 						isSingle
 					/>
-					<Button isDefault onClick={ onDone }>
+					<Button isPrimary onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 				</div>

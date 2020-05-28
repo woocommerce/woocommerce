@@ -219,7 +219,7 @@ class ProductByCategoryBlock extends Component {
 							this.setChangedAttributes( { catOperator: value } )
 						}
 					/>
-					<Button isDefault onClick={ onDone }>
+					<Button isPrimary onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 					<Button
