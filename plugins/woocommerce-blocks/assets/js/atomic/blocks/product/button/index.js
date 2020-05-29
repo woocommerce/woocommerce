@@ -3,14 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { Disabled } from '@wordpress/components';
 import { Icon, cart } from '@woocommerce/icons';
-import { ProductButton } from '@woocommerce/atomic-components/product';
 
 /**
  * Internal dependencies
  */
 import sharedConfig from '../shared-config';
+import edit from './edit';
 
 const blockConfig = {
 	title: __( 'Add to Cart Button', 'woo-gutenberg-products-block' ),
@@ -22,15 +21,7 @@ const blockConfig = {
 		src: <Icon srcElement={ cart } />,
 		foreground: '#96588a',
 	},
-	edit( props ) {
-		const { attributes } = props;
-
-		return (
-			<Disabled>
-				<ProductButton product={ attributes.product } />
-			</Disabled>
-		);
-	},
+	edit,
 };
 
 registerBlockType( 'woocommerce/product-button', {

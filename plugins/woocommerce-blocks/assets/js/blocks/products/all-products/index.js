@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, grid } from '@woocommerce/icons';
+import '@woocommerce/atomic-blocks';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import { Icon, grid } from '@woocommerce/icons';
 import Editor from './edit';
 import { attributes as sharedAttributes, defaults } from '../attributes';
 import { getBlockClassName } from '../utils.js';
-import '../../../atomic/blocks/product';
 
 const blockSettings = {
 	title: __( 'All Products', 'woo-gutenberg-products-block' ),

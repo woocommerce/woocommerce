@@ -8,7 +8,7 @@
 	],
 	"moduleDirectories": [ "node_modules" ],
 	"moduleNameMapper": {
-		"@woocommerce/atomic-components": "assets/js/atomic/components",
+		"@woocommerce/atomic-blocks": "assets/js/atomic/blocks",
 		"@woocommerce/atomic-utils": "assets/js/atomic/utils",
 		"@woocommerce/icons": "assets/js/icons",
 		"@woocommerce/settings": "assets/js/settings/shared",

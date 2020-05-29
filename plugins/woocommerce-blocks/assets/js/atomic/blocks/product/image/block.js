@@ -10,7 +10,7 @@ import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
 /**
  * Internal dependencies
  */
-import { ProductSaleBadge } from '../../../components/product';
+import ProductSaleBadge from '../sale-badge/block';
 
 const SaleBadge = ( { product, saleBadgeAlign, shouldRender } ) => {
 	return shouldRender ? (
