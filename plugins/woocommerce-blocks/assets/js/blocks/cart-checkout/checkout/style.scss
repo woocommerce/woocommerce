@@ -84,7 +84,7 @@
 	}
 
 	.wc-block-order-summary-item__quantity {
-		@include font-size(12px);
+		@include font-size(smaller);
 		align-items: center;
 		background: #fff;
 		border: 2px solid currentColor;
@@ -106,11 +106,11 @@
 		padding-left: $gap-large;
 		padding-top: $gap;
 		padding-bottom: $gap;
-		line-height: $gap-large;
+		line-height: 1.375;
 
 		p,
 		.wc-block-product-metadata {
-			line-height: $gap;
+			line-height: 1.375;
 			margin-top: #{ ( $gap-large - $gap ) / 2 };
 		}
 	}

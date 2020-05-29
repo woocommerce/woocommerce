@@ -19,7 +19,7 @@
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-quantity-selector__input {
-		@include font-size(16px);
+		@include font-size(regular);
 		order: 2;
 		min-width: 40px;
 		flex: 1 1 auto;
@@ -49,7 +49,7 @@
 	}
 	.wc-block-quantity-selector__button {
 		@include reset-button;
-		@include font-size(16px);
+		@include font-size(regular);
 		min-width: 30px;
 		cursor: pointer;
 		color: $core-grey-dark-700;

@@ -1,17 +1,17 @@
 .wc-block-text-input {
 	position: relative;
-	margin-bottom: rem($gap-large);
+	margin-bottom: em($gap-large);
 	white-space: nowrap;
 
 	label {
 		@include reset-typography();
-		@include font-size(16px);
+		@include font-size(regular);
 		position: absolute;
 		transform: translateY(0.75em);
 		left: 0;
 		top: 0;
 		transform-origin: top left;
-		line-height: 1.375;
+		line-height: 1.375; // =22px when font-size is 16px.
 		color: $gray-50;
 		transition: transform 200ms ease;
 		margin: 0 0 0 #{$gap + 1px};
@@ -36,17 +36,17 @@
 	input[type="url"],
 	input[type="text"],
 	input[type="email"] {
-		@include font-size(16px);
+		@include font-size(regular);
 		background-color: #fff;
-		padding: rem($gap-small) $gap;
+		padding: em($gap-small) $gap;
 		border-radius: 4px;
 		border: 1px solid $input-border-gray;
 		width: 100%;
-		line-height: 1.375;
+		line-height: 1.375; // =22px when font-size is 16px.
 		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
-		height: rem(48px);
+		height: 3em;
 		min-height: 0;
 		color: $input-text-active;
 
@@ -59,7 +59,7 @@
 	&.is-active input[type="url"],
 	&.is-active input[type="text"],
 	&.is-active input[type="email"] {
-		padding: rem($gap-large) 0 rem($gap-smallest) $gap;
+		padding: em($gap-large) 0 em($gap-smallest) $gap;
 	}
 
 	&.has-error input {

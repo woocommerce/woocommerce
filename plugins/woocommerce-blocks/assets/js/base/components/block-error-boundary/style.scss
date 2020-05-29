@@ -9,7 +9,7 @@
 }
 
 .wc-block-error__header {
-	font-size: 2em;
+	@include font-size(larger);
 	font-weight: bold;
 	margin: 0;
 }

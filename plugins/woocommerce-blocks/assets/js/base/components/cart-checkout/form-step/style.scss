@@ -29,7 +29,7 @@ $line-offset-from-circle-size: 8px;
 	margin-bottom: $gap-smaller;
 
 	.wc-block-checkout-step__title {
-		@include font-size(16px);
+		@include font-size(regular);
 		line-height: 1.5;
 		color: $gray-80;
 		font-weight: 400;
@@ -38,7 +38,7 @@ $line-offset-from-circle-size: 8px;
 }
 
 .wc-block-checkout-step__heading-content {
-	@include font-size(12px);
+	@include font-size(smaller);
 	line-height: 2;
 	color: $gray-80;
 
@@ -49,14 +49,14 @@ $line-offset-from-circle-size: 8px;
 }
 
 .wc-block-checkout-step__description {
-	@include font-size(14px);
+	@include font-size(small);
 	line-height: 1.25;
 	color: $gray-60;
 	margin-bottom: $gap;
 }
 
 .wc-block-checkout-step::before {
-	@include font-size(14px);
+	@include font-size(small);
 	counter-increment: checkout-step;
 	content: counter(checkout-step);
 	content: counter(checkout-step) / "";
