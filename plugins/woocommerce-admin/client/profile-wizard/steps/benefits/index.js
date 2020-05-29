@@ -13,7 +13,11 @@ import { filter } from 'lodash';
  */
 import { Card, H, Plugins } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
-import { pluginNames, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	pluginNames,
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,7 +30,6 @@ import ShippingLabels from './images/shipping_labels';
 import SpeedIcon from './images/speed';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
-import { ONBOARDING_STORE_NAME } from '../../../../packages/data/src';
 
 class Benefits extends Component {
 	constructor( props ) {
@@ -325,7 +328,8 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateProfileItems, updateOptions } = dispatch( 'wc-api' );
+		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
+		const { updateOptions } = dispatch( 'wc-api' );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
