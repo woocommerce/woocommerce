@@ -17,6 +17,7 @@ import ApiError from './api-error';
 import SharedProductControl from './shared-product-control';
 import EditorBlockControls from './editor-block-controls';
 import LayoutEditor from './layout-editor';
+import EditProductLink from './edit-product-link';
 import { BLOCK_TITLE, BLOCK_ICON, BLOCK_DESCRIPTION } from '../constants';
 
 /**
@@ -98,6 +99,7 @@ const Editor = ( {
 									setAttributes={ setAttributes }
 								/>
 							</PanelBody>
+							<EditProductLink productId={ productId } />
 						</InspectorControls>
 						<LayoutEditor
 							clientId={ clientId }
