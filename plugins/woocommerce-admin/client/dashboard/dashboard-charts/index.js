@@ -7,11 +7,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
-import {
-	IconButton,
-	NavigableMenu,
-	SelectControl,
-} from '@wordpress/components';
+import { Button, NavigableMenu, SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -216,7 +212,7 @@ class DashboardCharts extends Component {
 							orientation="horizontal"
 							role="menubar"
 						>
-							<IconButton
+							<Button
 								className={ classNames(
 									'woocommerce-chart__type-button',
 									{
@@ -225,7 +221,6 @@ class DashboardCharts extends Component {
 											query.chartType === 'line',
 									}
 								) }
-								icon={ <Gridicon icon="line-graph" /> }
 								title={ __(
 									'Line chart',
 									'woocommerce-admin'
@@ -234,8 +229,10 @@ class DashboardCharts extends Component {
 								role="menuitemradio"
 								tabIndex={ query.chartType === 'line' ? 0 : -1 }
 								onClick={ this.handleTypeToggle( 'line' ) }
-							/>
-							<IconButton
+							>
+								<Gridicon icon="line-graph" />
+							</Button>
+							<Button
 								className={ classNames(
 									'woocommerce-chart__type-button',
 									{
@@ -243,13 +240,14 @@ class DashboardCharts extends Component {
 											query.chartType === 'bar',
 									}
 								) }
-								icon={ <Gridicon icon="stats-alt" /> }
 								title={ __( 'Bar chart', 'woocommerce-admin' ) }
 								aria-checked={ query.chartType === 'bar' }
 								role="menuitemradio"
 								tabIndex={ query.chartType === 'bar' ? 0 : -1 }
 								onClick={ this.handleTypeToggle( 'bar' ) }
-							/>
+							>
+								<Gridicon icon="stats-alt" />
+							</Button>
 						</NavigableMenu>
 					</SectionHeader>
 					{ this.renderChartBlocks( query ) }

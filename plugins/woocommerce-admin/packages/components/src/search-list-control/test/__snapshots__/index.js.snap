@@ -1696,14 +1696,9 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </span>
       <button
         aria-describedby="woocommerce-tag__label-0"
-        aria-label="Remove Clementine"
-        className="components-button components-icon-button woocommerce-tag__remove"
-        onBlur={[Function]}
+        className="components-button woocommerce-tag__remove"
+        label="Remove Clementine"
         onClick={[Function]}
-        onFocus={[Function]}
-        onMouseDown={[Function]}
-        onMouseEnter={[Function]}
-        onMouseLeave={[Function]}
         type="button"
       >
         <svg
@@ -2036,14 +2031,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </span>
       <button
         aria-describedby="woocommerce-tag__label-1"
-        aria-label="Remove Clementine"
-        className="components-button components-icon-button woocommerce-tag__remove"
-        onBlur={[Function]}
+        className="components-button woocommerce-tag__remove"
+        label="Remove Clementine"
         onClick={[Function]}
-        onFocus={[Function]}
-        onMouseDown={[Function]}
-        onMouseEnter={[Function]}
-        onMouseLeave={[Function]}
         type="button"
       >
         <svg
@@ -2082,14 +2072,9 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </span>
       <button
         aria-describedby="woocommerce-tag__label-2"
-        aria-label="Remove Guava"
-        className="components-button components-icon-button woocommerce-tag__remove"
-        onBlur={[Function]}
+        className="components-button woocommerce-tag__remove"
+        label="Remove Guava"
         onClick={[Function]}
-        onFocus={[Function]}
-        onMouseDown={[Function]}
-        onMouseEnter={[Function]}
-        onMouseLeave={[Function]}
         type="button"
       >
         <svg

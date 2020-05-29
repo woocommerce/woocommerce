@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import clickOutside from 'react-click-outside';
 import { Component, lazy, Suspense } from '@wordpress/element';
-import { IconButton, NavigableMenu } from '@wordpress/components';
+import { Button, NavigableMenu } from '@wordpress/components';
 import { partial, uniqueId, find } from 'lodash';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import PagesIcon from 'gridicons/dist/pages';
@@ -227,7 +227,7 @@ class ActivityPanel extends Component {
 		}
 
 		return (
-			<IconButton
+			<Button
 				role="tab"
 				className={ className }
 				tabIndex={ tabIndex }
@@ -236,15 +236,15 @@ class ActivityPanel extends Component {
 				key={ 'activity-panel-tab-' + tab.name }
 				id={ 'activity-panel-tab-' + tab.name }
 				onClick={ partial( this.togglePanel, tab.name ) }
-				icon={ tab.icon }
 			>
+				{ tab.icon }
 				{ tab.title }{ ' ' }
 				{ tab.unread && (
 					<span className="screen-reader-text">
 						{ __( 'unread activity', 'woocommerce-admin' ) }
 					</span>
 				) }
-			</IconButton>
+			</Button>
 		);
 	}
 
@@ -274,17 +274,8 @@ class ActivityPanel extends Component {
 					id="woocommerce-activity-panel"
 					aria-labelledby={ headerId }
 				>
-					<IconButton
+					<Button
 						onClick={ this.toggleMobile }
-						icon={
-							mobileOpen ? (
-								<CrossIcon />
-							) : (
-								<ActivityPanelToggleBubble
-									hasUnread={ hasUnread }
-								/>
-							)
-						}
 						label={
 							mobileOpen
 								? __(
@@ -294,9 +285,16 @@ class ActivityPanel extends Component {
 								: viewLabel
 						}
 						aria-expanded={ mobileOpen }
-						tooltip={ false }
 						className="woocommerce-layout__activity-panel-mobile-toggle"
-					/>
+					>
+						{ mobileOpen ? (
+							<CrossIcon />
+						) : (
+							<ActivityPanelToggleBubble
+								hasUnread={ hasUnread }
+							/>
+						) }
+					</Button>
 					<div className={ panelClasses }>
 						<NavigableMenu
 							role="tablist"

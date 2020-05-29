@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import classnames from 'classnames';
-import { Button, Dashicon, IconButton, Popover } from '@wordpress/components';
+import { Button, Dashicon, Popover } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
 import { withState, withInstanceId } from '@wordpress/compose';
@@ -68,16 +68,17 @@ const Tag = ( {
 				</Popover>
 			) }
 			{ remove && (
-				<IconButton
+				<Button
 					className="woocommerce-tag__remove"
-					icon={ <Dashicon icon="dismiss" size={ 20 } /> }
 					onClick={ remove( id ) }
 					label={ sprintf(
 						__( 'Remove %s', 'woocommerce-admin' ),
 						label
 					) }
 					aria-describedby={ labelId }
-				/>
+				>
+					<Dashicon icon="dismiss" size={ 20 } />
+				</Button>
 			) }
 		</span>
 	);

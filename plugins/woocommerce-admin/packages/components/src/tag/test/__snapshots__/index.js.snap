@@ -67,14 +67,8 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
   </span>
   <button
     aria-describedby="woocommerce-tag__label-1"
-    aria-label="Remove foo"
-    className="components-button components-icon-button woocommerce-tag__remove"
-    onBlur={[Function]}
-    onClick={[Function]}
-    onFocus={[Function]}
-    onMouseDown={[Function]}
-    onMouseEnter={[Function]}
-    onMouseLeave={[Function]}
+    className="components-button woocommerce-tag__remove"
+    label="Remove foo"
     type="button"
   >
     <svg

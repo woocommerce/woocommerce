@@ -65,6 +65,8 @@
 		width: 40px;
 		height: 38px;
 		align-self: center;
+		color: $core-grey-dark-500;
+		padding: $gap-smaller;
 
 		@include breakpoint( '<400px' ) {
 			position: absolute;
@@ -169,7 +171,8 @@
 }
 
 .woocommerce-filters-advanced__add-button {
-	color: inherit;
+	align-items: center;
+	color: $core-grey-dark-500;
 	padding: $gap-smaller;
 
 	svg {

@@ -3,17 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import {
-	IconButton,
-	Button,
-	Dashicon,
-	SelectControl,
-} from '@wordpress/components';
+import { Button, Dashicon, SelectControl } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import moment from 'moment';
+import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 
 /**
  * WooCommerce dependencies
@@ -219,15 +215,16 @@ class StoreAlerts extends Component {
 				action={
 					numberOfAlerts > 1 && (
 						<div className="woocommerce-store-alerts__pagination">
-							<IconButton
-								icon="arrow-left-alt2"
+							<Button
 								onClick={ this.previousAlert }
 								disabled={ currentIndex === 0 }
 								label={ __(
 									'Previous Alert',
 									'woocommerce-admin'
 								) }
-							/>
+							>
+								<Icon icon={ chevronLeft } />
+							</Button>
 							<span
 								className="woocommerce-store-alerts__pagination-label"
 								role="status"
@@ -252,15 +249,16 @@ class StoreAlerts extends Component {
 									},
 								} ) }
 							</span>
-							<IconButton
-								icon="arrow-right-alt2"
+							<Button
 								onClick={ this.nextAlert }
 								disabled={ numberOfAlerts - 1 === currentIndex }
 								label={ __(
 									'Next Alert',
 									'woocommerce-admin'
 								) }
-							/>
+							>
+								<Icon icon={ chevronRight } />
+							</Button>
 						</div>
 					)
 				}

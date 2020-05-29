@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CheckboxControl, IconButton } from '@wordpress/components';
+import { CheckboxControl, Button } from '@wordpress/components';
 import { applyFilters } from '@wordpress/hooks';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -394,7 +394,10 @@ class ReportTable extends Component {
 		}
 
 		// Hide any headers based on user prefs, if loaded.
-		const filteredHeaders = this.filterShownHeaders( headers, userPrefColumns );
+		const filteredHeaders = this.filterShownHeaders(
+			headers,
+			userPrefColumns
+		);
 		const className = classnames( 'woocommerce-report-table', {
 			'has-compare': !! compareBy,
 			'has-search': !! searchBy,
@@ -449,19 +452,18 @@ class ReportTable extends Component {
 							/>
 						),
 						downloadable && (
-							<IconButton
+							<Button
 								key="download"
 								className="woocommerce-table__download-button"
 								disabled={ isLoading }
 								onClick={ this.onClickDownload }
-								isLink
 							>
 								<DownloadIcon />
 								<span className="woocommerce-table__download-button__label">
 									{ labels.downloadButton ||
 										__( 'Download', 'woocommerce-admin' ) }
 								</span>
-							</IconButton>
+							</Button>
 						),
 					] }
 					headers={ filteredHeaders }
@@ -472,7 +474,8 @@ class ReportTable extends Component {
 					onPageChange={ this.onPageChange }
 					rows={ rows }
 					rowsPerPage={
-						parseInt( query.per_page, 10 ) || QUERY_DEFAULTS.pageSize
+						parseInt( query.per_page, 10 ) ||
+						QUERY_DEFAULTS.pageSize
 					}
 					summary={ summary }
 					totalRows={ totalResults }
@@ -644,7 +647,7 @@ export default compose(
 					tableQuery,
 					defaultDateRange,
 					fields: summaryFields,
-				} )
+			  } )
 			: {};
 		const queriedTableData =
 			tableData ||
@@ -657,7 +660,11 @@ export default compose(
 				advancedFilters,
 				defaultDateRange,
 			} );
-		const extendedTableData = extendTableData( select, props, queriedTableData );
+		const extendedTableData = extendTableData(
+			select,
+			props,
+			queriedTableData
+		);
 
 		return {
 			primaryData,

@@ -5,9 +5,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment, Suspense, lazy } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial, get } from 'lodash';
-import { IconButton, Icon, Dropdown, Button } from '@wordpress/components';
+import { Dropdown, Button, Icon } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
+import { Icon as WPIcon, plusCircleFilled } from '@wordpress/icons';
 
 /**
  * WooCommerce dependencies
@@ -180,12 +181,13 @@ class CustomizableDashboard extends Component {
 				position="top center"
 				className="woocommerce-dashboard-section__add-more"
 				renderToggle={ ( { onToggle, isOpen } ) => (
-					<IconButton
+					<Button
 						onClick={ onToggle }
-						icon="plus-alt"
 						title={ __( 'Add more sections', 'woocommerce-admin' ) }
 						aria-expanded={ isOpen }
-					/>
+					>
+						<WPIcon icon={ plusCircleFilled } />
+					</Button>
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>

@@ -53,7 +53,8 @@
 
 	.woocommerce-filters-filter__button {
 		position: relative;
-		display: block;
+		align-items: center;
+		display: flex;
 		width: 100%;
 		padding: 1em 1em 1em 3em;
 		background-color: $core-grey-light-100;
@@ -72,11 +73,9 @@
 			background-color: $core-grey-light-100;
 		}
 
-		.dashicon {
+		svg {
 			position: absolute;
 			left: 1em;
-			top: 50%;
-			transform: translate(0, -50%);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-# 4.1.0 (Unreleased)
+# 5.0.0 (Unreleased)
 - Added `<ImageUpload />` component.
 - Style form components for WordPress 5.3.
 - Fix CompareFilter options format (key prop vs. id).
@@ -6,6 +6,10 @@
 - Add state classes to `<TextControlWithAffixes />` component.
 - Fix `<AnimationSlider />` example code.
 - Add `<Plugins />` component for installation of plugins.
+- Removed use of `IconButton` in favor of `Button` component.
+
+## Breaking Changes
+- Removed `SplitButton` because its not being used.
 
 # 4.0.0
 

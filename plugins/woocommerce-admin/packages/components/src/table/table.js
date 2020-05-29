@@ -4,11 +4,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import classnames from 'classnames';
-import { IconButton } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { find, get, noop } from 'lodash';
-import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
+import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 
 const ASC = 'asc';
 const DESC = 'desc';
@@ -233,21 +233,7 @@ class Table extends Component {
 									>
 										{ isSortable ? (
 											<Fragment>
-												<IconButton
-													icon={
-														sortedBy === key &&
-														sortDir === ASC ? (
-															<Gridicon
-																size={ 18 }
-																icon="chevron-up"
-															/>
-														) : (
-															<Gridicon
-																size={ 18 }
-																icon="chevron-down"
-															/>
-														)
-													}
+												<Button
 													aria-describedby={ labelId }
 													onClick={
 														hasData
@@ -256,8 +242,18 @@ class Table extends Component {
 													}
 													isDefault
 												>
+													{ sortedBy === key &&
+													sortDir === ASC ? (
+														<Icon
+															icon={ chevronUp }
+														/>
+													) : (
+														<Icon
+															icon={ chevronDown }
+														/>
+													) }
 													{ textLabel }
-												</IconButton>
+												</Button>
 												<span
 													className="screen-reader-text"
 													id={ labelId }

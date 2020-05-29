@@ -3,12 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, createRef } from '@wordpress/element';
-import {
-	SelectControl,
-	Button,
-	Dropdown,
-	IconButton,
-} from '@wordpress/components';
+import { SelectControl, Button, Dropdown } from '@wordpress/components';
 import { partial, findIndex, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
@@ -317,7 +312,7 @@ class AdvancedFilters extends Component {
 										updateFilter={ this.updateFilter }
 									/>
 								) }
-								<IconButton
+								<Button
 									className={ classnames(
 										'woocommerce-filters-advanced__line-item',
 										'woocommerce-filters-advanced__remove'
@@ -327,8 +322,9 @@ class AdvancedFilters extends Component {
 										this.removeFilter,
 										key
 									) }
-									icon={ <Gridicon icon="cross-small" /> }
-								/>
+								>
+									<Gridicon icon="cross-small" />
+								</Button>
 							</li>
 						);
 					} ) }
@@ -339,17 +335,17 @@ class AdvancedFilters extends Component {
 							className="woocommerce-filters-advanced__add-filter-dropdown"
 							position="bottom center"
 							renderToggle={ ( { isOpen, onToggle } ) => (
-								<IconButton
+								<Button
 									className="woocommerce-filters-advanced__add-button"
-									icon={ <Gridicon icon="add-outline" /> }
 									onClick={ onToggle }
 									aria-expanded={ isOpen }
 								>
+									<Gridicon icon="add-outline" />
 									{ __(
 										'Add a Filter',
 										'woocommerce-admin'
 									) }
-								</IconButton>
+								</Button>
 							) }
 							renderContent={ ( { onClose } ) => (
 								<ul className="woocommerce-filters-advanced__add-dropdown">

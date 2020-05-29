@@ -40,6 +40,10 @@
 	.components-popover__content {
 		padding: 0 $gap $gap-smaller;
 	}
+
+	> button svg {
+		fill: $core-grey-dark-500;
+	}
 }
 
 .woocommerce-dashboard-section__add-more-choices {

@@ -3,7 +3,8 @@
  */
 import { Component } from '@wordpress/element';
 import classnames from 'classnames';
-import { IconButton, Dropdown, NavigableMenu } from '@wordpress/components';
+import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
+import { Icon, moreVertical } from '@wordpress/icons';
 import PropTypes from 'prop-types';
 
 /**
@@ -25,13 +26,15 @@ class EllipsisMenu extends Component {
 			);
 
 			return (
-				<IconButton
+				<Button
 					className={ toggleClassname }
 					onClick={ onToggle }
 					icon="ellipsis"
 					title={ label }
 					aria-expanded={ isOpen }
-				/>
+				>
+					<Icon icon={ moreVertical } />
+				</Button>
 			);
 		};
 

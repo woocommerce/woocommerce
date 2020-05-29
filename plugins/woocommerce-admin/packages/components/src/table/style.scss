@@ -31,10 +31,11 @@
 		text-align: center;
 	}
 
-	button.woocommerce-table__download-button.is-link {
+	button.woocommerce-table__download-button {
 		padding: 6px $gap-small;
 		color: $studio-black;
 		text-decoration: none;
+		align-items: center;
 
 		svg {
 			margin-right: $gap-smaller;
@@ -209,6 +210,7 @@ th.woocommerce-table__item {
 		border: none;
 		background: transparent !important;
 		box-shadow: none !important;
+		align-items: center;
 
 		// @todo Add interactive styles
 		&:hover {
@@ -223,7 +225,7 @@ th.woocommerce-table__item {
 	&.is-sortable {
 		padding: 0;
 
-		.gridicon {
+		svg {
 			visibility: hidden;
 			margin-left: $gap-smallest;
 		}
@@ -231,7 +233,7 @@ th.woocommerce-table__item {
 		&.is-sorted .components-button,
 		.components-button:hover,
 		.components-button:focus {
-			.gridicon {
+			svg {
 				visibility: visible;
 			}
 		}
