@@ -237,7 +237,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 				) }
 			</p>
 			<Button
-				className="wc-block-attribute-filter__add_attribute_button"
+				className="wc-block-attribute-filter__add-attribute-button"
 				isDefault
 				isLarge
 				href={ getAdminLink(

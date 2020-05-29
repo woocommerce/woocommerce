@@ -69,9 +69,10 @@
 	}
 
 	.wc-block-gateway-input {
-		@include font-size(16px, 22px);
+		@include font-size(regular);
+		line-height: 1.375; // =22px when font-size is 16px.
 		background-color: #fff;
-		padding: $gap-small $gap;
+		padding: em($gap-small) $gap;
 		border-radius: 4px;
 		border: 1px solid $input-border-gray;
 		width: 100%;
@@ -92,7 +93,8 @@
 
 	label {
 		@include reset-typography();
-		@include font-size(16px, 22px);
+		@include font-size(regular);
+		line-height: 1.375; // =22px when font-size is 16px.
 		position: absolute;
 		transform: translateY(0.75em);
 		left: 0;
@@ -129,7 +131,7 @@
 
 	.wc-block-gateway-input.focused.empty,
 	.wc-block-gateway-input:not(.empty) {
-		padding: rem($gap-large) $gap rem($gap-smallest);
+		padding: em($gap-large) $gap em($gap-smallest);
 		& + label {
 			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}

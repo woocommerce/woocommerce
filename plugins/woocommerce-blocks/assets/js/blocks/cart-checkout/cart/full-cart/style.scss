@@ -50,7 +50,7 @@ table.wc-block-cart-items {
 		padding-right: 0;
 	}
 	.wc-block-cart-items__header {
-		@include font-size(12px);
+		@include font-size(smaller);
 		text-transform: uppercase;
 
 		.wc-block-cart-items__header-image {
@@ -76,7 +76,7 @@ table.wc-block-cart-items {
 		.wc-block-cart-item__quantity {
 			.wc-block-cart-item__remove-link {
 				@include link-button;
-				@include font-size(12px);
+				@include font-size(smaller);
 
 				color: $core-grey-dark-400;
 				text-transform: none;
@@ -94,7 +94,7 @@ table.wc-block-cart-items {
 			}
 		}
 		.wc-block-cart-item__total {
-			@include font-size(16px);
+			@include font-size(regular);
 			text-align: right;
 			line-height: 1.25;
 

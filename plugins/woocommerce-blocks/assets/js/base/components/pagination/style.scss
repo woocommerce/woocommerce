@@ -4,9 +4,9 @@
 
 .wc-block-pagination-page,
 .wc-block-pagination-ellipsis {
+	@include font-size(regular);
 	color: #333;
 	display: inline-block;
-	font-size: 1em;
 	font-weight: normal;
 }
 

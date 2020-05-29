@@ -1,10 +1,14 @@
-// Converts a font-size in px to rem and optionally sets a relative line-height.
-@mixin font-size($sizeValue: 16px, $lineHeight: false) {
-	font-size: ($sizeValue / 16px) * 1rem;
+$fontSizes: (
+	"smaller": 0.75,
+	"small": 0.875,
+	"regular": 1,
+	"large": 1.25,
+	"larger": 2,
+);
 
-	@if ($lineHeight) {
-		line-height: $lineHeight / $sizeValue;
-	}
+// Maps a named font-size to its em equivalent.
+@mixin font-size($sizeName) {
+	font-size: map-get($fontSizes, $sizeName) * 1em;
 }
 
 @keyframes loading-fade {
@@ -117,7 +121,7 @@
 	-ms-word-break: break-all;
 }
 
-// Converts a px unit to rem.
-@function rem($size, $base: 16px) {
-	@return $size / $base * 1rem;
+// Converts a px unit to em.
+@function em($size, $base: 16px) {
+	@return $size / $base * 1em;
 }

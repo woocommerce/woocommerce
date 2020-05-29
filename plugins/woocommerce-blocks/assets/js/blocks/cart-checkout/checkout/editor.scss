@@ -1,6 +1,6 @@
 .editor-styles-wrapper {
 	.wp-block h4.wc-block-checkout-step__title {
-		@include font-size(16px);
+		@include font-size(regular);
 		line-height: 24px;
 		margin: 0 $gap-small 0 0;
 	}

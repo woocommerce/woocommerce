@@ -1,5 +1,5 @@
 // Extra class for specificity to overwrite editor styles.
 .wc-block-component__title.wc-block-component__title {
-	@include font-size(20px);
+	@include font-size(large);
 	font-weight: normal;
 }

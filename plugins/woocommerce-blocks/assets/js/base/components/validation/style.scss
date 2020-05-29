@@ -1,6 +1,6 @@
 .wc-block-form-input-validation-error {
+	@include font-size(smaller);
 	color: $error-red;
-	@include font-size(12px);
 	max-width: 100%;
 	position: absolute;
 	top: calc(100% - 1px);

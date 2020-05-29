@@ -13,7 +13,7 @@
 		.wc-block-review-list-item__meta {
 			.wc-block-review-list-item__author {
 				@include placeholder();
-				font-size: 1em;
+				@include font-size(regular);
 				width: 80px;
 			}
 
@@ -156,13 +156,13 @@
 	order: 2;
 
 	> .wc-block-review-list-item__rating__stars {
+		@include font-size(regular);
 		display: inline-block;
 		top: 0;
 		overflow: hidden;
 		position: relative;
 		height: 1.618em;
 		line-height: 1.618;
-		font-size: 1em;
 		width: 5.3em;
 		font-family: star; /* stylelint-disable-line */
 		font-weight: 400;

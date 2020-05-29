@@ -1,5 +1,5 @@
 .wc-block-low-stock-badge {
-	@include font-size(12px);
+	@include font-size(smaller);
 	background-color: $white;
 	border-radius: 3px;
 	border: 1px solid $black;

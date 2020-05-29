@@ -1,8 +1,8 @@
 .wc-block-totals-footer-item {
 	.wc-block-totals-table-item__value,
 	.wc-block-totals-table-item__label {
+		@include font-size(large);
 		color: #000;
-		font-size: 1.25em;
 	}
 
 	.wc-block-totals-table-item__label {

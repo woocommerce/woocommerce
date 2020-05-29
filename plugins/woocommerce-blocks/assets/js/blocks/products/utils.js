@@ -32,7 +32,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 			) }
 		</p>
 		<Button
-			className="wc-block-products__add_product_button"
+			className="wc-block-products__add-product-button"
 			isDefault
 			isLarge
 			href={ adminUrl + 'post-new.php?post_type=product' }

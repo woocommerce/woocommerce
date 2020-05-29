@@ -1,5 +1,5 @@
 .wc-block-sale-badge {
-	@include font-size(12px);
+	@include font-size(smaller);
 	background-color: $core-grey-dark-600;
 	border-radius: 2px;
 	color: $white;

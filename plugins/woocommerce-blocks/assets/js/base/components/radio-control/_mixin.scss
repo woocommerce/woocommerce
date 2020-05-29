@@ -50,7 +50,7 @@
 
 	.wc-block-radio-control__description,
 	.wc-block-radio-control__secondary-description {
-		font-size: 0.875em;
+		@include font-size(small);
 		line-height: 20px;
 		color: $core-grey-dark-400;
 	}

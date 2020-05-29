@@ -133,7 +133,7 @@ export default function( { attributes, setAttributes } ) {
 				) }
 			</p>
 			<Button
-				className="wc-block-price-slider__add_product_button"
+				className="wc-block-price-slider__add-product-button"
 				isDefault
 				isLarge
 				href={ getAdminLink( 'post-new.php?post_type=product' ) }

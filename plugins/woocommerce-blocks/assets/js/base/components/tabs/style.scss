@@ -25,7 +25,8 @@
 				outline: 1px dotted $gray-60;
 			}
 			.wc-block-components-tabs__item-content {
-				@include font-size(16px, 16px);
+				@include font-size(regular);
+				line-height: 1;
 				width: fit-content;
 				display: inline-block;
 				font-weight: bold;
