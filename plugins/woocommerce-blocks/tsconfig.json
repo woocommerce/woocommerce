@@ -16,8 +16,9 @@
 		"jsx": "preserve",
 		"allowSyntheticDefaultImports": true,
 		"paths": {
-			"@woocommerce/atomic-components/*": [
-				"assets/js/base/atomic/components/*"
+			"@woocommerce/atomic-blocks": [ "assets/js/base/atomic/blocks" ],
+			"@woocommerce/atomic-blocks/*": [
+				"assets/js/base/atomic/blocks/*"
 			],
 			"@woocommerce/atomic-utils": [ "assets/js/atomic/utils" ],
 			"@woocommerce/base-components/*": [ "assets/js/base/components/*" ],

@@ -14,7 +14,7 @@ import {
 	ProductRating,
 	ProductSummary,
 	ProductSaleBadge,
-} from '../components/product';
+} from '../blocks/product/block-components';
 
 /**
  * Map blocks names to components.

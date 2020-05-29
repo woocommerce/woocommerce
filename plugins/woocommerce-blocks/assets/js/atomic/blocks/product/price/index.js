@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, bill } from '@woocommerce/icons';
-import { ProductPrice } from '@woocommerce/atomic-components/product';
 
 /**
  * Internal dependencies
  */
 import sharedConfig from '../shared-config';
+import edit from './edit';
 
 const blockConfig = {
 	title: __( 'Product Price', 'woo-gutenberg-products-block' ),
@@ -21,17 +21,7 @@ const blockConfig = {
 		src: <Icon srcElement={ bill } />,
 		foreground: '#96588a',
 	},
-
-	/**
-	 * Renders the edit view for a block.
-	 *
-	 * @param {Object} props Props to pass to block.
-	 */
-	edit( props ) {
-		const { attributes } = props;
-
-		return <ProductPrice product={ attributes.product } />;
-	},
+	edit,
 };
 
 registerBlockType( 'woocommerce/product-price', {

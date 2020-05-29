@@ -18,7 +18,7 @@ export default {
 	supports: {
 		html: false,
 	},
-	parent: [ 'woocommerce/all-products' ],
+	parent: [ 'woocommerce/all-products', 'woocommerce/single-product' ],
 	attributes: {
 		product: {
 			type: 'object',
