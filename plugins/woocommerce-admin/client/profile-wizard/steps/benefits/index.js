@@ -37,7 +37,6 @@ class Benefits extends Component {
 		this.state = {
 			isConnecting: false,
 			isInstalling: false,
-			isActioned: false,
 		};
 
 		this.isJetpackActive = props.activePlugins.includes( 'jetpack' );
@@ -62,11 +61,9 @@ class Benefits extends Component {
 
 	componentDidUpdate( prevProps, prevState ) {
 		const { goToNextStep } = this.props;
-		const { isActioned } = this.state;
 
 		// No longer pending or updating profile items, go to next step.
 		if (
-			isActioned &&
 			! this.isPending() &&
 			( prevProps.isRequesting ||
 				prevState.isConnecting ||
@@ -77,21 +74,21 @@ class Benefits extends Component {
 	}
 
 	isPending() {
-		const { isActioned, isConnecting, isInstalling } = this.state;
+		const { isConnecting, isInstalling } = this.state;
 		const { isRequesting } = this.props;
-		return isActioned && ( isConnecting || isInstalling || isRequesting );
+		return isConnecting || isInstalling || isRequesting;
 	}
 
 	async skipPluginInstall() {
 		const {
 			createNotice,
+			goToNextStep,
 			isProfileItemsError,
 			updateProfileItems,
 		} = this.props;
 
 		const plugins = this.isJetpackActive ? 'skipped-wcs' : 'skipped';
 		await updateProfileItems( { plugins } );
-		this.setState( { isActioned: true } );
 
 		if ( isProfileItemsError ) {
 			createNotice(
@@ -107,12 +104,14 @@ class Benefits extends Component {
 				plugins,
 			} );
 		}
+
+		goToNextStep();
 	}
 
 	async startPluginInstall() {
 		const { updateProfileItems, updateOptions } = this.props;
 
-		this.setState( { isActioned: true, isInstalling: true } );
+		this.setState( { isInstalling: true } );
 
 		await updateOptions( {
 			woocommerce_setup_jetpack_opted_in: true,
