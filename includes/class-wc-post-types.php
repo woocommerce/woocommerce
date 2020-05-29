@@ -23,6 +23,7 @@ class WC_Post_Types {
 		add_action( 'init', array( __CLASS__, 'register_post_types' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_post_status' ), 9 );
 		add_action( 'init', array( __CLASS__, 'support_jetpack_omnisearch' ) );
+		add_filter( 'term_updated_messages', array( __CLASS__, 'updated_term_messages' ) );
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
@@ -477,6 +478,68 @@ class WC_Post_Types {
 		}
 
 		do_action( 'woocommerce_after_register_post_type' );
+	}
+
+	/**
+	 * Customize taxonomies update messages.
+	 *
+	 * @access public
+	 * @param array $messages The list of available messages.
+	 * @since 4.1.2
+	 * @return bool
+	 */
+	public function updated_term_messages( $messages ) {
+
+		$messages['product_cat'] = array(
+			0 => '',
+			1 => __( 'Category added.', 'woocommerce' ),
+			2 => __( 'Category deleted.', 'woocommerce' ),
+			3 => __( 'Category updated.', 'woocommerce' ),
+			4 => __( 'Category not added.', 'woocommerce' ),
+			5 => __( 'Category not updated.', 'woocommerce-' ),
+			6 => __( 'Category not deleted.', 'woocommerce' ),
+		);
+
+		$messages['product_tag'] = array(
+			0 => '',
+			1 => __( 'Tag added.', 'woocommerce' ),
+			2 => __( 'Tag deleted.', 'woocommerce' ),
+			3 => __( 'Tag updated.', 'woocommerce' ),
+			4 => __( 'Tag not added.', 'woocommerce' ),
+			5 => __( 'Tag not updated.', 'woocommerce' ),
+			6 => __( 'Tag not deleted.', 'woocommerce' ),
+		);
+
+		$wc_product_attributes = array();
+		$attribute_taxonomies  = wc_get_attribute_taxonomies();
+
+		if ( $attribute_taxonomies ) {
+			foreach ( $attribute_taxonomies as $tax ) {
+				$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+
+				if ( $name ) {
+					$label = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
+
+					$messages[$name] = array(
+						0 => '',
+						/* translators: %s: taxonomy label */
+						1 => sprintf( __( '%s added', 'woocommerce' ), $label ),
+						/* translators: %s: taxonomy label */
+						2 => sprintf( __( '%s deleted', 'woocommerce' ), $label ),
+						/* translators: %s: taxonomy label */
+						3 => sprintf( __( '%s updated', 'woocommerce' ), $label ),
+						/* translators: %s: taxonomy label */
+						4 => sprintf( __( '%s not added', 'woocommerce' ), $label ),
+						/* translators: %s: taxonomy label */
+						5 => sprintf( __( '%s not updated', 'woocommerce' ), $label ),
+						/* translators: %s: taxonomy label */
+						6 => sprintf( __( '%s not deleted', 'woocommerce' ), $label ),
+					);
+				}
+			}
+		}
+
+		return $messages;
 	}
 
 	/**
