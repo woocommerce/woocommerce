@@ -153,7 +153,7 @@ function wc_update_order( $args ) {
 /**
  * Given a path, this will convert any of the subpaths into their corresponding tokens.
  *
- * @since 4.2.0
+ * @since 4.3.0
  * @param string $path The absolute path to tokenize.
  * @param array  $path_tokens An array keyed with the token, containing paths that should be replaced.
  * @return string The tokenized path.
@@ -192,7 +192,7 @@ function wc_tokenize_path( $path, $path_tokens ) {
 /**
  * Given a tokenized path, this will expand the tokens to their full path.
  *
- * @since 4.2.0
+ * @since 4.3.0
  * @param string $path The absolute path to expand.
  * @param array  $path_tokens An array keyed with the token, containing paths that should be expanded.
  * @return string The absolute path.
