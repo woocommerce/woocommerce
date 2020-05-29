@@ -102,6 +102,11 @@ export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
 		>
 			<TabPanel
 				className="woocommerce-stats-overview__tabs"
+				onSelect={ ( period ) => {
+					recordEvent( 'statsoverview_date_picker_update', {
+						period,
+					} );
+				} }
 				tabs={ [
 					{
 						title: __( 'Today', 'woocommerce-admin' ),

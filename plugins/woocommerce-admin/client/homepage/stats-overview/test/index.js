@@ -50,6 +50,29 @@ describe( 'StatsOverview tracking', () => {
 			}
 		);
 	} );
+
+	it( 'should record an event when a period is clicked', () => {
+		render(
+			<StatsOverview
+				userPrefs={ {
+					hiddenStats: null,
+				} }
+				updateCurrentUserData={ () => {} }
+			/>
+		);
+
+		const monthBtn = screen.getByRole( 'tab', {
+			name: 'Month to date',
+		} );
+		fireEvent.click( monthBtn );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'statsoverview_date_picker_update',
+			{
+				period: 'month',
+			}
+		);
+	} );
 } );
 
 describe( 'StatsOverview toggle and persist stat preference', () => {
