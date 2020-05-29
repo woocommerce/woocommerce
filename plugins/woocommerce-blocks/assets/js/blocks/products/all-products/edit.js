@@ -26,6 +26,7 @@ import { Icon, grid } from '@woocommerce/icons';
 import GridLayoutControl from '@woocommerce/block-components/grid-layout-control';
 import { HAS_PRODUCTS } from '@woocommerce/block-settings';
 import { InnerBlockConfigurationProvider } from '@woocommerce/shared-context';
+import { getBlockMap } from '@woocommerce/atomic-utils';
 
 /**
  * Internal dependencies
@@ -37,7 +38,6 @@ import {
 } from '../utils';
 import {
 	DEFAULT_PRODUCT_LIST_LAYOUT,
-	getBlockMap,
 	getProductLayoutConfig,
 } from '../base-utils';
 import { getSharedContentControls, getSharedListControls } from '../edit';
