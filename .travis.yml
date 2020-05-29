@@ -38,9 +38,19 @@ jobs:
       - npm run build
       - npm install jest --global
       - npm run docker:up
-      - npm run test:e2e
     after_script:
       - npm run docker:down
+  - name: "WordPress env E2E Tests"
+    php: 7.4
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    script:
+      - composer require wp-cli/i18n-command
+      - npm run build
+      - npm install jest --global
+      - npm install @wordpress/env --global
+      - wp-env start
+    after_script:
+      - wp-env destroy
   - name: "WP Nightly"
     php: 7.4
     env: WP_VERSION=nightly WP_MULTISITE=0
