@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { getBlockMap } from '../../../blocks/products/base-utils';
+import { getBlockMap } from '@woocommerce/atomic-utils';
 
 /**
  * Maps a layout config into atomic components.

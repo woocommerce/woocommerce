@@ -28,7 +28,9 @@ const Editor = ( {
 	setAttributes,
 	error,
 	getProduct,
+	product,
 	isLoading,
+	clientId,
 } ) => {
 	const { productId, isPreview } = attributes;
 	const [ isEditing, setIsEditing ] = useState( ! productId );
@@ -97,7 +99,11 @@ const Editor = ( {
 								/>
 							</PanelBody>
 						</InspectorControls>
-						<LayoutEditor />
+						<LayoutEditor
+							clientId={ clientId }
+							product={ product }
+							isLoading={ isLoading }
+						/>
 					</>
 				) }
 			</BlockErrorBoundary>
