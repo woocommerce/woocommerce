@@ -327,12 +327,8 @@ class CustomizableDashboard extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getCurrentUserData,
-			isGetProfileItemsRequesting,
-			getOptions,
-			isGetOptionsRequesting,
-		} = select( 'wc-api' );
+		const { getCurrentUserData, getOptions } = select( 'wc-api' );
+
 		const userData = getCurrentUserData();
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
@@ -341,7 +337,6 @@ export default compose(
 		const withSelectData = {
 			userPrefSections: userData.dashboard_sections,
 			defaultDateRange,
-			requesting: false,
 		};
 
 		if ( isOnboardingEnabled() ) {
@@ -357,14 +352,6 @@ export default compose(
 				[ 'woocommerce_task_list_complete' ],
 				false
 			);
-			withSelectData.requesting =
-				withSelectData.requesting || isGetProfileItemsRequesting();
-			withSelectData.requesting =
-				withSelectData.requesting ||
-				isGetOptionsRequesting( [
-					'woocommerce_task_list_payments',
-					'woocommerce_task_list_hidden',
-				] );
 		}
 
 		return withSelectData;
