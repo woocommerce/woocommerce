@@ -673,7 +673,7 @@ function wc_get_product_class( $class = '', $product = null ) {
 	 * WooCommerce Post Class filter.
 	 *
 	 * @since 3.6.2
-	 * @param array      $class Array of CSS classes.
+	 * @param array      $classes Array of CSS classes.
 	 * @param WC_Product $product Product object.
 	 */
 	$classes = apply_filters( 'woocommerce_post_class', $classes, $product );
