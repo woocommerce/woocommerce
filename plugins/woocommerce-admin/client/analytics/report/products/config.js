@@ -42,7 +42,7 @@ export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
 
 const filterConfig = {
 	label: __( 'Show', 'woocommerce-admin' ),
-	staticParams: [],
+	staticParams: [ 'chartType', 'paged', 'per_page' ],
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
@@ -102,7 +102,7 @@ const variationsConfig = {
 		query.filter === 'single_product' &&
 		!! query.products &&
 		query[ 'is-variable' ],
-	staticParams: [ 'filter', 'products' ],
+	staticParams: [ 'filter', 'products', 'chartType', 'paged', 'per_page' ],
 	param: 'filter-variations',
 	filters: [
 		{

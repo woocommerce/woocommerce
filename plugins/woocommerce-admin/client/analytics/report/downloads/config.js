@@ -27,7 +27,7 @@ export const charts = applyFilters( DOWLOADS_REPORT_CHARTS_FILTER, [
 export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [],
+		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [

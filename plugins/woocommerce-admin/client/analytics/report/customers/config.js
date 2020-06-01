@@ -22,7 +22,7 @@ const CUSTOMERS_REPORT_ADVANCED_FILTERS_FILTER =
 export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [],
+		staticParams: [ 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [

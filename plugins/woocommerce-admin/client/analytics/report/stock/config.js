@@ -13,7 +13,7 @@ export const showDatePicker = false;
 export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
-		staticParams: [],
+		staticParams: [ 'paged', 'per_page' ],
 		param: 'type',
 		showFilters: () => true,
 		filters: [

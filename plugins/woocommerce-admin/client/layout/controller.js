@@ -186,10 +186,14 @@ export class Controller extends Component {
 		const prevQuery = this.getQuery( prevProps.location.search );
 		const prevBaseQuery = omit(
 			this.getQuery( prevProps.location.search ),
+			'chartType',
+			'filter',
 			'paged'
 		);
 		const baseQuery = omit(
 			this.getQuery( this.props.location.search ),
+			'chartType',
+			'filter',
 			'paged'
 		);
 
