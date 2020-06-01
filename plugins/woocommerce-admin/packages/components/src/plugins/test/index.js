@@ -103,10 +103,12 @@ describe( 'Installing and activating', () => {
 describe( 'Installing and activating errors', () => {
 	let pluginsWrapper;
 	const errors = {
-		'failed-plugin': [ 'error message' ],
+		errors: {
+			'failed-plugin': [ 'error message' ],
+		},
 	};
 	const installPlugins = jest.fn().mockReturnValue( {
-		errors: { errors },
+		errors,
 	} );
 	const activatePlugins = jest.fn().mockReturnValue( {
 		success: false,
@@ -140,7 +142,7 @@ describe( 'Installing and activating errors', () => {
 
 		expect( createNotice ).toHaveBeenCalledWith(
 			'error',
-			errors[ 'failed-plugin' ][ 0 ]
+			errors.errors[ 'failed-plugin' ][ 0 ]
 		);
 	} );
 

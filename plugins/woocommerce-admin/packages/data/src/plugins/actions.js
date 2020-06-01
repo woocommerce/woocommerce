@@ -3,14 +3,13 @@
  */
 
 import { apiFetch } from '@wordpress/data-controls';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal Dependencies
  */
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { pluginNames } from './constants';
 
 export function updateActivePlugins( active, replace = false ) {
 	return {
@@ -85,16 +84,17 @@ export function* installPlugins( plugins ) {
 
 		return results;
 	} catch ( error ) {
-		const errorMsg = __(
-			'Something went wrong while trying to install your plugins.',
-			'woocommerce-admin'
-		);
-
-		yield setError( 'installPlugins', errorMsg );
-
+		yield setError( 'installPlugins', error );
 		yield setIsRequesting( 'installPlugins', false );
 
-		return errorMsg;
+		return {
+			errors: {
+				message: __(
+					'Something went wrong while trying to install your plugins.',
+					'woocommerce-admin'
+				),
+			},
+		};
 	}
 }
 
@@ -110,21 +110,22 @@ export function* activatePlugins( plugins ) {
 
 		if ( results.success && results.data.activated ) {
 			yield updateActivePlugins( results.data.activated );
+			yield setIsRequesting( 'activatePlugins', false );
 			return results;
 		}
 
 		throw new Error();
 	} catch ( error ) {
 		yield setError( 'activatePlugins', error );
-		return plugins.map( ( plugin ) => {
-			const pluginName = pluginNames[ plugin ] || plugin;
-			return sprintf(
-				__(
-					'There was an error activating %s. Please try again.',
+		yield setIsRequesting( 'activatePlugins', false );
+
+		return {
+			errors: {
+				message: __(
+					'Something went wrong while trying to activate your plugins.',
 					'woocommerce-admin'
 				),
-				pluginName
-			);
-		} );
+			}
+		};
 	}
 }
