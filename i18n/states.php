@@ -352,7 +352,6 @@ return array(
 	'GH' => array( // Ghanaian Regions.
 		'AF' => __( 'Ahafo', 'woocommerce' ),
 		'AH' => __( 'Ashanti', 'woocommerce' ),
-		'AV' => __( 'Avannaata Kommunia', 'woocommerce' ),
 		'BA' => __( 'Brong-Ahafo', 'woocommerce' ),
 		'BO' => __( 'Bono', 'woocommerce' ),
 		'BE' => __( 'Bono East', 'woocommerce' ),
