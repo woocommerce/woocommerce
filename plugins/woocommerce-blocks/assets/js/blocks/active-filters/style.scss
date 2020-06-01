@@ -3,13 +3,13 @@
 	overflow: hidden;
 
 	.wc-block-active-filters__clear-all {
+		@include font-size(regular);
 		float: right;
 		background: transparent none;
 		border: none;
 		padding: 0;
 		text-decoration: underline;
 		cursor: pointer;
-		font-size: 1em;
 
 		&:hover {
 			background: transparent none;
@@ -33,8 +33,8 @@
 			}
 
 			.wc-block-active-filters__list-item-type {
+				@include font-size(smaller);
 				text-transform: uppercase;
-				font-size: 0.7em;
 				letter-spacing: 0.1em;
 				margin: $gap 0 0;
 				display: block;
