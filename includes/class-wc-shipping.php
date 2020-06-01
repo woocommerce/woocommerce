@@ -332,7 +332,9 @@ class WC_Shipping {
 			if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 				foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
 					if ( ! $shipping_method->supports( 'shipping-zones' ) || $shipping_method->get_instance_id() ) {
+						do_action( 'woocommerce_before_get_rates_for_package', $package, $shipping_method, $this );
 						$package['rates'] = $package['rates'] + $shipping_method->get_rates_for_package( $package ); // + instead of array_merge maintains numeric keys
+						do_action( 'woocommerce_after_get_rates_for_package', $package, $shipping_method, $this );
 					}
 				}
 
