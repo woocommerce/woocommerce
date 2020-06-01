@@ -167,6 +167,7 @@ class List extends Component {
 				id={ listboxId }
 				role="listbox"
 				className={ listboxClasses }
+				tabIndex="-1"
 			>
 				{ options.map( ( option, index ) => (
 					<Button
