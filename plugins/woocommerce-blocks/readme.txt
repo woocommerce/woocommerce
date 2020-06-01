@@ -120,6 +120,10 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.6.1 - 2020-06-01 =
+
+- fix: Updated the wc_reserved_stock table for compatibility with versions of MySql < 5.6.5. [#2590](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2590)
+
 = 2.6.0 - 2020-05-25 =
 **New Blocks**
 
