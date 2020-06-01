@@ -19,14 +19,14 @@
 }
 
 .wc-block-dropdown-selector__placeholder {
-	font-size: 0.8em;
+	@include font-size(small);
 	height: 1.8em;
 	margin: 0 $gap-smallest;
 	white-space: nowrap;
 }
 
 .wc-block-dropdown-selector__input {
-	font-size: 0.8em;
+	@include font-size(small);
 	height: 1.8em;
 	min-width: 0;
 
@@ -126,7 +126,7 @@
 
 	.wc-block-dropdown-selector__selected-value__label,
 	.wc-block-dropdown-selector__selected-chip__label {
-		font-size: 0.8em;
+		@include font-size(small);
 		flex-grow: 1;
 		padding: 0;
 		text-align: left;
@@ -160,9 +160,9 @@
 }
 
 .wc-block-dropdown-selector__list-item {
+	@include font-size(small);
 	color: $core-grey-dark-600;
 	cursor: default;
-	font-size: 0.8em;
 	list-style: none;
 	margin: 0;
 	padding: 0 $gap-smallest;
