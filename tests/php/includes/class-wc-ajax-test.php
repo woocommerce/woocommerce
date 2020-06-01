@@ -76,7 +76,6 @@ class WC_AJAX_Test extends \WC_Unit_Test_Case {
 		// Refresh from DB.
 		$product = wc_get_product( $product->get_id() );
 
-		// Stock should not have been reduced because order status is 'pending'.
 		$this->assertEquals( 990, $product->get_stock_quantity() );
 		$line_items = $order->get_items();
 		foreach ( $line_items as $line_item ) {
