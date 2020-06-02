@@ -2,6 +2,12 @@
   "extends": [
     "config:base"
   ],
+  "ignoreDeps": [
+    "woocommerce/action-scheduler",
+    "woocommerce/woocommerce-admin",
+    "woocommerce/woocommerce-blocks",
+    "woocommerce/woocommerce-rest-api"
+  ],
   "packageRules": [
     {
       "packageNames": ["automattic/jetpack-autoloader"],
