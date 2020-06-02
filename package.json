@@ -12,6 +12,7 @@
   "scripts": {
     "build": "grunt && npm run makepot",
     "build-watch": "grunt watch",
+    "build:zip": "./bin/build-zip.sh",
     "lint:js": "eslint assets/js --ext=js",
     "docker:up": "npm explore @woocommerce/e2e-environment -- npm run docker:up",
     "docker:down": "npm explore @woocommerce/e2e-environment -- npm run docker:down",
