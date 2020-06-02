@@ -54,6 +54,7 @@ tests/cli/vendor
 # Composer
 /vendor/
 contributors.md
+contributors.html
 
 # Packages
 /packages/*
