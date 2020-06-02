@@ -517,6 +517,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		$properties = isset( $schema['properties'] ) ? $schema['properties'] : array();
 
 		$additional_fields = $this->get_additional_fields();
+
 		foreach ( $additional_fields as $field_name => $field_options ) {
 			// For back-compat, include any field with an empty schema
 			// because it won't be present in $this->get_item_schema().
@@ -560,8 +561,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				}
 				// Check for nested fields if $field is not a direct match.
 				$nested_fields = explode( '.', $field );
-				// A nested field is included so long as its top-level property is
-				// present in the schema.
+				// A nested field is included so long as its top-level property
+				// is present in the schema.
 				if ( in_array( $nested_fields[0], $fields, true ) ) {
 					$response_fields[] = $field;
 				}
