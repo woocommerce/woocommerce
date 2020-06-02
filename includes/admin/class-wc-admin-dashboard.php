@@ -217,7 +217,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				/**
 				 * Status widget low in stock count pre query.
 				 *
-				 * @since 5.3
+				 * @since 4.3.0
 				 * @param null|string $low_in_stock_count Low in stock count, by default null.
 				 * @param int         $stock              Low stock amount.
 				 * @param int         $nostock            No stock amount
@@ -249,7 +249,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				/**
 				 * Status widget out of stock count pre query.
 				 *
-				 * @since 5.3
+				 * @since 4.3.0
 				 * @param null|string $outofstock_count Out of stock count, by default null.
 				 * @param int         $nostock            No stock amount
 				 */
