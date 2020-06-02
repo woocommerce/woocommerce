@@ -1524,7 +1524,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test if total_sales count gets updated for canceled orders.
 	 */
-	public function test_wc_decrease_total_sales_counts() {
+	public function test_wc_update_total_sales_counts_for_cancelled_orders() {
 		$product = WC_Helper_Product::create_simple_product( true );
 		WC()->cart->add_to_cart( $product->get_id(), 3 );
 
@@ -1550,7 +1550,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test if total_sales count gets updated for deleted orders.
 	 */
-	public function test_wc_decrease_deleted_total_sales_counts() {
+	public function test_wc_update_total_sales_counts_for_deleted_orders() {
 		$product = WC_Helper_Product::create_simple_product( true );
 		WC()->cart->add_to_cart( $product->get_id(), 3 );
 
