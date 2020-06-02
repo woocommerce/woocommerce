@@ -1415,19 +1415,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Update a product's sale count based on the lookup table for previous orders.
+	 * Update a product's sale count based on query for previous orders.
 	 *
 	 * @since  4.3
-	 * @param  int $product_id Product ID.
+	 * @param  int        $product_id Product ID.
+	 * @param  null|array $exclude_order_ids An array of order IDs to exclude from the count.
 	 */
-	public function update_product_sales_by_lookup( $product_id ) {
+	public function update_product_sales_by_query( $product_id, $exclude_order_ids = null ) {
 		global $wpdb;
-		$total_sales = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT count( order_product.order_item_id ) FROM {$wpdb->prefix}wc_order_product_lookup as order_product, {$wpdb->prefix}wc_order_stats as order_stats WHERE order_product.product_id = %d AND order_product.order_id = order_stats.order_id AND order_stats.status IN ( 'wc-completed', 'wc-processing', 'wc-on-hold' )",
-				$product_id
-			)
-		);
+
+		$prepare_args = array();
+		$exclude_order_id_clause = '';
+		if ( is_array( $exclude_order_ids ) && ! empty( $exclude_order_ids ) ) {
+			$prepare_args = $exclude_order_ids;
+			$exclude_order_id_clause = 'posts.ID NOT IN ( ' . implode( ',', array_fill( 0, count( $exclude_order_ids ), '%d' ) ) . ') AND ';
+		}
+
+		$query = "SELECT SUM( order_item_meta__qty.meta_value ) AS order_item_count FROM {$wpdb->posts} AS posts " .
+			"INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id " .
+			"INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta__qty ON " .
+			"order_items.order_item_id = order_item_meta__qty.order_item_id AND order_item_meta__qty.meta_key = '_qty' " .
+			"INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta__product_id_array ON " .
+			'order_items.order_item_id = order_item_meta__product_id_array.order_item_id ' .
+			"WHERE {$exclude_order_id_clause} posts.post_type IN ( 'shop_order','shop_order_refund' ) " .
+			"AND posts.post_status IN ( 'wc-completed', 'wc-processing', 'wc-on-hold' ) " .
+			"AND ( order_item_meta__product_id_array.meta_key IN ( '_product_id', '_variation_id' ) " .
+			'AND order_item_meta__product_id_array.meta_value = %d )';
+		$prepare_args[] = $product_id;
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$total_sales = $wpdb->get_var( $wpdb->prepare( $query, $prepare_args ) );
 		$this->update_product_sales( $product_id, absint( $total_sales ), 'set' );
 	}
 

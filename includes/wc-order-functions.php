@@ -811,14 +811,19 @@ function wc_update_total_sales_counts( $order_id ) {
 		return;
 	}
 
+	$exclude_order_ids = array();
+	// When deleting a post, we want to exclude the current order id, as it hasn't yet been removed.
+	if ( 'before_delete_post' === current_action() ) {
+		$exclude_order_ids = array( $order_id );
+	}
+
 	if ( count( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
 			$product_id = $item->get_product_id();
 
 			if ( $product_id ) {
-
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales_by_lookup( $product_id );
+				$data_store->update_product_sales_by_query( $product_id, $exclude_order_ids );
 			}
 		}
 	}
@@ -841,6 +846,9 @@ function wc_update_total_sales_counts( $order_id ) {
 	do_action( 'woocommerce_recorded_sales', $order_id );
 }
 add_action( 'woocommerce_order_status_changed', 'wc_update_total_sales_counts' );
+add_action( 'trashed_post', 'wc_update_total_sales_counts' );
+add_action( 'untrashed_post', 'wc_update_total_sales_counts' );
+add_action( 'before_delete_post', 'wc_update_total_sales_counts' );
 
 /**
  * Update used coupon amount for each coupon within an order.
