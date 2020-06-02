@@ -9,17 +9,17 @@ import { createContext, useContext } from '@wordpress/element';
  * all children blocks in a given tree contained in the context with information
  * about the parent block. Typically this is used for extensibility features.
  *
- * @member {Object} InnerBlockConfigurationContext A react context object
+ * @member {Object} InnerBlockLayoutContext A react context object
  */
-const InnerBlockConfigurationContext = createContext( {
+const InnerBlockLayoutContext = createContext( {
 	parentName: '',
 	layoutStyleClassPrefix: '',
 } );
 
-export const useInnerBlockConfigurationContext = () =>
-	useContext( InnerBlockConfigurationContext );
+export const useInnerBlockLayoutContext = () =>
+	useContext( InnerBlockLayoutContext );
 
-export const InnerBlockConfigurationProvider = ( {
+export const InnerBlockLayoutContextProvider = ( {
 	parentName = '',
 	layoutStyleClassPrefix = '',
 	children,
@@ -30,13 +30,13 @@ export const InnerBlockConfigurationProvider = ( {
 	};
 
 	return (
-		<InnerBlockConfigurationContext.Provider value={ contextValue }>
+		<InnerBlockLayoutContext.Provider value={ contextValue }>
 			{ children }
-		</InnerBlockConfigurationContext.Provider>
+		</InnerBlockLayoutContext.Provider>
 	);
 };
 
-InnerBlockConfigurationProvider.propTypes = {
+InnerBlockLayoutContextProvider.propTypes = {
 	children: PropTypes.node,
 	parentName: PropTypes.string,
 	layoutStyleClassPrefix: PropTypes.string,

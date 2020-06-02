@@ -4,7 +4,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import ProductListContainer from '@woocommerce/base-components/product-list/container';
-import { InnerBlockConfigurationProvider } from '@woocommerce/shared-context';
+import { InnerBlockLayoutContextProvider } from '@woocommerce/shared-context';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 
 /**
@@ -32,7 +32,7 @@ class Block extends Component {
 		 * wc-block-{$this->block_name},
 		 */
 		return (
-			<InnerBlockConfigurationProvider
+			<InnerBlockLayoutContextProvider
 				parentName="woocommerce/all-products"
 				layoutStyleClassPrefix="wc-block-grid"
 			>
@@ -40,7 +40,7 @@ class Block extends Component {
 					attributes={ attributes }
 					urlParameterSuffix={ urlParameterSuffix }
 				/>
-			</InnerBlockConfigurationProvider>
+			</InnerBlockLayoutContextProvider>
 		);
 	}
 }
