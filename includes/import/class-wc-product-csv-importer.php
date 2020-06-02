@@ -592,7 +592,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Just skip current field.
 	 *
 	 * By default is applied wc_clean() to all not listed fields
-	 * in self::get_formating_callback(), use this method to skip any formating.
+	 * in self::get_formatting_callback(), use this method to skip any formatting.
 	 *
 	 * @param string $value Field value.
 	 *
@@ -674,11 +674,22 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Get formatting callback.
+	 * Deprecated get formatting callback method.
 	 *
+	 * @deprecated 4.3.0
 	 * @return array
 	 */
 	protected function get_formating_callback() {
+		return $this->get_formatting_callback();
+	}
+
+	/**
+	 * Get formatting callback.
+	 *
+	 * @since 4.3.0
+	 * @return array
+	 */
+	protected function get_formatting_callback() {
 
 		/**
 		 * Columns not mentioned here will get parsed with 'wc_clean'.
@@ -935,7 +946,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Map and format raw data to known fields.
 	 */
 	protected function set_parsed_data() {
-		$parse_functions = $this->get_formating_callback();
+		$parse_functions = $this->get_formatting_callback();
 		$mapped_keys     = $this->get_mapped_keys();
 		$use_mb          = function_exists( 'mb_convert_encoding' );
 
