@@ -973,6 +973,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
+			/**
+			 * Filter product importer parsed data.
+			 *
+			 * @param array $parsed_data Parsed data.
+			 * @param WC_Product_Importer $importer Importer instance.
+			 */
 			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
 		}
 	}
