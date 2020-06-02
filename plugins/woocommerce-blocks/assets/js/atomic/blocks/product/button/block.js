@@ -3,14 +3,55 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { _n, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
 import { useStoreAddToCart } from '@woocommerce/base-hooks';
-import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
 import { decodeEntities } from '@wordpress/html-entities';
 import { triggerFragmentRefresh } from '@woocommerce/base-utils';
+import {
+	useInnerBlockLayoutContext,
+	useProductDataContext,
+} from '@woocommerce/shared-context';
 
-const ProductButton = ( { product, className } ) => {
+/**
+ * Product Button Block Component.
+ *
+ * @param {Object} props             Incoming props.
+ * @param {string} [props.className] CSS Class name for the component.
+ * @param {Object} [props.product]   Optional product object. Product from context will be used if
+ *                                   this is not provided.
+ * @return {*} The component.
+ */
+const ProductButton = ( { className, ...props } ) => {
+	const productDataContext = useProductDataContext();
+	const product = props.product || productDataContext.product;
+
+	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
+	const componentClass = `${ layoutStyleClassPrefix }__product-add-to-cart`;
+
+	return (
+		<div
+			className={ classnames(
+				className,
+				componentClass,
+				'wp-block-button',
+				{
+					'is-loading': ! product,
+				}
+			) }
+		>
+			{ product ? (
+				<AddToCartButton product={ product } />
+			) : (
+				<AddToCartButtonPlaceholder />
+			) }
+		</div>
+	);
+};
+
+const AddToCartButton = ( { product } ) => {
+	const firstMount = useRef( true );
+
 	const {
 		id,
 		permalink,
@@ -19,31 +60,13 @@ const ProductButton = ( { product, className } ) => {
 		is_purchasable: isPurchasable,
 		is_in_stock: isInStock,
 	} = product;
+
 	const {
 		cartQuantity,
 		addingToCart,
 		cartIsLoading,
 		addToCart,
 	} = useStoreAddToCart( id );
-	const { layoutStyleClassPrefix } = useInnerBlockConfigurationContext();
-	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
-	const getButtonText = () => {
-		if ( addedToCart ) {
-			return sprintf(
-				// translators: %s number of products in cart.
-				_n(
-					'%d in cart',
-					'%d in cart',
-					cartQuantity,
-					'woo-gutenberg-products-block'
-				),
-				cartQuantity
-			);
-		}
-		return decodeEntities( productCartDetails.text );
-	};
-
-	const firstMount = useRef( true );
 
 	useEffect( () => {
 		// Avoid running on first mount when cart quantity is first set.
@@ -54,61 +77,85 @@ const ProductButton = ( { product, className } ) => {
 		triggerFragmentRefresh();
 	}, [ cartQuantity ] );
 
-	const wrapperClasses = classnames(
-		className,
-		`${ layoutStyleClassPrefix }__product-add-to-cart`,
-		'wp-block-button'
-	);
+	if ( cartIsLoading ) {
+		return <AddToCartButtonPlaceholder />;
+	}
 
-	const buttonClasses = classnames(
-		'wp-block-button__link',
-		'add_to_cart_button',
-		{
-			loading: addingToCart,
-			added: addedToCart,
-		}
+	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
+	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
+	const buttonAriaLabel = decodeEntities(
+		productCartDetails?.description || ''
 	);
+	const buttonText = addedToCart
+		? sprintf(
+				// translators: %s number of products in cart.
+				_n(
+					'%d in cart',
+					'%d in cart',
+					cartQuantity,
+					'woo-gutenberg-products-block'
+				),
+				cartQuantity
+		  )
+		: decodeEntities(
+				productCartDetails?.text ||
+					__( 'Add to cart', 'woo-gutenberg-products-block' )
+		  );
 
-	if ( Object.keys( product ).length === 0 || cartIsLoading ) {
+	if ( ! allowAddToCart ) {
 		return (
-			<div className={ wrapperClasses }>
-				<button className={ buttonClasses } disabled={ true } />
-			</div>
+			<a
+				href={ permalink }
+				aria-label={ buttonAriaLabel }
+				className={ classnames(
+					'wp-block-button__link',
+					'add_to_cart_button',
+					{
+						loading: addingToCart,
+						added: addedToCart,
+					}
+				) }
+				rel="nofollow"
+			>
+				{ buttonText }
+			</a>
 		);
 	}
-	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
+
 	return (
-		<div className={ wrapperClasses }>
-			{ allowAddToCart ? (
-				<button
-					onClick={ addToCart }
-					aria-label={ decodeEntities(
-						productCartDetails.description
-					) }
-					className={ buttonClasses }
-					disabled={ addingToCart }
-				>
-					{ getButtonText() }
-				</button>
-			) : (
-				<a
-					href={ permalink }
-					aria-label={ decodeEntities(
-						productCartDetails.description
-					) }
-					className={ buttonClasses }
-					rel="nofollow"
-				>
-					{ getButtonText() }
-				</a>
+		<button
+			onClick={ addToCart }
+			aria-label={ buttonAriaLabel }
+			className={ classnames(
+				'wp-block-button__link',
+				'add_to_cart_button',
+				{
+					loading: addingToCart,
+					added: addedToCart,
+				}
 			) }
-		</div>
+			disabled={ addingToCart }
+		>
+			{ buttonText }
+		</button>
+	);
+};
+
+const AddToCartButtonPlaceholder = () => {
+	return (
+		<button
+			className={ classnames(
+				'wp-block-button__link',
+				'add_to_cart_button'
+			) }
+			disabled={ true }
+		/>
 	);
 };
 
 ProductButton.propTypes = {
 	className: PropTypes.string,
-	product: PropTypes.object.isRequired,
+	product: PropTypes.object,
 };
 
 export default ProductButton;

@@ -1,2 +1,2 @@
-export * from './inner-block-configuration-context';
+export * from './inner-block-layout-context';
 export * from './product-data-context';

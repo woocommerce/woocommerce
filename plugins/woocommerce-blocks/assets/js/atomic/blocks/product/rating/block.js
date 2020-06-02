@@ -4,13 +4,30 @@
 import PropTypes from 'prop-types';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { useInnerBlockConfigurationContext } from '@woocommerce/shared-context';
+import {
+	useInnerBlockLayoutContext,
+	useProductDataContext,
+} from '@woocommerce/shared-context';
 
-const ProductRating = ( { className, product } ) => {
-	const rating = parseFloat( product.average_rating );
-	const { layoutStyleClassPrefix } = useInnerBlockConfigurationContext();
+/**
+ * Product Rating Block Component.
+ *
+ * @param {Object} props             Incoming props.
+ * @param {string} [props.className] CSS Class name for the component.
+ * @param {Object} [props.product]   Optional product object. Product from context will be used if
+ *                                   this is not provided.
+ * @return {*} The component.
+ */
+const ProductRating = ( { className, ...props } ) => {
+	const productDataContext = useProductDataContext();
+	const product = props.product || productDataContext.product;
 
-	if ( ! Number.isFinite( rating ) || rating === 0 ) {
+	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
+	const componentClass = `${ layoutStyleClassPrefix }__product-rating`;
+
+	const rating = getAverageRating( product );
+
+	if ( ! rating ) {
 		return null;
 	}
 
@@ -24,14 +41,9 @@ const ProductRating = ( { className, product } ) => {
 	);
 
 	return (
-		<div
-			className={ classnames(
-				className,
-				`${ layoutStyleClassPrefix }__product-rating`
-			) }
-		>
+		<div className={ classnames( className, componentClass ) }>
 			<div
-				className={ `${ layoutStyleClassPrefix }__product-rating__stars` }
+				className={ `${ componentClass }__stars` }
 				role="img"
 				aria-label={ ratingText }
 			>
@@ -41,9 +53,16 @@ const ProductRating = ( { className, product } ) => {
 	);
 };
 
+const getAverageRating = ( product ) => {
+	// eslint-disable-next-line camelcase
+	const rating = parseFloat( product?.average_rating || 0 );
+
+	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
+};
+
 ProductRating.propTypes = {
 	className: PropTypes.string,
-	product: PropTypes.object.isRequired,
+	product: PropTypes.object,
 };
 
 export default ProductRating;
