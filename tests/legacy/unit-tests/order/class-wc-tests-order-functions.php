@@ -1572,4 +1572,34 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
 	}
+
+	/**
+	 * Test if total_sales count gets updated for trashed and untrashed orders.
+	 */
+	public function test_wc_update_total_sales_counts_for_trashed_orders() {
+		$product = WC_Helper_Product::create_simple_product( true );
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		$order = new WC_Order( $order_id );
+		$order->update_status( 'processing' );
+
+		$this->assertEquals( 3, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		wp_trash_post( $order_id );
+
+		$this->assertEquals( 0, get_post_meta( $product->get_id(), 'total_sales', true ) );
+
+		wp_untrash_post( $order_id );
+
+		$this->assertEquals( 3, get_post_meta( $product->get_id(), 'total_sales', true ) );
+	}
 }
