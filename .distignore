@@ -1,17 +1,18 @@
 .*
 .*/
+./bin/
+./build/
+./node_modules/
+./tests/
 *.lock
 *.md
 *.zip
 babel.config.js
-bin/
-build/
 CHANGELOG.txt
 composer.*
 docker-compose.yaml
 Dockerfile
 Gruntfile.js
-node_modules/
 none
 package-lock.json
 package.json
@@ -21,4 +22,4 @@ phpunit.xml
 phpunit.xml.dist
 README.md
 renovate.json
-tests
+webpack.config.js
