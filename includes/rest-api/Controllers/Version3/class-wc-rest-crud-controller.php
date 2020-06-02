@@ -480,6 +480,24 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Get fields for an object if getter is defined.
+	 *
+	 * @param object $object  Object we are fetching response for.
+	 * @param string $context Context of the request. Can be `view` or `edit`.
+	 * @param array  $fields  List of fields to fetch.
+	 * @return array Data fetched from getters.
+	 */
+	public function fetch_fields_using_getters( $object, $context, $fields ) {
+		$data = array();
+		foreach ( $fields as $field ) {
+			if ( method_exists( $this, "api_get_$field" ) ) {
+				$data[ $field ] = $this->{"api_get_$field"}( $object, $context );
+			}
+		}
+		return $data;
+	}
+
+	/**
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Data         $object  Object data.

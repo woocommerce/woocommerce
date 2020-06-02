@@ -159,7 +159,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->get_product_data( $object, $context );
+		$fields  = $this->get_fields_for_response( $request );
+		$data    = $this->get_product_data( $object, $context, $fields );
 
 		// Add variations to variable products.
 		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
@@ -590,16 +591,50 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Fetch price HTML.
+	 * @param WC_Product $product Product object.
+	 * @param string     $context Context of request, can be `view` or `edit`.
+	 *
+	 * @return string
+	 */
+	protected function api_get_price_html( $product, $context ) {
+		return $product->get_price_html();
+	}
+
+	/**
+	 * Fetch related IDs.
+	 * @param WC_Product $product Product object.
+	 * @param string     $context Context of request, can be `view` or `edit`.
+	 *
+	 * @return array
+	 */
+	protected function api_get_related_ids( $product, $context ) {
+		return array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) );
+	}
+
+	/**
+	 * Fetch meta data.
+	 * @param WC_Product $product Product object.
+	 * @param string     $context Context of request, can be `view` or `edit`.
+	 *
+	 * @return array
+	 */
+	protected function api_get_meta_data( $product, $context ) {
+		return $product->get_meta_data();
+	}
+
+	/**
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
 	 * @param string     $context Request context.
 	 *                            Options: 'view' and 'edit'.
+	 * @param array      $fields  List of fields to fetch. If empty, then all fields will be returned.
 	 *
 	 * @return array
 	 */
-	protected function get_product_data( $product, $context = 'view' ) {
-		$data = array(
+	protected function get_product_data( $product, $context = 'view', $fields = array() ) {
+		$base_data = array(
 			'id'                    => $product->get_id(),
 			'name'                  => $product->get_name( $context ),
 			'slug'                  => $product->get_slug( $context ),
@@ -622,7 +657,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			'date_on_sale_from_gmt' => wc_rest_prepare_date_response( $product->get_date_on_sale_from( $context ) ),
 			'date_on_sale_to'       => wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ), false ),
 			'date_on_sale_to_gmt'   => wc_rest_prepare_date_response( $product->get_date_on_sale_to( $context ) ),
-			'price_html'            => $product->get_price_html(),
 			'on_sale'               => $product->is_on_sale( $context ),
 			'purchasable'           => $product->is_purchasable(),
 			'total_sales'           => $product->get_total_sales( $context ),
@@ -655,7 +689,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			'reviews_allowed'       => $product->get_reviews_allowed( $context ),
 			'average_rating'        => 'view' === $context ? wc_format_decimal( $product->get_average_rating(), 2 ) : $product->get_average_rating( $context ),
 			'rating_count'          => $product->get_rating_count(),
-			'related_ids'           => array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) ),
 			'upsell_ids'            => array_map( 'absint', $product->get_upsell_ids( $context ) ),
 			'cross_sell_ids'        => array_map( 'absint', $product->get_cross_sell_ids( $context ) ),
 			'parent_id'             => $product->get_parent_id( $context ),
@@ -668,7 +701,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			'variations'            => array(),
 			'grouped_products'      => array(),
 			'menu_order'            => $product->get_menu_order( $context ),
-			'meta_data'             => $product->get_meta_data(),
+		);
+
+		$data = array_merge(
+			$base_data,
+			$this->fetch_fields_using_getters( $product, $context, $fields )
 		);
 
 		return $data;
