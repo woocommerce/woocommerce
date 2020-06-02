@@ -402,6 +402,10 @@
 		del {
 			opacity: 0.5;
 		}
+
+		ins {
+			text-decoration: none;
+		}
 	}
 
 	.wc-block-grid__product-rating {
@@ -416,10 +420,6 @@
 	}
 
 	.wc-block-grid__products .wc-block-grid__product-onsale {
-		position: absolute;
-		right: 4px;
-		top: 4px;
-		display: inline-block;
 		background: $twentytwenty-highlights-color;
 		color: #fff;
 		font-family: $twentytwenty-headings;
@@ -427,10 +427,26 @@
 		letter-spacing: -0.02em;
 		line-height: 1.2;
 		text-transform: uppercase;
-		z-index: 1;
 		font-size: 1.5rem;
+	}
+
+	// Override style from WC Core that set its position to absolute.
+	// These rulesets can be removed once https://github.com/woocommerce/woocommerce/pull/26516 is released.
+	.wc-block-grid__products .wc-block-component__sale-badge {
+		position: static;
+	}
+	.wc-block-grid__products .wc-block-grid__product-image .wc-block-component__sale-badge {
+		position: absolute;
+	}
+
+	// These styles are not applied to the All Products atomic block, so it can be positioned normally.
+	.wc-block-grid__products .wc-block-grid__product-onsale:not(.wc-block-component__sale-badge) {
+		position: absolute;
+		right: 4px;
+		top: 4px;
 		margin: 0;
 		padding: 1rem;
+		z-index: 1;
 	}
 
 	@media only screen and (min-width: 768px) {

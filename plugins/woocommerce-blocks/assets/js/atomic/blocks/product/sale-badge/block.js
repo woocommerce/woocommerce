@@ -17,6 +17,7 @@ const ProductSaleBadge = ( { className, product, align } ) => {
 		return (
 			<div
 				className={ classnames(
+					'wc-block-component__sale-badge',
 					className,
 					alignClass,
 					`${ layoutStyleClassPrefix }__product-onsale`
