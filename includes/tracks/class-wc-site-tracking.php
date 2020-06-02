@@ -96,7 +96,7 @@ class WC_Site_Tracking {
 	public static function add_enable_tracking_function() {
 		global $wp_scripts;
 		
-		if( ! isset( $wp_scripts->registered['woo-tracks'] ) ) {
+		if ( ! isset( $wp_scripts->registered['woo-tracks'] ) ) {
 			return;
 		}
 		
