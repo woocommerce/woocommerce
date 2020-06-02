@@ -251,7 +251,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				 *
 				 * @since 4.3.0
 				 * @param null|string $outofstock_count Out of stock count, by default null.
-				 * @param int         $nostock            No stock amount
+				 * @param int         $nostock          No stock amount
 				 */
 				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
 
