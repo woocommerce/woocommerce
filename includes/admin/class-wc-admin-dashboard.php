@@ -224,7 +224,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				 */
 				$lowinstock_count = apply_filters( 'woocommerce_status_widget_low_in_stock_count_pre_query', null, $stock, $nostock );
 
-				if ( ! is_null( $lowinstock_count ) ) {
+				if ( is_null( $lowinstock_count ) ) {
 					$lowinstock_count = $wpdb->get_var(
 						$wpdb->prepare(
 							"SELECT COUNT( product_id )
@@ -255,7 +255,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				 */
 				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
 
-				if ( ! is_null( $outofstock_count ) ) {
+				if ( is_null( $outofstock_count ) ) {
 					$outofstock_count = (int) $wpdb->get_var(
 						$wpdb->prepare(
 							"SELECT COUNT( product_id )
