@@ -3,10 +3,9 @@
 }
 
 .wc-block-shipping-calculator-address__button {
-	margin-top: $gap;
 	width: 100%;
 }
 
 .wc-block-cart__shipping-calculator {
-	padding-top: $gap-large;
+	padding: em($gap-smaller) 0 em($gap-small);
 }

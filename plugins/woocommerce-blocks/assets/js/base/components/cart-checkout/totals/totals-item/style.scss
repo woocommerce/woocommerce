@@ -1,7 +1,7 @@
 .wc-block-totals-table-item {
 	display: flex;
 	flex-wrap: wrap;
-	padding: 0.625em 0;
+	padding: em($gap-small) 0;
 	width: 100%;
 }
 
