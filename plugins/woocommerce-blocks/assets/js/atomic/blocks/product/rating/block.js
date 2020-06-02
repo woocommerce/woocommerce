@@ -41,7 +41,9 @@ const ProductRating = ( { className, ...props } ) => {
 	);
 
 	return (
-		<div className={ classnames( className, componentClass ) }>
+		<div
+			className={ classnames( className, componentClass, 'star-rating' ) }
+		>
 			<div
 				className={ `${ componentClass }__stars` }
 				role="img"

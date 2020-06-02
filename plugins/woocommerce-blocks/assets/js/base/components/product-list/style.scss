@@ -56,8 +56,7 @@
 }
 
 // Extra specificity to avoid editor styles on linked images.
-.entry-content .wc-block-grid__product-image,
-.wc-block-grid__product-image {
+.wc-block-grid__products .wc-block-grid__product-image {
 	text-decoration: none;
 	display: block;
 	position: relative;
@@ -69,8 +68,7 @@
 		box-shadow: none;
 	}
 
-	.wc-block-grid__product-image__image {
-		vertical-align: middle;
+	img {
 		width: 100%;
 
 		&[hidden] {
@@ -88,6 +86,7 @@
 .edit-post-visual-editor .editor-block-list__block .wc-block-grid__product-title,
 .editor-styles-wrapper .wc-block-grid__product-title,
 .wc-block-grid__product-title {
+	font-family: inherit;
 	line-height: 1.2em;
 	font-weight: 700;
 	padding: 0;
@@ -106,23 +105,9 @@
 .wc-block-grid__product-price {
 	display: block;
 
-	.wc-block-grid__product-price__regular {
-		font-size: 0.8em;
-		line-height: 1;
-		color: #555;
-		margin-top: -0.25em;
-		display: block;
-	}
 	.wc-block-grid__product-price__value {
-		letter-spacing: -1px;
-		font-weight: 600;
-		display: block;
-		font-size: 1.25em;
-		line-height: 1.25;
-		color: #000;
-		span {
-			white-space: nowrap;
-		}
+		margin-left: 0.5em;
+
 		.is-loading &::before {
 			@include placeholder();
 			content: ".";

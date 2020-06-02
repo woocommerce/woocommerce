@@ -32,6 +32,7 @@ const ProductPrice = ( { className, ...props } ) => {
 				className={ classnames(
 					className,
 					componentClass,
+					'price',
 					'is-loading'
 				) }
 			/>
@@ -42,7 +43,7 @@ const ProductPrice = ( { className, ...props } ) => {
 	const currency = getCurrencyFromPriceResponse( prices );
 
 	return (
-		<div className={ classnames( className, componentClass ) }>
+		<div className={ classnames( className, componentClass, 'price' ) }>
 			{ hasPriceRange( prices ) ? (
 				<PriceRange
 					componentClass={ componentClass }
