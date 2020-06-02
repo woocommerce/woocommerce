@@ -58,9 +58,18 @@ abstract class WC_Legacy_Cart {
 	 * @param mixed  $value Value to set.
 	 */
 	public function __isset( $name ) {
-		if ( array_key_exists( $name, $this->cart_session_data ) || 'fees' === $name ) {
+		$legacy_keys = array_merge(
+			array(
+				'tax_display_cart',
+				'fees',
+			),
+			array_keys( $this->cart_session_data )
+		);
+
+		if ( in_array( $key, $legacy_keys, true ) ) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -163,6 +172,10 @@ abstract class WC_Legacy_Cart {
 			case 'discount_total':
 				wc_deprecated_argument( 'WC_Cart->discount_total', '2.3', 'After tax coupons are no longer supported. For more information see: https://woocommerce.wordpress.com/2014/12/upcoming-coupon-changes-in-woocommerce-2-3/' );
 				$value = 0;
+				break;
+			case 'tax_display_cart':
+				wc_deprecated_argument( 'WC_Cart->tax_display_cart', '4.3', 'Use WC_Cart->is_tax_displayed() instead.' );
+				$value = $this->is_tax_displayed();
 				break;
 		}
 		return $value;

@@ -42,13 +42,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $applied_coupons = array();
 
 	/**
-	 * Are prices in the cart displayed inc or excl tax?
-	 *
-	 * @var string
-	 */
-	public $tax_display_cart = 'incl';
-
-	/**
 	 * This stores the chosen shipping methods for the cart item packages.
 	 *
 	 * @var array
