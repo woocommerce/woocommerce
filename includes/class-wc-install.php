@@ -318,7 +318,7 @@ class WC_Install {
 		if ( $execute ) {
 			self::create_tables();
 		}
-		$queries = dbDelta( self::get_schema(), false );
+		$queries        = dbDelta( self::get_schema(), false );
 		$missing_tables = array();
 		foreach ( $queries as $table_name => $result ) {
 			if ( "Created table $table_name" === $result ) {

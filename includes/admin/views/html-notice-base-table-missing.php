@@ -9,9 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 ?>
 <div class="updated woocommerce-message">
-	<a class="woocommerce-message-close notice-dismiss"
-	   href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'base_tables_missing' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>">
-			<?php esc_html_e( 'Dismiss', 'woocommerce' ); ?>
+	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'base_tables_missing' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>">
+		<?php esc_html_e( 'Dismiss', 'woocommerce' ); ?>
 	</a>
 
 	<p>

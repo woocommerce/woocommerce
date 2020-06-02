@@ -23,10 +23,9 @@ class WCInstallTest extends \WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
 		$original_table_name = "{$wpdb->prefix}wc_tax_rate_classes";
-		$changed_table_name = "{$wpdb->prefix}wc_tax_rate_classes_2";
-
-		$clear_query = 'DROP TABLE IF EXISTS %s;';
-		$rename_table_query = 'RENAME TABLE %s to %s;';
+		$changed_table_name  = "{$wpdb->prefix}wc_tax_rate_classes_2";
+		$clear_query         = 'DROP TABLE IF EXISTS %s;';
+		$rename_table_query  = 'RENAME TABLE %s to %s;';
 
 		// Workaround to call a private function.
 		$schema = function () {
@@ -65,10 +64,9 @@ class WCInstallTest extends \WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
 		$original_table_name = "{$wpdb->prefix}wc_tax_rate_classes";
-		$changed_table_name = "{$wpdb->prefix}wc_tax_rate_classes_2";
-
-		$clear_query = 'DROP TABLE IF EXISTS %s;';
-		$rename_table_query = 'RENAME TABLE %s to %s;';
+		$changed_table_name  = "{$wpdb->prefix}wc_tax_rate_classes_2";
+		$clear_query         = 'DROP TABLE IF EXISTS %s;';
+		$rename_table_query  = 'RENAME TABLE %s to %s;';
 
 		// Workaround to call a private function.
 		$schema = function () {
