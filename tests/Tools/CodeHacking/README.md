@@ -1,170 +1,149 @@
 # Code Hacking
 
-Code hacking is a mechanism that allows to temporarily modifying PHP code files while they are loaded. It's intended to ease unit testing code that would otherwise be very difficult or impossible to test (and **only** for this - see [An important note](#an-important-note) about that).
+Code hacking is a mechanism that modifies PHP code files while they are loaded. It's intended to ease unit testing code that would otherwise be very difficult or impossible to test (and **only** for this - see [An important note](#an-important-note) about that).
 
-The code hacker consists of the following classes:
+Currently, the code hacker allows to do the following inside unit tests:
 
- * `CodeHacker`: the core class that performs the hacking and has some public configuration and activation methods.
- * `CodeHackerTestHook`: a PHPUnit hook class that wires everything so that the code hacking mechanism can be used within unit tests.
- * Hack classes inside the `Hack` folders: some predefined frequently used hacks.
+* Replace standalone functions with custom callbacks.
+* Replace invocations to public static methods with custom callbacks.
+* Create subclasses of `final` classes.
 
 ## How to use
 
 Let's go through an example.
 
-First, create a file named `class-wc-admin-hello-worlder` in `includes/admin/class-wc-admin-hello-worlder.php` with the following code:
+First, create a file named `class-wc-admin-foobar.php` in `includes/admin` with the following code:
 
 ```
 <?php
 
-class WC_Admin_Hello_Worlder {
+class WC_Admin_Foobar {
+	public function do_something_that_depends_on_an_option() {
+		return 'The option returns: ' . get_option('some_option', 'default option value');
+	}
 
-	public function say_hello( $to_who ) {
-		Logger::log_hello( $to_who );
-		$site_name = get_option( 'site_name' );
-		return "Hello {$to_who}, welcome to {$site_name}!";
+	public function do_something_that_depends_on_the_legacy_service( $what ) {
+		return 'The legacy service returns: ' . WC_Some_Legacy_Service::do_something( $what );
+	}
+}
+
+class WC_Some_Legacy_Service {
+	public static function do_something( $what ) {
+		return "The legacy service does something with: " . $what;
 	}
 }
 ```
 
-This class has two bits that are difficult to unit test: the call to `Logger::log_hello` and the `get_option` invocation. Let's see how the code hacker can help us with that. 
+This class has two bits that are difficult to unit test: the call to `WC_Some_Legacy_Service::do_something` (let's assume that we can't refactor that one) and the `get_option` invocation. Let's see how the code hacker can help us with that. 
 
-Create a file named `class-wc-tests-admin-hello-worlder.php` in `tests/unit-tests/admin` with this code:
+Now, modify `tests/legacy/mockable-functions.php` so that the returned array contains `'get_option'` (if it doesn't already), and modify `tests/legacy/classes-with-mockable-static-methods.php` so that the returned array contains `WC_Some_Legacy_Service`.
+
+Create a file named `class-wc-tests-admin-foobar.php` in `tests/unit-tests/admin` with this code:
 
 ```
 <?php
 
-use Automattic\WooCommerce\Testing\CodeHacking\CodeHacker;
-use Automattic\WooCommerce\Testing\CodeHacking\Hacks\StaticMockerHack;
-use Automattic\WooCommerce\Testing\CodeHacking\Hacks\FunctionsMockerHack;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
-class LoggerMock {
+class WC_Tests_Admin_Foobar extends WC_Unit_Test_Case {
+	public function test_functions_mocking() {
+		$tested = new WC_Admin_Foobar();
 
-	public static $_logged = null;
+		FunctionsMockerHack::add_function_mocks([
+			'get_option' => function( $name, $default = false ) {
+				return "Mocked get_option invoked for '$name'";
+			}
+		]);
 
-	public static function log_hello( $to_who ) {
-		self::$_logged = $to_who;
-	}
-}
-
-class FunctionsMock {
-
-	public static $_option_requested = null;
-	public static $_option_value     = null;
-
-	public static function get_option( $option, $default = false ) {
-		self::$_option_requested = $option;
-		return self::$_option_value;
-	}
-}
-
-class WC_Tests_Admin_Hello_Worlder extends WC_Unit_Test_Case {
-
-	public static function before_test_say_hello() {
-		CodeHacker::add_hack( new StaticMockerHack( 'Logger', 'LoggerMock' ) );
-		CodeHacker::add_hack( new FunctionsMockerHack( 'FunctionsMock' ) );
-		CodeHacker::enable();
+		$expected = "The option returns: Mocked get_option invoked for 'some_option'";
+		$actual = $tested->do_something_that_depends_on_an_option();
+		$this->assertEquals( $expected, $actual );
 	}
 
-	public function test_say_hello() {
-		FunctionsMock::$_option_value = 'MSX world';
+	public function test_static_method_mocking() {
+		$tested = new WC_Admin_Foobar();
 
-		$sut    = new WC_Admin_Hello_Worlder();
-		$actual = $sut->say_hello( 'Nestor' );
+		StaticMockerHack::add_method_mocks([
+			'WC_Some_Legacy_Service' => [
+				'do_something' => function( $what ) {
+					return "MOCKED do_something invoked for '$what'";
+				}
+			]
+		]);
 
-		$this->assertEquals( 'Hello Nestor, welcome to MSX world!', $actual );
-		$this->assertEquals( 'site_name', FunctionsMock::$_option_requested );
-		$this->assertEquals( 'Nestor', LoggerMock::$_logged );
+		$expected = "The legacy service returns: MOCKED do_something invoked for 'foobar'";
+		$actual = $tested->do_something_that_depends_on_the_legacy_service( 'foobar' );
+		$this->assertEquals( $expected, $actual );
 	}
 }
 ```
 
-Then run `vendor/bin/phpunit tests/unit-tests/admin/class-wc-tests-admin-hello-worlder.php` and see the magic happen. Note that this works because `CodeHackerTestHook` has been registered in `phpunit.xml`.
+Then run `vendor/bin/phpunit tests/legacy/unit-tests/admin/class-wc-tests-admin-foobar.php` and see the magic happen.
 
-As you can see, the basic mechanism consists of creating a `public static before_[test_method_name]` method in the test class, where you register whatever hacks you need with `CodeHacker::add_hack` and finally you invoke `CodeHacker::enable()` to enable the hacking. `StaticMockerHack` and `FunctionsMockerHack` are two of the predefined hack classes inside the `Hack` folder, see their source code for details on how they work and how to use them. 
+### Mocking functions
 
-You can define a `before_all` method too, which will run before all the tests (and before the `before_[test_method_name]` method).
+For a function to be mockable its name needs to be included in the array returned by `tests/legacy/mockable-functions.php`, so if you need to mock a function that is not included in the array, just go and add it.
 
-You might be asking why special `before_` are required if we already have PHPUnit's `setUp` method. The answer is: by the time `setUp` runs the code files to test are already loaded, so there's no way to hack them.
+Function mocks can be defined by using `FunctionsMockerHack::add_function_mocks`. This method accepts an associative array where keys are function names and values are callbacks with the same signature as the functions they are replacing.
 
-Alternatively, hacks can be defined using class and method annotations as well (with the added bonus that you don't need the `use` statements anymore):
+If you ever need to remove the configured function mocks from inside a test, you can do so by executing `FunctionsMockerHack::get_hack_instance()->reset()`. This is done automatically before each test via PHPUnit's `BeforeTestHook`, so normally you won't need to do that.
+
+Note that the code hacker is configured so that only the production code files are modified, the tests code itself is **not** modified. This means that you can use the original functions within your tests even if you have mocked them, for example the following would work:
 
 ```
-/**
- * @hack StaticMocker Logger LoggerMock
- */
-class WC_Tests_Admin_Hello_Worlder extends WC_Unit_Test_Case {
-
-	/**
-	 * @hack FunctionsMocker FunctionsMock
-	 * @hack BypassFinals
-	 */
-	public function test_say_hello() {
-            ...
-	}
-}
+//Mock get_option but only if the requested option name is 'foo'
+FunctionsMockerHack::add_function_mocks([
+    'get_option' => function($name, $default = false) {
+        return 'foo' === $name ? 'mocked value for option foo' : get_option( $name, $default );
+    }
+]);
 ```
 
-The syntax is `@hack HackClassName [hack class constructor parameters]`. Important bits:
+### Mocking public static methods
 
-* Specify constructor parameters after the class name. If a parameter has a space, enclose it in quotation marks, `""`. 
-* If the hack class is inside the `Automattic\WooCommerce\Testing\CodeHacking\Hacks` namespace you don't need to specify the namespace.
-* If the hack class name has the `Hack` suffix you can omit the suffix (e.g. `@hack FunctionsMocker` for the `FunctionsMockerHack` class).
-* If the annotation is applied to the test class definition the hack will be applied to all the tests within the class. 
-* You don't need to `CodeHacker::enable()` when using `@hack`, this will be done for you.
+For a public static method to be mockable the name of the class that defines it needs to be included in the array returned by `tests/legacy/classes-with-mockable-static-methods.php`, so if you need to mock a static method for a class that is not included in the array, just go and add it.
+ 
+Static method mocks can be defined by using `StaticMockerHack::add_method_mocks`. This method accepts an associative array where keys are class names and values are in turn associative arrays, those having method names as keys and callbacks with the same signature as the methods they are replacing as values.
+ 
+If you ever need to remove the configured static method mocks from inside a test, you can do so by executing `StaticMockerHack::get_hack_instance()->reset()`. This is done automatically before each test via PHPUnit's `BeforeTestHook`, so normally you won't need to do that.
+ 
+Note that the code hacker is configured so that only the production code files are modified, the tests code itself is **not** modified. This means that you can use the original static methods within your tests even if you have mocked them, for example the following would work:
+
+```
+StaticMockerHack::add_method_mocks([
+    'WC_Some_Legacy_Service' => [
+        //Mock WC_Some_Legacy_Service::do_something but only if the supplied parameter is 'foo'
+        'do_something' => function( $what ) {
+            return 'foo' === $what ? "MOCKED do_something invoked for '$what'" : WC_Some_Legacy_Service::do_something( $what );
+        }
+    ]
+]);
+```
+
+### Subclassing `final` classes
+
+Inside your test files you can create classes that extend classes marked as `final` thanks to the `BypassFinalsHack` that is registered at bootstrap time. No extra configuration is needed.
+
+If you want to try it out, mark the `WC_Admin_Foobar` in the previos example as `final`, then add the following to the tests file: `class WC_Admin_Foobar_Subclass extends WC_Admin_Foobar {}`. Without the hack you would get a `Class WC_Admin_Foobar_Subclass may not inherit from final class (WC_Admin_Foobar)` error when trying to run the tests. 
+
+## How it works under the hood
+
+The core of the code hacker is the `CodeHacker` class, which is based on [the Bypass Finals project](https://github.com/dg/bypass-finals) by David Grudl. This class is actually [a streamWrapper class](https://www.php.net/manual/en/class.streamwrapper.php) for the regular filesystem, most of its methods are just short-circuited to the regular PHP filesystem handling functions but the `stream_open` method contains some code that allows the magic to happen. What it does (for PHP files only) is to read the file contents and apply all the necessary modifications to it, then if the code has been modified it is stored in a temporary file which is then the one that receives any further filesystem operations instead of the original file. That way, for all practical purposes the content of the file is the "hacked" content.  
+
+The files inside `tests/Tools/CodeHacking/Hacks` implement the "hacks" (code file modifications) that are registered via `CodeHacker::add_hack` within `tests/legacy/bootstrap.php`.  
+
+A `BeforeTestHook` is used to reset all hacks to its initial state to ensure that no functions or methods are being mocked when the test starts.
+
+The functions mocker works by replacing all instances of `the_function(...)` with `FunctionsMockerHack::the_function(...)`, then `FunctionsMockerHack::__call_static` is implemented in a way that invokes the appropriate callback if defined for the invoked function, or reverts to executing the original function if not. The static methods mocker works similarly, but replacing instances of `TheClass::the_method(...)` with `StaticMockerHack::invoke__the_method__for__TheClass(...)`.   
 
 ## Creating new hacks
 
-New hacks can be created and used the same way as the predefined ones. A hack is defined as one of these:
+If you ever need to define a new hack to cover a different kind of code that's difficult to test, that's what you need to do.
 
-* A function with the signature `hack($code, $path)`.
-* An object containing a `public function hack($code, $path)`.
+First, implement the hack as a class that contains a `public function hack($code, $path)` method and a `public function reset()` method. The former takes in `$code` a string with the contents of the file pointed by `$path` and returns the modified code, the later reverts the hack to its original state (e.g. for `FunctionsMockerHack` it unregisters all the previously registered function mocks). For convenience you can make your hack a subclass of `CodeHack` but that's not mandatory.
 
-The `hack` function/method receives a string with the entire contents of the code file in `$code`, and the full path of the code file in `$path`. It must return a string with the hacked file contents (or, if no hacking is required, the unmodified value of `$code`).
-
-There's a `CodeHack` abstract class inside the `Hacks` directory that can be useful to develop new hacks, but that's provided just for convenience and it's not mandatory to use it (any class with a proper `hack` method will work).
- 
-## How it works under the hood
-
-The Code Hacker is based on [the Bypass Finals project](https://github.com/dg/bypass-finals) by David Grudl.
-
-The `CodeHacker` class is actually [a streamWrapper class](https://www.php.net/manual/en/class.streamwrapper.php) for the regular filesystem. Most of its methods are just short-circuited to the regular PHP filesystem handling functions, but the `stream_open` method contains some code that allows the magic to happen. What it does (for PHP files only) is to read the file contents and apply all the hacks to it, then if the code has been modified it is stored in a temporary file which is then the one that receives any further filesystem operations instead of the original file. That way, for all practical purposes the content of the file is the "hacked" content.   
-
-The `CodeHackerTestHook` then uses reflection to find `before_` methods and `@hack` anotations, putting everything in place right before the tests are executed.
-
-## Workaround for static mocking of already loaded code: the `StaticWrapper`
-
-Before the test hooks that configure the code hacker run there's already a significant amount of code files already loaded, as a result of WooCommerce being loaded and initialized within the unit tests bootstrap files. These code file can't be hacked using the described approach, and therefore require to _hack the hack_.
-
-A workaround for a particular case is provided. If you need to register a `StaticMockerHack` for a class that has been already loaded (you will notice because registering the hack the usual way does nothing), do the following instead:
-
-1. Add the class name (NOT the file name) to the array returned by `tests/classes-that-need-static-wrapper.php`.
-
-2. Configure the mock using `StaticWrapper::set_mock_class_for`.
-
-```
-class WC_Tests_Admin_Hello_Worlder extends WC_Unit_Test_Case {
-
-	public function test_say_hello() {
-		FunctionsMock::$_option_value = 'MSX world';
-
-		StaticWrapper::set_mock_class_for('Logger', 'LoggerMock');
-
-		$sut    = new WC_Admin_Hello_Worlder();
-		$actual = $sut->say_hello( 'Nestor' );
-
-		$this->assertEquals( 'Hello Nestor, welcome to MSX world!', $actual );
-		$this->assertEquals( 'site_name', FunctionsMock::$_option_requested );
-		$this->assertEquals( 'Nestor', LoggerMock::$_logged );
-	}
-}
-```
-
-Note that in this case you don't explicitly interact with the code hacker, neither directly nor by using `@hack` annotations.
-
-Under the hood this is hacking all the classes in the list with a "clean" `StaticWrapper`-derived class; here "clean" means that all static methods are redirected to the original class via `__callStatic`. This hacking happens at the beginning of the bootstrapping process, when nothing from WooCommerce has been loaded yet. Later on `StaticWrapper::set_mock_class_for` can be used at any time to selectively mock any static method in the class.
-
-Alternatively, you can configure mock functions instead of a mock class. See the source of `StaticWrapper` for more details.
+Second, configure the hack as required inside the `initialize_code_hacker` method in `tests/legacy/bootstrap.php`, and register it using `CodeHacker::add_hack`.
 
 ## Temporarily disabling the code hacker
 

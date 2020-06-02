@@ -5,8 +5,6 @@
  * @package WooCommerce/Testing
  */
 
-// phpcs:disable Squiz.Commenting.FunctionComment.Missing
-
 namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
 
 /**
@@ -16,6 +14,13 @@ namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
  */
 final class BypassFinalsHack extends CodeHack {
 
+	/**
+	 * Hacks code by removing "final" keywords from class definitions.
+	 *
+	 * @param string $code The code to hack.
+	 * @param string $path The path of the file containing the code to hack.
+	 * @return string The hacked code.
+	 */
 	public function hack( $code, $path ) {
 		if ( stripos( $code, 'final' ) !== false ) {
 			$tokens = $this->tokenize( $code );
@@ -27,6 +32,11 @@ final class BypassFinalsHack extends CodeHack {
 
 		return $code;
 	}
+
+	/**
+	 * Revert the hack to its initial state - nothing to do since finals can't be reverted.
+	 */
+	public function reset() {
+	}
 }
 
-// phpcs:enable Squiz.Commenting.FunctionComment.Missing

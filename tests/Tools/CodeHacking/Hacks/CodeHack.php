@@ -25,6 +25,11 @@ abstract class CodeHack {
 	abstract public function hack( $code, $path);
 
 	/**
+	 * Revert the hack to its initial state.
+	 */
+	abstract public function reset();
+
+	/**
 	 * Tokenize PHP source code.
 	 *
 	 * @param string $code PHP code to tokenize.

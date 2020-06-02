@@ -10,7 +10,6 @@
 namespace Automattic\WooCommerce\Testing\Tools\CodeHacking;
 
 use \ReflectionObject;
-use \ReflectionFunction;
 use \ReflectionException;
 
 /**
@@ -55,7 +54,7 @@ final class CodeHacker {
 	 *
 	 * @var array
 	 */
-	private static $path_white_list = array();
+	private static $paths_with_files_to_hack = array();
 
 	/**
 	 * Registered hacks.
@@ -63,13 +62,6 @@ final class CodeHacker {
 	 * @var array
 	 */
 	private static $hacks = array();
-
-	/**
-	 * Registered persistent hacks.
-	 *
-	 * @var array
-	 */
-	private static $persistent_hacks = array();
 
 	/**
 	 * Is the code hacker enabled?.
@@ -100,13 +92,6 @@ final class CodeHacker {
 	}
 
 	/**
-	 * Unregister all the non-persistent registered hacks.
-	 */
-	public static function clear_hacks() {
-		self::$hacks = self::$persistent_hacks;
-	}
-
-	/**
 	 * Check if the code hacker is enabled.
 	 *
 	 * @return bool True if the code hacker is enabled.
@@ -116,46 +101,27 @@ final class CodeHacker {
 	}
 
 	/**
-	 * Check if persistent hacks have been registered.
-	 *
-	 * @return bool True if persistent hacks have been registered.
+	 * Execute the 'reset()' method in all the registered hacks.
 	 */
-	public static function has_persistent_hacks() {
-		return count( self::$persistent_hacks ) > 0;
+	public static function reset_hacks() {
+		foreach ( self::$hacks as $hack ) {
+			call_user_func( array( $hack, 'reset' ) );
+		}
 	}
 
 	/**
 	 * Register a new hack.
 	 *
 	 * @param mixed $hack A function with signature "hack($code, $path)" or an object containing a method with that signature.
-	 * @param bool  $persistent If true, the hack will be registered as persistent (so that clear_hacks will not clear it).
 	 * @throws \Exception Invalid input.
 	 */
-	public static function add_hack( $hack, $persistent = false ) {
-		if ( ! is_callable( $hack ) && ! is_object( $hack ) ) {
-			throw new \Exception( "CodeHacker::addhack: Hacks must be either functions, or objects having a 'process(\$text, \$path)' method." );
+	public static function add_hack( $hack ) {
+		if ( ! self::is_valid_hack_object( $hack ) ) {
+			$class = get_class( $hack );
+			throw new \Exception( "CodeHacker::addhack for instance of $class: Hacks must be objects having a 'process(\$text, \$path)' method and a 'reset()' method." );
 		}
 
-		if ( ! self::is_valid_hack_callback( $hack ) && ! self::is_valid_hack_object( $hack ) ) {
-			throw new \Exception( "CodeHacker::addhack: Hacks must be either a function with a 'hack(\$code,\$path)' signature, or an object containing a public method 'hack' with that signature. " );
-		}
-
-		if ( $persistent ) {
-			self::$persistent_hacks[] = $hack;
-		}
 		self::$hacks[] = $hack;
-	}
-
-	/**
-	 * Check if the supplied argument is a valid hack callback (has two mandatory arguments).
-	 *
-	 * @param mixed $callback Argument to check.
-	 *
-	 * @return bool true if the argument is a valid hack callback, false otherwise.
-	 * @throws ReflectionException Error when instantiating ReflectionFunction.
-	 */
-	private static function is_valid_hack_callback( $callback ) {
-		return is_callable( $callback ) && HACK_CALLBACK_ARGUMENT_COUNT === ( new ReflectionFunction( $callback ) )->getNumberOfRequiredParameters();
 	}
 
 	/**
@@ -172,20 +138,34 @@ final class CodeHacker {
 
 		$ro = new ReflectionObject( ( $callback ) );
 		try {
-			$rm = $ro->getMethod( 'hack' );
-			return $rm->isPublic() && ! $rm->isStatic() && 2 === $rm->getNumberOfRequiredParameters();
+			$rm                    = $ro->getMethod( 'hack' );
+			$has_valid_hack_method = $rm->isPublic() && ! $rm->isStatic() && 2 === $rm->getNumberOfRequiredParameters();
+
+			$rm                     = $ro->getMethod( 'reset' );
+			$has_valid_reset_method = $rm->isPublic() && ! $rm->isStatic() && 0 === $rm->getNumberOfRequiredParameters();
+
+			return $has_valid_hack_method && $has_valid_reset_method;
 		} catch ( ReflectionException $exception ) {
 			return false;
 		}
 	}
 
 	/**
-	 * Set the white list of files to hack. If note set, all the PHP files will be hacked.
+	 * Initialize the code hacker.
 	 *
-	 * @param array $path_white_list Paths of the files to hack, can be relative paths.
+	 * @param array $paths Paths of the directories containing the files to hack.
+	 * @throws \Exception Invalid input.
 	 */
-	public static function set_white_list( array $path_white_list ) {
-		self::$path_white_list = $path_white_list;
+	public static function initialize( array $paths ) {
+		if ( ! is_array( $paths ) || empty( $paths ) ) {
+			throw new \Exception( 'CodeHacker::initialize - $paths must be a non-empty array with the directories containing the files to be hacked.' );
+		}
+		self::$paths_with_files_to_hack = array_map(
+			function( $path ) {
+				return realpath( $path );
+			},
+			$paths
+		);
 	}
 
 	/**
@@ -352,7 +332,7 @@ final class CodeHacker {
 	 */
 	public function stream_open( $path, $mode, $options, &$opened_path ) {
 		$use_path = (bool) ( $options & STREAM_USE_PATH );
-		if ( 'rb' === $mode && self::path_in_white_list( $path ) && 'php' === pathinfo( $path, PATHINFO_EXTENSION ) ) {
+		if ( 'rb' === $mode && self::path_in_list_of_paths_to_hack( $path ) && 'php' === pathinfo( $path, PATHINFO_EXTENSION ) ) {
 			$content = $this->native( 'file_get_contents', $path, $use_path, $this->context );
 			if ( false === $content ) {
 				return false;
@@ -511,13 +491,15 @@ final class CodeHacker {
 	 * @param string $path File path to check.
 	 *
 	 * @return bool TRUE if there's an entry in the white list that ends with $path, FALSE otherwise.
+	 *
+	 * @throws \Exception The class is not initialized.
 	 */
-	private static function path_in_white_list( $path ) {
-		if ( empty( self::$path_white_list ) ) {
-			return true;
+	private static function path_in_list_of_paths_to_hack( $path ) {
+		if ( empty( self::$paths_with_files_to_hack ) ) {
+			throw new \Exception( "CodeHacker is not initialized, it must initialized by invoking 'initialize'" );
 		}
-		foreach ( self::$path_white_list as $white_list_item ) {
-			if ( substr( $path, -strlen( $white_list_item ) ) === $white_list_item ) {
+		foreach ( self::$paths_with_files_to_hack as $white_list_item ) {
+			if ( substr( $path, 0, strlen( $white_list_item ) ) === $white_list_item ) {
 				return true;
 			}
 		}
