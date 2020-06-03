@@ -27,7 +27,14 @@ class InboxNoteAction extends Component {
 	}
 
 	handleActionClick( event ) {
-		const { action, noteId, triggerNoteAction } = this.props;
+		const {
+			action,
+			actionCallback,
+			noteId,
+			triggerNoteAction,
+			removeAllNotes,
+			removeNote,
+		} = this.props;
 		const href = event.target.href || '';
 		let inAction = true;
 
@@ -37,23 +44,32 @@ class InboxNoteAction extends Component {
 			window.open( href, '_blank' );
 		}
 
-		this.setState( { inAction }, () =>
-			triggerNoteAction( noteId, action.id )
-		);
+		if ( ! action ) {
+			if ( noteId ) {
+				removeNote( noteId );
+			} else {
+				removeAllNotes();
+			}
+			actionCallback( true );
+		} else {
+			this.setState( { inAction }, () =>
+				triggerNoteAction( noteId, action.id )
+			);
+		}
 	}
 
 	render() {
-		const { action } = this.props;
+		const { action, dismiss, label } = this.props;
 		return (
 			<Button
 				isDefault
-				isPrimary={ action.primary }
+				isPrimary={ dismiss || action.primary }
 				isBusy={ this.state.inAction }
 				disabled={ this.state.inAction }
-				href={ action.url || undefined }
+				href={ action ? action.url : undefined }
 				onClick={ this.handleActionClick }
 			>
-				{ action.label }
+				{ dismiss ? label : action.label }
 			</Button>
 		);
 	}
@@ -61,6 +77,9 @@ class InboxNoteAction extends Component {
 
 InboxNoteAction.propTypes = {
 	noteId: PropTypes.number,
+	label: PropTypes.string,
+	dismiss: PropTypes.bool,
+	actionCallback: PropTypes.func,
 	action: PropTypes.shape( {
 		id: PropTypes.number.isRequired,
 		url: PropTypes.string,
@@ -71,9 +90,13 @@ InboxNoteAction.propTypes = {
 
 export default compose(
 	withDispatch( ( dispatch ) => {
-		const { triggerNoteAction } = dispatch( 'wc-api' );
+		const { removeAllNotes, removeNote, triggerNoteAction } = dispatch(
+			'wc-api'
+		);
 
 		return {
+			removeAllNotes,
+			removeNote,
 			triggerNoteAction,
 		};
 	} )

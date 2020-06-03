@@ -62,7 +62,6 @@ class WC_Admin_Notes_Migrate_From_Shopify {
 		$note->set_title( __( 'Do you want to migrate from Shopify to WooCommerce?', 'woocommerce-admin' ) );
 		$note->set_content( __( 'Changing eCommerce platforms might seem like a big hurdle to overcome, but it is easier than you might think to move your products, customers, and orders to WooCommerce. This article will help you with going through this process.', 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );

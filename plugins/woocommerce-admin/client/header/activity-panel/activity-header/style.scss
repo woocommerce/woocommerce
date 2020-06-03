@@ -27,3 +27,22 @@
 		background: $core-grey-light-700;
 	}
 }
+
+.woocommerce-layout__inbox-panel-header {
+	padding: 15px 43px 10px;
+	h3 {
+		margin: 5px 0;
+		font-weight: 500;
+	}
+	span {
+		margin-left: 7px;
+		background: #40464d;
+		border-radius: 0.8em;
+		color: $core-grey-light-200;
+		display: inline-block;
+		text-align: center;
+		width: 1.6em;
+		font-size: 14px;
+		vertical-align: top;
+	}
+}

@@ -122,7 +122,6 @@ class NoteActions extends Notes {
 				'note_type'    => $note->get_type(),
 				'note_title'   => $note->get_title(),
 				'note_content' => $note->get_content(),
-				'note_icon'    => $note->get_icon(),
 				'action_name'  => $triggered_action->name,
 				'action_label' => $triggered_action->label,
 			)

@@ -37,8 +37,14 @@ const isGetNotesRequesting = ( getResource ) => ( query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
+const getUndoDismissRequesting = ( getResource ) => () => {
+	const resourceName = 'note-undo-dismiss';
+	return getResource( resourceName );
+};
+
 export default {
 	getNotes,
 	getNotesError,
 	isGetNotesRequesting,
+	getUndoDismissRequesting,
 };

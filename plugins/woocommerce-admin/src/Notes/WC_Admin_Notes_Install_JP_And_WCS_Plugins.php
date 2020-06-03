@@ -48,7 +48,6 @@ class WC_Admin_Notes_Install_JP_And_WCS_Plugins {
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_ADMIN_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'plugins' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(

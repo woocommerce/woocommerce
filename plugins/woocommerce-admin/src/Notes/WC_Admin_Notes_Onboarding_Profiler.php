@@ -47,7 +47,6 @@ class WC_Admin_Notes_Onboarding_Profiler {
 		$note->set_title( __( 'Welcome to WooCommerce! Set up your store and start selling', 'woocommerce-admin' ) );
 		$note->set_content( __( "We're here to help you going through the most important steps to get your store up and running.", 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
-		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );

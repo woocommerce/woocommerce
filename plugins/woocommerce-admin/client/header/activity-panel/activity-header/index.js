@@ -13,17 +13,27 @@ import { EllipsisMenu, H } from '@woocommerce/components';
 
 class ActivityHeader extends Component {
 	render() {
-		const { title, className, menu } = this.props;
+		const { className, menu, subtitle, title, unreadMessages } = this.props;
 		const cardClassName = classnames(
-			'woocommerce-layout__activity-panel-header',
+			{
+				'woocommerce-layout__inbox-panel-header': subtitle,
+				'woocommerce-layout__activity-panel-header': ! subtitle,
+			},
 			className
 		);
+		const countUnread = unreadMessages ? unreadMessages : 0;
 
 		return (
 			<div className={ cardClassName }>
 				<H className="woocommerce-layout__activity-panel-header-title">
 					{ title }
+					{ countUnread > 0 && <span>{ unreadMessages }</span> }
 				</H>
+				{ subtitle && (
+					<div className="woocommerce-layout__activity-panel-header-subtitle">
+						{ subtitle }
+					</div>
+				) }
 				{ menu && (
 					<div className="woocommerce-layout__activity-panel-header-menu">
 						{ menu }
@@ -36,7 +46,9 @@ class ActivityHeader extends Component {
 
 ActivityHeader.propTypes = {
 	className: PropTypes.string,
+	unreadMessages: PropTypes.number,
 	title: PropTypes.string.isRequired,
+	subtitle: PropTypes.string,
 	menu: PropTypes.shape( {
 		type: PropTypes.oneOf( [ EllipsisMenu ] ),
 	} ),

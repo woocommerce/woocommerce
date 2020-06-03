@@ -52,7 +52,6 @@ class WC_Admin_Notes_Personalize_Store {
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'notice' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action( 'personalize-homepage', __( 'Personalize homepage', 'woocommerce-admin' ), admin_url( 'post.php?post=' . $homepage_id . '&action=edit' ), WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED, true );

@@ -24,7 +24,6 @@ class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 		$note->set_title( 'PHPUNIT_TEST_MARKETING_NOTE' );
 		$note->set_content( 'PHPUNIT_TEST_MARKETING_NOTE_CONTENT' );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING );
-		$note->set_icon( 'info' );
 		$note->set_name( 'PHPUNIT_TEST_MARKETING_NOTE_NAME' );
 		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_is_snoozable( false );

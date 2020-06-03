@@ -21,15 +21,17 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$note->set_title( 'PHPUNIT_TEST_NOTE' );
 		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'info' );
 		$note->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_is_snoozable( false );
+		$note->set_layout( 'plain' );
+		$note->set_image( '' );
 		$note->add_action(
 			'PHPUNIT_TEST_ACTION_SLUG',
 			'PHPUNIT_TEST_ACTION_LABEL',
 			'?s=PHPUNIT_TEST_ACTION_URL'
 		);
+		$note->set_is_deleted( false );
 		$note->save();
 
 		// Load in a new instance of the note.
@@ -40,11 +42,13 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $note->get_title(), $read_note->get_title() );
 		$this->assertEquals( $note->get_content(), $read_note->get_content() );
 		$this->assertEquals( $note->get_type(), $read_note->get_type() );
-		$this->assertEquals( $note->get_icon(), $read_note->get_icon() );
 		$this->assertEquals( $note->get_name(), $read_note->get_name() );
 		$this->assertEquals( $note->get_source(), $read_note->get_source() );
 		$this->assertEquals( $note->get_is_snoozable(), '0' !== $read_note->get_is_snoozable() );
+		$this->assertEquals( $note->get_layout(), $read_note->get_layout() );
+		$this->assertEquals( $note->get_image(), $read_note->get_image() );
 		$this->assertEquals( $note->get_actions(), $read_note->get_actions() );
+		$this->assertEquals( $note->get_is_deleted(), $read_note->get_is_deleted() );
 	}
 
 	/**

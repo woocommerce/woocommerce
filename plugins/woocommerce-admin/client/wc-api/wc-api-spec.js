@@ -58,10 +58,19 @@ function createWcApiSpec() {
 					...user.operations.update( resourceNames, data ),
 				];
 			},
+			remove( resourceNames, data ) {
+				return [ ...notes.operations.remove( resourceNames, data ) ];
+			},
+			removeAll( resourceNames ) {
+				return [ ...notes.operations.removeAll( resourceNames ) ];
+			},
 			updateLocally( resourceNames, data ) {
 				return [
 					...items.operations.updateLocally( resourceNames, data ),
 				];
+			},
+			undoRemoveAll( resourceNames, data ) {
+				return [ ...notes.operations.undoRemoveAll( resourceNames, data ) ];
 			},
 		},
 	};

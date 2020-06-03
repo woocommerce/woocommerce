@@ -63,7 +63,6 @@ class WC_Admin_Notes_Onboarding_Payments {
 		$note->set_title( __( 'Start accepting payments on your store!', 'woocommerce-admin' ) );
 		$note->set_content( __( 'Take payments with the provider that’s right for you - choose from 100+ payment gateways for WooCommerce.', 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'credit-card' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );

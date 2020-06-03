@@ -315,7 +315,6 @@ class WC_Admin_Notes_Order_Milestones {
 		$note_action = $this->get_note_action_for_milestone( $current_milestone );
 		$note->add_action( $note_action['name'], $note_action['label'], $note_action['query'] );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_icon( 'trophy' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->save();

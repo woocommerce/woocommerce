@@ -30,10 +30,12 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			'locale'       => $note->get_locale(),
 			'title'        => $note->get_title(),
 			'content'      => $note->get_content(),
-			'icon'         => $note->get_icon(),
 			'status'       => $note->get_status(),
 			'source'       => $note->get_source(),
 			'is_snoozable' => (int) $note->get_is_snoozable(),
+			'layout'       => $note->get_layout(),
+			'image'        => $note->get_image(),
+			'is_deleted'   => (int) $note->get_is_deleted(),
 		);
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data() );
@@ -71,7 +73,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		if ( 0 !== $note_id || '0' !== $note_id ) {
 			$note_row = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT name, type, locale, title, content, icon, content_data, status, source, date_created, date_reminder, is_snoozable FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
+					"SELECT name, type, locale, title, content, content_data, status, source, date_created, date_reminder, is_snoozable, layout, image FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
 					$note->get_id()
 				)
 			);
@@ -94,7 +96,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_locale( $note_row->locale );
 			$note->set_title( $note_row->title );
 			$note->set_content( $note_row->content );
-			$note->set_icon( $note_row->icon );
 
 			// The default for 'content_value' used to be an array, so there might be rows with invalid data!
 			$content_data = json_decode( $note_row->content_data );
@@ -110,6 +111,8 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_date_created( $note_row->date_created );
 			$note->set_date_reminder( $note_row->date_reminder );
 			$note->set_is_snoozable( $note_row->is_snoozable );
+			$note->set_layout( $note_row->layout );
+			$note->set_image( $note_row->image );
 			$this->read_actions( $note );
 			$note->read_meta_data();
 			$note->set_object_read( true );
@@ -154,13 +157,15 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 					'locale'        => $note->get_locale(),
 					'title'         => $note->get_title(),
 					'content'       => $note->get_content(),
-					'icon'          => $note->get_icon(),
 					'content_data'  => wp_json_encode( $note->get_content_data() ),
 					'status'        => $note->get_status(),
 					'source'        => $note->get_source(),
 					'date_created'  => $date_created_to_db,
 					'date_reminder' => $date_reminder_to_db,
 					'is_snoozable'  => $note->get_is_snoozable(),
+					'layout'        => $note->get_layout(),
+					'image'         => $note->get_image(),
+					'is_deleted'    => $note->get_is_deleted(),
 				),
 				array( 'note_id' => $note->get_id() )
 			);
@@ -334,7 +339,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		$query = $wpdb->prepare(
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']} LIMIT %d, %d",
+			"SELECT note_id, title, content, layout, image FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']} LIMIT %d, %d",
 			$offset,
 			$args['per_page']
 		);
@@ -396,6 +401,10 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			}
 		}
 
+		$escaped_is_deleted = '';
+		if ( isset( $args['is_deleted'] ) ) {
+			$escaped_is_deleted = esc_sql( $args['is_deleted'] );
+		}
 		$escaped_where_types  = implode( ',', $where_type_array );
 		$escaped_status_types = implode( ',', $where_status_array );
 		$where_clauses        = '';
@@ -407,6 +416,8 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		if ( ! empty( $escaped_status_types ) ) {
 			$where_clauses .= " AND status IN ($escaped_status_types)";
 		}
+
+		$where_clauses .= $escaped_is_deleted ? ' AND is_deleted = 1' : ' AND is_deleted = 0';
 
 		/**
 		 * Filter the notes WHERE clause before retrieving the data.

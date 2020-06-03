@@ -93,10 +93,14 @@ class ActivityPanel extends Component {
 		} ) );
 	}
 
-	handleClickOutside() {
+	handleClickOutside( event ) {
 		const { isPanelOpen, currentTab } = this.state;
+		const isClickOnModalOrSnackbar =
+			event.target.closest(
+				'.woocommerce-inbox-dismiss-confirmation_modal'
+			) || event.target.closest( '.components-snackbar__action' );
 
-		if ( isPanelOpen ) {
+		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
 			this.togglePanel( currentTab );
 		}
 	}

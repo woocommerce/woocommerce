@@ -125,7 +125,6 @@ class WC_Admin_Notes_New_Sales_Record {
 			$note->set_content( $content );
 			$note->set_content_data( $content_data );
 			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-			$note->set_icon( 'trophy' );
 			$note->set_name( self::NOTE_NAME );
 			$note->set_source( 'woocommerce-admin' );
 			$note->add_action( 'view-report', __( 'View report', 'woocommerce-admin' ), $report_url );

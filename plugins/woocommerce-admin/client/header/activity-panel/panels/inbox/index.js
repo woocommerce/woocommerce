@@ -4,18 +4,19 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import Gridicon from 'gridicons';
 import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { ActivityCard, ActivityCardPlaceholder } from '../../activity-card';
+import { ActivityCard } from '../../activity-card';
+import InboxNotePlaceholder from './placeholder';
 import ActivityHeader from '../../activity-header';
 import InboxNoteCard from './card';
 import { EmptyContent, Section } from '@woocommerce/components';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
+import { getUnreadNotesCount, hasValidNotes } from './utils';
 
 class InboxPanel extends Component {
 	constructor( props ) {
@@ -35,7 +36,7 @@ class InboxPanel extends Component {
 			<ActivityCard
 				className="woocommerce-empty-activity-card"
 				title={ __( 'Your inbox is empty', 'woocommerce-admin' ) }
-				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
+				icon={ false }
 			>
 				{ __(
 					'As things begin to happen in your store your inbox will start to fill up. ' +
@@ -46,26 +47,52 @@ class InboxPanel extends Component {
 		);
 	}
 
-	renderNotes() {
-		const { lastRead, notes } = this.props;
+	renderNotes( hasNotes ) {
+		const {
+			isDismissUndoRequesting,
+			isDismissAllUndoRequesting,
+			lastRead,
+			notes,
+		} = this.props;
 
-		if ( Object.keys( notes ).length === 0 ) {
+		if ( isDismissAllUndoRequesting ) {
+			return;
+		}
+
+		if ( ! hasNotes ) {
 			return this.renderEmptyCard();
 		}
 
 		const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
-		return notesArray.map( ( note ) => (
-			<InboxNoteCard
-				key={ note.id }
-				note={ note }
-				lastRead={ lastRead }
-			/>
-		) );
+		return notesArray.map( ( note ) => {
+			if ( isDismissUndoRequesting === note.id ) {
+				return (
+					<InboxNotePlaceholder
+						className="banner message-is-unread"
+						key={ note.id }
+					/>
+				);
+			}
+			return (
+				<InboxNoteCard
+					key={ note.id }
+					note={ note }
+					lastRead={ lastRead }
+				/>
+			);
+		} );
 	}
 
 	render() {
-		const { isError, isRequesting } = this.props;
+		const {
+			isError,
+			isRequesting,
+			isUndoRequesting,
+			isDismissAllUndoRequesting,
+			lastRead,
+			notes,
+		} = this.props;
 
 		if ( isError ) {
 			const title = __(
@@ -90,20 +117,32 @@ class InboxPanel extends Component {
 			);
 		}
 
+		const hasNotes = hasValidNotes( notes );
+
 		return (
 			<Fragment>
-				<ActivityHeader title={ __( 'Inbox', 'woocommerce-admin' ) } />
+				{ ( hasNotes || isRequesting || isUndoRequesting ) && (
+					<ActivityHeader
+						title={ __( 'Inbox', 'woocommerce-admin' ) }
+						subtitle={ __(
+							'Insights and growth tips for your business',
+							'woocommerce-admin'
+						) }
+						unreadMessages={ getUnreadNotesCount(
+							notes,
+							lastRead
+						) }
+					/>
+				) }
+				{ ( isRequesting || isDismissAllUndoRequesting ) && (
+					<Section>
+						<InboxNotePlaceholder className="banner message-is-unread" />
+					</Section>
+				) }
 				<Section>
-					{ isRequesting ? (
-						<ActivityCardPlaceholder
-							className="woocommerce-inbox-activity-card"
-							hasAction
-							hasDate
-							lines={ 2 }
-						/>
-					) : (
-						this.renderNotes()
-					) }
+					{ ! isRequesting &&
+						! isDismissAllUndoRequesting &&
+						this.renderNotes( hasNotes ) }
 				</Section>
 			</Fragment>
 		);
@@ -117,6 +156,7 @@ export default compose(
 			getNotes,
 			getNotesError,
 			isGetNotesRequesting,
+			getUndoDismissRequesting,
 		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
 		const inboxQuery = {
@@ -132,22 +172,32 @@ export default compose(
 				'title',
 				'content',
 				'type',
-				'icon',
 				'status',
 				'actions',
 				'date_created',
 				'date_created_gmt',
+				'layout',
+				'image',
+				'is_deleted',
 			],
 		};
 
 		const notes = getNotes( inboxQuery );
 		const isError = Boolean( getNotesError( inboxQuery ) );
 		const isRequesting = isGetNotesRequesting( inboxQuery );
+		const {
+			isUndoRequesting,
+			isDismissUndoRequesting,
+			isDismissAllUndoRequesting,
+		} = getUndoDismissRequesting();
 
 		return {
 			notes,
 			isError,
 			isRequesting,
+			isUndoRequesting,
+			isDismissUndoRequesting,
+			isDismissAllUndoRequesting,
 			lastRead: userData.activity_panel_inbox_last_read,
 		};
 	} ),

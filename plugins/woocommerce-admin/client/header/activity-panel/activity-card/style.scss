@@ -8,15 +8,18 @@
 	border-bottom: 1px solid $core-grey-light-400;
 	color: $gray-text;
 	@include font-size( 13 );
-	display: grid;
-	grid-template-columns: 84px 1fr;
-	grid-template-areas:
-		'icon header'
-		'icon body'
-		'icon actions';
 
-	@include breakpoint( '<782px' ) {
-		grid-template-columns: 76px 1fr;
+	&:not(.woocommerce-empty-activity-card) {
+		display: grid;
+		grid-template-columns: 84px 1fr;
+		grid-template-areas:
+			'icon header'
+			'icon body'
+			'icon actions';
+
+		@include breakpoint( '<782px' ) {
+			grid-template-columns: 76px 1fr;
+		}
 	}
 }
 
@@ -51,6 +54,14 @@
 		margin: 0;
 		@include font-size( 13 );
 		order: 2;
+
+		.woocommerce-empty-activity-card & {
+			color: $dark-gray-primary;
+			@include font-size( 16 );
+			font-style: normal;
+			line-height: 24px;
+			font-weight: normal;
+		}
 	}
 
 	.woocommerce-activity-card__date {
@@ -99,6 +110,13 @@
 
 	& > p:last-child {
 		margin-bottom: 0;
+	}
+	.woocommerce-empty-activity-card & {
+		color: $medium-gray-text;
+		font-style: normal;
+		font-weight: normal;
+		@include font-size( 14 );
+		line-height: 20px;
 	}
 }
 
@@ -359,9 +377,7 @@
 }
 
 .woocommerce-empty-activity-card {
-	grid-template-columns: 72px 1fr;
-
-	@include breakpoint( '<782px' ) {
-		grid-template-columns: 64px 1fr;
-	}
+	background: $core-grey-light-200;
+	margin: 20px;
+	border-bottom: unset;
 }

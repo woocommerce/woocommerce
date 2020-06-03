@@ -46,7 +46,6 @@ class WC_Admin_Notes_EU_VAT_Number {
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_MARKETING );
-		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
