@@ -8,6 +8,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use Automattic\WooCommerce\Admin\Loader;
+
 /**
  * Contains backend logic for the dashboard feature.
  */
@@ -81,8 +83,9 @@ class AnalyticsDashboard {
 	 */
 	public function register_page() {
 		$features = wc_admin_get_feature_config();
-		$id       = $features['homepage'] ? 'woocommerce-home' : 'woocommerce-dashboard';
-		$title    = $features['homepage'] ? __( 'Home', 'woocommerce-admin' ) : __( 'Dashboard', 'woocommerce-admin' );
+		$homepage_enabled = Loader::is_homepage_enabled( $features );
+		$id       = $homepage_enabled ? 'woocommerce-home' : 'woocommerce-dashboard';
+		$title    = $homepage_enabled ? __( 'Home', 'woocommerce-admin' ) : __( 'Dashboard', 'woocommerce-admin' );
 
 		wc_admin_register_page(
 			array(

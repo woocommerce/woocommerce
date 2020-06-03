@@ -20,6 +20,8 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
+import { getSetting } from '@woocommerce/wc-admin-settings';
+
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ 'analytics/report' )
 );
@@ -44,7 +46,7 @@ const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
-export const getPages = () => {
+export const getPages = ( homepageEnabled ) => {
 	const pages = [];
 	const initialBreadcrumbs = [ [ '', wcSettings.woocommerceTranslation ] ];
 
@@ -72,7 +74,7 @@ export const getPages = () => {
 
 	if (
 		window.wcAdminFeatures[ 'analytics-dashboard' ] &&
-		! window.wcAdminFeatures.homepage
+		! homepageEnabled
 	) {
 		pages.push( {
 			container: Dashboard,
@@ -85,7 +87,7 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures.homepage ) {
+	if ( homepageEnabled ) {
 		pages.push( {
 			container: Homepage,
 			path: '/',
@@ -98,7 +100,7 @@ export const getPages = () => {
 	}
 
 	if ( window.wcAdminFeatures.analytics ) {
-		if ( window.wcAdminFeatures.homepage ) {
+		if ( homepageEnabled ) {
 			pages.push( {
 				container: Dashboard,
 				path: '/analytics/overview',
@@ -114,7 +116,7 @@ export const getPages = () => {
 			} );
 		}
 		const ReportWpOpenMenu = `toplevel_page_wc-admin-path--analytics-${
-			window.wcAdminFeatures.homepage ? 'overview' : 'revenue'
+			homepageEnabled ? 'overview' : 'revenue'
 		}`;
 
 		pages.push( {
@@ -216,7 +218,7 @@ export class Controller extends Component {
 	}
 
 	render() {
-		const { page, match, location } = this.props;
+		const { page, match, location, homepageEnabled } = this.props;
 		const { url, params } = match;
 		const query = this.getQuery( location.search );
 
@@ -229,6 +231,7 @@ export class Controller extends Component {
 					path={ url }
 					pathMatch={ page.path }
 					query={ query }
+					homepageEnabled={ homepageEnabled }
 				/>
 			</Suspense>
 		);
@@ -249,9 +252,14 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	if ( isWCAdmin ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
-		const defaultPath = window.wcAdminFeatures.homepage
-			? 'homepage'
-			: 'dashboard';
+		const { woocommerce_homescreen_enabled: homepageOption } = getSetting(
+			'preloadOptions',
+			{}
+		);
+		const defaultPath =
+			window.wcAdminFeatures.homepage && homepageOption === 'yes'
+				? 'homepage'
+				: 'dashboard';
 		const path = query.path || defaultPath;
 		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
 

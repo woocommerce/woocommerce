@@ -8,6 +8,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use Automattic\WooCommerce\Admin\Loader;
+
 /**
  * Contains backend logic for the Analytics feature.
  */
@@ -76,17 +78,17 @@ class Analytics {
 	 */
 	public function register_pages() {
 		$features = wc_admin_get_feature_config();
-
+		$homepage_enabled = Loader::is_homepage_enabled( $features );
 		$report_pages = array(
 			array(
 				'id'       => 'woocommerce-analytics',
 				'title'    => __( 'Analytics', 'woocommerce-admin' ),
 				'path'     => '/analytics/overview',
-				'path'     => $features['homepage'] ? '/analytics/overview' : '/analytics/revenue',
+				'path'     => $homepage_enabled ? '/analytics/overview' : '/analytics/revenue',
 				'icon'     => 'dashicons-chart-bar',
 				'position' => 56, // After WooCommerce & Product menu items.
 			),
-			$features['homepage'] ? array(
+			$homepage_enabled ? array(
 				'id'       => 'woocommerce-analytics-overview',
 				'title'    => __( 'Overview', 'woocommerce-admin' ),
 				'parent' => 'woocommerce-analytics',

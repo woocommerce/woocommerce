@@ -25,6 +25,7 @@ import Header from 'header';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
 import TransientNotices from './transient-notices';
+import withWCApiSelect from 'wc-api/with-select';
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
 );
@@ -74,6 +75,7 @@ class _Layout extends Component {
 			installedPlugins,
 			isEmbedded,
 			isJetpackConnected,
+			homepageEnabled,
 		} = this.props;
 
 		if ( isEmbedded ) {
@@ -92,9 +94,7 @@ class _Layout extends Component {
 
 		// When pathname is `/` we are on the dashboard
 		if ( path.length === 0 ) {
-			path = window.wcAdminFeatures.homepage
-				? 'home_screen'
-				: 'dashboard';
+			path = homepageEnabled ? 'home_screen' : 'dashboard';
 		}
 
 		recordPageView( path, {
@@ -156,8 +156,9 @@ const Layout = compose(
 	withPluginsHydration( {
 		...( window.wcSettings.plugins || {} ),
 		jetpackStatus:
-			window.wcSettings.dataEndpoints &&
-			window.wcSettings.dataEndpoints.jetpackStatus || false,
+			( window.wcSettings.dataEndpoints &&
+				window.wcSettings.dataEndpoints.jetpackStatus ) ||
+			false,
 	} ),
 	withSelect( ( select, { isEmbedded } ) => {
 		// Embedded pages don't send plugin info to Tracks.
@@ -181,20 +182,18 @@ const Layout = compose(
 
 class _PageLayout extends Component {
 	render() {
+		const { homepageEnabled } = this.props;
 		return (
 			<Router history={ getHistory() }>
 				<Switch>
-					{ getPages().map( ( page ) => {
+					{ getPages( homepageEnabled ).map( ( page ) => {
 						return (
 							<Route
 								key={ page.path }
 								path={ page.path }
 								exact
 								render={ ( props ) => (
-									<Layout
-										page={ page }
-										{ ...props }
-									/>
+									<Layout page={ page } homepageEnabled={ homepageEnabled } { ...props } />
 								) }
 							/>
 						);
@@ -204,10 +203,19 @@ class _PageLayout extends Component {
 		);
 	}
 }
-// Use the useFilters HoC so PageLayout is re-rendered when filters are used to add new pages or reports
-export const PageLayout = useFilters( [ PAGES_FILTER, REPORTS_FILTER ] )(
-	_PageLayout
-);
+
+export const PageLayout = compose(
+	// Use the useFilters HoC so PageLayout is re-rendered when filters are used to add new pages or reports
+	useFilters( [ PAGES_FILTER, REPORTS_FILTER ] ),
+	withWCApiSelect( ( select ) => {
+		const { getOptions } = select( 'wc-api' );
+		const options = getOptions( [ 'woocommerce_homescreen_enabled' ] );
+		const homepageEnabled =
+			window.wcAdminFeatures.homepage &&
+			get( options, [ 'woocommerce_homescreen_enabled' ], false ) === 'yes';
+		return { homepageEnabled };
+	} )
+)( _PageLayout );
 
 export class EmbedLayout extends Component {
 	render() {

@@ -91,6 +91,8 @@ class Loader {
 		* Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
 		*/
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+
+		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 	}
 
 	/**
@@ -189,6 +191,29 @@ class Loader {
 	}
 
 	/**
+	 * Preload options to prime state of the application.
+	 *
+	 * @param array $options Array of options to preload.
+	 * @return array
+	 */
+	public function preload_options( $options ) {
+		$options[] = 'woocommerce_homescreen_enabled';
+
+		return $options;
+	}
+
+	/**
+	 * Determine if homescreen is enabled.
+	 *
+	 * @param array $features Array of features returned from wc_admin_get_feature_config.
+	 * @return bool
+	 */
+	public static function is_homepage_enabled( $features ) {
+		$option = get_option( 'woocommerce_homescreen_enabled', 'no' );
+		return $features['homepage'] && 'yes' === $option;
+	}
+
+	/**
 	 * Gets the URL to an asset file.
 	 *
 	 * @param  string $file File name (without extension).
@@ -251,7 +276,7 @@ class Loader {
 	 */
 	public static function register_page_handler() {
 		$features = wc_admin_get_feature_config();
-		$id = $features['homepage'] ? 'woocommerce-home' : 'woocommerce-dashboard';
+		$id = self::is_homepage_enabled( $features ) ? 'woocommerce-home' : 'woocommerce-dashboard';
 
 		wc_admin_register_page(
 			array(
