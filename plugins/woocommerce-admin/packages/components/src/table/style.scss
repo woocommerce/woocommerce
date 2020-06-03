@@ -71,20 +71,31 @@
 .woocommerce-table__table {
 	overflow-x: auto;
 
-	&::after {
+	&::after,
+	&::before {
 		content: '';
 		position: absolute;
-		right: 0;
 		top: 0;
-		width: 41px;
+		width: 60px;
 		height: 100%;
-		background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
 		opacity: 0;
 		pointer-events: none;
 		transition: opacity 0.3s;
+		z-index: 1;
 	}
 
-	&.is-scrollable::after {
+	&::after {
+		right: 0;
+		background: linear-gradient(90deg, rgba($white, 0), $white);
+	}
+
+	&::before {
+		left: 0;
+		background: linear-gradient(90deg, $white, rgba($white, 0));
+	}
+
+	&.is-scrollable-right::after,
+	&.is-scrollable-left::before {
 		opacity: 1;
 	}
 
