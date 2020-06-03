@@ -533,6 +533,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( isset( $this->_fields ) && is_array( $this->_fields ) && $request === $this->_request ) {
 			return $this->_fields;
 		}
+		$this->_request = $request;
 
 		$schema     = $this->get_item_schema();
 		$properties = isset( $schema['properties'] ) ? $schema['properties'] : array();
@@ -560,10 +561,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		$fields = array_keys( $properties );
 
 		if ( ! isset( $request['_fields'] ) ) {
+			$this->_fields = $fields;
 			return $fields;
 		}
 		$requested_fields = wp_parse_list( $request['_fields'] );
 		if ( 0 === count( $requested_fields ) ) {
+			$this->_fields = $fields;
 			return $fields;
 		}
 		// Trim off outside whitespace from the comma delimited list.
@@ -591,7 +594,6 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			},
 			array()
 		);
-		$this->_request = $request;
 		return $this->_fields;
 	}
 }
