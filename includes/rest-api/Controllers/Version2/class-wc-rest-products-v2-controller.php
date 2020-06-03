@@ -159,8 +159,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$fields  = $this->get_fields_for_response( $request );
-		$data    = $this->get_product_data( $object, $context, $fields );
+		$data    = $this->get_product_data( $object, $context, $request );
 
 		// Add variations to variable products.
 		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
@@ -626,14 +625,18 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get product data.
 	 *
-	 * @param WC_Product $product Product instance.
-	 * @param string     $context Request context.
-	 *                            Options: 'view' and 'edit'.
-	 * @param array      $fields  List of fields to fetch. If empty, then all fields will be returned.
+	 * @param WC_Product      $product Product instance.
+	 * @param string          $context Request context. Options: 'view' and 'edit'.
+	 * @param WP_REST_Request $request Current request object. For backward compatibility, we pass this argument silently.
 	 *
 	 * @return array
 	 */
-	protected function get_product_data( $product, $context = 'view', $fields = array() ) {
+	protected function get_product_data( $product, $context = 'view' ) {
+		$fields = array();
+		$request = func_get_arg( 2 );
+		if ( $request instanceof WP_REST_Request ) {
+			$fields = $this->get_fields_for_response( $request );
+		}
 		$base_data = array(
 			'id'                    => $product->get_id(),
 			'name'                  => $product->get_name( $context ),
