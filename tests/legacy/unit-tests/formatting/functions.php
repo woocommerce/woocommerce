@@ -699,15 +699,15 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// Test with missing UTC offset.
 		delete_option( 'gmt_offset' );
-		$this->assertEquals( 'UTC', wc_timezone_string() );
+		$this->assertContains( wc_timezone_string(), array( '+00:00', 'UTC' ) );
 
 		// Test with manually set UTC offset.
 		update_option( 'gmt_offset', -4 );
-		$this->assertNotEquals( 'UTC', wc_timezone_string() );
+		$this->assertNotContains( wc_timezone_string(), array( '+00:00', 'UTC' ) );
 
 		// Test with invalid offset.
-		update_option( 'gmt_offset', 99 );
-		$this->assertEquals( 'UTC', wc_timezone_string() );
+		update_option( 'gmt_offset', 'invalid' );
+		$this->assertContains( wc_timezone_string(), array( '+00:00', 'UTC' ) );
 
 		// Restore default.
 		update_option( 'gmt_offset', '0' );
