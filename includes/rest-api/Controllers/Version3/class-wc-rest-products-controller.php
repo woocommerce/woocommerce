@@ -1327,10 +1327,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param string     $context Request context.
 	 *                            Options: 'view' and 'edit'.
 	 * @param array      $fields  List of fields to fetch. If empty, then all fields will be returned.
+	 *                            For backward compatibility, we pass this argument silently.
 	 * @return array
 	 */
-	protected function get_product_data( $product, $context = 'view', $fields = array() ) {
-		$data = parent::get_product_data( $product, $context, $fields );
+	protected function get_product_data( $product, $context = 'view' ) {
+		$request = func_get_arg( 2 );
+		$data = parent::get_product_data( $product, $context, $request );
 
 		// Replace in_stock with stock_status.
 		$pos             = array_search( 'in_stock', array_keys( $data ), true );
