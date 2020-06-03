@@ -44,6 +44,20 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	protected $rest_base = '';
 
 	/**
+	 * Used to cache computed return fields.
+	 *
+	 * @var null|array
+	 */
+	private $_fields = null;
+
+	/**
+	 * Used to verify if cached fields are for correct request object.
+	 *
+	 * @var null|WP_REST_Request
+	 */
+	private $_request = null;
+
+	/**
 	 * Add the schema from additional fields to an schema array.
 	 *
 	 * The type of object is inferred from the passed schema.
@@ -513,6 +527,13 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @return array Fields to be included in the response.
 	 */
 	public function get_fields_for_response( $request ) {
+		// From xdebug profiling, this method could take upto 25% of request time in index calls.
+		// Cache it and make sure _fields was cached on current request object!
+		// TODO: Submit this caching behavior in core.
+		if ( isset( $this->_fields ) && is_array( $this->_fields ) && $request === $this->_request ) {
+			return $this->_fields;
+		}
+
 		$schema     = $this->get_item_schema();
 		$properties = isset( $schema['properties'] ) ? $schema['properties'] : array();
 
@@ -552,7 +573,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			$requested_fields[] = 'id';
 		}
 		// Return the list of all requested fields which appear in the schema.
-		return array_reduce(
+		$this->_fields = array_reduce(
 			$requested_fields,
 			function( $response_fields, $field ) use ( $fields ) {
 				if ( in_array( $field, $fields, true ) ) {
@@ -570,5 +591,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			},
 			array()
 		);
+		$this->_request = $request;
+		return $this->_fields;
 	}
 }
