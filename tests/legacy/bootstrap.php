@@ -35,12 +35,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
-		//phpcs:disable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
-		$classLoader = new ClassLoader();
-		$classLoader->addPsr4( 'Automattic\\WooCommerce\\Testing\\Tools\\', __DIR__ . '/../Tools', false );
-		$classLoader->register();
-		//phpcs:enable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
-
 		$this->tests_dir = dirname( __FILE__ );
 		$this->initialize_code_hacker();
 
