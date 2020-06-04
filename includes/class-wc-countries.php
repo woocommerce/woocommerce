@@ -516,7 +516,7 @@ class WC_Countries {
 					'DK'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'FR'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city_upper}\n{country}",
 					'HK'      => "{company}\n{first_name} {last_name_upper}\n{address_1}\n{address_2}\n{city_upper}\n{state_upper}\n{country}",
-					'HU'      => "{name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
+					'HU'      => "{last_name} {first_name}\n{company}\n{city}\n{address_1}\n{address_2}\n{postcode}\n{country}",
 					'IN'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {postcode}\n{state}, {country}",
 					'IS'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'IT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode}\n{city}\n{state_upper}\n{country}",
@@ -981,6 +981,27 @@ class WC_Countries {
 						),
 					),
 					'HU' => array(
+						'last_name' => array(
+							'class' => array( 'form-row-first' ),
+							'priority' => 10,
+						),
+						'first_name' => array(
+							'class' => array( 'form-row-last' ),
+							'priority' => 20,
+						),
+						'postcode' => array(
+							'class' => array( 'form-row-first', 'address-field' ),
+							'priority' => 65,
+						),
+						'city' => array(
+							'class' => array( 'form-row-last', 'address-field', 'form-row-last' ),
+						),
+						'address_1' => array(
+							'priority' => 71,
+						),
+						'address_2' => array(
+							'priority' => 72,
+						),
 						'state' => array(
 							'label' => __( 'County', 'woocommerce' ),
 						),
@@ -1039,12 +1060,12 @@ class WC_Countries {
 							'priority' => 20,
 						),
 						'postcode'   => array(
-							'class'    => array( 'form-row-first' ),
+							'class'    => array( 'form-row-first', 'address-field' ),
 							'priority' => 65,
 						),
 						'state'      => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
-							'class'    => array( 'form-row-last' ),
+							'class'    => array( 'form-row-last', 'address-field' ),
 							'priority' => 66,
 						),
 						'city'       => array(
