@@ -22,7 +22,7 @@ import { recordEvent } from 'lib/tracks';
 import { CurrencyContext } from 'lib/currency-context';
 import {
 	getIndicatorData,
-	getIndictorValues,
+	getIndicatorValues,
 } from 'dashboard/store-performance/utils';
 
 export const StatsList = ( {
@@ -62,7 +62,8 @@ export const StatsList = ( {
 					secondaryValue,
 					delta,
 					reportUrl,
-				} = getIndictorValues( {
+					reportUrlType,
+				} = getIndicatorValues( {
 					indicator: item,
 					primaryData,
 					secondaryData,
@@ -76,6 +77,7 @@ export const StatsList = ( {
 						isHomepage
 						key={ item.stat }
 						href={ reportUrl }
+						hrefType={ reportUrlType }
 						label={ item.label }
 						value={ primaryValue }
 						prevLabel={ __(

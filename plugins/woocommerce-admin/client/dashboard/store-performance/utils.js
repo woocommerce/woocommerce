@@ -11,8 +11,23 @@ import { getCurrentDates, appendTimestamp } from '@woocommerce/date';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
-export const getIndictorValues = ( {
+function getReportUrl( href, persistedQuery, primaryItem ) {
+	if ( ! href ) {
+		return '';
+	}
+
+	if ( href === '/jetpack' ) {
+		return getAdminLink( 'admin.php?page=jetpack#/dashboard' );
+	}
+
+	return getNewPath( persistedQuery, href, {
+		chart: primaryItem.chart,
+	} );
+}
+
+export const getIndicatorValues = ( {
 	indicator,
 	primaryData,
 	secondaryData,
@@ -38,12 +53,8 @@ export const getIndictorValues = ( {
 			primaryItem._links.report[ 0 ] &&
 			primaryItem._links.report[ 0 ].href ) ||
 		'';
-	const reportUrl =
-		( href &&
-			getNewPath( persistedQuery, href, {
-				chart: primaryItem.chart,
-			} ) ) ||
-		'';
+	const reportUrl = getReportUrl( href, persistedQuery, primaryItem );
+	const reportUrlType = href === '/jetpack' ? 'wp-admin' : 'wc-admin';
 	const isCurrency = primaryItem.format === 'currency';
 
 	const delta = calculateDelta( primaryItem.value, secondaryItem.value );
@@ -58,6 +69,7 @@ export const getIndictorValues = ( {
 		secondaryValue,
 		delta,
 		reportUrl,
+		reportUrlType,
 	};
 };
 

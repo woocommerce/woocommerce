@@ -10,6 +10,8 @@ export const DEFAULT_STATS = applyFilters(
 		'revenue/net_revenue',
 		'orders/orders_count',
 		'products/items_sold',
+		'jetpack/stats/visitors',
+		'jetpack/stats/views',
 	]
 );
 

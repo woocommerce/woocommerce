@@ -21,6 +21,7 @@ import Link from '../link';
 const SummaryNumber = ( {
 	delta,
 	href,
+	hrefType,
 	isOpen,
 	label,
 	onToggle,
@@ -81,6 +82,7 @@ const SummaryNumber = ( {
 			containerProps.href = href;
 			containerProps.role = 'menuitem';
 			containerProps.onClick = onLinkClickCallback;
+			containerProps.type = hrefType;
 		}
 	} else {
 		Container = 'div';
@@ -155,6 +157,11 @@ SummaryNumber.propTypes = {
 	 */
 	href: PropTypes.string,
 	/**
+	 * The type of the link
+	 */
+	hrefType: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] )
+		.isRequired,
+	/**
 	 * Boolean describing whether the menu list is open. Only applies in mobile view,
 	 * and only applies to the toggle-able item (first in the list).
 	 */
@@ -196,6 +203,7 @@ SummaryNumber.propTypes = {
 
 SummaryNumber.defaultProps = {
 	href: '',
+	hrefType: 'wc-admin',
 	isOpen: false,
 	prevLabel: __( 'Previous Period:', 'woocommerce-admin' ),
 	reverseTrend: false,

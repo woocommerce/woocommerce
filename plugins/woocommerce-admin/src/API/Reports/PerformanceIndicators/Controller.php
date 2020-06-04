@@ -231,6 +231,8 @@ class Controller extends \WC_REST_Reports_Controller {
 			$this->endpoints[ $endpoint ] = '/jetpack/v4/module/' . $item['module'] . '/data';
 			$this->formats[ $stat ]       = $item['format'];
 		}
+
+		$this->urls['jetpack/stats'] = '/jetpack';
 	}
 
 	/**
