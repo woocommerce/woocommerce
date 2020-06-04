@@ -527,6 +527,7 @@ class WC_Countries {
 					'NZ'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {postcode}\n{country}",
 					'NO'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'PL'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+					'PR'      => "{company}\n{name}\n{address_1} {address_2}\n{city} {postcode}\n{country}",
 					'PT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'SK'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'RS'      => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -1147,6 +1148,12 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+						),
+					),
+					'PR' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'PT' => array(
