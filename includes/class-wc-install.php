@@ -330,13 +330,13 @@ class WC_Install {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::add_notice( 'base_tables_missing' );
 			}
-			update_option( 'woocommerce-schema-missing-tables', $missing_tables );
+			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
 			}
-			update_option( 'woocommerce-schema-version', WC()->version );
-			delete_option( 'woocommerce-schema-missing-tables' );
+			update_option( 'woocommerce_schema_version', WC()->version );
+			delete_option( 'woocommerce_schema_missing_tables' );
 		}
 		return $missing_tables;
 	}
