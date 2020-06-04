@@ -63,10 +63,10 @@
 	},
 	"devDependencies": {
 		"@babel/cli": "7.10.1",
-		"@babel/core": "7.10.1",
+		"@babel/core": "7.10.2",
 		"@babel/plugin-proposal-class-properties": "7.10.1",
 		"@babel/polyfill": "7.10.1",
-		"@babel/preset-env": "7.10.1",
+		"@babel/preset-env": "7.10.2",
 		"@octokit/graphql": "4.5.0",
 		"@storybook/addon-a11y": "5.3.18",
 		"@storybook/addon-actions": "5.3.18",
