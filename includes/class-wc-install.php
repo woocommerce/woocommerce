@@ -335,7 +335,7 @@ class WC_Install {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
 			}
-			update_option( 'woocommerce_schema_version', WC()->version );
+			update_option( 'woocommerce_schema_version', WC()->db_version );
 			delete_option( 'woocommerce_schema_missing_tables' );
 		}
 		return $missing_tables;

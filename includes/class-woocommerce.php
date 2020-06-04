@@ -23,6 +23,15 @@ final class WooCommerce {
 	public $version = '4.3.0';
 
 	/**
+	 * WooCommerce Schema version.
+	 *
+	 * @since 4.3 started with version string 430.
+	 *
+	 * @var string
+	 */
+	public $db_version = '430';
+
+	/**
 	 * The single instance of the class.
 	 *
 	 * @var WooCommerce
