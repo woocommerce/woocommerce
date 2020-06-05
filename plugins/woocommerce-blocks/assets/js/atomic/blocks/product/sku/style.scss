@@ -1,0 +1,9 @@
+.wc-block-layout {
+	.wc-block-components-product-sku {
+		margin-top: 0;
+		margin-bottom: $gap-small;
+		display: block;
+		text-transform: uppercase;
+		@include font-size(small);
+	}
+}

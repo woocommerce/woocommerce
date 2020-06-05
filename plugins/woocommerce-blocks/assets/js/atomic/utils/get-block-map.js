@@ -13,6 +13,7 @@ import ProductRating from '../blocks/product/rating/block';
 import ProductSaleBadge from '../blocks/product/sale-badge/block';
 import ProductSummary from '../blocks/product/summary/block';
 import ProductTitle from '../blocks/product/title/frontend';
+import ProductSku from '../blocks/product/sku/block';
 
 /**
  * Map blocks to components suitable for use on the frontend.
@@ -27,5 +28,6 @@ export const getBlockMap = ( blockName ) => ( {
 	'woocommerce/product-button': ProductButton,
 	'woocommerce/product-summary': ProductSummary,
 	'woocommerce/product-sale-badge': ProductSaleBadge,
+	'woocommerce/product-sku': ProductSku,
 	...getRegisteredInnerBlocks( blockName ),
 } );

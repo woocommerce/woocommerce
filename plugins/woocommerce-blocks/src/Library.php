@@ -98,6 +98,7 @@ class Library {
 			'product-rating',
 			'product-sale-badge',
 			'product-summary',
+			'product-sku',
 		];
 		foreach ( $atomic_blocks as $atomic_block ) {
 			$instance = new \Automattic\WooCommerce\Blocks\BlockTypes\AtomicBlock( $atomic_block );

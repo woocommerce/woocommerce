@@ -8,3 +8,4 @@ import './product/rating';
 import './product/button';
 import './product/summary';
 import './product/sale-badge';
+import './product/sku';
