@@ -17,6 +17,7 @@ import classnames from 'classnames';
 import { recordEvent } from 'lib/tracks';
 import './style.scss';
 import { H, Section } from '@woocommerce/components';
+import { getUrlParams } from 'utils';
 
 class InboxNoteCard extends Component {
 	constructor( props ) {
@@ -67,21 +68,16 @@ class InboxNoteCard extends Component {
 
 	getScreenName() {
 		let screenName = '';
-		const urlParams = new URLSearchParams( window.location.search );
-
-		if ( urlParams.has( 'page' ) ) {
-			const currentPage =
-				urlParams.get( 'page' ) === 'wc-admin'
-					? 'home_screen'
-					: urlParams.get( 'page' );
-			screenName = urlParams.has( 'path' )
-				? urlParams
-						.get( 'path' )
-						.replace( /\//g, '_' )
-						.substring( 1 )
+		const { page, path, post_type: postType } = getUrlParams(
+			window.location.search
+		);
+		if ( page ) {
+			const currentPage = page === 'wc-admin' ? 'home_screen' : page;
+			screenName = path
+				? path.replace( /\//g, '_' ).substring( 1 )
 				: currentPage;
-		} else if ( urlParams.has( 'post_type' ) ) {
-			screenName = urlParams.get( 'post_type' );
+		} else if ( postType ) {
+			screenName = postType;
 		}
 		return screenName;
 	}

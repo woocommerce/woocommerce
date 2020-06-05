@@ -21,6 +21,7 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getUrlParams } from 'utils';
 
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ 'analytics/report' )
@@ -55,8 +56,7 @@ export const getPages = ( homepageEnabled ) => {
 			container: DevDocs,
 			path: '/devdocs',
 			breadcrumbs: ( { location } ) => {
-				const searchParams = new URLSearchParams( location.search );
-				const component = searchParams.get( 'component' );
+				const { component } = getUrlParams( location.search );
 
 				if ( component ) {
 					return [
