@@ -5,48 +5,17 @@ import { render } from 'react-dom';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
- * Given some block attributes, gets attributes from the dataset or uses defaults.
- *
- * @param {Object} blockAttributes Object containing block attributes.
- * @param {Array} dataset Dataset from DOM.
- * @return {Array} Array of parsed attributes.
- */
-export const getAttributesFromDataset = ( blockAttributes, dataset ) => {
-	const attributes = [];
-
-	Object.keys( blockAttributes ).forEach( ( key ) => {
-		if ( typeof dataset[ key ] !== 'undefined' ) {
-			switch ( blockAttributes[ key ].type ) {
-				case 'boolean':
-					attributes[ key ] = dataset[ key ] !== 'false';
-					break;
-				case 'number':
-					attributes[ key ] = parseInt( dataset[ key ], 10 );
-					break;
-				default:
-					attributes[ key ] = dataset[ key ];
-					break;
-			}
-		} else {
-			attributes[ key ] = blockAttributes[ key ].default;
-		}
-	} );
-
-	return attributes;
-};
-
-/**
  * Renders a block component in the place of a specified set of selectors.
  *
  * @param {Object}   props                         Render props.
- * @param {string}   props.selector                CSS selector to match the elements to replace.
  * @param {Function} props.Block                   React component to use as a replacement.
+ * @param {string}   props.selector                CSS selector to match the elements to replace.
  * @param {Function} [props.getProps ]             Function to generate the props object for the block.
  * @param {Function} [props.getErrorBoundaryProps] Function to generate the props object for the error boundary.
  */
 export const renderFrontend = ( {
-	selector,
 	Block,
+	selector,
 	getProps = () => {},
 	getErrorBoundaryProps = () => {},
 } ) => {
@@ -61,7 +30,6 @@ export const renderFrontend = ( {
 				...el.dataset,
 				...props.attributes,
 			};
-
 			el.classList.remove( 'is-loading' );
 
 			render(

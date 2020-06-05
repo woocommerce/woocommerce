@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { createContext, useContext } from '@wordpress/element';
+import classnames from 'classnames';
 
 /**
  * This context is a configuration object used for connecting
@@ -13,7 +14,8 @@ import { createContext, useContext } from '@wordpress/element';
  */
 const InnerBlockLayoutContext = createContext( {
 	parentName: '',
-	layoutStyleClassPrefix: '',
+	parentClassName: '',
+	isLoading: false,
 } );
 
 export const useInnerBlockLayoutContext = () =>
@@ -21,17 +23,25 @@ export const useInnerBlockLayoutContext = () =>
 
 export const InnerBlockLayoutContextProvider = ( {
 	parentName = '',
-	layoutStyleClassPrefix = '',
+	parentClassName = '',
+	isLoading = false,
 	children,
 } ) => {
 	const contextValue = {
 		parentName,
-		layoutStyleClassPrefix,
+		parentClassName,
+		isLoading,
 	};
 
 	return (
 		<InnerBlockLayoutContext.Provider value={ contextValue }>
-			{ children }
+			<div
+				className={ classnames( 'wc-block-layout', {
+					'wc-block-layout--is-loading': isLoading,
+				} ) }
+			>
+				{ children }
+			</div>
 		</InnerBlockLayoutContext.Provider>
 	);
 };
@@ -39,5 +49,5 @@ export const InnerBlockLayoutContextProvider = ( {
 InnerBlockLayoutContextProvider.propTypes = {
 	children: PropTypes.node,
 	parentName: PropTypes.string,
-	layoutStyleClassPrefix: PropTypes.string,
+	parentClassName: PropTypes.string,
 };

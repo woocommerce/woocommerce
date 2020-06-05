@@ -172,8 +172,8 @@ class Checkout extends AbstractBlock {
 		return '
 			<div class="wc-block-skeleton wc-block-sidebar-layout wc-block-checkout wc-block-checkout--is-loading wc-block-checkout--skeleton hidden" aria-hidden="true">
 				<div class="wc-block-main wc-block-checkout__main">
-					<div class="wc-block-component-express-checkout"></div>
-					<div class="wc-block-component-express-checkout-continue-rule"><span></span></div>
+					<div class="wc-block-components-express-checkout"></div>
+					<div class="wc-block-components-express-checkout-continue-rule"><span></span></div>
 					<form class="wc-block-checkout-form">
 						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
 							<span></span>

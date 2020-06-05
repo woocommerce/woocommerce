@@ -55,217 +55,14 @@
 	list-style: none;
 }
 
-// Extra specificity to avoid editor styles on linked images.
-.wc-block-grid__products .wc-block-grid__product-image {
-	text-decoration: none;
-	display: block;
-	position: relative;
-
-	a {
-		text-decoration: none;
-		border: 0;
-		outline: 0;
-		box-shadow: none;
-	}
-
-	img {
-		width: 100%;
-
-		&[hidden] {
-			display: none;
-		}
-
-		.is-loading & {
-			@include placeholder();
-			height: 0;
-			padding-bottom: 100%;
-		}
-	}
-}
-
-.edit-post-visual-editor .editor-block-list__block .wc-block-grid__product-title,
-.editor-styles-wrapper .wc-block-grid__product-title,
-.wc-block-grid__product-title {
-	font-family: inherit;
-	line-height: 1.2em;
-	font-weight: 700;
-	padding: 0;
-	color: inherit;
-	font-size: inherit;
-	display: block;
-
-	.is-loading &::before {
-		@include placeholder();
-		content: ".";
-		display: inline-block;
-		width: 6em;
-	}
-}
-
-.wc-block-grid__product-price {
-	display: block;
-
-	.wc-block-grid__product-price__value {
-		margin-left: 0.5em;
-
-		.is-loading &::before {
-			@include placeholder();
-			content: ".";
-			display: inline-block;
-			width: 3em;
-		}
-	}
-}
-
-.wc-block-grid__product-add-to-cart {
-	word-break: break-word;
-	white-space: normal;
-	a,
-	button {
-		word-break: break-word;
-		white-space: normal;
-		margin: 0 auto !important;
-		display: inline-flex;
-		justify-content: center;
-
-		&.loading {
-			opacity: 0.25;
-		}
-
-		&::after {
-			margin-left: 0.5em;
-			display: inline-block;
-		}
-
-		&.added::after {
-			font-family: WooCommerce; /* stylelint-disable-line */
-			content: "\e017";
-		}
-
-		&.loading::after {
-			font-family: WooCommerce; /* stylelint-disable-line */
-			content: "\e031";
-			animation: spin 2s linear infinite;
-		}
-
-		.is-loading & {
-			@include placeholder();
-			min-width: 7em;
-		}
-	}
-}
-
-.wc-block-grid__product-rating {
-	display: block;
-
-	.wc-block-grid__product-rating__stars,
-	.star-rating {
-		overflow: hidden;
-		position: relative;
-		width: 5.3em;
-		height: 1.618em;
-		line-height: 1.618;
-		font-size: 1em;
-		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-		font-family: star;
-		font-weight: 400;
-		margin: 0 auto;
-		text-align: left;
-
-		&::before {
-			content: "\53\53\53\53\53";
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			opacity: 0.5;
-			color: #aaa;
-			white-space: nowrap;
-		}
-		span {
-			overflow: hidden;
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			padding-top: 1.5em;
-		}
-		span::before {
-			content: "\53\53\53\53\53";
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			color: #000;
-			white-space: nowrap;
-		}
-	}
-}
-
-.wc-block-grid__product-onsale {
-	border: 1px solid #43454b;
-	color: #43454b;
-	background: #fff;
-	padding: 0.202em 0.6180469716em;
-	font-size: 0.875rem;
-	text-align: center;
-	text-transform: uppercase;
-	font-weight: 600;
-	display: inline-block;
-	width: auto;
-	border-radius: 3px;
-	z-index: 9;
-	position: relative;
-	margin: $gap-smaller auto;
-}
-
-.editor-styles-wrapper .wc-block-grid__products .wc-block-grid__product .wc-block-grid__product-image,
-.wc-block-grid__product-image {
-	.wc-block-grid__product-onsale {
-		&.wc-block-grid__product-onsale--alignleft {
-			position: absolute;
-			left: $gap-smaller/2;
-			top: $gap-smaller/2;
-			right: auto;
-			margin: 0;
-		}
-		&.wc-block-grid__product-onsale--aligncenter {
-			position: absolute;
-			top: $gap-smaller/2;
-			left: 50%;
-			transform: translateX(-50%);
-			margin: 0;
-		}
-		&.wc-block-grid__product-onsale--alignright {
-			position: absolute;
-			right: $gap-smaller/2;
-			top: $gap-smaller/2;
-			left: auto;
-			margin: 0;
-		}
-	}
-}
-
-// Element spacing.
-.wc-block-grid__product {
-	.wc-block-grid__product-image,
-	.wc-block-grid__product-title,
-	.wc-block-grid__product-price,
-	.wc-block-grid__product-rating,
-	.wc-block-grid__product-add-to-cart {
-		margin-top: 0;
-		margin-bottom: $gap-small;
-	}
-}
-
+.theme-twentytwenty .wc-block-grid,
 .wc-block-grid {
 	&.has-aligned-buttons {
 		.wc-block-grid__product {
 			display: flex;
 			flex-direction: column;
 		}
-		.wc-block-grid__product > .wc-block-grid__product-title:last-child,
-		.wc-block-grid__product > div:last-child {
+		.wc-block-grid__product > :last-child {
 			margin-top: auto;
 			margin-bottom: 0;
 			padding-bottom: $gap-small;
@@ -288,7 +85,6 @@
 	}
 }
 
-// Responsive media styles.
 @include breakpoint( "<480px" ) {
 	.wc-block-grid {
 		@for $i from 2 to 9 {
@@ -305,11 +101,9 @@
 				}
 			}
 		}
-		.wc-block-grid__product-image img {
-			width: 100%;
-		}
 	}
 }
+
 @include breakpoint( "480px-600px" ) {
 	.wc-block-grid {
 		@for $i from 2 to 9 {
@@ -330,121 +124,6 @@
 					}
 				}
 			}
-		}
-		.wc-block-grid__product-image img {
-			width: 100%;
-		}
-	}
-}
-
-.theme-twentysixteen {
-	.wc-block-grid {
-		// Prevent white theme styles.
-		.price ins {
-			color: #77a464;
-		}
-	}
-}
-
-.theme-twentynineteen {
-	.wc-block-grid__product {
-		font-size: 0.88889em;
-	}
-	// Change the title font to match headings.
-	.wc-block-grid__product-title,
-	.wc-block-grid__product-onsale {
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-	}
-	.wc-block-grid__product-title::before {
-		display: none;
-	}
-	.wc-block-grid__product-onsale {
-		line-height: 1;
-	}
-}
-
-.theme-twentytwenty {
-	$twentytwenty-headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-serif;
-	$twentytwenty-highlights-color: #cd2653;
-
-	.wc-block-grid__product-link {
-		color: #000;
-	}
-
-	.wc-block-grid__product-title {
-		font-family: $twentytwenty-headings;
-		color: #000;
-		font-size: 1.2em;
-	}
-
-	.wc-block-grid__product-price {
-		.wc-block-grid__product-price__value,
-		.woocommerce-Price-amount {
-			font-family: $twentytwenty-headings;
-			font-size: 0.9em;
-		}
-
-		del {
-			opacity: 0.5;
-		}
-
-		ins {
-			text-decoration: none;
-		}
-	}
-
-	.wc-block-grid__product-rating {
-		.wc-block-grid__product-rating__stars,
-		.star-rating {
-			font-size: 0.7em;
-		}
-	}
-
-	.wc-block-grid__product-add-to-cart > .wp-block-button__link {
-		font-family: $twentytwenty-headings;
-	}
-
-	.wc-block-grid__products .wc-block-grid__product-onsale {
-		background: $twentytwenty-highlights-color;
-		color: #fff;
-		font-family: $twentytwenty-headings;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		line-height: 1.2;
-		text-transform: uppercase;
-		font-size: 1.5rem;
-	}
-
-	// Override style from WC Core that set its position to absolute.
-	// These rulesets can be removed once https://github.com/woocommerce/woocommerce/pull/26516 is released.
-	.wc-block-grid__products .wc-block-component__sale-badge {
-		position: static;
-	}
-	.wc-block-grid__products .wc-block-grid__product-image .wc-block-component__sale-badge {
-		position: absolute;
-	}
-
-	// These styles are not applied to the All Products atomic block, so it can be positioned normally.
-	.wc-block-grid__products .wc-block-grid__product-onsale:not(.wc-block-component__sale-badge) {
-		position: absolute;
-		right: 4px;
-		top: 4px;
-		margin: 0;
-		padding: 1rem;
-		z-index: 1;
-	}
-
-	@media only screen and (min-width: 768px) {
-		.wc-block-grid__product-onsale {
-			font-size: 0.75em;
-			padding: 1rem;
-		}
-	}
-
-	@media only screen and (min-width: 1168px) {
-		.wc-block-grid__product-onsale {
-			font-size: 0.85em;
-			padding: 0.75em;
 		}
 	}
 }

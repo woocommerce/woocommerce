@@ -6,18 +6,16 @@ import { getRegisteredInnerBlocks } from '@woocommerce/blocks-registry';
 /**
  * Internal dependencies
  */
-import {
-	ProductTitle,
-	ProductPrice,
-	ProductButton,
-	ProductImage,
-	ProductRating,
-	ProductSummary,
-	ProductSaleBadge,
-} from '../blocks/product/block-components';
+import ProductButton from '../blocks/product/button/block';
+import ProductImage from '../blocks/product/image/frontend';
+import ProductPrice from '../blocks/product/price/block';
+import ProductRating from '../blocks/product/rating/block';
+import ProductSaleBadge from '../blocks/product/sale-badge/block';
+import ProductSummary from '../blocks/product/summary/block';
+import ProductTitle from '../blocks/product/title/frontend';
 
 /**
- * Map blocks names to components.
+ * Map blocks to components suitable for use on the frontend.
  *
  * @param {string} blockName Name of the parent block. Used to get extension children.
  */

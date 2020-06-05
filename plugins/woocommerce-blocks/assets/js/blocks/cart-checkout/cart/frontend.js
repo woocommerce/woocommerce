@@ -11,7 +11,7 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/block-settings';
 import { __experimentalCreateInterpolateElement } from 'wordpress-element';
 import {
 	renderFrontend,
-	getAttributesFromDataset,
+	getValidBlockAttributes,
 } from '@woocommerce/base-utils';
 
 /**
@@ -37,7 +37,7 @@ const CartFrontend = ( props ) => {
 const getProps = ( el ) => {
 	return {
 		emptyCart: el.innerHTML,
-		attributes: getAttributesFromDataset( blockAttributes, el.dataset ),
+		attributes: getValidBlockAttributes( blockAttributes, el.dataset ),
 	};
 };
 

@@ -2,16 +2,15 @@
  * External dependencies
  */
 import { StoreNoticesProvider } from '@woocommerce/base-context';
-import {
-	renderFrontend,
-	getAttributesFromDataset,
-} from '@woocommerce/base-utils';
+import { getValidBlockAttributes } from '@woocommerce/base-utils';
+import { renderParentBlock } from '@woocommerce/atomic-utils';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import blockAttributes from './attributes';
+import { BLOCK_NAME } from './constants';
 
 /**
  * Wrapper component to supply the notice provider.
@@ -28,12 +27,13 @@ const FrontendBlock = ( props ) => {
 
 const getProps = ( el ) => {
 	return {
-		attributes: getAttributesFromDataset( blockAttributes, el.dataset ),
+		attributes: getValidBlockAttributes( blockAttributes, el.dataset ),
 	};
 };
 
-renderFrontend( {
-	selector: '.wp-block-woocommerce-single-product',
+renderParentBlock( {
 	Block: FrontendBlock,
+	blockName: BLOCK_NAME,
+	selector: '.wp-block-woocommerce-single-product',
 	getProps,
 } );

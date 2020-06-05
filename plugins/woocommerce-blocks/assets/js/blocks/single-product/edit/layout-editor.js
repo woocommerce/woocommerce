@@ -10,7 +10,6 @@ import {
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
 import { createBlocksFromTemplate } from '@woocommerce/atomic-utils';
-import classnames from 'classnames';
 import { PanelBody, Button } from '@wordpress/components';
 import { Icon, restore } from '@woocommerce/icons';
 
@@ -26,7 +25,7 @@ import {
 /**
  * Component to handle edit mode of the "Single Product Block".
  */
-const LayoutEditor = ( { product, clientId, isLoading } ) => {
+const LayoutEditor = ( { isLoading, product, clientId } ) => {
 	const baseClassName = 'wc-block-single-product';
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
@@ -41,7 +40,8 @@ const LayoutEditor = ( { product, clientId, isLoading } ) => {
 	return (
 		<InnerBlockLayoutContextProvider
 			parentName={ BLOCK_NAME }
-			layoutStyleClassPrefix={ baseClassName }
+			parentClassName={ baseClassName }
+			isLoading={ isLoading }
 		>
 			<ProductDataContextProvider product={ product }>
 				<InspectorControls>
@@ -66,11 +66,7 @@ const LayoutEditor = ( { product, clientId, isLoading } ) => {
 						</Button>
 					</PanelBody>
 				</InspectorControls>
-				<div
-					className={ classnames( baseClassName, {
-						'is-loading': isLoading,
-					} ) }
-				>
+				<div className={ baseClassName }>
 					<InnerBlocks
 						template={ DEFAULT_INNER_BLOCKS }
 						allowedBlocks={ ALLOWED_INNER_BLOCKS }

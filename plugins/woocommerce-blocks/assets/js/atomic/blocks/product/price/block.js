@@ -11,6 +11,11 @@ import {
 } from '@woocommerce/shared-context';
 
 /**
+ * Internal dependencies
+ */
+import './style.scss';
+
+/**
  * Product Price Block Component.
  *
  * @param {Object} props             Incoming props.
@@ -19,21 +24,19 @@ import {
  *                                   this is not provided.
  * @return {*} The component.
  */
-const ProductPrice = ( { className, ...props } ) => {
+const Block = ( { className, ...props } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
 	const productDataContext = useProductDataContext();
 	const product = props.product || productDataContext.product;
-
-	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
-	const componentClass = `${ layoutStyleClassPrefix }__product-price`;
 
 	if ( ! product ) {
 		return (
 			<div
 				className={ classnames(
 					className,
-					componentClass,
 					'price',
-					'is-loading'
+					'wc-block-components-product-price',
+					`${ parentClassName }__product-price`
 				) }
 			/>
 		);
@@ -43,17 +46,22 @@ const ProductPrice = ( { className, ...props } ) => {
 	const currency = getCurrencyFromPriceResponse( prices );
 
 	return (
-		<div className={ classnames( className, componentClass, 'price' ) }>
+		<div
+			className={ classnames(
+				className,
+				'price',
+				'wc-block-components-product-price',
+				`${ parentClassName }__product-price`
+			) }
+		>
 			{ hasPriceRange( prices ) ? (
 				<PriceRange
-					componentClass={ componentClass }
 					currency={ currency }
 					minAmount={ prices.price_range.min_amount }
 					maxAmount={ prices.price_range.max_amount }
 				/>
 			) : (
 				<Price
-					componentClass={ componentClass }
 					currency={ currency }
 					price={ prices.price }
 					regularPrice={ prices.regular_price }
@@ -71,9 +79,16 @@ const hasPriceRange = ( prices ) => {
 	);
 };
 
-const PriceRange = ( { componentClass, currency, minAmount, maxAmount } ) => {
+const PriceRange = ( { currency, minAmount, maxAmount } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
+
 	return (
-		<span className={ `${ componentClass }__value` }>
+		<span
+			className={ classnames(
+				'wc-block-components-product-price__value',
+				`${ parentClassName }__product-price__value`
+			) }
+		>
 			<FormattedMonetaryAmount
 				currency={ currency }
 				value={ minAmount }
@@ -87,18 +102,30 @@ const PriceRange = ( { componentClass, currency, minAmount, maxAmount } ) => {
 	);
 };
 
-const Price = ( { componentClass, currency, price, regularPrice } ) => {
+const Price = ( { currency, price, regularPrice } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
+
 	return (
 		<>
 			{ regularPrice !== price && (
-				<del className={ `${ componentClass }__regular` }>
+				<del
+					className={ classnames(
+						'wc-block-components-product-price__regular',
+						`${ parentClassName }__product-price__regular`
+					) }
+				>
 					<FormattedMonetaryAmount
 						currency={ currency }
 						value={ regularPrice }
 					/>
 				</del>
 			) }
-			<span className={ `${ componentClass }__value` }>
+			<span
+				className={ classnames(
+					'wc-block-components-product-price__value',
+					`${ parentClassName }__product-price__value`
+				) }
+			>
 				<FormattedMonetaryAmount
 					currency={ currency }
 					value={ price }
@@ -108,9 +135,9 @@ const Price = ( { componentClass, currency, price, regularPrice } ) => {
 	);
 };
 
-ProductPrice.propTypes = {
+Block.propTypes = {
 	className: PropTypes.string,
 	product: PropTypes.object,
 };
 
-export default ProductPrice;
+export default Block;

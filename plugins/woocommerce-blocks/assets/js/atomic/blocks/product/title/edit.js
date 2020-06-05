@@ -23,7 +23,7 @@ export default ( { attributes, setAttributes } ) => {
 					<p>{ __( 'Level', 'woo-gutenberg-products-block' ) }</p>
 					<HeadingToolbar
 						isCollapsed={ false }
-						minLevel={ 2 }
+						minLevel={ 1 }
 						maxLevel={ 7 }
 						selectedLevel={ headingLevel }
 						onChange={ ( newLevel ) =>

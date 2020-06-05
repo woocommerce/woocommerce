@@ -204,17 +204,22 @@ class Editor extends Component {
 							'woo-gutenberg-products-block'
 						) }
 					</Tip>
-					<div className="wc-block-grid has-1-columns">
-						<ul className="wc-block-grid__products">
-							<li className="wc-block-grid__product">
-								<ProductDataContextProvider
-									product={ previewProducts[ 0 ] }
-								>
-									<InnerBlocks { ...InnerBlockProps } />
-								</ProductDataContextProvider>
-							</li>
-						</ul>
-					</div>
+					<InnerBlockLayoutContextProvider
+						parentName="woocommerce/all-products"
+						parentClassName="wc-block-grid"
+					>
+						<div className="wc-block-grid has-1-columns">
+							<ul className="wc-block-grid__products">
+								<li className="wc-block-grid__product">
+									<ProductDataContextProvider
+										product={ previewProducts[ 0 ] }
+									>
+										<InnerBlocks { ...InnerBlockProps } />
+									</ProductDataContextProvider>
+								</li>
+							</ul>
+						</div>
+					</InnerBlockLayoutContextProvider>
 					<div className="wc-block-all-products__actions">
 						<Button
 							className="wc-block-all-products__done-button"
@@ -280,23 +285,16 @@ class Editor extends Component {
 		}
 
 		return (
-			<InnerBlockLayoutContextProvider
-				parentName="woocommerce/all-products"
-				layoutStyleClassPrefix="wc-block-grid"
+			<div
+				className={ getBlockClassName(
+					'wc-block-all-products',
+					attributes
+				) }
 			>
-				<div
-					className={ getBlockClassName(
-						'wc-block-all-products',
-						attributes
-					) }
-				>
-					{ this.getBlockControls() }
-					{ this.getInspectorControls() }
-					{ isEditing
-						? this.renderEditMode()
-						: this.renderViewMode() }
-				</div>
-			</InnerBlockLayoutContextProvider>
+				{ this.getBlockControls() }
+				{ this.getInspectorControls() }
+				{ isEditing ? this.renderEditMode() : this.renderViewMode() }
+			</div>
 		);
 	};
 }

@@ -10,6 +10,11 @@ import {
 } from '@woocommerce/shared-context';
 
 /**
+ * Internal dependencies
+ */
+import './style.scss';
+
+/**
  * Product Title Block Component.
  *
  * @param {Object}  props                Incoming props.
@@ -20,18 +25,15 @@ import {
  *                                       this is not provided.
  * @return {*} The component.
  */
-const ProductTitle = ( {
+export const Block = ( {
 	className,
 	headingLevel = 2,
 	productLink = true,
 	...props
 } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
 	const productDataContext = useProductDataContext();
 	const product = props.product || productDataContext.product;
-
-	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
-	const componentClass = `${ layoutStyleClassPrefix }__product-title`;
-
 	const TagName = `h${ headingLevel }`;
 
 	if ( ! product ) {
@@ -40,8 +42,8 @@ const ProductTitle = ( {
 				// @ts-ignore
 				className={ classnames(
 					className,
-					componentClass,
-					'is-loading'
+					'wc-block-components-product-title',
+					`${ parentClassName }__product-title`
 				) }
 			/>
 		);
@@ -51,7 +53,13 @@ const ProductTitle = ( {
 
 	return (
 		// @ts-ignore
-		<TagName className={ classnames( className, componentClass ) }>
+		<TagName
+			className={ classnames(
+				className,
+				'wc-block-components-product-title',
+				`${ parentClassName }__product-title`
+			) }
+		>
 			{ productLink ? (
 				<a href={ product.permalink } rel="nofollow">
 					{ productName }
@@ -63,11 +71,11 @@ const ProductTitle = ( {
 	);
 };
 
-ProductTitle.propTypes = {
+Block.propTypes = {
 	className: PropTypes.string,
 	product: PropTypes.object,
 	headingLevel: PropTypes.number,
 	productLink: PropTypes.bool,
 };
 
-export default ProductTitle;
+export default Block;

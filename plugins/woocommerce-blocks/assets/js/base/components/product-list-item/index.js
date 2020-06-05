@@ -13,10 +13,11 @@ import { renderProductLayout } from './utils';
 
 const ProductListItem = ( { product, attributes, instanceId } ) => {
 	const { layoutConfig } = attributes;
-	const { layoutStyleClassPrefix, parentName } = useInnerBlockLayoutContext();
+	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const isLoading = Object.keys( product ).length === 0;
-	const classes = classnames( `${ layoutStyleClassPrefix }__product`, {
+	const classes = classnames( `${ parentClassName }__product`, {
 		'is-loading': isLoading,
+		'wc-block-layout--is-loading': isLoading, // This can be removed when switching to inner block rendering.
 	} );
 
 	return (
