@@ -87,6 +87,7 @@ class InboxPanel extends Component {
 	render() {
 		const {
 			isError,
+			isPanelEmpty,
 			isRequesting,
 			isUndoRequesting,
 			isDismissAllUndoRequesting,
@@ -119,9 +120,16 @@ class InboxPanel extends Component {
 
 		const hasNotes = hasValidNotes( notes );
 
+		const isActivityHeaderVisible =
+			hasNotes || isRequesting || isUndoRequesting;
+
+		if ( isPanelEmpty ) {
+			isPanelEmpty( ! hasNotes && ! isActivityHeaderVisible );
+		}
+
 		return (
 			<Fragment>
-				{ ( hasNotes || isRequesting || isUndoRequesting ) && (
+				{ isActivityHeaderVisible && (
 					<ActivityHeader
 						title={ __( 'Inbox', 'woocommerce-admin' ) }
 						subtitle={ __(
@@ -134,16 +142,18 @@ class InboxPanel extends Component {
 						) }
 					/>
 				) }
-				{ ( isRequesting || isDismissAllUndoRequesting ) && (
+				<div className="woocommerce-homepage-notes-wrapper">
+					{ ( isRequesting || isDismissAllUndoRequesting ) && (
+						<Section>
+							<InboxNotePlaceholder className="banner message-is-unread" />
+						</Section>
+					) }
 					<Section>
-						<InboxNotePlaceholder className="banner message-is-unread" />
+						{ ! isRequesting &&
+							! isDismissAllUndoRequesting &&
+							this.renderNotes( hasNotes ) }
 					</Section>
-				) }
-				<Section>
-					{ ! isRequesting &&
-						! isDismissAllUndoRequesting &&
-						this.renderNotes( hasNotes ) }
-				</Section>
+				</div>
 			</Fragment>
 		);
 	}

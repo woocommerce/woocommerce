@@ -10,6 +10,9 @@ jest.mock( 'homepage/stats-overview', () => jest.fn().mockReturnValue( null ) );
 // We aren't testing the <TaskList /> component here.
 jest.mock( 'task-list', () => jest.fn().mockReturnValue( '[TaskList]' ) );
 
+// We aren't testing the <InboxPanel /> component here.
+jest.mock( 'header/activity-panel/panels/inbox', () => jest.fn().mockReturnValue( '[InboxPanel]' ) );
+
 describe( 'Homepage Layout', () => {
 	it( 'should show TaskList placeholder when loading', () => {
 		const { container } = render(
