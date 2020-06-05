@@ -18,7 +18,6 @@ import {
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
 import { getCurrencyFromPriceResponse } from '@woocommerce/base-utils';
-import { Card, CardBody } from 'wordpress-components';
 import {
 	useStoreCartCoupons,
 	useStoreCart,
@@ -95,66 +94,54 @@ const Cart = ( { attributes } ) => {
 				/>
 			</Main>
 			<Sidebar className="wc-block-cart__sidebar">
-				<Card isElevated={ true }>
-					<CardBody>
-						<Title
-							headingLevel="2"
-							className="wc-block-cart__totals-title"
-						>
-							{ __(
-								'Cart totals',
-								'woo-gutenberg-products-block'
-							) }
-						</Title>
-						<SubtotalsItem
-							currency={ totalsCurrency }
-							values={ cartTotals }
-						/>
-						<TotalsFeesItem
-							currency={ totalsCurrency }
-							values={ cartTotals }
-						/>
-						<TotalsDiscountItem
-							cartCoupons={ appliedCoupons }
-							currency={ totalsCurrency }
-							isRemovingCoupon={ isRemovingCoupon }
-							removeCoupon={ removeCoupon }
-							values={ cartTotals }
-						/>
-						{ cartNeedsShipping && (
-							<TotalsShippingItem
-								showCalculator={ isShippingCalculatorEnabled }
-								showRatesWithoutAddress={
-									! isShippingCostHidden
-								}
-								values={ cartTotals }
-								currency={ totalsCurrency }
-							/>
-						) }
-						{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
-							<TotalsTaxesItem
-								currency={ totalsCurrency }
-								values={ cartTotals }
-							/>
-						) }
-						{ COUPONS_ENABLED && (
-							<TotalsCouponCodeInput
-								onSubmit={ applyCoupon }
-								isLoading={ isApplyingCoupon }
-							/>
-						) }
-						<TotalsFooterItem
-							currency={ totalsCurrency }
-							values={ cartTotals }
-						/>
-						<CheckoutButton
-							link={ getSetting(
-								'page-' + attributes?.checkoutPageId,
-								false
-							) }
-						/>
-					</CardBody>
-				</Card>
+				<Title headingLevel="2" className="wc-block-cart__totals-title">
+					{ __( 'Cart totals', 'woo-gutenberg-products-block' ) }
+				</Title>
+				<SubtotalsItem
+					currency={ totalsCurrency }
+					values={ cartTotals }
+				/>
+				<TotalsFeesItem
+					currency={ totalsCurrency }
+					values={ cartTotals }
+				/>
+				<TotalsDiscountItem
+					cartCoupons={ appliedCoupons }
+					currency={ totalsCurrency }
+					isRemovingCoupon={ isRemovingCoupon }
+					removeCoupon={ removeCoupon }
+					values={ cartTotals }
+				/>
+				{ cartNeedsShipping && (
+					<TotalsShippingItem
+						showCalculator={ isShippingCalculatorEnabled }
+						showRatesWithoutAddress={ ! isShippingCostHidden }
+						values={ cartTotals }
+						currency={ totalsCurrency }
+					/>
+				) }
+				{ ! DISPLAY_CART_PRICES_INCLUDING_TAX && (
+					<TotalsTaxesItem
+						currency={ totalsCurrency }
+						values={ cartTotals }
+					/>
+				) }
+				{ COUPONS_ENABLED && (
+					<TotalsCouponCodeInput
+						onSubmit={ applyCoupon }
+						isLoading={ isApplyingCoupon }
+					/>
+				) }
+				<TotalsFooterItem
+					currency={ totalsCurrency }
+					values={ cartTotals }
+				/>
+				<CheckoutButton
+					link={ getSetting(
+						'page-' + attributes?.checkoutPageId,
+						false
+					) }
+				/>
 			</Sidebar>
 		</SidebarLayout>
 	);

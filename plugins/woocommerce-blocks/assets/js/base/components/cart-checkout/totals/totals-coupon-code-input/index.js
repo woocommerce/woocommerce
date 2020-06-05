@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { PanelBody, PanelRow } from 'wordpress-components';
 import { Button } from '@woocommerce/base-components/cart-checkout';
 import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
@@ -12,6 +11,7 @@ import LoadingMask from '@woocommerce/base-components/loading-mask';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import { useValidationContext } from '@woocommerce/base-context';
+import Panel from '@woocommerce/base-components/panel';
 
 /**
  * Internal dependencies
@@ -42,8 +42,9 @@ const TotalsCouponCodeInput = ( {
 	const textInputId = `wc-block-coupon-code__input-${ instanceId }`;
 
 	return (
-		<PanelBody
+		<Panel
 			className="wc-block-coupon-code"
+			initialOpen={ initialOpen }
 			title={
 				<Label
 					label={ __(
@@ -57,7 +58,7 @@ const TotalsCouponCodeInput = ( {
 					htmlFor={ textInputId }
 				/>
 			}
-			initialOpen={ initialOpen }
+			titleTag="h2"
 		>
 			<LoadingMask
 				screenReaderLabel={ __(
@@ -67,7 +68,7 @@ const TotalsCouponCodeInput = ( {
 				isLoading={ isLoading }
 				showSpinner={ false }
 			>
-				<PanelRow className="wc-block-coupon-code__row">
+				<div className="wc-block-coupon-code__content">
 					<form className="wc-block-coupon-code__form">
 						<ValidatedTextInput
 							id={ textInputId }
@@ -105,9 +106,9 @@ const TotalsCouponCodeInput = ( {
 						propertyName="coupon"
 						elementId={ textInputId }
 					/>
-				</PanelRow>
+				</div>
 			</LoadingMask>
-		</PanelBody>
+		</Panel>
 	);
 };
 

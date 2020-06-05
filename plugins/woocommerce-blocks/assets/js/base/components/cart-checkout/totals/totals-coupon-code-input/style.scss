@@ -19,8 +19,9 @@
 	}
 }
 
-.wc-block-coupon-code__row {
+.wc-block-coupon-code__content {
 	flex-direction: column;
+	position: relative;
 
 	.wc-block-form-input-validation-error {
 		margin-top: $gap-smaller;

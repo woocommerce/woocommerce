@@ -3,23 +3,22 @@
 	border: 2px solid $black;
 	border-radius: 5px;
 	padding: 8px;
+	position: relative;
 
 	.wc-block-component-express-checkout__title {
-		position: relative;
 		background-color: $white;
 		padding-left: $gap-small;
 		padding-right: $gap-small;
-		margin-top: -24px;
 		margin-left: $gap-small;
-		margin-bottom: $gap-small;
-		color: $black;
-		font-weight: bold;
 		display: inline-block;
 		vertical-align: middle;
+		transform: translateY(-50%);
+		position: absolute;
+		top: 0;
 	}
 
 	.wc-block-component-express-checkout__content {
-		padding: 0 $gap-large;
+		padding: $gap $gap-large 0;
 	}
 
 	.wc-block-component-express-checkout-payment-event-buttons {
@@ -186,5 +185,14 @@
 	.wc-block-gateway-container.wc-card-cvc-element {
 		flex-basis: calc(50% - #{$gap-smaller});
 		margin-left: $gap-smaller;
+	}
+}
+
+// For Twenty Twenty we need to increase specificity of the title.
+.theme-twentytwenty {
+	.wc-block-component-express-checkout .wc-block-component-express-checkout__title {
+		padding-left: $gap-small;
+		padding-right: $gap-small;
+		margin-left: $gap-small;
 	}
 }

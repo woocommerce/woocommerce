@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useExpressPaymentMethods } from '@woocommerce/base-hooks';
 import { StoreNoticesProvider } from '@woocommerce/base-context';
+import Title from '@woocommerce/base-components/title';
 
 /**
  * Internal dependencies
@@ -15,9 +16,12 @@ const ExpressCheckoutContainer = ( { children } ) => {
 	return (
 		<>
 			<div className="wc-block-component-express-checkout">
-				<div className="wc-block-component-express-checkout__title">
+				<Title
+					className="wc-block-component-express-checkout__title"
+					headingLevel="2"
+				>
 					{ __( 'Express checkout', 'woo-gutenberg-products-block' ) }
-				</div>
+				</Title>
 				<div className="wc-block-component-express-checkout__content">
 					<StoreNoticesProvider context="wc/express-payment-area">
 						{ children }

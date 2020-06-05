@@ -111,7 +111,6 @@ const stableMainEntry = {
 	blocks: './assets/js/index.js',
 
 	// @wordpress/components styles
-	'panel-style': './node_modules/wordpress-components/src/panel/style.scss',
 	'custom-select-control-style':
 		'./node_modules/wordpress-components/src/custom-select-control/style.scss',
 	'spinner-style':

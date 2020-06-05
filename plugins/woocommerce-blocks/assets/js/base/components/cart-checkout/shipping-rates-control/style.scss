@@ -1,5 +1,7 @@
-.wc-block-shipping-rates-control__package-title {
-	font-weight: bold;
+.wc-block-shipping-rates-control__package {
+	.wc-block-shipping-rates-control__package-title {
+		margin: 0;
+	}
 }
 
 .wc-block-shipping-rates-control__package-items {
@@ -7,7 +9,7 @@
 	color: $core-grey-dark-400;
 	display: block;
 	list-style: none;
-	margin: 0 0 $gap-small;
+	margin: 0;
 	padding: 0;
 }
 
@@ -29,7 +31,7 @@
 }
 
 .components-notice.wc-block-shipping-rates-control__no-results-notice {
-	margin-bottom: $gap;
+	margin-bottom: 0;
 }
 
 // Resets when it's inside a panel.
@@ -40,19 +42,6 @@
 		&,
 		&.is-opened {
 			padding-bottom: 0;
-		}
-
-		.components-panel__body-title {
-			margin-bottom: 0;
-		}
-
-		.components-panel__body-toggle {
-			padding-bottom: 14px;
-			padding-top: 14px;
-		}
-
-		.wc-block-shipping-rates-control__package-title {
-			font-weight: normal;
 		}
 
 		.wc-block-shipping-rates-control__package-items {
