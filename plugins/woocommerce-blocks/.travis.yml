@@ -47,21 +47,21 @@ jobs:
           php: 7.1
           env:
               - WP_VERSION=latest
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
           script:
               - phpunit
         - name: PHP 5.6/unit-tests/Latest WP
           php: 5.6
           env:
               - WP_VERSION=latest
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
           script:
               - phpunit
         - name: PHP Linting Check
           php: 7.3
           env:
               - WP_TRAVISCI=phpcs
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
           script:
               - npm run lint:php
         - name: Javascript Tests
@@ -69,13 +69,13 @@ jobs:
               - npm install
               - npm run test
           env:
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: Javascript/CSS Lint check
           script:
               - npm install
               - npm run lint:ci
           env:
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
         - name: E2E Tests
           script:
               - npm ci
@@ -84,12 +84,12 @@ jobs:
               - npm run build:e2e-test
               - npm run test:e2e
           env:
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
         - stage: deploy
           if: (NOT type IN (pull_request)) AND (branch = master)
           name: Deploy Storybook
           env:
-              - WOOCOMMERCE_BLOCKS_PHASE=experimental
+              - WOOCOMMERCE_BLOCKS_PHASE=3
           install:
               - npm ci
           script:

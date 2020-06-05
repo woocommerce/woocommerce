@@ -49,6 +49,10 @@ export const IS_SHIPPING_COST_HIDDEN = getSetting(
 	'isShippingCostHidden',
 	false
 );
+export const WOOCOMMERCE_BLOCKS_PHASE = getSetting(
+	'woocommerceBlocksPhase',
+	1
+);
 export const WC_BLOCKS_ASSET_URL = getSetting( 'wcBlocksAssetUrl', '' );
 export const SHIPPING_COUNTRIES = getSetting( 'shippingCountries', {} );
 export const ALLOWED_COUNTRIES = getSetting( 'allowedCountries', {} );

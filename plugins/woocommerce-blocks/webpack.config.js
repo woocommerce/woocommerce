@@ -3,7 +3,6 @@
  */
 const path = require( 'path' );
 const { kebabCase } = require( 'lodash' );
-const { DefinePlugin } = require( 'webpack' );
 const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' );
 const CreateFileWebpack = require( 'create-file-webpack' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
@@ -89,22 +88,13 @@ const CoreConfig = {
 				' :msg (:elapsed seconds)',
 		} ),
 		new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
-		new DefinePlugin( {
-			// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
-			'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
-				// eslint-disable-next-line woocommerce/feature-flag
-				process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
-			),
-		} ),
 		new CreateFileWebpack( {
 			path: './',
 			// file name
 			fileName: 'blocks.ini',
 			// content of the file
-			content: `woocommerce_blocks_phase = ${
-				// eslint-disable-next-line woocommerce/feature-flag
-				process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
-			}`,
+			content: `woocommerce_blocks_phase = ${ process.env
+				.WOOCOMMERCE_BLOCKS_PHASE || 3 }`,
 		} ),
 	],
 };

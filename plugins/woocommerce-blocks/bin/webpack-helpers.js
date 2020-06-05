@@ -9,7 +9,6 @@ const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extrac
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const chalk = require( 'chalk' );
 const { omit } = require( 'lodash' );
-const { DefinePlugin } = require( 'webpack' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 function findModuleMatch( module, match ) {
@@ -149,16 +148,17 @@ const stableMainEntry = {
 	'active-filters': './assets/js/blocks/active-filters/index.js',
 	'block-error-boundary':
 		'./assets/js/base/components/block-error-boundary/style.scss',
-	'single-product': './assets/js/blocks/single-product/index.js',
-};
-
-const experimentalMainEntry = {
 	cart: './assets/js/blocks/cart-checkout/cart/index.js',
 	checkout: './assets/js/blocks/cart-checkout/checkout/index.js',
 };
 
+const experimentalMainEntry = {
+	'single-product': './assets/js/blocks/single-product/index.js',
+};
+
 const mainEntry =
-	process.env.WOOCOMMERCE_BLOCKS_PHASE === 'stable'
+	// env variables are strings, so we compare against a string, so we need to parse it.
+	parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3
 		? stableMainEntry
 		: { ...stableMainEntry, ...experimentalMainEntry };
 
@@ -168,16 +168,17 @@ const stableFrontEndEntry = {
 	'price-filter': './assets/js/blocks/price-filter/frontend.js',
 	'attribute-filter': './assets/js/blocks/attribute-filter/frontend.js',
 	'active-filters': './assets/js/blocks/active-filters/frontend.js',
-	'single-product': './assets/js/blocks/single-product/frontend.js',
-};
-
-const experimentalFrontEndEntry = {
 	cart: './assets/js/blocks/cart-checkout/cart/frontend.js',
 	checkout: './assets/js/blocks/cart-checkout/checkout/frontend.js',
 };
 
+const experimentalFrontEndEntry = {
+	'single-product': './assets/js/blocks/single-product/frontend.js',
+};
+
 const frontEndEntry =
-	process.env.WOOCOMMERCE_BLOCKS_PHASE === 'stable'
+	// env variables are strings, so we compare against a string, so we need to parse it.
+	parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3
 		? stableFrontEndEntry
 		: { ...stableFrontEndEntry, ...experimentalFrontEndEntry };
 
@@ -358,13 +359,6 @@ const getMainConfig = ( options = {} ) => {
 				requestToExternal,
 				requestToHandle,
 			} ),
-			new DefinePlugin( {
-				// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
-				'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
-					// eslint-disable-next-line woocommerce/feature-flag
-					process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
-				),
-			} ),
 		],
 		resolve,
 	};
@@ -459,13 +453,6 @@ const getFrontConfig = ( options = {} ) => {
 				injectPolyfill: true,
 				requestToExternal,
 				requestToHandle,
-			} ),
-			new DefinePlugin( {
-				// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
-				'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
-					// eslint-disable-next-line woocommerce/feature-flag
-					process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
-				),
 			} ),
 		],
 		resolve,
@@ -598,13 +585,6 @@ const getPaymentMethodsExtensionConfig = ( options = {} ) => {
 				injectPolyfill: true,
 				requestToExternal,
 				requestToHandle,
-			} ),
-			new DefinePlugin( {
-				// Inject the `WOOCOMMERCE_BLOCKS_PHASE` global, used for feature flagging.
-				'process.env.WOOCOMMERCE_BLOCKS_PHASE': JSON.stringify(
-					// eslint-disable-next-line woocommerce/feature-flag
-					process.env.WOOCOMMERCE_BLOCKS_PHASE || 'experimental'
-				),
 			} ),
 		],
 		resolve,

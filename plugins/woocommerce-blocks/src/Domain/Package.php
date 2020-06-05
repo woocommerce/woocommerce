@@ -72,4 +72,22 @@ class Package {
 		// Append index.php so WP does not return the parent directory.
 		return plugin_dir_url( $this->path . '/index.php' ) . $relative_url;
 	}
+
+	/**
+	 * Checks if we're executing the code in an experimental build mode.
+	 *
+	 * @return boolean
+	 */
+	public static function is_experimental_build() {
+		return WOOCOMMERCE_BLOCKS_PHASE > 2;
+	}
+
+	/**
+	 * Checks if we're executing the code in an feature plugin or experimental build mode.
+	 *
+	 * @return boolean
+	 */
+	public static function is_feature_plugin_build() {
+		return WOOCOMMERCE_BLOCKS_PHASE > 1;
+	}
 }

@@ -27,14 +27,15 @@ function findParent( sourceNode, predicate ) {
  * @example
  * ```js
  * // good
- * if ( process.env.WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
+ * if ( process.env.WOOCOMMERCE_BLOCKS_PHASE > 1 ) {
  *
  * // bad
- * if ( WOOCOMMERCE_BLOCKS_PHASE === 'experimental' ) {
+ * if ( WOOCOMMERCE_BLOCKS_PHASE > 1 ) {
  * ```
  *
  * @param {Object} node    The WOOCOMMERCE_BLOCKS_PHASE identifier node.
  * @param {Object} context The eslint context object.
+ * @todo: update this rule to match the new flags.
  */
 function testIsAccessedViaProcessEnv( node, context ) {
 	let parent = node.parent;

@@ -20,7 +20,7 @@ module.exports = {
 	rules: {
 		'@wordpress/dependency-group': 'off',
 		'woocommerce/dependency-group': 'error',
-		'woocommerce/feature-flag': 'error',
+		'woocommerce/feature-flag': 'off',
 		'valid-jsdoc': 'off',
 		radix: 'error',
 		yoda: [ 'error', 'never' ],

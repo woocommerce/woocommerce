@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { registerBlockType } from '@wordpress/blocks';
 import { Icon, card } from '@woocommerce/icons';
 import classnames from 'classnames';
+import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -49,4 +49,4 @@ const settings = {
 	},
 };
 
-registerBlockType( 'woocommerce/checkout', settings );
+registerFeaturePluginBlockType( 'woocommerce/checkout', settings );
