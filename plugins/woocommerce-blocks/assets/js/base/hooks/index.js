@@ -1,6 +1,5 @@
 export * from './cart';
 export * from './checkout';
-export * from './order';
 export * from './payment-methods';
 export * from './shipping';
 export * from './use-collection';
