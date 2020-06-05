@@ -14,7 +14,7 @@ import {
 import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 
-const CheckoutOrderSummaryItem = ( { cartItem } ) => {
+const OrderSummaryItem = ( { cartItem } ) => {
 	const {
 		images,
 		low_stock_remaining: lowStockRemaining = null,
@@ -37,9 +37,9 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 		.getAmount();
 
 	return (
-		<div className="wc-block-order-summary-item">
-			<div className="wc-block-order-summary-item__image">
-				<div className="wc-block-order-summary-item__quantity">
+		<div className="wc-block-components-order-summary-item">
+			<div className="wc-block-components-order-summary-item__image">
+				<div className="wc-block-components-order-summary-item__quantity">
 					<Label
 						label={ quantity }
 						screenReaderLabel={ sprintf(
@@ -51,11 +51,11 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 				</div>
 				<ProductImage image={ images.length ? images[ 0 ] : {} } />
 			</div>
-			<div className="wc-block-order-summary-item__description">
-				<div className="wc-block-order-summary-item__header">
+			<div className="wc-block-components-order-summary-item__description">
+				<div className="wc-block-components-order-summary-item__header">
 					<ProductName permalink={ permalink } name={ name } />
 					<ProductPrice
-						className="wc-block-order-summary-item__total-price"
+						className="wc-block-components-order-summary-item__total-price"
 						currency={ currency }
 						value={ linePrice }
 					/>
@@ -71,7 +71,7 @@ const CheckoutOrderSummaryItem = ( { cartItem } ) => {
 	);
 };
 
-CheckoutOrderSummaryItem.propTypes = {
+OrderSummaryItem.propTypes = {
 	cartItems: PropTypes.shape( {
 		images: PropTypes.array,
 		low_stock_remaining: PropTypes.number,
@@ -87,4 +87,4 @@ CheckoutOrderSummaryItem.propTypes = {
 	} ),
 };
 
-export default CheckoutOrderSummaryItem;
+export default OrderSummaryItem;
