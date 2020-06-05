@@ -994,8 +994,8 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`order_id` bigint(20) NOT NULL,
 	`product_id` bigint(20) NOT NULL,
 	`stock_quantity` double NOT NULL DEFAULT 0,
-	`timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`expires` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	PRIMARY KEY  (`order_id`, `product_id`)
 ) $collate;
 		";

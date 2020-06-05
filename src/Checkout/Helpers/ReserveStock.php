@@ -13,6 +13,31 @@ defined( 'ABSPATH' ) || exit;
  * Stock Reservation class.
  */
 final class ReserveStock {
+
+	/**
+	 * Is stock reservation enabled?
+	 *
+	 * @var boolean
+	 */
+	private $enabled = true;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		// Table needed for this feature are added in 4.3.
+		$this->enabled = get_option( 'woocommerce_schema_version', 0 ) >= 430;
+	}
+
+	/**
+	 * Is stock reservation enabled?
+	 *
+	 * @return boolean
+	 */
+	protected function is_enabled() {
+		return $this->enabled;
+	}
+
 	/**
 	 * Query for any existing holds on stock for this item.
 	 *
@@ -23,6 +48,10 @@ final class ReserveStock {
 	 */
 	public function get_reserved_stock( \WC_Product $product, $exclude_order_id = 0 ) {
 		global $wpdb;
+
+		if ( ! $this->is_enabled() ) {
+			return 0;
+		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) );
@@ -39,7 +68,7 @@ final class ReserveStock {
 	public function reserve_stock_for_order( \WC_Order $order, $minutes = 0 ) {
 		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
 
-		if ( ! $minutes ) {
+		if ( ! $minutes || ! $this->is_enabled() ) {
 			return;
 		}
 
@@ -124,9 +153,10 @@ final class ReserveStock {
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				"
-				REPLACE INTO {$wpdb->wc_reserved_stock} ( order_id, product_id, stock_quantity, expires )
-				SELECT %d, %d, %d, ( NOW() + INTERVAL %d MINUTE ) from DUAL
+				INSERT INTO {$wpdb->wc_reserved_stock} ( `order_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` )
+				SELECT %d, %d, %d, NOW(), ( NOW() + INTERVAL %d MINUTE ) FROM DUAL
 				WHERE ( $query_for_stock FOR UPDATE ) - ( $query_for_reserved_stock FOR UPDATE ) >= %d
+				ON DUPLICATE KEY UPDATE `expires` = VALUES( `expires` )
 				",
 				$order->get_id(),
 				$product_id,
