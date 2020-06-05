@@ -1,34 +1,27 @@
 /**
  * External dependencies
  */
-import { __, sprintf, _n } from '@wordpress/i18n';
+import { _n, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import Title from '@woocommerce/base-components/title';
 
-const CartLineItemsTitle = ( {
-	title = __( 'Shopping cart', 'woo-gutenberg-products-block' ),
-	itemCount = 1,
-} ) => {
-	const itemCountHeading = sprintf(
-		_n( '%d item', '%d items', itemCount, 'woo-gutenberg-products-block' ),
-		itemCount
-	);
-	const readableHeading = `${ title } – ${ itemCountHeading }`;
-
+const CartLineItemsTitle = ( { itemCount = 1 } ) => {
 	return (
-		<Title headingLevel="2" aria-label={ readableHeading }>
-			<span>{ title } </span>
-			{ !! itemCount && (
-				<span className="wc-block-cart__item-count">
-					{ itemCountHeading }
-				</span>
+		<Title headingLevel="2">
+			{ sprintf(
+				_n(
+					'Your cart (%d item)',
+					'Your cart (%d items)',
+					itemCount,
+					'woo-gutenberg-products-block'
+				),
+				itemCount
 			) }
 		</Title>
 	);
 };
 
 CartLineItemsTitle.propTypes = {
-	title: PropTypes.string,
 	itemCount: PropTypes.number,
 };
 
