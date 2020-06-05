@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	OrderSummary,
 	SubtotalsItem,
 	TotalsFeesItem,
 	TotalsCouponCodeInput,
@@ -17,11 +18,6 @@ import {
 	DISPLAY_CART_PRICES_INCLUDING_TAX,
 } from '@woocommerce/block-settings';
 import { useStoreCartCoupons } from '@woocommerce/base-hooks';
-
-/**
- * Internal dependencies
- */
-import OrderSummary from './order-summary.js';
 
 const CheckoutSidebar = ( {
 	cartCoupons = [],

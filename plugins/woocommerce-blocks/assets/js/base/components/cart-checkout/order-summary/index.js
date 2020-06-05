@@ -9,9 +9,9 @@ import Panel from '@woocommerce/base-components/panel';
 /**
  * Internal dependencies
  */
-import CheckoutOrderSummaryItem from './order-summary-item.js';
+import OrderSummaryItem from './order-summary-item.js';
 
-const CheckoutOrderSummary = ( { cartItems = [] } ) => {
+const OrderSummary = ( { cartItems = [] } ) => {
 	const { isLarge, hasContainerWidth } = useContainerWidthContext();
 
 	if ( ! hasContainerWidth ) {
@@ -20,19 +20,19 @@ const CheckoutOrderSummary = ( { cartItems = [] } ) => {
 
 	return (
 		<Panel
-			className="wc-block-order-summary"
+			className="wc-block-components-order-summary"
 			initialOpen={ isLarge }
 			title={
-				<span className="wc-block-order-summary__button-text">
+				<span className="wc-block-components-order-summary__button-text">
 					{ __( 'Order summary', 'woo-gutenberg-products-block' ) }
 				</span>
 			}
 			titleTag="h2"
 		>
-			<div className="wc-block-order-summary__content">
+			<div className="wc-block-order-components-summary__content">
 				{ cartItems.map( ( cartItem ) => {
 					return (
-						<CheckoutOrderSummaryItem
+						<OrderSummaryItem
 							key={ cartItem.key }
 							cartItem={ cartItem }
 						/>
@@ -43,10 +43,10 @@ const CheckoutOrderSummary = ( { cartItems = [] } ) => {
 	);
 };
 
-CheckoutOrderSummary.propTypes = {
+OrderSummary.propTypes = {
 	cartItems: PropTypes.arrayOf(
 		PropTypes.shape( { key: PropTypes.string.isRequired } )
 	),
 };
 
-export default CheckoutOrderSummary;
+export default OrderSummary;
