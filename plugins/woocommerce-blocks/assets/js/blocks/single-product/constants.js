@@ -36,6 +36,7 @@ export const DEFAULT_INNER_BLOCKS = [
 					[ 'woocommerce/product-price' ],
 					[ 'woocommerce/product-summary' ],
 					[ 'woocommerce/product-button' ],
+					[ 'woocommerce/product-sku' ],
 				],
 			],
 		],

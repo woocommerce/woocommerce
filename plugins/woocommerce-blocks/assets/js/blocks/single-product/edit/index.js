@@ -6,6 +6,7 @@ import { useState } from '@wordpress/element';
 import { Placeholder, Button, PanelBody } from '@wordpress/components';
 import { withProduct } from '@woocommerce/block-hocs';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
+import EditProductLink from '@woocommerce/block-components/edit-product-link';
 import { singleProductBlockPreview } from '@woocommerce/resource-previews';
 import { InspectorControls } from '@wordpress/block-editor';
 
@@ -17,7 +18,6 @@ import ApiError from './api-error';
 import SharedProductControl from './shared-product-control';
 import EditorBlockControls from './editor-block-controls';
 import LayoutEditor from './layout-editor';
-import EditProductLink from './edit-product-link';
 import { BLOCK_TITLE, BLOCK_ICON, BLOCK_DESCRIPTION } from '../constants';
 
 /**
@@ -99,8 +99,8 @@ const Editor = ( {
 									setAttributes={ setAttributes }
 								/>
 							</PanelBody>
-							<EditProductLink productId={ productId } />
 						</InspectorControls>
+						<EditProductLink productId={ productId } />
 						<LayoutEditor
 							clientId={ clientId }
 							product={ product }
