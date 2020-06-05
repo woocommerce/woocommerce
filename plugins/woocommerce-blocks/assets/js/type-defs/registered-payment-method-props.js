@@ -119,10 +119,6 @@
  * @typedef BillingDataProps
  *
  * @property {BillingData}             billingData               The address used for billing.
- * @property {Function}                setBillingData            Used to set the cart billing
- *                                                               address.
- * @property {Object}                  order                     The order object for the purchase.
- * @property {boolean}                 orderLoading              True if the order is being loaded.
  * @property {PreparedCartTotalItem}   cartTotal                 The total item for the cart.
  * @property {SiteCurrency}            currency                  Currency object.
  * @property {PreparedCartTotalItem[]} cartTotalItems            The various subtotal amounts.
