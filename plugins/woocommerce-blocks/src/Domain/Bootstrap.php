@@ -64,6 +64,7 @@ class Bootstrap {
 		if ( ! $this->has_core_dependencies() ) {
 			return;
 		}
+		$this->define_feature_flag();
 		$this->register_dependencies();
 		$this->register_payment_methods();
 
@@ -72,7 +73,6 @@ class Bootstrap {
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
 			$this->add_build_notice();
-			$this->define_feature_flag();
 			$this->container->get( AssetDataRegistry::class );
 			$this->container->get( Installer::class );
 			BlockAssets::init();
@@ -130,17 +130,17 @@ class Bootstrap {
 	 * Define the global feature flag.
 	 */
 	protected function define_feature_flag() {
-		$allowed_flags = [ 'experimental', 'stable' ];
-		$flag          = getenv( 'WOOCOMMERCE_BLOCKS_PHASE' );
-		if ( ! in_array( $flag, $allowed_flags, true ) ) {
-			if ( file_exists( __DIR__ . '/../../blocks.ini' ) ) {
-				$woo_options = parse_ini_file( __DIR__ . '/../../blocks.ini' );
-				$flag        = is_array( $woo_options ) && 'experimental' === $woo_options['woocommerce_blocks_phase'] ? 'experimental' : 'stable';
-			} else {
-				$flag = 'stable';
-			}
+		$default_flag  = defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ? '2' : '1';
+		$allowed_flags = [ '1', '2', '3' ];
+
+		if ( file_exists( __DIR__ . '/../../blocks.ini' ) ) {
+			$woo_options = parse_ini_file( __DIR__ . '/../../blocks.ini' );
+			$flag        = is_array( $woo_options ) && in_array( $woo_options['woocommerce_blocks_phase'], $allowed_flags, true ) ? $woo_options['woocommerce_blocks_phase'] : $default_flag;
+		} else {
+			$flag = $default_flag;
 		}
-		define( 'WOOCOMMERCE_BLOCKS_PHASE', $flag );
+
+		define( 'WOOCOMMERCE_BLOCKS_PHASE', intval( $flag ) );
 	}
 
 	/**

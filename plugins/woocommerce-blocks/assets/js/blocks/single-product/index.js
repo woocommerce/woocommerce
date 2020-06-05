@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { registerBlockType } from '@wordpress/blocks';
+import { registerExperimentalBlockType } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -40,4 +40,4 @@ const settings = {
 	save,
 };
 
-registerBlockType( BLOCK_NAME, settings );
+registerExperimentalBlockType( BLOCK_NAME, settings );

@@ -20,6 +20,9 @@ defined( 'ABSPATH' ) || exit;
 
 $minimum_wp_version = '5.2';
 
+if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
+	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );
+}
 /**
  * Whether notices must be displayed in the current page (plugins and WooCommerce pages).
  *

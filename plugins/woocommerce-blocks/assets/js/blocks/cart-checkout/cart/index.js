@@ -3,10 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
-import { registerBlockType } from '@wordpress/blocks';
 import { Icon, cart } from '@woocommerce/icons';
 import classnames from 'classnames';
-
+import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
@@ -51,4 +50,4 @@ const settings = {
 	},
 };
 
-registerBlockType( 'woocommerce/cart', settings );
+registerFeaturePluginBlockType( 'woocommerce/cart', settings );
