@@ -5,6 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { Icon, grid } from '@woocommerce/icons';
 
 /**
+ * Internal dependencies
+ */
+import save from './save';
+
+/**
  * Holds default config for this collection of blocks.
  */
 export default {
@@ -18,5 +23,10 @@ export default {
 		html: false,
 	},
 	parent: [ 'woocommerce/all-products', 'woocommerce/single-product' ],
-	save() {},
+	save,
+	deprecated: [
+		{
+			save() {},
+		},
+	],
 };

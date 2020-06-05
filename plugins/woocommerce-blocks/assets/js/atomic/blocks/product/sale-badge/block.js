@@ -11,6 +11,11 @@ import {
 } from '@woocommerce/shared-context';
 
 /**
+ * Internal dependencies
+ */
+import './style.scss';
+
+/**
  * Product Sale Badge Block Component.
  *
  * @param {Object} props             Incoming props.
@@ -20,27 +25,27 @@ import {
  *                                   this is not provided.
  * @return {*} The component.
  */
-const ProductSaleBadge = ( { className, align, ...props } ) => {
+const Block = ( { className, align, ...props } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
 	const productDataContext = useProductDataContext();
 	const product = props.product || productDataContext.product;
-
-	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
-	const componentClass = `${ layoutStyleClassPrefix }__product-onsale`;
 
 	if ( ! product || ! product.on_sale ) {
 		return null;
 	}
 
 	const alignClass =
-		typeof align === 'string' ? `${ componentClass }--align${ align }` : '';
+		typeof align === 'string'
+			? `wc-block-components-product-sale-badge--align${ align }`
+			: '';
 
 	return (
 		<div
 			className={ classnames(
-				'wc-block-component__sale-badge',
+				'wc-block-components-product-sale-badge',
 				className,
 				alignClass,
-				componentClass
+				`${ parentClassName }__product-onsale`
 			) }
 		>
 			<Label
@@ -54,10 +59,10 @@ const ProductSaleBadge = ( { className, align, ...props } ) => {
 	);
 };
 
-ProductSaleBadge.propTypes = {
+Block.propTypes = {
 	className: PropTypes.string,
 	align: PropTypes.string,
 	product: PropTypes.object,
 };
 
-export default ProductSaleBadge;
+export default Block;

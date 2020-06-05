@@ -34,7 +34,7 @@ class Block extends Component {
 		return (
 			<InnerBlockLayoutContextProvider
 				parentName="woocommerce/all-products"
-				layoutStyleClassPrefix="wc-block-grid"
+				parentClassName="wc-block-grid"
 			>
 				<ProductListContainer
 					attributes={ attributes }

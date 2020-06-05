@@ -13,7 +13,7 @@
 	"sideEffects": [
 		"*.css",
 		"*.scss",
-		"./assets/js/atomic/blocks/product/**",
+		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
 		"./assets/js/settings/blocks/**",
 		"./assets/js/middleware/**"
@@ -165,6 +165,7 @@
 		"config": "3.3.1",
 		"dinero.js": "1.8.1",
 		"downshift": "4.1.0",
+		"html-react-parser": "^0.10.5",
 		"jest-environment-jsdom-sixteen": "1.0.3",
 		"react-number-format": "4.4.1",
 		"reakit": "1.0.2",

@@ -1,0 +1,19 @@
+.wc-block-layout {
+	.wc-block-components-product-price {
+		margin-top: 0;
+		margin-bottom: $gap-small;
+		display: block;
+
+		&__regular {
+			margin-right: 0.5em;
+		}
+	}
+	&--is-loading {
+		.wc-block-components-product-price::before {
+			@include placeholder();
+			content: ".";
+			display: inline-block;
+			width: 5em;
+		}
+	}
+}

@@ -15,20 +15,20 @@ import './style.scss';
 const ExpressCheckoutContainer = ( { children } ) => {
 	return (
 		<>
-			<div className="wc-block-component-express-checkout">
+			<div className="wc-block-components-express-checkout">
 				<Title
-					className="wc-block-component-express-checkout__title"
+					className="wc-block-components-express-checkout__title"
 					headingLevel="2"
 				>
 					{ __( 'Express checkout', 'woo-gutenberg-products-block' ) }
 				</Title>
-				<div className="wc-block-component-express-checkout__content">
+				<div className="wc-block-components-express-checkout__content">
 					<StoreNoticesProvider context="wc/express-payment-area">
 						{ children }
 					</StoreNoticesProvider>
 				</div>
 			</div>
-			<div className="wc-block-component-express-checkout-continue-rule">
+			<div className="wc-block-components-express-checkout-continue-rule">
 				{ __( 'Or continue below', 'woo-gutenberg-products-block' ) }
 			</div>
 		</>

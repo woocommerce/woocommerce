@@ -112,7 +112,7 @@
 	}
 }
 
-.wc-block-component-express-checkout-continue-rule {
+.wc-block-components-express-checkout-continue-rule {
 	display: flex;
 	align-items: center;
 	text-align: center;
@@ -160,15 +160,15 @@
 
 // Loading placeholder state.
 .wc-block-checkout--is-loading {
-	.wc-block-component-express-checkout,
+	.wc-block-components-express-checkout,
 	.wc-block-checkout__actions button {
 		@include placeholder();
 		@include force-content();
 	}
-	.wc-block-component-express-checkout {
+	.wc-block-components-express-checkout {
 		min-height: 150px;
 	}
-	.wc-block-component-express-checkout-continue-rule span {
+	.wc-block-components-express-checkout-continue-rule span {
 		@include placeholder();
 		@include force-content();
 		width: 150px;

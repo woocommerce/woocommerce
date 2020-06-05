@@ -13,7 +13,8 @@ import {
 /**
  * Internal dependencies
  */
-import ProductSaleBadge from '../sale-badge/block.js';
+import ProductSaleBadge from './../sale-badge/block';
+import './style.scss';
 
 /**
  * Product Image Block Component.
@@ -27,19 +28,16 @@ import ProductSaleBadge from '../sale-badge/block.js';
  *                                        this is not provided.
  * @return {*} The component.
  */
-const ProductImage = ( {
+const Block = ( {
 	className,
 	productLink = true,
-	showSaleBadge = true,
+	showSaleBadge,
 	saleBadgeAlign = 'right',
 	...props
 } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
 	const productDataContext = useProductDataContext();
 	const product = props.product || productDataContext.product;
-
-	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
-	const componentClass = `${ layoutStyleClassPrefix }__product-image`;
-
 	const [ imageLoaded, setImageLoaded ] = useState( false );
 
 	if ( ! product ) {
@@ -47,11 +45,12 @@ const ProductImage = ( {
 			<div
 				className={ classnames(
 					className,
-					componentClass,
-					'is-loading'
+					'wc-block-components-product-image',
+					'wc-block-components-product-image--placeholder',
+					`${ parentClassName }__product-image`
 				) }
 			>
-				<ImagePlaceholder componentClass={ componentClass } />
+				<ImagePlaceholder />
 			</div>
 		);
 	}
@@ -60,14 +59,22 @@ const ProductImage = ( {
 		product?.images && product.images.length ? product.images[ 0 ] : null;
 
 	return (
-		<div className={ classnames( className, componentClass ) }>
+		<div
+			className={ classnames(
+				className,
+				'wc-block-components-product-image',
+				`${ parentClassName }__product-image`
+			) }
+		>
 			{ productLink ? (
 				<a href={ product.permalink } rel="nofollow">
-					{ showSaleBadge && (
-						<ProductSaleBadge align={ saleBadgeAlign } />
+					{ !! showSaleBadge && (
+						<ProductSaleBadge
+							align={ saleBadgeAlign }
+							product={ product }
+						/>
 					) }
 					<Image
-						componentClass={ componentClass }
 						image={ image }
 						onLoad={ () => setImageLoaded( true ) }
 						loaded={ imageLoaded }
@@ -75,11 +82,13 @@ const ProductImage = ( {
 				</a>
 			) : (
 				<>
-					{ showSaleBadge && (
-						<ProductSaleBadge align={ saleBadgeAlign } />
+					{ !! showSaleBadge && (
+						<ProductSaleBadge
+							align={ saleBadgeAlign }
+							product={ product }
+						/>
 					) }
 					<Image
-						componentClass={ componentClass }
 						image={ image }
 						onLoad={ () => setImageLoaded( true ) }
 						loaded={ imageLoaded }
@@ -90,26 +99,16 @@ const ProductImage = ( {
 	);
 };
 
-const ImagePlaceholder = ( { componentClass } ) => {
-	return (
-		<img
-			className={ classnames(
-				`${ componentClass }__image`,
-				`${ componentClass }__image_placeholder`
-			) }
-			src={ PLACEHOLDER_IMG_SRC }
-			alt=""
-		/>
-	);
+const ImagePlaceholder = () => {
+	return <img src={ PLACEHOLDER_IMG_SRC } alt="" />;
 };
 
-const Image = ( { componentClass, image, onLoad, loaded } ) => {
+const Image = ( { image, onLoad, loaded } ) => {
 	const { thumbnail, srcset, sizes, alt } = image || {};
 
 	return (
 		<>
 			<img
-				className={ classnames( `${ componentClass }__image` ) }
 				src={ thumbnail }
 				srcSet={ srcset }
 				sizes={ sizes }
@@ -117,14 +116,12 @@ const Image = ( { componentClass, image, onLoad, loaded } ) => {
 				onLoad={ onLoad }
 				hidden={ ! loaded }
 			/>
-			{ ! loaded && (
-				<ImagePlaceholder componentClass={ componentClass } />
-			) }
+			{ ! loaded && <ImagePlaceholder /> }
 		</>
 	);
 };
 
-ProductImage.propTypes = {
+Block.propTypes = {
 	className: PropTypes.string,
 	product: PropTypes.object,
 	productLink: PropTypes.bool,
@@ -132,4 +129,4 @@ ProductImage.propTypes = {
 	saleBadgeAlign: PropTypes.string,
 };
 
-export default ProductImage;
+export default Block;

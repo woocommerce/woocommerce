@@ -6,23 +6,19 @@ import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { Icon, search } from '@woocommerce/icons';
 
 const NoMatchingProducts = ( { resetCallback = () => {} } ) => {
-	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
+	const { parentClassName } = useInnerBlockLayoutContext();
 	return (
-		<div className={ `${ layoutStyleClassPrefix }__no-products` }>
+		<div className={ `${ parentClassName }__no-products` }>
 			<Icon
-				className={ `${ layoutStyleClassPrefix }__no-products-image` }
+				className={ `${ parentClassName }__no-products-image` }
 				alt=""
 				srcElement={ search }
 				size={ 100 }
 			/>
-			<strong
-				className={ `${ layoutStyleClassPrefix }__no-products-title` }
-			>
+			<strong className={ `${ parentClassName }__no-products-title` }>
 				{ __( 'No products found', 'woo-gutenberg-products-block' ) }
 			</strong>
-			<p
-				className={ `${ layoutStyleClassPrefix }__no-products-description` }
-			>
+			<p className={ `${ parentClassName }__no-products-description` }>
 				{ __(
 					'We were unable to find any results based on your search.',
 					'woo-gutenberg-products-block'

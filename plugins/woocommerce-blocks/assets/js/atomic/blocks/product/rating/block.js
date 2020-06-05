@@ -10,6 +10,11 @@ import {
 } from '@woocommerce/shared-context';
 
 /**
+ * Internal dependencies
+ */
+import './style.scss';
+
+/**
  * Product Rating Block Component.
  *
  * @param {Object} props             Incoming props.
@@ -18,13 +23,10 @@ import {
  *                                   this is not provided.
  * @return {*} The component.
  */
-const ProductRating = ( { className, ...props } ) => {
+const Block = ( { className, ...props } ) => {
+	const { parentClassName } = useInnerBlockLayoutContext();
 	const productDataContext = useProductDataContext();
 	const product = props.product || productDataContext.product;
-
-	const { layoutStyleClassPrefix } = useInnerBlockLayoutContext();
-	const componentClass = `${ layoutStyleClassPrefix }__product-rating`;
-
 	const rating = getAverageRating( product );
 
 	if ( ! rating ) {
@@ -42,10 +44,18 @@ const ProductRating = ( { className, ...props } ) => {
 
 	return (
 		<div
-			className={ classnames( className, componentClass, 'star-rating' ) }
+			className={ classnames(
+				className,
+				'star-rating',
+				'wc-block-components-product-rating',
+				`${ parentClassName }__product-rating`
+			) }
 		>
 			<div
-				className={ `${ componentClass }__stars` }
+				className={ classnames(
+					'wc-block-components-product-rating__stars',
+					`${ parentClassName }__product-rating__stars`
+				) }
 				role="img"
 				aria-label={ ratingText }
 			>
@@ -62,9 +72,9 @@ const getAverageRating = ( product ) => {
 	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
 };
 
-ProductRating.propTypes = {
+Block.propTypes = {
 	className: PropTypes.string,
 	product: PropTypes.object,
 };
 
-export default ProductRating;
+export default Block;
