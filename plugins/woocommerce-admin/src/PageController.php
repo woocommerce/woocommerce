@@ -168,6 +168,11 @@ class PageController {
 			while ( $parent_id ) {
 				if ( isset( $this->pages[ $parent_id ] ) ) {
 					$parent = $this->pages[ $parent_id ];
+
+					if ( 0 === strpos( $parent['path'], self::PAGE_ROOT ) ) {
+						$parent['path'] = 'admin.php?page=' . self::PAGE_ROOT . '&path=' . $parent['path'];
+					}
+
 					array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );
 					$parent_id = isset( $parent['parent'] ) ? $parent['parent'] : false;
 				} else {
