@@ -30,7 +30,7 @@ class SingleProduct extends AbstractBlock {
 			$this->namespace . '/' . $this->block_name,
 			array(
 				'render_callback' => array( $this, 'render' ),
-				'editor_script'   => 'wc-' . $this->block_name,
+				'editor_script'   => 'wc-' . $this->block_name . '-block',
 				'editor_style'    => 'wc-block-editor',
 				'style'           => [ 'wc-block-style', 'wc-block-vendors-style' ],
 				'script'          => 'wc-' . $this->block_name . '-frontend',
