@@ -83,6 +83,7 @@
 		"@types/react": "16.9.35",
 		"@types/wordpress__data": "4.6.7",
 		"@types/wordpress__element": "2.4.1",
+		"@woocommerce/woocommerce-rest-api": "1.0.1",
 		"@wordpress/babel-preset-default": "4.10.0",
 		"@wordpress/base-styles": "1.4.0",
 		"@wordpress/blocks": "6.12.0",
