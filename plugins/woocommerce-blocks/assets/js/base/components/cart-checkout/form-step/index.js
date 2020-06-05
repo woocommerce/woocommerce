@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import Title from '@woocommerce/base-components/title';
 
 /**
  * Internal dependencies
@@ -11,9 +12,13 @@ import './style.scss';
 
 const StepHeading = ( { title, stepHeadingContent } ) => (
 	<div className="wc-block-checkout-step__heading">
-		<h2 aria-hidden="true" className="wc-block-checkout-step__title">
+		<Title
+			aria-hidden="true"
+			className="wc-block-checkout-step__title"
+			headingLevel="2"
+		>
 			{ title }
-		</h2>
+		</Title>
 		{ !! stepHeadingContent && (
 			<span className="wc-block-checkout-step__heading-content">
 				{ stepHeadingContent }

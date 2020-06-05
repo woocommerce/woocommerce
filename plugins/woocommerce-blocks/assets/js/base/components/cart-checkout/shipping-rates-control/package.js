@@ -5,8 +5,9 @@ import PropTypes from 'prop-types';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import Label from '@woocommerce/base-components/label';
+import Title from '@woocommerce/base-components/title';
+import Panel from '@woocommerce/base-components/panel';
 import classNames from 'classnames';
-import { PanelBody, PanelRow } from 'wordpress-components';
 
 /**
  * Internal dependencies
@@ -28,9 +29,12 @@ const Package = ( {
 	const header = (
 		<>
 			{ title && (
-				<div className="wc-block-shipping-rates-control__package-title">
+				<Title
+					className="wc-block-shipping-rates-control__package-title"
+					headingLevel="3"
+				>
 					{ title }
-				</div>
+				</Title>
 			) }
 			{ showItems && (
 				<ul className="wc-block-shipping-rates-control__package-items">
@@ -75,13 +79,13 @@ const Package = ( {
 	);
 	if ( collapsible ) {
 		return (
-			<PanelBody
+			<Panel
 				className="wc-block-shipping-rates-control__package"
-				title={ header }
 				initialOpen={ true }
+				title={ header }
 			>
-				<PanelRow>{ body }</PanelRow>
-			</PanelBody>
+				{ body }
+			</Panel>
 		);
 	}
 	return (

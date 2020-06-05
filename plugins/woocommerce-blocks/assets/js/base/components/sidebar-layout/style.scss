@@ -13,54 +13,26 @@
 
 .wc-block-sidebar {
 	margin: 0;
-	padding-left: percentage($gap-largest / 1060px);
+	padding-left: percentage($gap-large / 1060px);
 	width: 35%;
 
-	// Reset Gutenberg <Panel> styles when used in the sidebar.
-	.components-panel__body {
+	.wc-blocks-components-panel {
 		border-top: 1px solid $core-grey-light-600;
 		border-bottom: 1px solid $core-grey-light-600;
 
-		&.is-opened {
-			padding-left: 0;
-			padding-right: 0;
-			padding-top: 0;
+		+ .wc-blocks-components-panel {
+			border-top: none;
+		}
 
-			> .components-panel__body-title {
-				margin-bottom: 0;
-				margin-left: 0;
-				margin-right: 0;
-			}
+		> h2 {
+			@include font-size(large);
+			@include reset-box();
 		}
 	}
 
-	.components-panel__body-title {
-		@include text-heading();
-		background: transparent;
-
-		&:hover,
-		&:focus,
-		&:active {
-			background: transparent;
-		}
-	}
-
-	.components-panel__body-toggle {
-		@include reset-typography();
-		background: transparent;
-		font-weight: normal;
-		font-size: inherit;
-		padding-left: 0;
-		padding-right: 36px;
-
-		&:hover,
-		&:focus,
-		&:active {
-			background: transparent;
-		}
-
-		.components-panel__arrow {
-			right: 0;
+	.wc-blocks-components-panel__button {
+		> svg {
+			padding-right: $gap;
 		}
 	}
 }
@@ -79,17 +51,25 @@
 		.wc-block-sidebar {
 			padding: 0;
 			width: 100%;
-
-			// Reset card component styling on mobile.
-			.components-card {
-				background: transparent;
-				box-shadow: none;
-				border: none;
-			}
-			.components-card__body {
-				border: none;
-				padding: 0;
-			}
 		}
+	}
+}
+
+.is-large {
+	.wc-block-sidebar {
+		.wc-block-totals-table-item,
+		.wc-blocks-components-panel__button,
+		.wc-blocks-components-panel__content {
+			padding-left: $gap;
+			padding-right: $gap;
+		}
+	}
+}
+
+// For Twenty Twenty we need to increase specificity a bit more.
+.theme-twentytwenty {
+	.wc-block-sidebar .wc-blocks-components-panel > h2 {
+		@include font-size(large);
+		@include reset-box();
 	}
 }
