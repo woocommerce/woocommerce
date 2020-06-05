@@ -10,7 +10,7 @@
  * Requires at least: 5.2
  * Requires PHP: 5.6
  * WC requires at least: 4.0
- * WC tested up to: 4.0
+ * WC tested up to: 4.2
  *
  * @package WooCommerce\Blocks
  * @internal This file is only used when running the REST API as a feature plugin.
