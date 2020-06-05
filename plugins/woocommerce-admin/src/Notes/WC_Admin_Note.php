@@ -24,6 +24,7 @@ class WC_Admin_Note extends \WC_Data {
 	const E_WC_ADMIN_NOTE_MARKETING     = 'marketing'; // used for adding marketing messages.
 
 	// Note status codes.
+	const E_WC_ADMIN_NOTE_PENDING    = 'pending';    // the note is not actioned but shouldn't be displayed.
 	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
 	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';   // the note has had its action completed by a user.
 	const E_WC_ADMIN_NOTE_SNOOZED    = 'snoozed';    // the note has been snoozed by a user.
@@ -137,6 +138,7 @@ class WC_Admin_Note extends \WC_Data {
 	 */
 	public static function get_allowed_statuses() {
 		$allowed_statuses = array(
+			self::E_WC_ADMIN_NOTE_PENDING,
 			self::E_WC_ADMIN_NOTE_ACTIONED,
 			self::E_WC_ADMIN_NOTE_UNACTIONED,
 			self::E_WC_ADMIN_NOTE_SNOOZED,
