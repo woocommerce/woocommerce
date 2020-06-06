@@ -29,8 +29,11 @@
     "@babel/preset-env": "7.9.0",
     "@babel/register": "7.9.0",
     "@jest/test-sequencer": "^25.0.0",
+    "@typescript-eslint/eslint-plugin": "3.1.0",
+    "@typescript-eslint/parser": "3.1.0",
     "@woocommerce/e2e-environment": "file:tests/e2e/env",
     "@wordpress/e2e-test-utils": "4.3.1",
+    "@wordpress/eslint-plugin": "6.1.0",
     "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
@@ -62,11 +65,12 @@
     "lint-staged": "9.5.0",
     "mocha": "7.0.1",
     "node-sass": "4.13.0",
-    "prettier": "github:automattic/calypso-prettier#c56b4251",
+    "prettier": "npm:wp-prettier@^2.0.5",
     "puppeteer": "2.0.0",
     "puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "stylelint": "12.0.1",
     "stylelint-config-wordpress": "16.0.0",
+    "typescript": "3.9.5",
     "webpack": "4.41.6",
     "webpack-cli": "3.3.11",
     "wp-textdomain": "^1.0.1"
@@ -91,6 +95,10 @@
       "git add"
     ],
     "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.ts": [
       "eslint --fix",
       "git add"
     ]

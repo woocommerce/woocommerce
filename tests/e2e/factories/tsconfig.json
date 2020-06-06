@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es2015",
+    "module": "commonjs",
+    "types": [ "node", "jest" ],
+    "outDir": "dist",
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": [ "./src/**/*" ]
+}
