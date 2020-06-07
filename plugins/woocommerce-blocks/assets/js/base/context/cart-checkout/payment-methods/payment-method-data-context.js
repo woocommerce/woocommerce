@@ -276,6 +276,23 @@ export const PaymentMethodDataProvider = ( { children } ) => {
 		}
 	}, [ checkoutIsIdle, currentStatus.isSuccessful ] );
 
+	// if checkout has an error and payment is not being made with a saved token
+	// and payment status is success, then let's sync payment status back to
+	// pristine.
+	useEffect( () => {
+		if (
+			checkoutHasError &&
+			currentStatus.isSuccessful &&
+			! paymentData.hasSavedToken
+		) {
+			dispatch( statusOnly( PRISTINE ) );
+		}
+	}, [
+		checkoutHasError,
+		currentStatus.isSuccessful,
+		paymentData.hasSavedToken,
+	] );
+
 	// set initial active payment method if it's undefined.
 	useEffect( () => {
 		const paymentMethodKeys = Object.keys( paymentData.paymentMethods );

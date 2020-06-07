@@ -35,6 +35,7 @@ export const DEFAULT_PAYMENT_DATA = {
 		// wants to pass along for payment
 		// processing server side.
 	},
+	hasSavedToken: false,
 	errorMessage: '',
 	paymentMethods: {},
 	expressPaymentMethods: {},
