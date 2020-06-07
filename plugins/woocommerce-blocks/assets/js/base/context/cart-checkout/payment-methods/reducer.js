@@ -15,6 +15,12 @@ const {
 	SET_SHOULD_SAVE_PAYMENT_METHOD,
 } = ACTION_TYPES;
 
+const hasSavedPaymentToken = ( paymentMethodData ) => {
+	return !! (
+		typeof paymentMethodData === 'object' && paymentMethodData.isSavedToken
+	);
+};
+
 /**
  * Reducer for payment data state
  *
@@ -64,6 +70,9 @@ const reducer = (
 						currentStatus: SUCCESS,
 						paymentMethodData:
 							paymentMethodData || state.paymentMethodData,
+						hasSavedToken: hasSavedPaymentToken(
+							paymentMethodData
+						),
 				  }
 				: state;
 		case PROCESSING:
