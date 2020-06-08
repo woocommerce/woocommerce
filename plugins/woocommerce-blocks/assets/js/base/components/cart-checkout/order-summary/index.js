@@ -10,6 +10,7 @@ import Panel from '@woocommerce/base-components/panel';
  * Internal dependencies
  */
 import OrderSummaryItem from './order-summary-item.js';
+import './style.scss';
 
 const OrderSummary = ( { cartItems = [] } ) => {
 	const { isLarge, hasContainerWidth } = useContainerWidthContext();
@@ -29,7 +30,7 @@ const OrderSummary = ( { cartItems = [] } ) => {
 			}
 			titleTag="h2"
 		>
-			<div className="wc-block-order-components-summary__content">
+			<div className="wc-block-components-order-summary__content">
 				{ cartItems.map( ( cartItem ) => {
 					return (
 						<OrderSummaryItem

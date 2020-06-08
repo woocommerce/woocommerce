@@ -15,6 +15,7 @@
 		transform: translateY(-50%);
 		position: absolute;
 		top: 0;
+		margin-top: -2px; // Same as container border width.
 	}
 
 	.wc-block-components-express-checkout__content {

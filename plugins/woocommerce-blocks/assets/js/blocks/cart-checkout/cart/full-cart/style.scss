@@ -266,7 +266,7 @@ table.wc-block-cart-items {
 	.wc-block-sidebar {
 		> .wc-block-cart__totals-title,
 		.wc-block-cart__shipping-calculator,
-		.wc-block-shipping-totals__fieldset,
+		.wc-block-shipping-rates-control__package:not(.wc-blocks-components-panel),
 		> .wc-block-cart__submit-container {
 			padding-left: $gap;
 			padding-right: $gap;
