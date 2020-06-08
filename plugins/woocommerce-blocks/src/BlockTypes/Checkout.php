@@ -176,16 +176,44 @@ class Checkout extends AbstractBlock {
 					<div class="wc-block-components-express-checkout-continue-rule"><span></span></div>
 					<form class="wc-block-checkout-form">
 						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<span></span>
+							<div class="wc-block-checkout-step__heading">
+								<div class="wc-block-checkout-step__title"></div>
+							</div>
+							<div class="wc-block-checkout-step__container">
+								<div class="wc-block-checkout-step__content">
+									<span></span>
+								</div>
+							</div>
 						</fieldset>
 						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<span></span>
+							<div class="wc-block-checkout-step__heading">
+								<div class="wc-block-checkout-step__title"></div>
+							</div>
+							<div class="wc-block-checkout-step__container">
+								<div class="wc-block-checkout-step__content">
+									<span></span>
+								</div>
+							</div>
 						</fieldset>
 						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<span></span>
+							<div class="wc-block-checkout-step__heading">
+								<div class="wc-block-checkout-step__title"></div>
+							</div>
+							<div class="wc-block-checkout-step__container">
+								<div class="wc-block-checkout-step__content">
+									<span></span>
+								</div>
+							</div>
 						</fieldset>
 						<fieldset class="wc-block-checkout__contact-fields wc-block-checkout-step">
-							<span></span>
+							<div class="wc-block-checkout-step__heading">
+								<div class="wc-block-checkout-step__title"></div>
+							</div>
+							<div class="wc-block-checkout-step__container">
+								<div class="wc-block-checkout-step__content">
+									<span></span>
+								</div>
+							</div>
 						</fieldset>
 					</form>
 				</div>
