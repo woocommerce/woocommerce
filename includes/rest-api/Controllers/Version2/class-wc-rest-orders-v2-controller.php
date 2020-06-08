@@ -203,15 +203,61 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get formatted item data.
 	 *
-	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @since 3.0.0
+	 * @param WC_Order $order WC_Data instance.
+	 *
 	 * @return array
 	 */
-	protected function get_formatted_item_data( $object ) {
-		$data              = $object->get_data();
+	protected function get_formatted_item_data( $order ) {
+		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds' );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
+
+		// Only fetch fields that we need.
+		$request = func_get_arg( 1 );
+		if ( $request ) {
+			$fields            = $this->get_fields_for_response( $request );
+			$extra_fields      = array_intersect( $extra_fields, $fields );
+			$format_decimal    = array_intersect( $format_decimal, $fields );
+			$format_date       = array_intersect( $format_date, $fields );
+			$format_line_items = array_intersect( $format_line_items, $fields );
+		}
+
+		$data = $order->get_base_data();
+
+		// Add extra data as necessary.
+		foreach ( $extra_fields as $field ) {
+			switch ( $field ) {
+				case 'meta_data':
+					$data['meta_data'] = $order->get_meta_data();
+					break;
+				case 'line_items':
+					$data['line_items'] = $order->get_items( 'line_item');
+					break;
+				case 'tax_lines':
+					$data['tax_lines'] = $order->get_items( 'tax' );
+					break;
+				case 'shipping_lines':
+					$data['shipping_lines'] = $order->get_items( 'shipping' );
+					break;
+				case 'fee_lines':
+					$data['fee_lines'] = $order->get_items( 'fee' );
+					break;
+				case 'coupon_lines':
+					$data['coupon_lines'] = $order->get_items( 'coupon' );
+					break;
+				case 'refunds':
+					foreach ( $order->get_refunds() as $refund ) {
+						$data['refunds'][] = array(
+							'id'     => $refund->get_id(),
+							'reason' => $refund->get_reason() ? $refund->get_reason() : '',
+							'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
+						);
+					}
+					break;
+			}
+		}
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -233,59 +279,53 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
 		}
 
-		// Refunds.
-		$data['refunds'] = array();
-		foreach ( $object->get_refunds() as $refund ) {
-			$data['refunds'][] = array(
-				'id'     => $refund->get_id(),
-				'reason' => $refund->get_reason() ? $refund->get_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
-			);
-		}
-
-		return array(
-			'id'                   => $object->get_id(),
-			'parent_id'            => $data['parent_id'],
-			'number'               => $data['number'],
-			'order_key'            => $data['order_key'],
-			'created_via'          => $data['created_via'],
-			'version'              => $data['version'],
-			'status'               => $data['status'],
-			'currency'             => $data['currency'],
-			'date_created'         => $data['date_created'],
-			'date_created_gmt'     => $data['date_created_gmt'],
-			'date_modified'        => $data['date_modified'],
-			'date_modified_gmt'    => $data['date_modified_gmt'],
-			'discount_total'       => $data['discount_total'],
-			'discount_tax'         => $data['discount_tax'],
-			'shipping_total'       => $data['shipping_total'],
-			'shipping_tax'         => $data['shipping_tax'],
-			'cart_tax'             => $data['cart_tax'],
-			'total'                => $data['total'],
-			'total_tax'            => $data['total_tax'],
-			'prices_include_tax'   => $data['prices_include_tax'],
-			'customer_id'          => $data['customer_id'],
-			'customer_ip_address'  => $data['customer_ip_address'],
-			'customer_user_agent'  => $data['customer_user_agent'],
-			'customer_note'        => $data['customer_note'],
-			'billing'              => $data['billing'],
-			'shipping'             => $data['shipping'],
-			'payment_method'       => $data['payment_method'],
-			'payment_method_title' => $data['payment_method_title'],
-			'transaction_id'       => $data['transaction_id'],
-			'date_paid'            => $data['date_paid'],
-			'date_paid_gmt'        => $data['date_paid_gmt'],
-			'date_completed'       => $data['date_completed'],
-			'date_completed_gmt'   => $data['date_completed_gmt'],
-			'cart_hash'            => $data['cart_hash'],
-			'meta_data'            => $data['meta_data'],
-			'line_items'           => $data['line_items'],
-			'tax_lines'            => $data['tax_lines'],
-			'shipping_lines'       => $data['shipping_lines'],
-			'fee_lines'            => $data['fee_lines'],
-			'coupon_lines'         => $data['coupon_lines'],
-			'refunds'              => $data['refunds'],
+		$allowed_fields = array(
+			'id',
+			'parent_id',
+			'number',
+			'order_key',
+			'created_via',
+			'version',
+			'status',
+			'currency',
+			'date_created',
+			'date_created_gmt',
+			'date_modified',
+			'date_modified_gmt',
+			'discount_total',
+			'discount_tax',
+			'shipping_total',
+			'shipping_tax',
+			'cart_tax',
+			'total',
+			'total_tax',
+			'prices_include_tax',
+			'customer_id',
+			'customer_ip_address',
+			'customer_user_agent',
+			'customer_note',
+			'billing',
+			'shipping',
+			'payment_method',
+			'payment_method_title',
+			'transaction_id',
+			'date_paid',
+			'date_paid_gmt',
+			'date_completed',
+			'date_completed_gmt',
+			'cart_hash',
+			'meta_data',
+			'line_items',
+			'tax_lines',
+			'shipping_lines',
+			'fee_lines',
+			'coupon_lines',
+			'refunds',
 		);
+
+		$data = array_intersect_key( $data, array_flip( $allowed_fields ) );
+
+		return $data;
 	}
 
 	/**
@@ -299,7 +339,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
 		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$data                = $this->get_formatted_item_data( $object );
+		$data                = $this->get_formatted_item_data( $object, $request );
 		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data                = $this->add_additional_fields_to_object( $data, $request );
 		$data                = $this->filter_response_by_context( $data, $context );
