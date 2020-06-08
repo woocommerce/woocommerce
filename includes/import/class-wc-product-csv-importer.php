@@ -384,7 +384,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return array|WP_Error
+	 * @return array of arrays with "parent" and "name" keys.
 	 */
 	public function parse_categories_field( $value ) {
 		if ( empty( $value ) ) {
