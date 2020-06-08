@@ -1,6 +1,7 @@
 export { default as Icon } from './icon';
 
 export { default as arrowBack } from './library/arrow-back';
+export { default as arrowDownAlt2 } from './library/arrow-down-alt2';
 export { default as bank } from './library/bank';
 export { default as barcode } from './library/barcode';
 export { default as bill } from './library/bill';
@@ -20,6 +21,7 @@ export { default as grid } from './library/grid';
 export { default as image } from './library/image';
 export { default as list } from './library/list';
 export { default as more } from './library/more';
+export { default as noAlt } from './library/no-alt';
 export { default as notes } from './library/notes';
 export { default as notice } from './library/notice';
 export { default as radioSelected } from './library/radio-selected';
