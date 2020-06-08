@@ -55,7 +55,7 @@
 
 .wc-block-gateway-container {
 	position: relative;
-	margin-bottom: $gap;
+	margin-bottom: em($gap-large);
 	white-space: nowrap;
 
 	&.wc-card-number-element {
@@ -81,6 +81,7 @@
 		box-sizing: border-box;
 		height: 3em;
 		color: $input-text-active;
+		cursor: text;
 
 		&:focus {
 			background-color: #fff;
@@ -106,6 +107,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{2 * $gap});
+		cursor: text;
 
 		@media screen and (prefers-reduced-motion: reduce) {
 			transition: none;
@@ -146,6 +148,29 @@
 
 	.wc-block-gateway-input.has-error + label {
 		color: $error-red;
+	}
+}
+
+// These elements have available space below, so we can display errors with a
+// larger line height.
+.is-medium,
+.is-large {
+	.wc-card-expiry-element,
+	.wc-card-cvc-element {
+		.wc-block-form-input-validation-error > p {
+			line-height: 16px;
+			padding-top: 4px;
+		}
+	}
+}
+
+.is-mobile,
+.is-small {
+	.wc-card-expiry-element,
+	.wc-card-cvc-element {
+		.wc-block-form-input-validation-error > p {
+			min-height: 28px;
+		}
 	}
 }
 
