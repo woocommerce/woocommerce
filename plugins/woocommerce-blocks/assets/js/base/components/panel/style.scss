@@ -12,6 +12,7 @@
 		margin-bottom: em(6px);
 		margin-top: em(6px);
 		padding-bottom: em($gap-small - 6px);
+		padding-right: #{24px + $gap-smaller};
 		padding-top: em($gap-small - 6px);
 		position: relative;
 		text-align: left;

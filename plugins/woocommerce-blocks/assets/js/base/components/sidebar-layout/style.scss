@@ -29,12 +29,6 @@
 			@include reset-box();
 		}
 	}
-
-	.wc-blocks-components-panel__button {
-		> svg {
-			padding-right: $gap;
-		}
-	}
 }
 
 .is-medium,
@@ -58,8 +52,7 @@
 .is-large {
 	.wc-block-sidebar {
 		.wc-block-totals-table-item,
-		.wc-blocks-components-panel__button,
-		.wc-blocks-components-panel__content {
+		.wc-blocks-components-panel {
 			padding-left: $gap;
 			padding-right: $gap;
 		}
