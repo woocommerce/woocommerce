@@ -18,6 +18,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{2 * $gap});
+		cursor: text;
 
 		@media screen and (prefers-reduced-motion: reduce) {
 			transition: none;
