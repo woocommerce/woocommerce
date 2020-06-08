@@ -87,7 +87,7 @@ export const Layout = ( props ) => {
 				>
 					{ isTaskListEnabled && renderTaskList() }
 					<StatsOverview />
-					<QuickLinks />
+					{ ! isTaskListEnabled && <QuickLinks /> }
 				</div>
 			</Fragment>
 		);
@@ -151,6 +151,7 @@ export default compose(
 				'woocommerce_task_list_hidden',
 			] );
 			const { isUndoRequesting } = getUndoDismissRequesting();
+
 			return {
 				isUndoRequesting,
 				requestingTaskList: isGetOptionsRequesting( [
