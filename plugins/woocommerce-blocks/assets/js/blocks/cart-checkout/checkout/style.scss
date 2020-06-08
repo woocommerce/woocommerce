@@ -90,7 +90,25 @@
 		width: 150px;
 	}
 	.wc-block-checkout-form {
-		fieldset span {
+		.wc-block-checkout-step__title {
+			@include placeholder();
+			@include force-content();
+			display: block;
+			width: 10em;
+
+			&::before {
+				@include placeholder();
+				@include force-content();
+				border-radius: 50%;
+				display: block;
+				height: 100%;
+				width: 1.5em;
+			}
+		}
+		.wc-block-checkout-step__container::after {
+			@include placeholder();
+		}
+		.wc-block-checkout-step__content > span {
 			@include placeholder();
 			@include force-content();
 			display: block;

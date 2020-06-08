@@ -1,6 +1,3 @@
-$circle-size: 24px;
-$line-offset-from-circle-size: 8px;
-
 .wc-block-checkout-form {
 	counter-reset: checkout-step;
 }
@@ -8,13 +5,21 @@ $line-offset-from-circle-size: 8px;
 .wc-block-checkout-form fieldset.wc-block-checkout-step {
 	position: relative;
 	border: none;
-	padding: 0 0 $gap-larger $gap-larger;
+	padding: 0 0 0 $gap-larger;
 	background: none;
 	margin: 0;
 
 	.is-large & {
 		padding-right: $gap-large;
 	}
+}
+
+.wc-block-checkout-step__container {
+	position: relative;
+}
+
+.wc-block-checkout-step__content {
+	padding-bottom: $gap-larger;
 }
 
 .wc-block-checkout-form fieldset.wc-block-checkout-step:disabled {
@@ -28,11 +33,11 @@ $line-offset-from-circle-size: 8px;
 	flex-wrap: wrap;
 	margin-bottom: $gap-smaller;
 	position: relative;
+}
 
-	.wc-block-checkout-step__title {
-		line-height: 1.5;
-		margin: 0 $gap-small 0 0;
-	}
+.wc-block-checkout-step__title {
+	line-height: 1.5;
+	margin: 0 $gap-small 0 0;
 }
 
 .wc-block-checkout-step__heading-content {
@@ -54,37 +59,29 @@ $line-offset-from-circle-size: 8px;
 	margin-bottom: $gap;
 }
 
-.wc-block-checkout-step::before {
-	@include font-size(small);
+.wc-block-checkout-step__title::before {
+	@include reset-box();
+	background: transparent;
 	counter-increment: checkout-step;
-	content: counter(checkout-step);
-	content: counter(checkout-step) / "";
+	content: "\00a0" counter(checkout-step) ".";
+	content: "\00a0" counter(checkout-step) "." / "";
 	position: absolute;
-	width: $circle-size;
-	height: $circle-size;
-	left: 0;
+	width: $gap-larger;
+	left: -$gap-larger/2;
 	top: 0;
-	background: $gray-20;
-	color: $white;
-	line-height: $circle-size;
 	text-align: center;
-	border-radius: $circle-size / 2;
-	box-sizing: content-box;
+	transform: translateX(-50%);
 }
 
-// because themes can register different background colors, we can't always
-// relay on using white border to offest the step left line,
-.wc-block-checkout-step::after {
+.wc-block-checkout-step__container::after {
 	content: "";
-	// 1 Circle size + offset of the first circle and next circle.
-	height: calc(100% - #{$circle-size + $line-offset-from-circle-size * 2});
-	width: 1px;
-	background-color: $gray-10;
+	height: calc(100% - #{$gap-smaller});
+	border-left: 1px solid;
 	position: absolute;
-	left: $circle-size/2;
-	top: $circle-size + $line-offset-from-circle-size;
+	left: -$gap-larger/2;
+	top: 0;
 }
 
-.wc-block-checkout-step:last-child::after {
+.wc-block-checkout-step:last-child .wc-block-checkout-step__container::after {
 	content: none;
 }
