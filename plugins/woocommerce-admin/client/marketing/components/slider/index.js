@@ -21,21 +21,18 @@ class Slider extends Component {
 		this.container = createRef();
 		this.onEnter = this.onEnter.bind( this );
 		this.updateSliderHeight = this.updateSliderHeight.bind( this );
+		this.debouncedUpdateSliderHeight = debounce( this.updateSliderHeight, 50 );
 	}
 
 	/**
 	 * Update the slider height on Resize
 	 */
 	componentDidMount() {
-		// Update the slider height on Resize
-		window.addEventListener(
-			'resize',
-			debounce( this.updateSliderHeight, 50 )
-		);
+		window.addEventListener( 'resize', this.debouncedUpdateSliderHeight );
 	}
 
 	componentWillUnmount() {
-		window.removeEventListener( 'resize', this.updateSliderHeight )
+		window.removeEventListener( 'resize', this.debouncedUpdateSliderHeight );
 	}
 
 	updateSliderHeight() {
