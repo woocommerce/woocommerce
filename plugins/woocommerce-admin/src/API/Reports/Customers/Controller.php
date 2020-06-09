@@ -474,6 +474,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_date_arg' ),
+			'items'             => array(
+				'type' => 'string',
+			),
 		);
 		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
@@ -491,6 +494,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_date_arg' ),
+			'items'             => array(
+				'type' => 'string',
+			),
 		);
 		$params['orders_count_min']        = array(
 			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'woocommerce-admin' ),
@@ -508,6 +514,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 		$params['total_spend_min']         = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'woocommerce-admin' ),
@@ -523,6 +532,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 		$params['avg_order_value_min']     = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'woocommerce-admin' ),
@@ -538,6 +550,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => array( '\Automattic\WooCommerce\Admin\API\Reports\TimeInterval', 'rest_validate_between_numeric_arg' ),
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 		$params['last_order_before']       = array(
 			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
