@@ -6,6 +6,8 @@
  * @package WooCommerce/Interface
  */
 
+use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -16,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Singleton for managing the WC queue instance.
  *
  * @version 3.5.0
+ *
+ * @deprecated 4.3.0 Use dependency injection instead to get an instance of WC_Query_Interface, see the ObjectContainer class.
  */
 class WC_Queue {
 
@@ -39,13 +43,7 @@ class WC_Queue {
 	 * @return WC_Queue_Interface
 	 */
 	final public static function instance() {
-
-		if ( is_null( self::$instance ) ) {
-			$class          = self::get_class();
-			self::$instance = new $class();
-			self::$instance = self::validate_instance( self::$instance );
-		}
-		return self::$instance;
+		return self::$instance = ObjectContainer::get_instance_of( WC_Queue_Interface::class );
 	}
 
 	/**

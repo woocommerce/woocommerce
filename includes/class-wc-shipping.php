@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -52,6 +53,8 @@ class WC_Shipping {
 	 *
 	 * @var WC_Shipping
 	 * @since 2.1
+	 *
+	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	protected static $_instance = null;
 
@@ -62,12 +65,11 @@ class WC_Shipping {
 	 *
 	 * @since 2.1
 	 * @return WC_Shipping Main instance
+	 *
+	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	public static function instance() {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
-		}
-		return self::$_instance;
+		return self::$_instance = ObjectContainer::get_instance_of( __CLASS__ );
 	}
 
 	/**
