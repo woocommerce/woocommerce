@@ -226,7 +226,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	protected function get_objects( $query_args ) {
 		$query_args['paginate'] = true;
-//		$query_args['return']   = 'objects';
+		$query_args['return']   = 'objects';
 		$results                = wc_get_products( $query_args );
 
 		return array(
