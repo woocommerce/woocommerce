@@ -72,7 +72,7 @@ those and list here as checklist items. You can have different engineers write t
     * [ ] The release affects filters or action hooks.
         * [ ] This is documented (see: <!-- Enter a link to the documentation here -->)
 
-* [ ] Link to **testing instructions** for this release: <!-- Enter a link to the testing instructions here -->
+* [ ] Link to **testing instructions** for this release: <!-- Enter a link to the testing instructions here, ideally in /docs/testing/releases -->
 
 * [ ] The release has a negative performance impact on sites.
     * [ ] There are new assets (JavaScript or CSS bundles)

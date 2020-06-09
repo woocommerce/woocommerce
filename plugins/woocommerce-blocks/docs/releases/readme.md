@@ -90,6 +90,7 @@ _Outcome_: **Release branch has all relevant changes merged & pushed and there i
 -   Make any other changes to readme as needed - e.g. support versions changing, new blocks.
 -   Push readme changes to release branch on origin repo.
     -   Note: you can push your readme changes directly to branch – no need for a PR & review process.
+-   Create testing notes for the release (you might be able to copy some from the pulls included in the release). Add the notes to [`docs/testing/releases`](../testing/releases/) (and update the [README.md index](../testing/releases/README.md) there)
 
 _Outcome_: **Release branch has `readme.txt` is updated with release details.**
 
@@ -108,7 +109,7 @@ _Outcome_: **Release branch has `readme.txt` is updated with release details.**
     -   Test to confirm new features/fixes are working correctly.
     -   Smoke test – test a cross section of core functionality.
     -   Tests performed should be recorded and listed in the release pull request.
--   Ask a team member to review the changes in the release pull request and for anyone who has done testing that they approve the pull request. **Remember release pull requests are just used for tracking the release and are not merged into master**.
+-   Ask a team member to review the changes in the release pull request and for anyone who has done testing that they approve the pull request.
 
 _Outcome_: **Confident that source code is ready for release: intended fixes are working correctly, no release blockers or build issues.**
 
