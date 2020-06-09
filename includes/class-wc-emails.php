@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,6 +29,8 @@ class WC_Emails {
 	 * The single instance of the class
 	 *
 	 * @var WC_Emails
+	 *
+	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	protected static $_instance = null;
 
@@ -46,12 +49,11 @@ class WC_Emails {
 	 * @since 2.1
 	 * @static
 	 * @return WC_Emails Main instance
+	 *
+	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	public static function instance() {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
-		}
-		return self::$_instance;
+		return self::$_instance = ObjectContainer::get_instance_of( __CLASS__ );
 	}
 
 	/**
