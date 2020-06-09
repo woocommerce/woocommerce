@@ -355,7 +355,7 @@ class TaskDashboard extends Component {
 								<CardHeader>
 									<H>
 										{ __(
-											'Store setup',
+											'Finish setup',
 											'woocommerce-admin'
 										) }
 									</H>
