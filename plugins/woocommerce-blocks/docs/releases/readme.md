@@ -47,7 +47,7 @@ _Outcome_: **Team is aware of release and in agreement about what fixes & featur
 
 #### Create a release pull request
 
-Using the [release pull request template](../../.github/pull_request_template.md), create a pull request for the release branch you just created. This pull request will have changes merged to master but might not be a straight merge if it contains cherry-picked commits. The pull request also contains the checklist to go over as a part of the release along with being a place to contain all planning/communication around the release. The checklist should be completed and the pull request has an approved review from at least one team member before you do the Github deploy or release the plugin to WordPress.org.
+Using the [release pull request template](../../.github/release_pull_request_template.md), create a pull request for the release branch you just created. This pull request will have changes merged to master but might not be a straight merge if it contains cherry-picked commits. The pull request also contains the checklist to go over as a part of the release along with being a place to contain all planning/communication around the release. The checklist should be completed and the pull request has an approved review from at least one team member before you do the Github deploy or release the plugin to WordPress.org.
 
 ### Patch releases against latest master
 
@@ -164,7 +164,7 @@ If the tagged release should be updated in WooCommerce core, do this immediately
 - Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed etc.
 - After the checklist is complete and the testing is done, it will be up to the WooCommerce core team to approve and merge the pull request.
 
-*Outcome:* The package is updated in WooCommerce core frequently and successfully merged to WooCommerce master as a stable release..
+_Outcome:_ The package is updated in WooCommerce core frequently and successfully merged to WooCommerce master as a stable release.
 
 ## Appendix: Versions
 
