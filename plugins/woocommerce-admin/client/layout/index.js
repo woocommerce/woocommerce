@@ -80,7 +80,7 @@ class _Layout extends Component {
 
 		if ( isEmbedded ) {
 			const path = document.location.pathname + document.location.search;
-			recordPageView( path, { isEmbedded } );
+			recordPageView( path, { is_embedded: true } );
 			return;
 		}
 
@@ -193,7 +193,11 @@ class _PageLayout extends Component {
 								path={ page.path }
 								exact
 								render={ ( props ) => (
-									<Layout page={ page } homepageEnabled={ homepageEnabled } { ...props } />
+									<Layout
+										page={ page }
+										homepageEnabled={ homepageEnabled }
+										{ ...props }
+									/>
 								) }
 							/>
 						);
@@ -212,7 +216,8 @@ export const PageLayout = compose(
 		const options = getOptions( [ 'woocommerce_homescreen_enabled' ] );
 		const homepageEnabled =
 			window.wcAdminFeatures.homepage &&
-			get( options, [ 'woocommerce_homescreen_enabled' ], false ) === 'yes';
+			get( options, [ 'woocommerce_homescreen_enabled' ], false ) ===
+				'yes';
 		return { homepageEnabled };
 	} )
 )( _PageLayout );
