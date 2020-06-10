@@ -20,11 +20,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load colors.
-$bg        = get_option( 'woocommerce_email_background_color' );
-$body      = get_option( 'woocommerce_email_body_background_color' );
-$base      = get_option( 'woocommerce_email_base_color' );
-$base_text = wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text      = get_option( 'woocommerce_email_text_color' );
+$bg           = get_option( 'woocommerce_email_background_color' );
+$body         = get_option( 'woocommerce_email_body_background_color' );
+$base         = get_option( 'woocommerce_email_base_color' );
+$base_text    = wc_light_or_dark( $base, '#202020', '#ffffff' );
+$text         = get_option( 'woocommerce_email_text_color' );
+$bg_dk        = get_option( 'woocommerce_email_background_color_dk' );
+$body_dk      = get_option( 'woocommerce_email_body_background_color_dk' );
+$base_dk      = get_option( 'woocommerce_email_base_color_dk' );
+$base_text_dk = wc_light_or_dark( $base_dk, '#202020', '#ffffff' );
+$text_dk      = get_option( 'woocommerce_email_text_color_dk' );
+$image_dk_src = get_option( 'woocommerce_email_header_image_dk' );
 
 // Pick a contrasting color for links.
 $link_color = wc_hex_is_light( $base ) ? $base : $base_text;
@@ -39,6 +45,13 @@ $base_lighter_20 = wc_hex_lighter( $base, 20 );
 $base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
 $text_lighter_40 = wc_hex_lighter( $text, 40 );
+
+$bg_dk_lighter_10   = wc_hex_lighter( $bg_dk, 10 );
+$body_dk_lighter_10 = wc_hex_lighter( $body_dk, 10 );
+$base_dk_darker_20  = wc_hex_darker( $base_dk, 20 );
+$base_dk_darker_40  = wc_hex_darker( $base_dk, 40 );
+$text_dk_darker_20  = wc_hex_darker( $text_dk, 20 );
+$text_dk_darker_40  = wc_hex_darker( $text_dk, 40 );
 
 // !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
 // body{padding: 0;} ensures proper scale/positioning of the email in the iOS native email app.
@@ -224,5 +237,82 @@ img {
 	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 10px;
 	max-width: 100%;
 	height: auto;
+}
+
+// important flag is necessary as long as styles are inlined on each element as these styles are written to the style tag in the document head.
+:root {
+	color-scheme: light dark;
+	supported-color-schemes: light dark;
+}
+@media (prefers-color-scheme: dark) {
+	#wrapper {
+		background-color: <?php echo esc_attr( $bg_dk ); ?> !important;
+	}
+
+	#template_container {
+		background-color: <?php echo esc_attr( $body_dk ); ?> !important;
+		border: 1px solid <?php echo esc_attr( $bg_dk_lighter_10 ); ?> !important;
+	}
+
+	#template_header {
+		background-color: <?php echo esc_attr( $base_dk ); ?> !important;
+		color: <?php echo esc_attr( $base_text_dk ); ?> !important;
+	}
+
+	#template_header_image p img {
+		content:url('<?php echo esc_attr( $image_dk_src ); ?>') !important;
+	}
+
+	#template_header h1,
+	#template_header h1 a {
+		color: <?php echo esc_attr( $base_text ); ?> !important;
+	}
+
+	#template_footer #credit {
+		color: <?php echo esc_attr( $text_dk_darker_40 ); ?> !important;
+	}
+
+	#body_content {
+		background-color: <?php echo esc_attr( $body_dk ); ?> !important;
+	}
+
+	#body_content_inner {
+		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
+	}
+
+	.td {
+		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
+		border: 1px solid <?php echo esc_attr( $body_dk_lighter_10 ); ?> !important;
+	}
+
+	.address {
+		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
+		border: 1px solid <?php echo esc_attr( $body_dk_lighter_10 ); ?> !important;
+	}
+
+	.text {
+		color: <?php echo esc_attr( $text_dk ); ?> !important;
+	}
+
+	.link {
+		color: <?php echo esc_attr( $base_dk ); ?> !important;
+	}
+
+	h1 {
+		color: <?php echo esc_attr( $base_dk ); ?> !important;
+		text-shadow: 0 1px 0 <?php echo esc_attr( $base_dk_darker_20 ); ?> !important;
+	}
+
+	h2 {
+		color: <?php echo esc_attr( $base_dk ); ?> !important;
+	}
+
+	h3 {
+		color: <?php echo esc_attr( $base_dk ); ?> !important;
+	}
+
+	a {
+		color: <?php echo esc_attr( $link_color_dk ); ?> !important;
+	}
 }
 <?php

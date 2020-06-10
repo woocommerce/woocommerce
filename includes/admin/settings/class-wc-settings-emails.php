@@ -126,9 +126,21 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
+					'title'       => __( 'Header image - Dark Theme', 'woocommerce' ),
+					'desc'        => __( 'URL to an image you want to show in the email header when the email client is using the dark theme/dark mode. Upload images using the media uploader (Admin > Media).', 'woocommerce' ),
+					'id'          => 'woocommerce_email_header_image_dk',
+					'type'        => 'text',
+					'css'         => 'min-width:400px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'default'     => '',
+					'autoload'    => false,
+					'desc_tip'    => true,
+				),
+
+				array(
 					'title'       => __( 'Footer text', 'woocommerce' ),
 					/* translators: %s: Available placeholders for use */
-					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url}' ),
+					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_address}' ),
 					'id'          => 'woocommerce_email_footer_text',
 					'css'         => 'width:400px; height: 75px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -182,6 +194,54 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type'     => 'color',
 					'css'      => 'width:6em;',
 					'default'  => '#3c3c3c',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'    => __( 'Base color - Dark Theme', 'woocommerce' ),
+					/* translators: %s: default color */
+					'desc'     => sprintf( __( 'The base color for WooCommerce email templates when the email client is using the dark theme/dark mode. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
+					'id'       => 'woocommerce_email_base_color_dk',
+					'type'     => 'color',
+					'css'      => 'width:6em;',
+					'default'  => '#96588a',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'    => __( 'Background color - Dark Theme', 'woocommerce' ),
+					/* translators: %s: default color */
+					'desc'     => sprintf( __( 'The background color for WooCommerce email templates when the email client is using the dark theme/dark mode. Default %s.', 'woocommerce' ), '<code>#2c2c2c</code>' ),
+					'id'       => 'woocommerce_email_background_color_dk',
+					'type'     => 'color',
+					'css'      => 'width:6em;',
+					'default'  => '#2c2c2c',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'    => __( 'Body background color - Dark Theme', 'woocommerce' ),
+					/* translators: %s: default color */
+					'desc'     => sprintf( __( 'The main body background color when the email client is using the dark theme/dark mode. Default %s.', 'woocommerce' ), '<code>#1c1c1c</code>' ),
+					'id'       => 'woocommerce_email_body_background_color_dk',
+					'type'     => 'color',
+					'css'      => 'width:6em;',
+					'default'  => '#1c1c1c',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'    => __( 'Body text color - Dark Theme', 'woocommerce' ),
+					/* translators: %s: default color */
+					'desc'     => sprintf( __( 'The main body text color when the email client is using the dark theme/dark mode. Default %s.', 'woocommerce' ), '<code>#DFDFDF</code>' ),
+					'id'       => 'woocommerce_email_text_color_dk',
+					'type'     => 'color',
+					'css'      => 'width:6em;',
+					'default'  => '#DFDFDF',
 					'autoload' => false,
 					'desc_tip' => true,
 				),
