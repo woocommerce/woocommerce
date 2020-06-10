@@ -5,7 +5,8 @@
  * @package WooCommerce\Tests\Settings
  */
 
-//phpcs:ignore Squiz.Commenting.FileComment.Missing
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
+
 require_once __DIR__ . '/class-wc-settings-example.php';
 
 /**
@@ -175,13 +176,24 @@ HTML;
 	public function test_output() {
 		global $current_section;
 
+		$actual = null;
+
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Admin_Settings' => array(
+					'output_fields' => function( $settings ) use ( &$actual ) {
+						$actual = $settings;
+					},
+				),
+			)
+		);
+
 		$sut = new WC_Settings_Example();
 
 		$current_section = 'foobar';
 		$sut->output();
 
 		$expected = array( 'foo' => 'bar' );
-		$actual   = $sut->output_fields_argument;
 		$this->assertEquals( $expected, $actual );
 	}
 
@@ -191,13 +203,24 @@ HTML;
 	public function test_save__saves_fields() {
 		global $current_section;
 
+		$actual = null;
+
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Admin_Settings' => array(
+					'save_fields' => function( $settings ) use ( &$actual ) {
+						$actual = $settings;
+					},
+				),
+			)
+		);
+
 		$sut = new WC_Settings_Example();
 
 		$current_section = 'foobar';
 		$sut->save();
 
 		$expected = array( 'foo' => 'bar' );
-		$actual   = $sut->save_fields_argument;
 		$this->assertEquals( $expected, $actual );
 	}
 

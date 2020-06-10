@@ -11,18 +11,10 @@
 class WC_Settings_Example extends WC_Settings_Page {
 	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
-	// phpcs:disable Squiz.Commenting.VariableComment.Missing
-	public $output_fields_argument;
-	public $save_fields_argument;
-	// phpcs:enable Squiz.Commenting.VariableComment.Missing
-
 	public function __construct() {
 		$this->id    = 'example';
 		$this->label = 'Example';
 		parent::__construct();
-
-		$this->output_fields_argument = null;
-		$this->save_fields_argument   = null;
 	}
 
 	protected function get_settings_for_default_section() {
@@ -41,14 +33,6 @@ class WC_Settings_Example extends WC_Settings_Page {
 		$sections                = parent::get_own_sections();
 		$sections['new_section'] = 'New Section';
 		return $sections;
-	}
-
-	protected function output_fields( $settings ) {
-		$this->output_fields_argument = $settings;
-	}
-
-	protected function save_fields( $settings ) {
-		$this->save_fields_argument = $settings;
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionComment.Missing

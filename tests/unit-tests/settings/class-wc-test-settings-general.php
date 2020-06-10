@@ -5,7 +5,8 @@
  * @package WooCommerce\Tests\Settings
  */
 
-//phpcs:ignore Squiz.Commenting.FileComment.Missing
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
+
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 
 /**
@@ -84,28 +85,21 @@ class WC_Test_Settings_General extends WC_Settings_Unit_Test_Case {
 	 * Test for get_settings (retrieves currencies properly).
 	 */
 	public function test_get_settings__currencies() {
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'get_woocommerce_currencies'      => function() {
+					return array(
+						'c1' => 'Currency 1',
+						'c2' => 'Currency 2',
+					);
+				},
+				'get_woocommerce_currency_symbol' => function( $currency = '' ) {
+					return "symbol for $currency";
+				},
+			)
+		);
+
 		$sut = new WC_Settings_General();
-
-		$sut = $this->getMockBuilder( WC_Settings_General::class )
-					->setMethods( array( 'get_currencies', 'get_currency_symbol' ) )
-					->getMock();
-
-		$sut->method( 'get_currencies' )
-			->willReturn(
-				array(
-					'c1' => 'Currency 1',
-					'c2' => 'Currency 2',
-				)
-			);
-
-		$sut->method( 'get_currency_symbol' )
-			->will(
-				$this->returnCallback(
-					function( $code ) {
-						return "symbol for $code";
-					}
-				)
-			);
 
 		$settings         = $sut->get_settings();
 		$currency_setting = $this->setting_by_id( $settings, 'woocommerce_currency' );

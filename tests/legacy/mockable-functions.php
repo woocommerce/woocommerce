@@ -8,5 +8,6 @@
  */
 
 return array(
-	// 'get_option'
+	'get_woocommerce_currencies',
+	'get_woocommerce_currency_symbol',
 );

@@ -8,5 +8,5 @@
  */
 
 return array(
-	// 'WC_Admin_Settings'
+	'WC_Admin_Settings',
 );
