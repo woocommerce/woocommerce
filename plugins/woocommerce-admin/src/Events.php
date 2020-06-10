@@ -20,6 +20,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Personalize_Store;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_EU_VAT_Number;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_WooCommerce_Payments;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Marketing;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Start_Dropshipping_Business;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_WooCommerce_Subscriptions;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Migrate_From_Shopify;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
@@ -79,6 +80,7 @@ class Events {
 		WC_Admin_Notes_EU_VAT_Number::possibly_add_note();
 		WC_Admin_Notes_Marketing::possibly_add_note();
 		WC_Admin_Notes_Giving_Feedback_Notes::possibly_add_note();
+		WC_Admin_Notes_Start_Dropshipping_Business::possibly_add_note();
 		WC_Admin_Notes_WooCommerce_Subscriptions::possibly_add_note();
 		WC_Admin_Notes_Migrate_From_Shopify::possibly_add_note();
 
