@@ -7,6 +7,7 @@
 - Fix `<AnimationSlider />` example code.
 - Add `<Plugins />` component for installation of plugins.
 - Removed use of `IconButton` in favor of `Button` component.
+- Add custom autocompleter support to `<Search />` component.
 
 ## Breaking Changes
 - Removed `SplitButton` because its not being used.

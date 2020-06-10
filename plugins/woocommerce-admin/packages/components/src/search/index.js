@@ -63,6 +63,16 @@ export class Search extends Component {
 				return usernames;
 			case 'variations':
 				return variations;
+			case 'custom':
+				if (
+					! this.props.autocompleter ||
+					typeof this.props.autocompleter !== 'object'
+				) {
+					throw new Error(
+						"Invalid autocompleter provided to Search component, it requires a completer object when using 'custom' type."
+					);
+				}
+				return this.props.autocompleter;
 			default:
 				return {};
 		}
@@ -200,7 +210,12 @@ Search.propTypes = {
 		'taxes',
 		'usernames',
 		'variations',
+		'custom',
 	] ).isRequired,
+	/**
+	 * The custom autocompleter to be used in searching when type is 'custom'
+	 */
+	autocompleter: PropTypes.object,
 	/**
 	 * A placeholder for the search input.
 	 */

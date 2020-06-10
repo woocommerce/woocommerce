@@ -22,7 +22,8 @@ Name | Type | Default | Description
 `allowFreeTextSearch` | Boolean | `false` | Render additional options in the autocompleter to allow free text entering depending on the type
 `className` | String | `null` | Class name applied to parent div
 `onChange` | Function | `noop` | Function called when selected results change, passed result list
-`type` | One of: 'categories', 'countries', 'coupons', 'customers', 'downloadIps', 'emails', 'orders', 'products', 'taxes', 'usernames', 'variations' | `null` | (required) The object type to be used in searching
+`type` | One of: 'categories', 'countries', 'coupons', 'customers', 'downloadIps', 'emails', 'orders', 'products', 'taxes', 'usernames', 'variations', 'custom' | `null` | (required) The object type to be used in searching
+`autocompleter` | Completer | `null` | Custom [completer](https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface) to be used in searching. Required when `type` is 'custom'
 `placeholder` | String | `null` | A placeholder for the search input
 `selected` | Array | `[]` | An array of objects describing selected values. If the label of the selected value is omitted, the Tag of that value will not be rendered inside the search box.
 `inlineTags` | Boolean | `false` | Render tags inside input, otherwise render below input
