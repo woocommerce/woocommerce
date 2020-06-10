@@ -207,3 +207,16 @@
 		}
 	}
 }
+
+// Tweak to fix dropdown and placeholder in IE 11
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+	.woocommerce-admin-dismiss-dropdown {
+		margin-top: 0;
+	}
+
+	.woocommerce-inbox-message__wrapper {
+		.is-placeholder & {
+			padding-bottom: 10px;
+		}
+	}
+}
