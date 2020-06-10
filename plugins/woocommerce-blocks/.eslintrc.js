@@ -15,6 +15,7 @@ module.exports = {
 		browser: true,
 		context: true,
 		jestPuppeteer: true,
+		fetchMock: true,
 	},
 	plugins: [ 'jest', 'woocommerce' ],
 	rules: {

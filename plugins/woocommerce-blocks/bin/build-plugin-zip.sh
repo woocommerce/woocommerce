@@ -87,7 +87,8 @@ copy_dest_files() {
 		--exclude=docker-compose.yml \
 		--exclude=tsconfig.json \
 		--exclude=woocommerce-gutenberg-products-block.zip \
-		--exclude="zip-file/"
+		--exclude="zip-file/" \
+		--exclude=globals.d.ts
 	status "Done copying files!"
 	cd "$CURRENT_DIR" || exit
 }

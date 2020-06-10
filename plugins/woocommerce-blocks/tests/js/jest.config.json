@@ -30,12 +30,17 @@
 		"<rootDir>/tests/js/setup-globals.js",
 		"<rootDir>/tests/js/setup-fetch.js"
 	],
+	"setupFilesAfterEnv": [
+		"<rootDir>/tests/js/setup-after-env.js",
+		"@wordpress/jest-console"
+	],
 	"testPathIgnorePatterns": [
 		"<rootDir>/tests/",
 		"<rootDir>/node_modules/",
 		"<rootDir>/vendor/"
 	],
 	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
+	"testEnvironment": "jest-environment-jsdom-sixteen",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
 		"^.+\\.js$": "<rootDir>/tests/js/jestPreprocess.js"
