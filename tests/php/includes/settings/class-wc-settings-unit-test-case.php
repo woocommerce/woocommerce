@@ -16,7 +16,7 @@ abstract class WC_Settings_Unit_Test_Case extends WC_Unit_Test_Case {
 	 * @param array  $settings Settings array.
 	 * @param string $id Identifier to find for.
 	 *
-	 * @return |null The setting, or null if no setting exists in the supplied array with the supplied identifier.
+	 * @return array|null The setting, or null if no setting exists in the supplied array with the supplied identifier.
 	 */
 	public function setting_by_id( $settings, $id ) {
 		foreach ( $settings as $setting ) {
@@ -26,5 +26,21 @@ abstract class WC_Settings_Unit_Test_Case extends WC_Unit_Test_Case {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Given a settings array return an associative array of id => type.
+	 *
+	 * @param array $settings The settings to transform.
+	 *
+	 * @return array The transformed settings.
+	 */
+	public function get_ids_and_types( $settings ) {
+		$settings_ids_and_types = array();
+		foreach ( $settings as $setting ) {
+			$settings_ids_and_types[ $setting['id'] ] = $setting['type'];
+		}
+
+		return $settings_ids_and_types;
 	}
 }
