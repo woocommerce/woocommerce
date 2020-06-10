@@ -31,25 +31,6 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 }
 \Automattic\WooCommerce\Packages::init();
 
-// Define a simple autoloader for the object container to work.
-// Function grabbed from https://container.thephpleague.com/3.x
-spl_autoload_register(
-	function ( $class ) {
-		$prefix   = 'Automattic\\WooCommerce\\';
-		$base_dir = __DIR__ . '/src/';
-		$len      = strlen( $prefix );
-		if ( strncmp( $prefix, $class, $len ) !== 0 ) {
-			// no, move to the next registered autoloader
-			return;
-		}
-		$relative_class = substr( $class, $len );
-		$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
-		if ( file_exists( $file ) ) {
-			require $file;
-		}
-	}
-);
-
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
 	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
