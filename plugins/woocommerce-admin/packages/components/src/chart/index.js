@@ -383,7 +383,6 @@ class Chart extends Component {
 											chartType === 'line',
 									}
 								) }
-								icon={ <Gridicon icon="line-graph" /> }
 								title={ __(
 									'Line chart',
 									'woocommerce-admin'

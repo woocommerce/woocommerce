@@ -172,12 +172,6 @@ const webpackConfig = {
 								],
 							},
 							prependData:
-								'@import "node_modules/@wordpress/base-styles/_colors.scss"; ' +
-								'@import "node_modules/@wordpress/base-styles/_variables.scss"; ' +
-								'@import "node_modules/@wordpress/base-styles/_mixins.scss"; ' +
-								'@import "node_modules/@wordpress/base-styles/_breakpoints.scss"; ' +
-								'@import "node_modules/@wordpress/base-styles/_animations.scss"; ' +
-								'@import "node_modules/@wordpress/base-styles/_z-index.scss"; ' +
 								'@import "_colors"; ' +
 								'@import "_variables"; ' +
 								'@import "_breakpoints"; ' +
@@ -252,9 +246,7 @@ const webpackConfig = {
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
-		minimizer: [
-			new TerserPlugin(),
-		],
+		minimizer: [ new TerserPlugin() ],
 	},
 };
 

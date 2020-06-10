@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -76,7 +76,7 @@ describe( 'StatsOverview tracking', () => {
 } );
 
 describe( 'StatsOverview toggle and persist stat preference', () => {
-	it( 'should update preferences', () => {
+	it( 'should update preferences', async () => {
 		const updateCurrentUserData = jest.fn();
 
 		render(
@@ -97,14 +97,16 @@ describe( 'StatsOverview toggle and persist stat preference', () => {
 		} );
 		fireEvent.click( totalSalesBtn );
 
-		expect( updateCurrentUserData ).toHaveBeenCalledWith( {
-			homepage_stats: {
-				hiddenStats: [
-					'revenue/net_revenue',
-					'products/items_sold',
-					'revenue/total_sales',
-				],
-			},
+		await waitFor( () => {
+			expect( updateCurrentUserData ).toHaveBeenCalledWith( {
+				homepage_stats: {
+					hiddenStats: [
+						'revenue/net_revenue',
+						'products/items_sold',
+						'revenue/total_sales',
+					],
+				},
+			} );
 		} );
 	} );
 } );

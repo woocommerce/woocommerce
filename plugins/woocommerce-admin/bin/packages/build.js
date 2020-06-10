@@ -139,8 +139,9 @@ function buildScssFile( styleFile ) {
 				.join( ' ' ) + fs.readFileSync( styleFile, 'utf8' ),
 	} );
 
+	const postCSSConfig = require( '../../postcss.config' ).plugins[ 0 ];
 	const postCSSSync = ( callback ) => {
-		postcss( require( './post-css-config' ) )
+		postcss( postCSSConfig )
 			.process( builtSass.css, {
 				from: 'src/app.css',
 				to: 'dest/app.css',

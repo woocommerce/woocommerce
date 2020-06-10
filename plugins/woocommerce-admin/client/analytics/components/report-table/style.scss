@@ -26,6 +26,10 @@
 		position: relative;
 	}
 
+	.woocommerce-table__compare.components-button {
+		padding: 8px;
+	}
+
 	&.has-compare,
 	&.has-search {
 		.woocommerce-card__action {

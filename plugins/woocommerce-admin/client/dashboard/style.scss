@@ -58,6 +58,10 @@
 	padding: $gap;
 	margin: $gap-smaller;
 
+	&.components-button {
+		height: auto;
+	}
+
 	.dashicons-arrow-right-alt {
 		transform: rotate(-45deg);
 	}

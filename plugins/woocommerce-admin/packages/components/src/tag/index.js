@@ -51,7 +51,6 @@ const Tag = ( {
 					className="woocommerce-tag__text"
 					id={ labelId }
 					onClick={ () => setState( () => ( { isVisible: true } ) ) }
-					isToggled={ isVisible }
 				>
 					{ labelTextNode }
 				</Button>

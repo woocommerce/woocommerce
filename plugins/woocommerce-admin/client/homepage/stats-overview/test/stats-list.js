@@ -68,8 +68,6 @@ describe( 'StatsList', () => {
 		);
 
 		// Check that there should be two.
-		expect( screen.getAllByText( 'Previous Period:' ) ).toHaveLength( 2 );
-		expect( screen.getAllByText( '0%' ) ).toHaveLength( 2 );
 		expect( screen.getByText( 'Net Sales' ) ).toBeDefined();
 		expect( screen.getByText( 'Orders' ) ).toBeDefined();
 	} );

@@ -12,9 +12,9 @@ module.exports = {
 			themes: {
 				'woocommerce-page': {
 					primary: '#7f54b3',
-					secondary: '#c9356e',
+					secondary: '#3858e9',
 					toggle: '#674399',
-					button: '#c9356e',
+					button: '#3858e9',
 					outlines: '#c9356e',
 				},
 			},

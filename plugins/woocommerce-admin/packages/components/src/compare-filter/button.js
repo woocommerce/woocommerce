@@ -23,8 +23,8 @@ const CompareButton = ( {
 			<span className={ className }>
 				<Button
 					className="woocommerce-compare-button"
-					isDefault
 					disabled={ true }
+					isSecondary
 				>
 					{ children }
 				</Button>
@@ -33,9 +33,9 @@ const CompareButton = ( {
 	) : (
 		<Button
 			className={ classnames( 'woocommerce-compare-button', className ) }
-			isDefault
 			onClick={ onClick }
 			disabled={ disabled }
+			isSecondary
 		>
 			{ children }
 		</Button>

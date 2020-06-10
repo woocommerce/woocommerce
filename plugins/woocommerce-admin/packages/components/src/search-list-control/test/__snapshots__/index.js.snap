@@ -55,7 +55,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -64,8 +64,8 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -93,7 +93,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-1 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-1"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -102,8 +102,8 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -136,7 +136,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-1 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-1"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -145,8 +145,8 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -179,7 +179,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-2 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-2"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -188,8 +188,8 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -222,7 +222,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -231,8 +231,8 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -260,7 +260,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -269,8 +269,8 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -356,7 +356,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -365,8 +365,8 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -394,7 +394,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -403,8 +403,8 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -432,7 +432,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -441,8 +441,8 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -470,7 +470,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -479,8 +479,8 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -508,7 +508,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -517,8 +517,8 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -546,7 +546,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -555,8 +555,8 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -642,7 +642,7 @@ exports[`SearchListControl should render a search box and list of options with a
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -651,8 +651,8 @@ exports[`SearchListControl should render a search box and list of options with a
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -680,7 +680,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -689,8 +689,8 @@ exports[`SearchListControl should render a search box and list of options with a
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -718,7 +718,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -727,8 +727,8 @@ exports[`SearchListControl should render a search box and list of options with a
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -756,7 +756,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -765,8 +765,8 @@ exports[`SearchListControl should render a search box and list of options with a
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -794,7 +794,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -803,8 +803,8 @@ exports[`SearchListControl should render a search box and list of options with a
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -832,7 +832,7 @@ exports[`SearchListControl should render a search box and list of options with a
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -841,8 +841,8 @@ exports[`SearchListControl should render a search box and list of options with a
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1010,7 +1010,7 @@ exports[`SearchListControl should render a search box and list of options, with 
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1019,8 +1019,8 @@ exports[`SearchListControl should render a search box and list of options, with 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1048,7 +1048,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1057,8 +1057,8 @@ exports[`SearchListControl should render a search box and list of options, with 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1086,7 +1086,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1095,8 +1095,8 @@ exports[`SearchListControl should render a search box and list of options, with 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1124,7 +1124,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1133,8 +1133,8 @@ exports[`SearchListControl should render a search box and list of options, with 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1162,7 +1162,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1171,8 +1171,8 @@ exports[`SearchListControl should render a search box and list of options, with 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1200,7 +1200,7 @@ exports[`SearchListControl should render a search box and list of options, with 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1209,8 +1209,8 @@ exports[`SearchListControl should render a search box and list of options, with 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1440,7 +1440,7 @@ exports[`SearchListControl should render a search box with a search term, and on
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1449,8 +1449,8 @@ exports[`SearchListControl should render a search box with a search term, and on
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1478,7 +1478,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1487,8 +1487,8 @@ exports[`SearchListControl should render a search box with a search term, and on
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1575,7 +1575,7 @@ exports[`SearchListControl should render a search box with a search term, and on
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1584,8 +1584,8 @@ exports[`SearchListControl should render a search box with a search term, and on
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1613,7 +1613,7 @@ exports[`SearchListControl should render a search box with a search term, and on
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1622,8 +1622,8 @@ exports[`SearchListControl should render a search box with a search term, and on
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1696,15 +1696,15 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </span>
       <button
         aria-describedby="woocommerce-tag__label-0"
+        aria-label="Remove Clementine"
         className="components-button woocommerce-tag__remove"
-        label="Remove Clementine"
         onClick={[Function]}
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="dashicon dashicons-dismiss"
-          focusable="false"
+          focusable={false}
           height={20}
           role="img"
           viewBox="0 0 20 20"
@@ -1758,7 +1758,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1767,8 +1767,8 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1796,7 +1796,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={true}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1805,8 +1805,8 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1834,7 +1834,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1843,8 +1843,8 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1872,7 +1872,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1881,8 +1881,8 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1910,7 +1910,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1919,8 +1919,8 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -1948,7 +1948,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1957,8 +1957,8 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -2031,15 +2031,15 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </span>
       <button
         aria-describedby="woocommerce-tag__label-1"
+        aria-label="Remove Clementine"
         className="components-button woocommerce-tag__remove"
-        label="Remove Clementine"
         onClick={[Function]}
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="dashicon dashicons-dismiss"
-          focusable="false"
+          focusable={false}
           height={20}
           role="img"
           viewBox="0 0 20 20"
@@ -2072,15 +2072,15 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </span>
       <button
         aria-describedby="woocommerce-tag__label-2"
+        aria-label="Remove Guava"
         className="components-button woocommerce-tag__remove"
-        label="Remove Guava"
         onClick={[Function]}
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="dashicon dashicons-dismiss"
-          focusable="false"
+          focusable={false}
           height={20}
           role="img"
           viewBox="0 0 20 20"
@@ -2134,7 +2134,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     >
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2143,8 +2143,8 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -2172,7 +2172,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={true}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2181,8 +2181,8 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -2210,7 +2210,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2219,8 +2219,8 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -2248,7 +2248,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={true}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2257,8 +2257,8 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -2286,7 +2286,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2295,8 +2295,8 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"
@@ -2324,7 +2324,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       </button>
       <button
         aria-checked={false}
-        className="components-button components-icon-button components-menu-item__button  woocommerce-search-list__item depth-0 has-text"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2333,8 +2333,8 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           className="woocommerce-search-list__item-state"
         >
           <svg
-            aria-hidden="true"
-            focusable="false"
+            aria-hidden={true}
+            focusable={false}
             height="24"
             role="img"
             viewBox="0 0 24 24"

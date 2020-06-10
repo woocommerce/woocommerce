@@ -37,10 +37,6 @@
 		color: $studio-pink;
 	}
 
-	a.components-button.is-button {
-		color: $studio-white;
-	}
-
 	a:hover,
 	a:active,
 	a:focus,
@@ -54,7 +50,7 @@
 		box-shadow: 0 0 0 1px $studio-pink, 0 0 2px 1px rgba($studio-pink, 0.8);
 	}
 
-	.components-button.is-button.is-primary {
+	.components-button.is-primary {
 		color: $studio-white;
 		box-shadow: none;
 
@@ -68,40 +64,22 @@
 		}
 	}
 
-	.components-button {
-		fill: currentColor;
-
-		&:not(:disabled) {
-			&:hover,
-			&:active,
-			&:focus {
-				fill: currentColor;
-			}
-		}
-	}
-
-	.components-button.is-button.is-default:not(.is-primary) {
+	.components-button:not(.is-primary):not(.woocommerce-chart__type-button) {
 		color: $gray-text;
 		fill: currentColor;
-		border-color: $button-border;
-		background: $button;
-		box-shadow: none;
 
 		&:not(:disabled) {
 			&:hover,
 			&:active,
 			&:focus {
-				color: $gray-text;
-				background: $button-hover;
+				color: $gray-text-hover;
 				border-color: $button-hover-border;
 			}
 		}
 	}
 
-	.components-button.is-default:disabled:not(.is-primary) {
+	.components-button:disabled:not(.is-primary) {
 		color: $button-disabled;
-		border-color: $button-disabled-border;
-		background: $button;
 		&:hover,
 		&:active,
 		&:focus {
@@ -164,7 +142,7 @@
 }
 
 body.woocommerce-page {
-	.components-button.is-button.is-primary {
+	.components-button.is-primary {
 		color: $studio-white;
 
 		&:not(:disabled) {
@@ -179,7 +157,7 @@ body.woocommerce-page {
 	.components-snackbar .components-button.is-tertiary {
 		color: $studio-white;
 
-		&:not(:disabled):not([aria-disabled='true']):not(.is-default):hover {
+		&:not(:disabled):not([aria-disabled='true']):hover {
 			color: $studio-white;
 		}
 	}

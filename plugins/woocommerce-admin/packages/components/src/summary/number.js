@@ -1,13 +1,16 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import {
+	Button,
+	Tooltip,
+	__experimentalText as Text,
+} from '@wordpress/components';
+import { sprintf, __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import Gridicon from 'gridicons';
 import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
-
 /**
  * Internal dependencies
  */
@@ -44,7 +47,6 @@ const SummaryNumber = ( {
 		'is-bad-trend': reverseTrend ? delta > 0 : delta < 0,
 	} );
 
-	let icon = delta > 0 ? 'arrow-up' : 'arrow-down';
 	let screenReaderLabel =
 		delta > 0
 			? sprintf(
@@ -58,8 +60,6 @@ const SummaryNumber = ( {
 					prevLabel
 			  );
 	if ( ! delta ) {
-		// delta is zero or falsey
-		icon = 'arrow-right';
 		screenReaderLabel = sprintf(
 			__( 'No change from %s', 'woocommerce-admin' ),
 			prevLabel
@@ -91,48 +91,43 @@ const SummaryNumber = ( {
 	return (
 		<li className={ liClasses }>
 			<Container { ...containerProps }>
-				<span className="woocommerce-summary__item-label">
-					{ label }
-				</span>
+				<div className="woocommerce-summary__item-label">
+					<Text variant="body.small">{ label }</Text>
+				</div>
 
-				<span className="woocommerce-summary__item-data">
-					<span className="woocommerce-summary__item-value">
-						{ ! isNil( value )
-							? value
-							: __( 'N/A', 'woocommerce-admin' ) }
-					</span>
-					<div
-						className="woocommerce-summary__item-delta"
-						role="presentation"
-						aria-label={ screenReaderLabel }
-					>
-						<Gridicon
-							className="woocommerce-summary__item-delta-icon"
-							icon={ icon }
-							size={ 18 }
-						/>
-						<span className="woocommerce-summary__item-delta-value">
-							{ ! isNil( delta )
-								? sprintf(
-										__( '%d%%', 'woocommerce-admin' ),
-										delta
-								  )
+				<div className="woocommerce-summary__item-data">
+					<div className="woocommerce-summary__item-value">
+						<Text variant="title.small">
+							{ ! isNil( value )
+								? value
 								: __( 'N/A', 'woocommerce-admin' ) }
-						</span>
+						</Text>
 					</div>
-				</span>
-				<span className="woocommerce-summary__item-prev-label">
-					{ prevLabel }
-				</span>
-				{
-					' ' /* Add a real space so the line breaks here, and not in the label text. */
-				}
-				<span className="woocommerce-summary__item-prev-value">
-					{ ! isNil( prevValue )
-						? prevValue
-						: __( 'N/A', 'woocommerce-admin' ) }
-				</span>
 
+					<Tooltip
+						text={
+							! isNil( prevValue )
+								? `${ prevLabel } ${ prevValue }`
+								: __( 'N/A', 'woocommerce-admin' )
+						}
+						position="top center"
+					>
+						<div
+							className="woocommerce-summary__item-delta"
+							role="presentation"
+							aria-label={ screenReaderLabel }
+						>
+							<Text variant="caption">
+								{ ! isNil( delta )
+									? sprintf(
+											__( '%d%%', 'woocommerce-admin' ),
+											delta
+									  )
+									: __( 'N/A', 'woocommerce-admin' ) }
+							</Text>
+						</div>
+					</Tooltip>
+				</div>
 				{ onToggle ? (
 					<Gridicon
 						className="woocommerce-summary__toggle"

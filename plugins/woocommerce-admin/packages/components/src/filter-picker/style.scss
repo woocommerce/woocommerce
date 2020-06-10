@@ -23,11 +23,12 @@
 }
 
 .woocommerce-filters-filter__content-list-item {
+	border: 1px solid transparent;
 	border-bottom: 1px solid $core-grey-light-700;
 	margin: 0;
 
 	&:last-child {
-		border-bottom: none;
+		border-bottom: 1px solid transparent;
 	}
 
 	&.is-selected {

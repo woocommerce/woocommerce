@@ -102,15 +102,14 @@
 
 .woocommerce-chart__type-button {
 	background: transparent !important;
+
 	&.components-button {
 		color: $core-grey-light-700;
 		display: inline-flex;
+		padding: 8px;
+
 		&.woocommerce-chart__type-button-selected {
 			color: $core-grey-dark-500;
-		}
-		&:hover {
-			color: $core-grey-dark-800;
-			box-shadow: none !important;
 		}
 	}
 }

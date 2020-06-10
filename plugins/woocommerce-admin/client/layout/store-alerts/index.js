@@ -70,8 +70,8 @@ class StoreAlerts extends Component {
 			return (
 				<Button
 					key={ action.name }
-					isDefault
 					isPrimary={ action.primary }
+					isDefault={ ! action.primary }
 					href={ action.url || undefined }
 					onClick={ () => triggerNoteAction( alert.id, action.id ) }
 				>

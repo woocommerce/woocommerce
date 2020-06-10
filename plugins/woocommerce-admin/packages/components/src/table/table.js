@@ -257,7 +257,6 @@ class Table extends Component {
 															? this.sortBy( key )
 															: noop
 													}
-													isDefault
 												>
 													{ sortedBy === key &&
 													sortDir === ASC ? (
