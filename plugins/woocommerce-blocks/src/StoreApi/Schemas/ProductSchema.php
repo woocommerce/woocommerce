@@ -177,6 +177,74 @@ class ProductSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'items'       => 'number',
 			],
+			'categories'          => [
+				'description' => __( 'List of categories, if applicable.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'id'   => [
+							'description' => __( 'Category ID', 'woo-gutenberg-products-block' ),
+							'type'        => 'number',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'name' => [
+							'description' => __( 'Category name', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'slug' => [
+							'description' => __( 'Category slug', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'link' => [
+							'description' => __( 'Category link', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
+			'tags'                => [
+				'description' => __( 'List of tags, if applicable.', 'woo-gutenberg-products-block' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'id'   => [
+							'description' => __( 'Tag ID', 'woo-gutenberg-products-block' ),
+							'type'        => 'number',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'name' => [
+							'description' => __( 'Tag name', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'slug' => [
+							'description' => __( 'Tag slug', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'link' => [
+							'description' => __( 'Tag link', 'woo-gutenberg-products-block' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
 			'has_options'         => [
 				'description' => __( 'Does the product have options?', 'woo-gutenberg-products-block' ),
 				'type'        => 'boolean',
@@ -247,6 +315,8 @@ class ProductSchema extends AbstractSchema {
 			'review_count'        => $product->get_review_count(),
 			'images'              => $this->get_images( $product ),
 			'variations'          => $product->is_type( 'variable' ) ? $product->get_visible_children() : [],
+			'categories'          => $this->get_term_list( $product, 'product_cat' ),
+			'tags'                => $this->get_term_list( $product, 'product_tag' ),
 			'has_options'         => $product->has_options(),
 			'is_purchasable'      => $product->is_purchasable(),
 			'is_in_stock'         => $product->is_in_stock(),
@@ -381,5 +451,43 @@ class ProductSchema extends AbstractSchema {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns a list of terms assigned to the product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param string      $taxonomy Taxonomy name.
+	 * @return array Array of terms (id, name, slug).
+	 */
+	protected function get_term_list( \WC_Product $product, $taxonomy = '' ) {
+		if ( ! $taxonomy ) {
+			return [];
+		}
+
+		$terms = get_the_terms( $product->get_id(), $taxonomy );
+
+		if ( ! $terms || is_wp_error( $terms ) ) {
+			return [];
+		}
+
+		$return = [];
+
+		foreach ( $terms as $term ) {
+			$link = get_term_link( $term, $taxonomy );
+
+			if ( is_wp_error( $link ) ) {
+				$link = false;
+			}
+
+			$return[] = (object) [
+				'id'   => $term->term_id,
+				'name' => $term->name,
+				'slug' => $term->slug,
+				'link' => $link,
+			];
+		}
+
+		return $return;
 	}
 }
