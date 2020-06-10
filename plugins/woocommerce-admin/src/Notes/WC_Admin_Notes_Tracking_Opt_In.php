@@ -66,7 +66,6 @@ class WC_Admin_Notes_Tracking_Opt_In {
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'tracking-dismiss', __( 'Dismiss', 'woocommerce-admin' ), false, WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED, false );
 		$note->add_action( 'tracking-opt-in', __( 'Activate usage tracking', 'woocommerce-admin' ), false, WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED, true );
 		return $note;
 	}

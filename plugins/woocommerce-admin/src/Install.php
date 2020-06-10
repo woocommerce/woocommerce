@@ -44,6 +44,9 @@ class Install {
 			'wc_admin_update_110_remove_facebook_note',
 			'wc_admin_update_110_db_version',
 		),
+		'1.3.0'  => array(
+			'wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note',
+		),
 	);
 
 	/**

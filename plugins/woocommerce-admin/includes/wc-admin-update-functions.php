@@ -91,3 +91,12 @@ function wc_admin_update_110_remove_facebook_note() {
 function wc_admin_update_110_db_version() {
 	Installer::update_db_version( '1.1.0' );
 }
+
+/**
+ * Remove Dismiss action from tracking opt-in admin note.
+ */
+function wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note() {
+	global $wpdb;
+
+	$wpdb->query( "DELETE actions FROM {$wpdb->prefix}wc_admin_note_actions actions INNER JOIN {$wpdb->prefix}wc_admin_notes notes USING (note_id) WHERE actions.name = 'tracking-dismiss' AND notes.name = 'wc-admin-usage-tracking-opt-in'" );
+}
