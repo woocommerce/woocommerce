@@ -7,6 +7,7 @@ import { camelCase, mapKeys } from 'lodash';
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
+import { defaultCartState } from '../default-states';
 
 /**
  * Sub-reducer for cart items array.
@@ -36,54 +37,7 @@ const cartItemsReducer = ( state = [], action ) => {
  *
  * @return  {Object}          New or existing state.
  */
-const reducer = (
-	state = {
-		cartItemsPendingQuantity: [],
-		cartItemsPendingDelete: [],
-		cartData: {
-			coupons: [],
-			shippingRates: [],
-			shippingAddress: {
-				first_name: '',
-				last_name: '',
-				company: '',
-				address_1: '',
-				address_2: '',
-				city: '',
-				state: '',
-				postcode: '',
-				country: '',
-			},
-			items: [],
-			itemsCount: 0,
-			itemsWeight: 0,
-			needsShipping: true,
-			totals: {
-				currency_code: '',
-				currency_symbol: '',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '',
-				currency_suffix: '',
-				total_items: '0',
-				total_items_tax: '0',
-				total_fees: '0',
-				total_fees_tax: '0',
-				total_discount: '0',
-				total_discount_tax: '0',
-				total_shipping: '0',
-				total_shipping_tax: '0',
-				total_price: '0',
-				total_tax: '0',
-				tax_lines: [],
-			},
-		},
-		metaData: {},
-		errors: [],
-	},
-	action
-) => {
+const reducer = ( state = defaultCartState, action ) => {
 	switch ( action.type ) {
 		case types.RECEIVE_ERROR:
 			state = {

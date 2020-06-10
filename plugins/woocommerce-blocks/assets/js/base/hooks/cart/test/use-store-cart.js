@@ -75,6 +75,7 @@ describe( 'useStoreCart', () => {
 	const mockStoreCartData = {
 		cartCoupons: [],
 		cartItems: mockCartItems,
+		cartItemErrors: [],
 		cartItemsCount: 1,
 		cartItemsWeight: 10,
 		cartNeedsPayment: true,

@@ -35,8 +35,11 @@ const getAmountFromRawPrice = ( priceObject, currency ) => {
 
 /**
  * Cart line item table row component.
+ *
+ * @param {Object} props
+ * @param {CartItem|Object} props.lineItem
  */
-const CartLineItemRow = ( { lineItem } ) => {
+const CartLineItemRow = ( { lineItem = {} } ) => {
 	const {
 		name = '',
 		short_description: shortDescription = '',

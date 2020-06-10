@@ -40,5 +40,5 @@
 			"@woocommerce/type-defs/*": [ "assets/js/type-defs/*" ]
 		}
 	},
-	"include": [ "./assets/js/**/*.js" ]
+	"include": [ "./assets/js/**/*.js", "./globals.d.ts" ]
 }

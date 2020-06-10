@@ -65,7 +65,8 @@ copy_dest_files() {
 	--exclude=none \
 	--exclude=blocks.ini \
 	--exclude=docker-compose.yml \
-	--exclude=tsconfig.json
+	--exclude=tsconfig.json \
+	--exclude=globals.d.ts
   output 2 "Done copying files!"
   cd "$3" || exit
 }
