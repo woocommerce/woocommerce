@@ -101,7 +101,7 @@ const webpackConfig = {
 				? `wp-admin-scripts/[name].min.js`
 				: `[name]/index.min.js`;
 		},
-		chunkFilename: `chunks/[name].[chunkhash].min.js`,
+		chunkFilename: `chunks/[id].[chunkhash].min.js`,
 		path: path.join( __dirname, 'dist' ),
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'this',
@@ -226,6 +226,7 @@ const webpackConfig = {
 		} ),
 		new MiniCssExtractPlugin( {
 			filename: './[name]/style.css',
+			chunkFilename: './chunks/[id].style.css',
 		} ),
 		new CopyWebpackPlugin(
 			wcAdminPackages.map( ( packageName ) => ( {
