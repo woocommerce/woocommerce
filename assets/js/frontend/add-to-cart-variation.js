@@ -43,7 +43,7 @@
 		// Init after gallery.
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
-			$form.trigger( 'wc_variation_form' );
+			$form.trigger( 'wc_variation_form', self );
 			self.loading = false;
 		}, 100 );
 	};
@@ -160,12 +160,12 @@
 	/**
 	 * Looks for matching variations for current selected attributes.
 	 */
-	VariationForm.prototype.onFindVariation = function( event ) {
+	VariationForm.prototype.onFindVariation = function( event, chosenAttributes ) {
 		var form              = event.data.variationForm,
-			attributes        = form.getChosenAttributes(),
+			attributes        = 'undefined' !== typeof chosenAttributes ? chosenAttributes : form.getChosenAttributes(),
 			currentAttributes = attributes.data;
 
-		if ( attributes.count === attributes.chosenCount ) {
+		if ( attributes.count && attributes.count === attributes.chosenCount ) {
 			if ( form.useAjax ) {
 				if ( form.xhr ) {
 					form.xhr.abort();
