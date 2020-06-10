@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce;
 
+use PHPUnit\Exception;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -36,7 +38,37 @@ class Autoloader {
 			return false;
 		}
 
-		return require $autoloader;
+		$autoloader_result = require $autoloader;
+		if ( ! $autoloader_result ) {
+			return false;
+		}
+
+		self::register_psr4_autoloader();
+
+		return $autoloader_result;
+	}
+
+	/**
+	 * Define a PSR4 autoloader for the dependency injection engine to work.
+	 * Function grabbed from https://container.thephpleague.com/3.x
+	 */
+	protected static function register_psr4_autoloader() {
+		spl_autoload_register(
+			function ( $class ) {
+				$prefix   = 'Automattic\\WooCommerce\\';
+				$base_dir = __DIR__ . '/';
+				$len      = strlen( $prefix );
+				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+					// no, move to the next registered autoloader.
+					return;
+				}
+				$relative_class = substr( $class, $len );
+				$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+				if ( file_exists( $file ) ) {
+					require $file;
+				}
+			}
+		);
 	}
 
 	/**
