@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Test_Settings_Page file.
+ * Class WC_Settings_General_Test file.
  *
  * @package WooCommerce\Tests\Settings
  */
@@ -12,7 +12,7 @@ require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 /**
  * Unit tests for the WC_Settings_General class.
  */
-class WC_Test_Settings_General extends WC_Settings_Unit_Test_Case {
+class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 
 	/**
 	 * Test for get_settings (triggers the woocommerce_general_settings filter).

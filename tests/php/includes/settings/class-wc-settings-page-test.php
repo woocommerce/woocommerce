@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Test_Settings_Page file.
+ * Class WC_Settings_Page_Test file.
  *
  * @package WooCommerce\Tests\Settings
  */
@@ -12,7 +12,7 @@ require_once __DIR__ . '/class-wc-settings-example.php';
 /**
  * Unit tests for the base functionality of WC_Settings_Page.
  */
-class WC_Test_Settings_Page extends WC_Unit_Test_Case {
+class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Test for constructor.
