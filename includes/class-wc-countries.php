@@ -994,7 +994,7 @@ class WC_Countries {
 							'priority' => 65,
 						),
 						'city' => array(
-							'class' => array( 'form-row-last', 'address-field', 'form-row-last' ),
+							'class' => array( 'form-row-last', 'address-field' ),
 						),
 						'address_1' => array(
 							'priority' => 71,
