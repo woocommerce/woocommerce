@@ -104,6 +104,7 @@ const TotalsShippingItem = ( {
 										! isShippingCalculatorOpen
 									);
 								} }
+								aria-expanded={ isShippingCalculatorOpen }
 							>
 								{ __(
 									'(change address)',
