@@ -245,73 +245,94 @@ img {
 	supported-color-schemes: light dark;
 }
 @media (prefers-color-scheme: dark) {
-	#wrapper {
+	#wrapper,
+	[data-ogsc] #wrapper,
+	[data-ogsb] #wrapper {
 		background-color: <?php echo esc_attr( $bg_dk ); ?> !important;
 	}
 
-	#template_container {
+	#template_container,
+	[data-ogsb] #template_container,
+	[data-ogsc] #template_container {
 		background-color: <?php echo esc_attr( $body_dk ); ?> !important;
 		border: 1px solid <?php echo esc_attr( $bg_dk_lighter_10 ); ?> !important;
 	}
 
-	#template_header {
+	#template_header,
+	[data-ogsc] #template_header,
+	[data-ogsb] #template_header {
 		background-color: <?php echo esc_attr( $base_dk ); ?> !important;
 		color: <?php echo esc_attr( $base_text_dk ); ?> !important;
 	}
 
-	#template_header_image p img {
+	#template_header_image p img,
+	[data-ogsc] #template_header_image p img {
 		content:url('<?php echo esc_attr( $image_dk_src ); ?>') !important;
 	}
 
 	#template_header h1,
-	#template_header h1 a {
+	[data-ogsc] #template_header h1,
+	#template_header h1 a,
+	[data-ogsc] #template_header h1 a {
 		color: <?php echo esc_attr( $base_text ); ?> !important;
 	}
 
-	#template_footer #credit {
+	#template_footer #credit,
+	[data-ogsc] #template_footer #credit {
 		color: <?php echo esc_attr( $text_dk_darker_40 ); ?> !important;
 	}
 
-	#body_content {
+	#body_content,
+	[data-ogsb] #body_content,
+	[data-ogsc] #body_content {
 		background-color: <?php echo esc_attr( $body_dk ); ?> !important;
 	}
 
-	#body_content_inner {
+	#body_content_inner,
+	[data-ogsc] #body_content_inner {
 		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
 	}
 
-	.td {
-		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
-		border: 1px solid <?php echo esc_attr( $body_dk_lighter_10 ); ?> !important;
-	}
-
-	.address {
+	.td,
+	[data-ogsc] .td {
 		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
 		border: 1px solid <?php echo esc_attr( $body_dk_lighter_10 ); ?> !important;
 	}
 
-	.text {
+	.address,
+	[data-ogsc] .address {
+		color: <?php echo esc_attr( $text_dk_darker_20 ); ?> !important;
+		border: 1px solid <?php echo esc_attr( $body_dk_lighter_10 ); ?> !important;
+	}
+
+	.text,
+	[data-ogsc] .text {
 		color: <?php echo esc_attr( $text_dk ); ?> !important;
 	}
 
-	.link {
+	.link,
+	[data-ogsc] .link {
 		color: <?php echo esc_attr( $base_dk ); ?> !important;
 	}
 
-	h1 {
+	h1,
+	[data-ogsc] h1 {
 		color: <?php echo esc_attr( $base_dk ); ?> !important;
 		text-shadow: 0 1px 0 <?php echo esc_attr( $base_dk_darker_20 ); ?> !important;
 	}
 
-	h2 {
+	h2,
+	[data-ogsc] h2 {
 		color: <?php echo esc_attr( $base_dk ); ?> !important;
 	}
 
-	h3 {
+	h3,
+	[data-ogsc] h3 {
 		color: <?php echo esc_attr( $base_dk ); ?> !important;
 	}
 
-	a {
+	a,
+	[data-ogsc] a {
 		color: <?php echo esc_attr( $link_color_dk ); ?> !important;
 	}
 }
