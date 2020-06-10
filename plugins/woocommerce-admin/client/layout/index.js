@@ -6,7 +6,7 @@ import { withSelect } from '@wordpress/data';
 import { Component, lazy, Suspense } from '@wordpress/element';
 import { Router, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { get, isFunction } from 'lodash';
+import { get, isFunction, identity } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -14,7 +14,12 @@ import { get, isFunction } from 'lodash';
 import { useFilters, Spinner } from '@woocommerce/components';
 import { getHistory } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { PLUGINS_STORE_NAME, withPluginsHydration } from '@woocommerce/data';
+import {
+	OPTIONS_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	withPluginsHydration,
+	withOptionsHydration,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -25,7 +30,6 @@ import Header from 'header';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
 import TransientNotices from './transient-notices';
-import withWCApiSelect from 'wc-api/with-select';
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
 );
@@ -211,13 +215,16 @@ class _PageLayout extends Component {
 export const PageLayout = compose(
 	// Use the useFilters HoC so PageLayout is re-rendered when filters are used to add new pages or reports
 	useFilters( [ PAGES_FILTER, REPORTS_FILTER ] ),
-	withWCApiSelect( ( select ) => {
-		const { getOptions } = select( 'wc-api' );
-		const options = getOptions( [ 'woocommerce_homescreen_enabled' ] );
+	window.wcSettings.preloadOptions
+		? withOptionsHydration( {
+				...window.wcSettings.preloadOptions,
+		  } )
+		: identity,
+	withSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
 		const homepageEnabled =
 			window.wcAdminFeatures.homepage &&
-			get( options, [ 'woocommerce_homescreen_enabled' ], false ) ===
-				'yes';
+			getOption( 'woocommerce_homescreen_enabled' ) === 'yes';
 		return { homepageEnabled };
 	} )
 )( _PageLayout );

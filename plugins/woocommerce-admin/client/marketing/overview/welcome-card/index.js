@@ -2,24 +2,23 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { get } from 'lodash';
 import { Button } from '@wordpress/components';
 import Gridicon from 'gridicons';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 
 /**
  * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { recordEvent } from 'lib/tracks';
-import withSelect from 'wc-api/with-select';
 import WelcomeImage from './images/welcome.svg';
 
 const WelcomeCard = ( {
@@ -72,17 +71,17 @@ export { WelcomeCard }
 // default export
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptions, isUpdateOptionsRequesting } = select( 'wc-api' );
-		const hideOptionName = 'woocommerce_marketing_overview_welcome_hidden';
-		const options = getOptions( [ hideOptionName ] );
-		const isHidden = get( options, [ hideOptionName ], 'no' ) === 'yes';
-		const isUpdateRequesting = Boolean( isUpdateOptionsRequesting( [ hideOptionName ] ) );
+		const { getOption, isOptionsUpdating } = select( OPTIONS_STORE_NAME );
+		const isUpdateRequesting = isOptionsUpdating();
+
 		return {
-			isHidden: isHidden || isUpdateRequesting,
+			isHidden:
+				getOption( 'woocommerce_marketing_overview_welcome_hidden' ) ===
+					'yes' || isUpdateRequesting,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		return {
 			updateOptions,
 		};

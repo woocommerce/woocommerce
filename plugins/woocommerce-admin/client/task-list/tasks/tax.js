@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { difference, filter, get } from 'lodash';
+import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 
@@ -19,7 +19,11 @@ import {
 	getSetting,
 	setSetting,
 } from '@woocommerce/wc-admin-settings';
-import { SETTINGS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	SETTINGS_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	OPTIONS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,7 +31,6 @@ import { SETTINGS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import Connect from 'dashboard/components/connect';
 import { getCountryCode } from 'dashboard/utils';
 import StoreLocation from './steps/location';
-import withWCApiSelect from 'wc-api/with-select';
 import { recordEvent, queueRecordEvent } from 'lib/tracks';
 
 class Tax extends Component {
@@ -491,38 +494,16 @@ class Tax extends Component {
 }
 
 export default compose(
-	withWCApiSelect( ( select ) => {
-		const { getOptions } = select( 'wc-api' );
-
-		const { getActivePlugins, isJetpackConnected } = select(
-			PLUGINS_STORE_NAME
-		);
-		const activePlugins = getActivePlugins();
-		const pluginsToActivate = difference(
-			[ 'jetpack', 'woocommerce-services' ],
-			activePlugins
-		);
-		const options = getOptions( [
-			'wc_connect_options',
-			'woocommerce_setup_jetpack_opted_in',
-		] );
-		const connectOptions = get( options, 'wc_connect_options', {} );
-		const tosAccepted =
-			connectOptions.tos_accepted ||
-			options.woocommerce_setup_jetpack_opted_in;
-
-		return {
-			isJetpackConnected: isJetpackConnected(),
-			pluginsToActivate,
-			tosAccepted,
-		};
-	} ),
 	withSelect( ( select ) => {
 		const {
 			getSettings,
 			getSettingsError,
 			isGetSettingsRequesting,
 		} = select( SETTINGS_STORE_NAME );
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getActivePlugins, isJetpackConnected } = select(
+			PLUGINS_STORE_NAME
+		);
 
 		const { general: generalSettings = {} } = getSettings( 'general' );
 		const isGeneralSettingsError = Boolean( getSettingsError( 'general' ) );
@@ -537,6 +518,16 @@ export default compose(
 		const isTaxSettingsError = Boolean( getSettingsError( 'tax' ) );
 		const isTaxSettingsRequesting = isGetSettingsRequesting( 'tax' );
 
+		const activePlugins = getActivePlugins();
+		const pluginsToActivate = difference(
+			[ 'jetpack', 'woocommerce-services' ],
+			activePlugins
+		);
+		const connectOptions = getOption( 'wc_connect_options' ) || {};
+		const tosAccepted =
+			connectOptions.tos_accepted ||
+			getOption( 'woocommerce_setup_jetpack_opted_in' );
+
 		return {
 			isGeneralSettingsError,
 			isGeneralSettingsRequesting,
@@ -545,6 +536,9 @@ export default compose(
 			taxSettings,
 			isTaxSettingsError,
 			isTaxSettingsRequesting,
+			isJetpackConnected: isJetpackConnected(),
+			pluginsToActivate,
+			tosAccepted,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

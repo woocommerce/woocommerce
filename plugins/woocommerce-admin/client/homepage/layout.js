@@ -11,8 +11,12 @@ import {
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import classnames from 'classnames';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
+
+/**
+ * WooCommerce dependencies
+ */
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -21,9 +25,9 @@ import QuickLinks from '../quick-links';
 import StatsOverview from './stats-overview';
 import './style.scss';
 import { isOnboardingEnabled } from 'dashboard/utils';
-import withSelect from 'wc-api/with-select';
 import TaskListPlaceholder from '../task-list/placeholder';
 import InboxPanel from '../header/activity-panel/panels/inbox';
+import withWCApiSelect from 'wc-api/with-select';
 
 const TaskList = lazy( () =>
 	import( /* webpackChunkName: "task-list" */ '../task-list' )
@@ -138,32 +142,27 @@ Layout.propTypes = {
 };
 
 export default compose(
-	withSelect( ( select ) => {
+	withWCApiSelect( ( select ) => {
 		const {
-			getOptions,
 			getUndoDismissRequesting,
-			isGetOptionsRequesting,
 		} = select( 'wc-api' );
+		const { isUndoRequesting } = getUndoDismissRequesting();
+		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
 
 		if ( isOnboardingEnabled() ) {
-			const options = getOptions( [
-				'woocommerce_task_list_complete',
-				'woocommerce_task_list_hidden',
-			] );
-			const { isUndoRequesting } = getUndoDismissRequesting();
-
 			return {
 				isUndoRequesting,
-				requestingTaskList: isGetOptionsRequesting( [
-					'woocommerce_task_list_complete',
-					'woocommerce_task_list_hidden',
-				] ),
 				taskListComplete:
-					get( options, [ 'woocommerce_task_list_complete' ] ) ===
-					'yes',
+					getOption( 'woocommerce_task_list_complete' ) === 'yes',
 				taskListHidden:
-					get( options, [ 'woocommerce_task_list_hidden' ] ) ===
-					'yes',
+					getOption( 'woocommerce_task_list_hidden' ) === 'yes',
+				requestingTaskList:
+					isResolving( 'getOption', [
+						'woocommerce_task_list_complete',
+					] ) ||
+					isResolving( 'getOption', [
+						'woocommerce_task_list_hidden',
+					] ),
 			};
 		}
 

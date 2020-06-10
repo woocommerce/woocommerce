@@ -5,17 +5,13 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
 import { Form, H, TextControl } from '@woocommerce/components';
-
-/**
- * Internal dependencies
- */
-import withSelect from 'wc-api/with-select';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 class PayFast extends Component {
 	getInitialConfigValues = () => {
@@ -42,45 +38,34 @@ class PayFast extends Component {
 		return errors;
 	};
 
-	componentDidUpdate( prevProps ) {
-		const {
-			createNotice,
-			isOptionsRequesting,
-			hasOptionsError,
-			markConfigured,
-		} = this.props;
+	updateSettings = async ( values ) => {
+		const { updateOptions, createNotice, markConfigured } = this.props;
 
-		if ( prevProps.isOptionsRequesting && ! isOptionsRequesting ) {
-			if ( ! hasOptionsError ) {
-				markConfigured( 'bacs' );
-				createNotice(
-					'success',
-					__(
-						'Direct bank transfer details added successfully',
-						'woocommerce-admin'
-					)
-				);
-			} else {
-				createNotice(
-					'error',
-					__(
-						'There was a problem saving your payment setings',
-						'woocommerce-admin'
-					)
-				);
-			}
-		}
-	}
-
-	updateSettings = ( values ) => {
-		const { updateOptions } = this.props;
-
-		updateOptions( {
+		const update = await updateOptions( {
 			woocommerce_bacs_settings: {
 				enabled: 'yes',
 			},
 			woocommerce_bacs_accounts: [ values ],
 		} );
+
+		if ( update.success ) {
+			markConfigured( 'bacs' );
+			createNotice(
+				'success',
+				__(
+					'Direct bank transfer details added successfully',
+					'woocommerce-admin'
+				)
+			);
+		} else {
+			createNotice(
+				'error',
+				__(
+					'There was a problem saving your payment setings',
+					'woocommerce-admin'
+				)
+			);
+		}
 	};
 
 	render() {
@@ -171,28 +156,16 @@ class PayFast extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptionsError, isUpdateOptionsRequesting } = select(
-			'wc-api'
-		);
-		const isOptionsRequesting = Boolean(
-			isUpdateOptionsRequesting( [
-				'woocommerce_bacs_settings',
-				'woocommerce_bacs_accounts',
-			] )
-		);
-		const hasOptionsError = getOptionsError( [
-			'woocommerce_bacs_settings',
-			'woocommerce_bacs_accounts',
-		] );
+		const { isOptionsUpdating } = select( OPTIONS_STORE_NAME );
+		const isOptionsRequesting = isOptionsUpdating();
 
 		return {
-			hasOptionsError,
 			isOptionsRequesting,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 
 		return {
 			createNotice,

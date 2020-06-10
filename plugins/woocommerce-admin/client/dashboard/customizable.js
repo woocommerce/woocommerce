@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Fragment, Suspense, lazy, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { partial, get } from 'lodash';
+import { partial } from 'lodash';
 import { Dropdown, Button, Icon } from '@wordpress/components';
 import { applyFilters } from '@wordpress/hooks';
 import { Icon as WPIcon, plusCircleFilled } from '@wordpress/icons';
@@ -15,6 +15,7 @@ import { Icon as WPIcon, plusCircleFilled } from '@wordpress/icons';
 import { H, Spinner } from '@woocommerce/components';
 import {
 	SETTINGS_STORE_NAME,
+	OPTIONS_STORE_NAME,
 	useUserPreferences,
 } from '@woocommerce/data';
 
@@ -329,8 +330,7 @@ const CustomizableDashboard = ( {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptions } = select( 'wc-api' );
-
+		const { getOption } = select( OPTIONS_STORE_NAME );
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
@@ -340,16 +340,13 @@ export default compose(
 		};
 
 		if ( isOnboardingEnabled() ) {
-			const options = getOptions( [
-				'woocommerce_task_list_complete',
-				'woocommerce_task_list_hidden',
-			] );
+			withSelectData.homepageEnabled =
+				window.wcAdminFeatures.homepage &&
+				getOption( 'woocommerce_homescreen_enabled' ) === 'yes';
 			withSelectData.taskListHidden =
-				get( options, [ 'woocommerce_task_list_hidden' ], 'no' ) ===
-				'yes';
+				getOption( 'woocommerce_task_list_hidden' ) === 'yes';
 			withSelectData.taskListComplete =
-				get( options, [ 'woocommerce_task_list_complete' ], 'no' ) ===
-				'yes';
+				getOption( 'woocommerce_task_list_complete' ) === 'yes';
 		}
 
 		return withSelectData;

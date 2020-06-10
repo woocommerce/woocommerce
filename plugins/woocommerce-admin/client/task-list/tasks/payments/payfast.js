@@ -6,17 +6,13 @@ import { Component, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
 import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
-
-/**
- * Internal dependencies
- */
-import withSelect from 'wc-api/with-select';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 class PayFast extends Component {
 	getInitialConfigValues = () => {
@@ -54,39 +50,12 @@ class PayFast extends Component {
 		return errors;
 	};
 
-	componentDidUpdate( prevProps ) {
-		const {
-			createNotice,
-			isOptionsRequesting,
-			hasOptionsError,
-			markConfigured,
-		} = this.props;
-
-		if ( prevProps.isOptionsRequesting && ! isOptionsRequesting ) {
-			if ( ! hasOptionsError ) {
-				markConfigured( 'payfast' );
-				createNotice(
-					'success',
-					__( 'PayFast connected successfully', 'woocommerce-admin' )
-				);
-			} else {
-				createNotice(
-					'error',
-					__(
-						'There was a problem saving your payment setings',
-						'woocommerce-admin'
-					)
-				);
-			}
-		}
-	}
-
-	updateSettings = ( values ) => {
-		const { updateOptions } = this.props;
+	updateSettings = async ( values ) => {
+		const { updateOptions, createNotice, markConfigured } = this.props;
 
 		// Because the PayFast extension only works with the South African Rand
 		// currency, force the store to use it while setting the PayFast settings
-		updateOptions( {
+		const update = await updateOptions( {
 			woocommerce_currency: 'ZAR',
 			woocommerce_payfast_settings: {
 				merchant_id: values.merchant_id,
@@ -95,6 +64,22 @@ class PayFast extends Component {
 				enabled: 'yes',
 			},
 		} );
+
+		if ( update.success ) {
+			markConfigured( 'payfast' );
+			createNotice(
+				'success',
+				__( 'PayFast connected successfully', 'woocommerce-admin' )
+			);
+		} else {
+			createNotice(
+				'error',
+				__(
+					'There was a problem saving your payment setings',
+					'woocommerce-admin'
+				)
+			);
+		}
 	};
 
 	renderConnectStep() {
@@ -190,28 +175,16 @@ class PayFast extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptionsError, isUpdateOptionsRequesting } = select(
-			'wc-api'
-		);
-		const isOptionsRequesting = Boolean(
-			isUpdateOptionsRequesting( [
-				'woocommerce_currency',
-				'woocommerce_payfast_settings',
-			] )
-		);
-		const hasOptionsError = getOptionsError( [
-			'woocommerce_currency',
-			'woocommerce_payfast_settings',
-		] );
+		const { isOptionsUpdating } = select( OPTIONS_STORE_NAME );
+		const isOptionsRequesting = isOptionsUpdating();
 
 		return {
-			hasOptionsError,
 			isOptionsRequesting,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 
 		return {
 			createNotice,

@@ -7,7 +7,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
@@ -15,8 +15,7 @@ import { withDispatch } from '@wordpress/data';
 import { Form, Link, Stepper, TextControl } from '@woocommerce/components';
 import { getQuery } from '@woocommerce/navigation';
 import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
-import withSelect from 'wc-api/with-select';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { PLUGINS_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 class PayPal extends Component {
 	constructor( props ) {
@@ -119,13 +118,12 @@ class PayPal extends Component {
 	async updateSettings( values ) {
 		const {
 			createNotice,
-			isSettingsError,
 			options,
 			updateOptions,
 			markConfigured,
 		} = this.props;
 
-		await updateOptions( {
+		const update = await updateOptions( {
 			woocommerce_ppec_paypal_settings: {
 				...options.woocommerce_ppec_paypal_settings,
 				api_username: values.api_username,
@@ -134,7 +132,7 @@ class PayPal extends Component {
 			},
 		} );
 
-		if ( ! isSettingsError ) {
+		if ( update.success ) {
 			createNotice(
 				'success',
 				__( 'PayPal connected successfully.', 'woocommerce-admin' )
@@ -178,7 +176,7 @@ class PayPal extends Component {
 	}
 
 	renderManualConfig() {
-		const { isOptionsRequesting } = this.props;
+		const { isOptionsUpdating } = this.props;
 		const link = (
 			<Link
 				href="https://docs.woocommerce.com/document/paypal-express-checkout/#section-8"
@@ -225,7 +223,7 @@ class PayPal extends Component {
 							<Button
 								onClick={ handleSubmit }
 								isPrimary
-								disabled={ isOptionsRequesting }
+								isBusy={ isOptionsUpdating }
 							>
 								{ __( 'Proceed', 'woocommerce-admin' ) }
 							</Button>
@@ -291,23 +289,20 @@ PayPal.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getOptions, isGetOptionsRequesting } = select( 'wc-api' );
+		const { getOption, isOptionsUpdating } = select( OPTIONS_STORE_NAME );
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
-		const options = getOptions( [ 'woocommerce_ppec_paypal_settings' ] );
-		const isOptionsRequesting = Boolean(
-			isGetOptionsRequesting( [ 'woocommerce_ppec_paypal_settings' ] )
-		);
+		const options = getOption( 'woocommerce_ppec_paypal_settings' );
 		const activePlugins = getActivePlugins();
 
 		return {
 			activePlugins,
 			options,
-			isOptionsRequesting,
+			isOptionsUpdating: isOptionsUpdating(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		return {
 			createNotice,
 			updateOptions,

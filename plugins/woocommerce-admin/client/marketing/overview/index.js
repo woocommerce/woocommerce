@@ -4,6 +4,11 @@
 import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
+ * WooCommerce dependencies
+ */
+import { withOptionsHydration } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
@@ -26,4 +31,6 @@ const MarketingOverview = () => {
 	);
 };
 
-export default MarketingOverview;
+export default withOptionsHydration( {
+	...( window.wcSettings.preloadOptions || {} ),
+} )( MarketingOverview );

@@ -247,7 +247,9 @@ const hydrateSettings =
 export default compose(
 	withSelect( ( select ) => {
 		const { getNotes } = select( 'wc-api' );
-		const { getProfileItems, getOnboardingError } = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems, getOnboardingError } = select(
+			ONBOARDING_STORE_NAME
+		);
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 
 		const notesQuery = {

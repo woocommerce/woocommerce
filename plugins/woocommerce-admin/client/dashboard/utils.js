@@ -51,6 +51,7 @@ export function getProductIdsForCart(
 	installedPlugins
 ) {
 	const onboarding = getSetting( 'onboarding', {} );
+	const productIds = [];
 
 	// The population of onboarding.productTypes only happens if the task list should be shown
 	// so bail early if it isn't present.
@@ -58,7 +59,6 @@ export function getProductIdsForCart(
 		return productIds;
 	}
 
-	const productIds = [];
 	const productTypes = profileItems.product_types || [];
 
 	productTypes.forEach( ( productType ) => {

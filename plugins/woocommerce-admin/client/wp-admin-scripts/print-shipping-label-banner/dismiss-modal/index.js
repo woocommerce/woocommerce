@@ -8,6 +8,11 @@ import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
 /**
+ * WooCommerce dependencies
+ */
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
 import '../style.scss';
@@ -75,7 +80,7 @@ export class DismissModal extends Component {
 
 export default compose(
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		return { updateOptions };
 	} )
 )( DismissModal );

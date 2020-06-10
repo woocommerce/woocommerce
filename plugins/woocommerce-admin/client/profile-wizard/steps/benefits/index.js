@@ -5,7 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { filter } from 'lodash';
 
 /**
@@ -17,6 +17,7 @@ import {
 	pluginNames,
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
+	OPTIONS_STORE_NAME
 } from '@woocommerce/data';
 
 /**
@@ -28,7 +29,6 @@ import ManagementIcon from './images/management';
 import SalesTaxIcon from './images/sales_tax';
 import ShippingLabels from './images/shipping_labels';
 import SpeedIcon from './images/speed';
-import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
 class Benefits extends Component {
@@ -108,12 +108,12 @@ class Benefits extends Component {
 		goToNextStep();
 	}
 
-	async startPluginInstall() {
+	startPluginInstall() {
 		const { updateProfileItems, updateOptions } = this.props;
 
 		this.setState( { isInstalling: true } );
 
-		await updateOptions( {
+		updateOptions( {
 			woocommerce_setup_jetpack_opted_in: true,
 		} );
 
@@ -328,7 +328,7 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

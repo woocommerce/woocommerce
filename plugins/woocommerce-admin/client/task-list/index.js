@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, cloneElement, Fragment } from '@wordpress/element';
-import { get, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { compose } from '@wordpress/compose';
 import classNames from 'classnames';
 import {
@@ -21,7 +21,11 @@ import { Icon, check, chevronRight } from '@wordpress/icons';
  */
 import { H, List, EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	PLUGINS_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -118,7 +122,7 @@ class TaskDashboard extends Component {
 
 		return getAllTasks( {
 			profileItems,
-			options: taskListPayments,
+			taskListPayments,
 			query,
 			toggleCartModal: this.toggleCartModal.bind( this ),
 			installedPlugins,
@@ -383,7 +387,7 @@ class TaskDashboard extends Component {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
-		const { getOptions } = select( 'wc-api' );
+		const { getOption } = select( OPTIONS_STORE_NAME );
 		const {
 			getActivePlugins,
 			getInstalledPlugins,
@@ -391,28 +395,18 @@ export default compose(
 		} = select( PLUGINS_STORE_NAME );
 		const profileItems = getProfileItems();
 
-		const options = getOptions( [
-			'woocommerce_task_list_welcome_modal_dismissed',
-			'woocommerce_task_list_hidden',
-			'woocommerce_task_list_tracked_completed_tasks',
-		] );
-		const modalDismissed = get(
-			options,
-			[ 'woocommerce_task_list_welcome_modal_dismissed' ],
-			false
-		);
-		const taskListPayments = getOptions( [
-			'woocommerce_task_list_payments',
-		] );
-		const trackedCompletedTasks = get(
-			options,
-			[ 'woocommerce_task_list_tracked_completed_tasks' ],
-			[]
-		);
+		const modalDismissed =
+			getOption( 'woocommerce_task_list_welcome_modal_dismissed' ) ||
+			false;
+		const taskListPayments = getOption( 'woocommerce_task_list_payments' );
+		const trackedCompletedTasks =
+			getOption( 'woocommerce_task_list_tracked_completed_tasks' ) || [];
+		const payments = getOption( 'woocommerce_task_list_payments' );
+
 		const installedPlugins = getInstalledPlugins();
 		const tasks = getAllTasks( {
 			profileItems,
-			options: getOptions( [ 'woocommerce_task_list_payments' ] ),
+			options: payments,
 			query: props.query,
 			installedPlugins,
 		} );
@@ -437,7 +431,7 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( 'wc-api' );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
 		return {
 			updateOptions,
 		};
