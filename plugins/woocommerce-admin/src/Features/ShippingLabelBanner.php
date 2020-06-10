@@ -142,7 +142,7 @@ class ShippingLabelBanner {
 	 * @param string $hook current page hook.
 	 */
 	public function add_print_shipping_label_script( $hook ) {
-		$rtl = is_rtl() ? '-rtl' : '';
+		$rtl = is_rtl() ? '.rtl' : '';
 		wp_enqueue_style(
 			'print-shipping-label-banner-style',
 			Loader::get_url( "print-shipping-label-banner/style{$rtl}", 'css' ),

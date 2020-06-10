@@ -138,6 +138,7 @@
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.3.0",
+		"@automattic/mini-css-extract-plugin-with-rtl": "^0.8.0",
 		"@babel/cli": "7.8.4",
 		"@babel/core": "7.9.6",
 		"@babel/plugin-transform-async-to-generator": "7.8.3",
@@ -202,7 +203,6 @@
 		"lint-staged": "10.1.7",
 		"locutus": "2.0.11",
 		"merge-config": "2.0.0",
-		"mini-css-extract-plugin": "0.9.0",
 		"moment-timezone-data-webpack-plugin": "1.2.0",
 		"node-sass": "4.13.1",
 		"node-watch": "0.6.3",

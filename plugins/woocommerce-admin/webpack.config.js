@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const MiniCssExtractPlugin = require( '@automattic/mini-css-extract-plugin-with-rtl' );
 const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
@@ -219,7 +219,6 @@ const webpackConfig = {
 			},
 		} ),
 		new WebpackRTLPlugin( {
-			filename: './[name]/style-rtl.css',
 			minify: {
 				safe: true,
 			},
@@ -227,6 +226,7 @@ const webpackConfig = {
 		new MiniCssExtractPlugin( {
 			filename: './[name]/style.css',
 			chunkFilename: './chunks/[id].style.css',
+			rtlEnabled: true,
 		} ),
 		new CopyWebpackPlugin(
 			wcAdminPackages.map( ( packageName ) => ( {
