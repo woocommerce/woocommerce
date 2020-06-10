@@ -332,10 +332,12 @@ window.wpNavMenuClassChange = function( page, url ) {
 
 	if ( page.wpOpenMenu ) {
 		const currentMenu = document.querySelector( '#' + page.wpOpenMenu );
-		currentMenu.classList.remove( 'wp-not-current-submenu' );
-		currentMenu.classList.add( 'wp-has-current-submenu' );
-		currentMenu.classList.add( 'wp-menu-open' );
-		currentMenu.classList.add( 'current' );
+		if ( currentMenu ) {
+			currentMenu.classList.remove( 'wp-not-current-submenu' );
+			currentMenu.classList.add( 'wp-has-current-submenu' );
+			currentMenu.classList.add( 'wp-menu-open' );
+			currentMenu.classList.add( 'current' );
+		}
 	}
 
 	const wpWrap = document.querySelector( '#wpwrap' );
