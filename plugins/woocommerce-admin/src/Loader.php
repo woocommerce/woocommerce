@@ -426,7 +426,11 @@ class Loader {
 		wp_register_script(
 			WC_ADMIN_APP,
 			self::get_url( 'app/index', 'js' ),
-			array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n', 'moment' ),
+			array(
+				'wp-core-data',
+				'wc-components',
+				'wp-date',
+			),
 			$js_file_version,
 			true
 		);
@@ -863,10 +867,10 @@ class Loader {
 			}
 		}
 
-		$current_user_data = array();
-		foreach ( self::get_user_data_fields() as $user_field ) {
-			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'woocommerce_admin_' . $user_field, true ) );
-		}
+		$user_controller   = new \WP_REST_Users_Controller();
+		$user_response     = $user_controller->get_current_item( new \WP_REST_Request() );
+		$current_user_data = is_wp_error( $user_response ) ? (object) array() : $user_response->get_data();
+
 		$settings['currentUserData']      = $current_user_data;
 		$settings['reviewsEnabled']       = get_option( 'woocommerce_enable_reviews' );
 		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );

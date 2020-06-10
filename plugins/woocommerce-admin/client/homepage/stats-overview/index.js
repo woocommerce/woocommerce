@@ -2,12 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { compose } from '@wordpress/compose';
 import { Fragment } from '@wordpress/element';
 import { TabPanel } from '@wordpress/components';
-import { xor } from 'lodash';
-import { withDispatch } from '@wordpress/data';
-import PropTypes from 'prop-types';
+import { get, xor } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -19,6 +16,7 @@ import {
 	MenuTitle,
 	Link,
 } from '@woocommerce/components';
+import { useUserPreferences } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath } from '@woocommerce/navigation';
 
@@ -26,7 +24,6 @@ import { getNewPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './style.scss';
-import withSelect from 'wc-api/with-select';
 import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
 import { recordEvent } from 'lib/tracks';
@@ -39,17 +36,14 @@ const stats = performanceIndicators.filter( ( indicator ) => {
 	return DEFAULT_STATS.includes( indicator.stat );
 } );
 
-export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
-	const userHiddenStats = userPrefs.hiddenStats;
-	const hiddenStats = userHiddenStats
-		? userHiddenStats
-		: DEFAULT_HIDDEN_STATS;
+export const StatsOverview = () => {
+	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
+	const hiddenStats = get( userPrefs, [ 'homepage_stats', 'hiddenStats' ], DEFAULT_HIDDEN_STATS );
 
 	const toggleStat = ( stat ) => {
 		const nextHiddenStats = xor( hiddenStats, [ stat ] );
-		userPrefs.hiddenStats = nextHiddenStats;
-		updateCurrentUserData( {
-			homepage_stats: userPrefs,
+		updateUserPreferences( {
+			homepage_stats: { hiddenStats: nextHiddenStats },
 		} );
 		recordEvent( 'statsoverview_indicators_toggle', {
 			indicator_name: stat,
@@ -153,30 +147,4 @@ export const StatsOverview = ( { userPrefs, updateCurrentUserData } ) => {
 	);
 };
 
-StatsOverview.propTypes = {
-	/**
-	 * Homepage user preferences.
-	 */
-	userPrefs: PropTypes.object.isRequired,
-	/**
-	 * A method to update user meta.
-	 */
-	updateCurrentUserData: PropTypes.func.isRequired,
-};
-
-export default compose(
-	withSelect( ( select ) => {
-		const { getCurrentUserData } = select( 'wc-api' );
-
-		return {
-			userPrefs: getCurrentUserData().homepage_stats || {},
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { updateCurrentUserData } = dispatch( 'wc-api' );
-
-		return {
-			updateCurrentUserData,
-		};
-	} )
-)( StatsOverview );
+export default StatsOverview;

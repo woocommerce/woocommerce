@@ -11,7 +11,7 @@ import './stylesheets/_index.scss';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import Navigation from './navigation';
 import 'wc-api/wp-data-store';
-import { withSettingsHydration } from '@woocommerce/data';
+import { withCurrentUserHydration, withSettingsHydration } from '@woocommerce/data';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -20,11 +20,15 @@ __webpack_public_path__ = global.wcAdminAssets.path;
 const appRoot = document.getElementById( 'root' );
 const navigationRoot = document.getElementById( 'woocommerce-embedded-navigation' );
 const settingsGroup = 'wc_admin';
+const hydrateUser = window.wcSettings.currentUserData;
 
 if ( navigationRoot ) {
-	const HydratedNavigation = withSettingsHydration( settingsGroup, window.wcSettings )(
+	let HydratedNavigation = withSettingsHydration( settingsGroup, window.wcSettings )(
 		Navigation
 	);
+	if ( hydrateUser ) {
+		HydratedNavigation = withCurrentUserHydration( hydrateUser )( HydratedNavigation );
+	}
 	render( <HydratedNavigation />, navigationRoot );
 
 	// Collapse the WP Menu.
@@ -33,15 +37,21 @@ if ( navigationRoot ) {
 }
 
 if ( appRoot ) {
-	const HydratedPageLayout = withSettingsHydration( settingsGroup, window.wcSettings )(
+	let HydratedPageLayout = withSettingsHydration( settingsGroup, window.wcSettings )(
 		PageLayout
 	);
+	if ( hydrateUser ) {
+		HydratedPageLayout = withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
+	}
 	render( <HydratedPageLayout />, appRoot );
 } else {
 	const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
-	const HydratedEmbedLayout = withSettingsHydration( settingsGroup, window.wcSettings )(
+	let HydratedEmbedLayout = withSettingsHydration( settingsGroup, window.wcSettings )(
 		EmbedLayout
 	);
+	if ( hydrateUser ) {
+		HydratedEmbedLayout = withCurrentUserHydration( hydrateUser )( HydratedEmbedLayout );
+	}
 	// Render the header.
 	render( <HydratedEmbedLayout />, embeddedRoot );
 

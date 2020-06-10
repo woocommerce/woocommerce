@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
@@ -225,13 +224,6 @@ export default compose(
 		return {
 			...data,
 			...indicatorData,
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { updateCurrentUserData } = dispatch( 'wc-api' );
-
-		return {
-			updateCurrentUserData,
 		};
 	} )
 )( StorePerformance );
