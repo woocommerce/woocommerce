@@ -51,7 +51,7 @@ class TaskDashboard extends Component {
 
 		if ( ! incompleteTasks.length ) {
 			updateOptions( {
-				woocommerce_task_list_complete: true,
+				woocommerce_task_list_complete: 'yes',
 			} );
 		}
 
@@ -80,7 +80,7 @@ class TaskDashboard extends Component {
 
 		if ( ! incompleteTasks.length && prevIncompleteTasks.length ) {
 			updateOptions( {
-				woocommerce_task_list_complete: true,
+				woocommerce_task_list_complete: 'yes',
 			} );
 		}
 

@@ -158,9 +158,9 @@ export default compose(
 					'woocommerce_task_list_complete',
 					'woocommerce_task_list_hidden',
 				] ),
-				taskListComplete: get( options, [
-					'woocommerce_task_list_complete',
-				] ),
+				taskListComplete:
+					get( options, [ 'woocommerce_task_list_complete' ] ) ===
+					'yes',
 				taskListHidden:
 					get( options, [ 'woocommerce_task_list_hidden' ] ) ===
 					'yes',

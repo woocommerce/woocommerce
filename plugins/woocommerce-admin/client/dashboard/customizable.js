@@ -347,11 +347,9 @@ export default compose(
 			withSelectData.taskListHidden =
 				get( options, [ 'woocommerce_task_list_hidden' ], 'no' ) ===
 				'yes';
-			withSelectData.taskListComplete = get(
-				options,
-				[ 'woocommerce_task_list_complete' ],
-				false
-			);
+			withSelectData.taskListComplete =
+				get( options, [ 'woocommerce_task_list_complete' ], 'no' ) ===
+				'yes';
 		}
 
 		return withSelectData;

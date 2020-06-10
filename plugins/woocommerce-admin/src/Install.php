@@ -40,7 +40,7 @@ class Install {
 			'wc_admin_update_0251_remove_unsnooze_action',
 			'wc_admin_update_0251_db_version',
 		),
-		'1.1.0' => array(
+		'1.1.0'  => array(
 			'wc_admin_update_110_remove_facebook_note',
 			'wc_admin_update_110_db_version',
 		),
@@ -60,6 +60,8 @@ class Install {
 		'woocommerce_admin_last_orders_milestone'  => 'wc_admin_last_orders_milestone',
 		'woocommerce_admin-wc-helper-last-refresh' => 'wc-admin-wc-helper-last-refresh',
 		'woocommerce_admin_report_export_status'   => 'wc_admin_report_export_status',
+		'woocommerce_task_list_complete'           => 'woocommerce_task_list_complete',
+		'woocommerce_task_list_hidden'             => 'woocommerce_task_list_hidden',
 	);
 
 	/**
@@ -87,8 +89,16 @@ class Install {
 				continue;
 			}
 
+			if ( '1' === $old_option_value ) {
+				$old_option_value = 'yes';
+			} elseif ( '0' === $old_option_value ) {
+				$old_option_value = 'no';
+			}
+
 			update_option( $new_option, $old_option_value );
-			delete_option( $old_option );
+			if ( $new_option !== $old_option ) {
+				delete_option( $old_option );
+			}
 		}
 	}
 
