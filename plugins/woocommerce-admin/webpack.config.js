@@ -5,7 +5,6 @@ const MiniCssExtractPlugin = require( '@automattic/mini-css-extract-plugin-with-
 const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const { DefinePlugin } = require( 'webpack' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const FixStyleOnlyEntriesPlugin = require( 'webpack-fix-style-only-entries' );
 const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
@@ -20,21 +19,6 @@ const UnminifyWebpackPlugin = require( './unminify' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
-
-// generate-feature-config.php defaults to 'plugin', so lets match that here.
-let WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'plugin';
-if ( [ 'development', 'plugin', 'core' ].indexOf( WC_ADMIN_PHASE ) === -1 ) {
-	WC_ADMIN_PHASE = 'plugin';
-}
-const WC_ADMIN_CONFIG = require( path.join(
-	__dirname,
-	'config',
-	WC_ADMIN_PHASE + '.json'
-) );
-const WC_ADMIN_ADDITIONAL_FEATURES =
-	( process.env.WC_ADMIN_ADDITIONAL_FEATURES &&
-		JSON.parse( process.env.WC_ADMIN_ADDITIONAL_FEATURES ) ) ||
-	{};
 
 const externals = {
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
@@ -200,13 +184,6 @@ const webpackConfig = {
 	},
 	plugins: [
 		new FixStyleOnlyEntriesPlugin(),
-		// Inject the current feature flags.
-		new DefinePlugin( {
-			'window.wcAdminFeatures': {
-				...WC_ADMIN_CONFIG.features,
-				...WC_ADMIN_ADDITIONAL_FEATURES,
-			},
-		} ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );

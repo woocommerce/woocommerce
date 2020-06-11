@@ -91,8 +91,6 @@ class Loader {
 		* Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
 		*/
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
-
-		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 	}
 
 	/**
@@ -123,9 +121,9 @@ class Loader {
 	}
 
 	/**
-	 * Gets an array of enabled WooCommerce Admin features/sections.
+	 * Gets a build configured array of enabled WooCommerce Admin features/sections.
 	 *
-	 * @return bool Enabled Woocommerce Admin features/sections.
+	 * @return array Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_features() {
 		return apply_filters( 'woocommerce_admin_features', array() );
@@ -164,6 +162,10 @@ class Loader {
 	 * @return bool Returns true if the feature is enabled.
 	 */
 	public static function is_feature_enabled( $feature ) {
+		if ( 'homepage' === $feature && 'yes' !== get_option( 'woocommerce_homescreen_enabled', 'no' ) ) {
+			return false;
+		}
+
 		$features = self::get_features();
 		return in_array( $feature, $features, true );
 	}
@@ -171,7 +173,7 @@ class Loader {
 	/**
 	 * Returns if the onboarding feature of WooCommerce Admin should be enabled.
 	 *
-	 * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build, but only if the user recieved the test/opted in.
+	 * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build, but only if the user received the test/opted in.
 	 *
 	 * @return bool Returns true if the onboarding is enabled.
 	 */
@@ -188,29 +190,6 @@ class Loader {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Preload options to prime state of the application.
-	 *
-	 * @param array $options Array of options to preload.
-	 * @return array
-	 */
-	public function preload_options( $options ) {
-		$options[] = 'woocommerce_homescreen_enabled';
-
-		return $options;
-	}
-
-	/**
-	 * Determine if homescreen is enabled.
-	 *
-	 * @param array $features Array of features returned from wc_admin_get_feature_config.
-	 * @return bool
-	 */
-	public static function is_homepage_enabled( $features ) {
-		$option = get_option( 'woocommerce_homescreen_enabled', 'no' );
-		return $features['homepage'] && 'yes' === $option;
 	}
 
 	/**
@@ -275,8 +254,7 @@ class Loader {
 	 * @todo The entry point for the embed needs moved to this class as well.
 	 */
 	public static function register_page_handler() {
-		$features = wc_admin_get_feature_config();
-		$id       = self::is_homepage_enabled( $features ) ? 'woocommerce-home' : 'woocommerce-dashboard';
+		$id = self::is_feature_enabled( 'homepage' ) ? 'woocommerce-home' : 'woocommerce-dashboard';
 
 		wc_admin_register_page(
 			array(
@@ -481,6 +459,13 @@ class Loader {
 			return;
 		}
 
+		$features        = self::get_features();
+		$enabled_features = array();
+		foreach ( $features as $key ) {
+			$enabled_features[ $key ] = self::is_feature_enabled( $key );
+		}
+		wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features ), 'before' );
+
 		wp_enqueue_script( WC_ADMIN_APP );
 		wp_enqueue_style( WC_ADMIN_APP );
 		wp_enqueue_style( 'wc-material-icons' );
@@ -633,10 +618,8 @@ class Loader {
 	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
 	 */
 	public static function embed_page_header() {
-
-		$features = wc_admin_get_feature_config();
 		if (
-			$features['navigation'] &&
+			self::is_feature_enabled( 'navigation' ) &&
 			\Automattic\WooCommerce\Admin\Features\Navigation::instance()->is_woocommerce_page()
 		) {
 			self::embed_navigation_menu();

@@ -32,11 +32,11 @@ const ProfileWizard = lazy( () =>
 
 class Dashboard extends Component {
 	render() {
-		const { path, profileItems, query, homepageEnabled } = this.props;
+		const { path, profileItems, query } = this.props;
 		if (
 			isOnboardingEnabled() &&
 			! profileItems.completed &&
-			! homepageEnabled
+			! window.wcAdminFeatures.homepage
 		) {
 			return (
 				<Suspense fallback={ <Spinner /> }>

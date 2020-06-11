@@ -5,10 +5,6 @@ IS_CUSTOM_BUILD=false;
 SLUG='';
 
 while [ $# -gt 0 ]; do
-	if [[ $1 == '-f' || $1 == '--features' ]]; then
-		export WC_ADMIN_ADDITIONAL_FEATURES="$2"
-		IS_CUSTOM_BUILD=true
-	fi
 	if [[ $1 == '-s' || $1 == '--slug' ]]; then
 		IS_CUSTOM_BUILD=true
 		SLUG=$2
@@ -51,7 +47,6 @@ read -r VERSION
 if [ $IS_CUSTOM_BUILD = true ]; then
 	PLUGIN_TAG="${VERSION}-${SLUG}"
 
-	warning "You are building a custom build of wc-admin with these features ${GREEN_BOLD}$WC_ADMIN_ADDITIONAL_FEATURES${YELLOW_BOLD} applied."
 	warning "A release on Github will be made with the tag ${GREEN_BOLD}$PLUGIN_TAG${COLOR_RESET}"
 	warning "The resulting zip will be called ${GREEN_BOLD}$ZIP_FILE${COLOR_RESET}"
 else

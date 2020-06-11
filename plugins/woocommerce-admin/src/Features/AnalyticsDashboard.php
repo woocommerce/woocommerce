@@ -82,10 +82,8 @@ class AnalyticsDashboard {
 	 * Registers dashboard page.
 	 */
 	public function register_page() {
-		$features = wc_admin_get_feature_config();
-		$homepage_enabled = Loader::is_homepage_enabled( $features );
-		$id       = $homepage_enabled ? 'woocommerce-home' : 'woocommerce-dashboard';
-		$title    = $homepage_enabled ? __( 'Home', 'woocommerce-admin' ) : __( 'Dashboard', 'woocommerce-admin' );
+		$id       = Loader::is_feature_enabled( 'homepage' ) ? 'woocommerce-home' : 'woocommerce-dashboard';
+		$title    = Loader::is_feature_enabled( 'homepage' ) ? __( 'Home', 'woocommerce-admin' ) : __( 'Dashboard', 'woocommerce-admin' );
 
 		wc_admin_register_page(
 			array(

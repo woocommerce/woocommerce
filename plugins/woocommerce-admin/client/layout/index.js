@@ -15,7 +15,6 @@ import { useFilters, Spinner } from '@woocommerce/components';
 import { getHistory } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
-	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	withPluginsHydration,
 	withOptionsHydration,
@@ -79,7 +78,6 @@ class _Layout extends Component {
 			installedPlugins,
 			isEmbedded,
 			isJetpackConnected,
-			homepageEnabled,
 		} = this.props;
 
 		if ( isEmbedded ) {
@@ -98,7 +96,9 @@ class _Layout extends Component {
 
 		// When pathname is `/` we are on the dashboard
 		if ( path.length === 0 ) {
-			path = homepageEnabled ? 'home_screen' : 'dashboard';
+			path = window.wcAdminFeatures.homepage
+				? 'home_screen'
+				: 'dashboard';
 		}
 
 		recordPageView( path, {
@@ -186,22 +186,17 @@ const Layout = compose(
 
 class _PageLayout extends Component {
 	render() {
-		const { homepageEnabled } = this.props;
 		return (
 			<Router history={ getHistory() }>
 				<Switch>
-					{ getPages( homepageEnabled ).map( ( page ) => {
+					{ getPages().map( ( page ) => {
 						return (
 							<Route
 								key={ page.path }
 								path={ page.path }
 								exact
 								render={ ( props ) => (
-									<Layout
-										page={ page }
-										homepageEnabled={ homepageEnabled }
-										{ ...props }
-									/>
+									<Layout page={ page } { ...props } />
 								) }
 							/>
 						);
@@ -219,14 +214,7 @@ export const PageLayout = compose(
 		? withOptionsHydration( {
 				...window.wcSettings.preloadOptions,
 		  } )
-		: identity,
-	withSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const homepageEnabled =
-			window.wcAdminFeatures.homepage &&
-			getOption( 'woocommerce_homescreen_enabled' ) === 'yes';
-		return { homepageEnabled };
-	} )
+		: identity
 )( _PageLayout );
 
 export class EmbedLayout extends Component {
