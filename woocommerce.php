@@ -16,8 +16,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
-
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
 }
@@ -37,7 +35,7 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 }
 
 // Initialize dependency injection.
-ObjectContainer::init();
+WooCommerce::init_container();
 
 /**
  * Returns the main instance of WC.
