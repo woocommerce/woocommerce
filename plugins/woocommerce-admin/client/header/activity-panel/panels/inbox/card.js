@@ -233,7 +233,7 @@ class InboxNoteCard extends Component {
 					</p>
 					<div className="woocommerce-inbox-dismiss-confirmation_buttons">
 						<Button
-							isDefault
+							isSecondary
 							onClick={ () => this.closeDismissModal() }
 						>
 							{ __( 'Cancel', 'woocommerce-admin' ) }

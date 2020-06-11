@@ -67,7 +67,7 @@ class OrdersPanel extends Component {
 				actions={
 					<Button
 						href="https://docs.woocommerce.com/document/managing-orders/"
-						isDefault
+						isSecondary
 						target="_blank"
 					>
 						{ __( 'Learn more', 'woocommerce-admin' ) }
@@ -200,7 +200,7 @@ class OrdersPanel extends Component {
 					}
 					actions={
 						<Button
-							isDefault
+							isSecondary
 							href={ getAdminLink(
 								'post.php?action=edit&post=' + order.order_id
 							) }

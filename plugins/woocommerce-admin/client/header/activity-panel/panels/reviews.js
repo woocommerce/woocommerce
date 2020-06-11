@@ -111,7 +111,7 @@ class ReviewsPanel extends Component {
 
 		const cardActions = (
 			<Button
-				isDefault
+				isSecondary
 				onClick={ () =>
 					recordEvent( 'review_manage_click', manageReviewEvent )
 				}
@@ -231,7 +231,7 @@ class ReviewsPanel extends Component {
 					<Button
 						href={ buttonUrl }
 						target={ buttonTarget }
-						isDefault
+						isSecondary
 					>
 						{ buttonText }
 					</Button>

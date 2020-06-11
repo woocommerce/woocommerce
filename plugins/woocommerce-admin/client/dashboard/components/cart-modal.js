@@ -156,7 +156,6 @@ class CartModal extends Component {
 
 					<Button
 						isPrimary
-						isDefault
 						isBusy={ purchaseNowButtonBusy }
 						onClick={ () => this.onClickPurchaseNow() }
 					>

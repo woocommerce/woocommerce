@@ -156,7 +156,7 @@ exports[`ActivityCard should render an action on a card 1`] = `
     className="woocommerce-activity-card__actions"
   >
     <ForwardRef(Button)
-      isDefault={true}
+      isSecondary={true}
       key="0"
       onClick={[Function]}
     >
@@ -237,7 +237,7 @@ exports[`ActivityCard should render multiple actions on a card 1`] = `
       Action 1
     </ForwardRef(Button)>
     <ForwardRef(Button)
-      isDefault={true}
+      isSecondary={true}
       key="1"
       onClick={[Function]}
     >

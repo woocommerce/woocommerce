@@ -57,7 +57,7 @@ function HistoricalDataActions( {
 						>
 							{ __( 'Start', 'woocommerce-admin' ) }
 						</Button>
-						<Button isDefault onClick={ onDeletePreviousData }>
+						<Button isSecondary onClick={ onDeletePreviousData }>
 							{ __(
 								'Delete Previously Imported Data',
 								'woocommerce-admin'
@@ -83,10 +83,10 @@ function HistoricalDataActions( {
 		// Has imported all possible data
 		return (
 			<Fragment>
-				<Button isDefault onClick={ onReimportData }>
+				<Button isSecondary onClick={ onReimportData }>
 					{ __( 'Re-import Data', 'woocommerce-admin' ) }
 				</Button>
-				<Button isDefault onClick={ onDeletePreviousData }>
+				<Button isSecondary onClick={ onDeletePreviousData }>
 					{ __(
 						'Delete Previously Imported Data',
 						'woocommerce-admin'

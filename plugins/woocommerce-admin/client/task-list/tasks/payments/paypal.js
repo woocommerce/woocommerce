@@ -109,7 +109,7 @@ class PayPal extends Component {
 	renderConnectButton() {
 		const { connectURL } = this.state;
 		return (
-			<Button isPrimary isDefault href={ connectURL }>
+			<Button isPrimary href={ connectURL }>
 				{ __( 'Connect', 'woocommerce-admin' ) }
 			</Button>
 		);

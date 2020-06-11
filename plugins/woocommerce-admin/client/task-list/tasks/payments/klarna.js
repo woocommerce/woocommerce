@@ -71,7 +71,7 @@ class Klarna extends Component {
 		return (
 			<Fragment>
 				<p>{ configureText }</p>
-				<Button isPrimary isDefault onClick={ this.continue }>
+				<Button isPrimary onClick={ this.continue }>
 					{ __( 'Continue', 'woocommerce-admin' ) }
 				</Button>
 			</Fragment>

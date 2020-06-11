@@ -298,7 +298,9 @@ class Payments extends Component {
 								{ container && ! isConfigured ? (
 									<Button
 										isPrimary={ key === recommendedMethod }
-										isDefault={ key !== recommendedMethod }
+										isSecondary={
+											key !== recommendedMethod
+										}
 										onClick={ () => {
 											recordEvent(
 												'tasklist_payment_setup',

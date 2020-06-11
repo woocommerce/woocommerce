@@ -75,17 +75,8 @@ article.woocommerce-stats-overview__install-jetpack-promo {
 	footer {
 		border-top: 1px solid $promo-actions-border;
 
-		// All of this added specificity is required because styles that
-		// need overriding are already specified at a high level.
-		.woocommerce-layout & button.components-button,
-		.woocommerce-layout & button.components-button.is-button {
-			padding: 8px 16px;
+		.components-button {
 			margin: 16px 4px;
-			height: inherit;
-			color: $theme-color;
-			cursor: pointer;
-			line-height: 2;
-			border-radius: 3px;
 
 			&.is-busy {
 				background-image: linear-gradient(-45deg, lighten($theme-color, 40%) 28%, #fff 0, #fff 72%, lighten($theme-color, 40%) 0);

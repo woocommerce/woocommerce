@@ -96,7 +96,7 @@ class ProductStockCard extends Component {
 		}
 
 		return [
-			<Button key="update" isDefault onClick={ this.beginEdit }>
+			<Button key="update" isSecondary onClick={ this.beginEdit }>
 				{ __( 'Update stock', 'woocommerce-admin' ) }
 			</Button>,
 		];

@@ -138,7 +138,7 @@ class DatePickerContent extends Component {
 										{ selected.name === 'custom' && (
 											<Button
 												className="woocommerce-filters-date__button"
-												isDefault
+												isSecondary
 												onClick={ resetCustomValues }
 												disabled={
 													! ( after || before )

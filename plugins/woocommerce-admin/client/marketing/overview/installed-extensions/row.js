@@ -17,7 +17,6 @@ import { Button, ProductIcon } from '../../components';
 import { recordEvent } from 'lib/tracks';
 
 class InstalledExtensionRow extends Component {
-
 	constructor( props ) {
 		super( props );
 
@@ -71,10 +70,10 @@ class InstalledExtensionRow extends Component {
 								{ link.text }
 							</Link>
 						</li>
-					)
+					);
 				} ) }
 			</ul>
-		)
+		);
 	}
 
 	onLinkClick( link ) {
@@ -98,25 +97,25 @@ class InstalledExtensionRow extends Component {
 
 		return (
 			<Button
-				isDefault
+				isSecondary
 				onClick={ this.onActivateClick }
 				disabled={ isLoading }
 			>
 				{ __( 'Activate', 'woocommerce-admin' ) }
 			</Button>
-		)
+		);
 	}
 
 	getFinishSetupButton() {
 		return (
 			<Button
-				isDefault
+				isSecondary
 				href={ this.props.settingsUrl }
 				onClick={ this.onFinishSetupClick }
 			>
 				{ __( 'Finish setup', 'woocommerce-admin' ) }
 			</Button>
-		)
+		);
 	}
 
 	render() {
@@ -142,7 +141,9 @@ class InstalledExtensionRow extends Component {
 					<div className="woocommerce-marketing-installed-extensions-card__item-text">
 						<h4>{ name }</h4>
 						{ status === 'configured' || (
-							<p className="woocommerce-marketing-installed-extensions-card__item-description">{ description }</p>
+							<p className="woocommerce-marketing-installed-extensions-card__item-description">
+								{ description }
+							</p>
 						) }
 					</div>
 					<div className="woocommerce-marketing-installed-extensions-card__item-actions">
@@ -150,7 +151,7 @@ class InstalledExtensionRow extends Component {
 					</div>
 				</div>
 			</div>
-		)
+		);
 	}
 }
 

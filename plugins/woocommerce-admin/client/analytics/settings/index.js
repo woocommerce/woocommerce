@@ -149,7 +149,7 @@ const Settings = ( { createNotice, query } ) => {
 					/>
 				) ) }
 				<div className="woocommerce-settings__actions">
-					<Button isDefault onClick={ resetDefaults }>
+					<Button isSecondary onClick={ resetDefaults }>
 						{ __( 'Reset Defaults', 'woocommerce-admin' ) }
 					</Button>
 					<Button

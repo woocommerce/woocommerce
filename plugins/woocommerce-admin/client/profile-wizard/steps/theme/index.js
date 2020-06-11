@@ -241,7 +241,7 @@ class Theme extends Component {
 							</Button>
 						) : (
 							<Button
-								isDefault
+								isSecondary
 								onClick={ () => this.onChoose( theme, 'card' ) }
 								isBusy={ chosen === slug }
 							>

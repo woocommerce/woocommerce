@@ -59,7 +59,7 @@ class Setting extends Component {
 			case 'button':
 				return (
 					<Button
-						isDefault
+						isSecondary
 						onClick={ this.handleInputCallback }
 						disabled={ disabled }
 					>

@@ -7,7 +7,7 @@ This component creates simple reusable html `<button></button>` element.
 
 ```jsx
 <Button
-	isDefault
+	isSecondary
 	onClick={ this.onActivateClick }
 	disabled={ isLoading }
 >

@@ -60,10 +60,11 @@ class InboxNoteAction extends Component {
 
 	render() {
 		const { action, dismiss, label } = this.props;
+		const isPrimary = dismiss || action.primary;
 		return (
 			<Button
-				isDefault
-				isPrimary={ dismiss || action.primary }
+				isPrimary={ isPrimary }
+				isSecondary={ ! isPrimary }
 				isBusy={ this.state.inAction }
 				disabled={ this.state.inAction }
 				href={ action ? action.url : undefined }
