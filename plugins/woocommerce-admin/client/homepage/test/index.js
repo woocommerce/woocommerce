@@ -11,19 +11,22 @@ jest.mock( 'homepage/stats-overview', () => jest.fn().mockReturnValue( null ) );
 jest.mock( 'task-list', () => jest.fn().mockReturnValue( '[TaskList]' ) );
 
 // We aren't testing the <InboxPanel /> component here.
-jest.mock( 'header/activity-panel/panels/inbox', () => jest.fn().mockReturnValue( '[InboxPanel]' ) );
+jest.mock( 'header/activity-panel/panels/inbox', () =>
+	jest.fn().mockReturnValue( '[InboxPanel]' )
+);
+
+// We aren't testing the <QuickLinks /> component here.
+jest.mock( 'quick-links', () => jest.fn().mockReturnValue( '[QuickLinks]' ) );
 
 describe( 'Homepage Layout', () => {
 	it( 'should show TaskList placeholder when loading', () => {
 		const { container } = render(
-			<Layout
-				requestingTaskList
-				taskListHidden={ false }
-				query={ {} }
-			/>
+			<Layout requestingTaskList taskListHidden={ false } query={ {} } />
 		);
 
-		const placeholder = container.querySelector( '.woocommerce-task-card.is-loading' );
+		const placeholder = container.querySelector(
+			'.woocommerce-task-card.is-loading'
+		);
 		expect( placeholder ).not.toBeNull();
 	} );
 
@@ -37,11 +40,13 @@ describe( 'Homepage Layout', () => {
 		);
 
 		// Expect that we're rendering the "full" home screen (with columns).
-		const columns = container.querySelector( '.woocommerce-homepage-column' );
+		const columns = container.querySelector(
+			'.woocommerce-homepage-column'
+		);
 		expect( columns ).not.toBeNull();
 
 		// Expect that the <TaskList /> is there too.
-		const taskList = await screen.findByText( '[TaskList]' )
+		const taskList = await screen.findByText( '[TaskList]' );
 		expect( taskList ).toBeDefined();
 	} );
 
@@ -57,11 +62,13 @@ describe( 'Homepage Layout', () => {
 		);
 
 		// Expect that we're NOT rendering the "full" home screen (with columns).
-		const columns = container.querySelector( '.woocommerce-homepage-column' );
+		const columns = container.querySelector(
+			'.woocommerce-homepage-column'
+		);
 		expect( columns ).toBeNull();
 
 		// Expect that the <TaskList /> is there though.
-		const taskList = await screen.findByText( '[TaskList]' )
+		const taskList = await screen.findByText( '[TaskList]' );
 		expect( taskList ).toBeDefined();
 	} );
 
@@ -75,7 +82,7 @@ describe( 'Homepage Layout', () => {
 			/>
 		);
 
-		const taskList = screen.queryByText( '[TaskList]' )
+		const taskList = screen.queryByText( '[TaskList]' );
 		expect( taskList ).toBeNull();
 	} );
 
@@ -89,7 +96,35 @@ describe( 'Homepage Layout', () => {
 			/>
 		);
 
-		const taskList = screen.queryByText( '[TaskList]' )
+		const taskList = screen.queryByText( '[TaskList]' );
 		expect( taskList ).toBeNull();
+	} );
+
+	it( 'should show QuickLinks when user has hidden TaskList', () => {
+		render(
+			<Layout
+				requestingTaskList={ false }
+				taskListComplete={ false }
+				taskListHidden
+				query={ {} }
+			/>
+		);
+
+		const quickLinks = screen.queryByText( '[QuickLinks]' );
+		expect( quickLinks ).toBeDefined();
+	} );
+
+	it( 'should show QuickLinks when TaskList is complete', () => {
+		render(
+			<Layout
+				requestingTaskList={ false }
+				taskListComplete
+				taskListHidden={ false }
+				query={ {} }
+			/>
+		);
+
+		const quickLinks = screen.queryByText( '[QuickLinks]' );
+		expect( quickLinks ).toBeDefined();
 	} );
 } );
