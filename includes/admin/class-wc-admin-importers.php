@@ -151,7 +151,7 @@ class WC_Admin_Importers {
 			return;
 		}
 
-		$id          = absint( $_POST['import_id'] ); // PHPCS: input var ok.
+		$id          = absint( $_POST['import_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$file        = get_attached_file( $id );
 		$parser      = new WXR_Parser();
 		$import_data = $parser->parse( $file );
