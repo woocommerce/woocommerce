@@ -26,6 +26,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Migrate_From_Shopify;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_First_Product;
 
 /**
  * WC_Admin_Events Class.
@@ -83,6 +84,7 @@ class Events {
 		WC_Admin_Notes_Start_Dropshipping_Business::possibly_add_note();
 		WC_Admin_Notes_WooCommerce_Subscriptions::possibly_add_note();
 		WC_Admin_Notes_Migrate_From_Shopify::possibly_add_note();
+		WC_Admin_Notes_First_Product::possibly_add_note();
 
 		if ( Loader::is_feature_enabled( 'remote-inbox-notifications' ) ) {
 			DataSourcePoller::read_specs_from_data_sources();
