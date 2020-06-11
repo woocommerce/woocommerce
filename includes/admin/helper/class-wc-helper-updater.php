@@ -73,6 +73,9 @@ class WC_Helper_Updater {
 			}
 		}
 
+		$tanslations = self::get_translations_update_data();
+		$transient->translations = array_merge( $transients->translations, $translations );
+
 		return $transient;
 	}
 
@@ -160,6 +163,93 @@ class WC_Helper_Updater {
 		}
 
 		return self::_update_check( $payload );
+	}
+
+	/**
+	 * Get translations updates informations.
+	 *
+	 * Scans through all subscriptions for the connected user, as well
+	 * as all Woo extensions without a subscription, and obtains update
+	 * data for each product.
+	 *
+	 * @return array Update data {product_id => data}
+	 */
+	public static function get_translations_update_data() {
+		$payload = array();
+
+		$installed_translations = wp_get_installed_translations( 'plugins' );
+
+		$locales = array_values( get_available_languages() );
+		/**
+		 * Filters the locales requested for plugin translations.
+		 *
+		 * @since 3.7.0
+		 * @since 4.5.0 The default value of the `$locales` parameter changed to include all locales.
+		 *
+		 * @param array $locales Plugin locales. Default is all available locales of the site.
+		 */
+		$locales = apply_filters( 'plugins_update_check_locales', $locales );
+		$locales = array_unique( $locales );
+
+		// Scan local plugins which may or may not have a subscription.
+		$plugins = WC_Helper::get_local_woo_plugins();
+		$active      = array_intersect( array_keys( $woo_plugins ), get_option( 'active_plugins', array() ) );
+
+		$to_send = compact( 'plugins', 'active' );
+
+		if ( wp_doing_cron() ) {
+			$timeout = 30;
+		} else {
+			// Three seconds, plus one extra second for every 10 plugins.
+			$timeout = 3 + (int) ( count( $plugins ) / 10 );
+		}
+
+		$options = array(
+			'timeout'    => $timeout,
+			'body'       => array(
+				'plugins'      => wp_json_encode( $to_send ),
+				'translations' => wp_json_encode( $translations ),
+				'locale'       => wp_json_encode( $locales ),
+				'all'          => wp_json_encode( true ),
+			),
+			'user-agent' => 'WordPress/' . $wp_version . '; ' . home_url( '/' ),
+		);
+
+		if ( $extra_stats ) {
+			$options['body']['update_stats'] = wp_json_encode( $extra_stats );
+		}
+
+		$url      = 'htts://translate.wordpress.com/projects/';
+		$http_url = $url;
+		$ssl      = wp_http_supports( array( 'ssl' ) ); // Is this necessary? or we alwyas support ssl now?
+		if ( $ssl ) {
+			$url = set_url_scheme( $url, 'https' );
+		}
+
+		$raw_response = wp_remote_post( $url, $options );
+		if ( $ssl && is_wp_error( $raw_response ) ) {
+			trigger_error(
+				sprintf(
+					/* translators: %s: Support forums URL. */
+					__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'woocommerce' ),
+					__( 'https://wordpress.org/support/forums/', 'woocommerce' )
+				) . ' ' . __( '(WordPress could not establish a secure connection to WordPress.org. Please contact your server administrator.)', 'woocommerce' ),
+				headers_sent() || WP_DEBUG ? E_USER_WARNING : E_USER_NOTICE
+			);
+			$raw_response = wp_remote_post( $http_url, $options );
+		}
+
+		if ( is_wp_error( $raw_response ) || 200 != wp_remote_retrieve_response_code( $raw_response ) ) {
+			return array();
+		}
+
+		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
+
+		if ( is_array( $response ) ) {
+			return $response['translations'];
+		} else {
+			return array();
+		}
 	}
 
 	/**
