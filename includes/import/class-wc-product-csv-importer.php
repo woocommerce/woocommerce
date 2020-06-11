@@ -1024,7 +1024,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'failed'         => array(),
 			'updated'        => array(),
 			'skipped'        => array(),
-			'distinct_count' => 0, // Counts imported products excluding variations.
+			'imported_distinct_count' => 0, // Counts imported products excluding variations.
+			'updated_distinct_count'  => 0, // Counts imported products excluding variations.
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
@@ -1090,11 +1091,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data['failed'][] = $result;
 			} elseif ( $result['updated'] ) {
 				$data['updated'][] = $result['id'];
+
+				if ( 'variation' !== $result['type'] ) {
+					$data['updated_distinct_count'] ++;
+				}
 			} else {
 				$data['imported'][] = $result['id'];
 
 				if ( 'variation' !== $result['type'] ) {
-					$data['distinct_count'] ++;
+					$data['imported_distinct_count'] ++;
 				}
 			}
 
