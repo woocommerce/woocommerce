@@ -35,6 +35,7 @@ export const DEFAULT_INNER_BLOCKS = [
 					[ 'woocommerce/product-rating' ],
 					[ 'woocommerce/product-price' ],
 					[ 'woocommerce/product-summary' ],
+					[ 'woocommerce/product-stock-indicator' ],
 					[ 'woocommerce/product-button' ],
 					[ 'woocommerce/product-sku' ],
 					[ 'woocommerce/product-category-list' ],

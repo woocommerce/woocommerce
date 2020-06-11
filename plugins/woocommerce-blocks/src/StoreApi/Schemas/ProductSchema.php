@@ -263,6 +263,12 @@ class ProductSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'is_on_backorder'     => [
+				'description' => __( 'Is the product stock backordered? This will also return false if backorder notifications are turned off.', 'woo-gutenberg-products-block' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'low_stock_remaining' => [
 				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woo-gutenberg-products-block' ),
 				'type'        => [ 'integer', 'null' ],
@@ -320,6 +326,7 @@ class ProductSchema extends AbstractSchema {
 			'has_options'         => $product->has_options(),
 			'is_purchasable'      => $product->is_purchasable(),
 			'is_in_stock'         => $product->is_in_stock(),
+			'is_on_backorder'     => 'onbackorder' === $product->get_stock_status(),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
 			'add_to_cart'         => (object) $this->prepare_html_response(
 				[
@@ -365,7 +372,7 @@ class ProductSchema extends AbstractSchema {
 		$remaining_stock = $this->get_remaining_stock( $product );
 
 		if ( ! is_null( $remaining_stock ) && $remaining_stock <= wc_get_low_stock_amount( $product ) ) {
-			return $remaining_stock;
+			return max( $remaining_stock, 0 );
 		}
 
 		return null;

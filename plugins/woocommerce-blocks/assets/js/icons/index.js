@@ -5,6 +5,7 @@ export { default as arrowDownAlt2 } from './library/arrow-down-alt2';
 export { default as bank } from './library/bank';
 export { default as barcode } from './library/barcode';
 export { default as bill } from './library/bill';
+export { default as box } from './library/box';
 export { default as card } from './library/card';
 export { default as cart } from './library/cart';
 export { default as checkPayment } from './library/check-payment';
