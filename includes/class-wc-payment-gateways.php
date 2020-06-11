@@ -8,8 +8,6 @@
  * @package WooCommerce/Classes/Payment
  */
 
-use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -29,8 +27,6 @@ class WC_Payment_Gateways {
 	 *
 	 * @var WC_Payment_Gateways
 	 * @since 2.1.0
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	protected static $_instance = null;
 
@@ -41,11 +37,12 @@ class WC_Payment_Gateways {
 	 *
 	 * @since 2.1
 	 * @return WC_Payment_Gateways Main instance
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	public static function instance() {
-		return self::$_instance = ObjectContainer::get_instance_of( __CLASS__ );
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self();
+		}
+		return self::$_instance;
 	}
 
 	/**

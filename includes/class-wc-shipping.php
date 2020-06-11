@@ -9,7 +9,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -53,8 +52,6 @@ class WC_Shipping {
 	 *
 	 * @var WC_Shipping
 	 * @since 2.1
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	protected static $_instance = null;
 
@@ -65,11 +62,12 @@ class WC_Shipping {
 	 *
 	 * @since 2.1
 	 * @return WC_Shipping Main instance
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	public static function instance() {
-		return self::$_instance = ObjectContainer::get_instance_of( __CLASS__ );
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self();
+		}
+		return self::$_instance;
 	}
 
 	/**
@@ -334,26 +332,7 @@ class WC_Shipping {
 			if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 				foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
 					if ( ! $shipping_method->supports( 'shipping-zones' ) || $shipping_method->get_instance_id() ) {
-						/**
-						 * Fires before getting shipping rates for a package.
-						 *
-						 * @since 4.3.0
-						 * @param array $package Package of cart items.
-						 * @param WC_Shipping_Method $shipping_method Shipping method instance.
-						 */
-						do_action( 'woocommerce_before_get_rates_for_package', $package, $shipping_method );
-
-						// Use + instead of array_merge to maintain numeric keys.
-						$package['rates'] = $package['rates'] + $shipping_method->get_rates_for_package( $package );
-
-						/**
-						 * Fires after getting shipping rates for a package.
-						 *
-						 * @since 4.3.0
-						 * @param array $package Package of cart items.
-						 * @param WC_Shipping_Method $shipping_method Shipping method instance.
-						 */
-						do_action( 'woocommerce_after_get_rates_for_package', $package, $shipping_method );
+						$package['rates'] = $package['rates'] + $shipping_method->get_rates_for_package( $package ); // + instead of array_merge maintains numeric keys
 					}
 				}
 
