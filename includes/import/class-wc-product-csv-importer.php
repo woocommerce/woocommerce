@@ -1025,7 +1025,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'updated'        => array(),
 			'skipped'        => array(),
 			'imported_distinct_count' => 0, // Counts imported products excluding variations.
-			'updated_distinct_count'  => 0, // Counts imported products excluding variations.
+			'updated_distinct_count'  => 0, // Counts updated products excluding variations.
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
