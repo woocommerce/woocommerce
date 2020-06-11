@@ -8,8 +8,6 @@
  * @version 3.4.0
  */
 
-use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -21,8 +19,6 @@ class WC_Checkout {
 	 * The single instance of the class.
 	 *
 	 * @var WC_Checkout|null
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	protected static $instance = null;
 
@@ -53,23 +49,19 @@ class WC_Checkout {
 	 * @since 2.1
 	 * @static
 	 * @return WC_Checkout Main instance
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	public static function instance() {
-		return self::$instance = ObjectContainer::get_instance_of( __CLASS__ );
-	}
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
 
-	/**
-	 * Class constructor, hooks the appropriate actions.
-	 */
-	public function __construct() {
-		// Hook in actions once.
-		add_action( 'woocommerce_checkout_billing', array( $this, 'checkout_form_billing' ) );
-		add_action( 'woocommerce_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
+			// Hook in actions once.
+			add_action( 'woocommerce_checkout_billing', array( self::$instance, 'checkout_form_billing' ) );
+			add_action( 'woocommerce_checkout_shipping', array( self::$instance, 'checkout_form_shipping' ) );
 
-		// woocommerce_checkout_init action is ran once when the class is first constructed.
-		do_action( 'woocommerce_checkout_init', $this );
+			// woocommerce_checkout_init action is ran once when the class is first constructed.
+			do_action( 'woocommerce_checkout_init', self::$instance );
+		}
+		return self::$instance;
 	}
 
 	/**

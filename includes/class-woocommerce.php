@@ -8,9 +8,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Tools\DependencyManagement\ObjectContainer;
-use Automattic\WooCommerce\Providers\CustomerProvider;
-
 /**
  * Main WooCommerce Class.
  *
@@ -39,8 +36,6 @@ final class WooCommerce {
 	 *
 	 * @var WooCommerce
 	 * @since 2.1
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	protected static $_instance = null;
 
@@ -115,20 +110,6 @@ final class WooCommerce {
 	public $deprecated_hook_handlers = array();
 
 	/**
-	 * The container used for dependency injection.
-	 *
-	 * @var ObjectContainer
-	 */
-	private $container;
-
-	/**
-	 * The instance of CustomerProvider to use.
-	 *
-	 * @var CustomerProvider
-	 */
-	private $customer_provider;
-
-	/**
 	 * Main WooCommerce Instance.
 	 *
 	 * Ensures only one instance of WooCommerce is loaded or can be loaded.
@@ -137,11 +118,12 @@ final class WooCommerce {
 	 * @static
 	 * @see WC()
 	 * @return WooCommerce - Main instance.
-	 *
-	 * @deprecated 4.3.0 Use dependency injection instead, see the ObjectContainer class.
 	 */
 	public static function instance() {
-		return self::$_instance = ObjectContainer::get_instance_of( __CLASS__ );
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self();
+		}
+		return self::$_instance;
 	}
 
 	/**
@@ -177,10 +159,7 @@ final class WooCommerce {
 	/**
 	 * WooCommerce Constructor.
 	 */
-	public function __construct( ObjectContainer $container, CustomerProvider $customer_provider ) {
-		$this->container         = $container;
-		$this->customer_provider = $customer_provider;
-
+	public function __construct() {
 		$this->define_constants();
 		$this->define_tables();
 		$this->includes();
@@ -497,8 +476,8 @@ final class WooCommerce {
 		}
 
 		$this->theme_support_includes();
-		$this->query = $this->container->get( WC_Query::class );
-		$this->api   = $this->container->get( WC_API::class );
+		$this->query = new WC_Query();
+		$this->api   = new WC_API();
 		$this->api->init();
 	}
 
@@ -580,13 +559,13 @@ final class WooCommerce {
 		$this->load_plugin_textdomain();
 
 		// Load class instances.
-		$this->product_factory                     = $this->container->get( WC_Product_Factory::class );
-		$this->order_factory                       = $this->container->get( WC_Order_Factory::class );
-		$this->countries                           = $this->container->get( WC_Countries::class );
-		$this->integrations                        = $this->container->get( WC_Integrations::class );
-		$this->structured_data                     = $this->container->get( WC_Structured_Data::class );
-		$this->deprecated_hook_handlers['actions'] = $this->container->get( WC_Deprecated_Action_Hooks::class );
-		$this->deprecated_hook_handlers['filters'] = $this->container->get( WC_Deprecated_Filter_Hooks::class );
+		$this->product_factory                     = new WC_Product_Factory();
+		$this->order_factory                       = new WC_Order_Factory();
+		$this->countries                           = new WC_Countries();
+		$this->integrations                        = new WC_Integrations();
+		$this->structured_data                     = new WC_Structured_Data();
+		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
+		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
@@ -774,12 +753,12 @@ final class WooCommerce {
 	public function initialize_cart() {
 		// Cart needs customer info.
 		if ( is_null( $this->customer ) || ! $this->customer instanceof WC_Customer ) {
-			$this->customer = $this->customer_provider->get_logged_in_customer();
+			$this->customer = new WC_Customer( get_current_user_id(), true );
 			// Customer should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
 		}
 		if ( is_null( $this->cart ) || ! $this->cart instanceof WC_Cart ) {
-			$this->cart = $this->container->get( WC_Cart::class );
+			$this->cart = new WC_Cart();
 		}
 	}
 
@@ -793,7 +772,7 @@ final class WooCommerce {
 		// Session class, handles session data for users - can be overwritten if custom handler is needed.
 		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
 		if ( is_null( $this->session ) || ! $this->session instanceof $session_class ) {
-			$this->session = $this->container->get( $session_class );
+			$this->session = new $session_class();
 			$this->session->init();
 		}
 	}
@@ -833,9 +812,11 @@ final class WooCommerce {
 	 * Get queue instance.
 	 *
 	 * @return WC_Queue_Interface
+	 *
+	 * @deprecated 4.3.0 Use the container to get an instance of WC_Queue_Interface instead.
 	 */
 	public function queue() {
-		return $this->container->get( WC_Queue_Interface::class );
+		return WC_Queue::instance();
 	}
 
 	/**
@@ -844,7 +825,7 @@ final class WooCommerce {
 	 * @return WC_Checkout
 	 */
 	public function checkout() {
-		return $this->container->get( WC_Checkout::class );
+		return WC_Checkout::instance();
 	}
 
 	/**
@@ -853,7 +834,7 @@ final class WooCommerce {
 	 * @return WC_Payment_Gateways
 	 */
 	public function payment_gateways() {
-		return $this->container->get( WC_Payment_Gateways::class );
+		return WC_Payment_Gateways::instance();
 	}
 
 	/**
@@ -862,7 +843,7 @@ final class WooCommerce {
 	 * @return WC_Shipping
 	 */
 	public function shipping() {
-		return $this->container->get( WC_Shipping::class );
+		return WC_Shipping::instance();
 	}
 
 	/**
@@ -871,7 +852,7 @@ final class WooCommerce {
 	 * @return WC_Emails
 	 */
 	public function mailer() {
-		return $this->container->get( WC_Emails::class );
+		return WC_Emails::instance();
 	}
 
 	/**

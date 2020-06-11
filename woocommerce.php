@@ -46,7 +46,7 @@ ObjectContainer::init();
  * @return WooCommerce
  */
 function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
-	return ObjectContainer::get_instance_of( WooCommerce::class );
+	return WooCommerce::instance();
 }
 
 // Global for backwards compatibility.

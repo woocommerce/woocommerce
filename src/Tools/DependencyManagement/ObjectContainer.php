@@ -101,8 +101,7 @@ final class ObjectContainer {
 		self::$instance->reflection_container = new WooReflectionContainer();
 		$container->delegate( self::$instance->reflection_container );
 
-		// Perform any required manual class and service provider registration.
-		self::$instance->register_classes();
+		// Perform any required service provider registration.
 		self::$instance->register_service_providers();
 	}
 
@@ -113,24 +112,6 @@ final class ObjectContainer {
 	 */
 	public function __construct( Container $container ) {
 		$this->container = $container;
-	}
-
-	/**
-	 * Register class resolutions for which default autowiring is not appropriate/enough.
-	 */
-	private function register_classes() {
-		$singletons = array(
-			\CustomerProvider::class,
-			\WC_Checkout::class,
-			\WC_Emails::class,
-			\WC_Payment_Gateways::class,
-			\WC_Shipping::class,
-			\WooCommerce::class,
-		);
-
-		foreach ( $singletons as $class_name ) {
-			$this->reflection_container->share( $class_name );
-		}
 	}
 
 	/**
