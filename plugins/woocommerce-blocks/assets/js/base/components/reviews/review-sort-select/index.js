@@ -13,7 +13,7 @@ import './style.scss';
 const ReviewSortSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 	return (
 		<SortSelect
-			className="wc-block-review-sort-select"
+			className="wc-block-review-sort-select wc-block-components-review-sort-select"
 			defaultValue={ defaultValue }
 			label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
 			onChange={ onChange }

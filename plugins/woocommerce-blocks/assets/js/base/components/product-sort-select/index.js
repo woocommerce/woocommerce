@@ -13,7 +13,7 @@ import './style.scss';
 const ProductSortSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 	return (
 		<SortSelect
-			className="wc-block-product-sort-select"
+			className="wc-block-product-sort-select wc-block-components-product-sort-select"
 			defaultValue={ defaultValue }
 			name="orderby"
 			onChange={ onChange }

@@ -16,27 +16,37 @@ As a WordPress plugin, Blocks has to play nicely with other plugins and themes, 
 
 #### Naming
 
-All class names assigned to an element must be prefixed with the following, each joined by a dash (`-`):
+All class names assigned to an element must be prefixed. We use different prefixes to differentiate frontend and editor elements as well as identifying if they are components or not:
 
--   The `wc-block` plugin prefix.
--   The name of the sub-package (where applicable, e.g. if there was a distributed sub-package called `components` living within the blocks plugin, the prefix would be `wc-block-components-`).
--   The name of the directory in which the component resides.
+-   `wc-block` for classes applied to a single block.
+-   `wc-block-components` for classes applied to a component, which might be used by several blocks.
+-   `wc-block-editor` for classes applied to a single block but only used in the editor UI.
+-   `wc-block-editor-components` for classes applied to an editor component.
 
-Any descendant of the component's root element must append a dash-delimited descriptor, separated from the base by two consecutive underscores `__`.
+As a rule of thumb, this is the relation between location in the source tree and class name used:
 
-    Example, `assets/base/components/checkbox-list` uses the class name: `wc-block-checkbox-list`.
+| Location in the tree | Class names used | Can be styled by themes?
+| --- | --- | :---: |
+| assets/js/atomic/blocks | `.wc-block-components-` | ✓ |
+| assets/js/base/components | `.wc-block-components-` | ✓ |
+| assets/js/blocks | Frontend: `.wc-block-`<br>Editor: `.wc-block-editor-` | ✓<br>✘ |
+| assets/js/components |  `.wc-block-editor-components-` | ✘ |
+
+After the prefix, class names are built using BEM:
 
 A **root element** (or **Block** in BEM notation) is a standalone entity that is meaningful on its own. Whilst they can be nested and interact with each other, semantically they remain equal; there is no precedence or hierarchy.
 
-    Example: `wc-block-package-directory`
+    Example: `wc-block-directory-name`
+
+Any descendant of the component's root element must append a dash-delimited descriptor, separated from the base by two consecutive underscores `__`.
 
 A **child element** (or **Element** in BEM notation) has no standalone meaning and is semantically tied to its block.
 
-    Example: `wc-block-package-directory__descriptor-foo-bar`
+    Example: `wc-block-directory-name__descriptor-foo-bar`
 
 Finally, A **modifier** is a flag on an element which can be used to change appearance, behavior or state.
 
-    Example: `wc-block-package-directory__descriptor-foo-bar--state`
+    Example: `wc-block-directory-name__descriptor-foo-bar--state`
 
 The **root element** is considered to be the highest ancestor element returned by the default export in the index.js. Notably, if your folder contains multiple files, each with their own default exported component, only the element rendered by that of index.js can be considered the root. All others should be treated as **descendants**.
 
@@ -44,10 +54,10 @@ Naming is not strictly tied to the DOM so it **doesn’t matter how many nested 
 
 **Nesting Example:**
 
--   `wc-block-dropdown-selector` (Root Element/BEM Block)
--   ├── `wc-block-dropdown-selector__input` (Child Element/BEM Element)
--   ├── `wc-block-dropdown-selector__input--hidden` (Modifier)
--   └── `wc-block-dropdown-selector__placeholder` (Child Element/BEM Element)
+-   `wc-block-components-dropdown-selector` (Root Element/BEM Block)
+-   ├── `wc-block-components-dropdown-selector__input` (Child Element/BEM Element)
+-   ├── `wc-block-components-dropdown-selector__input--hidden` (Modifier)
+-   └── `wc-block-components-dropdown-selector__placeholder` (Child Element/BEM Element)
 
 ### RTL Styles
 
