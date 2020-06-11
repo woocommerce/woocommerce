@@ -8,6 +8,9 @@
 - Add `<Plugins />` component for installation of plugins.
 - Removed use of `IconButton` in favor of `Button` component.
 - Add custom autocompleter support to `<Search />` component.
+- Fix `<SelectControl />` component to allow clicking anywhere on options in list to select.
+- Add support for `<List />` component item tags and link types.
+- Add `<List />` and `<Link />` components to Storybook.
 
 ## Breaking Changes
 - Removed `SplitButton` because its not being used.
