@@ -105,7 +105,11 @@ describe( 'Link', () => {
 	} );
 
 	it( 'should support `onClick`', () => {
-		const clickHandler = jest.fn();
+		// Prevent jsdom "Error: Not implemented: navigation" in test output
+		const clickHandler = jest.fn( ( event ) => {
+			event.preventDefault();
+			return false;
+		} );
 
 		const { container } = render(
 			<Link

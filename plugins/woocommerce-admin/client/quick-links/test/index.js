@@ -56,7 +56,12 @@ describe( 'QuickLinks', () => {
 		const recordEvent = jest.fn();
 
 		render(
-			<QuickLinks getSetting={ () => {} } recordEvent={ recordEvent } />
+			<QuickLinks
+				getSetting={ () => {} }
+				recordEvent={ recordEvent }
+				// Prevent jsdom "Error: Not implemented: navigation" in test output
+				onItemClick={ () => false }
+			/>
 		);
 
 		userEvent.click(
@@ -76,7 +81,12 @@ describe( 'QuickLinks', () => {
 		const recordEvent = jest.fn();
 
 		render(
-			<QuickLinks getSetting={ () => {} } recordEvent={ recordEvent } />
+			<QuickLinks
+				getSetting={ () => {} }
+				recordEvent={ recordEvent }
+				// Prevent jsdom "Error: Not implemented: navigation" in test output
+				onItemClick={ () => false }
+			/>
 		);
 
 		userEvent.click(
@@ -96,7 +106,12 @@ describe( 'QuickLinks', () => {
 		const recordEvent = jest.fn();
 
 		render(
-			<QuickLinks getSetting={ () => {} } recordEvent={ recordEvent } />
+			<QuickLinks
+				getSetting={ () => {} }
+				recordEvent={ recordEvent }
+				// Prevent jsdom "Error: Not implemented: navigation" in test output
+				onItemClick={ () => false }
+			/>
 		);
 
 		userEvent.click(
@@ -118,7 +133,12 @@ describe( 'QuickLinks', () => {
 		const recordEvent = jest.fn();
 
 		render(
-			<QuickLinks getSetting={ () => {} } recordEvent={ recordEvent } />
+			<QuickLinks
+				getSetting={ () => {} }
+				recordEvent={ recordEvent }
+				// Prevent jsdom "Error: Not implemented: navigation" in test output
+				onItemClick={ () => false }
+			/>
 		);
 
 		userEvent.click(
@@ -139,10 +159,6 @@ describe( 'QuickLinks', () => {
 
 		render(
 			<QuickLinks getSetting={ getSetting } recordEvent={ () => {} } />
-		);
-
-		userEvent.click(
-			screen.getByRole( 'menuitem', { name: 'View my store' } )
 		);
 
 		expect( getSetting ).toHaveBeenCalledWith( 'siteUrl' );
