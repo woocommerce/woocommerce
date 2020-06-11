@@ -2056,6 +2056,157 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that adding a variation with URL parameter increases the quantity appropriately
+	 * as described in issue 24000.
+	 */
+	public function test_add_variation_by_url() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_pop( $variations );
+
+		// Add variation with add_to_cart_action.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check if the item is in the cart.
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+
+		// Add variation using parent id.
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour'  => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Check that the second add to cart call increases the quantity of the existing cart-item.
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 2, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+	}
+
+	/**
+	 * Test that adding a variation via URL parameter fails when specifying a value for the attribute
+	 * that differs from a value belonging to that variant.
+	 */
+	public function test_add_variation_by_url_with_invalid_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_pop( $variations );
+
+		// Attempt adding variation with add_to_cart_action, specifying a different colour.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['attribute_pa_colour'] = 'green';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_colour'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check that the notices contain an error message about an invalid colour.
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$this->assertEquals( 'Invalid value posted for colour', $notices['error'][0]['notice'] );
+	}
+
+	/**
+	 * Test that adding a variation via URL parameter succeeds when some attributes belong to the
+	 * variation and others are specificed via URL parameter.
+	 */
+	public function test_add_variation_by_url_with_valid_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_shift( $variations );
+
+		// Attempt adding variation with add_to_cart_action, specifying attributes not defined in the variation.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['attribute_pa_colour'] = 'red';
+		$_REQUEST['attribute_pa_number'] = '1';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_colour'] );
+		unset( $_REQUEST['attribute_pa_number'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Check if the item is in the cart.
+		$this->assertCount( 1, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 1, WC()->cart->get_cart_contents_count() );
+
+		// Check that there are no error notices.
+		$this->assertArrayNotHasKey( 'error', $notices );
+	}
+
+	/**
+	 * Test that adding a varition via URL parameter fails when an 'any' attribute is missing.
+	 */
+	public function test_add_variation_by_url_fails_with_missing_any_attribute() {
+		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = array_shift( $variations );
+
+		// Attempt adding variation with add_to_cart_action, without specifying attribute_pa_colour.
+		$_REQUEST['add-to-cart'] = $variation['variation_id'];
+		$_REQUEST['attribute_pa_number'] = '0';
+		WC_Form_Handler::add_to_cart_action( false );
+		$notices = WC()->session->get( 'wc_notices', array() );
+
+		// Reset filter / REQUEST variables.
+		unset( $_REQUEST['add-to-cart'] );
+		unset( $_REQUEST['attribute_pa_number'] );
+		remove_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );
+
+		// Verify that there is nothing in the cart.
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
+
+		// Check that the notices contain an error message about an invalid colour.
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertCount( 1, $notices['error'] );
+		$this->assertEquals( 'colour is a required field', $notices['error'][0]['notice'] );
+	}
+
+	/**
 	 * Helper function. Adds 1.5 taxable fees to cart.
 	 */
 	public function add_fee_1_5_to_cart() {
