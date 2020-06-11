@@ -26,22 +26,29 @@ const SortSelect = ( {
 	readOnly,
 	value,
 } ) => {
-	const selectId = `wc-block-sort-select__select-${ instanceId }`;
+	const selectId = `wc-block-components-sort-select__select-${ instanceId }`;
 
 	return (
-		<div className={ classNames( 'wc-block-sort-select', className ) }>
+		<div
+			className={ classNames(
+				'wc-block-sort-select',
+				'wc-block-components-sort-select',
+				className
+			) }
+		>
 			<Label
 				label={ label }
 				screenReaderLabel={ screenReaderLabel }
 				wrapperElement="label"
 				wrapperProps={ {
-					className: 'wc-block-sort-select__label',
+					className:
+						'wc-block-sort-select__label wc-block-components-sort-select__label',
 					htmlFor: selectId,
 				} }
 			/>
 			<select // eslint-disable-line jsx-a11y/no-onchange
 				id={ selectId }
-				className="wc-block-sort-select__select"
+				className="wc-block-sort-select__select wc-block-components-sort-select__select"
 				defaultValue={ defaultValue }
 				onChange={ onChange }
 				readOnly={ readOnly }

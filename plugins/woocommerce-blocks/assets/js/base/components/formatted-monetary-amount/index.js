@@ -51,7 +51,11 @@ const FormattedMonetaryAmount = ( {
 		return null;
 	}
 
-	const classes = classNames( 'wc-block-formatted-money-amount', className );
+	const classes = classNames(
+		'wc-block-formatted-money-amount',
+		'wc-block-components-formatted-money-amount',
+		className
+	);
 	const numberFormatProps = {
 		displayType: 'text',
 		...props,
