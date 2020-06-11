@@ -282,7 +282,7 @@ class WC_Admin_Importers {
 					'position'   => 'done',
 					'percentage' => 100,
 					'url'        => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-					'imported'   => count( $results['imported'] ),
+					'imported'   => $results['distinct_count'],
 					'failed'     => count( $results['failed'] ),
 					'updated'    => count( $results['updated'] ),
 					'skipped'    => count( $results['skipped'] ),
@@ -293,7 +293,7 @@ class WC_Admin_Importers {
 				array(
 					'position'   => $importer->get_file_position(),
 					'percentage' => $percent_complete,
-					'imported'   => count( $results['imported'] ),
+					'imported'   => $results['distinct_count'],
 					'failed'     => count( $results['failed'] ),
 					'updated'    => count( $results['updated'] ),
 					'skipped'    => count( $results['skipped'] ),

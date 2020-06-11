@@ -279,6 +279,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return array(
 				'id'      => $object->get_id(),
 				'updated' => $updating,
+				'type'    => $object->get_type(),
 			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
