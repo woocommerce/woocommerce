@@ -645,7 +645,11 @@ class Onboarding {
 			'AU',
 			'AT',
 			'BE',
+			'BG',
+			// 'BR', // Preview, requires invite.
 			'CA',
+			'CY',
+			'CZ',
 			'DK',
 			'EE',
 			'FI',
@@ -653,6 +657,7 @@ class Onboarding {
 			'DE',
 			'GR',
 			'HK',
+			'IN', // Preview.
 			'IE',
 			'IT',
 			'JP',
@@ -660,11 +665,14 @@ class Onboarding {
 			'LT',
 			'LU',
 			'MY',
+			'MT',
+			'MX',
 			'NL',
 			'NZ',
 			'NO',
 			'PL',
 			'PT',
+			'RO',
 			'SG',
 			'SK',
 			'SI',
@@ -673,6 +681,7 @@ class Onboarding {
 			'CH',
 			'GB',
 			'US',
+			'PR',
 		);
 	}
 
