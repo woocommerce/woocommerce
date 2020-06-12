@@ -471,6 +471,7 @@ class WC_Helper {
 
 		if ( $wc_screen_id . '_page_wc-addons' === $screen_id && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			wp_enqueue_style( 'woocommerce-helper', WC()->plugin_url() . '/assets/css/helper.css', array(), Constants::get_constant( 'WC_VERSION' ) );
+			wp_style_add_data( 'woocommerce-helper', 'rtl', 'replace' );
 		}
 	}
 
@@ -1149,7 +1150,18 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$plugins     = get_plugins();
+		$plugins = get_plugins();
+
+		/**
+		 * Check if plugins have WC headers, if not then clear cache and fetch again.
+		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call -- for example when WC is activated/updated.
+		 * Also, get_plugins call is expensive so we should clear this cache very conservatively.
+		 */
+		if ( ! empty( $plugins ) && ! array_key_exists( 'Woo', current( $plugins ) ) ) {
+			wp_clean_plugins_cache( false );
+			$plugins = get_plugins();
+		}
+
 		$woo_plugins = array();
 
 		// Backwards compatibility for woothemes_queue_update().
@@ -1467,8 +1479,6 @@ class WC_Helper {
 		$screen    = get_current_screen();
 		$screen_id = $screen ? $screen->id : '';
 
-		self::_prompt_helper_connect( $screen_id );
-
 		if ( 'update-core' !== $screen_id ) {
 			return;
 		}
@@ -1482,56 +1492,6 @@ class WC_Helper {
 		$notice = self::_get_extensions_update_notice();
 		if ( ! empty( $notice ) ) {
 			echo '<div class="updated woocommerce-message"><p>' . $notice . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		}
-	}
-
-	/**
-	 * Prompt a Helper connection if the user has WooCommerce.com extensions.
-	 *
-	 * @param string $screen_id Current screen ID.
-	 */
-	private static function _prompt_helper_connect( $screen_id ) {
-		if ( apply_filters( 'woocommerce_helper_suppress_connect_notice', false ) ) {
-			return;
-		}
-
-		$screens   = wc_get_screen_ids();
-		$screens[] = 'plugins';
-
-		if ( ! in_array( $screen_id, $screens, true ) ) {
-			return;
-		}
-
-		// Don't show the notice on the Helper screens.
-		$screen_addons = sanitize_title( __( 'WooCommerce', 'woocommerce' ) ) . '_page_wc-addons';
-
-		if ( $screen_addons === $screen_id && ! empty( $_REQUEST['section'] ) && 'helper' === $_REQUEST['section'] ) {
-			return;
-		}
-
-		// We believe we have an active connection.
-		$auth = WC_Helper_Options::get( 'auth' );
-		if ( ! empty( $auth['access_token'] ) ) {
-			return;
-		}
-
-		$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
-		if ( empty( $active_plugins ) ) {
-			return;
-		}
-
-		$woo_plugins = self::get_local_woo_plugins();
-		if ( empty( $woo_plugins ) ) {
-			return;
-		}
-
-		$active_woo_plugins = array_intersect_key( $woo_plugins, array_flip( $active_plugins ) );
-
-		if ( count( $active_woo_plugins ) > 0 ) {
-			/* translators: %s: helper screen url */
-			$notice = __( '<a href="%s">Connect your store</a> to WooCommerce.com to receive extensions updates and support.', 'woocommerce' );
-			$notice = sprintf( $notice, admin_url( 'admin.php?page=wc-addons&section=helper' ) );
-			echo '<div class="updated woocommerce-message"><p>' . wp_kses_post( $notice ) . '</p></div>';
 		}
 	}
 

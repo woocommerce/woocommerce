@@ -20,7 +20,16 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '4.1.0';
+	public $version = '4.3.0';
+
+	/**
+	 * WooCommerce Schema version.
+	 *
+	 * @since 4.3 started with version string 430.
+	 *
+	 * @var string
+	 */
+	public $db_version = '430';
 
 	/**
 	 * The single instance of the class.
@@ -246,7 +255,6 @@ final class WooCommerce {
 			'order_itemmeta'         => 'woocommerce_order_itemmeta',
 			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
 			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
-			'wc_reserved_stock'      => 'wc_reserved_stock',
 		);
 
 		foreach ( $tables as $name => $table ) {

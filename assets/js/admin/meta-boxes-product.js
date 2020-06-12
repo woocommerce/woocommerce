@@ -476,7 +476,9 @@ jQuery( function( $ ) {
 
 				$( '.product_attributes .woocommerce_attribute' ).each( function( index, el ) {
 					if ( $( el ).css( 'display' ) !== 'none' && $( el ).is( '.taxonomy' ) ) {
-						$( 'select.attribute_taxonomy' ).find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' ).prop( 'disabled', true );
+						$( 'select.attribute_taxonomy' )
+							.find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' )
+							.prop( 'disabled', true );
 					}
 				});
 

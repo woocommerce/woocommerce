@@ -287,6 +287,7 @@ class WC_Install {
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
 		self::create_tables();
+		self::verify_base_tables();
 		self::create_options();
 		self::create_roles();
 		self::setup_environment();
@@ -301,6 +302,43 @@ class WC_Install {
 
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
+	}
+
+	/**
+	 * Check if all the base tables are present.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 *
+	 * @return array List of querues.
+	 */
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		if ( $execute ) {
+			self::create_tables();
+		}
+		$queries        = dbDelta( self::get_schema(), false );
+		$missing_tables = array();
+		foreach ( $queries as $table_name => $result ) {
+			if ( "Created table $table_name" === $result ) {
+				$missing_tables[] = $table_name;
+			}
+		}
+
+		if ( 0 < count( $missing_tables ) ) {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::add_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
+		} else {
+			if ( $modify_notice ) {
+				WC_Admin_Notices::remove_notice( 'base_tables_missing' );
+			}
+			update_option( 'woocommerce_schema_version', WC()->db_version );
+			delete_option( 'woocommerce_schema_missing_tables' );
+		}
+		return $missing_tables;
 	}
 
 	/**
@@ -621,6 +659,11 @@ class WC_Install {
 
 	/**
 	 * Set up the database tables which the plugin needs to function.
+	 * WARNING: If you are modifying this method, make sure that its safe to call regardless of the state of database.
+	 *
+	 * This is called from `install` method and is executed in-sync when WC is installed or updated. This can also be called optionally from `verify_base_tables`.
+	 *
+	 * TODO: Add all crucial tables that we have created from workers in the past.
 	 *
 	 * Tables:
 	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
@@ -947,14 +990,6 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   PRIMARY KEY  (tax_rate_class_id),
   UNIQUE KEY slug (slug($max_index_length))
 ) $collate;
-CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
-	`order_id` bigint(20) NOT NULL,
-	`product_id` bigint(20) NOT NULL,
-	`stock_quantity` double NOT NULL DEFAULT 0,
-	`timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`expires` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY  (`order_id`, `product_id`)
-) $collate;
 		";
 
 		return $tables;
@@ -988,7 +1023,6 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			"{$wpdb->prefix}woocommerce_shipping_zones",
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
-			"{$wpdb->prefix}wc_reserved_stock",
 		);
 
 		/**
@@ -1196,7 +1230,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 		}
 
 		// Install files and folders for uploading files and prevent hotlinking.
-		$upload_dir      = wp_upload_dir();
+		$upload_dir      = wp_get_upload_dir();
 		$download_method = get_option( 'woocommerce_file_download_method', 'force' );
 
 		$files = array(
@@ -1215,19 +1249,16 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 				'file'    => 'index.html',
 				'content' => '',
 			),
-		);
-
-		if ( 'redirect' !== $download_method ) {
-			$files[] = array(
+			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			);
-		}
+				'content' => 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all',
+			),
+		);
 
 		foreach ( $files as $file ) {
 			if ( wp_mkdir_p( $file['base'] ) && ! file_exists( trailingslashit( $file['base'] ) . $file['file'] ) ) {
-				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'w' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				$file_handle = @fopen( trailingslashit( $file['base'] ) . $file['file'], 'wb' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 				if ( $file_handle ) {
 					fwrite( $file_handle, $file['content'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 					fclose( $file_handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose

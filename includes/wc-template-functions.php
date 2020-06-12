@@ -673,7 +673,7 @@ function wc_get_product_class( $class = '', $product = null ) {
 	 * WooCommerce Post Class filter.
 	 *
 	 * @since 3.6.2
-	 * @param array      $class Array of CSS classes.
+	 * @param array      $classes Array of CSS classes.
 	 * @param WC_Product $product Product object.
 	 */
 	$classes = apply_filters( 'woocommerce_post_class', $classes, $product );
@@ -2097,7 +2097,7 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_subtotal' ) ) {
 	 * @since 3.7.0
 	 */
 	function woocommerce_widget_shopping_cart_subtotal() {
-		echo '<strong>' . esc_html__( 'Subtotal', 'woocommerce' ) . ':</strong> ' . WC()->cart->get_cart_subtotal(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<strong>' . esc_html__( 'Subtotal:', 'woocommerce' ) . '</strong> ' . WC()->cart->get_cart_subtotal(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
