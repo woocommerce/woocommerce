@@ -263,16 +263,24 @@ class ShippingRates extends Component {
 											) }
 										</div>
 										<div className="woocommerce-shipping-rate__main">
-											<div className="woocommerce-shipping-rate__name">
-												{ zone.name }
-												{ zone.toggleable && (
+											{ zone.toggleable ? (
+												<label
+													htmlFor={ `woocommerce-shipping-rate__toggle-${ zone.id }` }
+													className="woocommerce-shipping-rate__name"
+												>
+													{ zone.name }
 													<FormToggle
+														id={ `woocommerce-shipping-rate__toggle-${ zone.id }` }
 														{ ...getInputProps(
 															`${ zone.id }_enabled`
 														) }
 													/>
-												) }
-											</div>
+												</label>
+											) : (
+												<div className="woocommerce-shipping-rate__name">
+													{ zone.name }
+												</div>
+											) }
 											{ ( ! zone.toggleable ||
 												values[
 													`${ zone.id }_enabled`
