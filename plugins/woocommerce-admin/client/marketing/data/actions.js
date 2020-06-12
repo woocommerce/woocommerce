@@ -31,17 +31,17 @@ export function removeActivatingPlugin( pluginSlug ) {
 	};
 }
 
-export function receiveRecommendedPlugins( plugins ) {
+export function receiveRecommendedPlugins( plugins, category ) {
 	return {
 		type: 'SET_RECOMMENDED_PLUGINS',
-		plugins,
+		data: { plugins, category },
 	};
 }
 
-export function receiveBlogPosts( posts ) {
+export function receiveBlogPosts( posts, category ) {
 	return {
 		type: 'SET_BLOG_POSTS',
-		posts,
+		data: { posts, category },
 	};
 }
 

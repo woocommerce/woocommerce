@@ -9,7 +9,6 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Admin\Features\Marketing;
 use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
@@ -64,40 +63,11 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/recommended',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_recommended_plugins' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args' => array(
-						'per_page' => $this->get_collection_params()['per_page'],
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
 			'/' . $this->rest_base . '/installed-plugins',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_installed_plugins' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/knowledge-base',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_knowledge_base_posts' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -133,7 +103,7 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 		// Instead we will get that data in a separate request to ensure they are loaded.
 		return rest_ensure_response(
 			array(
-				'status'  => 'success',
+				'status' => 'success',
 			)
 		);
 	}
@@ -160,40 +130,8 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 	 *
 	 * @return \WP_Error|\WP_REST_Response
 	 */
-	public function get_recommended_plugins( $request ) {
-		$all_plugins = Marketing::get_instance()->get_recommended_plugins();
-		$valid_plugins = [];
-		$per_page = $request->get_param( 'per_page' );
-
-		foreach ( $all_plugins as $plugin ) {
-			if ( ! PluginsHelper::is_plugin_installed( $plugin['plugin'] ) ) {
-				$valid_plugins[] = $plugin;
-			}
-		}
-
-		return rest_ensure_response( array_slice( $valid_plugins, 0, $per_page ) );
-	}
-
-	/**
-	 * Return installed marketing extensions data.
-	 *
-	 * @param \WP_REST_Request $request Request data.
-	 *
-	 * @return \WP_Error|\WP_REST_Response
-	 */
 	public function get_installed_plugins( $request ) {
 		return rest_ensure_response( InstalledExtensions::get_data() );
-	}
-
-	/**
-	 * Return installed marketing extensions data.
-	 *
-	 * @param \WP_REST_Request $request Request data.
-	 *
-	 * @return \WP_Error|\WP_REST_Response
-	 */
-	public function get_knowledge_base_posts( $request ) {
-		return rest_ensure_response( Marketing::get_instance()->get_knowledge_base_posts() );
 	}
 
 }

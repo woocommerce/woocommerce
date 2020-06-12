@@ -6,7 +6,6 @@ import { registerStore } from '@wordpress/data';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { without } from 'lodash';
 
-
 /**
  * Internal dependencies
  */
@@ -20,8 +19,8 @@ const { installedExtensions } = getSetting( 'marketing', {} );
 const DEFAULT_STATE = {
 	installedPlugins: installedExtensions,
 	activatingPlugins: [],
-	recommendedPlugins: [],
-	blogPosts: [],
+	recommendedPlugins: {},
+	blogPosts: {},
 };
 
 registerStore( STORE_KEY, {
@@ -50,12 +49,18 @@ registerStore( STORE_KEY, {
 			case 'SET_RECOMMENDED_PLUGINS':
 				return {
 					...state,
-					recommendedPlugins: action.plugins,
+					recommendedPlugins: {
+						...state.recommendedPlugins,
+						[ action.data.category ]: action.data.plugins,
+					},
 				};
 			case 'SET_BLOG_POSTS':
 				return {
 					...state,
-					blogPosts: action.posts,
+					blogPosts: {
+						...state.blogPosts,
+						[ action.data.category ]: action.data.posts,
+					},
 				};
 		}
 

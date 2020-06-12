@@ -6,11 +6,10 @@ export function getActivatingPlugins( state ) {
 	return state.activatingPlugins;
 }
 
-export function getRecommendedPlugins( state ) {
-	return state.recommendedPlugins;
+export function getRecommendedPlugins( state, category ) {
+	return state.recommendedPlugins[ category ] || [];
 }
 
-export function getBlogPosts( state ) {
-	return state.blogPosts;
+export function getBlogPosts( state, category ) {
+	return state.blogPosts[ category ] || [];
 }
-

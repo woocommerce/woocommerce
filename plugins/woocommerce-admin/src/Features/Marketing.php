@@ -143,21 +143,39 @@ class Marketing {
 	/**
 	 * Load knowledge base posts from WooCommerce.com
 	 *
+	 * @param string $category Category of posts to retrieve.
 	 * @return array
 	 */
-	public function get_knowledge_base_posts() {
-		$posts = get_transient( self::KNOWLEDGE_BASE_TRANSIENT );
+	public function get_knowledge_base_posts( $category ) {
+
+		$kb_transient = self::KNOWLEDGE_BASE_TRANSIENT;
+
+		$categories = array(
+			'marketing' => 1744,
+			'coupons'   => 25202,
+		);
+
+		// Default to marketing category (if no category set on the kb component).
+		if ( ! empty( $category ) && array_key_exists( $category, $categories ) ) {
+			$category_id  = $categories[ $category ];
+			$kb_transient = $kb_transient . '_' . strtolower( $category );
+		} else {
+			$category_id = $categories['marketing'];
+		}
+
+		$posts = get_transient( $kb_transient );
 
 		if ( false === $posts ) {
 			$request_url = add_query_arg(
 				array(
-					'categories' => 1744, // Marketing.
+					'categories' => $category_id,
 					'page'       => 1,
 					'per_page'   => 8,
 					'_embed'     => 1,
 				),
 				'https://woocommerce.com/wp-json/wp/v2/posts'
 			);
+
 			$request = wp_remote_get( $request_url );
 			$posts   = [];
 
@@ -191,7 +209,7 @@ class Marketing {
 			}
 
 			set_transient(
-				self::KNOWLEDGE_BASE_TRANSIENT,
+				$kb_transient,
 				$posts,
 				// Expire transient in 15 minutes if remote get failed.
 				empty( $posts ) ? 900 : DAY_IN_SECONDS

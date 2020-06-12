@@ -14,14 +14,15 @@ import {
 } from './actions';
 import { API_NAMESPACE } from './constants';
 
-export function* getRecommendedPlugins() {
+export function* getRecommendedPlugins( category ) {
 	try {
+		const categoryParam = yield category ? `&category=${ category }` : '';
 		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/overview/recommended?per_page=6`
+			path: `${ API_NAMESPACE }/recommended?per_page=6${ categoryParam }`,
 		} );
 
 		if ( response ) {
-			yield receiveRecommendedPlugins( response );
+			yield receiveRecommendedPlugins( response, category );
 		} else {
 			throw new Error();
 		}
@@ -30,15 +31,16 @@ export function* getRecommendedPlugins() {
 	}
 }
 
-export function* getBlogPosts() {
+export function* getBlogPosts( category ) {
 	try {
+		const categoryParam = yield category ? `?category=${ category }` : '';
 		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/overview/knowledge-base`,
+			path: `${ API_NAMESPACE }/knowledge-base${ categoryParam }`,
 			method: 'GET',
 		} );
 
 		if ( response ) {
-			yield receiveBlogPosts( response );
+			yield receiveBlogPosts( response, category );
 		} else {
 			throw new Error();
 		}

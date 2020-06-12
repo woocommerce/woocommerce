@@ -36,6 +36,7 @@
 
 		@include breakpoint( '>960px' ) {
 			flex-wrap: nowrap;
+			width: 50%;
 
 			&:not(:last-child) {
 				margin-bottom: 0;
@@ -105,12 +106,14 @@
 			justify-content: flex-start;
 			align-items: center;
 			font-size: 12px;
-			line-height: 16px;
+			line-height: 17px;
 			color: $core-grey-dark-500;
 			margin: 0;
+			padding: 0;
+			height: 17px;
 
 			.woocommerce-gravatar {
-				margin-left: 5px;
+				margin: 1px 0 0 5px;
 			}
 		}
 	}
