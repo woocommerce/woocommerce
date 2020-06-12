@@ -3,6 +3,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Fragment } from '@wordpress/element';
 import { filter, some } from 'lodash';
 import interpolateComponents from 'interpolate-components';
@@ -16,6 +17,7 @@ import {
 	WC_ASSET_URL as wcAssetUrl,
 } from '@woocommerce/wc-admin-settings';
 import { Link } from '@woocommerce/components';
+import { WC_ADMIN_NAMESPACE } from 'wc-api/constants';
 
 /**
  * Internal dependencies
@@ -23,6 +25,7 @@ import { Link } from '@woocommerce/components';
 import Bacs from './bacs';
 import BacsIcon from './images/bacs';
 import CodIcon from './images/cod';
+import { createNoticesFromResponse } from 'lib/notices';
 import Stripe from './stripe';
 import Square from './square';
 import WCPay from './wcpay';
@@ -34,7 +37,8 @@ import PayFast from './payfast';
 export function getPaymentMethods( {
 	activePlugins,
 	countryCode,
-	isJetpackConnected,
+	createNotice,
+	installAndActivatePlugins,
 	options,
 	profileItems,
 } ) {
@@ -118,10 +122,34 @@ export function getPaymentMethods( {
 				</Fragment>
 			),
 			before: <WCPayIcon />,
-			visible:
-				[ 'US' ].includes( countryCode ) &&
-				! hasCbdIndustry &&
-				isJetpackConnected,
+			onClick: ( resolve, reject ) => {
+				const errorMessage = __(
+					'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
+					'woocommerce-admin'
+				);
+
+				const connect = () => {
+					apiFetch( {
+						path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
+						method: 'POST',
+					} )
+						.then( ( response ) => {
+							window.location = response.connectUrl;
+						} )
+						.catch( () => {
+							createNotice( 'error', errorMessage );
+							reject();
+						} );
+				};
+
+				installAndActivatePlugins( [ 'woocommerce-payments' ] )
+					.then( () => connect() )
+					.catch( ( error ) => {
+						createNoticesFromResponse( error );
+						reject();
+					} );
+			},
+			visible: [ 'US', 'PR' ].includes( countryCode ) && ! hasCbdIndustry,
 			plugins: [ 'woocommerce-payments' ],
 			container: <WCPay />,
 			isConfigured: wcPayIsConnected,
@@ -151,7 +179,8 @@ export function getPaymentMethods( {
 			),
 			before: <img src={ wcAssetUrl + 'images/stripe.png' } alt="" />,
 			visible:
-				stripeSupportedCountries.includes( countryCode ) && ! hasCbdIndustry,
+				stripeSupportedCountries.includes( countryCode ) &&
+				! hasCbdIndustry,
 			plugins: [ 'woocommerce-gateway-stripe' ],
 			container: <Stripe />,
 			isConfigured:

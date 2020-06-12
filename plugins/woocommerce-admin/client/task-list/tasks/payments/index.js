@@ -42,7 +42,9 @@ class Payments extends Component {
 			( method ) => ( enabledMethods[ method.key ] = method.isEnabled )
 		);
 		this.state = {
+			busyMethod: null,
 			enabledMethods,
+			recommendedMethod: this.getRecommendedMethod(),
 		};
 
 		this.completeTask = this.completeTask.bind( this );
@@ -50,26 +52,22 @@ class Payments extends Component {
 		this.skipTask = this.skipTask.bind( this );
 	}
 
-	componentDidUpdate( prevProps ) {
-		if ( prevProps === this.props ) {
-			return;
-		}
-		const { methods } = this.props;
+	componentDidUpdate() {
+		const { recommendedMethod } = this.state;
 
-		let recommendedMethod = 'stripe';
-		methods.forEach( ( method ) => {
-			const { key, visible } = method;
-
-			if ( key === 'wcpay' && visible ) {
-				recommendedMethod = 'wcpay';
-			}
-		} );
-
-		if ( this.state.recommendedMethod !== recommendedMethod ) {
+		const method = this.getRecommendedMethod();
+		if ( recommendedMethod !== method ) {
 			this.setState( {
-				recommendedMethod,
+				recommendedMethod: method,
 			} );
 		}
+	}
+
+	getRecommendedMethod() {
+		const { methods } = this.props;
+		return methods.find( ( m ) => m.key === 'wcpay' && m.visible )
+			? 'wcpay'
+			: 'stripe';
 	}
 
 	async completeTask() {
@@ -210,9 +208,36 @@ class Payments extends Component {
 		} );
 	}
 
+	async handleClick( method ) {
+		const { methods } = this.props;
+		const { key, onClick } = method;
+
+		recordEvent( 'tasklist_payment_setup', {
+			options: methods.map( ( option ) => option.key ),
+			selected: key,
+		} );
+
+		if ( onClick ) {
+			this.setState( { busyMethod: key } );
+			await new Promise( onClick )
+				.then( () => {
+					this.setState( { busyMethod: null } );
+				} )
+				.catch( () => {
+					this.setState( { busyMethod: null } );
+				} );
+
+			return;
+		}
+
+		updateQueryString( {
+			method: key,
+		} );
+	}
+
 	render() {
 		const currentMethod = this.getCurrentMethod();
-		const { enabledMethods, recommendedMethod } = this.state;
+		const { busyMethod, enabledMethods, recommendedMethod } = this.state;
 		const { methods, query, requesting } = this.props;
 		const configuredMethods = methods.filter(
 			( method ) => method.isConfigured
@@ -301,20 +326,11 @@ class Payments extends Component {
 										isSecondary={
 											key !== recommendedMethod
 										}
-										onClick={ () => {
-											recordEvent(
-												'tasklist_payment_setup',
-												{
-													options: methods.map(
-														( option ) => option.key
-													),
-													selected: key,
-												}
-											);
-											updateQueryString( {
-												method: key,
-											} );
-										} }
+										isBusy={ busyMethod === key }
+										disabled={ busyMethod }
+										onClick={ () =>
+											this.handleClick( method )
+										}
 									>
 										{ __( 'Set up', 'woocommerce-admin' ) }
 									</Button>
@@ -355,7 +371,18 @@ class Payments extends Component {
 }
 
 export default compose(
-	withSelect( ( select ) => {
+	withDispatch( ( dispatch ) => {
+		const { createNotice } = dispatch( 'core/notices' );
+		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
+		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
+		return {
+			createNotice,
+			installAndActivatePlugins,
+			updateOptions,
+		};
+	} ),
+	withSelect( ( select, props ) => {
+		const { createNotice, installAndActivatePlugins } = props;
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
 		const { getOption, isOptionsUpdating } = select( OPTIONS_STORE_NAME );
 		const { getActivePlugins, isJetpackConnected } = select(
@@ -391,6 +418,8 @@ export default compose(
 		const methods = getPaymentMethods( {
 			activePlugins,
 			countryCode,
+			createNotice,
+			installAndActivatePlugins,
 			isJetpackConnected: isJetpackConnected(),
 			options,
 			profileItems,
@@ -405,14 +434,6 @@ export default compose(
 			options,
 			methods,
 			requesting,
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
-		return {
-			createNotice,
-			updateOptions,
 		};
 	} )
 )( Payments );
