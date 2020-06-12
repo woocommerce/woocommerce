@@ -167,6 +167,15 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'This tool will delete all customer session data from the database, including current carts and saved carts in the database.', 'woocommerce-rest-api' )
 				),
 			),
+			'clear_template_cache'               => array(
+				'name'   => __( 'Clear template cache', 'woocommerce-rest-api' ),
+				'button' => __( 'Clear', 'woocommerce-rest-api' ),
+				'desc'   => sprintf(
+					'<strong class="red">%1$s</strong> %2$s',
+					__( 'Note:', 'woocommerce-rest-api' ),
+					__( 'This tool will empty the template cache.', 'woocommerce-rest-api' )
+				),
+			),
 			'install_pages'                      => array(
 				'name'   => __( 'Create default WooCommerce pages', 'woocommerce-rest-api' ),
 				'button' => __( 'Create pages', 'woocommerce-rest-api' ),
@@ -213,6 +222,10 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		// Jetpack does the image resizing heavy lifting so you don't have to.
 		if ( ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) || ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			unset( $tools['regenerate_thumbnails'] );
+		}
+
+		if ( ! function_exists( 'wc_clear_template_cache' ) ) {
+			unset( $tools['clear_template_cache'] );
 		}
 
 		return apply_filters( 'woocommerce_debug_tools', $tools );
@@ -562,6 +575,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$message .= implode( ', ', $missing_tables );
 					$ran = false;
 				}
+				break;
+
+			case 'clear_template_cache':
+				wc_clear_template_cache();
+				$message = __( 'Template cache cleared.', 'woocommerce-rest-api' );
 				break;
 
 			default:
