@@ -169,9 +169,13 @@ export const getPages = () => {
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Marketing', 'woocommerce-admin' ),
+				[
+					'/marketing',
+					__( 'Marketing', 'woocommerce-admin' ),
+				],
+				__( 'Overview', 'woocommerce-admin' ),
 			],
-			wpOpenMenu: 'toplevel_page_wc-admin-path--marketing',
+			wpOpenMenu: 'toplevel_page_woocommerce-marketing',
 		} );
 	}
 
