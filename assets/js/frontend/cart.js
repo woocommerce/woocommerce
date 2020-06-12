@@ -105,7 +105,7 @@ jQuery( function( $ ) {
 			}
 
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
-			$( '.woocommerce-cart-form' ).find( ':input[name="update_cart"]' ).prop( 'disabled', true );
+			$( '.woocommerce-cart-form' ).find( ':input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
 
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
@@ -304,14 +304,14 @@ jQuery( function( $ ) {
 				'.woocommerce-cart-form .cart_item :input',
 				this.input_changed );
 
-			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true );
+			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
 		},
 
 		/**
 		 * After an input is changed, enable the update cart button.
 		 */
 		input_changed: function() {
-			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', false );
+			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', false ).attr( 'aria-disabled', false );
 		},
 
 		/**
