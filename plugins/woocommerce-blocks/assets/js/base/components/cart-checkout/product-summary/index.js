@@ -8,7 +8,11 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Returns an element containing a summary of the product.
  */
-const ProductSummary = ( { shortDescription = '', fullDescription = '' } ) => {
+const ProductSummary = ( {
+	className,
+	shortDescription = '',
+	fullDescription = '',
+} ) => {
 	const source = shortDescription ? shortDescription : fullDescription;
 
 	if ( ! source ) {
@@ -16,11 +20,17 @@ const ProductSummary = ( { shortDescription = '', fullDescription = '' } ) => {
 	}
 
 	return (
-		<Summary source={ source } maxLength={ 15 } countType={ getSetting( 'wordCountType', 'words' ) } />
+		<Summary
+			className={ className }
+			source={ source }
+			maxLength={ 15 }
+			countType={ getSetting( 'wordCountType', 'words' ) }
+		/>
 	);
 };
 
 ProductSummary.propTypes = {
+	className: PropTypes.string,
 	shortDescription: PropTypes.string,
 	fullDescription: PropTypes.string,
 };

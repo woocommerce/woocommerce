@@ -13,15 +13,10 @@
 	}
 }
 
-.wc-block-checkout__main {
-	fieldset.wc-block-checkout-step:first-child {
-		margin-top: $gap-small;
-	}
-}
-
 .wc-block-checkout__sidebar {
 	.wc-block-product-name {
 		color: inherit;
+		padding-right: $gap-small;
 		flex-grow: 1;
 		// Required by IE11.
 		flex-basis: 0;

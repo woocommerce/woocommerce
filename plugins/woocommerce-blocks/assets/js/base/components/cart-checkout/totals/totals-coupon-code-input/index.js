@@ -44,6 +44,7 @@ const TotalsCouponCodeInput = ( {
 	return (
 		<Panel
 			className="wc-block-coupon-code"
+			hasBorder={ true }
 			initialOpen={ initialOpen }
 			title={
 				<Label

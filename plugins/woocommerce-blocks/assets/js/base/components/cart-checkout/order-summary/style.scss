@@ -1,5 +1,8 @@
 .wc-block-components-order-summary {
-	border: 0;
+	.wc-blocks-components-panel__button {
+		margin-top: 0;
+		padding-top: 0;
+	}
 }
 
 .wc-block-components-order-summary__content {

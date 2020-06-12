@@ -15,12 +15,17 @@
 			flex-basis: 100%;
 			text-align: left;
 		}
+	}
 
-		.wc-block-radio-control__option {
-			&:last-child {
-				border-bottom: none;
-			}
+	.wc-block-radio-control__option,
+	.wc-block-radio-control__option-layout {
+		&:last-child {
+			border-bottom: none;
 		}
+	}
+
+	.wc-block-shipping-rates-control__no-results-notice {
+		margin-bottom: em($gap-small);
 	}
 
 	.wc-block-shipping-totals__change-address-button {

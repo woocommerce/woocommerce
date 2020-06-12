@@ -34,31 +34,8 @@
 	margin-bottom: 0;
 }
 
-// Resets when it's inside a panel.
 .wc-block-shipping-rates-control {
-	.wc-block-shipping-rates-control__package.components-panel__body {
-		border-bottom: none;
-
-		&,
-		&.is-opened {
-			padding-bottom: 0;
-		}
-
-		.wc-block-shipping-rates-control__package-items {
-			margin: 0;
-		}
-
-		.wc-block-radio-control {
-			width: 100%;
-		}
-
-		.wc-block-radio-control__option {
-			margin-right: 0;
-			max-width: none;
-
-			&:first-child {
-				border-top: 1px solid $core-grey-light-600;
-			}
-		}
+	.wc-blocks-components-panel__content {
+		padding-bottom: 0;
 	}
 }

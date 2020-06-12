@@ -18,6 +18,7 @@ const ProductMetadata = ( {
 	return (
 		<div className="wc-block-product-metadata">
 			<ProductSummary
+				className="wc-block-product-description"
 				shortDescription={ shortDescription }
 				fullDescription={ fullDescription }
 			/>

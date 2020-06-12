@@ -15,6 +15,7 @@ const Panel = ( {
 	children,
 	className,
 	initialOpen = false,
+	hasBorder = false,
 	title,
 	titleTag: TitleTag = 'div',
 } ) => {
@@ -22,7 +23,9 @@ const Panel = ( {
 
 	return (
 		<div
-			className={ classNames( className, 'wc-blocks-components-panel' ) }
+			className={ classNames( className, 'wc-blocks-components-panel', {
+				'has-border': hasBorder,
+			} ) }
 		>
 			<TitleTag>
 				<button
@@ -50,6 +53,7 @@ const Panel = ( {
 
 Panel.propTypes = {
 	className: PropTypes.string,
+	hasBorder: PropTypes.bool,
 	initialOpen: PropTypes.bool,
 	title: PropTypes.element,
 	titleTag: PropTypes.string,
