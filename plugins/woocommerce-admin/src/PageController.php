@@ -170,7 +170,7 @@ class PageController {
 					$parent = $this->pages[ $parent_id ];
 
 					if ( 0 === strpos( $parent['path'], self::PAGE_ROOT ) ) {
-						$parent['path'] = 'admin.php?page=' . self::PAGE_ROOT . '&path=' . $parent['path'];
+						$parent['path'] = 'admin.php?page=' . $parent['path'];
 					}
 
 					array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );

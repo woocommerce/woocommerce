@@ -124,7 +124,7 @@ class WC_Admin_Tests_Page_Controller extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			array(
-				'admin.php?page=wc-admin&path=wc-admin&path=/marketing',
+				'admin.php?page=wc-admin&path=/marketing',
 				'Marketing',
 			),
 			$breadcrumbs[1],
