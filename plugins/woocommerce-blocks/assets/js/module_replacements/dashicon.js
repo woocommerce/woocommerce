@@ -7,9 +7,16 @@ import {
 } from '@woocommerce/icons';
 import { createElement } from '@wordpress/element';
 
-export default ( { icon, size = 20, className, ...extraProps } ) => {
-	let Icon = () => null;
-	switch ( icon ) {
+// Note: Aside from import/export, everything in this file must be IE11 friendly
+// because currently it does not go through babel transpiling. It is injected
+// as a replacement for the `@wordpress/component/dashicon` component via
+// the Webpack NormalModuleReplacementPlugin plugin.
+
+export default function( props ) {
+	let Icon = function() {
+		return null;
+	};
+	switch ( props.icon ) {
 		case 'arrow-down-alt2':
 			Icon = ArrowDownIcon;
 			break;
@@ -17,7 +24,8 @@ export default ( { icon, size = 20, className, ...extraProps } ) => {
 			Icon = DismissIcon;
 			break;
 	}
-	// can't use JSX here because the Webpack NormalModuleReplacementPlugin
-	// is unable to parse JSX at that point in the build.
-	return createElement( Icon, { size, className, ...extraProps } );
-};
+	return createElement( Icon, {
+		size: props.size || 20,
+		className: props.className,
+	} );
+}
