@@ -11,7 +11,8 @@ import { withSelect, withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { pluginNames, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { createNoticesFromResponse } from 'lib/notices';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 
 export class Plugins extends Component {
 	constructor() {
@@ -41,9 +42,8 @@ export class Plugins extends Component {
 		}
 
 		const {
+			installAndActivatePlugins,
 			isRequesting,
-			installPlugins,
-			activatePlugins,
 			pluginSlugs,
 		} = this.props;
 
@@ -52,60 +52,26 @@ export class Plugins extends Component {
 			return false;
 		}
 
-		const installs = await installPlugins( pluginSlugs );
-
-		if ( installs.errors && Object.keys( installs.errors.errors ).length ) {
-			this.handleErrors( installs.errors );
-			return;
-		}
-
-		const activations = await activatePlugins( pluginSlugs );
-
-		if ( activations.success && activations.data.activated ) {
-			this.handleSuccess( activations.data.activated );
-			return;
-		}
-
-		if ( activations.errors ) {
-			this.handleErrors( activations.errors );
-		}
+		installAndActivatePlugins( pluginSlugs )
+			.then( ( response ) => {
+				createNoticesFromResponse( response );
+				this.handleSuccess( response.data.activated );
+			} )
+			.catch( ( error ) => {
+				createNoticesFromResponse( error );
+				this.handleErrors( error.errors );
+			} );
 	}
 
 	handleErrors( errors ) {
-		const { onError, createNotice } = this.props;
-		const { errors: pluginErrors } = errors;
-
-		if ( pluginErrors ) {
-			Object.keys( pluginErrors ).forEach( ( plugin ) => {
-				createNotice(
-					'error',
-					// Replace the slug with a plugin name if a constant exists.
-					pluginNames[ plugin ]
-						? pluginErrors[ plugin ][ 0 ].replace(
-								`\`${ plugin }\``,
-								pluginNames[ plugin ]
-						  )
-						: pluginErrors[ plugin ][ 0 ]
-				);
-			} );
-		} else if ( errors.message ) {
-			createNotice( 'error', errors.message );
-		}
+		const { onError } = this.props;
 
 		this.setState( { hasErrors: true } );
 		onError( errors );
 	}
 
 	handleSuccess( activePlugins ) {
-		const { createNotice, onComplete } = this.props;
-
-		createNotice(
-			'success',
-			__(
-				'Plugins were successfully installed and activated.',
-				'woocommerce-admin'
-			)
-		);
+		const { onComplete } = this.props;
 		onComplete( activePlugins );
 	}
 
@@ -221,15 +187,10 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
-		const { activatePlugins, installPlugins } = dispatch(
-			PLUGINS_STORE_NAME
-		);
+		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
 
 		return {
-			activatePlugins,
-			createNotice,
-			installPlugins,
+			installAndActivatePlugins,
 		};
 	} )
 )( Plugins );

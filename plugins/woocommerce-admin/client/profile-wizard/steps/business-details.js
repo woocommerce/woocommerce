@@ -13,7 +13,12 @@ import { keys, get, pickBy } from 'lodash';
  */
 import { formatValue } from '@woocommerce/number';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { ONBOARDING_STORE_NAME, pluginNames, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	pluginNames,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -24,12 +29,11 @@ import {
 	SelectControl,
 	Form,
 	TextControl,
-	Plugins,
 } from '@woocommerce/components';
-import withWCApiSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 import { getCurrencyRegion } from 'dashboard/utils';
 import { CurrencyContext } from 'lib/currency-context';
+import { createNoticesFromResponse } from 'lib/notices';
 
 const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
 
@@ -60,12 +64,6 @@ class BusinessDetails extends Component {
 				: true,
 		};
 
-		this.state = {
-			installExtensions: false,
-			isInstallingExtensions: false,
-			extensionInstallError: false,
-		};
-
 		this.extensions = [
 			'facebook-for-woocommerce',
 			'mailchimp-for-woocommerce',
@@ -82,7 +80,7 @@ class BusinessDetails extends Component {
 		const {
 			createNotice,
 			goToNextStep,
-			isError,
+			installAndActivatePlugins,
 			updateProfileItems,
 		} = this.props;
 		const {
@@ -125,27 +123,38 @@ class BusinessDetails extends Component {
 			}
 		} );
 
-		await updateProfileItems( updates );
+		const promises = [
+			updateProfileItems( updates ).catch( () => {
+				createNotice(
+					'error',
+					__(
+						'There was a problem updating your business details.',
+						'woocommerce-admin'
+					)
+				);
+				throw new Error();
+			} ),
+		];
 
-		if ( ! isError ) {
-			if ( businessExtensions.length === 0 ) {
-				goToNextStep();
-				return;
-			}
-
-			this.setState( {
-				installExtensions: true,
-				isInstallingExtensions: true,
-			} );
-		} else {
-			createNotice(
-				'error',
-				__(
-					'There was a problem updating your business details.',
-					'woocommerce-admin'
-				)
+		if ( businessExtensions.length ) {
+			promises.push(
+				installAndActivatePlugins( businessExtensions )
+					.then( ( response ) => {
+						createNoticesFromResponse( response );
+					} )
+					.catch( ( error ) => {
+						this.setState( {
+							hasInstallActivateError: true,
+						} );
+						createNoticesFromResponse( error );
+						throw new Error();
+					} )
 			);
 		}
+
+		Promise.all( promises ).then( () => {
+			goToNextStep();
+		} );
 	}
 
 	validate( values ) {
@@ -274,7 +283,7 @@ class BusinessDetails extends Component {
 	}
 
 	renderBusinessExtensionHelpText( values ) {
-		const { isInstallingExtensions } = this.state;
+		const { isInstallingActivating } = this.props;
 		const extensions = this.getBusinessExtensions( values );
 
 		if ( extensions.length === 0 ) {
@@ -287,7 +296,7 @@ class BusinessDetails extends Component {
 			} )
 			.join( ', ' );
 
-		if ( isInstallingExtensions ) {
+		if ( isInstallingActivating ) {
 			return (
 				<p>
 					{ sprintf(
@@ -319,9 +328,6 @@ class BusinessDetails extends Component {
 	}
 
 	renderBusinessExtensions( values, getInputProps ) {
-		const { installExtensions, extensionInstallError } = this.state;
-		const { goToNextStep } = this.props;
-		const extensionsToInstall = this.getBusinessExtensions( values );
 		const extensionBenefits = [
 			{
 				slug: 'facebook-for-woocommerce',
@@ -382,33 +388,16 @@ class BusinessDetails extends Component {
 						</div>
 					</div>
 				) ) }
-
-				{ installExtensions && (
-					<div className="woocommerce-profile-wizard__card-actions">
-						<Plugins
-							onComplete={ () => {
-								goToNextStep();
-							} }
-							onSkip={ () => {
-								goToNextStep();
-							} }
-							onError={ () => {
-								this.setState( {
-									extensionInstallError: true,
-									isInstallingExtensions: false,
-								} );
-							} }
-							autoInstall={ ! extensionInstallError }
-							pluginSlugs={ extensionsToInstall }
-						/>
-					</div>
-				) }
 			</Fragment>
 		);
 	}
 
 	render() {
-		const { isInstallingExtensions, extensionInstallError } = this.state;
+		const {
+			goToNextStep,
+			isInstallingActivating,
+			hasInstallActivateError,
+		} = this.props;
 		const { formatCurrency } = this.context;
 		const productCountOptions = [
 			{
@@ -662,20 +651,35 @@ class BusinessDetails extends Component {
 											getInputProps
 										) }
 
-									{ ! extensionInstallError && (
+									<div className="woocommerce-profile-wizard__card-actions">
 										<Button
 											isPrimary
 											className="woocommerce-profile-wizard__continue"
 											onClick={ handleSubmit }
 											disabled={ ! isValidForm }
-											isBusy={ isInstallingExtensions }
+											isBusy={ isInstallingActivating }
 										>
-											{ __(
-												'Continue',
-												'woocommerce-admin'
-											) }
+											{ ! hasInstallActivateError
+												? __(
+														'Continue',
+														'woocommerce-admin'
+												  )
+												: __(
+														'Retry',
+														'woocommerce-admin'
+												  ) }
 										</Button>
-									) }
+										{ hasInstallActivateError && (
+											<Button
+												onClick={ () => goToNextStep() }
+											>
+												{ __(
+													'Continue without installing',
+													'woocommerce-admin'
+												) }
+											</Button>
+										) }
+									</div>
 								</Fragment>
 							</Card>
 
@@ -692,37 +696,43 @@ class BusinessDetails extends Component {
 BusinessDetails.contextType = CurrencyContext;
 
 export default compose(
-	withWCApiSelect( ( select ) => {
-		const { getProfileItems, getOnboardingError } = select( ONBOARDING_STORE_NAME );
-
-		return {
-			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
-			profileItems: getProfileItems(),
-		};
-	} ),
 	withSelect( ( select ) => {
 		const {
 			getSettings,
 			getSettingsError,
 			isGetSettingsRequesting,
 		} = select( SETTINGS_STORE_NAME );
-
+		const { getProfileItems, getOnboardingError } = select(
+			ONBOARDING_STORE_NAME
+		);
+		const { getPluginsError, isPluginsRequesting } = select(
+			PLUGINS_STORE_NAME
+		);
 		const { general: settings = {} } = getSettings( 'general' );
-		const isSettingsError = Boolean( getSettingsError( 'general' ) );
-		const isSettingsRequesting = isGetSettingsRequesting( 'general' );
 
 		return {
-			isSettingsError,
-			isSettingsRequesting,
+			hasInstallActivateError:
+				getPluginsError( 'installPlugins' ) ||
+				getPluginsError( 'activatePlugins' ),
+			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
+			profileItems: getProfileItems(),
+			isSettingsError: Boolean( getSettingsError( 'general' ) ),
+			isSettingsRequesting: isGetSettingsRequesting( 'general' ),
 			settings,
+			isInstallingActivating:
+				isPluginsRequesting( 'installPlugins' ) ||
+				isPluginsRequesting( 'activatePlugins' ) ||
+				isPluginsRequesting( 'getJetpackConnectUrl' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
+		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			createNotice,
+			installAndActivatePlugins,
 			updateProfileItems,
 		};
 	} )

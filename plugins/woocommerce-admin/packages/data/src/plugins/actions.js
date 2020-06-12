@@ -1,13 +1,12 @@
 /**
  * External Dependencies
  */
-
-import { apiFetch } from '@wordpress/data-controls';
-import { __ } from '@wordpress/i18n';
+import { apiFetch, dispatch } from '@wordpress/data-controls';
 
 /**
  * Internal Dependencies
  */
+import { pluginNames, STORE_NAME } from './constants';
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 
@@ -68,16 +67,12 @@ export function* installPlugins( plugins ) {
 			data: { plugins: plugins.join( ',' ) },
 		} );
 
-		if ( ! results ) {
-			throw new Error();
-		}
-
-		if ( results.success && results.data.installed ) {
+		if ( results.data.installed.length ) {
 			yield updateInstalledPlugins( results.data.installed );
 		}
 
 		if ( Object.keys( results.errors.errors ).length ) {
-			yield setError( 'installPlugins', results.errors );
+			throw results.errors;
 		}
 
 		yield setIsRequesting( 'installPlugins', false );
@@ -85,16 +80,7 @@ export function* installPlugins( plugins ) {
 		return results;
 	} catch ( error ) {
 		yield setError( 'installPlugins', error );
-		yield setIsRequesting( 'installPlugins', false );
-
-		return {
-			errors: {
-				message: __(
-					'Something went wrong while trying to install your plugins.',
-					'woocommerce-admin'
-				),
-			},
-		};
+		throw formatErrors( error );
 	}
 }
 
@@ -108,24 +94,47 @@ export function* activatePlugins( plugins ) {
 			data: { plugins: plugins.join( ',' ) },
 		} );
 
-		if ( results.success && results.data.activated ) {
+		if ( results.data.activated.length ) {
 			yield updateActivePlugins( results.data.activated );
-			yield setIsRequesting( 'activatePlugins', false );
-			return results;
 		}
 
-		throw new Error();
-	} catch ( error ) {
-		yield setError( 'activatePlugins', error );
+		if ( Object.keys( results.errors.errors ).length ) {
+			throw results.errors;
+		}
+
 		yield setIsRequesting( 'activatePlugins', false );
 
-		return {
-			errors: {
-				message: __(
-					'Something went wrong while trying to activate your plugins.',
-					'woocommerce-admin'
-				),
-			}
-		};
+		return results;
+	} catch ( error ) {
+		yield setError( 'activatePlugins', error );
+		throw formatErrors( error );
 	}
+}
+
+export function* installAndActivatePlugins( plugins ) {
+	try {
+		yield dispatch( STORE_NAME, 'installPlugins', plugins );
+		const activations = yield dispatch( STORE_NAME, 'activatePlugins', plugins );
+		return activations;
+	} catch ( error ) {
+		throw error;
+	}
+}
+
+export function formatErrors( response ) {
+	if ( response.errors ) {
+		// Replace the slug with a plugin name if a constant exists.
+		Object.keys( response.errors ).forEach( plugin => {
+			response.errors[ plugin ] = response.errors[ plugin ].map( pluginError => {
+				return pluginNames[ plugin ]
+					? pluginError.replace(
+						`\`${ plugin }\``,
+						pluginNames[ plugin ]
+					)
+					: pluginError;
+			} );
+		} );
+	}
+
+	return response;
 }

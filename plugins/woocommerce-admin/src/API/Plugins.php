@@ -234,7 +234,7 @@ class Plugins extends \WC_REST_Data_Controller {
 				$errors->add(
 					$plugin,
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s`. is not in the list of allowed plugins.', 'woocommerce-admin' ), $slug )
+					sprintf( __( 'The requested plugin `%s` is not in the list of allowed plugins.', 'woocommerce-admin' ), $slug )
 				);
 				continue;
 			}
@@ -315,6 +315,9 @@ class Plugins extends \WC_REST_Data_Controller {
 			),
 			'errors'  => $errors,
 			'success' => count( $errors->errors ) === 0,
+			'message' => count( $errors->errors ) === 0
+				? __( 'Plugins were successfully installed.', 'woocommerce-admin' )
+				: __( 'There was a problem installing some of the requested plugins.', 'woocommerce-admin' ),
 		);
 	}
 
@@ -422,6 +425,9 @@ class Plugins extends \WC_REST_Data_Controller {
 			),
 			'errors'  => $errors,
 			'success' => count( $errors->errors ) === 0,
+			'message' => count( $errors->errors ) === 0
+				? __( 'Plugins were successfully activated.', 'woocommerce-admin' )
+				: __( 'There was a problem activating some of the requested plugins.', 'woocommerce-admin' ),
 		) );
 	}
 

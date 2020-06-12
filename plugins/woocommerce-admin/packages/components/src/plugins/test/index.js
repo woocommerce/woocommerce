@@ -46,16 +46,12 @@ describe( 'Rendering', () => {
 
 describe( 'Installing and activating', () => {
 	let pluginsWrapper;
-	const installPlugins = jest.fn().mockReturnValue( {
-		success: true,
-	} );
-	const activatePlugins = jest.fn().mockReturnValue( {
+	const installAndActivatePlugins = jest.fn().mockResolvedValue( {
 		success: true,
 		data: {
 			activated: [ 'jetpack' ],
 		},
 	} );
-	const createNotice = jest.fn();
 	const onComplete = jest.fn();
 
 	beforeEach( () => {
@@ -63,40 +59,23 @@ describe( 'Installing and activating', () => {
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
 				onComplete={ onComplete }
-				installPlugins={ installPlugins }
-				activatePlugins={ activatePlugins }
-				createNotice={ createNotice }
+				installAndActivatePlugins={ installAndActivatePlugins }
 			/>
 		);
 	} );
 
-	it( 'should call installPlugins', async () => {
+	it( 'should call installAndActivatePlugins', async () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( installPlugins ).toHaveBeenCalledWith( [ 'jetpack' ] );
+		expect( installAndActivatePlugins ).toHaveBeenCalledWith( [ 'jetpack' ] );
 	} );
 
-	it( 'should call activatePlugin', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
-
-		expect( activatePlugins ).toHaveBeenCalledWith( [ 'jetpack' ] );
-	} );
-	it( 'should create a success notice', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
-
-		expect( createNotice ).toHaveBeenCalledWith(
-			'success',
-			'Plugins were successfully installed and activated.'
-		);
-	} );
 	it( 'should call the onComplete callback', async () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( onComplete ).toHaveBeenCalledWith( [ 'jetpack' ] );
+		await expect( onComplete ).toHaveBeenCalledWith( [ 'jetpack' ] );
 	} );
 } );
 
@@ -107,43 +86,28 @@ describe( 'Installing and activating errors', () => {
 			'failed-plugin': [ 'error message' ],
 		},
 	};
-	const installPlugins = jest.fn().mockReturnValue( {
+	const installAndActivatePlugins = jest.fn().mockRejectedValue( {
 		errors,
 	} );
-	const activatePlugins = jest.fn().mockReturnValue( {
-		success: false,
-	} );
-	const createNotice = jest.fn();
+	const onComplete = jest.fn();
 	const onError = jest.fn();
 
 	beforeEach( () => {
 		pluginsWrapper = shallow(
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
-				onComplete={ () => {} }
-				installPlugins={ installPlugins }
-				activatePlugins={ activatePlugins }
-				createNotice={ createNotice }
+				onComplete={ onComplete }
+				installAndActivatePlugins={ installAndActivatePlugins }
 				onError={ onError }
 			/>
 		);
 	} );
 
-	it( 'should not call activatePlugin on install error', async () => {
+	it( 'should not call onComplete on install error', async () => {
 		const installButton = pluginsWrapper.find( Button ).at( 0 );
 		installButton.simulate( 'click' );
 
-		expect( activatePlugins ).not.toHaveBeenCalled();
-	} );
-
-	it( 'should create an error notice', async () => {
-		const installButton = pluginsWrapper.find( Button ).at( 0 );
-		installButton.simulate( 'click' );
-
-		expect( createNotice ).toHaveBeenCalledWith(
-			'error',
-			errors.errors[ 'failed-plugin' ][ 0 ]
-		);
+		expect( onComplete ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should call the onError callback', async () => {
