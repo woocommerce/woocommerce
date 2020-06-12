@@ -1,3 +1,9 @@
+.wc-blocks-components-panel.has-border {
+	border-top: 1px solid $core-grey-light-600;
+	border-bottom: 1px solid $core-grey-light-600;
+	margin-bottom: -1px;
+}
+
 .wc-blocks-components-panel__button {
 	&,
 	&:hover,

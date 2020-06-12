@@ -19,7 +19,7 @@
 }
 
 .wc-block-checkout-step__content {
-	padding-bottom: $gap-larger;
+	padding-bottom: em($gap-large);
 }
 
 .wc-block-checkout-form fieldset.wc-block-checkout-step:disabled {
@@ -31,12 +31,15 @@
 	justify-content: space-between;
 	align-content: center;
 	flex-wrap: wrap;
-	margin-bottom: $gap-smaller;
+	margin: em($gap-small) 0 em($gap);
 	position: relative;
 }
 
+.wc-block-checkout-step:first-child .wc-block-checkout-step__heading {
+	margin-top: 0;
+}
+
 .wc-block-checkout-step__title {
-	line-height: 1.5;
 	margin: 0 $gap-small 0 0;
 }
 
@@ -75,7 +78,7 @@
 
 .wc-block-checkout-step__container::after {
 	content: "";
-	height: calc(100% - #{$gap-smaller});
+	height: 100%;
 	border-left: 1px solid;
 	position: absolute;
 	left: -$gap-larger/2;

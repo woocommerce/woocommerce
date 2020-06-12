@@ -17,13 +17,6 @@
 	width: 35%;
 
 	.wc-blocks-components-panel {
-		border-top: 1px solid $core-grey-light-600;
-		border-bottom: 1px solid $core-grey-light-600;
-
-		+ .wc-blocks-components-panel {
-			border-top: none;
-		}
-
 		> h2 {
 			@include font-size(large);
 			@include reset-box();

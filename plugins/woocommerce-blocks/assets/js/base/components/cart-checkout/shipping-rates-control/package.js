@@ -81,6 +81,7 @@ const Package = ( {
 		return (
 			<Panel
 				className="wc-block-shipping-rates-control__package"
+				hasBorder={ true }
 				initialOpen={ true }
 				title={ header }
 			>
