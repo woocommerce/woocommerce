@@ -199,7 +199,7 @@
 		"grunt-wp-i18n": "1.0.3",
 		"husky": "4.2.5",
 		"jest-environment-jsdom-sixteen": "1.0.3",
-		"lerna": "3.20.2",
+		"lerna": "3.22.1",
 		"lint-staged": "10.1.7",
 		"locutus": "2.0.11",
 		"merge-config": "2.0.0",
