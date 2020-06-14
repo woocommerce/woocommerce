@@ -223,8 +223,8 @@ class WC_Helper_Updater {
 					continue;
 				}
 
-				$is_plugin_locale_installe = in_array( $plugin['slug'], $installed_translations ) && array_key_exists( $set['wp_locale'], $installed_translations[ $plugin['slug'] ] );
-				if ( $is_plugin_locale_installe ) {
+				$is_plugin_locale_installed = in_array( $plugin['slug'], $installed_translations ) && array_key_exists( $set['wp_locale'], $installed_translations[ $plugin['slug'] ] );
+				if ( $is_plugin_locale_installed ) {
 					$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin['slug'] ][ $set['wp_locale'] ]['PO-Revision-Date'] );
 					$new_translation_revision_time       = new DateTime( $set['last_modified'] );
 					// Skip if translation set is not newer than what is installed already.
