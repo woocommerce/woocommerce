@@ -73,8 +73,8 @@ class WC_Helper_Updater {
 			}
 		}
 
-		$tanslations = self::get_translations_update_data();
-		$transient->translations = array_merge( $transients->translations, $translations );
+		$translations = self::get_translations_update_data();
+		$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
 
 		return $transient;
 	}
@@ -193,7 +193,7 @@ class WC_Helper_Updater {
 
 		// Scan local plugins which may or may not have a subscription.
 		$plugins = WC_Helper::get_local_woo_plugins();
-		$active      = array_intersect( array_keys( $woo_plugins ), get_option( 'active_plugins', array() ) );
+		$active  = array_intersect( array_keys( $plugins ), get_option( 'active_plugins', array() ) );
 
 		$to_send = compact( 'plugins', 'active' );
 
@@ -204,52 +204,50 @@ class WC_Helper_Updater {
 			$timeout = 3 + (int) ( count( $plugins ) / 10 );
 		}
 
-		$options = array(
-			'timeout'    => $timeout,
-			'body'       => array(
-				'plugins'      => wp_json_encode( $to_send ),
-				'translations' => wp_json_encode( $translations ),
-				'locale'       => wp_json_encode( $locales ),
-				'all'          => wp_json_encode( true ),
-			),
-			'user-agent' => 'WordPress/' . $wp_version . '; ' . home_url( '/' ),
-		);
+		$translations = array();
 
-		if ( $extra_stats ) {
-			$options['body']['update_stats'] = wp_json_encode( $extra_stats );
+		foreach ( $active as $active_plugin ) {
+			$plugin       = $plugins[ $active_plugin ];
+			$url          = 'https://translate.wordpress.com/api/projects/woocommerce/' . $plugin['slug'];
+			$raw_response = wp_remote_post( $url );
+			if ( is_wp_error( $raw_response ) ) {
+				continue; // Something went wrong!
+			}
+
+			$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
+			if ( array_key_exists( 'success', $response ) && false === $response['success'] ) {
+				continue; // For projects we have not set up yet!
+			}
+			foreach ( $response['translation_sets'] as $set ) {
+				if ( ! in_array( $set['wp_locale'], $locales ) ) {
+					continue;
+				}
+
+				$is_plugin_locale_installe = in_array( $plugin['slug'], $installed_translations ) && array_key_exists( $set['wp_locale'], $installed_translations[ $plugin['slug'] ] );
+				if ( $is_plugin_locale_installe ) {
+					$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin['slug'] ][ $set['wp_locale'] ]['PO-Revision-Date'] );
+					$new_translation_revision_time       = new DateTime( $set['last_modified'] );
+					// Skip if translation set is not newer than what is installed already.
+					if ( $new_translation_revision_time <= $installed_translation_revision_time ) {
+						continue;
+					}
+				}
+
+				$package = 'https://translate.wordpress.com/projects/woocommerce/' . $plugin['slug'] . '/' . $set['locale'] . '/default/export-translations/?format=language-pack';
+
+				$translations[] = array(
+					'type'       => 'plugin',
+					'slug'       => $plugin['slug'],
+					'language'   => $set['wp_locale'],
+					'version'    => $plugin['Version'],
+					'updated'    => $set['last_modified'], // This needs a check because if we already have such set instaelled we should skipp.
+					'package'    => $package,
+					'autoupdate' => true, // No idea if this should be here.
+				);
+			}
 		}
 
-		$url      = 'htts://translate.wordpress.com/projects/';
-		$http_url = $url;
-		$ssl      = wp_http_supports( array( 'ssl' ) ); // Is this necessary? or we alwyas support ssl now?
-		if ( $ssl ) {
-			$url = set_url_scheme( $url, 'https' );
-		}
-
-		$raw_response = wp_remote_post( $url, $options );
-		if ( $ssl && is_wp_error( $raw_response ) ) {
-			trigger_error(
-				sprintf(
-					/* translators: %s: Support forums URL. */
-					__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'woocommerce' ),
-					__( 'https://wordpress.org/support/forums/', 'woocommerce' )
-				) . ' ' . __( '(WordPress could not establish a secure connection to WordPress.org. Please contact your server administrator.)', 'woocommerce' ),
-				headers_sent() || WP_DEBUG ? E_USER_WARNING : E_USER_NOTICE
-			);
-			$raw_response = wp_remote_post( $http_url, $options );
-		}
-
-		if ( is_wp_error( $raw_response ) || 200 != wp_remote_retrieve_response_code( $raw_response ) ) {
-			return array();
-		}
-
-		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
-
-		if ( is_array( $response ) ) {
-			return $response['translations'];
-		} else {
-			return array();
-		}
+		return $translations;
 	}
 
 	/**
