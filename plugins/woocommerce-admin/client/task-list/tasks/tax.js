@@ -95,7 +95,12 @@ class Tax extends Component {
 			taxSettings,
 			isGeneralSettingsRequesting,
 		} = this.props;
-		const { woocommerce_calc_taxes: calcTaxes } = generalSettings;
+		const {
+			woocommerce_calc_taxes: calcTaxes,
+			woocommerce_store_address: storeAddress,
+			woocommerce_default_country: defaultCountry,
+			woocommerce_store_postcode: storePostCode,
+		} = generalSettings;
 		const { stepIndex } = this.state;
 		const currentStep = this.getSteps()[ stepIndex ];
 		const currentStepKey = currentStep && currentStep.key;
@@ -129,6 +134,14 @@ class Tax extends Component {
 		}
 
 		if ( currentStepKey === 'connect' && isJetpackConnected ) {
+			this.completeStep();
+		}
+
+		const isCompleteAddress = Boolean(
+			storeAddress && defaultCountry && storePostCode
+		);
+
+		if ( currentStepKey === 'store_location' && isCompleteAddress ) {
 			this.completeStep();
 		}
 

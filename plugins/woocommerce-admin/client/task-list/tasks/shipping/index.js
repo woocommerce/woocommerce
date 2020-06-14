@@ -111,7 +111,12 @@ class Shipping extends Component {
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { countryCode } = this.props;
+		const { countryCode, settings } = this.props;
+		const {
+			woocommerce_store_address: storeAddress,
+			woocommerce_default_country: defaultCountry,
+			woocommerce_store_postcode: storePostCode,
+		} = settings;
 		const { step } = this.state;
 
 		if (
@@ -120,6 +125,14 @@ class Shipping extends Component {
 				prevState.step !== 'rates' )
 		) {
 			this.fetchShippingZones();
+		}
+
+		const isCompleteAddress = Boolean(
+			storeAddress && defaultCountry && storePostCode
+		);
+
+		if ( step === 'store_location' && isCompleteAddress ) {
+			this.completeStep();
 		}
 	}
 
