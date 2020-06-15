@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Checkout Block can be created 1`] = `
-"<!-- wp:woocommerce/checkout -->
-<div class=\\"wp-block-woocommerce-checkout is-loading\\"></div>
-<!-- /wp:woocommerce/checkout -->"
-`;

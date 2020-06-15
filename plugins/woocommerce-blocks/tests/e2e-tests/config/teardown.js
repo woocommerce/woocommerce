@@ -12,15 +12,23 @@ import {
 	deleteCoupons,
 	deleteProducts,
 	deleteShippingZones,
+	deleteBlockPages,
 } from '../fixtures/fixture-loaders';
 
 module.exports = async ( globalConfig ) => {
 	await teardownPuppeteer( globalConfig );
-	const { taxes, coupons, products, shippingZones } = global.fixtureData;
+	const {
+		taxes,
+		coupons,
+		products,
+		shippingZones,
+		pages,
+	} = global.fixtureData;
 	return Promise.all( [
 		deleteTaxes( taxes ),
 		deleteCoupons( coupons ),
 		deleteProducts( products ),
 		deleteShippingZones( shippingZones ),
+		deleteBlockPages( pages ),
 	] ).catch( console.log );
 };
