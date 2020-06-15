@@ -1,4 +1,3 @@
-//phpcs:ignore
 /*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(
 	function( $ ) {
