@@ -583,6 +583,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$message = __( 'Template cache cleared.', 'woocommerce-rest-api' );
 				} else {
 					$message = __( 'The active version of WooCommerce does not support template cache clearing.', 'woocommerce-rest-api' );
+					$ran = false;
 				}
 				break;
 
