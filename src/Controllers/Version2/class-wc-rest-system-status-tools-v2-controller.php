@@ -583,6 +583,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					$message = __( 'Template cache cleared.', 'woocommerce-rest-api' );
 				} else {
 					$message = __( 'The active version of WooCommerce does not support template cache clearing.', 'woocommerce-rest-api' );
+				}
+				break;
+
 			case 'verify_db_tables':
 				if ( ! method_exists( 'WC_Install', 'verify_base_tables' ) ) {
 					$message = __( 'You need WooCommerce 4.2 or newer to run this tool.', 'woocommerce-rest-api' );
