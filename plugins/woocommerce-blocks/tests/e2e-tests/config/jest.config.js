@@ -8,6 +8,7 @@ module.exports = {
 	moduleNameMapper: {
 		'@woocommerce/e2e-tests/(.*)':
 			'<rootDir>/node_modules/woocommerce/tests/e2e-tests/$1',
+		'@woocommerce/blocks-test-utils': '<rootDir>/tests/utils',
 	},
 
 	preset: 'jest-puppeteer',

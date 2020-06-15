@@ -3,7 +3,10 @@
  */
 const WooCommerceRestApi = require( '@woocommerce/woocommerce-rest-api' )
 	.default;
-
+const glob = require( 'glob-promise' );
+const { dirname } = require( 'path' );
+const { readJson } = require( 'fs-extra' );
+const axios = require( 'axios' ).default;
 require( 'dotenv' ).config();
 
 /**
@@ -29,6 +32,7 @@ const WooCommerce = new WooCommerceRestApi( {
 	},
 } );
 
+const WPAPI = `${ process.env.WORDPRESS_BASE_URL }:${ process.env.WORDPRESS_PORT }/wp-json/wp/v2/pages`;
 /**
  * prepare some store settings.
  *
@@ -249,6 +253,51 @@ const deleteShippingZones = ( ids ) => {
 	return Promise.all( ids.map( deleteZone ) );
 };
 
+const createBlockPages = () => {
+	return glob( `${ dirname( __filename ) }/../specs/**/*.fixture.json` ).then(
+		( files ) => {
+			return Promise.all(
+				files.map( async ( filePath ) => {
+					const file = await readJson( filePath );
+					const { title, pageContent: content } = file;
+					return axios
+						.post(
+							WPAPI,
+							{
+								title,
+								content,
+								status: 'publish',
+							},
+							{
+								auth: {
+									username: process.env.WORDPRESS_LOGIN,
+									password: process.env.WORDPRESS_PASSWORD,
+								},
+							}
+						)
+						.then( ( response ) => response.data.id );
+				} )
+			);
+		}
+	);
+};
+
+const deleteBlockPages = ( ids ) => {
+	return Promise.all(
+		ids.map( ( id ) =>
+			axios.delete( `${ WPAPI }/${ id }`, {
+				params: {
+					force: true,
+				},
+				auth: {
+					username: process.env.WORDPRESS_LOGIN,
+					password: process.env.WORDPRESS_PASSWORD,
+				},
+			} )
+		)
+	);
+};
+
 module.exports = {
 	setupSettings,
 	createTaxes,
@@ -260,4 +309,6 @@ module.exports = {
 	enablePaymentGateways,
 	createShippingZones,
 	deleteShippingZones,
+	createBlockPages,
+	deleteBlockPages,
 };

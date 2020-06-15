@@ -6,7 +6,9 @@
 		"!**/vendor/**",
 		"!**/test/**"
 	],
-	"moduleDirectories": [ "node_modules" ],
+	"moduleDirectories": [
+		"node_modules"
+	],
 	"moduleNameMapper": {
 		"@woocommerce/atomic-blocks": "assets/js/atomic/blocks",
 		"@woocommerce/atomic-utils": "assets/js/atomic/utils",
@@ -23,7 +25,8 @@
 		"@woocommerce/base-utils(.*)$": "assets/js/base/utils",
 		"@woocommerce/block-data": "assets/js/data",
 		"@woocommerce/resource-previews": "assets/js/previews",
-		"@woocommerce/shared-context": "assets/js/shared/context"
+		"@woocommerce/shared-context": "assets/js/shared/context",
+		"@woocommerce/blocks-test-utils": "tests/utils"
 	},
 	"setupFiles": [
 		"<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-globals.js",
@@ -39,7 +42,9 @@
 		"<rootDir>/node_modules/",
 		"<rootDir>/vendor/"
 	],
-	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
+	"transformIgnorePatterns": [
+		"node_modules/(?!(simple-html-tokenizer)/)"
+	],
 	"testEnvironment": "jest-environment-jsdom-sixteen",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {

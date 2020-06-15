@@ -12,6 +12,7 @@ import {
 	createCoupons,
 	createProducts,
 	createShippingZones,
+	createBlockPages,
 	enablePaymentGateways,
 } from '../fixtures/fixture-loaders';
 
@@ -30,6 +31,7 @@ module.exports = async ( globalConfig ) => {
 		createCoupons(),
 		createProducts(),
 		createShippingZones(),
+		createBlockPages(),
 		enablePaymentGateways(),
 	] )
 		.then( ( results ) => {
@@ -39,12 +41,20 @@ module.exports = async ( globalConfig ) => {
 			 * in which setup and teardown run in is separate from the one our
 			 * test use, so there is no risk of data bleeding.
 			 */
-			const [ , taxes, coupons, products, shippingZones ] = results;
+			const [
+				,
+				taxes,
+				coupons,
+				products,
+				shippingZones,
+				pages,
+			] = results;
 			global.fixtureData = {
 				taxes,
 				coupons,
 				products,
 				shippingZones,
+				pages,
 			};
 		} )
 		.catch( console.log );

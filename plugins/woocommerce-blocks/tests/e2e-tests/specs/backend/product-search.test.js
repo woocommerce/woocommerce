@@ -2,37 +2,63 @@
  * External dependencies
  */
 import {
-	insertBlock,
-	getEditedPostContent,
-	createNewPost,
 	switchUserToAdmin,
+	getEditedPostContent,
+	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
 import { clearAndFillInput } from '@woocommerce/e2e-tests/utils';
+import { visitBlockPage } from '@woocommerce/blocks-test-utils';
 
-describe( 'Product Search', () => {
-	beforeEach( async () => {
+const block = {
+	name: 'Product Search',
+	slug: 'woocommerce/product-search',
+	class: '.wc-block-product-search',
+};
+
+describe( `${ block.name } Block`, () => {
+	beforeAll( async () => {
 		await switchUserToAdmin();
-		await createNewPost();
+		await visitBlockPage( `${ block.name } Block` );
 	} );
 
-	it( 'can be created', async () => {
-		await insertBlock( 'Product Search' );
+	it( 'renders without crashing', async () => {
+		// Gutenberg error
+		expect(
+			( await page.content() ).match(
+				/Your site doesn’t include support for/gi
+			)
+		).toBeNull();
+		// Our ErrorBoundary
+		expect(
+			( await page.content() ).match(
+				/There was an error whilst rendering/gi
+			)
+		).toBeNull();
+		// Validation Error
+		expect(
+			( await page.content() ).match(
+				/This block contains unexpected or invalid content/gi
+			)
+		).toBeNull();
 
-		expect( await getEditedPostContent() ).toMatchSnapshot();
+		await expect( page ).toMatchElement( block.class );
 	} );
 
 	it( 'can toggle field label', async () => {
-		await insertBlock( 'Product Search' );
+		await openDocumentSettingsSidebar();
+		// we focus on the block
+		await page.click( block.class );
 		await page.click( '.components-form-toggle__input' );
-
 		await expect( page ).not.toMatchElement(
-			'.wc-block-product-search .wc-block-product-search__label'
+			`${ block.class } .wc-block-product-search__label`
+		);
+		await page.click( '.components-form-toggle__input' );
+		await expect( page ).toMatchElement(
+			`${ block.class } .wc-block-product-search__label`
 		);
 	} );
 
 	it( 'can change field labels in editor', async () => {
-		await insertBlock( 'Product Search' );
-
 		await expect( page ).toFill(
 			'textarea.wc-block-product-search__label',
 			'I am a new label'
