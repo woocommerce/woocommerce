@@ -1,25 +1,59 @@
+$border-width: 1px;
+
 .wc-block-components-express-checkout {
 	margin: auto;
-	border: 2px solid $black;
-	border-radius: 5px;
-	padding: 8px;
 	position: relative;
 
-	.wc-block-components-express-checkout__title {
-		background-color: $white;
-		padding-left: $gap-small;
-		padding-right: $gap-small;
-		margin-left: $gap-small;
-		display: inline-block;
-		vertical-align: middle;
-		transform: translateY(-50%);
+	.wc-block-components-express-checkout__title-container {
+		display: flex;
+		flex-direction: row;
+		left: 0;
 		position: absolute;
+		right: 0;
 		top: 0;
-		margin-top: -2px; // Same as container border width.
+		vertical-align: middle;
+
+		// Pseudo-elements used to show the border before and after the title.
+		&::before {
+			border: $border-width solid transparent;
+			border-left-color: currentColor;
+			border-top-color: currentColor;
+			border-radius: 5px 0 0 0;
+			content: "";
+			display: block;
+			margin-right: $gap-small;
+			pointer-events: none;
+			width: #{$gap-larger - $gap-small - $border-width * 2};
+		}
+
+		&::after {
+			border: $border-width solid transparent;
+			border-right-color: currentColor;
+			border-top-color: currentColor;
+			border-radius: 0 5px 0 0;
+			content: "";
+			display: block;
+			margin-left: $gap-small;
+			pointer-events: none;
+			flex-grow: 1;
+		}
+	}
+
+	.wc-block-components-express-checkout__title {
+		flex-grow: 0;
+		transform: translateY(-50%);
 	}
 
 	.wc-block-components-express-checkout__content {
-		padding: $gap $gap-large 0;
+		border: $border-width solid currentColor;
+		border-top-width: 0;
+		border-radius: 5px;
+		margin-top: 0.75em;
+		padding: em($gap-large) #{$gap-larger - $border-width} em($gap) #{$gap-larger - $border-width};
+
+		> p {
+			margin-bottom: em($gap);
+		}
 	}
 
 	.wc-block-components-express-checkout-payment-event-buttons {
@@ -29,10 +63,11 @@
 		flex-wrap: wrap;
 		width: 100%;
 		padding: 0;
-		margin: 0 0 $gap;
+		margin: 0;
 		overflow: hidden;
 		> li {
 			display: inline-block;
+			margin: 0;
 			width: 50%;
 			> img {
 				width: 100%;
@@ -214,11 +249,16 @@
 	}
 }
 
+.theme-twentynineteen {
+	.wc-block-components-express-checkout__title::before {
+		display: none;
+	}
+}
+
 // For Twenty Twenty we need to increase specificity of the title.
 .theme-twentytwenty {
 	.wc-block-components-express-checkout .wc-block-components-express-checkout__title {
 		padding-left: $gap-small;
 		padding-right: $gap-small;
-		margin-left: $gap-small;
 	}
 }
