@@ -353,9 +353,13 @@ class WC_Admin_Status {
 		<strong style="color:#a00;">
 			<span class="dashicons dashicons-warning"></span>
 			<?php
-				esc_html_e( 'Missing base tables: ', 'woocommerce' );
-				echo esc_html( implode( ', ', $missing_tables ) );
-				esc_html_e( '. Some WooCommerce functionality may not work as expected.', 'woocommerce' );
+				echo esc_html(
+					sprintf(
+					// translators: Comma seperated list of missing tables.
+						__( 'Missing base tables: %s. Some WooCommerce functionality may not work as expected.', 'woocommerce' ),
+						implode( ', ', $missing_tables )
+					)
+				);
 			?>
 		</strong>
 
