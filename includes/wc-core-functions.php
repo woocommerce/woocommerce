@@ -270,7 +270,7 @@ function wc_get_template_part( $slug, $name = '' ) {
 		// Don't cache the absolute path so that it can be shared between web servers with different paths.
 		$cache_path = wc_tokenize_path( $template, wc_get_path_define_tokens() );
 
-		wp_cache_set( $cache_key, $cache_path, 'woocommerce' );
+		wc_set_template_cache( $cache_key, $cache_path );
 	} else {
 		// Make sure that the absolute path to the template is resolved.
 		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
@@ -302,7 +302,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		// Don't cache the absolute path so that it can be shared between web servers with different paths.
 		$cache_path = wc_tokenize_path( $template, wc_get_path_define_tokens() );
 
-		wp_cache_set( $cache_key, $cache_path, 'woocommerce' );
+		wc_set_template_cache( $cache_key, $cache_path );
 	} else {
 		// Make sure that the absolute path to the template is resolved.
 		$template = wc_untokenize_path( $template, wc_get_path_define_tokens() );
@@ -401,6 +401,42 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
 
 	// Return what we found.
 	return apply_filters( 'woocommerce_locate_template', $template, $template_name, $template_path );
+}
+
+/**
+ * Add a template to the template cache.
+ *
+ * @since 4.3.0
+ * @param string $cache_key Object cache key.
+ * @param string $template Located template.
+ */
+function wc_set_template_cache( $cache_key, $template ) {
+	wp_cache_set( $cache_key, $template, 'woocommerce' );
+
+	$cached_templates = wp_cache_get( 'cached_templates', 'woocommerce' );
+	if ( is_array( $cached_templates ) ) {
+		$cached_templates[] = $cache_key;
+	} else {
+		$cached_templates = array( $cache_key );
+	}
+
+	wp_cache_set( 'cached_templates', $cached_templates, 'woocommerce' );
+}
+
+/**
+ * Clear the template cache.
+ *
+ * @since 4.3.0
+ */
+function wc_clear_template_cache() {
+	$cached_templates = wp_cache_get( 'cached_templates', 'woocommerce' );
+	if ( is_array( $cached_templates ) ) {
+		foreach ( $cached_templates as $cache_key ) {
+			wp_cache_delete( $cache_key, 'woocommerce' );
+		}
+
+		wp_cache_delete( 'cached_templates', 'woocommerce' );
+	}
 }
 
 /**
