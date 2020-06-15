@@ -1,5 +1,5 @@
 ---
-name: "\U+1F512 Security issue"
+name: "\U0001F512 Security issue"
 about: Please report security issues *only* via https://www.hackerone.com
 title: ''
 labels: ''
