@@ -5,8 +5,3 @@
 /vendor export-ignore
 /README.md export-ignore
 /readme.txt export-ignore
-/composer.* export-ignore
-/package.json export-ignore
-/package-lock.json export-ignore
-/renovate.json export-ignore
-/unit-tests export-ignore
