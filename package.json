@@ -30,7 +30,7 @@
     "@babel/register": "7.9.0",
     "@jest/test-sequencer": "^25.0.0",
     "@woocommerce/e2e-environment": "file:tests/e2e/env",
-    "@wordpress/e2e-test-utils": "4.3.1",
+    "@wordpress/e2e-test-utils": "4.9.0",
     "autoprefixer": "9.7.5",
     "babel-eslint": "10.1.0",
     "chai": "4.2.0",
