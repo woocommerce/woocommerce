@@ -25,10 +25,10 @@
 		padding: 3px 2px 3px 36px;
 		border-radius: 4px;
 		border-color: $core-form-grey;
+		box-shadow: $shadow-popover;
 
 		&.is-active {
-			border-color: $studio-woocommerce-purple-60;
-			box-shadow: 0 0 2px rgba($studio-woocommerce-purple-60, 0.8);
+			border-color: $blue-medium-focus;
 		}
 	}
 

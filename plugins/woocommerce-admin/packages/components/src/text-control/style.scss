@@ -8,6 +8,7 @@
 	box-shadow: none;
 	padding: 12px 12px 4px;
 	position: relative;
+	box-shadow: $shadow-popover;
 
 	&:hover {
 		border-color: $studio-gray-40;
@@ -38,7 +39,7 @@
 	}
 
 	&.active {
-		box-shadow: 0 0 0 2px $studio-woocommerce-purple-60;
+		box-shadow: 0 0 0 2px $blue-medium-focus;
 		border-color: transparent;
 
 		input {

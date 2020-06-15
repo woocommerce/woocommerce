@@ -172,7 +172,6 @@ class ProductTypes extends Component {
 
 					<Button
 						isPrimary
-						className="woocommerce-profile-wizard__continue"
 						onClick={ this.onContinue }
 						disabled={ ! selected.length }
 					>

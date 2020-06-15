@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, CheckboxControl } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
@@ -116,21 +116,24 @@ class Setting extends Component {
 		const { disabled } = this.state;
 
 		return options.map( ( option ) => {
-			const id = uniqueId( name + '-' + option.value );
 			return (
-				<label htmlFor={ id } key={ option.value }>
-					<input
-						id={ id }
-						type="checkbox"
-						name={ name }
-						onChange={ handleChange }
-						aria-label={ option.description }
-						checked={ value && value.includes( option.value ) }
-						value={ option.value }
-						disabled={ disabled }
-					/>
-					{ option.label }
-				</label>
+				<CheckboxControl
+					key={ name + '-' + option.value }
+					label={ option.label }
+					name={ name }
+					checked={ value && value.includes( option.value ) }
+					onChange={ ( checked ) =>
+						handleChange( {
+							target: {
+								checked,
+								name,
+								type: 'checkbox',
+								value: option.value,
+							},
+						} )
+					}
+					disabled={ disabled }
+				/>
 			);
 		} );
 	}

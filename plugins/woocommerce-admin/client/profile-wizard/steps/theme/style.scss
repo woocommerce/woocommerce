@@ -26,7 +26,6 @@
 
 	button {
 		border: 0;
-		border-bottom: 1px solid transparent;
 		color: $studio-gray-50;
 		display: flex;
 		align-items: center;
@@ -34,16 +33,10 @@
 		background: transparent;
 		height: 48px;
 		width: 100%;
-		cursor: pointer;
 		@include font-size(14);
 		font-weight: 500;
 		outline: none;
 		padding: 0 $gap-large;
-
-		&.is-active {
-			border-bottom: 1px solid $studio-woocommerce-purple-60;
-			color: $studio-woocommerce-purple-60;
-		}
 	}
 }
 

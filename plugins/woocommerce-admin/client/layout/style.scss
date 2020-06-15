@@ -90,7 +90,7 @@
 		&.is-active,
 		&.is-complete {
 			.woocommerce-stepper__step-icon {
-				background: $studio-woocommerce-purple-60;
+				background: $blue-medium-focus;
 				color: $studio-white;
 			}
 
@@ -100,7 +100,7 @@
 		}
 
 		.woocommerce-spinner {
-			background: $studio-woocommerce-purple-60;
+			background: $blue-medium-focus;
 		}
 	}
 
@@ -136,37 +136,10 @@
 			display: inline-block;
 		}
 
-		.components-form-toggle__track {
-			width: 36px;
-			max-width: 36px;
-			height: 18px;
-			max-height: 18px;
-		}
-
 		.components-base-control__field {
 			margin-bottom: 0;
 		}
-
-		&.is-checked {
-			.components-form-toggle__track {
-				background-color: $studio-woocommerce-purple-60;
-				border-color: $studio-woocommerce-purple-60;
-			}
-		}
 	}
-}
-
-body.woocommerce-page .components-button.is-button.is-primary.is-busy:not(:disabled):focus {
-	cursor: progress;
-	/* stylelint-disable function-parentheses-space-inside, function-comma-space-after */
-	background-image: linear-gradient(
-		-45deg,
-		$studio-pink-50 28%,
-		color($studio-pink-50 shade(30%)) 28%,
-		color($studio-pink-50 shade(30%)) 72%,
-		$studio-pink-50 72%
-	) !important; // Gutenberg & PostCSS Add the gradient late in output, based on the 'primary' color, which in our case is purple. Our busy state should be pink.
-	/* stylelint-enable */
 }
 
 .woocommerce-task-dashboard__container .components-button.is-button,

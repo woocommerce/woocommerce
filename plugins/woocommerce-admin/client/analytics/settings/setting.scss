@@ -40,13 +40,13 @@
 		margin-bottom: 0;
 	}
 
-	input[type='checkbox'] {
-		margin-right: $gap-small;
-	}
-
 	button {
 		margin-bottom: $gap-small;
 		align-self: flex-start;
+	}
+
+	.components-base-control__field {
+		display: flex;
 	}
 }
 

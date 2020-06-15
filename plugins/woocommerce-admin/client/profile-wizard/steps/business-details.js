@@ -654,7 +654,6 @@ class BusinessDetails extends Component {
 									<div className="woocommerce-profile-wizard__card-actions">
 										<Button
 											isPrimary
-											className="woocommerce-profile-wizard__continue"
 											onClick={ handleSubmit }
 											disabled={ ! isValidForm }
 											isBusy={ isInstallingActivating }

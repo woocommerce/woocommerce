@@ -5,10 +5,6 @@
 		color: $studio-pink-50;
 	}
 
-	.woocommerce-profile-wizard__continue {
-		line-height: 32px;
-	}
-
 	.woocommerce-card {
 		margin-top: $gap;
 
@@ -218,10 +214,6 @@
 	.woocommerce-profile-wizard__tracking {
 		.woocommerce-profile-wizard__tracking-checkbox {
 			margin-top: $gap;
-			.components-checkbox-control__input[type='checkbox']:checked {
-				background-color: $studio-woocommerce-purple-60;
-				border-color: $studio-woocommerce-purple-60;
-			}
 		}
 
 		.components-form-toggle {
@@ -263,12 +255,6 @@
 
 			.components-base-control__field {
 				margin: 0;
-			}
-
-			.components-checkbox-control__input {
-				position: absolute;
-				top: 0;
-				left: 3px;
 			}
 
 			label.components-checkbox-control__label {
@@ -322,10 +308,10 @@
 	.woocommerce-select-control__control {
 		margin: $gap 0;
 		padding-right: $gap + 24px;
+		box-shadow: $shadow-popover;
 
 		&.is-active {
-			box-shadow: 0 0 0 1px $studio-woocommerce-purple-60;
-			border-color: $studio-woocommerce-purple-60;
+			border-color: $blue-medium-focus;
 		}
 
 		.components-base-control__label {

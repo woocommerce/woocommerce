@@ -237,7 +237,6 @@ class Benefits extends Component {
 						isBusy={ isInstallAction }
 						disabled={ isRequesting || isInstallAction }
 						onClick={ this.startPluginInstall }
-						className="woocommerce-profile-wizard__continue"
 					>
 						{ __( 'Yes please!', 'woocommerce-admin' ) }
 					</Button>

@@ -50,84 +50,8 @@
 		box-shadow: 0 0 0 1px $studio-pink, 0 0 2px 1px rgba($studio-pink, 0.8);
 	}
 
-	.components-button.is-primary {
-		color: $studio-white;
-		box-shadow: none;
-
-		&:not(:disabled) {
-			&:hover,
-			&:active,
-			&:focus {
-				box-shadow: none;
-				color: $studio-white;
-			}
-		}
-	}
-
-	.components-button:not(.is-primary):not(.woocommerce-chart__type-button) {
-		color: $gray-text;
-		fill: currentColor;
-
-		&:not(:disabled) {
-			&:hover,
-			&:active,
-			&:focus {
-				color: $gray-text-hover;
-				border-color: $button-hover-border;
-			}
-		}
-	}
-
-	.components-button:disabled:not(.is-primary) {
-		color: $button-disabled;
-		&:hover,
-		&:active,
-		&:focus {
-			color: $button-disabled;
-			border-color: $button-disabled-border;
-			background: $button;
-		}
-	}
-
-	input:focus,
-	textarea:focus,
-	select:focus,
-	button:focus {
-		color: $core-grey-dark-700;
-		border-color: $studio-woocommerce-purple-60;
-		box-shadow: 0 0 2px rgba($studio-woocommerce-purple-60, 0.8);
-	}
-
 	select:hover {
 		color: $core-grey-dark-700;
-	}
-
-	input[type='checkbox'] {
-		border-radius: 3px;
-	}
-
-	input[type='checkbox'],
-	input[type='radio'] {
-		width: 18px;
-		height: 18px;
-		min-width: 18px;
-		border: 2px solid $studio-gray-50;
-
-		&:focus {
-			border-color: $studio-woocommerce-purple-60;
-			box-shadow: 0 0 0 1px $studio-woocommerce-purple-60,
-				0 0 2px 1px rgba($studio-woocommerce-purple-60, 0.8);
-		}
-	}
-
-	input[type='checkbox']:checked,
-	input[type='radio']:checked {
-		background-color: $studio-woocommerce-purple-60;
-		border-color: $studio-woocommerce-purple-60;
-	}
-
-	input[type='checkbox']:focus:checked {
-		border: 2px solid $studio-woocommerce-purple-60;
 	}
 
 	input[type='radio']:checked::before {
