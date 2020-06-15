@@ -297,6 +297,7 @@ class WC_Install {
 		self::maybe_enable_setup_wizard();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		self::maybe_enable_homescreen();
 
 		delete_transient( 'wc_installing' );
 
@@ -339,6 +340,17 @@ class WC_Install {
 			delete_option( 'woocommerce_schema_missing_tables' );
 		}
 		return $missing_tables;
+	}
+
+	/**
+	 * Check if the homepage should be enabled and set the appropriate option if thats the case.
+	 *
+	 * @since 4.3.0
+	 */
+	private static function maybe_enable_homescreen() {
+		if ( self::is_new_install() && ! get_option( 'woocommerce_homescreen_enabled' ) ) {
+			add_option( 'woocommerce_homescreen_enabled', 'yes' );
+		}
 	}
 
 	/**
