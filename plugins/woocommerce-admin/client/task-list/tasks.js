@@ -82,7 +82,7 @@ export function getAllTasks( {
 			onClick: () =>
 				remainingProductIds.length ? toggleCartModal() : null,
 			visible: productIds.length,
-			completed: ! remainingProductIds.length,
+			completed: productIds.length && ! remainingProductIds.length,
 			time: __( '2 minutes', 'woocommerce-admin' ),
 		},
 		{
