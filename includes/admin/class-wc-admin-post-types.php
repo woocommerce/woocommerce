@@ -14,7 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( class_exists( 'WC_Admin_Post_Types', false ) ) {
 	new WC_Admin_Post_Types();
-
 	return;
 }
 
@@ -114,8 +113,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Change messages when a post type is updated.
 	 *
-	 * @param array $messages Array of messages.
-	 *
+	 * @param  array $messages Array of messages.
 	 * @return array
 	 */
 	public function post_updated_messages( $messages ) {
@@ -135,7 +133,7 @@ class WC_Admin_Post_Types {
 			/* translators: %s: product url */
 			8  => sprintf( __( 'Product submitted. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
 			9  => sprintf(
-			/* translators: 1: date 2: product url */
+				/* translators: 1: date 2: product url */
 				__( 'Product scheduled for: %1$s. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ),
 				esc_url( get_permalink( $post->ID ) ) . '</strong>'
@@ -155,7 +153,7 @@ class WC_Admin_Post_Types {
 			7  => __( 'Order saved.', 'woocommerce' ),
 			8  => __( 'Order submitted.', 'woocommerce' ),
 			9  => sprintf(
-			/* translators: %s: date */
+				/* translators: %s: date */
 				__( 'Order scheduled for: %s.', 'woocommerce' ),
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
 			),
@@ -174,7 +172,7 @@ class WC_Admin_Post_Types {
 			7  => __( 'Coupon saved.', 'woocommerce' ),
 			8  => __( 'Coupon submitted.', 'woocommerce' ),
 			9  => sprintf(
-			/* translators: %s: date */
+				/* translators: %s: date */
 				__( 'Coupon scheduled for: %s.', 'woocommerce' ),
 				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ) . '</strong>'
 			),
@@ -187,9 +185,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Specify custom bulk actions messages for different post types.
 	 *
-	 * @param array $bulk_messages Array of messages.
-	 * @param array $bulk_counts Array of how many objects were updated.
-	 *
+	 * @param  array $bulk_messages Array of messages.
+	 * @param  array $bulk_counts Array of how many objects were updated.
 	 * @return array
 	 */
 	public function bulk_post_updated_messages( $bulk_messages, $bulk_counts ) {
@@ -281,10 +278,9 @@ class WC_Admin_Post_Types {
 	 * Offers a way to hook into save post without causing an infinite loop
 	 * when quick/bulk saving product info.
 	 *
-	 * @param int $post_id Post ID being saved.
-	 * @param object $post Post object being saved.
-	 *
 	 * @since 3.0.0
+	 * @param int    $post_id Post ID being saved.
+	 * @param object $post Post object being saved.
 	 */
 	public function bulk_and_quick_edit_hook( $post_id, $post ) {
 		remove_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ) );
@@ -295,9 +291,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Quick and bulk edit saving.
 	 *
-	 * @param int $post_id Post ID being saved.
+	 * @param int    $post_id Post ID being saved.
 	 * @param object $post Post object being saved.
-	 *
 	 * @return int
 	 */
 	public function bulk_and_quick_edit_save_post( $post_id, $post ) {
@@ -331,7 +326,7 @@ class WC_Admin_Post_Types {
 	/**
 	 * Quick edit.
 	 *
-	 * @param int $post_id Post ID being saved.
+	 * @param int        $post_id Post ID being saved.
 	 * @param WC_Product $product Product object.
 	 */
 	private function quick_edit_save( $post_id, $product ) {
@@ -382,7 +377,6 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $_REQUEST['_featured'] ) ); // WPCS: input var ok, sanitization ok.
 
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
-
 			if ( isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				$new_regular_price = ( '' === $_REQUEST['_regular_price'] ) ? '' : wc_format_decimal( $_REQUEST['_regular_price'] ); // WPCS: input var ok, sanitization ok.
 				$product->set_regular_price( $new_regular_price );
@@ -450,12 +444,11 @@ class WC_Admin_Post_Types {
 	/**
 	 * Bulk edit.
 	 *
-	 * @param int $post_id Post ID being saved.
+	 * @param int        $post_id Post ID being saved.
 	 * @param WC_Product $product Product object.
 	 */
 	public function bulk_edit_save( $post_id, $product ) {
 		$data_store = $product->get_data_store();
-		$data       = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
 
 		if ( ! empty( $_REQUEST['change_weight'] ) && isset( $_REQUEST['_weight'] ) ) { // WPCS: input var ok, sanitization ok.
 			$product->set_weight( wc_clean( wp_unslash( $_REQUEST['_weight'] ) ) ); // WPCS: input var ok, sanitization ok.
@@ -511,11 +504,7 @@ class WC_Admin_Post_Types {
 		}
 
 		// Handle price - remove dates and set to lowest.
-		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array(
-			'simple',
-			'external',
-			'variable'
-		) );
+		$change_price_product_types    = apply_filters( 'woocommerce_bulk_edit_save_price_product_types', array( 'simple', 'external', 'variable' ) );
 		$can_product_type_change_price = false;
 		foreach ( $change_price_product_types as $product_type ) {
 			if ( $product->is_type( $product_type ) ) {
@@ -527,13 +516,13 @@ class WC_Admin_Post_Types {
 		if ( $can_product_type_change_price ) {
 			if ( ! empty( $_REQUEST['change_regular_price'] ) && isset( $_REQUEST['_regular_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				if ( $product->is_type( 'variable' ) ) {
-					$products_to_be_updated = [];
+					$products_to_be_updated = array();
 					foreach ( $product->get_children() as $child_id ) {
 						$child                    = wc_get_product( $child_id );
 						$products_to_be_updated[] = $child;
 					}
 				} else {
-					$products_to_be_updated = [ $product ];
+					$products_to_be_updated = array( $product );
 				}
 
 				foreach ( $products_to_be_updated as $product_to_be_updated ) {
@@ -556,13 +545,13 @@ class WC_Admin_Post_Types {
 
 			if ( ! empty( $_REQUEST['change_sale_price'] ) && isset( $_REQUEST['_sale_price'] ) ) { // WPCS: input var ok, sanitization ok.
 				if ( $product->is_type( 'variable' ) ) {
-					$products_to_be_updated = [];
+					$products_to_be_updated = array();
 					foreach ( $product->get_children() as $child_id ) {
 						$child                    = wc_get_product( $child_id );
 						$products_to_be_updated[] = $child;
 					}
 				} else {
-					$products_to_be_updated = [ $product ];
+					$products_to_be_updated = array( $product );
 				}
 
 				foreach ( $products_to_be_updated as $product_to_be_updated ) {
@@ -687,7 +676,6 @@ class WC_Admin_Post_Types {
 				if ( $is_percentage ) {
 					$percent   = $sale_price / 100;
 					$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
-
 				} else {
 					$new_price = max( 0, $product->regular_price - $sale_price );
 				}
@@ -760,9 +748,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Change title boxes in admin.
 	 *
-	 * @param string $text Text to shown.
+	 * @param string  $text Text to shown.
 	 * @param WP_Post $post Current post object.
-	 *
 	 * @return string
 	 */
 	public function enter_title_here( $text, $post ) {
@@ -774,7 +761,6 @@ class WC_Admin_Post_Types {
 				$text = esc_html__( 'Coupon code', 'woocommerce' );
 				break;
 		}
-
 		return $text;
 	}
 
@@ -786,8 +772,7 @@ class WC_Admin_Post_Types {
 	public function edit_form_after_title( $post ) {
 		if ( 'shop_coupon' === $post->post_type ) {
 			?>
-			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2"
-					  placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // WPCS: XSS ok. ?></textarea>
+			<textarea id="woocommerce-coupon-description" name="excerpt" cols="5" rows="2" placeholder="<?php esc_attr_e( 'Description (optional)', 'woocommerce' ); ?>"><?php echo $post->post_excerpt; // WPCS: XSS ok. ?></textarea>
 			<?php
 		}
 	}
@@ -795,9 +780,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Hidden default Meta-Boxes.
 	 *
-	 * @param array $hidden Hidden boxes.
-	 * @param object $screen Current screen.
-	 *
+	 * @param  array  $hidden Hidden boxes.
+	 * @param  object $screen Current screen.
 	 * @return array
 	 */
 	public function hidden_meta_boxes( $hidden, $screen ) {
@@ -837,15 +821,12 @@ class WC_Admin_Post_Types {
 				?>
 			</strong>
 
-			<a href="#catalog-visibility"
-			   class="edit-catalog-visibility hide-if-no-js"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+			<a href="#catalog-visibility" class="edit-catalog-visibility hide-if-no-js"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 
 			<div id="catalog-visibility-select" class="hide-if-js">
 
-				<input type="hidden" name="current_visibility" id="current_visibility"
-					   value="<?php echo esc_attr( $current_visibility ); ?>"/>
-				<input type="hidden" name="current_featured" id="current_featured"
-					   value="<?php echo esc_attr( $current_featured ); ?>"/>
+				<input type="hidden" name="current_visibility" id="current_visibility" value="<?php echo esc_attr( $current_visibility ); ?>" />
+				<input type="hidden" name="current_featured" id="current_featured" value="<?php echo esc_attr( $current_featured ); ?>" />
 
 				<?php
 				echo '<p>' . esc_html__( 'This setting determines which shop pages products will be listed on.', 'woocommerce' ) . '</p>';
@@ -857,10 +838,8 @@ class WC_Admin_Post_Types {
 				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
-					<a href="#catalog-visibility"
-					   class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
-					<a href="#catalog-visibility"
-					   class="cancel-post-visibility hide-if-no-js"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
+					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
+					<a href="#catalog-visibility" class="cancel-post-visibility hide-if-no-js"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
 				</p>
 			</div>
 		</div>
@@ -871,7 +850,6 @@ class WC_Admin_Post_Types {
 	 * Change upload dir for downloadable files.
 	 *
 	 * @param array $pathdata Array of paths.
-	 *
 	 * @return array
 	 */
 	public function upload_dir( $pathdata ) {
@@ -889,7 +867,6 @@ class WC_Admin_Post_Types {
 				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
 			}
 		}
-
 		return $pathdata;
 	}
 
@@ -897,8 +874,8 @@ class WC_Admin_Post_Types {
 	 * Change filename for WooCommerce uploads and prepend unique chars for security.
 	 *
 	 * @param string $full_filename Original filename.
-	 * @param string $ext Extension of file.
-	 * @param string $dir Directory path.
+	 * @param string $ext           Extension of file.
+	 * @param string $dir           Directory path.
 	 *
 	 * @return string New filename with unique hash.
 	 * @since 4.0
@@ -923,7 +900,7 @@ class WC_Admin_Post_Types {
 	 * Change filename to append random text.
 	 *
 	 * @param string $full_filename Original filename with extension.
-	 * @param string $ext Extension.
+	 * @param string $ext           Extension.
 	 *
 	 * @return string Modified filename.
 	 */
@@ -963,10 +940,9 @@ class WC_Admin_Post_Types {
 	 * Grant downloadable file access to any newly added files on any existing.
 	 * orders for this product that have previously been granted downloadable file access.
 	 *
-	 * @param int $product_id product identifier.
-	 * @param int $variation_id optional product variation identifier.
+	 * @param int   $product_id product identifier.
+	 * @param int   $variation_id optional product variation identifier.
 	 * @param array $downloadable_files newly set files.
-	 *
 	 * @deprecated and moved to post-data class.
 	 */
 	public function process_product_file_download_paths( $product_id, $variation_id, $downloadable_files ) {
@@ -976,10 +952,9 @@ class WC_Admin_Post_Types {
 	/**
 	 * When editing the shop page, we should hide templates.
 	 *
-	 * @param array $page_templates Templates array.
-	 * @param string $theme Classname.
+	 * @param array   $page_templates Templates array.
+	 * @param string  $theme Classname.
 	 * @param WP_Post $post The current post object.
-	 *
 	 * @return array
 	 */
 	public function hide_cpt_archive_templates( $page_templates, $theme, $post ) {
@@ -1011,8 +986,8 @@ class WC_Admin_Post_Types {
 	/**
 	 * Add a post display state for special WC pages in the page list table.
 	 *
-	 * @param array $post_states An array of post display states.
-	 * @param WP_Post $post The current post object.
+	 * @param array   $post_states An array of post display states.
+	 * @param WP_Post $post        The current post object.
 	 */
 	public function add_display_post_states( $post_states, $post ) {
 		if ( wc_get_page_id( 'shop' ) === $post->ID ) {
