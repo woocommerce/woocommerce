@@ -44,6 +44,11 @@ class WC_Tracker {
 			return;
 		}
 
+		// Don't send if site is opted out of tracking.
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return;
+		}
+
 		if ( ! apply_filters( 'woocommerce_tracker_send_override', $override ) ) {
 			// Send a maximum of once per week by default.
 			$last_send = self::get_last_send_time();
