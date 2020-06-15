@@ -560,23 +560,6 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				$message = __( 'Database upgrade routine has been scheduled to run in the background.', 'woocommerce-rest-api' );
 				break;
 
-			case 'verify_db_tables':
-				if ( ! method_exists( 'WC_Install', 'verify_base_tables' ) ) {
-					$message = __( 'You need WooCommerce 4.2 or newer to run this tool.', 'woocommerce-rest-api' );
-					$ran = false;
-					break;
-				}
-				// Try to manually create table again.
-				$missing_tables = WC_Install::verify_base_tables( true, true );
-				if ( 0 === count( $missing_tables ) ) {
-					$message = __( 'Database verified successfully.', 'woocommerce-rest-api' );
-				} else {
-					$message = __( 'Verifying database... One or more tables are still missing: ', 'woocommerce-rest-api' );
-					$message .= implode( ', ', $missing_tables );
-					$ran = false;
-				}
-				break;
-
 			case 'clear_template_cache':
 				if ( function_exists( 'wc_clear_template_cache' ) ) {
 					wc_clear_template_cache();
