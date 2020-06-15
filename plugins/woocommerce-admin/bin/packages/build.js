@@ -139,7 +139,7 @@ function buildScssFile( styleFile ) {
 				.join( ' ' ) + fs.readFileSync( styleFile, 'utf8' ),
 	} );
 
-	const postCSSConfig = require( '../../postcss.config' ).plugins[ 0 ];
+	const postCSSConfig = require( '@wordpress/postcss-plugins-preset' );
 	const postCSSSync = ( callback ) => {
 		postcss( postCSSConfig )
 			.process( builtSass.css, {

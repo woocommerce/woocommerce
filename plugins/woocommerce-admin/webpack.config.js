@@ -72,6 +72,8 @@ wpAdminScripts.forEach( ( name ) => {
 	entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
 } );
 
+const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
+
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
@@ -139,12 +141,10 @@ const webpackConfig = {
 					MiniCssExtractPlugin.loader,
 					'css-loader',
 					{
-						// postcss loader so we can use autoprefixer and theme Gutenberg components
 						loader: 'postcss-loader',
 						options: {
-							config: {
-								path: 'postcss.config.js',
-							},
+							ident: 'postcss',
+							plugins: postcssPlugins,
 						},
 					},
 					{

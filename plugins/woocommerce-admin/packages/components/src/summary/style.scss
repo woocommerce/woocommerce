@@ -277,7 +277,7 @@ $border: $light-gray-tertiary;
 
 	&:hover {
 		background-color: $light-gray-100;
-		color: darken($theme-color, 20%);
+		color: color($theme-color shade(20%));
 	}
 
 	&:active {
