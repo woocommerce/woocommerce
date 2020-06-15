@@ -644,7 +644,66 @@ class WC_Admin_Post_Types {
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
 	}
 
+	/**
+	 * Calculate the new regular price based on the given parameters
+	 *
+	 * @param WC_Product $product The product of which the regular price must be calculated.
+	 *
+	 * @return float|int|mixed|string|null
+	 */
+	private function calculate_new_regular_price( $product ) {
+		if ( ! isset( $_REQUEST['change_regular_price'] ) || ! isset( $_REQUEST['_regular_price'] ) ) {
+			return false;
+		}
+
+		$old_regular_price    = $product->get_regular_price();
+		$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
+		$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
+		$is_percentage        = (bool) strstr( $raw_regular_price, '%' );
+
+		$regular_price = wc_format_decimal( $raw_regular_price );
+		$new_price     = false;
+
+		switch ( $change_regular_price ) {
+			case 1:
+				$new_price = $regular_price;
+				break;
+			case 2:
+				if ( $is_percentage ) {
+					$percent   = $regular_price / 100;
+					$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
+				} else {
+					$new_price = $old_regular_price + $regular_price;
+				}
+				break;
+			case 3:
+				if ( $is_percentage ) {
+					$percent   = $regular_price / 100;
+					$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
+				} else {
+					$new_price = max( 0, $old_regular_price - $regular_price );
+				}
+				break;
+
+			default:
+				break;
+		}
+
+		return $new_price;
+	}
+
+	/**
+	 * Calculate the new sale price based on the given parameters
+	 *
+	 * @param WC_Product $product The product of which the sale price must be calculated.
+	 *
+	 * @return float|int|mixed|string|null
+	 */
 	private function calculate_new_sale_price( $product ) {
+		if ( ! isset( $_REQUEST['change_sale_price'] ) || ! isset( $_REQUEST['_sale_price'] ) ) {
+			return false;
+		}
+
 		$change_sale_price = absint( $_REQUEST['change_sale_price'] ); // WPCS: input var ok, sanitization ok.
 		$raw_sale_price    = wc_clean( wp_unslash( $_REQUEST['_sale_price'] ) ); // WPCS: input var ok, sanitization ok.
 		$is_percentage     = (bool) strstr( $raw_sale_price, '%' );
@@ -678,43 +737,6 @@ class WC_Admin_Post_Types {
 					$new_price = max( 0, $product->regular_price - ( $product->regular_price * $percent ) );
 				} else {
 					$new_price = max( 0, $product->regular_price - $sale_price );
-				}
-				break;
-
-			default:
-				break;
-		}
-
-		return $new_price;
-	}
-
-	private function calculate_new_regular_price( $product ) {
-		$old_regular_price    = $product->get_regular_price();
-		$change_regular_price = absint( $_REQUEST['change_regular_price'] ); // WPCS: input var ok, sanitization ok.
-		$raw_regular_price    = wc_clean( wp_unslash( $_REQUEST['_regular_price'] ) ); // WPCS: input var ok, sanitization ok.
-		$is_percentage        = (bool) strstr( $raw_regular_price, '%' );
-
-		$regular_price = wc_format_decimal( $raw_regular_price );
-		$new_price     = false;
-
-		switch ( $change_regular_price ) {
-			case 1:
-				$new_price = $regular_price;
-				break;
-			case 2:
-				if ( $is_percentage ) {
-					$percent   = $regular_price / 100;
-					$new_price = $old_regular_price + ( round( $old_regular_price * $percent, wc_get_price_decimals() ) );
-				} else {
-					$new_price = $old_regular_price + $regular_price;
-				}
-				break;
-			case 3:
-				if ( $is_percentage ) {
-					$percent   = $regular_price / 100;
-					$new_price = max( 0, $old_regular_price - ( round( $old_regular_price * $percent, wc_get_price_decimals() ) ) );
-				} else {
-					$new_price = max( 0, $old_regular_price - $regular_price );
 				}
 				break;
 
