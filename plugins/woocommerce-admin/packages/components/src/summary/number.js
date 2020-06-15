@@ -34,10 +34,10 @@ const SummaryNumber = ( {
 	selected,
 	value,
 	onLinkClickCallback,
-	isHomepage,
+	isHomescreen,
 } ) => {
 	const liClasses = classnames( 'woocommerce-summary__item-container', {
-		'is-homepage': isHomepage,
+		'is-homescreen': isHomescreen,
 		'is-dropdown-button': onToggle,
 		'is-dropdown-expanded': isOpen,
 	} );

@@ -5,7 +5,9 @@ import { render, screen } from '@testing-library/react';
 import { Layout } from '../layout';
 
 // Rendering <StatsOverview /> breaks tests.
-jest.mock( 'homepage/stats-overview', () => jest.fn().mockReturnValue( null ) );
+jest.mock( 'homescreen/stats-overview', () =>
+	jest.fn().mockReturnValue( null )
+);
 
 // We aren't testing the <TaskList /> component here.
 jest.mock( 'task-list', () => jest.fn().mockReturnValue( '[TaskList]' ) );
@@ -18,7 +20,7 @@ jest.mock( 'header/activity-panel/panels/inbox', () =>
 // We aren't testing the <QuickLinks /> component here.
 jest.mock( 'quick-links', () => jest.fn().mockReturnValue( '[QuickLinks]' ) );
 
-describe( 'Homepage Layout', () => {
+describe( 'Homescreen Layout', () => {
 	it( 'should show TaskList placeholder when loading', () => {
 		const { container } = render(
 			<Layout requestingTaskList taskListHidden={ false } query={ {} } />
@@ -41,7 +43,7 @@ describe( 'Homepage Layout', () => {
 
 		// Expect that we're rendering the "full" home screen (with columns).
 		const columns = container.querySelector(
-			'.woocommerce-homepage-column'
+			'.woocommerce-homescreen-column'
 		);
 		expect( columns ).not.toBeNull();
 
@@ -63,7 +65,7 @@ describe( 'Homepage Layout', () => {
 
 		// Expect that we're NOT rendering the "full" home screen (with columns).
 		const columns = container.querySelector(
-			'.woocommerce-homepage-column'
+			'.woocommerce-homescreen-column'
 		);
 		expect( columns ).toBeNull();
 

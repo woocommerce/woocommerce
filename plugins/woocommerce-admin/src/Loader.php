@@ -162,7 +162,7 @@ class Loader {
 	 * @return bool Returns true if the feature is enabled.
 	 */
 	public static function is_feature_enabled( $feature ) {
-		if ( 'homepage' === $feature && 'yes' !== get_option( 'woocommerce_homescreen_enabled', 'no' ) ) {
+		if ( 'homescreen' === $feature && 'yes' !== get_option( 'woocommerce_homescreen_enabled', 'no' ) ) {
 			return false;
 		}
 
@@ -254,7 +254,7 @@ class Loader {
 	 * @todo The entry point for the embed needs moved to this class as well.
 	 */
 	public static function register_page_handler() {
-		$id = self::is_feature_enabled( 'homepage' ) ? 'woocommerce-home' : 'woocommerce-dashboard';
+		$id = self::is_feature_enabled( 'homescreen' ) ? 'woocommerce-home' : 'woocommerce-dashboard';
 
 		wc_admin_register_page(
 			array(

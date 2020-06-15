@@ -3,7 +3,7 @@
 	overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the right-hand column 'stick'
 }
 
-.woocommerce-homepage {
+.woocommerce-homescreen {
 	display: flex;
 	max-width: 1032px;
 	margin: 0 auto;
@@ -13,7 +13,7 @@
 		width: 100%;
 	}
 
-	&.hasInbox .woocommerce-homepage-column {
+	&.hasInbox .woocommerce-homescreen-column {
 		width: calc(50% - 12px);
 		margin: 0;
 
@@ -54,7 +54,7 @@
 		}
 	}
 }
-.woocommerce-homepage-column {
+.woocommerce-homescreen-column {
 	width: 50%;
 	top: 130px;
 	margin: 0 auto;

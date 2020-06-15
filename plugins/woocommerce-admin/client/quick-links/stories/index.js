@@ -19,7 +19,7 @@ function getSetting() {
 }
 
 export default {
-	title: 'WooCommerce Admin/homepage/QuickLinks',
+	title: 'WooCommerce Admin/homescreen/QuickLinks',
 	component: QuickLinks,
 	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 };

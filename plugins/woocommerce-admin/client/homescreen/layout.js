@@ -78,12 +78,12 @@ export const Layout = ( props ) => {
 		return (
 			<Fragment>
 				{ showInbox && (
-					<div className="woocommerce-homepage-column is-inbox">
+					<div className="woocommerce-homescreen-column is-inbox">
 						<InboxPanel isPanelEmpty={ isInboxPanelEmpty } />
 					</div>
 				) }
 				<div
-					className="woocommerce-homepage-column"
+					className="woocommerce-homescreen-column"
 					ref={ content }
 					style={ {
 						position: isContentSticky ? 'sticky' : 'static',
@@ -111,7 +111,7 @@ export const Layout = ( props ) => {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-homepage', {
+			className={ classnames( 'woocommerce-homescreen', {
 				hasInbox: showInbox,
 			} ) }
 		>

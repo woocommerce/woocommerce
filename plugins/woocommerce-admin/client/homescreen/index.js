@@ -26,7 +26,7 @@ const ProfileWizard = lazy( () =>
 );
 import Layout from './layout';
 
-const Homepage = ( { profileItems, query } ) => {
+const Homescreen = ( { profileItems, query } ) => {
 	if ( isOnboardingEnabled() && ! profileItems.completed ) {
 		return (
 			<Suspense fallback={ <Spinner /> }>
@@ -52,4 +52,4 @@ export default compose(
 
 		return { profileItems };
 	} )
-)( Homepage );
+)( Homescreen );

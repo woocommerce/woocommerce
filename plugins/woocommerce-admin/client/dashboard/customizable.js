@@ -341,7 +341,7 @@ export default compose(
 
 		if ( isOnboardingEnabled() ) {
 			withSelectData.homepageEnabled =
-				window.wcAdminFeatures.homepage &&
+				window.wcAdminFeatures.homescreen &&
 				getOption( 'woocommerce_homescreen_enabled' ) === 'yes';
 			withSelectData.taskListHidden =
 				getOption( 'woocommerce_task_list_hidden' ) === 'yes';

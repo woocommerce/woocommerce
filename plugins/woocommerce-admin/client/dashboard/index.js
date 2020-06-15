@@ -36,7 +36,7 @@ class Dashboard extends Component {
 		if (
 			isOnboardingEnabled() &&
 			! profileItems.completed &&
-			! window.wcAdminFeatures.homepage
+			! window.wcAdminFeatures.homescreen
 		) {
 			return (
 				<Suspense fallback={ <Spinner /> }>

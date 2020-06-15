@@ -96,7 +96,7 @@ class _Layout extends Component {
 
 		// When pathname is `/` we are on the dashboard
 		if ( path.length === 0 ) {
-			path = window.wcAdminFeatures.homepage
+			path = window.wcAdminFeatures.homescreen
 				? 'home_screen'
 				: 'dashboard';
 		}

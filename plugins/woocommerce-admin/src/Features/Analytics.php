@@ -77,7 +77,7 @@ class Analytics {
 	 * Registers report pages.
 	 */
 	public function register_pages() {
-		$homepage_enabled = Loader::is_feature_enabled( 'homepage' );
+		$homepage_enabled = Loader::is_feature_enabled( 'homescreen' );
 		$report_pages = array(
 			array(
 				'id'       => 'woocommerce-analytics',

@@ -198,7 +198,7 @@ $border: $light-gray-tertiary;
 .woocommerce-summary__item-container {
 	margin-bottom: 0;
 
-	&:not(.is-homepage):last-of-type .woocommerce-summary__item {
+	&:not(.is-homescreen):last-of-type .woocommerce-summary__item {
 		// Make sure the last item always uses the outer-border color.
 		border-bottom-color: $border !important;
 	}

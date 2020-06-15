@@ -12,6 +12,6 @@
 	  	"shipping-label-banner": true,
 		"store-alerts": true,
 		"wcpay": true,
-		"homepage": false
+		"homescreen": false
 	}
 }

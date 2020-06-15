@@ -52,7 +52,7 @@ export const StatsList = ( {
 				if ( primaryRequesting || secondaryRequesting ) {
 					return (
 						<SummaryNumberPlaceholder
-							className="is-homepage"
+							className="is-homescreen"
 							key={ item.stat }
 						/>
 					);
@@ -74,7 +74,7 @@ export const StatsList = ( {
 
 				return (
 					<SummaryNumber
-						isHomepage
+						isHomescreen
 						key={ item.stat }
 						href={ reportUrl }
 						hrefType={ reportUrlType }

@@ -34,8 +34,8 @@ const Dashboard = lazy( () =>
 const DevDocs = lazy( () =>
 	import( /* webpackChunkName: "devdocs" */ 'devdocs' )
 );
-const Homepage = lazy( () =>
-	import( /* webpackChunkName: "homepage" */ 'homepage' )
+const Homescreen = lazy( () =>
+	import( /* webpackChunkName: "homescreen" */ 'homescreen' )
 );
 const MarketingOverview = lazy( () =>
 	import( /* webpackChunkName: "marketing-overview" */ 'marketing/overview' )
@@ -73,7 +73,7 @@ export const getPages = () => {
 
 	if (
 		window.wcAdminFeatures[ 'analytics-dashboard' ] &&
-		! window.wcAdminFeatures.homepage
+		! window.wcAdminFeatures.homescreen
 	) {
 		pages.push( {
 			container: Dashboard,
@@ -86,9 +86,9 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures.homepage ) {
+	if ( window.wcAdminFeatures.homescreen ) {
 		pages.push( {
-			container: Homepage,
+			container: Homescreen,
 			path: '/',
 			breadcrumbs: [
 				...initialBreadcrumbs,
@@ -99,7 +99,7 @@ export const getPages = () => {
 	}
 
 	if ( window.wcAdminFeatures.analytics ) {
-		if ( window.wcAdminFeatures.homepage ) {
+		if ( window.wcAdminFeatures.homescreen ) {
 			pages.push( {
 				container: Dashboard,
 				path: '/analytics/overview',
@@ -115,7 +115,7 @@ export const getPages = () => {
 			} );
 		}
 		const ReportWpOpenMenu = `toplevel_page_wc-admin-path--analytics-${
-			window.wcAdminFeatures.homepage ? 'overview' : 'revenue'
+			window.wcAdminFeatures.homescreen ? 'overview' : 'revenue'
 		}`;
 
 		pages.push( {
@@ -255,8 +255,8 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
 		const defaultPath =
-			window.wcAdminFeatures.homepage
-				? 'homepage'
+			window.wcAdminFeatures.homescreen
+				? 'homescreen'
 				: 'dashboard';
 		const path = query.path || defaultPath;
 		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
@@ -286,7 +286,7 @@ window.wpNavMenuUrlUpdate = function( query ) {
 		'stock',
 		'settings',
 		'customers',
-		'homepage',
+		'homescreen',
 	] );
 	const nextQuery = getPersistedQuery( query );
 
