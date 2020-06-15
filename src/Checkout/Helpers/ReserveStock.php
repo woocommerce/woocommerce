@@ -124,6 +124,10 @@ final class ReserveStock {
 	public function release_stock_for_order( \WC_Order $order ) {
 		global $wpdb;
 
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
 		$wpdb->delete(
 			$wpdb->wc_reserved_stock,
 			array(
