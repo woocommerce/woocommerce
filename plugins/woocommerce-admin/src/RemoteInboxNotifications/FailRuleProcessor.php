@@ -16,11 +16,12 @@ class FailRuleProcessor implements RuleProcessorInterface {
 	/**
 	 * Fails the rule.
 	 *
-	 * @param object $rule The rule to process.
+	 * @param object $rule         The specific rule being processed by this rule processor.
+	 * @param object $stored_state Stored state.
 	 *
 	 * @return bool Always false.
 	 */
-	public function process( $rule ) {
+	public function process( $rule, $stored_state ) {
 		return false;
 	}
 

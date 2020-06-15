@@ -17,11 +17,12 @@ class PassRuleProcessor implements RuleProcessorInterface {
 	/**
 	 * Passes the rule.
 	 *
-	 * @param object $rule The specific rule being processed by this rule processor.
+	 * @param object $rule         The specific rule being processed by this rule processor.
+	 * @param object $stored_state Stored state.
 	 *
 	 * @return bool Always true.
 	 */
-	public function process( $rule ) {
+	public function process( $rule, $stored_state ) {
 		return true;
 	}
 

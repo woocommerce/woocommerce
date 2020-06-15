@@ -27,12 +27,16 @@ class NotRuleProcessor implements RuleProcessorInterface {
 	/**
 	 * Evaluates the rules in the operand and negates the result.
 	 *
-	 * @param object $rule The specific rule being processed by this rule processor.
+	 * @param object $rule         The specific rule being processed by this rule processor.
+	 * @param object $stored_state Stored state.
 	 *
 	 * @return bool The result of the operation.
 	 */
-	public function process( $rule ) {
-		$evaluated_operand = $this->rule_evaluator->evaluate( $rule->operand );
+	public function process( $rule, $stored_state ) {
+		$evaluated_operand = $this->rule_evaluator->evaluate(
+			$rule->operand,
+			$stored_state
+		);
 
 		return ! $evaluated_operand;
 	}

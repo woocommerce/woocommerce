@@ -29,7 +29,7 @@ class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -52,7 +52,7 @@ class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -79,7 +79,7 @@ class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -108,7 +108,7 @@ class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -137,7 +137,7 @@ class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( true, $result );
 	}

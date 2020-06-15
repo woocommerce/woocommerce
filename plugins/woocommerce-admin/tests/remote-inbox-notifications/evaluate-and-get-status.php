@@ -54,6 +54,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'unactioned',
+			new stdClass(),
 			new PassingRuleEvaluator()
 		);
 
@@ -72,6 +73,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'pending',
+			new stdClass(),
 			new FailingRuleEvaluator()
 		);
 
@@ -90,6 +92,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'snoozed',
+			new stdClass(),
 			new PassingRuleEvaluator()
 		);
 
@@ -108,6 +111,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'snoozed',
+			new stdClass(),
 			new FailingRuleEvaluator()
 		);
 
@@ -126,6 +130,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'actioned',
+			new stdClass(),
 			new PassingRuleEvaluator()
 		);
 
@@ -144,6 +149,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'actioned',
+			new stdClass(),
 			new FailingRuleEvaluator()
 		);
 
@@ -162,6 +168,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'pending',
+			new stdClass(),
 			new PassingRuleEvaluator()
 		);
 
@@ -180,6 +187,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'pending',
+			new stdClass(),
 			new FailingRuleEvaluator()
 		);
 
@@ -197,6 +205,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 		$result = EvaluateAndGetStatus::evaluate(
 			$spec,
 			'unactioned',
+			new stdClass(),
 			new FailingRuleEvaluator()
 		);
 

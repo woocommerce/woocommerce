@@ -31,11 +31,12 @@ class PluginVersionRuleProcessor implements RuleProcessorInterface {
 	/**
 	 * Process the rule.
 	 *
-	 * @param object $rule The specific rule being processed by this rule processor.
+	 * @param object $rule         The specific rule being processed by this rule processor.
+	 * @param object $stored_state Stored state.
 	 *
 	 * @return bool Whether the rule passes or not.
 	 */
-	public function process( $rule ) {
+	public function process( $rule, $stored_state ) {
 		$active_plugin_slugs = $this->plugins_provider->get_active_plugin_slugs();
 
 		if ( ! in_array( $rule->plugin, $active_plugin_slugs, true ) ) {

@@ -21,6 +21,8 @@ class DataSourcePoller {
 
 	/**
 	 * Reads the data sources for specs and persists those specs.
+	 *
+	 * @return bool Whether any specs were read.
 	 */
 	public static function read_specs_from_data_sources() {
 		$specs = array();
@@ -34,6 +36,8 @@ class DataSourcePoller {
 
 		// Persist the specs as an option.
 		update_option( RemoteInboxNotificationsEngine::SPECS_OPTION_NAME, $specs );
+
+		return 0 !== count( $specs );
 	}
 
 	/**

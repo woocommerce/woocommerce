@@ -44,7 +44,7 @@ class WC_Tests_RemoteInboxNotifications_OrRuleProcessor extends WC_Unit_Test_Cas
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -81,7 +81,7 @@ class WC_Tests_RemoteInboxNotifications_OrRuleProcessor extends WC_Unit_Test_Cas
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( true, $result );
 	}
@@ -118,7 +118,7 @@ class WC_Tests_RemoteInboxNotifications_OrRuleProcessor extends WC_Unit_Test_Cas
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( true, $result );
 	}
@@ -155,7 +155,7 @@ class WC_Tests_RemoteInboxNotifications_OrRuleProcessor extends WC_Unit_Test_Cas
 			}'
 		);
 
-		$result = $processor->process( $rule );
+		$result = $processor->process( $rule, new stdClass() );
 
 		$this->assertEquals( true, $result );
 	}

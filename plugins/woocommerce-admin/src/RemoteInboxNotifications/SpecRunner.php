@@ -18,9 +18,10 @@ class SpecRunner {
 	/**
 	 * Run the spec.
 	 *
-	 * @param object $spec The spec to run.
+	 * @param object $spec         The spec to run.
+	 * @param object $stored_state Stored state.
 	 */
-	public static function run_spec( $spec ) {
+	public static function run_spec( $spec, $stored_state ) {
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 
 		// Create or update the note.
@@ -33,15 +34,12 @@ class SpecRunner {
 		}
 
 		// Evaluate the spec and get the new note status.
-		$rule_evaluator = new RuleEvaluator(
-			new GetRuleProcessor()
-		);
-
 		$previous_status = $note->get_status();
 		$status          = EvaluateAndGetStatus::evaluate(
 			$spec,
 			$previous_status,
-			$rule_evaluator
+			$stored_state,
+			new RuleEvaluator()
 		);
 
 		// If the status is changing, update the created date to now.
