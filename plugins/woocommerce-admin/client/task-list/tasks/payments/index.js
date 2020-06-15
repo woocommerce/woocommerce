@@ -239,8 +239,8 @@ class Payments extends Component {
 		const currentMethod = this.getCurrentMethod();
 		const { busyMethod, enabledMethods, recommendedMethod } = this.state;
 		const { methods, query, requesting } = this.props;
-		const configuredMethods = methods.filter(
-			( method ) => method.isConfigured
+		const hasEnabledMethods = Object.keys( enabledMethods ).filter(
+			( method ) => enabledMethods[ method ]
 		).length;
 
 		if ( currentMethod ) {
@@ -348,7 +348,7 @@ class Payments extends Component {
 					);
 				} ) }
 				<div className="woocommerce-task-payments__actions">
-					{ configuredMethods.length === 0 ? (
+					{ ! hasEnabledMethods ? (
 						<Button isLink onClick={ this.skipTask }>
 							{ __(
 								'My store doesn’t take payments',
