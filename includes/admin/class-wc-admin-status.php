@@ -340,6 +340,29 @@ class WC_Admin_Status {
 	}
 
 	/**
+	 * Prints table info if a base table is not present.
+	 */
+	private static function output_tables_info() {
+		$missing_tables = WC_Install::verify_base_tables( false );
+		if ( 0 === count( $missing_tables ) ) {
+			return;
+		}
+		?>
+
+		<br>
+		<strong style="color:#a00;">
+			<span class="dashicons dashicons-warning"></span>
+			<?php
+				esc_html_e( 'Missing base tables: ', 'woocommerce' );
+				echo esc_html( implode( ', ', $missing_tables ) );
+				esc_html_e( '. Some WooCommerce functionality may not work as expected.', 'woocommerce' );
+			?>
+		</strong>
+
+		<?php
+	}
+
+	/**
 	 * Prints the information about plugins for the system status report.
 	 * Used for both active and inactive plugins sections.
 	 *
