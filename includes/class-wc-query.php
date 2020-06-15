@@ -380,6 +380,10 @@ class WC_Query {
 	 */
 	public function adjust_posts_count( $count ) {
 		$posts = $this->get_current_posts();
+		if ( is_null( $posts ) ) {
+			return $count;
+		}
+
 		$count = 0;
 		foreach ( $posts as $post ) {
 			$id      = is_object( $post ) ? $post->ID : $post;

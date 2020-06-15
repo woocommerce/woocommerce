@@ -455,12 +455,12 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 			$nav_filtering_data = array();
 		}
 
-		$products    = array();
-		$posts = array();
+		$products = array();
+		$posts    = array();
 		for ( $i = 0; $i < 5; $i++ ) {
 			$product = WC_Helper_Product::create_simple_product();
 			array_push( $products, $product );
-			$post = $use_objects ? (object)['ID' => $product->get_id()] : $product->get_id();
+			$post = $use_objects ? (object) array( 'ID' => $product->get_id() ) : $product->get_id();
 			array_push( $posts, $post );
 		}
 
@@ -502,5 +502,19 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		foreach ( array_slice( $products, 2 ) as $product ) {
 			$this->assertEquals( true, wc_get_loop_product_visibility( $product->get_id() ) );
 		}
+	}
+
+	/**
+	 * @testdox adjust_posts should return the input unmodified if get_current_posts returns null.
+	 */
+	public function test_adjust_posts_count_when_there_are_no_posts() {
+		$sut = $this
+			->getMockBuilder( WC_Query::class )
+			->setMethods( array( 'get_current_posts', 'get_layered_nav_chosen_attributes_inst' ) )
+			->getMock();
+
+		$sut->method( 'get_current_posts' )->willReturn( null );
+
+		$this->assertEquals( 34, $sut->adjust_posts_count( 34 ) );
 	}
 }
