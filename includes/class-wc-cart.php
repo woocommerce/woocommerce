@@ -765,7 +765,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function check_cart_item_stock() {
 		$error                    = new WP_Error();
 		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$hold_stock_minutes       = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
 		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
@@ -784,7 +783,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// Check stock based on all items in the cart and consider any held stock within pending orders.
-			$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $current_session_order_id ) : 0;
+			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
 			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
