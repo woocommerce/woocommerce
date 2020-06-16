@@ -1002,6 +1002,14 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   PRIMARY KEY  (tax_rate_class_id),
   UNIQUE KEY slug (slug($max_index_length))
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
+	`order_id` bigint(20) NOT NULL,
+	`product_id` bigint(20) NOT NULL,
+	`stock_quantity` double NOT NULL DEFAULT 0,
+	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	PRIMARY KEY  (`order_id`, `product_id`)
+) $collate;
 		";
 
 		return $tables;
@@ -1035,6 +1043,7 @@ CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
 			"{$wpdb->prefix}woocommerce_shipping_zones",
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
+			"{$wpdb->prefix}wc_reserved_stock",
 		);
 
 		/**
