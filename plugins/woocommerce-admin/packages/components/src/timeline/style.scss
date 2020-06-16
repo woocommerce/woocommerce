@@ -1,0 +1,122 @@
+
+.woocommerce-timeline {
+	ul {
+		margin: 0;
+		padding-left: 0;
+		list-style-type: none;
+
+		li {
+			margin-bottom: 0;
+		}
+	}
+
+	.woocommerce-timeline-group {
+		.woocommerce-timeline-group__title {
+			color: $studio-gray-90;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+
+			margin: 0 0 $gap 0;
+
+			// Overrides the default `display: block` for p elements in the title.
+			// This is done to prevent soft line breaks from appearing in shorter
+			// titles.
+			display: inline-block;
+		}
+
+		hr {
+			float: right;
+			width: calc(100% - #{ $gap-largest });
+
+			margin-bottom: $gap;
+
+			// Color is according to design, we should probably find a suitable color variable.
+			border: 0.5px solid #e3dfe2;
+		}
+	}
+
+	.woocommerce-timeline-item {
+		.woocommerce-timeline-item__top-border {
+			min-height: 16px;
+			border-left: 1px solid $studio-gray-10;
+			margin: 0 $gap-small;
+		}
+
+		.woocommerce-timeline-item__title {
+			display: flex;
+			align-items: center;
+			flex-direction: row;
+			justify-content: space-between;
+			color: $studio-gray-80;
+
+			* {
+				font-size: 16px;
+			}
+		}
+
+		.woocommerce-timeline-item__headline {
+			display: flex;
+			align-items: center;
+			flex-direction: row;
+			margin: $gap-smaller 0;
+
+			* {
+				margin: 0;
+			}
+			& > * {
+				padding: 0 $gap;
+			}
+
+			svg {
+				fill: $studio-white;
+				padding: $gap-smallest;
+				background: $studio-gray-10;
+				border-radius: 9999px;
+				box-sizing: content-box;
+				// We hard code the size to maintain consistent styling and spacing.
+				width: 16px;
+				height: 16px;
+
+				&.is-success {
+					background: $valid-green;
+				}
+
+				&.is-warning {
+					background: $notice-yellow;
+				}
+
+				&.is-error {
+					background: $error-red;
+				}
+			}
+		}
+
+		.woocommerce-timeline-item__timestamp {
+			font-size: 14px;
+			line-height: 16px;
+		}
+
+		.woocommerce-timeline-item__body {
+			display: flex;
+			flex-direction: column;
+
+			color: $studio-gray-60;
+
+			margin: 0 $gap-small;
+			padding: $gap-smaller $gap-larger;
+			border-left: 1px solid $studio-gray-10;
+
+			// Make sure child elements fit tightly together.
+			* {
+				margin: 0;
+				font-size: 14px;
+			}
+		}
+	}
+}
+
+// Hide last <hr /> element.
+.woocommerce-timeline ul :last-child.woocommerce-timeline-group hr:last-child {
+	display: none;
+}

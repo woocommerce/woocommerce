@@ -1,4 +1,5 @@
 # 5.0.0 (Unreleased)
+- Added `<Timeline />` component.
 - Added `<ImageUpload />` component.
 - Style form components for WordPress 5.3.
 - Fix CompareFilter options format (key prop vs. id).
