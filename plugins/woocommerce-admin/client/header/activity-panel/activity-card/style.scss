@@ -45,11 +45,6 @@
 	display: flex;
 	flex-direction: column;
 
-	a {
-		color: $studio-woocommerce-purple;
-		text-decoration: none;
-	}
-
 	.woocommerce-activity-card__title {
 		margin: 0;
 		@include font-size( 13 );

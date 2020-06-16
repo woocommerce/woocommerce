@@ -31,25 +31,6 @@
 }
 
 .woocommerce-layout {
-	a:link,
-	a:visited,
-	.components-button.is-link {
-		color: $studio-pink;
-	}
-
-	a:hover,
-	a:active,
-	a:focus,
-	.components-button.is-link:hover,
-	.components-button.is-link:active,
-	.components-button.is-link:focus {
-		color: $studio-pink;
-	}
-
-	a:focus {
-		box-shadow: 0 0 0 1px $studio-pink, 0 0 2px 1px rgba($studio-pink, 0.8);
-	}
-
 	select:hover {
 		color: $core-grey-dark-700;
 	}
