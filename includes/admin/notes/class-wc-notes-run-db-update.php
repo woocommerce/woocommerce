@@ -156,7 +156,6 @@ class WC_Notes_Run_Db_Update {
 			. sprintf( ' ' . esc_html__( 'The database update process runs in the background and may take a little while, so please be patient. Advanced users can alternatively update via %1$sWP CLI%2$s.', 'woocommerce' ), '<a href="https://github.com/woocommerce/woocommerce/wiki/Upgrading-the-database-using-WP-CLI">', '</a>' )
 		);
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
-		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-core' );
