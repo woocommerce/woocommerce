@@ -1,6 +1,7 @@
 // Set up some local color variables to make the CSS more clear
 $outer-border: $core-grey-light-700;
-$promo-actions-border: $core-grey-light-500;
+$promo-actions-border-top: $core-grey-light-500;
+$promo-actions-border-bottom: $light-gray-tertiary;
 
 .woocommerce-stats-overview {
 	.woocommerce-card__body {
@@ -73,7 +74,8 @@ article.woocommerce-stats-overview__install-jetpack-promo {
 		margin: 0 $gap-large $gap;
 	}
 	footer {
-		border-top: 1px solid $promo-actions-border;
+		border-top: 1px solid $promo-actions-border-top;
+		border-bottom: 1px solid $promo-actions-border-bottom;
 
 		.components-button {
 			margin: $gap $gap-smallest;
