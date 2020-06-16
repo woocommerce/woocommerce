@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Chip with custom wrapper should render a chip made up of a div instead of a li 1`] = `
+<div
+  className="wc-block-components-chip wc-block-components-chip--radius-small"
+>
+  <span
+    aria-hidden="true"
+    className="wc-block-components-chip__text"
+  >
+    Test
+  </span>
+  <span
+    className="screen-reader-text"
+  >
+    Test
+  </span>
+  <button
+    aria-label="Remove coupon \\"Test\\""
+    className="wc-block-components-chip__remove"
+    disabled={false}
+    onClick={[Function]}
+  >
+    ✕
+  </button>
+</div>
+`;
+
+exports[`Chip without custom wrapper should render defined radius 1`] = `
+<li
+  className="wc-block-components-chip wc-block-components-chip--radius-large"
+>
+  <span
+    aria-hidden="true"
+    className="wc-block-components-chip__text"
+  >
+    Test
+  </span>
+  <span
+    className="screen-reader-text"
+  >
+    Test
+  </span>
+  <button
+    aria-label="Remove coupon \\"Test\\""
+    className="wc-block-components-chip__remove"
+    disabled={false}
+    onClick={[Function]}
+  >
+    ✕
+  </button>
+</li>
+`;
+
+exports[`Chip without custom wrapper should render text and the remove button 1`] = `
+<li
+  className="wc-block-components-chip wc-block-components-chip--radius-small"
+>
+  <span
+    aria-hidden="true"
+    className="wc-block-components-chip__text"
+  >
+    Test
+  </span>
+  <span
+    className="screen-reader-text"
+  >
+    Test
+  </span>
+  <button
+    aria-label="Remove coupon \\"Test\\""
+    className="wc-block-components-chip__remove"
+    disabled={false}
+    onClick={[Function]}
+  >
+    ✕
+  </button>
+</li>
+`;
+
+exports[`Chip without custom wrapper should render with disabled remove button 1`] = `
+<li
+  className="wc-block-components-chip wc-block-components-chip--radius-small"
+>
+  <span
+    aria-hidden="true"
+    className="wc-block-components-chip__text"
+  >
+    Test
+  </span>
+  <span
+    className="screen-reader-text"
+  >
+    Test
+  </span>
+  <button
+    aria-label="Remove coupon \\"Test\\""
+    className="wc-block-components-chip__remove"
+    disabled={true}
+    onClick={[Function]}
+  >
+    ✕
+  </button>
+</li>
+`;
