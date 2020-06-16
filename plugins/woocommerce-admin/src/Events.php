@@ -24,6 +24,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Marketing;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Start_Dropshipping_Business;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_WooCommerce_Subscriptions;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Migrate_From_Shopify;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Launch_Checklist;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Real_Time_Order_Alerts;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
@@ -90,6 +91,7 @@ class Events {
 		WC_Admin_Notes_Start_Dropshipping_Business::possibly_add_note();
 		WC_Admin_Notes_WooCommerce_Subscriptions::possibly_add_note();
 		WC_Admin_Notes_Migrate_From_Shopify::possibly_add_note();
+		WC_Admin_Notes_Launch_Checklist::possibly_add_note();
 		WC_Admin_Notes_Home_Screen_Feedback::possibly_add_note();
 		WC_Admin_Notes_Need_Some_Inspiration::possibly_add_note();
 		WC_Admin_Notes_Learn_More_About_Product_Settings::possibly_add_note();
