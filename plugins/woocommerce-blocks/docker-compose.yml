@@ -69,6 +69,7 @@ services:
       WORDPRESS_PORT:
       WORDPRESS_EMAIL:
       DOMAIN_NAME:
+      GUTENBERG_LATEST:
     volumes:
       - ./:/var/www/html/wp-content/plugins/woocommerce-gutenberg-products-block
       - wordpress:/var/www/html

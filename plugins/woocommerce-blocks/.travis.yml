@@ -76,7 +76,7 @@ jobs:
               - npm run lint:ci
           env:
               - WOOCOMMERCE_BLOCKS_PHASE=3
-        - name: E2E Tests
+        - name: E2E Tests (WP 5.2)
           script:
               - npm ci
               - npm run test:e2e:up
@@ -84,6 +84,39 @@ jobs:
               - npm run build:e2e-test
               - npm run test:e2e
           env:
+              - WP_VERSION=5.2
+              - WOOCOMMERCE_BLOCKS_PHASE=3
+        - name: E2E Tests (WP 5.3)
+          script:
+              - npm ci
+              - npm run test:e2e:up
+              - composer install
+              - npm run build:e2e-test
+              - npm run test:e2e
+          env:
+              - WP_VERSION=5.3
+              - WOOCOMMERCE_BLOCKS_PHASE=3
+        - name: E2E Tests (WP 5.4)
+          script:
+              - npm ci
+              - npm run test:e2e:up
+              - composer install
+              - npm run build:e2e-test
+              - npm run test:e2e
+          env:
+              - WP_VERSION=5.4
+              - WOOCOMMERCE_BLOCKS_PHASE=3
+        - name: E2E Tests (WP 5.4 with Gutenberg plugin)
+          script:
+              - npm ci
+              - npm run test:e2e:up
+              - composer install
+              - npm run build:e2e-test
+              - npm install @wordpress/e2e-test-utils@latest
+              - npm run test:e2e
+          env:
+              - WP_VERSION=5.4
+              - GUTENBERG_LATEST=true
               - WOOCOMMERCE_BLOCKS_PHASE=3
         - stage: deploy
           if: (NOT type IN (pull_request)) AND (branch = main)

@@ -15,6 +15,10 @@ const block = {
 	class: '.wc-block-cart',
 };
 
+if ( process.env.WP_VERSION < 5.3 || process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
+	// eslint-disable-next-line jest/no-focused-tests
+	test.only( `skipping ${ block.name } tests`, () => {} );
+
 describe( `${ block.name } Block`, () => {
 	beforeAll( async () => {
 		await switchUserToAdmin();

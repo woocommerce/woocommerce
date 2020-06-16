@@ -91,7 +91,7 @@
 		"@wordpress/components": "8.5.0",
 		"@wordpress/data-controls": "1.6.0",
 		"@wordpress/dependency-extraction-webpack-plugin": "2.1.0",
-		"@wordpress/e2e-test-utils": "^4.3.1",
+		"@wordpress/e2e-test-utils": "4.3.1",
 		"@wordpress/editor": "9.10.0",
 		"@wordpress/element": "2.10.0",
 		"@wordpress/eslint-plugin": "3.3.0",
