@@ -431,7 +431,7 @@ class ProductSchema extends AbstractSchema {
 		if ( $product->is_type( 'variable' ) ) {
 			$prices = $product->get_variation_prices( true );
 
-			if ( min( $prices['price'] ) !== max( $prices['price'] ) ) {
+			if ( ! empty( $prices['price'] ) && ( min( $prices['price'] ) !== max( $prices['price'] ) ) ) {
 				return (object) [
 					'min_amount' => $this->prepare_money_response( min( $prices['price'] ), wc_get_price_decimals() ),
 					'max_amount' => $this->prepare_money_response( max( $prices['price'] ), wc_get_price_decimals() ),
