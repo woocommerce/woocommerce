@@ -335,11 +335,17 @@ class Products extends AbstractRoute {
 					'term_id'   => array(
 						'description'       => __( 'List of attribute term IDs.', 'woo-gutenberg-products-block' ),
 						'type'              => 'array',
+						'items'             => [
+							'type' => 'integer',
+						],
 						'sanitize_callback' => 'wp_parse_id_list',
 					),
 					'slug'      => array(
 						'description'       => __( 'List of attribute slug(s). If a term ID is provided, this will be ignored.', 'woo-gutenberg-products-block' ),
 						'type'              => 'array',
+						'items'             => [
+							'type' => 'string',
+						],
 						'sanitize_callback' => 'wp_parse_slug_list',
 					),
 					'operator'  => array(
