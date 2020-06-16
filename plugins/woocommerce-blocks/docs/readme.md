@@ -2,25 +2,12 @@
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
-## Table of Contents
-
-**Contributing**
-
--   [Getting Started](contributors/getting-started.md)
--   [Coding Guidelines](contributors/coding-guidelines.md)
--   [Smoke Testing](contributors/smoke-testing.md)
--   [JavaScript Testing](contributors/javascript-testing.md)
--   [Component Testing & Development (with Storybook)](contributors/storybook.md)
-
-**Releases**
-
--   [Releasing New Versions](releases/readme.md)
--   [WordPress Update Testing Checklist](releases/wordpress-update-testing-checklist.md)
-
-**API documentation**
-
--   [Store API documentation](../src/RestApi/StoreApi/README.md)
-
-**For themes**
-
--   [Theming documention](theming/README.md)
+| Document                                          | Description                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Contributing](contributors/getting-started.md)   | These documents explain how you can contribute to the development of the blocks plugin, development best practices, and how to help with testing.                                                                                                                               |
+| [Releases](releases/readme.md)                    | These documents cover how to release and test new versions of the blocks plugin.                                                                                                                                                                                                |
+| [Blocks](blocks/README.md)                        | This documentation covers functionality specific to certain Blocks.                                                                                                                                                                                                             |
+| [Block Client APIs](block-client-apis/README.md)  | This documentation covers API interfaces within Blocks. In most cases, these docs describe APIs and interfaces that are internal only, and thus are provided to assist with developing the blocks in this repository. Documentation will tend to focus on high level overviews. |
+| [Store API (REST API)](../src/StoreApi/README.md) | These documents cover the Store API used to get product data on the frontend.                                                                                                                                                                                                   |
+| [Extensibility](extensibility/README.md)          | These documents cover extensibility of WooCommerce Blocks.                                                                                                                                                                                                                      |
+| [Theming](theming/README.md)                      | These documents cover theming for blocks, styles, CSS classnames and other theming best practices.                                                                                                                                                                              |
