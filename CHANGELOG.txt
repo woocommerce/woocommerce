@@ -9,8 +9,11 @@
 * Enhancement - Accessibility: add aria-disabled attribute to "Update cart" button on checkout page. #26726
 * Enhancement - Update "Subtotal" translation string in wc-template-functions.php. #26706
 * Enhancement - Add a new Features settings section, enabling woocommerce_homescreen_enabled for all new stores. #26625
+* Enhancement - Add warning in status report if a base database table is missing. #26455
+* Enhancement - Updated stock handling to prevent race conditions when orders come in at the same time. #26395
 * Tweak - Allow checkout even if reserved table is not present. #26705
 * Tweak - Add note to Products Importer description that TXT files are also supported. #26670
+* Tweak - Allow set different notice types with WC_Admin_Notices. #26410
 * Fix - Encode HTML entities for product attribute name and values. #26754
 * Fix - Fix an issue with attribute value escaping in product CSV exports. #26739
 * Fix - Fix comment_type value for reviews created with WordPress 5.5. #26729
@@ -20,7 +23,19 @@
 * Fix - Correct grammar mistake in the help tip of the Connected to WooCommerce.com field of the System Status Report. #26666
 * Fix - Allow float value timezone offsets to display the correct float values. #26637
 * Fix - Add asterisk to star rating if 'Star ratings should be required, not optional' checkbox is enabled. #26596
+* Fix - Use calculations similar to cart for orders as well (fixed regression). #26583
+* Fix - Fixed data-id of notices in checkout. #26386
+* Fix - Fixed password visible toggle in the checkout page. #26292
+* Fix - Product description display fix when multiple products shortcodes are present on a page. #26250
+* Fix - Using the add-to-cart parameter with a product variant id will now have the variation attributes populated correctly. #26237
+* Fix - Better template caching support for multi-server environments. #23971
 * Dev - Adjusted the WC tested up to check to only apply to major versions. #26685
+* Dev - Make shipping calculations more flexible by providing actions. #26542
+* Dev - Trigger check_variations with custom values. #26525
+* Dev - Add verify_base_db method to check if all base tables are present. #26454
+* Dev - Added action before the "Add payment method" save button and a filter to validate manually added fields when adding payment method. #26445
+* Dev - `wc_get_shipping_method_count() has a new argument (`$enabled_only`) which allows restricting the non-legacy shipping methods to the enabled ones. #25753
+* Dev - Added pre query filters for WP dashboard WooCommerce status widget. #25321
 
 **REST API 1.0.10**
 * Enhancement - Add API tool to clear template cache. woocommerce/woocommerce-rest-api#212
