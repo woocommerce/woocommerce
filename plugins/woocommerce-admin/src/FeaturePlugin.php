@@ -18,6 +18,7 @@ use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_WooCommerce_Payments;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Install_JP_And_WCS_Plugins;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Draw_Attention;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_First_Order;
+use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Coupon_Page_Moved;
 use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes_Home_Screen_Feedback;
 

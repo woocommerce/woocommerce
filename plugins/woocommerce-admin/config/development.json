@@ -4,6 +4,7 @@
 		"analytics": true,
 		"analytics-dashboard": true,
 		"analytics-dashboard/customizable": true,
+		"coupons": true,
 		"devdocs": true,
 		"marketing": true,
 		"navigation": true,

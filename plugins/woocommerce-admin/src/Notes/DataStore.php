@@ -405,16 +405,30 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		if ( isset( $args['is_deleted'] ) ) {
 			$escaped_is_deleted = esc_sql( $args['is_deleted'] );
 		}
+
+		$where_name_array = [];
+		if ( isset( $args['name'] ) ) {
+			foreach ( $args['name'] as $args_name ) {
+				$args_name          = trim( $args_name );
+				$where_name_array[] = sprintf( "'%s'", esc_sql( $args_name ) );
+			}
+		}
+
 		$escaped_where_types  = implode( ',', $where_type_array );
-		$escaped_status_types = implode( ',', $where_status_array );
+		$escaped_where_status = implode( ',', $where_status_array );
+		$escaped_where_names  = implode( ',', $where_name_array );
 		$where_clauses        = '';
 
 		if ( ! empty( $escaped_where_types ) ) {
 			$where_clauses .= " AND type IN ($escaped_where_types)";
 		}
 
-		if ( ! empty( $escaped_status_types ) ) {
-			$where_clauses .= " AND status IN ($escaped_status_types)";
+		if ( ! empty( $escaped_where_status ) ) {
+			$where_clauses .= " AND status IN ($escaped_where_status)";
+		}
+
+		if ( ! empty( $escaped_where_names ) ) {
+			$where_clauses .= " AND name IN ($escaped_where_names)";
 		}
 
 		$where_clauses .= $escaped_is_deleted ? ' AND is_deleted = 1' : ' AND is_deleted = 0';

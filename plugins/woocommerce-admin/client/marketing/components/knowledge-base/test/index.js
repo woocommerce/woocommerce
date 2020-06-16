@@ -107,7 +107,7 @@ describe( 'No posts and loading', () => {
 	beforeEach( () => {
 		knowledgeBaseWrapper = shallow(
 			<KnowledgeBase
-				posts={ { 'marketing': [] } }
+				posts={ [] }
 				isLoading={ true }
 				category={ 'marketing' }
 			/>

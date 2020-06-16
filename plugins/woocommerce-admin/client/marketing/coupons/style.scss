@@ -1,0 +1,30 @@
+.woocommerce-marketing-coupons {
+	padding-top: $gap;
+
+	* {
+		box-sizing: border-box;
+	}
+
+	.woocommerce-card {
+		border-radius: 0;
+	}
+
+	.woocommerce-card__header {
+		padding: $gap $gap-large;
+		border-bottom: 1px solid $core-grey-light-500;
+		border-radius: 0;
+	}
+
+	.woocommerce-card__title {
+		font-size: 20px;
+		line-height: 28px;
+		font-weight: normal;
+	}
+
+	.woocommerce-card__description {
+		font-size: 14px;
+		line-height: 20px;
+		font-weight: normal;
+		margin-top: 4px;
+	}
+}

@@ -10,11 +10,15 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * Contains backend logic for the Marketing feature.
  */
 class Marketing {
+
+	use CouponsMovedTrait;
+
 	/**
 	 * Name of recommended plugins transient.
 	 *
@@ -50,13 +54,12 @@ class Marketing {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 9 );
-		add_action( 'admin_menu', array( $this, 'register_pages' ) );
-		add_action( 'admin_head', array( $this, 'modify_menu_structure' ) );
-
 		if ( ! is_admin() ) {
 			return;
 		}
+
+		add_action( 'admin_menu', array( $this, 'register_pages' ), 5 );
+		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 6 );
 
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
@@ -77,58 +80,75 @@ class Marketing {
 			'dashicons-megaphone',
 			58
 		);
+
+		PageController::get_instance()->connect_page(
+			[
+				'id'         => 'woocommerce-marketing',
+				'title'      => 'Marketing',
+				'capability' => 'manage_woocommerce',
+				'path'       => 'wc-admin&path=/marketing',
+			]
+		);
 	}
 
 	/**
 	 * Registers report pages.
 	 */
 	public function register_pages() {
-		$marketing_pages = array(
-			array(
-				'id'    => 'woocommerce-marketing-overview',
-				'title' => __( 'Overview', 'woocommerce-admin' ),
-				'path'  => '/marketing',
-			),
-		);
+		$this->register_overview_page();
 
-		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', $marketing_pages );
+		$controller = PageController::get_instance();
+		$defaults   = [
+			'parent'        => 'woocommerce-marketing',
+			'existing_page' => false,
+		];
 
+		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', [] );
 		foreach ( $marketing_pages as $marketing_page ) {
-			if ( ! is_null( $marketing_page ) ) {
-				$marketing_page['parent'] = 'woocommerce-marketing';
-				wc_admin_register_page( $marketing_page );
+			if ( ! is_array( $marketing_page ) ) {
+				continue;
+			}
+
+			$marketing_page = array_merge( $defaults, $marketing_page );
+
+			if ( $marketing_page['existing_page'] ) {
+				$controller->connect_page( $marketing_page );
+			} else {
+				$controller->register_page( $marketing_page );
 			}
 		}
 	}
 
 	/**
-	 * Modify the Marketing menu structure
+	 * Register the main Marketing page, which is Marketing > Overview.
+	 *
+	 * This is done separately because we need to ensure the page is registered properly and
+	 * that the link is done properly. For some reason the normal page registration process
+	 * gives us the wrong menu link.
 	 */
-	public function modify_menu_structure() {
+	protected function register_overview_page() {
 		global $submenu;
 
-		$marketing_submenu_key = 'woocommerce-marketing';
-		$overview_key          = null;
+		// First register the page.
+		PageController::get_instance()->register_page(
+			[
+				'id'     => 'woocommerce-marketing-overview',
+				'title'  => __( 'Overview', 'woocommerce-admin' ),
+				'path'   => 'wc-admin&path=/marketing',
+				'parent' => 'woocommerce-marketing',
+			]
+		);
 
-		// User does not have capabilites to see the submenu.
-		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu[ $marketing_submenu_key ] ) ) {
+		// Now fix the path, since register_page() gets it wrong.
+		if ( ! isset( $submenu['woocommerce-marketing'] ) ) {
 			return;
 		}
 
-		foreach ( $submenu[ $marketing_submenu_key ] as $submenu_key => $submenu_item ) {
-			if ( 'wc-admin&path=/marketing' === $submenu_item[2] ) {
-				$overview_key = $submenu_key;
+		foreach ( $submenu['woocommerce-marketing'] as &$item ) {
+			// The "slug" (aka the path) is the third item in the array.
+			if ( 0 === strpos( $item[2], 'wc-admin' ) ) {
+				$item[2] = 'admin.php?page=' . $item[2];
 			}
-		}
-
-		// Remove PHP powered top level page.
-		unset( $submenu[ $marketing_submenu_key ][0] );
-
-		// Move overview menu item to top.
-		if ( null !== $overview_key ) {
-			$menu = $submenu[ $marketing_submenu_key ][ $overview_key ];
-			unset( $submenu[ $marketing_submenu_key ][ $overview_key ] );
-			array_unshift( $submenu[ $marketing_submenu_key ], $menu );
 		}
 	}
 
@@ -170,7 +190,7 @@ class Marketing {
 		$plugins = get_transient( self::RECOMMENDED_PLUGINS_TRANSIENT );
 
 		if ( false === $plugins ) {
-			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.0/recommendations.json' );
+			$request = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.1/recommendations.json' );
 			$plugins = [];
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
@@ -267,5 +287,4 @@ class Marketing {
 
 		return $posts;
 	}
-
 }
