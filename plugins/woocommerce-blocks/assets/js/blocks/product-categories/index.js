@@ -36,6 +36,13 @@ registerBlockType( 'woocommerce/product-categories', {
 	},
 	attributes: {
 		/**
+		 * Alignment of the block.
+		 */
+		align: {
+			type: 'string',
+		},
+
+		/**
 		 * Whether to show the product count in each category.
 		 */
 		hasCount: {

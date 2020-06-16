@@ -43,6 +43,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		return array_merge(
 			parent::get_attributes(),
 			array(
+				'align'          => $this->get_schema_align(),
 				'className'      => $this->get_schema_string(),
 				'hasCount'       => $this->get_schema_boolean( true ),
 				'hasImage'       => $this->get_schema_boolean( false ),
@@ -84,11 +85,39 @@ class ProductCategories extends AbstractDynamicBlock {
 			}
 		}
 
-		$output  = '<div class="wc-block-product-categories ' . esc_attr( $attributes['className'] ) . ' ' . ( $attributes['isDropdown'] ? 'is-dropdown' : 'is-list' ) . '">';
+		$classes = $this->get_container_classes( $attributes );
+
+		$output  = '<div class="' . esc_attr( $classes ) . '">';
 		$output .= ! empty( $attributes['isDropdown'] ) ? $this->renderDropdown( $categories, $attributes, $uid ) : $this->renderList( $categories, $attributes, $uid );
 		$output .= '</div>';
 
 		return $output;
+	}
+
+	/**
+	 * Get the list of classes to apply to this block.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string space-separated list of classes.
+	 */
+	protected function get_container_classes( $attributes = array() ) {
+		$classes = array( 'wc-block-product-categories' );
+
+		if ( isset( $attributes['align'] ) ) {
+			$classes[] = "align{$attributes['align']}";
+		}
+
+		if ( ! empty( $attributes['className'] ) ) {
+			$classes[] = $attributes['className'];
+		}
+
+		if ( $attributes['isDropdown'] ) {
+			$classes[] = 'is-dropdown';
+		} else {
+			$classes[] = 'is-list';
+		}
+
+		return implode( ' ', $classes );
 	}
 
 	/**
